@@ -24,7 +24,9 @@ const (
 	ComponentVersionTag = common.ComponentVersionTag
 )
 
-type ResourceSpecHandler struct{}
+type ResourceSpecHandler struct {
+	opts *ocm.ModificationOptions
+}
 
 var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
 
@@ -45,7 +47,7 @@ func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	return &desc, nil
 }
 
-func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
+func (h ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
 	spec, ok := r.Spec().(*ResourceSpec)
 	if !ok {
 		return fmt.Errorf("element spec is not a valid resource spec, failed to assert type %T to ResourceSpec", r.Spec())
@@ -74,7 +76,14 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element,
 		Relation:  spec.Relation,
 		SourceRef: compdescv2.ConvertSourcerefsTo(spec.SourceRef),
 	}
-	return v.SetResource(meta, acc)
+	opts := []ocm.ModificationOption{}
+	if h.opts != nil {
+		opts = append(opts, h.opts)
+	}
+	if ocm.IsIntermediate(v.Repository().GetSpecification()) {
+		opts = append(opts, ocm.ModifyResource())
+	}
+	return v.SetResource(meta, acc, opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
