@@ -56,6 +56,8 @@ var _ = Describe("oci artifact transfer", func() {
 	BeforeEach(func() {
 		env = NewBuilder(NewEnvironment())
 
+		FakeOCIRepo(env, OCIPATH, OCIHOST)
+
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 			ldesc = OCIManifest1(env)
 		})
@@ -75,8 +77,6 @@ var _ = Describe("oci artifact transfer", func() {
 				})
 			})
 		})
-
-		FakeOCIRepo(env, OCIPATH, OCIHOST)
 
 		_ = ldesc
 	})

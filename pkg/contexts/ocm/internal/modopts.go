@@ -34,12 +34,13 @@ type ModificationOptions struct {
 	SkipDigest *bool
 }
 
-func (m *ModificationOptions) Eval(list ...ModificationOption) {
+func (m *ModificationOptions) ApplyModificationOptions(list ...ModificationOption) *ModificationOptions {
 	for _, o := range list {
 		if o != nil {
 			o.ApplyModificationOption(m)
 		}
 	}
+	return m
 }
 
 func (m ModificationOptions) ApplyModificationOption(opts *ModificationOptions) {
@@ -67,7 +68,7 @@ func (m *ModificationOptions) GetHasher(algo ...string) Hasher {
 
 func EvalModificationOptions(list ...ModificationOption) ModificationOptions {
 	var m ModificationOptions
-	m.Eval(list...)
+	m.ApplyModificationOptions(list...)
 	return m
 }
 

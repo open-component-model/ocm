@@ -40,9 +40,9 @@ func (r *ocmResource) Set() {
 func (r *ocmResource) Close() error {
 	switch {
 	case r.access != nil:
-		return r.Builder.ocm_vers.SetResource(&r.meta, r.access, r.opts)
+		return r.Builder.ocm_vers.SetResource(&r.meta, r.access, r.opts.ApplyModificationOptions((ocm.ModifyResource())))
 	case r.blob != nil:
-		return r.Builder.ocm_vers.SetResourceBlob(&r.meta, r.blob, r.hint, nil, r.opts)
+		return r.Builder.ocm_vers.SetResourceBlob(&r.meta, r.blob, r.hint, nil, r.opts.ApplyModificationOptions((ocm.ModifyResource())))
 	}
 	return errors.New("access or blob required")
 }

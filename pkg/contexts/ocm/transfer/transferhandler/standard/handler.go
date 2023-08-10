@@ -76,7 +76,7 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 
 func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
 	blob := accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m)
-	return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
+	return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m), ocm.SkipVerify())
 }
 
 func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
