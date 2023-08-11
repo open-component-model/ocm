@@ -3,6 +3,7 @@
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7156/badge)](https://bestpractices.coreinfrastructure.org/projects/7156)
 [![REUSE status](https://api.reuse.software/badge/github.com/open-component-model/ocm)](https://api.reuse.software/info/github.com/open-component-model/ocm)
 [![OCM Integration Tests](https://github.com/open-component-model/ocm-integrationtest/actions/workflows/integrationtest.yaml/badge.svg?branch=main)](https://open-component-model.github.io/ocm-integrationtest/report.html)
+[![Go Report Card](https://goreportcard.com/badge/github.com/open-component-model/ocm)](https://goreportcard.com/report/github.com/open-component-model/ocm)
 
 The Open Component Model provides a standard for describing delivery [artifacts](docs/ocm/model.md#artifacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories).
 
