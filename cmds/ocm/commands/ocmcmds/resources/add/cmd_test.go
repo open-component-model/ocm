@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -34,6 +35,8 @@ import (
 
 const ARCH = "/tmp/ca"
 const VERSION = "v1"
+const OCIPATH = "/tmp/oci"
+const OCIHOST = "ghcr.io"
 
 func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, ff ...func(r compdesc.Resource)) {
 	rblob := accessio.BlobAccessForFile("text/plain", "/testdata/testcontent", env)
@@ -97,6 +100,14 @@ var _ = Describe("Add resources", func() {
 
 	BeforeEach(func() {
 		env = NewTestEnv(TestData())
+
+		// fake OCI registry
+		FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
+
+		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+			OCIManifest1For(env.Builder, "mandelsoft/pause", "v0.1.0")
+		})
+
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "--provider", "mandelsoft", "--file", ARCH)).To(Succeed())
 	})
 
@@ -185,7 +196,7 @@ var _ = Describe("Add resources", func() {
 	})
 
 	DescribeTable("adds helm chart", func(rsc string) {
-		Expect(env.Execute("add", "resources", "--file", ARCH, rsc)).To(Succeed())
+		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, rsc)).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -243,7 +254,7 @@ var _ = Describe("Add resources", func() {
 		Expect(r.Type).To(Equal("ociImage"))
 		Expect(r.Version).To(Equal("v0.1.0"))
 		Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
-
+		Expect(r.GetDigest()).To(Equal(DS_OCIMANIFEST1))
 		Expect(r.Access.GetType()).To(Equal(ociartifact.Type))
 
 		acc, err := env.OCMContext().AccessSpecForSpec(r.Access)

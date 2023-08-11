@@ -14,7 +14,7 @@ type (
 	ModificationOptions = internal.ModificationOptions
 )
 
-func EvalModificationOptions(list ...ModificationOption) ModificationOptions {
+func EvalModificationOptions(list ...ModificationOption) *ModificationOptions {
 	return internal.EvalModificationOptions(list...)
 }
 

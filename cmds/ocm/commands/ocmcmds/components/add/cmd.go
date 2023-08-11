@@ -194,7 +194,7 @@ func (o *Command) Run() error {
 
 	printer := common2.NewPrinter(o.Context.StdOut())
 	fs := o.Context.FileSystem()
-	h := comp.NewResourceSpecHandler(o.Version, schemaoption.From(o).Schema)
+	h := comp.New(o.Version, schemaoption.From(o).Schema)
 	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, templateroption.From(o).Options, h, o.Elements)
 	if err != nil {
 		return err

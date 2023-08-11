@@ -25,11 +25,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCINAMESPACE = "ocm/test"
-const OCIVERSION = "v2.0"
-const OCIHOST = "alias"
-
 const CTF = "ctf"
 const COMPONENT = "fabianburth.org/component"
 const VERSION = "v1.0"

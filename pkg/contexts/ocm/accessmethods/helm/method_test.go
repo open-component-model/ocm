@@ -21,8 +21,6 @@ import (
 	helm2 "github.com/open-component-model/ocm/pkg/helm"
 )
 
-const OCIHOST = "alias"
-
 var _ = Describe("Method", func() {
 	var env *Builder
 

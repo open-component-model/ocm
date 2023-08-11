@@ -66,10 +66,10 @@ func (m *ModificationOptions) GetHasher(algo ...string) Hasher {
 	return m.HasherProvider.GetHasher(utils.OptionalDefaulted(m.DefaultHashAlgorithm, algo...))
 }
 
-func EvalModificationOptions(list ...ModificationOption) ModificationOptions {
+func EvalModificationOptions(list ...ModificationOption) *ModificationOptions {
 	var m ModificationOptions
 	m.ApplyModificationOptions(list...)
-	return m
+	return &m
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +139,7 @@ func SkipVerify(flag ...bool) ModificationOption {
 type skipdigest bool
 
 func (m skipdigest) ApplyModificationOption(opts *ModificationOptions) {
-	opts.ModifyResource = utils.BoolP(m)
+	opts.SkipDigest = utils.BoolP(m)
 }
 
 // SkipDigest disables digest creation if enabled.

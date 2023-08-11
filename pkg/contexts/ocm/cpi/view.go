@@ -483,7 +483,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 
 	ctx := c.impl.GetContext()
 	opts := internal.EvalModificationOptions(modopts...)
-	CompleteModificationOptions(ctx, &opts)
+	CompleteModificationOptions(ctx, opts)
 
 	spec, err := ctx.AccessSpecForSpec(acc)
 	if err != nil {
@@ -517,7 +517,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		}
 
 		// evaluate given digesting constraints and settings
-		hashAlgo, digester, digest := c.evaluateResourceDigest(res, old, opts)
+		hashAlgo, digester, digest := c.evaluateResourceDigest(res, old, *opts)
 		hasher := opts.GetHasher(hashAlgo)
 		if digester.HashAlgorithm == "" && hasher == nil {
 			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, hashAlgo)
