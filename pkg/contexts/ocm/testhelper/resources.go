@@ -6,6 +6,7 @@ package testhelper
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -15,7 +16,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
-func Subst(values ...string) map[string]string {
+type Subst = map[string]string
+
+func SubstList(values ...string) map[string]string {
 	r := map[string]string{}
 	for i := 0; i+1 < len(values); i += 2 {
 		r[values[i]] = values[i+1]
@@ -23,7 +26,7 @@ func Subst(values ...string) map[string]string {
 	return r
 }
 
-func SubstFrom(v interface{}) map[string]string {
+func SubstFrom(v interface{}, prefix ...string) map[string]string {
 	data, err := json.Marshal(v)
 	if err != nil {
 		panic(err)
@@ -32,6 +35,14 @@ func SubstFrom(v interface{}) map[string]string {
 	err = json.Unmarshal(data, &values)
 	if err != nil {
 		panic(err)
+	}
+	if len(prefix) > 0 {
+		p := strings.Join(prefix, "")
+		n := map[string]string{}
+		for k, v := range values {
+			n[p+k] = v
+		}
+		values = n
 	}
 	return values
 }

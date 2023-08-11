@@ -86,6 +86,6 @@ meta:
   schemaVersion: v2
 `
 		Expect(env.ReadFile(vfs.Join(env, OUT, comparch.ComponentDescriptorFileName))).To(YAMLEqual(cd,
-			MergeSubst(SubstFrom(DS_TESTDATA), Subst("type", resourcetypes.PLAIN_TEXT))))
+			MergeSubst(SubstFrom(DS_TESTDATA), SubstList("type", resourcetypes.PLAIN_TEXT))))
 	})
 })

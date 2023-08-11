@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -20,7 +21,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -44,6 +44,18 @@ const SIGN_ALGO = rsa.Algorithm
 
 const PUBKEY = "/tmp/pub"
 const PRIVKEY = "/tmp/priv"
+
+const D_COMPONENTA = "01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d"
+const D_COMPONENTB = "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
+
+var substitutions = Subst{
+	"test": D_COMPONENTA,
+	"r0":   D_TESTDATA,
+	"r1":   DS_OCIMANIFEST1.Value,
+	"r2":   DS_OCIMANIFEST2.Value,
+	"ref":  D_COMPONENTB,
+	"rb0":  D_OTHERDATA,
+}
 
 var _ = Describe("access method", func() {
 	var env *TestEnv
@@ -73,57 +85,67 @@ var _ = Describe("access method", func() {
 				OCIManifest1(env.Builder)
 				OCIManifest2(env.Builder)
 			})
+		})
 
-			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-				env.Component(COMPONENTA, func() {
-					env.Version(VERSION, func() {
-						env.Provider(PROVIDER)
-						env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-							env.BlobStringData(mime.MIME_TEXT, "testdata")
-						})
-						env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
-							env.Access(
-								ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
-							)
-							env.Label("transportByValue", true)
-						})
-						env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
-							env.Access(
-								ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
-							)
-						})
-					})
-				})
-				env.Component(COMPONENTB, func() {
-					env.Version(VERSION, func() {
-						env.Provider(PROVIDER)
-						env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
-							env.BlobStringData(mime.MIME_TEXT, "otherdata")
-						})
-						env.Reference("ref", COMPONENTA, VERSION)
-					})
-				})
-			})
+		It("has digests", func() {
+			prepareEnv(env, ARCH, ARCH)
+
+			repo := Must(ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env))
+			defer Close(repo, "repo")
+			cv := Must(repo.LookupComponentVersion(COMPONENTA, VERSION))
+			defer Close(cv, "cva")
+
+			r := Must(cv.GetResource(metav1.NewIdentity("value")))
+			Expect(r.Meta().Digest).To(Equal(DS_OCIMANIFEST1))
+
+			r = Must(cv.GetResource(metav1.NewIdentity("ref")))
+			Expect(r.Meta().Digest).To(Equal(DS_OCIMANIFEST2))
+		})
+
+		It("sign single component in component archive", func() {
+			prepareEnv(env, ARCH, "")
+
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTA+":"+VERSION)).To(Succeed())
+
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
+  resource 0:  "name"="testdata": digest SHA-256:${r0}[genericBlobDigest/v1]
+  resource 1:  "name"="value": digest SHA-256:${r1}[ociArtifactDigest/v1]
+  resource 2:  "name"="ref": digest SHA-256:${r2}[ociArtifactDigest/v1]
+successfully signed github.com/mandelsoft/test:v1 (digest SHA-256:${test})`,
+				substitutions),
+			)
+
+			session := datacontext.NewSession()
+			defer session.Close()
+
+			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(src)
+			cv, err := src.LookupComponentVersion(COMPONENTA, VERSION)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTA))
 		})
 
 		It("sign component archive", func() {
 			prepareEnv(env, ARCH, ARCH)
 
 			buf := bytes.NewBuffer(nil)
-			digest := "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
 			Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
   no digest found for "github.com/mandelsoft/test:v1"
   applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref:v1]...
-    resource 0:  "name"="testdata": digest SHA-256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
-    resource 1:  "name"="value": digest SHA-256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f[ociArtifactDigest/v1]
-    resource 2:  "name"="ref": digest SHA-256:c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7[ociArtifactDigest/v1]
-  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d[jsonNormalisation/v1]
-  resource 0:  "name"="otherdata": digest SHA-256:54b8007913ec5a907ca69001d59518acfd106f7b02f892eabf9cae3f8b2414b4[genericBlobDigest/v1]
-successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:` + digest + `)
-`))
+    resource 0:  "name"="testdata": digest SHA-256:${r0}[genericBlobDigest/v1]
+    resource 1:  "name"="value": digest SHA-256:${r1}[ociArtifactDigest/v1]
+    resource 2:  "name"="ref": digest SHA-256:${r2}[ociArtifactDigest/v1]
+  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${test}[jsonNormalisation/v1]
+  resource 0:  "name"="otherdata": digest SHA-256:${rb0}[genericBlobDigest/v1]
+successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
+`, substitutions))
 
 			session := datacontext.NewSession()
 			defer session.Close()
@@ -134,27 +156,26 @@ successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:` + digest + `)
 			cv, err := src.LookupComponentVersion(COMPONENTB, VERSION)
 			Expect(err).To(Succeed())
 			session.AddCloser(cv)
-			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTB))
 		})
 
 		It("sign component archive with --lookup option", func() {
 			prepareEnv(env, ARCH2, ARCH)
 
 			buf := bytes.NewBuffer(nil)
-			digest := "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
 			Expect(env.CatchOutput(buf).Execute("sign", "components", "--lookup", ARCH2, "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
   no digest found for "github.com/mandelsoft/test:v1"
   applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref:v1]...
-    resource 0:  "name"="testdata": digest SHA-256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
-    resource 1:  "name"="value": digest SHA-256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f[ociArtifactDigest/v1]
-    resource 2:  "name"="ref": digest SHA-256:c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7[ociArtifactDigest/v1]
-  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d[jsonNormalisation/v1]
-  resource 0:  "name"="otherdata": digest SHA-256:54b8007913ec5a907ca69001d59518acfd106f7b02f892eabf9cae3f8b2414b4[genericBlobDigest/v1]
-successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:` + digest + `)
-`))
+    resource 0:  "name"="testdata": digest SHA-256:${r0}[genericBlobDigest/v1]
+    resource 1:  "name"="value": digest SHA-256:${r1}[ociArtifactDigest/v1]
+    resource 2:  "name"="ref": digest SHA-256:${r2}[ociArtifactDigest/v1]
+  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${test}[jsonNormalisation/v1]
+  resource 0:  "name"="otherdata": digest SHA-256:${rb0}[genericBlobDigest/v1]
+successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
+`, substitutions))
 
 			session := datacontext.NewSession()
 			defer session.Close()
@@ -165,7 +186,7 @@ successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:` + digest + `)
 			cv, err := src.LookupComponentVersion(COMPONENTB, VERSION)
 			Expect(err).To(Succeed())
 			session.AddCloser(cv)
-			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTB))
 		})
 
 	})
@@ -232,33 +253,6 @@ Error: signing: github.com/mandelsoft/ref:v1: failed resolving component referen
 })
 
 func prepareEnv(env *TestEnv, componentAArchive, componentBArchive string) {
-	spec, err := ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem()))
-	Expect(err).To(Succeed())
-	env.OCIContext().SetAlias(OCIHOST, spec)
-
-	env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-		env.Namespace(OCINAMESPACE, func() {
-			env.Manifest(OCIVERSION, func() {
-				env.Config(func() {
-					env.BlobStringData(mime.MIME_JSON, "{}")
-				})
-				env.Layer(func() {
-					env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
-				})
-			})
-		})
-		env.Namespace(OCINAMESPACE2, func() {
-			env.Manifest(OCIVERSION, func() {
-				env.Config(func() {
-					env.BlobStringData(mime.MIME_JSON, "{}")
-				})
-				env.Layer(func() {
-					env.BlobStringData(mime.MIME_TEXT, "otherlayer")
-				})
-			})
-		})
-	})
-
 	env.OCMCommonTransport(componentAArchive, accessio.FormatDirectory, func() {
 		env.Component(COMPONENTA, func() {
 			env.Version(VERSION, func() {
@@ -281,15 +275,17 @@ func prepareEnv(env *TestEnv, componentAArchive, componentBArchive string) {
 		})
 	})
 
-	env.OCMCommonTransport(componentBArchive, accessio.FormatDirectory, func() {
-		env.Component(COMPONENTB, func() {
-			env.Version(VERSION, func() {
-				env.Provider(PROVIDER)
-				env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
-					env.BlobStringData(mime.MIME_TEXT, "otherdata")
+	if componentBArchive != "" {
+		env.OCMCommonTransport(componentBArchive, accessio.FormatDirectory, func() {
+			env.Component(COMPONENTB, func() {
+				env.Version(VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
+						env.BlobStringData(mime.MIME_TEXT, "otherdata")
+					})
+					env.Reference("ref", COMPONENTA, VERSION)
 				})
-				env.Reference("ref", COMPONENTA, VERSION)
 			})
 		})
-	})
+	}
 }
