@@ -56,8 +56,10 @@ sources, source, src, s
       --inputData !bytesBase64       data (string, !!string or !<base64>
       --inputExcludes stringArray    excludes (path) for inputs
       --inputFollowSymlinks          follow symbolic links during archive creation for inputs
+      --inputFormattedJson YAML      JSON formatted text
       --inputHelmRepository string   helm repository base URL
       --inputIncludes stringArray    includes (path) for inputs
+      --inputJson YAML               JSON formatted text
       --inputLibraries stringArray   library path for inputs
       --inputPath string             path field for input
       --inputPreserveDir             preserve directory in archive for inputs
@@ -66,6 +68,7 @@ sources, source, src, s
       --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
+      --inputYaml YAML               YAML formatted text
       --mediaType string             media type for artifact blob representation
 ```
 
@@ -417,6 +420,18 @@ with the field <code>type</code> in the <code>input</code> field:
   
     The utf8 string content to provide.
   
+  - **<code>json</code>** *JSON or JSON string interpreted as JSON*
+  
+    The content emitted as JSON.
+  
+  - **<code>formattedJson</code>** *YAML/JSON or JSON/YAML string interpreted as JSON*
+  
+    The content emitted as formatted JSON.
+  
+  - **<code>yaml</code>** *AML/JSON or JSON/YAML string interpreted as YAML*
+  
+    The content emitted as YAML.
+  
   - **<code>mediaType</code>** *string*
   
     This OPTIONAL property describes the media type to store with the local blob.
@@ -428,7 +443,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes whether the content should be stored
     compressed or not.
   
-  Options used to configure fields: <code>--inputCompress</code>, <code>--inputText</code>, <code>--mediaType</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputFormattedJson</code>, <code>--inputJson</code>, <code>--inputText</code>, <code>--inputYaml</code>, <code>--mediaType</code>
 
 The following list describes the supported access methods, their versions
 and specification formats.

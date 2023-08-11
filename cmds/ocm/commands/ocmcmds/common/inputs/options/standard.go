@@ -41,4 +41,10 @@ var DataOption = flagsets.NewBytesOptionType("inputData", "data (string, !!strin
 
 var TextOption = flagsets.NewStringOptionType("inputText", "utf8 text")
 
+var YAMLOption = flagsets.NewYAMLOptionType("inputYaml", "YAML formatted text")
+
+var JSONOption = flagsets.NewYAMLOptionType("inputJson", "JSON formatted text")
+
+var FormattedJSONOption = flagsets.NewYAMLOptionType("inputFormattedJson", "JSON formatted text")
+
 var HelmRepositoryOption = flagsets.NewStringOptionType("inputHelmRepository", "helm repository base URL")
