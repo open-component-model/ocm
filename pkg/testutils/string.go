@@ -54,9 +54,9 @@ func (matcher *StringEqualMatcher) Match(actual interface{}) (success bool, err 
 		return false, fmt.Errorf("Refusing to compare <nil> to <string>.")
 	}
 
-	s, ok := actual.(string)
-	if !ok {
-		return false, fmt.Errorf("Actual value is no string, but a %T.", actual)
+	s, err := AsString(actual)
+	if err != nil {
+		return false, err
 	}
 	if matcher.Trim {
 		return strings.TrimSpace(s) == strings.TrimSpace(matcher.Expected), nil
@@ -65,8 +65,8 @@ func (matcher *StringEqualMatcher) Match(actual interface{}) (success bool, err 
 }
 
 func (matcher *StringEqualMatcher) FailureMessage(actual interface{}) (message string) {
-	actualString, actualOK := actual.(string)
-	if actualOK {
+	actualString, err := AsString(actual)
+	if err == nil {
 		compare, expected := actualString, matcher.Expected
 		if matcher.Trim {
 			compare = strings.TrimSpace(actualString)
@@ -82,6 +82,10 @@ func (matcher *StringEqualMatcher) FailureMessage(actual interface{}) (message s
 }
 
 func (matcher *StringEqualMatcher) NegatedFailureMessage(actual interface{}) (message string) {
+	actualString, err := AsString(actual)
+	if err == nil {
+		return format.Message(actualString, "not to equal", matcher.Expected)
+	}
 	return format.Message(actual, "not to equal", matcher.Expected)
 }
 

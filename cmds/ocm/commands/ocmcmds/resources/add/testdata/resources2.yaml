@@ -1,7 +1,7 @@
 ---
 name: testdata
 version: 3.3.3
-type: PlainText
+type: plainText
 input:
   type: file
   path: testcontent

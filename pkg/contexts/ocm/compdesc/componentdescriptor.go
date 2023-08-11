@@ -118,6 +118,18 @@ const (
 	SystemIdentityVersion = "version"
 )
 
+type ElementMetaAccess interface {
+	GetName() string
+	GetVersion() string
+	GetIdentity(accessor ElementAccessor) metav1.Identity
+	GetLabels() metav1.Labels
+}
+
+type ArtifactMetaAccess interface {
+	ElementMetaAccess
+	GetType() string
+}
+
 // ElementMeta defines a object that is uniquely identified by its identity.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true

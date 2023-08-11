@@ -10,6 +10,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -43,8 +45,8 @@ var _ = Describe("Download Component Version", func() {
 			env.Component(COMPONENT, func() {
 				env.Version(VERSION, func() {
 					env.Provider(PROVIDER)
-					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
+					env.Resource("testdata", "", resourcetypes.PLAIN_TEXT, metav1.LocalRelation, func() {
+						env.BlobStringData(mime.MIME_TEXT, S_TESTDATA)
 					})
 				})
 			})
@@ -57,27 +59,33 @@ var _ = Describe("Download Component Version", func() {
 /tmp/res: downloaded
 `))
 		Expect(env.DirExists(OUT)).To(BeTrue())
-		Expect(env.ReadFile(vfs.Join(env, OUT, comparch.BlobsDirectoryName, "sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))).To(Equal([]byte("testdata")))
+		Expect(env.ReadFile(vfs.Join(env, OUT, comparch.BlobsDirectoryName, "sha256."+D_TESTDATA))).To(Equal([]byte(S_TESTDATA)))
 
-		cd := `component:
+		cd := `
+component:
   componentReferences: []
   name: github.com/mandelsoft/test
   provider: mandelsoft
   repositoryContexts: []
   resources:
   - access:
-      localReference: sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50
+      localReference: sha256.${value}
       mediaType: text/plain
       type: localBlob
+    digest:
+      value: ${value}
+      normalisationAlgorithm: ${normalisationAlgorithm}
+      hashAlgorithm: ${hashAlgorithm}
     name: testdata
     relation: local
-    type: PlainText
+    type: ${type}
     version: v1
   sources: []
   version: v1
 meta:
   schemaVersion: v2
 `
-		Expect(env.ReadFile(vfs.Join(env, OUT, comparch.ComponentDescriptorFileName))).To(Equal([]byte(cd)))
+		Expect(env.ReadFile(vfs.Join(env, OUT, comparch.ComponentDescriptorFileName))).To(YAMLEqual(cd,
+			MergeSubst(SubstFrom(DS_TESTDATA), Subst("type", resourcetypes.PLAIN_TEXT))))
 	})
 })

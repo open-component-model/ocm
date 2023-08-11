@@ -210,10 +210,10 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 						}
 						msgs = []interface{}{"overwrite"}
 					}
-					notifyArtifactInfo(printer, log, "resource", i, hint, msgs...)
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, msgs...)
 					err = handler.HandleTransferResource(r, m, hint, t)
 				} else {
-					notifyArtifactInfo(printer, log, "resource", i, hint, "already present")
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
 				}
 			}
 			err = errors.Join(err, m.Close())
@@ -247,7 +247,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 			if ok {
 				// sources do not have digests fo far, so they have to copied, always.
 				hint := ocmcpi.ArtifactNameHint(a, src)
-				notifyArtifactInfo(printer, log, "source", i, hint)
+				notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint)
 				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))
 			}
 			err = errors.Join(err, m.Close())
@@ -262,7 +262,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 	return nil
 }
 
-func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, hint string, msgs ...interface{}) {
+func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, meta compdesc.ArtifactMetaAccess, hint string, msgs ...interface{}) {
 	msg := "copying"
 	cmsg := "..."
 	if len(msgs) > 0 {
@@ -275,14 +275,14 @@ func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string,
 	}
 	if printer != nil {
 		if hint != "" {
-			printer.Printf("...%s %d(%s)%s\n", kind, index, hint, cmsg)
+			printer.Printf("...%s %d %s[%s](%s)%s\n", kind, index, meta.GetName(), meta.GetType(), hint, cmsg)
 		} else {
-			printer.Printf("...%s %d%s\n", kind, index, cmsg)
+			printer.Printf("...%s %d %s[%s]%s\n", kind, index, meta.GetName(), meta.GetType(), cmsg)
 		}
 	}
 	if hint != "" {
-		log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d(%s)", index, hint), "message", msg)
+		log.Debug("handle artifact", "kind", kind, "name", meta.GetName(), "type", meta.GetType(), "index", index, "hint", hint, "message", msg)
 	} else {
-		log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d", index), "message", msg)
+		log.Debug("handle artifact", "kind", kind, "name", meta.GetName(), "type", meta.GetType(), "index", index, "message", msg)
 	}
 }

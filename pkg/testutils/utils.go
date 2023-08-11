@@ -92,3 +92,15 @@ func MustFailWithMessage(err error, msg string) {
 func ExpectError(values ...interface{}) types.Assertion {
 	return Expect(values[len(values)-1])
 }
+
+func AsString(actual interface{}) (string, error) {
+	s, ok := actual.(string)
+	if !ok {
+		b, ok := actual.([]byte)
+		if !ok {
+			return "", fmt.Errorf("Actual value is no string (or byte array), but a %T.", actual)
+		}
+		s = string(b)
+	}
+	return s, nil
+}

@@ -5,6 +5,8 @@
 package testhelper
 
 import (
+	"encoding/json"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/blob"
@@ -12,6 +14,37 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
+
+func Subst(values ...string) map[string]string {
+	r := map[string]string{}
+	for i := 0; i+1 < len(values); i += 2 {
+		r[values[i]] = values[i+1]
+	}
+	return r
+}
+
+func SubstFrom(v interface{}) map[string]string {
+	data, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	var values map[string]string
+	err = json.Unmarshal(data, &values)
+	if err != nil {
+		panic(err)
+	}
+	return values
+}
+
+func MergeSubst(subst ...map[string]string) map[string]string {
+	r := map[string]string{}
+	for _, s := range subst {
+		for k, v := range s {
+			r[k] = v
+		}
+	}
+	return r
+}
 
 func TextResourceDigestSpec(d string) *metav1.DigestSpec {
 	return &metav1.DigestSpec{
