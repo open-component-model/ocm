@@ -40,7 +40,12 @@ func (e *base) Result() interface{} {
 	return e.result
 }
 
+type static struct {
+	def_modopts ocm.ModificationOptions
+}
+
 type state struct {
+	*static
 	ocm_repo    ocm.Repository
 	ocm_comp    ocm.ComponentAccess
 	ocm_vers    ocm.ComponentVersionAccess
@@ -72,13 +77,13 @@ func NewBuilder(t *env.Environment) *Builder {
 	if t == nil {
 		t = env.NewEnvironment()
 	}
-	return &Builder{Environment: t}
+	return &Builder{Environment: t, state: state{static: &static{}}}
 }
 
 var _ accessio.Option = (*Builder)(nil)
 
 func (b *Builder) set() {
-	b.state = state{}
+	b.state = state{static: b.state.static}
 
 	if len(b.stack) > 0 {
 		b.peek().Set()

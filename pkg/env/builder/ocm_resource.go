@@ -51,7 +51,7 @@ func (r *ocmResource) Close() error {
 
 func (b *Builder) Resource(name, vers, typ string, relation metav1.ResourceRelation, f ...func()) {
 	b.expect(b.ocm_vers, T_OCMVERSION)
-	r := &ocmResource{}
+	r := &ocmResource{opts: b.def_modopts}
 	r.meta.Name = name
 	r.meta.Version = vers
 	r.meta.Type = typ
@@ -69,8 +69,12 @@ func (b *Builder) Digest(value, algo, norm string) {
 }
 
 func (b *Builder) ModificationOptions(opts ...ocm.ModificationOption) {
-	b.expect(b.ocm_modopts, "rsource or source")
+	target := &b.def_modopts
+	if b.ocm_modopts != nil {
+		target = b.ocm_modopts
+	}
+	b.expect(target, "resource")
 	for _, o := range opts {
-		o.ApplyModificationOption(b.ocm_modopts)
+		o.ApplyModificationOption(target)
 	}
 }

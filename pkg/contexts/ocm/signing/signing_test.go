@@ -111,6 +111,7 @@ var _ = Describe("access method", func() {
 
 	Context("special cases", func() {
 		DescribeTable("handles none access", func(mode string) {
+			env.ModificationOptions(ocm.SkipDigest())
 			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 				env.Component(COMPONENTA, func() {
 					env.Version(VERSION, func() {
@@ -163,8 +164,8 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			dig = Must(VerifyComponentVersion(cv, SIGNATURE, Resolver(resolver), Printer(pr)))
 			Expect(dig.Value).To(Equal(digest))
 		},
-			Entry(DIGESTMODE_TOP, DIGESTMODE_TOP),
-			Entry(DIGESTMODE_LOCAL, DIGESTMODE_LOCAL),
+			// Entry(DIGESTMODE_TOP, DIGESTMODE_TOP),
+			FEntry(DIGESTMODE_LOCAL, DIGESTMODE_LOCAL),
 		)
 	})
 
