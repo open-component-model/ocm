@@ -34,6 +34,22 @@ type ModificationOptions struct {
 	SkipDigest *bool
 }
 
+func (m *ModificationOptions) IsModifyResource() bool {
+	return utils.AsBool(m.ModifyResource)
+}
+
+func (m *ModificationOptions) IsAcceptExistentDigests() bool {
+	return utils.AsBool(m.AcceptExistentDigests)
+}
+
+func (m *ModificationOptions) IsSkipDigest() bool {
+	return utils.AsBool(m.SkipDigest)
+}
+
+func (m *ModificationOptions) IsSkipVerify() bool {
+	return utils.AsBool(m.SkipVerify)
+}
+
 func (m *ModificationOptions) ApplyModificationOptions(list ...ModificationOption) *ModificationOptions {
 	for _, o := range list {
 		if o != nil {

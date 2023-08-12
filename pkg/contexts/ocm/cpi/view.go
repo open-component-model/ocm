@@ -511,7 +511,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		}
 
 		if old == nil {
-			if !utils.AsBool(opts.ModifyResource) && c.impl.IsPersistent() {
+			if !opts.IsModifyResource() && c.impl.IsPersistent() {
 				return fmt.Errorf("new resource would invalidate signature")
 			}
 		}
@@ -523,12 +523,8 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, hashAlgo)
 		}
 
-		if compdesc.IsNoneAccessKind(res.Access.GetKind()) {
-			res.Digest = metav1.NewExcludeFromSignatureDigest()
-		}
-
-		if res.Digest == nil {
-			if !utils.AsBool(opts.SkipDigest) && !utils.AsBool(opts.SkipVerify) {
+		if res.Digest == nil && !compdesc.IsNoneAccessKind(res.Access.GetKind()) {
+			if !opts.IsSkipDigest() && !opts.IsSkipVerify() {
 				dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, opts.HasherProvider, meth, digester)
 				if err != nil {
 					return err
@@ -536,7 +532,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 				if len(dig) == 0 {
 					return fmt.Errorf("%s: no digester accepts resource", res.Name)
 				}
-				if digest != "" && !utils.AsBool(opts.SkipVerify) {
+				if digest != "" && !opts.IsSkipVerify() {
 					if digest != dig[0].Value {
 						return fmt.Errorf("digest mismatch: %s != %s", dig[0].Value, digest)
 					}
@@ -553,11 +549,13 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 					// legacy mode: no digest
 				}
 			}
+		} else {
+			res.Digest = nil
 		}
 
 		if old != nil {
 			eq := res.Equivalent(old)
-			if !eq.IsLocalHashEqual() && !utils.AsBool(opts.ModifyResource) && c.impl.IsPersistent() {
+			if !eq.IsLocalHashEqual() && !opts.IsModifyResource() && c.impl.IsPersistent() {
 				return fmt.Errorf("resource would invalidate signature")
 			}
 			cd.Signatures = nil
@@ -599,7 +597,7 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 		if !old.Digest.IsNone() {
 			digester.HashAlgorithm = old.Digest.HashAlgorithm
 			digester.NormalizationAlgorithm = old.Digest.NormalisationAlgorithm
-			if utils.AsBool(opts.AcceptExistentDigests) && !utils.AsBool(opts.ModifyResource) && c.impl.IsPersistent() {
+			if opts.IsAcceptExistentDigests() && !opts.IsModifyResource() && c.impl.IsPersistent() {
 				res.Digest = old.Digest
 			}
 		}

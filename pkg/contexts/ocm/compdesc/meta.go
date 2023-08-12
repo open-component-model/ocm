@@ -11,7 +11,7 @@ import (
 )
 
 type (
-	Objectmeta   = metav1.ObjectMeta
+	ObjectMeta   = metav1.ObjectMeta
 	Timestamp    = metav1.Timestamp
 	Provider     = metav1.Provider
 	ProviderName = metav1.ProviderName

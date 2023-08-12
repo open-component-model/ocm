@@ -164,8 +164,8 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			dig = Must(VerifyComponentVersion(cv, SIGNATURE, Resolver(resolver), Printer(pr)))
 			Expect(dig.Value).To(Equal(digest))
 		},
-			// Entry(DIGESTMODE_TOP, DIGESTMODE_TOP),
-			FEntry(DIGESTMODE_LOCAL, DIGESTMODE_LOCAL),
+			Entry(DIGESTMODE_TOP, DIGESTMODE_TOP),
+			Entry(DIGESTMODE_LOCAL, DIGESTMODE_LOCAL),
 		)
 	})
 
@@ -496,7 +496,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 		)
 	})
 
-	Context("rhombus", func() {
+	Context("legacy rhombus", func() {
 		D_DATAA := "8a835d52867572bdaf7da7fb35ee59ad45c3db2dacdeeca62178edd5d07ef08c"
 		D_DATAB := "5f103fcedc97b81bfc1841447d164781ed0f6244ce20b26d7a8a7d5880156c33"
 		D_DATAB512 := "a9469fc2e9787c8496cf1526508ae86d4e855715ef6b8f7031bdc55759683762f1c330b94a4516dff23e32f19fb170cbcb53015f1ffc0d77624ee5c9a288a030"
@@ -532,7 +532,8 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 
 		_, _, _, _ = DS_DATAA, DS_DATAB, DS_DATAC, DS_DATAD
 
-		BeforeEach(func() {
+		setup := func(opts ...ocm.ModificationOption) {
+			env.ModificationOptions(opts...)
 			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 				env.Component(COMPONENTA, func() {
 					env.Version(VERSION, func() {
@@ -571,13 +572,14 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 					})
 				})
 			})
-		})
+		}
 
-		DescribeTable("hashes unsigned", func(c EntryCheck) {
+		DescribeTable("hashes unsigned", func(c EntryCheck, mopts ...ocm.ModificationOption) {
 			var finalizer Finalizer
 			defer Defer(finalizer.Finalize)
 
 			{
+				setup(mopts...)
 				arch := finalizer.Nested()
 				src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 				Expect(err).To(Succeed())
@@ -626,7 +628,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 			sub.Close(cva)
 			Expect(len(cva.GetDescriptor().Signatures)).To(Equal(0))
 
-			c.Check1CheckA(cva, DS_DATAA)
+			c.Check1CheckA(cva, DS_DATAA, mopts...)
 
 			////////
 
@@ -645,13 +647,17 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 		},
 			Entry(DIGESTMODE_TOP, &EntryTop{}),
 			Entry(DIGESTMODE_LOCAL, &EntryLocal{}),
+
+			Entry("legacy "+DIGESTMODE_TOP, &EntryTop{}, ocm.SkipDigest()),
+			Entry("legacy "+DIGESTMODE_LOCAL, &EntryLocal{}, ocm.SkipDigest()),
 		)
 
-		DescribeTable("signs unsigned", func(c EntryCheck) {
+		DescribeTable("signs unsigned", func(c EntryCheck, mopts ...ocm.ModificationOption) {
 			var finalizer Finalizer
 			defer Defer(finalizer.Finalize)
 
 			{
+				setup(mopts...)
 				arch := finalizer.Nested()
 				src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 				Expect(err).To(Succeed())
@@ -697,7 +703,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 			finalizer.Close(cva)
 			Expect(len(cva.GetDescriptor().Signatures)).To(Equal(0))
 
-			c.Check1CheckA(cva, DS_DATAA)
+			c.Check1CheckA(cva, DS_DATAA, mopts...)
 			////////
 
 			cvb := Must(src.LookupComponentVersion(COMPONENTB, VERSION))
@@ -714,12 +720,16 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 		},
 			Entry(DIGESTMODE_TOP, &EntryTop{}),
 			Entry(DIGESTMODE_LOCAL, &EntryLocal{}),
+
+			Entry("legacy "+DIGESTMODE_TOP, &EntryTop{}, ocm.SkipDigest()),
+			Entry("legacy "+DIGESTMODE_LOCAL, &EntryLocal{}, ocm.SkipDigest()),
 		)
 
 		It("signs and rehashes presigned in top mode", func() {
 			var finalizer Finalizer
 			defer Defer(finalizer.Finalize)
 
+			setup(ocm.SkipDigest())
 			// digestD := "f428e9af521fcbd3229b01fb5cc0c4875ddb199de6356acf40642df6917d0e8f"
 			digestD := "342d30317bee13ec30d815122f23b19d9ee54a15ff8be1ec550c8072d5a6dba6"
 			digestB := D_COMPB512
@@ -783,6 +793,8 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 		It("verifies after sub level signing", func() {
 			var finalizer Finalizer
 			defer Defer(finalizer.Finalize)
+
+			setup(ocm.SkipDigest())
 
 			digestD := D_COMPD
 			digestB := D_COMPB512
@@ -850,6 +862,9 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 		})
 
 		It("fixes digest mode", func() {
+
+			setup(ocm.SkipDigest())
+
 			var finalizer Finalizer
 			defer Check(finalizer.Finalize)
 
@@ -907,6 +922,8 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 		It("fixes digest mode in recursive signing", func() {
 			var finalizer Finalizer
 			defer Check(finalizer.Finalize)
+
+			setup(ocm.SkipDigest())
 
 			{ // sign with mode local
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
@@ -1074,7 +1091,7 @@ const wrongDigest = "0a835d52867572bdaf7da7fb35ee59ad45c3db2dacdeeca62178edd5d07
 type EntryCheck interface {
 	Mode() string
 	Check1CheckD(cvd ocm.ComponentVersionAccess, d common.Properties)
-	Check1CheckA(cva ocm.ComponentVersionAccess, d *metav1.DigestSpec)
+	Check1CheckA(cva ocm.ComponentVersionAccess, d *metav1.DigestSpec, mopts ...ocm.ModificationOption)
 	Check1Corrupt(cva ocm.ComponentVersionAccess, f *Finalizer, cvd ocm.ComponentVersionAccess)
 
 	Check2Ref(cv ocm.ComponentVersionAccess, name string, d string)
@@ -1090,7 +1107,7 @@ func (*EntryLocal) Check1CheckD(cvd ocm.ComponentVersionAccess, _ common.Propert
 	ExpectWithOffset(1, cvd.GetDescriptor().NestedDigests).To(BeNil())
 }
 
-func (*EntryLocal) Check1CheckA(cva ocm.ComponentVersionAccess, d *metav1.DigestSpec) {
+func (*EntryLocal) Check1CheckA(cva ocm.ComponentVersionAccess, d *metav1.DigestSpec, _ ...ocm.ModificationOption) {
 	CheckResourceDigests(cva.GetDescriptor(), map[string]*metav1.DigestSpec{
 		"data_a": d,
 	}, 1)
@@ -1128,8 +1145,14 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 `, digests))
 }
 
-func (*EntryTop) Check1CheckA(cva ocm.ComponentVersionAccess, _ *metav1.DigestSpec) {
-	ExpectWithOffset(1, cva.GetDescriptor().Resources[0].Digest).To(BeNil())
+func (*EntryTop) Check1CheckA(cva ocm.ComponentVersionAccess, d *metav1.DigestSpec, mopts ...ocm.ModificationOption) {
+	if ocm.EvalModificationOptions(mopts...).IsSkipDigest() {
+		ExpectWithOffset(1, cva.GetDescriptor().Resources[0].Digest).To(BeNil())
+	} else {
+		CheckResourceDigests(cva.GetDescriptor(), map[string]*metav1.DigestSpec{
+			"data_a": d,
+		}, 1)
+	}
 }
 
 func (e *EntryTop) Check1Corrupt(_ ocm.ComponentVersionAccess, _ *Finalizer, cvd ocm.ComponentVersionAccess) {
