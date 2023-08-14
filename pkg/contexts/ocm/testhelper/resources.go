@@ -5,9 +5,6 @@
 package testhelper
 
 import (
-	"encoding/json"
-	"strings"
-
 	"github.com/open-component-model/ocm/pkg/common"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/blob"
@@ -15,47 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
-
-type Subst = map[string]string
-
-func SubstList(values ...string) map[string]string {
-	r := map[string]string{}
-	for i := 0; i+1 < len(values); i += 2 {
-		r[values[i]] = values[i+1]
-	}
-	return r
-}
-
-func SubstFrom(v interface{}, prefix ...string) map[string]string {
-	data, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-	var values map[string]string
-	err = json.Unmarshal(data, &values)
-	if err != nil {
-		panic(err)
-	}
-	if len(prefix) > 0 {
-		p := strings.Join(prefix, "")
-		n := map[string]string{}
-		for k, v := range values {
-			n[p+k] = v
-		}
-		values = n
-	}
-	return values
-}
-
-func MergeSubst(subst ...map[string]string) map[string]string {
-	r := map[string]string{}
-	for _, s := range subst {
-		for k, v := range s {
-			r[k] = v
-		}
-	}
-	return r
-}
 
 func TextResourceDigestSpec(d string) *metav1.DigestSpec {
 	return &metav1.DigestSpec{

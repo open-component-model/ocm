@@ -498,6 +498,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 
 	Context("legacy rhombus", func() {
 		D_DATAA := "8a835d52867572bdaf7da7fb35ee59ad45c3db2dacdeeca62178edd5d07ef08c"
+		D_DATAA512 := "47e63fa783ec370d83b84ce3de37a3de3fdd5cdc64d4fb21a530dce00fa1011e8dbc85f7509694a5875bf82e710ce00ac6bcd8e716741a7fc4c51a181b741920"
 		D_DATAB := "5f103fcedc97b81bfc1841447d164781ed0f6244ce20b26d7a8a7d5880156c33"
 		D_DATAB512 := "a9469fc2e9787c8496cf1526508ae86d4e855715ef6b8f7031bdc55759683762f1c330b94a4516dff23e32f19fb170cbcb53015f1ffc0d77624ee5c9a288a030"
 		D_DATAC := "90e06e32c46338db42d78d49fee035063d4b10e83cfbf0d1831e14527245da12"
@@ -509,11 +510,13 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 		DS_DATAD := TextResourceDigestSpec(D_DATAD)
 
 		D_COMPA := "bdb62ce8299f10e230b91bc9a9bfdbf2d33147f205fcf736d802c7e1cec7b5e8"
+		D_COMPA512 := "7aa760f27b494814e56c44413afd7bc9d932df28918d63bea222be4bd2b6abd921225cca2140d6eb549418a75b8db2a32be1852012d77474657505f0ea57b34d"
+		// D_COMPA_HASHED := "0bf5d019bab058a392b6bcb2ae50c93a02f623da0a439b1bbbfd4b1f795fbd3aafe271e3b757fad06e9118f74b18c2b83c7443f86e0c04c4539196bad79c6380"
 		D_COMPB := "d1def1b60cc8b241451b0e3fccb705a9d99db188b72ec4548519017921700857"
-		D_COMPBR := "e47deeca35bc34116770a50a88954a0b028eb4e236d089b84e419c6d7ce15d97"
+		D_COMPB512 := "08366761127c791e550d2082e34e68c8836739c68f018f969a46a17a6c13b529390303335ee0ae3cd938af9e0f31665427a1b45360622d864a5dbe053917a75d"
+		// D_COMPBR := "e47deeca35bc34116770a50a88954a0b028eb4e236d089b84e419c6d7ce15d97"
 		D_COMPC := "b376a7b440c0b1e506e54a790966119a8e229cf9226980b84c628d77ef06fc58"
 		D_COMPD := "64674d3e2843d36c603f44477e4cd66ee85fe1a91227bbcd271202429024ed61"
-		D_COMPB512 := "08366761127c791e550d2082e34e68c8836739c68f018f969a46a17a6c13b529390303335ee0ae3cd938af9e0f31665427a1b45360622d864a5dbe053917a75d"
 
 		localDigests := common.Properties{
 			"D_DATAA":    D_DATAA,
@@ -522,9 +525,9 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 			"D_DATAC":    D_DATAC,
 			"D_DATAD":    D_DATAD,
 
-			"D_COMPA":    D_COMPA,
-			"D_COMPB":    D_COMPB,
-			"D_COMPBR":   D_COMPBR,
+			"D_COMPA": D_COMPA,
+			"D_COMPB": D_COMPB,
+			// "D_COMPBR":   D_COMPB,
 			"D_COMPC":    D_COMPC,
 			"D_COMPD":    D_COMPD,
 			"D_COMPB512": D_COMPB512,
@@ -725,14 +728,17 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 			Entry("legacy "+DIGESTMODE_LOCAL, &EntryLocal{}, ocm.SkipDigest()),
 		)
 
-		It("signs and rehashes presigned in top mode", func() {
+		// D_COMPD_LEGACY := "342d30317bee13ec30d815122f23b19d9ee54a15ff8be1ec550c8072d5a6dba6"
+		// D_COMPB_HASHED := "af8a8324b7848fc5887c63e632402df99c729669889b4d2ae7efceb9f1c2341b81d8a18b82e994564d854422a544c3dffc7d64d8389c90ab7fad19a50bb75e31"
+		D_COMPB_HASHED := "6ef2fa650b73302f2f23543adf4588e18ec419c5604eab43dcbb7d4ef12a7e6ad0f5d872d34a9839d428861e22770973e0ca7316891f8b246cb0942d4fede3fc"
+		// DigestDFor512 := "64674d3e2843d36c603f44477e4cd66ee85fe1a91227bbcd271202429024ed61"
+		// DigestBFor512 := "af8a8324b7848fc5887c63e632402df99c729669889b4d2ae7efceb9f1c2341b81d8a18b82e994564d854422a544c3dffc7d64d8389c90ab7fad19a50bb75e31"
+
+		DescribeTable("signs and rehashes presigned in top mode", (func(subst Substitutions, mopts ...ocm.ModificationOption) {
 			var finalizer Finalizer
 			defer Defer(finalizer.Finalize)
 
-			setup(ocm.SkipDigest())
-			// digestD := "f428e9af521fcbd3229b01fb5cc0c4875ddb199de6356acf40642df6917d0e8f"
-			digestD := "342d30317bee13ec30d815122f23b19d9ee54a15ff8be1ec550c8072d5a6dba6"
-			digestB := D_COMPB512
+			setup(mopts...)
 			{
 				arch := finalizer.Nested()
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
@@ -740,9 +746,18 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 
 				resolver := ocm.NewCompoundResolver(src)
 
-				SignComponent(resolver, COMPONENTB, digestB, DigestMode(DIGESTMODE_TOP), HashByAlgo(sha512.Algorithm))
-				VerifyComponent(resolver, COMPONENTB, digestB)
-				log := SignComponent(resolver, COMPONENTD, digestD, DigestMode(DIGESTMODE_TOP))
+				log := SignComponent(resolver, COMPONENTB, subst["D_COMPB_X"], DigestMode(DIGESTMODE_TOP), HashByAlgo(sha512.Algorithm))
+				Expect(log).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
+  no digest found for "github.com/mandelsoft/test:v1"
+  applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref:v1]...
+    resource 0:  "name"="data_a": digest SHA-512:${D_DATAA_X}[genericBlobDigest/v1]
+  reference 0:  github.com/mandelsoft/test:v1: digest SHA-512:${D_COMPA_X}[jsonNormalisation/v1]
+  resource 0:  "name"="data_b": digest ${HASH}:${D_DATAB_X}[genericBlobDigest/v1]
+
+`, MergeSubst(localDigests, subst)))
+				VerifyComponent(resolver, COMPONENTB, subst["D_COMPB_X"])
+				log = SignComponent(resolver, COMPONENTD, subst["D_COMPD_X"], DigestMode(DIGESTMODE_TOP))
 
 				Expect(log).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]...
@@ -750,17 +765,17 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
   applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/top:v1]...
     no digest found for "github.com/mandelsoft/test:v1"
     applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/top:v1]...
-      resource 0:  "name"="data_a": digest SHA-256:8a835d52867572bdaf7da7fb35ee59ad45c3db2dacdeeca62178edd5d07ef08c[genericBlobDigest/v1]
-    reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:bdb62ce8299f10e230b91bc9a9bfdbf2d33147f205fcf736d802c7e1cec7b5e8[jsonNormalisation/v1]
-    resource 0:  "name"="data_b": digest SHA-512:a9469fc2e9787c8496cf1526508ae86d4e855715ef6b8f7031bdc55759683762f1c330b94a4516dff23e32f19fb170cbcb53015f1ffc0d77624ee5c9a288a030[genericBlobDigest/v1]
-  reference 0:  github.com/mandelsoft/ref:v1: digest SHA-256:e47deeca35bc34116770a50a88954a0b028eb4e236d089b84e419c6d7ce15d97[jsonNormalisation/v1]
+      resource 0:  "name"="data_a": digest SHA-256:${D_DATAA}[genericBlobDigest/v1]
+    reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${D_COMPA}[jsonNormalisation/v1]
+    resource 0:  "name"="data_b": digest SHA-256:${D_DATAB}[genericBlobDigest/v1]
+  reference 0:  github.com/mandelsoft/ref:v1: digest SHA-256:${D_COMPB}[jsonNormalisation/v1]
   no digest found for "github.com/mandelsoft/ref2:v1"
   applying to version "github.com/mandelsoft/ref2:v1"[github.com/mandelsoft/top:v1]...
-    reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:bdb62ce8299f10e230b91bc9a9bfdbf2d33147f205fcf736d802c7e1cec7b5e8[jsonNormalisation/v1]
-    resource 0:  "name"="data_c": digest SHA-256:90e06e32c46338db42d78d49fee035063d4b10e83cfbf0d1831e14527245da12[genericBlobDigest/v1]
-  reference 1:  github.com/mandelsoft/ref2:v1: digest SHA-256:b376a7b440c0b1e506e54a790966119a8e229cf9226980b84c628d77ef06fc58[jsonNormalisation/v1]
-  resource 0:  "name"="data_d": digest SHA-256:5a5c3f681c2af10d682926a635a1dc9dfe7087d4fa3daf329bf0acad540911a9[genericBlobDigest/v1]
-`))
+    reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${D_COMPA}[jsonNormalisation/v1]
+    resource 0:  "name"="data_c": digest SHA-256:${D_DATAC}[genericBlobDigest/v1]
+  reference 1:  github.com/mandelsoft/ref2:v1: digest SHA-256:${D_COMPC}[jsonNormalisation/v1]
+  resource 0:  "name"="data_d": digest SHA-256:${D_DATAD}[genericBlobDigest/v1]
+`, MergeSubst(localDigests, subst)))
 				Defer(arch.Finalize)
 			}
 
@@ -768,17 +783,17 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 			finalizer.Close(src)
 			cv := Must(src.LookupComponentVersion(COMPONENTD, VERSION))
 			finalizer.Close(cv)
-			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digestD))
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(subst["D_COMPD_X"]))
 
 			Expect(cv.GetDescriptor().NestedDigests).NotTo(BeNil())
 			Expect(cv.GetDescriptor().NestedDigests.String()).To(StringEqualTrimmedWithContext(`
-github.com/mandelsoft/ref:v1: SHA-256:${D_COMPBR}[jsonNormalisation/v1]
-  data_b:v1[]: SHA-512:${D_DATAB512}[genericBlobDigest/v1]
+github.com/mandelsoft/ref:v1: SHA-256:${D_COMPB}[jsonNormalisation/v1]
+  data_b:v1[]: SHA-256:${D_DATAB}[genericBlobDigest/v1]
 github.com/mandelsoft/ref2:v1: SHA-256:${D_COMPC}[jsonNormalisation/v1]
   data_c:v1[]: SHA-256:${D_DATAC}[genericBlobDigest/v1]
 github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
   data_a:v1[]: SHA-256:${D_DATAA}[genericBlobDigest/v1]
-`, localDigests))
+`, MergeSubst(localDigests, subst)))
 
 			cva, err := src.LookupComponentVersion(COMPONENTA, VERSION)
 			Expect(err).To(Succeed())
@@ -787,17 +802,35 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 
 			////////
 
-			VerifyComponent(src, COMPONENTD, digestD)
-		})
+			VerifyComponent(src, COMPONENTD, subst["D_COMPD_X"])
+		}),
+			Entry("legacy", Substitutions{
+				"HASH":      "SHA-512",
+				"D_DATAA_X": D_DATAA512,
+				"D_DATAB_X": D_DATAB512,
+				"D_DATAB":   D_DATAB,
+				"D_COMPA_X": D_COMPA512,
+				"D_COMPB_X": D_COMPB512,
+				"D_COMPD_X": D_COMPD,
+				"D_COMPB":   D_COMPB,
+			}, ocm.SkipDigest()),
+			Entry("hashed", Substitutions{
+				"HASH":      "SHA-256",
+				"D_DATAA_X": D_DATAA512,
+				"D_DATAB_X": D_DATAB,
+				"D_COMPA_X": D_COMPA512,
+				"D_COMPB_X": D_COMPB_HASHED,
+				"D_COMPD_X": D_COMPD,
+			}),
+		)
 
-		It("verifies after sub level signing", func() {
+		DescribeTable("verifies after sub level signing", func(subst Substitutions, mopts ...ocm.ModificationOption) {
 			var finalizer Finalizer
 			defer Defer(finalizer.Finalize)
 
-			setup(ocm.SkipDigest())
+			setup(mopts...)
 
 			digestD := D_COMPD
-			digestB := D_COMPB512
 			{
 				arch := finalizer.Nested()
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
@@ -824,12 +857,12 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
     resource 0:  "name"="data_c": digest SHA-256:${D_DATAC}[genericBlobDigest/v1]
   reference 1:  github.com/mandelsoft/ref2:v1: digest SHA-256:${D_COMPC}[jsonNormalisation/v1]
   resource 0:  "name"="data_d": digest SHA-256:${D_DATAD}[genericBlobDigest/v1]
-`, localDigests))
+`, MergeSubst(localDigests, subst)))
 
 				fmt.Printf("SIGN B\n")
-				SignComponent(resolver, COMPONENTB, digestB, HashByAlgo(sha512.Algorithm), DigestMode(DIGESTMODE_TOP))
+				SignComponent(resolver, COMPONENTB, subst["D_COMPB_X"], HashByAlgo(sha512.Algorithm), DigestMode(DIGESTMODE_TOP))
 				fmt.Printf("VERIFY B\n")
-				VerifyComponent(resolver, COMPONENTB, digestB)
+				VerifyComponent(resolver, COMPONENTB, subst["D_COMPB_X"])
 
 				Defer(arch.Finalize)
 			}
@@ -849,7 +882,7 @@ github.com/mandelsoft/ref2:v1: SHA-256:${D_COMPC}[jsonNormalisation/v1]
   data_c:v1[]: SHA-256:${D_DATAC}[genericBlobDigest/v1]
 github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
   data_a:v1[]: SHA-256:${D_DATAA}[genericBlobDigest/v1]
-`, localDigests))
+`, MergeSubst(localDigests, subst)))
 
 			cva, err := src.LookupComponentVersion(COMPONENTA, VERSION)
 			Expect(err).To(Succeed())
@@ -859,11 +892,18 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 			////////
 			fmt.Printf("VERIFY D\n")
 			VerifyComponent(src, COMPONENTD, digestD)
-		})
+		},
+			Entry("legacy", Substitutions{
+				"D_COMPB_X": D_COMPB512,
+			}, ocm.SkipDigest()),
+			Entry("hashed", Substitutions{
+				"D_COMPB_X": D_COMPB_HASHED,
+			}),
+		)
 
-		It("fixes digest mode", func() {
+		DescribeTable("fixes digest mode", func(subst Substitutions, mopts ...ocm.ModificationOption) {
 
-			setup(ocm.SkipDigest())
+			setup(mopts...)
 
 			var finalizer Finalizer
 			defer Check(finalizer.Finalize)
@@ -917,13 +957,16 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				Expect(GetDigestMode(cd)).To(Equal(DIGESTMODE_LOCAL))
 				Check(finalizer.Finalize)
 			}
-		})
+		},
+			Entry("legacy", Substitutions{}, ocm.SkipDigest()),
+			Entry("hashed", Substitutions{}),
+		)
 
-		It("fixes digest mode in recursive signing", func() {
+		DescribeTable("fixes digest mode in recursive signing", func(subst Substitutions, mopts ...ocm.ModificationOption) {
 			var finalizer Finalizer
 			defer Check(finalizer.Finalize)
 
-			setup(ocm.SkipDigest())
+			setup(mopts...)
 
 			{ // sign with mode local
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
@@ -986,7 +1029,10 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 
 				Check(finalizer.Finalize)
 			}
-		})
+		},
+			Entry("legacy", Substitutions{}, ocm.SkipDigest()),
+			Entry("hashed", Substitutions{}),
+		)
 	})
 })
 

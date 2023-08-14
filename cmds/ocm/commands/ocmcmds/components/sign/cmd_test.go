@@ -48,7 +48,7 @@ const PRIVKEY = "/tmp/priv"
 const D_COMPONENTA = "01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d"
 const D_COMPONENTB = "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
 
-var substitutions = Subst{
+var substitutions = Substitutions{
 	"test": D_COMPONENTA,
 	"r0":   D_TESTDATA,
 	"r1":   DS_OCIMANIFEST1.Value,

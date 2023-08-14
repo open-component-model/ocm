@@ -30,7 +30,7 @@ values:
 
 var _ = Describe("config value mapping", func() {
 	It("handles simple values substitution", func() {
-		configs := Configurations(`
+		configs := UnmarshalConfigurations(`
 - name: test1
   file: file1
   path: a.b.c
@@ -38,7 +38,7 @@ var _ = Describe("config value mapping", func() {
 `)
 		subst, err := localize.Configure(configs, nil, nil, nil, nil, config, nil, nil)
 		Expect(err).To(Succeed())
-		Expect(subst).To(Equal(Substitutions(`
+		Expect(subst).To(Equal(UnmarshalSubstitutions(`
 - name: test1
   file: file1
   path: a.b.c
@@ -47,7 +47,7 @@ var _ = Describe("config value mapping", func() {
 	})
 
 	It("handles simple expression substitution", func() {
-		configs := Configurations(`
+		configs := UnmarshalConfigurations(`
 - name: test1
   file: file1
   path: a.b.c
@@ -55,7 +55,7 @@ var _ = Describe("config value mapping", func() {
 `)
 		subst, err := localize.Configure(configs, nil, nil, nil, nil, config, nil, nil)
 		Expect(err).To(Succeed())
-		Expect(subst).To(Equal(Substitutions(`
+		Expect(subst).To(Equal(UnmarshalSubstitutions(`
 - name: test1
   file: file1
   path: a.b.c
@@ -64,7 +64,7 @@ var _ = Describe("config value mapping", func() {
 	})
 
 	It("fails for invalid expression substitution", func() {
-		configs := Configurations(`
+		configs := UnmarshalConfigurations(`
 - file: file1
   path: a.b.c
   value: (( values.x ))
@@ -81,15 +81,15 @@ var _ = Describe("config value mapping", func() {
   path: a.b.c
   value: contextvalue
 `
-		configs := Configurations(`
+		configs := UnmarshalConfigurations(`
 - name: test1
   file: file1
   path: a.b.c
   value: (( adjustments.context.value ))
 `)
-		subst, err := localize.Configure(configs, Substitutions(context), nil, nil, nil, config, nil, nil)
+		subst, err := localize.Configure(configs, UnmarshalSubstitutions(context), nil, nil, nil, config, nil, nil)
 		Expect(err).To(Succeed())
-		Expect(subst).To(Equal(Substitutions(context + `
+		Expect(subst).To(Equal(UnmarshalSubstitutions(context + `
 - name: test1
   file: file1
   path: a.b.c
@@ -101,7 +101,7 @@ var _ = Describe("config value mapping", func() {
 helper:
   help: (( |x|->"helped " x ))
 `)
-		configs := Configurations(`
+		configs := UnmarshalConfigurations(`
 - name: test1
   file: file1
   path: a.b.c
@@ -109,7 +109,7 @@ helper:
 `)
 		subst, err := localize.Configure(configs, nil, nil, nil, template, config, nil, nil)
 		Expect(err).To(Succeed())
-		Expect(subst).To(Equal(Substitutions(`
+		Expect(subst).To(Equal(UnmarshalSubstitutions(`
 - name: test1
   file: file1
   path: a.b.c
@@ -166,7 +166,7 @@ utilities:
 
 		It("uses resolved library from component version", func() {
 
-			configs := Configurations(`
+			configs := UnmarshalConfigurations(`
 - name: test1
   file: file1
   path: a.b.c
@@ -180,7 +180,7 @@ utilities:
 			}
 			subst, err := localize.Configure(configs, nil, cv, nil, nil, config, libs, nil)
 			Expect(err).To(Succeed())
-			Expect(subst).To(Equal(Substitutions(`
+			Expect(subst).To(Equal(UnmarshalSubstitutions(`
 - name: test1
   file: file1
   path: a.b.c
@@ -190,7 +190,7 @@ utilities:
 
 		It("uses templated configRules", func() {
 
-			configs := Configurations(`
+			configs := UnmarshalConfigurations(`
 - name: test1
   file: file1
   path: a.b.c
@@ -217,7 +217,7 @@ configRules:
 			}
 			subst, err := localize.Configure(configs, nil, cv, nil, []byte(template), config, libs, nil)
 			Expect(err).To(Succeed())
-			Expect(subst).To(Equal(Substitutions(`
+			Expect(subst).To(Equal(UnmarshalSubstitutions(`
 - name: gena
   file: file1
   path: some.path.a

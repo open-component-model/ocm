@@ -95,7 +95,7 @@ var _ = Describe("image value mapping", func() {
 	})
 
 	It("uses image ref data from component version", func() {
-		rules := InstRules(`
+		rules := UnmarshalInstRules(`
 templateResource:
   resource:
     name: template

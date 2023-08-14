@@ -487,7 +487,13 @@ func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 			return errors.Wrapf(err, resMsg(raw, acc.Describe(octx), "failed creating access for resource"))
 		}
 
-		rdigest := raw.Digest
+		var rdigest *metav1.DigestSpec
+		if raw.Digest != nil &&
+			(state.Context.IsRoot() || opts.DigestMode != DIGESTMODE_TOP || raw.Digest.HashAlgorithm == opts.Hasher.Algorithm()) {
+			// keep precalculated digest, if present.
+			// For top mode any non-root level digest can be recalculated.
+			rdigest = raw.Digest
+		}
 		if preset != nil && (!state.Context.RootContextInfo.Sign || preset.Digest.HashAlgorithm == opts.Hasher.Algorithm()) {
 			// prefer digest from context.
 			// If access method enforces a dedicated algorithm, then this should have been done
@@ -508,6 +514,12 @@ func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 		if !checkDigest(rdigest, &digest[0]) {
 			return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, rdigest))
 		}
+		if raw.Digest != nil &&
+			NormalizedDigesterType(raw.Digest) == NormalizedDigesterType(&digest[0]) {
+			if raw.Digest.Value != digest[0].Value {
+				return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
+			}
+		}
 		cd.Resources[i].Digest = &digest[0]
 		if legacy {
 			cd.Resources[i].Digest.HashAlgorithm = signing.LegacyHashAlgorithm(cd.Resources[i].Digest.HashAlgorithm)
@@ -525,6 +537,12 @@ func DigesterType(digest *metav1.DigestSpec) ocm.DigesterType {
 		dc.HashAlgorithm = digest.HashAlgorithm
 		dc.NormalizationAlgorithm = digest.NormalisationAlgorithm
 	}
+	return dc
+}
+
+func NormalizedDigesterType(digest *metav1.DigestSpec) ocm.DigesterType {
+	dc := DigesterType(digest)
+	dc.HashAlgorithm = signing.NormalizeHashAlgorithm(dc.HashAlgorithm)
 	return dc
 }
 

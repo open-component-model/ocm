@@ -35,7 +35,7 @@ var _ = Describe("value substitution in filesystem", func() {
 	})
 
 	It("handles simple values substitution", func() {
-		subs := Substitutions(`
+		subs := UnmarshalSubstitutions(`
 - name: test1
   file: dir/manifest1.yaml
   path: manifest.value1
@@ -61,7 +61,7 @@ manifest:
 	})
 
 	It("handles multiple values substitution", func() {
-		subs := Substitutions(`
+		subs := UnmarshalSubstitutions(`
 - name: test1
   file: dir/manifest1.yaml
   path: manifest.value1
@@ -82,7 +82,7 @@ manifest:
 	})
 
 	It("handles json substitution", func() {
-		subs := Substitutions(`
+		subs := UnmarshalSubstitutions(`
 - name: test1
   file: dir/some.json
   path: manifest.value1
