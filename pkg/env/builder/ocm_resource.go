@@ -15,6 +15,7 @@ import (
 type ocmResource struct {
 	base
 
+	orig   ocm.AccessSpec
 	meta   compdesc.ResourceMeta
 	access compdesc.AccessSpec
 	blob   accessio.BlobAccess
@@ -32,12 +33,16 @@ func (r *ocmResource) Set() {
 	r.Builder.ocm_rsc = &r.meta
 	r.Builder.ocm_acc = &r.access
 	r.Builder.ocm_meta = &r.meta.ElementMeta
+	r.Builder.ocm_labels = &r.meta.ElementMeta.Labels
 	r.Builder.ocm_modopts = &r.opts
 	r.Builder.blob = &r.blob
 	r.Builder.hint = &r.hint
 }
 
 func (r *ocmResource) Close() error {
+	if r.orig != nil && (r.access == nil && r.blob == nil) {
+		r.access = r.orig
+	}
 	switch {
 	case r.access != nil:
 		return r.Builder.ocm_vers.SetResource(&r.meta, r.access, r.opts.ApplyModificationOptions((ocm.ModifyResource())))
@@ -56,6 +61,16 @@ func (b *Builder) Resource(name, vers, typ string, relation metav1.ResourceRelat
 	r.meta.Version = vers
 	r.meta.Type = typ
 	r.meta.Relation = relation
+	b.configure(r, f)
+}
+
+func (b *Builder) ModifyResource(id metav1.Identity, f ...func()) {
+	b.expect(b.ocm_vers, T_OCMVERSION)
+	ra, err := b.ocm_vers.GetResource(id)
+	b.failOn(err, 1)
+	acc, err := ra.Access()
+	b.failOn(err, 1)
+	r := &ocmResource{orig: acc, opts: b.def_modopts, meta: *ra.Meta()}
 	b.configure(r, f)
 }
 

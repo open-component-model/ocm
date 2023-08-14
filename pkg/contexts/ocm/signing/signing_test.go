@@ -1192,7 +1192,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 }
 
 func (*EntryTop) Check1CheckA(cva ocm.ComponentVersionAccess, d *metav1.DigestSpec, mopts ...ocm.ModificationOption) {
-	if ocm.EvalModificationOptions(mopts...).IsSkipDigest() {
+	if ocm.NewModificationOptions(mopts...).IsSkipDigest() {
 		ExpectWithOffset(1, cva.GetDescriptor().Resources[0].Digest).To(BeNil())
 	} else {
 		CheckResourceDigests(cva.GetDescriptor(), map[string]*metav1.DigestSpec{

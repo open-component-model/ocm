@@ -8,7 +8,6 @@ import (
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
 func (cd *ComponentDescriptor) Equal(obj interface{}) bool {
@@ -39,30 +38,14 @@ func (cd *ComponentDescriptor) Equal(obj interface{}) bool {
 func (cd *ComponentDescriptor) Equivalent(o *ComponentDescriptor) equivalent.EqualState {
 	return equivalent.StateEquivalent().Apply(
 		cd.ObjectMeta.Equivalent(o.ObjectMeta),
-		equivalentElems(cd.Resources, o.Resources),
-		equivalentElems(cd.Sources, o.Sources),
-		equivalentElems(cd.References, o.References),
-		equivalentSignatures(cd.Signatures, o.Signatures),
+		EquivalentElems(cd.Resources, o.Resources),
+		EquivalentElems(cd.Sources, o.Sources),
+		EquivalentElems(cd.References, o.References),
+		cd.Signatures.Equivalent(o.Signatures),
 	)
 }
 
-func equivalentSignatures(a metav1.Signatures, b metav1.Signatures) equivalent.EqualState {
-	if len(a) != len(b) {
-		return equivalent.StateNotLocalHashEqual()
-	}
-outer:
-	for _, s := range a {
-		if o := b.GetByName(s.Name); o != nil {
-			if reflect.DeepEqual(s, *o) {
-				continue outer
-			}
-		}
-		return equivalent.StateNotLocalHashEqual()
-	}
-	return equivalent.StateEquivalent()
-}
-
-func equivalentElems(a ElementAccessor, b ElementAccessor) equivalent.EqualState {
+func EquivalentElems(a ElementAccessor, b ElementAccessor) equivalent.EqualState {
 	state := equivalent.StateEquivalent()
 
 	// Equivaluent of elements handles nil to provide state accoding to it

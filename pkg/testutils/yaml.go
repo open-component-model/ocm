@@ -5,7 +5,6 @@
 package testutils
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -13,30 +12,15 @@ import (
 	"github.com/go-test/deep"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"
-	"sigs.k8s.io/yaml"
+
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // YAMLEqual compares two yaml structures.
 // If value mappings are given, the expected string is evaluated by envsubst, first.
 // It is an error for actual to be nil.  Use BeNil() instead.
 func YAMLEqual(expected interface{}, subst ...map[string]string) types.GomegaMatcher {
-	var err error
-	expectedString, err := AsString(expected)
-	if err != nil {
-		data, err := json.Marshal(expectedString)
-		if err != nil {
-			return &reportError{err}
-		}
-		expectedString = string(data)
-	} else {
-		expectedString, err = eval(expectedString, subst...)
-	}
-	if err != nil {
-		return &reportError{err}
-	}
-
-	var data interface{}
-	err = yaml.Unmarshal([]byte(expectedString), &data)
+	data, err := AsStructure(expected, subst...)
 	if err != nil {
 		return &reportError{err}
 	}
@@ -55,12 +39,7 @@ func (matcher *YAMLEqualMatcher) Match(actual interface{}) (success bool, err er
 		return false, fmt.Errorf("Refusing to compare <nil> to <string>.")
 	}
 
-	actualString, err := AsString(actual)
-	if err != nil {
-		return false, err
-	}
-	var data interface{}
-	err = yaml.Unmarshal([]byte(actualString), &data)
+	data, err := AsStructure(actual)
 	if err != nil {
 		return false, err
 	}
@@ -68,17 +47,17 @@ func (matcher *YAMLEqualMatcher) Match(actual interface{}) (success bool, err er
 }
 
 func (matcher *YAMLEqualMatcher) FailureMessage(actual interface{}) (message string) {
-	actualString, err := AsString(actual)
+	data, err := AsStructure(actual)
 	if err == nil {
-		var data interface{}
-		err = yaml.Unmarshal([]byte(actualString), &data)
-		if err == nil {
-			diff := deep.Equal(data, matcher.Expected)
-			if len(diff) > 0 {
-				return fmt.Sprintf("unexpected diff in YAML: \n    %s\n", strings.Join(diff, "\n    "))
-			}
-			return "identical"
+		diff := deep.Equal(data, matcher.Expected)
+		if len(diff) > 0 {
+			eff, _ := runtime.DefaultYAMLEncoding.Marshal(data)
+			return fmt.Sprintf(
+				"Found\n%s\n%s",
+				string(eff),
+				fmt.Sprintf("unexpected diff in YAML: \n    %s\n", strings.Join(diff, "\n    ")))
 		}
+		return "identical"
 	}
 	return format.Message(actual, "to equal", matcher.Expected, err.Error())
 }

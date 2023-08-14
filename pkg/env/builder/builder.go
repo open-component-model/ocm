@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -52,6 +53,7 @@ type state struct {
 	ocm_rsc     *compdesc.ResourceMeta
 	ocm_src     *compdesc.SourceMeta
 	ocm_meta    *compdesc.ElementMeta
+	ocm_labels  *metav1.Labels
 	ocm_acc     *compdesc.AccessSpec
 	ocm_modopts *ocm.ModificationOptions
 

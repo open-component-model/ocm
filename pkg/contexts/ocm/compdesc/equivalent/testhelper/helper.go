@@ -39,3 +39,23 @@ func CheckNotLocalHashEqual(eq equivalent.EqualState) {
 	Expect(eq.IsArtifactEqual()).To(BeTrue())
 	Expect(eq.IsArtifactDetectable()).To(BeTrue())
 }
+
+func CheckNotDetectable(eq equivalent.EqualState) {
+	ExpectWithOffset(1, eq).To(Equal(equivalent.StateNotArtifactEqual(false)))
+
+	Expect(eq.IsEquivalent()).To(BeFalse())
+	Expect(eq.IsHashEqual()).To(BeFalse())
+	Expect(eq.IsLocalHashEqual()).To(BeTrue())
+	Expect(eq.IsArtifactEqual()).To(BeFalse())
+	Expect(eq.IsArtifactDetectable()).To(BeFalse())
+}
+
+func CheckNotArtifactEqual(eq equivalent.EqualState) {
+	ExpectWithOffset(1, eq).To(Equal(equivalent.StateNotArtifactEqual(true)))
+
+	Expect(eq.IsEquivalent()).To(BeFalse())
+	Expect(eq.IsHashEqual()).To(BeFalse())
+	Expect(eq.IsLocalHashEqual()).To(BeTrue())
+	Expect(eq.IsArtifactEqual()).To(BeFalse())
+	Expect(eq.IsArtifactDetectable()).To(BeTrue())
+}

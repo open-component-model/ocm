@@ -32,9 +32,12 @@ const D_TESTDATA = "810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b
 
 var DS_TESTDATA = TextResourceDigestSpec(D_TESTDATA)
 
-func TestDataResource(env *builder.Builder) {
+func TestDataResource(env *builder.Builder, config ...func()) {
 	env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
 		env.BlobStringData(mime.MIME_TEXT, "testdata")
+		for _, f := range config {
+			f()
+		}
 	})
 }
 
@@ -44,8 +47,11 @@ const D_OTHERDATA = "54b8007913ec5a907ca69001d59518acfd106f7b02f892eabf9cae3f8b2
 
 var DS_OTHERDATA = TextResourceDigestSpec(D_OTHERDATA)
 
-func OtherDataResource(env *builder.Builder) {
+func OtherDataResource(env *builder.Builder, config ...func()) {
 	env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
 		env.BlobStringData(mime.MIME_TEXT, S_OTHERDATA)
+		for _, f := range config {
+			f()
+		}
 	})
 }

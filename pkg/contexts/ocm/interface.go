@@ -150,8 +150,8 @@ type (
 	ModificationOptions = internal.ModificationOptions
 )
 
-func EvalModificationOptions(list ...ModificationOption) *ModificationOptions {
-	return internal.EvalModificationOptions(list...)
+func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
+	return internal.NewModificationOptions(list...)
 }
 
 func ModifyResource(flag ...bool) ModificationOption {

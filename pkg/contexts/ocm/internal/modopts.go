@@ -82,7 +82,7 @@ func (m *ModificationOptions) GetHasher(algo ...string) Hasher {
 	return m.HasherProvider.GetHasher(utils.OptionalDefaulted(m.DefaultHashAlgorithm, algo...))
 }
 
-func EvalModificationOptions(list ...ModificationOption) *ModificationOptions {
+func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 	var m ModificationOptions
 	m.ApplyModificationOptions(list...)
 	return &m

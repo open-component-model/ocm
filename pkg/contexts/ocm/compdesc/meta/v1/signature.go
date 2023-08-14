@@ -26,6 +26,22 @@ const (
 // Signatures is a list of signatures.
 type Signatures []Signature
 
+func (s Signatures) Equivalent(o Signatures) equivalent.EqualState {
+	if len(s) != len(o) {
+		return equivalent.StateNotEquivalent()
+	}
+outer:
+	for _, a := range s {
+		if b := o.GetByName(a.Name); b != nil {
+			if reflect.DeepEqual(&a, b) {
+				continue outer
+			}
+		}
+		return equivalent.StateNotEquivalent()
+	}
+	return equivalent.StateEquivalent()
+}
+
 func (s Signatures) Len() int {
 	return len(s)
 }
@@ -124,7 +140,7 @@ func (d *DigestSpec) Equivalent(o *DigestSpec) equivalent.EqualState {
 	if (d.IsExcluded() && o == nil) || reflect.DeepEqual(d, o) {
 		return equivalent.StateEquivalent()
 	}
-	return equivalent.StateNotArtifactEqual(true)
+	return equivalent.StateNotArtifactEqual(d != nil && o != nil)
 }
 
 // SignatureSpec defines a signature.

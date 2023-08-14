@@ -42,6 +42,10 @@ func NewIdentity(name string, extras ...string) Identity {
 	return metav1.NewIdentity(name, extras...)
 }
 
+func NewExtraIdentity(extras ...string) Identity {
+	return metav1.NewExtraIdentity(extras...)
+}
+
 func IsIdentity(s string) bool {
 	return metav1.IsIdentity(s)
 }

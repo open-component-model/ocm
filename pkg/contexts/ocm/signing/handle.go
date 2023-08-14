@@ -99,6 +99,10 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 		opts = opts.Dup()
 		opts.Printer = printer
 	}
+	err := opts.Complete(DefaultHandlerRegistry())
+	if err != nil {
+		return nil, err
+	}
 	if state == nil {
 		s := NewWalkingState(cv.GetContext().LoggingContext().WithContext(REALM))
 		state = &s

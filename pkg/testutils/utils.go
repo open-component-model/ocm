@@ -5,6 +5,7 @@
 package testutils
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -13,11 +14,12 @@ import (
 
 	"github.com/onsi/gomega/types"
 
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func Close(c io.Closer, msg ...interface{}) {
-	Defer(c.Close, msg...)
+	DeferWithOffset(1, c.Close, msg...)
 }
 
 func Defer(f func() error, msg ...interface{}) {
@@ -103,4 +105,32 @@ func AsString(actual interface{}) (string, error) {
 		s = string(b)
 	}
 	return s, nil
+}
+
+func AsStructure(actual interface{}, substs ...Substitutions) (interface{}, error) {
+	var err error
+
+	s, ok := actual.(string)
+	if !ok {
+		b, ok := actual.([]byte)
+		if !ok {
+			b, err = json.Marshal(actual)
+			if err != nil {
+				return "", fmt.Errorf("Actual value (%T) is no string, byte array, or serializable object.", actual)
+			}
+		}
+		s = string(b)
+	}
+	if subst := MergeSubst(substs...); len(subst) != 0 {
+		s, err = eval(s, subst)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var value interface{}
+	err = runtime.DefaultYAMLEncoding.Unmarshal([]byte(s), &value)
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
 }

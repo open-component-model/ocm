@@ -39,7 +39,7 @@ var (
 
 func New(opts ...ocm.ModificationOption) *ResourceSpecHandler {
 	if len(opts) > 0 {
-		return &ResourceSpecHandler{opts: ocm.EvalModificationOptions(opts...)}
+		return &ResourceSpecHandler{opts: ocm.NewModificationOptions(opts...)}
 	}
 	return &ResourceSpecHandler{}
 }

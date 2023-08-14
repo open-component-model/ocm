@@ -482,7 +482,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 	}
 
 	ctx := c.impl.GetContext()
-	opts := internal.EvalModificationOptions(modopts...)
+	opts := internal.NewModificationOptions(modopts...)
 	CompleteModificationOptions(ctx, opts)
 
 	spec, err := ctx.AccessSpecForSpec(acc)
