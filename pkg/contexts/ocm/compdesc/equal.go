@@ -38,9 +38,9 @@ func (cd *ComponentDescriptor) Equal(obj interface{}) bool {
 func (cd *ComponentDescriptor) Equivalent(o *ComponentDescriptor) equivalent.EqualState {
 	return equivalent.StateEquivalent().Apply(
 		cd.ObjectMeta.Equivalent(o.ObjectMeta),
-		EquivalentElems(cd.Resources, o.Resources),
-		EquivalentElems(cd.Sources, o.Sources),
-		EquivalentElems(cd.References, o.References),
+		cd.Resources.Equivalent(o.Resources),
+		cd.Sources.Equivalent(o.Sources),
+		cd.References.Equivalent(o.References),
 		cd.Signatures.Equivalent(o.Signatures),
 	)
 }

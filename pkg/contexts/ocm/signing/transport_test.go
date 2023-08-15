@@ -10,6 +10,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
@@ -30,12 +33,17 @@ import (
 )
 
 const (
-	LABEL_SIG     = "non-volatile"
-	LABEL_VOL     = "volatile"
-	LABEL_VOL_NEW = "new-volatile"
+	LABEL_SIG       = "non-volatile"
+	LABEL_VOL       = "volatile"
+	LABEL_VOL_NEW   = "new-volatile"
+	LABEL_VOL_LOCAL = "local-volatile"
 
 	TARGET = "/tmp/target"
+
+	D_COMPA = "05dae7a597029ffbde9f3460b6ca9d059c3d78ca7c72a1d640c4555c6e91c921"
 )
+
+type Modifier func(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor)
 
 var _ = Describe("transport and signing", func() {
 	var env *Builder
@@ -78,18 +86,36 @@ var _ = Describe("transport and signing", func() {
       relation: local
       type: PlainText
       version: v1
+    - access:
+        imageReference: alias.alias/ocm/value:v2.0
+        type: ociArtifact
+      digest:
+        hashAlgorithm: SHA-256
+        normalisationAlgorithm: ociArtifactDigest/v1
+        value: ${IMAGE}
+      name: image
+      relation: local
+      type: ociImage
+      version: v1
     sources: []
     version: v1
   meta:
     configuredSchemaVersion: v2
 `, Substitutions{
 		"DIGEST": D_TESTDATA,
+		"IMAGE":  D_OCIMANIFEST1,
 	}))
 
 	BeforeEach(func() {
 		env = NewBuilder(tenv.NewEnvironment())
 
 		env.RSAKeyPair(SIGNATURE, SIGNATURE2)
+
+		FakeOCIRepo(env, OCIPATH, OCIHOST)
+
+		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+			OCIManifest1(env)
+		})
 
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.ComponentVersion(COMPONENTA, VERSION, func() {
@@ -104,6 +130,7 @@ var _ = Describe("transport and signing", func() {
 					env.Label(LABEL_SIG, "signed", metav1.WithSigning())
 					env.Label(LABEL_VOL, "orig volatile")
 				})
+				OCIArtifactResource1(env, "image", OCIHOST)
 			})
 		})
 
@@ -117,7 +144,7 @@ var _ = Describe("transport and signing", func() {
 		Expect(cv.GetDescriptor()).To(YAMLEqual(descData))
 	})
 
-	It("retransports after local signing", func() {
+	DescribeTable("retransports after local signing", func(modify Modifier) {
 		target := Must(ctf.Create(env, accessobj.ACC_WRITABLE, TARGET, 0o700, env))
 		defer Close(target, "target")
 
@@ -126,9 +153,11 @@ var _ = Describe("transport and signing", func() {
 		cv := Must(repo.LookupComponentVersion(COMPONENTA, VERSION))
 		defer Close(cv, "cv")
 
+		desc := cv.GetDescriptor().Copy()
+
 		printer, buf := common.NewBufferedPrinter()
 		// transport
-		handler := Must(standard.New())
+		handler := Must(standard.New(standard.ResourcesByValue()))
 		MustBeSuccessful(transfer.TransferVersion(printer, nil, cv, target, handler))
 
 		var targetfinal finalizer.Finalizer
@@ -136,7 +165,12 @@ var _ = Describe("transport and signing", func() {
 
 		tcv := Must(target.LookupComponentVersion(COMPONENTA, VERSION))
 		targetfinal.Close(tcv, "tcv")
-		Expect(tcv.GetDescriptor()).To(YAMLEqual(descData))
+
+		ra := desc.GetResourceIndexByIdentity(metav1.NewIdentity("image"))
+		Expect(ra).To(BeNumerically(">=", 0))
+		// indeed, the artifact set archive hash seems to be reproducible
+		desc.Resources[ra].Access = localblob.New("sha256:b0692bcec00e0a875b6b280f3209d6776f3eca128adcb7e81e82fd32127c0c62", "ocm/value:v2.0", "application/vnd.oci.image.manifest.v1+tar+gzip", nil)
+		Expect(tcv.GetDescriptor()).To(YAMLEqual(desc))
 
 		descSigned := tcv.GetDescriptor().Copy()
 
@@ -147,7 +181,6 @@ var _ = Describe("transport and signing", func() {
 		)
 		spec := Must(signing.Apply(printer, nil, tcv, sopts))
 
-		D_COMPA := "4dd928ad1d9d7d47a822f5d84bd16097188bb03bb99a059f78271583ee92f8b9"
 		digSpec := &metav1.DigestSpec{
 			HashAlgorithm:          "SHA-256",
 			NormalisationAlgorithm: "jsonNormalisation/v1",
@@ -172,19 +205,10 @@ var _ = Describe("transport and signing", func() {
 		Expect(tcv.GetDescriptor()).To(DeepEqual(descSigned))
 
 		merged := tcv.GetDescriptor().Copy()
-		MustBeSuccessful(targetfinal.Finalize())
 
 		// change volatile data in origin
-		rid := metav1.NewIdentity("testdata")
-		ra := Must(cv.GetResource(rid))
-		tr := Must(merged.GetResourceByIdentity(rid))
-
-		ra.Meta().SetLabel(LABEL_VOL, "changed-resource-volatile")
-		tr.SetLabel(LABEL_VOL, "changed-resource-volatile")
-		cv.GetDescriptor().Labels.Set(LABEL_VOL, "changed-comp-volatile")
-		merged.Labels.Set(LABEL_VOL, "changed-comp-volatile")
-		cv.GetDescriptor().Provider.Labels.Set(LABEL_VOL, "changed-prov-volatile")
-		merged.Provider.Labels.Set(LABEL_VOL, "changed-prov-volatile")
+		modify(cv, tcv, merged)
+		MustBeSuccessful(targetfinal.Finalize())
 
 		// transfer changed volatile data
 		buf.Reset()
@@ -195,5 +219,107 @@ var _ = Describe("transport and signing", func() {
 		tcv = Must(target.LookupComponentVersion(COMPONENTA, VERSION))
 		targetfinal.Close(tcv, "tcv")
 		Expect(tcv.GetDescriptor()).To(DeepEqual(merged))
-	})
+
+		// verify signature after modification
+		sopts = signing.NewOptions(
+			signing.VerifySignature(SIGNATURE),
+			signing.VerifyDigests(),
+		)
+		Must(signing.Apply(printer, nil, tcv, sopts))
+		if tcv.GetDescriptor().GetSignatureIndex(SIGNATURE2) >= 0 {
+			sopts = signing.NewOptions(
+				signing.VerifySignature(SIGNATURE2),
+				signing.VerifyDigests(),
+			)
+			Must(signing.Apply(printer, nil, tcv, sopts))
+		}
+	},
+		Entry("modify component label", componentLabel),
+		Entry("modify provider label", providerLabel),
+		Entry("modify resource label", resourceLabel),
+
+		Entry("merge component label", mergeComponentLabel),
+		Entry("merge provider label", mergeProviderLabel),
+		Entry("merge resource label", mergeResourceLabel),
+
+		Entry("source signature", sourceSignature),
+	)
 })
+
+func componentLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
+	cv.GetDescriptor().Labels.Set(LABEL_VOL, "changed-comp-volatile")
+	merged.Labels.Set(LABEL_VOL, "changed-comp-volatile")
+}
+
+func mergeComponentLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
+	cv.GetDescriptor().Labels.Set(LABEL_VOL_NEW, "new-volatile")
+	merged.Labels.Set(LABEL_VOL_NEW, "new-volatile")
+
+	tcv.GetDescriptor().Labels.Set(LABEL_VOL_LOCAL, "local-volatile")
+	merged.Labels.Set(LABEL_VOL_LOCAL, "local-volatile")
+}
+
+func providerLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
+	cv.GetDescriptor().Provider.Labels.Set(LABEL_VOL, "changed-prov-volatile")
+	merged.Provider.Labels.Set(LABEL_VOL, "changed-prov-volatile")
+}
+
+func mergeProviderLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
+	cv.GetDescriptor().Provider.Labels.Set(LABEL_VOL_NEW, "new-volatile")
+	merged.Provider.Labels.Set(LABEL_VOL_NEW, "new-volatile")
+
+	tcv.GetDescriptor().Provider.Labels.Set(LABEL_VOL_LOCAL, "local-volatile")
+	merged.Provider.Labels.Set(LABEL_VOL_LOCAL, "local-volatile")
+}
+
+func resourceLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
+	rid := metav1.NewIdentity("testdata")
+	ra := Must(cv.GetResource(rid))
+	tr := NotNil(merged.GetResourceAccessByIdentity(rid))
+
+	ra.Meta().SetLabel(LABEL_VOL, "changed-resource-volatile")
+	tr.SetLabel(LABEL_VOL, "changed-resource-volatile")
+}
+
+func mergeResourceLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
+	rid := metav1.NewIdentity("testdata")
+	tr := NotNil(merged.GetResourceAccessByIdentity(rid))
+
+	ra := NotNil(cv.GetDescriptor().GetResourceAccessByIdentity(rid))
+	ra.SetLabel(LABEL_VOL_NEW, "new-resource-volatile")
+	tr.SetLabel(LABEL_VOL_NEW, "new-resource-volatile")
+
+	ra = NotNil(tcv.GetDescriptor().GetResourceAccessByIdentity(rid))
+	ra.SetLabel(LABEL_VOL_LOCAL, "local-resource-volatile")
+	tr.SetLabel(LABEL_VOL_LOCAL, "local-resource-volatile")
+}
+
+func sourceSignature(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
+	// sign in source
+	sopts := signing.NewOptions(
+		signing.Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE2),
+		signing.Update(), signing.VerifyDigests(),
+	)
+	spec, err := signing.Apply(common.NewPrinter(nil), nil, cv, sopts)
+	ExpectWithOffset(1, err).To(Succeed())
+
+	signatures := []compdesc.Signature{
+		compdesc.Signature{
+			Name:   SIGNATURE2,
+			Digest: *spec,
+			Signature: metav1.SignatureSpec{
+				Algorithm: rsa.Algorithm,
+				MediaType: rsa.MediaType,
+				Value:     cv.GetDescriptor().Signatures[0].Signature.Value,
+			},
+		},
+	}
+	ExpectWithOffset(1, spec).To(Equal(&metav1.DigestSpec{
+		HashAlgorithm:          "SHA-256",
+		NormalisationAlgorithm: "jsonNormalisation/v1",
+		Value:                  D_COMPA,
+	}))
+	ExpectWithOffset(1, cv.GetDescriptor().Signatures).To(ConsistOf(signatures))
+
+	merged.Signatures = append(signatures, merged.Signatures...)
+}

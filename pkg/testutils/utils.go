@@ -40,6 +40,11 @@ func DeferWithOffset(o int, f func() error, msg ...interface{}) {
 	}
 }
 
+func NotNil[T any](o T) T {
+	ExpectWithOffset(1, o).NotTo(BeNil())
+	return o
+}
+
 func Must[T any](o T, err error) T {
 	ExpectWithOffset(1, err).To(Succeed())
 	return o

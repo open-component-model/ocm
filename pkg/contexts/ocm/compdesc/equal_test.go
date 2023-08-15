@@ -76,8 +76,9 @@ var _ = Describe("equivalence", func() {
 			a = &compdesc.Resource{
 				ResourceMeta: compdesc.ResourceMeta{
 					ElementMeta: compdesc.ElementMeta{
-						Name:   "r1",
-						Labels: labels.Copy(),
+						Name:    "r1",
+						Version: "v1",
+						Labels:  labels.Copy(),
 					},
 					Type:     "test",
 					Relation: v1.LocalRelation,
@@ -115,6 +116,12 @@ var _ = Describe("equivalence", func() {
 			CheckNotLocalHashEqual(b.Equivalent(a))
 		})
 
+		It("handles version change", func() {
+			b.Version = "X"
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
 		It("handles relation change", func() {
 			b.Relation = compdesc.ExternalRelation
 			CheckNotLocalHashEqual(a.Equivalent(b))
@@ -141,19 +148,373 @@ var _ = Describe("equivalence", func() {
 			CheckNotArtifactEqual(a.Equivalent(b))
 			CheckNotArtifactEqual(b.Equivalent(a))
 		})
-
 	})
 
 	Context("resources", func() {
+		var a, b compdesc.Resources
 
+		BeforeEach(func() {
+			a = compdesc.Resources{
+				compdesc.Resource{
+					ResourceMeta: compdesc.ResourceMeta{
+						ElementMeta: compdesc.ElementMeta{
+							Name:   "r1",
+							Labels: labels.Copy(),
+						},
+						Type:     "test",
+						Relation: v1.LocalRelation,
+						Digest: &v1.DigestSpec{
+							HashAlgorithm:          "hash",
+							NormalisationAlgorithm: "norm",
+							Value:                  "x",
+						},
+					},
+					Access: localblob.New("test1", "test1", "test", nil),
+				},
+				compdesc.Resource{
+					ResourceMeta: compdesc.ResourceMeta{
+						ElementMeta: compdesc.ElementMeta{
+							Name:          "r2",
+							ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+							Labels:        labels.Copy(),
+						},
+						Type:     "test",
+						Relation: v1.LocalRelation,
+						Digest: &v1.DigestSpec{
+							HashAlgorithm:          "hash",
+							NormalisationAlgorithm: "norm",
+							Value:                  "y",
+						},
+					},
+					Access: localblob.New("test2", "test2", "test", nil),
+				},
+			}
+
+			b = a.Copy()
+		})
+
+		It("handles equal", func() {
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles order change", func() {
+			b[0], b[1] = b[1], b[0]
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles volatile change", func() {
+			b[0].Labels[1].Value = []byte("X")
+			CheckNotEquivalent(a.Equivalent(b))
+			CheckNotEquivalent(b.Equivalent(a))
+		})
+
+		It("handles non-volatile attr change", func() {
+			b[0].Type = "X"
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles different digest", func() {
+			b[0].Digest.Value = "X"
+			CheckNotArtifactEqual(a.Equivalent(b))
+			CheckNotArtifactEqual(b.Equivalent(a))
+		})
+
+		It("handles undetectable digest", func() {
+			b[0].Digest = nil
+			CheckNotDetectable(a.Equivalent(b))
+			CheckNotDetectable(b.Equivalent(a))
+			a[0].Digest = nil
+			CheckNotDetectable(a.Equivalent(b))
+			CheckNotDetectable(b.Equivalent(a))
+		})
+
+		It("handles additional entry", func() {
+			b = append(b, compdesc.Resource{
+				ResourceMeta: compdesc.ResourceMeta{
+					ElementMeta: compdesc.ElementMeta{
+						Name:          "r3",
+						ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+						Labels:        labels.Copy(),
+					},
+					Type:     "test",
+					Relation: v1.LocalRelation,
+					Digest: &v1.DigestSpec{
+						HashAlgorithm:          "hash",
+						NormalisationAlgorithm: "norm",
+						Value:                  "z",
+					},
+				},
+				Access: localblob.New("test3", "test3", "test", nil),
+			})
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles additional non-digest entry", func() {
+			b = append(b, compdesc.Resource{
+				ResourceMeta: compdesc.ResourceMeta{
+					ElementMeta: compdesc.ElementMeta{
+						Name:          "r3",
+						ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+						Labels:        labels.Copy(),
+					},
+					Type:     "test",
+					Relation: v1.LocalRelation,
+					Digest:   compdesc.NewExcludeFromSignatureDigest(),
+				},
+				Access: localblob.New("test3", "test3", "test", nil),
+			})
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+
+			a = append(a, *b[2].Copy())
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+
+			b[2].Access = localblob.New("test4", "test4", "test", nil)
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+
+			b[2].Type = "X"
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+	})
+
+	Context("source", func() {
+		var a, b *compdesc.Source
+
+		BeforeEach(func() {
+			a = &compdesc.Source{
+				SourceMeta: compdesc.SourceMeta{
+					ElementMeta: compdesc.ElementMeta{
+						Name:   "s1",
+						Labels: labels.Copy(),
+					},
+					Type: "test",
+				},
+				Access: localblob.New("test", "test", "test", nil),
+			}
+			b = a.Copy()
+		})
+
+		It("handles equal", func() {
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles volatile meta change", func() {
+			b.Labels[1].Value = []byte("X")
+			CheckNotEquivalent(a.Equivalent(b))
+			CheckNotEquivalent(b.Equivalent(a))
+		})
+
+		It("handles non-volatile meta change", func() {
+			b.Labels[0].Value = []byte("X")
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles version change", func() {
+			b.Version = "X"
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles type change", func() {
+			b.Type = "X"
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		// actually content not relevant
+		It("handles access change", func() {
+			b.Access = ociartifact.New("test")
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
 	})
 
 	Context("sources", func() {
+		var a, b compdesc.Sources
 
+		BeforeEach(func() {
+			a = compdesc.Sources{
+				compdesc.Source{
+					SourceMeta: compdesc.SourceMeta{
+						ElementMeta: compdesc.ElementMeta{
+							Name:   "s1",
+							Labels: labels.Copy(),
+						},
+						Type: "test",
+					},
+					Access: localblob.New("test1", "test1", "test", nil),
+				},
+				compdesc.Source{
+					SourceMeta: compdesc.SourceMeta{
+						ElementMeta: compdesc.ElementMeta{
+							Name:          "s2",
+							ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+							Labels:        labels.Copy(),
+						},
+						Type: "test",
+					},
+					Access: localblob.New("test2", "test2", "test", nil),
+				},
+			}
+
+			b = a.Copy()
+		})
+
+		It("handles equal", func() {
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles order change", func() {
+			b[0], b[1] = b[1], b[0]
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles volatile change", func() {
+			b[0].Labels[1].Value = []byte("X")
+			CheckNotEquivalent(a.Equivalent(b))
+			CheckNotEquivalent(b.Equivalent(a))
+		})
+
+		It("handles non-volatile attr change", func() {
+			b[0].Type = "X"
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles additional entry", func() {
+			b = append(b, compdesc.Source{
+				SourceMeta: compdesc.SourceMeta{
+					ElementMeta: compdesc.ElementMeta{
+						Name:          "s3",
+						ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+						Labels:        labels.Copy(),
+					},
+					Type: "test",
+				},
+				Access: localblob.New("test3", "test3", "test", nil),
+			})
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+	})
+
+	Context("reference", func() {
+		var a, b *compdesc.ComponentReference
+
+		BeforeEach(func() {
+			a = &compdesc.ComponentReference{
+				ElementMeta: compdesc.ElementMeta{
+					Name:    "r1",
+					Version: "v1",
+					Labels:  labels.Copy(),
+				},
+				ComponentName: "test",
+			}
+			b = a.Copy()
+		})
+
+		It("handles equal", func() {
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles volatile meta change", func() {
+			b.Labels[1].Value = []byte("X")
+			CheckNotEquivalent(a.Equivalent(b))
+			CheckNotEquivalent(b.Equivalent(a))
+		})
+
+		It("handles non-volatile meta change", func() {
+			b.Labels[0].Value = []byte("X")
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles version change", func() {
+			b.Version = "X"
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles component change", func() {
+			b.ComponentName = "X"
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
 	})
 
 	Context("references", func() {
+		var a, b compdesc.References
 
+		BeforeEach(func() {
+			a = compdesc.References{
+				compdesc.ComponentReference{
+					ElementMeta: compdesc.ElementMeta{
+						Name:    "s1",
+						Version: "v1",
+						Labels:  labels.Copy(),
+					},
+					ComponentName: "c1",
+				},
+				compdesc.ComponentReference{
+					ElementMeta: compdesc.ElementMeta{
+						Name:    "s2",
+						Version: "v1",
+						Labels:  labels.Copy(),
+					},
+					ComponentName: "c2",
+				},
+			}
+
+			b = a.Copy()
+		})
+
+		It("handles equal", func() {
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles order change", func() {
+			b[0], b[1] = b[1], b[0]
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles volatile change", func() {
+			b[0].Labels[1].Value = []byte("X")
+			CheckNotEquivalent(a.Equivalent(b))
+			CheckNotEquivalent(b.Equivalent(a))
+		})
+
+		It("handles component change", func() {
+			b[0].ComponentName = "X"
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles additional entry", func() {
+			b = append(b, compdesc.ComponentReference{
+				ElementMeta: compdesc.ElementMeta{
+					Name:          "s3",
+					ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+					Labels:        labels.Copy(),
+				},
+				ComponentName: "c3",
+			})
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
 	})
 
 	Context("signatures", func() {

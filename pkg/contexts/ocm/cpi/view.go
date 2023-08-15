@@ -659,6 +659,10 @@ func (c *componentVersionAccessView) GetResource(id metav1.Identity) (ResourceAc
 	return newResourceAccess(c, r.Access, r.ResourceMeta), nil
 }
 
+func (c *componentVersionAccessView) GetResourceIndex(id metav1.Identity) int {
+	return c.GetDescriptor().GetResourceIndexByIdentity(id)
+}
+
 func (c *componentVersionAccessView) GetResourceByIndex(i int) (ResourceAccess, error) {
 	if i < 0 || i >= len(c.GetDescriptor().Resources) {
 		return nil, errors.ErrInvalid("resource index", strconv.Itoa(i))
@@ -740,6 +744,10 @@ func (c *componentVersionAccessView) GetSource(id metav1.Identity) (SourceAccess
 	return newSourceAccess(c, r.Access, r.SourceMeta), nil
 }
 
+func (c *componentVersionAccessView) GetSourceIndex(id metav1.Identity) int {
+	return c.GetDescriptor().GetSourceIndexByIdentity(id)
+}
+
 func (c *componentVersionAccessView) GetSourceByIndex(i int) (SourceAccess, error) {
 	if i < 0 || i >= len(c.GetDescriptor().Sources) {
 		return nil, errors.ErrInvalid("source index", strconv.Itoa(i))
@@ -762,6 +770,10 @@ func (c *componentVersionAccessView) GetReferences() compdesc.References {
 
 func (c *componentVersionAccessView) GetReference(id metav1.Identity) (ComponentReference, error) {
 	return c.GetDescriptor().GetReferenceByIdentity(id)
+}
+
+func (c *componentVersionAccessView) GetReferenceIndex(id metav1.Identity) int {
+	return c.GetDescriptor().GetReferenceIndexByIdentity(id)
 }
 
 func (c *componentVersionAccessView) GetReferenceByIndex(i int) (ComponentReference, error) {

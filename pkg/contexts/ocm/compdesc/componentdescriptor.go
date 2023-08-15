@@ -377,6 +377,10 @@ func SourceArtifacts(cd *ComponentDescriptor) ArtifactAccessor {
 	return cd.Sources
 }
 
+func (r Sources) Equivalent(o Sources) equivalent.EqualState {
+	return EquivalentElems(r, o)
+}
+
 func (s Sources) Len() int {
 	return len(s)
 }
@@ -513,6 +517,10 @@ var _ ElementAccessor = Resources{}
 
 func ResourceArtifacts(cd *ComponentDescriptor) ArtifactAccessor {
 	return cd.Resources
+}
+
+func (r Resources) Equivalent(o Resources) equivalent.EqualState {
+	return EquivalentElems(r, o)
 }
 
 func (r Resources) Len() int {
@@ -674,6 +682,10 @@ func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) 
 }
 
 type References []ComponentReference
+
+func (r References) Equivalent(o References) equivalent.EqualState {
+	return EquivalentElems(r, o)
+}
 
 func (r References) Len() int {
 	return len(r)

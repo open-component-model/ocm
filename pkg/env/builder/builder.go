@@ -130,16 +130,20 @@ func (b *Builder) push(e element) {
 func (b *Builder) configure(e element, funcs []func(), skip ...int) interface{} {
 	e.SetBuilder(b)
 	b.push(e)
-	for _, f := range funcs {
-		if f != nil {
-			f()
-		}
-	}
+	b.Configure(funcs...)
 	err := b.pop().Close()
 	if err != nil {
 		Fail(err.Error(), utils.Optional(skip...)+2)
 	}
 	return e.Result()
+}
+
+func (b *Builder) Configure(funcs ...func()) {
+	for _, f := range funcs {
+		if f != nil {
+			f()
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

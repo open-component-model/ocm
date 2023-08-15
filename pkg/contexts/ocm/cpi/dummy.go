@@ -63,6 +63,10 @@ func (d *DummyComponentVersionAccess) GetResource(meta metav1.Identity) (Resourc
 	return nil, errors.ErrNotFound("resource", meta.String())
 }
 
+func (d *DummyComponentVersionAccess) GetResourceIndex(metav1.Identity) int {
+	return -1
+}
+
 func (d *DummyComponentVersionAccess) GetResourceByIndex(i int) (ResourceAccess, error) {
 	return nil, errors.ErrInvalid("resource index", strconv.Itoa(i))
 }
@@ -79,12 +83,20 @@ func (d *DummyComponentVersionAccess) GetSource(meta metav1.Identity) (SourceAcc
 	panic("implement me")
 }
 
+func (d *DummyComponentVersionAccess) GetSourceIndex(metav1.Identity) int {
+	return -1
+}
+
 func (d *DummyComponentVersionAccess) GetSourceByIndex(i int) (SourceAccess, error) {
 	return nil, errors.ErrInvalid("source index", strconv.Itoa(i))
 }
 
 func (d *DummyComponentVersionAccess) GetReference(meta metav1.Identity) (ComponentReference, error) {
 	return ComponentReference{}, errors.ErrNotFound("reference", meta.String())
+}
+
+func (d *DummyComponentVersionAccess) GetReferenceIndex(metav1.Identity) int {
+	return -1
 }
 
 func (d *DummyComponentVersionAccess) GetReferenceByIndex(i int) (ComponentReference, error) {
