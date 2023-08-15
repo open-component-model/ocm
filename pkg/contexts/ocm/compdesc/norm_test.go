@@ -42,6 +42,7 @@ var CD1 = `
       - name: label2
         value: bar
         signing: true
+        mergeAlgorithm: test
       name: introspect-image
       relation: local
       type: ociImage

@@ -39,6 +39,9 @@ definitions:
         pattern: '^v[0-9]+$'
       signing:
         type: 'boolean'
+      mergeAlgorithm:
+        pattern: '^[a-z][a-z0-9/_-]+$'
+      mergeConfig: {}
     additionalProperties: false
 
   componentName:

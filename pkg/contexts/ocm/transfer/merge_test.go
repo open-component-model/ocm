@@ -8,8 +8,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/labelmergehandler/handlers/simplelistmerge"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/go-test/deep"
@@ -53,10 +55,54 @@ var _ = Describe("basic merge operations for transport", func() {
 
 		It("add signed additional ones", func() {
 			res := dst.Copy()
-			MustBeSuccessful(transfer.MergeLabels(src, &res))
+			MustBeSuccessful(transfer.MergeLabels(ocm.DefaultContext(), src, &res))
 			Expect(res).To(ConsistOf(append(dst, *src.GetDef("add-unsigned"))))
 		})
 
+		It("merges with list merger", func() {
+			src.Clear()
+			src.Set("test", simplelistmerge.LabelValue{
+				map[string]interface{}{
+					"name": "e1",
+					"data": "data1",
+				},
+				map[string]interface{}{
+					"name": "e2",
+					"data": "data2",
+				},
+			})
+
+			dst.Set("test", simplelistmerge.LabelValue{
+				map[string]interface{}{
+					"name": "e1",
+					"data": "old",
+				},
+				map[string]interface{}{
+					"name": "e3",
+					"data": "new",
+				},
+			},
+				metav1.WithMerging(simplelistmerge.ALGORITHM, simplelistmerge.NewConfig("", simplelistmerge.MODE_LOCAL)))
+			res := dst.Copy()
+			MustBeSuccessful(transfer.MergeLabels(ocm.DefaultContext(), src, &res))
+
+			var v simplelistmerge.LabelValue
+			Expect(res.GetValue("test", &v)).To(BeTrue())
+			Expect(v).To(DeepEqual(simplelistmerge.LabelValue{
+				map[string]interface{}{
+					"name": "e1",
+					"data": "data1",
+				},
+				map[string]interface{}{
+					"name": "e3",
+					"data": "new",
+				},
+				map[string]interface{}{
+					"name": "e2",
+					"data": "data2",
+				},
+			}))
+		})
 	})
 
 	////////////////////////////////////////////////////////////////////////////
@@ -226,7 +272,7 @@ var _ = Describe("basic merge operations for transport", func() {
 		})
 
 		It("merges equal", func() {
-			n := Must(transfer.PrepareDescriptor(src, dst))
+			n := Must(transfer.PrepareDescriptor(ocm.DefaultContext(), src, dst))
 			diff := deep.Equal(n, dst)
 			Expect(diff).To(BeEmpty())
 		})
@@ -291,7 +337,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e.Signatures[0] = s.Signatures[0]
 			e.Signatures = append(s.Signatures.Copy(), d.Signatures[1])
 
-			n := Must(transfer.PrepareDescriptor(s, d))
+			n := Must(transfer.PrepareDescriptor(nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -301,7 +347,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.Provider.Labels, &d.Provider.Labels, &e.Provider.Labels)
 
-			n := Must(transfer.PrepareDescriptor(s, d))
+			n := Must(transfer.PrepareDescriptor(nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -311,7 +357,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.Labels, &d.Labels, &e.Labels)
 
-			n := Must(transfer.PrepareDescriptor(s, d))
+			n := Must(transfer.PrepareDescriptor(nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -322,7 +368,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.Resources[0].Labels, &d.Resources[0].Labels, &e.Resources[0].Labels)
 
-			n := Must(transfer.PrepareDescriptor(s, d))
+			n := Must(transfer.PrepareDescriptor(nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -332,7 +378,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.Sources[0].Labels, &d.Sources[0].Labels, &e.Sources[0].Labels)
 
-			n := Must(transfer.PrepareDescriptor(s, d))
+			n := Must(transfer.PrepareDescriptor(nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -342,7 +388,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.References[0].Labels, &d.References[0].Labels, &e.References[0].Labels)
 
-			n := Must(transfer.PrepareDescriptor(s, d))
+			n := Must(transfer.PrepareDescriptor(nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 	})

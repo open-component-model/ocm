@@ -517,7 +517,12 @@ func IgnoreLabelsWithoutSignature(v interface{}) bool {
 
 var LabelExcludes = ExcludeEmpty{DynamicArrayExcludes{
 	ValueChecker: IgnoreLabelsWithoutSignature,
-	Continue:     NoExcludes{},
+	Continue: MapIncludes{
+		"name":    NoExcludes{},
+		"version": NoExcludes{},
+		"value":   NoExcludes{},
+		"signing": NoExcludes{},
+	},
 }}
 
 ////////////////////////////////////////////////////////////////////////////////

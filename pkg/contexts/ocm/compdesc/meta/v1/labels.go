@@ -15,6 +15,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+const (
+	KIND_LABEL                 = "label"
+	KIND_LABEL_MERGE_ALGORITHM = "label merge algorithm"
+)
+
 // Label is a label that can be set on objects.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
@@ -30,6 +35,13 @@ type Label struct {
 	Version string `json:"version,omitempty"`
 	// Signing describes whether the label should be included into the signature
 	Signing bool `json:"signing,omitempty"`
+
+	// MergeAlgorithm optionally described the Merge algorithm used to
+	// merge the label value during a transport.
+	MergeAlgorithm string `json:"mergeAlgorithm,omitempty"`
+
+	// MergeConfig contains optional config for the label merge algorithm.
+	MergeConfig json.RawMessage `json:"mergeConfig,omitempty"`
 }
 
 // DeepCopyInto copies labels.
@@ -38,32 +50,51 @@ func (in *Label) DeepCopyInto(out *Label) {
 	out.Value = append(out.Value[:0:0], in.Value...)
 }
 
-var versionRegex = regexp.MustCompile("^v[0-9]+$")
+// GetValue returns the label value with the given name as parsed object.
+func (in *Label) GetValue(dest interface{}) error {
+	return json.Unmarshal(in.Value, dest)
+}
 
-func NewLabel(name string, value interface{}, opts ...LabelOption) (*Label, error) {
-	var data []byte
-	var err error
-	var ok bool
+// SetValue sets the label value by marshalling the given object.
+// A passed byte slice is validated to be valid json.
+func (in *Label) SetValue(value interface{}) error {
+	var (
+		data []byte
+		ok   bool
+		err  error
+	)
 
 	if data, ok = value.([]byte); ok {
 		var v interface{}
 		err = json.Unmarshal(data, &v)
 		if err != nil {
-			return nil, errors.ErrInvalid("label value", string(data), name)
+			return errors.ErrInvalid("label value", string(data), in.Name)
 		}
 	} else {
 		data, err = json.Marshal(value)
 		if err != nil {
-			return nil, errors.ErrInvalid("label value", "<object>", name)
+			return errors.ErrInvalid("label value", "<object>", in.Name)
 		}
 	}
-	l := &Label{Name: name, Value: data}
+	in.Value = data
+	return nil
+}
+
+var versionRegex = regexp.MustCompile("^v[0-9]+$")
+
+func NewLabel(name string, value interface{}, opts ...LabelOption) (*Label, error) {
+	l := Label{Name: name}
+	err := l.SetValue(value)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, o := range opts {
-		if err := o.ApplyToLabel(l); err != nil {
+		if err := o.ApplyToLabel(&l); err != nil {
 			return nil, errors.Wrapf(err, "label %q", name)
 		}
 	}
-	return l, nil
+	return &l, nil
 }
 
 // Labels describe a list of labels
@@ -116,7 +147,7 @@ func (l Labels) Get(name string) ([]byte, bool) {
 func (l Labels) GetValue(name string, dest interface{}) (bool, error) {
 	for _, label := range l {
 		if label.Name == name {
-			return true, json.Unmarshal(label.Value, dest)
+			return true, label.GetValue(dest)
 		}
 	}
 	return false, nil
@@ -272,6 +303,8 @@ func (o labelOptVersion) ApplyToLabel(l *Label) error {
 	return nil
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type labelOptSigning struct {
 	sign bool
 }
@@ -288,5 +321,40 @@ func WithSigning(b ...bool) LabelOption {
 
 func (o *labelOptSigning) ApplyToLabel(l *Label) error {
 	l.Signing = o.sign
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// LabelMergeHandlerConfig must be label merge handler config. but cannot be checked
+// because of cyclic package dependencies.
+type LabelMergeHandlerConfig interface{}
+
+type labelOptMerge struct {
+	cfg  json.RawMessage
+	algo string
+}
+
+var _ LabelOption = (*labelOptMerge)(nil)
+
+func WithMerging(algo string, cfg LabelMergeHandlerConfig) LabelOption {
+	var data []byte
+	if cfg != nil {
+		var err error
+		data, err = json.Marshal(cfg)
+		if err != nil {
+			return nil
+		}
+	}
+	return &labelOptMerge{algo: algo, cfg: data}
+}
+
+func (o *labelOptMerge) ApplyToLabel(l *Label) error {
+	if o.algo != "" {
+		l.MergeAlgorithm = o.algo
+	}
+	if len(o.cfg) > 0 {
+		l.MergeConfig = o.cfg
+	}
 	return nil
 }

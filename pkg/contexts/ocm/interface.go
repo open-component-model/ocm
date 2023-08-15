@@ -180,3 +180,15 @@ func SkipVerify(flag ...bool) ModificationOption {
 func SkipDigest(flag ...bool) ModificationOption {
 	return internal.SkipDigest(flag...)
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type (
+	LabelMergeHandler         = internal.LabelMergeHandler
+	LabelMergeHandlerConfig   = internal.LabelMergeHandlerConfig
+	LabelMergeHandlerRegistry = internal.LabelMergeHandlerRegistry
+)
+
+func DefaultLabelMergeHandlerRegistry() LabelMergeHandlerRegistry {
+	return internal.DefaultLabelMergeHandlerRegistry
+}

@@ -23,6 +23,7 @@ type Builder struct {
 	spechandlers  RepositorySpecHandlers
 	blobhandlers  BlobHandlerRegistry
 	blobdigesters BlobDigesterRegistry
+	mergehandlers LabelMergeHandlerRegistry
 }
 
 func (b *Builder) getContext() context.Context {
@@ -69,6 +70,11 @@ func (b Builder) WithRepositorySpecHandlers(reg RepositorySpecHandlers) Builder 
 
 func (b Builder) WithBlobHandlers(reg BlobHandlerRegistry) Builder {
 	b.blobhandlers = reg
+	return b
+}
+
+func (b Builder) WithLabelMergeHandlers(reg LabelMergeHandlerRegistry) Builder {
+	b.mergehandlers = reg
 	return b
 }
 
@@ -172,6 +178,20 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 			b.blobhandlers = DefaultBlobHandlerRegistry
 		}
 	}
+	if b.mergehandlers == nil {
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.mergehandlers = NewLabelMergeHandlerRegistry()
+		case datacontext.MODE_CONFIGURED:
+			b.mergehandlers = DefaultLabelMergeHandlerRegistry.Copy()
+		case datacontext.MODE_EXTENDED:
+			b.mergehandlers = NewLabelMergeHandlerRegistry(DefaultLabelMergeHandlerRegistry)
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.mergehandlers = DefaultLabelMergeHandlerRegistry
+		}
+	}
 	if b.blobdigesters == nil {
 		switch mode {
 		case datacontext.MODE_INITIAL:
@@ -187,7 +207,7 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		}
 	}
 
-	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers, b.blobhandlers, b.blobdigesters, b.repodel, b.credentials.ConfigContext())
+	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers, b.blobhandlers, b.mergehandlers, b.blobdigesters, b.repodel, b.credentials.ConfigContext())
 }
 
 type delegatingDecoder struct {

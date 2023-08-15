@@ -54,7 +54,7 @@ Add a resource by a description file:
 <pre>
 ---
 name: myrresource
-type: PlainText
+type: plainText
 version: ${version]
 input:
   type: file

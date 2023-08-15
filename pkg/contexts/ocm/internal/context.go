@@ -60,6 +60,7 @@ type Context interface {
 	RepositorySpecHandlers() RepositorySpecHandlers
 	MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error)
 
+	LabelMergeHandlers() LabelMergeHandlerRegistry
 	BlobHandlers() BlobHandlerRegistry
 	BlobDigesters() BlobDigesterRegistry
 
@@ -134,6 +135,7 @@ type _context struct {
 	specHandlers  RepositorySpecHandlers
 	blobHandlers  BlobHandlerRegistry
 	blobDigesters BlobDigesterRegistry
+	mergeHandlers LabelMergeHandlerRegistry
 	aliases       map[string]RepositorySpec
 	resolver      *resolver
 	finalizer     Finalizer
@@ -141,7 +143,7 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry, repodel RepositoryDelegationRegistry, delegates datacontext.Delegates) Context {
+func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, mergeHandlers LabelMergeHandlerRegistry, blobDigesters BlobDigesterRegistry, repodel RepositoryDelegationRegistry, delegates datacontext.Delegates) Context {
 	c := &_context{
 		sharedattributes:     credctx.AttributesContext(),
 		credctx:              credctx,
@@ -149,6 +151,7 @@ func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme Repo
 		specHandlers:         specHandlers,
 		blobHandlers:         blobHandlers,
 		blobDigesters:        blobDigesters,
+		mergeHandlers:        mergeHandlers,
 		knownAccessTypes:     accessscheme,
 		knownRepositoryTypes: reposcheme,
 		aliases:              map[string]RepositorySpec{},
@@ -213,6 +216,10 @@ func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec) (Repositor
 
 func (c *_context) BlobHandlers() BlobHandlerRegistry {
 	return c.blobHandlers
+}
+
+func (c *_context) LabelMergeHandlers() LabelMergeHandlerRegistry {
+	return c.mergeHandlers
 }
 
 func (c *_context) BlobDigesters() BlobDigesterRegistry {

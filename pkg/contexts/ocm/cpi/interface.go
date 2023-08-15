@@ -236,3 +236,23 @@ var (
 func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
 	return internal.WrapContextProvider(ctx)
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type (
+	LabelMergeHandler         = internal.LabelMergeHandler
+	LabelMergeHandlerConfig   = internal.LabelMergeHandlerConfig
+	LabelMergeHandlerRegistry = internal.LabelMergeHandlerRegistry
+)
+
+func DefaultLabelMergeHandlerRegistry() LabelMergeHandlerRegistry {
+	return internal.DefaultLabelMergeHandlerRegistry
+}
+
+func RegisterLabelMergeHandler(h LabelMergeHandler, types ...string) {
+	r := DefaultLabelMergeHandlerRegistry()
+	r.RegisterHandler(h)
+	for _, t := range types {
+		r.AssignHandler(h.Algorithm(), t)
+	}
+}
