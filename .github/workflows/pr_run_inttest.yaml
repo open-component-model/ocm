@@ -12,10 +12,16 @@ jobs:
         PR_NUMBER="${{ github.event.pull_request.number || github.event.issue.number }}"
         echo "PR number is: ${PR_NUMBER}"
         echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v1
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Repository Dispatch
       uses: myrotvorets/trigger-repository-dispatch-action@1.0.0
       with:
-        token: ${{ secrets.OCMBOT_APP_ID }} # metadata:read and contents:read&write
+        token: ${{ steps.generate_token.outputs.token }} # metadata:read and contents:read&write
         repo: open-component-model/ocm-integrationtest
         type: ocm_pr
         payload: '{ "ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "pr": "${{ env.PR_NUMBER }}" }'
