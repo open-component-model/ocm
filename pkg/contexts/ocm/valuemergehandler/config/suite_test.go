@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package simplelistmerge_test
+package config_test
 
 import (
 	"testing"
@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "List Label Merge Suite")
+	RunSpecs(t, "Merge Specification Config Test Suite")
 }

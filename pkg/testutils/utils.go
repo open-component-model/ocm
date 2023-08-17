@@ -83,7 +83,14 @@ func MustBeNonNil[T any](o T) T {
 	return o
 }
 
-func MustBeSuccessful(err error) {
+func MustBeSuccessful(actual ...interface{}) {
+	if actual[len(actual)-1] == nil {
+		return
+	}
+	err, ok := actual[len(actual)-1].(error)
+	if !ok {
+		Fail("no errors return", 1)
+	}
 	ExpectWithOffset(1, err).To(Succeed())
 }
 
@@ -94,6 +101,14 @@ func MustBeSuccessfulWithOffset(offset int, err error) {
 func MustFailWithMessage(err error, msg string) {
 	ExpectWithOffset(1, err).NotTo(BeNil())
 	ExpectWithOffset(1, err.Error()).To(Equal(msg))
+}
+
+func ErrorFrom(args ...interface{}) error {
+	e, ok := args[len(args)-1].(error)
+	if !ok {
+		Fail("no errors return", 1)
+	}
+	return e
 }
 
 func ExpectError(values ...interface{}) types.Assertion {

@@ -23,7 +23,7 @@ type Builder struct {
 	spechandlers  RepositorySpecHandlers
 	blobhandlers  BlobHandlerRegistry
 	blobdigesters BlobDigesterRegistry
-	mergehandlers LabelMergeHandlerRegistry
+	mergehandlers ValueMergeHandlerRegistry
 }
 
 func (b *Builder) getContext() context.Context {
@@ -73,7 +73,7 @@ func (b Builder) WithBlobHandlers(reg BlobHandlerRegistry) Builder {
 	return b
 }
 
-func (b Builder) WithLabelMergeHandlers(reg LabelMergeHandlerRegistry) Builder {
+func (b Builder) WithLabelMergeHandlers(reg ValueMergeHandlerRegistry) Builder {
 	b.mergehandlers = reg
 	return b
 }
@@ -181,15 +181,15 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 	if b.mergehandlers == nil {
 		switch mode {
 		case datacontext.MODE_INITIAL:
-			b.mergehandlers = NewLabelMergeHandlerRegistry()
+			b.mergehandlers = NewValueMergeHandlerRegistry()
 		case datacontext.MODE_CONFIGURED:
-			b.mergehandlers = DefaultLabelMergeHandlerRegistry.Copy()
+			b.mergehandlers = DefaultValueMergeHandlerRegistry.Copy()
 		case datacontext.MODE_EXTENDED:
-			b.mergehandlers = NewLabelMergeHandlerRegistry(DefaultLabelMergeHandlerRegistry)
+			b.mergehandlers = NewValueMergeHandlerRegistry(DefaultValueMergeHandlerRegistry)
 		case datacontext.MODE_DEFAULTED:
 			fallthrough
 		case datacontext.MODE_SHARED:
-			b.mergehandlers = DefaultLabelMergeHandlerRegistry
+			b.mergehandlers = DefaultValueMergeHandlerRegistry
 		}
 	}
 	if b.blobdigesters == nil {

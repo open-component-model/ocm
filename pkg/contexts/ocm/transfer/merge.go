@@ -8,7 +8,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func PrepareDescriptor(ctx ocm.Context, s *compdesc.ComponentDescriptor, t *compdesc.ComponentDescriptor) (*compdesc.ComponentDescriptor, error) {
@@ -83,31 +84,16 @@ func MergeLabels(ctx ocm.Context, s metav1.Labels, t *metav1.Labels) error {
 }
 
 func MergeLabel(ctx ocm.Context, s metav1.Label, t *metav1.Label) error {
-	var err error
-
-	n := t.MergeAlgorithm
-	if n == "" {
-		n = ctx.LabelMergeHandlers().GetAlgorithmFor(s.Name)
+	r := valuemergehandler.Value{t.Value}
+	v := t.Version
+	if v == "" {
+		v = "v1"
 	}
-	if n != "" {
-		h := ctx.LabelMergeHandlers().GetHandler(n)
-		if h == nil {
-			return errors.ErrUnknown(metav1.KIND_LABEL_MERGE_ALGORITHM, n)
-		}
-		var cfg ocm.LabelMergeHandlerConfig
-
-		if len(t.MergeConfig) != 0 {
-			cfg, err = h.DecodeConfig(t.MergeConfig)
-			if err == nil {
-				err = cfg.Complete(ctx)
-			}
-			if err != nil {
-				return errors.Wrapf(err, "invalid merge config for label %q", t.Name)
-			}
-		}
-		return h.Merge(ctx, &s, t, cfg)
+	mod, err := valuemergehandler.Merge(ctx, t.Merge, "label:"+t.Name+"@"+v, runtime.RawValue{s.Value}, &r)
+	if mod {
+		t.Value = r.RawMessage
 	}
-	return nil
+	return err
 }
 
 // MergeSignatures tries to merge old signatures into the new target state.

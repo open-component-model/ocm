@@ -22,6 +22,13 @@ definitions:
         type: string
         format: date-time
 
+  merge:
+    type: 'object'
+    properties:
+      algorithm:
+        pattern: '^[a-z][a-z0-9/_-]+$'
+      config: { }
+    additionalProperties: false
   labels:
     type: 'array'
     items:
@@ -39,9 +46,8 @@ definitions:
         pattern: '^v[0-9]+$'
       signing:
         type: 'boolean'
-      mergeAlgorithm:
-        pattern: '^[a-z][a-z0-9/_-]+$'
-      mergeConfig: {}
+      merge:
+        $ref: '#/definitions/merge'
     additionalProperties: false
 
   componentName:

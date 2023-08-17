@@ -240,19 +240,24 @@ func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
 ////////////////////////////////////////////////////////////////////////////////
 
 type (
-	LabelMergeHandler         = internal.LabelMergeHandler
-	LabelMergeHandlerConfig   = internal.LabelMergeHandlerConfig
-	LabelMergeHandlerRegistry = internal.LabelMergeHandlerRegistry
+	ValueMergeHandler              = internal.ValueMergeHandler
+	ValueMergeHandlerSpecification = internal.ValueMergeHandlerSpecification
+	ValueMergeHandlerConfig        = internal.ValueMergeHandlerConfig
+	ValueMergeHandlerRegistry      = internal.ValueMergeHandlerRegistry
 )
 
-func DefaultLabelMergeHandlerRegistry() LabelMergeHandlerRegistry {
-	return internal.DefaultLabelMergeHandlerRegistry
+func DefaultValueMergeHandlerRegistry() ValueMergeHandlerRegistry {
+	return internal.DefaultValueMergeHandlerRegistry
 }
 
-func RegisterLabelMergeHandler(h LabelMergeHandler, types ...string) {
-	r := DefaultLabelMergeHandlerRegistry()
-	r.RegisterHandler(h)
-	for _, t := range types {
-		r.AssignHandler(h.Algorithm(), t)
-	}
+func RegisterValueMergeHandler(h ValueMergeHandler) {
+	DefaultValueMergeHandlerRegistry().RegisterHandler(h)
+}
+
+func AssignValueMergeHandler(hint string, spec *ValueMergeHandlerSpecification) {
+	DefaultValueMergeHandlerRegistry().AssignHandler(hint, spec)
+}
+
+func NewValueMergeHandlerRegistry(base ...ValueMergeHandlerRegistry) ValueMergeHandlerRegistry {
+	return internal.NewValueMergeHandlerRegistry(base...)
 }

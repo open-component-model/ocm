@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -72,7 +73,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "[<options>] [--version <version>] [<ctf archive>] {<components.yaml>}",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add component version(s) to a (new) transport archive",
@@ -140,8 +141,14 @@ The optional field <code>meta.configuredSchemaVersion</code> for a component
 entry can be used to specify a dedicated serialization format to use for the
 component descriptor. If given it overrides the <code>--schema</code> option
 of the command. By default, v2 is used.
+
+Various elements support to add arbirary information by using labels
+(see <CMD>ocm ocm-labels</CMD>).
 `,
 	}
+
+	cmd.AddCommand(topicocmlabels.New(o.Context))
+	return cmd
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {

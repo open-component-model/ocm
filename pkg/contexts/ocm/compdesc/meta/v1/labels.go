@@ -13,12 +13,41 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/listformat"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
 	KIND_LABEL                 = "label"
 	KIND_LABEL_MERGE_ALGORITHM = "label merge algorithm"
 )
+
+type MergeAlgorithmSpecification struct {
+	// Algorithm optionally described the Merge algorithm used to
+	// merge the label value during a transfer.
+	Algorithm string `json:"algorithm"`
+	// eConfig contains optional config for the merge algorithm.
+	Config json.RawMessage `json:"config,omitempty"`
+}
+
+var _ listformat.DirectDescriptionSource = (*MergeAlgorithmSpecification)(nil)
+
+func (s *MergeAlgorithmSpecification) Description() string {
+	return s.Algorithm
+}
+
+func NewMergeAlgorithmSpecification(algo string, spec interface{}) (*MergeAlgorithmSpecification, error) {
+	m, err := runtime.AsRawMessage(spec)
+	if err != nil {
+		return nil, err
+	}
+	return &MergeAlgorithmSpecification{
+		Algorithm: algo,
+		Config:    m,
+	}, nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 // Label is a label that can be set on objects.
 // +k8s:deepcopy-gen=true
@@ -36,12 +65,9 @@ type Label struct {
 	// Signing describes whether the label should be included into the signature
 	Signing bool `json:"signing,omitempty"`
 
-	// MergeAlgorithm optionally described the Merge algorithm used to
-	// merge the label value during a transport.
-	MergeAlgorithm string `json:"mergeAlgorithm,omitempty"`
-
-	// MergeConfig contains optional config for the label merge algorithm.
-	MergeConfig json.RawMessage `json:"mergeConfig,omitempty"`
+	// MergeAlgorithm optionally describes the desired merge handling used to
+	// merge the label value during a transfer.
+	Merge *MergeAlgorithmSpecification `json:"merge,omitempty"`
 }
 
 // DeepCopyInto copies labels.
@@ -58,25 +84,12 @@ func (in *Label) GetValue(dest interface{}) error {
 // SetValue sets the label value by marshalling the given object.
 // A passed byte slice is validated to be valid json.
 func (in *Label) SetValue(value interface{}) error {
-	var (
-		data []byte
-		ok   bool
-		err  error
-	)
-
-	if data, ok = value.([]byte); ok {
-		var v interface{}
-		err = json.Unmarshal(data, &v)
-		if err != nil {
-			return errors.ErrInvalid("label value", string(data), in.Name)
-		}
-	} else {
-		data, err = json.Marshal(value)
-		if err != nil {
-			return errors.ErrInvalid("label value", "<object>", in.Name)
-		}
+	var v runtime.RawValue
+	err := v.SetValue(value)
+	if err != nil {
+		return err
 	}
-	in.Value = data
+	in.Value = v.RawMessage
 	return nil
 }
 
@@ -350,11 +363,16 @@ func WithMerging(algo string, cfg LabelMergeHandlerConfig) LabelOption {
 }
 
 func (o *labelOptMerge) ApplyToLabel(l *Label) error {
-	if o.algo != "" {
-		l.MergeAlgorithm = o.algo
-	}
-	if len(o.cfg) > 0 {
-		l.MergeConfig = o.cfg
+	if o.algo != "" || len(o.cfg) > 0 {
+		if l.Merge == nil {
+			l.Merge = &MergeAlgorithmSpecification{}
+		}
+		if o.algo != "" {
+			l.Merge.Algorithm = o.algo
+		}
+		if len(o.cfg) > 0 {
+			l.Merge.Config = o.cfg
+		}
 	}
 	return nil
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/labelmergehandler/handlers/simplelistmerge"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/maplistmerge"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/go-test/deep"
@@ -61,7 +61,7 @@ var _ = Describe("basic merge operations for transport", func() {
 
 		It("merges with list merger", func() {
 			src.Clear()
-			src.Set("test", simplelistmerge.LabelValue{
+			src.Set("test", maplistmerge.Value{
 				map[string]interface{}{
 					"name": "e1",
 					"data": "data1",
@@ -72,7 +72,7 @@ var _ = Describe("basic merge operations for transport", func() {
 				},
 			})
 
-			dst.Set("test", simplelistmerge.LabelValue{
+			dst.Set("test", maplistmerge.Value{
 				map[string]interface{}{
 					"name": "e1",
 					"data": "old",
@@ -82,13 +82,13 @@ var _ = Describe("basic merge operations for transport", func() {
 					"data": "new",
 				},
 			},
-				metav1.WithMerging(simplelistmerge.ALGORITHM, simplelistmerge.NewConfig("", simplelistmerge.MODE_LOCAL)))
+				metav1.WithMerging(maplistmerge.ALGORITHM, maplistmerge.NewConfig("", maplistmerge.MODE_LOCAL)))
 			res := dst.Copy()
 			MustBeSuccessful(transfer.MergeLabels(ocm.DefaultContext(), src, &res))
 
-			var v simplelistmerge.LabelValue
+			var v maplistmerge.Value
 			Expect(res.GetValue("test", &v)).To(BeTrue())
-			Expect(v).To(DeepEqual(simplelistmerge.LabelValue{
+			Expect(v).To(DeepEqual(maplistmerge.Value{
 				map[string]interface{}{
 					"name": "e1",
 					"data": "data1",

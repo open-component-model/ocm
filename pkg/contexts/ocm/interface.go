@@ -184,11 +184,11 @@ func SkipDigest(flag ...bool) ModificationOption {
 ////////////////////////////////////////////////////////////////////////////////
 
 type (
-	LabelMergeHandler         = internal.LabelMergeHandler
-	LabelMergeHandlerConfig   = internal.LabelMergeHandlerConfig
-	LabelMergeHandlerRegistry = internal.LabelMergeHandlerRegistry
+	LabelMergeHandler         = internal.ValueMergeHandler
+	LabelMergeHandlerConfig   = internal.ValueMergeHandlerConfig
+	LabelMergeHandlerRegistry = internal.ValueMergeHandlerRegistry
 )
 
 func DefaultLabelMergeHandlerRegistry() LabelMergeHandlerRegistry {
-	return internal.DefaultLabelMergeHandlerRegistry
+	return internal.DefaultValueMergeHandlerRegistry
 }

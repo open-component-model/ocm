@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package simplemapmerge
+package defaultmerge
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	// special case to resolve dependency cycles.
+	hpi "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -16,6 +17,7 @@ func (m Mode) String() string {
 }
 
 const (
+	MODE_DEFAULT = Mode("")
 	MODE_NONE    = Mode("none")
 	MODE_LOCAL   = Mode("local")
 	MODE_INBOUND = Mode("inbound")
@@ -31,11 +33,11 @@ type Config struct {
 	Overwrite Mode `json:"overwrite"`
 }
 
-func (c *Config) Complete(ctx cpi.Context) error {
+func (c Config) Complete(ctx hpi.Context) error {
 	switch c.Overwrite {
 	case MODE_NONE, MODE_LOCAL, MODE_INBOUND:
 	case "":
-		c.Overwrite = MODE_NONE
+		// leave choice to using algorithm
 	default:
 		return errors.ErrInvalid("merge overwrite mode", string(c.Overwrite))
 	}

@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -48,6 +49,9 @@ func CheckComponent(env *TestEnv, handler func(ocm.Repository)) {
 	var clabels metav1.Labels
 	MustBeSuccessful(clabels.Set("purpose", "test"))
 
+	var rlabels metav1.Labels
+	MustBeSuccessful(rlabels.Set("city", "Karlsruhe", metav1.WithMerging(defaultmerge.ALGORITHM, defaultmerge.NewConfig(defaultmerge.MODE_INBOUND))))
+
 	Expect(string(cd.Provider.Name)).To(Equal("ocm.software"))
 	Expect(cd.Provider.Labels).To(Equal(plabels))
 	Expect(cd.Labels).To(Equal(clabels))
@@ -55,6 +59,9 @@ func CheckComponent(env *TestEnv, handler func(ocm.Repository)) {
 	r := Must(cv.GetResource(metav1.Identity{"name": "data"}))
 	data := Must(ocm.ResourceData(r))
 	Expect(string(data)).To(Equal("!stringdata"))
+
+	r = Must(cv.GetResource(metav1.Identity{"name": "text"}))
+	Expect(r.Meta().Labels).To(Equal(rlabels))
 
 	Expect(cv.GetDescriptor().References).To(Equal(compdesc.References{{
 		ElementMeta: compdesc.ElementMeta{

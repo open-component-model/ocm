@@ -54,6 +54,7 @@ import (
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
 	topicocmdownloaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/downloadhandlers"
+	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
@@ -263,6 +264,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(topicocmaccessmethods.New(ctx))
 	cmd.AddCommand(topicocmuploaders.New(ctx))
 	cmd.AddCommand(topicocmdownloaders.New(ctx))
+	cmd.AddCommand(topicocmlabels.New(ctx))
 	cmd.AddCommand(attributes.New(ctx))
 	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
@@ -274,6 +276,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	help.AddCommand(topicocmaccessmethods.New(ctx))
 	help.AddCommand(topicocmuploaders.New(ctx))
 	help.AddCommand(topicocmdownloaders.New(ctx))
+	help.AddCommand(topicocmlabels.New(ctx))
 	help.AddCommand(attributes.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 

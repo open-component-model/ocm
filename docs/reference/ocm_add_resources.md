@@ -809,7 +809,7 @@ Add a resource by a description file:
 <pre>
 &dash;&dash;&dash;
 name: myrresource
-type: PlainText
+type: plainText
 version: ${version]
 input:
   type: file
