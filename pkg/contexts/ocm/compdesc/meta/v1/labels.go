@@ -19,7 +19,7 @@ import (
 
 const (
 	KIND_LABEL                 = "label"
-	KIND_LABEL_MERGE_ALGORITHM = "label merge algorithm"
+	KIND_VALUE_MERGE_ALGORITHM = "label merge algorithm"
 )
 
 type MergeAlgorithmSpecification struct {

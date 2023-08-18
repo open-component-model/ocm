@@ -13,10 +13,11 @@ type Descriptor struct {
 	Short         string `json:"shortDescription"`
 	Long          string `json:"description"`
 
-	Actions       []ActionDescriptor         `json:"actions,omitempty"`
-	AccessMethods []AccessMethodDescriptor   `json:"accessMethods,omitempty"`
-	Uploaders     List[UploaderDescriptor]   `json:"uploaders,omitempty"`
-	Downloaders   List[DownloaderDescriptor] `json:"downloaders,omitempty"`
+	Actions            []ActionDescriptor                `json:"actions,omitempty"`
+	AccessMethods      []AccessMethodDescriptor          `json:"accessMethods,omitempty"`
+	Uploaders          List[UploaderDescriptor]          `json:"uploaders,omitempty"`
+	Downloaders        List[DownloaderDescriptor]        `json:"downloaders,omitempty"`
+	ValueMergeHandlers List[ValueMergeHandlerDescriptor] `json:"valueMergeHandlers,omitempty"`
 }
 
 type DownloaderKey = ArtifactContext
@@ -78,6 +79,19 @@ type AccessMethodDescriptor struct {
 	Format                 string      `json:"format"`
 	SupportContentIdentity bool        `json:"supportContentIdentity,omitempty"`
 	CLIOptions             []CLIOption `json:"options,omitempty"`
+}
+
+type ValueMergeHandlerDescriptor struct {
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+}
+
+func (a ValueMergeHandlerDescriptor) GetName() string {
+	return a.Name
+}
+
+func (a ValueMergeHandlerDescriptor) GetDescription() string {
+	return a.Description
 }
 
 type ActionDescriptor struct {

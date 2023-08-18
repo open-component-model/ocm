@@ -22,6 +22,8 @@ type (
 	Value         = internal.Value
 )
 
+const KIND_VALUE_MERGE_ALGORITHM = hpi.KIND_VALUE_MERGE_ALGORITHM
+
 func For(ctx cpi.ContextProvider) Registry {
 	return ctx.OCMContext().LabelMergeHandlers()
 }

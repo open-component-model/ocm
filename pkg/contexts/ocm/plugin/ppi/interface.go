@@ -60,6 +60,9 @@ type Plugin interface {
 	DecodeAction(data []byte) (ActionSpec, error)
 	GetAction(name string) Action
 
+	RegisterValueMergeHandler(h ValueMergeHandler) error
+	GetValueMergeHandler(name string) ValueMergeHandler
+
 	GetOptions() *Options
 	GetConfig() (interface{}, error)
 }
@@ -130,4 +133,24 @@ type Action interface {
 	ConsumerType() string
 
 	Execute(p Plugin, spec ActionSpec, creds credentials.DirectCredentials) (result ActionResult, err error)
+}
+
+type Value = runtime.RawValue
+
+type ValueMergeResult struct {
+	Modified bool   `json:"modified"`
+	Value    Value  `json:"value"`
+	Message  string `json:"message,omitempty"`
+}
+
+type ValueMergeData struct {
+	Local   Value `json:"local"`
+	Inbound Value `json:"inbound"`
+}
+
+type ValueMergeHandler interface {
+	Name() string
+	Description() string
+
+	Execute(p Plugin, local Value, inbound Value, config json.RawMessage) (result ValueMergeResult, err error)
 }

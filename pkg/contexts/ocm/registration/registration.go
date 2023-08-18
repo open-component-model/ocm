@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	plugindownload "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/plugin"
+	pluginmerge "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/plugin"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -39,6 +40,14 @@ func RegisterExtensions(ctx ocm.Context) error {
 						logger.LogError(err, "cannot register action handler for plugin", "plugin", p.Name(), "handler", a.Name, "selector", s)
 					}
 				}
+			}
+		}
+		for _, a := range p.GetDescriptor().ValueMergeHandlers {
+			h, err := pluginmerge.New(p, a.Name)
+			if err != nil {
+				logger.Error("cannot create value merge handler for plugin", "plugin", p.Name(), "handler", a.Name)
+			} else {
+				ctx.LabelMergeHandlers().RegisterHandler(h)
 			}
 		}
 		for _, m := range p.GetDescriptor().AccessMethods {

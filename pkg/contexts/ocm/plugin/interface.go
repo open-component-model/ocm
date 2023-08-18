@@ -19,14 +19,15 @@ const (
 var TAG = descriptor.REALM
 
 type (
-	Descriptor             = descriptor.Descriptor
-	ActionDescriptor       = descriptor.ActionDescriptor
-	AccessMethodDescriptor = descriptor.AccessMethodDescriptor
-	DownloaderDescriptor   = descriptor.DownloaderDescriptor
-	DownloaderKey          = descriptor.DownloaderKey
-	UploaderDescriptor     = descriptor.UploaderDescriptor
-	UploaderKey            = descriptor.UploaderKey
-	UploaderKeySet         = descriptor.UploaderKeySet
+	Descriptor                  = descriptor.Descriptor
+	ActionDescriptor            = descriptor.ActionDescriptor
+	ValueMergeHandlerDescriptor = descriptor.ValueMergeHandlerDescriptor
+	AccessMethodDescriptor      = descriptor.AccessMethodDescriptor
+	DownloaderDescriptor        = descriptor.DownloaderDescriptor
+	DownloaderKey               = descriptor.DownloaderKey
+	UploaderDescriptor          = descriptor.UploaderDescriptor
+	UploaderKey                 = descriptor.UploaderKey
+	UploaderKeySet              = descriptor.UploaderKeySet
 
 	AccessSpecInfo       = internal.AccessSpecInfo
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo

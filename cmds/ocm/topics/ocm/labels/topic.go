@@ -70,7 +70,7 @@ which is a list of label definitions. Every label definition has several fields:
   
   Modifiable labels can be changed independently in any transport target
   location of a component version. This might require to update label values
-  when importing a new setiing for a component version. This means a merging
+  when importing a new setting for a component version. This means a merging
   of content to reflect the combination of changes in the transport source and
   target.
 
@@ -124,7 +124,6 @@ The label version is defaulted to <code>v1</code>.
 
 There are some built-in algorithms featuring a flat name. But it will be
 possible to add arbitrary algorithms using the plugin concept. 
-Those algorithms are prefixed by the plugin name separated by a slash.
 
 The following algorithms are possible:
 ` + valuemergehandler.Usage(ctx.OCMContext()),

@@ -7,7 +7,6 @@ package hpi
 import (
 	"strings"
 
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -82,7 +81,7 @@ func Merge(ctx cpi.Context, m *Specification, hint string, local Value, inbound 
 
 	h := ctx.LabelMergeHandlers().GetHandler(m.Algorithm)
 	if h == nil {
-		return false, errors.ErrUnknown(metav1.KIND_LABEL_MERGE_ALGORITHM, m.Algorithm)
+		return false, errors.ErrUnknown(KIND_VALUE_MERGE_ALGORITHM, m.Algorithm)
 	}
 
 	var cfg cpi.ValueMergeHandlerConfig

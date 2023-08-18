@@ -33,7 +33,8 @@ type plugin struct {
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
-	actions map[string]Action
+	actions       map[string]Action
+	mergehandlers map[string]ValueMergeHandler
 
 	configParser func(message json.RawMessage) (interface{}, error)
 }
@@ -53,7 +54,8 @@ func NewPlugin(name string, version string) Plugin {
 		accessScheme:   runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		uploaderScheme: runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 
-		actions: map[string]Action{},
+		actions:       map[string]Action{},
+		mergehandlers: map[string]ValueMergeHandler{},
 
 		descriptor: descriptor.Descriptor{
 			Version:       descriptor.VERSION,
@@ -328,6 +330,24 @@ func (p *plugin) DecodeAction(data []byte) (ActionSpec, error) {
 
 func (p *plugin) GetAction(name string) Action {
 	return p.actions[name]
+}
+
+func (p *plugin) RegisterValueMergeHandler(a ValueMergeHandler) error {
+	if p.GetValueMergeHandler(a.Name()) != nil {
+		return errors.ErrAlreadyExists("value mergehandler", a.Name())
+	}
+
+	hd := descriptor.ValueMergeHandlerDescriptor{
+		Name:        a.Name(),
+		Description: a.Description(),
+	}
+	p.descriptor.ValueMergeHandlers = append(p.descriptor.ValueMergeHandlers, hd)
+	p.mergehandlers[a.Name()] = a
+	return nil
+}
+
+func (p *plugin) GetValueMergeHandler(name string) ValueMergeHandler {
+	return p.mergehandlers[name]
 }
 
 func (p *plugin) GetConfig() (interface{}, error) {

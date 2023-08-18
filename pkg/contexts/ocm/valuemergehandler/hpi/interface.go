@@ -7,6 +7,7 @@
 package hpi
 
 import (
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -31,6 +32,8 @@ type (
 	Specification = internal.Specification
 	Value         = internal.Value
 )
+
+const KIND_VALUE_MERGE_ALGORITHM = metav1.KIND_VALUE_MERGE_ALGORITHM
 
 func Register(h Handler) {
 	internal.Register(h)
