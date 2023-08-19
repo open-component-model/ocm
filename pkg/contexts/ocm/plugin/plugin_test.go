@@ -9,6 +9,8 @@ package plugin_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	common2 "github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
 
@@ -150,6 +152,47 @@ someattr: value
 			ok, r := Must2(p.MergeValue(spec, local, inbound))
 			Expect(ok).To(BeTrue())
 			Expect(r.RawMessage).To(YAMLEqual(`{"mode":"resolved"}`))
+		})
+
+		It("provider merge specs", func() {
+			p := registry.Get("merge")
+			Expect(p).NotTo(BeNil())
+			Expect(p.Error()).To(Equal(""))
+			Expect(p.IsValid()).To(BeTrue())
+			s := p.GetLabelMergeSpecification("testlabel", "v1")
+			Expect(s).NotTo(BeNil())
+			Expect(s.GetDescription()).To(Equal("generic testlabel merge spec"))
+			Expect(s.Algorithm).To(Equal("default"))
+			s = p.GetLabelMergeSpecification("testlabel", "v2")
+			Expect(s).NotTo(BeNil())
+			Expect(s.GetDescription()).To(Equal("v2 testlabel merge spec"))
+			Expect(s.Algorithm).To(Equal("simpleMapMerge"))
+		})
+
+		It("described plugin", func() {
+			p := registry.Get("merge")
+			Expect(p).NotTo(BeNil())
+			pr, buf := common2.NewBufferedPrinter()
+			common.DescribePluginDescriptor(nil, p.GetDescriptor(), pr)
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+Plugin Name:      merge
+Plugin Version:   v1
+Capabilities:     Value Merge Handlers, Label Merge Specifications
+Description: 
+      a test plugin with value merge algorithm acme.org/test
+
+Value Merge Handlers:
+- Name: acme.org/test
+    test merger
+
+Label Merge Specifications:
+- Name: testlabel
+  Algorithm: default
+    generic testlabel merge spec
+- Name: testlabel@v2
+  Algorithm: simpleMapMerge
+    v2 testlabel merge spec
+`))
 		})
 	})
 })

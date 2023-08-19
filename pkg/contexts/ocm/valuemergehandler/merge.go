@@ -12,3 +12,7 @@ import (
 func Merge(ctx cpi.Context, m *Specification, hint string, local Value, inbound *Value) (bool, error) {
 	return hpi.Merge(ctx, m, hint, local, inbound)
 }
+
+func LabelHint(name string, optversion ...string) string {
+	return hpi.LabelHint(name, optversion...)
+}

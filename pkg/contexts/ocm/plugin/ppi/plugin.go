@@ -10,6 +10,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -35,6 +36,7 @@ type plugin struct {
 
 	actions       map[string]Action
 	mergehandlers map[string]ValueMergeHandler
+	mergespecs    map[string]*descriptor.LabelMergeSpecification
 
 	configParser func(message json.RawMessage) (interface{}, error)
 }
@@ -56,6 +58,7 @@ func NewPlugin(name string, version string) Plugin {
 
 		actions:       map[string]Action{},
 		mergehandlers: map[string]ValueMergeHandler{},
+		mergespecs:    map[string]*descriptor.LabelMergeSpecification{},
 
 		descriptor: descriptor.Descriptor{
 			Version:       descriptor.VERSION,
@@ -348,6 +351,27 @@ func (p *plugin) RegisterValueMergeHandler(a ValueMergeHandler) error {
 
 func (p *plugin) GetValueMergeHandler(name string) ValueMergeHandler {
 	return p.mergehandlers[name]
+}
+
+func (p *plugin) RegisterLabelMergeSpecification(name, version string, spec *metav1.MergeAlgorithmSpecification, desc string) error {
+	e := descriptor.LabelMergeSpecification{
+		Name:                        name,
+		Version:                     version,
+		Description:                 desc,
+		MergeAlgorithmSpecification: *spec,
+	}
+
+	if p.GetLabelMergeSpecification(e.GetName()) != nil {
+		return errors.ErrAlreadyExists("label merge spec", e.GetName())
+	}
+
+	p.descriptor.LabelMergeSpecifications = append(p.descriptor.LabelMergeSpecifications, e)
+	p.mergespecs[e.GetName()] = &e
+	return nil
+}
+
+func (p *plugin) GetLabelMergeSpecification(id string) *descriptor.LabelMergeSpecification {
+	return p.mergespecs[id]
 }
 
 func (p *plugin) GetConfig() (interface{}, error) {

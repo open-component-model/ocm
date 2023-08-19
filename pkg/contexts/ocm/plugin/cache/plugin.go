@@ -108,6 +108,25 @@ func (p *pluginImpl) GetValueMappingDescriptor(name string) *descriptor.ValueMer
 	return nil
 }
 
+func (p *pluginImpl) GetLabelMergeSpecification(name, version string) *descriptor.LabelMergeSpecification {
+	if !p.IsValid() {
+		return nil
+	}
+
+	var fallback *descriptor.LabelMergeSpecification
+	for i, s := range p.descriptor.LabelMergeSpecifications {
+		if s.Name == name {
+			if s.Version == version {
+				return &s
+			}
+			if s.Version == "" {
+				fallback = &p.descriptor.LabelMergeSpecifications[i]
+			}
+		}
+	}
+	return fallback
+}
+
 func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *descriptor.AccessMethodDescriptor {
 	if !p.IsValid() {
 		return nil

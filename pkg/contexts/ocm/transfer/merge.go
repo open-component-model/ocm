@@ -9,6 +9,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -89,7 +90,7 @@ func MergeLabel(ctx ocm.Context, s metav1.Label, t *metav1.Label) error {
 	if v == "" {
 		v = "v1"
 	}
-	mod, err := valuemergehandler.Merge(ctx, t.Merge, "label:"+t.Name+"@"+v, runtime.RawValue{s.Value}, &r)
+	mod, err := valuemergehandler.Merge(ctx, t.Merge, hpi.LabelHint(t.Name, v), runtime.RawValue{s.Value}, &r)
 	if mod {
 		t.Value = r.RawMessage
 	}

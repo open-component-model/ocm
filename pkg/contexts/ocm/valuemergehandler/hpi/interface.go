@@ -57,3 +57,12 @@ func NewSpecification(algo string, cfg ...Config) (*Specification, error) {
 func NewRegistry(base ...Registry) Registry {
 	return internal.NewRegistry(base...)
 }
+
+func LabelHint(name string, optversion ...string) string {
+	hint := "label:" + name
+	v := utils.Optional(optversion...)
+	if v != "" {
+		hint += "@" + v
+	}
+	return hint
+}

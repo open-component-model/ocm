@@ -4,6 +4,12 @@
 
 package descriptor
 
+import (
+	"encoding/json"
+
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+)
+
 const VERSION = "v1"
 
 type Descriptor struct {
@@ -13,11 +19,12 @@ type Descriptor struct {
 	Short         string `json:"shortDescription"`
 	Long          string `json:"description"`
 
-	Actions            []ActionDescriptor                `json:"actions,omitempty"`
-	AccessMethods      []AccessMethodDescriptor          `json:"accessMethods,omitempty"`
-	Uploaders          List[UploaderDescriptor]          `json:"uploaders,omitempty"`
-	Downloaders        List[DownloaderDescriptor]        `json:"downloaders,omitempty"`
-	ValueMergeHandlers List[ValueMergeHandlerDescriptor] `json:"valueMergeHandlers,omitempty"`
+	Actions                  []ActionDescriptor                `json:"actions,omitempty"`
+	AccessMethods            []AccessMethodDescriptor          `json:"accessMethods,omitempty"`
+	Uploaders                List[UploaderDescriptor]          `json:"uploaders,omitempty"`
+	Downloaders              List[DownloaderDescriptor]        `json:"downloaders,omitempty"`
+	ValueMergeHandlers       List[ValueMergeHandlerDescriptor] `json:"valueMergeHandlers,omitempty"`
+	LabelMergeSpecifications List[LabelMergeSpecification]     `json:"labelMergeSpecifications,omitempty"`
 }
 
 type DownloaderKey = ArtifactContext
@@ -92,6 +99,32 @@ func (a ValueMergeHandlerDescriptor) GetName() string {
 
 func (a ValueMergeHandlerDescriptor) GetDescription() string {
 	return a.Description
+}
+
+type LabelMergeSpecification struct {
+	Name                               string `json:"name"`
+	Version                            string `json:"version,omitempty"`
+	Description                        string `json:"description,omitempty"`
+	metav1.MergeAlgorithmSpecification `json:",inline"`
+}
+
+func (a LabelMergeSpecification) GetName() string {
+	if a.Version != "" {
+		return a.Name + "@" + a.Version
+	}
+	return a.Name
+}
+
+func (a LabelMergeSpecification) GetDescription() string {
+	return a.Description
+}
+
+func (a LabelMergeSpecification) GetAlgorithm() string {
+	return a.Algorithm
+}
+
+func (a LabelMergeSpecification) GetConfig() json.RawMessage {
+	return a.Config
 }
 
 type ActionDescriptor struct {

@@ -95,11 +95,7 @@ func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 		if s.Name == "" {
 			continue
 		}
-		hint := "label:" + s.Name
-		if s.Version != "" {
-			hint += "@" + s.Version
-		}
-		reg.AssignHandler(hint, &s.Merge)
+		reg.AssignHandler(hpi.LabelHint(s.Name, s.Version), &s.Merge)
 	}
 	return nil
 }

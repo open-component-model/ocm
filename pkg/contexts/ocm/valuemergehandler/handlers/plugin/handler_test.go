@@ -9,6 +9,7 @@ package plugin_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -52,5 +53,15 @@ var _ = Describe("plugin value merge handler", func() {
 
 		Expect(mod).To(BeTrue())
 		Expect(inbound.RawMessage).To(YAMLEqual(`{"mode":"resolved"}`))
+	})
+
+	It("assigns specs", func() {
+		registration.RegisterExtensions(ctx)
+
+		Expect(registry.GetHandler(ALGORITHM)).NotTo(BeNil())
+
+		s := ctx.LabelMergeHandlers().GetAssignment(hpi.LabelHint("testlabel", "v2"))
+		Expect(s).NotTo(BeNil())
+		Expect(s.Algorithm).To(Equal("simpleMapMerge"))
 	})
 })

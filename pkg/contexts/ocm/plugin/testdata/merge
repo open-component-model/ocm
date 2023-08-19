@@ -12,7 +12,7 @@ Error() {
 }
 
 Info() {
-  echo '{"version":"v1","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","description":"a test plugin with value merge algorithm acme.org/test","valueMergeHandlers":[{"name":"acme.org/test","description":"test merger"}]}
+  echo '{"version":"v1","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","description":"a test plugin with value merge algorithm acme.org/test","valueMergeHandlers":[{"name":"acme.org/test","description":"test merger"}],"labelMergeSpecifications":[{"name":"testlabel","description":"generic testlabel merge spec","algorithm":"default"},{"name":"testlabel","version":"v2","description":"v2 testlabel merge spec","algorithm":"simpleMapMerge"}]}
 '
 }
 
@@ -23,7 +23,7 @@ Execute() {
 ValueMergeHandler() {
   case "$1" in
     execute) Execute "${@:2}";;
-    *) Error "invalid accessmethod command $1";;
+    *) Error "invalid valuemergehandler command $1";;
   esac
 }
 

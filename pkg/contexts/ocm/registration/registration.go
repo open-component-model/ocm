@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	plugindownload "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/plugin"
 	pluginmerge "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/plugin"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -101,6 +102,15 @@ func RegisterExtensions(ctx ocm.Context) error {
 							download.For(ctx).Register(hdlr, opts)
 						}
 					}
+				}
+			}
+
+			for _, s := range p.GetDescriptor().LabelMergeSpecifications {
+				h := ctx.LabelMergeHandlers().GetHandler(s.GetAlgorithm())
+				if h == nil {
+					logger.Error("cannot assign label merge spec for plugin", "label", s.GetName(), "algorithm", s.GetAlgorithm(), "plugin", p.Name())
+				} else {
+					ctx.LabelMergeHandlers().AssignHandler(hpi.LabelHint(s.Name, s.Version), &s.MergeAlgorithmSpecification)
 				}
 			}
 		}
