@@ -93,6 +93,14 @@ func DetermineElementsForSource(ctx clictx.Context, ictx inputs.Context, templ t
 				list = append(list, data)
 			}
 		} else {
+			if entry, ok := tmp[h.Key()]; ok {
+				if m, ok := entry.(map[string]interface{}); ok {
+					if len(tmp) != 1 {
+						return nil, errors.Newf("invalid %s spec %d: either a list or a single spec possible for %s (found keys %s)", h.Key(), i, listkey, utils2.StringMapKeys(tmp))
+					}
+					tmp = m
+				}
+			}
 			if len(tmp) == 0 {
 				return nil, errors.Newf("invalid %s spec %d: empty", h.Key(), i)
 			}

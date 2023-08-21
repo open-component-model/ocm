@@ -210,7 +210,7 @@ func (a *action) handle(kind, path string, cv ocm.ComponentVersionAccess, spec *
 	var err error
 	if spec != nil {
 		if spec.ResourceReference != nil && len(spec.ResourceReference.Resource) != 0 {
-			return a.download(kind, a.cmd.ParameterFile, cv, spec.ResourceReference, resolver)
+			return a.download(kind, path, cv, spec.ResourceReference, resolver)
 		} else {
 			var content interface{}
 			if len(spec.Content) > 0 {
