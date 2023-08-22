@@ -65,7 +65,7 @@ eval-resources:
 	$(OCM) add resources --dry-run --templater spiff $(ATTRIBUTES) resources.yaml
 
 .PHONY: build
-build: $(GEN)/image.$(NAME)
+build: $(GEN)/image.$(NAME)$(FLAGSUF)
 
 $(GEN)/image.$(NAME): $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
 	docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM) --file Dockerfile $(REPO_ROOT) \
@@ -107,7 +107,7 @@ plain-push: $(GEN)/.exists
 .PHONY: transport
 transport:
 ifneq ($(TARGETREPO),)
-	$(OCM) transfer component -Vc  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
+	$(OCM) transfer component -Vr  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
 endif
 
 $(GEN)/.exists:
@@ -124,7 +124,7 @@ info:
 
 .PHONY: describe
 describe: $(GEN)/ctf
-	ocm get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
+	ocm get resources --lookup $(OCMREPO) -r -o treewide $(GEN)/ctf
 
 .PHONY: descriptor
 descriptor: $(GEN)/ctf
