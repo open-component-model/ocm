@@ -446,7 +446,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	}
 
 	// prepare file content to be passed to executor
-	err = setupFiles(octx, &finalize, op, ccfg, params, econfig, cv)
+	err = setupFiles(octx, &finalize, op, ccfg, params, econfig, cv, resolver)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error setting up executor file set")
 	}
@@ -457,7 +457,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	return d.Exec(op)
 }
 
-func setupFiles(octx ocm.Context, finalize *Finalizer, op *Operation, ccfg *globalconfig.Config, params []byte, econfig []byte, cv ocm.ComponentVersionAccess) error {
+func setupFiles(octx ocm.Context, finalize *Finalizer, op *Operation, ccfg *globalconfig.Config, params []byte, econfig []byte, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) error {
 	// prepare file content to be passed to executor
 	op.Files = map[string]accessio.BlobAccess{}
 	if ccfg != nil {
@@ -484,7 +484,7 @@ func setupFiles(octx ocm.Context, finalize *Finalizer, op *Operation, ccfg *glob
 			return errors.Wrapf(err, "cannot create repo for component version")
 		}
 		defer repo.Close()
-		handler, err := standard.New(standard.Recursive(), standard.KeepGlobalAccess())
+		handler, err := standard.New(standard.Recursive(), standard.KeepGlobalAccess(), standard.Resolver(resolver))
 		if err != nil {
 			return errors.Wrapf(err, "cannot create transfer handler")
 		}

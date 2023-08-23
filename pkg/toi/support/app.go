@@ -46,7 +46,7 @@ func NewCLICommand(ctx ocm.Context, name string, exec func(options *ExecutorOpti
 		},
 	}
 	cmd := &cobra.Command{
-		Use:                   name + " {<options>} <action> <component version>",
+		Use:                   name + " {<options>} [<action>] <component version>",
 		Short:                 "Bootstrapper using the OCM bootstrap mechanism",
 		Version:               version.Get().String(),
 		TraverseChildren:      true,
@@ -55,12 +55,14 @@ func NewCLICommand(ctx ocm.Context, name string, exec func(options *ExecutorOpti
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			action := ""
 			if len(args) > 0 {
-				action = args[0]
+				if len(args) > 1 {
+					action = args[0]
+					opts.ComponentVersionName = args[1]
+				} else {
+					opts.ComponentVersionName = args[0]
+				}
 			}
 			opts.Action = action
-			if len(args) > 1 {
-				opts.ComponentVersionName = args[1]
-			}
 			return opts.Complete()
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
