@@ -113,7 +113,7 @@ func (o *Option) additionalFields(e interface{}) []string {
 }
 
 func (o *Option) Mapper(opts options.OptionSetProvider, path func(interface{}) string, mapper processing.MappingFunction) processing.MappingFunction {
-	if o.Closure {
+	if o != nil && o.Closure {
 		use := o.AddReferencePath(opts)
 		return func(e interface{}) interface{} {
 			fields := mapper(e).([]string)
@@ -156,7 +156,7 @@ type ClosureFunction func(*output.Options, interface{}) []interface{}
 func (c ClosureFunction) Exploder(opts *output.Options) processing.ExplodeFunction {
 	if c != nil {
 		copts := From(opts)
-		if copts.Closure {
+		if copts != nil && copts.Closure {
 			return func(e interface{}) []interface{} { return c(opts, e) }
 		}
 	}
@@ -166,7 +166,7 @@ func (c ClosureFunction) Exploder(opts *output.Options) processing.ExplodeFuncti
 func AddChain(opts *output.Options, chain, add processing.ProcessChain) processing.ProcessChain {
 	copts := From(opts)
 
-	if !copts.Closure {
+	if copts == nil || !copts.Closure {
 		return chain
 	}
 	return processing.Append(chain, add)

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	artifacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/download"
+	cli "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/cli/download"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/download"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -23,5 +24,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(artifacts.NewCommand(ctx))
 	cmd.AddCommand(components.NewCommand(ctx))
+	cmd.AddCommand(cli.NewCommand(ctx))
 	return cmd
 }

@@ -38,8 +38,10 @@ Hash lists normalized forms for all component versions specified, if only a comp
 all versions are listed.
 
 
-If the option <code>--constraints</code> is given, and no version is specified for a component, only versions matching
-the given version constraints (semver https://github.com/Masterminds/semver) are selected. With <code>--latest</code> only
+If the option <code>--constraints</code> is given, and no version is specified
+for a component, only versions matching the given version constraints
+(semver https://github.com/Masterminds/semver) are selected.
+With <code>--latest</code> only
 the latest matching versions will be selected.
 
 
