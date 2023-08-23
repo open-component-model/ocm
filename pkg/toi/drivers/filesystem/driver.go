@@ -38,7 +38,7 @@ func New(fs vfs.FileSystem) install.Driver {
 // SetConfig sets Docker driver configuration.
 func (d *Driver) SetConfig(settings map[string]string) error {
 	if settings != nil {
-		d.TargetPath = settings[d.TargetPath]
+		d.TargetPath = settings[OptionTargetPath]
 	}
 
 	if d.TargetPath == "" {

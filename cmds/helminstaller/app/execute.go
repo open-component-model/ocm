@@ -219,7 +219,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 		}
 	}
 
-	e.outf("Installing helm chart...\n")
+	e.outf("Installing helm chart [%s]...\n", e.Action)
 
 	ns := "default"
 	if cfg.Namespace != "" {

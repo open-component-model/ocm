@@ -74,9 +74,11 @@ func (o *SignatureCommand) Complete(args []string) error {
 	return nil
 }
 
-func (o *SignatureCommand) Run() error {
+func (o *SignatureCommand) Run() (rerr error) {
 	session := ocm.NewSession(nil)
-	defer session.Close()
+	defer errors.PropagateError(&rerr, func() error {
+		return session.Close()
+	})
 
 	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
@@ -126,7 +128,7 @@ func NewAction(desc []string, ctx ocm.Context, p common.Printer, sopts *signing.
 func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.ComponentDescriptor, error) {
 	sopts := *a.sopts
 	sopts.Resolver = ocm.NewCompoundResolver(o.Repository, a.sopts.Resolver)
-	d, err := signing.Apply(a.printer, &a.state, o.ComponentVersion, &sopts, true)
+	d, err := signing.Apply(a.printer, &a.state, o.ComponentVersion, &sopts)
 	var cd *compdesc.ComponentDescriptor
 	nv := common.VersionedElementKey(o.ComponentVersion)
 	vi := a.state.Get(nv)
