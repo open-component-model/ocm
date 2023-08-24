@@ -70,7 +70,7 @@ func get(blob accessio.DataAccess, expected []byte) []byte {
 
 var _ = Describe("art parsing", func() {
 	It("succeeds", func() {
-		env := builder.NewBuilder(env.NewEnvironment(env.TestData()))
+		env := builder.NewBuilder(env.TestData())
 		defer vfs.Cleanup(env)
 
 		prov, err := env.ReadFile("/testdata/testchart.prov")

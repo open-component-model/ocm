@@ -57,7 +57,7 @@ var _ = Describe("access method", func() {
 	var env *Builder
 
 	BeforeEach(func() {
-		env = NewBuilder(tenv.NewEnvironment(tenv.ModifiableTestData()))
+		env = NewBuilder(tenv.ModifiableTestData())
 		env.RSAKeyPair(SIGNATURE, SIGNATURE2)
 	})
 

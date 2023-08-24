@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
-	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -54,7 +53,7 @@ var _ = Describe("oci artifact transfer", func() {
 	var ldesc *artdesc.Descriptor
 
 	BeforeEach(func() {
-		env = NewBuilder(NewEnvironment())
+		env = NewBuilder()
 
 		FakeOCIRepo(env, OCIPATH, OCIHOST)
 

@@ -26,7 +26,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	tenv "github.com/open-component-model/ocm/pkg/env"
 )
 
 const COMP = "github.com/compa"
@@ -43,7 +42,7 @@ var _ = Describe("upload", func() {
 	var env *Builder
 
 	BeforeEach(func() {
-		env = NewBuilder(tenv.NewEnvironment())
+		env = NewBuilder()
 
 		// fake OCI registry
 		FakeOCIRepo(env, OCIPATH, OCIHOST)

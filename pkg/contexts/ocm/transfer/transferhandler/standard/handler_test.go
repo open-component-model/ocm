@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -70,7 +69,7 @@ var _ = Describe("Transfer handler", func() {
 	var ldesc *artdesc.Descriptor
 
 	BeforeEach(func() {
-		env = NewBuilder(NewEnvironment())
+		env = NewBuilder()
 
 		env.RSAKeyPair(SIGNATURE)
 

@@ -46,7 +46,7 @@ type TestEnv struct {
 }
 
 func NewTestEnv(opts ...env.Option) *TestEnv {
-	b := builder.NewBuilder(env.NewEnvironment(opts...))
+	b := builder.NewBuilder(opts...)
 	ctx := clictx.WithOCM(b.OCMContext()).New()
 	return &TestEnv{
 		Builder: b,

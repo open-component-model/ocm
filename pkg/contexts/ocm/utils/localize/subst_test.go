@@ -23,7 +23,7 @@ var _ = Describe("value substitution in filesystem", func() {
 	)
 
 	BeforeEach(func() {
-		env = builder.NewBuilder(env2.NewEnvironment(env2.ModifiableTestData()))
+		env = builder.NewBuilder(env2.ModifiableTestData())
 		fs, err := projectionfs.New(env.FileSystem(), "testdata")
 		Expect(err).To(Succeed())
 		payloadfs = fs

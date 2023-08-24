@@ -26,7 +26,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/ocirepo"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	tenv "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -51,7 +50,7 @@ var _ = Describe("upload", func() {
 	var env *Builder
 
 	BeforeEach(func() {
-		env = NewBuilder(tenv.NewEnvironment())
+		env = NewBuilder()
 
 		// fake OCI registry
 		spec := Must(ctfoci.NewRepositorySpec(accessobj.ACC_WRITABLE, TARGETPATH, env))

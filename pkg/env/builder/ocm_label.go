@@ -5,8 +5,6 @@
 package builder
 
 import (
-	. "github.com/onsi/gomega"
-
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
@@ -17,7 +15,7 @@ const T_OCMLABELS = "element with labels"
 func (b *Builder) Label(name string, value interface{}, opts ...metav1.LabelOption) {
 	b.expect(b.ocm_labels, T_OCMLABELS)
 
-	ExpectWithOffset(1, b.ocm_labels.Set(name, value, opts...)).To(Succeed())
+	b.failOn(b.ocm_labels.Set(name, value, opts...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

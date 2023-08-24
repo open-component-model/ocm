@@ -13,7 +13,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	testenv "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
@@ -22,7 +21,7 @@ var _ = Describe("", func() {
 	var env *builder.Builder
 
 	BeforeEach(func() {
-		env = builder.NewBuilder(testenv.NewEnvironment())
+		env = builder.NewBuilder()
 		// ocmlog.Context().AddRule(logging.NewConditionRule(logging.DebugLevel, accessio.ALLOC_REALM))
 	})
 

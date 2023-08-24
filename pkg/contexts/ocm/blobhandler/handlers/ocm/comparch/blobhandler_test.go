@@ -32,7 +32,7 @@ var _ = Describe("blobhandler", func() {
 		var b *builder.Builder
 
 		BeforeEach(func() {
-			b = builder.NewBuilder(env.NewEnvironment())
+			b = builder.NewBuilder()
 		})
 
 		AfterEach(func() {

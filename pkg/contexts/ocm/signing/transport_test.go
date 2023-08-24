@@ -29,7 +29,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	tenv "github.com/open-component-model/ocm/pkg/env"
 )
 
 const (
@@ -107,7 +106,7 @@ var _ = Describe("transport and signing", func() {
 	}))
 
 	BeforeEach(func() {
-		env = NewBuilder(tenv.NewEnvironment())
+		env = NewBuilder()
 
 		env.RSAKeyPair(SIGNATURE, SIGNATURE2)
 
