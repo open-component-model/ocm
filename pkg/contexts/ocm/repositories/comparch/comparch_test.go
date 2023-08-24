@@ -11,6 +11,8 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/blob"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/env"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -120,5 +122,27 @@ var _ = Describe("Repository", func() {
 		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
 		acc := Must(res[0].AccessMethod())
 		defer Close(acc)
+	})
+
+	It("modifies component archive from spec", func() {
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize, "finalizer")
+
+		env := env.NewEnvironment(env.ModifiableTestData())
+		octx := env.OCMContext()
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH, accessio.PathFileSystem(env)))
+		repo := Must(spec.Repository(octx, nil))
+		finalize.Close(repo, "repo")
+		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
+		finalize.Close(cv, "cv")
+		cv.GetDescriptor().Provider.Name = "modified provider"
+		MustBeSuccessful(finalize.Finalize())
+
+		spec = Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, TAR_COMPARCH, accessio.PathFileSystem(env)))
+		repo = Must(spec.Repository(octx, nil))
+		finalize.Close(repo, "repo")
+		cv = Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
+		finalize.Close(cv, "cv")
+		Expect(cv.GetDescriptor().Provider.Name).To(Equal(metav1.ProviderName("modified provider")))
 	})
 })
