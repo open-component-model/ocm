@@ -117,7 +117,9 @@ func RequireReProcessing(vi *VersionInfo, ctx *DigestContext, opts *Options) boo
 func apply(printer common.Printer, state WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv bool) (dc *DigestContext, efferr error) {
 	var closer errors.ErrorFunction
 	if closecv {
-		closer = cv.Close
+		closer = func() error {
+			return cv.Close()
+		}
 	}
 	nv := common.VersionedElementKey(cv)
 	defer errors.PropagateErrorf(&efferr, closer, "%s", state.History.Append(nv))
