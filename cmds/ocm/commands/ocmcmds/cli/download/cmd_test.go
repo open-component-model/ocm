@@ -6,6 +6,7 @@ package download_test
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"runtime"
 
@@ -56,7 +57,7 @@ var _ = Describe("Test Environment", func() {
 
 	It("downloads ocm cli", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("download", "cli", "--repo", CTF)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("download", "cli", "--path", "--repo", CTF)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 updating OCM CLI command at /testdata/bin/ocm
@@ -68,4 +69,7 @@ updating OCM CLI command at /testdata/bin/ocm
 		Expect(Must(env.Stat(OCM)).Mode() & os.ModePerm).To(BeNumerically("==", 0o755))
 	})
 
+	It("downloads ocm cli", func() {
+		fmt.Printf("%s\n", Must(os.Executable()))
+	})
 })

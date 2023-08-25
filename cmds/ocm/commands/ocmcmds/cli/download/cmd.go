@@ -29,6 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var (
@@ -43,6 +44,7 @@ type Command struct {
 
 	Comp string
 	Ids  []v1.Identity
+	Path bool
 }
 
 // NewCommand creates a new CLI download command.
@@ -74,6 +76,11 @@ The default location is the location of the <code>ocm</code> executable in
 the actual PATH.
 `,
 	}
+}
+
+func (o *Command) AddFlags(fs *pflag.FlagSet) {
+	o.BaseCommand.AddFlags(fs)
+	fs.BoolVarP(&o.Path, "path", "p", false, "lookup executable in PATH")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -123,6 +130,12 @@ func (o *Command) Run() error {
 	dest := destoption.From(o)
 	if dest.Destination == "" {
 		p := os.Getenv("OCMCMD")
+		if p == "" && !o.Path {
+			p, err = os.Executable()
+			if err != nil {
+				out.Outln(o, "WARNING: cannot detect actual executable (%w) -> fallback to PATH lookup")
+			}
+		}
 		if p == "" {
 			list := utils.SplitPathList(os.ExpandEnv(os.Getenv("PATH")))
 			for _, e := range list {
