@@ -50,7 +50,7 @@ var _ = Describe("management", func() {
 		Expect(h.Normalize()).To(Equal([]uint8(`{"parent":"yyy","payload":{"comment":"start of routing slip","type":"comment"},"timestamp":"1970-01-01T01:00:00+01:00"}`)))
 	})
 
-	FIt("adds entry", func() {
+	It("adds entry", func() {
 		var slip routingslip.RoutingSlip
 
 		e1 := comment.New("start of routing slip")

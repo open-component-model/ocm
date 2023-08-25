@@ -20,15 +20,36 @@ import (
 
 type RoutingSlip []HistoryEntry
 
+func (s RoutingSlip) Leaves() []digest.Digest {
+	found := generics.Set[digest.Digest]{}
+	for _, e := range s {
+		found.Add(e.Digest)
+	}
+	for _, e := range s {
+		if e.Parent != nil {
+			found.Delete(*e.Parent)
+		}
+	}
+	return found.AsArray()
+}
+
+func (s RoutingSlip) Lookup(d digest.Digest) *HistoryEntry {
+	for i := range s {
+		if s[i].Digest == d {
+			return &s[i]
+		}
+	}
+	return nil
+}
+
 func (s RoutingSlip) Verify(ctx Context, name string, sig bool) error {
 	if len(s) == 0 {
 		return nil
 	}
-	last := &s[len(s)-1]
+	leaves := s.Leaves()
 
 	if sig {
 		registry := signingattr.Get(ctx)
-		handler := registry.GetVerifier(last.Signature.Algorithm)
 		key := registry.GetPublicKey(name)
 		if key == nil {
 			key = registry.GetPrivateKey(name)
@@ -36,38 +57,43 @@ func (s RoutingSlip) Verify(ctx Context, name string, sig bool) error {
 		if key == nil {
 			return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, name)
 		}
-		err := handler.Verify(last.Digest.Encoded(), sha256.Handler{}.Crypto(), last.Signature.ConvertToSigning(), key)
-		if err != nil {
-			return err
+		for _, d := range leaves {
+			last := s.Lookup(d)
+			handler := registry.GetVerifier(last.Signature.Algorithm)
+			if handler == nil {
+				return errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, last.Signature.Algorithm)
+			}
+			err := handler.Verify(last.Digest.Encoded(), sha256.Handler{}.Crypto(), last.Signature.ConvertToSigning(), key)
+			if err != nil {
+				return errors.Wrapf(err, "cannot verify entry %s", d)
+			}
 		}
 	}
 
-	cur := last
 	found := generics.Set[digest.Digest]{}
+leaves:
+	for _, d := range leaves {
+		cur := s.Lookup(d)
 
-next:
-	for {
-		if found.Contains(cur.Digest) {
-			return fmt.Errorf("cycle with with digest %q", cur.Digest)
-		}
-		found.Add(cur.Digest)
-		d, err := cur.CalculateDigest()
-		if err != nil {
-			return err
-		}
-		if d != cur.Digest {
-			return fmt.Errorf("content digest %q dow not match %q", d, cur.Digest)
-		}
-		if cur.Parent == nil {
-			break
-		}
-		for _, e := range s {
-			if e.Digest == *cur.Parent {
-				cur = &e
-				continue next
+		for {
+			if found.Contains(cur.Digest) {
+				continue leaves
+			}
+			found.Add(cur.Digest)
+			d, err := cur.CalculateDigest()
+			if err != nil {
+				return err
+			}
+			if d != cur.Digest {
+				return fmt.Errorf("content digest %q dow not match %q", d, cur.Digest)
+			}
+			if cur.Parent == nil {
+				break
+			}
+			if cur = s.Lookup(*cur.Parent); cur == nil {
+				return fmt.Errorf("parent %q of %q not found", cur.Parent, d)
 			}
 		}
-		return fmt.Errorf("parent %q of %q not found", cur.Parent, d)
 	}
 	return nil
 }
