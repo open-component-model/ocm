@@ -5,10 +5,13 @@
 package routingslip
 
 import (
+	"fmt"
+
 	"github.com/opencontainers/go-digest"
 
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/internal"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/norm/jcs"
@@ -20,8 +23,37 @@ type (
 	GenericEntry = internal.GenericEntry
 )
 
+func AsGenericEntry(u *runtime.UnstructuredTypedObject) *GenericEntry {
+	return internal.AsGenericEntry(u)
+}
+
 func ToGenericEntry(e Entry) (*GenericEntry, error) {
 	return internal.ToGenericEntry(e)
+}
+
+func NewGenericEntryWith(typ string, attrs ...interface{}) (*GenericEntry, error) {
+	r := map[string]interface{}{}
+	i := 0
+	for len(attrs) > i {
+		n, ok := attrs[i].(string)
+		if !ok {
+			return nil, errors.ErrInvalid("key type", fmt.Sprintf("%T", attrs[i]))
+		}
+		r[n] = attrs[i+1]
+		i += 2
+	}
+	return NewGenericEntry(typ, r)
+}
+
+func NewGenericEntry(typ string, data interface{}) (*GenericEntry, error) {
+	u, err := runtime.ToUnstructuredTypedObject(data)
+	if err != nil {
+		return nil, err
+	}
+	if typ != "" {
+		u.SetType(typ)
+	}
+	return AsGenericEntry(u), nil
 }
 
 var excludes = signing.MapExcludes{

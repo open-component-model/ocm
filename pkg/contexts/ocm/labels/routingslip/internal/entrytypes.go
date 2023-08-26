@@ -7,6 +7,8 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/modern-go/reflect2"
 
@@ -84,7 +86,36 @@ func (_ *UnknownEntry) IsUnknown() bool {
 }
 
 func (u *UnknownEntry) Describe(ctx Context) string {
-	return fmt.Sprintf("unknown routing slip entry %q", u.GetKind())
+	keys := utils.StringMapKeys(u.Object)
+	cnt := 0
+	desc := []string{}
+	delta := 0
+	for _, k := range keys {
+		v := u.Object[k]
+		if k == runtime.ATTR_TYPE {
+			delta = 1
+			continue
+		}
+		if v == nil {
+			continue
+		}
+		value := reflect.ValueOf(v)
+		if value.Kind() == reflect.Array || value.Kind() == reflect.Map || value.Kind() == reflect.Slice {
+			continue
+		}
+		cnt++
+		if cnt > 3 {
+			break
+		}
+		desc = append(desc, fmt.Sprintf("%s: %v", k, v))
+	}
+	if len(desc) == 0 {
+		return "unknown type"
+	}
+	if len(keys)+delta > len(desc) {
+		return strings.Join(desc, ", ") + ", ..."
+	}
+	return strings.Join(desc, ", ")
 }
 
 var _ Entry = &UnknownEntry{}
@@ -101,6 +132,10 @@ type GenericEntry struct {
 }
 
 var _ Entry = &GenericEntry{}
+
+func AsGenericEntry(u *runtime.UnstructuredTypedObject) *GenericEntry {
+	return &GenericEntry{runtime.UnstructuredVersionedTypedObject{*u}}
+}
 
 func ToGenericEntry(spec Entry) (*GenericEntry, error) {
 	if reflect2.IsNil(spec) {

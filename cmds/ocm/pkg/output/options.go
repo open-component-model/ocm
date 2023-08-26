@@ -37,13 +37,16 @@ func Selected(mode string) func(o options.OptionSetProvider) bool {
 type Options struct {
 	options.OptionSet
 
-	Outputs     Outputs
-	OutputMode  string
-	Output      Output
-	Sort        []string
-	FixedColums int
-	Context     clictx.Context // this context could be ocm context.
-	Logging     logging.Context
+	allColumns bool
+
+	Outputs          Outputs
+	OutputMode       string
+	Output           Output
+	Sort             []string
+	OptimizedColumns int
+	FixedColums      int
+	Context          clictx.Context // this context could be ocm context.
+	Logging          logging.Context
 }
 
 func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
@@ -51,6 +54,11 @@ func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
 		Outputs:   outputs,
 		OptionSet: opts,
 	}
+}
+
+func (o *Options) OptimizeColumns(n int) *Options {
+	o.OptimizedColumns = n
+	return o
 }
 
 func (o *Options) LogContext() logging.Context {
@@ -66,6 +74,10 @@ func (o *Options) Options(proto options.Options) interface{} {
 
 func (o *Options) Get(proto interface{}) bool {
 	return o.OptionSet.Get(proto)
+}
+
+func (o *Options) UseColumnOptimization() bool {
+	return o.OptimizedColumns > 0 && !o.allColumns
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
@@ -95,6 +107,9 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 		}
 	}
 
+	if o.OptimizedColumns > 0 {
+		fs.BoolVarP(&o.allColumns, "all-columns", "", false, "show all table columns")
+	}
 	o.OptionSet.AddFlags(fs)
 }
 

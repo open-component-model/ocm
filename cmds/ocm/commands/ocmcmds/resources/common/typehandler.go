@@ -50,10 +50,6 @@ func WithTypes(types []string) elemhdlr.Option {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type TypeHandler struct {
-	*elemhdlr.TypeHandler
-}
-
 func NewTypeHandler(octx clictx.OCM, opts *output.Options, repo ocm.Repository, session ocm.Session, compspecs []string, hopts ...elemhdlr.Option) (utils.TypeHandler, error) {
 	return elemhdlr.NewTypeHandler(octx, opts, repo, session, ocm.KIND_RESOURCE, compspecs, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
 		return access.GetDescriptor().Resources

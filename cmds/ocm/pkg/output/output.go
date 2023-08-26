@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	. "github.com/open-component-model/ocm/pkg/out"
 
@@ -20,6 +19,8 @@ import (
 )
 
 type Object = interface{}
+
+type Objects = []Object
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -150,7 +151,7 @@ func (this *JSONOutput) Out() error {
 		buf.WriteByte('\n')
 		d = buf.Bytes()
 	}
-	os.Stdout.Write(d)
+	this.Context.StdOut().Write(d)
 	return nil
 }
 

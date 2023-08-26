@@ -98,20 +98,20 @@ leaves:
 	return nil
 }
 
-func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry) error {
+func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry) (*HistoryEntry, error) {
 	registry := signingattr.Get(ctx)
 	handler := registry.GetSigner(algo)
 	if handler == nil {
-		return errors.ErrUnknown(compdesc.KIND_SIGN_ALGORITHM, algo)
+		return nil, errors.ErrUnknown(compdesc.KIND_SIGN_ALGORITHM, algo)
 	}
 	key := registry.GetPrivateKey(name)
 	if key == nil {
-		return errors.ErrUnknown(compdesc.KIND_PRIVATE_KEY, name)
+		return nil, errors.ErrUnknown(compdesc.KIND_PRIVATE_KEY, name)
 	}
 
 	gen, err := ToGenericEntry(e)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	entry := &HistoryEntry{
 		Payload:   gen,
@@ -122,22 +122,22 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry) error 
 	if len(*s) > 0 {
 		entry.Parent = &(*s)[len(*s)-1].Digest
 		if entry.Parent.String() == "" {
-			return fmt.Errorf("no parent digest set")
+			return nil, fmt.Errorf("no parent digest set")
 		}
 	}
 	d, err := entry.CalculateDigest()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	entry.Digest = d
 
 	sig, err := handler.Sign(ctx.CredentialsContext(), d.Encoded(), sha256.Handler{}.Crypto(), name, key)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	entry.Signature = *metav1.SignatureSpecFor(sig)
 	*s = append(*s, *entry)
-	return nil
+	return entry, nil
 }
 
 func GetSlip(cv cpi.ComponentVersionAccess, name string) (RoutingSlip, error) {

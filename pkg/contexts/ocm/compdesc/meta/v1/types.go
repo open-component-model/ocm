@@ -251,6 +251,10 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	return err
 }
 
+func (t Timestamp) String() string {
+	return t.Format(time.RFC3339)
+}
+
 func (t *Timestamp) Time() time.Time {
 	return t._time.Time
 }

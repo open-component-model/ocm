@@ -11,6 +11,7 @@ import (
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/add"
 	resourceconfig "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resourceconfig/add"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
+	routingslips "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/routingslips/add"
 	sourceconfig "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sourceconfig/add"
 	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -30,5 +31,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(sources.NewCommand(ctx))
 	cmd.AddCommand(references.NewCommand(ctx))
 	cmd.AddCommand(components.NewCommand(ctx))
+	cmd.AddCommand(routingslips.NewCommand(ctx))
 	return cmd
 }

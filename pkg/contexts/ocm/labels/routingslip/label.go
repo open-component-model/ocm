@@ -31,23 +31,27 @@ func init() {
 	hpi.Assign(hpi.LabelHint(NAME), spec)
 }
 
-func AddEntry(cv cpi.ComponentVersionAccess, name string, algo string, e Entry) error {
+func AddEntry(cv cpi.ComponentVersionAccess, name string, algo string, e Entry) (*HistoryEntry, error) {
 	var label Label
 	_, err := cv.GetDescriptor().Labels.GetValue(NAME, &label)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if label == nil {
 		label = Label{}
 	}
 	slip := label[name]
-	err = slip.Add(cv.GetContext(), name, algo, e)
+	entry, err := slip.Add(cv.GetContext(), name, algo, e)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	label[name] = slip
 
-	return cv.GetDescriptor().Labels.SetValue(NAME, label)
+	err = cv.GetDescriptor().Labels.SetValue(NAME, label)
+	if err != nil {
+		return nil, err
+	}
+	return entry, nil
 }
 
 func Get(cv cpi.ComponentVersionAccess) (Label, error) {
