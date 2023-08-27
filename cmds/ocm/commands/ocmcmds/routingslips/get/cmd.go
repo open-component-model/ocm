@@ -5,9 +5,9 @@
 package get
 
 import (
-	common2 "github.com/open-component-model/ocm/pkg/common"
-	"github.com/spf13/cobra"
+	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/failonerroroption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
@@ -17,8 +17,10 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -37,8 +39,13 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{
 		BaseCommand: utils.NewBaseCommand(ctx,
+			NewOptions(),
 			versionconstraintsoption.New(),
-			repooption.New(), output.OutputOptions(outputs, lookupoption.New()).OptimizeColumns(2),
+			repooption.New(),
+			output.OutputOptions(outputs,
+				failonerroroption.New(),
+				lookupoption.New(),
+			).OptimizeColumns(2).WithStatusCheck(check),
 		),
 	}, utils.Names(Names, names...)...)
 }
@@ -72,12 +79,22 @@ func (o *Command) Run() error {
 	}
 
 	opts := output.From(o)
-	hdlr, err := common.NewTypeHandler(o.Context.OCM(), opts, repooption.From(o).Repository, session, []string{o.Comp}, common.OptionsFor(o))
+	hdlr, err := common.NewTypeHandler(o.Context.OCM(), opts, repooption.From(o).Repository, session, []string{o.Comp}, common.WithVerification(From(o).Verify), common.OptionsFor(o))
 	if err != nil {
 		return err
 	}
 	specs := utils.StringElemSpecs(o.Slips...)
 	return utils.HandleOutputs(opts, hdlr, specs...)
+}
+
+func check(opts *output.Options, e interface{}, err error) error {
+	if failonerroroption.From(opts).Fail {
+		elem := common.Elem(e)
+		if elem.Error != "" {
+			return fmt.Errorf("validation failed: for details see output")
+		}
+	}
+	return err
 }
 
 ////////////////////////////////////////////////////////////////////////////////

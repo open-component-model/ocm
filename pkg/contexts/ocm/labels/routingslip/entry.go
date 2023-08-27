@@ -61,6 +61,8 @@ var excludes = signing.MapExcludes{
 	"signature": nil,
 }
 
+type HistoryEntries = []HistoryEntry
+
 type HistoryEntry struct {
 	Payload   *GenericEntry        `json:"payload"`
 	Timestamp metav1.Timestamp     `json:"timestamp"`

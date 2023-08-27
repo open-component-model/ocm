@@ -17,20 +17,23 @@ type ElementOutput struct {
 	source  ProcessingSource
 	Elems   data.Iterable
 	Context Context
+	Status  error
 }
 
 var _ Output = (*ElementOutput)(nil)
 
-func NewElementOutput(log logging.Context, ctx Context, chain ProcessChain) *ElementOutput {
-	return (&ElementOutput{}).new(log, ctx, chain)
+func NewElementOutput(opts *Options, chain ProcessChain) *ElementOutput {
+	return (&ElementOutput{}).new(opts, chain)
 }
 
-func (this *ElementOutput) new(log logging.Context, ctx Context, chain ProcessChain) *ElementOutput {
+func (this *ElementOutput) new(opts *Options, chain ProcessChain) *ElementOutput {
+	log := opts.LogContext()
 	if log == nil {
 		log = logging.DefaultContext()
 	}
 	this.source = NewIncrementalProcessingSource(log)
-	this.Context = ctx
+	this.Context = opts.Context
+	chain = opts.AdaptChain(&this.Status, chain)
 	if chain == nil {
 		this.Elems = this.source
 	} else {
@@ -50,5 +53,5 @@ func (this *ElementOutput) Close() error {
 }
 
 func (this *ElementOutput) Out() error {
-	return nil
+	return this.Status
 }

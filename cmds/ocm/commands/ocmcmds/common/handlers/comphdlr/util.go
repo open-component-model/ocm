@@ -16,7 +16,7 @@ import (
 func Evaluate(octx clictx.OCM, session ocm.Session, repobase ocm.Repository, compspecs []string, oopts *output.Options, opts ...Option) (Objects, error) {
 	h := NewTypeHandler(octx, session, repobase, opts...)
 
-	comps := output.NewElementOutput(octx.Context().LoggingContext(), nil, closureoption.Closure(oopts, ClosureExplode, Sort))
+	comps := output.NewElementOutput(oopts, closureoption.Closure(oopts, ClosureExplode, Sort))
 	err := utils.HandleOutput(comps, h, utils.StringElemSpecs(compspecs...)...)
 	if err != nil {
 		return nil, err

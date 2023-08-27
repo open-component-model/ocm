@@ -10,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/opencontainers/go-digest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -43,6 +44,7 @@ type Command struct {
 	Type      string
 	Entry     *routingslip.GenericEntry
 	Algorithm string
+	Digest    string
 }
 
 // NewCommand creates a new routing slip add command.
@@ -74,6 +76,7 @@ $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandels
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.StringVarP(&o.Algorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
+	fs.StringVarP(&o.Digest, "digest", "", "", "parent digest to use")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -142,6 +145,11 @@ func (a *action) Out() error {
 		return fmt.Errorf("no component version selected")
 	}
 
-	_, err := routingslip.AddEntry(a.data[0].ComponentVersion, a.cmd.Name, a.cmd.Algorithm, a.cmd.Entry)
+	var err error
+	if a.cmd.Digest == "" {
+		_, err = routingslip.AddEntry(a.data[0].ComponentVersion, a.cmd.Name, a.cmd.Algorithm, a.cmd.Entry)
+	} else {
+		_, err = routingslip.AddEntry(a.data[0].ComponentVersion, a.cmd.Name, a.cmd.Algorithm, a.cmd.Entry, digest.Digest(a.cmd.Digest))
+	}
 	return err
 }

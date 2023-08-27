@@ -58,7 +58,7 @@ func NewProcessingTableOutput(opts *Options, chain ProcessChain, header ...strin
 
 func (this *TableProcessingOutput) new(opts *Options, chain ProcessChain, header []string) *TableProcessingOutput {
 	this.header = header
-	this.ElementOutput.new(opts.LogContext(), opts.Context, chain)
+	this.ElementOutput.new(opts, chain)
 	this.opts = opts
 	return this
 }
@@ -136,7 +136,7 @@ func (this *TableProcessingOutput) Out() error {
 	}
 
 	FormatTable(this.Context, "", append(lines, data.StringArraySlice(slice)...))
-	return nil
+	return this.ElementOutput.Out()
 }
 
 func compareColumn(c int) CompareFunction {

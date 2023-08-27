@@ -89,12 +89,15 @@ type ElementFilter interface {
 type TypeHandler struct {
 	components comphdlr.Objects
 	filter     ElementFilter
+	verify     bool
 }
 
 var _ utils.TypeHandler = (*TypeHandler)(nil)
 
 func NewTypeHandler(octx clictx.OCM, opts *output.Options, repo ocm.Repository, session ocm.Session, compspecs []string, hopts ...Option) (utils.TypeHandler, error) {
-	components, err := comphdlr.Evaluate(octx, session, repo, compspecs, nil, MapToCompHandlerOptions(hopts...))
+	copts := *opts
+	copts.StatusCheck = nil
+	components, err := comphdlr.Evaluate(octx, session, repo, compspecs, &copts, MapToCompHandlerOptions(hopts...))
 	if err != nil {
 		return nil, err
 	}
@@ -148,13 +151,26 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 			})
 		} else {
 			for _, n := range utils2.StringMapKeys(slips) {
-				for i := range slips[n] {
-					h.add(&result, c, n, &slips[n][i])
-				}
+				h.addEntries(&result, c, slips.Get(n))
 			}
 		}
 	}
 	return result, nil
+}
+
+func (h *TypeHandler) addEntries(result *[]output.Object, c *comphdlr.Object, slip *routingslip.RoutingSlip) {
+	err := slip.Verify(c.ComponentVersion.GetContext(), slip.Name, h.verify)
+	if err != nil {
+		o := &Object{
+			Component: c,
+			Slip:      slip.Name,
+			Error:     err.Error(),
+		}
+		*result = append(*result, o)
+	}
+	for i := range slip.Entries {
+		h.add(result, c, slip.Name, slip.Get(i))
+	}
 }
 
 func (h *TypeHandler) add(result *[]output.Object, c *comphdlr.Object, n string, he *routingslip.HistoryEntry) {
@@ -197,9 +213,7 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 			Error:     err.Error(),
 		})
 	} else {
-		for i := range slip {
-			h.add(&result, c, elemspec.String(), &slip[i])
-		}
+		h.addEntries(&result, c, slip)
 	}
 	return result, nil
 }

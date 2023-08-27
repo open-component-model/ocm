@@ -51,7 +51,7 @@ var _ = Describe("management", func() {
 	})
 
 	It("adds entry", func() {
-		var slip routingslip.RoutingSlip
+		slip := routingslip.NewRoutingSlip(ORG)
 
 		e1 := comment.New("start of routing slip")
 		e2 := comment.New("next comment")
@@ -60,8 +60,8 @@ var _ = Describe("management", func() {
 
 		fmt.Printf("%s\n", string(Must(yaml.Marshal(slip))))
 
-		Expect(len(slip)).To(Equal(2))
-		Expect(slip[1].Parent).To(Equal(&slip[0].Digest))
+		Expect(slip.Len()).To(Equal(2))
+		Expect(slip.Get(1).Parent).To(Equal(&slip.Get(0).Digest))
 		MustBeSuccessful(slip.Verify(env.OCMContext(), ORG, true))
 	})
 })

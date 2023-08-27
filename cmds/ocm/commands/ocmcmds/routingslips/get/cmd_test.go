@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/entrytypes/comment"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -55,8 +56,33 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("gets single entry", func() {
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
+		repo := Must(ctf.Open(env, accessobj.ACC_WRITABLE, ARCH, 0, env))
+		finalize.Close(repo)
+		cv := Must(repo.LookupComponentVersion(COMP, VERSION))
+		finalize.Close(cv)
+		slip := Must(routingslip.GetSlip(cv, PROVIDER))
+		slip.Entries[0].Signature.Value = slip.Entries[0].Signature.Value[1:] + "0"
+		MustBeSuccessful(routingslip.SetSlip(cv, slip))
+		MustBeSuccessful(finalize.Finalize())
+
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "routingslip", ARCH)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("get", "routingslip", "-v", "--fail-on-error", ARCH)).To(MatchError("validation failed: for details see output"))
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
+			`
+TYPE    TIMESTAMP                 DESCRIPTION
+                                  Error: cannot verify entry ` + e1a.Digest.String() + `: signature verification failed, crypto/rsa: verification error
+comment ` + e1a.Timestamp.String() + ` Comment: first entry
+
+`))
+	})
+
+	It("detects manipulation", func() {
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("get", "routingslip", "-v", ARCH)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 COMPONENT-VERSION NAME     TYPE    TIMESTAMP                 DESCRIPTION

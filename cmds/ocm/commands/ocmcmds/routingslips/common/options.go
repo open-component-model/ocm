@@ -6,6 +6,7 @@ package common
 
 import (
 	"github.com/Masterminds/semver/v3"
+	"github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
@@ -39,6 +40,18 @@ func OptionsFor(o options.OptionSetProvider) Options {
 		hopts = append(hopts, Resolver(lookup))
 	}
 	return hopts
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type verify bool
+
+func (o verify) ApplyToElemHandler(handler *TypeHandler) {
+	handler.verify = bool(o)
+}
+
+func WithVerification(flag ...bool) Option {
+	return verify(utils.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

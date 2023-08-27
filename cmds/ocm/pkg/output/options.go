@@ -6,10 +6,10 @@ package output
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/mandelsoft/logging"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -34,6 +34,10 @@ func Selected(mode string) func(o options.OptionSetProvider) bool {
 	}
 }
 
+// StatusCheckFunction manipulates the processing status error according to
+// the state of the given entry.
+type StatusCheckFunction func(opts *Options, e interface{}, old error) error
+
 type Options struct {
 	options.OptionSet
 
@@ -43,6 +47,7 @@ type Options struct {
 	OutputMode       string
 	Output           Output
 	Sort             []string
+	StatusCheck      StatusCheckFunction
 	OptimizedColumns int
 	FixedColums      int
 	Context          clictx.Context // this context could be ocm context.
@@ -59,6 +64,23 @@ func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
 func (o *Options) OptimizeColumns(n int) *Options {
 	o.OptimizedColumns = n
 	return o
+}
+
+// WithStatusCheck provides the possibility to check every entry to
+// influence the final out status
+func (o *Options) WithStatusCheck(f StatusCheckFunction) *Options {
+	o.StatusCheck = f
+	return o
+}
+
+func (o *Options) AdaptChain(errvar *error, chain processing.ProcessChain) processing.ProcessChain {
+	if o.StatusCheck != nil {
+		chain = processing.Map(func(e interface{}) interface{} {
+			*errvar = o.StatusCheck(o, e, *errvar)
+			return e
+		}).Append(chain)
+	}
+	return chain
 }
 
 func (o *Options) LogContext() logging.Context {
@@ -83,11 +105,7 @@ func (o *Options) UseColumnOptimization() bool {
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	s := ""
 	if len(o.Outputs) > 1 {
-		list := []string{}
-		for o := range o.Outputs {
-			list = append(list, o)
-		}
-		sort.Strings(list)
+		list := utils.StringMapKeys(o.Outputs)
 		sep := ""
 		for _, o := range list {
 			if o != "" {

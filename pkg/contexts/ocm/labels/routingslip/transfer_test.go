@@ -78,7 +78,7 @@ transferring version "acme.org/routingslip:1.0.0"...
 		MustBeSuccessful(tcv.Close())
 		MustBeSuccessful(err)
 
-		Expect(len(slip)).To(Equal(1))
+		Expect(slip.Len()).To(Equal(1))
 
 		buf.Reset()
 		MustBeSuccessful(routingslip.AddEntry(cv, NAME, rsa.Algorithm, e2))

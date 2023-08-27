@@ -18,9 +18,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
-type RoutingSlip []HistoryEntry
+const KIND_ENTRY = "routing slip entry"
 
-func (s RoutingSlip) Leaves() []digest.Digest {
+type RoutingSlipIndex map[digest.Digest]*HistoryEntry
+
+func (s RoutingSlipIndex) Leaves() []digest.Digest {
 	found := generics.Set[digest.Digest]{}
 	for _, e := range s {
 		found.Add(e.Digest)
@@ -33,16 +35,7 @@ func (s RoutingSlip) Leaves() []digest.Digest {
 	return found.AsArray()
 }
 
-func (s RoutingSlip) Lookup(d digest.Digest) *HistoryEntry {
-	for i := range s {
-		if s[i].Digest == d {
-			return &s[i]
-		}
-	}
-	return nil
-}
-
-func (s RoutingSlip) Verify(ctx Context, name string, sig bool) error {
+func (s RoutingSlipIndex) Verify(ctx Context, name string, sig bool) error {
 	if len(s) == 0 {
 		return nil
 	}
@@ -58,7 +51,7 @@ func (s RoutingSlip) Verify(ctx Context, name string, sig bool) error {
 			return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, name)
 		}
 		for _, d := range leaves {
-			last := s.Lookup(d)
+			last := s[d]
 			handler := registry.GetVerifier(last.Signature.Algorithm)
 			if handler == nil {
 				return errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, last.Signature.Algorithm)
@@ -73,7 +66,7 @@ func (s RoutingSlip) Verify(ctx Context, name string, sig bool) error {
 	found := generics.Set[digest.Digest]{}
 leaves:
 	for _, d := range leaves {
-		cur := s.Lookup(d)
+		cur := s[d]
 
 		for {
 			if found.Contains(cur.Digest) {
@@ -90,7 +83,7 @@ leaves:
 			if cur.Parent == nil {
 				break
 			}
-			if cur = s.Lookup(*cur.Parent); cur == nil {
+			if cur = s[*cur.Parent]; cur == nil {
 				return fmt.Errorf("parent %q of %q not found", cur.Parent, d)
 			}
 		}
@@ -98,7 +91,63 @@ leaves:
 	return nil
 }
 
-func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry) (*HistoryEntry, error) {
+////////////////////////////////////////////////////////////////////////////////
+
+type RoutingSlip struct {
+	Name    string
+	Entries []HistoryEntry
+}
+
+func NewRoutingSlip(name string) *RoutingSlip {
+	return &RoutingSlip{Name: name}
+}
+
+func (s *RoutingSlip) Len() int {
+	return len(s.Entries)
+}
+
+func (s *RoutingSlip) Get(i int) *HistoryEntry {
+	return &s.Entries[i]
+}
+
+func (s *RoutingSlip) Leaves() []digest.Digest {
+	found := generics.Set[digest.Digest]{}
+	for _, e := range s.Entries {
+		found.Add(e.Digest)
+	}
+	for _, e := range s.Entries {
+		if e.Parent != nil {
+			found.Delete(*e.Parent)
+		}
+	}
+	return found.AsArray()
+}
+
+func (s *RoutingSlip) Lookup(d digest.Digest) *HistoryEntry {
+	for i := range s.Entries {
+		if s.Entries[i].Digest == d {
+			return &s.Entries[i]
+		}
+	}
+	return nil
+}
+
+func (s *RoutingSlip) Index() RoutingSlipIndex {
+	index := RoutingSlipIndex{}
+	for i := range s.Entries {
+		index[s.Entries[i].Digest] = &s.Entries[i]
+	}
+	return index
+}
+
+func (s *RoutingSlip) Verify(ctx Context, name string, sig bool) error {
+	if len(s.Entries) == 0 {
+		return nil
+	}
+	return s.Index().Verify(ctx, name, sig)
+}
+
+func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, parent ...digest.Digest) (*HistoryEntry, error) {
 	registry := signingattr.Get(ctx)
 	handler := registry.GetSigner(algo)
 	if handler == nil {
@@ -109,6 +158,35 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry) (*Hist
 		return nil, errors.ErrUnknown(compdesc.KIND_PRIVATE_KEY, name)
 	}
 
+	err := s.Verify(ctx, name, true)
+	if err != nil {
+		return nil, err
+	}
+
+	var base *HistoryEntry
+	if len(parent) > 0 {
+		base = s.Lookup(parent[0])
+		if base == nil {
+			return nil, errors.ErrNotFound(KIND_ENTRY, parent[0].String(), name)
+		}
+	}
+	if base == nil && s.Len() > 0 {
+		leaves := s.Leaves()
+		if len(leaves) == 1 {
+			base = s.Lookup(leaves[0])
+		} else {
+			last := &s.Entries[s.Len()-1]
+			for _, l := range leaves {
+				if last.Digest == l {
+					base = last
+					break
+				}
+			}
+			if base == nil {
+				return nil, fmt.Errorf("no unique base entry found in %s", name)
+			}
+		}
+	}
 	gen, err := ToGenericEntry(e)
 	if err != nil {
 		return nil, err
@@ -119,8 +197,8 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry) (*Hist
 		Digest:    "",
 		Signature: metav1.SignatureSpec{},
 	}
-	if len(*s) > 0 {
-		entry.Parent = &(*s)[len(*s)-1].Digest
+	if base != nil {
+		entry.Parent = &base.Digest
 		if entry.Parent.String() == "" {
 			return nil, fmt.Errorf("no parent digest set")
 		}
@@ -136,19 +214,24 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry) (*Hist
 		return nil, err
 	}
 	entry.Signature = *metav1.SignatureSpecFor(sig)
-	*s = append(*s, *entry)
+	s.Entries = append(s.Entries, *entry)
 	return entry, nil
 }
 
-func GetSlip(cv cpi.ComponentVersionAccess, name string) (RoutingSlip, error) {
+////////////////////////////////////////////////////////////////////////////////
+
+func GetSlip(cv cpi.ComponentVersionAccess, name string) (*RoutingSlip, error) {
 	label, err := Get(cv)
 	if err != nil {
 		return nil, err
 	}
-	return label[name], nil
+	return &RoutingSlip{
+		Name:    name,
+		Entries: label[name],
+	}, nil
 }
 
-func SetSlip(cv cpi.ComponentVersionAccess, name string, slip RoutingSlip) error {
+func SetSlip(cv cpi.ComponentVersionAccess, slip *RoutingSlip) error {
 	label, err := Get(cv)
 	if err != nil {
 		return err
@@ -156,6 +239,6 @@ func SetSlip(cv cpi.ComponentVersionAccess, name string, slip RoutingSlip) error
 	if label == nil {
 		label = Label{}
 	}
-	label[name] = slip
+	label[slip.Name] = slip.Entries
 	return Set(cv, label)
 }
