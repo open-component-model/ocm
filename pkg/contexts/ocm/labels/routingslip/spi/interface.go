@@ -13,6 +13,8 @@ import (
 type (
 	Context         = cpi.Context
 	Entry           = internal.Entry
+	UnknownEntry    = internal.UnknownEntry
+	GenericEntry    = internal.GenericEntry
 	EntryType       = internal.EntryType
 	EntryTypeScheme = internal.EntryTypeScheme
 )

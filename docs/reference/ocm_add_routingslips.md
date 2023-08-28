@@ -3,7 +3,7 @@
 ### Synopsis
 
 ```
-ocm add routingslips [<options>] <component-reference> <routing-slip> <type> [<yaml config>]
+ocm add routingslips [<options>] <component-version> <routing-slip> <type>
 ```
 
 ##### Aliases
@@ -22,6 +22,14 @@ routingslips, routingslip, rs
       --repo string          repository name or spec
 ```
 
+
+#### Entry Specification Options
+
+```
+      --comment string       comment field value
+      --entry YAML           routing slip entry specification (YAML)
+```
+
 ### Description
 
 
@@ -32,6 +40,26 @@ the type is not checked, if it is not known. Accordingly, an arbitrary config
 given as JSON or YAML can be given to determine the attribute set of the new
 entry for unknown types.
 
+
+The following list describes the well-known entry types explicitly supported
+by this version of the CLI, their versions and specification formats. Other
+kinds of entries can be configured using the <code>--entry</code> option.
+
+- Entry type <code>comment</code>
+
+  An unstructured comment as entry in a routing slip.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>comment</code>**  *string*
+    
+      Any text as entry in a routing slip.
+  
+  Options used to configure fields: <code>--comment</code>
+  
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -70,10 +98,7 @@ Dedicated OCM repository types:
   - <code>ComponentArchive</code>: v1
 
 OCI Repository types (using standard component repository to OCI mapping):
-  - <code>ArtifactSet</code>: v1
   - <code>CommonTransportFormat</code>: v1
-  - <code>DockerDaemon</code>: v1
-  - <code>Empty</code>: v1
   - <code>OCIRegistry</code>: v1
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
@@ -92,7 +117,7 @@ references.
 ### Examples
 
 ```
-$ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandelsoft.org comment "comment=some text"
+$ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandelsoft.org comment --entry "comment=some text"
 ```
 
 ### SEE ALSO

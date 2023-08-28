@@ -7,7 +7,9 @@ package add
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/spi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/opencontainers/go-digest"
@@ -45,6 +47,9 @@ type Command struct {
 	Entry     *routingslip.GenericEntry
 	Algorithm string
 	Digest    string
+
+	prov       flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider
+	configopts flagsets.ConfigOptions
 }
 
 // NewCommand creates a new routing slip add command.
@@ -54,8 +59,8 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "[<options>] <component-reference> <routing-slip> <type> [<yaml config>]",
-		Args:  cobra.MinimumNArgs(3),
+		Use:   "[<options>] <component-version> <routing-slip> <type>",
+		Args:  cobra.ExactArgs(3),
 		Short: "add routing slip entry",
 		Long: `
 Add a routing slip entry for the specified routing slip name to the given
@@ -64,9 +69,10 @@ qualifiers separated by a slash (/). It is possible to use arbitrary types,
 the type is not checked, if it is not known. Accordingly, an arbitrary config
 given as JSON or YAML can be given to determine the attribute set of the new
 entry for unknown types.
-`,
+
+` + routingslip.EntryUsage(spi.DefaultEntryTypeScheme(), true),
 		Example: `
-$ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandelsoft.org comment "comment=some text"
+$ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandelsoft.org comment --entry "comment=some text"
 `,
 	}
 	// cmd.AddCommand(topicroutingslips.New(o.Context, "ocm-routingslips"))
@@ -74,6 +80,10 @@ $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandels
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
+	o.prov = spi.DefaultEntryTypeScheme().CreateConfigTypeSetConfigProvider().(flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider)
+	o.configopts = o.prov.CreateOptions()
+	o.configopts.AddFlags(fs)
+
 	o.BaseCommand.AddFlags(fs)
 	fs.StringVarP(&o.Algorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
 	fs.StringVarP(&o.Digest, "digest", "", "", "parent digest to use")
@@ -83,15 +93,16 @@ func (o *Command) Complete(args []string) error {
 	o.CompSpec = args[0]
 	o.Name = args[1]
 	o.Type = args[2]
-	data := map[string]interface{}{}
 
-	if len(args) > 3 {
-		err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[3]), &data)
-		if err != nil {
-			return errors.Wrapf(err, "invalid entry data")
-		}
+	if o.Type == "" {
+		return errors.ErrInvalid(routingslip.KIND_ENTRY_TYPE, o.Type)
 	}
-	data["type"] = o.Type
+	o.prov.SetTypeName(o.Type)
+
+	data, err := o.prov.GetConfigFor(o.configopts)
+	if err != nil {
+		return err
+	}
 	u, err := runtime.ToUnstructuredTypedObject(data)
 	if err != nil {
 		return errors.Wrapf(err, "invalid entry data")

@@ -5,6 +5,7 @@
 package spi
 
 import (
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -29,6 +30,7 @@ func MustNewEntryMultiFormatVersion(kind string, formats EntryFormatVersionRegis
 ////////////////////////////////////////////////////////////////////////////////
 
 type additionalTypeInfo interface {
+	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
 	Description() string
 	Format() string
 }
@@ -37,6 +39,7 @@ type entryType struct {
 	runtime.VersionedTypedObjectType[Entry]
 	description string
 	format      string
+	handler     flagsets.ConfigOptionTypeSetHandler
 }
 
 var _ additionalTypeInfo = (*entryType)(nil)
@@ -63,6 +66,10 @@ func NewEntryTypeByFormatVersion(name string, fmt runtime.FormatVersion[Entry], 
 	return NewEntryTypeByBaseType(runtime.NewVersionedTypedObjectTypeByFormatVersion[Entry](name, fmt), opts...)
 }
 
+func (t *entryType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler {
+	return t.handler
+}
+
 func (t *entryType) Description() string {
 	return t.description
 }
@@ -85,6 +92,10 @@ func (t entryTypeTarget) SetDescription(value string) {
 
 func (t entryTypeTarget) SetFormat(value string) {
 	t.format = value
+}
+
+func (t entryTypeTarget) SetConfigHandler(value flagsets.ConfigOptionTypeSetHandler) {
+	t.handler = value
 }
 
 ////////////////////////////////////////////////////////////////////////////////

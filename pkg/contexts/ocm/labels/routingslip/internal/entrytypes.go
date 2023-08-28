@@ -12,8 +12,10 @@ import (
 
 	"github.com/modern-go/reflect2"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -22,6 +24,8 @@ type Context = cpi.Context
 
 type EntryType interface {
 	runtime.VersionedTypedObjectType[Entry]
+
+	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
 
 	Description() string
 	Format() string
@@ -42,8 +46,12 @@ type (
 	EntryTypeProvider = runtime.KnownTypesProvider[Entry, EntryType]
 )
 
+////////////////////////////////////////////////////////////////////////////////
+
 type EntryTypeScheme interface {
 	runtime.TypeScheme[Entry, EntryType]
+
+	CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
 }
 
 type _EntryTypeScheme = runtime.TypeScheme[Entry, EntryType]
@@ -60,6 +68,30 @@ func NewEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
 func NewStrictEntryTypeScheme(base ...EntryTypeScheme) runtime.VersionedTypeRegistry[Entry, EntryType] {
 	scheme := runtime.MustNewDefaultTypeScheme[Entry, EntryType](nil, false, nil, utils.Optional(base...))
 	return &entryTypeScheme{scheme}
+}
+
+func (t *entryTypeScheme) CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
+	prov := flagsets.NewExplicitlyTypedConfigProvider("entry", "routing slip entry specification", true)
+	prov.AddGroups("Entry Specification Options")
+	for _, p := range t.KnownTypes() {
+		err := prov.AddTypeSet(p.ConfigOptionTypeSetHandler())
+		if err != nil {
+			logging.Logger().LogError(err, "cannot compose entry type CLI options")
+		}
+	}
+	if t.BaseScheme() != nil {
+		base := t.BaseScheme().(EntryTypeScheme)
+		for _, s := range base.CreateConfigTypeSetConfigProvider().OptionTypeSets() {
+			if prov.GetTypeSet(s.GetName()) == nil {
+				err := prov.AddTypeSet(s)
+				if err != nil {
+					logging.Logger().LogError(err, "cannot compose access type CLI options")
+				}
+			}
+		}
+	}
+
+	return prov
 }
 
 func (t *entryTypeScheme) KnownTypes() runtime.KnownTypes[Entry, EntryType] {
@@ -99,20 +131,20 @@ func (u *UnknownEntry) Describe(ctx Context) string {
 		if v == nil {
 			continue
 		}
+		if cnt > 3 {
+			continue
+		}
 		value := reflect.ValueOf(v)
 		if value.Kind() == reflect.Array || value.Kind() == reflect.Map || value.Kind() == reflect.Slice {
 			continue
 		}
 		cnt++
-		if cnt > 3 {
-			break
-		}
 		desc = append(desc, fmt.Sprintf("%s: %v", k, v))
 	}
 	if len(desc) == 0 {
-		return "unknown type"
+		return "<unknown type>"
 	}
-	if len(keys)+delta > len(desc) {
+	if len(keys) > len(desc)+delta {
 		return strings.Join(desc, ", ") + ", ..."
 	}
 	return strings.Join(desc, ", ")

@@ -260,7 +260,7 @@ func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 	a.accprov = a.ctx.OCMContext().AccessMethods().CreateConfigTypeSetConfigProvider()
 	inptypes := inputs.For(a.ctx).ConfigTypeSetConfigProvider()
 
-	set := flagsets.NewConfigOptionSet("resources")
+	set := flagsets.NewConfigOptionTypeSet("resources")
 	set.AddAll(a.accprov)
 	dup, err := set.AddAll(inptypes)
 	if err != nil {

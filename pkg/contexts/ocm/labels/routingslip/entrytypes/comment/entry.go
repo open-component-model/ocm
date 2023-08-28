@@ -19,7 +19,7 @@ const (
 
 func init() {
 	spi.Register(spi.NewEntryType[*Entry](Type, spi.WithDescription(usage)))
-	spi.Register(spi.NewEntryType[*Entry](TypeV1))
+	spi.Register(spi.NewEntryType[*Entry](TypeV1, spi.WithFormatSpec(formatV1), spi.WithConfigHandler(ConfigHandler())))
 }
 
 // New creates a new Helm Chart accessor for helm repositories.
@@ -43,7 +43,3 @@ var _ spi.Entry = (*Entry)(nil)
 func (a *Entry) Describe(ctx spi.Context) string {
 	return fmt.Sprintf("Comment: %s", a.Comment)
 }
-
-const usage = `
-An unstructured comment as entry in a routing slip.
-`

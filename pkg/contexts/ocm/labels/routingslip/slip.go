@@ -18,7 +18,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
-const KIND_ENTRY = "routing slip entry"
+const (
+	KIND_ENTRY      = "routing slip entry"
+	KIND_ENTRY_TYPE = "routing slip entry type"
+)
 
 type RoutingSlipIndex map[digest.Digest]*HistoryEntry
 

@@ -32,7 +32,6 @@ const ARCH = "/tmp/ctf"
 const TARGET = "/tmp/target"
 const COMPONENT = "acme.org/routingslip"
 const VERSION = "1.0.0"
-const NAME = "acme.org"
 const LOCAL = "local.org"
 
 var _ = Describe("management", func() {
@@ -58,8 +57,8 @@ var _ = Describe("management", func() {
 		finalize.Close(c, "comp")
 		cv := Must(c.NewVersion(VERSION))
 		finalize.Close(cv, "vers")
-		cv.GetDescriptor().Provider.Name = NAME
-		MustBeSuccessful(routingslip.AddEntry(cv, NAME, rsa.Algorithm, e1))
+		cv.GetDescriptor().Provider.Name = ORG
+		MustBeSuccessful(routingslip.AddEntry(cv, ORG, rsa.Algorithm, e1))
 		MustBeSuccessful(c.AddVersion(cv))
 
 		target := Must(ctf.Open(env, accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, TARGET, 0o700, env))
@@ -73,7 +72,7 @@ transferring version "acme.org/routingslip:1.0.0"...
 ...adding component version...
 `))
 		tcv := Must(target.LookupComponentVersion(COMPONENT, VERSION))
-		slip, err := routingslip.GetSlip(tcv, NAME)
+		slip, err := routingslip.GetSlip(tcv, ORG)
 		MustBeSuccessful(routingslip.AddEntry(tcv, LOCAL, rsa.Algorithm, e1))
 		MustBeSuccessful(tcv.Close())
 		MustBeSuccessful(err)
@@ -81,7 +80,7 @@ transferring version "acme.org/routingslip:1.0.0"...
 		Expect(slip.Len()).To(Equal(1))
 
 		buf.Reset()
-		MustBeSuccessful(routingslip.AddEntry(cv, NAME, rsa.Algorithm, e2))
+		MustBeSuccessful(routingslip.AddEntry(cv, ORG, rsa.Algorithm, e2))
 		MustBeSuccessful(transfer.TransferVersion(pr, nil, cv, target, Must(standard.New())))
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 transferring version "acme.org/routingslip:1.0.0"...

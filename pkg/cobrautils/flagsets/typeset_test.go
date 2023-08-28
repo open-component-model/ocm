@@ -15,7 +15,7 @@ var _ = Describe("type set", func() {
 	var set flagsets.ConfigOptionTypeSet
 
 	BeforeEach(func() {
-		set = flagsets.NewConfigOptionSet("set")
+		set = flagsets.NewConfigOptionTypeSet("set")
 	})
 
 	It("composes type set", func() {
@@ -27,11 +27,11 @@ var _ = Describe("type set", func() {
 	})
 
 	It("aligns two sets", func() {
-		set1 := flagsets.NewConfigOptionSet("first")
+		set1 := flagsets.NewConfigOptionTypeSet("first")
 		set1.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
 		set1.AddOptionType(flagsets.NewStringOptionType("other", "another test string"))
 
-		set2 := flagsets.NewConfigOptionSet("second")
+		set2 := flagsets.NewConfigOptionTypeSet("second")
 		set2.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
 		set2.AddOptionType(flagsets.NewStringOptionType("third", "a third string"))
 

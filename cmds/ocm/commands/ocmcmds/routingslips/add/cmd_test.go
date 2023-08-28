@@ -43,9 +43,9 @@ var _ = Describe("Test Environment", func() {
 		env.Cleanup()
 	})
 
-	It("add entry", func() {
+	It("adds entry by generic entry option", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("add", "routingslip", ARCH, PROVIDER, comment.Type, "comment: first entry")).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("add", "routingslip", ARCH, PROVIDER, comment.Type, "--entry", "comment: first entry")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 `))
@@ -56,5 +56,40 @@ var _ = Describe("Test Environment", func() {
 		slip := Must(routingslip.GetSlip(cv, PROVIDER))
 		Expect(slip.Len()).To(Equal(1))
 		Expect(Must(slip.Get(0).Payload.Evaluate(env.OCMContext())).Describe(env.OCMContext())).To(Equal("Comment: first entry"))
+	})
+
+	It("adds entry by explicit field option", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("add", "routingslip", ARCH, PROVIDER, comment.Type, "--comment", "first entry")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
+			`
+`))
+		repo := Must(ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env))
+		defer Close(repo, "repo")
+		cv := Must(repo.LookupComponentVersion(COMP, VERSION))
+		defer Close(cv, "cv")
+		slip := Must(routingslip.GetSlip(cv, PROVIDER))
+		Expect(slip.Len()).To(Equal(1))
+		Expect(Must(slip.Get(0).Payload.Evaluate(env.OCMContext())).Describe(env.OCMContext())).To(Equal("Comment: first entry"))
+	})
+
+	It("adds dynamic entry by generic entry option", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("add", "routingslip", ARCH, PROVIDER, "arbitrary", "--entry", "comment: first entry")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
+			`
+`))
+		repo := Must(ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env))
+		defer Close(repo, "repo")
+		cv := Must(repo.LookupComponentVersion(COMP, VERSION))
+		defer Close(cv, "cv")
+		slip := Must(routingslip.GetSlip(cv, PROVIDER))
+		Expect(slip.Len()).To(Equal(1))
+		Expect(Must(slip.Get(0).Payload.Evaluate(env.OCMContext())).Describe(env.OCMContext())).To(Equal("comment: first entry"))
+	})
+
+	It("fails for dynamic entry with additional explicit option", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("add", "routingslip", ARCH, PROVIDER, "arbitrary", "--comment=test", "--entry", "comment: first entry")).To(MatchError(`unexpected options comment`))
 	})
 })

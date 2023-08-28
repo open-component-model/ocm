@@ -70,10 +70,7 @@ Dedicated OCM repository types:
   - <code>ComponentArchive</code>: v1
 
 OCI Repository types (using standard component repository to OCI mapping):
-  - <code>ArtifactSet</code>: v1
   - <code>CommonTransportFormat</code>: v1
-  - <code>DockerDaemon</code>: v1
-  - <code>Empty</code>: v1
   - <code>OCIRegistry</code>: v1
   - <code>oci</code>: v1
   - <code>ociRegistry</code>

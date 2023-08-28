@@ -120,7 +120,7 @@ test.de/x:v1      acme.org comment ` + e1a.Timestamp.String() + ` Comment: first
 NAME          TYPE          TIMESTAMP                 DESCRIPTION
 a.company.com comment       ` + e2a.Timestamp.String() + ` Comment: first other entry
 a.company.com comment       ` + e2b.Timestamp.String() + ` Comment: second other entry
-a.company.com acme.org/test ` + e2c.Timestamp.String() + ` name: unit-tests, status: passed, ...
+a.company.com acme.org/test ` + e2c.Timestamp.String() + ` name: unit-tests, status: passed
 acme.org      comment       ` + e1a.Timestamp.String() + ` Comment: first entry
 `))
 		})
@@ -133,7 +133,7 @@ acme.org      comment       ` + e1a.Timestamp.String() + ` Comment: first entry
 TYPE          TIMESTAMP                 DESCRIPTION
 comment       ` + e2a.Timestamp.String() + ` Comment: first other entry
 comment       ` + e2b.Timestamp.String() + ` Comment: second other entry
-acme.org/test ` + e2c.Timestamp.String() + ` name: unit-tests, status: passed, ...
+acme.org/test ` + e2c.Timestamp.String() + ` name: unit-tests, status: passed
 `))
 		})
 
@@ -145,7 +145,7 @@ acme.org/test ` + e2c.Timestamp.String() + ` name: unit-tests, status: passed, .
 TYPE          DIGEST   PARENT   TIMESTAMP                 DESCRIPTION
 comment       ` + digests(e2a, nil) + ` Comment: first other entry
 comment       ` + digests(e2b, e2a) + ` Comment: second other entry
-acme.org/test ` + digests(e2c, e2b) + ` name: unit-tests, status: passed, ...
+acme.org/test ` + digests(e2c, e2b) + ` name: unit-tests, status: passed
 `))
 		})
 

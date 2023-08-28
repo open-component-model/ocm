@@ -17,12 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/norm/jcs"
 )
 
-type (
-	Context      = internal.Context
-	Entry        = internal.Entry
-	GenericEntry = internal.GenericEntry
-)
-
 func AsGenericEntry(u *runtime.UnstructuredTypedObject) *GenericEntry {
 	return internal.AsGenericEntry(u)
 }
