@@ -14,6 +14,7 @@ local
 /cmds/test/generics
 /gen
 bin/
+!/cmds/ocm/commands/ocmcmds/cli/download/testdata/bin
 *.go.grc.bk
 go.mod.bak
 dist/

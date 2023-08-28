@@ -5,6 +5,7 @@
 package download
 
 import (
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
@@ -16,17 +17,24 @@ func From(o *output.Options) *Option {
 	return opt
 }
 
-func NewOptions() *Option {
-	return &Option{}
+func NewOptions(silent ...bool) *Option {
+	return &Option{SilentOption: utils.Optional(silent...)}
 }
 
 type Option struct {
-	UseHandlers bool
+	SilentOption bool
+	UseHandlers  bool
+}
+
+func (o *Option) SetUseHandlers(ok ...bool) *Option {
+	o.UseHandlers = utils.OptionalDefaultedBool(true, ok...)
+	return o
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.UseHandlers, "download-handlers", "d", false, "use download handler if possible")
-
+	if !o.SilentOption {
+		fs.BoolVarP(&o.UseHandlers, "download-handlers", "d", false, "use download handler if possible")
+	}
 }
 
 func (o *Option) Usage() string {

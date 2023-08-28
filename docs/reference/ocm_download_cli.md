@@ -1,44 +1,43 @@
-## ocm get references &mdash; Get References Of A Component Version
+## ocm download cli &mdash; Download OCM CLI From An OCM Repository
 
 ### Synopsis
 
 ```
-ocm get references [<options>]  <component> {<name> { <key>=<value> }}
+ocm download cli [<options>]  [<component> {<name> { <key>=<value> }}]
 ```
 
 ##### Aliases
 
 ```
-references, reference, refs
+cli, ocmcli, ocm-cli
 ```
 
 ### Options
 
 ```
   -c, --constraints constraints   version constraint
-  -h, --help                      help for references
-      --latest                    restrict component versions to latest
-      --lookup stringArray        repository name or spec for closure lookup fallback
-  -o, --output string             output mode (JSON, json, tree, wide, yaml)
-  -r, --recursive                 follow component reference nesting
+  -h, --help                      help for cli
+  -O, --outfile string            output file or directory
       --repo string               repository name or spec
-  -s, --sort stringArray          sort fields
 ```
 
 ### Description
 
 
-Get references of a component version. References are specified
-by identities. An identity consists of 
+Download an OCM CLI executable. By default, the standard publishing component
+and repository is used. Optionally, another component or repo and even a resource
+can be specified. Resources are specified by identities. An identity consists of 
 a name argument followed by optional <code>&lt;key>=&lt;value></code>
 arguments.
+
+The option <code>-O</code> is used to declare the output destination.
+The default location is the location of the <code>ocm</code> executable in
+the actual PATH.
 
 
 If the option <code>--constraints</code> is given, and no version is specified
 for a component, only versions matching the given version constraints
 (semver https://github.com/Masterminds/semver) are selected.
-With <code>--latest</code> only
-the latest matching versions will be selected.
 
 
 If the <code>--repo</code> option is specified, the given names are interpreted
@@ -88,32 +87,16 @@ OCI Repository types (using standard component repository to OCI mapping):
 
 
 
-With the option <code>--recursive</code> the complete reference tree of a component reference is traversed.
-
-\
-If a component lookup for building a reference closure is required
-the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. By default, the component versions are searched in
-the repository holding the component version for which the closure is
-determined. For *Component Archives* this is never possible, because
-it only contains a single component version. Therefore, in this scenario
-this option must always be specified to be able to follow component
-references.
-
-With the option <code>--output</code> the output mode can be selected.
-The following modes are supported:
-  - <code></code> (default)
-  - <code>JSON</code>
-  - <code>json</code>
-  - <code>tree</code>
-  - <code>wide</code>
-  - <code>yaml</code>
+The library supports some downloads with semantics based on resource types. For example a helm chart
+can be download directly as helm chart archive, even if stored as OCI artifact.
+This is handled by download handler. Their usage can be enabled with the <code>--download-handlers</code>
+option. Otherwise the resource as returned by the access method is stored.
 
 
 ### SEE ALSO
 
 ##### Parents
 
-* [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
+* [ocm download](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

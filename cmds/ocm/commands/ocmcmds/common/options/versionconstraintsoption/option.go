@@ -6,6 +6,7 @@ package versionconstraintsoption
 
 import (
 	"github.com/Masterminds/semver/v3"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -18,26 +19,39 @@ func From(o options.OptionSetProvider) *Option {
 	return opt
 }
 
-func New() *Option {
-	return &Option{}
+func New(silent ...bool) *Option {
+	return &Option{SilentLatestOption: utils.Optional(silent...)}
 }
 
 type Option struct {
-	Latest      bool
-	Constraints []*semver.Constraints
+	SilentLatestOption bool
+	Latest             bool
+	Constraints        []*semver.Constraints
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.Latest, "latest", "", false, "restrict component versions to latest")
+	if !o.SilentLatestOption {
+		fs.BoolVarP(&o.Latest, "latest", "", false, "restrict component versions to latest")
+	}
 	flag.SemverConstraintsVarP(fs, &o.Constraints, "constraints", "c", nil, "version constraint")
+}
+
+func (o *Option) SetLatest(latest ...bool) *Option {
+	o.Latest = utils.OptionalDefaultedBool(true, latest...)
+	return o
 }
 
 func (o *Option) Usage() string {
 
 	s := `
-If the option <code>--constraints</code> is given, and no version is specified for a component, only versions matching
-the given version constraints (semver https://github.com/Masterminds/semver) are selected. With <code>--latest</code> only
+If the option <code>--constraints</code> is given, and no version is specified
+for a component, only versions matching the given version constraints
+(semver https://github.com/Masterminds/semver) are selected.
+`
+	if !o.SilentLatestOption {
+		s += `With <code>--latest</code> only
 the latest matching versions will be selected.
 `
+	}
 	return s
 }
