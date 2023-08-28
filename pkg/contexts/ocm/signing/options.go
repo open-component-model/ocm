@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -23,14 +24,28 @@ type Option interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type digestmode struct {
-	mode string
+type printer struct {
+	printer common.Printer
 }
+
+func Printer(p common.Printer) Option {
+	return &printer{p}
+}
+
+func (o *printer) ApplySigningOption(opts *Options) {
+	opts.Printer = o.printer
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 const (
 	DIGESTMODE_LOCAL = "local" // (default) store nested digests locally in component descriptor
 	DIGESTMODE_TOP   = "top"   // store aggregated nested digests in signed component version
 )
+
+type digestmode struct {
+	mode string
+}
 
 func DigestMode(name string) Option {
 	return &digestmode{name}
@@ -296,6 +311,7 @@ func (o *pubkey) ApplySigningOption(opts *Options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type Options struct {
+	Printer           common.Printer
 	Update            bool
 	Recursively       bool
 	DigestMode        string
@@ -328,6 +344,9 @@ func (opts *Options) Eval(list ...Option) *Options {
 }
 
 func (o *Options) ApplySigningOption(opts *Options) {
+	if o.Printer != nil {
+		opts.Printer = o.Printer
+	}
 	if o.Signer != nil {
 		opts.Signer = o.Signer
 	}
@@ -370,6 +389,7 @@ func (o *Options) ApplySigningOption(opts *Options) {
 }
 
 func (o *Options) Complete(registry signing.Registry) error {
+	o.Printer = common.AssurePrinter(o.Printer)
 	if o.Registry == nil {
 		if registry == nil {
 			registry = signing.DefaultRegistry()
@@ -495,6 +515,7 @@ func (o *Options) Nested() *Options {
 		opts.Update = opts.DoUpdate() && opts.DigestMode == DIGESTMODE_LOCAL
 		opts.Signer = nil
 	}
+	opts.Printer = opts.Printer.AddGap("  ")
 	return opts
 }
 

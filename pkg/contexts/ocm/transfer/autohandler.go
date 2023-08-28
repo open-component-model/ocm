@@ -42,7 +42,7 @@ func NewDefaultTransferHandler() transferhandler.TransferHandler {
 // registered handler types with checked by trying the most significant
 // handlers, first, to find the best matching handler for the given option set.
 func NewTransferHandler(list ...transferhandler.TransferOption) (h transferhandler.TransferHandler, ferr error) {
-	var opts transferhandler.TransferOptions
+	var opts transferhandler.TransferHandlerOptions
 
 	created := -1
 outer:
@@ -53,9 +53,14 @@ outer:
 			if o == nil {
 				continue
 			}
+			c, ok := o.(transferhandler.TransferOptionsCreator)
+			if !ok {
+				// option nor used for transfer handlers, just ignore it here.
+				continue
+			}
 			if opts == nil {
 				created = i
-				opts = o.NewOptions()
+				opts = c.NewOptions()
 			}
 			if err := o.ApplyTransferOption(opts); err != nil {
 				if errors.IsErrNotSupportedKind(err, transferhandler.KIND_TRANSFEROPTION) {
@@ -67,7 +72,7 @@ outer:
 					} else {
 						// try next options implementation
 						created = i
-						opts = o.NewOptions()
+						opts = c.NewOptions()
 						continue outer
 					}
 				} else {
@@ -103,9 +108,10 @@ outer:
 			return NewDefaultTransferHandler(), nil
 		}
 		if ferr != nil {
-			// contiue second chance from beginning
+			// continue second chance from beginning
 			continue
 		}
+		// all options are accepted now, so just return the appropriate handler.
 		return opts.NewTransferHandler()
 	}
 }

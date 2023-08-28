@@ -13,7 +13,7 @@ import (
 
 const KIND_TRANSFEROPTION = "transfer option"
 
-// TransferOptions is the general type for an option bag
+// TransferHandlerOptions is the general type for an option bag
 // holding options for a transfer handler.
 // Different transfer handler implementations may use differ
 // concrete option sets.
@@ -21,12 +21,20 @@ const KIND_TRANSFEROPTION = "transfer option"
 // The options setters/getters MUST be interfaces, which may be implemented
 // by different option set types to enable the option implementations
 // to work with different options sets.
-type TransferOptions interface {
+type TransferHandlerOptions interface {
 	NewTransferHandler() (TransferHandler, error)
 }
 
+type TransferOptions interface{}
+
+// TransferOptionsCreator is an optional interface for a TransferOption.
+// The option may provide a default TransferOptions object if it applies
+// to regular transfer handler options. THis is used to infer an applicable
+// transfer hander for the gicven option set.
+// Options not intended for the transfer handler MUST NOT implement this
+// interface to not hamper the handler detection process.
 type TransferOptionsCreator interface {
-	NewOptions() TransferOptions
+	NewOptions() TransferHandlerOptions
 }
 
 // TransferOption is an option used to configure a transfer handler.
@@ -43,20 +51,19 @@ type TransferOptionsCreator interface {
 // For example the spiff transfer handler options include all the standard
 // handler options.
 type TransferOption interface {
-	TransferOptionsCreator
 	ApplyTransferOption(TransferOptions) error
 }
 
 type optionsPointer[P any] interface {
-	TransferOptions
+	TransferHandlerOptions
 	*P
 }
 
-// SpecilizedOptionsCreator is the base implementation for options objects
+// SpecializedOptionsCreator is the base implementation for options objects
 // for specialized transfer handlers.
-type SpecilizedOptionsCreator[P optionsPointer[T], T any] struct{}
+type SpecializedOptionsCreator[P optionsPointer[T], T any] struct{}
 
-func (o SpecilizedOptionsCreator[P, T]) NewOptions() TransferOptions {
+func (o SpecializedOptionsCreator[P, T]) NewOptions() TransferHandlerOptions {
 	var opts T
 	return P(&opts)
 }

@@ -114,7 +114,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 		defer tgt.Close()
 
-		err = transfer.TransferComponentVersion(nil, cv, tgt, append(topts, standard.ResourcesByValue(), &optionsChecker{})...)
+		err = transfer.Transfer(cv, tgt, append(topts, standard.ResourcesByValue(), &optionsChecker{})...)
 		Expect(err).To(Succeed())
 		Expect(env.DirExists(OUT)).To(BeTrue())
 

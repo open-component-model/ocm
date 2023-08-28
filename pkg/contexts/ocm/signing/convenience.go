@@ -5,7 +5,6 @@
 package signing
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -13,7 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-func SignComponentVersion(printer common.Printer, cv ocm.ComponentVersionAccess, name string, privkey interface{}, optlist ...Option) (*metav1.DigestSpec, error) {
+func SignComponentVersion(cv ocm.ComponentVersionAccess, name string, privkey interface{}, optlist ...Option) (*metav1.DigestSpec, error) {
 	var opts Options
 
 	opts.Eval(
@@ -35,10 +34,10 @@ func SignComponentVersion(printer common.Printer, cv ocm.ComponentVersionAccess,
 	if err != nil {
 		return nil, errors.Wrapf(err, "inconsistent options for signing")
 	}
-	return Apply(printer, nil, cv, &opts)
+	return Apply(nil, nil, cv, &opts)
 }
 
-func VerifyComponentVersion(printer common.Printer, cv ocm.ComponentVersionAccess, name string, pubkey interface{}, optlist ...Option) (*metav1.DigestSpec, error) {
+func VerifyComponentVersion(cv ocm.ComponentVersionAccess, name string, pubkey interface{}, optlist ...Option) (*metav1.DigestSpec, error) {
 	var opts Options
 	if len(cv.GetDescriptor().Signatures) == 1 && name == "" {
 		name = cv.GetDescriptor().Signatures[0].Name
@@ -65,5 +64,5 @@ func VerifyComponentVersion(printer common.Printer, cv ocm.ComponentVersionAcces
 	if err != nil {
 		return nil, errors.Wrapf(err, "inconsistent options for verification")
 	}
-	return Apply(printer, nil, cv, &opts)
+	return Apply(nil, nil, cv, &opts)
 }

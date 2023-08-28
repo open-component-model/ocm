@@ -31,9 +31,9 @@ var (
 	_ ScriptFilesystemOption = (*Options)(nil)
 )
 
-type TransferOptionsCreator = transferhandler.SpecilizedOptionsCreator[*Options, Options]
+type TransferOptionsCreator = transferhandler.SpecializedOptionsCreator[*Options, Options]
 
-func (o *Options) NewOptions() transferhandler.TransferOptions {
+func (o *Options) NewOptions() transferhandler.TransferHandlerOptions {
 	return &Options{}
 }
 
