@@ -14,13 +14,21 @@ jobs:
         PR_NUMBER="${{ github.event.pull_request.number || github.event.issue.number }}"
         echo "PR number is: ${PR_NUMBER}"
         echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+    - name: Check for Secret availability
+      if: github.event.pull_request.head.repo.fork == true
+      shell: bash
+      run: |
+          echo "Integration tests can not run due to lacking permissions! You are \
+          working in a forked repository."
     - name: Generate token
+      if: github.event.pull_request.head.repo.fork == false
       id: generate_token
       uses: tibdex/github-app-token@v1
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Repository Dispatch
+      if: github.event.pull_request.head.repo.fork == false
       uses: myrotvorets/trigger-repository-dispatch-action@1.0.0
       with:
         token: ${{ steps.generate_token.outputs.token }} # metadata:read and contents:read&write
