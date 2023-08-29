@@ -44,10 +44,9 @@ type localOptions struct {
 }
 
 func (opts *localOptions) Eval(optlist ...transferhandler.TransferOption) error {
-	var local localOptions
 	for _, o := range optlist {
 		if _, ok := o.(transferhandler.TransferOptionsCreator); !ok {
-			err := o.ApplyTransferOption(&local)
+			err := o.ApplyTransferOption(opts)
 			if err != nil {
 				return err
 			}
