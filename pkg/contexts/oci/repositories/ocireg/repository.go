@@ -145,7 +145,7 @@ func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {
 			},
 			DefaultScheme: r.info.Scheme,
 			DefaultTLS: &tls.Config{
-				MinVersion: tls.VersionTLS10,
+				MinVersion: tls.VersionTLS13,
 				RootCAs: func() *x509.CertPool {
 					rootCAs, _ := x509.SystemCertPool()
 					if rootCAs == nil {
