@@ -39,7 +39,7 @@ var _ = Describe("configure", func() {
 		sett2.AddOptionType(flagsets.NewStringOptionType("common", "a test string"))
 		sett2.AddOptionType(flagsets.NewStringOptionType("t2", "t2 argument"))
 
-		prov = flagsets.NewTypedConfigProvider("entry", "entry data")
+		prov = flagsets.NewTypedConfigProvider("entry", "entry data", "entryType")
 		prov.AddTypeSet(sett1)
 		prov.AddTypeSet(sett2)
 		flags = pflag.NewFlagSet("flags", pflag.ContinueOnError)

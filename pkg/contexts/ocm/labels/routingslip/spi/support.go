@@ -11,7 +11,7 @@ import (
 
 type EntryTypeVersionScheme = runtime.TypeVersionScheme[Entry, EntryType]
 
-func NewEnryTypeVersionScheme(kind string) EntryTypeVersionScheme {
+func NewEntryTypeVersionScheme(kind string) EntryTypeVersionScheme {
 	return runtime.NewTypeVersionScheme[Entry, EntryType](kind, NewStrictEntryTypeScheme())
 }
 

@@ -12,24 +12,16 @@ import (
 
 	"github.com/modern-go/reflect2"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets/flagsetscheme"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Context = cpi.Context
 
-type EntryType interface {
-	runtime.VersionedTypedObjectType[Entry]
-
-	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
-
-	Description() string
-	Format() string
-}
+type EntryType = flagsetscheme.VersionTypedObjectType[Entry]
 
 // Entry is the interface access method specifications
 // must fulfill. The main task is to map the specification
@@ -48,54 +40,14 @@ type (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type EntryTypeScheme interface {
-	runtime.TypeScheme[Entry, EntryType]
-
-	CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
-}
-
-type _EntryTypeScheme = runtime.TypeScheme[Entry, EntryType]
-
-type entryTypeScheme struct {
-	_EntryTypeScheme
-}
+type EntryTypeScheme = flagsetscheme.TypeScheme[Entry, EntryType]
 
 func NewEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
-	scheme := runtime.MustNewDefaultTypeScheme[Entry, EntryType](&UnknownEntry{}, true, nil, utils.Optional(base...))
-	return &entryTypeScheme{scheme}
+	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("entry", "", "routing slip entry specification", "Entry Specification Options", &UnknownEntry{}, true, base...)
 }
 
-func NewStrictEntryTypeScheme(base ...EntryTypeScheme) runtime.VersionedTypeRegistry[Entry, EntryType] {
-	scheme := runtime.MustNewDefaultTypeScheme[Entry, EntryType](nil, false, nil, utils.Optional(base...))
-	return &entryTypeScheme{scheme}
-}
-
-func (t *entryTypeScheme) CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
-	prov := flagsets.NewExplicitlyTypedConfigProvider("entry", "routing slip entry specification", true)
-	prov.AddGroups("Entry Specification Options")
-	for _, p := range t.KnownTypes() {
-		err := prov.AddTypeSet(p.ConfigOptionTypeSetHandler())
-		if err != nil {
-			logging.Logger().LogError(err, "cannot compose entry type CLI options")
-		}
-	}
-	if t.BaseScheme() != nil {
-		base := t.BaseScheme().(EntryTypeScheme)
-		for _, s := range base.CreateConfigTypeSetConfigProvider().OptionTypeSets() {
-			if prov.GetTypeSet(s.GetName()) == nil {
-				err := prov.AddTypeSet(s)
-				if err != nil {
-					logging.Logger().LogError(err, "cannot compose access type CLI options")
-				}
-			}
-		}
-	}
-
-	return prov
-}
-
-func (t *entryTypeScheme) KnownTypes() runtime.KnownTypes[Entry, EntryType] {
-	return t._EntryTypeScheme.KnownTypes() // Goland
+func NewStrictEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
+	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("entry", "", "routing slip entry specification", "Entry Specification Options", nil, false, base...)
 }
 
 func CreateEntry(t runtime.TypedObject) (Entry, error) {

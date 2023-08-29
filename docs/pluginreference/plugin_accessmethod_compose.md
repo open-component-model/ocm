@@ -41,6 +41,7 @@ The following predefined option types can be used:
   - <code>accessRepository</code>: [*string*] repository URL
   - <code>accessVersion</code>: [*string*] version for access specification
   - <code>bucket</code>: [*string*] bucket name
+  - <code>comment</code>: [*string*] comment field value
   - <code>commit</code>: [*string*] git commit id
   - <code>digest</code>: [*string*] blob digest
   - <code>globalAccess</code>: [*map[string]YAML*] access specification for global access

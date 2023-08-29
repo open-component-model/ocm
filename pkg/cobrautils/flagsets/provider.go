@@ -62,16 +62,17 @@ func (p *plainConfigProvider) GetConfigFor(opts ConfigOptions) (Config, error) {
 
 type typedConfigProvider struct {
 	_ConfigTypeOptionSetConfigProvider
+	typeOption string
 }
 
 var _ ConfigTypeOptionSetConfigProvider = (*typedConfigProvider)(nil)
 
-func NewTypedConfigProvider(name string, desc string, acceptUnknown ...bool) ConfigTypeOptionSetConfigProvider {
-	return &typedConfigProvider{NewTypedConfigProviderBase(name, desc, TypeNameProviderFromOptions(name+"Type"), utils.Optional(acceptUnknown...), NewStringOptionType(name+"Type", "type of "+desc))}
+func NewTypedConfigProvider(name string, desc, typeOption string, acceptUnknown ...bool) ConfigTypeOptionSetConfigProvider {
+	return &typedConfigProvider{NewTypedConfigProviderBase(name, desc, TypeNameProviderFromOptions(typeOption), utils.Optional(acceptUnknown...), NewStringOptionType(name+"Type", "type of "+desc)), typeOption}
 }
 
 func (p *typedConfigProvider) IsExplicitlySelected(opts ConfigOptions) bool {
-	return opts.Changed(p.GetName()+"Type", p.GetName())
+	return opts.Changed(p.typeOption, p.GetName())
 }
 
 func TypeNameProviderFromOptions(name string) TypeNameProvider {
