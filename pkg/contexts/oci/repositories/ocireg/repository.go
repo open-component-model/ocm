@@ -19,7 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
@@ -147,13 +146,14 @@ func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {
 			DefaultTLS: &tls.Config{
 				MinVersion: tls.VersionTLS13,
 				RootCAs: func() *x509.CertPool {
-					rootCAs, _ := x509.SystemCertPool()
-					if rootCAs == nil {
-						rootCAs = x509.NewCertPool()
-					}
+					var rootCAs *x509.CertPool
 					if creds != nil {
-						c := creds.GetProperty(identity.ATTR_CERTIFICATE_AUTHORITY)
+						c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
 						if c != "" {
+							rootCAs, _ = x509.SystemCertPool()
+							if rootCAs == nil {
+								rootCAs = x509.NewCertPool()
+							}
 							rootCAs.AppendCertsFromPEM([]byte(c))
 						}
 					}
