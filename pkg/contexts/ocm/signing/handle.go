@@ -95,11 +95,15 @@ func (s *WalkingState) GetContext(nv common.NameVersion, ctxkey common.NameVersi
 }
 
 func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
+	if printer != nil {
+		opts = opts.Dup()
+		opts.Printer = printer
+	}
 	if state == nil {
 		s := NewWalkingState(cv.GetContext().LoggingContext().WithContext(REALM))
 		state = &s
 	}
-	dc, err := apply(common.AssurePrinter(printer), *state, cv, opts, utils.Optional(closecv...))
+	dc, err := apply(*state, cv, opts, utils.Optional(closecv...))
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +118,7 @@ func RequireReProcessing(vi *VersionInfo, ctx *DigestContext, opts *Options) boo
 	return opts.DoSign() && !vi.digestingContexts[ctx.CtxKey].Signed
 }
 
-func apply(printer common.Printer, state WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv bool) (dc *DigestContext, efferr error) {
+func apply(state WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv bool) (dc *DigestContext, efferr error) {
 	var closer errors.ErrorFunction
 	if closecv {
 		closer = func() error {
@@ -130,10 +134,10 @@ func apply(printer common.Printer, state WalkingState, cv ocm.ComponentVersionAc
 			return vi.digestingContexts[state.Context.CtxKey], err
 		}
 	}
-	return _apply(printer, state, nv, cv, vi, opts)
+	return _apply(state, nv, cv, vi, opts)
 }
 
-func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAccess, vi *VersionInfo, opts *Options) (*DigestContext, error) { //nolint: maintidx // yes
+func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAccess, vi *VersionInfo, opts *Options) (*DigestContext, error) { //nolint: maintidx // yes
 	prefix := ""
 	var ctx *DigestContext
 	if vi == nil {
@@ -155,7 +159,7 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 			}
 		} else {
 			var err error
-			opts, err = ctx.determineSignatureInfo(printer, state, opts)
+			opts, err = ctx.determineSignatureInfo(state, opts)
 			if err != nil {
 				return nil, fmt.Errorf("failed to determine signature info: %w", err)
 			}
@@ -168,7 +172,7 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 	if ctx.Digest != nil {
 		if !opts.DoSign() || ctx.Signed {
 			state.Logger.Debug("reusing from context", "cv", nv, "root", ctx.CtxKey, "ctx", ctx.Source)
-			printer.Printf("reusing %s[%s] from context %q\n", nv, ctx.CtxKey, ctx.Source)
+			opts.Printer.Printf("reusing %s[%s] from context %q\n", nv, ctx.CtxKey, ctx.Source)
 			return ctx, nil
 		}
 	}
@@ -180,7 +184,7 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 		// digests used for the existing signatures.
 		substate := state
 		substate.Context = nil
-		nctx, err := _apply(printer, substate, nv, cv, vi, opts)
+		nctx, err := _apply(substate, nv, cv, vi, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -200,7 +204,7 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 	state.Context = ctx
 
 	state.Logger.Debug(fmt.Sprintf("%sapplying to version", prefix), "cv", nv, "root", ctx.CtxKey)
-	printer.Printf("%sapplying to version %q[%s]...\n", prefix, nv, ctx.CtxKey)
+	opts.Printer.Printf("%sapplying to version %q[%s]...\n", prefix, nv, ctx.CtxKey)
 
 	signatureNames := opts.SignatureNames
 	if len(signatureNames) == 0 && opts.Keyless {
@@ -222,10 +226,10 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 	var spec *metav1.DigestSpec
 	legacy := signing.IsLegacyHashAlgorithm(ctx.RootContextInfo.DigestType.HashAlgorithm) && !opts.DoSign()
 	if ctx.Digest == nil {
-		if err := calculateReferenceDigests(printer, state, opts, legacy); err != nil {
+		if err := calculateReferenceDigests(state, opts, legacy); err != nil {
 			return nil, err
 		}
-		if err := calculareResourceDigests(printer, state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
+		if err := calculareResourceDigests(state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
 			return nil, err
 		}
 		dt := ctx.DigestType
@@ -249,7 +253,7 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 	}
 
 	if opts.DoVerify() {
-		dig, err := doVerify(printer, cd, state, signatureNames, opts)
+		dig, err := doVerify(cd, state, signatureNames, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -339,7 +343,7 @@ func resMsg(ref *compdesc.Resource, acc string, msg string, args ...interface{})
 	return fmt.Sprintf("%s %s:%s", fmt.Sprintf(msg, args...), ref.Name, ref.Version)
 }
 
-func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state WalkingState, signatureNames []string, opts *Options) (*metav1.DigestSpec, error) {
+func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNames []string, opts *Options) (*metav1.DigestSpec, error) {
 	var spec *metav1.DigestSpec
 	found := []string{}
 	for _, n := range signatureNames {
@@ -354,7 +358,7 @@ func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state Wa
 				if opts.SignatureConfigured(n) {
 					return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
 				}
-				printer.Printf("Warning: no public key for signature %q in %s\n", n, state.History)
+				opts.Printer.Printf("Warning: no public key for signature %q in %s\n", n, state.History)
 				continue
 			}
 		}
@@ -364,7 +368,7 @@ func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state Wa
 			if opts.SignatureConfigured(n) {
 				return nil, errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, n)
 			}
-			printer.Printf("Warning: no verifier (%s) found for signature %q in %s\n", sig.Signature.Algorithm, n, state.History)
+			opts.Printer.Printf("Warning: no verifier (%s) found for signature %q in %s\n", sig.Signature.Algorithm, n, state.History)
 			continue
 		}
 
@@ -399,7 +403,7 @@ func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state Wa
 	return spec, nil
 }
 
-func calculateReferenceDigests(printer common.Printer, state WalkingState, opts *Options, legacy bool) error {
+func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) error {
 	ctx := state.Context
 	cd := ctx.Descriptor
 	for i, reference := range cd.References {
@@ -407,7 +411,7 @@ func calculateReferenceDigests(printer common.Printer, state WalkingState, opts 
 		nctx := state.GetContext(rnv, state.Context.CtxKey)
 
 		if nctx == nil || nctx.Digest == nil {
-			printer.Printf("  no digest found for %q\n", rnv)
+			opts.Printer.Printf("  no digest found for %q\n", rnv)
 			nctx = nil
 		}
 		nested, err := opts.Resolver.LookupComponentVersion(reference.GetComponentName(), reference.GetVersion())
@@ -418,13 +422,13 @@ func calculateReferenceDigests(printer common.Printer, state WalkingState, opts 
 			closer := accessio.OnceCloser(nested)
 			defer closer.Close()
 			digestOpts := opts.Nested()
-			nctx, err = apply(printer.AddGap("  "), state, nested, digestOpts, true)
+			nctx, err = apply(state, nested, digestOpts, true)
 			if err != nil {
 				return errors.Wrapf(err, refMsg(reference, "failed applying to component reference"))
 			}
 		} else {
 			state.Logger.Debug("accepting digest from context", "reference", reference)
-			printer.Printf("  accepting digest from context for %s", reference)
+			opts.Printer.Printf("  accepting digest from context for %s", reference)
 			if err != nil {
 				return errors.Wrapf(err, refMsg(reference, "failed applying to component reference"))
 			}
@@ -452,12 +456,12 @@ func calculateReferenceDigests(printer common.Printer, state WalkingState, opts 
 		cd.References[i].Digest = nctx.Digest
 		ctx.Refs[nctx.Key] = nctx.Digest
 		state.Logger.Debug("reference digest", "index", i, "reference", common.NewNameVersion(reference.ComponentName, reference.Version), "hashalgo", nctx.Digest.HashAlgorithm, "normalgo", nctx.Digest.NormalisationAlgorithm, "digest", nctx.Digest.Value)
-		printer.Printf("  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, nctx.Digest)
+		opts.Printer.Printf("  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, nctx.Digest)
 	}
 	return nil
 }
 
-func calculareResourceDigests(printer common.Printer, state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) error {
+func calculareResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) error {
 	octx := cv.GetContext()
 	blobdigesters := octx.BlobDigesters()
 	for i, res := range cv.GetResources() {
@@ -514,7 +518,7 @@ func calculareResourceDigests(printer common.Printer, state WalkingState, cv ocm
 		}
 		rid := res.Meta().GetIdentity(cv.GetDescriptor().Resources)
 		state.Logger.Debug("resource digest", "index", i, "id", rid, "hashalgo", digest[0].HashAlgorithm, "normalgo", digest[0].NormalisationAlgorithm, "digest", digest[0].Value)
-		printer.Printf("  resource %d:  %s: digest %s\n", i, rid, &digest[0])
+		opts.Printer.Printf("  resource %d:  %s: digest %s\n", i, rid, &digest[0])
 	}
 	return nil
 }

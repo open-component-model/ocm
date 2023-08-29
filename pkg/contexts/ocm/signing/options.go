@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -23,15 +24,35 @@ type Option interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type digestmode struct {
-	mode string
+type printer struct {
+	printer common.Printer
 }
+
+// Printer provides an option configuring a printer for a signing/verification
+// operation.
+func Printer(p common.Printer) Option {
+	return &printer{p}
+}
+
+func (o *printer) ApplySigningOption(opts *Options) {
+	opts.Printer = o.printer
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 const (
 	DIGESTMODE_LOCAL = "local" // (default) store nested digests locally in component descriptor
 	DIGESTMODE_TOP   = "top"   // store aggregated nested digests in signed component version
 )
 
+type digestmode struct {
+	mode string
+}
+
+// DigestMode provides an option configuring the digest mode for a signing/verification
+// operation. Possible values are
+//   - DIGESTMODE_LOCAL(default) all digest information is store along with a component version
+//   - DIGESTMODE_TOP (experimental) all digest information is gathered for referenced component versions in the initially signed component version.
 func DigestMode(name string) Option {
 	return &digestmode{name}
 }
@@ -46,6 +67,9 @@ type recursive struct {
 	flag bool
 }
 
+// Recursive provides an option configuring recursion for a signing/verification
+// operation. If enabled the operation will be done for all component versions
+// in the reference graph.
 func Recursive(flags ...bool) Option {
 	return &recursive{utils.GetOptionFlag(flags...)}
 }
@@ -60,6 +84,8 @@ type update struct {
 	flag bool
 }
 
+// Update provides an option configuring the update mode for a signing/verification
+// operation. Only if enabled, state changes will be persisted.
 func Update(flags ...bool) Option {
 	return &update{utils.GetOptionFlag(flags...)}
 }
@@ -74,6 +100,8 @@ type verify struct {
 	flag bool
 }
 
+// VerifyDigests provides an option requesting signature verification for a
+// signing/verification operation.
 func VerifyDigests(flags ...bool) Option {
 	return &verify{utils.GetOptionFlag(flags...)}
 }
@@ -89,8 +117,24 @@ type signer struct {
 	name   string
 }
 
+// Sign provides an option requesting signing for a dedicated name and signer for a
+// signing/verification operation.
 func Sign(h signing.Signer, name string) Option {
 	return &signer{h, name}
+}
+
+// Signer provides an option requesting to use a dedicated signer for a
+// signing/verification operation.
+func Signer(h signing.Signer) Option {
+	return &signer{h, ""}
+}
+
+// SignerByName provides an option requesting to use a dedicated signer by name
+// for a signing/verification operation. The effective signer is taken from
+// the signer registry provided by the OCM context.
+func SignerByName(n string) Option {
+	h := signing.DefaultHandlerRegistry().GetSigner(n)
+	return &signer{h, ""}
 }
 
 func (o *signer) ApplySigningOption(opts *Options) {
@@ -107,10 +151,15 @@ type hasher struct {
 	hasher signing.Hasher
 }
 
+// Hash provides an option requesting hashing with a dedicated hasher for a
+// signing/hash operation.
 func Hash(h signing.Hasher) Option {
 	return &hasher{h}
 }
 
+// HashByAlgo provides an option requesting to use a dedicated hasher by name
+// for a signing/hash operation. The effective hasher is taken from
+// the hasher registry provided by the OCM context.
 func HashByAlgo(name string) Option {
 	h := signing.DefaultHandlerRegistry().GetHasher(name)
 	return Hash(h)
@@ -126,6 +175,9 @@ type verifier struct {
 	name string
 }
 
+// VerifySignature provides an option requesting verification for dedicated
+// signature names for a signing/verification operation. If no name is specified
+// the names are taken from the component version.
 func VerifySignature(names ...string) Option {
 	name := ""
 	for _, n := range names {
@@ -151,6 +203,9 @@ type resolver struct {
 	resolver []ocm.ComponentVersionResolver
 }
 
+// Resolver provides an option requesting to use a dedicated component version
+// resolver for a signing/verification operation. It is used to resolve
+// references in component versions.
 func Resolver(h ...ocm.ComponentVersionResolver) Option {
 	return &resolver{h}
 }
@@ -165,6 +220,11 @@ type skip struct {
 	skip map[string]bool
 }
 
+// SkipAccessTypes provides an option to declare dedicated resource types
+// which should be excluded from digesting. This is a legacy options,
+// required only for the handling of older component version not yet
+// completely configured with resource digests. The content of resources with
+// the given types will be marked as not signature relevant.
 func SkipAccessTypes(names ...string) Option {
 	m := map[string]bool{}
 	for _, n := range names {
@@ -190,6 +250,9 @@ type registry struct {
 	registry signing.Registry
 }
 
+// Registry provides an option requesting to use a dedicated signing registry
+// for a signing/verification operation. It is used to lookup
+// signers, verifiers, hashers and signing public/private keys by name.
 func Registry(h signing.Registry) Option {
 	return &registry{h}
 }
@@ -205,6 +268,8 @@ type signame struct {
 	reset bool
 }
 
+// SignatureName provides an option requesting to use dedicated signature names
+// for a signing/verification operation.
 func SignatureName(name string, reset ...bool) Option {
 	return &signame{name, utils.Optional(reset...)}
 }
@@ -224,6 +289,8 @@ type issuer struct {
 	name string
 }
 
+// Issuer provides an option requesting to use a dedicated issuer name
+// for a signing operation.
 func Issuer(name string) Option {
 	return &issuer{name}
 }
@@ -238,6 +305,8 @@ type rootverts struct {
 	pool *x509.CertPool
 }
 
+// RootCertificates provides an option requesting to dedicated root certificates
+// for a signing/verification operation using certificates.
 func RootCertificates(pool *x509.CertPool) Option {
 	return &rootverts{pool}
 }
@@ -253,11 +322,16 @@ type privkey struct {
 	key  interface{}
 }
 
+// PrivateKey provides an option requesting to use a dedicated private key
+// for a dedicated signature name for a signing operation.
 func PrivateKey(name string, key interface{}) Option {
 	return &privkey{name, key}
 }
 
 func (o *privkey) ApplySigningOption(opts *Options) {
+	if o.key == nil {
+		return
+	}
 	if opts.Keys == nil {
 		opts.Keys = signing.NewKeyRegistry()
 	}
@@ -271,11 +345,16 @@ type pubkey struct {
 	key  interface{}
 }
 
+// PublicKey provides an option requesting to use a dedicated public key
+// for a dedicated signature name for a verification operation.
 func PublicKey(name string, key interface{}) Option {
 	return &pubkey{name, key}
 }
 
 func (o *pubkey) ApplySigningOption(opts *Options) {
+	if o.key == nil {
+		return
+	}
 	if opts.Keys == nil {
 		opts.Keys = signing.NewKeyRegistry()
 	}
@@ -285,6 +364,7 @@ func (o *pubkey) ApplySigningOption(opts *Options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type Options struct {
+	Printer           common.Printer
 	Update            bool
 	Recursively       bool
 	DigestMode        string
@@ -317,6 +397,9 @@ func (opts *Options) Eval(list ...Option) *Options {
 }
 
 func (o *Options) ApplySigningOption(opts *Options) {
+	if o.Printer != nil {
+		opts.Printer = o.Printer
+	}
 	if o.Signer != nil {
 		opts.Signer = o.Signer
 	}
@@ -359,6 +442,7 @@ func (o *Options) ApplySigningOption(opts *Options) {
 }
 
 func (o *Options) Complete(registry signing.Registry) error {
+	o.Printer = common.AssurePrinter(o.Printer)
 	if o.Registry == nil {
 		if registry == nil {
 			registry = signing.DefaultRegistry()
@@ -484,6 +568,7 @@ func (o *Options) Nested() *Options {
 		opts.Update = opts.DoUpdate() && opts.DigestMode == DIGESTMODE_LOCAL
 		opts.Signer = nil
 	}
+	opts.Printer = opts.Printer.AddGap("  ")
 	return opts
 }
 

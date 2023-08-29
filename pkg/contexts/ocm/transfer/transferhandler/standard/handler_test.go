@@ -47,6 +47,19 @@ const OCIHOST = "alias"
 const SIGNATURE = "test"
 const SIGN_ALGO = rsa.Algorithm
 
+type optionsChecker struct {
+	standard.TransferOptionsCreator
+}
+
+var _ transferhandler.TransferOption = (*optionsChecker)(nil)
+
+func (o *optionsChecker) ApplyTransferOption(options transferhandler.TransferOptions) error {
+	if _, ok := options.(*standard.Options); !ok {
+		return fmt.Errorf("unexpected options type %T", options)
+	}
+	return nil
+}
+
 var _ = Describe("Transfer handler", func() {
 	var env *Builder
 	var ldesc *artdesc.Descriptor
@@ -100,13 +113,8 @@ var _ = Describe("Transfer handler", func() {
 		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
 		Expect(err).To(Succeed())
 		defer tgt.Close()
-		opts := &standard.Options{}
-		opts.SetResourcesByValue(true)
-		transferhandler.ApplyOptions(opts, topts...)
-		handler := standard.NewDefaultHandler(opts)
-		// handler, err := standard.New(standard.ResourcesByValue())
-		Expect(err).To(Succeed())
-		err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
+
+		err = transfer.Transfer(cv, tgt, append(topts, standard.ResourcesByValue(), &optionsChecker{})...)
 		Expect(err).To(Succeed())
 		Expect(env.DirExists(OUT)).To(BeTrue())
 

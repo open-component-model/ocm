@@ -25,9 +25,12 @@ func New() *Option {
 }
 
 type Option struct {
+	standard.TransferOptionsCreator
 	RepoSpecs []string
 	Resolver  ocm.ComponentVersionResolver
 }
+
+var _ transferhandler.TransferOption = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.RepoSpecs, "lookup", "", nil, "repository name or spec for closure lookup fallback")
