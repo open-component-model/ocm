@@ -51,12 +51,13 @@ Matchers exist for the following usage contexts or consumer types:
     the <code>hostpath</code> type.
 
     Credential consumers of the consumer type HelmChartRepository evaluate the following credential properties:
-
-    - **<code>username</code>**: basic auth user name.
-    - **<code>password</code>**: basic auth password.
-    - **<code>certificate</code>**: TLS client certificate.
-    - **<code>privateKey</code>**: TLS private key.
-
+    
+      - <code>username</code>: the basic auth user name
+      - <code>password</code>: the basic auth password
+      - <code>certificate</code>: TLS client certificate
+      - <code>privateKey</code>: TLS private key
+      - <code>certificateAuthority</code>: TLS certificate authority
+    
   - <code>OCIRegistry</code>: OCI registry credential matcher
 
     It matches the <code>OCIRegistry</code> consumer type and additionally acts like
@@ -67,8 +68,8 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>username</code>: the basic auth user name
       - <code>password</code>: the basic auth password
       - <code>identityToken</code>: the bearer token used for non-basic auth authorization
-
-
+      - <code>certificateAuthority</code>: the certificate authority certificate used to verify certificates
+    
   - <code>S3</code>: S3 credential matcher
 
     This matcher is a hostpath matcher.

@@ -8,7 +8,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"path"
 	"strings"
 
@@ -20,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
@@ -145,6 +145,7 @@ func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {
 			},
 			DefaultScheme: r.info.Scheme,
 			DefaultTLS: &tls.Config{
+				MinVersion: tls.VersionTLS10,
 				RootCAs: func() *x509.CertPool {
 					rootCAs, _ := x509.SystemCertPool()
 					if rootCAs == nil {

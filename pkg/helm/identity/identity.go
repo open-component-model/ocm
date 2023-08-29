@@ -5,7 +5,6 @@
 package identity
 
 import (
-	"github.com/open-component-model/ocm/pkg/listformat"
 	"strings"
 
 	"helm.sh/helm/v3/pkg/registry"
@@ -15,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/pkg/listformat"
 )
 
 // CONSUMER_TYPE is the Helm chart repository type.
