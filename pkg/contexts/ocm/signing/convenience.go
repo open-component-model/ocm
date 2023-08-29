@@ -12,12 +12,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-func SignComponentVersion(cv ocm.ComponentVersionAccess, name string, privkey interface{}, optlist ...Option) (*metav1.DigestSpec, error) {
+func SignComponentVersion(cv ocm.ComponentVersionAccess, name string, optlist ...Option) (*metav1.DigestSpec, error) {
 	var opts Options
 
 	opts.Eval(
 		SignatureName(name),
-		PrivateKey(name, privkey),
 		Update(),
 		Recursive(),
 		VerifyDigests(),
@@ -37,7 +36,7 @@ func SignComponentVersion(cv ocm.ComponentVersionAccess, name string, privkey in
 	return Apply(nil, nil, cv, &opts)
 }
 
-func VerifyComponentVersion(cv ocm.ComponentVersionAccess, name string, pubkey interface{}, optlist ...Option) (*metav1.DigestSpec, error) {
+func VerifyComponentVersion(cv ocm.ComponentVersionAccess, name string, optlist ...Option) (*metav1.DigestSpec, error) {
 	var opts Options
 	if len(cv.GetDescriptor().Signatures) == 1 && name == "" {
 		name = cv.GetDescriptor().Signatures[0].Name
@@ -48,14 +47,7 @@ func VerifyComponentVersion(cv ocm.ComponentVersionAccess, name string, pubkey i
 		VerifySignature(name),
 		Recursive(),
 	)
-	if name != "" && pubkey != nil {
-		PublicKey(name, pubkey).ApplySigningOption(&opts)
-	}
 	opts.Eval(optlist...)
-
-	if opts.SignatureName() != "" && (opts.Keys == nil || opts.Keys.GetPublicKey(opts.SignatureName()) == nil) {
-		PublicKey(name, pubkey).ApplySigningOption(&opts)
-	}
 
 	if opts.Signer != nil {
 		return nil, errors.Newf("impossible signer option set for verification")

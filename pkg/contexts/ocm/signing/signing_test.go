@@ -139,7 +139,7 @@ var _ = Describe("access method", func() {
 
 			pr, buf := common.NewBufferedPrinter()
 			// key taken from signing attr
-			dig := Must(SignComponentVersion(cv, SIGNATURE, nil, SignerByName(SIGN_ALGO), Resolver(resolver), DigestMode(mode), Printer(pr)))
+			dig := Must(SignComponentVersion(cv, SIGNATURE, SignerByName(SIGN_ALGO), Resolver(resolver), DigestMode(mode), Printer(pr)))
 			Expect(closer.Close()).To(Succeed())
 			Expect(archcloser.Close()).To(Succeed())
 			Expect(dig.Value).To(StringEqualWithContext(digest))
@@ -160,7 +160,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			})
 			////////
 
-			dig = Must(VerifyComponentVersion(cv, SIGNATURE, nil, Resolver(resolver), Printer(pr)))
+			dig = Must(VerifyComponentVersion(cv, SIGNATURE, Resolver(resolver), Printer(pr)))
 			Expect(dig.Value).To(Equal(digest))
 		},
 			Entry(DIGESTMODE_TOP, DIGESTMODE_TOP),

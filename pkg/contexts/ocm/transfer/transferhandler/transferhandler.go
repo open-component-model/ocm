@@ -13,18 +13,27 @@ import (
 
 const KIND_TRANSFEROPTION = "transfer option"
 
-// TransferHandlerOptions is the general type for an option bag
-// holding options for a transfer handler.
-// Different transfer handler implementations may use differ
+// TransferHandlerOptions is the general type for a dedicated kind of option set
+// holding options for a dedicated type of transfer handler.
+// Different transfer handler implementations may use different
 // concrete option sets.
-// Therefore, every option set uses its own options type
-// The options setters/getters MUST be interfaces, which may be implemented
+// To support option sets with an overlapping set of accepted options,
+// it is not possible to use fixed structs with explicit fields
+// for every option as target for the apply methods of the option
+// objects. Therefore, every option uses its own option type interfaces.
+// The option's setters/getters MUST be interfaces, which may be implemented
 // by different option set types to enable the option implementations
 // to work with different options sets.
+//
+// For example the spiff transfer handler options include all the standard
+// handler options.
 type TransferHandlerOptions interface {
+	TransferOptions
 	NewTransferHandler() (TransferHandler, error)
 }
 
+// TransferOptions is the general interface used by TransferOption implementations
+// as target to apply themselves to.
 type TransferOptions interface{}
 
 // TransferOptionsCreator is an optional interface for a TransferOption.
@@ -37,19 +46,15 @@ type TransferOptionsCreator interface {
 	NewOptions() TransferHandlerOptions
 }
 
-// TransferOption is an option used to configure a transfer handler.
-// Different transfer handlers may use different sets of transfer options
-// by an own implementation of the TransferOptions interface enriched
-// by own supported option interfaces.
-// Options are gathered in such objects acting as option bag.
-// To enable options to be used with different such implementations
-// every option MUST have own interfaces for the concrete option getter/setter,
-// which are used by the options to apply themselves to an option bag.
-// This way different implementation of TransferOptions can share options
-// configurable by the same option functions.
-//
-// For example the spiff transfer handler options include all the standard
-// handler options.
+// TransferOption is an option used to configure the transfer process.
+// This interface is used by transfer operations for the optional list
+// of given options.
+// Every option decides on its own, whether it is applicable to the given target,
+// which is given by the generic TransferOptions interface.
+// There are two kinds of options:
+//   - handler specific options additionally implement the TransferOptionsCreator
+//     interface.
+//   - operation related option do not implement this interface.
 type TransferOption interface {
 	ApplyTransferOption(TransferOptions) error
 }
@@ -72,7 +77,9 @@ func (o SpecializedOptionsCreator[P, T]) NewOptions() TransferHandlerOptions {
 
 // TransferHandler controls the transfer of component versions.
 // It can be used to control the value transport of sources and resources
-// on artifact level and the way how nested component version are transported.
+// on artifact level (by providing specific handling for dedicated artifact attributes),
+// the concrete re/source transfer step, and the way how
+// nested component version are transported.
 // There are two implementations delivered as part of the OCM library:
 //   - package transferhandler.standard: able to select recursive transfer
 //     general value artifact transport.

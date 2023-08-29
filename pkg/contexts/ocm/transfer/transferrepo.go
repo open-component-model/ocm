@@ -8,12 +8,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func TransferComponents(printer common.Printer, closure TransportClosure, repo ocm.Repository, prefix string, all bool, tgt ocm.Repository, handler transferhandler.TransferHandler) error {
+func TransferComponents(printer common.Printer, closure TransportClosure, repo ocm.Repository, prefix string, all bool, tgt ocm.Repository, handler TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
@@ -36,7 +35,7 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 	return list.Result()
 }
 
-func transferVersions(printer common.Printer, closure TransportClosure, list *errors.ErrorList, handler transferhandler.TransferHandler, repo ocm.Repository, c string, tgt ocm.Repository) {
+func transferVersions(printer common.Printer, closure TransportClosure, list *errors.ErrorList, handler TransferHandler, repo ocm.Repository, c string, tgt ocm.Repository) {
 	comp, err := repo.LookupComponent(c)
 	if list.Addf(printer, err, "component %s", c) == nil {
 		defer comp.Close()

@@ -10,8 +10,28 @@ import (
 )
 
 type (
-	TransferOption  = transferhandler.TransferOption
+	// TransferOption if the interface for options given to transfer functions.
+	// The can influence the behaviour of the transfer process by configuring
+	// appropriate transfer handlers.
+	TransferOption = transferhandler.TransferOption
+
+	// TransferOptions is the target interface for consumers of
+	// a TransferOption.
 	TransferOptions = transferhandler.TransferOptions
+
+	// TransferHandler controls the transfer of component versions.
+	// It can be used to control the value transport of sources and resources
+	// on artifact level (by providing specific handling for dedicated artifact attributes),
+	// the concrete re/source transfer step, and the way how
+	// nested component version are transported.
+	// There are two implementations delivered as part of the OCM library:
+	//   - package transferhandler.standard: able to select recursive transfer
+	//     general value artifact transport.
+	//   - package transferhandler.spiff: controls transfer using a spiff script.
+	// Custom implemetations can be used to gain fine-grained control
+	// over the transfer process, whose general flow is handled by
+	// a uniform Transfer function.
+	TransferHandler = transferhandler.TransferHandler
 )
 
 // Local options do not relate to the transfer handler, but directly to the
