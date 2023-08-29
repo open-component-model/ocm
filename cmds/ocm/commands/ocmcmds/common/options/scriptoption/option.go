@@ -11,6 +11,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -25,13 +27,17 @@ func New() *Option {
 }
 
 type Option struct {
+	spiff.TransferOptionsCreator
 	ScriptFile string
 	Script     string
 	ScriptData []byte
 	FileSystem vfs.FileSystem
 }
 
-var _ options.OptionWithCLIContextCompleter = (*Option)(nil)
+var (
+	_ options.OptionWithCLIContextCompleter = (*Option)(nil)
+	_ transferhandler.TransferOption        = (*Option)(nil)
+)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.ScriptFile, "scriptFile", "s", "", "filename of transfer handler script")
@@ -97,4 +103,14 @@ If no script option is given and the cli config defines a script <code>default</
 this one is used.
 `
 	return s
+}
+
+func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
+	var err error
+	if o.ScriptData != nil {
+		err = spiff.Script(o.ScriptData).ApplyTransferOption(opts)
+	} else if o.ScriptFile != "" {
+		err = spiff.ScriptByFile(o.ScriptFile, o.FileSystem).ApplyTransferOption(opts)
+	}
+	return err
 }

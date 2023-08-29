@@ -26,6 +26,7 @@ func From(o options.OptionSetProvider) *Option {
 }
 
 type Option struct {
+	standard.TransferOptionsCreator
 	flag *pflag.Flag
 
 	ElementName      string
@@ -35,6 +36,8 @@ type Option struct {
 	AdditionalFields []string
 	FieldEnricher    func(interface{}) []string
 }
+
+var _ transferhandler.TransferOption = (*Option)(nil)
 
 func New(elemname string, settings ...interface{}) *Option {
 	o := &Option{ElementName: elemname, AddReferencePath: options.Always()}

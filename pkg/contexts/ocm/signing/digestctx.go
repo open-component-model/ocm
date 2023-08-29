@@ -172,7 +172,7 @@ func (dc *DigestContext) ValidFor(ctx *DigestContext) bool {
 	return true
 }
 
-func (dc *DigestContext) determineSignatureInfo(printer common.Printer, state WalkingState, opts *Options) (*Options, error) {
+func (dc *DigestContext) determineSignatureInfo(state WalkingState, opts *Options) (*Options, error) {
 	if opts.SignatureName() != "" {
 		// determine digester type
 		var found bool
@@ -209,7 +209,7 @@ func (dc *DigestContext) determineSignatureInfo(printer common.Printer, state Wa
 			if dc.DigestType == st {
 				signatures = append(signatures, sig.Name)
 			} else {
-				printer.Printf("Warning: digest type %s for signature %q in %s does not match (signature ignored)\n", dc.DigestType.String(), sig.Name, state.History)
+				opts.Printer.Printf("Warning: digest type %s for signature %q in %s does not match (signature ignored)\n", dc.DigestType.String(), sig.Name, state.History)
 			}
 		} else {
 			if opts.SignatureConfigured(sig.Name) {

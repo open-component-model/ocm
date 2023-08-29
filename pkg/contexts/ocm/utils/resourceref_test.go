@@ -5,6 +5,8 @@
 package utils_test
 
 import (
+	"io"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/env"
@@ -34,12 +36,12 @@ const SIGNATURE = "test"
 const SIGN_ALGO = rsa.Algorithm
 
 func CheckResourceRef(cv ocm.ComponentVersionAccess, name string, path ...metav1.Identity) {
-	ref := metav1.NewNestedResourceRef(metav1.NewIdentity(name), path)
-	res, eff, err := utils.ResolveResourceReference(cv, ref, nil)
-	ExpectWithOffset(1, err).To(Succeed())
-	defer Close(eff)
-	m := Must(res.AccessMethod())
-	data := Must(m.Get())
+	data := Must(utils.GetResourceDataForRef(cv, metav1.NewNestedResourceRef(metav1.NewIdentity(name), path)))
+	ExpectWithOffset(1, string(data)).To(Equal(name))
+
+	reader := Must(utils.GetResourceReaderForRef(cv, metav1.NewNestedResourceRef(metav1.NewIdentity(name), path)))
+	defer Close(reader)
+	data = Must(io.ReadAll(reader))
 	ExpectWithOffset(1, string(data)).To(Equal(name))
 }
 

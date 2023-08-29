@@ -11,7 +11,6 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
@@ -31,6 +30,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/bootstrap"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/clean"

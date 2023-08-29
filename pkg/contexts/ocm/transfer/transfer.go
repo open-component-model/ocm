@@ -7,8 +7,6 @@ package transfer
 import (
 	"fmt"
 
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/config"
-
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -16,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -26,7 +23,7 @@ type WalkingState = common.WalkingState[*struct{}, interface{}]
 
 type TransportClosure = common.NameVersionInfo[*struct{}]
 
-func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
@@ -34,7 +31,7 @@ func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcp
 	return transferVersion(common.AssurePrinter(printer), Logger(src), state, src, tgt, handler)
 }
 
-func transferVersion(printer common.Printer, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func transferVersion(printer common.Printer, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	nv := common.VersionedElementKey(src)
 	log = log.WithValues("history", state.History.String(), "version", nv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
@@ -116,7 +113,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	return list.Add(comp.AddVersion(t)).Result()
 }
 
-func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) (rerr error) {
+func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
 	if handler == nil {
 		handler = standard.NewDefaultHandler(nil)
 	}
