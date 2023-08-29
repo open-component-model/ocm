@@ -6,6 +6,9 @@ package ocireg
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"path"
 	"strings"
 
@@ -141,6 +144,21 @@ func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {
 				return "", "", nil
 			},
 			DefaultScheme: r.info.Scheme,
+			DefaultTLS: &tls.Config{
+				RootCAs: func() *x509.CertPool {
+					rootCAs, _ := x509.SystemCertPool()
+					if rootCAs == nil {
+						rootCAs = x509.NewCertPool()
+					}
+					if creds != nil {
+						c := creds.GetProperty(identity.ATTR_CERTIFICATE_AUTHORITY)
+						if c != "" {
+							rootCAs.AppendCertsFromPEM([]byte(c))
+						}
+					}
+					return rootCAs
+				}(),
+			},
 		})),
 	}
 
