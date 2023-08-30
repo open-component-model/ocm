@@ -62,15 +62,15 @@ It the option <code>--overwrite</code> is given, component version in the
 target repository will be overwritten, if they already exist.
 
 
-It the option <code>--copy-resources</code> is given, all referential 
+It the option <code>--copy-resources</code> is given, all referential
 resources will potentially be localized, mapped to component version local
-resources in the target repository. It the option <code>--copy-local-resources</code> 
+resources in the target repository. It the option <code>--copy-local-resources</code>
 is given, instead, only resources with the relation <code>local</code> will be
 transferred. This behaviour can be further influenced by specifying a transfer
 script with the <code>script</code> option family.
 
 
-It the option <code>--copy-sources</code> is given, all referential 
+It the option <code>--copy-sources</code> is given, all referential
 sources will potentially be localized, mapped to component version local
 resources in the target repository.
 This behaviour can be further influenced by specifying a transfer script
@@ -82,7 +82,7 @@ is omitted completely for the given resource types.
 
 
 It the option <code>--stop-on-existing</code> is given together with the <code>--recursive</code>
-option, the recursion is stopped for component versions already existing in the 
+option, the recursion is stopped for component versions already existing in the
 target repository. This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.
 
@@ -97,11 +97,11 @@ are configured for the operation. It has the following format
 
 The uploader name may be a path expression with the following possibilities:
   - <code>plugin</code>: [downloaders provided by plugins]
-    
+
     sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
 
   - <code>ocm/ociArtifacts</code>: downloading OCI artifacts
-    
+
     The <code>ociArtifacts</code> downloader is able to to download OCI artifacts
     as artifact archive according to the OCI distribution spec.
     The following artifact media types are supported:
@@ -113,14 +113,14 @@ The uploader name may be a path expression with the following possibilities:
       - <code>application/vnd.docker.distribution.manifest.v2+tar+gzip</code>
       - <code>application/vnd.docker.distribution.manifest.list.v2+tar</code>
       - <code>application/vnd.docker.distribution.manifest.list.v2+tar+gzip</code>
-    
+
     By default, it is registered for these mimetypes.
-    
+
     It accepts a config with the following fields:
       - <code>namespacePrefix</code>: a namespace prefix used for the uploaded artifacts
       - <code>ociRef</code>: an OCI repository reference
       - <code>repository</code>: an OCI repository specification for the target OCI registry
-    
+
     Alternatively, a single string value can be given representing an OCI repository
     reference.
 
@@ -132,14 +132,14 @@ upload handlers.
 
 It is possible to use a dedicated transfer script based on spiff.
 The option <code>--scriptFile</code> can be used to specify this script
-by a file name. With <code>--script</code> it can be taken from the 
+by a file name. With <code>--script</code> it can be taken from the
 CLI config using an entry of the following format:
 
 <pre>
 type: scripts.ocm.config.ocm.software
 scripts:
-  &lt;name>: 
-    path: &lt;filepath> 
+  &lt;name>:
+    path: &lt;filepath>
     script:
       &lt;scriptdata>
 </pre>

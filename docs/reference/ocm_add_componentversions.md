@@ -46,7 +46,7 @@ already exists.
 
 If option <code>--complete</code> is given all component versions referenced by
 the added one, will be added, also. Therefore, the <code>--lookup</code> is required
-to specify an OCM repository to lookup the missing component versions. If 
+to specify an OCM repository to lookup the missing component versions. If
 additionally the <code>-V</code> is given, the resources of those additional
 components will be added by value.
 
@@ -85,7 +85,7 @@ All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
 Additionally settings can be specified by a yaml file using the <code>--settings <file></code>
 option. With the option <code>--addenv</code> environment variables are added to the binding.
-Values are overwritten in the order environment, settings file, command line settings. 
+Values are overwritten in the order environment, settings file, command line settings.
 
 Note: Variable names are case-sensitive.
 
@@ -101,7 +101,7 @@ There are several templaters that can be selected by the <code>--templater</code
     key:
       subkey: "abc {{.MY_VAL}}"
   </pre>
-  
+
 - <code>none</code> do not do any substitution.
 
 - <code>spiff</code> [spiff templating](https://github.com/mandelsoft/spiff).
@@ -111,7 +111,7 @@ There are several templaters that can be selected by the <code>--templater</code
     key:
       subkey: "abc (( values.MY_VAL ))"
   </pre>
-  
+
 - <code>subst</code> simple value substitution with the <code>drone/envsubst</code> templater.
 
   It supports string values, only. Complex settings will be json encoded.
@@ -119,7 +119,7 @@ There are several templaters that can be selected by the <code>--templater</code
     key:
       subkey: "abc ${MY_VAL}"
   </pre>
-  
+
 
 \
 If a component lookup for building a reference closure is required
@@ -132,9 +132,9 @@ this option must always be specified to be able to follow component
 references.
 
 
-It the option <code>--copy-resources</code> is given, all referential 
+It the option <code>--copy-resources</code> is given, all referential
 resources will potentially be localized, mapped to component version local
-resources in the target repository. It the option <code>--copy-local-resources</code> 
+resources in the target repository. It the option <code>--copy-local-resources</code>
 is given, instead, only resources with the relation <code>local</code> will be
 transferred. This behaviour can be further influenced by specifying a transfer
 script with the <code>script</code> option family.

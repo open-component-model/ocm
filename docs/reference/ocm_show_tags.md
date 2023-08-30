@@ -29,7 +29,7 @@ relative to the specified registry using the syntax
     <pre>&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</pre>
 </center>
 
-If no <code>--repo</code> option is specified the given names are interpreted 
+If no <code>--repo</code> option is specified the given names are interpreted
 as extended OCI artifact references.
 
 <center>
@@ -45,7 +45,7 @@ The <code>--repo</code> option takes a repository/OCI registry specification:
 For the *Common Transport Format* the types <code>directory</code>,
 <code>tar</code> or <code>tgz</code> are possible.
 
-Using the JSON variant any repository types supported by the 
+Using the JSON variant any repository types supported by the
 linked library can be used:
   - <code>ArtifactSet</code>: v1
   - <code>CommonTransportFormat</code>: v1

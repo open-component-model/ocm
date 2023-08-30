@@ -16,7 +16,7 @@ ocm [<options>] <sub command> ...
   -h, --help                    help for ocm
       --logconfig string        log config
   -L, --logfile string          set log file
-      --logkeys stringArray     log tags/realms(.) to be enabled ([.]name{,[.]name}[=level])
+      --logkeys stringArray     log tags/realms(with leading /) to be enabled ([/]name{,[/]name}[=level])
   -l, --loglevel string         set log level
   -v, --verbose                 deprecated: enable logrus verbose logging
       --version                 show version
@@ -120,7 +120,7 @@ The value can be a simple type or a JSON/YAML string for complex values
   artifact is uploaded as OCI artifact, the repository path part is shortened,
   either by hashing all but the last repository name part or by executing
   some prefix based name mappings.
-  
+
   If a boolean is given the short hash or none mode is enabled.
   The YAML flavor uses the following fields:
   - *<code>mode</code>* *string*: <code>hash</code>, <code>shortHash</code>, <code>prefixMapping</code>
@@ -129,9 +129,9 @@ The value can be a simple type or a JSON/YAML string for complex values
   - *<code>prefix</code>*: *string* repository prefix to use (replaces potential sub path of OCM repo).
     or <code>none</code>.
   - *<code>prefixMapping</code>*: *map[string]string* repository path prefix mapping.
-  
+
   Notes:
-  
+
   - The mapping only occurs in transfer commands and only when transferring to OCI registries (e.g.
     when transferring to a CTF archive this option will be ignored).
   - The mapping only happens for local resources. When external image references are transferred (with
@@ -141,13 +141,13 @@ The value can be a simple type or a JSON/YAML string for complex values
   - The artifact name of the component-descriptor is not mapped.
   - If the mapping is provided on the command line it must be JSON format and needs to be properly
     escaped (see example below).
-  
+
   Example:
-  
+
   Assume a component named <code>github.com/my_org/myexamplewithalongname</code> and a chart name
   <code>echo</code> in the <code>Charts.yaml</code> of the chart archive. The following input to a
   <code>resource.yaml</code> creates a component version:
-  
+
   <pre>
   name: mychart
   type: helmChart
@@ -163,23 +163,23 @@ The value can be a simple type or a JSON/YAML string for complex values
     repository: ocm/ocm.software/ocmcli/ocmcli-image
     path: ghcr.io/acme/ocm/ocm.software/ocmcli/ocmcli-image:0.1.0
   </pre>
-  
+
   The following command:
-  
+
   <pre>
   ocm "-X mapocirepo={\"mode\":\"mapping\",\"prefixMappings\":{\"acme/github.com/my_org/myexamplewithalongname/ocm/ocm.software/ocmcli\":\"acme/cli\", \"acme/github.com/my_org/myexamplewithalongnameabc123\":\"acme/mychart\"}}" transfer ctf -f --copy-resources ./ctf ghcr.io/acme
   </pre>
-  
+
   will result in the following artifacts in <code>ghcr.io/my_org</code>:
-  
+
   <pre>
   mychart/echo
   cli/ocmcli-image
   </pre>
-  
+
   Note that the host name part of the transfer target <code>ghcr.io/acme</code> is excluded from the
   prefix but the path <code>acme</code> is considered.
-  
+
   The same using a config file <code>.ocmconfig</code>:
   <pre>
   type: generic.config.ocm.software/v1
@@ -194,7 +194,7 @@ The value can be a simple type or a JSON/YAML string for complex values
   	    acme/github.com/my\_org/myexamplewithalongname/ocm/ocm.software/ocmcli: acme/cli
   		acme/github.com/my\_org/myexamplewithalongnameabc123: acme/mychart
   </pre>
-  
+
   <pre>
   ocm transfer ca -f --copy-resources ./ca ghcr.io/acme
   </pre>
@@ -211,7 +211,7 @@ The value can be a simple type or a JSON/YAML string for complex values
 
   Public and private Key settings given as JSON document with the following
   format:
-  
+
   <pre>
   {
     "publicKeys"": [
@@ -225,7 +225,7 @@ The value can be a simple type or a JSON/YAML string for complex values
        }
     ]
   </pre>
-  
+
   One of following data fields are possible:
   - <code>data</code>:       base64 encoded binary data
   - <code>stringdata</code>: plain text data
