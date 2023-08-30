@@ -270,9 +270,11 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	vers := m.Version()
 	if vers == "" {
 		meth := descriptor.AccessMethodDescriptor{
-			Name:                   m.Name(),
-			Description:            m.Description(),
-			Format:                 m.Format(),
+			ValueSetDescriptor: descriptor.ValueSetDescriptor{
+				Name:        m.Name(),
+				Description: m.Description(),
+				Format:      m.Format(),
+			},
 			SupportContentIdentity: idp,
 		}
 		p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
@@ -281,12 +283,14 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		vers = "v1"
 	}
 	meth := descriptor.AccessMethodDescriptor{
-		Name:                   m.Name(),
-		Version:                vers,
-		Description:            m.Description(),
-		Format:                 m.Format(),
+		ValueSetDescriptor: descriptor.ValueSetDescriptor{
+			Name:        m.Name(),
+			Version:     vers,
+			Description: m.Description(),
+			Format:      m.Format(),
+			CLIOptions:  optlist,
+		},
 		SupportContentIdentity: idp,
-		CLIOptions:             optlist,
 	}
 	p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
 	p.accessScheme.RegisterByDecoder(m.Name()+"/"+vers, m)
