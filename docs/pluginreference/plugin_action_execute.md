@@ -19,8 +19,8 @@ plugin action execute <spec> [<options>]
 
 This command executes an action.
 
-This action has to provide an execution result as JSON string on *stdout*. It has the 
-following fields: 
+This action has to provide an execution result as JSON string on *stdout*. It has the
+following fields:
 
 - **<code>name</code>** *string*
 
