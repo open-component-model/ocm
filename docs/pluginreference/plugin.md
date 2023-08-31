@@ -21,11 +21,11 @@ mechanism to add further variants, like repository types, backend technologies,
 access methods, blob downloaders and uploaders.
 
 This requires Go coding, which is feasible for additional standard
-implementations. Nevertheless, it is useful to provide a more dynamic 
+implementations. Nevertheless, it is useful to provide a more dynamic
 way to enrich the functionality of the library and the OCM command line
 tool.
 
-This can be achieved by the experimental *plugin* concept. It allows 
+This can be achieved by the experimental *plugin* concept. It allows
 to implement functionality in separate executables (the plugins) and
 register them for any main program based on this library.
 
@@ -48,7 +48,7 @@ Errors have to be reported on *stderr* as JSON document with the fields:
   The error message provided by a command.
 
 Any plugin, regardless of its functionality has to provide an [plugin info](plugin_info.md),
-which prints JSON document containing a plugin descriptor that describes the 
+which prints JSON document containing a plugin descriptor that describes the
 apabilities of the plugin.
 
 

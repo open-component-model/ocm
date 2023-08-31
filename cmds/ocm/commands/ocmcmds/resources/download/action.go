@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/common"
