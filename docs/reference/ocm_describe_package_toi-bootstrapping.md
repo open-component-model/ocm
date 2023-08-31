@@ -183,7 +183,7 @@ This field has either the fields of a *ResourceReference* to refer to the
 content of an OCM resource or the field:
 
 - **<code>content</code>** *string|[]byte|YAML*
-  
+
   Either a resource reference or the field <code>content</code> must be given.
   The content field may contain a string or an inline YAML document.
   For larger content the resource reference form should be preferred.
@@ -239,7 +239,7 @@ handle any helm chart, not just a dedicated helm deployment.
 Because of this, there is a clear separation between an installation specific
 configuration, which is provided by the user calling the TOI commands, and
 the parameterization of the executor, which is completely specified in the
-package. 
+package.
 
 The task of the package is to represent a dedicated deployment source. As such
 it has to provide information to tell the executor what to install, while
