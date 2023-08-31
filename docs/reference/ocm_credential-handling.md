@@ -25,58 +25,58 @@ credential consumer, which checks for the expected credential properties.
 
 The following credential consumer types are used:
   - <code>Buildcredentials.ocm.software</code>: Gardener config credential matcher
-    
+
     It matches the <code>Buildcredentials.ocm.software</code> consumer type and additionally acts like
     the <code>hostpath</code> type.
-    
+
     Credential consumers of the consumer type Buildcredentials.ocm.software evaluate the following credential properties:
-    
+
       - <code>key</code>: secret key use to access the credential server
-    
+
 
   - <code>Github</code>: GitHub credential matcher
-    
+
     This matcher is a hostpath matcher.
-    
+
     Credential consumers of the consumer type Github evaluate the following credential properties:
-    
+
       - <code>token</code>: GitHub personal access token
-    
+
 
   - <code>HelmChartRepository</code>: Helm chart repository
-    
-    It matches the <code>HelmChartRepository</code> consumer type and additionally acts like 
+
+    It matches the <code>HelmChartRepository</code> consumer type and additionally acts like
     the <code>hostpath</code> type.
-    
+
     Credential consumers of the consumer type HelmChartRepository evaluate the following credential properties:
-    
+
     - **<code>username</code>**: basic auth user name.
     - **<code>password</code>**: basic auth password.
     - **<code>certificate</code>**: TLS client certificate.
     - **<code>privateKey</code>**: TLS private key.
 
   - <code>OCIRegistry</code>: OCI registry credential matcher
-    
-    It matches the <code>OCIRegistry</code> consumer type and additionally acts like 
+
+    It matches the <code>OCIRegistry</code> consumer type and additionally acts like
     the <code>hostpath</code> type.
-    
+
     Credential consumers of the consumer type OCIRegistry evaluate the following credential properties:
-    
+
       - <code>username</code>: the basic auth user name
       - <code>password</code>: the basic auth password
       - <code>identityToken</code>: the bearer token used for non-basic auth authorization
-    
+
 
   - <code>S3</code>: S3 credential matcher
-    
+
     This matcher is a hostpath matcher.
-    
+
     Credential consumers of the consumer type S3 evaluate the following credential properties:
-    
+
       - <code>awsAccessKeyID</code>: AWS access key id
       - <code>awsSecretAccessKey</code>: AWS secret for access key id
       - <code>token</code>: AWS access token (alternatively)
-    
+
 
 \
 Those consumer types provide their own matchers, which are often based
@@ -84,15 +84,15 @@ on some standard generic matches. Those generic matchers and their
 behaviours are described in the following list:
   - <code>exact</code>: exact match of given pattern set
   - <code>hostpath</code>: Host and path based credential matcher
-    
+
     This matcher works on the following properties:
-    
-    - *<code>type</code>* (required if set in pattern): the identity type 
+
+    - *<code>type</code>* (required if set in pattern): the identity type
     - *<code>hostname</code>* (required if set in pattern): the hostname of a server
     - *<code>port</code>* (optional): the port of a server
-    - *<code>pathprefix</code>* (optional): a path prefix to match. The 
+    - *<code>pathprefix</code>* (optional): a path prefix to match. The
       element with the most matching path components is selected (separator is <code>/</code>).
-    
+
 
   - <code>partial</code>: complete match of given pattern ignoring additional attributes
 

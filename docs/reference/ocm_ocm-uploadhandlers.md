@@ -5,7 +5,7 @@
 
 An upload handler is used to process resources using the access method
 <code>localBlob</code> transferred into an OCM
-repository. They may decide to store the content in some other 
+repository. They may decide to store the content in some other
 storage repository. This may be an additional storage location or it
 may replace the storage of the resource as local blob.
 If an additional storage location is chosen, the local access method
@@ -21,7 +21,7 @@ meaningful OCI repository name based on the repository prefix
 of the OCM repository (parallel to <code>component-descriptors</code> prefix
 used to store the component descriptor artifacts).
 
-### Handler Registration 
+### Handler Registration
 
 Programmatically any kind of handlers can be registered for various
 upload conditions. But this feature is available as command-line option, also.
@@ -37,11 +37,11 @@ exact behaviour of the handler for selected artifacts.
 
 The following handler names are possible:
   - <code>plugin</code>: [downloaders provided by plugins]
-    
+
     sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
 
   - <code>ocm/ociArtifacts</code>: downloading OCI artifacts
-    
+
     The <code>ociArtifacts</code> downloader is able to to download OCI artifacts
     as artifact archive according to the OCI distribution spec.
     The following artifact media types are supported:
@@ -53,14 +53,14 @@ The following handler names are possible:
       - <code>application/vnd.docker.distribution.manifest.v2+tar+gzip</code>
       - <code>application/vnd.docker.distribution.manifest.list.v2+tar</code>
       - <code>application/vnd.docker.distribution.manifest.list.v2+tar+gzip</code>
-    
+
     By default, it is registered for these mimetypes.
-    
+
     It accepts a config with the following fields:
       - <code>namespacePrefix</code>: a namespace prefix used for the uploaded artifacts
       - <code>ociRef</code>: an OCI repository reference
       - <code>repository</code>: an OCI repository specification for the target OCI registry
-    
+
     Alternatively, a single string value can be given representing an OCI repository
     reference.
 

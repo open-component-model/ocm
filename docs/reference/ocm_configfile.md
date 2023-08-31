@@ -18,7 +18,7 @@ The following configuration types are supported:
 - <code>attributes.config.ocm.software</code>
   The config type <code>attributes.config.ocm.software</code> can be used to define a list
   of arbitrary attribute specifications:
-  
+
   <pre>
       type: attributes.config.ocm.software
       attributes:
@@ -28,7 +28,7 @@ The following configuration types are supported:
 - <code>credentials.config.ocm.software</code>
   The config type <code>credentials.config.ocm.software</code> can be used to define a list
   of arbitrary configuration specifications:
-  
+
   <pre>
       type: credentials.config.ocm.software
       consumers:
@@ -44,7 +44,7 @@ The following configuration types are supported:
             - &lt;credential specification>
             ... credential chain
       aliases:
-         &lt;name>: 
+         &lt;name>:
            repository: &lt;repository specification>
            credentials:
             - &lt;credential specification>
@@ -53,7 +53,7 @@ The following configuration types are supported:
 - <code>downloader.ocm.config.ocm.software</code>
   The config type <code>downloader.ocm.config.ocm.software</code> can be used to define a list
   of pre-configured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):
-  
+
   <pre>
       type: downloader.ocm.config.ocm.software
       descrition: "my standard download handler configuration"
@@ -67,7 +67,7 @@ The following configuration types are supported:
 - <code>generic.config.ocm.software</code>
   The config type <code>generic.config.ocm.software</code> can be used to define a list
   of arbitrary configuration specifications and named configuration sets:
-  
+
   <pre>
       type: generic.config.ocm.software
       configurations:
@@ -82,7 +82,7 @@ The following configuration types are supported:
                 ...
               ...
   </pre>
-  
+
   Configurations are directly applied. Configuration sets are
   just stored in the configuration context and can be applied
   on-demand. On the CLI, this can be done using the main command option
@@ -93,7 +93,7 @@ The following configuration types are supported:
   - <code>path</code>: path of file with key data
   - <code>data</code>: base64 encoded binary data
   - <code>stringdata</code>: data a string parsed by key handler
-  
+
   <pre>
       type: keys.config.ocm.software
       privateKeys:
@@ -108,7 +108,7 @@ The following configuration types are supported:
 - <code>logging.config.ocm.software</code>
   The config type <code>logging.config.ocm.software</code> can be used to configure the logging
   aspect of a dedicated context type:
-  
+
   <pre>
       type: logging.config.ocm.software
       contextType: attributes.context.ocm.software
@@ -117,16 +117,16 @@ The following configuration types are supported:
         rules:
           - ...
   </pre>
-  
+
   The context type attributes.context.ocm.software is the root context of a
   context hierarchy.
-  
+
   If no context type is specified, the config will be applies to any target
   acting as logging context provider, which is not a non-root context.
 - <code>memory.credentials.config.ocm.software</code>
   The config type <code>memory.credentials.config.ocm.software</code> can be used to define a list
   of arbitrary credentials stored in a memory based credentials repository:
-  
+
   <pre>
       type: memory.credentials.config.ocm.software
       repoName: default
@@ -145,7 +145,7 @@ The following configuration types are supported:
 - <code>oci.config.ocm.software</code>
   The config type <code>oci.config.ocm.software</code> can be used to define
   OCI registry aliases:
-  
+
   <pre>
       type: oci.config.ocm.software
       aliases:
@@ -153,10 +153,10 @@ The following configuration types are supported:
          ...
   </pre>
 - <code>ocm.cmd.config.ocm.software</code>
-  The config type <code>ocm.cmd.config.ocm.software</code> can be used to 
-  configure predefined aliases for dedicated OCM repositories and 
+  The config type <code>ocm.cmd.config.ocm.software</code> can be used to
+  configure predefined aliases for dedicated OCM repositories and
   OCI registries.
-  
+
   <pre>
      type: ocm.cmd.config.ocm.software
      ocmRepositories:
@@ -169,11 +169,11 @@ The following configuration types are supported:
 - <code>ocm.config.ocm.software</code>
   The config type <code>ocm.config.ocm.software</code> can be used to set some
   configurations for an OCM context;
-  
+
   <pre>
       type: ocm.config.ocm.software
       aliases:
-         myrepo: 
+         myrepo:
             type: &lt;any repository type>
             &lt;specification attributes>
             ...
@@ -185,10 +185,10 @@ The following configuration types are supported:
           prefix: ghcr.io/open-component-model/ocm
           priority: 10
   </pre>
-  
+
   With aliases repository alias names can be mapped to a repository specification.
   The alias name can be used in a string notation for an OCM repository.
-  
+
   Resolvers define a list of OCM repository specifications to be used to resolve
   dedicated component versions. These settings are used to compose a standard
   component version resolver provided for an OCM context. Optionally, a component
@@ -196,21 +196,21 @@ The following configuration types are supported:
   components with the given name prefix (always complete name segments).
   An optional priority can be used to influence the lookup order. Larger value
   means higher priority (default 10).
-  
+
   All matching entries are tried to lookup a component version in the following
   order:
   - highest priority first
   - longest matching sequence of component name segments first.
-  
+
   If resolvers are defined, it is possible to use component version names on the
   command line without a repository. The names are resolved with the specified
   resolution rule.
   They are also used as default lookup repositories to lookup component references
   for recursive operations on component versions (<code>--lookup</code> option).
 - <code>plugin.config.ocm.software</code>
-  The config type <code>plugin.config.ocm.software</code> can be used to configure a 
+  The config type <code>plugin.config.ocm.software</code> can be used to configure a
   plugin.
-  
+
   <pre>
       type: plugin.config.ocm.software
       plugin: &lt;plugin name>
@@ -219,7 +219,7 @@ The following configuration types are supported:
   </pre>
 - <code>scripts.ocm.config.ocm.software</code>
   The config type <code>scripts.ocm.config.ocm.software</code> can be used to define transfer scripts:
-  
+
   <pre>
       type: scripts.ocm.config.ocm.software
       scripts:
@@ -230,7 +230,7 @@ The following configuration types are supported:
   </pre>
 - <code>transport.ocm.config.ocm.software</code>
   The config type <code>transport.ocm.config.ocm.software</code> can be used to define transfer scripts:
-  
+
   <pre>
       type: transport.ocm.config.ocm.software
       recursive: true
@@ -246,7 +246,7 @@ The following configuration types are supported:
 - <code>uploader.ocm.config.ocm.software</code>
   The config type <code>uploader.ocm.config.ocm.software</code> can be used to define a list
   of pre-configured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):
-  
+
   <pre>
       type: uploader.ocm.config.ocm.software
       descrition: "my standard download handler configuration"

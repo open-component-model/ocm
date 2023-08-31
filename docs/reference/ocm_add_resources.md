@@ -113,7 +113,7 @@ it is possible to add extra identity attributes. Explicitly specified options
 override values specified by the <code>--resource</code> option.
 (Note: Go templates are not supported for YAML-based option values. Besides
 this restriction, the finally composed element description is still processd
-by the selected templater.) 
+by the selected templater.)
 
 The resource type can be specified with the option <code>--type</code>. Therefore, the
 minimal required meta data for elements can be completely specified by dedicated
@@ -129,7 +129,7 @@ All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
 Additionally settings can be specified by a yaml file using the <code>--settings <file></code>
 option. With the option <code>--addenv</code> environment variables are added to the binding.
-Values are overwritten in the order environment, settings file, command line settings. 
+Values are overwritten in the order environment, settings file, command line settings.
 
 Note: Variable names are case-sensitive.
 
@@ -145,7 +145,7 @@ There are several templaters that can be selected by the <code>--templater</code
     key:
       subkey: "abc {{.MY_VAL}}"
   </pre>
-  
+
 - <code>none</code> do not do any substitution.
 
 - <code>spiff</code> [spiff templating](https://github.com/mandelsoft/spiff).
@@ -155,7 +155,7 @@ There are several templaters that can be selected by the <code>--templater</code
     key:
       subkey: "abc (( values.MY_VAL ))"
   </pre>
-  
+
 - <code>subst</code> simple value substitution with the <code>drone/envsubst</code> templater.
 
   It supports string values, only. Complex settings will be json encoded.
@@ -163,7 +163,7 @@ There are several templaters that can be selected by the <code>--templater</code
     key:
       subkey: "abc ${MY_VAL}"
   </pre>
-  
+
 
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
@@ -173,20 +173,20 @@ with the field <code>type</code> in the <code>input</code> field:
   This blob type is used to provide base64 encoded binary content. The
   specification supports the following fields:
   - **<code>data</code>** *[]byte*
-  
+
     The binary data to provide.
-  
+
   - **<code>mediaType</code>** *string*
-  
+
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is application/octet-stream and
     application/gzip if compression is enabled.
-  
+
   - **<code>compress</code>** *bool*
-  
+
     This OPTIONAL property describes whether the content should be stored
     compressed or not.
-  
+
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputData</code>, <code>--mediaType</code>
 
 - Input type <code>dir</code>
@@ -197,115 +197,115 @@ with the field <code>type</code> in the <code>input</code> field:
   <code>preserveDir</code> is set to true the directory itself is added to the tar.
   If the field <code>followSymLinks</code> is set to <code>true</code>, symbolic
   links are not packed but their targets files or folders.
-  With the list fields <code>includeFiles</code> and <code>excludeFiles</code> it is 
+  With the list fields <code>includeFiles</code> and <code>excludeFiles</code> it is
   possible to specify which files should be included or excluded. The values are
   regular expression used to match relative file paths. If no includes are specified
   all file not explicitly excluded are used.
-  
-  This blob type specification supports the following fields: 
+
+  This blob type specification supports the following fields:
   - **<code>path</code>** *string*
-  
+
     This REQUIRED property describes the file path to directory relative to the
     resource file location.
-  
+
   - **<code>mediaType</code>** *string*
-  
+
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is application/x-tar and
     application/gzip if compression is enabled.
-  
+
   - **<code>compress</code>** *bool*
-  
+
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
-  
+
   - **<code>preserveDir</code>** *bool*
-  
+
     This OPTIONAL property describes whether the specified directory with its
     basename should be included as top level folder.
-  
+
   - **<code>followSymlinks</code>** *bool*
-  
+
     This OPTIONAL property describes whether symbolic links should be followed or
     included as links.
-  
+
   - **<code>excludeFiles</code>** *list of regex*
-  
-    This OPTIONAL property describes regular expressions used to match files 
+
+    This OPTIONAL property describes regular expressions used to match files
     that should NOT be included in the tar file. It takes precedence over
     the include match.
-  
+
   - **<code>includeFiles</code>** *list of regex*
-  
-    This OPTIONAL property describes regular expressions used to match files 
+
+    This OPTIONAL property describes regular expressions used to match files
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
-  
+
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputExcludes</code>, <code>--inputFollowSymlinks</code>, <code>--inputIncludes</code>, <code>--inputPath</code>, <code>--inputPreserveDir</code>, <code>--mediaType</code>
 
 - Input type <code>docker</code>
 
   The path must denote an image tag that can be found in the local
   docker daemon. The denoted image is packed as OCI artifact set.
-  
-  This blob type specification supports the following fields: 
+
+  This blob type specification supports the following fields:
   - **<code>path</code>** *string*
-  
+
     This REQUIRED property describes the image name to import from the
     local docker daemon.
-  
+
   - **<code>repository</code>** *string*
-  
+
     This OPTIONAL property can be used to specify the repository hint for the
     generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
-  
+
   Options used to configure fields: <code>--hint</code>, <code>--inputPath</code>
 
 - Input type <code>dockermulti</code>
 
   This input type describes the composition of a multi-platform OCI image.
-  The various variants are taken from the local docker daemon. They should be 
+  The various variants are taken from the local docker daemon. They should be
   built with the buildx command for cross platform docker builds.
   The denoted images, as well as the wrapping image index is packed as OCI artifact set.
-  
+
   This blob type specification supports the following fields:
   - **<code>variants</code>** *[]string*
-  
+
     This REQUIRED property describes a set of  image names to import from the
     local docker daemon used to compose a resulting image index.
-  
+
   - **<code>repository</code>** *string*
-  
+
     This OPTIONAL property can be used to specify the repository hint for the
     generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
-  
+
   Options used to configure fields: <code>--hint</code>, <code>--inputVariants</code>
 
 - Input type <code>file</code>
 
-  The path must denote a file relative the resources file. 
+  The path must denote a file relative the resources file.
   The content is compressed if the <code>compress</code> field
   is set to <code>true</code>.
-  
-  This blob type specification supports the following fields: 
+
+  This blob type specification supports the following fields:
   - **<code>path</code>** *string*
-  
+
     This REQUIRED property describes the file path to the helm chart relative to the
     resource file location.
-  
+
   - **<code>mediaType</code>** *string*
-  
+
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is application/octet-stream and
     application/gzip if compression is enabled.
-  
+
   - **<code>compress</code>** *bool*
-  
+
     This OPTIONAL property describes whether the content should be stored
     compressed or not.
-  
+
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
 - Input type <code>helm</code>
@@ -315,65 +315,65 @@ with the field <code>type</code> in the <code>input</code> field:
   The denoted chart is packed as an OCI artifact set.
   For the filesystem version additional provider info is taken from a file with
   the same name and the suffix <code>.prov</code>.
-  
-  If the chart should just be stored as plain archive, please use the 
+
+  If the chart should just be stored as plain archive, please use the
   type <code>file</code> or <code>dir</code>, instead.
-  
-  This blob type specification supports the following fields: 
+
+  This blob type specification supports the following fields:
   - **<code>path</code>** *string*
-  
+
     This REQUIRED property describes the file path to the helm chart relative to the
     resource file location.
-  
+
   - **<code>version</code>** *string*
-  
+
     This OPTIONAL property can be set to configure an explicit version hint.
     If not specified the version from the chart will be used.
     Basically, it is a good practice to use the component version for local resources
     This can be achieved by using templating for this attribute in the resource file.
-  
+
   - **<code>helmRepository</code>** *string*
-  
-    This OPTIONAL property can be set, if the helm chart should be loaded from 
+
+    This OPTIONAL property can be set, if the helm chart should be loaded from
     a helm repository instead of the local filesystem. It describes
     the base URL of the chart repository. If specified, the <code>path</code> field
     must describe the name of the chart in the chart repository, and <code>version</code>
     must describe the version of the chart imported from the chart repository
-  
+
   - **<code>repository</code>** *string*
-  
+
     This OPTIONAL property can be used to specify the repository hint for the
     generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
-  
+
   - **<code>caCertFile</code>** *string*
-  
+
     This OPTIONAL property can be used to specify a relative filename for
     the TLS root certificate used to access a helm repository.
-  
+
   - **<code>caCert</code>** *string*
-  
+
     This OPTIONAL property can be used to specify a TLS root certificate used to
     access a helm repository.
-  
+
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputHelmRepository</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
 
 - Input type <code>ociImage</code>
 
   The path must denote an OCI image reference.
-  
-  This blob type specification supports the following fields: 
+
+  This blob type specification supports the following fields:
   - **<code>path</code>** *string*
-  
+
     This REQUIRED property describes the OVI image reference of the image to
     import.
-  
+
   - **<code>repository</code>** *string*
-  
+
     This OPTIONAL property can be used to specify the repository hint for the
     generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
-  
+
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
 - Input type <code>spiff</code>
@@ -381,37 +381,37 @@ with the field <code>type</code> in the <code>input</code> field:
   The path must denote a [spiff](https://github.com/mandelsoft/spiff) template relative the resources file.
   The content is compressed if the <code>compress</code> field
   is set to <code>true</code>.
-  
-  This blob type specification supports the following fields: 
+
+  This blob type specification supports the following fields:
   - **<code>path</code>** *string*
-  
+
     This REQUIRED property describes the file path to the helm chart relative to the
     resource file location.
-  
+
   - **<code>mediaType</code>** *string*
-  
+
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is application/octet-stream and
     application/gzip if compression is enabled.
-  
+
   - **<code>compress</code>** *bool*
-  
+
     This OPTIONAL property describes whether the content should be stored
     compressed or not.
-  
+
   - **<code>values</code>** *map[string]any*
-  
+
     This OPTIONAL property describes an additional value binding for the template processing. It will be available
     under the node <code>inputvalues</code>.
-  
+
   - **<code>libraries</code>** *[]string*
-  
+
     This OPTIONAL property describes a list of spiff libraries to include in template
     processing.
-  
+
   The variable settigs from the command line are available as binding, also. They are provided under the node
   <code>values</code>.
-  
+
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputPath</code>, <code>--inputValues</code>, <code>--mediaType</code>
 
 - Input type <code>utf8</code>
@@ -419,32 +419,32 @@ with the field <code>type</code> in the <code>input</code> field:
   This blob type is used to provide inline text based content (UTF8). The
   specification supports the following fields:
   - **<code>text</code>** *string*
-  
+
     The utf8 string content to provide.
-  
+
   - **<code>json</code>** *JSON or JSON string interpreted as JSON*
-  
+
     The content emitted as JSON.
-  
+
   - **<code>formattedJson</code>** *YAML/JSON or JSON/YAML string interpreted as JSON*
-  
+
     The content emitted as formatted JSON.
-  
+
   - **<code>yaml</code>** *AML/JSON or JSON/YAML string interpreted as YAML*
-  
+
     The content emitted as YAML.
-  
+
   - **<code>mediaType</code>** *string*
-  
+
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is application/octet-stream and
     application/gzip if compression is enabled.
-  
+
   - **<code>compress</code>** *bool*
-  
+
     This OPTIONAL property describes whether the content should be stored
     compressed or not.
-  
+
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputFormattedJson</code>, <code>--inputJson</code>, <code>--inputText</code>, <code>--inputYaml</code>, <code>--mediaType</code>
 
 The following list describes the supported access methods, their versions
@@ -453,61 +453,61 @@ Typically there is special support for the CLI artifact add commands.
 The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.
-  
+
 - Access type <code>S3</code>
 
   This method implements the access of a blob stored in an S3 bucket.
 
   The following versions are supported:
   - Version <code>v1</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>region</code>** (optional) *string*
-    
+
       OCI repository reference (this artifact name used to store the blob).
-    
+
     - **<code>bucket</code>** *string*
-    
+
       The name of the S3 bucket containing the blob
-    
+
     - **<code>key</code>** *string*
-    
+
       The key of the desired blob
-    
+
     - **<code>version</code>** (optional) *string*
-    
+
       The key of the desired blob
-    
+
     - **<code>mediaType</code>** (optional) *string*
-    
+
       The media type of the content
-  
+
   - Version <code>v2</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>region</code>** (optional) *string*
-    
+
       OCI repository reference (this artifact name used to store the blob).
-    
+
     - **<code>bucketName</code>** *string*
-    
+
       The name of the S3 bucket containing the blob
-    
+
     - **<code>objectKey</code>** *string*
-    
+
       The key of the desired blob
-    
+
     - **<code>version</code>** (optional) *string*
-    
+
       The key of the desired blob
-    
+
     - **<code>mediaType</code>** (optional) *string*
-    
+
       The media type of the content
-  
-  
+
+
 - Access type <code>gitHub</code>
 
   This method implements the access of the content of a git commit stored in a
@@ -515,245 +515,245 @@ shown below.
 
   The following versions are supported:
   - Version <code>v1</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>repoUrl</code>**  *string*
-    
+
       Repository URL with or without scheme.
-    
+
     - **<code>ref</code>** (optional) *string*
-    
+
       Original ref used to get the commit from
-    
+
     - **<code>commit</code>** *string*
-    
+
       The sha/id of the git commit
-  
+
   Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>
-    
+
 - Access type <code>helm</code>
 
   This method implements the access of a Helm chart stored in a Helm repository.
 
   The following versions are supported:
   - Version <code>v1</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>helmRepository</code>** *string*
-    
+
       Helm repository URL.
-    
+
     - **<code>helmChart</code>** *string*
-    
+
       The name of the Helm chart and its version separated by a colon.
-    
+
     - **<code>version</code>** *string*
-    
+
       The version of the Helm chart if not specified as part of the chart name.
-    
+
     - **<code>caCert</code>** *string*
-    
+
       An optional TLS root certificate.
-    
+
     - **<code>keyring</code>** *string*
-    
+
       An optional keyring used to verify the chart.
-    
+
     It uses the consumer identity type HelmChartRepository with the fields
     for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
-  
+
   Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
-  
+
 - Access type <code>localBlob</code>
 
   This method is used to store a resource blob along with the component descriptor
   on behalf of the hosting OCM repository.
-  
+
   Its implementation is specific to the implementation of OCM
   repository used to read the component descriptor. Every repository
   implementation may decide how and where local blobs are stored,
   but it MUST provide an implementation for this method.
-  
+
   Regardless of the chosen implementation the attribute specification is
   defined globally the same.
 
   The following versions are supported:
   - Version <code>v1</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>localReference</code>** *string*
-    
+
       Repository type specific location information as string. The value
       may encode any deep structure, but typically just an access path is sufficient.
-    
+
     - **<code>mediaType</code>** *string*
-    
+
       The media type of the blob used to store the resource. It may add
       format information like <code>+tar</code> or <code>+gzip</code>.
-    
+
     - **<code>referenceName</code>** (optional) *string*
-    
+
       This optional attribute may contain identity information used by
       other repositories to restore some global access with an identity
       related to the original source.
-    
+
       For example, if an OCI artifact originally referenced using the
       access method <code>ociArtifact</code> is stored during
       some transport step as local artifact, the reference name can be set
       to its original repository name. An import step into an OCI based OCM
       repository may then decide to make this artifact available again as
       regular OCI artifact.
-    
+
     - **<code>globalAccess</code>** (optional) *access method specification*
-    
+
       If a resource blob is stored locally, the repository implementation
       may decide to provide an external access information (independent
       of the OCM model).
-    
+
       For example, an OCI artifact stored as local blob
       can be additionally stored as regular OCI artifact in an OCI registry.
-    
+
       This additional external access information can be added using
       a second external access method specification.
-  
+
   Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
-      
+
 - Access type <code>none</code>
 
   dummy resource with no access
 
-  
+
 - Access type <code>npm</code>
 
   This method implements the access of an NPM package in an NPM registry.
 
   The following versions are supported:
   - Version <code>v1</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>registry</code>** *string*
-    
+
       Base URL of the NPM registry.
-    
+
     - **<code>package</code>** *string*
-    
+
       The name of the NPM package
-    
+
     - **<code>version</code>** *string*
-    
+
       The version name of the NPM package
-  
+
   Options used to configure fields: <code>--accessPackage</code>, <code>--accessRegistry</code>, <code>--accessVersion</code>
-  
+
 - Access type <code>ociArtifact</code>
 
   This method implements the access of an OCI artifact stored in an OCI registry.
 
   The following versions are supported:
   - Version <code>v1</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>imageReference</code>** *string*
-    
+
       OCI image/artifact reference following the possible docker schemes:
       - <code>&lt;repo>/&lt;artifact>:&lt;digest>@&lt;tag></code>
       - <code><host>[&lt;port>]/&lt;repo path>/&lt;artifact>:&lt;version>@&lt;tag></code>
-  
+
   Options used to configure fields: <code>--reference</code>
-  
+
 - Access type <code>ociBlob</code>
 
   This method implements the access of an OCI blob stored in an OCI repository.
 
   The following versions are supported:
   - Version <code>v1</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>imageReference</code>** *string*
-    
+
       OCI repository reference (this artifact name used to store the blob).
-    
+
     - **<code>mediaType</code>** *string*
-    
+
       The media type of the blob
-    
+
     - **<code>digest</code>** *string*
-    
+
       The digest of the blob used to access the blob in the OCI repository.
-    
+
     - **<code>size</code>** *integer*
-    
+
       The size of the blob
-  
+
   Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
-      
+
 - Access type <code>s3</code>
 
   This method implements the access of a blob stored in an S3 bucket.
 
   The following versions are supported:
   - Version <code>v1</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>region</code>** (optional) *string*
-    
+
       OCI repository reference (this artifact name used to store the blob).
-    
+
     - **<code>bucket</code>** *string*
-    
+
       The name of the S3 bucket containing the blob
-    
+
     - **<code>key</code>** *string*
-    
+
       The key of the desired blob
-    
+
     - **<code>version</code>** (optional) *string*
-    
+
       The key of the desired blob
-    
+
     - **<code>mediaType</code>** (optional) *string*
-    
+
       The media type of the content
-  
+
   - Version <code>v2</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>region</code>** (optional) *string*
-    
+
       OCI repository reference (this artifact name used to store the blob).
-    
+
     - **<code>bucketName</code>** *string*
-    
+
       The name of the S3 bucket containing the blob
-    
+
     - **<code>objectKey</code>** *string*
-    
+
       The key of the desired blob
-    
+
     - **<code>version</code>** (optional) *string*
-    
+
       The key of the desired blob
-    
+
     - **<code>mediaType</code>** (optional) *string*
-    
+
       The media type of the content
-  
+
   Options used to configure fields: <code>--accessVersion</code>, <code>--bucket</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--region</code>
-  
+
 
 All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
 Additionally settings can be specified by a yaml file using the <code>--settings <file></code>
 option. With the option <code>--addenv</code> environment variables are added to the binding.
-Values are overwritten in the order environment, settings file, command line settings. 
+Values are overwritten in the order environment, settings file, command line settings.
 
 Note: Variable names are case-sensitive.
 
@@ -769,7 +769,7 @@ There are several templaters that can be selected by the <code>--templater</code
     key:
       subkey: "abc {{.MY_VAL}}"
   </pre>
-  
+
 - <code>none</code> do not do any substitution.
 
 - <code>spiff</code> [spiff templating](https://github.com/mandelsoft/spiff).
@@ -779,7 +779,7 @@ There are several templaters that can be selected by the <code>--templater</code
     key:
       subkey: "abc (( values.MY_VAL ))"
   </pre>
-  
+
 - <code>subst</code> simple value substitution with the <code>drone/envsubst</code> templater.
 
   It supports string values, only. Complex settings will be json encoded.
@@ -787,7 +787,7 @@ There are several templaters that can be selected by the <code>--templater</code
     key:
       subkey: "abc ${MY_VAL}"
   </pre>
-  
+
 
 
 ### Examples

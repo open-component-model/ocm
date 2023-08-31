@@ -52,7 +52,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.LogLevel, "loglevel", "l", "", "set log level")
 	fs.StringVarP(&o.LogFileName, "logfile", "L", "", "set log file")
 	fs.StringVarP(&o.LogConfig, "logconfig", "", "", "log config")
-	fs.StringArrayVarP(&o.LogKeys, "logkeys", "", nil, "log tags/realms(.) to be enabled ([.]name{,[.]name}[=level])")
+	fs.StringArrayVarP(&o.LogKeys, "logkeys", "", nil, "log tags/realms(with leading /) to be enabled ([/]name{,[/]name}[=level])")
 }
 
 func (o *Options) Close() error {
