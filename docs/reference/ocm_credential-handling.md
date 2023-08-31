@@ -50,10 +50,12 @@ The following credential consumer types are used:
 
     Credential consumers of the consumer type HelmChartRepository evaluate the following credential properties:
 
-    - **<code>username</code>**: basic auth user name.
-    - **<code>password</code>**: basic auth password.
-    - **<code>certificate</code>**: TLS client certificate.
-    - **<code>privateKey</code>**: TLS private key.
+      - <code>username</code>: the basic auth user name
+      - <code>password</code>: the basic auth password
+      - <code>certificate</code>: TLS client certificate
+      - <code>privateKey</code>: TLS private key
+      - <code>certificateAuthority</code>: TLS certificate authority
+
 
   - <code>OCIRegistry</code>: OCI registry credential matcher
 
@@ -65,6 +67,7 @@ The following credential consumer types are used:
       - <code>username</code>: the basic auth user name
       - <code>password</code>: the basic auth password
       - <code>identityToken</code>: the bearer token used for non-basic auth authorization
+      - <code>certificateAuthority</code>: the certificate authority certificate used to verify certificates
 
 
   - <code>S3</code>: S3 credential matcher

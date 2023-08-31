@@ -88,7 +88,7 @@ It uses the following fields:
 
   - **<code>name</code>** *string*
 
-    This required field describe the name of the option. THis might be 
+    This required field describe the name of the option. THis might be
     the name of a preconfigured option, or a new one.
 
   - **<code>type</code>** *string*

@@ -19,8 +19,8 @@ This command accepts an access specification as argument. It is used to
 validate the specification and to provide some metadata for the given
 specification.
 
-This metadata has to be provided as JSON string on *stdout* and has the 
-following fields: 
+This metadata has to be provided as JSON string on *stdout* and has the
+following fields:
 
 - **<code>mediaType</code>** *string*
 
