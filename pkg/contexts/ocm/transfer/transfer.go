@@ -58,6 +58,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	}
 	defer comp.Close()
 
+	var ok bool
 	t, err := comp.LookupVersion(src.GetVersion())
 	defer accessio.Close(t)
 	if err != nil {
@@ -71,7 +72,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 				printer.Printf("  version %q already present -> skip transport\n", nv)
 				return nil
 			}
-			ok, err := handler.UpdateVersion(src, t)
+			ok, err = handler.UpdateVersion(src, t)
 			if err != nil {
 				return err
 			}
@@ -79,31 +80,37 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 				printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
 				return nil
 			}
-			printer.Printf("  updating volatile properties of %q\n", nv)
-			doMerge = true
-			doCopy = false
+			ok, err = handler.OverwriteVersion(src, t)
+			if ok {
+				printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
+				doMerge = false
+				doCopy = false
+			} else {
+				printer.Printf("  updating volatile properties of %q\n", nv)
+				doMerge = true
+				doCopy = false
+			}
 		} else {
-			msg := "  version %q already present"
+			msg := "  version %q already present, but"
 			if eq.IsLocalHashEqual() {
 				if eq.IsArtifactDetectable() {
 					doMerge = true
-					msg += ", but differs, because some artifact digests are changed"
+					msg += " differs because some artifact digests are changed"
 				} else {
-					msg += "might differ, because not all artifact digests are known"
+					msg += " might differ, because not all artifact digests are known"
 					// TODO: option to handle unknown digests like identical digests (copy=false, merge=true)
 				}
 			} else {
 				if eq.IsArtifactDetectable() {
 					if eq.IsArtifactEqual() {
-						msg += "differs, because signature relevant properties have been changed"
+						msg += " differs because signature relevant properties have been changed"
 					} else {
-						msg += "differs, because some artifacts and signature relevant properties have been changed"
+						msg += " differs because some artifacts and signature relevant properties have been changed"
 					}
 				} else {
-					msg += "differs, because signature relevant properties have been changed (and not all artifact digests are known)"
+					msg += "differs because signature relevant properties have been changed (and not all artifact digests are known)"
 				}
 			}
-			var ok bool
 			ok, err = handler.OverwriteVersion(src, t)
 			if ok {
 				printer.Printf("warning: "+msg+" (transport enforced by overwrite option)\n", nv)
