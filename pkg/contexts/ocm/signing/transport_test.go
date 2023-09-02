@@ -13,6 +13,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
@@ -175,7 +176,7 @@ var _ = Describe("transport and signing", func() {
 
 		// sign in target
 		sopts := signing.NewOptions(
-			signing.Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+			signing.Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
 			signing.Update(), signing.VerifyDigests(),
 		)
 		spec := Must(signing.Apply(printer, nil, tcv, sopts))
@@ -296,7 +297,7 @@ func mergeResourceLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.Com
 func sourceSignature(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
 	// sign in source
 	sopts := signing.NewOptions(
-		signing.Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE2),
+		signing.Sign(signingattr.Get(cv.GetContext()).GetSigner(SIGN_ALGO), SIGNATURE2),
 		signing.Update(), signing.VerifyDigests(),
 	)
 	spec, err := signing.Apply(common.NewPrinter(nil), nil, cv, sopts)

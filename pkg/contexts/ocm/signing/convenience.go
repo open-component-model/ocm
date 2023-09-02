@@ -6,9 +6,9 @@ package signing
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
@@ -27,7 +27,7 @@ func SignComponentVersion(cv ocm.ComponentVersionAccess, name string, optlist ..
 		return nil, errors.Newf("impossible verification option set for signing")
 	}
 	if opts.Signer == nil {
-		opts.Signer = signing.DefaultHandlerRegistry().GetSigner(rsa.Algorithm)
+		opts.Signer = signingattr.Get(cv.GetContext()).GetSigner(rsa.Algorithm)
 	}
 	err := opts.Complete(nil)
 	if err != nil {

@@ -53,6 +53,6 @@ func CompleteModificationOptions(ctx ContextProvider, m *ModificationOptions) {
 		m.DefaultHashAlgorithm = attr.DefaultHasher
 	}
 	if m.HasherProvider == nil {
-		m.HasherProvider = attr.Provider
+		m.HasherProvider = attr.GetProvider(ctx.OCMContext())
 	}
 }

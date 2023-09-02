@@ -35,7 +35,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
@@ -281,7 +280,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs,
 		resolver := ocm.NewCompoundResolver(src)
 
 		opts := ocmsign.NewOptions(
-			ocmsign.Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+			ocmsign.Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
 			ocmsign.Resolver(resolver),
 			ocmsign.Update(), ocmsign.VerifyDigests(),
 		)

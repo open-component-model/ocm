@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -86,6 +87,13 @@ type Attribute struct {
 	DefaultHasher string
 }
 
+func (a *Attribute) GetProvider(ctx datacontext.Context) internal.HasherProvider {
+	if a.Provider != nil {
+		return a.Provider
+	}
+	return signingattr.Get(ctx)
+}
+
 func (a *Attribute) GetHasher(names ...string) internal.Hasher {
 	name := utils.Optional(names...)
 	if name != "" {
@@ -98,7 +106,7 @@ func Get(ctx datacontext.Context) *Attribute {
 	a := ctx.GetAttributes().GetAttribute(ATTR_KEY)
 	if a == nil {
 		return &Attribute{
-			signing.DefaultRegistry(),
+			signingattr.Get(ctx),
 			sha256.Algorithm,
 		}
 	}

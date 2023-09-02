@@ -227,7 +227,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			closer := session.AddCloser(cv)
 
 			opts := NewOptions(
-				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
@@ -308,7 +308,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 
 			opts := NewOptions(
 				DigestMode(mode),
-				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
@@ -360,7 +360,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 
 			opts := NewOptions(
 				DigestMode(mode),
-				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
@@ -477,7 +477,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 
 			opts := NewOptions(
 				DigestMode(mode),
-				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
 				Resolver(src),
 				Update(), VerifyDigests(),
 			)

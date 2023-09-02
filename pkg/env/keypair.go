@@ -10,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func (e *Environment) RSAKeyPair(name ...string) {
@@ -25,6 +26,7 @@ func (e *Environment) RSAKeyPair(name ...string) {
 func (e *Environment) ReadRSAKeyPair(name, path string) {
 	reg := signingattr.Get(e.OCMContext())
 	pubfound := false
+	path, _ = utils.ResolvePath(path)
 	if ok, _ := e.Exists(filepath.Join(path, "rsa.pub")); ok {
 		pubbytes, err := e.ReadFile(filepath.Join(path, "rsa.pub"))
 		e.failOn(err)

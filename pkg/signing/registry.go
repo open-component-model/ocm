@@ -44,6 +44,8 @@ type KeyRegistry interface {
 	RegisterPrivateKey(name string, key interface{})
 	GetPublicKey(name string) interface{}
 	GetPrivateKey(name string) interface{}
+
+	HasKeys() bool
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -182,17 +184,33 @@ func DefaultHandlerRegistry() HandlerRegistry {
 
 type keyRegistry struct {
 	lock        sync.RWMutex
+	parents     []KeyRegistry
 	publicKeys  map[string]interface{}
 	privateKeys map[string]interface{}
 }
 
 var _ KeyRegistry = (*keyRegistry)(nil)
 
-func NewKeyRegistry() KeyRegistry {
+func NewKeyRegistry(parents ...KeyRegistry) KeyRegistry {
 	return &keyRegistry{
+		parents:     parents,
 		publicKeys:  map[string]interface{}{},
 		privateKeys: map[string]interface{}{},
 	}
+}
+
+func (r *keyRegistry) HasKeys() bool {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	if len(r.publicKeys) > 0 || len(r.privateKeys) > 0 {
+		return true
+	}
+	for _, p := range r.parents {
+		if p.HasKeys() {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *keyRegistry) RegisterPublicKey(name string, key interface{}) {
@@ -210,13 +228,31 @@ func (r *keyRegistry) RegisterPrivateKey(name string, key interface{}) {
 func (r *keyRegistry) GetPublicKey(name string) interface{} {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return r.publicKeys[name]
+	k, ok := r.publicKeys[name]
+	if !ok && r.parents != nil {
+		for _, p := range r.parents {
+			k = p.GetPublicKey(name)
+			if k != nil {
+				break
+			}
+		}
+	}
+	return k
 }
 
 func (r *keyRegistry) GetPrivateKey(name string) interface{} {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return r.privateKeys[name]
+	k, ok := r.privateKeys[name]
+	if !ok && r.parents != nil {
+		for _, p := range r.parents {
+			k = p.GetPrivateKey(name)
+			if k != nil {
+				break
+			}
+		}
+	}
+	return k
 }
 
 var defaultKeyRegistry = NewKeyRegistry()
@@ -313,6 +349,10 @@ outer:
 	}
 	sort.Strings(names)
 	return names
+}
+
+func (r *registry) HasKeys() bool {
+	return r.keys.HasKeys()
 }
 
 func (r *registry) RegisterPublicKey(name string, key interface{}) {

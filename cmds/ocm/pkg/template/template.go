@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 
@@ -133,7 +134,7 @@ func (o *Options) Execute(data string) (string, error) {
 
 func ReadYAMLSettings(fs vfs.FileSystem, path string) (Values, error) {
 	result := Values{}
-	data, err := vfs.ReadFile(fs, path)
+	data, err := utils2.ReadFile(fs, path)
 	if err != nil {
 		return nil, err
 	}
