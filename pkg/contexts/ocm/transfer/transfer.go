@@ -140,7 +140,8 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 
 	var n *compdesc.ComponentDescriptor
 	if doMerge {
-		n, err = PrepareDescriptor(src.GetContext(), src.GetDescriptor(), t.GetDescriptor())
+		log.WithValues("source", src.GetDescriptor(), "target", t.GetDescriptor()).Info("  applying 2-way merge")
+		n, err = PrepareDescriptor(log, src.GetContext(), src.GetDescriptor(), t.GetDescriptor())
 		if err != nil {
 			return err
 		}

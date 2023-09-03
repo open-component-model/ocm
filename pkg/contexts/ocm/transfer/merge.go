@@ -5,6 +5,8 @@
 package transfer
 
 import (
+	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -13,7 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-func PrepareDescriptor(ctx ocm.Context, s *compdesc.ComponentDescriptor, t *compdesc.ComponentDescriptor) (*compdesc.ComponentDescriptor, error) {
+func PrepareDescriptor(log logging.Logger, ctx ocm.Context, s *compdesc.ComponentDescriptor, t *compdesc.ComponentDescriptor) (*compdesc.ComponentDescriptor, error) {
 	if ctx == nil {
 		ctx = ocm.DefaultContext()
 	}
@@ -21,19 +23,19 @@ func PrepareDescriptor(ctx ocm.Context, s *compdesc.ComponentDescriptor, t *comp
 	n := s.Copy()
 	err := MergeSignatures(t.Signatures, &n.Signatures)
 	if err == nil {
-		err = MergeLabels(ctx, t.Labels, &n.Labels)
+		err = MergeLabels(log, ctx, t.Labels, &n.Labels)
 	}
 	if err == nil {
-		err = MergeLabels(ctx, t.Provider.Labels, &n.Provider.Labels)
+		err = MergeLabels(log, ctx, t.Provider.Labels, &n.Provider.Labels)
 	}
 	if err == nil {
-		err = MergeElements(ctx, t.Sources, n.Sources)
+		err = MergeElements(log, ctx, t.Sources, n.Sources)
 	}
 	if err == nil {
-		err = MergeElements(ctx, t.Resources, n.Resources)
+		err = MergeElements(log, ctx, t.Resources, n.Resources)
 	}
 	if err == nil {
-		err = MergeElements(ctx, t.References, n.References)
+		err = MergeElements(log, ctx, t.References, n.References)
 	}
 
 	if err != nil {
@@ -42,13 +44,13 @@ func PrepareDescriptor(ctx ocm.Context, s *compdesc.ComponentDescriptor, t *comp
 	return n, nil
 }
 
-func MergeElements(ctx ocm.Context, s compdesc.ElementAccessor, t compdesc.ElementAccessor) error {
+func MergeElements(log logging.Logger, ctx ocm.Context, s compdesc.ElementAccessor, t compdesc.ElementAccessor) error {
 	for i := 0; i < s.Len(); i++ {
 		es := s.Get(i)
 		id := es.GetMeta().GetIdentity(s)
 		et := compdesc.GetByIdentity(t, id)
 		if et != nil {
-			if err := MergeLabels(ctx, es.GetMeta().Labels, &et.GetMeta().Labels); err != nil {
+			if err := MergeLabels(log, ctx, es.GetMeta().Labels, &et.GetMeta().Labels); err != nil {
 				return err
 			}
 
@@ -66,19 +68,21 @@ func MergeElements(ctx ocm.Context, s compdesc.ElementAccessor, t compdesc.Eleme
 }
 
 // MergeLabels tries to merge old label states into the new target state.
-func MergeLabels(ctx ocm.Context, s metav1.Labels, t *metav1.Labels) error {
+func MergeLabels(log logging.Logger, ctx ocm.Context, s metav1.Labels, t *metav1.Labels) error {
 	for _, l := range s {
 		if l.Signing {
 			continue
 		}
 		idx := t.GetIndex(l.Name)
 		if idx < 0 {
+			log.Trace("appending label", "name", l.Name, "value", l.Value)
 			*t = append(*t, l)
 		} else {
 			err := MergeLabel(ctx, l, &(*t)[idx])
 			if err != nil {
 				return err
 			}
+			log.Trace("merge result", "name", l.Name, "result", (*t)[idx].Value)
 		}
 	}
 	return nil

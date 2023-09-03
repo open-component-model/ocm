@@ -84,6 +84,7 @@ func Merge(ctx cpi.Context, m *Specification, hint string, local Value, inbound 
 		return false, errors.ErrUnknown(KIND_VALUE_MERGE_ALGORITHM, m.Algorithm)
 	}
 
+	Log.Trace("merge handler", "handler", m.Algorithm, "config", m.Config)
 	var cfg cpi.ValueMergeHandlerConfig
 	if len(m.Config) != 0 {
 		cfg, err = h.DecodeConfig(m.Config)

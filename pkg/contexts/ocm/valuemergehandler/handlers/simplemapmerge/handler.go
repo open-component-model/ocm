@@ -45,6 +45,7 @@ It supports the following config structure:
 func merge(ctx hpi.Context, c *Config, lv Value, tv *Value) (bool, error) {
 	var err error
 
+	subm := false
 	modified := false
 	for lk, le := range lv {
 		if te, ok := (*tv)[lk]; ok {
@@ -52,27 +53,38 @@ func merge(ctx hpi.Context, c *Config, lv Value, tv *Value) (bool, error) {
 				switch c.Overwrite {
 				case MODE_DEFAULT:
 					if c.Entries != nil {
-						modified, te, err = hpi.GenericMerge(ctx, c.Entries, "", le, te)
+						hpi.Log.Trace("different entry found in target -> merge it", "name", lk, "entries", c.Entries)
+						subm, te, err = hpi.GenericMerge(ctx, c.Entries, "", le, te)
 						if err != nil {
 							return false, errors.Wrapf(err, "map key %q", lk)
 						}
-						if modified {
+						if subm {
 							(*tv)[lk] = te
+							modified = true
+							hpi.Log.Trace("entry merge result", "result", (*tv))
+						} else {
+							hpi.Log.Trace("not modified")
 						}
 						break
 					}
 					fallthrough
 				case MODE_NONE:
+					hpi.Log.Trace("different entry found in target -> fail", "name", lk)
 					return false, fmt.Errorf("target value for %q changed", lk)
 				case MODE_LOCAL:
 					(*tv)[lk] = le
+					hpi.Log.Trace("different entry found in target -> use local", "name", lk, "result", (*tv))
 					modified = true
 				}
+			} else {
+				hpi.Log.Trace("entry found in target", "name", lk)
 			}
 		} else {
 			(*tv)[lk] = le
+			hpi.Log.Trace("entry not found in target -> append it", "name", lk, "result", (*tv))
 			modified = true
 		}
 	}
+	hpi.Log.Trace("merge result", "modified", modified, "result", (*tv))
 	return modified, nil
 }

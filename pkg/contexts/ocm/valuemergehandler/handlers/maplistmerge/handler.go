@@ -52,6 +52,7 @@ It supports the following config structure:
 func merge(ctx cpi.Context, c *Config, lv Value, tv *Value) (bool, error) {
 	var err error
 
+	subm := false
 	modified := false
 	for _, le := range lv {
 		key := le[c.KeyField]
@@ -64,12 +65,13 @@ func merge(ctx cpi.Context, c *Config, lv Value, tv *Value) (bool, error) {
 						switch c.Overwrite {
 						case MODE_DEFAULT:
 							if c.Entries != nil {
-								modified, te, err = hpi.GenericMerge(ctx, c.Entries, "", le, te)
+								subm, te, err = hpi.GenericMerge(ctx, c.Entries, "", le, te)
 								if err != nil {
 									return false, errors.Wrapf(err, "entry identity %q", key)
 								}
-								if modified {
+								if subm {
 									(*tv)[i] = te
+									modified = true
 								}
 								break
 							}
