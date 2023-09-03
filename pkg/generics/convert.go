@@ -17,3 +17,15 @@ func ConvertSlice[S, T any](in ...S) []T {
 	}
 	return r
 }
+
+func ConvertSliceTo[T, S any](in []S) []T {
+	if in == nil {
+		return nil
+	}
+	r := make([]T, len(in))
+	for i := range in {
+		var s any = in[i]
+		r[i] = As[T](s)
+	}
+	return r
+}

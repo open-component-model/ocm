@@ -269,7 +269,11 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 
 	found := cd.GetSignatureIndex(opts.SignatureName())
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
-		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), ctx.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
+		priv, err := opts.PrivateKey()
+		if err != nil {
+			return nil, err
+		}
+		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), ctx.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, priv)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor")
 		}

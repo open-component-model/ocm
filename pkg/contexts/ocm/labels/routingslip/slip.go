@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
@@ -48,7 +49,11 @@ func (s RoutingSlipIndex) Verify(ctx Context, name string, sig bool) error {
 		registry := signingattr.Get(ctx)
 		key := registry.GetPublicKey(name)
 		if key == nil {
-			key = registry.GetPrivateKey(name)
+			var err error
+			key, err = signing.ResolvePrivateKey(registry, name)
+			if err != nil {
+				return err
+			}
 		}
 		if key == nil {
 			return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, name)
@@ -156,12 +161,15 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, parent
 	if handler == nil {
 		return nil, errors.ErrUnknown(compdesc.KIND_SIGN_ALGORITHM, algo)
 	}
-	key := registry.GetPrivateKey(name)
+	key, err := signing.ResolvePrivateKey(registry, name)
+	if err != nil {
+		return nil, err
+	}
 	if key == nil {
 		return nil, errors.ErrUnknown(compdesc.KIND_PRIVATE_KEY, name)
 	}
 
-	err := s.Verify(ctx, name, true)
+	err = s.Verify(ctx, name, true)
 	if err != nil {
 		return nil, err
 	}

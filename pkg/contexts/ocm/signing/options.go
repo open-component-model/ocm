@@ -381,6 +381,8 @@ type Options struct {
 	SignatureNames    []string
 	NormalizationAlgo string
 	Keyless           bool
+
+	effectiveRegistry signing.Registry
 }
 
 var _ Option = (*Options)(nil)
@@ -449,6 +451,12 @@ func (o *Options) Complete(registry signing.Registry) error {
 		}
 		o.Registry = registry
 	}
+
+	o.effectiveRegistry = o.Registry
+	if o.Keys != nil && o.Keys.HasKeys() {
+		o.effectiveRegistry = signing.RegistryWithPreferredKeys(o.Registry, o.Keys)
+	}
+
 	if o.SkipAccessTypes == nil {
 		o.SkipAccessTypes = map[string]bool{}
 	}
@@ -456,7 +464,11 @@ func (o *Options) Complete(registry signing.Registry) error {
 		if len(o.SignatureNames) == 0 {
 			return errors.Newf("signature name required for signing")
 		}
-		if o.PrivateKey() == nil && !o.Keyless {
+		priv, err := o.PrivateKey()
+		if err != nil {
+			return err
+		}
+		if priv == nil && !o.Keyless {
 			return errors.ErrNotFound(compdesc.KIND_PRIVATE_KEY, o.SignatureNames[0])
 		}
 		if o.DigestMode == "" {
@@ -537,23 +549,11 @@ func (o *Options) SignatureConfigured(name string) bool {
 }
 
 func (o *Options) PublicKey(sig string) interface{} {
-	if o.Keys != nil {
-		k := o.Keys.GetPublicKey(sig)
-		if k != nil {
-			return k
-		}
-	}
-	return o.Registry.GetPublicKey(sig)
+	return o.effectiveRegistry.GetPublicKey(sig)
 }
 
-func (o *Options) PrivateKey() interface{} {
-	if o.Keys != nil {
-		k := o.Keys.GetPrivateKey(o.SignatureName())
-		if k != nil {
-			return k
-		}
-	}
-	return o.Registry.GetPrivateKey(o.SignatureName())
+func (o *Options) PrivateKey() (interface{}, error) {
+	return signing.ResolvePrivateKey(o.effectiveRegistry, o.SignatureName())
 }
 
 func (o *Options) Dup() *Options {
