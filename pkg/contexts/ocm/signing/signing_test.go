@@ -33,6 +33,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha512"
 )
 
@@ -1033,6 +1034,53 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 			Entry("legacy", Substitutions{}, ocm.SkipDigest()),
 			Entry("hashed", Substitutions{}),
 		)
+	})
+
+	Context("ref hashes", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.ComponentVersion(COMPONENTA, VERSION, func() {
+					env.Provider(PROVIDER)
+				})
+				env.ComponentVersion(COMPONENTB, VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Reference("refa", COMPONENTA, VERSION)
+				})
+				env.ComponentVersion(COMPONENTC, VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Reference("refb", COMPONENTB, VERSION)
+				})
+			})
+		})
+
+		FIt("handles top level signature", func() {
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+			defer Close(src, "ctf")
+
+			resolver := ocm.NewCompoundResolver(src)
+
+			cv := Must(resolver.LookupComponentVersion(COMPONENTC, VERSION))
+			defer cv.Close()
+
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Resolver(resolver),
+				VerifyDigests(),
+			)
+			MustBeSuccessful(opts.Complete(signingattr.Get(DefaultContext)))
+
+			digestC := "1e81ac0fe69614e6fd73ab7a1c809dd31fcbcb810f0036be7a296d226e4bd64b"
+			pr, buf := common.NewBufferedPrinter()
+			dig := Must(Apply(pr, nil, cv, opts))
+			Expect(dig.Value).To(StringEqualWithContext(digestC))
+
+			Expect(cv.GetDescriptor().References[0].Digest.HashAlgorithm).To(Equal(sha256.Algorithm))
+
+			cvb := Must(resolver.LookupComponentVersion(COMPONENTB, VERSION))
+			defer Close(cvb)
+			Expect(cvb.GetDescriptor().References[0].Digest).NotTo(BeNil())
+			_ = buf
+		})
 	})
 })
 
