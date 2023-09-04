@@ -16,7 +16,7 @@ ocm [<options>] <sub command> ...
   -h, --help                    help for ocm
       --logconfig string        log config
   -L, --logfile string          set log file
-      --logkeys stringArray     log tags/realms(with leading /) to be enabled ([/]name{,[/]name}[=level])
+      --logkeys stringArray     log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])
   -l, --loglevel string         set log level
   -v, --verbose                 deprecated: enable logrus verbose logging
       --version                 show version
@@ -75,13 +75,19 @@ form
 </center>
 
 The <code>--log*</code> options can be used to configure the logging behaviour.
+For details see [ocm logging](ocm_logging.md).
+
 There is a quick config option <code>--logkeys</code> to configure simple
 tag/realm based condition rules. The comma-separated names build an AND rule.
-Hereby, names starting with a slash (<code>/</code>) denote a realm (without the leading slash).
-A realm is a slash separated sequence of identifiers, which matches all logging realms
-with the given realms as path prefix. A tag directly matches the logging tags.
-Used tags and realms can be found under topic [ocm logging](ocm_logging.md). The ocm coding basically
-uses the realm <code>ocm</code>.
+Hereby, names starting with a slash (<code>/</code>) denote a realm (without
+the leading slash). A realm is a slash separated sequence of identifiers. If
+the realm name starts with a plus (<code>+</code>) character the generated rule
+will match the realm and all its sub-realms, otherwise, only the dedicated
+realm is affected. For example <code>/+ocm=trace</code> will enable all log output of the
+OCM library.
+
+A tag directly matches the logging tags. Used tags and realms can be found under
+topic [ocm logging](ocm_logging.md). The ocm coding basically uses the realm <code>ocm</code>.
 The default level to enable is <code>info</code>. Separated by an equal sign (<code>=</code>)
 optionally a dedicated level can be specified. Log levels can be (<code>error</code>,
 <code>warn</code>, <code>info</code>, <code>debug</code> and <code>trace</code>.
