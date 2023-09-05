@@ -7,6 +7,7 @@ package artifacthdlr
 import (
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
@@ -27,7 +28,7 @@ func explodeAttached(o interface{}) []interface{} {
 	dig := blob.Digest()
 	prefix := Attachment(dig, "")
 	list, err := obj.Namespace.ListTags()
-	hist := append(obj.History.Copy(), common.NewNameVersion("", dig.String()))
+	hist := generics.AppendedSlice(obj.History, common.NewNameVersion("", dig.String()))
 	if err == nil {
 		for _, l := range list {
 			if strings.HasPrefix(l, prefix) {

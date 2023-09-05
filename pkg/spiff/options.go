@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type Option interface {
@@ -110,14 +111,14 @@ func TemplateData(name string, data []byte) OptionFunction {
 
 func StubFile(path string, fss ...vfs.FileSystem) OptionFunction {
 	return func(r *Request) error {
-		r.Stubs = append(r.Stubs, spiffing.NewSourceFile(path, accessio.FileSystem(append(fss, r.FileSystem)...)))
+		r.Stubs = append(r.Stubs, spiffing.NewSourceFile(path, accessio.FileSystem(generics.AppendedSlice(fss, r.FileSystem)...)))
 		return nil
 	}
 }
 
 func TemplateFile(path string, fss ...vfs.FileSystem) OptionFunction {
 	return func(r *Request) error {
-		r.Template = spiffing.NewSourceFile(path, accessio.FileSystem(append(fss, r.FileSystem)...))
+		r.Template = spiffing.NewSourceFile(path, accessio.FileSystem(generics.AppendedSlice(fss, r.FileSystem)...))
 		return nil
 	}
 }

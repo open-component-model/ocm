@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type ResourceInput struct {
@@ -54,7 +55,7 @@ func (s *sourceInfo) Sub(indices ...interface{}) SourceInfo {
 	}
 	return &sourceInfo{
 		origin:  s.origin,
-		indices: append(s.indices, indices...),
+		indices: generics.AppendedSlice(s.indices, indices...),
 	}
 }
 
