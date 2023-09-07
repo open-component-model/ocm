@@ -1053,7 +1053,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 			})
 		})
 
-		FIt("handles top level signature", func() {
+		It("handles top level signature", func() {
 			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 			defer Close(src, "ctf")
 
