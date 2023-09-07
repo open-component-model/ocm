@@ -10,13 +10,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/entrytypes/comment"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
 const ARCH = "/tmp/ca"

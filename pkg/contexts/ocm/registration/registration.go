@@ -5,6 +5,8 @@
 package registration
 
 import (
+	"golang.org/x/exp/slices"
+
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -15,6 +17,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	plugindownload "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/plugin"
+	pluginroutingslip "github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/entrytypes/plugin"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/spi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	pluginmerge "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -30,6 +35,7 @@ func RegisterExtensions(ctx ocm.Context) error {
 		if !p.IsValid() {
 			continue
 		}
+
 		for _, a := range p.GetDescriptor().Actions {
 			h, err := pluginaction.New(p, a.Name)
 			if err != nil {
@@ -43,6 +49,7 @@ func RegisterExtensions(ctx ocm.Context) error {
 				}
 			}
 		}
+
 		for _, a := range p.GetDescriptor().ValueMergeHandlers {
 			h, err := pluginmerge.New(p, a.Name)
 			if err != nil {
@@ -51,6 +58,7 @@ func RegisterExtensions(ctx ocm.Context) error {
 				ctx.LabelMergeHandlers().RegisterHandler(h)
 			}
 		}
+
 		for _, m := range p.GetDescriptor().AccessMethods {
 			name := m.Name
 			if m.Version != "" {
@@ -60,6 +68,20 @@ func RegisterExtensions(ctx ocm.Context) error {
 				"plugin", p.Name(),
 				"type", name)
 			pi.GetContext().AccessMethods().Register(pluginaccess.NewType(name, p, &m))
+		}
+
+		for _, m := range p.GetDescriptor().ValueSets {
+			if !slices.Contains(m.Purposes, descriptor.PURPOSE_ROUTINGSLIP) {
+				continue
+			}
+			name := m.Name
+			if m.Version != "" {
+				name = name + runtime.VersionSeparator + m.Version
+			}
+			logger.Info("registering routing slip entry type",
+				"plugin", p.Name(),
+				"type", name)
+			spi.For(pi.GetContext()).Register(pluginroutingslip.NewType(name, p, &m))
 		}
 
 		if p.IsAutoConfigurationEnabled() {

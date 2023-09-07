@@ -14,6 +14,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets/flagsetscheme"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -21,7 +22,7 @@ import (
 
 type Context = cpi.Context
 
-type EntryType = flagsetscheme.VersionTypedObjectType[Entry]
+type EntryType flagsetscheme.VersionTypedObjectType[Entry]
 
 // Entry is the interface access method specifications
 // must fulfill. The main task is to map the specification
@@ -31,6 +32,7 @@ type Entry interface {
 	runtime.VersionedTypedObject
 
 	Describe(ctx Context) string
+	Validate(ctx Context) error
 }
 
 type (
@@ -102,6 +104,10 @@ func (u *UnknownEntry) Describe(ctx Context) string {
 	return strings.Join(desc, ", ")
 }
 
+func (u *UnknownEntry) Validate(ctx Context) error {
+	return nil
+}
+
 var _ Entry = &UnknownEntry{}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -159,12 +165,23 @@ func (s *GenericEntry) Describe(ctx Context) string {
 	return eff.Describe(ctx)
 }
 
+func (s *GenericEntry) Validate(ctx Context) error {
+	eff, err := s.Evaluate(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "invalid access specification")
+	}
+	if _, ok := eff.(*GenericEntry); ok {
+		return nil
+	}
+	return eff.Validate(ctx)
+}
+
 func (s *GenericEntry) Evaluate(ctx Context) (Entry, error) {
 	raw, err := s.GetRaw()
 	if err != nil {
 		return nil, err
 	}
-	return defaultEntryTypeScheme.Decode(raw, runtime.DefaultJSONEncoding) // TODO: switch to context
+	return For(ctx).Decode(raw, runtime.DefaultJSONEncoding) // TODO: switch to context
 }
 
 // defaultEntryTypeScheme contains all globally known access serializer.

@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -22,17 +23,17 @@ func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
 
 	cmd := &cobra.Command{
-		Use:   Name + " <name> <options json> <base spec json>",
-		Short: "compose access specification from options and base specification",
+		Use:   Name + " <purpose> <name> <options json> <base spec json>",
+		Short: "compose value set from options and base specification",
 		Long: `
-The task of this command is to compose an access specification based on some
-explicitly given input options and preconfigured specifications.
+The task of this command is ued to compose and validate a value set based on
+some explicitly given input options and preconfigured specifications.
 
-The finally composed access specification has to be returned as JSON document
+The finally composed set has to be returned as JSON document
 on *stdout*.
 
-This command is only used, if for an access method descriptor configuration
-options are defined (<CMD>` + p.Name() + ` descriptor</CMD>).
+This command is only used, if for a value set descriptor configuration
+na direct composition rules are configured (<CMD>` + p.Name() + ` descriptor</CMD>).
 
 If possible, predefined standard options should be used. In such a case only the
 <code>name</code> field should be defined for an option. If required, new options can be
@@ -42,7 +43,7 @@ by other plugins. Therefore, it is highly recommended to use use names prefixed
 by the plugin name.
 
 ` + options.DefaultRegistry.Usage(),
-		Args: cobra.ExactArgs(3),
+		Args: cobra.ExactArgs(4),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},
@@ -55,6 +56,7 @@ by the plugin name.
 }
 
 type Options struct {
+	Purpose string
 	Name    string
 	Options map[string]interface{}
 	Base    map[string]interface{}
@@ -64,23 +66,24 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Options) Complete(args []string) error {
-	o.Name = args[0]
-	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[1]), &o.Options); err != nil {
-		return errors.Wrapf(err, "invalid access specification options")
+	o.Purpose = args[0]
+	o.Name = args[1]
+	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[2]), &o.Options); err != nil {
+		return errors.Wrapf(err, "invalid avalue set options")
 	}
-	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[2]), &o.Base); err != nil {
-		return errors.Wrapf(err, "invalid base access specification")
+	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[3]), &o.Base); err != nil {
+		return errors.Wrapf(err, "invalid base set specification")
 	}
 	return nil
 }
 
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	k, v := runtime.KindVersion(opts.Name)
-	m := p.GetAccessMethod(k, v)
-	if m == nil {
-		return errors.ErrUnknown(errors.KIND_ACCESSMETHOD, opts.Name)
+	s := p.GetValueSet(opts.Purpose, k, v)
+	if s == nil {
+		return errors.ErrUnknown(descriptor.KIND_VALUESET, opts.Name)
 	}
-	err := m.ComposeAccessSpecification(p, opts.Options, opts.Base)
+	err := s.Compose(p, opts.Options, opts.Base)
 	if err != nil {
 		return err
 	}

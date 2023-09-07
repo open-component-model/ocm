@@ -6,6 +6,8 @@
 
 NAME="$(basename "$0")"
 
+set -e
+
 Error() {
   echo '{ "error": "'$1'" }' >&2
   exit 1
@@ -42,41 +44,35 @@ Info() {
   PATHOPT='{"name":"accessPath","type":"string","description":"file path"}'
   MEDIAOPT='{"name":"mediaType"}'
   OPTS='['$PATHOPT','$MEDIAOPT']'
-  echo '{"version":"v1","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","description":"a test plugin with access method test","accessMethods":[{"name":"test","shortDescription":"test access","description":"","options":'$OPTS'},{"name":"test","version":"v1","shortDescription":"test access","description":""}]}
+  echo '{"version":"v1","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","description":"a test plugin with valueset test","valuesets":[{"name":"test","purposes":["routingslip"],"shortDescription":"test set","description":"","options":'$OPTS'},{"name":"test","purposes":["routingslip"],"version":"v1","shortDescription":"test set","description":""}]}
 '
 }
 
-Get() {
-  echo "test content"
-  for arg; do
-    echo "$arg"
-  done
-}
-
-Validate() {
-  echo '{"short":"a test","mediaType":"plain/text","description":"","hint":"testfile","consumerId":{"hostname":"localhost","type":"test"}}'
-}
-
 Compose() {
-  BASE="$3"
-  OPTS="$2"
+  BASE="$4"
+  OPTS="$3"
 
   setopt accessPath path
   setopt mediaType mediaType
   echo "$BASE"
 }
 
-AccessMethod() {
+Validate() {
+  echo '{"description":"a test"}'
+}
+
+
+ValueSet() {
   case "$1" in
     get) Get "${@:2}";;
-    validate) Validate "${@:2}";;
     compose) Compose "${@:2}";;
-    *) Error "invalid accessmethod command $1";;
+    validate) Validate "${@:2}";;
+    *) Error "invalid valueset command $1";;
   esac
 }
 
 case "$1" in
   info) Info;;
-  accessmethod) AccessMethod "${@:2}";;
+  valueset) ValueSet "${@:2}";;
   *) Error "invalid command $1";;
 esac

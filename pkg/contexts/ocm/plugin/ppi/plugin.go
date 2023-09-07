@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"golang.org/x/exp/slices"
+
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -38,6 +40,9 @@ type plugin struct {
 	mergehandlers map[string]ValueMergeHandler
 	mergespecs    map[string]*descriptor.LabelMergeSpecification
 
+	valuesets map[string]map[string]ValueSet
+	setScheme map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
+
 	configParser func(message json.RawMessage) (interface{}, error)
 }
 
@@ -59,6 +64,9 @@ func NewPlugin(name string, version string) Plugin {
 		actions:       map[string]Action{},
 		mergehandlers: map[string]ValueMergeHandler{},
 		mergespecs:    map[string]*descriptor.LabelMergeSpecification{},
+
+		valuesets: map[string]map[string]ValueSet{},
+		setScheme: map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]{},
 
 		descriptor: descriptor.Descriptor{
 			Version:       descriptor.VERSION,
@@ -270,7 +278,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	vers := m.Version()
 	if vers == "" {
 		meth := descriptor.AccessMethodDescriptor{
-			ValueSetDescriptor: descriptor.ValueSetDescriptor{
+			ValueSetDefinition: descriptor.ValueSetDefinition{
 				Name:        m.Name(),
 				Description: m.Description(),
 				Format:      m.Format(),
@@ -283,7 +291,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		vers = "v1"
 	}
 	meth := descriptor.AccessMethodDescriptor{
-		ValueSetDescriptor: descriptor.ValueSetDescriptor{
+		ValueSetDefinition: descriptor.ValueSetDefinition{
 			Name:        m.Name(),
 			Version:     vers,
 			Description: m.Description(),
@@ -390,4 +398,108 @@ func (p *plugin) GetConfig() (interface{}, error) {
 		return &cfg, nil
 	}
 	return p.configParser(p.options.Config)
+}
+
+func (p *plugin) DecodeValueSet(purpose string, data []byte) (runtime.TypedObject, error) {
+	schemes := p.setScheme[purpose]
+	if schemes == nil {
+		return nil, errors.ErrUnknown(descriptor.KIND_PURPOSE)
+	}
+	return schemes.Decode(data, nil)
+}
+
+func (p *plugin) GetValueSet(purpose string, name string, version string) ValueSet {
+	n := name
+	if version != "" {
+		n += "/" + version
+	}
+	set := p.valuesets[purpose]
+	if set == nil {
+		return nil
+	}
+	return set[n]
+}
+
+func (p *plugin) RegisterValueSet(s ValueSet) error {
+	n := s.Name()
+	if s.Version() != "" {
+		n += runtime.VersionSeparator + s.Version()
+	}
+	for _, pp := range s.Purposes() {
+		if p.GetValueSet(pp, s.Name(), s.Version()) != nil {
+			return errors.ErrAlreadyExists(descriptor.KIND_VALUESET, n)
+		}
+	}
+
+	var optlist []CLIOption
+	for _, o := range s.Options() {
+		known := options.DefaultRegistry.GetOptionType(o.GetName())
+		if known != nil {
+			if o.ValueType() != known.ValueType() {
+				return fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
+			}
+			optlist = append(optlist, CLIOption{
+				Name: o.GetName(),
+			})
+		} else {
+			optlist = append(optlist, CLIOption{
+				Name:        o.GetName(),
+				Type:        o.ValueType(),
+				Description: o.GetDescriptionText(),
+			})
+		}
+	}
+	vers := s.Version()
+	if vers == "" {
+		set := descriptor.ValueSetDescriptor{
+			ValueSetDefinition: descriptor.ValueSetDefinition{
+				Name:        s.Name(),
+				Description: s.Description(),
+				Format:      s.Format(),
+			},
+			Purposes: slices.Clone(s.Purposes()),
+		}
+		p.descriptor.ValueSets = append(p.descriptor.ValueSets, set)
+		for _, pp := range s.Purposes() {
+			schemes := p.setScheme[pp]
+			if schemes == nil {
+				schemes = runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil)
+				p.setScheme[pp] = schemes
+			}
+			schemes.RegisterByDecoder(s.Name(), s)
+			sets := p.valuesets[pp]
+			if sets == nil {
+				sets = map[string]ValueSet{}
+				p.valuesets[pp] = sets
+			}
+			sets[s.Name()] = s
+		}
+		vers = "v1"
+	}
+	set := descriptor.ValueSetDescriptor{
+		ValueSetDefinition: descriptor.ValueSetDefinition{
+			Name:        s.Name(),
+			Version:     vers,
+			Description: s.Description(),
+			Format:      s.Format(),
+			CLIOptions:  optlist,
+		},
+		Purposes: slices.Clone(s.Purposes()),
+	}
+	p.descriptor.ValueSets = append(p.descriptor.ValueSets, set)
+	for _, pp := range s.Purposes() {
+		schemes := p.setScheme[pp]
+		if schemes == nil {
+			schemes = runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil)
+			p.setScheme[pp] = schemes
+		}
+		schemes.RegisterByDecoder(s.Name()+"/"+vers, s)
+		sets := p.valuesets[pp]
+		if sets == nil {
+			sets = map[string]ValueSet{}
+			p.valuesets[pp] = sets
+		}
+		sets[s.Name()+"/"+vers] = s
+	}
+	return nil
 }

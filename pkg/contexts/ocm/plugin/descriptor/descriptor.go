@@ -25,7 +25,10 @@ type Descriptor struct {
 	Downloaders              List[DownloaderDescriptor]        `json:"downloaders,omitempty"`
 	ValueMergeHandlers       List[ValueMergeHandlerDescriptor] `json:"valueMergeHandlers,omitempty"`
 	LabelMergeSpecifications List[LabelMergeSpecification]     `json:"labelMergeSpecifications,omitempty"`
+	ValueSets                List[ValueSetDescriptor]          `json:"valuesets,omitempty"`
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type DownloaderKey = ArtifactContext
 
@@ -61,6 +64,8 @@ type DownloaderRegistration struct {
 	Priority      int `json:"priority,omitempty"`
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type UploaderDescriptor struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
@@ -80,17 +85,36 @@ func (d UploaderDescriptor) GetConstraints() []UploaderKey {
 }
 
 type AccessMethodDescriptor struct {
-	ValueSetDescriptor     `json:",inline"`
+	ValueSetDefinition     `json:",inline"`
 	SupportContentIdentity bool `json:"supportContentIdentity,omitempty"`
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type ValueSetDescriptor struct {
+	ValueSetDefinition `json:",inline"`
+	Purposes           []string `json:"purposes"`
+}
+
+const PURPOSE_ROUTINGSLIP = "routingslip"
+
+type ValueSetDefinition struct {
 	Name        string      `json:"name"`
 	Version     string      `json:"version,omitempty"`
 	Description string      `json:"description"`
 	Format      string      `json:"format"`
 	CLIOptions  []CLIOption `json:"options,omitempty"`
 }
+
+func (d ValueSetDefinition) GetName() string {
+	return d.Name
+}
+
+func (d ValueSetDefinition) GetDescription() string {
+	return d.Description
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type ValueMergeHandlerDescriptor struct {
 	Name        string `json:"name"`
@@ -104,6 +128,8 @@ func (a ValueMergeHandlerDescriptor) GetName() string {
 func (a ValueMergeHandlerDescriptor) GetDescription() string {
 	return a.Description
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type LabelMergeSpecification struct {
 	Name                               string `json:"name"`
@@ -131,6 +157,8 @@ func (a LabelMergeSpecification) GetConfig() json.RawMessage {
 	return a.Config
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type ActionDescriptor struct {
 	Name             string   `json:"name"`
 	Versions         []string `json:"versions,omitempty"`
@@ -146,6 +174,8 @@ func (a ActionDescriptor) GetName() string {
 func (a ActionDescriptor) GetDescription() string {
 	return a.Description
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type CLIOption struct {
 	Name        string `json:"name"`

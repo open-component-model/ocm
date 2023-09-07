@@ -22,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/topics/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/valueset"
 )
 
 type PluginCommand struct {
@@ -65,6 +66,7 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 	cmd.AddCommand(accessmethod.New(p))
 	cmd.AddCommand(upload.New(p))
 	cmd.AddCommand(download.New(p))
+	cmd.AddCommand(valueset.New(p))
 
 	cmd.InitDefaultHelpCmd()
 	var help *cobra.Command

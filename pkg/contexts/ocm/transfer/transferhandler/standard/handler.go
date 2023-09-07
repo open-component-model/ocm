@@ -89,7 +89,6 @@ func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, h
 	return accessio.Retry(h.opts.GetRetries(), time.Second, func() error {
 		return t.SetSourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
 	})
-
 }
 
 func (h *Handler) GlobalAccess(ctx ocm.Context, m ocm.AccessMethod) ocm.AccessSpec {

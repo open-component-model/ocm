@@ -43,3 +43,7 @@ var _ spi.Entry = (*Entry)(nil)
 func (a *Entry) Describe(ctx spi.Context) string {
 	return fmt.Sprintf("Comment: %s", a.Comment)
 }
+
+func (a *Entry) Validate(spi.Context) error {
+	return nil
+}

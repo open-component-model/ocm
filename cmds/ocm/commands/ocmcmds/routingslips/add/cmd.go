@@ -7,9 +7,6 @@ package add
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/spi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/opencontainers/go-digest"
@@ -24,8 +21,11 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/spi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -80,7 +80,7 @@ $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandels
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	o.prov = spi.DefaultEntryTypeScheme().CreateConfigTypeSetConfigProvider().(flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider)
+	o.prov = routingslip.For(o.OCMContext()).CreateConfigTypeSetConfigProvider().(flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider)
 	o.configopts = o.prov.CreateOptions()
 	o.configopts.AddFlags(fs)
 
@@ -107,7 +107,12 @@ func (o *Command) Complete(args []string) error {
 	if err != nil {
 		return errors.Wrapf(err, "invalid entry data")
 	}
+
 	o.Entry = routingslip.AsGenericEntry(u)
+	err = o.Entry.Validate(o.OCMContext())
+	if err != nil {
+		return err
+	}
 	if o.Algorithm == "" {
 		o.Algorithm = rsa.Algorithm
 	}

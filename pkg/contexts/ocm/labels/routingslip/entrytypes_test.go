@@ -30,6 +30,10 @@ func (m *My) Describe(ctx ocm.Context) string {
 	return fmt.Sprintf("%s with %q", m.GetKind(), m.Value)
 }
 
+func (m *My) Validate(ctx ocm.Context) error {
+	return nil
+}
+
 func New(v string) *My {
 	return &My{
 		ObjectVersionedTypedObject: runtime.NewVersionedTypedObject(TYPE),

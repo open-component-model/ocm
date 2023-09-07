@@ -26,3 +26,7 @@ func NewStrictEntryTypeScheme() runtime.VersionedTypeRegistry[Entry, EntryType] 
 func DefaultEntryTypeScheme() EntryTypeScheme {
 	return internal.DefaultEntryTypeScheme()
 }
+
+func For(ctx cpi.ContextProvider) EntryTypeScheme {
+	return internal.For(ctx)
+}

@@ -40,6 +40,7 @@ type entryType struct {
 	description string
 	format      string
 	handler     flagsets.ConfigOptionTypeSetHandler
+	validator   func(Entry) error
 }
 
 var _ additionalTypeInfo = (*entryType)(nil)
@@ -76,6 +77,13 @@ func (t *entryType) Description() string {
 
 func (t *entryType) Format() string {
 	return t.format
+}
+
+func (t *entryType) Validate(e Entry) error {
+	if t.validator == nil {
+		return nil
+	}
+	return t.validator(e)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
