@@ -15,7 +15,9 @@ artifacts, artifact, art, a
 ### Options
 
 ```
+      --dirtree          extract as effective filesystem content
   -h, --help             help for artifacts
+      --layers ints      extract dedicated layers
   -O, --outfile string   output file or directory
       --repo string      repository name or spec
   -t, --type string      archive format (directory, tar, tgz) (default "directory")
@@ -63,6 +65,12 @@ linked library can be used:
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 
+
+
+With option <code>--layers</code> it is possible to request the download of
+dedicated layers, only. Option <code>--dirtree</code> expects the artifact to
+be a layered filesystem (for example OCI Image) and provided the effective
+filesystem content.
 
 
 The <code>--type</code> option accepts a file format for the
