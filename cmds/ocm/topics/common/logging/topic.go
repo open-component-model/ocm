@@ -35,7 +35,7 @@ or by command line options of the <CMD>ocm</CMD> command. Details about
 the YAML structure of a logging settings can be found on https://github.com/mandelsoft/logging.
 
 The command line also supports some quick-config options for enabling log levels
-for dedicated tags and realms (logging keys).
+for dedicated tags and realms or realm prefixes (logging keys).
 
 ` + describe("tags", logging.GetTagDefinitions()) + `
 

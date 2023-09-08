@@ -5,6 +5,7 @@
 package get
 
 import (
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -119,7 +120,7 @@ func getTreewide(opts *output.Options) output.Output {
 
 func mapGetRegularOutput(e interface{}) interface{} {
 	r := common.Elem(e)
-	return append(elemhdlr.MapMetaOutput(e), r.Type, string(r.Relation))
+	return generics.AppendedSlice(elemhdlr.MapMetaOutput(e), r.Type, string(r.Relation))
 }
 
 func mapGetWideOutput(e interface{}) interface{} {

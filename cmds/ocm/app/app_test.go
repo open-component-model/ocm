@@ -7,6 +7,7 @@ package app_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -71,8 +72,8 @@ var _ = Describe("Test Environment", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
-ERROR <nil> ocm/test error
-ERROR <nil> ocm/test ctxerror
+ERROR <nil> error realm ocm realm test
+ERROR <nil> ctxerror realm ocm realm test
 `))
 	})
 
@@ -80,14 +81,14 @@ ERROR <nil> ocm/test ctxerror
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "-X", "plugindir=xxx", "-l", "Debug", "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
-V[4] ocm/test debug
-V[3] ocm/test info
-V[2] ocm/test warn
-ERROR <nil> ocm/test error
-V[4] ocm/test ctxdebug
-V[3] ocm/test ctxinfo
-V[2] ocm/test ctxwarn
-ERROR <nil> ocm/test ctxerror
+V[4] debug realm ocm realm test
+V[3] info realm ocm realm test
+V[2] warn realm ocm realm test
+ERROR <nil> error realm ocm realm test
+V[4] ctxdebug realm ocm realm test
+V[3] ctxinfo realm ocm realm test
+V[2] ctxwarn realm ocm realm test
+ERROR <nil> ctxerror realm ocm realm test
 `))
 	})
 
@@ -95,14 +96,14 @@ ERROR <nil> ocm/test ctxerror
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "--logconfig", "@testdata/logcfg.yaml", "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
-V[4] ocm/test debug
-V[3] ocm/test info
-V[2] ocm/test warn
-ERROR <nil> ocm/test error
-V[4] ocm/test ctxdebug
-V[3] ocm/test ctxinfo
-V[2] ocm/test ctxwarn
-ERROR <nil> ocm/test ctxerror
+V[4] debug realm ocm realm test
+V[3] info realm ocm realm test
+V[2] warn realm ocm realm test
+ERROR <nil> error realm ocm realm test
+V[4] ctxdebug realm ocm realm test
+V[3] ctxinfo realm ocm realm test
+V[2] ctxwarn realm ocm realm test
+ERROR <nil> ctxerror realm ocm realm test
 `))
 	})
 
@@ -116,14 +117,14 @@ rules:
       conditions:
         - realm: test`, "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
-V[4] ocm/test debug
-V[3] ocm/test info
-V[2] ocm/test warn
-ERROR <nil> ocm/test error
-V[4] ocm/test ctxdebug
-V[3] ocm/test ctxinfo
-V[2] ocm/test ctxwarn
-ERROR <nil> ocm/test ctxerror
+V[4] debug realm ocm realm test
+V[3] info realm ocm realm test
+V[2] warn realm ocm realm test
+ERROR <nil> error realm ocm realm test
+V[4] ctxdebug realm ocm realm test
+V[3] ctxinfo realm ocm realm test
+V[2] ctxwarn realm ocm realm test
+ERROR <nil> ctxerror realm ocm realm test
 `))
 	})
 
@@ -134,7 +135,8 @@ ERROR <nil> ocm/test ctxerror
 		data, err := vfs.ReadFile(env.FileSystem(), "logfile")
 		Expect(err).To(Succeed())
 
-		Expect(len(string(data))).To(Equal(191))
+		fmt.Printf("%s\n", string(data))
+		Expect(len(string(data))).To(Equal(181))
 	})
 
 	It("sets attr from file", func() {

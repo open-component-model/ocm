@@ -22,13 +22,19 @@ import (
 
 var Description = `
 The <code>--log*</code> options can be used to configure the logging behaviour.
+For details see <CMD>ocm logging</CMD>.
+
 There is a quick config option <code>--logkeys</code> to configure simple
 tag/realm based condition rules. The comma-separated names build an AND rule.
-Hereby, names starting with a slash (<code>/</code>) denote a realm (without the leading slash).
-A realm is a slash separated sequence of identifiers, which matches all logging realms
-with the given realms as path prefix. A tag directly matches the logging tags.
-Used tags and realms can be found under topic <CMD>ocm logging</CMD>. The ocm coding basically
-uses the realm <code>ocm</code>.
+Hereby, names starting with a slash (<code>/</code>) denote a realm (without
+the leading slash). A realm is a slash separated sequence of identifiers. If
+the realm name starts with a plus (<code>+</code>) character the generated rule 
+will match the realm and all its sub-realms, otherwise, only the dedicated
+realm is affected. For example <code>/+ocm=trace</code> will enable all log output of the
+OCM library.
+
+A tag directly matches the logging tags. Used tags and realms can be found under
+topic <CMD>ocm logging</CMD>. The ocm coding basically uses the realm <code>ocm</code>.
 The default level to enable is <code>info</code>. Separated by an equal sign (<code>=</code>)
 optionally a dedicated level can be specified. Log levels can be (<code>error</code>,
 <code>warn</code>, <code>info</code>, <code>debug</code> and <code>trace</code>.
@@ -52,7 +58,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.LogLevel, "loglevel", "l", "", "set log level")
 	fs.StringVarP(&o.LogFileName, "logfile", "L", "", "set log file")
 	fs.StringVarP(&o.LogConfig, "logconfig", "", "", "log config")
-	fs.StringArrayVarP(&o.LogKeys, "logkeys", "", nil, "log tags/realms(with leading /) to be enabled ([/]name{,[/]name}[=level])")
+	fs.StringArrayVarP(&o.LogKeys, "logkeys", "", nil, "log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])")
 }
 
 func (o *Options) Close() error {
@@ -127,8 +133,14 @@ func (o *Options) Configure(ctx ocm.Context, logctx logging.Context) error {
 		for _, tag := range strings.Split(t, ",") {
 			tag = strings.TrimSpace(tag)
 			if strings.HasPrefix(tag, "/") {
-				cond = append(cond, logging.NewRealmPrefix(tag[1:]))
-				cfgcond = append(cfgcond, config.RealmPrefix(tag[1:]))
+				realm := tag[1:]
+				if strings.HasPrefix(realm, "+") {
+					cond = append(cond, logging.NewRealmPrefix(realm[1:]))
+					cfgcond = append(cfgcond, config.RealmPrefix(realm[1:]))
+				} else {
+					cond = append(cond, logging.NewRealm(realm))
+					cfgcond = append(cfgcond, config.Realm(realm))
+				}
 			} else {
 				cond = append(cond, logging.NewTag(tag))
 				cfgcond = append(cfgcond, config.Tag(tag))

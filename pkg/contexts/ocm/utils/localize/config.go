@@ -13,6 +13,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/spiff"
 )
@@ -101,7 +102,7 @@ func Configure(
 			if l, ok := cur.([]interface{}); !ok {
 				return nil, errors.Newf("node 'configRules' in template must be a list of configuration requests")
 			} else {
-				temp["configRules"] = append(l, cfglist...)
+				temp["configRules"] = generics.AppendedSlice(l, cfglist...)
 			}
 		} else {
 			temp["configRules"] = cfglist
@@ -128,5 +129,5 @@ func Configure(
 		ConfigRules Substitutions `json:"configRules,omitempty"`
 	}
 	err = runtime.DefaultYAMLEncoding.Unmarshal(config, &subst)
-	return append(subst.Adjustments, subst.ConfigRules...), err
+	return generics.AppendedSlice(subst.Adjustments, subst.ConfigRules...), err
 }

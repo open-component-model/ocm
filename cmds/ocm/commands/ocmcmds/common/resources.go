@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
+	"github.com/open-component-model/ocm/pkg/generics"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
@@ -131,7 +132,7 @@ type ElementMetaDataSpecificationsProvider struct {
 
 func NewElementMetaDataSpecificationsProvider(name string, adder flagsets.ConfigAdder, types ...flagsets.ConfigOptionType) *ElementMetaDataSpecificationsProvider {
 	meta := flagsets.NewPlainConfigProvider(name, flagsets.ComposedAdder(addMeta(name), adder),
-		append(types,
+		generics.AppendedSlice(types,
 			flagsets.NewYAMLOptionType(name, fmt.Sprintf("%s meta data (yaml)", name)),
 			flagsets.NewStringOptionType("name", fmt.Sprintf("%s name", name)),
 			flagsets.NewStringOptionType("version", fmt.Sprintf("%s version", name)),
@@ -227,7 +228,7 @@ func NewContentResourceSpecificationProvider(ctx clictx.Context, name string, ad
 		DefaultType: deftype,
 		ctx:         ctx,
 		ElementMetaDataSpecificationsProvider: NewElementMetaDataSpecificationsProvider(name, flagsets.ComposedAdder(addContentMeta, adder),
-			append(types,
+			generics.AppendedSlice(types,
 				flagsets.NewStringOptionType("type", fmt.Sprintf("%s type", name)),
 			)...,
 		),
@@ -369,7 +370,7 @@ type ResourceAdderCommand struct {
 
 func NewResourceAdderCommand(ctx clictx.Context, h ResourceSpecHandler, provider ElementSpecificationsProvider, opts ...options.Options) ResourceAdderCommand {
 	return ResourceAdderCommand{
-		BaseCommand: utils.NewBaseCommand(ctx, append(opts,
+		BaseCommand: utils.NewBaseCommand(ctx, generics.AppendedSlice[options.Options](opts,
 			fileoption.NewCompArch(),
 			dryrunoption.New(fmt.Sprintf("evaluate and print %s specifications", h.Key()), true),
 			templateroption.New(""),

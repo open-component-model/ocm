@@ -140,7 +140,7 @@ func SignerByName(n string) Option {
 func (o *signer) ApplySigningOption(opts *Options) {
 	n := strings.TrimSpace(o.name)
 	if n != "" {
-		opts.SignatureNames = append(append([]string{}, n), opts.SignatureNames...)
+		opts.SignatureNames = append([]string{n}, opts.SignatureNames...)
 	}
 	opts.Signer = o.signer
 }
@@ -211,7 +211,7 @@ func Resolver(h ...ocm.ComponentVersionResolver) Option {
 }
 
 func (o *resolver) ApplySigningOption(opts *Options) {
-	opts.Resolver = ocm.NewCompoundResolver(append(append([]ocm.ComponentVersionResolver{}, opts.Resolver), o.resolver...)...)
+	opts.Resolver = ocm.NewCompoundResolver(append([]ocm.ComponentVersionResolver{opts.Resolver}, o.resolver...)...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

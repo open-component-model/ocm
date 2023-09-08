@@ -43,9 +43,9 @@ var _ = Describe("logging configuration", func() {
 		LogTest(ctx)
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[3] ocm info
-V[2] ocm warn
-ERROR <nil> ocm error
+V[3] info realm ocm
+V[2] warn realm ocm
+ERROR <nil> error realm ocm
 `))
 	})
 
@@ -54,10 +54,10 @@ ERROR <nil> ocm error
 		LogTest(ctx)
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] ocm debug
-V[3] ocm info
-V[2] ocm warn
-ERROR <nil> ocm error
+V[4] debug realm ocm
+V[3] info realm ocm
+V[2] warn realm ocm
+ERROR <nil> error realm ocm
 `))
 	})
 
@@ -66,10 +66,10 @@ ERROR <nil> ocm error
 		LogTest(cfg)
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] ocm debug
-V[3] ocm info
-V[2] ocm warn
-ERROR <nil> ocm error
+V[4] debug realm ocm
+V[3] info realm ocm
+V[2] warn realm ocm
+ERROR <nil> error realm ocm
 `))
 	})
 
@@ -88,14 +88,14 @@ settings:
 		LogTest(cfg, "cfg")
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] ocm debug
-V[3] ocm info
-V[2] ocm warn
-ERROR <nil> ocm error
-V[4] ocm cfgdebug
-V[3] ocm cfginfo
-V[2] ocm cfgwarn
-ERROR <nil> ocm cfgerror
+V[4] debug realm ocm
+V[3] info realm ocm
+V[2] warn realm ocm
+ERROR <nil> error realm ocm
+V[4] cfgdebug realm ocm
+V[3] cfginfo realm ocm
+V[2] cfgwarn realm ocm
+ERROR <nil> cfgerror realm ocm
 `))
 	})
 
@@ -114,14 +114,14 @@ settings:
 		LogTest(cfg, "cfg")
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] ocm debug
-V[3] ocm info
-V[2] ocm warn
-ERROR <nil> ocm error
-V[4] ocm cfgdebug
-V[3] ocm cfginfo
-V[2] ocm cfgwarn
-ERROR <nil> ocm cfgerror
+V[4] debug realm ocm
+V[3] info realm ocm
+V[2] warn realm ocm
+ERROR <nil> error realm ocm
+V[4] cfgdebug realm ocm
+V[3] cfginfo realm ocm
+V[2] cfgwarn realm ocm
+ERROR <nil> cfgerror realm ocm
 `))
 	})
 
@@ -141,13 +141,13 @@ settings:
 		LogTest(cfg, "cfg")
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[3] ocm info
-V[2] ocm warn
-ERROR <nil> ocm error
-V[4] ocm cfgdebug
-V[3] ocm cfginfo
-V[2] ocm cfgwarn
-ERROR <nil> ocm cfgerror
+V[3] info realm ocm
+V[2] warn realm ocm
+ERROR <nil> error realm ocm
+V[4] cfgdebug realm ocm
+V[3] cfginfo realm ocm
+V[2] cfgwarn realm ocm
+ERROR <nil> cfgerror realm ocm
 `))
 	})
 
@@ -194,10 +194,10 @@ settings:
 			LogTest(ctx)
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] ocm debug
-V[3] ocm info
-V[2] ocm warn
-ERROR <nil> ocm error
+V[4] debug realm ocm
+V[3] info realm ocm
+V[2] warn realm ocm
+ERROR <nil> error realm ocm
 `))
 		})
 
@@ -212,9 +212,9 @@ ERROR <nil> ocm error
 			LogTest(ctx)
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[3] ocm info
-V[2] ocm warn
-ERROR <nil> ocm error
+V[3] info realm ocm
+V[2] warn realm ocm
+ERROR <nil> error realm ocm
 `))
 		})
 		It("re-applies config with extra id", func() {
@@ -228,10 +228,10 @@ ERROR <nil> ocm error
 			LogTest(ctx)
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] ocm debug
-V[3] ocm info
-V[2] ocm warn
-ERROR <nil> ocm error
+V[4] debug realm ocm
+V[3] info realm ocm
+V[2] warn realm ocm
+ERROR <nil> error realm ocm
 `))
 		})
 	})
