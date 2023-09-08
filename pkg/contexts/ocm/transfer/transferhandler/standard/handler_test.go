@@ -13,6 +13,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
+	"github.com/open-component-model/ocm/pkg/generics"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -114,7 +115,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 		defer tgt.Close()
 
-		err = transfer.Transfer(cv, tgt, append(topts, standard.ResourcesByValue(), &optionsChecker{})...)
+		err = transfer.Transfer(cv, tgt, generics.AppendedSlice[transferhandler.TransferOption](topts, standard.ResourcesByValue(), &optionsChecker{})...)
 		Expect(err).To(Succeed())
 		Expect(env.DirExists(OUT)).To(BeTrue())
 

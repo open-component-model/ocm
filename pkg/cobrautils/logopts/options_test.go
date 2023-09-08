@@ -27,6 +27,7 @@ var _ = Describe("log configuration", func() {
 			LogKeys: []string{
 				"tag=trace",
 				"/realm=info",
+				"/+all=info",
 			},
 		}
 
@@ -40,7 +41,11 @@ var _ = Describe("log configuration", func() {
 
 		Expect(logctx.GetDefaultLevel()).To(Equal(logging.DebugLevel))
 		Expect(logctx.Logger(logging.NewTag("tag")).Enabled(logging.TraceLevel)).To(BeTrue())
+		Expect(logctx.Logger(logging.NewRealm("all")).Enabled(logging.DebugLevel)).To(BeFalse())
+		Expect(logctx.Logger(logging.NewRealm("all/test")).Enabled(logging.DebugLevel)).To(BeFalse())
+		Expect(logctx.Logger(logging.NewRealm("realm")).Enabled(logging.InfoLevel)).To(BeTrue())
+		Expect(logctx.Logger(logging.NewRealm("realm")).Enabled(logging.DebugLevel)).To(BeFalse())
 		Expect(logctx.Logger(logging.NewRealm("realm/test")).Enabled(logging.InfoLevel)).To(BeTrue())
-		Expect(logctx.Logger(logging.NewRealm("realm/test")).Enabled(logging.DebugLevel)).To(BeFalse())
+		Expect(logctx.Logger(logging.NewRealm("realm/test")).Enabled(logging.DebugLevel)).To(BeTrue())
 	})
 })

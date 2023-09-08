@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type Named interface {
@@ -56,5 +57,5 @@ next:
 		}
 		list = append(list, e)
 	}
-	return append(append(l[:0:0], l...), list...)
+	return generics.AppendedSlice(l, list...)
 }

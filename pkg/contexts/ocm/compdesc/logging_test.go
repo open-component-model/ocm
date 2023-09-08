@@ -43,7 +43,7 @@ var _ = Describe("logging", func() {
 		_, err := compdesc.Decode([]byte("[]"))
 		Expect(err).To(MatchError(`error unmarshaling JSON: while decoding JSON: json: cannot unmarshal array into Go value of type struct { Meta v1.Metadata "json:\"meta\""; APIVersion string "json:\"apiVersion\"" }`))
 		Expect(buf.String()).To(testutils.StringEqualTrimmedWithContext(`
-V[4] ocm/compdesc decoding of component descriptor failed error error unmarshaling JSON: while decoding JSON: json: cannot unmarshal array into Go value of type struct { Meta v1.Metadata "json:\"meta\""; APIVersion string "json:\"apiVersion\"" } data []
+V[4] decoding of component descriptor failed realm ocm realm ocm/compdesc error error unmarshaling JSON: while decoding JSON: json: cannot unmarshal array into Go value of type struct { Meta v1.Metadata "json:\"meta\""; APIVersion string "json:\"apiVersion\"" } data []
 `))
 	})
 
@@ -64,7 +64,7 @@ component:
 `))
 		Expect(err).To(MatchError(`component.creationTime: Does not match format 'date-time'`))
 		Expect(buf.String()).To(testutils.StringEqualTrimmedWithContext(`
-V[4] ocm/compdesc versioned decoding of component descriptor failed error component.creationTime: Does not match format 'date-time' scheme v2 data meta: schemaVersion: v2 component: name: acme.org/test version: 1.0.0 provider: acme.org creationTime: "0815" repositoryContexts: [] resources: [] sources: [] componentReferences: []
+V[4] versioned decoding of component descriptor failed realm ocm realm ocm/compdesc error component.creationTime: Does not match format 'date-time' scheme v2 data meta: schemaVersion: v2 component: name: acme.org/test version: 1.0.0 provider: acme.org creationTime: "0815" repositoryContexts: [] resources: [] sources: [] componentReferences: []
 `))
 	})
 

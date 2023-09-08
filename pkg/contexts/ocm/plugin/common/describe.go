@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
@@ -175,8 +176,8 @@ func GetActionInfo(reg api.ActionTypeRegistry, actions []descriptor.ActionDescri
 		if i == nil {
 			i = &ActionInfo{
 				ActionDesc:   a.Description,
-				Versions:     append(a.Versions[:0:0], a.Versions...),
-				Selectors:    append(a.DefaultSelectors[:0:0], a.DefaultSelectors...),
+				Versions:     slices.Clone(a.Versions),
+				Selectors:    slices.Clone(a.DefaultSelectors),
 				ConsumerType: a.ConsumerType,
 			}
 			if err := runtime.SortVersions(i.Versions); err != nil {
