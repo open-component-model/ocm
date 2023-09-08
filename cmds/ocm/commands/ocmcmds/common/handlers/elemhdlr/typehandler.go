@@ -168,7 +168,7 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 			e := elemaccess.Get(i)
 			if h.filterElement(e) {
 				result = append(result, &Object{
-					History:   append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+					History:   c.History.Append(common.VersionedElementKey(c.ComponentVersion)),
 					Version:   c.ComponentVersion,
 					VersionId: c.Identity,
 					Id:        e.GetMeta().GetIdentity(elemaccess),
@@ -179,7 +179,7 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 
 		if len(result) == 0 && h.forceEmpty {
 			result = append(result, &Object{
-				History:   append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+				History:   c.History.Append(common.VersionedElementKey(c.ComponentVersion)),
 				Version:   c.ComponentVersion,
 				VersionId: c.Identity,
 				Id:        metav1.Identity{},
@@ -221,7 +221,7 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 		ok, _ := selector.Match(eid)
 		if ok {
 			result = append(result, &Object{
-				History:   append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+				History:   c.History.Append(common.VersionedElementKey(c.ComponentVersion)),
 				Version:   c.ComponentVersion,
 				VersionId: c.Identity,
 				Spec:      selector,
@@ -232,7 +232,7 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 	}
 	if len(result) == 0 && h.forceEmpty {
 		result = append(result, &Object{
-			History:   append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+			History:   c.History.Append(common.VersionedElementKey(c.ComponentVersion)),
 			Version:   c.ComponentVersion,
 			VersionId: c.Identity,
 			Id:        metav1.Identity{},

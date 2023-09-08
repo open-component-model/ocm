@@ -1128,6 +1128,14 @@ github.com/mandelsoft/filepath v0.0.0-20230412200429-36b1eb66bd27 h1:VivN6K8H4H0
 github.com/mandelsoft/filepath v0.0.0-20230412200429-36b1eb66bd27/go.mod h1:LxhqC7khDoRENwooP6f/vWvia9ivj6TqLYrR39zqkN0=
 github.com/mandelsoft/logging v0.0.0-20230830150659-23eef406cc79 h1:CNpizgLTmopPIkjXUX7iOAyEDm59WOg7yrriViF/sUw=
 github.com/mandelsoft/logging v0.0.0-20230830150659-23eef406cc79/go.mod h1:HjtBPH5tsJygvyYEu2r/ZwOOBGcu+oR2sKH73VEnHtg=
+github.com/mandelsoft/logging v0.0.0-20230901143854-59760383a02a h1:XAWD6mhShwue+rInkhbwBiFscwa9kAjfoISxQJKZ/HI=
+github.com/mandelsoft/logging v0.0.0-20230901143854-59760383a02a/go.mod h1:J/kRqdfAOQmMPfJeAcV2pfX1QLV9/NlAQdAJzpnaU+g=
+github.com/mandelsoft/logging v0.0.0-20230901151820-d2b141fbe4e0 h1:CxB7BSzgizMfu8hTsPoGwf3VNh4JTGthA5SS1orP8xU=
+github.com/mandelsoft/logging v0.0.0-20230901151820-d2b141fbe4e0/go.mod h1:J/kRqdfAOQmMPfJeAcV2pfX1QLV9/NlAQdAJzpnaU+g=
+github.com/mandelsoft/logging v0.0.0-20230904155400-33e44b3c12d5 h1:lG9tIZGdN2uGAQ7ft+EgANDZs8MwjrOog7ce6Q7ghcY=
+github.com/mandelsoft/logging v0.0.0-20230904155400-33e44b3c12d5/go.mod h1:J/kRqdfAOQmMPfJeAcV2pfX1QLV9/NlAQdAJzpnaU+g=
+github.com/mandelsoft/logging v0.0.0-20230905123808-7042ee3aae45 h1:BGJBqw9q1Brn3XAYcj52hhonjV7aHUftVJ3SuJpXQ/M=
+github.com/mandelsoft/logging v0.0.0-20230905123808-7042ee3aae45/go.mod h1:J/kRqdfAOQmMPfJeAcV2pfX1QLV9/NlAQdAJzpnaU+g=
 github.com/mandelsoft/spiff v1.7.0-beta-5 h1:3kC10nTviDQhL8diSxp7i4IC2iSiDg6KPbH1CAq7Lfw=
 github.com/mandelsoft/spiff v1.7.0-beta-5/go.mod h1:TwEeOPuRZxlzQBCLEyVTlHmBSruSGGNdiQ2fovVJ8ao=
 github.com/mandelsoft/vfs v0.0.0-20230713123140-269aa4fb1338 h1:06XAA8Z3qNQLdq8eUtxGRDgJ3dSzJuqt82y3E3siO6s=
@@ -1157,6 +1165,8 @@ github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27k
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-isatty v0.0.17 h1:BTarxUcIeDqL27Mc+vyvdWYSL28zpIhv3RoTdsLMPng=
 github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
+github.com/mattn/go-isatty v0.0.19 h1:JITubQf0MOLdlGRuRq+jtsDlekdYPia9ZFsB8h/APPA=
+github.com/mattn/go-isatty v0.0.19/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-oci8 v0.1.1/go.mod h1:wjDx6Xm9q7dFtHJvIlrI99JytznLw5wQ4R+9mNXJwGI=
 github.com/mattn/go-runewidth v0.0.2/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzpuz5H//U1FU=
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
@@ -1578,6 +1588,10 @@ github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtX
 github.com/urfave/cli v1.22.2/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/urfave/cli v1.22.4/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/urfave/cli v1.22.12/go.mod h1:sSBEIC79qR6OvcmsD4U3KABeOTxDqQtdDnaFuUN30b8=
+github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
+github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
+github.com/valyala/fasttemplate v1.2.2 h1:lxLXG0uE3Qnshl9QyaK6XJxMXlQZELvChBOCmQD0Loo=
+github.com/valyala/fasttemplate v1.2.2/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
 github.com/vbatts/tar-split v0.11.2/go.mod h1:vV3ZuO2yWSVsz+pfFzDG/upWH1JhjOiEaWq6kXyQ3VI=
 github.com/vbatts/tar-split v0.11.3 h1:hLFqsOLQ1SsppQNTMpkpPXClLDfC2A3Zgy9OUU+RVck=
 github.com/vbatts/tar-split v0.11.3/go.mod h1:9QlHN18E+fEH7RdG+QAJJcuya3rqT7eXSTY7wGrAokY=

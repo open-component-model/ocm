@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
@@ -57,7 +58,7 @@ type ResourceConfigAdderCommand struct {
 // NewCommand creates a new ctf command.
 func NewResourceConfigAdderCommand(ctx clictx.Context, adder ElementSpecificationsProvider, opts ...options.Options) ResourceConfigAdderCommand {
 	return ResourceConfigAdderCommand{
-		BaseCommand: utils.NewBaseCommand(ctx, append(opts, templateroption.New("none"))...),
+		BaseCommand: utils.NewBaseCommand(ctx, generics.AppendedSlice[options.Options](opts, templateroption.New("none"))...),
 		Adder:       adder,
 	}
 }

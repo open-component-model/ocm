@@ -10,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -426,7 +427,7 @@ type omitAccessTypesOption struct {
 func (o *omitAccessTypesOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
 	if eff, ok := to.(OmitAccessTypesOption); ok {
 		if o.add {
-			eff.SetOmittedAccessTypes(append(eff.GetOmittedAccessTypes(), o.list...)...)
+			eff.SetOmittedAccessTypes(generics.AppendedSlice(eff.GetOmittedAccessTypes(), o.list...)...)
 		} else {
 			eff.SetOmittedAccessTypes(o.list...)
 		}
