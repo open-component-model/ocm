@@ -51,15 +51,15 @@ kinds of entries can be configured using the <code>--entry</code> option.
 
   The following versions are supported:
   - Version <code>v1</code>
-  
+
     The type specific specification fields are:
-    
+
     - **<code>comment</code>**  *string*
-    
+
       Any text as entry in a routing slip.
-  
+
   Options used to configure fields: <code>--comment</code>
-  
+
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -68,7 +68,7 @@ relative to the specified repository using the syntax
     <pre>&lt;component>[:&lt;version>]</pre>
 </center>
 
-If no <code>--repo</code> option is specified the given names are interpreted 
+If no <code>--repo</code> option is specified the given names are interpreted
 as located OCM component version references:
 
 <center>
@@ -91,7 +91,7 @@ The <code>--repo</code> option takes an OCM repository specification:
 For the *Common Transport Format* the types <code>directory</code>,
 <code>tar</code> or <code>tgz</code> is possible.
 
-Using the JSON variant any repository types supported by the 
+Using the JSON variant any repository types supported by the
 linked library can be used:
 
 Dedicated OCM repository types:

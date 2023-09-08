@@ -1,9 +1,9 @@
-## plugin accessmethod compose &mdash; Compose Access Specification From Options And Base Specification
+## plugin valueset compose &mdash; Compose Value Set From Options And Base Specification
 
 ### Synopsis
 
 ```
-plugin accessmethod compose <name> <options json> <base spec json> [<options>]
+plugin valueset compose <purpose> <name> <options json> <base spec json> [<options>]
 ```
 
 ### Options
@@ -15,14 +15,14 @@ plugin accessmethod compose <name> <options json> <base spec json> [<options>]
 ### Description
 
 
-The task of this command is to compose an access specification based on some
-explicitly given input options and preconfigured specifications.
+The task of this command is ued to compose and validate a value set based on
+some explicitly given input options and preconfigured specifications.
 
-The finally composed access specification has to be returned as JSON document
+The finally composed set has to be returned as JSON document
 on *stdout*.
 
-This command is only used, if for an access method descriptor configuration
-options are defined ([plugin descriptor](plugin_descriptor.md)).
+This command is only used, if for a value set descriptor configuration
+na direct composition rules are configured ([plugin descriptor](plugin_descriptor.md)).
 
 If possible, predefined standard options should be used. In such a case only the
 <code>name</code> field should be defined for an option. If required, new options can be
@@ -67,7 +67,7 @@ The following predefined value types are supported:
 
 ##### Parents
 
-* [plugin accessmethod](plugin_accessmethod.md)	 &mdash; access method operations
+* [plugin valueset](plugin_valueset.md)	 &mdash; valueset operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 
 
