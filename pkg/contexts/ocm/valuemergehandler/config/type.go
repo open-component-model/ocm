@@ -7,7 +7,6 @@ package config
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -78,14 +77,14 @@ func (a *Config) AssignLabel(name string, version string, spec *hpi.Specificatio
 func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 	var reg hpi.Registry
 
-	t, ok := target.(cpi.Context)
+	t, ok := target.(hpi.Context)
 	if !ok {
 		reg, ok = target.(hpi.Registry)
 		if !ok {
 			return config.ErrNoContext(ConfigType)
 		}
 	} else {
-		reg = t.LabelMergeHandlers()
+		reg = hpi.For(t)
 	}
 
 	for n, s := range a.Assignments {

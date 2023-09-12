@@ -20,6 +20,7 @@ import (
 	pluginroutingslip "github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/entrytypes/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/spi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
 	pluginmerge "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -30,6 +31,7 @@ func RegisterExtensions(ctx ocm.Context) error {
 	pi := plugincacheattr.Get(ctx)
 
 	logger := Logger(ctx)
+	vmreg := valuemergehandler.For(ctx)
 	for _, n := range pi.PluginNames() {
 		p := pi.Get(n)
 		if !p.IsValid() {
@@ -55,7 +57,7 @@ func RegisterExtensions(ctx ocm.Context) error {
 			if err != nil {
 				logger.Error("cannot create value merge handler for plugin", "plugin", p.Name(), "handler", a.Name)
 			} else {
-				ctx.LabelMergeHandlers().RegisterHandler(h)
+				vmreg.RegisterHandler(h)
 			}
 		}
 
@@ -128,11 +130,11 @@ func RegisterExtensions(ctx ocm.Context) error {
 			}
 
 			for _, s := range p.GetDescriptor().LabelMergeSpecifications {
-				h := ctx.LabelMergeHandlers().GetHandler(s.GetAlgorithm())
+				h := vmreg.GetHandler(s.GetAlgorithm())
 				if h == nil {
 					logger.Error("cannot assign label merge spec for plugin", "label", s.GetName(), "algorithm", s.GetAlgorithm(), "plugin", p.Name())
 				} else {
-					ctx.LabelMergeHandlers().AssignHandler(hpi.LabelHint(s.Name, s.Version), &s.MergeAlgorithmSpecification)
+					vmreg.AssignHandler(hpi.LabelHint(s.Name, s.Version), &s.MergeAlgorithmSpecification)
 				}
 			}
 		}

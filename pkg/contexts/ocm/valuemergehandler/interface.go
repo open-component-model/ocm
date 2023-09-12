@@ -8,6 +8,7 @@ import (
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers"
 
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/internal"
@@ -16,6 +17,7 @@ import (
 type (
 	Context       = internal.Context
 	Handler       = internal.Handler
+	Handlers      = internal.Handlers
 	Config        = internal.Config
 	Registry      = internal.Registry
 	Specification = internal.Specification
@@ -27,10 +29,18 @@ const (
 	KIND_VALUESET              = "value set"
 )
 
-func For(ctx cpi.ContextProvider) Registry {
-	return ctx.OCMContext().LabelMergeHandlers()
-}
-
 func NewSpecification(algo string, cfg Config) (*Specification, error) {
 	return hpi.NewSpecification(algo, cfg)
+}
+
+func NewRegistry(base ...Registry) Registry {
+	return internal.NewRegistry(base...)
+}
+
+func For(ctx cpi.ContextProvider) Registry {
+	return hpi.For(ctx)
+}
+
+func SetFor(ctx datacontext.Context, registry Registry) {
+	hpi.SetFor(ctx, registry)
 }

@@ -7,7 +7,9 @@
 package hpi
 
 import (
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -65,4 +67,23 @@ func LabelHint(name string, optversion ...string) string {
 		hint += "@" + v
 	}
 	return hint
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+const ATTR_MERGE_HANDLERS = "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandlers"
+
+func For(ctx cpi.ContextProvider) Registry {
+	if ctx == nil {
+		return internal.DefaultRegistry
+	}
+	return ctx.OCMContext().GetAttributes().GetOrCreateAttribute(ATTR_MERGE_HANDLERS, create).(Registry)
+}
+
+func create(datacontext.Context) interface{} {
+	return NewRegistry(internal.DefaultRegistry)
+}
+
+func SetFor(ctx datacontext.Context, registry Registry) {
+	ctx.GetAttributes().SetAttribute(ATTR_MERGE_HANDLERS, registry)
 }

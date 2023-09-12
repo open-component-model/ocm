@@ -181,15 +181,3 @@ func SkipVerify(flag ...bool) ModificationOption {
 func SkipDigest(flag ...bool) ModificationOption {
 	return internal.SkipDigest(flag...)
 }
-
-////////////////////////////////////////////////////////////////////////////////
-
-type (
-	LabelMergeHandler         = internal.ValueMergeHandler
-	LabelMergeHandlerConfig   = internal.ValueMergeHandlerConfig
-	LabelMergeHandlerRegistry = internal.ValueMergeHandlerRegistry
-)
-
-func DefaultLabelMergeHandlerRegistry() LabelMergeHandlerRegistry {
-	return internal.DefaultValueMergeHandlerRegistry
-}

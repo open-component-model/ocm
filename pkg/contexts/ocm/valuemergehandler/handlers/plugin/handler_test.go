@@ -32,7 +32,7 @@ var _ = Describe("plugin value merge handler", func() {
 		env = NewBuilder(nil)
 		ctx = env.OCMContext()
 		plugindirattr.Set(ctx, "testdata")
-		registry = ctx.LabelMergeHandlers()
+		registry = valuemergehandler.For(ctx)
 	})
 
 	AfterEach(func() {
@@ -60,7 +60,7 @@ var _ = Describe("plugin value merge handler", func() {
 
 		Expect(registry.GetHandler(ALGORITHM)).NotTo(BeNil())
 
-		s := ctx.LabelMergeHandlers().GetAssignment(hpi.LabelHint("testlabel", "v2"))
+		s := registry.GetAssignment(hpi.LabelHint("testlabel", "v2"))
 		Expect(s).NotTo(BeNil())
 		Expect(s.Algorithm).To(Equal("simpleMapMerge"))
 	})

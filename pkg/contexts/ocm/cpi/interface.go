@@ -236,28 +236,3 @@ var (
 func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
 	return internal.WrapContextProvider(ctx)
 }
-
-////////////////////////////////////////////////////////////////////////////////
-
-type (
-	ValueMergeHandler              = internal.ValueMergeHandler
-	ValueMergeHandlerSpecification = internal.ValueMergeHandlerSpecification
-	ValueMergeHandlerConfig        = internal.ValueMergeHandlerConfig
-	ValueMergeHandlerRegistry      = internal.ValueMergeHandlerRegistry
-)
-
-func DefaultValueMergeHandlerRegistry() ValueMergeHandlerRegistry {
-	return internal.DefaultValueMergeHandlerRegistry
-}
-
-func RegisterValueMergeHandler(h ValueMergeHandler) {
-	DefaultValueMergeHandlerRegistry().RegisterHandler(h)
-}
-
-func AssignValueMergeHandler(hint string, spec *ValueMergeHandlerSpecification) {
-	DefaultValueMergeHandlerRegistry().AssignHandler(hint, spec)
-}
-
-func NewValueMergeHandlerRegistry(base ...ValueMergeHandlerRegistry) ValueMergeHandlerRegistry {
-	return internal.NewValueMergeHandlerRegistry(base...)
-}

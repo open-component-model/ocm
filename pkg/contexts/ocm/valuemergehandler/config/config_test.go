@@ -9,6 +9,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -56,7 +57,8 @@ var _ = Describe("merge config", func() {
 
 			Expect(ctx.ConfigContext().ApplyConfig(cfg, "programmatic")).To(Succeed())
 
-			found := ctx.LabelMergeHandlers().GetAssignments()
+			Expect(valuemergehandler.For(ctx).GetHandlers()).To(Equal(valuemergehandler.Handlers{}))
+			found := valuemergehandler.For(ctx).GetAssignments()
 			expected := map[string]*hpi.Specification{
 				"test":        spec1,
 				"label:l1@v2": spec2,
