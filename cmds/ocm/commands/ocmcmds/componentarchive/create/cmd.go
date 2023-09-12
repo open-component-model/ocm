@@ -61,7 +61,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(2),
 		Short: "create new component archive",
 		Example: `
-$ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org amcme.org/demo 1.0
+$ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org acme.org/demo 1.0
 `,
 		Long: `
 Create a new component archive. This might be either a directory prepared
