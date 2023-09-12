@@ -51,7 +51,7 @@ The following schema versions are supported for explicit conversions:
 ### Examples
 
 ```
-$ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org amcme.org/demo 1.0
+$ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org acme.org/demo 1.0
 ```
 
 ### SEE ALSO
