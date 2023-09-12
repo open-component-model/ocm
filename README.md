@@ -5,7 +5,11 @@
 [![OCM Integration Tests](https://github.com/open-component-model/ocm-integrationtest/actions/workflows/integrationtest.yaml/badge.svg?branch=main)](https://open-component-model.github.io/ocm-integrationtest/report.html)
 [![Go Report Card](https://goreportcard.com/badge/github.com/open-component-model/ocm)](https://goreportcard.com/report/github.com/open-component-model/ocm)
 
-The Open Component Model provides a standard for describing delivery [artifacts](docs/ocm/model.md#artifacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories).
+The Open Component Model (OCM) is an open standard to describe software bills of delivery (SBOD). OCM is a technology-agnostic and machine-readable format focused on the software artifacts that must be delivered for software products.
+
+OCM describes delivery [artifacts](docs/ocm/model.md#artifacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories).
+
+Check out the main project [web page](https://ocm.software) to find out more. It is your central entry point to all kind of ocm related [docs and guides](https://ocm.software/docs/overview/context), the [spec](https://ocm.software/spec/) and all project related [github repositories](https://github.com/open-component-model). It also offers a [Getting Started](https://ocm.software/docs/guides/getting-started-with-ocm) to quickly make your hands dirty with ocm, its tool set and concepts :-)
 
 ## OCM Specifications
 
@@ -49,7 +53,6 @@ The OCI and OCM support can be found in packages
 An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](https://github.com/open-component-model/ocm/blob/main/examples/make/Makefile).
 
 More comprehensive examples can be taken from the [`components`](https://github.com/open-component-model/ocm/tree/main/components) contained in this repository. [Here](components/helmdemo/README.md) a complete component build including a multi-arch image is done and finally packaged into a CTF archive which can be tranported into an OCI repository. See the readme files for details.
-
 
 
 ## Contributing
