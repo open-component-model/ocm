@@ -7,13 +7,11 @@
 
 The Open Component Model (OCM) is an open standard to describe software bills of delivery (SBOD). OCM is a technology-agnostic and machine-readable format focused on the software artifacts that must be delivered for software products.
 
-OCM describes delivery [artifacts](docs/ocm/model.md#artifacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories).
-
-Check out the [the main OCM project web page](https://ocm.software) to find out everything OCM can offer to you. It is your central entry point to all kind of ocm related [docs and guides](https://ocm.software/docs/overview/context), the [spec](https://ocm.software/spec/) and all project related [github repositories](https://github.com/open-component-model). It also offers a [Getting Started](https://ocm.software/docs/guides/getting-started-with-ocm) to quickly make your hands dirty with OCM, its toolset and concepts :-)
+Check out the [the main OCM project web page](https://ocm.software) to find out everything OCM can offer to you. It is your central entry point to all kind of ocm related [docs and guides](https://ocm.software/docs/overview/context), the [OCM specification](https://ocm.software/spec/) and all project related [github repositories](https://github.com/open-component-model). It also offers a [Getting Started](https://ocm.software/docs/guides/getting-started-with-ocm) to quickly make your hands dirty with OCM, its toolset and concepts :-)
 
 ## OCM Specifications
 
-OCM defines a set of semantic, formatting, and other types of specifications that can be found in the [`ocm-spec` repository](https://github.com/open-component-model/ocm-spec). Start learning about the core concepts of OCM elements [here](https://github.com/open-component-model/ocm-spec/tree/main/doc/specification/elements).
+OCM describes delivery [artifacts](docs/ocm/model.md#artifacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories). It defines a set of semantic, formatting, and other types of specifications that can be found in the [`ocm-spec` repository](https://github.com/open-component-model/ocm-spec). Start learning about the core concepts of OCM elements [here](https://github.com/open-component-model/ocm-spec/tree/main/doc/specification/elements).
 
 ## OCM Library
 
