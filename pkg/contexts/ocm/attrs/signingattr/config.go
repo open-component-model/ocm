@@ -83,7 +83,7 @@ func (k *KeySpec) Get() (interface{}, error) {
 		fs = osfs.New()
 	}
 
-	return utils.ReadFile(fs, k.Path)
+	return utils.ReadFile(k.Path, fs)
 }
 
 // New creates a new memory ConfigSpec.

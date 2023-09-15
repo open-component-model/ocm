@@ -179,6 +179,6 @@ type ValueSet interface {
 	// Format describes the attributes of the dedicated version.
 	Format() string
 
-	Validate(p Plugin, spec runtime.TypedObject) (info *ValueSetInfo, err error)
-	Compose(p Plugin, opts Config, config Config) error
+	ValidateSpecification(p Plugin, spec runtime.TypedObject) (info *ValueSetInfo, err error)
+	ComposeSpecification(p Plugin, opts Config, config Config) error
 }

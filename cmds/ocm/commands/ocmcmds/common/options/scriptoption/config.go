@@ -83,12 +83,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 			if spec.Path == "" {
 				return errors.Newf("script or path must be set for entry %q", t.Script)
 			}
-			fs := accessio.FileSystem(spec.FileSystem, t.FileSystem)
-			path, err := utils.ResolvePath(spec.Path)
-			if err != nil {
-				return err
-			}
-			data, err := vfs.ReadFile(fs, path)
+			data, err := utils.ReadFile(spec.Path, accessio.FileSystem(spec.FileSystem, t.FileSystem))
 			if err != nil {
 				return errors.Wrapf(err, "script file %q", spec.Path)
 			}

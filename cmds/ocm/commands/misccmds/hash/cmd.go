@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -79,11 +78,7 @@ func (o *Command) Complete(args []string) error {
 	if len(args) == 3 {
 		o.issuer = args[2]
 	}
-	path, err := utils2.ResolvePath(args[0])
-	if err != nil {
-		return err
-	}
-	o.priv, err = vfs.ReadFile(o.FileSystem(), path)
+	o.priv, err = utils2.ReadFile(args[0], o.FileSystem())
 	if err != nil {
 		return err
 	}

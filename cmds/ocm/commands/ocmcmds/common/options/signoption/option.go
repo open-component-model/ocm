@@ -123,7 +123,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 			return err
 		}
 		for _, r := range o.rootca {
-			data, err := utils.ReadFile(ctx.FileSystem(), r)
+			data, err := utils.ReadFile(r, ctx.FileSystem())
 			if err != nil {
 				return errors.Wrapf(err, "cannot read ca file %q", r)
 			}

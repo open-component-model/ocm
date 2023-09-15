@@ -37,7 +37,7 @@ func (o *Option) Usage() string {
 	s := `
 It the option <code>--skip-digest-generation</code> is given, resources added to a
 component version will not be digested, if no predefined digest is given. This
-option should only be used to simulate lagacy behaviour. Digests are required to
+option should only be used to simulate legacy behaviour. Digests are required to
 assure a proper transport behaviour.
 `
 	return s

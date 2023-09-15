@@ -63,11 +63,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		}
 	}
 	if o.ScriptFile != "" {
-		path, err := utils.ResolvePath(o.ScriptFile)
-		if err != nil {
-			return err
-		}
-		data, err := vfs.ReadFile(ctx.FileSystem(), path)
+		data, err := utils.ReadFile(o.ScriptFile, ctx.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "invalid transfer script file")
 		}

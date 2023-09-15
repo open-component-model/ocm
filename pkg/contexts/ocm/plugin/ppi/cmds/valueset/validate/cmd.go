@@ -79,7 +79,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if m == nil {
 		return errors.ErrUnknown(descriptor.KIND_VALUESET, spec.GetType())
 	}
-	info, err := m.Validate(p, spec)
+	info, err := m.ValidateSpecification(p, spec)
 	if err != nil {
 		return err
 	}

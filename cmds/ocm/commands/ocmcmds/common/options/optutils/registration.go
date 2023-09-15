@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
@@ -73,11 +72,7 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 		var raw []byte
 		var err error
 		if strings.HasPrefix(v, "@") {
-			path, err := utils.ResolvePath(v[1:])
-			if err != nil {
-				return err
-			}
-			raw, err = vfs.ReadFile(ctx.FileSystem(), path)
+			raw, err = utils.ReadFile(v[1:], ctx.FileSystem())
 			if err != nil {
 				return errors.Wrapf(err, "cannot read %s config from %q", o.name, v[1:])
 			}

@@ -5,6 +5,8 @@
 package ppi
 
 import (
+	"golang.org/x/exp/slices"
+
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -52,6 +54,47 @@ func MustNewUploaderBase(name, desc string) UploaderBase {
 		name: name,
 		desc: desc,
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ValueSetBase struct {
+	decoder
+	nameDescription
+
+	version string
+	format  string
+
+	purposes []string
+}
+
+func MustNewValueSetBase(name, version string, proto runtime.TypedObject, purposes []string, desc string, format string) ValueSetBase {
+	decoder, err := runtime.NewDirectDecoder(proto)
+	if err != nil {
+		panic(err)
+	}
+	return ValueSetBase{
+		decoder: decoder,
+		nameDescription: nameDescription{
+			name: name,
+			desc: desc,
+		},
+		version:  version,
+		format:   format,
+		purposes: slices.Clone(purposes),
+	}
+}
+
+func (b *ValueSetBase) Version() string {
+	return b.version
+}
+
+func (b *ValueSetBase) Format() string {
+	return b.format
+}
+
+func (b *ValueSetBase) Purposes() []string {
+	return b.purposes
 }
 
 ////////////////////////////////////////////////////////////////////////////////

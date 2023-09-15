@@ -38,18 +38,9 @@ func ParseLabel(fs vfs.FileSystem, a string, kind ...string) (*metav1.Label, err
 	}
 	label := a[:i]
 
-	var data []byte
-	if strings.HasPrefix(a[i+1:], "@") {
-		path, err := utils.ResolvePath(a[i+2:])
-		if err != nil {
-			return nil, err
-		}
-		data, err = vfs.ReadFile(fs, path)
-		if err != nil {
-			return nil, errors.Wrapf(err, "cannot read file %q", a[i+2:])
-		}
-	} else {
-		data = []byte(a[i+1:])
+	data, err := utils.ResolveData(a[i+1:], fs)
+	if err != nil {
+		return nil, err
 	}
 
 	var value interface{}

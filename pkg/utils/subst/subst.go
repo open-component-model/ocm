@@ -26,7 +26,7 @@ type SubstitutionTarget interface {
 func ParseFile(file string, fss ...vfs.FileSystem) (SubstitutionTarget, error) {
 	fs := accessio.FileSystem(fss...)
 
-	data, err := utils2.ReadFile(fs, file)
+	data, err := utils2.ReadFile(file, fs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot read file %q", file)
 	}

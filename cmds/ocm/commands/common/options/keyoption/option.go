@@ -5,7 +5,6 @@
 package keyoption
 
 import (
-	"encoding/base64"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -72,14 +71,10 @@ func (o *Option) HandleKeys(ctx clictx.Context, desc string, keys []string, add 
 		var data []byte
 		var err error
 		switch file[0] {
-		case '=':
-			data = []byte(file[1:])
-		case '!':
-			data, err = base64.StdEncoding.DecodeString(file[1:])
-		case '@':
-			data, err = utils.ReadFile(ctx.FileSystem(), file[1:])
+		case '=', '!', '@':
+			data, err = utils.ResolveData(file, ctx.FileSystem())
 		default:
-			data, err = utils.ReadFile(ctx.FileSystem(), file)
+			data, err = utils.ReadFile(file, ctx.FileSystem())
 		}
 		if err != nil {
 			return errors.Wrapf(err, "cannot read %s file %q", desc, file)

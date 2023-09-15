@@ -83,7 +83,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if s == nil {
 		return errors.ErrUnknown(descriptor.KIND_VALUESET, opts.Name)
 	}
-	err := s.Compose(p, opts.Options, opts.Base)
+	err := s.ComposeSpecification(p, opts.Options, opts.Base)
 	if err != nil {
 		return err
 	}

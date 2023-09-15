@@ -39,6 +39,12 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 	if len(d.Actions) > 0 {
 		caps = append(caps, "Actions")
 	}
+	if len(d.ValueSets) > 0 {
+		caps = append(caps, "Value Sets")
+	}
+	if len(d.ValueMergeHandlers) > 0 {
+		caps = append(caps, "Merge Handlers")
+	}
 	if len(caps) == 0 {
 		out.Printf("Capabilities:     none\n")
 	} else {
@@ -77,6 +83,10 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 	if len(d.Actions) > 0 {
 		out.Printf("Actions:\n")
 		plugincommon.DescribeActions(p.Context().GetActions().GetActionTypes(), d, out)
+	}
+	if len(d.ValueSets) > 0 {
+		out.Printf("Value Sets:\n")
+		plugincommon.DescribeValueSets(d, out)
 	}
 }
 

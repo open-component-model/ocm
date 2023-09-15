@@ -106,7 +106,7 @@ func (o *Options) Configure(ctx ocm.Context, logctx logging.Context) error {
 	if o.LogConfig != "" {
 		var cfg []byte
 		if strings.HasPrefix(o.LogConfig, "@") {
-			cfg, err = utils.ReadFile(fs, o.LogConfig[1:])
+			cfg, err = utils.ReadFile(o.LogConfig[1:], fs)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read logging config file %q", o.LogConfig[1:])
 			}
