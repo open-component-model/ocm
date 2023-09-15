@@ -4,6 +4,11 @@
 
 package equivalent
 
+// EqualState describes the equivalence state of elements
+// of a component version. For a complete component version
+// the equivalence state describes the local component version
+// content, not the state of the complete graph spanned by
+// component references.
 type EqualState struct {
 	equivalent   bool
 	hashEqual    bool
@@ -89,4 +94,8 @@ func StateNotArtifactEqual(detect bool) EqualState {
 
 func StateNotEquivalent() EqualState {
 	return EqualState{false, true, true, true}
+}
+
+func StateNotDetectable() EqualState {
+	return EqualState{false, true, false, false}
 }

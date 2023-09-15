@@ -426,7 +426,7 @@ func (r *Source) SetAccess(a AccessSpec) {
 
 func (r *Source) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 	if o, ok := e.(*Source); !ok {
-		return r.Labels.Equivalent(nil)
+		return equivalent.StateNotLocalHashEqual()
 	} else {
 		state := equivalent.StateLocalHashEqual(r.Type == o.Type)
 		return state.Apply(
@@ -587,11 +587,18 @@ func (r *Resource) SetDigest(d *metav1.DigestSpec) {
 
 func (r *Resource) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 	if o, ok := e.(*Resource); !ok {
-		return r.Labels.Equivalent(nil)
+		state := equivalent.StateNotLocalHashEqual()
+		if r.Digest.IsExcluded() || IsNoneAccess(r.Access) {
+			return state
+		} else {
+			state = state.Apply(equivalent.StateNotArtifactEqual(r.Digest != nil))
+		}
+		return state
 	} else {
+		// not delegated to ResourceMeta, because the significance of digests can only be determined at the Resource level.
 		state := equivalent.StateLocalHashEqual(r.Type == o.Type && r.Relation == o.Relation && reflect.DeepEqual(r.SourceRef, o.SourceRef))
 
-		if !IsNoneAccess(r.Access) || IsNoneAccess(o.Access) {
+		if !IsNoneAccess(r.Access) || !IsNoneAccess(o.Access) {
 			state = state.Apply(r.Digest.Equivalent(o.Digest))
 		}
 		return state.Apply(r.ElementMeta.Equivalent(&o.ElementMeta))
@@ -766,13 +773,20 @@ func (r *ComponentReference) SetDigest(d *metav1.DigestSpec) {
 
 func (r *ComponentReference) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 	if o, ok := e.(*ComponentReference); !ok {
-		return r.Labels.Equivalent(nil)
+		state := equivalent.StateNotLocalHashEqual()
+		if r.Digest != nil {
+			state = state.Apply(equivalent.StateNotArtifactEqual(true))
+		}
+		return state
 	} else {
 		state := equivalent.StateLocalHashEqual(r.Name == o.Name && r.Version == o.Version && r.ComponentName == o.ComponentName)
 		// TODO: how to handle digests
 		if r.Digest != nil && o.Digest != nil { // hmm, digest described more than the local component, should we use it at all?
 			state = state.Apply(r.Digest.Equivalent(o.Digest))
+		} else if r.Digest != o.Digest { // not both are nil
+			state = state.NotEquivalent()
 		}
+
 		return state.Apply(
 			r.ElementMeta.Equivalent(&o.ElementMeta),
 		)

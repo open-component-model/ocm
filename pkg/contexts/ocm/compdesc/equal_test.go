@@ -6,9 +6,12 @@ package compdesc_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent/testhelper"
 
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -148,6 +151,28 @@ var _ = Describe("equivalence", func() {
 			CheckNotArtifactEqual(a.Equivalent(b))
 			CheckNotArtifactEqual(b.Equivalent(a))
 		})
+
+		It("handles none access", func() {
+			a.Digest = nil
+			a.Access = none.New()
+			b.Digest = nil
+			b.Access = none.New()
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles no-digest", func() {
+			a.Digest = compdesc.NewExcludeFromSignatureDigest()
+			b.Digest = compdesc.NewExcludeFromSignatureDigest()
+			CheckEquivalent(a.Equivalent(b))
+			CheckEquivalent(b.Equivalent(a))
+		})
+
+		It("handles no-digest on one side", func() {
+			b.Digest = compdesc.NewExcludeFromSignatureDigest()
+			CheckNotArtifactEqual(a.Equivalent(b))
+			CheckNotArtifactEqual(b.Equivalent(a))
+		})
 	})
 
 	Context("resources", func() {
@@ -249,8 +274,45 @@ var _ = Describe("equivalence", func() {
 				},
 				Access: localblob.New("test3", "test3", "test", nil),
 			})
-			CheckNotLocalHashEqual(a.Equivalent(b))
-			CheckNotLocalHashEqual(b.Equivalent(a))
+			Expect(a.Equivalent(b)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(true))))
+			Expect(b.Equivalent(a)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(true))))
+		})
+
+		It("handles additional entry without any other meta data", func() {
+			b = append(b, compdesc.Resource{
+				ResourceMeta: compdesc.ResourceMeta{
+					ElementMeta: compdesc.ElementMeta{
+						Name:          "r3",
+						ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+					},
+					Type:     "test",
+					Relation: v1.LocalRelation,
+					Digest: &v1.DigestSpec{
+						HashAlgorithm:          "hash",
+						NormalisationAlgorithm: "norm",
+						Value:                  "z",
+					},
+				},
+				Access: localblob.New("test3", "test3", "test", nil),
+			})
+			Expect(a.Equivalent(b)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(true))))
+			Expect(b.Equivalent(a)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(true))))
+		})
+
+		It("handles additional entry without any other meta data and digest", func() {
+			b = append(b, compdesc.Resource{
+				ResourceMeta: compdesc.ResourceMeta{
+					ElementMeta: compdesc.ElementMeta{
+						Name:          "r3",
+						ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+					},
+					Type:     "test",
+					Relation: v1.LocalRelation,
+				},
+				Access: localblob.New("test3", "test3", "test", nil),
+			})
+			Expect(a.Equivalent(b)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(false))))
+			Expect(b.Equivalent(a)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(false))))
 		})
 
 		It("handles additional non-digest entry", func() {
@@ -407,6 +469,21 @@ var _ = Describe("equivalence", func() {
 			CheckNotLocalHashEqual(a.Equivalent(b))
 			CheckNotLocalHashEqual(b.Equivalent(a))
 		})
+
+		It("handles additional entry without any other meta data", func() {
+			b = append(b, compdesc.Source{
+				SourceMeta: compdesc.SourceMeta{
+					ElementMeta: compdesc.ElementMeta{
+						Name:          "s3",
+						ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+					},
+					Type: "test",
+				},
+				Access: localblob.New("test3", "test3", "test", nil),
+			})
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
 	})
 
 	Context("reference", func() {
@@ -514,6 +591,34 @@ var _ = Describe("equivalence", func() {
 			})
 			CheckNotLocalHashEqual(a.Equivalent(b))
 			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles additional entry without any other metadata", func() {
+			b = append(b, compdesc.ComponentReference{
+				ElementMeta: compdesc.ElementMeta{
+					Name:          "s3",
+					ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+				},
+				ComponentName: "c3",
+			})
+			CheckNotLocalHashEqual(a.Equivalent(b))
+			CheckNotLocalHashEqual(b.Equivalent(a))
+		})
+
+		It("handles additional entry without any other metadata", func() {
+			b = append(b, compdesc.ComponentReference{
+				ElementMeta: compdesc.ElementMeta{
+					Name:          "s3",
+					ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
+				},
+				ComponentName: "c3",
+				Digest: &v1.DigestSpec{
+					HashAlgorithm:          "hash",
+					NormalisationAlgorithm: "norm",
+					Value:                  "z",
+				},
+			})
+			Expect(a.Equivalent(b)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(true))))
 		})
 	})
 

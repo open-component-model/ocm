@@ -62,6 +62,15 @@ func MergeElements(log logging.Logger, ctx ocm.Context, s compdesc.ElementAccess
 					}
 				}
 			}
+			// keep digest for locally signed/hashed elements
+			if des, ok := es.(compdesc.ElementDigestAccessor); ok {
+				if des.GetDigest() != nil {
+					det := et.(compdesc.ElementDigestAccessor)
+					if det.GetDigest() == nil {
+						det.SetDigest(des.GetDigest())
+					}
+				}
+			}
 		}
 	}
 	return nil
