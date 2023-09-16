@@ -58,8 +58,8 @@ by the plugin name.
 type Options struct {
 	Purpose string
 	Name    string
-	Options map[string]interface{}
-	Base    map[string]interface{}
+	Options ppi.Config
+	Base    ppi.Config
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
@@ -83,7 +83,11 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if s == nil {
 		return errors.ErrUnknown(descriptor.KIND_VALUESET, opts.Name)
 	}
-	err := s.ComposeSpecification(p, opts.Options, opts.Base)
+	err := opts.Options.ConvertFor(s.Options()...)
+	if err != nil {
+		return err
+	}
+	err = s.ComposeSpecification(p, opts.Options, opts.Base)
 	if err != nil {
 		return err
 	}

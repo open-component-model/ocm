@@ -399,8 +399,6 @@ func (o *CLIOptions) Complete() error {
 			}
 		}
 		_ = ctx.ApplyConfig(spec, "cli")
-	} else {
-		return err
 	}
 	return registration.RegisterExtensions(o.Context.OCMContext())
 }

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -195,8 +196,21 @@ func (p *typedConfigProviderBase) GetConfigFor(opts ConfigOptions) (Config, erro
 	return data, nil
 }
 
-func (p *typedConfigProviderBase) applyConfigForType(name string, opts ConfigOptions, config Config) error {
+func (p *typedConfigProviderBase) GetTypeSetForType(name string) ConfigOptionTypeSet {
 	set := p.GetTypeSet(name)
+	if set == nil {
+		k, v := runtime.KindVersion(name)
+		if v == "" {
+			set = p.GetTypeSet(runtime.TypeName(name, "v1"))
+		} else if v == "v1" {
+			set = p.GetTypeSet(k)
+		}
+	}
+	return set
+}
+
+func (p *typedConfigProviderBase) applyConfigForType(name string, opts ConfigOptions, config Config) error {
+	set := p.GetTypeSetForType(name)
 	if set == nil {
 		return errors.ErrUnknown(name)
 	}

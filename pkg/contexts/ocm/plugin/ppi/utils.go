@@ -5,8 +5,13 @@
 package ppi
 
 import (
+	"encoding/json"
+	"reflect"
+
+	"github.com/pkg/errors"
 	"golang.org/x/exp/slices"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -120,4 +125,25 @@ type Config map[string]interface{}
 func (c Config) GetValue(name string) (interface{}, bool) {
 	v, ok := c[name]
 	return v, ok
+}
+
+func (c Config) ConvertFor(list ...options.OptionType) error {
+	for _, o := range list {
+		if v, ok := c[o.GetName()]; ok {
+			t := reflect.TypeOf(o.Create().Value())
+			if t != reflect.TypeOf(v) {
+				data, err := json.Marshal(v)
+				if err != nil {
+					return errors.Wrapf(err, "cannot marshal option value for %q", o.GetName())
+				}
+				value := reflect.New(t)
+				err = json.Unmarshal(data, value.Interface())
+				if err != nil {
+					return errors.Wrapf(err, "cannot unmarshal option value for %q[%s]", o.GetName(), o.ValueType())
+				}
+				c[o.GetName()] = value.Elem().Interface()
+			}
+		}
+	}
+	return nil
 }

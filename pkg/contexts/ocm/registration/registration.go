@@ -128,14 +128,14 @@ func RegisterExtensions(ctx ocm.Context) error {
 					}
 				}
 			}
+		}
 
-			for _, s := range p.GetDescriptor().LabelMergeSpecifications {
-				h := vmreg.GetHandler(s.GetAlgorithm())
-				if h == nil {
-					logger.Error("cannot assign label merge spec for plugin", "label", s.GetName(), "algorithm", s.GetAlgorithm(), "plugin", p.Name())
-				} else {
-					vmreg.AssignHandler(hpi.LabelHint(s.Name, s.Version), &s.MergeAlgorithmSpecification)
-				}
+		for _, s := range p.GetDescriptor().LabelMergeSpecifications {
+			h := vmreg.GetHandler(s.GetAlgorithm())
+			if h == nil {
+				logger.Error("cannot assign label merge spec for plugin", "label", s.GetName(), "algorithm", s.GetAlgorithm(), "plugin", p.Name())
+			} else {
+				vmreg.AssignHandler(hpi.LabelHint(s.Name, s.Version), &s.MergeAlgorithmSpecification)
 			}
 		}
 	}
