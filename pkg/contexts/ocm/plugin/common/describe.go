@@ -37,6 +37,9 @@ func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *descriptor.Descript
 	if len(d.Actions) > 0 {
 		caps = append(caps, "Actions")
 	}
+	if len(d.ValueSets) > 0 {
+		caps = append(caps, "Value Sets")
+	}
 	if len(d.ValueMergeHandlers) > 0 {
 		caps = append(caps, "Value Merge Handlers")
 	}
@@ -73,6 +76,12 @@ func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *descriptor.Descript
 		out.Printf("Actions:\n")
 		DescribeActions(reg, d, out)
 	}
+	if len(d.ValueSets) > 0 {
+		out.Printf("\n")
+		out.Printf("Value Sets:\n")
+		DescribeValueSets(d, out)
+	}
+
 	if len(d.ValueMergeHandlers) > 0 {
 		out.Printf("\n")
 		out.Printf("Value Merge Handlers:\n")
