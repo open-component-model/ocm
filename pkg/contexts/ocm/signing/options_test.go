@@ -11,6 +11,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -54,7 +55,7 @@ var _ = Describe("options", func() {
 			PrivateKey(NAME, priv),
 			PublicKey(NAME, cert),
 		)
-		Expect(opts.Complete(signing.DefaultRegistry())).To(Succeed())
+		Expect(opts.Complete(ocm.DefaultContext())).To(Succeed())
 	})
 
 	It("fails for options for verification without root cert", func() {
@@ -63,7 +64,7 @@ var _ = Describe("options", func() {
 			PrivateKey(NAME, priv),
 			PublicKey(NAME, cert),
 		)
-		Expect(opts.Complete(signing.DefaultRegistry())).To(HaveOccurred())
+		Expect(opts.Complete(ocm.DefaultContext())).To(HaveOccurred())
 	})
 
 	It("succeeds for options for signing with verification with root cert", func() {
@@ -73,7 +74,7 @@ var _ = Describe("options", func() {
 			PrivateKey(NAME, priv),
 			PublicKey(NAME, cert),
 		)
-		Expect(opts.Complete(signing.DefaultRegistry())).To(Succeed())
+		Expect(opts.Complete(ocm.DefaultContext())).To(Succeed())
 	})
 
 	It("fails for options for signing with verification without root cert", func() {
@@ -82,6 +83,6 @@ var _ = Describe("options", func() {
 			PrivateKey(NAME, priv),
 			PublicKey(NAME, cert),
 		)
-		Expect(opts.Complete(signing.DefaultRegistry())).To(HaveOccurred())
+		Expect(opts.Complete(ocm.DefaultContext())).To(HaveOccurred())
 	})
 })

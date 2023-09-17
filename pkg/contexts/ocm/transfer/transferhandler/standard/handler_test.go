@@ -412,7 +412,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 			ocmsign.Resolver(resolver),
 			ocmsign.Update(), ocmsign.VerifyDigests(),
 		)
-		Expect(opts.Complete(signingattr.Get(env.OCMContext()))).To(Succeed())
+		Expect(opts.Complete(env.OCMContext())).To(Succeed())
 		digest := "45aefd9317bde6c66d5edca868cf7b9a5313a6f965609af4e58bbfd44ae6e92c"
 		dig, err := ocmsign.Apply(nil, nil, cv, opts)
 		Expect(err).To(Succeed())
@@ -437,7 +437,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 			ocmsign.VerifySignature(SIGNATURE),
 			ocmsign.Update(), ocmsign.VerifyDigests(),
 		)
-		Expect(opts.Complete(signingattr.Get(env.OCMContext()))).To(Succeed())
+		Expect(opts.Complete(env.OCMContext())).To(Succeed())
 		dig, err = ocmsign.Apply(nil, nil, cv, opts)
 		Expect(err).To(Succeed())
 		Expect(dig.Value).To(Equal(digest))

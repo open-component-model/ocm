@@ -337,7 +337,7 @@ func (o *CLIOptions) Complete() error {
 
 	if o.Keys.HasKeys() {
 		def := signingattr.Get(o.Context.OCMContext())
-		err = signingattr.Set(o.Context.OCMContext(), signing.NewRegistry(def, signing.NewKeyRegistry(o.Keys, def)))
+		err = signingattr.Set(o.Context.OCMContext(), signing.NewRegistry(def.HandlerRegistry(), signing.NewKeyRegistry(o.Keys, def.KeyRegistry())))
 		if err != nil {
 			return err
 		}

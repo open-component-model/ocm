@@ -7,6 +7,8 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
+	_ "unsafe"
+
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"

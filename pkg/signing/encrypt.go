@@ -17,7 +17,7 @@ func DecryptionKeyName(name string) string {
 	return DECRYPTION_PREFIX + name
 }
 
-func ResolvePrivateKey(reg KeyRegistry, name string) (interface{}, error) {
+func ResolvePrivateKey(reg KeyRegistryFuncs, name string) (interface{}, error) {
 	key := reg.GetPrivateKey(name)
 	if key == nil {
 		return nil, nil

@@ -82,9 +82,18 @@ func Get(ctx datacontext.Context) signing.Registry {
 	return a.(signing.Registry)
 }
 
-func Set(ctx datacontext.Context, registry signing.KeyRegistry) error {
-	if _, ok := registry.(signing.Registry); !ok {
-		registry = signing.NewRegistry(signing.DefaultHandlerRegistry(), registry)
-	}
+func SetKeyRegistry(ctx datacontext.Context, registry signing.KeyRegistry) error {
+	old := Get(ctx)
+	r := signing.NewRegistry(old.HandlerRegistry(), registry)
+	return ctx.GetAttributes().SetAttribute(ATTR_KEY, r)
+}
+
+func SetHandlerRegistry(ctx datacontext.Context, registry signing.HandlerRegistry) error {
+	old := Get(ctx)
+	r := signing.NewRegistry(registry, old.KeyRegistry())
+	return ctx.GetAttributes().SetAttribute(ATTR_KEY, r)
+}
+
+func Set(ctx datacontext.Context, registry signing.Registry) error {
 	return ctx.GetAttributes().SetAttribute(ATTR_KEY, registry)
 }

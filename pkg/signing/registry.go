@@ -8,28 +8,44 @@ import (
 	"sort"
 	"sync"
 
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type Registry interface {
-	HandlerRegistry
-	KeyRegistry
+	HandlerRegistryFuncs
+	KeyRegistryFuncs
+
+	HandlerRegistryProvider
+	KeyRegistryProvider
+
+	Copy() Registry
 }
 
 type HasherProvider interface {
 	GetHasher(name string) Hasher
 }
 
-type HasherRegistry interface {
+type HasherRegistryFuncs interface {
 	HasherProvider
 
 	RegisterHasher(hasher Hasher)
 	HasherNames() []string
 }
 
-type SignerRegistry interface {
+type HasherRegistry interface {
+	HasherRegistryFuncs
+
+	Copy() HasherRegistry
+}
+
+type HasherRegistryProvider interface {
+	HasherRegistry() HasherRegistry
+}
+
+type SignerRegistryFuncs interface {
 	RegisterSignatureHandler(handler SignatureHandler)
 	RegisterSigner(algo string, signer Signer)
 	RegisterVerifier(algo string, verifier Verifier)
@@ -38,18 +54,49 @@ type SignerRegistry interface {
 	SignerNames() []string
 }
 
-type HandlerRegistry interface {
-	SignerRegistry
-	HasherRegistry
+type SignerRegistry interface {
+	SignerRegistryFuncs
+
+	Copy() SignerRegistry
 }
 
-type KeyRegistry interface {
+type SignerRegistryProvider interface {
+	SignerRegistry() SignerRegistry
+}
+
+type HandlerRegistryFuncs interface {
+	SignerRegistryFuncs
+	HasherRegistryFuncs
+
+	SignerRegistryProvider
+	HasherRegistryProvider
+}
+
+type HandlerRegistry interface {
+	HandlerRegistryFuncs
+	Copy() HandlerRegistry
+}
+
+type KeyRegistryFuncs interface {
 	RegisterPublicKey(name string, key interface{})
 	RegisterPrivateKey(name string, key interface{})
 	GetPublicKey(name string) interface{}
 	GetPrivateKey(name string) interface{}
 
 	HasKeys() bool
+}
+
+type HandlerRegistryProvider interface {
+	HandlerRegistry() HandlerRegistry
+}
+
+type KeyRegistry interface {
+	KeyRegistryFuncs
+	Copy() KeyRegistry
+}
+
+type KeyRegistryProvider interface {
+	KeyRegistry() KeyRegistry
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -68,27 +115,64 @@ var _ HandlerRegistry = (*handlerRegistry)(nil)
 
 func NewHandlerRegistry(parents ...HandlerRegistry) HandlerRegistry {
 	return &handlerRegistry{
-		_hasherRegistry: NewHasherRegistry(generics.ConvertSliceTo[HasherRegistry](parents)...),
-		_signerRegistry: NewSignerRegistry(generics.ConvertSliceTo[SignerRegistry](parents)...),
+		_hasherRegistry: NewHasherRegistry(generics.ConvertSliceWith(toHasherRegistry, parents)...),
+		_signerRegistry: NewSignerRegistry(generics.ConvertSliceWith(toSignerRegistry, parents)...),
 	}
+}
+
+func toHasherRegistry(o HasherRegistryProvider) HasherRegistry {
+	if o == nil {
+		return nil
+	}
+	return o.HasherRegistry()
+}
+
+func toSignerRegistry(o SignerRegistryProvider) SignerRegistry {
+	if o == nil {
+		return nil
+	}
+	return o.SignerRegistry()
+}
+
+func (r *handlerRegistry) Copy() HandlerRegistry {
+	return &handlerRegistry{
+		_hasherRegistry: r._hasherRegistry.Copy(),
+		_signerRegistry: r._signerRegistry.Copy(),
+	}
+}
+
+func (r *handlerRegistry) HasherRegistry() HasherRegistry {
+	return r._hasherRegistry
+}
+
+func (r *handlerRegistry) SignerRegistry() SignerRegistry {
+	return r._signerRegistry
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type signerRegistry struct {
-	lock     sync.RWMutex
-	parents  []SignerRegistry
-	signers  map[string]Signer
-	verifier map[string]Verifier
+	lock      sync.RWMutex
+	parents   []SignerRegistry
+	signers   map[string]Signer
+	verifiers map[string]Verifier
 }
 
 var _ SignerRegistry = (*signerRegistry)(nil)
 
 func NewSignerRegistry(parents ...SignerRegistry) SignerRegistry {
 	return &signerRegistry{
-		parents:  slices.Clone(parents),
-		signers:  map[string]Signer{},
-		verifier: map[string]Verifier{},
+		parents:   slices.Clone(parents),
+		signers:   map[string]Signer{},
+		verifiers: map[string]Verifier{},
+	}
+}
+
+func (r *signerRegistry) Copy() SignerRegistry {
+	return &signerRegistry{
+		parents:   r.parents,
+		signers:   maps.Clone(r.signers),
+		verifiers: maps.Clone(r.verifiers),
 	}
 }
 
@@ -96,15 +180,15 @@ func (r *signerRegistry) RegisterSignatureHandler(handler SignatureHandler) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	r.signers[handler.Algorithm()] = handler
-	r.verifier[handler.Algorithm()] = handler
+	r.verifiers[handler.Algorithm()] = handler
 }
 
 func (r *signerRegistry) RegisterSigner(algo string, signer Signer) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	r.signers[algo] = signer
-	if v, ok := signer.(Verifier); ok && r.verifier[algo] == nil {
-		r.verifier[algo] = v
+	if v, ok := signer.(Verifier); ok && r.verifiers[algo] == nil {
+		r.verifiers[algo] = v
 	}
 }
 
@@ -130,7 +214,7 @@ func (r *signerRegistry) SignerNames() []string {
 func (r *signerRegistry) RegisterVerifier(algo string, verifier Verifier) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.verifier[algo] = verifier
+	r.verifiers[algo] = verifier
 	if v, ok := verifier.(Signer); ok && r.signers[algo] == nil {
 		r.signers[algo] = v
 	}
@@ -160,7 +244,7 @@ func (r *signerRegistry) GetVerifier(name string) Verifier {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	v := r.verifier[name]
+	v := r.verifiers[name]
 	if v != nil {
 		return v
 	}
@@ -190,6 +274,13 @@ func NewHasherRegistry(parents ...HasherRegistry) HasherRegistry {
 	return &hasherRegistry{
 		parents: slices.Clone(parents),
 		hasher:  map[string]Hasher{},
+	}
+}
+
+func (r *hasherRegistry) Copy() HasherRegistry {
+	return &hasherRegistry{
+		parents: r.parents,
+		hasher:  maps.Clone(r.hasher),
 	}
 }
 
@@ -262,6 +353,14 @@ func NewKeyRegistry(parents ...KeyRegistry) KeyRegistry {
 		parents:     slices.Clone(parents),
 		publicKeys:  map[string]interface{}{},
 		privateKeys: map[string]interface{}{},
+	}
+}
+
+func (r *keyRegistry) Copy() KeyRegistry {
+	return &keyRegistry{
+		parents:     r.parents,
+		publicKeys:  maps.Clone(r.publicKeys),
+		privateKeys: maps.Clone(r.privateKeys),
 	}
 }
 
@@ -360,13 +459,28 @@ func NewRegistry(h HandlerRegistry, k KeyRegistry) Registry {
 	}
 }
 
+func (r *registry) HandlerRegistry() HandlerRegistry {
+	return r._HandlerRegistry
+}
+
+func (r *registry) KeyRegistry() KeyRegistry {
+	return r._KeyRegistry
+}
+
+func (r *registry) Copy() Registry {
+	return &registry{
+		_HandlerRegistry: r.HandlerRegistry().Copy(),
+		_KeyRegistry:     r.KeyRegistry().Copy(),
+	}
+}
+
 func RegistryWithPreferredKeys(reg Registry, keys KeyRegistry) Registry {
 	if keys == nil {
 		return reg
 	}
 	return &registry{
-		_HandlerRegistry: reg,
-		_KeyRegistry:     NewKeyRegistry(keys, reg),
+		_HandlerRegistry: reg.HandlerRegistry(),
+		_KeyRegistry:     NewKeyRegistry(keys, reg.KeyRegistry()),
 	}
 }
 

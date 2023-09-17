@@ -29,3 +29,19 @@ func ConvertSliceTo[T, S any](in []S) []T {
 	}
 	return r
 }
+
+// ConvertSliceWith converts the element type of a slice
+// using a concverter function.
+// Unfortunately this cannot be expressed in a type-safe way in Go.
+// I MUST follow the type constraint I super S, which cannot be expressed in Go.
+func ConvertSliceWith[S, T, I any](c func(I) T, in []S) []T {
+	if in == nil {
+		return nil
+	}
+	r := make([]T, len(in))
+	for i := range in {
+		var s any = in[i]
+		r[i] = c(As[I](s))
+	}
+	return r
+}

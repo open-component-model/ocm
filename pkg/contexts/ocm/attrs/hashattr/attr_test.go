@@ -15,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/hashattr"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha512"
 )
 
@@ -40,7 +39,6 @@ var _ = Describe("attribute", func() {
 
 	It("decode", func() {
 		attr := &hashattr.Attribute{
-			Provider:      signing.DefaultRegistry(),
 			DefaultHasher: sha512.Algorithm,
 		}
 
@@ -51,13 +49,13 @@ var _ = Describe("attribute", func() {
 	It("applies string", func() {
 		MustBeSuccessful(cfgctx.GetAttributes().SetAttribute(hashattr.ATTR_KEY, sha512.Algorithm))
 		attr := hashattr.Get(cfgctx)
-		Expect(attr.GetHasher()).To(Equal(sha512.Handler{}))
+		Expect(attr.GetHasher(cfgctx)).To(Equal(sha512.Handler{}))
 	})
 
 	It("applies config", func() {
 		cfg := hashattr.New(sha512.Algorithm)
 
 		MustBeSuccessful(cfgctx.ApplyConfig(cfg, "from test"))
-		Expect(hashattr.Get(cfgctx).GetHasher()).To(Equal(sha512.Handler{}))
+		Expect(hashattr.Get(cfgctx).GetHasher(cfgctx)).To(Equal(sha512.Handler{}))
 	})
 })

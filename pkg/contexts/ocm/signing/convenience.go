@@ -29,7 +29,7 @@ func SignComponentVersion(cv ocm.ComponentVersionAccess, name string, optlist ..
 	if opts.Signer == nil {
 		opts.Signer = signingattr.Get(cv.GetContext()).GetSigner(rsa.Algorithm)
 	}
-	err := opts.Complete(nil)
+	err := opts.Complete(cv.GetContext())
 	if err != nil {
 		return nil, errors.Wrapf(err, "inconsistent options for signing")
 	}
@@ -52,7 +52,7 @@ func VerifyComponentVersion(cv ocm.ComponentVersionAccess, name string, optlist 
 	if opts.Signer != nil {
 		return nil, errors.Newf("impossible signer option set for verification")
 	}
-	err := opts.Complete(nil)
+	err := opts.Complete(cv.GetContext())
 	if err != nil {
 		return nil, errors.Wrapf(err, "inconsistent options for verification")
 	}

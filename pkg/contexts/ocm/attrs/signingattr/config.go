@@ -156,7 +156,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	return errors.Wrapf(a.ApplyToRegistry(Get(t)), "applying config failed")
 }
 
-func (a *Config) ApplyToRegistry(registry signing.KeyRegistry) error {
+func (a *Config) ApplyToRegistry(registry signing.KeyRegistryFuncs) error {
 	for n, k := range a.PublicKeys {
 		key, err := k.Get()
 		if err != nil {
