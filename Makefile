@@ -62,7 +62,7 @@ force-test:
 .PHONY: test
 test:
 	@echo "> Test"
-	@go test  ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
+	@go test  ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
 
 .PHONY: generate
 generate:
