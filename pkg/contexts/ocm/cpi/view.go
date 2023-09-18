@@ -523,8 +523,9 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, hashAlgo)
 		}
 
-		if res.Digest == nil && !compdesc.IsNoneAccessKind(res.Access.GetKind()) {
-			if !opts.IsSkipDigest() && !opts.IsSkipVerify() {
+		if !compdesc.IsNoneAccessKind(res.Access.GetKind()) {
+			var calculatedDigest *DigestDescriptor
+			if (!opts.IsSkipVerify() && digest != "") || (!opts.IsSkipDigest() && digest == "") {
 				dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, opts.HasherProvider, meth, digester)
 				if err != nil {
 					return err
@@ -532,25 +533,26 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 				if len(dig) == 0 {
 					return fmt.Errorf("%s: no digester accepts resource", res.Name)
 				}
-				if digest != "" && !opts.IsSkipVerify() {
-					if digest != dig[0].Value {
-						return fmt.Errorf("digest mismatch: %s != %s", dig[0].Value, digest)
-					}
+				calculatedDigest = &dig[0]
+			}
+
+			if digest != "" && !opts.IsSkipVerify() {
+				if digest != calculatedDigest.Value {
+					return fmt.Errorf("digest mismatch: %s != %s", calculatedDigest.Value, digest)
 				}
-				res.Digest = &dig[0]
-			} else {
-				if digest != "" && !digester.IsInitial() {
-					res.Digest = &metav1.DigestSpec{
+			}
+
+			if !opts.IsSkipDigest() {
+				if digest == "" {
+					res.Digest = calculatedDigest
+				} else {
+					res.Digest = &compdesc.DigestSpec{
 						HashAlgorithm:          digester.HashAlgorithm,
 						NormalisationAlgorithm: digester.NormalizationAlgorithm,
 						Value:                  digest,
 					}
-				} else { //nolint:staticcheck // better readable
-					// legacy mode: no digest
 				}
 			}
-		} else {
-			res.Digest = nil
 		}
 
 		if old != nil {
@@ -577,16 +579,16 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 	hashAlgo := opts.DefaultHashAlgorithm
 	value := ""
 	if !res.Digest.IsNone() {
-		value = res.Digest.Value
-		if !res.Digest.IsComplete() {
-			if res.Digest.HashAlgorithm != "" {
-				hashAlgo = res.Digest.HashAlgorithm
-				if res.Digest.NormalisationAlgorithm != "" {
-					digester = DigesterType{
-						HashAlgorithm:          res.Digest.HashAlgorithm,
-						NormalizationAlgorithm: res.Digest.NormalisationAlgorithm,
-					}
-				}
+		if res.Digest.IsComplete() {
+			value = res.Digest.Value
+		}
+		if res.Digest.HashAlgorithm != "" {
+			hashAlgo = res.Digest.HashAlgorithm
+		}
+		if res.Digest.NormalisationAlgorithm != "" {
+			digester = DigesterType{
+				HashAlgorithm:          hashAlgo,
+				NormalizationAlgorithm: res.Digest.NormalisationAlgorithm,
 			}
 		}
 	}
@@ -599,6 +601,7 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 			digester.NormalizationAlgorithm = old.Digest.NormalisationAlgorithm
 			if opts.IsAcceptExistentDigests() && !opts.IsModifyResource() && c.impl.IsPersistent() {
 				res.Digest = old.Digest
+				value = old.Digest.Value
 			}
 		}
 	}
