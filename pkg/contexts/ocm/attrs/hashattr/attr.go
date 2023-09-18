@@ -9,7 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
+	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/context"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -20,6 +20,12 @@ import (
 const (
 	ATTR_KEY   = "github.com/mandelsoft/ocm/hasher"
 	ATTR_SHORT = "hasher"
+)
+
+type (
+	Context         = ocm.Context
+	ContextProvider = ocm.ContextProvider
+	Hasher          = ocm.Hasher
 )
 
 func init() {
@@ -84,7 +90,7 @@ type Attribute struct {
 	DefaultHasher string
 }
 
-func (a *Attribute) GetHasher(ctx datacontext.Context, names ...string) internal.Hasher {
+func (a *Attribute) GetHasher(ctx ContextProvider, names ...string) Hasher {
 	name := utils.Optional(names...)
 	if name != "" {
 		return signingattr.Get(ctx).GetHasher(name)
@@ -92,8 +98,8 @@ func (a *Attribute) GetHasher(ctx datacontext.Context, names ...string) internal
 	return signingattr.Get(ctx).GetHasher(a.DefaultHasher)
 }
 
-func Get(ctx datacontext.Context) *Attribute {
-	a := ctx.GetAttributes().GetAttribute(ATTR_KEY)
+func Get(ctx ContextProvider) *Attribute {
+	a := ctx.OCMContext().GetAttributes().GetAttribute(ATTR_KEY)
 	if a == nil {
 		return &Attribute{
 			sha256.Algorithm,
@@ -102,6 +108,6 @@ func Get(ctx datacontext.Context) *Attribute {
 	return a.(*Attribute)
 }
 
-func Set(ctx datacontext.Context, hasher string) error {
-	return ctx.GetAttributes().SetAttribute(ATTR_KEY, hasher)
+func Set(ctx ContextProvider, hasher string) error {
+	return ctx.OCMContext().GetAttributes().SetAttribute(ATTR_KEY, hasher)
 }

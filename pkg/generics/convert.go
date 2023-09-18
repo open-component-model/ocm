@@ -31,7 +31,7 @@ func ConvertSliceTo[T, S any](in []S) []T {
 }
 
 // ConvertSliceWith converts the element type of a slice
-// using a concverter function.
+// using a converter function.
 // Unfortunately this cannot be expressed in a type-safe way in Go.
 // I MUST follow the type constraint I super S, which cannot be expressed in Go.
 func ConvertSliceWith[S, T, I any](c func(I) T, in []S) []T {

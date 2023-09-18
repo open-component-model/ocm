@@ -5,7 +5,6 @@
 package signingattr
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/signing"
 )
@@ -15,7 +14,7 @@ func init() {
 }
 
 func setupContext(mode datacontext.BuilderMode, ctx datacontext.Context) {
-	if octx, ok := ctx.(cpi.Context); ok {
+	if octx, ok := ctx.(Context); ok {
 		switch mode {
 		case datacontext.MODE_SHARED:
 			fallthrough

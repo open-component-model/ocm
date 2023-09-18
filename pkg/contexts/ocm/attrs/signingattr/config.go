@@ -11,7 +11,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -149,7 +148,7 @@ func (a *Config) AddPrivateKeyData(name string, data []byte) {
 }
 
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
-	t, ok := target.(config.Context)
+	t, ok := target.(Context)
 	if !ok {
 		return cfgcpi.ErrNoContext(ConfigType)
 	}
