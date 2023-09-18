@@ -123,6 +123,9 @@ func (d *DigestSpec) Copy() *DigestSpec {
 }
 
 func (d *DigestSpec) Equal(o *DigestSpec) bool {
+	if d == o {
+		return true
+	}
 	if d == nil || o == nil {
 		return false
 	}

@@ -210,7 +210,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 
 				hint := ocmcpi.ArtifactNameHint(a, src)
 				old, err = cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
-				if err != nil || !old.Digest.Equal(r.Meta().Digest) {
+				if err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest) {
 					var msgs []interface{}
 					if !errors.IsErrNotFound(err) {
 						if err != nil {

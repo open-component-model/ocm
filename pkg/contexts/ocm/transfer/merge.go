@@ -57,7 +57,7 @@ func MergeElements(log logging.Logger, ctx ocm.Context, s compdesc.ElementAccess
 			// keep access for same digest
 			if aes, ok := es.(compdesc.ElementArtifactAccessor); ok {
 				if des, ok := es.(compdesc.ElementDigestAccessor); ok {
-					if des.GetDigest().Equal(et.(compdesc.ElementDigestAccessor).GetDigest()) {
+					if des.GetDigest() != nil && des.GetDigest().Equal(et.(compdesc.ElementDigestAccessor).GetDigest()) {
 						et.(compdesc.ElementArtifactAccessor).SetAccess(aes.GetAccess())
 					}
 				}

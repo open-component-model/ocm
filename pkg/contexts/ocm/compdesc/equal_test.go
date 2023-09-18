@@ -223,11 +223,13 @@ var _ = Describe("equivalence", func() {
 			CheckEquivalent(b.Equivalent(a))
 		})
 
+		/* order is now relevant, because it is relevant for the normalization
 		It("handles order change", func() {
 			b[0], b[1] = b[1], b[0]
 			CheckEquivalent(a.Equivalent(b))
 			CheckEquivalent(b.Equivalent(a))
 		})
+		*/
 
 		It("handles volatile change", func() {
 			b[0].Labels[1].Value = []byte("X")
@@ -436,11 +438,13 @@ var _ = Describe("equivalence", func() {
 			CheckEquivalent(b.Equivalent(a))
 		})
 
+		/* order is now relevant, because it is relevant for the normalization
 		It("handles order change", func() {
 			b[0], b[1] = b[1], b[0]
 			CheckEquivalent(a.Equivalent(b))
 			CheckEquivalent(b.Equivalent(a))
 		})
+		*/
 
 		It("handles volatile change", func() {
 			b[0].Labels[1].Value = []byte("X")
@@ -562,11 +566,13 @@ var _ = Describe("equivalence", func() {
 			CheckEquivalent(b.Equivalent(a))
 		})
 
+		/* order is now relevant, because it is relevant for the normalization
 		It("handles order change", func() {
 			b[0], b[1] = b[1], b[0]
 			CheckEquivalent(a.Equivalent(b))
 			CheckEquivalent(b.Equivalent(a))
 		})
+		*/
 
 		It("handles volatile change", func() {
 			b[0].Labels[1].Value = []byte("X")

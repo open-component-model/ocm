@@ -182,6 +182,22 @@ func (l *Labels) Set(name string, value interface{}, opts ...LabelOption) error 
 	return nil
 }
 
+// Set sets or modifies the label meta data.
+func (l *Labels) SetOptions(name string, opts ...LabelOption) error {
+	newLabel, err := NewLabel(name, nil, opts...)
+	if err != nil {
+		return err
+	}
+	for i, label := range *l {
+		if label.Name == name {
+			newLabel.Value = label.Value
+			(*l)[i] = *newLabel
+			return nil
+		}
+	}
+	return errors.ErrNotFound(KIND_LABEL, name)
+}
+
 // SetValue sets or modifies the value of a label, the label metadata
 // is not touched.
 func (l *Labels) SetValue(name string, value interface{}) error {
@@ -219,7 +235,7 @@ func (l Labels) Equivalent(o Labels) equivalent.EqualState {
 	for _, ol := range o {
 		ll := l.GetDef(ol.Name)
 		if ol.Signing {
-			if ll == nil || !reflect.DeepEqual(&ol, ll) || ol.Version != ll.Version {
+			if ll == nil || !reflect.DeepEqual(&ol, ll) {
 				state = state.NotLocalHashEqual()
 			}
 		} else {
@@ -227,7 +243,7 @@ func (l Labels) Equivalent(o Labels) equivalent.EqualState {
 				if ll.Signing {
 					state = state.NotLocalHashEqual()
 				}
-				if !reflect.DeepEqual(&ol, ll) || ol.Version != ll.Version {
+				if !reflect.DeepEqual(&ol, ll) {
 					state = state.NotEquivalent()
 				}
 			} else {
@@ -235,10 +251,10 @@ func (l Labels) Equivalent(o Labels) equivalent.EqualState {
 			}
 		}
 	}
-	for _, rl := range l {
-		l := o.GetDef(rl.Name)
-		if l == nil {
-			if rl.Signing {
+	for _, ll := range l {
+		ol := o.GetDef(ll.Name)
+		if ol == nil {
+			if ll.Signing {
 				state = state.NotLocalHashEqual()
 			}
 			state = state.NotEquivalent()
@@ -364,15 +380,15 @@ func WithMerging(algo string, cfg LabelMergeHandlerConfig) LabelOption {
 
 func (o *labelOptMerge) ApplyToLabel(l *Label) error {
 	if o.algo != "" || len(o.cfg) > 0 {
-		if l.Merge == nil {
-			l.Merge = &MergeAlgorithmSpecification{}
-		}
+		l.Merge = &MergeAlgorithmSpecification{}
 		if o.algo != "" {
 			l.Merge.Algorithm = o.algo
 		}
 		if len(o.cfg) > 0 {
 			l.Merge.Config = o.cfg
 		}
+	} else {
+		l.Merge = nil
 	}
 	return nil
 }

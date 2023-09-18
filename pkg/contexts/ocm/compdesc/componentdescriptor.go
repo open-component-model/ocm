@@ -323,6 +323,17 @@ func GetByIdentity(a ElementAccessor, id metav1.Identity) ElementMetaAccessor {
 	return nil
 }
 
+func GetIndexByIdentity(a ElementAccessor, id metav1.Identity) int {
+	l := a.Len()
+	for i := 0; i < l; i++ {
+		e := a.Get(i)
+		if e.GetMeta().GetIdentity(a).Equals(id) {
+			return i
+		}
+	}
+	return -1
+}
+
 // ElementAccessor provides generic access to list of elements.
 type ElementAccessor interface {
 	Len() int

@@ -479,8 +479,10 @@ func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 		}
 		if _, ok := opts.SkipAccessTypes[acc.GetKind()]; ok {
 			// set the do not sign digest notation on skip-access-type resources
-			cd.Resources[i].Digest = metav1.NewExcludeFromSignatureDigest()
-			continue
+			// if no digest is already known.
+			if cd.Resources[i].Digest == nil {
+				cd.Resources[i].Digest = metav1.NewExcludeFromSignatureDigest()
+			}
 		}
 		// special digest notation indicates to not digest the content
 		if cd.Resources[i].Digest.IsExcluded() {

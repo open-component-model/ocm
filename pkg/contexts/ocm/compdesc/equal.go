@@ -52,7 +52,17 @@ func EquivalentElems(a ElementAccessor, b ElementAccessor) equivalent.EqualState
 	// relevance for the signature.
 	for i := 0; i < a.Len(); i++ {
 		ea := a.Get(i)
-		state = state.Apply(ea.Equivalent(GetByIdentity(b, ea.GetMeta().GetIdentity(a))))
+
+		ib := GetIndexByIdentity(b, ea.GetMeta().GetIdentity(a))
+		if ib != i {
+			state = state.NotLocalHashEqual()
+		}
+
+		var eb ElementMetaAccessor
+		if ib >= 0 {
+			eb = b.Get(ib)
+		}
+		state = state.Apply(ea.Equivalent(eb))
 	}
 	for i := 0; i < b.Len(); i++ {
 		eb := b.Get(i)
