@@ -56,8 +56,12 @@ func Merge(ctx Context, m *Specification, hint Hint, local Value, inbound *Value
 	var err error
 
 	reg := For(ctx)
+
 	if m == nil {
 		m = &Specification{}
+	} else {
+		t := *m
+		m = &t
 	}
 	if m.Algorithm == "" && hint != "" {
 		spec := reg.GetAssignment(hint)
@@ -69,10 +73,7 @@ func Merge(ctx Context, m *Specification, hint Hint, local Value, inbound *Value
 			spec = reg.GetAssignment(hint)
 		}
 		if spec != nil {
-			m.Algorithm = spec.Algorithm
-			if len(m.Config) == 0 {
-				m.Config = spec.Config
-			}
+			m = spec
 		}
 	}
 	if m.Algorithm == "" {

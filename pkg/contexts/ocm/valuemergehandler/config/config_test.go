@@ -44,7 +44,7 @@ var _ = Describe("merge config", func() {
 			Expect(cfg.ApplyTo(nil, reg)).To(Succeed())
 
 			found := reg.GetAssignments()
-			expected := map[string]*hpi.Specification{
+			expected := map[hpi.Hint]*hpi.Specification{
 				"test":        spec1,
 				"label:l1@v2": spec2,
 			}
@@ -59,7 +59,7 @@ var _ = Describe("merge config", func() {
 
 			Expect(valuemergehandler.For(ctx).GetHandlers()).To(Equal(valuemergehandler.Handlers{}))
 			found := valuemergehandler.For(ctx).GetAssignments()
-			expected := map[string]*hpi.Specification{
+			expected := map[hpi.Hint]*hpi.Specification{
 				"test":        spec1,
 				"label:l1@v2": spec2,
 			}
