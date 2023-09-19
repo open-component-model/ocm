@@ -7,6 +7,8 @@ package internal
 import (
 	"sync"
 
+	"golang.org/x/exp/maps"
+
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -25,10 +27,10 @@ type Handler interface {
 
 type Registry interface {
 	RegisterHandler(h Handler)
-	AssignHandler(hint string, spec *Specification)
+	AssignHandler(hint Hint, spec *Specification)
 
 	GetHandler(name string) Handler
-	GetAssignment(typ string) *Specification
+	GetAssignment(hint Hint) *Specification
 
 	GetHandlers() Handlers
 	GetAssignments() MergeHandlerAssignments
@@ -60,7 +62,7 @@ func (m *registry) RegisterHandler(h Handler) {
 	m.handlerTypes[h.Algorithm()] = h
 }
 
-func (m *registry) AssignHandler(hint string, spec *Specification) {
+func (m *registry) AssignHandler(hint Hint, spec *Specification) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	m.assignments[hint] = spec
@@ -76,7 +78,7 @@ func (m *registry) GetHandler(algo string) Handler {
 	return h
 }
 
-func (m *registry) GetAssignment(hint string) *Specification {
+func (m *registry) GetAssignment(hint Hint) *Specification {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	h := m.assignments[hint]
@@ -91,14 +93,8 @@ func (m *registry) Copy() Registry {
 	defer m.lock.Unlock()
 	c := &registry{
 		base:         m.base,
-		handlerTypes: map[string]Handler{},
-		assignments:  map[string]*Specification{},
-	}
-	for k, v := range m.handlerTypes {
-		c.handlerTypes[k] = v
-	}
-	for k, v := range m.assignments {
-		c.assignments[k] = v
+		handlerTypes: maps.Clone(m.handlerTypes),
+		assignments:  maps.Clone(m.assignments),
 	}
 	return c
 }
@@ -113,13 +109,11 @@ func (m *registry) GetHandlers() Handlers {
 	if m.base != nil {
 		r = m.base.GetHandlers()
 	}
-	for k, v := range m.handlerTypes {
-		r[k] = v
-	}
+	maps.Copy(r, m.handlerTypes)
 	return r
 }
 
-type MergeHandlerAssignments = map[string]*Specification
+type MergeHandlerAssignments = map[Hint]*Specification
 
 func (m *registry) GetAssignments() MergeHandlerAssignments {
 	m.lock.Lock()
@@ -129,9 +123,7 @@ func (m *registry) GetAssignments() MergeHandlerAssignments {
 	if m.base != nil {
 		r = m.base.GetAssignments()
 	}
-	for k, v := range m.assignments {
-		r[k] = v
-	}
+	maps.Copy(r, m.assignments)
 	return r
 }
 

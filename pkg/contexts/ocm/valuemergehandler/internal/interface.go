@@ -25,12 +25,13 @@ type (
 	Context       = cpi.Context
 	Specification = metav1.MergeAlgorithmSpecification
 	Value         = runtime.RawValue
+	Hint          string
 )
 
 func Register(h Handler) {
 	DefaultRegistry.RegisterHandler(h)
 }
 
-func Assign(hint string, spec *Specification) {
+func Assign(hint Hint, spec *Specification) {
 	DefaultRegistry.AssignHandler(hint, spec)
 }

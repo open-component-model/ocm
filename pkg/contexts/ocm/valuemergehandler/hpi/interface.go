@@ -33,6 +33,7 @@ type (
 	Registry      = internal.Registry
 	Specification = internal.Specification
 	Value         = internal.Value
+	Hint          = internal.Hint
 )
 
 const KIND_VALUE_MERGE_ALGORITHM = metav1.KIND_VALUE_MERGE_ALGORITHM
@@ -41,7 +42,7 @@ func Register(h Handler) {
 	internal.Register(h)
 }
 
-func Assign(hint string, spec *Specification) {
+func Assign(hint Hint, spec *Specification) {
 	internal.Assign(hint, spec)
 }
 
@@ -60,13 +61,13 @@ func NewRegistry(base ...Registry) Registry {
 	return internal.NewRegistry(base...)
 }
 
-func LabelHint(name string, optversion ...string) string {
+func LabelHint(name string, optversion ...string) Hint {
 	hint := "label:" + name
 	v := utils.Optional(optversion...)
 	if v != "" {
 		hint += "@" + v
 	}
-	return hint
+	return Hint(hint)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

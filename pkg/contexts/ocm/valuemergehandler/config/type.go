@@ -25,7 +25,7 @@ func init() {
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	Labels                      []LabelAssignment
-	Assignments                 map[string]*hpi.Specification `json:"assignments,omitempty"`
+	Assignments                 map[hpi.Hint]*hpi.Specification `json:"assignments,omitempty"`
 }
 
 type LabelAssignment struct {
@@ -38,7 +38,7 @@ type LabelAssignment struct {
 func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(ConfigType),
-		Assignments:         map[string]*hpi.Specification{},
+		Assignments:         map[hpi.Hint]*hpi.Specification{},
 	}
 }
 
@@ -46,9 +46,9 @@ func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *Config) Assign(name string, spec *hpi.Specification) {
+func (a *Config) Assign(name hpi.Hint, spec *hpi.Specification) {
 	if a.Assignments == nil {
-		a.Assignments = map[string]*hpi.Specification{}
+		a.Assignments = map[hpi.Hint]*hpi.Specification{}
 	}
 	if spec == nil {
 		delete(a.Assignments, name)

@@ -52,7 +52,7 @@ func GenericMerge[T any](ctx Context, m *Specification, hint string, local T, in
 // The hint describes a merge hint if no algorithm is specified.
 // It used the format <string>[@<version>]. If used the is looks
 // for an assignment for this hint, first with version and the without version.
-func Merge(ctx Context, m *Specification, hint string, local Value, inbound *Value) (bool, error) {
+func Merge(ctx Context, m *Specification, hint Hint, local Value, inbound *Value) (bool, error) {
 	var err error
 
 	reg := For(ctx)
@@ -62,7 +62,7 @@ func Merge(ctx Context, m *Specification, hint string, local Value, inbound *Val
 	if m.Algorithm == "" && hint != "" {
 		spec := reg.GetAssignment(hint)
 		if spec == nil {
-			idx := strings.LastIndex(hint, "@")
+			idx := strings.LastIndex(string(hint), "@")
 			if idx > 1 {
 				hint = hint[:idx]
 			}
