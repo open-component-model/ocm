@@ -7,20 +7,20 @@ package transfer_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/maplistmerge"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/go-test/deep"
 
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/maplistmerge"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 )
 
 func TouchLabels(s, d, e *metav1.Labels) {
@@ -56,7 +56,7 @@ var _ = Describe("basic merge operations for transport", func() {
 
 		It("add signed additional ones", func() {
 			res := dst.Copy()
-			MustBeSuccessful(transfer.MergeLabels(hpi.Log, ocm.DefaultContext(), src, &res))
+			MustBeSuccessful(internal.MergeLabels(hpi.Log, ocm.DefaultContext(), src, &res))
 			Expect(res).To(ConsistOf(append(dst, *src.GetDef("add-unsigned"))))
 		})
 
@@ -85,7 +85,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			},
 				metav1.WithMerging(maplistmerge.ALGORITHM, maplistmerge.NewConfig("", maplistmerge.MODE_LOCAL)))
 			res := dst.Copy()
-			MustBeSuccessful(transfer.MergeLabels(hpi.Log, ocm.DefaultContext(), src, &res))
+			MustBeSuccessful(internal.MergeLabels(hpi.Log, ocm.DefaultContext(), src, &res))
 
 			var v maplistmerge.Value
 			Expect(res.GetValue("test", &v)).To(BeTrue())
@@ -153,7 +153,7 @@ var _ = Describe("basic merge operations for transport", func() {
 
 		It("add signed additional ones", func() {
 			res := dst.Copy()
-			MustBeSuccessful(transfer.MergeSignatures(src, &res))
+			MustBeSuccessful(internal.MergeSignatures(src, &res))
 			Expect(res).To(ConsistOf(append(dst, *src.GetByName("add"))))
 		})
 	})
@@ -273,7 +273,7 @@ var _ = Describe("basic merge operations for transport", func() {
 		})
 
 		It("merges equal", func() {
-			n := Must(transfer.PrepareDescriptor(hpi.Log, ocm.DefaultContext(), src, dst))
+			n := Must(internal.PrepareDescriptor(hpi.Log, ocm.DefaultContext(), src, dst))
 			diff := deep.Equal(n, dst)
 			Expect(diff).To(BeEmpty())
 		})
@@ -338,7 +338,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e.Signatures[0] = s.Signatures[0]
 			e.Signatures = append(s.Signatures.Copy(), d.Signatures[1])
 
-			n := Must(transfer.PrepareDescriptor(hpi.Log, nil, s, d))
+			n := Must(internal.PrepareDescriptor(hpi.Log, nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -348,7 +348,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.Provider.Labels, &d.Provider.Labels, &e.Provider.Labels)
 
-			n := Must(transfer.PrepareDescriptor(hpi.Log, nil, s, d))
+			n := Must(internal.PrepareDescriptor(hpi.Log, nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -358,7 +358,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.Labels, &d.Labels, &e.Labels)
 
-			n := Must(transfer.PrepareDescriptor(hpi.Log, nil, s, d))
+			n := Must(internal.PrepareDescriptor(hpi.Log, nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -369,7 +369,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.Resources[0].Labels, &d.Resources[0].Labels, &e.Resources[0].Labels)
 
-			n := Must(transfer.PrepareDescriptor(hpi.Log, nil, s, d))
+			n := Must(internal.PrepareDescriptor(hpi.Log, nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -379,7 +379,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.Sources[0].Labels, &d.Sources[0].Labels, &e.Sources[0].Labels)
 
-			n := Must(transfer.PrepareDescriptor(hpi.Log, nil, s, d))
+			n := Must(internal.PrepareDescriptor(hpi.Log, nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 
@@ -389,7 +389,7 @@ var _ = Describe("basic merge operations for transport", func() {
 			e := d.Copy()
 			TouchLabels(&s.References[0].Labels, &d.References[0].Labels, &e.References[0].Labels)
 
-			n := Must(transfer.PrepareDescriptor(hpi.Log, nil, s, d))
+			n := Must(internal.PrepareDescriptor(hpi.Log, nil, s, d))
 			Expect(n).To(DeepEqual(e))
 		})
 	})

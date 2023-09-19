@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package transfer
+package internal
 
 import (
 	"github.com/mandelsoft/logging"
@@ -15,6 +15,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
+// PrepareDescriptor provides a descriptor for the transport target based on a
+// descriptor from the transport source and a descriptor already prsent at the
+// target.
 func PrepareDescriptor(log logging.Logger, ctx ocm.Context, s *compdesc.ComponentDescriptor, t *compdesc.ComponentDescriptor) (*compdesc.ComponentDescriptor, error) {
 	if ctx == nil {
 		ctx = ocm.DefaultContext()

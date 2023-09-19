@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -84,7 +85,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			if ok {
 				printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
 				doMerge = false
-				doCopy = false
+				doCopy = true
 			} else {
 				printer.Printf("  updating volatile properties of %q\n", nv)
 				doMerge = true
@@ -97,8 +98,8 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 					doMerge = true
 					msg += " differs because some artifact digests are changed"
 				} else {
+					// TODO: option to precalculate missing digests (as pre equivalent step).
 					msg += " might differ, because not all artifact digests are known"
-					// TODO: option to handle unknown digests like identical digests (copy=false, merge=true)
 				}
 			} else {
 				if eq.IsArtifactDetectable() {
@@ -141,7 +142,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	var n *compdesc.ComponentDescriptor
 	if doMerge {
 		log.WithValues("source", src.GetDescriptor(), "target", t.GetDescriptor()).Info("  applying 2-way merge")
-		n, err = PrepareDescriptor(log, src.GetContext(), src.GetDescriptor(), t.GetDescriptor())
+		n, err = internal.PrepareDescriptor(log, src.GetContext(), src.GetDescriptor(), t.GetDescriptor())
 		if err != nil {
 			return err
 		}
@@ -160,7 +161,10 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		n.RepositoryContexts = append(n.RepositoryContexts, unstr)
 	}
 
-	if doCopy {
+	// just to be sure: both modes set to false would produce
+	// corrupted content in target.
+	// If no copy is done, merge must keep the access methods in target!!!
+	if !doMerge || doCopy {
 		err = copyVersion(printer, log, state.History, src, t, n, handler)
 		if err != nil {
 			return err
