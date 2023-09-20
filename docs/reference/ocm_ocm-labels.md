@@ -14,7 +14,7 @@ of a component version:
 The dedicated elements support this by providing a field <code>labels</code>,
 which is a list of label definitions. Every label definition has several fields:
 
-- *<code>name</code>* *string* 
+- *<code>name</code>* *string*
 
   The name of the label also determines the interpretaion of its value. All labels
   with a dedicated name must have the same globally unique meaning, enabling a
@@ -53,7 +53,7 @@ which is a list of label definitions. Every label definition has several fields:
   to be signing relevant by setting this label field to <code>true</code>.
 
 - *<code>merge</code>* *merge spec* (optional)
-  
+
   Modifiable labels can be changed independently in any transport target
   location of a component version. This might require to update label values
   when importing a new setting for a component version. This means a merging
@@ -109,62 +109,62 @@ The label version is defaulted to <code>v1</code>.
 ### Supported Merge Algorithms
 
 There are some built-in algorithms featuring a flat name. But it will be
-possible to add arbitrary algorithms using the plugin concept. 
+possible to add arbitrary algorithms using the plugin concept.
 
 The following algorithms are possible:
   - <code>default</code> (default): This handler merges arbitrary label values by deciding for
     one or none side.
-    
+
     It supports the following config structure:
     - *<code>overwrite</code>* *string* (optional) determines how to handle conflicts.
-    
+
       - <code>none</code> no change possible, if entry differs the merge is rejected.
       - <code>local</code> the local value is preserved.
       - <code>inbound</code> (default) the inbound value overwrites the local one.
-    
+
 
   - <code>mapListMerge</code>: This handler merges values with a list of map values by observing a key field
     to identify similar map entries.
     The default entry key is taken from map field <code>name</code>.
-    
+
     It supports the following config structure:
     - *<code>keyField</code>* *string* (optional)
-    
+
       the key field to identify entries in the maps.
-    
+
     - *<code>overwrite</code>* *string* (optional) determines how to handle conflicts.
-    
+
       - <code>none</code> (default) no change possible, if entry differs the merge is rejected.
       - <code>local</code> the local value is preserved.
       - <code>inbound</code> the inbound value overwrites the local one.
-    
+
     - *<code>entries</code> *merge spec* (optional)
-    
+
       The merge specification (<code>algorithm</code> and <code>config</code>) used to merge conflicting
       changes in list entries.
-    
+
 
   - <code>simpleListMerge</code>: This handler merges simple list labels values.
-    
+
     It supports the following config structure:
     - *<code>overwrite</code>* *string* (optional) determines how to handle conflicts.
-    
-    
+
+
 
   - <code>simpleMapMerge</code>: This handler merges simple map labels values.
-    
+
     It supports the following config structure:
     - *<code>overwrite</code>* *string* (optional) determines how to handle conflicts.
-    
+
       - <code>none</code> (default) no change possible, if entry differs the merge is rejected.
       - <code>local</code> the local value is preserved.
       - <code>inbound</code> the inbound value overwrites the local one.
-    
+
     - *<code>entries</code> *merge spec* (optional)
-    
+
       The merge specification (<code>algorithm</code> and <code>config</code>) used to merge conflicting
       changes in map entries.
-    
+
 
 
 

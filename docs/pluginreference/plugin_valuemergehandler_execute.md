@@ -16,7 +16,7 @@ plugin valuemergehandler execute <name> <spec> [<options>]
 
 
 This command executes a a value merge. The values are taken from *stdin* as JSON
-string. It has the following fields: 
+string. It has the following fields:
 
 - **<code>local</code>** *any*
 
@@ -26,8 +26,8 @@ string. It has the following fields:
 
   The value to merge into. THis value is based on the original inbound value.
 
-This action has to provide an execution result as JSON string on *stdout*. It has the 
-following fields: 
+This action has to provide an execution result as JSON string on *stdout*. It has the
+following fields:
 
 - **<code>modified</code>** *bool*
 

@@ -154,7 +154,7 @@ The following configuration types are supported:
   The config type <code>merge.config.ocm.software</code> can be used to set some
   assignments for the merging of (label) values. It applies to a value
   merge handler registry, either directly or via an OCM context.
-  
+
   <pre>
       type: merge.config.ocm.software
       labels:
@@ -163,7 +163,7 @@ The following configuration types are supported:
           algorithm: acme.org/audit
           config: ...
       assignments:
-         label:acme.org/audit/level@v1: 
+         label:acme.org/audit/level@v1:
             algorithm: acme.org/audit
             config: ...
             ...

@@ -9,17 +9,19 @@ ocm [<options>] <sub command> ...
 ### Options
 
 ```
-  -X, --attribute stringArray   attribute setting
-      --config string           configuration file
-      --config-set strings      apply configuration set
-  -C, --cred stringArray        credential setting
-  -h, --help                    help for ocm
-      --logconfig string        log config
-  -L, --logfile string          set log file
-      --logkeys stringArray     log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])
-  -l, --loglevel string         set log level
-  -v, --verbose                 deprecated: enable logrus verbose logging
-      --version                 show version
+  -X, --attribute stringArray     attribute setting
+      --config string             configuration file
+      --config-set strings        apply configuration set
+  -C, --cred stringArray          credential setting
+  -h, --help                      help for ocm
+      --logconfig string          log config
+  -L, --logfile string            set log file
+      --logkeys stringArray       log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])
+  -l, --loglevel string           set log level
+  -K, --private-key stringArray   private key setting
+  -k, --public-key stringArray    public key setting
+  -v, --verbose                   deprecated: enable logrus verbose logging
+      --version                   show version
 ```
 
 ### Description
@@ -275,6 +277,16 @@ Often a tagged value can also be substituted from a file with the syntax
 <center>
 <code>&lt;attr>=@&lt;filepath></code>
 </center>
+
+The <code>--public-key</code> and <code>--private-key</code> options can be
+used to define public and private keys on the command line. The options have an
+argument of the form <code>&lt;name>=&lt;filepath></code>. The name is the name
+of the key and represents the context is used for (For example the signature
+name of a component version)
+
+Alternatively a key can be specified as base64 encoded string if the argument
+start with the prefix <code>!</code> or as direct string with the prefix
+<code>=</code>.
 
 
 ### SEE ALSO
