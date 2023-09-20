@@ -38,15 +38,18 @@ var _ = Describe("management", func() {
 		e := comment.New("start of routing slip")
 
 		parent := digest.Digest("yyy")
+		t := metav1.NewTimestampFor(time.Unix(0, 0))
 
 		h := &routingslip.HistoryEntry{
 			Payload:   Must(routingslip.ToGenericEntry(e)),
-			Timestamp: metav1.NewTimestampFor(time.Unix(0, 0)),
+			Timestamp: t,
 			Parent:    &parent,
 			Digest:    "xxx",
 			Signature: metav1.SignatureSpec{},
 		}
 
+		fmt.Printf("timestamp: %s\n", t)
+		fmt.Printf("(pointer): %s\n", &t)
 		Expect(h.Normalize()).To(Equal([]uint8(`{"parent":"yyy","payload":{"comment":"start of routing slip","type":"comment"},"timestamp":"1970-01-01T01:00:00+01:00"}`)))
 	})
 

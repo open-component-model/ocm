@@ -190,6 +190,12 @@ func (o Provider) Equivalent(a Provider) equivalent.EqualState {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// RFC3339 copies time.RFC3339 without the Z.
+// the standard settings produces different results in
+// different environments, sometimes as UTC time (Z) and sometimes
+// with time offset instead of Z.
+const RFC3339 = "2006-01-02T15:04:05-07:00"
+
 type _time = v1.Time
 
 // Timestamp is time rounded to seconds.
@@ -231,9 +237,9 @@ func (t Timestamp) MarshalJSON() ([]byte, error) {
 		return nil, errors.New("Time.MarshalJSON: year outside of range [0,9999]")
 	}
 
-	b := make([]byte, 0, len(time.RFC3339)+2)
+	b := make([]byte, 0, len(RFC3339)+2)
 	b = append(b, '"')
-	b = t.AppendFormat(b, time.RFC3339)
+	b = append(b, []byte(t.Format(RFC3339))...)
 	b = append(b, '"')
 	return b, nil
 }
@@ -246,13 +252,13 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	// Fractional seconds are handled implicitly by Parse.
-	tt, err := time.Parse(`"`+time.RFC3339+`"`, string(data))
+	tt, err := time.Parse(`"`+RFC3339+`"`, string(data))
 	*t = NewTimestampFor(tt)
 	return err
 }
 
 func (t Timestamp) String() string {
-	return t.Format(time.RFC3339)
+	return t.Format(RFC3339)
 }
 
 func (t *Timestamp) Time() time.Time {
