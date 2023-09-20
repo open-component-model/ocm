@@ -72,8 +72,8 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.CatchOutput(buf).Execute("get", "routingslip", "-v", "--fail-on-error", ARCH)).To(MatchError("validation failed: for details see output"))
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-TYPE    TIMESTAMP                 DESCRIPTION
-                                  Error: cannot verify entry ` + e1a.Digest.String() + `: signature verification failed, crypto/rsa: verification error
+TYPE    TIMESTAMP            DESCRIPTION
+                             Error: cannot verify entry ` + e1a.Digest.String() + `: signature verification failed, crypto/rsa: verification error
 comment ` + e1a.Timestamp.String() + ` Comment: first entry
 
 `))
@@ -85,7 +85,7 @@ comment ` + e1a.Timestamp.String() + ` Comment: first entry
 		Expect(env.CatchOutput(buf).Execute("get", "routingslip", "-v", ARCH)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-COMPONENT-VERSION NAME     TYPE    TIMESTAMP                 DESCRIPTION
+COMPONENT-VERSION NAME     TYPE    TIMESTAMP            DESCRIPTION
 test.de/x:v1      acme.org comment ` + e1a.Timestamp.String() + ` Comment: first entry
 
 `))
@@ -117,7 +117,7 @@ test.de/x:v1      acme.org comment ` + e1a.Timestamp.String() + ` Comment: first
 			Expect(env.CatchOutput(buf).Execute("get", "routingslip", ARCH)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-NAME          TYPE          TIMESTAMP                 DESCRIPTION
+NAME          TYPE          TIMESTAMP            DESCRIPTION
 a.company.com comment       ` + e2a.Timestamp.String() + ` Comment: first other entry
 a.company.com comment       ` + e2b.Timestamp.String() + ` Comment: second other entry
 a.company.com acme.org/test ` + e2c.Timestamp.String() + ` name: unit-tests, status: passed
@@ -130,7 +130,7 @@ acme.org      comment       ` + e1a.Timestamp.String() + ` Comment: first entry
 			Expect(env.CatchOutput(buf).Execute("get", "routingslip", ARCH, "a.company.com")).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-TYPE          TIMESTAMP                 DESCRIPTION
+TYPE          TIMESTAMP            DESCRIPTION
 comment       ` + e2a.Timestamp.String() + ` Comment: first other entry
 comment       ` + e2b.Timestamp.String() + ` Comment: second other entry
 acme.org/test ` + e2c.Timestamp.String() + ` name: unit-tests, status: passed
@@ -142,7 +142,7 @@ acme.org/test ` + e2c.Timestamp.String() + ` name: unit-tests, status: passed
 			Expect(env.CatchOutput(buf).Execute("get", "routingslip", ARCH, "a.company.com", "-owide")).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-TYPE          DIGEST   PARENT   TIMESTAMP                 DESCRIPTION
+TYPE          DIGEST   PARENT   TIMESTAMP            DESCRIPTION
 comment       ` + digests(e2a, nil) + ` Comment: first other entry
 comment       ` + digests(e2b, e2a) + ` Comment: second other entry
 acme.org/test ` + digests(e2c, e2b) + ` name: unit-tests, status: passed
@@ -152,7 +152,7 @@ acme.org/test ` + digests(e2c, e2b) + ` name: unit-tests, status: passed
 		It("gets dedicated yaml slip", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "routingslip", ARCH, "a.company.com", "-ojson")).To(Succeed())
-			Expect(len(buf.String())).To(Equal(3485))
+			Expect(len(buf.String())).To(Equal(3470))
 		})
 	})
 })
