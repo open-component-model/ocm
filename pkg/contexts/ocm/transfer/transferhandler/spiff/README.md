@@ -9,6 +9,41 @@ the processing result.
 
 The following modes are used:
 
+## Update Mode
+
+This mode is used to decide on the update option for a component version. This controls whether an update on volatile (non-signature relevant) information should be done. It gets the following bindings:
+
+- `mode` *&lt;string>*: `update`
+- `values` *&lt;map>*:
+  - `component` *&lt;map>*:  the meta dats of the component version carrying the resource
+    - `name` *&lt;string>*: component name
+    - `version` *&lt;string>*: component version
+    - `provider` *&lt;provider>*: provider info, a struct with the field s
+      - `name` *&lt;string>*: provider name
+      - `labels` *&lt;map[string]any>*: provider attributes
+    - `labels` *&lt;map[string]>*: labels of the component version (deep)
+  - `target` *&lt;map>*:  the respository specification of the target resource
+
+The result value (field `process`) must be a boolean describing whether the update should be possible.
+
+## Overwrite Mode
+
+This mode is used to decide on the overwrite option for a component version. This controls whether an update on non-volatile (signature relevant) information should be done. It gets the
+following bindings:
+
+- `mode` *&lt;string>*: `overwrite`
+- `values` *&lt;map>*:
+  - `component` *&lt;map>*:  the meta dats of the component version carrying the resource
+    - `name` *&lt;string>*: component name
+    - `version` *&lt;string>*: component version
+    - `provider` *&lt;provider>*: provider info, a struct with the field s
+      - `name` *&lt;string>*: provider name
+      - `labels` *&lt;map[string]any>*: provider attributes
+    - `labels` *&lt;map[string]>*: labels of the component version (deep)
+  - `target` *&lt;map>*:  the respository specification of the target resource
+
+The result value (field `process`) must be a boolean describing whether the update should be possible.
+
 ## Resource Mode
 
 This mode is used to decide on the by-value option for a resource. It gets the
@@ -35,7 +70,7 @@ resource should be transported ny-value.
 This mode is used to decide on the by-value option for a source. It gets the
 following bindings:
 
-- `mode` **&lt;string>**: `resource`
+- `mode` **&lt;string>**: `source`
 - `values` **&lt;map>**: (see [Resource Mode](#resource-mode))
 
 The result value (field `process`) must be a boolean describing whether the

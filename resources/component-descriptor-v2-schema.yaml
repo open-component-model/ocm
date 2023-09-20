@@ -11,6 +11,13 @@ definitions:
       schemaVersion:
         type: 'string'
 
+  merge:
+    type: 'object'
+    properties:
+      algorithm:
+        pattern: '^[a-z][a-z0-9/_-]+$'
+      config: { }
+    additionalProperties: false
   label:
     type: 'object'
     required:
@@ -24,6 +31,8 @@ definitions:
         pattern: '^v[0-9]+$'
       signing:
         type: 'boolean'
+      merge:
+        $ref: '#/definitions/merge'
 
   componentName:
     type: 'string'

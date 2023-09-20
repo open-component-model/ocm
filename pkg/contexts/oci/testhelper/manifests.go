@@ -6,10 +6,13 @@ package testhelper
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
@@ -51,6 +54,15 @@ func OCIManifest1For(env *builder.Builder, ns, tag string) (*artdesc.Descriptor,
 		})
 	})
 	return mdesc, ldesc
+}
+
+func OCIArtifactResource1(env *builder.Builder, name string, host string, funcs ...func()) {
+	env.Resource(name, "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+		env.Access(
+			ociartifact.New(oci.StandardOCIRef(host+".alias", OCINAMESPACE, OCIVERSION)),
+		)
+		env.Configure(funcs...)
+	})
 }
 
 const (

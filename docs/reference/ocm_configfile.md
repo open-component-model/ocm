@@ -87,6 +87,14 @@ The following configuration types are supported:
   just stored in the configuration context and can be applied
   on-demand. On the CLI, this can be done using the main command option
   <code>--config-set &lt;name></code>.
+- <code>hasher.config.ocm.software</code>
+  The config type <code>hasher.config.ocm.software</code> can be used to define
+  the default hash algorithm used to calculate digests for resources.
+  It supports the field <code>hashAlgorithm</code>, with one of the following
+  values:
+    - <code>NO-DIGEST</code>
+    - <code>SHA-256</code> (default)
+    - <code>SHA-512</code>
 - <code>keys.config.ocm.software</code>
   The config type <code>keys.config.ocm.software</code> can be used to define
   public and private keys. A key value might be given by one of the fields:
@@ -141,6 +149,24 @@ The following configuration types are supported:
           credentials: # direct credential specification
               username: mandelsoft2
               password: specialsecret2
+  </pre>
+- <code>merge.config.ocm.software</code>
+  The config type <code>merge.config.ocm.software</code> can be used to set some
+  assignments for the merging of (label) values. It applies to a value
+  merge handler registry, either directly or via an OCM context.
+
+  <pre>
+      type: merge.config.ocm.software
+      labels:
+      - name: acme.org/audit/level
+        merge:
+          algorithm: acme.org/audit
+          config: ...
+      assignments:
+         label:acme.org/audit/level@v1:
+            algorithm: acme.org/audit
+            config: ...
+            ...
   </pre>
 - <code>oci.config.ocm.software</code>
   The config type <code>oci.config.ocm.software</code> can be used to define

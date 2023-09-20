@@ -12,6 +12,13 @@ components:
   resources:
     - name: text
       type: PlainText
+      labels:
+        - name: city
+          value: Karlsruhe
+          merge:
+            algorithm: default
+            config:
+              overwrite: inbound
       input:
         type: file
         path: testdata

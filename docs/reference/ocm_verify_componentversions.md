@@ -22,6 +22,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
       --latest                    restrict component versions to latest
   -L, --local                     verification based on information found in component versions, only
       --lookup stringArray        repository name or spec for closure lookup fallback
+  -K, --private-key stringArray   private key setting
   -k, --public-key stringArray    public key setting
       --repo string               repository name or spec
   -s, --signature stringArray     signature name

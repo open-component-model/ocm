@@ -10,7 +10,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -30,7 +29,7 @@ var _ = Describe("resolver", func() {
 	var env *Builder
 
 	BeforeEach(func() {
-		env = NewBuilder(NewEnvironment())
+		env = NewBuilder()
 
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.Component(COMPONENT, func() {

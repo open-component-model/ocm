@@ -13,6 +13,7 @@ import (
 
 	parse "github.com/mandelsoft/spiff/dynaml/x509"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -137,7 +138,8 @@ func (o *Command) Complete(args []string) error {
 	if o.cacert != "" {
 		cert, err := parse.ParseCertificate(o.cacert)
 		if err != nil {
-			data, err := vfs.ReadFile(o.Context.FileSystem(), o.cacert)
+			path, _ := utils2.ResolvePath(o.cacert)
+			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read ca cert file %q", o.cacert)
 			}
@@ -151,7 +153,8 @@ func (o *Command) Complete(args []string) error {
 	if o.cakey != "" {
 		key, err := parse.ParsePrivateKey(o.cakey)
 		if err != nil {
-			data, err := vfs.ReadFile(o.Context.FileSystem(), o.cacert)
+			path, _ := utils2.ResolvePath(o.cacert)
+			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read private key file %q", o.cacert)
 			}

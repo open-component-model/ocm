@@ -15,11 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCINAMESPACE = "ocm/test"
-const OCIVERSION = "v2.0"
-const OCIHOST = "alias"
-
 var _ = Describe("Method", func() {
 
 	var data = `globalAccess:

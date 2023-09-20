@@ -85,17 +85,21 @@ func (o SpecializedOptionsCreator[P, T]) NewOptions() TransferHandlerOptions {
 //     general value artifact transport.
 //   - package transferhandler.spiff: controls transfer using a spiff script.
 type TransferHandler interface {
+	// UpdateVersion decides whether an update of volatile (non-signature relevant) parts of a CV should be updated.
+	UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error)
+	// OverwriteVersion decides whether a modification of non-volatile (signature relevant) parts of a CV should be updated.
 	OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error)
 
+	// TransferVersion decides on continuing with a component version (reference).
 	TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference, tgt ocm.Repository) (ocm.ComponentVersionAccess, TransferHandler, error)
+	// TransferResource decides on the value transport of a resource.
 	TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.ResourceAccess) (bool, error)
+	// TransferSource decides on the value transport of a source.
 	TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.SourceAccess) (bool, error)
 
 	// HandleTransferResource technically transfers a resource.
-	// The access method must be closed by this method.
 	HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
 	// HandleTransferSource technically transfers a source.
-	// The access method must be closed by this method.
 	HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
 }
 
@@ -110,12 +114,4 @@ func ApplyOptions(set TransferOptions, opts ...TransferOption) error {
 func From(ctx config.ContextProvider, opts TransferOptions) error {
 	_, err := ctx.ConfigContext().ApplyTo(-1, opts)
 	return err
-}
-
-func BoolP(b bool) *bool {
-	return &b
-}
-
-func AsBool(b *bool) bool {
-	return b != nil && *b
 }

@@ -33,6 +33,10 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 	return NewDefaultHandler(defaultOpts), nil
 }
 
+func (h *Handler) UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
+	return !h.opts.IsSkipUpdate(), nil
+}
+
 func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
 	return h.opts.IsOverwrite(), nil
 }
@@ -72,15 +76,11 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 
 func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
 	blob := accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m)
-	defer blob.Close()
-
-	return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
+	return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m), ocm.SkipVerify())
 }
 
 func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
 	blob := accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m)
-	defer blob.Close()
-
 	return t.SetSourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
 }
 

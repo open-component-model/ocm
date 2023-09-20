@@ -36,6 +36,12 @@ func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *descriptor.Descript
 	if len(d.Actions) > 0 {
 		caps = append(caps, "Actions")
 	}
+	if len(d.ValueMergeHandlers) > 0 {
+		caps = append(caps, "Value Merge Handlers")
+	}
+	if len(d.LabelMergeSpecifications) > 0 {
+		caps = append(caps, "Label Merge Specifications")
+	}
 	if len(caps) == 0 {
 		out.Printf("Capabilities:     none\n")
 	} else {
@@ -65,6 +71,16 @@ func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *descriptor.Descript
 		out.Printf("\n")
 		out.Printf("Actions:\n")
 		DescribeActions(reg, d, out)
+	}
+	if len(d.ValueMergeHandlers) > 0 {
+		out.Printf("\n")
+		out.Printf("Value Merge Handlers:\n")
+		DescribeValueMergeHandlers(d, out)
+	}
+	if len(d.ValueMergeHandlers) > 0 {
+		out.Printf("\n")
+		out.Printf("Label Merge Specifications:\n")
+		DescribeLabelMergeSpecifications(d, out)
 	}
 }
 
@@ -251,6 +267,42 @@ func DescribeActions(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out c
 			out.Printf("Consumer type: %s (consumer attributes described by action type)\n", a.ConsumerType)
 			for _, p := range a.Attributes {
 				out.Printf("- %s\n", p)
+			}
+		}
+	}
+}
+
+func DescribeValueMergeHandlers(d *descriptor.Descriptor, out common.Printer) {
+	handlers := map[string]descriptor.ValueMergeHandlerDescriptor{}
+	for _, h := range d.ValueMergeHandlers {
+		handlers[h.GetName()] = h
+	}
+
+	for _, n := range utils2.StringMapKeys(handlers) {
+		a := handlers[n]
+		out.Printf("- Name: %s\n", n)
+		if a.Description != "" {
+			out.Printf("%s\n", utils2.IndentLines(a.Description, "    "))
+		}
+	}
+}
+
+func DescribeLabelMergeSpecifications(d *descriptor.Descriptor, out common.Printer) {
+	handlers := map[string]descriptor.LabelMergeSpecification{}
+	for _, h := range d.LabelMergeSpecifications {
+		handlers[h.GetName()] = h
+	}
+
+	for _, n := range utils2.StringMapKeys(handlers) {
+		a := handlers[n]
+		out.Printf("- Name: %s\n", n)
+		if a.Description != "" {
+			out.Printf("  Algorithm: %s\n", a.Algorithm)
+			if len(a.Config) > 0 {
+				out.Printf("  Config: %s\n", string(a.Config))
+			}
+			if a.Description != "" {
+				out.Printf("%s\n", utils2.IndentLines(a.Description, "    "))
 			}
 		}
 	}

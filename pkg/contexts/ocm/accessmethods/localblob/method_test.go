@@ -20,15 +20,9 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	tenv "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
-
-const OCIPATH = "/tmp/oci"
-const OCINAMESPACE = "ocm/test"
-const OCIVERSION = "v2.0"
-const OCIHOST = "alias"
 
 const CTF = "ctf"
 const COMPONENT = "fabianburth.org/component"
@@ -80,7 +74,7 @@ type: localBlob
 	It("check get inexpensive content version identity method", func() {
 		var env *Builder
 
-		env = NewBuilder(tenv.NewEnvironment())
+		env = NewBuilder()
 		defer env.Cleanup()
 
 		env.OCMCommonTransport(CTF, accessio.FormatDirectory, func() {

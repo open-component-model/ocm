@@ -25,16 +25,17 @@ The type specific specification fields are:
 
 - **`baseUrl`** *string*
 
-  OCI repository reference, containing the host part and the repository prefix
-  as path
+  OCI registry reference, containing the registry host URL.
+  `docker.io` cannot be used to host an OCM repository because
+  it provides a fixed number of levels for repository names (2).
 
-- **`legacyTypes`** (optional) *bool*
+- **`subPath`** (optional) *string*
 
-  OCI repository requires docker legacy mime types for OCI
-  image manifests. (automatically enabled for docker.io)
+  the OCI repository prefix used for the OCM repository.
 
-  `docker.io` cannot be used to host an OCM repository because 
-  is provides a fixed number of levels for repository names (2).
+- **`componentNameMapping`** (optional) *string* (deprecated)
+  
+  the mapping algorithm used to map OCM component names to OCU repository names ( `urlPath` (default) or `sha256-digest`).
 
 
 ### Go Bindings

@@ -33,7 +33,7 @@ var _ = Describe("artifact management", func() {
 	var env *builder.Builder
 
 	BeforeEach(func() {
-		env = builder.NewBuilder(env2.NewEnvironment(env2.TestData()))
+		env = builder.NewBuilder(env2.TestData())
 	})
 
 	AfterEach(func() {

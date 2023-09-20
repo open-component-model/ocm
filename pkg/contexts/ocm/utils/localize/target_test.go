@@ -44,6 +44,8 @@ var _ = Describe("value substitution in single target", func() {
 					env.Version(VERSION, func() {
 						env.Provider("mandelsoft")
 						env.Resource(IMAGE, "", "Spiff", v1.LocalRelation, func() {
+							env.ModificationOptions(ocm.SkipVerify())
+							env.Digest("fake", "sha256", "fake")
 							env.Access(ociartifact.New("ghcr.io/mandelsoft/test:v1"))
 						})
 					})
@@ -65,7 +67,7 @@ var _ = Describe("value substitution in single target", func() {
 		})
 
 		It("uses image ref data from component version", func() {
-			mappings := ImageMappings(`
+			mappings := UnmarshalImageMappings(`
 - name: test1
   image: a.b.img
   resource:
@@ -73,7 +75,7 @@ var _ = Describe("value substitution in single target", func() {
 `)
 			subst, err := localize.LocalizeMappings(mappings, cv, nil)
 			Expect(err).To(Succeed())
-			Expect(subst).To(Equal(ValueMappings(`
+			Expect(subst).To(Equal(UnmarshalValueMappings(`
 - name: image mapping "test1"
   path: a.b.img
   value: ghcr.io/mandelsoft/test:v1
@@ -82,7 +84,7 @@ var _ = Describe("value substitution in single target", func() {
 
 		It("uses multiple resolved image ref data from component version", func() {
 
-			mappings := ImageMappings(`
+			mappings := UnmarshalImageMappings(`
 - name: test1
   repository: a.b.rep
   tag: a.b.tag  
@@ -92,7 +94,7 @@ var _ = Describe("value substitution in single target", func() {
 `)
 			subst, err := localize.LocalizeMappings(mappings, cv, nil)
 			Expect(err).To(Succeed())
-			Expect(subst).To(Equal(ValueMappings(`
+			Expect(subst).To(Equal(UnmarshalValueMappings(`
 - name: image mapping "test1"-repository
   path: a.b.rep
   value: ghcr.io/mandelsoft/test
@@ -114,7 +116,7 @@ manifest:
 `)
 
 		It("handles simple values substitution", func() {
-			subs := ValueMappings(`
+			subs := UnmarshalValueMappings(`
 - name: test1
   path: manifest.value1
   value: config1
@@ -133,7 +135,7 @@ manifest:
 		})
 
 		It("handles json substitution", func() {
-			subs := ValueMappings(`
+			subs := UnmarshalValueMappings(`
 - name: test1
   path: manifest.value1
   value:

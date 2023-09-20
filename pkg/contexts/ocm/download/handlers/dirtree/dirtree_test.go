@@ -43,7 +43,7 @@ var _ = Describe("artifact management", func() {
 	cfg := Must(json.Marshal(ociv1.ImageConfig{}))
 
 	BeforeEach(func() {
-		env = builder.NewBuilder(env2.NewEnvironment(env2.TestData()))
+		env = builder.NewBuilder(env2.TestData())
 	})
 
 	AfterEach(func() {

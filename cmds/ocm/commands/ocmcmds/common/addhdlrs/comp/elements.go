@@ -7,7 +7,9 @@ package comp
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	. "github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
@@ -30,14 +32,22 @@ const (
 )
 
 type ResourceSpecHandler struct {
-	version string
-	schema  string
+	rschandler *rscs.ResourceSpecHandler
+	version    string
+	schema     string
 }
 
-var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
+var (
+	_ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
+	_ options.Options            = (*ResourceSpecHandler)(nil)
+)
 
-func NewResourceSpecHandler(v string, schema string) *ResourceSpecHandler {
-	return &ResourceSpecHandler{version: v, schema: schema}
+func New(v string, schema string, opts ...ocm.ModificationOption) *ResourceSpecHandler {
+	return &ResourceSpecHandler{rschandler: rscs.New(opts...), version: v, schema: schema}
+}
+
+func (h *ResourceSpecHandler) AddFlags(fs *pflag.FlagSet) {
+	h.rschandler.AddFlags(fs)
 }
 
 func (*ResourceSpecHandler) Key() string {
@@ -107,7 +117,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 	if err != nil {
 		return err
 	}
-	err = handle(ctx, ictx, elem.Source(), cv, r.Resources, rscs.ResourceSpecHandler{})
+	err = handle(ctx, ictx, elem.Source(), cv, r.Resources, h.rschandler)
 	if err != nil {
 		return err
 	}

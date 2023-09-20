@@ -13,7 +13,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -125,7 +124,7 @@ var _ = Describe("Method", func() {
 		BeforeEach(func() {
 			expectedContent, err = os.ReadFile(filepath.Join("testdata", "repo.tar.gz"))
 			Expect(err).ToNot(HaveOccurred())
-			env = NewBuilder(NewEnvironment())
+			env = NewBuilder()
 			downloader = &mockDownloader{
 				expected: expectedContent,
 			}

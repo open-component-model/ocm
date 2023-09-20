@@ -10,6 +10,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -33,7 +34,9 @@ type plugin struct {
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
-	actions map[string]Action
+	actions       map[string]Action
+	mergehandlers map[string]ValueMergeHandler
+	mergespecs    map[string]*descriptor.LabelMergeSpecification
 
 	configParser func(message json.RawMessage) (interface{}, error)
 }
@@ -53,7 +56,9 @@ func NewPlugin(name string, version string) Plugin {
 		accessScheme:   runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		uploaderScheme: runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 
-		actions: map[string]Action{},
+		actions:       map[string]Action{},
+		mergehandlers: map[string]ValueMergeHandler{},
+		mergespecs:    map[string]*descriptor.LabelMergeSpecification{},
 
 		descriptor: descriptor.Descriptor{
 			Version:       descriptor.VERSION,
@@ -328,6 +333,45 @@ func (p *plugin) DecodeAction(data []byte) (ActionSpec, error) {
 
 func (p *plugin) GetAction(name string) Action {
 	return p.actions[name]
+}
+
+func (p *plugin) RegisterValueMergeHandler(a ValueMergeHandler) error {
+	if p.GetValueMergeHandler(a.Name()) != nil {
+		return errors.ErrAlreadyExists("value mergehandler", a.Name())
+	}
+
+	hd := descriptor.ValueMergeHandlerDescriptor{
+		Name:        a.Name(),
+		Description: a.Description(),
+	}
+	p.descriptor.ValueMergeHandlers = append(p.descriptor.ValueMergeHandlers, hd)
+	p.mergehandlers[a.Name()] = a
+	return nil
+}
+
+func (p *plugin) GetValueMergeHandler(name string) ValueMergeHandler {
+	return p.mergehandlers[name]
+}
+
+func (p *plugin) RegisterLabelMergeSpecification(name, version string, spec *metav1.MergeAlgorithmSpecification, desc string) error {
+	e := descriptor.LabelMergeSpecification{
+		Name:                        name,
+		Version:                     version,
+		Description:                 desc,
+		MergeAlgorithmSpecification: *spec,
+	}
+
+	if p.GetLabelMergeSpecification(e.GetName()) != nil {
+		return errors.ErrAlreadyExists("label merge spec", e.GetName())
+	}
+
+	p.descriptor.LabelMergeSpecifications = append(p.descriptor.LabelMergeSpecifications, e)
+	p.mergespecs[e.GetName()] = &e
+	return nil
+}
+
+func (p *plugin) GetLabelMergeSpecification(id string) *descriptor.LabelMergeSpecification {
+	return p.mergespecs[id]
 }
 
 func (p *plugin) GetConfig() (interface{}, error) {

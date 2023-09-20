@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
@@ -22,6 +21,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 type ModifiedResourceSpecificationsFile struct {
@@ -110,13 +111,17 @@ func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(h ResourceSpecH
 	listkey := utils.Plural(h.Key(), 0)
 
 	var current string
-	if ok, err := vfs.FileExists(fs, o.ConfigFile); ok {
-		fi, err := fs.Stat(o.ConfigFile)
+	configFile, _ := utils2.ResolvePath(o.ConfigFile)
+	if ok, err := vfs.FileExists(fs, configFile); ok {
+		fi, err := fs.Stat(configFile)
 		if err != nil {
 			return errors.Wrapf(err, "cannot stat %s config file %q", listkey, o.ConfigFile)
 		}
 		mode = fi.Mode().Perm()
-		data, err := vfs.ReadFile(fs, o.ConfigFile)
+		if err != nil {
+			return err
+		}
+		data, err := vfs.ReadFile(fs, configFile)
 		if err != nil {
 			return errors.Wrapf(err, "cannot read %s config file %q", listkey, o.ConfigFile)
 		}

@@ -107,13 +107,29 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 
 /////////////////////////////////////////////////////////////////////////////
 
+type FailedEntry struct {
+	Scheme  string `json:"scheme,omitempty"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Error   string `json:"error"`
+}
+
 func Format(opts *output.Options) processing.ProcessChain {
 	o := schemaoption.From(opts)
 	if o.Schema == compdesc.InternalSchemaVersion {
 		return nil
 	}
 	return processing.Map(func(in interface{}) interface{} {
-		desc := comphdlr.Elem(in).GetDescriptor()
+		cv := comphdlr.Elem(in)
+		if cv == nil {
+			nv := in.(*comphdlr.Object).Spec.NameVersion()
+			return &FailedEntry{
+				Name:    nv.GetName(),
+				Version: nv.GetVersion(),
+				Error:   "not found",
+			}
+		}
+		desc := cv.GetDescriptor()
 		schema := o.Schema
 		if schema == "" {
 			schema = desc.SchemaVersion()
@@ -123,12 +139,7 @@ func Format(opts *output.Options) processing.ProcessChain {
 		}
 		out, err := compdesc.Convert(desc, compdesc.SchemaVersion(o.Schema))
 		if err != nil {
-			return struct {
-				Scheme  string `json:"scheme"`
-				Name    string `json:"name"`
-				Version string `json:"version"`
-				Error   string `json:"error"`
-			}{
+			return &FailedEntry{
 				Scheme:  desc.SchemaVersion(),
 				Name:    desc.GetName(),
 				Version: desc.GetVersion(),
