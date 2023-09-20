@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+//go:build unix
+
 package valuesets
 
 import (
@@ -13,6 +15,8 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 )
 
 const ARCH = "/tmp/ctf"
@@ -25,6 +29,9 @@ var _ = Describe("demoplugin", func() {
 
 	BeforeEach(func() {
 		env = testhelper.NewTestEnv()
+
+		cache.DirectoryCache.Reset()
+		plugindirattr.Set(env.OCMContext(), "testdata")
 
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.ComponentVersion(COMP, VERS, func() {
@@ -46,8 +53,8 @@ var _ = Describe("demoplugin", func() {
 		buf.Reset()
 		MustBeSuccessful(env.CatchOutput(buf).Execute("get", "routingslip", ARCH, PROV))
 		Expect(buf.String()).To(StringMatchTrimmedWithContext(`
-COMPONENT-VERSION   NAME     TYPE  TIMESTAMP                 DESCRIPTION
-acme.org/test:1.0.0 acme.org check .{25} test: passed
+COMPONENT-VERSION   NAME     TYPE  TIMESTAMP            DESCRIPTION
+acme.org/test:1.0.0 acme.org check .{20} test: passed
 `))
 		buf.Reset()
 		MustBeSuccessful(env.CatchOutput(buf).Execute("get", "routingslip", ARCH, PROV, "-oyaml"))

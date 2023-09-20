@@ -11,13 +11,6 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/common/compression"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/dirtree"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/utils/tarutils"
-	"github.com/spf13/cobra"
-	"golang.org/x/sys/unix"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
@@ -29,11 +22,16 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/dirtree"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -181,7 +179,7 @@ func (d *download) Save(o *artifacthdlr.Object, f string) error {
 			if len(opts.Layers) > 1 {
 				name = fmt.Sprintf("%s-%d", f, l)
 			}
-			file, err := dest.PathFilesystem.OpenFile(name, vfs.O_CREATE|vfs.O_TRUNC|unix.O_WRONLY, 0640)
+			file, err := dest.PathFilesystem.OpenFile(name, vfs.O_CREATE|vfs.O_TRUNC|vfs.O_WRONLY, 0640)
 			if err != nil {
 				return errors.Wrapf(err, "cannot create target file %s for layer %d", name, l)
 			}
