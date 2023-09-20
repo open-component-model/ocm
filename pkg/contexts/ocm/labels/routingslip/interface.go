@@ -17,6 +17,10 @@ type (
 	GenericEntry    = internal.GenericEntry
 )
 
+type SlipAccess interface {
+	Get(name string) *RoutingSlip
+}
+
 func DefaultEntryTypeScheme() EntryTypeScheme {
 	return internal.DefaultEntryTypeScheme()
 }

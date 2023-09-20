@@ -6,6 +6,7 @@ package get
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/failonerroroption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -113,7 +114,7 @@ func getRegular(opts *output.Options) output.Output {
 
 func getWide(opts *output.Options) output.Output {
 	return (&output.TableOutput{
-		Headers: output.Fields("COMPONENT-VERSION", "NAME", "TYPE", "DIGEST", "PARENT", "TIMESTAMP", "DESCRIPTION"),
+		Headers: output.Fields("COMPONENT-VERSION", "NAME", "TYPE", "DIGEST", "PARENT", "TIMESTAMP", "LINKS", "DESCRIPTION"),
 		Options: opts,
 		Mapping: mapGetWideOutput,
 	}).New()
@@ -142,6 +143,8 @@ func mapGetRegularOutput(e interface{}) interface{} {
 }
 
 func mapGetWideOutput(e interface{}) interface{} {
+	var links []string
+
 	r := common.Elem(e)
 
 	t := ""
@@ -149,6 +152,7 @@ func mapGetWideOutput(e interface{}) interface{} {
 	p := ""
 	ts := ""
 	desc := "Error: " + r.Error
+
 	if r.HistoryEntry != nil {
 		ts = r.HistoryEntry.Timestamp.String()
 		t = r.HistoryEntry.Payload.GetType()
@@ -165,12 +169,18 @@ func mapGetWideOutput(e interface{}) interface{} {
 		if r.HistoryEntry.Payload != nil {
 			desc = r.HistoryEntry.Payload.Describe(r.Component.ComponentVersion.GetContext())
 		}
+		for _, l := range r.HistoryEntry.Links {
+			if l.Name != "" && len(l.Digest.Encoded()) > 8 {
+				links = append(links, fmt.Sprintf("%s@%s", l.Name, l.Digest.Encoded()[:8]))
+			}
+		}
 	}
 	return []string{
 		common2.VersionedElementKey(r.Component.ComponentVersion).String(),
 		r.Slip,
 		t, d, p,
 		ts,
+		strings.Join(links, ","),
 		desc,
 	}
 }

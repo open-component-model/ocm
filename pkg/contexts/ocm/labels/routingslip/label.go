@@ -16,7 +16,7 @@ import (
 
 const NAME = "routing-slips"
 
-type Label map[string]HistoryEntries
+type LabelValue map[string]HistoryEntries
 
 var spec = utils.Must(hpi.NewSpecification(
 	simplemapmerge.ALGORITHM,
@@ -33,18 +33,19 @@ func init() {
 	hpi.Assign(hpi.LabelHint(NAME), spec)
 }
 
-func (l Label) Has(name string) bool {
+func (l LabelValue) Has(name string) bool {
 	return l[name] != nil
 }
 
-func (l Label) Get(name string) *RoutingSlip {
+func (l LabelValue) Get(name string) *RoutingSlip {
 	return &RoutingSlip{
 		Name:    name,
 		Entries: l[name],
+		Access:  l,
 	}
 }
 
-func (l Label) Query(name string) *RoutingSlip {
+func (l LabelValue) Query(name string) *RoutingSlip {
 	a := l[name]
 	if a == nil {
 		return nil
@@ -52,38 +53,39 @@ func (l Label) Query(name string) *RoutingSlip {
 	return &RoutingSlip{
 		Name:    name,
 		Entries: a,
+		Access:  l,
 	}
 }
 
-func (l Label) Set(slip *RoutingSlip) {
+func (l LabelValue) Set(slip *RoutingSlip) {
 	l[slip.Name] = slip.Entries
 }
 
-func AddEntry(cv cpi.ComponentVersionAccess, name string, algo string, e Entry, parent ...digest.Digest) (*HistoryEntry, error) {
-	var label Label
+func AddEntry(cv cpi.ComponentVersionAccess, name string, algo string, e Entry, links []Link, parent ...digest.Digest) (*HistoryEntry, error) {
+	var label LabelValue
 	_, err := cv.GetDescriptor().Labels.GetValue(NAME, &label)
 	if err != nil {
 		return nil, err
 	}
 	if label == nil {
-		label = Label{}
+		label = LabelValue{}
 	}
 	slip := label.Get(name)
-	entry, err := slip.Add(cv.GetContext(), name, algo, e, parent...)
+	entry, err := slip.Add(cv.GetContext(), name, algo, e, links, parent...)
 	if err != nil {
 		return nil, err
 	}
 	label.Set(slip)
 
-	err = cv.GetDescriptor().Labels.SetValue(NAME, label)
+	err = Set(cv, label)
 	if err != nil {
 		return nil, err
 	}
 	return entry, nil
 }
 
-func Get(cv cpi.ComponentVersionAccess) (Label, error) {
-	var label Label
+func Get(cv cpi.ComponentVersionAccess) (LabelValue, error) {
+	var label LabelValue
 	_, err := cv.GetDescriptor().Labels.GetValue(NAME, &label)
 	if err != nil {
 		return nil, err
@@ -91,6 +93,6 @@ func Get(cv cpi.ComponentVersionAccess) (Label, error) {
 	return label, nil
 }
 
-func Set(cv cpi.ComponentVersionAccess, label Label) error {
+func Set(cv cpi.ComponentVersionAccess, label LabelValue) error {
 	return cv.GetDescriptor().Labels.SetValue(NAME, label)
 }

@@ -61,6 +61,7 @@ type HistoryEntry struct {
 	Payload   *GenericEntry        `json:"payload"`
 	Timestamp metav1.Timestamp     `json:"timestamp"`
 	Parent    *digest.Digest       `json:"parent,omitempty"`
+	Links     []Link               `json:"links,omitempty"`
 	Digest    digest.Digest        `json:"digest"`
 	Signature metav1.SignatureSpec `json:"signature"`
 }
@@ -75,6 +76,11 @@ func (e *HistoryEntry) CalculateDigest() (digest.Digest, error) {
 		return "", err
 	}
 	return digest.SHA256.FromBytes(data), nil
+}
+
+type Link struct {
+	Name   string        `json:"name"`
+	Digest digest.Digest `json:"digest"`
 }
 
 func CreateEntry(t runtime.VersionedTypedObject) (Entry, error) {

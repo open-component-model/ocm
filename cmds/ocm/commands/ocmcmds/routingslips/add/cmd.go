@@ -6,6 +6,7 @@ package add
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
@@ -44,6 +45,7 @@ type Command struct {
 	CompSpec  string
 	Name      string
 	Type      string
+	Links     []string
 	Entry     *routingslip.GenericEntry
 	Algorithm string
 	Digest    string
@@ -87,6 +89,7 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.StringVarP(&o.Algorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
 	fs.StringVarP(&o.Digest, "digest", "", "", "parent digest to use")
+	fs.StringSliceVarP(&o.Links, "links", "", nil, "links to other slip/entries (<slipname>@<digest>)")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -161,11 +164,48 @@ func (a *action) Out() error {
 		return fmt.Errorf("no component version selected")
 	}
 
-	var err error
+	cv := a.data[0].ComponentVersion
+	v, err := routingslip.Get(cv)
+	if err != nil {
+		return err
+	}
+	if v == nil {
+		v = routingslip.LabelValue{}
+	}
+
+	var links []routingslip.Link
+	for i, l := range a.cmd.Links {
+		idx := strings.Index(l, "@")
+		if idx <= 0 {
+			return fmt.Errorf("invalid link %q", l)
+		}
+		n := l[:i]
+		d := l[i+1:]
+		slip := v.Query(n)
+		if slip == nil {
+			return fmt.Errorf("link %q: slip %q not found", l, n)
+		}
+		var found digest.Digest
+		for e := 0; e < slip.Len(); e++ {
+			if strings.HasPrefix(slip.Get(e).Digest.Encoded(), d) {
+				if found != "" {
+					return fmt.Errorf("link %q: entry %q is not unique", l, d)
+				}
+				found = slip.Get(i).Digest
+			}
+		}
+		if found == "" {
+			return fmt.Errorf("link %q not found", l)
+		}
+		links = append(links, routingslip.Link{
+			Name:   n,
+			Digest: found,
+		})
+	}
 	if a.cmd.Digest == "" {
-		_, err = routingslip.AddEntry(a.data[0].ComponentVersion, a.cmd.Name, a.cmd.Algorithm, a.cmd.Entry)
+		_, err = routingslip.AddEntry(cv, a.cmd.Name, a.cmd.Algorithm, a.cmd.Entry, links)
 	} else {
-		_, err = routingslip.AddEntry(a.data[0].ComponentVersion, a.cmd.Name, a.cmd.Algorithm, a.cmd.Entry, digest.Digest(a.cmd.Digest))
+		_, err = routingslip.AddEntry(cv, a.cmd.Name, a.cmd.Algorithm, a.cmd.Entry, links, digest.Digest(a.cmd.Digest))
 	}
 	return err
 }

@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package entrytypes
+package types
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/entrytypes/comment"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/types/comment"
 )

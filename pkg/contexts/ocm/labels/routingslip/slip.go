@@ -20,8 +20,9 @@ import (
 )
 
 const (
-	KIND_ENTRY      = "routing slip entry"
-	KIND_ENTRY_TYPE = "routing slip entry type"
+	KIND_ENTRY        = "routing slip entry"
+	KIND_ENTRY_TYPE   = "routing slip entry type"
+	KIND_ROUTING_SLIP = "routing slip"
 )
 
 type RoutingSlipIndex map[digest.Digest]*HistoryEntry
@@ -39,7 +40,7 @@ func (s RoutingSlipIndex) Leaves() []digest.Digest {
 	return found.AsArray()
 }
 
-func (s RoutingSlipIndex) Verify(ctx Context, name string, sig bool) error {
+func (s RoutingSlipIndex) Verify(ctx Context, name string, sig bool, acc SlipAccess) error {
 	if len(s) == 0 {
 		return nil
 	}
@@ -72,28 +73,51 @@ func (s RoutingSlipIndex) Verify(ctx Context, name string, sig bool) error {
 	}
 
 	found := generics.Set[digest.Digest]{}
-leaves:
-	for _, d := range leaves {
-		cur := s[d]
+	for _, id := range leaves {
+		s.verify(ctx, name, id, acc, found)
+	}
+	return nil
+}
 
-		for {
-			if found.Contains(cur.Digest) {
-				continue leaves
+func (s RoutingSlipIndex) verify(ctx Context, name string, id digest.Digest, acc SlipAccess, found generics.Set[digest.Digest]) error {
+	cur := s[id]
+	if cur == nil {
+		return errors.ErrNotFound(KIND_ENTRY, id.String(), name)
+	}
+	for {
+		if found.Contains(cur.Digest) {
+			return nil
+		}
+		found.Add(cur.Digest)
+		d, err := cur.CalculateDigest()
+		if err != nil {
+			return err
+		}
+		if d != cur.Digest {
+			return fmt.Errorf("content digest %q does not match %q in %s", d, cur.Digest, name)
+		}
+		for _, l := range cur.Links {
+			if l.Name == name {
+				err := s.verify(ctx, name, l.Digest, acc, found)
+				if err != nil {
+					return err
+				}
+			} else {
+				slip := acc.Get(l.Name)
+				if slip == nil {
+					return errors.ErrNotFound(KIND_ROUTING_SLIP, l.Name)
+				}
+				err := slip.Index().verify(ctx, l.Name, l.Digest, acc, found)
+				if err != nil {
+					return err
+				}
 			}
-			found.Add(cur.Digest)
-			d, err := cur.CalculateDigest()
-			if err != nil {
-				return err
-			}
-			if d != cur.Digest {
-				return fmt.Errorf("content digest %q dow not match %q", d, cur.Digest)
-			}
-			if cur.Parent == nil {
-				break
-			}
-			if cur = s[*cur.Parent]; cur == nil {
-				return fmt.Errorf("parent %q of %q not found", cur.Parent, d)
-			}
+		}
+		if cur.Parent == nil {
+			break
+		}
+		if cur = s[*cur.Parent]; cur == nil {
+			return fmt.Errorf("parent %q of %q not found in %s", cur.Parent, d, name)
 		}
 	}
 	return nil
@@ -104,10 +128,11 @@ leaves:
 type RoutingSlip struct {
 	Name    string
 	Entries []HistoryEntry
+	Access  SlipAccess
 }
 
-func NewRoutingSlip(name string) *RoutingSlip {
-	return &RoutingSlip{Name: name}
+func NewRoutingSlip(name string, acc SlipAccess) *RoutingSlip {
+	return &RoutingSlip{Name: name, Access: acc}
 }
 
 func (s *RoutingSlip) Len() int {
@@ -152,10 +177,10 @@ func (s *RoutingSlip) Verify(ctx Context, name string, sig bool) error {
 	if len(s.Entries) == 0 {
 		return nil
 	}
-	return s.Index().Verify(ctx, name, sig)
+	return s.Index().Verify(ctx, name, sig, s.Access)
 }
 
-func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, parent ...digest.Digest) (*HistoryEntry, error) {
+func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links []Link, parent ...digest.Digest) (*HistoryEntry, error) {
 	registry := signingattr.Get(ctx)
 	handler := registry.GetSigner(algo)
 	if handler == nil {
@@ -172,6 +197,17 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, parent
 	err = s.Verify(ctx, name, true)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, l := range links {
+		slip := s.Access.Get(l.Name)
+		if slip == nil {
+			return nil, errors.ErrNotFound(KIND_ROUTING_SLIP, l.Name)
+		}
+		err = slip.Verify(ctx, name, true)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var base *HistoryEntry
@@ -205,6 +241,7 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, parent
 	entry := &HistoryEntry{
 		Payload:   gen,
 		Timestamp: metav1.NewTimestamp(),
+		Links:     links,
 		Digest:    "",
 		Signature: metav1.SignatureSpec{},
 	}
@@ -239,6 +276,7 @@ func GetSlip(cv cpi.ComponentVersionAccess, name string) (*RoutingSlip, error) {
 	return &RoutingSlip{
 		Name:    name,
 		Entries: label[name],
+		Access:  label,
 	}, nil
 }
 
@@ -248,7 +286,7 @@ func SetSlip(cv cpi.ComponentVersionAccess, slip *RoutingSlip) error {
 		return err
 	}
 	if label == nil {
-		label = Label{}
+		label = LabelValue{}
 	}
 	label[slip.Name] = slip.Entries
 	return Set(cv, label)

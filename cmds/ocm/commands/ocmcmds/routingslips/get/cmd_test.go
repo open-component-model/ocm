@@ -16,7 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/entrytypes/comment"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/types/comment"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
@@ -48,14 +48,14 @@ var _ = Describe("Test Environment", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERSION))
 		defer Close(cv)
 
-		e1a = Must(routingslip.AddEntry(cv, PROVIDER, rsa.Algorithm, comment.New("first entry")))
+		e1a = Must(routingslip.AddEntry(cv, PROVIDER, rsa.Algorithm, comment.New("first entry"), nil))
 	})
 
 	AfterEach(func() {
 		env.Cleanup()
 	})
 
-	It("gets single entry", func() {
+	It("detects manipulation", func() {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)
 
@@ -79,7 +79,7 @@ comment ` + e1a.Timestamp.String() + ` Comment: first entry
 `))
 	})
 
-	It("detects manipulation", func() {
+	It("gets single entry", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "routingslip", "-v", ARCH)).To(Succeed())
@@ -102,14 +102,14 @@ test.de/x:v1      acme.org comment ` + e1a.Timestamp.String() + ` Comment: first
 			cv := Must(repo.LookupComponentVersion(COMP, VERSION))
 			defer Close(cv)
 
-			e2a = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, comment.New("first other entry")))
-			e2b = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, comment.New("second other entry")))
+			e2a = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, comment.New("first other entry"), nil))
+			e2b = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, comment.New("second other entry"), nil))
 
 			te := Must(routingslip.NewGenericEntryWith("acme.org/test",
 				"name", "unit-tests",
 				"status", "passed",
 			))
-			e2c = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, te))
+			e2c = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, te, nil))
 		})
 
 		It("gets different slips", func() {
@@ -142,10 +142,10 @@ acme.org/test ` + e2c.Timestamp.String() + ` name: unit-tests, status: passed
 			Expect(env.CatchOutput(buf).Execute("get", "routingslip", ARCH, "a.company.com", "-owide")).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-TYPE          DIGEST   PARENT   TIMESTAMP            DESCRIPTION
-comment       ` + digests(e2a, nil) + ` Comment: first other entry
-comment       ` + digests(e2b, e2a) + ` Comment: second other entry
-acme.org/test ` + digests(e2c, e2b) + ` name: unit-tests, status: passed
+TYPE          DIGEST   PARENT   TIMESTAMP            LINKS DESCRIPTION
+comment       ` + digests(e2a, nil) + `       Comment: first other entry
+comment       ` + digests(e2b, e2a) + `       Comment: second other entry
+acme.org/test ` + digests(e2c, e2b) + `       name: unit-tests, status: passed
 `))
 		})
 
@@ -153,6 +153,34 @@ acme.org/test ` + digests(e2c, e2b) + ` name: unit-tests, status: passed
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "routingslip", ARCH, "a.company.com", "-ojson")).To(Succeed())
 			Expect(len(buf.String())).To(Equal(3470))
+		})
+
+		Context("with links", func() {
+			var e2d *routingslip.HistoryEntry
+
+			BeforeEach(func() {
+				repo := Must(ctf.Open(env, accessobj.ACC_WRITABLE, ARCH, 0, env))
+				defer Close(repo)
+				cv := Must(repo.LookupComponentVersion(COMP, VERSION))
+				defer Close(cv)
+
+				e2d = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, comment.New("linked entry"), []routingslip.Link{{
+					Name:   PROVIDER,
+					Digest: e1a.Digest,
+				}}))
+			})
+			It("gets dedicated wide slip with link", func() {
+				buf := bytes.NewBuffer(nil)
+				Expect(env.CatchOutput(buf).Execute("get", "routingslip", ARCH, "a.company.com", "-owide")).To(Succeed())
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
+					`
+TYPE          DIGEST   PARENT   TIMESTAMP            LINKS             DESCRIPTION
+comment       ` + digests(e2a, nil) + `                   Comment: first other entry
+comment       ` + digests(e2b, e2a) + `                   Comment: second other entry
+acme.org/test ` + digests(e2c, e2b) + `                   name: unit-tests, status: passed
+comment       ` + digests(e2d, e2c) + ` acme.org@` + e1a.Digest.Encoded()[:8] + ` Comment: linked entry
+`))
+			})
 		})
 	})
 })
