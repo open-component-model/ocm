@@ -7,6 +7,7 @@ package transfer
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -19,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/skipupdateoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
@@ -57,6 +59,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		closureoption.New("component reference"),
 		lookupoption.New(),
 		overwriteoption.New(),
+		skipupdateoption.New(),
 		rscbyvalueoption.New(),
 		srcbyvalueoption.New(),
 		omitaccesstypeoption.New(),
@@ -114,18 +117,10 @@ func (o *Command) Run() error {
 
 	transferopts := &spiff.Options{}
 	transferhandler.From(o.ConfigContext(), transferopts)
-	transferhandler.ApplyOptions(transferopts,
-		lookupoption.From(o),
-
-		closureoption.From(o),
-		overwriteoption.From(o),
-		rscbyvalueoption.From(o),
-		srcbyvalueoption.From(o),
-		stoponexistingoption.From(o),
-		omitaccesstypeoption.From(o),
+	transferhandler.ApplyOptions(transferopts, append(options.FindOptions[transferhandler.TransferOption](o),
 		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),
-	)
+	)...)
 	thdlr, err := spiff.New(transferopts)
 
 	if err != nil {

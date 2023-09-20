@@ -5,6 +5,7 @@
 package plugin
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,9 +27,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action/execute"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler"
+	merge "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler/execute"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/put"
 	uplval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/validate"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -70,6 +74,41 @@ func (p *pluginImpl) SetConfig(config json.RawMessage) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	p.config = config
+}
+
+func (p *pluginImpl) MergeValue(specification *valuemergehandler.Specification, local, inbound valuemergehandler.Value) (bool, *valuemergehandler.Value, error) {
+	desc := p.GetValueMappingDescriptor(specification.Algorithm)
+	if desc == nil {
+		return false, nil, errors.ErrNotSupported(valuemergehandler.KIND_VALUE_MERGE_ALGORITHM, specification.Algorithm, KIND_PLUGIN, p.Name())
+	}
+	input, err := json.Marshal(ppi.ValueMergeData{
+		Local:   local,
+		Inbound: inbound,
+	})
+	if err != nil {
+		return false, nil, err
+	}
+
+	args := []string{mergehandler.Name, merge.Name, specification.Algorithm}
+	if len(specification.Config) > 0 {
+		args = append(args, string(specification.Config))
+	}
+
+	var buf bytes.Buffer
+	_, err = p.Exec(bytes.NewReader(input), &buf, args...)
+	if err != nil {
+		return false, nil, errors.Wrapf(err, "plugin %s", p.Name())
+	}
+	var r ppi.ValueMergeResult
+
+	err = json.Unmarshal(buf.Bytes(), &r)
+	if err != nil {
+		if r.Message != "" {
+			return false, nil, fmt.Errorf("%w: %s", err, r.Message)
+		}
+		return false, nil, err
+	}
+	return r.Modified, &r.Value, nil
 }
 
 func (p *pluginImpl) Action(spec ppi.ActionSpec, creds json.RawMessage) (ppi.ActionResult, error) {

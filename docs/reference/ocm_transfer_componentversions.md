@@ -22,6 +22,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -h, --help                        help for componentversions
       --latest                      restrict component versions to latest
       --lookup stringArray          repository name or spec for closure lookup fallback
+      --no-update                   don't touch existing versions in target
   -N, --omit-access-types strings   omit by-value transfer for resource types
   -f, --overwrite                   overwrite existing component versions
   -r, --recursive                   follow component reference nesting
@@ -118,6 +119,14 @@ references.
 
 It the option <code>--overwrite</code> is given, component version in the
 target repository will be overwritten, if they already exist.
+
+
+With the option <code>--no-update</code> existing versions in the target
+repository will not be touched at all. An additional specification of the
+option <code>--overwrite</code> is ignored. By default, updates of
+volative (non-signature-relevant) information is enabled, but the
+modification of non-volatile data is prohibited unless the overwrite
+option is given.
 
 
 It the option <code>--copy-resources</code> is given, all referential

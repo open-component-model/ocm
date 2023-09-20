@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -98,6 +99,10 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 	if printer != nil {
 		opts = opts.Dup()
 		opts.Printer = printer
+	}
+	err := opts.Complete(signingattr.Get(cv.GetContext()))
+	if err != nil {
+		return nil, err
 	}
 	if state == nil {
 		s := NewWalkingState(cv.GetContext().LoggingContext().WithContext(REALM))
@@ -219,17 +224,13 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		}
 	}
 
-	if nv.GetName() == "github.com/mandelsoft/test" {
-		a := 0
-		_ = a
-	}
 	var spec *metav1.DigestSpec
 	legacy := signing.IsLegacyHashAlgorithm(ctx.RootContextInfo.DigestType.HashAlgorithm) && !opts.DoSign()
 	if ctx.Digest == nil {
 		if err := calculateReferenceDigests(state, opts, legacy); err != nil {
 			return nil, err
 		}
-		if err := calculareResourceDigests(state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
+		if err := calculateResourceDigests(state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
 			return nil, err
 		}
 		dt := ctx.DigestType
@@ -461,7 +462,7 @@ func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) e
 	return nil
 }
 
-func calculareResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) error {
+func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) error {
 	octx := cv.GetContext()
 	blobdigesters := octx.BlobDigesters()
 	for i, res := range cv.GetResources() {
@@ -478,11 +479,13 @@ func calculareResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 		}
 		if _, ok := opts.SkipAccessTypes[acc.GetKind()]; ok {
 			// set the do not sign digest notation on skip-access-type resources
-			cd.Resources[i].Digest = metav1.NewExcludeFromSignatureDigest()
-			continue
+			// if no digest is already known.
+			if cd.Resources[i].Digest == nil {
+				cd.Resources[i].Digest = metav1.NewExcludeFromSignatureDigest()
+			}
 		}
 		// special digest notation indicates to not digest the content
-		if cd.Resources[i].Digest != nil && reflect.DeepEqual(cd.Resources[i].Digest, metav1.NewExcludeFromSignatureDigest()) {
+		if cd.Resources[i].Digest.IsExcluded() {
 			continue
 		}
 
@@ -491,7 +494,13 @@ func calculareResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 			return errors.Wrapf(err, resMsg(raw, acc.Describe(octx), "failed creating access for resource"))
 		}
 
-		rdigest := raw.Digest
+		var rdigest *metav1.DigestSpec
+		if raw.Digest != nil &&
+			(state.Context.IsRoot() || opts.DigestMode != DIGESTMODE_TOP || raw.Digest.HashAlgorithm == opts.Hasher.Algorithm()) {
+			// keep precalculated digest, if present.
+			// For top mode any non-root level digest can be recalculated.
+			rdigest = raw.Digest
+		}
 		if preset != nil && (!state.Context.RootContextInfo.Sign || preset.Digest.HashAlgorithm == opts.Hasher.Algorithm()) {
 			// prefer digest from context.
 			// If access method enforces a dedicated algorithm, then this should have been done
@@ -512,6 +521,12 @@ func calculareResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 		if !checkDigest(rdigest, &digest[0]) {
 			return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, rdigest))
 		}
+		if raw.Digest != nil &&
+			NormalizedDigesterType(raw.Digest) == NormalizedDigesterType(&digest[0]) {
+			if raw.Digest.Value != digest[0].Value {
+				return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
+			}
+		}
 		cd.Resources[i].Digest = &digest[0]
 		if legacy {
 			cd.Resources[i].Digest.HashAlgorithm = signing.LegacyHashAlgorithm(cd.Resources[i].Digest.HashAlgorithm)
@@ -529,6 +544,12 @@ func DigesterType(digest *metav1.DigestSpec) ocm.DigesterType {
 		dc.HashAlgorithm = digest.HashAlgorithm
 		dc.NormalizationAlgorithm = digest.NormalisationAlgorithm
 	}
+	return dc
+}
+
+func NormalizedDigesterType(digest *metav1.DigestSpec) ocm.DigesterType {
+	dc := DigesterType(digest)
+	dc.HashAlgorithm = signing.NormalizeHashAlgorithm(dc.HashAlgorithm)
 	return dc
 }
 

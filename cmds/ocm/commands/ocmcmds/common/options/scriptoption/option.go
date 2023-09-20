@@ -6,6 +6,7 @@ package scriptoption
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -62,7 +63,11 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		}
 	}
 	if o.ScriptFile != "" {
-		data, err := vfs.ReadFile(ctx.FileSystem(), o.ScriptFile)
+		path, err := utils.ResolvePath(o.ScriptFile)
+		if err != nil {
+			return err
+		}
+		data, err := vfs.ReadFile(ctx.FileSystem(), path)
 		if err != nil {
 			return errors.Wrapf(err, "invalid transfer script file")
 		}

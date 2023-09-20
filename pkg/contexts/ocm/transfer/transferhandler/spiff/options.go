@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func init() {
@@ -118,6 +119,7 @@ func Script(data []byte) transferhandler.TransferOption {
 }
 
 func ScriptByFile(path string, fss ...vfs.FileSystem) transferhandler.TransferOption {
+	path, _ = utils.ResolvePath(path)
 	return &scriptOption{
 		source: path,
 		script: func() ([]byte, error) { return vfs.ReadFile(accessio.FileSystem(fss...), path) },

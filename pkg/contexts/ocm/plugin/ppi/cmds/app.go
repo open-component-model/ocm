@@ -19,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/describe"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/info"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/topics/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
 )
@@ -60,6 +61,7 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 	cmd.AddCommand(describe.New(p))
 	cmd.AddCommand(info.New(p))
 	cmd.AddCommand(action.New(p))
+	cmd.AddCommand(mergehandler.New(p))
 	cmd.AddCommand(accessmethod.New(p))
 	cmd.AddCommand(upload.New(p))
 	cmd.AddCommand(download.New(p))

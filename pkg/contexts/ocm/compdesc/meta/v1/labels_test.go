@@ -7,6 +7,7 @@ package v1_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -14,8 +15,10 @@ import (
 
 var _ = Describe("labels", func() {
 	Context("access", func() {
-		It("modififies label set", func() {
+		It("modifies label set", func() {
 			labels := v1.Labels{}
+
+			// Extend
 
 			MustBeSuccessful(labels.Set("l1", "v1"))
 			MustBeSuccessful(labels.Set("l2", "v2", v1.WithSigning()))
@@ -119,6 +122,73 @@ var _ = Describe("labels", func() {
 			var get v1.ObjectMeta
 			Expect(labels.GetValue("l1", &get)).To(BeTrue())
 			Expect(&get).To(Equal(meta))
+		})
+	})
+
+	Context("equivalence", func() {
+		var labels v1.Labels
+
+		BeforeEach(func() {
+			labels.Clear()
+			labels.Set("label1", "value1", v1.WithSigning())
+			labels.Set("label2", "value2", v1.WithSigning(), v1.WithVersion("v1"))
+			labels.Set("label3", "value3")
+			labels.Set("label4", "value4", v1.WithVersion("v1"))
+		})
+
+		It("detects equal", func() {
+			eq := labels.Equivalent(labels.Copy())
+			CheckEquivalent(eq)
+
+		})
+
+		It("detects volatile value modification", func() {
+			mod := labels.Copy()
+			mod.Set("label3", "mod")
+			CheckNotEquivalent(labels.Equivalent(mod))
+			CheckNotEquivalent(mod.Equivalent(labels))
+		})
+
+		It("detects volatile version modification", func() {
+			mod := labels.Copy()
+			mod.Set("label4", "value4", v1.WithVersion("v2"))
+			CheckNotEquivalent(labels.Equivalent(mod))
+			CheckNotEquivalent(mod.Equivalent(labels))
+		})
+
+		It("detects new volatile label", func() {
+			mod := labels.Copy()
+			mod.Set("label5", "mod")
+			CheckNotEquivalent(labels.Equivalent(mod))
+			CheckNotEquivalent(mod.Equivalent(labels))
+		})
+
+		It("detects non-volatile value modification", func() {
+			mod := labels.Copy()
+			mod.Set("label2", "mod", v1.WithSigning(), v1.WithVersion("v1"))
+			CheckNotLocalHashEqual(labels.Equivalent(mod))
+			CheckNotLocalHashEqual(mod.Equivalent(labels))
+		})
+
+		It("detects non-volatile version modification", func() {
+			mod := labels.Copy()
+			mod.Set("label2", "value2", v1.WithSigning(), v1.WithVersion("v2"))
+			CheckNotLocalHashEqual(labels.Equivalent(mod))
+			CheckNotLocalHashEqual(mod.Equivalent(labels))
+		})
+
+		It("detects new non-volatile label", func() {
+			mod := labels.Copy()
+			mod.Set("label5", "mod", v1.WithSigning())
+			CheckNotLocalHashEqual(labels.Equivalent(mod))
+			CheckNotLocalHashEqual(mod.Equivalent(labels))
+		})
+
+		It("detects change og signing property", func() {
+			mod := labels.Copy()
+			mod.Set("label1", "value1")
+			CheckNotLocalHashEqual(labels.Equivalent(mod))
+			CheckNotLocalHashEqual(mod.Equivalent(labels))
 		})
 	})
 })

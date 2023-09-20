@@ -50,7 +50,7 @@ var _ = Describe("download blueprint", func() {
 	var env *Builder
 
 	BeforeEach(func() {
-		env = NewBuilder(tenv.NewEnvironment(tenv.TestData()))
+		env = NewBuilder(tenv.TestData())
 
 		MustBeSuccessful(tarutils.CreateTarFromFs(Must(projectionfs.New(env, TESTDATA_PATH)), ARCHIVE_PATH, tarutils.Gzip, env))
 

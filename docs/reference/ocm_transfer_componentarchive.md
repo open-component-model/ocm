@@ -20,6 +20,7 @@ componentarchive, comparch, ca
       --copy-sources           transfer referenced sources by-value
   -h, --help                   help for componentarchive
       --lookup stringArray     repository name or spec for closure lookup fallback
+      --no-update              don't touch existing versions in target
   -f, --overwrite              overwrite existing component versions
   -t, --type string            archive format (directory, tar, tgz) (default "directory")
 ```
@@ -53,6 +54,14 @@ determined. For *Component Archives* this is never possible, because
 it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
+
+
+With the option <code>--no-update</code> existing versions in the target
+repository will not be touched at all. An additional specification of the
+option <code>--overwrite</code> is ignored. By default, updates of
+volative (non-signature-relevant) information is enabled, but the
+modification of non-volatile data is prohibited unless the overwrite
+option is given.
 
 
 It the option <code>--overwrite</code> is given, component version in the

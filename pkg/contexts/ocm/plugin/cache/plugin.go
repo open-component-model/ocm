@@ -82,6 +82,51 @@ func (p *pluginImpl) GetActionDescriptor(name string) *descriptor.ActionDescript
 	return nil
 }
 
+func (p *pluginImpl) GetValueMergeHandlerDescriptor(name string) *descriptor.ValueMergeHandlerDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	for _, a := range p.descriptor.ValueMergeHandlers {
+		if a.Name == name {
+			return &a
+		}
+	}
+	return nil
+}
+
+func (p *pluginImpl) GetValueMappingDescriptor(name string) *descriptor.ValueMergeHandlerDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	for _, a := range p.descriptor.ValueMergeHandlers {
+		if a.Name == name {
+			return &a
+		}
+	}
+	return nil
+}
+
+func (p *pluginImpl) GetLabelMergeSpecification(name, version string) *descriptor.LabelMergeSpecification {
+	if !p.IsValid() {
+		return nil
+	}
+
+	var fallback *descriptor.LabelMergeSpecification
+	for i, s := range p.descriptor.LabelMergeSpecifications {
+		if s.Name == name {
+			if s.Version == version {
+				return &s
+			}
+			if s.Version == "" {
+				fallback = &p.descriptor.LabelMergeSpecifications[i]
+			}
+		}
+	}
+	return fallback
+}
+
 func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *descriptor.AccessMethodDescriptor {
 	if !p.IsValid() {
 		return nil

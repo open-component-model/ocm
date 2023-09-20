@@ -9,17 +9,19 @@ ocm [<options>] <sub command> ...
 ### Options
 
 ```
-  -X, --attribute stringArray   attribute setting
-      --config string           configuration file
-      --config-set strings      apply configuration set
-  -C, --cred stringArray        credential setting
-  -h, --help                    help for ocm
-      --logconfig string        log config
-  -L, --logfile string          set log file
-      --logkeys stringArray     log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])
-  -l, --loglevel string         set log level
-  -v, --verbose                 deprecated: enable logrus verbose logging
-      --version                 show version
+  -X, --attribute stringArray     attribute setting
+      --config string             configuration file
+      --config-set strings        apply configuration set
+  -C, --cred stringArray          credential setting
+  -h, --help                      help for ocm
+      --logconfig string          log config
+  -L, --logfile string            set log file
+      --logkeys stringArray       log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])
+  -l, --loglevel string           set log level
+  -K, --private-key stringArray   private key setting
+  -k, --public-key stringArray    public key setting
+  -v, --verbose                   deprecated: enable logrus verbose logging
+      --version                   show version
 ```
 
 ### Description
@@ -111,6 +113,14 @@ The value can be a simple type or a JSON/YAML string for complex values
 - <code>github.com/mandelsoft/ocm/compat</code> [<code>compat</code>]: *bool*
 
   Compatibility mode: Avoid generic local access methods and prefer type specific ones.
+
+- <code>github.com/mandelsoft/ocm/hasher</code>: *JSON*
+
+  Preferred hash algorithm to calculate resource digests. The following
+  digesters are supported:
+    - <code>NO-DIGEST</code>
+    - <code>SHA-256</code> (default)
+    - <code>SHA-512</code>
 
 - <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
 
@@ -268,6 +278,16 @@ Often a tagged value can also be substituted from a file with the syntax
 <code>&lt;attr>=@&lt;filepath></code>
 </center>
 
+The <code>--public-key</code> and <code>--private-key</code> options can be
+used to define public and private keys on the command line. The options have an
+argument of the form <code>&lt;name>=&lt;filepath></code>. The name is the name
+of the key and represents the context is used for (For example the signature
+name of a component version)
+
+Alternatively a key can be specified as base64 encoded string if the argument
+start with the prefix <code>!</code> or as direct string with the prefix
+<code>=</code>.
+
 
 ### SEE ALSO
 
@@ -312,6 +332,7 @@ Often a tagged value can also be substituted from a file with the syntax
 * [ocm <b>oci-references</b>](ocm_oci-references.md)	 &mdash; notation for OCI references
 * [ocm <b>ocm-accessmethods</b>](ocm_ocm-accessmethods.md)	 &mdash; List of all supported access methods
 * [ocm <b>ocm-downloadhandlers</b>](ocm_ocm-downloadhandlers.md)	 &mdash; List of all available download handlers
+* [ocm <b>ocm-labels</b>](ocm_ocm-labels.md)	 &mdash; Labels and Label Merging
 * [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references
 * [ocm <b>ocm-uploadhandlers</b>](ocm_ocm-uploadhandlers.md)	 &mdash; List of all available upload handlers
 * [ocm <b>toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions

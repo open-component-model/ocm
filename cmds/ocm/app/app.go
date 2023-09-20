@@ -11,8 +11,11 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/keyoption"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	"github.com/open-component-model/ocm/pkg/signing"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -54,6 +57,7 @@ import (
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
 	topicocmdownloaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/downloadhandlers"
+	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
@@ -73,6 +77,8 @@ import (
 )
 
 type CLIOptions struct {
+	keyoption.Option
+
 	Completed   bool
 	Config      string
 	ConfigSets  []string
@@ -154,7 +160,7 @@ Often a tagged value can also be substituted from a file with the syntax
 <center>
 <code>&lt;attr>=@&lt;filepath></code>
 </center>
-`
+` + keyoption.Usage()
 
 // NewCliCommandForArgs is the regular way to instantiate a new CLI command.
 // It observes settings provides by options for the main command.
@@ -263,6 +269,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(topicocmaccessmethods.New(ctx))
 	cmd.AddCommand(topicocmuploaders.New(ctx))
 	cmd.AddCommand(topicocmdownloaders.New(ctx))
+	cmd.AddCommand(topicocmlabels.New(ctx))
 	cmd.AddCommand(attributes.New(ctx))
 	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
@@ -274,6 +281,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	help.AddCommand(topicocmaccessmethods.New(ctx))
 	help.AddCommand(topicocmuploaders.New(ctx))
 	help.AddCommand(topicocmdownloaders.New(ctx))
+	help.AddCommand(topicocmlabels.New(ctx))
 	help.AddCommand(attributes.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
@@ -294,6 +302,7 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.Version, "version", "", false, "show version") // otherwise it is implicitly added by cobra
 
 	o.LogOpts.AddFlags(fs)
+	o.Option.AddFlags(fs)
 }
 
 func (o *CLIOptions) Close() error {
@@ -317,6 +326,19 @@ func (o *CLIOptions) Complete() error {
 	_, err = utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
 	if err != nil {
 		return err
+	}
+
+	err = o.Option.Configure(o.Context)
+	if err != nil {
+		return err
+	}
+
+	if o.Keys.HasKeys() {
+		def := signingattr.Get(o.Context.OCMContext())
+		err = signingattr.Set(o.Context.OCMContext(), signing.NewRegistry(def, signing.NewKeyRegistry(o.Keys, def)))
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, n := range o.ConfigSets {

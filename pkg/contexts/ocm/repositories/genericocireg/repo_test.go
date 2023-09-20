@@ -10,6 +10,10 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
+	ocmtesthelper "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -32,9 +36,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci/ocirepo"
+	handler "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci/ocirepo"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
@@ -110,7 +114,7 @@ var _ = Describe("component repository mapping", func() {
 		MustBeSuccessful(finalize.Finalize())
 	})
 
-	It("handles legacylocalociblob  access method", func() {
+	It("handles legacylocalociblob access method", func() {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)
 
@@ -134,7 +138,7 @@ var _ = Describe("component repository mapping", func() {
 
 		acc = localociblob.New(digest.Digest(l.LocalReference))
 
-		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), acc))
+		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
 
 		rs := Must(vers.GetResourceByIndex(0))
@@ -156,8 +160,8 @@ var _ = Describe("component repository mapping", func() {
 		base := func(ctx *storagecontext.StorageContext) string {
 			return TESTBASE
 		}
-		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(ocirepo.NewBlobHandler(base))).New()
-		blob := accessio.BlobAccessForString(mime.MIME_OCTET, "anydata")
+		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(handler.NewBlobHandler(base))).New()
+		blob := accessio.BlobAccessForString(mime.MIME_OCTET, ocmtesthelper.S_TESTDATA)
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
@@ -181,8 +185,12 @@ var _ = Describe("component repository mapping", func() {
 		Expect(ok).To(BeTrue())
 		Expect(o.Digest).To(Equal(blob.Digest()))
 		Expect(o.Reference).To(Equal(TESTBASE + "/" + componentmapping.ComponentDescriptorNamespace + "/" + COMPONENT))
-		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), acc))
+		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
+
+		res := Must(vers.GetResourceByIndex(0))
+		Expect(res.Meta().Digest).NotTo(BeNil())
+		Expect(res.Meta().Digest.Value).To(Equal(ocmtesthelper.D_TESTDATA))
 	})
 
 	It("imports artifact", func() {
@@ -193,7 +201,8 @@ var _ = Describe("component repository mapping", func() {
 		base := func(ctx *storagecontext.StorageContext) string {
 			return TESTBASE
 		}
-		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(ocirepo.NewArtifactHandler(base), cpi.ForMimeType(mime))).New()
+		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(handler.NewArtifactHandler(base), cpi.ForMimeType(mime))).New()
+		keepblobattr.Set(ctx, true)
 
 		// create artifactset
 		opts := Must(accessio.AccessOptions(nil, accessio.PathFileSystem(tempfs)))
@@ -215,12 +224,27 @@ var _ = Describe("component repository mapping", func() {
 		blob := accessio.BlobAccessForFile(mime, "test.tgz", tempfs)
 
 		acc := Must(vers.AddBlob(blob, "", "artifact1", nil))
+		Expect(acc.GetKind()).To(Equal(localblob.Type))
+
+		MustBeSuccessful(vers.SetResource(cpi.NewResourceMeta("image", resourcetypes.OCI_IMAGE, metav1.LocalRelation), acc))
+		res := Must(vers.GetResourceByIndex(0))
+		rd := res.Meta().Digest
+		Expect(rd).NotTo(BeNil())
+		Expect(rd.Value).To(Equal(testhelper.DIGEST_MANIFEST))
+		Expect(rd.NormalisationAlgorithm).To(Equal(artifact.OciArtifactDigestV1))
+		Expect(rd.HashAlgorithm).To(Equal(sha256.Algorithm))
+
+		acc = acc.GlobalAccessSpec(ctx)
+		Expect(acc).NotTo(BeNil())
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		o := acc.(*ociartifact.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact1@sha256:" + testhelper.DIGEST_MANIFEST))
 		MustBeSuccessful(comp.AddVersion(vers))
 
 		acc = Must(vers.AddBlob(blob, "", "artifact2:v1", nil))
+
+		acc = acc.GlobalAccessSpec(ctx)
+		Expect(acc).NotTo(BeNil())
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		o = acc.(*ociartifact.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact2:v1"))
@@ -248,8 +272,8 @@ var _ = Describe("component repository mapping", func() {
 		comp := finalizer.ClosingWith(nested, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(nested, Must(comp.NewVersion("v1")))
 
-		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, v1.LocalRelation)
-		blob := accessio.BlobAccessForString(mime.MIME_TEXT, "testdata")
+		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
+		blob := accessio.BlobAccessForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
 
 		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
 		MustBeSuccessful(comp.AddVersion(vers))
@@ -264,7 +288,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// check content
 		vers = finalizer.ClosingWith(nested, Must(repo.LookupComponentVersion(COMPONENT, "v1")))
-		r := Must(vers.GetResource(v1.NewIdentity("rsc1")))
+		r := Must(vers.GetResource(metav1.NewIdentity("rsc1")))
 		data := Must(ocmutils.GetResourceData(r))
 		Expect(string(data)).To(Equal("otherdata"))
 		MustBeSuccessful(nested.Finalize())

@@ -25,14 +25,17 @@ var (
 )
 
 type Command struct {
+	handler common.ResourceSpecHandler
 	common.ResourceConfigAdderCommand
 }
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
+	h := rscs.New()
 	return utils.SetupCommand(
 		&Command{
-			common.NewResourceConfigAdderCommand(ctx, rscadd.NewResourceSpecificationsProvider(ctx, "")),
+			handler:                    h,
+			ResourceConfigAdderCommand: common.NewResourceConfigAdderCommand(ctx, rscadd.NewResourceSpecificationsProvider(ctx, ""), h),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -68,5 +71,5 @@ to add to a component version.
 }
 
 func (o *Command) Run() error {
-	return o.ProcessResourceDescriptions(rscs.ResourceSpecHandler{})
+	return o.ProcessResourceDescriptions(o.handler)
 }

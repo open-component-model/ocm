@@ -11,17 +11,18 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
-	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/open-component-model/ocm/pkg/generics"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -31,8 +32,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
@@ -66,7 +68,7 @@ var _ = Describe("Transfer handler", func() {
 	var ldesc *artdesc.Descriptor
 
 	BeforeEach(func() {
-		env = NewBuilder(NewEnvironment())
+		env = NewBuilder()
 
 		env.RSAKeyPair(SIGNATURE)
 
@@ -74,13 +76,13 @@ var _ = Describe("Transfer handler", func() {
 			ldesc = OCIManifest1(env)
 		})
 
+		FakeOCIRepo(env, OCIPATH, OCIHOST)
+
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.Component(COMPONENT, func() {
 				env.Version(VERSION, func() {
 					env.Provider(PROVIDER)
-					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
-					})
+					TestDataResource(env)
 					env.Resource("artifact", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 						env.Access(
 							ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
@@ -99,7 +101,6 @@ var _ = Describe("Transfer handler", func() {
 			})
 		})
 
-		FakeOCIRepo(env, OCIPATH, OCIHOST)
 	})
 
 	AfterEach(func() {
@@ -107,48 +108,100 @@ var _ = Describe("Transfer handler", func() {
 	})
 
 	DescribeTable("it should copy a resource by value to a ctf file", func(acc string, topts ...transferhandler.TransferOption) {
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
-		Expect(err).To(Succeed())
-		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
-		Expect(err).To(Succeed())
-		defer tgt.Close()
+		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+		defer Close(src, "source")
+		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+		defer Close(cv, "source cv")
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		defer Close(tgt, "target")
 
-		err = transfer.Transfer(cv, tgt, generics.AppendedSlice[transferhandler.TransferOption](topts, standard.ResourcesByValue(), &optionsChecker{})...)
-		Expect(err).To(Succeed())
+		// handler, err := standard.New(standard.ResourcesByValue())
+		p, buf := common.NewBufferedPrinter()
+		opts := append(topts, standard.ResourcesByValue(), transfer.WithPrinter(p), &optionsChecker{})
+		MustBeSuccessful(transfer.Transfer(cv, tgt, opts...))
 		Expect(env.DirExists(OUT)).To(BeTrue())
 
-		list, err := tgt.ComponentLister().GetComponents("", true)
-		Expect(err).To(Succeed())
+		Expect(string(buf.Bytes())).To(StringEqualTrimmedWithContext(`
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0 testdata[PlainText]...
+...resource 1 artifact[ociImage](ocm/value:v2.0)...
+...adding component version...
+`))
+
+		var nested finalizer.Finalizer
+		defer Defer(nested.Finalize)
+
+		list := Must(tgt.ComponentLister().GetComponents("", true))
 		Expect(list).To(Equal([]string{COMPONENT}))
-		comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
-		Expect(err).To(Succeed())
-		Expect(len(comp.GetDescriptor().Resources)).To(Equal(2))
-		data, err := json.Marshal(comp.GetDescriptor().Resources[1].Access)
-		Expect(err).To(Succeed())
+		tcv := Must(tgt.LookupComponentVersion(COMPONENT, VERSION))
+		nested.Close(tcv, "target cv")
+		Expect(len(tcv.GetDescriptor().Resources)).To(Equal(2))
+		data := Must(json.Marshal(tcv.GetDescriptor().Resources[1].Access))
 
 		fmt.Printf("%s\n", string(data))
 		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
 		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(acc, hash)))
 
-		r, err := comp.GetResourceByIndex(1)
-		Expect(err).To(Succeed())
-		meth, err := r.AccessMethod()
-		Expect(err).To(Succeed())
-		defer meth.Close()
-		reader, err := meth.Reader()
-		Expect(err).To(Succeed())
-		defer reader.Close()
-		set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))
-		Expect(err).To(Succeed())
-		defer set.Close()
+		tcd := tcv.GetDescriptor().Copy()
+		r := Must(tcv.GetResourceByIndex(1))
+		meth := Must(r.AccessMethod())
+		nested.Close(meth, "method")
+		reader := Must(meth.Reader())
+		nested.Close(reader, "reader")
+		set := Must(artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader)))
+		nested.Close(set, "set")
 
-		_, blob, err := set.GetBlobData(ldesc.Digest)
-		Expect(err).To(Succeed())
-		data, err = blob.Get()
-		Expect(err).To(Succeed())
+		_, blob := Must2(set.GetBlobData(ldesc.Digest))
+		nested.Close(blob)
+		data = Must(blob.Get())
 		Expect(string(data)).To(Equal("manifestlayer"))
+
+		MustBeSuccessful(nested.Finalize())
+
+		// retransfer
+		buf.Reset()
+		MustBeSuccessful(transfer.Transfer(cv, tgt, opts...))
+		Expect(string(buf.Bytes())).To(StringEqualTrimmedWithContext(`
+transferring version "github.com/mandelsoft/test:v1"...
+  version "github.com/mandelsoft/test:v1" already present -> skip transport`))
+		tcv = Must(tgt.LookupComponentVersion(COMPONENT, VERSION))
+		nested.Close(tcv, "target cv")
+		Expect(tcd).To(DeepEqual(tcv.GetDescriptor()))
+		MustBeSuccessful(nested.Finalize())
+
+		// modify volatile
+		cv.GetDescriptor().Labels.Set("new", "newvalue")
+		tcd.Labels.Set("new", "newvalue")
+		buf.Reset()
+		MustBeSuccessful(transfer.Transfer(cv, tgt, opts...))
+		Expect(string(buf.Bytes())).To(StringEqualTrimmedWithContext(`
+transferring version "github.com/mandelsoft/test:v1"...
+  updating volatile properties of "github.com/mandelsoft/test:v1"
+...adding component version...
+`))
+		tcv = Must(tgt.LookupComponentVersion(COMPONENT, VERSION))
+		nested.Close(tcv, "target cv")
+		Expect(tcd).To(DeepEqual(tcv.GetDescriptor()))
+		MustBeSuccessful(nested.Finalize())
+
+		// modify one artifact and overwrite
+		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), accessio.BlobAccessForString(mime.MIME_TEXT, "otherdata"), "", nil))
+		tcd.Resources[0].Digest = DS_OTHERDATA
+		tcd.Resources[0].Access = Must(runtime.ToUnstructuredVersionedTypedObject(localblob.New("sha256:"+D_OTHERDATA, "", mime.MIME_TEXT, nil)))
+		buf.Reset()
+		MustBeSuccessful(transfer.Transfer(cv, tgt, append(opts, standard.Overwrite())...))
+		Expect(string(buf.Bytes())).To(StringEqualTrimmedWithContext(`
+transferring version "github.com/mandelsoft/test:v1"...
+warning:   version "github.com/mandelsoft/test:v1" already present, but differs because some artifact digests are changed (transport enforced by overwrite option)
+...resource 0 testdata[PlainText] (overwrite)
+...resource 1 artifact[ociImage](ocm/value:v2.0) (already present)
+...adding component version...
+`))
+		tcv = Must(tgt.LookupComponentVersion(COMPONENT, VERSION))
+		nested.Close(tcv, "target cv")
+		Expect(tcd).To(DeepEqual(tcv.GetDescriptor()))
+		MustBeSuccessful(nested.Finalize())
+
 	},
 		Entry("without preserve global",
 			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}"),
@@ -227,7 +280,7 @@ var _ = Describe("Transfer handler", func() {
 		resolver := ocm.NewCompoundResolver(src)
 
 		opts := ocmsign.NewOptions(
-			ocmsign.Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+			ocmsign.Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
 			ocmsign.Resolver(resolver),
 			ocmsign.Update(), ocmsign.VerifyDigests(),
 		)

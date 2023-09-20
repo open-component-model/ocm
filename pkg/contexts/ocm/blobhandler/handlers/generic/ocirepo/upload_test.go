@@ -7,6 +7,7 @@ package ocirepo_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -25,8 +26,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	tenv "github.com/open-component-model/ocm/pkg/env"
-	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 const COMP = "github.com/compa"
@@ -38,30 +37,18 @@ const TARGET = "/tmp/target"
 
 const OCIHOST = "alias"
 const OCIPATH = "/tmp/source"
-const OCINAMESPACE = "ocm/value"
-const OCIVERSION = "v2.0"
 
 var _ = Describe("upload", func() {
 	var env *Builder
 
 	BeforeEach(func() {
-		env = NewBuilder(tenv.NewEnvironment())
+		env = NewBuilder()
 
 		// fake OCI registry
-		spec := Must(ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
-		env.OCIContext().SetAlias(OCIHOST, spec)
+		FakeOCIRepo(env, OCIPATH, OCIHOST)
 
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-			env.Namespace(OCINAMESPACE, func() {
-				env.Manifest(OCIVERSION, func() {
-					env.Config(func() {
-						env.BlobStringData(mime.MIME_JSON, "{}")
-					})
-					env.Layer(func() {
-						env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
-					})
-				})
-			})
+			OCIManifest1(env)
 		})
 
 		env.OCICommonTransport(TARGET, accessio.FormatDirectory)
@@ -123,6 +110,7 @@ var _ = Describe("upload", func() {
 		ocv2 := accessio.OnceCloser(cv2)
 		defer Close(ocv2)
 		ra = Must(cv2.GetResourceByIndex(0))
+		Expect(ra.Meta().Digest).To(Equal(DS_OCIMANIFEST1))
 		acc = Must(ra.Access())
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		val := Must(ctx.AccessSpecForSpec(acc))

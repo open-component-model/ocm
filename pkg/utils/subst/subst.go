@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 type SubstitutionTarget interface {
@@ -25,7 +26,7 @@ type SubstitutionTarget interface {
 func ParseFile(file string, fss ...vfs.FileSystem) (SubstitutionTarget, error) {
 	fs := accessio.FileSystem(fss...)
 
-	data, err := vfs.ReadFile(fs, file)
+	data, err := utils2.ReadFile(fs, file)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot read file %q", file)
 	}

@@ -369,6 +369,9 @@ type ResourceAdderCommand struct {
 }
 
 func NewResourceAdderCommand(ctx clictx.Context, h ResourceSpecHandler, provider ElementSpecificationsProvider, opts ...options.Options) ResourceAdderCommand {
+	if o, ok := h.(options.Options); ok {
+		opts = append(opts, o)
+	}
 	return ResourceAdderCommand{
 		BaseCommand: utils.NewBaseCommand(ctx, generics.AppendedSlice[options.Options](opts,
 			fileoption.NewCompArch(),

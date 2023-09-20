@@ -26,22 +26,28 @@ var Digests = common.Properties{
 	"D_OTHERDATA": D_OTHERDATA,
 }
 
+const S_TESTDATA = "testdata"
+
 const D_TESTDATA = "810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"
 
 var DS_TESTDATA = TextResourceDigestSpec(D_TESTDATA)
 
-func TestDataResource(env *builder.Builder) {
+func TestDataResource(env *builder.Builder, funcs ...func()) {
 	env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
 		env.BlobStringData(mime.MIME_TEXT, "testdata")
+		env.Configure(funcs...)
 	})
 }
+
+const S_OTHERDATA = "otherdata"
 
 const D_OTHERDATA = "54b8007913ec5a907ca69001d59518acfd106f7b02f892eabf9cae3f8b2414b4"
 
 var DS_OTHERDATA = TextResourceDigestSpec(D_OTHERDATA)
 
-func OtherDataResource(env *builder.Builder) {
+func OtherDataResource(env *builder.Builder, funcs ...func()) {
 	env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
-		env.BlobStringData(mime.MIME_TEXT, "otherdata")
+		env.BlobStringData(mime.MIME_TEXT, S_OTHERDATA)
+		env.Configure(funcs...)
 	})
 }

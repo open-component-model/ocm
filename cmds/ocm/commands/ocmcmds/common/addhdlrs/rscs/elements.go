@@ -7,6 +7,9 @@ package rscs
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/skipdigestoption"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -24,15 +27,43 @@ const (
 	ComponentVersionTag = common.ComponentVersionTag
 )
 
-type ResourceSpecHandler struct{}
+type ResourceSpecHandler struct {
+	options options.OptionSet
+	opts    *ocm.ModificationOptions
+}
 
-var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
+var (
+	_ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
+	_ options.Options            = (*ResourceSpecHandler)(nil)
+)
 
-func (ResourceSpecHandler) Key() string {
+func New(opts ...ocm.ModificationOption) *ResourceSpecHandler {
+	if len(opts) > 0 {
+		return &ResourceSpecHandler{opts: ocm.NewModificationOptions(opts...)}
+	}
+	return &ResourceSpecHandler{}
+}
+
+func (h *ResourceSpecHandler) AddFlags(opts *pflag.FlagSet) {
+	if len(h.options) == 0 {
+		h.options = options.OptionSet{skipdigestoption.New()}
+	}
+	h.options.AddFlags(opts)
+}
+
+func (h *ResourceSpecHandler) getModOpts() []ocm.ModificationOption {
+	opts := options.FindOptions[ocm.ModificationOption](h.options)
+	if h.opts != nil {
+		opts = append(opts, h.opts)
+	}
+	return opts
+}
+
+func (*ResourceSpecHandler) Key() string {
 	return "resource"
 }
 
-func (ResourceSpecHandler) RequireInputs() bool {
+func (*ResourceSpecHandler) RequireInputs() bool {
 	return true
 }
 
@@ -45,7 +76,7 @@ func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	return &desc, nil
 }
 
-func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
+func (h ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
 	spec, ok := r.Spec().(*ResourceSpec)
 	if !ok {
 		return fmt.Errorf("element spec is not a valid resource spec, failed to assert type %T to ResourceSpec", r.Spec())
@@ -74,7 +105,11 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element,
 		Relation:  spec.Relation,
 		SourceRef: compdescv2.ConvertSourcerefsTo(spec.SourceRef),
 	}
-	return v.SetResource(meta, acc)
+	opts := h.getModOpts()
+	if ocm.IsIntermediate(v.Repository().GetSpecification()) {
+		opts = append(opts, ocm.ModifyResource())
+	}
+	return v.SetResource(meta, acc, opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

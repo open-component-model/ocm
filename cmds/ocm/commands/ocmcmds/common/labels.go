@@ -10,6 +10,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"sigs.k8s.io/yaml"
 
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -39,7 +40,11 @@ func ParseLabel(fs vfs.FileSystem, a string, kind ...string) (*metav1.Label, err
 
 	var data []byte
 	if strings.HasPrefix(a[i+1:], "@") {
-		data, err = vfs.ReadFile(fs, a[i+2:])
+		path, err := utils.ResolvePath(a[i+2:])
+		if err != nil {
+			return nil, err
+		}
+		data, err = vfs.ReadFile(fs, path)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot read file %q", a[i+2:])
 		}

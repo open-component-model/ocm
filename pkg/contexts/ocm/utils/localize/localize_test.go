@@ -42,6 +42,8 @@ var _ = Describe("image value mapping", func() {
 				env.Version(VERSION, func() {
 					env.Provider("mandelsoft")
 					env.Resource(IMAGE, "", "Spiff", v1.LocalRelation, func() {
+						env.ModificationOptions(ocm.SkipVerify())
+						env.Digest("fake", "sha256", "fake")
 						env.Access(ociartifact.New("ghcr.io/mandelsoft/test:v1"))
 					})
 				})
@@ -64,7 +66,7 @@ var _ = Describe("image value mapping", func() {
 
 	It("uses image ref data from component version", func() {
 
-		mappings := Localizations(`
+		mappings := UnmarshalLocalizations(`
 - name: test1
   file: file1
   image: a.b.img
@@ -73,7 +75,7 @@ var _ = Describe("image value mapping", func() {
 `)
 		subst, err := localize.Localize(mappings, cv, nil)
 		Expect(err).To(Succeed())
-		Expect(subst).To(Equal(Substitutions(`
+		Expect(subst).To(Equal(UnmarshalSubstitutions(`
 - name: image mapping "test1"
   file: file1
   path: a.b.img
@@ -83,7 +85,7 @@ var _ = Describe("image value mapping", func() {
 
 	It("uses multiple resolved image ref data from component version", func() {
 
-		mappings := Localizations(`
+		mappings := UnmarshalLocalizations(`
 - name: test1
   file: file1
   repository: a.b.rep
@@ -94,7 +96,7 @@ var _ = Describe("image value mapping", func() {
 `)
 		subst, err := localize.Localize(mappings, cv, nil)
 		Expect(err).To(Succeed())
-		Expect(subst).To(Equal(Substitutions(`
+		Expect(subst).To(Equal(UnmarshalSubstitutions(`
 - name: image mapping "test1"-repository
   file: file1
   path: a.b.rep

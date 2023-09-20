@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -78,7 +79,11 @@ func (o *Command) Complete(args []string) error {
 	if len(args) == 3 {
 		o.issuer = args[2]
 	}
-	o.priv, err = vfs.ReadFile(o.FileSystem(), args[0])
+	path, err := utils2.ResolvePath(args[0])
+	if err != nil {
+		return err
+	}
+	o.priv, err = vfs.ReadFile(o.FileSystem(), path)
 	if err != nil {
 		return err
 	}

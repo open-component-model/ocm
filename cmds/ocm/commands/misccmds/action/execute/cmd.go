@@ -9,9 +9,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -22,6 +19,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var (
@@ -80,9 +80,13 @@ func (o *Command) Complete(args []string) error {
 
 	data := []byte(args[0])
 	if strings.HasPrefix(args[0], "@") {
-		data, err = vfs.ReadFile(o.FileSystem(), args[0][1:])
+		path, err := utils2.ResolvePath(args[0][1:])
 		if err != nil {
-			return errors.Wrapf(err, "cannot read file %q", args[0][1:])
+			return err
+		}
+		data, err = vfs.ReadFile(o.FileSystem(), path)
+		if err != nil {
+			return errors.Wrapf(err, "cannot read file %q", path)
 		}
 	}
 

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
@@ -83,7 +84,11 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 				return errors.Newf("script or path must be set for entry %q", t.Script)
 			}
 			fs := accessio.FileSystem(spec.FileSystem, t.FileSystem)
-			data, err := vfs.ReadFile(fs, spec.Path)
+			path, err := utils.ResolvePath(spec.Path)
+			if err != nil {
+				return err
+			}
+			data, err := vfs.ReadFile(fs, path)
 			if err != nil {
 				return errors.Wrapf(err, "script file %q", spec.Path)
 			}

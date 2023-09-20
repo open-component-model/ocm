@@ -64,6 +64,9 @@ entry can be used to specify a dedicated serialization format to use for the
 component descriptor. If given it overrides the <code>--schema</code> option
 of the command. By default, v2 is used.
 
+Various elements support to add arbirary information by using labels
+(see [ocm ocm-labels](ocm_ocm-labels.md)).
+
 
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:
@@ -193,9 +196,15 @@ next to the description file.
 
 
 
+##### Additional Help Topics
+
+* [ocm add componentversions <b>ocm-labels</b>](ocm_add_componentversions_ocm-labels.md)	 &mdash; Labels and Label Merging
+
+
 ##### Additional Links
 
 * [<b>ocm add sources</b>](ocm_add_sources.md)	 &mdash; add source information to a component version
 * [<b>ocm add resources</b>](ocm_add_resources.md)	 &mdash; add resources to a component version
 * [<b>ocm add references</b>](ocm_add_references.md)	 &mdash; add aggregation information to a component version
+* [<b>ocm ocm-labels</b>](ocm_ocm-labels.md)	 &mdash; Labels and Label Merging
 

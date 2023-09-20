@@ -21,6 +21,7 @@ resources, resource, res, r
   -h, --help                         help for resources
   -O, --output string                output file for dry-run
   -s, --settings stringArray         settings file with variable settings (yaml)
+      --skip-digest-generation       skip digest creation
       --templater string             templater to use (go, none, spiff, subst) (default "subst")
 ```
 
@@ -808,7 +809,7 @@ Add a resource by a description file:
 <pre>
 &dash;&dash;&dash;
 name: myrresource
-type: PlainText
+type: plainText
 version: ${version]
 input:
   type: file

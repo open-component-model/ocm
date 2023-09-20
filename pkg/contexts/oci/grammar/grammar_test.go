@@ -59,7 +59,15 @@ var _ = Describe("ref matching", func() {
 
 	Context("parts", func() {
 		It("path port", func() {
-			Check("/some/path/docker.sock:100", tool.Capture(PathPortRegexp), "/some/path/docker.sock:100")
+			Check("/some/path/docker.sock:100", tool.Anchored(tool.Capture(PathPortRegexp)), "/some/path/docker.sock:100")
+		})
+
+		It("host port", func() {
+			Check("github:100", tool.Anchored(tool.Capture(HostPortRegexp)), "github:100")
+		})
+
+		It("IP port", func() {
+			Check("100.1.2.10:100", tool.Anchored(tool.Capture(HostPortRegexp)), "100.1.2.10:100")
 		})
 	})
 
