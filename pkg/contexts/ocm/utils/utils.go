@@ -5,6 +5,8 @@
 package utils
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
@@ -30,4 +32,19 @@ func GetOCIArtifactRef(ctx ocm.Context, r ocm.ResourceAccess) (string, error) {
 		return acc.(*ociartifact.AccessSpec).ImageReference, nil
 	}
 	return "", errors.Newf("cannot map access to external image reference")
+}
+
+type KeyProvider interface {
+	Key() (string, error)
+}
+
+func Key(keyProvider interface{}) (string, error) {
+	if k, ok := keyProvider.(KeyProvider); ok {
+		return k.Key()
+	}
+	data, err := json.Marshal(keyProvider)
+	if err != nil {
+		return "", fmt.Errorf("cannot marshal spec %w, consider implementing a Key() function", err)
+	}
+	return string(data), err
 }

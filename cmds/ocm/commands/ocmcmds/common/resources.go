@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
-	"github.com/open-component-model/ocm/pkg/generics"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
@@ -33,6 +32,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 )

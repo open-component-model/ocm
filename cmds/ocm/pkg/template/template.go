@@ -13,12 +13,12 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Values map[string]interface{}

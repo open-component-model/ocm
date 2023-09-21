@@ -5,11 +5,11 @@
 package skipdigestoption
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 func From(o options.OptionSetProvider) *Option {

@@ -5,8 +5,8 @@
 package ocm
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -41,7 +41,6 @@ type Session interface {
 	EvaluateVersionRef(ctx Context, ref string) (*EvaluationResult, error)
 	DetermineRepository(ctx Context, ref string) (Repository, UniformRepositorySpec, error)
 	DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec) (Repository, error)
-	Key(spec RepositorySpec) (string, error)
 }
 
 type session struct {
@@ -97,7 +96,7 @@ func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository
 		return nil, err
 	}
 
-	keyName, err := s.Key(spec)
+	keyName, err := utils.Key(spec)
 	if err != nil {
 		return nil, err
 	}
@@ -292,21 +291,4 @@ func (s *session) DetermineRepositoryBySpec(ctx Context, spec *UniformRepository
 		return nil, err
 	}
 	return s.LookupRepository(ctx, rspec)
-}
-
-type KeyProvider interface {
-	Key() (string, error)
-}
-
-func (s *session) Key(spec RepositorySpec) (string, error) {
-	k, ok := spec.(KeyProvider)
-	if ok {
-		return k.Key()
-	} else {
-		data, err := json.Marshal(spec)
-		if err != nil {
-			return "", fmt.Errorf("cannot marshal spec %w, consider implementing a Key() function", err)
-		}
-		return string(data), err
-	}
 }

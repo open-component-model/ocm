@@ -6,12 +6,12 @@ package ocm_test
 
 import (
 	"encoding/json"
-	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	ocmreg "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 )
 
@@ -26,16 +26,15 @@ func (*test_spec) Key() (string, error) {
 }
 
 var _ = Describe("session", func() {
-	var session = ocm.NewSession(datacontext.NewSession())
 
 	It("spec without key function", func() {
 		spec := ocmreg.NewRepositorySpec("gcr.io", nil)
-		key := Must(session.Key(spec))
+		key := Must(utils.Key(spec))
 		Expect(key).To(Equal(string(Must(json.Marshal(spec)))))
 	})
 
 	It("spec with key function", func() {
-		key := Must(session.Key(&test_spec{}))
+		key := Must(utils.Key(&test_spec{}))
 		Expect(key).To(Equal(TEST_KEY))
 	})
 })
