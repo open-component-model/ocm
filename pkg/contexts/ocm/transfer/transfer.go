@@ -70,26 +70,30 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	} else {
 		if eq := d.Equivalent(t.GetDescriptor()); eq.IsHashEqual() {
 			if eq.IsEquivalent() {
-				printer.Printf("  version %q already present -> skip transport\n", nv)
-				return nil
-			}
-			ok, err = handler.UpdateVersion(src, t)
-			if err != nil {
-				return err
-			}
-			if !ok {
-				printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
-				return nil
-			}
-			ok, err = handler.OverwriteVersion(src, t)
-			if ok {
-				printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
-				doMerge = false
-				doCopy = true
+				if !needsResourceTransport(src, d, t.GetDescriptor(), handler) {
+					printer.Printf("  version %q already present -> skip transport\n", nv)
+					return nil
+				}
+				printer.Printf("  version %q already present -> but requires resource transport\n", nv)
 			} else {
-				printer.Printf("  updating volatile properties of %q\n", nv)
-				doMerge = true
-				doCopy = false
+				ok, err = handler.UpdateVersion(src, t)
+				if err != nil {
+					return err
+				}
+				if !ok {
+					printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
+					return nil
+				}
+				ok, err = handler.OverwriteVersion(src, t)
+				if ok {
+					printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
+					doMerge = false
+					doCopy = true
+				} else {
+					printer.Printf("  updating volatile properties of %q\n", nv)
+					doMerge = true
+					doCopy = false
+				}
 			}
 		} else {
 			msg := "  version %q already present, but"
@@ -214,7 +218,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 
 				hint := ocmcpi.ArtifactNameHint(a, src)
 				old, err = cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
-				if err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest) {
+				if err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest) || needsTransport(src.GetContext(), r, &old) {
 					var msgs []interface{}
 					if !errors.IsErrNotFound(err) {
 						if err != nil {
