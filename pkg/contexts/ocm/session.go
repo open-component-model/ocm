@@ -41,6 +41,7 @@ type Session interface {
 	EvaluateVersionRef(ctx Context, ref string) (*EvaluationResult, error)
 	DetermineRepository(ctx Context, ref string) (Repository, UniformRepositorySpec, error)
 	DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec) (Repository, error)
+	Key(spec RepositorySpec) (string, error)
 }
 
 type session struct {
@@ -95,13 +96,14 @@ func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository
 	if err != nil {
 		return nil, err
 	}
-	data, err := json.Marshal(spec)
+
+	keyName, err := s.Key(spec)
 	if err != nil {
 		return nil, err
 	}
 	key := datacontext.ObjectKey{
 		Object: ctx,
-		Name:   string(data),
+		Name:   keyName,
 	}
 
 	s.base.Lock()
@@ -290,4 +292,21 @@ func (s *session) DetermineRepositoryBySpec(ctx Context, spec *UniformRepository
 		return nil, err
 	}
 	return s.LookupRepository(ctx, rspec)
+}
+
+type KeyProvider interface {
+	Key() (string, error)
+}
+
+func (s *session) Key(spec RepositorySpec) (string, error) {
+	k, ok := spec.(KeyProvider)
+	if ok {
+		return k.Key()
+	} else {
+		data, err := json.Marshal(spec)
+		if err != nil {
+			return "", fmt.Errorf("cannot marshal spec %w, consider implementing a Key() function", err)
+		}
+		return string(data), err
+	}
 }
