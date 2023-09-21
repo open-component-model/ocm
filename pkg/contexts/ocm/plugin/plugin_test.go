@@ -9,11 +9,9 @@ package plugin_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	common2 "github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/actions/oci-repository-prepare"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -23,9 +21,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
 )
 
 var _ = Describe("setup plugin cache", func() {

@@ -7,10 +7,10 @@ package options
 import (
 	"reflect"
 
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 

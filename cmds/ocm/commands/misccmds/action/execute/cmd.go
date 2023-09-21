@@ -9,6 +9,9 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -20,8 +23,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var (

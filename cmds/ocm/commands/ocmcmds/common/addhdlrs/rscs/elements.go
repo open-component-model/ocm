@@ -7,13 +7,13 @@ package rscs
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/skipdigestoption"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/skipdigestoption"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
