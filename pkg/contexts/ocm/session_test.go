@@ -6,13 +6,13 @@ package ocm_test
 
 import (
 	"encoding/json"
-	"github.com/open-component-model/ocm/pkg/utils"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	ocmreg "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 var TEST_KEY = "test"
