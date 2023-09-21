@@ -6,7 +6,7 @@ package ocm
 
 import (
 	"fmt"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/common"

@@ -6,7 +6,7 @@ package ocm_test
 
 import (
 	"encoding/json"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	"github.com/open-component-model/ocm/pkg/utils"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
