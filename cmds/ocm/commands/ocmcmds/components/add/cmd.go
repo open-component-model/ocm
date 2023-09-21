@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -25,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
 	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
