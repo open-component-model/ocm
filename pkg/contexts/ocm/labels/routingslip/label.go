@@ -5,6 +5,8 @@
 package routingslip
 
 import (
+	"sort"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -38,11 +40,7 @@ func (l LabelValue) Has(name string) bool {
 }
 
 func (l LabelValue) Get(name string) *RoutingSlip {
-	return &RoutingSlip{
-		Name:    name,
-		Entries: l[name],
-		Access:  l,
-	}
+	return NewRoutingSlip(name, l, l[name]...)
 }
 
 func (l LabelValue) Query(name string) *RoutingSlip {
@@ -50,15 +48,26 @@ func (l LabelValue) Query(name string) *RoutingSlip {
 	if a == nil {
 		return nil
 	}
-	return &RoutingSlip{
-		Name:    name,
-		Entries: a,
-		Access:  l,
+	return l.Get(name)
+}
+
+func (l LabelValue) Leaves() []Link {
+	var links []Link
+
+	for k := range l {
+		for _, d := range l.Get(k).Leaves() {
+			links = append(links, Link{
+				Name:   k,
+				Digest: d,
+			})
+		}
 	}
+	sort.Slice(links, func(i, j int) bool { return links[i].Compare(links[j]) < 0 })
+	return links
 }
 
 func (l LabelValue) Set(slip *RoutingSlip) {
-	l[slip.Name] = slip.Entries
+	l[slip.name] = slip.entries
 }
 
 func AddEntry(cv cpi.ComponentVersionAccess, name string, algo string, e Entry, links []Link, parent ...digest.Digest) (*HistoryEntry, error) {

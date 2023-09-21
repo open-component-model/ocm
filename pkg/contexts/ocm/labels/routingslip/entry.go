@@ -6,6 +6,7 @@ package routingslip
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/opencontainers/go-digest"
 
@@ -81,6 +82,14 @@ func (e *HistoryEntry) CalculateDigest() (digest.Digest, error) {
 type Link struct {
 	Name   string        `json:"name"`
 	Digest digest.Digest `json:"digest"`
+}
+
+func (l Link) Compare(o Link) int {
+	r := strings.Compare(l.Name, o.Name)
+	if r == 0 {
+		r = strings.Compare(l.Digest.String(), o.Digest.String())
+	}
+	return r
 }
 
 func CreateEntry(t runtime.VersionedTypedObject) (Entry, error) {

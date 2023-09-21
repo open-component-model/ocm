@@ -15,7 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/entrytypes/comment"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/types/comment"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 )
 
@@ -23,6 +23,7 @@ const ARCH = "/tmp/ca"
 const VERSION = "v1"
 const COMP = "test.de/x"
 const PROVIDER = "acme.org"
+const OTHER = "other.org"
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
@@ -36,7 +37,7 @@ var _ = Describe("Test Environment", func() {
 				})
 			})
 		})
-		env.RSAKeyPair(PROVIDER)
+		env.RSAKeyPair(PROVIDER, OTHER)
 	})
 
 	AfterEach(func() {
@@ -92,4 +93,34 @@ var _ = Describe("Test Environment", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("add", "routingslip", ARCH, PROVIDER, "arbitrary", "--comment=test", "--entry", "comment: first entry")).To(MatchError(`unexpected options comment`))
 	})
+
+	DescribeTable("adds entry with slip link", func(args []string) {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("add", "routingslip", ARCH, PROVIDER, "comment", "--comment", "first entry")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
+			`
+`))
+		Expect(env.CatchOutput(buf).Execute("add", "routingslip", ARCH, OTHER, "comment", "--comment", "other succeeded")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
+			`
+`))
+		Expect(env.CatchOutput(buf).Execute(append([]string{"add", "routingslip", ARCH, OTHER, "comment", "--comment", "link"}, args...)...)).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
+			`
+`))
+		repo := Must(ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env))
+		defer Close(repo, "repo")
+		cv := Must(repo.LookupComponentVersion(COMP, VERSION))
+		defer Close(cv, "cv")
+		slip := Must(routingslip.GetSlip(cv, PROVIDER))
+		Expect(slip.Len()).To(Equal(1))
+		Expect(Must(slip.Get(0).Payload.Evaluate(env.OCMContext())).Describe(env.OCMContext())).To(Equal("Comment: first entry"))
+
+		slip2 := Must(routingslip.GetSlip(cv, OTHER))
+		Expect(slip2.Len()).To(Equal(2))
+		Expect(slip2.Get(1).Links).To(Equal([]routingslip.Link{{Name: PROVIDER, Digest: slip.Get(0).Digest}}))
+	},
+		Entry("for slip", []string{"--links=" + PROVIDER}),
+		Entry("for all slips", []string{"--links=all"}),
+	)
 })

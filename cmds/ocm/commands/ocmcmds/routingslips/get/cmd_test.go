@@ -64,7 +64,7 @@ var _ = Describe("Test Environment", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERSION))
 		finalize.Close(cv)
 		slip := Must(routingslip.GetSlip(cv, PROVIDER))
-		slip.Entries[0].Signature.Value = slip.Entries[0].Signature.Value[1:] + "0"
+		slip.Get(0).Signature.Value = slip.Get(0).Signature.Value[1:] + "0"
 		MustBeSuccessful(routingslip.SetSlip(cv, slip))
 		MustBeSuccessful(finalize.Finalize())
 

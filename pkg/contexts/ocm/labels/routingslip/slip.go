@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/opencontainers/go-digest"
+	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -126,58 +127,54 @@ func (s RoutingSlipIndex) verify(ctx Context, name string, id digest.Digest, acc
 ////////////////////////////////////////////////////////////////////////////////
 
 type RoutingSlip struct {
-	Name    string
-	Entries []HistoryEntry
-	Access  SlipAccess
+	name    string
+	entries []HistoryEntry
+
+	index  RoutingSlipIndex
+	access SlipAccess
 }
 
-func NewRoutingSlip(name string, acc SlipAccess) *RoutingSlip {
-	return &RoutingSlip{Name: name, Access: acc}
+func NewRoutingSlip(name string, acc SlipAccess, entries ...HistoryEntry) *RoutingSlip {
+	index := RoutingSlipIndex{}
+	for i := range entries {
+		index[entries[i].Digest] = &entries[i]
+	}
+	return &RoutingSlip{name: name, access: acc, entries: entries, index: index}
+}
+
+func (s *RoutingSlip) GetName() string {
+	return s.name
+}
+
+func (s *RoutingSlip) Entries() HistoryEntries {
+	return slices.Clone(s.entries)
 }
 
 func (s *RoutingSlip) Len() int {
-	return len(s.Entries)
+	return len(s.entries)
 }
 
 func (s *RoutingSlip) Get(i int) *HistoryEntry {
-	return &s.Entries[i]
+	return &s.entries[i]
 }
 
 func (s *RoutingSlip) Leaves() []digest.Digest {
-	found := generics.Set[digest.Digest]{}
-	for _, e := range s.Entries {
-		found.Add(e.Digest)
-	}
-	for _, e := range s.Entries {
-		if e.Parent != nil {
-			found.Delete(*e.Parent)
-		}
-	}
-	return found.AsArray()
+	return s.index.Leaves()
 }
 
 func (s *RoutingSlip) Lookup(d digest.Digest) *HistoryEntry {
-	for i := range s.Entries {
-		if s.Entries[i].Digest == d {
-			return &s.Entries[i]
-		}
-	}
-	return nil
+	return s.index[d]
 }
 
 func (s *RoutingSlip) Index() RoutingSlipIndex {
-	index := RoutingSlipIndex{}
-	for i := range s.Entries {
-		index[s.Entries[i].Digest] = &s.Entries[i]
-	}
-	return index
+	return s.index
 }
 
 func (s *RoutingSlip) Verify(ctx Context, name string, sig bool) error {
-	if len(s.Entries) == 0 {
+	if len(s.entries) == 0 {
 		return nil
 	}
-	return s.Index().Verify(ctx, name, sig, s.Access)
+	return s.index.Verify(ctx, name, sig, s.access)
 }
 
 func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links []Link, parent ...digest.Digest) (*HistoryEntry, error) {
@@ -199,17 +196,6 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 		return nil, err
 	}
 
-	for _, l := range links {
-		slip := s.Access.Get(l.Name)
-		if slip == nil {
-			return nil, errors.ErrNotFound(KIND_ROUTING_SLIP, l.Name)
-		}
-		err = slip.Verify(ctx, name, true)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	var base *HistoryEntry
 	if len(parent) > 0 {
 		base = s.Lookup(parent[0])
@@ -217,12 +203,13 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 			return nil, errors.ErrNotFound(KIND_ENTRY, parent[0].String(), name)
 		}
 	}
+
 	if base == nil && s.Len() > 0 {
 		leaves := s.Leaves()
 		if len(leaves) == 1 {
 			base = s.Lookup(leaves[0])
 		} else {
-			last := &s.Entries[s.Len()-1]
+			last := &s.entries[s.Len()-1]
 			for _, l := range leaves {
 				if last.Digest == l {
 					base = last
@@ -241,7 +228,6 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 	entry := &HistoryEntry{
 		Payload:   gen,
 		Timestamp: metav1.NewTimestamp(),
-		Links:     links,
 		Digest:    "",
 		Signature: metav1.SignatureSpec{},
 	}
@@ -251,6 +237,21 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 			return nil, fmt.Errorf("no parent digest set")
 		}
 	}
+
+	for _, l := range links {
+		slip := s.access.Get(l.Name)
+		if slip == nil {
+			return nil, errors.ErrNotFound(KIND_ROUTING_SLIP, l.Name)
+		}
+		err = slip.Verify(ctx, name, true)
+		if err != nil {
+			return nil, err
+		}
+		if base == nil || (l.Digest != base.Digest && l.Name != s.name) {
+			entry.Links = append(entry.Links, l)
+		}
+	}
+
 	d, err := entry.CalculateDigest()
 	if err != nil {
 		return nil, err
@@ -262,7 +263,8 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 		return nil, err
 	}
 	entry.Signature = *metav1.SignatureSpecFor(sig)
-	s.Entries = append(s.Entries, *entry)
+	s.entries = append(s.entries, *entry)
+	s.index[entry.Digest] = entry
 	return entry, nil
 }
 
@@ -274,9 +276,9 @@ func GetSlip(cv cpi.ComponentVersionAccess, name string) (*RoutingSlip, error) {
 		return nil, err
 	}
 	return &RoutingSlip{
-		Name:    name,
-		Entries: label[name],
-		Access:  label,
+		name:    name,
+		entries: label[name],
+		access:  label,
 	}, nil
 }
 
@@ -288,6 +290,6 @@ func SetSlip(cv cpi.ComponentVersionAccess, slip *RoutingSlip) error {
 	if label == nil {
 		label = LabelValue{}
 	}
-	label[slip.Name] = slip.Entries
+	label[slip.name] = slip.entries
 	return Set(cv, label)
 }

@@ -177,7 +177,23 @@ func (a *action) Out() error {
 	for i, l := range a.cmd.Links {
 		idx := strings.Index(l, "@")
 		if idx <= 0 {
-			return fmt.Errorf("invalid link %q", l)
+			if l == "all" {
+				links = v.Leaves()
+				break
+			} else {
+				slip := v.Query(l)
+				if slip != nil {
+					for _, d := range slip.Leaves() {
+						links = append(links, routingslip.Link{
+							Name:   l,
+							Digest: d,
+						})
+					}
+				} else {
+					return fmt.Errorf("link %q: slip not found", l)
+				}
+				continue
+			}
 		}
 		n := l[:i]
 		d := l[i+1:]

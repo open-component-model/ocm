@@ -159,17 +159,17 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 }
 
 func (h *TypeHandler) addEntries(result *[]output.Object, c *comphdlr.Object, slip *routingslip.RoutingSlip) {
-	err := slip.Verify(c.ComponentVersion.GetContext(), slip.Name, h.verify)
+	err := slip.Verify(c.ComponentVersion.GetContext(), slip.GetName(), h.verify)
 	if err != nil {
 		o := &Object{
 			Component: c,
-			Slip:      slip.Name,
+			Slip:      slip.GetName(),
 			Error:     err.Error(),
 		}
 		*result = append(*result, o)
 	}
-	for i := range slip.Entries {
-		h.add(result, c, slip.Name, slip.Get(i))
+	for i := range slip.Entries() {
+		h.add(result, c, slip.GetName(), slip.Get(i))
 	}
 }
 
