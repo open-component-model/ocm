@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -16,6 +15,7 @@ import (
 	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func From(o options.OptionSetProvider) *Option {

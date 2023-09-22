@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -23,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 var (

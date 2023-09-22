@@ -13,7 +13,6 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
-	"github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/spf13/cobra"
 
@@ -31,6 +30,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	handlercfg "github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/config"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const ARCH = "/tmp/ctf"

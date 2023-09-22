@@ -9,27 +9,26 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/common"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-
 	// . "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
 const (
@@ -187,7 +186,7 @@ var _ = Describe("transport and signing", func() {
 			Value:                  D_COMPA,
 		}
 		descSigned.Signatures = []compdesc.Signature{
-			compdesc.Signature{
+			{
 				Name:   SIGNATURE,
 				Digest: *digSpec,
 				Signature: metav1.SignatureSpec{
@@ -304,7 +303,7 @@ func sourceSignature(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.Compon
 	ExpectWithOffset(1, err).To(Succeed())
 
 	signatures := []compdesc.Signature{
-		compdesc.Signature{
+		{
 			Name:   SIGNATURE2,
 			Digest: *spec,
 			Signature: metav1.SignatureSpec{
