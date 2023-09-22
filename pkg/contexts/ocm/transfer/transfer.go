@@ -114,7 +114,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			msg := "  version %q already present, but"
 			if eq.IsLocalHashEqual() {
 				if eq.IsArtifactDetectable() {
-					doMerge = true
+					doMerge = true //nolint:ineffassign // ???
 					msg += " differs because some artifact digests are changed"
 				} else {
 					// TODO: option to precalculate missing digests (as pre equivalent step).
@@ -133,6 +133,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			}
 			ok, err = handler.OverwriteVersion(src, t)
 			if ok {
+				doMerge = false
 				printer.Printf("warning: "+msg+" (transport enforced by overwrite option)\n", nv)
 			} else {
 				printer.Printf(msg+" -> transport aborted (use option overwrite option to enforce transport)\n", nv)
@@ -236,17 +237,27 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 
 				hint := ocmcpi.ArtifactNameHint(a, src)
 				old, err = cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
-				if err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest) || needsTransport(src.GetContext(), r, &old) {
+
+				changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
+				valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
+				if changed || valueNeeded {
 					var msgs []interface{}
 					if !errors.IsErrNotFound(err) {
 						if err != nil {
 							return err
 						}
-						msgs = []interface{}{"overwrite"}
+						if !changed && valueNeeded {
+							msgs = []interface{}{"copy"}
+						} else {
+							msgs = []interface{}{"overwrite"}
+						}
 					}
 					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, msgs...)
 					err = handler.HandleTransferResource(r, m, hint, t)
 				} else {
+					if err == nil { // old resource found -> keep current access method
+						t.SetResource(r.Meta(), old.Access, ocm.ModifyResource(), ocm.SkipVerify())
+					}
 					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
 				}
 			}
