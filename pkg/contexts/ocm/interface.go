@@ -46,6 +46,7 @@ type (
 	AccessType                       = internal.AccessType
 	DataAccess                       = internal.DataAccess
 	BlobAccess                       = internal.BlobAccess
+	AccessProvider                   = internal.AccessProvider
 	SourceAccess                     = internal.SourceAccess
 	SourceMeta                       = internal.SourceMeta
 	ResourceAccess                   = internal.ResourceAccess

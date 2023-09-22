@@ -49,8 +49,6 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		}
 	}
 
-	doMerge := false
-	doCopy := true
 	d := src.GetDescriptor()
 
 	comp, err := tgt.LookupComponent(src.GetName())
@@ -62,6 +60,22 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	var ok bool
 	t, err := comp.LookupVersion(src.GetVersion())
 	defer accessio.Close(t)
+
+	// references have always to be handled, because of potentially different
+	// transport modes, which could affect the desired access methods in
+	// the target environment.
+
+	// doTransport controls, whether the transport of the local component
+	// version has to be re-considered.
+	doTransport := true
+
+	// doMerge controls. whether a potential current version in the target
+	// environment has to be merged into the transported one.
+	doMerge := false
+
+	// doCopy controls, whether the artifact content has to be considered.
+	doCopy := true
+
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			t, err = comp.NewVersion(src.GetVersion())
@@ -70,32 +84,37 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	} else {
 		if eq := d.Equivalent(t.GetDescriptor()); eq.IsHashEqual() {
 			if eq.IsEquivalent() {
-				printer.Printf("  version %q already present -> skip transport\n", nv)
-				return nil
-			}
-			ok, err = handler.UpdateVersion(src, t)
-			if err != nil {
-				return err
-			}
-			if !ok {
-				printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
-				return nil
-			}
-			ok, err = handler.OverwriteVersion(src, t)
-			if ok {
-				printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
-				doMerge = false
-				doCopy = true
+				if !needsResourceTransport(src, d, t.GetDescriptor(), handler) {
+					printer.Printf("  version %q already present -> skip transport\n", nv)
+					doTransport = false
+				} else {
+					printer.Printf("  version %q already present -> but requires resource transport\n", nv)
+				}
 			} else {
-				printer.Printf("  updating volatile properties of %q\n", nv)
-				doMerge = true
-				doCopy = false
+				ok, err = handler.UpdateVersion(src, t)
+				if err != nil {
+					return err
+				}
+				if !ok {
+					printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
+					return nil
+				}
+				ok, err = handler.OverwriteVersion(src, t)
+				if ok {
+					printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
+					doMerge = false
+					doCopy = true
+				} else {
+					printer.Printf("  updating volatile properties of %q\n", nv)
+					doMerge = true
+					doCopy = false
+				}
 			}
 		} else {
 			msg := "  version %q already present, but"
 			if eq.IsLocalHashEqual() {
 				if eq.IsArtifactDetectable() {
-					doMerge = true
+					doMerge = true //nolint:ineffassign // ???
 					msg += " differs because some artifact digests are changed"
 				} else {
 					// TODO: option to precalculate missing digests (as pre equivalent step).
@@ -114,6 +133,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			}
 			ok, err = handler.OverwriteVersion(src, t)
 			if ok {
+				doMerge = false
 				printer.Printf("warning: "+msg+" (transport enforced by overwrite option)\n", nv)
 			} else {
 				printer.Printf(msg+" -> transport aborted (use option overwrite option to enforce transport)\n", nv)
@@ -139,43 +159,46 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		}
 	}
 
-	var n *compdesc.ComponentDescriptor
-	if doMerge {
-		log.WithValues("source", src.GetDescriptor(), "target", t.GetDescriptor()).Info("  applying 2-way merge")
-		n, err = internal.PrepareDescriptor(log, src.GetContext(), src.GetDescriptor(), t.GetDescriptor())
-		if err != nil {
-			return err
+	if doTransport {
+		var n *compdesc.ComponentDescriptor
+		if doMerge {
+			log.WithValues("source", src.GetDescriptor(), "target", t.GetDescriptor()).Info("  applying 2-way merge")
+			n, err = internal.PrepareDescriptor(log, src.GetContext(), src.GetDescriptor(), t.GetDescriptor())
+			if err != nil {
+				return err
+			}
+		} else {
+			n = src.GetDescriptor().Copy()
 		}
-	} else {
-		n = src.GetDescriptor().Copy()
-	}
 
-	var unstr *runtime.UnstructuredTypedObject
-	if !ocm.IsIntermediate(tgt.GetSpecification()) {
-		unstr, err = runtime.ToUnstructuredTypedObject(tgt.GetSpecification())
-		if err != nil {
-			unstr = nil
+		var unstr *runtime.UnstructuredTypedObject
+		if !ocm.IsIntermediate(tgt.GetSpecification()) {
+			unstr, err = runtime.ToUnstructuredTypedObject(tgt.GetSpecification())
+			if err != nil {
+				unstr = nil
+			}
 		}
-	}
-	if unstr != nil {
-		n.RepositoryContexts = append(n.RepositoryContexts, unstr)
-	}
-
-	// just to be sure: both modes set to false would produce
-	// corrupted content in target.
-	// If no copy is done, merge must keep the access methods in target!!!
-	if !doMerge || doCopy {
-		err = copyVersion(printer, log, state.History, src, t, n, handler)
-		if err != nil {
-			return err
+		if unstr != nil {
+			n.RepositoryContexts = append(n.RepositoryContexts, unstr)
 		}
-	} else {
-		*t.GetDescriptor() = *n
-	}
 
-	printer.Printf("...adding component version...\n")
-	log.Info("  adding component version")
-	return list.Add(comp.AddVersion(t)).Result()
+		// just to be sure: both modes set to false would produce
+		// corrupted content in target.
+		// If no copy is done, merge must keep the access methods in target!!!
+		if !doMerge || doCopy {
+			err = copyVersion(printer, log, state.History, src, t, n, handler)
+			if err != nil {
+				return err
+			}
+		} else {
+			*t.GetDescriptor() = *n
+		}
+
+		printer.Printf("...adding component version...\n")
+		log.Info("  adding component version")
+		list.Add(comp.AddVersion(t))
+	}
+	return list.Result()
 }
 
 func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
@@ -214,17 +237,27 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 
 				hint := ocmcpi.ArtifactNameHint(a, src)
 				old, err = cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
-				if err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest) {
+
+				changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
+				valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
+				if changed || valueNeeded {
 					var msgs []interface{}
 					if !errors.IsErrNotFound(err) {
 						if err != nil {
 							return err
 						}
-						msgs = []interface{}{"overwrite"}
+						if !changed && valueNeeded {
+							msgs = []interface{}{"copy"}
+						} else {
+							msgs = []interface{}{"overwrite"}
+						}
 					}
 					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, msgs...)
 					err = handler.HandleTransferResource(r, m, hint, t)
 				} else {
+					if err == nil { // old resource found -> keep current access method
+						t.SetResource(r.Meta(), old.Access, ocm.ModifyResource(), ocm.SkipVerify())
+					}
 					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
 				}
 			}
