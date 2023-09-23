@@ -4,7 +4,8 @@ on: [pull_request]
 
 permissions:
   pull-requests: write
-
+  issues: write
+  
 jobs:
   labeler:
     runs-on: ubuntu-latest
