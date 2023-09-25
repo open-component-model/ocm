@@ -23,29 +23,11 @@ import (
 func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out common.Printer) {
 	out.Printf("Plugin Name:      %s\n", d.PluginName)
 	out.Printf("Plugin Version:   %s\n", d.PluginVersion)
+	DescribePluginDescriptorCapabilities(reg, d, out)
+}
 
-	var caps []string
-	if len(d.AccessMethods) > 0 {
-		caps = append(caps, "Access Methods")
-	}
-	if len(d.Uploaders) > 0 {
-		caps = append(caps, "Repository Uploaders")
-	}
-	if len(d.Downloaders) > 0 {
-		caps = append(caps, "Resource Downloaders")
-	}
-	if len(d.Actions) > 0 {
-		caps = append(caps, "Actions")
-	}
-	if len(d.ValueSets) > 0 {
-		caps = append(caps, "Value Sets")
-	}
-	if len(d.ValueMergeHandlers) > 0 {
-		caps = append(caps, "Value Merge Handlers")
-	}
-	if len(d.LabelMergeSpecifications) > 0 {
-		caps = append(caps, "Label Merge Specifications")
-	}
+func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out common.Printer) {
+	caps := d.Capabilities()
 	if len(caps) == 0 {
 		out.Printf("Capabilities:     none\n")
 	} else {

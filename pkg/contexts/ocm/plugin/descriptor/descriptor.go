@@ -30,6 +30,34 @@ type Descriptor struct {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func (d *Descriptor) Capabilities() []string {
+	var caps []string
+	if len(d.AccessMethods) > 0 {
+		caps = append(caps, "Access Methods")
+	}
+	if len(d.Uploaders) > 0 {
+		caps = append(caps, "Repository Uploaders")
+	}
+	if len(d.Downloaders) > 0 {
+		caps = append(caps, "Resource Downloaders")
+	}
+	if len(d.Actions) > 0 {
+		caps = append(caps, "Actions")
+	}
+	if len(d.ValueSets) > 0 {
+		caps = append(caps, "Value Sets")
+	}
+	if len(d.ValueMergeHandlers) > 0 {
+		caps = append(caps, "Value Merge Handlers")
+	}
+	if len(d.LabelMergeSpecifications) > 0 {
+		caps = append(caps, "Label Merge Specs")
+	}
+	return caps
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type DownloaderKey = ArtifactContext
 
 func NewDownloaderKey(arttype, mediatype string) DownloaderKey {

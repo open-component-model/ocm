@@ -20,7 +20,7 @@ func main() {
 	p := ppi.NewPlugin("demo", version.Get().String())
 
 	p.SetShort("demo plugin")
-	p.SetLong("plugin providing access to temp files any a check routingslip entry.")
+	p.SetLong("plugin providing access to temp files and a check routing slip entry.")
 	p.SetConfigParser(config.GetConfig)
 
 	p.RegisterAccessMethod(accessmethods.New())

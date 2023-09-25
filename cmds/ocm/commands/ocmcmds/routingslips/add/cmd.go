@@ -89,7 +89,7 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.StringVarP(&o.Algorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
 	fs.StringVarP(&o.Digest, "digest", "", "", "parent digest to use")
-	fs.StringSliceVarP(&o.Links, "links", "", nil, "links to other slip/entries (<slipname>@<digest>)")
+	fs.StringSliceVarP(&o.Links, "links", "", nil, "links to other slip/entries (<slipname>[@<digest>])")
 }
 
 func (o *Command) Complete(args []string) error {

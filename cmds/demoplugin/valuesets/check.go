@@ -6,13 +6,16 @@ package valuesets
 
 import (
 	out "fmt"
+	"strings"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const NAME = "check"
@@ -28,12 +31,15 @@ type Status struct {
 }
 
 const (
-	STATUS_PASSED = "passed"
-	STATUS_FAILED = "failed"
+	STATUS_PASSED  = "passed"
+	STATUS_FAILED  = "failed"
+	STATUS_SKIPPED = "skipped"
 )
 
+var status = generics.Set[string]{}.Add(STATUS_PASSED, STATUS_FAILED, STATUS_SKIPPED)
+
 var (
-	StatusOption  = options.NewStringMapOptionType("checkStatus", "status value for check")
+	StatusOption  = options.NewStringMapOptionType("checkStatus", out.Sprintf("status value for check (%s)", strings.Join(utils.StringMapKeys(status), ", ")))
 	MessageOption = options.NewStringMapOptionType("checkMessage", "message for check")
 )
 
@@ -70,8 +76,8 @@ func (v ValueSet) ValidateSpecification(p ppi.Plugin, spec runtime.TypedObject) 
 		if v.Status == "" {
 			return nil, out.Errorf("status not specified")
 		}
-		if v.Status != STATUS_FAILED && v.Status != STATUS_PASSED {
-			return nil, out.Errorf("invalid status (%s), expectd %s or %s", v.Status, STATUS_PASSED, STATUS_FAILED)
+		if !status.Contains(v.Status) {
+			return nil, out.Errorf("invalid status (%s), expected %s", v.Status, strings.Join(utils.StringMapKeys(status), ", "))
 		}
 
 		if len(desc) > 0 {

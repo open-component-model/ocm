@@ -45,10 +45,11 @@ Plugin Name:      action
 Plugin Version:   v1
 Path:             ` + path + `/action
 Status:           valid
-Capabilities:     Actions
 Source:           manually installed
+Capabilities:     Actions
 Description: 
       a test plugin with action oci.repository.prepare
+
 Actions:
 - Name: oci.repository.prepare
     Prepare the usage of a repository in an OCI registry.
@@ -69,10 +70,11 @@ Plugin Name:      test
 Plugin Version:   v1
 Path:             ` + path + `/test
 Status:           valid
-Capabilities:     Access Methods
 Source:           manually installed
+Capabilities:     Access Methods
 Description: 
       a test plugin with access method test
+
 Access Methods:
 - Name: test
   Versions:
