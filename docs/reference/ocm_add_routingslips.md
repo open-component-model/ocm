@@ -18,7 +18,7 @@ routingslips, routingslip, rs
   -S, --algorithm string     signature handler (default "RSASSA-PKCS1-V1_5")
       --digest string        parent digest to use
   -h, --help                 help for routingslips
-      --links strings        links to other slip/entries (<slipname>@<digest>)
+      --links strings        links to other slip/entries (<slipname>[@<digest>])
       --lookup stringArray   repository name or spec for closure lookup fallback
       --repo string          repository name or spec
 ```
