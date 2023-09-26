@@ -15,8 +15,24 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Options
 
 ```
-  -B, --bom-file string   file name to write the component version BOM
-  -h, --help              help for componentversions
+  -B, --bom-file string             file name to write the component version BOM
+  -c, --constraints constraints     version constraint
+  -L, --copy-local-resources        transfer referenced local resources by-value
+  -V, --copy-resources              transfer referenced resources by-value
+      --copy-sources                transfer referenced sources by-value
+  -h, --help                        help for componentversions
+      --latest                      restrict component versions to latest
+      --lookup stringArray          repository name or spec for closure lookup fallback
+      --no-update                   don't touch existing versions in target
+  -N, --omit-access-types strings   omit by-value transfer for resource types
+  -f, --overwrite                   overwrite existing component versions
+  -r, --recursive                   follow component reference nesting
+      --repo string                 repository name or spec
+      --script string               config name of transfer handler script
+  -s, --scriptFile string           filename of transfer handler script
+  -E, --stop-on-existing            stop on existing component version in target repository
+  -t, --type string                 archive format (directory, tar, tgz) (default "directory")
+      --uploader <name>=<value>     repository uploader (<name>[:<artifact type>[:<media type>]]=<JSON target config) (default [])
 ```
 
 ### Description
