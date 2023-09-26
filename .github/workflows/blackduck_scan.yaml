@@ -4,6 +4,12 @@ on:
     branches:
       - test-blackduck-action
 
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+  repository-projects: read
+
 jobs:
   blackduck:
     name: Black Duck SCA
