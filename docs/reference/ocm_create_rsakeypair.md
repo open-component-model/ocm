@@ -15,10 +15,12 @@ rsakeypair, rsa
 ### Options
 
 ```
-      --cacert string       certificate authority to sign public key
-      --cakey string        private key for certificate authority
-  -h, --help                help for rsakeypair
-      --validity duration   certificate validity (default 87600h0m0s)
+      --cacert string          certificate authority to sign public key
+      --cakey string           private key for certificate authority
+  -E, --encrypt                encrypt private key with new key
+  -e, --encryptionKey string   encrypt private key with given key
+  -h, --help                   help for rsakeypair
+      --validity duration      certificate validity (default 87600h0m0s)
 ```
 
 ### Description

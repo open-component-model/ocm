@@ -15,7 +15,7 @@ import (
 var _ = Describe("list merge", func() {
 	handler := New()
 
-	var e1, e2 LabelValue
+	var e1, e2 Value
 	var a, b runtime.RawValue
 
 	BeforeEach(func() {

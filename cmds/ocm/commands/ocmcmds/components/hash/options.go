@@ -13,7 +13,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 )
 
@@ -48,7 +47,7 @@ func (o *Option) Complete(cmd *Command) error {
 	repo := repooption.From(cmd).Repository
 	lookup := lookupoption.From(cmd)
 	sopts := signing.NewOptions(hashoption.From(cmd), signing.Resolver(repo, lookup.Resolver), signing.Update(o.Update), signing.VerifyDigests(o.Verify))
-	err := sopts.Complete(signingattr.Get(cmd.Context.OCMContext()))
+	err := sopts.Complete(cmd.Context.OCMContext())
 	if err == nil {
 		o.action = signingcmd.NewAction([]string{"", ""}, cmd.Context.OCMContext(), common.NewPrinter(nil), sopts)
 	}

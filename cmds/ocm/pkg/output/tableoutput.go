@@ -58,7 +58,7 @@ func NewProcessingTableOutput(opts *Options, chain ProcessChain, header ...strin
 
 func (this *TableProcessingOutput) new(opts *Options, chain ProcessChain, header []string) *TableProcessingOutput {
 	this.header = header
-	this.ElementOutput.new(opts.LogContext(), opts.Context, chain)
+	this.ElementOutput.new(opts, chain)
 	this.opts = opts
 	return this
 }
@@ -67,8 +67,37 @@ func (this *TableProcessingOutput) GetSortFields() []string {
 	return this.header[this.opts.FixedColums:]
 }
 
+func (this *TableProcessingOutput) optimizeColumns(slice data.IndexedSliceAccess) []string {
+	header := this.header
+	if len(slice) < 2 {
+		return header
+	}
+	cnt := this.opts.OptimizedColumns
+
+columns:
+	for cnt > 0 && len(header) > 1 {
+		e := slice[0].([]string)
+		if len(e) <= 1 {
+			break
+		}
+		v := e[0]
+		for j := range slice {
+			e = slice[j].([]string)
+			if len(e) < 1 || e[0] != v {
+				break columns
+			}
+		}
+		// all row value identical, skip column
+		header = header[1:]
+		for j := range slice {
+			slice[j] = slice[j].([]string)[1:]
+		}
+		cnt--
+	}
+	return header
+}
+
 func (this *TableProcessingOutput) Out() error {
-	lines := [][]string{this.header}
 
 	sort := this.opts.Sort
 	slice := data.IndexedSliceAccess(data.Slice(this.Elems))
@@ -76,10 +105,16 @@ func (this *TableProcessingOutput) Out() error {
 		out.Out(this.Context, "no elements found\n")
 		return nil
 	}
+	effheader := this.header
+	if this.opts.UseColumnOptimization() {
+		effheader = this.optimizeColumns(slice)
+	}
+
+	lines := [][]string{effheader}
 	if sort != nil {
-		cols := make([]string, len(this.header))
+		cols := make([]string, len(effheader))
 		idxs := map[string]int{}
-		for i, n := range this.header {
+		for i, n := range effheader {
 			cols[i] = strings.TrimPrefix(strings.ToLower(n), "-")
 			idxs[cols[i]] = i
 		}
@@ -101,7 +136,7 @@ func (this *TableProcessingOutput) Out() error {
 	}
 
 	FormatTable(this.Context, "", append(lines, data.StringArraySlice(slice)...))
-	return nil
+	return this.ElementOutput.Out()
 }
 
 func compareColumn(c int) CompareFunction {

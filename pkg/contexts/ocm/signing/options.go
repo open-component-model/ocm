@@ -11,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -113,28 +114,42 @@ func (o *verify) ApplySigningOption(opts *Options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type signer struct {
+	algo   string
 	signer signing.Signer
 	name   string
 }
 
 // Sign provides an option requesting signing for a dedicated name and signer for a
-// signing/verification operation.
+// signing operation.
 func Sign(h signing.Signer, name string) Option {
-	return &signer{h, name}
+	return &signer{"", h, name}
 }
 
 // Signer provides an option requesting to use a dedicated signer for a
 // signing/verification operation.
 func Signer(h signing.Signer) Option {
-	return &signer{h, ""}
+	return &signer{"", h, ""}
 }
 
-// SignerByName provides an option requesting to use a dedicated signer by name
-// for a signing/verification operation. The effective signer is taken from
+// SignByAlgo provides an option requesting signing with a signing algorithm
+// for a signing operation. The effective signer is taken from
 // the signer registry provided by the OCM context.
-func SignerByName(n string) Option {
-	h := signing.DefaultHandlerRegistry().GetSigner(n)
-	return &signer{h, ""}
+func SignByAlgo(algo string, name string) Option {
+	return &signer{algo, nil, name}
+}
+
+// SignerByAlgo provides an option requesting to use a dedicated signer by
+// algorithm for a signing operation. The effective signer is taken from
+// the signer registry provided by the OCM context.
+func SignerByAlgo(algo string) Option {
+	return &signer{algo, nil, ""}
+}
+
+// SignerByName set a signer by algorithm name.
+//
+// Deprecated: use SignerByAlgo.
+func SignerByName(algo string) Option {
+	return SignerByAlgo(algo)
 }
 
 func (o *signer) ApplySigningOption(opts *Options) {
@@ -142,30 +157,32 @@ func (o *signer) ApplySigningOption(opts *Options) {
 	if n != "" {
 		opts.SignatureNames = append([]string{n}, opts.SignatureNames...)
 	}
+	opts.SignAlgo = o.algo
 	opts.Signer = o.signer
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type hasher struct {
+	algo   string
 	hasher signing.Hasher
 }
 
 // Hash provides an option requesting hashing with a dedicated hasher for a
 // signing/hash operation.
 func Hash(h signing.Hasher) Option {
-	return &hasher{h}
+	return &hasher{"", h}
 }
 
 // HashByAlgo provides an option requesting to use a dedicated hasher by name
 // for a signing/hash operation. The effective hasher is taken from
 // the hasher registry provided by the OCM context.
-func HashByAlgo(name string) Option {
-	h := signing.DefaultHandlerRegistry().GetHasher(name)
-	return Hash(h)
+func HashByAlgo(algo string) Option {
+	return &hasher{algo, nil}
 }
 
 func (o *hasher) ApplySigningOption(opts *Options) {
+	opts.HashAlgo = o.algo
 	opts.Hasher = o.hasher
 }
 
@@ -369,10 +386,12 @@ type Options struct {
 	Recursively       bool
 	DigestMode        string
 	Verify            bool
+	SignAlgo          string
 	Signer            signing.Signer
 	Issuer            string
 	VerifySignature   bool
 	RootCerts         *x509.CertPool
+	HashAlgo          string
 	Hasher            signing.Hasher
 	Keys              signing.KeyRegistry
 	Registry          signing.Registry
@@ -381,6 +400,8 @@ type Options struct {
 	SignatureNames    []string
 	NormalizationAlgo string
 	Keyless           bool
+
+	effectiveRegistry signing.Registry
 }
 
 var _ Option = (*Options)(nil)
@@ -441,22 +462,54 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	}
 }
 
-func (o *Options) Complete(registry signing.Registry) error {
-	o.Printer = common.AssurePrinter(o.Printer)
-	if o.Registry == nil {
-		if registry == nil {
-			registry = signing.DefaultRegistry()
-		}
-		o.Registry = registry
+// Complete takes either nil, an ocm.ContextProvider or a signing.Registry.
+// To be compatible with an older version the type has been changed to interface
+// to support multiple variants.
+func (o *Options) Complete(ctx interface{}) error {
+	var reg signing.Registry
+
+	if ctx == nil {
+		ctx = ocm.DefaultContext()
 	}
+	switch t := ctx.(type) {
+	case ocm.ContextProvider:
+		reg = signingattr.Get(t.OCMContext())
+	case signing.Registry:
+		reg = t
+	default:
+		return fmt.Errorf("context argument (%T) is invalid", ctx)
+	}
+
+	o.Printer = common.AssurePrinter(o.Printer)
+
+	if o.Registry == nil {
+		o.Registry = reg
+	}
+
+	o.effectiveRegistry = o.Registry
+	if o.Keys != nil && o.Keys.HasKeys() {
+		o.effectiveRegistry = signing.RegistryWithPreferredKeys(o.Registry, o.Keys)
+	}
+
 	if o.SkipAccessTypes == nil {
 		o.SkipAccessTypes = map[string]bool{}
+	}
+
+	if o.Signer == nil && o.SignAlgo != "" {
+		o.Signer = o.Registry.GetSigner(o.SignAlgo)
+		if o.Signer == nil {
+			return errors.ErrUnknown(compdesc.KIND_SIGN_ALGORITHM, o.SignAlgo)
+		}
 	}
 	if o.Signer != nil {
 		if len(o.SignatureNames) == 0 {
 			return errors.Newf("signature name required for signing")
 		}
-		if o.PrivateKey() == nil && !o.Keyless {
+		priv, err := o.PrivateKey()
+		if err != nil {
+			return err
+		}
+		if priv == nil && !o.Keyless {
 			return errors.ErrNotFound(compdesc.KIND_PRIVATE_KEY, o.SignatureNames[0])
 		}
 		if o.DigestMode == "" {
@@ -485,6 +538,13 @@ func (o *Options) Complete(registry signing.Registry) error {
 	}
 	if o.NormalizationAlgo == "" {
 		o.NormalizationAlgo = compdesc.JsonNormalisationV1
+	}
+
+	if o.Hasher == nil && o.HashAlgo != "" {
+		o.Hasher = o.Registry.GetHasher(o.HashAlgo)
+		if o.Hasher == nil {
+			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, o.HashAlgo)
+		}
 	}
 	if o.Hasher == nil {
 		o.Hasher = o.Registry.GetHasher(sha256.Algorithm)
@@ -537,23 +597,11 @@ func (o *Options) SignatureConfigured(name string) bool {
 }
 
 func (o *Options) PublicKey(sig string) interface{} {
-	if o.Keys != nil {
-		k := o.Keys.GetPublicKey(sig)
-		if k != nil {
-			return k
-		}
-	}
-	return o.Registry.GetPublicKey(sig)
+	return o.effectiveRegistry.GetPublicKey(sig)
 }
 
-func (o *Options) PrivateKey() interface{} {
-	if o.Keys != nil {
-		k := o.Keys.GetPrivateKey(o.SignatureName())
-		if k != nil {
-			return k
-		}
-	}
-	return o.Registry.GetPrivateKey(o.SignatureName())
+func (o *Options) PrivateKey() (interface{}, error) {
+	return signing.ResolvePrivateKey(o.effectiveRegistry, o.SignatureName())
 }
 
 func (o *Options) Dup() *Options {

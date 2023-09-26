@@ -14,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -100,7 +99,7 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 		opts = opts.Dup()
 		opts.Printer = printer
 	}
-	err := opts.Complete(signingattr.Get(cv.GetContext()))
+	err := opts.Complete(cv.GetContext())
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +268,11 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 
 	found := cd.GetSignatureIndex(opts.SignatureName())
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
-		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), ctx.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
+		priv, err := opts.PrivateKey()
+		if err != nil {
+			return nil, err
+		}
+		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), ctx.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, priv)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor")
 		}
@@ -521,9 +524,8 @@ func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 		if !checkDigest(rdigest, &digest[0]) {
 			return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, rdigest))
 		}
-		if raw.Digest != nil &&
-			NormalizedDigesterType(raw.Digest) == NormalizedDigesterType(&digest[0]) {
-			if raw.Digest.Value != digest[0].Value {
+		if NormalizedDigesterType(raw.Digest) == NormalizedDigesterType(&digest[0]) {
+			if !checkDigest(raw.Digest, &digest[0]) {
 				return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
 			}
 		}

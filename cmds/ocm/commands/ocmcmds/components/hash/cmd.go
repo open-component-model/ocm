@@ -101,7 +101,7 @@ func addIdentityField(e interface{}) []string {
 	return []string{p.Identity.String()}
 }
 
-func TableOutput(opts *output.Options, h *handler, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
+func TableOutput(opts *output.Options, h *action, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
 	def := &output.TableOutput{
 		Headers: output.Fields("COMPONENT", "VERSION", "HASH", wide),
 		Options: opts,
@@ -137,28 +137,29 @@ var outputs = output.NewOutputs(getRegular, output.Outputs{
 }).AddChainedManifestOutputs(output.ComposeChain(closureoption.OutputChainFunction(comphdlr.ClosureExplode, comphdlr.Sort), mapManifest))
 
 func mapManifest(opts *output.Options) processing.ProcessChain {
-	h := newHandler(opts)
+	h := newAction(opts)
 	return processing.Map(h.digester).Map(h.manifester)
 }
 
 func getRegular(opts *output.Options) output.Output {
-	h := newHandler(opts)
+	h := newAction(opts)
 	return TableOutput(opts, h, h.mapGetRegularOutput).New()
 }
 
 func getWide(opts *output.Options) output.Output {
-	h := newHandler(opts)
+	h := newAction(opts)
 	return TableOutput(opts, h, h.mapGetWideOutput, "NORMALIZED FORM").New()
 }
 
 func getNorm(opts *output.Options) output.Output {
-	h := newHandler(opts)
+	h := newAction(opts)
 	return h
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type handler struct {
+// action as output.Output.
+type action struct {
 	ctx  clictx.Context
 	opts *hashoption.Option
 	mode *Option
@@ -166,10 +167,7 @@ type handler struct {
 	norms map[common.NameVersion]string
 }
 
-//////////
-// handler as output.Output
-
-func (h *handler) Add(e interface{}) error {
+func (h *action) Add(e interface{}) error {
 	m := h._manifester(h.digester(e))
 	if m.Error != "" {
 		return fmt.Errorf("cannot handle %s: %s\n", m.History, m.Error)
@@ -178,11 +176,11 @@ func (h *handler) Add(e interface{}) error {
 	return nil
 }
 
-func (h *handler) Close() error {
+func (h *action) Close() error {
 	return nil
 }
 
-func (h *handler) Out() error {
+func (h *action) Out() error {
 	if len(h.norms) > 1 {
 		dir := h.mode.outfile
 		if strings.HasSuffix(dir, ".ncd") {
@@ -207,7 +205,7 @@ func (h *handler) Out() error {
 	return nil
 }
 
-func (h *handler) write(p, n string) error {
+func (h *action) write(p, n string) error {
 	dir := filepath.Dir(p)
 	err := h.ctx.FileSystem().MkdirAll(dir, 0o755)
 	if err != nil {
@@ -218,8 +216,8 @@ func (h *handler) write(p, n string) error {
 
 /////////
 
-func newHandler(opts *output.Options) *handler {
-	h := &handler{
+func newAction(opts *output.Options) *action {
+	h := &action{
 		ctx:  opts.Context,
 		opts: hashoption.From(opts),
 		mode: From(opts),
@@ -230,11 +228,11 @@ func newHandler(opts *output.Options) *handler {
 	return h
 }
 
-func (h *handler) manifester(e interface{}) interface{} {
+func (h *action) manifester(e interface{}) interface{} {
 	return h._manifester(e)
 }
 
-func (h *handler) _manifester(e interface{}) *Manifest {
+func (h *action) _manifester(e interface{}) *Manifest {
 	p := e.(*Object)
 
 	tag := "-"
@@ -271,7 +269,7 @@ func (h *handler) _manifester(e interface{}) *Manifest {
 	return m
 }
 
-func (h *handler) digester(e interface{}) interface{} {
+func (h *action) digester(e interface{}) interface{} {
 	p := e.(*comphdlr.Object)
 	o := &Object{
 		Spec:    p.Spec,
@@ -286,7 +284,7 @@ func (h *handler) digester(e interface{}) interface{} {
 	return o
 }
 
-func (h *handler) mapGetRegularOutput(e interface{}) interface{} {
+func (h *action) mapGetRegularOutput(e interface{}) interface{} {
 	p := e.(*Object)
 
 	tag := "-"
@@ -306,7 +304,7 @@ func (h *handler) mapGetRegularOutput(e interface{}) interface{} {
 	return []string{p.Spec.Component, tag, hash}
 }
 
-func (h *handler) mapGetWideOutput(e interface{}) interface{} {
+func (h *action) mapGetWideOutput(e interface{}) interface{} {
 	p := e.(*Object)
 
 	tag := "-"

@@ -16,6 +16,7 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/images"
 	"github.com/containerd/containerd/log"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/pkg/errors"
 )
@@ -154,7 +155,7 @@ func (r dockerFetcher) open(ctx context.Context, req *request, mediatype string,
 
 	resp, err := req.doWithRetries(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, accessio.RetriableError(err)
 	}
 	defer func() {
 		if retErr != nil {

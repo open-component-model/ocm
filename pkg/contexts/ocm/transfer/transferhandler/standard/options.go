@@ -20,6 +20,7 @@ func init() {
 }
 
 type Options struct {
+	retries           *int
 	recursive         *bool
 	resourcesByValue  *bool
 	localByValue      *bool
@@ -36,6 +37,7 @@ type Options struct {
 var (
 	_ transferhandler.TransferOption = (*Options)(nil)
 
+	_ RetryOption                 = (*Options)(nil)
 	_ ResourcesByValueOption      = (*Options)(nil)
 	_ LocalResourcesByValueOption = (*Options)(nil)
 	_ OverwriteOption             = (*Options)(nil)
@@ -59,6 +61,11 @@ func (o *Options) NewTransferHandler() (transferhandler.TransferHandler, error) 
 }
 
 func (o *Options) ApplyTransferOption(target transferhandler.TransferOptions) error {
+	if o.retries != nil {
+		if opts, ok := target.(RetryOption); ok {
+			opts.SetRetries(*o.retries)
+		}
+	}
 	if o.recursive != nil {
 		if opts, ok := target.(RecursiveOption); ok {
 			opts.SetRecursive(*o.recursive)
@@ -175,6 +182,17 @@ func (o *Options) SetKeepGlobalAccess(keepGlobalAccess bool) {
 
 func (o *Options) IsKeepGlobalAccess() bool {
 	return utils.AsBool(o.keepGlobalAccess)
+}
+
+func (o *Options) SetRetries(retries int) {
+	o.retries = &retries
+}
+
+func (o *Options) GetRetries() int {
+	if o.retries == nil {
+		return 0
+	}
+	return *o.retries
 }
 
 func (o *Options) SetResolver(resolver ocm.ComponentVersionResolver) {
@@ -309,6 +327,32 @@ func (o skipUpdateOption) ApplyTransferOption(to transferhandler.TransferOptions
 // SkipUpdate enables the modification of non-digest (volatile) relevant information in a component version.
 func SkipUpdate(args ...bool) transferhandler.TransferOption {
 	return skipUpdateOption(utils.GetOptionFlag(args...))
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type RetryOption interface {
+	SetRetries(n int)
+	GetRetries() int
+}
+
+type retryOption struct {
+	TransferOptionsCreator
+	retries int
+}
+
+func (o *retryOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	if eff, ok := to.(RetryOption); ok {
+		eff.SetRetries(o.retries)
+		return nil
+	} else {
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "retry")
+	}
+}
+
+// Retries sets the number of retries for failing update operations.
+func Retries(retries int) transferhandler.TransferOption {
+	return &retryOption{retries: retries}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -174,7 +174,7 @@ var _ = Describe("Add resources", func() {
 		CheckTextResource(env, cd, "testdata")
 	})
 
-	It("add helm chart from rpo", func() {
+	It("add helm chart from repo", func() {
 		resp, err := http.Get("https://charts.helm.sh/stable")
 		if err == nil { // only if connected to internet
 			resp.Body.Close()
@@ -363,6 +363,14 @@ type: plainText
 			Expect(len(cd.Resources)).To(Equal(1))
 
 			CheckTextResource(env, cd, "testdata")
+		})
+
+		It("fail for non-matching input options", func() {
+			meta := `
+name: testdata
+type: plainText
+`
+			Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "file", "--inputHelmRepository=x", "--inputPath", "testdata/testcontent", "--"+options.MediatypeOption.GetName(), "text/plain")).To(MatchError(`resource (by options): input specification: option "inputHelmRepository" given, but not possible for input type file`))
 		})
 
 		It("adds spiff processed text blob by dedicated input options", func() {

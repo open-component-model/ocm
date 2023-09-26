@@ -116,6 +116,16 @@ func mapGetRegularOutput(e interface{}) interface{} {
 	if len(p.GetDescriptor().Actions) > 0 {
 		features = append(features, "actions")
 	}
+	if len(p.GetDescriptor().ValueSets) > 0 {
+		features = append(features, "valuesets")
+	}
+	if len(p.GetDescriptor().ValueMergeHandlers) > 0 {
+		features = append(features, "mergehandlers")
+	}
+	if len(p.GetDescriptor().LabelMergeSpecifications) > 0 {
+		features = append(features, "mergespecs")
+	}
+
 	return []string{p.Name(), p.Version(), loc, p.Message(), strings.Join(features, ",")}
 }
 

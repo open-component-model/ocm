@@ -20,7 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
@@ -89,7 +88,7 @@ func (o *SignatureCommand) Run() (rerr error) {
 	lookup := lookupoption.From(o)
 	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repo, comphdlr.OptionsFor(o))
 	sopts := signing.NewOptions(sign, signing.Resolver(repo, lookup.Resolver))
-	err = sopts.Complete(signingattr.Get(o.Context.OCMContext()))
+	err = sopts.Complete(o.Context.OCMContext())
 	if err != nil {
 		return err
 	}

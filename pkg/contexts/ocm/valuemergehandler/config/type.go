@@ -7,7 +7,6 @@ package config
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -26,7 +25,7 @@ func init() {
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	Labels                      []LabelAssignment
-	Assignments                 map[string]*hpi.Specification `json:"assignments,omitempty"`
+	Assignments                 map[hpi.Hint]*hpi.Specification `json:"assignments,omitempty"`
 }
 
 type LabelAssignment struct {
@@ -39,7 +38,7 @@ type LabelAssignment struct {
 func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(ConfigType),
-		Assignments:         map[string]*hpi.Specification{},
+		Assignments:         map[hpi.Hint]*hpi.Specification{},
 	}
 }
 
@@ -47,9 +46,9 @@ func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *Config) Assign(name string, spec *hpi.Specification) {
+func (a *Config) Assign(name hpi.Hint, spec *hpi.Specification) {
 	if a.Assignments == nil {
-		a.Assignments = map[string]*hpi.Specification{}
+		a.Assignments = map[hpi.Hint]*hpi.Specification{}
 	}
 	if spec == nil {
 		delete(a.Assignments, name)
@@ -78,14 +77,14 @@ func (a *Config) AssignLabel(name string, version string, spec *hpi.Specificatio
 func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 	var reg hpi.Registry
 
-	t, ok := target.(cpi.Context)
+	t, ok := target.(hpi.Context)
 	if !ok {
 		reg, ok = target.(hpi.Registry)
 		if !ok {
 			return config.ErrNoContext(ConfigType)
 		}
 	} else {
-		reg = t.LabelMergeHandlers()
+		reg = hpi.For(t)
 	}
 
 	for n, s := range a.Assignments {

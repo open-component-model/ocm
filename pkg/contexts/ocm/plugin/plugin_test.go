@@ -177,7 +177,7 @@ someattr: value
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 Plugin Name:      merge
 Plugin Version:   v1
-Capabilities:     Value Merge Handlers, Label Merge Specifications
+Capabilities:     Value Merge Handlers, Label Merge Specs
 Description: 
       a test plugin with value merge algorithm acme.org/test
 

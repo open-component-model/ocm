@@ -134,7 +134,7 @@ func (o *Options) Execute(data string) (string, error) {
 
 func ReadYAMLSettings(fs vfs.FileSystem, path string) (Values, error) {
 	result := Values{}
-	data, err := utils2.ReadFile(fs, path)
+	data, err := utils2.ReadFile(path, fs)
 	if err != nil {
 		return nil, err
 	}

@@ -168,6 +168,9 @@ The following algorithms are possible:
 
 
 
+The following label assignments are configured:
+  - <code>label:routing-slips</code>: simpleMapMerge
+
 
 ### SEE ALSO
 

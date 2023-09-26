@@ -28,6 +28,8 @@ type (
 	UploaderDescriptor          = descriptor.UploaderDescriptor
 	UploaderKey                 = descriptor.UploaderKey
 	UploaderKeySet              = descriptor.UploaderKeySet
+	ValueSetDefinition          = descriptor.ValueSetDefinition
+	ValueSetDescriptor          = descriptor.ValueSetDescriptor
 
 	AccessSpecInfo       = internal.AccessSpecInfo
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo

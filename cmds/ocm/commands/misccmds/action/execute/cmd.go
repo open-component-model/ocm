@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -81,13 +80,9 @@ func (o *Command) Complete(args []string) error {
 
 	data := []byte(args[0])
 	if strings.HasPrefix(args[0], "@") {
-		path, err := utils2.ResolvePath(args[0][1:])
+		data, err = utils2.ResolveData(args[0][1:], o.FileSystem())
 		if err != nil {
 			return err
-		}
-		data, err = vfs.ReadFile(o.FileSystem(), path)
-		if err != nil {
-			return errors.Wrapf(err, "cannot read file %q", path)
 		}
 	}
 

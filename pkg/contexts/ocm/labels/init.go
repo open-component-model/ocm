@@ -2,12 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package signing
+package labels
 
 import (
-	"github.com/open-component-model/ocm/pkg/signing"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/types"
 )
-
-func DefaultHandlerRegistry() signing.Registry {
-	return signing.DefaultRegistry()
-}

@@ -195,7 +195,7 @@ func (o *Command) Complete(args []string) error {
 	}
 	o.Id = id
 	if len(o.CredentialsFile) > 0 {
-		data, err := utils2.ReadFile(o.Context.FileSystem(), o.CredentialsFile)
+		data, err := utils2.ReadFile(o.CredentialsFile, o.Context.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "failed reading credentials file %q", o.CredentialsFile)
 		}
@@ -207,7 +207,7 @@ func (o *Command) Complete(args []string) error {
 		}
 	}
 	if len(o.ParameterFile) > 0 {
-		data, err := utils2.ReadFile(o.Context.FileSystem(), o.ParameterFile)
+		data, err := utils2.ReadFile(o.ParameterFile, o.Context.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "failed reading parameter file %q", o.ParameterFile)
 		}

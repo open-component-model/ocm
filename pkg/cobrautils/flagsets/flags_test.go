@@ -18,16 +18,16 @@ var _ = Describe("type set", func() {
 	var flags *pflag.FlagSet
 
 	BeforeEach(func() {
-		set = flagsets.NewConfigOptionSet("first")
+		set = flagsets.NewConfigOptionTypeSet("first")
 		flags = pflag.NewFlagSet("flags", pflag.ContinueOnError)
 	})
 
 	It("handles option group in args", func() {
-		set1 := flagsets.NewConfigOptionSet("first")
+		set1 := flagsets.NewConfigOptionTypeSet("first")
 		set1.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
 		set1.AddOptionType(flagsets.NewStringOptionType("other", "another test string"))
 
-		set2 := flagsets.NewConfigOptionSet("second")
+		set2 := flagsets.NewConfigOptionTypeSet("second")
 		set2.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
 		set2.AddOptionType(flagsets.NewStringOptionType("third", "a third string"))
 
@@ -44,11 +44,11 @@ var _ = Describe("type set", func() {
 	})
 
 	It("fails for mixed option group in args", func() {
-		set1 := flagsets.NewConfigOptionSet("first")
+		set1 := flagsets.NewConfigOptionTypeSet("first")
 		set1.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
 		set1.AddOptionType(flagsets.NewStringOptionType("other", "another test string"))
 
-		set2 := flagsets.NewConfigOptionSet("second")
+		set2 := flagsets.NewConfigOptionTypeSet("second")
 		set2.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
 		set2.AddOptionType(flagsets.NewStringOptionType("third", "a third string"))
 

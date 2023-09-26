@@ -92,7 +92,7 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.Config != "" && o.ConfigData == nil {
-		o.ConfigData, err = utils2.ReadFile(o.FileSystem(), o.Config)
+		o.ConfigData, err = utils2.ReadFile(o.Config, o.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "cannot read config %q", o.Config)
 		}
@@ -118,7 +118,7 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.Parameters != "" && o.ParameterData == nil {
-		o.ParameterData, err = utils2.ReadFile(o.FileSystem(), o.Parameters)
+		o.ParameterData, err = utils2.ReadFile(o.Parameters, o.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "cannot read parameters %q", o.Config)
 		}

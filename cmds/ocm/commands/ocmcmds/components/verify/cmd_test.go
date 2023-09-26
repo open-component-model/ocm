@@ -133,7 +133,7 @@ var _ = Describe("access method", func() {
 			PrivateKey(SIGNATURE, priv),
 			Update(), VerifyDigests(),
 		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+		Expect(opts.Complete(DefaultContext)).To(Succeed())
 		dig, err := Apply(nil, nil, cv, opts)
 		Expect(err).To(Succeed())
 		closer.Close()

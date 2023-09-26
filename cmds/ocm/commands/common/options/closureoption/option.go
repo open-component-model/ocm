@@ -7,6 +7,7 @@ package closureoption
 import (
 	"fmt"
 
+	"github.com/modern-go/reflect2"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -21,7 +22,9 @@ import (
 
 func From(o options.OptionSetProvider) *Option {
 	var opt *Option
-	o.AsOptionSet().Get(&opt)
+	if !reflect2.IsNil(o) {
+		o.AsOptionSet().Get(&opt)
+	}
 	return opt
 }
 

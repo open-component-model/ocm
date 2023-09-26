@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resourceconfig"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/routingslips"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sourceconfig"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions"
@@ -40,6 +41,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(componentarchive.NewCommand(ctx))
 	cmd.AddCommand(versions.NewCommand(ctx))
 	cmd.AddCommand(plugins.NewCommand(ctx))
+	cmd.AddCommand(routingslips.NewCommand(ctx))
 
 	cmd.AddCommand(topicocmrefs.New(ctx))
 	cmd.AddCommand(topicocmaccessmethods.New(ctx))

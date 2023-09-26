@@ -27,6 +27,7 @@ type (
 
 	ActionSpecInfo       = internal.ActionSpecInfo
 	AccessSpecInfo       = internal.AccessSpecInfo
+	ValueSetInfo         = internal.ValueSetInfo
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
 )
 
@@ -62,6 +63,10 @@ type Plugin interface {
 
 	RegisterValueMergeHandler(h ValueMergeHandler) error
 	GetValueMergeHandler(name string) ValueMergeHandler
+
+	RegisterValueSet(h ValueSet) error
+	DecodeValueSet(purpose string, data []byte) (runtime.TypedObject, error)
+	GetValueSet(purpose, name, version string) ValueSet
 
 	GetOptions() *Options
 	GetConfig() (interface{}, error)
@@ -153,4 +158,27 @@ type ValueMergeHandler interface {
 	Description() string
 
 	Execute(p Plugin, local Value, inbound Value, config json.RawMessage) (result ValueMergeResult, err error)
+}
+
+type ValueSet interface {
+	runtime.TypedObjectDecoder[AccessSpec]
+
+	Name() string
+	Version() string
+
+	// Purposes describes the purposes the set should be ued for.
+	// So far, only the purpose PURPOSE_ROUTINGSLIP is defined.
+	Purposes() []string
+
+	// Options provides the list of CLI options supported to compose the access
+	// specification.
+	Options() []options.OptionType
+
+	// Description provides a general description for the access mehod kind.
+	Description() string
+	// Format describes the attributes of the dedicated version.
+	Format() string
+
+	ValidateSpecification(p Plugin, spec runtime.TypedObject) (info *ValueSetInfo, err error)
+	ComposeSpecification(p Plugin, opts Config, config Config) error
 }

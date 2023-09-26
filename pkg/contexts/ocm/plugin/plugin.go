@@ -32,6 +32,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/put"
 	uplval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/validate"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/valueset"
+	vscompose "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/valueset/compose"
+	vsval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/valueset/validate"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -300,4 +303,50 @@ func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) ([]byte, err
 		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args, "config", p.config)
 	}
 	return cache.Exec(p.Path(), p.config, r, w, args...)
+}
+
+func (p *pluginImpl) ValidateValueSet(purpose string, spec []byte) (*ppi.ValueSetInfo, error) {
+	result, err := p.Exec(nil, nil, valueset.Name, vsval.Name, purpose, string(spec))
+	if err != nil {
+		return nil, errors.Wrapf(err, "plugin %s", p.Name())
+	}
+
+	var info ppi.ValueSetInfo
+	err = json.Unmarshal(result, &info)
+	if err != nil {
+		return nil, errors.Wrapf(err, "plugin %s: cannot unmarshal value set info", p.Name())
+	}
+	return &info, nil
+}
+
+func (p *pluginImpl) ComposeValueSet(purpose, name string, opts flagsets.ConfigOptions, base flagsets.Config) error {
+	cfg := flagsets.Config{}
+	for _, o := range opts.Options() {
+		cfg[o.GetName()] = o.Value()
+	}
+	optsdata, err := json.Marshal(cfg)
+	if err != nil {
+		return errors.Wrapf(err, "cannot marshal option values")
+	}
+	basedata, err := json.Marshal(base)
+	if err != nil {
+		return errors.Wrapf(err, "cannot marshal access specification base value")
+	}
+	result, err := p.Exec(nil, nil, valueset.Name, vscompose.Name, purpose, name, string(optsdata), string(basedata))
+	if err != nil {
+		return err
+	}
+	var r flagsets.Config
+	err = json.Unmarshal(result, &r)
+	if err != nil {
+		return errors.Wrapf(err, "cannot unmarshal composition result")
+	}
+
+	for k := range base {
+		delete(base, k)
+	}
+	for k, v := range r {
+		base[k] = v
+	}
+	return nil
 }

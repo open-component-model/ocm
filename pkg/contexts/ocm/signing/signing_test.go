@@ -33,6 +33,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha512"
 )
 
@@ -140,7 +141,7 @@ var _ = Describe("access method", func() {
 
 			pr, buf := common.NewBufferedPrinter()
 			// key taken from signing attr
-			dig := Must(SignComponentVersion(cv, SIGNATURE, SignerByName(SIGN_ALGO), Resolver(resolver), DigestMode(mode), Printer(pr)))
+			dig := Must(SignComponentVersion(cv, SIGNATURE, SignerByAlgo(SIGN_ALGO), Resolver(resolver), DigestMode(mode), Printer(pr)))
 			Expect(closer.Close()).To(Succeed())
 			Expect(archcloser.Close()).To(Succeed())
 			Expect(dig.Value).To(StringEqualWithContext(digest))
@@ -231,7 +232,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			Expect(opts.Complete(env)).To(Succeed())
 
 			pr, buf := common.NewBufferedPrinter()
 			dig, err := Apply(pr, nil, cv, opts)
@@ -240,7 +241,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			Expect(archcloser.Close()).To(Succeed())
 			Expect(dig.Value).To(StringEqualWithContext(digestA))
 
-			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			src, err = ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env)
 			Expect(err).To(Succeed())
 			session.AddCloser(src)
 			cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
@@ -262,7 +263,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			Expect(opts.Complete(env)).To(Succeed())
 
 			dig, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
@@ -312,14 +313,14 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			Expect(opts.Complete(env)).To(Succeed())
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
 			closer.Close()
 			archcloser.Close()
 			Expect(dig.Value).To(StringEqualWithContext(digestA))
 
-			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			src, err = ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env)
 			Expect(err).To(Succeed())
 			session.AddCloser(src)
 			cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
@@ -334,7 +335,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			Expect(opts.Complete(env)).To(Succeed())
 
 			dig, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
@@ -364,7 +365,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			Expect(opts.Complete(env)).To(Succeed())
 
 			pr, buf := common.NewBufferedPrinter()
 			dig, err := Apply(pr, nil, cv, opts)
@@ -373,7 +374,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			archcloser.Close()
 			Expect(dig.Value).To(StringEqualWithContext(digestB))
 
-			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			src, err = ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env)
 			Expect(err).To(Succeed())
 			session.AddCloser(src)
 			cv, err = src.LookupComponentVersion(COMPONENTB, VERSION)
@@ -414,7 +415,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 				Resolver(src),
 				VerifyDigests(),
 			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			Expect(opts.Complete(env)).To(Succeed())
 
 			dig, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
@@ -443,7 +444,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			Expect(opts.Complete(env)).To(Succeed())
 
 			_, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(HaveOccurred())
@@ -481,7 +482,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 				Resolver(src),
 				Update(), VerifyDigests(),
 			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			Expect(opts.Complete(env)).To(Succeed())
 
 			cv, err := src.LookupComponentVersion(COMPONENTB, VERSION)
 			Expect(err).To(Succeed())
@@ -643,7 +644,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 				Resolver(src),
 				VerifyDigests(),
 			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			Expect(opts.Complete(env)).To(Succeed())
 			_, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("github.com/mandelsoft/top:v1: failed applying to component reference refb[github.com/mandelsoft/ref:v1]: github.com/mandelsoft/top:v1->github.com/mandelsoft/ref:v1: failed applying to component reference ref[github.com/mandelsoft/test:v1]: github.com/mandelsoft/top:v1->github.com/mandelsoft/ref:v1->github.com/mandelsoft/test:v1: calculated resource digest ([{HashAlgorithm:SHA-256 NormalisationAlgorithm:genericBlobDigest/v1 Value:" + D_DATAA + "}]) mismatches existing digest (SHA-256:" + wrongDigest + "[genericBlobDigest/v1]) for data_a:v1 (Local blob sha256:" + D_DATAA + "[])"))
@@ -662,7 +663,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 			{
 				setup(mopts...)
 				arch := finalizer.Nested()
-				src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
+				src, err := ctf.Open(env, accessobj.ACC_WRITABLE, ARCH, 0, env)
 				Expect(err).To(Succeed())
 				arch.Close(src)
 
@@ -1034,6 +1035,53 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 			Entry("hashed", Substitutions{}),
 		)
 	})
+
+	Context("ref hashes", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.ComponentVersion(COMPONENTA, VERSION, func() {
+					env.Provider(PROVIDER)
+				})
+				env.ComponentVersion(COMPONENTB, VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Reference("refa", COMPONENTA, VERSION)
+				})
+				env.ComponentVersion(COMPONENTC, VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Reference("refb", COMPONENTB, VERSION)
+				})
+			})
+		})
+
+		It("handles top level signature", func() {
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+			defer Close(src, "ctf")
+
+			resolver := ocm.NewCompoundResolver(src)
+
+			cv := Must(resolver.LookupComponentVersion(COMPONENTC, VERSION))
+			defer cv.Close()
+
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Resolver(resolver),
+				VerifyDigests(),
+			)
+			MustBeSuccessful(opts.Complete(env))
+
+			digestC := "1e81ac0fe69614e6fd73ab7a1c809dd31fcbcb810f0036be7a296d226e4bd64b"
+			pr, buf := common.NewBufferedPrinter()
+			dig := Must(Apply(pr, nil, cv, opts))
+			Expect(dig.Value).To(StringEqualWithContext(digestC))
+
+			Expect(cv.GetDescriptor().References[0].Digest.HashAlgorithm).To(Equal(sha256.Algorithm))
+
+			cvb := Must(resolver.LookupComponentVersion(COMPONENTB, VERSION))
+			defer Close(cvb)
+			Expect(cvb.GetDescriptor().References[0].Digest).NotTo(BeNil())
+			_ = buf
+		})
+	})
 })
 
 func HashComponent(resolver ocm.ComponentVersionResolver, name string, digest string, other ...Option) string {
@@ -1076,12 +1124,12 @@ func SignComponent(resolver ocm.ComponentVersionResolver, name string, digest st
 	defer cv.Close()
 
 	opts := NewOptions(
-		Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+		Sign(signingattr.Get(cv.GetContext()).GetSigner(SIGN_ALGO), SIGNATURE),
 		Resolver(resolver),
 		VerifyDigests(),
 	)
 	opts.Eval(other...)
-	ExpectWithOffset(1, opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+	ExpectWithOffset(1, opts.Complete(cv.GetContext())).To(Succeed())
 
 	pr, buf := common.NewBufferedPrinter()
 	dig, err := Apply(pr, nil, cv, opts)
@@ -1101,7 +1149,7 @@ func VerifyComponent(resolver ocm.ComponentVersionResolver, name string, digest 
 		VerifyDigests(),
 	)
 	opts.Eval(other...)
-	ExpectWithOffset(1, opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+	ExpectWithOffset(1, opts.Complete(cv.GetContext())).To(Succeed())
 	dig, err := Apply(nil, nil, cv, opts)
 	ExpectWithOffset(1, err).To(Succeed())
 	ExpectWithOffset(1, dig.Value).To(Equal(digest))
