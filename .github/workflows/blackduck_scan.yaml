@@ -24,14 +24,19 @@ jobs:
       - name: Run Black Duck SCA
         uses: synopsys-sig/detect-action@v0.3.4
         env:
-          DETECT_PROJECT_GROUP_NAME: ${{ vars.BLACKDUCK_PROJECT_GROUP_NAME }}
+          DETECT_PROJECT_GROUP_NAME: opencomponentmodel
           DETECT_PROJECT_NAME: ocm
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_version: main
           DETECT_SOURCE_PATH: ./
+          LOGGING.LEVEL.COM.SYNOPSYS.INTEGRATION: DEBUG
+          DETECT.PROJECT.VERSION.DISTRIBUTION: SAAS
+          DETECT.TIMEOUT: 6000
+          BLACKDUCK.TRUST.CERT: true
         with:
             #scan-mode: INTELLIGENT
             github-token: ${{ secrets.GITHUB_TOKEN }}
             detect-version: 8.11.0
             blackduck-url: ${{ vars.BLACKDUCK_URL }}
             blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+            policy-name: 
