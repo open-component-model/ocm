@@ -2,8 +2,9 @@ package dirtree
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/utils"
 	"golang.org/x/exp/slices"
+
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Option interface {

@@ -16,9 +16,10 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/images"
 	"github.com/containerd/containerd/log"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/pkg/errors"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
 type dockerFetcher struct {
