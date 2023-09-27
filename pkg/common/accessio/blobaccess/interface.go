@@ -22,5 +22,5 @@ func ForFile(mime string, path string, fss ...vfs.FileSystem) BlobAccess {
 }
 
 func ForDirTree(mime string, path string, opts ...dirtree.Option) (BlobAccess, error) {
-	return dirtree.BlobAccessForDirTree(mime, path, opts...)
+	return dirtree.BlobAccessForDirTree(path, opts...)
 }
