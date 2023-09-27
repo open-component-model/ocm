@@ -5,6 +5,8 @@
 package docker
 
 import (
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -64,7 +66,12 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 	if version == "" || version == "latest" {
 		version = info.ComponentVersion.GetVersion()
 	}
-	blob, err := artifactset.SynthesizeArtifactBlob(ns, version)
+	blob, err := artifactset.SynthesizeArtifactBlob(ns, version,
+		func(art oci.ArtifactAccess) error {
+			art.Artifact().SetAnnotation(annotations.COMPVERS_ANNOTATION, info.ComponentVersion.String())
+			return nil
+		},
+	)
 	if err != nil {
 		return nil, "", err
 	}
