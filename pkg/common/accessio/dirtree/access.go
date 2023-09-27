@@ -3,14 +3,11 @@ package dirtree
 import (
 	"compress/gzip"
 	"fmt"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
-	"os"
 )
 
 func DataAccessForDirTree(path string, opts ...Option) (accessio.DataAccess, error) {
@@ -33,17 +30,9 @@ func BlobAccessForDirTree(mimeType string, path string, opts ...Option) (_ acces
 		FollowSymlinks: utils.AsBool(eff.FollowSymlinks),
 	}
 
-	var fs vfs.FileSystem
-	var tempdir string
-	if eff.FileSystem != nil {
-		fs = eff.FileSystem
-		tempdir = ""
-	} else {
-		fs = osfs.New()
-		tempdir = os.TempDir()
-	}
+	fs := accessio.FileSystem(eff.FileSystem)
 
-	temp, err := accessio.NewTempFile(fs, tempdir, "resourceblob*.tgz")
+	temp, err := accessio.NewTempFile(fs, fs.FSTempDir(), "resourceblob*.tgz")
 	if err != nil {
 		return nil, err
 	}

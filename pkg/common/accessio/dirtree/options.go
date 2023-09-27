@@ -13,6 +13,7 @@ type Option interface {
 type Options struct {
 	// FileSystem defines the file system that contains the specified directory.
 	FileSystem vfs.FileSystem
+	MimeType   string
 	// CompressWithGzip defines whether the specified directory should be compressed.
 	CompressWithGzip *bool `json:"compress,omitempty"`
 	// PreserveDir defines that the specified directory should be included in the blob.
@@ -35,6 +36,9 @@ func (o *Options) ApplyToDirtreeOptions(opts *Options) {
 	}
 	if o.FileSystem != nil {
 		opts.FileSystem = o.FileSystem
+	}
+	if o.MimeType != "" {
+		opts.MimeType = o.MimeType
 	}
 	if o.CompressWithGzip != nil {
 		opts.CompressWithGzip = utils.BoolP(*o.CompressWithGzip)
@@ -63,6 +67,16 @@ func (o *fileSystem) ApplyToDirtreeOptions(opts *Options) {
 
 func WithFileSystem(fs vfs.FileSystem) Option {
 	return &fileSystem{fs: fs}
+}
+
+type mimeType string
+
+func (o mimeType) ApplyToDirtreeOptions(opts *Options) {
+	opts.MimeType = string(o)
+}
+
+func WithMimeType(mime string) Option {
+	return mimeType(mime)
 }
 
 type compressWithGzip bool
