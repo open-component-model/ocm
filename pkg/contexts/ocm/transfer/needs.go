@@ -9,50 +9,8 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/access"
 )
-
-type baseAccess struct {
-	cv     ocm.ComponentVersionAccess
-	access compdesc.AccessSpec
-}
-
-func (r *baseAccess) ComponentVersion() ocm.ComponentVersionAccess {
-	return r.cv
-}
-
-func (r *baseAccess) Access() (ocm.AccessSpec, error) {
-	return r.cv.GetContext().AccessSpecForSpec(r.access)
-}
-
-func (r *baseAccess) AccessMethod() (ocm.AccessMethod, error) {
-	acc, err := r.Access()
-	if err != nil {
-		return nil, err
-	}
-	return r.cv.AccessMethod(acc)
-}
-
-type resourceAccess struct {
-	baseAccess
-	resource *compdesc.Resource
-}
-
-var _ ocm.ResourceAccess = (*resourceAccess)(nil)
-
-func (r *resourceAccess) Meta() *compdesc.ResourceMeta {
-	return &r.resource.ResourceMeta
-}
-
-type sourceAccess struct {
-	baseAccess
-	source *compdesc.Source
-}
-
-var _ ocm.SourceAccess = (*sourceAccess)(nil)
-
-func (r *sourceAccess) Meta() *compdesc.SourceMeta {
-	return &r.source.SourceMeta
-}
 
 func needsResourceTransport(cv ocm.ComponentVersionAccess, s, t *compdesc.ComponentDescriptor, handler TransferHandler) bool {
 	for _, r := range s.Resources {
@@ -61,14 +19,7 @@ func needsResourceTransport(cv ocm.ComponentVersionAccess, s, t *compdesc.Compon
 			return true
 		}
 
-		sa := &resourceAccess{
-			baseAccess: baseAccess{
-				cv:     cv,
-				access: r.Access,
-			},
-			resource: &r,
-		}
-
+		sa := access.NewResourceAccess(cv, &r)
 		sacc, err := sa.Access()
 		if err != nil {
 			return true
@@ -85,13 +36,7 @@ func needsResourceTransport(cv ocm.ComponentVersionAccess, s, t *compdesc.Compon
 			return true
 		}
 
-		sa := &sourceAccess{
-			baseAccess: baseAccess{
-				cv:     cv,
-				access: r.Access,
-			},
-			source: &r,
-		}
+		sa := access.NewSourceAccess(cv, &r)
 
 		sacc, err := sa.Access()
 		if err != nil {

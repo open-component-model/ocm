@@ -5,10 +5,10 @@
 package transfer
 
 import (
+	"encoding/json"
 	"fmt"
 
-	"github.com/spf13/cobra"
-
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -36,6 +36,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var (
@@ -48,6 +51,7 @@ type Command struct {
 
 	Refs       []string
 	TargetName string
+	BOMFile    string
 }
 
 // NewCommand creates a new ctf command.
@@ -84,6 +88,11 @@ $ ocm transfer components -t tgz ghcr.io/mandelsoft/kubelink ctf.tgz
 $ ocm transfer components -t tgz --repo OCIRegistry::ghcr.io mandelsoft/kubelink ctf.tgz
 `,
 	}
+}
+
+func (o *Command) AddFlags(fs *pflag.FlagSet) {
+	o.BaseCommand.AddFlags(fs)
+	fs.StringVarP(&o.BOMFile, "bom-file", "B", "", "file name to write the component version BOM")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -176,5 +185,31 @@ func (a *action) Out() error {
 	if a.errors.Result() != nil {
 		return fmt.Errorf("transfer finished with %d error(s)", a.errors.Len())
 	}
+
+	if a.cmd.BOMFile != "" {
+		bom := BOM{}
+		for _, nv := range generics.KeyList(a.closure) {
+			bom.List = append(bom.List, BomEntry{
+				Component: nv.GetName(),
+				Version:   nv.GetVersion(),
+			})
+		}
+		data, err := json.Marshal(&bom)
+		if err != nil {
+			return errors.Wrapf(err, "cannot marshal BOM")
+		}
+		err = vfs.WriteFile(a.cmd.FileSystem(), a.cmd.BOMFile, data, 0o640)
+		if err != nil {
+			return errors.Wrapf(err, "cannot write BOM")
+		}
+	}
 	return nil
+}
+
+type BomEntry struct {
+	Component string `json:"component"`
+	Version   string `json:"version"`
+}
+type BOM struct {
+	List []BomEntry `json:"componentVersions"`
 }

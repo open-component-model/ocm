@@ -188,6 +188,23 @@ transferring version "github.com/mandelsoft/test2:v1"...
 		CheckComponent(env, ldesc, tgt)
 	})
 
+	It("transfers ctf creating bom file", func() {
+		BOM := "/tmp/bom.json"
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--bom-file="+BOM, "--copy-resources", "--recursive", "--lookup", ARCH, ARCH2, ARCH2, OUT)).To(Succeed())
+
+		Expect(env.FileExists(BOM)).To(BeTrue())
+
+		data := Must(env.ReadFile(BOM))
+		Expect(data).To(YAMLEqual(`
+  componentVersions:
+  - component: github.com/mandelsoft/test
+    version: v1
+  - component: github.com/mandelsoft/test2
+    version: v1
+`))
+	})
+
 	It("transfers ctf to tgz with type option", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--copy-resources", "--type", accessio.FormatTGZ.String(), ARCH, ARCH, OUT)).To(Succeed())

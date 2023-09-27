@@ -114,7 +114,6 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			msg := "  version %q already present, but"
 			if eq.IsLocalHashEqual() {
 				if eq.IsArtifactDetectable() {
-					doMerge = true //nolint:ineffassign // ???
 					msg += " differs because some artifact digests are changed"
 				} else {
 					// TODO: option to precalculate missing digests (as pre equivalent step).

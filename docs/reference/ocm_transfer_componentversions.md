@@ -15,6 +15,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Options
 
 ```
+  -B, --bom-file string             file name to write the component version BOM
   -c, --constraints constraints     version constraint
   -L, --copy-local-resources        transfer referenced local resources by-value
   -V, --copy-resources              transfer referenced resources by-value
