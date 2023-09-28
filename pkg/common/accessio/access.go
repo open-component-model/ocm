@@ -387,10 +387,10 @@ type fileBlobAccess struct {
 
 var _ BlobAccess = (*fileBlobAccess)(nil)
 
-func BlobAccessForFile(mimeType string, path string, fs vfs.FileSystem) BlobAccess {
+func BlobAccessForFile(mimeType string, path string, fss ...vfs.FileSystem) BlobAccess {
 	return &fileBlobAccess{
 		mimeType:   mimeType,
-		dataAccess: dataAccess{fs: fs, path: path},
+		dataAccess: dataAccess{fs: FileSystem(fss...), path: path},
 	}
 }
 

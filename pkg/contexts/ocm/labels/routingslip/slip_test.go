@@ -14,14 +14,16 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/opencontainers/go-digest"
+	"sigs.k8s.io/yaml"
+
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/types/comment"
 	"github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-	"github.com/opencontainers/go-digest"
-	"sigs.k8s.io/yaml"
 )
 
 const ORG = "acme.org"

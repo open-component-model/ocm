@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/logging"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/listformat"

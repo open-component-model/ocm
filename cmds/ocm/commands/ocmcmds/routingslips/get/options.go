@@ -5,8 +5,9 @@
 package get
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 )
 
 func From(o options.OptionSetProvider) *Option {
