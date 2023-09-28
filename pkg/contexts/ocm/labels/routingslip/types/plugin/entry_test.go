@@ -9,7 +9,6 @@ package plugin_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/spi"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/spf13/pflag"
@@ -18,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/spi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	env2 "github.com/open-component-model/ocm/pkg/env"

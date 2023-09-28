@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
+	parse "github.com/mandelsoft/spiff/dynaml/x509"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	parse "github.com/mandelsoft/spiff/dynaml/x509"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"

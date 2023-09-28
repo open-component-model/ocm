@@ -19,13 +19,13 @@ import (
 	"github.com/containerd/containerd/reference"
 	"github.com/containerd/containerd/remotes/docker/schema1"
 	"github.com/containerd/containerd/version"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context/ctxhttp"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 )
 

@@ -5,7 +5,6 @@
 package repooption
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -13,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )

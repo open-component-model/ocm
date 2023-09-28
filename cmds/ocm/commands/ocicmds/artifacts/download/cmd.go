@@ -11,6 +11,8 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
@@ -31,7 +33,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
-	"github.com/spf13/cobra"
 )
 
 var (
