@@ -46,6 +46,6 @@ jobs:
           scan-mode: RAPID
           #scan-mode: INTELLIGENT
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          detect-version: 9.0.0
+          detect-version: 8.11.0
           blackduck-url: ${{ secrets.BLACKDUCK_URL }}
           blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
