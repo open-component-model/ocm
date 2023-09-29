@@ -36,6 +36,7 @@ jobs:
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_TIMEOUT: 6000
           BLACKDUCK_TRUST_CERT: true
+          NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
           #scan-mode: RAPID
           scan-mode: INTELLIGENT
