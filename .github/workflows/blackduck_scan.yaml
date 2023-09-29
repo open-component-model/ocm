@@ -15,7 +15,7 @@ jobs:
   blackduck:
     name: Black Duck SCA
     runs-on:
-      - ubuntu-latest
+      - large_runner
     steps:
       - name: Checkout
         uses: actions/checkout@v3
