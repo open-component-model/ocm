@@ -9,7 +9,7 @@ permissions:
   checks: read
   contents: read
   #deployments: write
-  id-token: read
+  id-token: write
   #issues: write
   #discussions: write
   #packages: write
