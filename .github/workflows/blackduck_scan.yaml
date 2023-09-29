@@ -6,7 +6,7 @@ on:
 
 permissions:
   #actions: write
-  #checks: write
+  checks: write
   contents: write
   #deployments: write
   id-token: write
