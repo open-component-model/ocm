@@ -6,18 +6,18 @@ on:
 
 permissions:
   #actions: write
-  #checks: write
-  #contents: write
+  checks: read
+  contents: read
   #deployments: write
   #id-token: write
   #issues: write
   #discussions: write
   #packages: write
   #pages: write
-  pull-requests: write
-  repository-projects: write
-  security-events: write
-  statuses: write
+  #pull-requests: write
+  #repository-projects: write
+  security-events: read
+  statuses: read
 
 jobs:
   blackduck:
