@@ -9,13 +9,13 @@ permissions:
   checks: read
   contents: read
   #deployments: write
-  #id-token: write
+  id-token: read
   #issues: write
   #discussions: write
   #packages: write
   #pages: write
-  #pull-requests: write
-  #repository-projects: write
+  pull-requests: read
+  repository-projects: read
   security-events: read
   statuses: read
 
