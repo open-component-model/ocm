@@ -27,15 +27,15 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1_19_x
+          go-version: 1.19.x
       - name: Run Black Duck SCA
-        uses: synopsys-sig/detect-action@v0_3_4
+        uses: synopsys-sig/detect-action@v0.3.4
         env:
           #DETECT_PROJECT_GROUP_NAME: opencomponentmodel
           DETECT_PROJECT_NAME: open-component-model/ocm
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION: main
-          DETECT_SOURCE_PATH: _/
+          DETECT_SOURCE_PATH: ./
           #LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: DEBUG
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_TIMEOUT: 6000
