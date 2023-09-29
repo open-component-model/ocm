@@ -39,8 +39,8 @@ jobs:
       - name: Run Black Duck SCA
         uses: synopsys-sig/detect-action@v0.3.4
         env:
-          DETECT_PROJECT_GROUP_NAME: opencomponentmodel
-          DETECT_PROJECT_NAME: ocm
+          #DETECT_PROJECT_GROUP_NAME: opencomponentmodel
+          #DETECT_PROJECT_NAME: ocm
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_version: main
           DETECT_SOURCE_PATH: ./
