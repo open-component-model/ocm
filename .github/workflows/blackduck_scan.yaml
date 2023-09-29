@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'add-final-blackduck-version'
 
 permissions:
   checks: write
