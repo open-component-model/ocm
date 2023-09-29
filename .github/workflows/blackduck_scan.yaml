@@ -5,7 +5,7 @@ on:
       - test-blackduck-action
 
 permissions:
-  checks: read
+  checks: write
 
 jobs:
   blackduck:
@@ -30,15 +30,16 @@ jobs:
           #DETECT_PROJECT_GROUP_NAME: opencomponentmodel
           #DETECT_PROJECT_NAME: ocm
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
-          DETECT_PROJECT_version: main
+          #DETECT_PROJECT_version: main
           DETECT_SOURCE_PATH: ./
           LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: DEBUG
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_TIMEOUT: 6000
           BLACKDUCK_TRUST_CERT: true
         with:
-            scan-mode: RAPID
-            github-token: ${{ secrets.GITHUB_TOKEN }}
-            detect-version: 8.11.0
-            blackduck-url: ${{ secrets.BLACKDUCK_URL }}
-            blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+          #scan-mode: RAPID
+          scan-mode: INTELLIGENT
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          #detect-version: 8.11.0
+          blackduck-url: ${{ secrets.BLACKDUCK_URL }}
+          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
