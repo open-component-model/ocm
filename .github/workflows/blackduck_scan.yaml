@@ -5,19 +5,19 @@ on:
       - test-blackduck-action
 
 permissions:
-  actions: read
-  checks: read
-  contents: read
-  deployments: read
+  actions: write
+  checks: write
+  contents: write
+  deployments: write
   id-token: write
-  issues: read
-  discussions: read
-  packages: read
-  pages: read
-  pull-requests: read
-  repository-projects: read
-  security-events: read
-  statuses: read
+  issues: write
+  discussions: write
+  packages: write
+  pages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+  statuses: write
 
 jobs:
   blackduck:
