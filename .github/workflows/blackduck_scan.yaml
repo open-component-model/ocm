@@ -44,8 +44,8 @@ jobs:
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
           scan-mode: RAPID
-          github-token: ${{ secrets_GITHUB_TOKEN }}
+          #scan-mode: INTELLIGENT
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           detect-version: 9.0.0
-          blackduck-url: ${{ secrets_BLACKDUCK_URL }}
-          blackduck-api-token: ${{ secrets_BLACKDUCK_API_TOKEN }}
-        
+          blackduck-url: ${{ secrets.BLACKDUCK_URL }}
+          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
