@@ -1,11 +1,7 @@
-name: Blackduck Scan PR
+name: Blackduck Scan Cron
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+  schedule:
+    - cron:  '5 0 * * 0'
 
 permissions:
   checks: write
@@ -35,14 +31,14 @@ jobs:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           #DETECT_PROJECT_version: main
           DETECT_SOURCE_PATH: ./
-          LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: DEBUG
+          #LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: DEBUG
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_TIMEOUT: 6000
           BLACKDUCK_TRUST_CERT: true
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
-          scan-mode: RAPID
-          #scan-mode: INTELLIGENT
+          #scan-mode: RAPID
+          scan-mode: INTELLIGENT
           github-token: ${{ secrets.GITHUB_TOKEN }}
           detect-version: 8.11.0
           blackduck-url: ${{ secrets.BLACKDUCK_URL }}
