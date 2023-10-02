@@ -50,7 +50,13 @@ install-requirements: $(deps) $(GOPATH)/bin/goimports
 
 .PHONY: golangci-lint
 golangci-lint:
-	go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCILINT_VERSION)
+	@# no recommended by website
+	@# go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCILINT_VERSION)
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin $(GOLANGCILINT_VERSION)
+
+.PHONY: golangci-lint-version
+golangci-lint-version:
+	@echo "$(GOLANGCILINT_VERSION)"
 
 .PHONY: go-bindata
 go-bindata:
