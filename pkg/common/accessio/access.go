@@ -15,6 +15,7 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/modern-go/reflect2"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -36,6 +37,31 @@ func ErrBlobNotFound(digest digest.Digest) error {
 
 func IsErrBlobNotFound(err error) bool {
 	return errors.IsErrNotFoundKind(err, KIND_BLOB)
+}
+
+// Validatable is an optional interface for DataAccess
+// implementations or any other object, which might reach
+// an error state. The error can then be queried with
+// the method Validatable.Validate.
+// This is used to support objects with access methods not
+// returning an error. If the object is not valid,
+// those methods return an unknown/default state, but
+// the object should be queryable for its state.
+type Validatable interface {
+	Validate() error
+}
+
+// ValidateObject checks whether an object
+// is in error state. If yes, an appropriate
+// error is returned.
+func ValidateObject(o interface{}) error {
+	if reflect2.IsNil(o) {
+		return nil
+	}
+	if p, ok := o.(Validatable); ok {
+		return p.Validate()
+	}
+	return nil
 }
 
 type DataGetter interface {
@@ -182,7 +208,10 @@ type dataAccess struct {
 	path string
 }
 
-var _ DataSource = (*dataAccess)(nil)
+var (
+	_ DataSource  = (*dataAccess)(nil)
+	_ Validatable = (*dataAccess)(nil)
+)
 
 func DataAccessForFile(fs vfs.FileSystem, path string) DataAccess {
 	return &dataAccess{fs: fs, path: path}
@@ -202,6 +231,17 @@ func (a *dataAccess) Reader() (io.ReadCloser, error) {
 		return nil, errors.Wrapf(err, "file %q", a.path)
 	}
 	return file, nil
+}
+
+func (a *dataAccess) Validate() error {
+	ok, err := vfs.Exists(a.fs, a.path)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.ErrNotFound("file", a.path)
+	}
+	return nil
 }
 
 func (a *dataAccess) Origin() string {

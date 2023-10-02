@@ -382,6 +382,9 @@ func (c *componentVersionAccessView) GetDescriptor() *compdesc.ComponentDescript
 }
 
 func (c *componentVersionAccessView) AccessMethod(spec AccessSpec) (meth AccessMethod, err error) {
+	if f, ok := spec.(*fakeSpec); ok {
+		return f.AccessMethod(c)
+	}
 	err = c.Execute(func() error {
 		if !spec.IsLocal(c.GetContext()) {
 			// fall back to original version
@@ -408,6 +411,28 @@ func (c *componentVersionAccessView) GetInexpensiveContentVersionIdentity(spec A
 	return id
 }
 
+// fakeSpec redirects the blob access to the original blob,
+// because the uploaded blob might not yet be accessible without
+// finally adding the version (for example ghcr.io).
+type fakeSpec struct {
+	AccessSpec
+	blob accessio.BlobAccess
+}
+
+var _ WrappedAccessSpec = (*fakeSpec)(nil)
+
+func (f *fakeSpec) UnwrapAccessSpec() AccessSpec {
+	return f.AccessSpec
+}
+
+func (f *fakeSpec) AccessMethod(comp ComponentVersionAccess) (AccessMethod, error) {
+	meth, err := f.AccessSpec.AccessMethod(comp)
+	if err != nil {
+		return nil, err
+	}
+	return &fakeMethod{meth, f.blob}, nil
+}
+
 func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
@@ -424,12 +449,24 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 		}
 		if acc != nil {
 			if !keepblobattr.Get(c.GetContext()) || acc.IsLocal(c.GetContext()) {
-				return acc, nil
+				return &fakeSpec{acc, blob}, nil
 			}
 			global = acc
 		}
 	}
-	return c.impl.AddBlobFor(storagectx, blob, refName, global)
+	acc, err := c.impl.AddBlobFor(storagectx, blob, refName, global)
+	if err != nil {
+		return nil, err
+	}
+	if acc.IsLocal(c.GetContext()) {
+		// local blobs might not be accessible from the underlying
+		// repository implementation if the component version is not
+		// finally added (for example ghcr.io as OCI repository).
+		// Therefore, we create a temporary access falling back to
+		// the initial blob content.
+		acc = &fakeSpec{acc, blob}
+	}
+	return acc, nil
 }
 
 func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...internal.ModificationOption) error {
@@ -443,6 +480,9 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, ac
 // SetResourceBlob adds a blob resource to the component version.
 func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.ModificationOption) error {
 	Logger(c).Info("adding resource blob", "resource", meta.Name)
+	if err := accessio.ValidateObject(blob); err != nil {
+		return err
+	}
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
@@ -465,6 +505,9 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *SourceMeta, acc co
 
 func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refName string, global AccessSpec) error {
 	Logger(c).Info("adding source blob", "source", meta.Name)
+	if err := accessio.ValidateObject(blob); err != nil {
+		return err
+	}
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob: (component %s:%s source %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
@@ -477,6 +520,19 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAc
 	return nil
 }
 
+type fakeMethod struct {
+	AccessMethod
+	blob accessio.BlobAccess
+}
+
+func (f *fakeMethod) Reader() (io.ReadCloser, error) {
+	return f.blob.Reader()
+}
+
+func (f *fakeMethod) Get() ([]byte, error) {
+	return f.blob.Get()
+}
+
 func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...internal.ModificationOption) error {
 	if c.impl.IsReadOnly() {
 		return accessio.ErrReadOnly
@@ -484,7 +540,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 
 	res := &compdesc.Resource{
 		ResourceMeta: *meta.Copy(),
-		Access:       acc,
+		Access:       effecticveAccessSpec(acc),
 	}
 
 	ctx := c.impl.GetContext()
@@ -495,6 +551,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 	if err != nil {
 		return err
 	}
+
 	meth, err := c.AccessMethod(spec)
 	if err != nil {
 		return err
@@ -621,7 +678,7 @@ func (c *componentVersionAccessView) SetSource(meta *internal.SourceMeta, acc co
 
 	res := &compdesc.Source{
 		SourceMeta: *meta.Copy(),
-		Access:     acc,
+		Access:     effecticveAccessSpec(acc),
 	}
 	return c.Execute(func() error {
 		if res.Version == "" {

@@ -5,6 +5,7 @@
 package genericocireg_test
 
 import (
+	"fmt"
 	"path"
 	"reflect"
 
@@ -131,7 +132,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// check provided actual access to be local blob
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
-		l, ok := acc.(*localblob.AccessSpec)
+		l, ok := cpi.EffecticveAccessSpec(acc).(*localblob.AccessSpec)
 		Expect(ok).To(BeTrue())
 		Expect(l.LocalReference).To(Equal(blob.Digest().String()))
 		Expect(l.GlobalAccess).To(BeNil())
@@ -174,7 +175,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// check provided actual access to be local blob
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
-		l, ok := acc.(*localblob.AccessSpec)
+		l, ok := cpi.EffecticveAccessSpec(acc).(*localblob.AccessSpec)
 		Expect(ok).To(BeTrue())
 		Expect(l.LocalReference).To(Equal(blob.Digest().String()))
 		Expect(l.GlobalAccess).NotTo(BeNil())
@@ -223,6 +224,7 @@ var _ = Describe("component repository mapping", func() {
 		vers := finalizer.ClosingWith(nested, Must(comp.NewVersion("v1")))
 		blob := accessio.BlobAccessForFile(mime, "test.tgz", tempfs)
 
+		fmt.Printf("physical digest: %s\n", blob.Digest())
 		acc := Must(vers.AddBlob(blob, "", "artifact1", nil))
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
 

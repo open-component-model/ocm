@@ -114,6 +114,10 @@ func NewGenericAccessSpec(spec string) (AccessSpec, error) {
 	return internal.NewGenericAccessSpec([]byte(spec))
 }
 
+func EffecticveAccessSpec(spec AccessSpec) AccessSpec {
+	return cpi.EffecticveAccessSpec(spec)
+}
+
 func ToGenericAccessSpec(spec AccessSpec) (*GenericAccessSpec, error) {
 	return internal.ToGenericAccessSpec(spec)
 }
