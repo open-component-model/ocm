@@ -168,3 +168,38 @@ func (v *view) View() (CloserView, error) {
 func (v *view) Closer() io.Closer {
 	return v.ref.Closer()
 }
+
+type Closers []io.Closer
+
+func (c *Closers) Add(closers ...io.Closer) {
+	for _, e := range closers {
+		if e != nil {
+			*c = append(*c, e)
+		}
+	}
+}
+
+func (c Closers) Effective() io.Closer {
+	switch len(c) {
+	case 0:
+		return nil
+	case 1:
+		return c[0]
+	default:
+		return c
+	}
+}
+
+func (c Closers) Close() error {
+	list := errors.ErrList()
+	for _, e := range c {
+		list.Add(e.Close())
+	}
+	return list.Result()
+}
+
+type CloserFunc func() error
+
+func (c CloserFunc) Close() error {
+	return c()
+}

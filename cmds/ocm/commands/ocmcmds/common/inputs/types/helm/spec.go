@@ -92,7 +92,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blob accessio.BlobAccess, hint string, err error) {
 	var chartLoader loader.Loader
 	if s.HelmRepository == "" {
 		_, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
@@ -122,7 +122,8 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 		}
 		chartLoader = loader.AccessLoader(acc)
 	}
-	defer chartLoader.Close()
+
+	defer errors.PropagateError(&err, chartLoader.Close)
 
 	chart, err := chartLoader.Chart()
 	if err != nil {
@@ -136,8 +137,8 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 		vers = info.ComponentVersion.GetVersion()
 	}
 
-	hint := ociartifact.Hint(info.ComponentVersion, chart.Name(), s.Repository, vers)
-	blob, err := chartLoader.ChartArtefactSet()
+	hint = ociartifact.Hint(info.ComponentVersion, chart.Name(), s.Repository, vers)
+	blob, err = chartLoader.ChartArtefactSet()
 	if err != nil || blob != nil {
 		return blob, hint, err
 	}

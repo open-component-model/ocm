@@ -243,7 +243,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 					var msgs []interface{}
 					if !errors.IsErrNotFound(err) {
 						if err != nil {
-							return err
+							return errors.Join(err, m.Close())
 						}
 						if !changed && valueNeeded {
 							msgs = []interface{}{"copy"}

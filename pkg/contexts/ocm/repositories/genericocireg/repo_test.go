@@ -132,7 +132,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// check provided actual access to be local blob
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
-		l, ok := cpi.EffecticveAccessSpec(acc).(*localblob.AccessSpec)
+		l, ok := acc.(*localblob.AccessSpec)
 		Expect(ok).To(BeTrue())
 		Expect(l.LocalReference).To(Equal(blob.Digest().String()))
 		Expect(l.GlobalAccess).To(BeNil())
@@ -175,7 +175,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// check provided actual access to be local blob
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
-		l, ok := cpi.EffecticveAccessSpec(acc).(*localblob.AccessSpec)
+		l, ok := acc.(*localblob.AccessSpec)
 		Expect(ok).To(BeTrue())
 		Expect(l.LocalReference).To(Equal(blob.Digest().String()))
 		Expect(l.GlobalAccess).NotTo(BeNil())

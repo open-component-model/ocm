@@ -35,7 +35,7 @@ func (s *FileProcessSpec) Validate(fldPath *field.Path, ctx inputs.Context, inpu
 	return allErrs
 }
 
-func (s *FileProcessSpec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
+func (s *FileProcessSpec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.BlobAccess, string, error) {
 	fs := ctx.FileSystem()
 	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
 	if err != nil {
@@ -75,9 +75,9 @@ func (s *FileProcessSpec) GetBlob(ctx inputs.Context, info inputs.InputResourceI
 		}
 		if data == nil {
 			inputBlob.Close()
-			return accessio.TemporaryBlobAccessFor(accessio.BlobAccessForFile(s.MediaType, inputPath, fs)), "", nil
+			return accessio.BlobAccessForFile(s.MediaType, inputPath, fs), "", nil
 		}
-		return accessio.TemporaryBlobAccessFor(accessio.BlobAccessForData(s.MediaType, data)), "", nil
+		return accessio.BlobAccessForData(s.MediaType, data), "", nil
 	}
 
 	temp, err := accessio.NewTempFile(fs, "", "compressed*.gzip")

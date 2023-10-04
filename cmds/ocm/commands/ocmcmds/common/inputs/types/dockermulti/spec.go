@@ -99,7 +99,7 @@ func (s *Spec) getVariant(ctx clictx.Context, finalize *Finalizer, variant strin
 	return art, nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.BlobAccess, string, error) {
 	index := artdesc.NewIndexArtifact()
 	i := 0
 

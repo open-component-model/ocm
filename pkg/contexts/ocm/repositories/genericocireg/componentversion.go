@@ -126,7 +126,6 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 		return nil, err
 	}
 
-	accessSpec = cpi.EffecticveAccessSpec(accessSpec)
 	switch a.GetKind() {
 	case localblob.Type:
 		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access), nil

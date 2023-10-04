@@ -28,14 +28,14 @@ type CachedBlobAccess struct {
 	effective accessio.BlobAccess
 }
 
-var _ accessio.BlobAccess = (*CachedBlobAccess)(nil)
+var _ accessio.BlobAccessBase = (*CachedBlobAccess)(nil)
 
 func CachedBlobAccessForWriter(ctx datacontext.Context, mime string, src accessio.DataWriter) accessio.BlobAccess {
-	return &CachedBlobAccess{
+	return accessio.NewMultiViewBlobAccess(&CachedBlobAccess{
 		source: src,
 		mime:   mime,
 		cache:  tmpcache.Get(ctx),
-	}
+	})
 }
 
 func CachedBlobAccessForDataAccess(ctx datacontext.Context, mime string, src accessio.DataAccess) accessio.BlobAccess {

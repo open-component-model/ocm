@@ -1,6 +1,8 @@
 package blobaccess
 
 import (
+	"io"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -19,6 +21,18 @@ func ForData(mime string, data []byte) BlobAccess {
 
 func ForFile(mime string, path string, fss ...vfs.FileSystem) BlobAccess {
 	return accessio.BlobAccessForFile(mime, path, fss...)
+}
+
+func ForFileWithCLoser(closer io.Closer, mime string, path string, fss ...vfs.FileSystem) BlobAccess {
+	return accessio.BlobAccessForFileWithCloser(closer, mime, path, fss...)
+}
+
+func ForTemporaryFile(mime string, file vfs.File, fss ...vfs.FileSystem) BlobAccess {
+	return accessio.BlobAccessForTemporaryFile(mime, file, fss...)
+}
+
+func ForTemporaryFilePath(mime string, path string, fss ...vfs.FileSystem) BlobAccess {
+	return accessio.BlobAccessForTemporaryFilePath(mime, path, fss...)
 }
 
 func ForDirTree(path string, opts ...dirtree.Option) (BlobAccess, error) {
