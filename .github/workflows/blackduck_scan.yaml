@@ -42,8 +42,8 @@ jobs:
           DETECT_BLACKDUCK_SIGNATURE_SCANNER_MEMORY: 4096
           #BLACKDUCK_TRUST_CERT: true
           NODE_TLS_REJECT_UNAUTHORIZED: true
-          SYNOPSYS_SKIP_PHONE_HOME: true
-          BLACKDUCK_SKIP_PHONE_HOME: true
+          DETECT_DIAGNOSTIC: false 
+          DETECT_DIAGNOSTIC_EXTENDED: false 
         with:
           scan-mode: RAPID
           #scan-mode: INTELLIGENT
@@ -51,3 +51,4 @@ jobs:
           detect-version: 8.11.0
           blackduck-url: ${{ secrets.BLACKDUCK_URL }}
           blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+          detect-trust-cert: false
