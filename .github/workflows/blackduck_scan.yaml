@@ -42,6 +42,8 @@ jobs:
           DETECT_BLACKDUCK_SIGNATURE_SCANNER_MEMORY: 4096
           BLACKDUCK_TRUST_CERT: true
           NODE_TLS_REJECT_UNAUTHORIZED: true
+          SYNOPSYS_SKIP_PHONE_HOME: true
+          BLACKDUCK_SKIP_PHONE_HOME: true
         with:
           scan-mode: RAPID
           #scan-mode: INTELLIGENT
