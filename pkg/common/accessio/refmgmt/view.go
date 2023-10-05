@@ -6,7 +6,6 @@ package refmgmt
 
 import (
 	"io"
-	"sync"
 )
 
 type ViewManager[V io.Closer] interface {
@@ -57,7 +56,6 @@ func (m *viewManager[O, V]) view() (V, error) {
 }
 
 type View[V io.Closer] struct {
-	lock sync.Mutex
 	mgr  ViewManager[V]
 	view CloserView
 }

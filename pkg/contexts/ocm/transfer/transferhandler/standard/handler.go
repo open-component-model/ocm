@@ -11,6 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -76,16 +77,23 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 	return h.opts.IsSourcesByValue(), nil
 }
 
-func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
-	blob := accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m)
-
+func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMethodView, hint string, t ocm.ComponentVersionAccess) error {
+	blob, err := cpi.BlobAccessForAccessMethod(m)
+	if err != nil {
+		return err
+	}
+	defer blob.Close()
 	return accessio.Retry(h.opts.GetRetries(), time.Second, func() error {
 		return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m), ocm.SkipVerify())
 	})
 }
 
-func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
-	blob := accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m)
+func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m cpi.AccessMethodView, hint string, t ocm.ComponentVersionAccess) error {
+	blob, err := cpi.BlobAccessForAccessMethod(m)
+	if err != nil {
+		return err
+	}
+	defer blob.Close()
 	return accessio.Retry(h.opts.GetRetries(), time.Second, func() error {
 		return t.SetSourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
 	})

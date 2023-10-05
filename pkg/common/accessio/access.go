@@ -16,9 +16,9 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
-	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -276,6 +276,17 @@ type blobAccess struct {
 type annotatedBlobAccessView[T DataAccess] struct {
 	_blobAccess
 	access T
+}
+
+func (a *annotatedBlobAccessView[T]) Dup() (BlobAccess, error) {
+	b, err := a._blobAccess.Dup()
+	if err != nil {
+		return nil, err
+	}
+	return &annotatedBlobAccessView[T]{
+		_blobAccess: b,
+		access:      a.access,
+	}, nil
 }
 
 func (a *annotatedBlobAccessView[T]) Source() T {

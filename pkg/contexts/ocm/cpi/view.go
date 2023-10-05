@@ -304,14 +304,16 @@ type ComponentVersionAccessImpl interface {
 	GetBlobCache() BlobCache
 }
 
+type BlobCacheEntry = accessio.BlobAccess
+
 type BlobCache interface {
 	// AddBlobFor stores blobs for added blobs not yet accessible
 	// by generated access method until version is finally added.
-	AddBlobFor(acc compdesc.AccessSpec, blob BlobAccess) error
+	AddBlobFor(acc compdesc.AccessSpec, blob BlobCacheEntry) error
 
 	// GetBlobFor retrieves the original blob access for
 	// a given access specification.
-	GetBlobFor(acc compdesc.AccessSpec) BlobAccess
+	GetBlobFor(acc compdesc.AccessSpec) BlobCacheEntry
 
 	RemoveBlobFor(acc compdesc.AccessSpec)
 	Clear() error
@@ -319,12 +321,12 @@ type BlobCache interface {
 
 type blobCache struct {
 	lock      sync.Mutex
-	blobcache map[interface{}]accessio.BlobAccess
+	blobcache map[interface{}]BlobCacheEntry
 }
 
 func NewBlobCache() BlobCache {
 	return &blobCache{
-		blobcache: map[interface{}]accessio.BlobAccess{},
+		blobcache: map[interface{}]BlobCacheEntry{},
 	}
 }
 
@@ -337,21 +339,21 @@ func (c *blobCache) RemoveBlobFor(acc compdesc.AccessSpec) {
 	}
 }
 
-func (c *blobCache) AddBlobFor(acc compdesc.AccessSpec, blob BlobAccess) error {
+func (c *blobCache) AddBlobFor(acc compdesc.AccessSpec, blob BlobCacheEntry) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	if c.blobcache[acc] == nil {
-		blob, err := blob.Dup()
+		l, err := blob.Dup()
 		if err != nil {
 			return err
 		}
-		c.blobcache[acc] = blob
+		c.blobcache[acc] = l
 	}
 	return nil
 }
 
-func (c *blobCache) GetBlobFor(acc compdesc.AccessSpec) BlobAccess {
+func (c *blobCache) GetBlobFor(acc compdesc.AccessSpec) BlobCacheEntry {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -365,7 +367,7 @@ func (c *blobCache) Clear() error {
 	for _, b := range c.blobcache {
 		list.Add(b.Close())
 	}
-	c.blobcache = map[interface{}]accessio.BlobAccess{}
+	c.blobcache = map[interface{}]BlobCacheEntry{}
 	return list.Result()
 }
 
@@ -377,7 +379,6 @@ type ComponentVersionAccessImplBase struct {
 	name    string
 	version string
 
-	lock      sync.Mutex
 	blobcache BlobCache
 }
 
