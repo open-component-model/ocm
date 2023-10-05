@@ -16,13 +16,14 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 var (
-	ErrClosed   = errors.ErrClosed()
+	ErrClosed   = refmgmt.ErrClosed
 	ErrReadOnly = errors.ErrReadOnly()
 )
 
@@ -297,7 +298,7 @@ func BlobAccessForDataAccess[T DataAccess](digest digest.Digest, size int64, mim
 	}
 
 	return &annotatedBlobAccessView[T]{
-		_blobAccess: NewMultiViewBlobAccess(a),
+		_blobAccess: NewBlobAccessForBase(a),
 		access:      access,
 	}
 }
@@ -307,7 +308,7 @@ func BlobAccessForString(mimeType string, data string) BlobAccess {
 }
 
 func BlobAccessForData(mimeType string, data []byte) BlobAccess {
-	return NewMultiViewBlobAccess(&blobAccess{
+	return NewBlobAccessForBase(&blobAccess{
 		digest:   digest.FromBytes(data),
 		size:     int64(len(data)),
 		mimeType: mimeType,
@@ -425,14 +426,14 @@ var (
 )
 
 func BlobAccessForFile(mimeType string, path string, fss ...vfs.FileSystem) BlobAccess {
-	return NewMultiViewBlobAccess(&fileBlobAccess{
+	return NewBlobAccessForBase(&fileBlobAccess{
 		mimeType:   mimeType,
 		dataAccess: dataAccess{fs: FileSystem(fss...), path: path},
 	})
 }
 
 func BlobAccessForFileWithCloser(closer io.Closer, mimeType string, path string, fss ...vfs.FileSystem) BlobAccess {
-	return NewMultiViewBlobAccess(&fileBlobAccess{
+	return NewBlobAccessForBase(&fileBlobAccess{
 		mimeType:   mimeType,
 		dataAccess: dataAccess{fs: FileSystem(fss...), path: path},
 	}, closer)
@@ -496,34 +497,16 @@ func (b *blobNopCloser) Close() error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type multiViewBlobAccess struct {
-	refs   ReferencableCloser
-	access BlobAccessBase
+func NewBlobAccessForBase(acc BlobAccessBase, closer ...io.Closer) BlobAccess {
+	return refmgmt.WithView[BlobAccessBase, BlobAccess](acc, blobAccessViewCreator, closer...)
 }
 
-func NewMultiViewBlobAccess(acc BlobAccessBase, closer ...io.Closer) BlobAccess {
-	var c Closers
-
-	c.Add(acc)
-	c.Add(closer...)
-	m := &multiViewBlobAccess{
-		refs:   NewRefCloser(c.Effective(), true),
-		access: acc,
-	}
-	v, _ := m.View()
-	return v
-}
-
-func (m *multiViewBlobAccess) View() (BlobAccess, error) {
-	v, err := m.refs.View(false)
-	if err != nil {
-		return nil, err
-	}
-	return &blobAccessView{v, m.access}, nil
+func blobAccessViewCreator(blob BlobAccessBase, view *refmgmt.View[BlobAccess]) BlobAccess {
+	return &blobAccessView{view, blob}
 }
 
 type blobAccessView struct {
-	view   CloserView
+	*refmgmt.View[BlobAccess]
 	access BlobAccessBase
 }
 
@@ -531,31 +514,12 @@ func (b *blobAccessView) base() BlobAccessBase {
 	return b.access
 }
 
-func (b *blobAccessView) Dup() (BlobAccess, error) {
-	v, err := b.view.View()
-	if err != nil {
-		return nil, err
-	}
-	return &blobAccessView{
-		view:   v,
-		access: b.access,
-	}, nil
-}
-
 func (b *blobAccessView) Validate() error {
 	return ValidateObject(b.access)
 }
 
-func (b *blobAccessView) Close() error {
-	return b.view.Close()
-}
-
-func (b *blobAccessView) IsClosed() bool {
-	return b.view.IsClosed()
-}
-
 func (b *blobAccessView) Get() (result []byte, err error) {
-	return result, b.view.Execute(func() error {
+	return result, b.Execute(func() error {
 		result, err = b.access.Get()
 		if err != nil {
 			return fmt.Errorf("unable to get access: %w", err)
@@ -566,7 +530,7 @@ func (b *blobAccessView) Get() (result []byte, err error) {
 }
 
 func (b *blobAccessView) Reader() (result io.ReadCloser, err error) {
-	return result, b.view.Execute(func() error {
+	return result, b.Execute(func() error {
 		result, err = b.access.Reader()
 		if err != nil {
 			return fmt.Errorf("unable to read access: %w", err)
@@ -577,7 +541,7 @@ func (b *blobAccessView) Reader() (result io.ReadCloser, err error) {
 }
 
 func (b *blobAccessView) Digest() (result digest.Digest) {
-	err := b.view.Execute(func() error {
+	err := b.Execute(func() error {
 		result = b.access.Digest()
 		return nil
 	})
@@ -596,7 +560,7 @@ func (b *blobAccessView) DigestKnown() bool {
 }
 
 func (b *blobAccessView) Size() (result int64) {
-	err := b.view.Execute(func() error {
+	err := b.Execute(func() error {
 		result = b.access.Size()
 		return nil
 	})
@@ -646,7 +610,7 @@ var (
 )
 
 func BlobAccessForTemporaryFile(mime string, temp vfs.File, fss ...vfs.FileSystem) BlobAccess {
-	return NewMultiViewBlobAccess(&temporaryFileBlob{
+	return NewBlobAccessForBase(&temporaryFileBlob{
 		_blobAccess: BlobAccessForFile(mime, temp.Name(), fss...),
 		filesystem:  FileSystem(fss...),
 		path:        temp.Name(),
@@ -655,7 +619,7 @@ func BlobAccessForTemporaryFile(mime string, temp vfs.File, fss ...vfs.FileSyste
 }
 
 func BlobAccessForTemporaryFilePath(mime string, temp string, fss ...vfs.FileSystem) BlobAccess {
-	return NewMultiViewBlobAccess(&temporaryFileBlob{
+	return NewBlobAccessForBase(&temporaryFileBlob{
 		_blobAccess: BlobAccessForFile(mime, temp, fss...),
 		filesystem:  FileSystem(fss...),
 		path:        temp,

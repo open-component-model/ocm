@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"helm.sh/helm/v3/pkg/registry"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -32,7 +33,7 @@ type ChartAccess interface {
 
 func newFileAccess(c *chartAccess, path string, mime string) accessio.BlobAccess {
 	c.refcnt++
-	return accessio.BlobAccessForFileWithCloser(accessio.CloserFunc(c.unref), mime, path, c.fs)
+	return accessio.BlobAccessForFileWithCloser(refmgmt.CloserFunc(c.unref), mime, path, c.fs)
 }
 
 type chartAccess struct {

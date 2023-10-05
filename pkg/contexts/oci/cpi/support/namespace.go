@@ -5,6 +5,7 @@
 package support
 
 import (
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -15,7 +16,7 @@ import (
 
 // BlobProvider manages the technical access to blobs.
 type BlobProvider interface {
-	accessio.Allocatable
+	refmgmt.Allocatable
 	cpi.BlobSource
 	cpi.BlobSink
 }

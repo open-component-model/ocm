@@ -1,8 +1,8 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package accessio
+package refmgmt
 
 import (
 	"io"
@@ -10,6 +10,8 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/errors"
 )
+
+var ErrClosed = errors.ErrClosed()
 
 // ReferencableCloser manages closable views to a basic closer.
 // If the last view is closed, the basic closer is finally closed.
