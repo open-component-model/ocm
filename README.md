@@ -4,6 +4,7 @@
 [![REUSE status](https://api.reuse.software/badge/github.com/open-component-model/ocm)](https://api.reuse.software/info/github.com/open-component-model/ocm)
 [![OCM Integration Tests](https://github.com/open-component-model/ocm-integrationtest/actions/workflows/integrationtest.yaml/badge.svg?branch=main)](https://open-component-model.github.io/ocm-integrationtest/report.html)
 [![Go Report Card](https://goreportcard.com/badge/github.com/open-component-model/ocm)](https://goreportcard.com/report/github.com/open-component-model/ocm)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopen-component-model%2Focm.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopen-component-model%2Focm?ref=badge_shield)
 
 The Open Component Model (OCM) is an open standard to describe software bills of delivery (SBOD). OCM is a technology-agnostic and machine-readable format focused on the software artifacts that must be delivered for software products.
 
@@ -64,3 +65,6 @@ OCM follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/m
 Copyright 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
 Please see our [LICENSE](LICENSE) for copyright and license information.
 Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/open-component-model/ocm).
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopen-component-model%2Focm.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopen-component-model%2Focm?ref=badge_large)
