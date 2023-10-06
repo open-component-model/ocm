@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package blobaccess
+package spi
 
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/internal"
@@ -16,11 +16,7 @@ const (
 	BLOB_UNKNOWN_DIGEST = internal.BLOB_UNKNOWN_DIGEST
 )
 
-type (
-	DataAccess = internal.DataAccess
-	DataReader = internal.DataReader
-	DataGetter = internal.DataGetter
-)
+type DataAccess = internal.DataAccess
 
 type (
 	BlobAccess     = internal.BlobAccess

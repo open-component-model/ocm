@@ -10,11 +10,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	. "github.com/open-component-model/ocm/pkg/finalizer"
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
@@ -139,8 +139,8 @@ type accessMethod struct {
 }
 
 var (
-	_ cpi.AccessMethod      = (*accessMethod)(nil)
-	_ accessio.DigestSource = (*accessMethod)(nil)
+	_ cpi.AccessMethod        = (*accessMethod)(nil)
+	_ blobaccess.DigestSource = (*accessMethod)(nil)
 )
 
 func NewMethod(ctx cpi.ContextProvider, a cpi.AccessSpec, ref string, repo ...oci.Repository) (*accessMethod, error) {

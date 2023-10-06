@@ -11,9 +11,9 @@ import (
 	"io"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -155,7 +155,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 			dig, err = s.GetDigest()
 		} else {
 			// second: fallback to standard digest interface
-			dig = acc.(accessio.DigestSource).Digest()
+			dig = acc.(blobaccess.DigestSource).Digest()
 		}
 
 		if dig != "" {

@@ -9,6 +9,7 @@ import (
 	"io"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/spi"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -28,10 +29,10 @@ type CachedBlobAccess struct {
 	effective accessio.BlobAccess
 }
 
-var _ accessio.BlobAccessBase = (*CachedBlobAccess)(nil)
+var _ spi.BlobAccessBase = (*CachedBlobAccess)(nil)
 
 func CachedBlobAccessForWriter(ctx datacontext.Context, mime string, src accessio.DataWriter) accessio.BlobAccess {
-	return accessio.NewBlobAccessForBase(&CachedBlobAccess{
+	return spi.NewBlobAccessForBase(&CachedBlobAccess{
 		source: src,
 		mime:   mime,
 		cache:  tmpcache.Get(ctx),

@@ -507,7 +507,7 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 		return nil, errors.Wrapf(err, "inavlid blob access")
 	}
 	defer blob.Close()
-	err = accessio.ValidateObject(blob)
+	err = utils.ValidateObject(blob)
 	if err != nil {
 		return nil, errors.Wrapf(err, "inavlid blob access")
 	}
@@ -558,7 +558,7 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, ac
 // SetResourceBlob adds a blob resource to the component version.
 func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.ModificationOption) error {
 	Logger(c).Info("adding resource blob", "resource", meta.Name)
-	if err := accessio.ValidateObject(blob); err != nil {
+	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
@@ -584,7 +584,7 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *SourceMeta, acc co
 
 func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refName string, global AccessSpec) error {
 	Logger(c).Info("adding source blob", "source", meta.Name)
-	if err := accessio.ValidateObject(blob); err != nil {
+	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)

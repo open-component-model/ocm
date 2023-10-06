@@ -16,11 +16,17 @@ import (
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/marstr/guid"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/errors"
+)
+
+const (
+	BLOB_UNKNOWN_SIZE   = blobaccess.BLOB_UNKNOWN_SIZE
+	BLOB_UNKNOWN_DIGEST = blobaccess.BLOB_UNKNOWN_DIGEST
 )
 
 type StaticAllocatable struct{}

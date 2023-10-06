@@ -5,15 +5,16 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/spi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
-func DataAccessForDirTree(path string, opts ...Option) (accessio.DataAccess, error) {
+func DataAccessForDirTree(path string, opts ...Option) (spi.DataAccess, error) {
 	blobAccess, err := BlobAccessForDirTree(path, opts...)
 	if err != nil {
 		return nil, err
@@ -21,13 +22,13 @@ func DataAccessForDirTree(path string, opts ...Option) (accessio.DataAccess, err
 	return blobAccess, nil
 }
 
-func BlobAccessForDirTree(path string, opts ...Option) (_ accessio.BlobAccess, rerr error) {
+func BlobAccessForDirTree(path string, opts ...Option) (_ spi.BlobAccess, rerr error) {
 	var eff Options
 	for _, opt := range opts {
 		opt.ApplyToDirtreeOptions(&eff)
 	}
 
-	fs := accessio.FileSystem(eff.FileSystem)
+	fs := utils.FileSystem(eff.FileSystem)
 	ok, err := vfs.IsDir(fs, path)
 	if err != nil {
 		return nil, err
@@ -43,7 +44,7 @@ func BlobAccessForDirTree(path string, opts ...Option) (_ accessio.BlobAccess, r
 		FollowSymlinks: utils.AsBool(eff.FollowSymlinks),
 	}
 
-	temp, err := accessio.NewTempFile(fs, fs.FSTempDir(), "resourceblob*.tgz")
+	temp, err := blobaccess.NewTempFile(fs.FSTempDir(), "resourceblob*.tgz", fs)
 	if err != nil {
 		return nil, err
 	}

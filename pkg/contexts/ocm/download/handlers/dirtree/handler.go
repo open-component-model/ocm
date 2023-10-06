@@ -13,6 +13,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -122,7 +123,7 @@ func (h *Handler) download(pr common.Printer, fs vfs.FileSystem, path string, lf
 			pr.Printf("%s: %d byte(s) written\n", path, n)
 			return true, path, nil
 		} else {
-			cw := accessio.NewCountingWriter(w)
+			cw := iotools.NewCountingWriter(w)
 			err := tarutils.PackFsIntoTar(lfs, "", cw, tarutils.TarFileSystemOptions{})
 			if err == nil {
 				pr.Printf("%s: %d byte(s) written\n", path, cw.Size())

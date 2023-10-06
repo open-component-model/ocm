@@ -7,6 +7,7 @@ package ociartifact_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
@@ -42,6 +43,6 @@ var _ = Describe("Method", func() {
 		m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()})
 		Expect(err).To(Succeed())
 
-		Expect(m.(accessio.DigestSource).Digest().String()).To(Equal("sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"))
+		Expect(m.(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"))
 	})
 })

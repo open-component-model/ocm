@@ -9,6 +9,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/compression"
@@ -74,24 +75,28 @@ func (c *additionalCloser) Read(p []byte) (n int, err error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func BlobData(blob DataGetter, err error) ([]byte, error) {
+// Deprecated: use blobaccess.BlobData
+func BlobData(blob blobaccess.DataGetter, err error) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
 	return blob.Get()
 }
 
-func BlobReader(blob DataReader, err error) (io.ReadCloser, error) {
+// Deprecated: use blobaccess.BlobReader
+func BlobReader(blob blobaccess.DataReader, err error) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
 	return blob.Reader()
 }
 
+// Deprecated: use utils.FileSystem
 func FileSystem(fss ...vfs.FileSystem) vfs.FileSystem {
 	return utils.FileSystem(fss...)
 }
 
+// Deprecated: use utils.DefaultedFileSystem
 func DefaultedFileSystem(def vfs.FileSystem, fss ...vfs.FileSystem) vfs.FileSystem {
 	return utils.DefaultedFileSystem(def, fss...)
 }

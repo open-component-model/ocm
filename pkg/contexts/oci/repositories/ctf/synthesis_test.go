@@ -7,6 +7,7 @@ package ctf_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -35,7 +36,7 @@ type DummyMethod struct {
 }
 
 var _ ocm.AccessMethod = (*DummyMethod)(nil)
-var _ accessio.DigestSource = (*DummyMethod)(nil)
+var _ blobaccess.DigestSource = (*DummyMethod)(nil)
 
 func (d *DummyMethod) GetKind() string {
 	return localblob.Type
@@ -120,7 +121,7 @@ var _ = Describe("syntheses", func() {
 
 		defer Close(blobcloser, "blob")
 
-		info := accessio.CastBlobAccess[accessio.FileLocation](blob)
+		info := blobaccess.Cast[blobaccess.FileLocation](blob)
 		path := info.Path()
 		Expect(path).To(MatchRegexp(filepath.Join(info.FileSystem().FSTempDir(), "artifactblob.*\\.tgz")))
 		Expect(vfs.Exists(info.FileSystem(), path)).To(BeTrue())

@@ -7,6 +7,7 @@ package builder
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dirtree"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const T_BLOBACCESS = "blob access"
@@ -33,7 +34,7 @@ func (b *Builder) BlobFromFile(mime string, path string) {
 		b.fail("access already set")
 	}
 	*(b.blob) = accessio.BlobAccessForFile(mime, path, b.FileSystem())
-	b.failOn(accessio.ValidateObject(*(b.blob)))
+	b.failOn(utils.ValidateObject(*(b.blob)))
 }
 
 func (b *Builder) BlobFromDirTree(path string, opts ...dirtree.Option) {

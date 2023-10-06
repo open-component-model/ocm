@@ -1,8 +1,8 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package accessio_test
+package blobaccess_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
@@ -11,7 +11,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 )
 
 var _ = Describe("artifact management", func() {
@@ -28,20 +28,20 @@ var _ = Describe("artifact management", func() {
 	})
 
 	It("temp file exists", func() {
-		tmp, err := accessio.NewTempFile(tempfs, "", "test*.tmp")
+		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		defer tmp.Close()
 		Expect(vfs.FileExists(tempfs, tmp.Name())).To(BeTrue())
 	})
 	It("temp file deleted on close", func() {
-		tmp, err := accessio.NewTempFile(tempfs, "", "test*.tmp")
+		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		name := tmp.Name()
 		Expect(tmp.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, name)).To(BeFalse())
 	})
 	It("temp file released", func() {
-		tmp, err := accessio.NewTempFile(tempfs, "", "test*.tmp")
+		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		name := tmp.Name()
 		file := tmp.Release()
@@ -50,7 +50,7 @@ var _ = Describe("artifact management", func() {
 		Expect(vfs.FileExists(tempfs, name)).To(BeTrue())
 	})
 	It("temp file blob", func() {
-		tmp, err := accessio.NewTempFile(tempfs, "", "test*.tmp")
+		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		name := tmp.Name()
 		blob := tmp.AsBlob("ttt")
@@ -61,7 +61,7 @@ var _ = Describe("artifact management", func() {
 	})
 	It("temp file blob access", func() {
 		value := []byte("this is a test")
-		tmp, err := accessio.NewTempFile(tempfs, "", "test*.tmp")
+		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		tmp.Writer().Write(value)
 		Expect(tmp.Sync()).To(Succeed())
