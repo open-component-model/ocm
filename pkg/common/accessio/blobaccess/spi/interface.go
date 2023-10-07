@@ -6,6 +6,7 @@ package spi
 
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/internal"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 )
 
 const (
@@ -15,6 +16,8 @@ const (
 	BLOB_UNKNOWN_SIZE   = internal.BLOB_UNKNOWN_SIZE
 	BLOB_UNKNOWN_DIGEST = internal.BLOB_UNKNOWN_DIGEST
 )
+
+var ErrClosed = refmgmt.ErrClosed
 
 type DataAccess = internal.DataAccess
 

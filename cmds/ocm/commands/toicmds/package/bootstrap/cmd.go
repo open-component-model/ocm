@@ -22,6 +22,7 @@ import (
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -57,8 +58,8 @@ type Command struct {
 	CredentialsFile string
 	ParameterFile   string
 	OutputFile      string
-	Credentials     accessio.DataSource
-	Parameters      accessio.DataSource
+	Credentials     blobaccess.DataSource
+	Parameters      blobaccess.DataSource
 	Config          map[string]string
 	EnvDir          string
 }

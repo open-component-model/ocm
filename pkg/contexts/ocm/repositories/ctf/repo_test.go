@@ -15,6 +15,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -48,15 +49,15 @@ var _ = Describe("access method", func() {
 		final.Close(cv)
 
 		// add resource
-		MustBeSuccessful(cv.SetResourceBlob(compdesc.NewResourceMeta("text1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), accessio.BlobAccessForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
+		MustBeSuccessful(cv.SetResourceBlob(compdesc.NewResourceMeta("text1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
 		Expect(Must(cv.GetResource(compdesc.NewIdentity("text1"))).Meta().Digest).To(Equal(DS_TESTDATA))
 
 		// add resource with digest
-		MustBeSuccessful(cv.SetResourceBlob(compdesc.NewResourceMeta("text2", resourcetypes.PLAIN_TEXT, metav1.LocalRelation).SetDigest(DS_TESTDATA), accessio.BlobAccessForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
+		MustBeSuccessful(cv.SetResourceBlob(compdesc.NewResourceMeta("text2", resourcetypes.PLAIN_TEXT, metav1.LocalRelation).SetDigest(DS_TESTDATA), blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
 		Expect(Must(cv.GetResource(compdesc.NewIdentity("text2"))).Meta().Digest).To(Equal(DS_TESTDATA))
 
 		// reject resource with wrong digest
-		Expect(cv.SetResourceBlob(compdesc.NewResourceMeta("text3", resourcetypes.PLAIN_TEXT, metav1.LocalRelation).SetDigest(TextResourceDigestSpec("fake")), accessio.BlobAccessForString(mime.MIME_TEXT, S_TESTDATA), "", nil)).To(MatchError("unable to set resource: digest mismatch: " + D_TESTDATA + " != fake"))
+		Expect(cv.SetResourceBlob(compdesc.NewResourceMeta("text3", resourcetypes.PLAIN_TEXT, metav1.LocalRelation).SetDigest(TextResourceDigestSpec("fake")), blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil)).To(MatchError("unable to set resource: digest mismatch: " + D_TESTDATA + " != fake"))
 
 		MustBeSuccessful(c.AddVersion(cv))
 		MustBeSuccessful(final.Finalize())
@@ -103,7 +104,7 @@ var _ = Describe("access method", func() {
 		final.Close(cv)
 
 		// add resource
-		Expect(ErrorFrom((cv.SetResourceBlob(compdesc.NewResourceMeta("text1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), accessio.BlobAccessForFile(mime.MIME_TEXT, "non-existing-file"), "", nil)))).To(MatchError(`file "non-existing-file" not found`))
+		Expect(ErrorFrom((cv.SetResourceBlob(compdesc.NewResourceMeta("text1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blobaccess.ForFile(mime.MIME_TEXT, "non-existing-file"), "", nil)))).To(MatchError(`file "non-existing-file" not found`))
 
 		MustBeSuccessful(final.Finalize())
 	})

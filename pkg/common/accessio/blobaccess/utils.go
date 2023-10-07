@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/spi"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -98,16 +99,24 @@ func (t *TempFile) Close() error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func BlobData(blob DataGetter, err error) ([]byte, error) {
-	if err != nil {
-		return nil, err
+// BlobData can be applied directly to a function result
+// providing a BlobAccess to get the data for the provided blob.
+// If the blob access providing function provides an error
+// result it is passed to the caller.
+func BlobData(blob DataGetter, err ...error) ([]byte, error) {
+	if len(err) > 0 && err[0] != nil {
+		return nil, err[0]
 	}
 	return blob.Get()
 }
 
-func BlobReader(blob DataReader, err error) (io.ReadCloser, error) {
-	if err != nil {
-		return nil, err
+// BlobReader can be applied directly to a function result
+// providing a BlobAccess to get a reader for the provided blob.
+// If the blob access providing function provides an error
+// result it is passed to the caller.
+func BlobReader(blob DataReader, err ...error) (io.ReadCloser, error) {
+	if len(err) > 0 && err[0] != nil {
+		return nil, err[0]
 	}
 	return blob.Reader()
 }

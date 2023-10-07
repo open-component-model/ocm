@@ -18,6 +18,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -119,7 +120,7 @@ var _ = Describe("component repository mapping", func() {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)
 
-		blob := accessio.BlobAccessForString(mime.MIME_OCTET, "anydata")
+		blob := blobaccess.ForString(mime.MIME_OCTET, "anydata")
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
@@ -162,7 +163,7 @@ var _ = Describe("component repository mapping", func() {
 			return TESTBASE
 		}
 		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(handler.NewBlobHandler(base))).New()
-		blob := accessio.BlobAccessForString(mime.MIME_OCTET, ocmtesthelper.S_TESTDATA)
+		blob := blobaccess.ForString(mime.MIME_OCTET, ocmtesthelper.S_TESTDATA)
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
@@ -222,7 +223,7 @@ var _ = Describe("component repository mapping", func() {
 		nested := finalize.Nested()
 		comp := finalizer.ClosingWith(nested, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(nested, Must(comp.NewVersion("v1")))
-		blob := accessio.BlobAccessForFile(mime, "test.tgz", tempfs)
+		blob := blobaccess.ForFile(mime, "test.tgz", tempfs)
 
 		fmt.Printf("physical digest: %s\n", blob.Digest())
 		acc := Must(vers.AddBlob(blob, "", "artifact1", nil))
@@ -275,7 +276,7 @@ var _ = Describe("component repository mapping", func() {
 		vers := finalizer.ClosingWith(nested, Must(comp.NewVersion("v1")))
 
 		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
-		blob := accessio.BlobAccessForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
+		blob := blobaccess.ForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
 
 		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
 		MustBeSuccessful(comp.AddVersion(vers))
@@ -284,7 +285,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// modify rsource in component
 		vers = finalizer.ClosingWith(nested, Must(repo.LookupComponentVersion(COMPONENT, "v1")))
-		blob = accessio.BlobAccessForString(mime.MIME_TEXT, "otherdata")
+		blob = blobaccess.ForString(mime.MIME_TEXT, "otherdata")
 		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
 		MustBeSuccessful(nested.Finalize())
 

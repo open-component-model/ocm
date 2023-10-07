@@ -10,6 +10,7 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -67,22 +68,22 @@ func (a *readerAccess) Origin() string {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type dataAccess struct {
+type fileDataAccess struct {
 	_nopCloser
 	fs   vfs.FileSystem
 	path string
 }
 
 var (
-	_ DataSource  = (*dataAccess)(nil)
-	_ Validatable = (*dataAccess)(nil)
+	_ DataSource  = (*fileDataAccess)(nil)
+	_ Validatable = (*fileDataAccess)(nil)
 )
 
 func DataAccessForFile(fs vfs.FileSystem, path string) DataAccess {
-	return &dataAccess{fs: fs, path: path}
+	return &fileDataAccess{fs: fs, path: path}
 }
 
-func (a *dataAccess) Get() ([]byte, error) {
+func (a *fileDataAccess) Get() ([]byte, error) {
 	data, err := vfs.ReadFile(a.fs, a.path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "file %q", a.path)
@@ -90,7 +91,7 @@ func (a *dataAccess) Get() ([]byte, error) {
 	return data, nil
 }
 
-func (a *dataAccess) Reader() (io.ReadCloser, error) {
+func (a *fileDataAccess) Reader() (io.ReadCloser, error) {
 	file, err := a.fs.Open(a.path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "file %q", a.path)
@@ -98,7 +99,7 @@ func (a *dataAccess) Reader() (io.ReadCloser, error) {
 	return file, nil
 }
 
-func (a *dataAccess) Validate() error {
+func (a *fileDataAccess) Validate() error {
 	ok, err := vfs.Exists(a.fs, a.path)
 	if err != nil {
 		return err
@@ -109,7 +110,7 @@ func (a *dataAccess) Validate() error {
 	return nil
 }
 
-func (a *dataAccess) Origin() string {
+func (a *fileDataAccess) Origin() string {
 	return a.path
 }
 

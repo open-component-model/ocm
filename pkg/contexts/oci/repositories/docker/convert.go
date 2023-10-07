@@ -17,6 +17,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
@@ -89,8 +90,8 @@ func (a *artBlobCache) AddBlob(blob accessio.BlobAccess) (int64, digest.Digest, 
 	return blob.Size(), blob.Digest(), err
 }
 
-func (c *artBlobCache) AddData(data accessio.DataAccess) (int64, digest.Digest, error) {
-	return c.AddBlob(accessio.BlobAccessForDataAccess(accessio.BLOB_UNKNOWN_DIGEST, accessio.BLOB_UNKNOWN_SIZE, "", data))
+func (c *artBlobCache) AddData(data blobaccess.DataAccess) (int64, digest.Digest, error) {
+	return c.AddBlob(blobaccess.ForDataAccess(accessio.BLOB_UNKNOWN_DIGEST, accessio.BLOB_UNKNOWN_SIZE, "", data))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

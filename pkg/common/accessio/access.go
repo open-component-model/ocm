@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
+	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -32,12 +32,12 @@ const (
 
 // Deprecated: use blobaccess.ErrBlobNotFound.
 func ErrBlobNotFound(digest digest.Digest) error {
-	return errors.ErrNotFound(KIND_BLOB, digest.String())
+	return errors.ErrNotFound(blobaccess.KIND_BLOB, digest.String())
 }
 
 // Deprecated: use blobaccess.IsErrBlobNotFound.
 func IsErrBlobNotFound(err error) bool {
-	return errors.IsErrNotFoundKind(err, KIND_BLOB)
+	return errors.IsErrNotFoundKind(err, blobaccess.KIND_BLOB)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,12 +77,12 @@ func DataAccessForFile(fs vfs.FileSystem, path string) DataAccess {
 ////////////////////////////////////////////////////////////////////////////////
 
 // Deprecated: use blobaccess.DataAccessForBytes.
-func DataAccessForBytes(data []byte, origin ...string) DataSource {
+func DataAccessForBytes(data []byte, origin ...string) blobaccess.DataSource {
 	return blobaccess.DataAccessForBytes(data, origin...)
 }
 
 // Deprecated: use blobaccess.DataAccessForString.
-func DataAccessForString(data string, origin ...string) DataSource {
+func DataAccessForString(data string, origin ...string) blobaccess.DataSource {
 	return blobaccess.DataAccessForBytes([]byte(data), origin...)
 }
 
@@ -90,25 +90,25 @@ func DataAccessForString(data string, origin ...string) DataSource {
 
 // AnnotatedBlobAccess provides access to the original underlying data source.
 // Deprecated: use blobaccess.AnnotatedBlobAccess.
-type AnnotatedBlobAccess[T DataAccess] interface {
-	BlobAccess
+type AnnotatedBlobAccess[T blobaccess.DataAccess] interface {
+	blobaccess.BlobAccess
 	Source() T
 }
 
 // BlobAccessForDataAccess wraps the general access object into a blob access.
 // It closes the wrapped access, if closed.
 // Deprecated: use blobaccess.ForDataAccess.
-func BlobAccessForDataAccess[T DataAccess](digest digest.Digest, size int64, mimeType string, access T) AnnotatedBlobAccess[T] {
+func BlobAccessForDataAccess[T blobaccess.DataAccess](digest digest.Digest, size int64, mimeType string, access T) blobaccess.AnnotatedBlobAccess[T] {
 	return blobaccess.ForDataAccess[T](digest, size, mimeType, access)
 }
 
 // Deprecated: use blobaccess.ForString.
-func BlobAccessForString(mimeType string, data string) BlobAccess {
+func BlobAccessForString(mimeType string, data string) blobaccess.BlobAccess {
 	return blobaccess.ForData(mimeType, []byte(data))
 }
 
 // Deprecated: use blobaccess.ForData.
-func BlobAccessForData(mimeType string, data []byte) BlobAccess {
+func BlobAccessForData(mimeType string, data []byte) blobaccess.BlobAccess {
 	return blobaccess.ForData(mimeType, data)
 }
 
@@ -119,14 +119,14 @@ func BlobAccessForData(mimeType string, data []byte) BlobAccess {
 // a new view for the given blob access, so closing the resulting
 // blob access will directly close the backing blob access.
 // Deprecated: use blobaccess.WithMimeType.
-func BlobWithMimeType(mimeType string, blob BlobAccess) BlobAccess {
-	return blobaccess.BlobWithMimeType(mimeType, blob)
+func BlobWithMimeType(mimeType string, blob blobaccess.BlobAccess) blobaccess.BlobAccess {
+	return blobaccess.WithMimeType(mimeType, blob)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Deprecated: use blobaccess.ForFile.
-func BlobAccessForFile(mimeType string, path string, fss ...vfs.FileSystem) BlobAccess {
+func BlobAccessForFile(mimeType string, path string, fss ...vfs.FileSystem) blobaccess.BlobAccess {
 	return blobaccess.ForFile(mimeType, path, fss...)
 }
 

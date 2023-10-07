@@ -3,15 +3,14 @@ package blobaccess
 import (
 	"io"
 	"sync"
-	"sync/atomic"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/spi"
 	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
-	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/opencontainers/go-digest"
 )
 
 var ErrClosed = refmgmt.ErrClosed
@@ -45,107 +44,25 @@ func Validate(o BlobAccess) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type blobAccess struct {
-	lock     sync.RWMutex
-	digest   digest.Digest
-	size     int64
-	mimeType string
-	closed   atomic.Bool
-	access   DataAccess
-}
-
-func (b *blobAccess) Close() error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-	if !b.closed.Load() {
-		tmp := b.access
-		b.closed.Store(true)
-		return tmp.Close()
-	}
-	return ErrClosed
-}
-
-func (b *blobAccess) Get() ([]byte, error) {
-	if b.closed.Load() {
-		return nil, ErrClosed
-	}
-	return b.access.Get()
-}
-
-func (b *blobAccess) Reader() (io.ReadCloser, error) {
-	if b.closed.Load() {
-		return nil, ErrClosed
-	}
-	return b.access.Reader()
-}
-
-func (b *blobAccess) MimeType() string {
-	return b.mimeType
-}
-
-func (b *blobAccess) DigestKnown() bool {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-	return b.digest != ""
-}
-
-func (b *blobAccess) Digest() digest.Digest {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-	if b.digest == "" {
-		b.update()
-	}
-	return b.digest
-}
-
-func (b *blobAccess) Size() int64 {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-	if b.size < 0 {
-		b.update()
-	}
-	return b.size
-}
-
-func (b *blobAccess) update() error {
-	reader, err := b.Reader()
-	if err != nil {
-		return err
-	}
-
-	defer reader.Close()
-	count := iotools.NewCountingReader(reader)
-
-	digest, err := digest.Canonical.FromReader(count)
-	if err != nil {
-		return err
-	}
-
-	b.size = count.Size()
-	b.digest = digest
-
-	return nil
-}
-
+// ForString wraps a string into a BlobAccess, which does not need a close.
 func ForString(mime string, data string) BlobAccess {
 	return ForData(mime, []byte(data))
 }
 
+// ForData wraps data into a BlobAccess, which does not need a close.
 func ForData(mime string, data []byte) BlobAccess {
-	return spi.NewBlobAccessForBase(&blobAccess{
-		digest:   digest.FromBytes(data),
-		size:     int64(len(data)),
-		mimeType: mime,
-		access:   DataAccessForBytes(data),
-	})
+	return spi.ForStaticDataAccessAndMeta(mime, DataAccessForBytes(data), digest.FromBytes(data), int64(len(data)))
 }
 
-type _blobAccess = BlobAccess
+type (
+	_blobAccess     = BlobAccess
+	_blobAccessBase = spi.BlobAccessBase
+)
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type fileBlobAccess struct {
-	dataAccess
+	fileDataAccess
 	mimeType string
 }
 
@@ -196,18 +113,46 @@ func (f *fileBlobAccess) Digest() digest.Digest {
 	return d
 }
 
+// ForFile wraps a file path into a BlobAccess, which does not need a close.
 func ForFile(mime string, path string, fss ...vfs.FileSystem) BlobAccess {
-	return spi.NewBlobAccessForBase(&fileBlobAccess{
-		mimeType:   mime,
-		dataAccess: dataAccess{fs: utils.FileSystem(fss...), path: path},
-	})
+	return &fileBlobAccess{
+		mimeType:       mime,
+		fileDataAccess: fileDataAccess{fs: utils.FileSystem(fss...), path: path},
+	}
+}
+
+type fileBlobAccessView struct {
+	_blobAccess
+	access *fileDataAccess
+}
+
+var (
+	_ BlobAccess   = (*fileBlobAccessView)(nil)
+	_ FileLocation = (*fileBlobAccessView)(nil)
+)
+
+func (f *fileBlobAccessView) Dup() (BlobAccess, error) {
+	b, err := f._blobAccess.Dup()
+	if err != nil {
+		return nil, err
+	}
+	return &fileBlobAccessView{b, f.access}, nil
+}
+
+func (f *fileBlobAccessView) FileSystem() vfs.FileSystem {
+	return f.access.fs
+}
+
+func (f *fileBlobAccessView) Path() string {
+	return f.access.path
 }
 
 func ForFileWithCloser(closer io.Closer, mime string, path string, fss ...vfs.FileSystem) BlobAccess {
-	return spi.NewBlobAccessForBase(&fileBlobAccess{
-		mimeType:   mime,
-		dataAccess: dataAccess{fs: utils.FileSystem(fss...), path: path},
-	}, closer)
+	fb := &fileBlobAccess{fileDataAccess{fs: utils.FileSystem(fss...), path: path}, mime}
+	return &fileBlobAccessView{
+		spi.NewBlobAccessForBase(fb, closer),
+		&fb.fileDataAccess,
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -240,13 +185,10 @@ func (a *annotatedBlobAccessView[T]) Source() T {
 
 // ForDataAccess wraps the general access object into a blob access.
 // It closes the wrapped access, if closed.
+// If the wrapped data access does not need a close, the BlobAccess
+// does not need a close, also.
 func ForDataAccess[T DataAccess](digest digest.Digest, size int64, mimeType string, access T) AnnotatedBlobAccess[T] {
-	a := &blobAccess{
-		digest:   digest,
-		size:     size,
-		mimeType: mimeType,
-		access:   access,
-	}
+	a := spi.ForStaticDataAccessAndMeta(mimeType, access, digest, size)
 
 	return &annotatedBlobAccessView[T]{
 		_blobAccess: spi.NewBlobAccessForBase(a),
@@ -265,8 +207,8 @@ type temporaryFileBlob struct {
 }
 
 var (
-	_ BlobAccessBase = (*temporaryFileBlob)(nil)
-	_ FileLocation   = (*temporaryFileBlob)(nil)
+	_ spi.BlobAccessBase = (*temporaryFileBlob)(nil)
+	_ FileLocation       = (*temporaryFileBlob)(nil)
 )
 
 func (b *temporaryFileBlob) Validate() error {
@@ -334,11 +276,11 @@ type mimeBlob struct {
 	mimetype string
 }
 
-// BlobWithMimeType changes the mime type for a blob access
+// WithMimeType changes the mime type for a blob access
 // by wrapping the given blob access. It does NOT provide
 // a new view for the given blob access, so closing the resulting
 // blob access will directly close the backing blob access.
-func BlobWithMimeType(mimeType string, blob BlobAccess) BlobAccess {
+func WithMimeType(mimeType string, blob BlobAccess) BlobAccess {
 	return &mimeBlob{blob, mimeType}
 }
 

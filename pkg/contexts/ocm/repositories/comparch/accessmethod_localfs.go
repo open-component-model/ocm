@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
@@ -53,10 +54,10 @@ func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
 		var err error
 		m.blobAccess, err = m.base.GetBlobData(m.spec.LocalReference)
 		if err != nil {
-			return accessio.BlobReader(m.blobAccess, err)
+			return blobaccess.BlobReader(m.blobAccess, err)
 		}
 	}
-	return accessio.BlobReader(m.blobAccess, nil)
+	return blobaccess.BlobReader(m.blobAccess, nil)
 }
 
 func (m *localFilesystemBlobAccessMethod) Get() ([]byte, error) {
@@ -71,10 +72,10 @@ func (m *localFilesystemBlobAccessMethod) Get() ([]byte, error) {
 		var err error
 		m.blobAccess, err = m.base.GetBlobData(m.spec.LocalReference)
 		if err != nil {
-			return accessio.BlobData(m.blobAccess, err)
+			return blobaccess.BlobData(m.blobAccess, err)
 		}
 	}
-	return accessio.BlobData(m.blobAccess, nil)
+	return blobaccess.BlobData(m.blobAccess, nil)
 }
 
 func (m *localFilesystemBlobAccessMethod) MimeType() string {

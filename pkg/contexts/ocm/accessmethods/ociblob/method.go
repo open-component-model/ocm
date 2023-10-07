@@ -11,7 +11,7 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -90,7 +90,7 @@ func (s *AccessSpec) GetInexpensiveContentVersionIdentity(access cpi.ComponentVe
 
 type accessMethod struct {
 	lock sync.Mutex
-	blob accessio.BlobAccess
+	blob blobaccess.BlobAccess
 	comp cpi.ComponentVersionAccess
 	spec *AccessSpec
 }
@@ -116,11 +116,11 @@ func (m *accessMethod) Close() error {
 }
 
 func (m *accessMethod) Get() ([]byte, error) {
-	return accessio.BlobData(m.getBlob())
+	return blobaccess.BlobData(m.getBlob())
 }
 
 func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	return accessio.BlobReader(m.getBlob())
+	return blobaccess.BlobReader(m.getBlob())
 }
 
 func (m *accessMethod) MimeType() string {
@@ -158,11 +158,11 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 	if err != nil {
 		return nil, err
 	}
-	if m.spec.Size == accessio.BLOB_UNKNOWN_SIZE {
+	if m.spec.Size == blobaccess.BLOB_UNKNOWN_SIZE {
 		m.spec.Size = size
-	} else if size != accessio.BLOB_UNKNOWN_SIZE {
+	} else if size != blobaccess.BLOB_UNKNOWN_SIZE {
 		return nil, errors.Newf("blob size mismatch %d != %d", size, m.spec.Size)
 	}
-	m.blob = accessio.BlobAccessForDataAccess(m.spec.Digest, m.spec.Size, m.spec.MediaType, acc)
+	m.blob = blobaccess.ForDataAccess(m.spec.Digest, m.spec.Size, m.spec.MediaType, acc)
 	return m.blob, nil
 }

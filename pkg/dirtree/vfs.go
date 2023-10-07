@@ -11,12 +11,12 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func NewVFSDirNode(ctx Context, p string, fss ...vfs.FileSystem) (*DirNode, error) {
-	fs := accessio.FileSystem(fss...)
+	fs := utils.FileSystem(fss...)
 	f, err := fs.Stat(p)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func NewVFSDirNode(ctx Context, p string, fss ...vfs.FileSystem) (*DirNode, erro
 }
 
 func NewVFSFileNode(ctx Context, p string, fss ...vfs.FileSystem) (Node, error) {
-	fs := accessio.FileSystem(fss...)
+	fs := utils.FileSystem(fss...)
 
 	fi, err := fs.Lstat(p)
 	if err != nil {

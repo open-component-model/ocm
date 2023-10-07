@@ -21,6 +21,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -39,16 +40,16 @@ const OCIPATH = "/tmp/oci"
 const OCIHOST = "ghcr.io"
 
 func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, ff ...func(r compdesc.Resource)) {
-	rblob := accessio.BlobAccessForFile(mime.MIME_TEXT, "/testdata/testcontent", env)
+	rblob := blobaccess.ForFile(mime.MIME_TEXT, "/testdata/testcontent", env)
 	CheckTextResourceBlob(env, cd, name, rblob, ff...)
 }
 
 func CheckTextResourceWith(env *TestEnv, cd *compdesc.ComponentDescriptor, name, txt string) {
-	rblob := accessio.BlobAccessForString(mime.MIME_TEXT, txt)
+	rblob := blobaccess.ForString(mime.MIME_TEXT, txt)
 	CheckTextResourceBlob(env, cd, name, rblob)
 }
 
-func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, rblob accessio.BlobAccess, ff ...func(r compdesc.Resource)) {
+func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, rblob blobaccess.BlobAccess, ff ...func(r compdesc.Resource)) {
 	dig := rblob.Digest()
 	data, err := rblob.Get()
 	Expect(err).To(Succeed())
@@ -86,7 +87,7 @@ func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name 
 	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal("text/plain"))
 }
 
-func Get(blob accessio.BlobAccess, expected []byte) []byte {
+func Get(blob blobaccess.BlobAccess, expected []byte) []byte {
 	data, err := blob.Get()
 	ExpectWithOffset(1, err).To(Succeed())
 	if expected != nil {
@@ -217,7 +218,7 @@ var _ = Describe("Add resources", func() {
 		// Expect(acc.(*localblob.AccessSpec).LocalReference).To(Equal("sha256.817db2696ed23f7779a7f848927e2958d2236e5483ad40875274462d8fa8ef9a"))
 
 		blobpath := env.Join(ARCH, comparch.BlobsDirectoryName, common.DigestToFileName(digest.Digest(acc.(*localblob.AccessSpec).LocalReference)))
-		blob := accessio.BlobAccessForFile(mime.MIME_GZIP, blobpath, env)
+		blob := blobaccess.ForFile(mime.MIME_GZIP, blobpath, env)
 
 		set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
 		Expect(err).To(Succeed())

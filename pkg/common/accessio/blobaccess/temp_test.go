@@ -14,7 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 )
 
-var _ = Describe("artifact management", func() {
+var _ = Describe("temp file management", func() {
 	var tempfs vfs.FileSystem
 
 	BeforeEach(func() {

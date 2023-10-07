@@ -23,8 +23,7 @@ type (
 )
 
 type (
-	BlobAccess     = internal.BlobAccess
-	BlobAccessBase = internal.BlobAccessBase
+	BlobAccess = internal.BlobAccess
 
 	DigestSource = internal.DigestSource
 	MimeType     = internal.MimeType

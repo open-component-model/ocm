@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -67,7 +67,7 @@ func SimpleWriteWithCredentials() error {
 			Type:     resourcetypes.BLOB,
 			Relation: metav1.LocalRelation,
 		},
-		accessio.BlobAccessForString(mime.MIME_TEXT, "testdata"),
+		blobaccess.ForString(mime.MIME_TEXT, "testdata"),
 		"", nil,
 	)
 	if err != nil {

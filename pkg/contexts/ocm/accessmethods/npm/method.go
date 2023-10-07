@@ -18,6 +18,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -140,7 +141,7 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 				return accessio.VerifyingReaderWithHash(r, crypto.SHA1, meta.Dist.Shasum), nil
 			}
 		}
-		acc := accessio.DataAccessForReaderFunction(f, meta.Dist.Tarball)
+		acc := blobaccess.DataAccessForReaderFunction(f, meta.Dist.Tarball)
 		return accessobj.CachedBlobAccessForWriter(c.GetContext(), mime.MIME_TGZ, accessio.NewDataAccessWriter(acc)), nil
 	}
 	return cpi.NewDefaultMethod(c, a, mime.MIME_TGZ, factory), nil

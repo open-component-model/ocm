@@ -1,0 +1,27 @@
+4b760f8d (local/transfer) refs/remotes/local/transfer@{0}: update by push
+34ec0eeb refs/remotes/local/transfer@{1}: update by push
+ceab7bd6 refs/remotes/local/transfer@{2}: update by push
+e3a70e82 refs/remotes/local/transfer@{3}: update by push
+96a90675 refs/remotes/local/transfer@{4}: update by push
+d7bab461 refs/remotes/local/transfer@{5}: update by push
+2599eb05 refs/remotes/local/transfer@{6}: update by push
+812ae34f refs/remotes/local/transfer@{7}: update by push
+55a54444 refs/remotes/local/transfer@{8}: update by push
+89713c80 refs/remotes/local/transfer@{9}: update by push
+c014ac8f refs/remotes/local/transfer@{10}: update by push
+4558fbb6 refs/remotes/local/transfer@{11}: update by push
+552240e9 refs/remotes/local/transfer@{12}: update by push
+6fbf33fe refs/remotes/local/transfer@{13}: update by push
+dfce0cf1 refs/remotes/local/transfer@{14}: update by push
+a6d11bc4 refs/remotes/local/transfer@{15}: update by push
+9437f175 refs/remotes/local/transfer@{16}: update by push
+6ed5da15 refs/remotes/local/transfer@{17}: update by push
+67568b96 refs/remotes/local/transfer@{18}: update by push
+5594a708 refs/remotes/local/transfer@{19}: update by push
+0a763307 refs/remotes/local/transfer@{20}: update by push
+59f07c57 refs/remotes/local/transfer@{21}: update by push
+4a346c44 refs/remotes/local/transfer@{22}: update by push
+ec257146 refs/remotes/local/transfer@{23}: update by push
+17b3e0f6 refs/remotes/local/transfer@{24}: update by push
+892b79f1 refs/remotes/local/transfer@{25}: update by push
+4f070dfe refs/remotes/local/transfer@{26}: update by push

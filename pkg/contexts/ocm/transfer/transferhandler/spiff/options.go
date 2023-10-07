@@ -8,7 +8,6 @@ import (
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -122,7 +121,7 @@ func ScriptByFile(path string, fss ...vfs.FileSystem) transferhandler.TransferOp
 	path, _ = utils.ResolvePath(path)
 	return &scriptOption{
 		source: path,
-		script: func() ([]byte, error) { return vfs.ReadFile(accessio.FileSystem(fss...), path) },
+		script: func() ([]byte, error) { return vfs.ReadFile(utils.FileSystem(fss...), path) },
 	}
 }
 

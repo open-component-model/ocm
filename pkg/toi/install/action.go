@@ -18,6 +18,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -445,6 +446,8 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 		Err:         nil,
 	}
 
+	defer op.Close()
+
 	// prepare file content to be passed to executor
 	err = setupFiles(octx, &finalize, op, ccfg, params, econfig, cv, resolver)
 	if err != nil {
@@ -457,21 +460,29 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	return d.Exec(op)
 }
 
+func (op *Operation) Close() error {
+	list := errors.ErrListf("closing operation")
+	for _, b := range op.Files {
+		list.Add(b.Close())
+	}
+	return list.Result()
+}
+
 func setupFiles(octx ocm.Context, finalize *Finalizer, op *Operation, ccfg *globalconfig.Config, params []byte, econfig []byte, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) error {
 	// prepare file content to be passed to executor
-	op.Files = map[string]accessio.BlobAccess{}
+	op.Files = map[string]blobaccess.BlobAccess{}
 	if ccfg != nil {
 		data, err := runtime.DefaultYAMLEncoding.Marshal(ccfg)
 		if err != nil {
 			return errors.Wrapf(err, "marshalling ocm config failed")
 		}
-		op.Files[InputOCMConfig] = accessio.BlobAccessForData(mime.MIME_OCTET, data)
+		op.Files[InputOCMConfig] = blobaccess.ForData(mime.MIME_OCTET, data)
 	}
 	if params != nil {
-		op.Files[InputParameters] = accessio.BlobAccessForData(mime.MIME_OCTET, params)
+		op.Files[InputParameters] = blobaccess.ForData(mime.MIME_OCTET, params)
 	}
 	if econfig != nil {
-		op.Files[InputConfig] = accessio.BlobAccessForData(mime.MIME_OCTET, econfig)
+		op.Files[InputConfig] = blobaccess.ForData(mime.MIME_OCTET, econfig)
 	}
 	if cv != nil {
 		fs, err := osfs.NewTempFileSystem()
@@ -492,7 +503,7 @@ func setupFiles(octx ocm.Context, finalize *Finalizer, op *Operation, ccfg *glob
 		if err != nil {
 			return errors.Wrapf(err, "component version transport failed")
 		}
-		op.Files[InputOCMRepo] = accessio.BlobAccessForFile(mime.MIME_OCTET, "arch", fs)
+		op.Files[InputOCMRepo] = blobaccess.ForFile(mime.MIME_OCTET, "arch", fs)
 	}
 	return nil
 }

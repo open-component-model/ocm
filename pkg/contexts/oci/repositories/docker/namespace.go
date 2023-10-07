@@ -16,6 +16,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
@@ -199,7 +200,7 @@ func (n *namespaceHandler) GetArtifact(i support.NamespaceAccessImpl, vers strin
 
 	priv := i.WithContainer(newNamespaceContainer(n, newBlobHandler(cache)))
 	// assure explicit close of wrapper container for artifact close
-	return support.NewArtifactForBlob(priv, accessio.BlobAccessForData(mime, data), priv)
+	return support.NewArtifactForBlob(priv, blobaccess.ForData(mime, data), priv)
 }
 
 func (n *namespaceHandler) HasArtifact(vers string) (bool, error) {

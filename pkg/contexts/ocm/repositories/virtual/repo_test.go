@@ -14,7 +14,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -90,7 +90,7 @@ var _ = Describe("virtual repo", func() {
 			vers := Must(comp.NewVersion("v1.0.0", false))
 			finalize.Close(vers, "version")
 
-			blob := accessio.BlobAccessForString(mime.MIME_TEXT, "new test data")
+			blob := blobaccess.ForString(mime.MIME_TEXT, "new test data")
 			MustBeSuccessful(vers.SetResourceBlob(compdesc.NewResourceMeta("new", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blob, "", nil))
 
 			r := Must(vers.GetResourceByIndex(0))

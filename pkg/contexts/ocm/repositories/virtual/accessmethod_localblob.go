@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
@@ -73,7 +74,7 @@ func (m *localBlobAccessMethod) Reader() (io.ReadCloser, error) {
 }
 
 func (m *localBlobAccessMethod) Get() ([]byte, error) {
-	return accessio.BlobData(m.getBlob())
+	return blobaccess.BlobData(m.getBlob())
 }
 
 func (m *localBlobAccessMethod) MimeType() string {

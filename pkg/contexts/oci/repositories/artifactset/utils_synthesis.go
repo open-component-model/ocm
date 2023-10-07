@@ -9,11 +9,11 @@ import (
 
 	. "github.com/open-component-model/ocm/pkg/finalizer"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -30,8 +30,7 @@ type ArtifactBlob interface {
 type Producer func(set *ArtifactSet) (string, error)
 
 func SythesizeArtifactSet(producer Producer) (ArtifactBlob, error) {
-	fs := osfs.New()
-	temp, err := accessio.NewTempFile(fs, "", "artifactblob*.tgz")
+	temp, err := blobaccess.NewTempFile("", "artifactblob*.tgz")
 	if err != nil {
 		return nil, err
 	}
