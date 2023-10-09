@@ -21,10 +21,13 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	"github.com/open-component-model/ocm/pkg/encrypt"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 var (
@@ -39,6 +42,7 @@ type Command struct {
 	MoreIssuers []string
 	priv        string
 	pub         string
+	ekey        string
 
 	attrs  map[string]string
 	cacert string
@@ -47,6 +51,9 @@ type Command struct {
 	Validity time.Duration
 	CACert   *x509.Certificate
 	CAKey    interface{}
+
+	Encrypt             string
+	CreateEncryptionKey bool
 }
 
 var _ utils.OCMCommand = (*Command)(nil)
@@ -91,6 +98,8 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.cacert, "cacert", "", "", "certificate authority to sign public key")
 	set.StringVarP(&o.cakey, "cakey", "", "", "private key for certificate authority")
 	set.DurationVarP(&o.Validity, "validity", "", 10*24*365*time.Hour, "certificate validity")
+	set.StringVarP(&o.Encrypt, "encryptionKey", "e", "", "encrypt private key with given key")
+	set.BoolVarP(&o.CreateEncryptionKey, "encrypt", "E", false, "encrypt private key with new key")
 }
 
 func (o *Command) FilterSettings(args ...string) []string {
@@ -100,9 +109,14 @@ func (o *Command) FilterSettings(args ...string) []string {
 
 func (o *Command) Complete(args []string) error {
 	args = o.FilterSettings(args...)
+
 	if len(args) > 2 {
 		return errors.Newf("only a maximum of two filenames possible")
 	}
+	if o.CreateEncryptionKey && o.Encrypt != "" {
+		return errors.Newf("only one of --encrypt or --encryptionKey is possible")
+	}
+
 	if o.attrs != nil && len(o.attrs) > 0 {
 		var subject pkix.Name
 		for k, v := range o.attrs {
@@ -137,7 +151,8 @@ func (o *Command) Complete(args []string) error {
 	if o.cacert != "" {
 		cert, err := parse.ParseCertificate(o.cacert)
 		if err != nil {
-			data, err := vfs.ReadFile(o.Context.FileSystem(), o.cacert)
+			path, _ := utils2.ResolvePath(o.cacert)
+			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read ca cert file %q", o.cacert)
 			}
@@ -151,7 +166,8 @@ func (o *Command) Complete(args []string) error {
 	if o.cakey != "" {
 		key, err := parse.ParsePrivateKey(o.cakey)
 		if err != nil {
-			data, err := vfs.ReadFile(o.Context.FileSystem(), o.cacert)
+			path, _ := utils2.ResolvePath(o.cacert)
+			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read private key file %q", o.cacert)
 			}
@@ -193,6 +209,10 @@ func (o *Command) Complete(args []string) error {
 		}
 	}
 
+	if o.ekey == "" {
+		o.ekey = o.priv + ".ekey"
+	}
+
 	return nil
 }
 
@@ -212,25 +232,76 @@ func (o *Command) Run() error {
 			return errors.Wrapf(err, "signing failed")
 		}
 	}
-	if err := o.WriteKey(priv, o.priv); err != nil {
+
+	var key []byte
+	if o.CreateEncryptionKey {
+		key, err = encrypt.NewKey(encrypt.AES_256)
+		if err != nil {
+			return errors.Wrapf(err, "cannot create new encryption key")
+		}
+	}
+	if o.Encrypt != "" {
+		reg := signingattr.Get(o.Context.OCMContext())
+		p, err := signing.ResolvePrivateKey(reg, signing.DecryptionKeyName(o.Encrypt))
+		if err != nil {
+			return err
+		}
+		key, err = encrypt.KeyFromAny(p)
+		if err != nil {
+			return errors.Wrapf(err, "key %q", signing.DecryptionKeyName(o.Encrypt))
+		}
+	}
+	if key != nil {
+		data, err := rsa.KeyData(priv)
+		if err != nil {
+			return err
+		}
+		algo, err := encrypt.AlgoForKey(key)
+		if err != nil {
+			return errors.Wrapf(err, "key %q", signing.DecryptionKeyName(o.Encrypt))
+		}
+		cipherText, err := encrypt.Encrypt(key, data)
+		if err != nil {
+			return err
+		}
+		priv = encrypt.EncryptedToPem(algo, cipherText)
+		if o.CreateEncryptionKey {
+			if err := o.WriteKey(encrypt.KeyToPem(key), o.ekey, true); err != nil {
+				return errors.Wrapf(err, "failed to write encryption key file %q", o.ekey)
+			}
+		}
+	}
+	if err := o.WriteKey(priv, o.priv, key != nil); err != nil {
 		return errors.Wrapf(err, "failed to write private key file %q", o.priv)
 	}
-	if err := o.WriteKey(pub, o.pub); err != nil {
+	if err := o.WriteKey(pub, o.pub, false); err != nil {
 		return errors.Wrapf(err, "failed to write public key file %q", o.pub)
 	}
-	out.Outf(o.Context, "created rsa key pair %s[%s]\n", o.priv, o.pub)
+	msg := ""
+	add := ""
+	if key != nil {
+		msg = " encrypted"
+		if o.CreateEncryptionKey {
+			add = "[" + o.ekey + "]"
+		}
+	}
+	out.Outf(o.Context, "created%s rsa key pair %s[%s]%s\n", msg, o.priv, o.pub, add)
 	return nil
 }
 
-func (o *Command) WriteKey(key interface{}, path string) error {
+func (o *Command) WriteKey(key interface{}, path string, raw bool) error {
 	fd, err := o.Context.FileSystem().OpenFile(path, vfs.O_CREATE|vfs.O_WRONLY, 0o600)
 	if err != nil {
 		return err
 	}
 
 	if certdata, ok := key.([]byte); ok {
-		block := &pem.Block{Type: "CERTIFICATE", Bytes: certdata}
-		err = pem.Encode(fd, block)
+		if raw {
+			_, err = fd.Write(certdata)
+		} else {
+			block := &pem.Block{Type: "CERTIFICATE", Bytes: certdata}
+			err = pem.Encode(fd, block)
+		}
 	} else {
 		err = rsa.WriteKeyData(key, fd)
 	}

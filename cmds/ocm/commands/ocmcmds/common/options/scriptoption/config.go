@@ -13,6 +13,7 @@ import (
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -82,8 +83,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 			if spec.Path == "" {
 				return errors.Newf("script or path must be set for entry %q", t.Script)
 			}
-			fs := accessio.FileSystem(spec.FileSystem, t.FileSystem)
-			data, err := vfs.ReadFile(fs, spec.Path)
+			data, err := utils.ReadFile(spec.Path, accessio.FileSystem(spec.FileSystem, t.FileSystem))
 			if err != nil {
 				return errors.Wrapf(err, "script file %q", spec.Path)
 			}

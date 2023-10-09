@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -99,6 +100,21 @@ func (s OptionSet) Options(proto Options) interface{} {
 		}
 	}
 	return nil
+}
+
+func FindOptions[T any](s OptionSetProvider) []T {
+	var found []T
+
+	t := generics.TypeOf[T]()
+	for _, o := range s.AsOptionSet() {
+		if reflect.TypeOf(o).AssignableTo(t) {
+			found = append(found, generics.As[T](o))
+		}
+		if set, ok := o.(OptionSetProvider); ok {
+			found = append(found, FindOptions[T](set)...)
+		}
+	}
+	return found
 }
 
 // Get extracts the option for a given target. This might be a

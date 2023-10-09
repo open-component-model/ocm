@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 var Description = `
@@ -105,7 +106,7 @@ func (o *Options) Configure(ctx ocm.Context, logctx logging.Context) error {
 	if o.LogConfig != "" {
 		var cfg []byte
 		if strings.HasPrefix(o.LogConfig, "@") {
-			cfg, err = vfs.ReadFile(fs, o.LogConfig[1:])
+			cfg, err = utils.ReadFile(o.LogConfig[1:], fs)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read logging config file %q", o.LogConfig[1:])
 			}

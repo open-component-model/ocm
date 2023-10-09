@@ -26,9 +26,9 @@ func New(p ppi.Plugin) *cobra.Command {
 		Short: "compose access specification from options and base specification",
 		Long: `
 The task of this command is to compose an access specification based on some
-explicitly given input options and preconfigured specification.
+explicitly given input options and preconfigured specifications.
 
-The finally composed access specification has to be returned as JSON doocument
+The finally composed access specification has to be returned as JSON document
 on *stdout*.
 
 This command is only used, if for an access method descriptor configuration
@@ -56,8 +56,8 @@ by the plugin name.
 
 type Options struct {
 	Name    string
-	Options map[string]interface{}
-	Base    map[string]interface{}
+	Options ppi.Config
+	Base    ppi.Config
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
@@ -80,7 +80,11 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if m == nil {
 		return errors.ErrUnknown(errors.KIND_ACCESSMETHOD, opts.Name)
 	}
-	err := m.ComposeAccessSpecification(p, opts.Options, opts.Base)
+	err := opts.Options.ConvertFor(m.Options()...)
+	if err != nil {
+		return err
+	}
+	err = m.ComposeAccessSpecification(p, opts.Options, opts.Base)
 	if err != nil {
 		return err
 	}

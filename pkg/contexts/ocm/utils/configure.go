@@ -43,6 +43,11 @@ func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context
 				cfg := h + "/" + DEFAULT_OCM_CONFIG_DIR + "/ocmconfig"
 				if ok, err := vfs.FileExists(fs, cfg); ok && err == nil {
 					path = cfg
+				} else {
+					cfg := h + "/" + DEFAULT_OCM_CONFIG_DIR + "/config"
+					if ok, err := vfs.FileExists(fs, cfg); ok && err == nil {
+						path = cfg
+					}
 				}
 			}
 		}

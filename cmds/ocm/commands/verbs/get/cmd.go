@@ -13,6 +13,7 @@ import (
 	plugins "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/get"
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/get"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/get"
+	routingslips "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/routingslips/get"
 	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -31,5 +32,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(sources.NewCommand(ctx))
 	cmd.AddCommand(credentials.NewCommand(ctx))
 	cmd.AddCommand(plugins.NewCommand(ctx))
+	cmd.AddCommand(routingslips.NewCommand(ctx))
 	return cmd
 }

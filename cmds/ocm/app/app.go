@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/keyoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/action"
 	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
@@ -29,6 +30,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/routingslips"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
@@ -54,6 +56,7 @@ import (
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
 	topicocmdownloaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/downloadhandlers"
+	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
@@ -65,14 +68,18 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
 type CLIOptions struct {
+	keyoption.Option
+
 	Completed   bool
 	Config      string
 	ConfigSets  []string
@@ -154,7 +161,7 @@ Often a tagged value can also be substituted from a file with the syntax
 <center>
 <code>&lt;attr>=@&lt;filepath></code>
 </center>
-`
+` + keyoption.Usage()
 
 // NewCliCommandForArgs is the regular way to instantiate a new CLI command.
 // It observes settings provides by options for the main command.
@@ -237,6 +244,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.HideCommand(components.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(plugins.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(action.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(routingslips.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.OverviewCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.OverviewCommand(ocicmds.NewCommand(opts.Context)))
@@ -263,6 +271,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(topicocmaccessmethods.New(ctx))
 	cmd.AddCommand(topicocmuploaders.New(ctx))
 	cmd.AddCommand(topicocmdownloaders.New(ctx))
+	cmd.AddCommand(topicocmlabels.New(ctx))
 	cmd.AddCommand(attributes.New(ctx))
 	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
@@ -274,6 +283,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	help.AddCommand(topicocmaccessmethods.New(ctx))
 	help.AddCommand(topicocmuploaders.New(ctx))
 	help.AddCommand(topicocmdownloaders.New(ctx))
+	help.AddCommand(topicocmlabels.New(ctx))
 	help.AddCommand(attributes.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
@@ -294,6 +304,7 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.Version, "version", "", false, "show version") // otherwise it is implicitly added by cobra
 
 	o.LogOpts.AddFlags(fs)
+	o.Option.AddFlags(fs)
 }
 
 func (o *CLIOptions) Close() error {
@@ -317,6 +328,19 @@ func (o *CLIOptions) Complete() error {
 	_, err = utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
 	if err != nil {
 		return err
+	}
+
+	err = o.Option.Configure(o.Context)
+	if err != nil {
+		return err
+	}
+
+	if o.Keys.HasKeys() {
+		def := signingattr.Get(o.Context.OCMContext())
+		err = signingattr.Set(o.Context.OCMContext(), signing.NewRegistry(def.HandlerRegistry(), signing.NewKeyRegistry(o.Keys, def.KeyRegistry())))
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, n := range o.ConfigSets {
@@ -375,8 +399,6 @@ func (o *CLIOptions) Complete() error {
 			}
 		}
 		_ = ctx.ApplyConfig(spec, "cli")
-	} else {
-		return err
 	}
 	return registration.RegisterExtensions(o.Context.OCMContext())
 }

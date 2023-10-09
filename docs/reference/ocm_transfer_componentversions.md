@@ -15,6 +15,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Options
 
 ```
+  -B, --bom-file string             file name to write the component version BOM
   -c, --constraints constraints     version constraint
   -L, --copy-local-resources        transfer referenced local resources by-value
   -V, --copy-resources              transfer referenced resources by-value
@@ -22,6 +23,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -h, --help                        help for componentversions
       --latest                      restrict component versions to latest
       --lookup stringArray          repository name or spec for closure lookup fallback
+      --no-update                   don't touch existing versions in target
   -N, --omit-access-types strings   omit by-value transfer for resource types
   -f, --overwrite                   overwrite existing component versions
   -r, --recursive                   follow component reference nesting
@@ -85,10 +87,7 @@ Dedicated OCM repository types:
   - <code>ComponentArchive</code>: v1
 
 OCI Repository types (using standard component repository to OCI mapping):
-  - <code>ArtifactSet</code>: v1
   - <code>CommonTransportFormat</code>: v1
-  - <code>DockerDaemon</code>: v1
-  - <code>Empty</code>: v1
   - <code>OCIRegistry</code>: v1
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
@@ -118,6 +117,14 @@ references.
 
 It the option <code>--overwrite</code> is given, component version in the
 target repository will be overwritten, if they already exist.
+
+
+With the option <code>--no-update</code> existing versions in the target
+repository will not be touched at all. An additional specification of the
+option <code>--overwrite</code> is ignored. By default, updates of
+volative (non-signature-relevant) information is enabled, but the
+modification of non-volatile data is prohibited unless the overwrite
+option is given.
 
 
 It the option <code>--copy-resources</code> is given, all referential

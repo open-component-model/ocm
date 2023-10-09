@@ -8,8 +8,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"golang.org/x/exp/slices"
+
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -33,7 +36,12 @@ type plugin struct {
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
-	actions map[string]Action
+	actions       map[string]Action
+	mergehandlers map[string]ValueMergeHandler
+	mergespecs    map[string]*descriptor.LabelMergeSpecification
+
+	valuesets map[string]map[string]ValueSet
+	setScheme map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
 	configParser func(message json.RawMessage) (interface{}, error)
 }
@@ -53,7 +61,12 @@ func NewPlugin(name string, version string) Plugin {
 		accessScheme:   runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		uploaderScheme: runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 
-		actions: map[string]Action{},
+		actions:       map[string]Action{},
+		mergehandlers: map[string]ValueMergeHandler{},
+		mergespecs:    map[string]*descriptor.LabelMergeSpecification{},
+
+		valuesets: map[string]map[string]ValueSet{},
+		setScheme: map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]{},
 
 		descriptor: descriptor.Descriptor{
 			Version:       descriptor.VERSION,
@@ -265,9 +278,11 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	vers := m.Version()
 	if vers == "" {
 		meth := descriptor.AccessMethodDescriptor{
-			Name:                   m.Name(),
-			Description:            m.Description(),
-			Format:                 m.Format(),
+			ValueSetDefinition: descriptor.ValueSetDefinition{
+				Name:        m.Name(),
+				Description: m.Description(),
+				Format:      m.Format(),
+			},
 			SupportContentIdentity: idp,
 		}
 		p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
@@ -276,12 +291,14 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		vers = "v1"
 	}
 	meth := descriptor.AccessMethodDescriptor{
-		Name:                   m.Name(),
-		Version:                vers,
-		Description:            m.Description(),
-		Format:                 m.Format(),
+		ValueSetDefinition: descriptor.ValueSetDefinition{
+			Name:        m.Name(),
+			Version:     vers,
+			Description: m.Description(),
+			Format:      m.Format(),
+			CLIOptions:  optlist,
+		},
 		SupportContentIdentity: idp,
-		CLIOptions:             optlist,
 	}
 	p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
 	p.accessScheme.RegisterByDecoder(m.Name()+"/"+vers, m)
@@ -330,6 +347,45 @@ func (p *plugin) GetAction(name string) Action {
 	return p.actions[name]
 }
 
+func (p *plugin) RegisterValueMergeHandler(a ValueMergeHandler) error {
+	if p.GetValueMergeHandler(a.Name()) != nil {
+		return errors.ErrAlreadyExists("value mergehandler", a.Name())
+	}
+
+	hd := descriptor.ValueMergeHandlerDescriptor{
+		Name:        a.Name(),
+		Description: a.Description(),
+	}
+	p.descriptor.ValueMergeHandlers = append(p.descriptor.ValueMergeHandlers, hd)
+	p.mergehandlers[a.Name()] = a
+	return nil
+}
+
+func (p *plugin) GetValueMergeHandler(name string) ValueMergeHandler {
+	return p.mergehandlers[name]
+}
+
+func (p *plugin) RegisterLabelMergeSpecification(name, version string, spec *metav1.MergeAlgorithmSpecification, desc string) error {
+	e := descriptor.LabelMergeSpecification{
+		Name:                        name,
+		Version:                     version,
+		Description:                 desc,
+		MergeAlgorithmSpecification: *spec,
+	}
+
+	if p.GetLabelMergeSpecification(e.GetName()) != nil {
+		return errors.ErrAlreadyExists("label merge spec", e.GetName())
+	}
+
+	p.descriptor.LabelMergeSpecifications = append(p.descriptor.LabelMergeSpecifications, e)
+	p.mergespecs[e.GetName()] = &e
+	return nil
+}
+
+func (p *plugin) GetLabelMergeSpecification(id string) *descriptor.LabelMergeSpecification {
+	return p.mergespecs[id]
+}
+
 func (p *plugin) GetConfig() (interface{}, error) {
 	if len(p.options.Config) == 0 {
 		return nil, nil
@@ -342,4 +398,108 @@ func (p *plugin) GetConfig() (interface{}, error) {
 		return &cfg, nil
 	}
 	return p.configParser(p.options.Config)
+}
+
+func (p *plugin) DecodeValueSet(purpose string, data []byte) (runtime.TypedObject, error) {
+	schemes := p.setScheme[purpose]
+	if schemes == nil {
+		return nil, errors.ErrUnknown(descriptor.KIND_PURPOSE)
+	}
+	return schemes.Decode(data, nil)
+}
+
+func (p *plugin) GetValueSet(purpose string, name string, version string) ValueSet {
+	n := name
+	if version != "" {
+		n += "/" + version
+	}
+	set := p.valuesets[purpose]
+	if set == nil {
+		return nil
+	}
+	return set[n]
+}
+
+func (p *plugin) RegisterValueSet(s ValueSet) error {
+	n := s.Name()
+	if s.Version() != "" {
+		n += runtime.VersionSeparator + s.Version()
+	}
+	for _, pp := range s.Purposes() {
+		if p.GetValueSet(pp, s.Name(), s.Version()) != nil {
+			return errors.ErrAlreadyExists(descriptor.KIND_VALUESET, n)
+		}
+	}
+
+	var optlist []CLIOption
+	for _, o := range s.Options() {
+		known := options.DefaultRegistry.GetOptionType(o.GetName())
+		if known != nil {
+			if o.ValueType() != known.ValueType() {
+				return fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
+			}
+			optlist = append(optlist, CLIOption{
+				Name: o.GetName(),
+			})
+		} else {
+			optlist = append(optlist, CLIOption{
+				Name:        o.GetName(),
+				Type:        o.ValueType(),
+				Description: o.GetDescriptionText(),
+			})
+		}
+	}
+	vers := s.Version()
+	if vers == "" {
+		set := descriptor.ValueSetDescriptor{
+			ValueSetDefinition: descriptor.ValueSetDefinition{
+				Name:        s.Name(),
+				Description: s.Description(),
+				Format:      s.Format(),
+			},
+			Purposes: slices.Clone(s.Purposes()),
+		}
+		p.descriptor.ValueSets = append(p.descriptor.ValueSets, set)
+		for _, pp := range s.Purposes() {
+			schemes := p.setScheme[pp]
+			if schemes == nil {
+				schemes = runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil)
+				p.setScheme[pp] = schemes
+			}
+			schemes.RegisterByDecoder(s.Name(), s)
+			sets := p.valuesets[pp]
+			if sets == nil {
+				sets = map[string]ValueSet{}
+				p.valuesets[pp] = sets
+			}
+			sets[s.Name()] = s
+		}
+		vers = "v1"
+	}
+	set := descriptor.ValueSetDescriptor{
+		ValueSetDefinition: descriptor.ValueSetDefinition{
+			Name:        s.Name(),
+			Version:     vers,
+			Description: s.Description(),
+			Format:      s.Format(),
+			CLIOptions:  optlist,
+		},
+		Purposes: slices.Clone(s.Purposes()),
+	}
+	p.descriptor.ValueSets = append(p.descriptor.ValueSets, set)
+	for _, pp := range s.Purposes() {
+		schemes := p.setScheme[pp]
+		if schemes == nil {
+			schemes = runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil)
+			p.setScheme[pp] = schemes
+		}
+		schemes.RegisterByDecoder(s.Name()+"/"+vers, s)
+		sets := p.valuesets[pp]
+		if sets == nil {
+			sets = map[string]ValueSet{}
+			p.valuesets[pp] = sets
+		}
+		sets[s.Name()+"/"+vers] = s
+	}
+	return nil
 }

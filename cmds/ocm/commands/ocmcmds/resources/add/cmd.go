@@ -31,7 +31,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.NewResourceAdderCommand(ctx, rscs.ResourceSpecHandler{}, NewResourceSpecificationsProvider(ctx, "")),
+			common.NewResourceAdderCommand(ctx, rscs.New(), NewResourceSpecificationsProvider(ctx, "")),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -54,7 +54,7 @@ Add a resource by a description file:
 <pre>
 ---
 name: myrresource
-type: PlainText
+type: plainText
 version: ${version]
 input:
   type: file

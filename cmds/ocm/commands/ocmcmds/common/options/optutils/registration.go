@@ -9,13 +9,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Registration struct {
@@ -72,7 +72,7 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 		var raw []byte
 		var err error
 		if strings.HasPrefix(v, "@") {
-			raw, err = vfs.ReadFile(ctx.FileSystem(), v[1:])
+			raw, err = utils.ReadFile(v[1:], ctx.FileSystem())
 			if err != nil {
 				return errors.Wrapf(err, "cannot read %s config from %q", o.name, v[1:])
 			}

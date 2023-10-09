@@ -6,9 +6,9 @@ package signing
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
@@ -27,9 +27,9 @@ func SignComponentVersion(cv ocm.ComponentVersionAccess, name string, optlist ..
 		return nil, errors.Newf("impossible verification option set for signing")
 	}
 	if opts.Signer == nil {
-		opts.Signer = signing.DefaultHandlerRegistry().GetSigner(rsa.Algorithm)
+		opts.Signer = signingattr.Get(cv.GetContext()).GetSigner(rsa.Algorithm)
 	}
-	err := opts.Complete(nil)
+	err := opts.Complete(cv.GetContext())
 	if err != nil {
 		return nil, errors.Wrapf(err, "inconsistent options for signing")
 	}
@@ -52,7 +52,7 @@ func VerifyComponentVersion(cv ocm.ComponentVersionAccess, name string, optlist 
 	if opts.Signer != nil {
 		return nil, errors.Newf("impossible signer option set for verification")
 	}
-	err := opts.Complete(nil)
+	err := opts.Complete(cv.GetContext())
 	if err != nil {
 		return nil, errors.Wrapf(err, "inconsistent options for verification")
 	}

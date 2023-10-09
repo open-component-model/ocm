@@ -5,6 +5,8 @@
 package cache
 
 import (
+	"golang.org/x/exp/slices"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 )
 
@@ -82,6 +84,51 @@ func (p *pluginImpl) GetActionDescriptor(name string) *descriptor.ActionDescript
 	return nil
 }
 
+func (p *pluginImpl) GetValueMergeHandlerDescriptor(name string) *descriptor.ValueMergeHandlerDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	for _, a := range p.descriptor.ValueMergeHandlers {
+		if a.Name == name {
+			return &a
+		}
+	}
+	return nil
+}
+
+func (p *pluginImpl) GetValueMappingDescriptor(name string) *descriptor.ValueMergeHandlerDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	for _, a := range p.descriptor.ValueMergeHandlers {
+		if a.Name == name {
+			return &a
+		}
+	}
+	return nil
+}
+
+func (p *pluginImpl) GetLabelMergeSpecification(name, version string) *descriptor.LabelMergeSpecification {
+	if !p.IsValid() {
+		return nil
+	}
+
+	var fallback *descriptor.LabelMergeSpecification
+	for i, s := range p.descriptor.LabelMergeSpecifications {
+		if s.Name == name {
+			if s.Version == version {
+				return &s
+			}
+			if s.Version == "" {
+				fallback = &p.descriptor.LabelMergeSpecifications[i]
+			}
+		}
+	}
+	return fallback
+}
+
 func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *descriptor.AccessMethodDescriptor {
 	if !p.IsValid() {
 		return nil
@@ -96,6 +143,33 @@ func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *descriptor
 			}
 			if m.Version == "" || m.Version == "v1" {
 				fallback = m
+				fallbackFound = true
+			}
+		}
+	}
+	if fallbackFound && (version == "" || version == "v1") {
+		return &fallback
+	}
+	return nil
+}
+
+func (p *pluginImpl) GetValueSetDescriptor(purpose, name, version string) *descriptor.ValueSetDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	var fallback descriptor.ValueSetDescriptor
+	fallbackFound := false
+	for _, s := range p.descriptor.ValueSets {
+		if !slices.Contains(s.Purposes, purpose) {
+			continue
+		}
+		if s.Name == name {
+			if s.Version == version {
+				return &s
+			}
+			if s.Version == "" || s.Version == "v1" {
+				fallback = s
 				fallbackFound = true
 			}
 		}

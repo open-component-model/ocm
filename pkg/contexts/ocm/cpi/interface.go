@@ -7,9 +7,12 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
+	_ "unsafe"
+
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/registrations"
@@ -67,7 +70,6 @@ type (
 	GenericRepositorySpec            = internal.GenericRepositorySpec
 	RepositoryType                   = internal.RepositoryType
 	ComponentReference               = internal.ComponentReference
-	References                       = compdesc.References
 )
 
 type (
@@ -88,6 +90,8 @@ type (
 	BlobDigester         = internal.BlobDigester
 	BlobDigesterRegistry = internal.BlobDigesterRegistry
 	DigestDescriptor     = internal.DigestDescriptor
+	HasherProvider       = internal.HasherProvider
+	Hasher               = internal.Hasher
 )
 
 type NamePath = registrations.NamePath
@@ -106,6 +110,10 @@ func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {
 
 func New() Context {
 	return internal.Builder{}.New()
+}
+
+func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) *ResourceMeta {
+	return compdesc.NewResourceMeta(name, typ, relation)
 }
 
 func NewDigestDescriptor(digest string, typ DigesterType) *DigestDescriptor {
@@ -158,6 +166,10 @@ func MustRegisterDigester(digester BlobDigester, arttypes ...string) {
 
 func SetDefaultDigester(d BlobDigester) {
 	internal.SetDefaultDigester(d)
+}
+
+func ToGenericAccessSpec(spec AccessSpec) (*GenericAccessSpec, error) {
+	return internal.ToGenericAccessSpec(spec)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {

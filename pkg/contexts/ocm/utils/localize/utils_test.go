@@ -16,37 +16,37 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-func Localizations(data string) []localize.Localization {
+func UnmarshalLocalizations(data string) []localize.Localization {
 	var v []localize.Localization
 	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return v
 }
 
-func Configurations(data string) []localize.Configuration {
+func UnmarshalConfigurations(data string) []localize.Configuration {
 	var v []localize.Configuration
 	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return v
 }
 
-func Substitutions(data string) localize.Substitutions {
+func UnmarshalSubstitutions(data string) localize.Substitutions {
 	var v localize.Substitutions
 	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return v
 }
 
-func ImageMappings(data string) localize.ImageMappings {
+func UnmarshalImageMappings(data string) localize.ImageMappings {
 	var v localize.ImageMappings
 	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return v
 }
 
-func ValueMappings(data string) localize.ValueMappings {
+func UnmarshalValueMappings(data string) localize.ValueMappings {
 	var v localize.ValueMappings
 	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return v
 }
 
-func InstRules(data string) *localize.InstantiationRules {
+func UnmarshalInstRules(data string) *localize.InstantiationRules {
 	var v localize.InstantiationRules
 	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return &v

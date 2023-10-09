@@ -25,6 +25,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 	"sigs.k8s.io/yaml"
 
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
@@ -239,16 +241,12 @@ func JoinIndentLines(orig []string, gap string, skipfirst ...bool) string {
 	return s + strings.Join(orig, "\n"+gap)
 }
 
-func StringMapKeys[E any](m map[string]E) []string {
+func StringMapKeys[K ~string, E any](m map[K]E) []K {
 	if m == nil {
 		return nil
 	}
-
-	keys := []string{}
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
+	keys := maps.Keys(m)
+	slices.Sort(keys)
 	return keys
 }
 
@@ -314,15 +312,18 @@ func OptionalDefaulted[T any](def T, list ...T) T {
 	return def
 }
 
-// OptionalDefaultedBool checks all args for true. If no true is given
+// OptionalDefaultedBool checks all args for true. If arg is given
 // the given default is returned.
 func OptionalDefaultedBool(def bool, list ...bool) bool {
+	if len(list) == 0 {
+		return def
+	}
 	for _, e := range list {
 		if e {
 			return e
 		}
 	}
-	return def
+	return false
 }
 
 // GetOptionFlag returns the flag value used to set a bool option
@@ -341,4 +342,16 @@ func Must[T any](o T, err error) T {
 }
 
 func IgnoreError(_ error) {
+}
+
+func BoolP[T ~bool](b T) *bool {
+	v := bool(b)
+	return &v
+}
+
+func AsBool(b *bool, def ...bool) bool {
+	if b == nil && len(def) > 0 {
+		return Optional(def...)
+	}
+	return b != nil && *b
 }

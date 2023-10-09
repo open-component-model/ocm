@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
-	"github.com/open-component-model/ocm/pkg/generics"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
@@ -33,6 +32,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
@@ -260,7 +260,7 @@ func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 	a.accprov = a.ctx.OCMContext().AccessMethods().CreateConfigTypeSetConfigProvider()
 	inptypes := inputs.For(a.ctx).ConfigTypeSetConfigProvider()
 
-	set := flagsets.NewConfigOptionSet("resources")
+	set := flagsets.NewConfigOptionTypeSet("resources")
 	set.AddAll(a.accprov)
 	dup, err := set.AddAll(inptypes)
 	if err != nil {
@@ -369,6 +369,9 @@ type ResourceAdderCommand struct {
 }
 
 func NewResourceAdderCommand(ctx clictx.Context, h ResourceSpecHandler, provider ElementSpecificationsProvider, opts ...options.Options) ResourceAdderCommand {
+	if o, ok := h.(options.Options); ok {
+		opts = append(opts, o)
+	}
 	return ResourceAdderCommand{
 		BaseCommand: utils.NewBaseCommand(ctx, generics.AppendedSlice[options.Options](opts,
 			fileoption.NewCompArch(),

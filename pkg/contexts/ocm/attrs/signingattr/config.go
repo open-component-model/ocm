@@ -11,11 +11,11 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -81,7 +81,8 @@ func (k *KeySpec) Get() (interface{}, error) {
 	if fs == nil {
 		fs = osfs.New()
 	}
-	return vfs.ReadFile(fs, k.Path)
+
+	return utils.ReadFile(k.Path, fs)
 }
 
 // New creates a new memory ConfigSpec.
@@ -147,14 +148,14 @@ func (a *Config) AddPrivateKeyData(name string, data []byte) {
 }
 
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
-	t, ok := target.(config.Context)
+	t, ok := target.(Context)
 	if !ok {
 		return cfgcpi.ErrNoContext(ConfigType)
 	}
 	return errors.Wrapf(a.ApplyToRegistry(Get(t)), "applying config failed")
 }
 
-func (a *Config) ApplyToRegistry(registry signing.KeyRegistry) error {
+func (a *Config) ApplyToRegistry(registry signing.KeyRegistryFuncs) error {
 	for n, k := range a.PublicKeys {
 		key, err := k.Get()
 		if err != nil {

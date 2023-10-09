@@ -6,12 +6,11 @@ package signoption
 
 import (
 	"crypto/x509"
-	"encoding/base64"
 	"strings"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/keyoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/hashoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -24,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -39,13 +39,12 @@ func New(sign bool) *Option {
 }
 
 type Option struct {
-	rootca []string
+	keyoption.Option
 
+	rootca        []string
 	local         bool
 	SignMode      bool
 	signAlgorithm string
-	publicKeys    []string
-	privateKeys   []string
 	Issuer        string
 	RootCerts     *x509.CertPool
 	// Verify the digests
@@ -58,7 +57,6 @@ type Option struct {
 	SignatureNames []string
 	Update         bool
 	Signer         signing.Signer
-	Keys           signing.KeyRegistry
 
 	Hash hashoption.Option
 
@@ -66,11 +64,10 @@ type Option struct {
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
+	o.Option.AddFlags(fs)
 	fs.StringArrayVarP(&o.SignatureNames, "signature", "s", nil, "signature name")
-	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
 	if o.SignMode {
 		o.Hash.AddFlags(fs)
-		fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
 		fs.StringVarP(&o.signAlgorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
 		fs.StringVarP(&o.Issuer, "issuer", "I", "", "issuer name")
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
@@ -92,6 +89,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 				return errors.Newf("empty signature name (name %d) not possible", i)
 			}
 		}
+		o.DefaultName = o.SignatureNames[0] // set default name for key handling
 	} else {
 		o.SignatureNames = nil
 	}
@@ -114,11 +112,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		o.Recursively = !o.local
 	}
 
-	err := o.handleKeys(ctx, "public key", o.publicKeys, o.Keys.RegisterPublicKey)
-	if err != nil {
-		return err
-	}
-	err = o.handleKeys(ctx, "private key", o.privateKeys, o.Keys.RegisterPrivateKey)
+	err := o.Option.Configure(ctx)
 	if err != nil {
 		return err
 	}
@@ -129,7 +123,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 			return err
 		}
 		for _, r := range o.rootca {
-			data, err := vfs.ReadFile(ctx.FileSystem(), r)
+			data, err := utils.ReadFile(r, ctx.FileSystem())
 			if err != nil {
 				return errors.Wrapf(err, "cannot read ca file %q", r)
 			}
@@ -139,44 +133,6 @@ func (o *Option) Configure(ctx clictx.Context) error {
 			}
 		}
 		o.RootCerts = pool
-	}
-	return nil
-}
-
-func (o *Option) handleKeys(ctx clictx.Context, desc string, keys []string, add func(string, interface{})) error {
-	for _, k := range keys {
-		name := ""
-		if len(o.SignatureNames) > 0 {
-			name = o.SignatureNames[0]
-		}
-		file := k
-		sep := strings.Index(k, "=")
-		if sep > 0 {
-			name = k[:sep]
-			file = k[sep+1:]
-		}
-		if len(file) == 0 {
-			return errors.Newf("empty file name")
-		}
-		var data []byte
-		var err error
-		switch file[0] {
-		case '=':
-			data = []byte(file[1:])
-		case '!':
-			data, err = base64.StdEncoding.DecodeString(file[1:])
-		case '@':
-			data, err = vfs.ReadFile(ctx.FileSystem(), file[1:])
-		default:
-			data, err = vfs.ReadFile(ctx.FileSystem(), file)
-		}
-		if err != nil {
-			return errors.Wrapf(err, "cannot read %s file %q", desc, file)
-		}
-		if name == "" {
-			return errors.Newf("signature name required")
-		}
-		add(name, data)
 	}
 	return nil
 }
@@ -193,6 +149,7 @@ Alternatively a key can be specified as base64 encoded string if the argument
 start with the prefix <code>!</code> or as direct string with the prefix
 <code>=</code>.
 `
+
 	if o.SignMode {
 		s += `
 If in signing mode a public key is specified, existing signatures for the

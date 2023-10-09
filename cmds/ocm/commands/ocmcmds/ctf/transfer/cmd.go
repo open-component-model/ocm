@@ -15,11 +15,13 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/skipupdateoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -48,9 +50,10 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
 		closureoption.New("component reference"),
+		skipupdateoption.New(),
+		overwriteoption.New(),
 		lookupoption.New(),
 		formatoption.New(),
-		overwriteoption.New(),
 		rscbyvalueoption.New(),
 		srcbyvalueoption.New(),
 		omitaccesstypeoption.New(),
@@ -104,16 +107,10 @@ func (o *Command) Run() error {
 	}
 
 	thdlr, err := spiff.New(
-		closureoption.From(o),
-		lookupoption.From(o),
-		rscbyvalueoption.From(o),
-		srcbyvalueoption.From(o),
-		omitaccesstypeoption.From(o),
-		stoponexistingoption.From(o),
-		overwriteoption.From(o),
-		spiff.Script(scriptoption.From(o).ScriptData),
-		spiff.ScriptFilesystem(o.FileSystem()),
-	)
+		append(options.FindOptions[transferhandler.TransferOption](o),
+			spiff.Script(scriptoption.From(o).ScriptData),
+			spiff.ScriptFilesystem(o.FileSystem()),
+		)...)
 	if err != nil {
 		return err
 	}

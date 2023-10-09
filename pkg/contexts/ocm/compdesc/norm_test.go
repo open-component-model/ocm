@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.software/v3alpha1"
@@ -42,6 +43,7 @@ var CD1 = `
       - name: label2
         value: bar
         signing: true
+        mergeAlgorithm: test
       name: introspect-image
       relation: local
       type: ociImage
@@ -185,8 +187,51 @@ var _ = Describe("Normalization", func() {
 	It("hashes v2", func() {
 		n, err := compdesc.Normalize(cd1, compdesc.JsonNormalisationV2)
 		Expect(err).To(Succeed())
-		// Expect(string(n)).To(Equal("[{\"component\":[{\"componentReferences\":[]},{\"name\":\"github.com/vasu1124/introspect\"},{\"provider\":[{\"name\":\"internal\"}]},{\"resources\":[[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"ociArtifactDigest/v1\"},{\"value\":\"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c\"}]},{\"labels\":[[{\"name\":\"label2\"},{\"signing\":true},{\"value\":\"bar\"}]]},{\"name\":\"introspect-image\"},{\"relation\":\"local\"},{\"type\":\"ociImage\"},{\"version\":\"1.0.0\"}],[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"genericBlobDigest/v1\"},{\"value\":\"d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf\"}]},{\"name\":\"introspect-blueprint\"},{\"relation\":\"local\"},{\"type\":\"landscaper.gardener.cloud/blueprint\"},{\"version\":\"1.0.0\"}],[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"ociArtifactDigest/v1\"},{\"value\":\"6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c\"}]},{\"name\":\"introspect-helm\"},{\"relation\":\"external\"},{\"type\":\"helm\"},{\"version\":\"0.1.0\"}]]},{\"sources\":[[{\"name\":\"introspect\"},{\"type\":\"git\"},{\"version\":\"1.0.0\"}]]},{\"version\":\"1.0.0\"}]}]"))
 		Expect(string(n)).To(Equal(`{"component":{"componentReferences":[],"name":"github.com/vasu1124/introspect","provider":{"name":"internal"},"resources":[{"digest":{"hashAlgorithm":"SHA-256","normalisationAlgorithm":"ociArtifactDigest/v1","value":"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c"},"labels":[{"name":"label2","signing":true,"value":"bar"}],"name":"introspect-image","relation":"local","type":"ociImage","version":"1.0.0"},{"digest":{"hashAlgorithm":"SHA-256","normalisationAlgorithm":"genericBlobDigest/v1","value":"d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf"},"name":"introspect-blueprint","relation":"local","type":"landscaper.gardener.cloud/blueprint","version":"1.0.0"},{"digest":{"hashAlgorithm":"SHA-256","normalisationAlgorithm":"ociArtifactDigest/v1","value":"6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c"},"name":"introspect-helm","relation":"external","type":"helm","version":"0.1.0"}],"sources":[{"name":"introspect","type":"git","version":"1.0.0"}],"version":"1.0.0"}}`))
+	})
+
+	It("hashes v1 with none access", func() {
+		cd1.Resources = append(cd1.Resources, compdesc.Resource{
+			ResourceMeta: compdesc.ResourceMeta{
+				ElementMeta: compdesc.ElementMeta{
+					Name:    "none",
+					Version: "v1",
+				},
+				Type:     "plainText",
+				Relation: v1.LocalRelation,
+				Digest: &v1.DigestSpec{ // must set to nil
+					HashAlgorithm:          "x",
+					NormalisationAlgorithm: "y",
+					Value:                  "z",
+				},
+			},
+			Access: none.New(),
+		})
+		n, err := compdesc.Normalize(cd1, compdesc.JsonNormalisationV1)
+		Expect(err).To(Succeed())
+		Expect(string(n)).To(StringEqualWithContext(`[{"component":[{"componentReferences":[]},{"name":"github.com/vasu1124/introspect"},{"provider":"internal"},{"resources":[[{"digest":[{"hashAlgorithm":"SHA-256"},{"normalisationAlgorithm":"ociArtifactDigest/v1"},{"value":"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c"}]},{"extraIdentity":null},{"labels":[[{"name":"label2"},{"signing":true},{"value":"bar"}]]},{"name":"introspect-image"},{"relation":"local"},{"type":"ociImage"},{"version":"1.0.0"}],[{"digest":[{"hashAlgorithm":"SHA-256"},{"normalisationAlgorithm":"genericBlobDigest/v1"},{"value":"d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf"}]},{"extraIdentity":null},{"name":"introspect-blueprint"},{"relation":"local"},{"type":"landscaper.gardener.cloud/blueprint"},{"version":"1.0.0"}],[{"digest":[{"hashAlgorithm":"SHA-256"},{"normalisationAlgorithm":"ociArtifactDigest/v1"},{"value":"6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c"}]},{"extraIdentity":null},{"name":"introspect-helm"},{"relation":"external"},{"type":"helm"},{"version":"0.1.0"}],[{"extraIdentity":null},{"name":"none"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"version":"1.0.0"}]},{"meta":[{"schemaVersion":"v2"}]}]`))
+	})
+
+	It("hashes v2 with none access", func() {
+		cd1.Resources = append(cd1.Resources, compdesc.Resource{
+			ResourceMeta: compdesc.ResourceMeta{
+				ElementMeta: compdesc.ElementMeta{
+					Name:    "none",
+					Version: "v1",
+				},
+				Type:     "plainText",
+				Relation: v1.LocalRelation,
+				Digest: &v1.DigestSpec{ // must set to nil
+					HashAlgorithm:          "x",
+					NormalisationAlgorithm: "y",
+					Value:                  "z",
+				},
+			},
+			Access: none.New(),
+		})
+		n, err := compdesc.Normalize(cd1, compdesc.JsonNormalisationV2)
+		Expect(err).To(Succeed())
+		Expect(string(n)).To(Equal(`{"component":{"componentReferences":[],"name":"github.com/vasu1124/introspect","provider":{"name":"internal"},"resources":[{"digest":{"hashAlgorithm":"SHA-256","normalisationAlgorithm":"ociArtifactDigest/v1","value":"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c"},"labels":[{"name":"label2","signing":true,"value":"bar"}],"name":"introspect-image","relation":"local","type":"ociImage","version":"1.0.0"},{"digest":{"hashAlgorithm":"SHA-256","normalisationAlgorithm":"genericBlobDigest/v1","value":"d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf"},"name":"introspect-blueprint","relation":"local","type":"landscaper.gardener.cloud/blueprint","version":"1.0.0"},{"digest":{"hashAlgorithm":"SHA-256","normalisationAlgorithm":"ociArtifactDigest/v1","value":"6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c"},"name":"introspect-helm","relation":"external","type":"helm","version":"0.1.0"},{"name":"none","relation":"local","type":"plainText","version":"v1"}],"sources":[{"name":"introspect","type":"git","version":"1.0.0"}],"version":"1.0.0"}}`))
 	})
 
 	It("hashes v2 with complex provider", func() {

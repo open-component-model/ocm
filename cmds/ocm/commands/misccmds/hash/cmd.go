@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -22,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 var (
@@ -78,7 +78,7 @@ func (o *Command) Complete(args []string) error {
 	if len(args) == 3 {
 		o.issuer = args[2]
 	}
-	o.priv, err = vfs.ReadFile(o.FileSystem(), args[0])
+	o.priv, err = utils2.ReadFile(args[0], o.FileSystem())
 	if err != nil {
 		return err
 	}

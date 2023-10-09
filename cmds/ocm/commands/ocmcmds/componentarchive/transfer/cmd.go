@@ -12,9 +12,11 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/skipupdateoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -39,7 +41,15 @@ type Command struct {
 
 // NewCommand creates a new transfer command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(), lookupoption.New(), overwriteoption.New(), rscbyvalueoption.New(), srcbyvalueoption.New())}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(
+		&Command{BaseCommand: utils.NewBaseCommand(ctx,
+			formatoption.New(),
+			lookupoption.New(),
+			skipupdateoption.New(),
+			overwriteoption.New(),
+			rscbyvalueoption.New(),
+			srcbyvalueoption.New(),
+		)}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -90,12 +100,7 @@ func (o *Command) Run() error {
 
 	transferopts := &standard.Options{}
 	transferhandler.From(o.ConfigContext(), transferopts)
-	transferhandler.ApplyOptions(transferopts,
-		lookupoption.From(o),
-		overwriteoption.From(o),
-		rscbyvalueoption.From(o),
-		srcbyvalueoption.From(o),
-	)
+	transferhandler.ApplyOptions(transferopts, options.FindOptions[transferhandler.TransferOption](o)...)
 	thdlr, err := standard.New(transferopts)
 	if err != nil {
 		return err

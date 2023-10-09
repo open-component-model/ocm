@@ -65,6 +65,10 @@ func NewAccess(fs vfs.FileSystem, readonly bool) (*Access, error) {
 	return a, nil
 }
 
+func (a *Access) IsReadOnly() bool {
+	return a.readonly
+}
+
 func (a *Access) Reset() error {
 	a.lock.Lock()
 	defer a.lock.Unlock()

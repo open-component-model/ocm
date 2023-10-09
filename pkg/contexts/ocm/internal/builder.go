@@ -187,7 +187,7 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		}
 	}
 
-	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers, b.blobhandlers, b.blobdigesters, b.repodel, b.credentials.ConfigContext())
+	return datacontext.SetupContext(mode, newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers, b.blobhandlers, b.blobdigesters, b.repodel, b.credentials.ConfigContext()))
 }
 
 type delegatingDecoder struct {

@@ -18,6 +18,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Values map[string]interface{}
@@ -133,7 +134,7 @@ func (o *Options) Execute(data string) (string, error) {
 
 func ReadYAMLSettings(fs vfs.FileSystem, path string) (Values, error) {
 	result := Values{}
-	data, err := vfs.ReadFile(fs, path)
+	data, err := utils2.ReadFile(path, fs)
 	if err != nil {
 		return nil, err
 	}

@@ -5,11 +5,13 @@
 package v1
 
 import (
+	"reflect"
 	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -83,8 +85,29 @@ type ObjectMeta struct {
 	CreationTime *Timestamp `json:"creationTime,omitempty"`
 }
 
+func (o *ObjectMeta) Equal(obj interface{}) bool {
+	if e, ok := obj.(*ObjectMeta); ok {
+		if o.Name == e.Name &&
+			o.Version == e.Version &&
+			reflect.DeepEqual(o.Provider, e.Provider) &&
+			reflect.DeepEqual(o.Labels, e.Labels) {
+			return true
+		}
+		// check Creation time ?
+	}
+	return false
+}
+
+func (o ObjectMeta) Equivalent(a ObjectMeta) equivalent.EqualState {
+	state := equivalent.StateLocalHashEqual(o.Name == a.Name && o.Version == a.Version)
+	return state.Apply(
+		o.Provider.Equivalent(a.Provider),
+		o.Labels.Equivalent(a.Labels),
+	)
+}
+
 // GetName returns the name of the object.
-func (o ObjectMeta) GetName() string {
+func (o *ObjectMeta) GetName() string {
 	return o.Name
 }
 
@@ -160,6 +183,11 @@ func (o *Provider) Copy() *Provider {
 	}
 }
 
+func (o Provider) Equivalent(a Provider) equivalent.EqualState {
+	state := equivalent.StateLocalHashEqual(o.Name == a.Name)
+	return state.Apply(o.Labels.Equivalent(a.Labels))
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type _time = v1.Time
@@ -172,19 +200,25 @@ type Timestamp struct {
 
 func NewTimestamp() Timestamp {
 	return Timestamp{
-		_time: v1.NewTime(time.Now().Round(time.Second)),
+		_time: v1.NewTime(time.Now().UTC().Round(time.Second)),
 	}
 }
 
 func NewTimestampP() *Timestamp {
 	return &Timestamp{
-		_time: v1.NewTime(time.Now().Round(time.Second)),
+		_time: v1.NewTime(time.Now().UTC().Round(time.Second)),
 	}
 }
 
 func NewTimestampFor(t time.Time) Timestamp {
 	return Timestamp{
-		_time: v1.NewTime(t.Round(time.Second)),
+		_time: v1.NewTime(t.UTC().Round(time.Second)),
+	}
+}
+
+func NewTimestampPFor(t time.Time) *Timestamp {
+	return &Timestamp{
+		_time: v1.NewTime(t.UTC().Round(time.Second)),
 	}
 }
 
@@ -211,10 +245,15 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		return nil
 	}
+
 	// Fractional seconds are handled implicitly by Parse.
 	tt, err := time.Parse(`"`+time.RFC3339+`"`, string(data))
 	*t = NewTimestampFor(tt)
 	return err
+}
+
+func (t Timestamp) String() string {
+	return t.Format(time.RFC3339)
 }
 
 func (t *Timestamp) Time() time.Time {
@@ -223,10 +262,6 @@ func (t *Timestamp) Time() time.Time {
 
 func (t *Timestamp) Equal(o Timestamp) bool {
 	return t._time.Equal(&o._time)
-}
-
-func (t *Timestamp) UTC() Timestamp {
-	return NewTimestampFor(t._time.UTC())
 }
 
 func (t *Timestamp) Add(d time.Duration) Timestamp {

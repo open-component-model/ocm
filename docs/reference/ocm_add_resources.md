@@ -21,6 +21,7 @@ resources, resource, res, r
   -h, --help                         help for resources
   -O, --output string                output file for dry-run
   -s, --settings stringArray         settings file with variable settings (yaml)
+      --skip-digest-generation       skip digest creation
       --templater string             templater to use (go, none, spiff, subst) (default "subst")
 ```
 
@@ -247,6 +248,8 @@ with the field <code>type</code> in the <code>input</code> field:
 
   The path must denote an image tag that can be found in the local
   docker daemon. The denoted image is packed as OCI artifact set.
+  The OCI image will contain an informational back link to the component version
+  using the manifest annotation <code>software.ocm/component-version</code>.
 
   This blob type specification supports the following fields:
   - **<code>path</code>** *string*
@@ -267,7 +270,10 @@ with the field <code>type</code> in the <code>input</code> field:
   This input type describes the composition of a multi-platform OCI image.
   The various variants are taken from the local docker daemon. They should be
   built with the buildx command for cross platform docker builds.
-  The denoted images, as well as the wrapping image index is packed as OCI artifact set.
+  The denoted images, as well as the wrapping image index is packed as OCI
+  artifact set.
+  They will contain an informational back link to the component version
+  using the manifest annotation <code>software.ocm/component-version</code>.
 
   This blob type specification supports the following fields:
   - **<code>variants</code>** *[]string*
@@ -808,7 +814,7 @@ Add a resource by a description file:
 <pre>
 &dash;&dash;&dash;
 name: myrresource
-type: PlainText
+type: plainText
 version: ${version]
 input:
   type: file

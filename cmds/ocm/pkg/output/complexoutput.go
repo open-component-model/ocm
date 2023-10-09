@@ -10,7 +10,6 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	. "github.com/open-component-model/ocm/pkg/out"
 
-	"github.com/mandelsoft/logging"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -25,12 +24,12 @@ type ComplexProcessingOutput struct {
 
 var _ Output = &ComplexProcessingOutput{}
 
-func NewProcessingComplexOutput(log logging.Context, ctx Context, chain ProcessChain, fields ...string) *ComplexProcessingOutput {
-	return (&ComplexProcessingOutput{}).new(log, ctx, chain, fields)
+func NewProcessingComplexOutput(opts *Options, chain ProcessChain, fields ...string) *ComplexProcessingOutput {
+	return (&ComplexProcessingOutput{}).new(opts, chain, fields)
 }
 
-func (this *ComplexProcessingOutput) new(log logging.Context, ctx Context, chain ProcessChain, fields []string) *ComplexProcessingOutput {
-	this.ElementOutput.new(log, ctx, chain)
+func (this *ComplexProcessingOutput) new(opts *Options, chain ProcessChain, fields []string) *ComplexProcessingOutput {
+	this.ElementOutput.new(opts, chain)
 	this.fields = fields
 	return this
 }
@@ -57,7 +56,7 @@ func (this *ComplexProcessingOutput) Out() error {
 			}
 		}
 	}
-	return nil
+	return this.ElementOutput.Out()
 }
 
 func (this *ComplexProcessingOutput) out(gap string, m map[string]interface{}) {

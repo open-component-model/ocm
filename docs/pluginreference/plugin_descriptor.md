@@ -57,6 +57,16 @@ following fields:
   require dedicated environment specific actions.
   For example, the creation of OCI repositories before an artifact upload.
 
+- **<code>valueMergeHandlers</code>** *[]ValueMergeHandlerDescriptor*
+
+  The list of supported merge handlers. Merge handlers are used to
+  merge label values if a component version is re-transferred to
+  a target repository.
+
+- **<code>labelMergeSpecifications</code>** *[]LabelMergeSpecification*
+
+  The list of assignments of label merge specification to labels.
+
 #### Access Method Descriptor
 
 An access method descriptor describes a dedicated supported access method.
@@ -116,6 +126,7 @@ The following predefined option types can be used:
   - <code>accessRepository</code>: [*string*] repository URL
   - <code>accessVersion</code>: [*string*] version for access specification
   - <code>bucket</code>: [*string*] bucket name
+  - <code>comment</code>: [*string*] comment field value
   - <code>commit</code>: [*string*] git commit id
   - <code>digest</code>: [*string*] blob digest
   - <code>globalAccess</code>: [*map[string]YAML*] access specification for global access
@@ -231,6 +242,45 @@ The descriptor for an action has the following fields:
   consumer type used to lookup the credentials. The consumer attributes are
   derived from the the action specification and cannot be influenced by the
   plugin.
+
+### Value Merge Handler Descriptor
+
+The descriptor for a value merge handler has the following fields:
+
+- **<code>name</code>** *string*
+
+  The name of the algorithm.
+
+- **<code>description</code>** *string*
+
+  The description of the algorithm.
+
+### Label Merge Specification
+
+The descriptor for a label merge specification has the following fields:
+
+- **<code>name</code>** *string*
+
+  The name of the label.
+
+- **<code>version</code>** *string* (optional)
+
+  The dedicated label format version the specification should be used for. If no
+  version is specified the setting is valid for all versions without a dedicated
+  assignment.
+
+- **<code>description</code>** *string*
+
+  The details for the merging.
+
+- **<code>algorithm</code>** *string*
+
+  The name of (top-level) the algorithm to use.
+
+- **<code>config</code>** *any* (optional)
+
+  The configuration settings used for the algorithm. It may contain nested
+  merge specifications.
 
 
 ### Examples

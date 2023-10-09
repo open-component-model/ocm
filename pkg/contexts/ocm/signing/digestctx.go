@@ -68,9 +68,11 @@ func NewDigestContext(cd *compdesc.ComponentDescriptor, parent *DigestContext) *
 			}
 			root.In[nv] = &digs
 		}
-		digs := GetDigests(cd)
-		if len(digs.Resources) > 0 {
-			root.In[key] = digs
+		digs, all := GetDigests(cd)
+		if len(root.In) == 0 && all {
+			if len(digs.Resources) > 0 {
+				root.In[key] = digs
+			}
 		}
 	} else {
 		root = parent.RootContextInfo
@@ -85,18 +87,23 @@ func NewDigestContext(cd *compdesc.ComponentDescriptor, parent *DigestContext) *
 	}
 }
 
-func GetDigests(cd *compdesc.ComponentDescriptor) *metav1.NestedComponentDigests {
+func GetDigests(cd *compdesc.ComponentDescriptor) (*metav1.NestedComponentDigests, bool) {
+	all := true
 	digs := &metav1.NestedComponentDigests{
 		Name:    cd.GetName(),
 		Version: cd.GetVersion(),
 	}
 	for _, r := range cd.Resources {
-		if r.Digest != nil {
-			ad := ArtefactDigest(&r)
-			digs.Resources = append(digs.Resources, ad)
+		if !compdesc.IsNoneAccess(r.Access) {
+			if r.Digest != nil {
+				ad := ArtefactDigest(&r)
+				digs.Resources = append(digs.Resources, ad)
+			} else {
+				all = false
+			}
 		}
 	}
-	return digs
+	return digs, all
 }
 
 func (dc *DigestContext) IsRoot() bool {
@@ -113,7 +120,10 @@ func (dc *DigestContext) GetDigests() metav1.NestedDigests {
 }
 
 func (dc *DigestContext) Propagate(d *metav1.DigestSpec) error {
-	digs := GetDigests(dc.Descriptor)
+	digs, all := GetDigests(dc.Descriptor)
+	if !all {
+		return fmt.Errorf("not all digests calculated")
+	}
 	digs.Digest = d
 	dc.Digest = d
 	preset := dc.GetPreset(dc.Key)

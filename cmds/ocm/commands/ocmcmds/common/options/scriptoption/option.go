@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -62,7 +63,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		}
 	}
 	if o.ScriptFile != "" {
-		data, err := vfs.ReadFile(ctx.FileSystem(), o.ScriptFile)
+		data, err := utils.ReadFile(o.ScriptFile, ctx.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "invalid transfer script file")
 		}

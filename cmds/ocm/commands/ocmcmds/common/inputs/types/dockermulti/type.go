@@ -6,6 +6,7 @@ package dockermulti
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 )
 
 const TYPE = "dockermulti"
@@ -18,7 +19,10 @@ const usage = `
 This input type describes the composition of a multi-platform OCI image.
 The various variants are taken from the local docker daemon. They should be 
 built with the buildx command for cross platform docker builds.
-The denoted images, as well as the wrapping image index is packed as OCI artifact set.
+The denoted images, as well as the wrapping image index is packed as OCI
+artifact set.
+They will contain an informational back link to the component version
+using the manifest annotation <code>` + annotations.COMPVERS_ANNOTATION + `</code>.
 
 This blob type specification supports the following fields:
 - **<code>variants</code>** *[]string*

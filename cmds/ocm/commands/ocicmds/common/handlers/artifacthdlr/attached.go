@@ -7,12 +7,12 @@ package artifacthdlr
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 func Attachment(d digest.Digest, suffix string) string {

@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations/rules"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -28,19 +29,19 @@ var CDExcludes = signing.MapExcludes{
 		"repositoryContexts": nil,
 		"resources": signing.DefaultedMapFields{
 			Next: signing.DynamicArrayExcludes{
-				ValueChecker: signing.IgnoreResourcesWithAccessType("localBlob"),
+				ValueChecker: rules.IgnoreResourcesWithAccessType("localBlob"),
 				Continue: signing.MapExcludes{
 					"access": nil,
 					"srcRef": nil,
 					"labels": signing.DynamicArrayExcludes{
-						ValueChecker: signing.IgnoreLabelsWithoutSignature,
+						ValueChecker: rules.IgnoreLabelsWithoutSignature,
 						Continue:     signing.NoExcludes{},
 					},
 				},
 			},
 		}.EnforceNull("extraIdentity"),
 		"sources": signing.DynamicArrayExcludes{
-			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
+			ValueChecker: rules.IgnoreResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
 				"access": nil,
 				"labels": nil,
@@ -448,7 +449,7 @@ var _ = Describe("normalization", func() {
 		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"resources": signing.DynamicArrayExcludes{
-					ValueChecker: signing.IgnoreResourcesWithAccessType("localBlob"),
+					ValueChecker: rules.IgnoreResourcesWithAccessType("localBlob"),
 					Continue: signing.MapExcludes{
 						"access": nil,
 					},
@@ -693,7 +694,7 @@ resources:
 				"resources": signing.ArrayExcludes{
 					Continue: signing.MapExcludes{
 						"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
-							ValueChecker: signing.IgnoreLabelsWithoutSignature,
+							ValueChecker: rules.IgnoreLabelsWithoutSignature,
 							Continue:     signing.NoExcludes{},
 						}},
 					},

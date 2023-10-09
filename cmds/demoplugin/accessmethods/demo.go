@@ -36,11 +36,6 @@ type AccessSpec struct {
 	MediaType string `json:"mediaType,omitempty"`
 }
 
-const (
-	OPT_PATH  = "path"
-	OPT_MEDIA = "mediaType"
-)
-
 type AccessMethod struct {
 	ppi.AccessMethodBase
 }

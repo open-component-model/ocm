@@ -24,7 +24,7 @@ func NewProcessingAttrOutput(opts *Options, chain ProcessChain, header ...string
 }
 
 func (this *AttrProcessingOutput) new(opts *Options, chain ProcessChain, header []string) *AttrProcessingOutput {
-	this.ElementOutput.new(opts.LogContext(), opts.Context, chain)
+	this.ElementOutput.new(opts, chain)
 	this.opts = opts
 	return this
 }
@@ -46,5 +46,5 @@ func (this *AttrProcessingOutput) Out() error {
 		}
 		set.PrintAttributes(this.opts.Context)
 	}
-	return nil
+	return this.ElementOutput.Out()
 }

@@ -102,7 +102,7 @@ func (o *Command) Run() error {
 var outputs = output.NewOutputs(getRegular, output.Outputs{}).AddChainedManifestOutputs(infoChain)
 
 func getRegular(opts *output.Options) output.Output {
-	return output.NewProcessingFunctionOutput(opts.LogContext(), opts.Context, processing.Chain(opts.LogContext()),
+	return output.NewProcessingFunctionOutput(opts, processing.Chain(opts.LogContext()),
 		generics.Conditional(From(opts).BlobFiles, outInfoWithFiles, outInfo))
 }
 

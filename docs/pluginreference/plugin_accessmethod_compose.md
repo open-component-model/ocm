@@ -16,9 +16,9 @@ plugin accessmethod compose <name> <options json> <base spec json> [<options>]
 
 
 The task of this command is to compose an access specification based on some
-explicitly given input options and preconfigured specification.
+explicitly given input options and preconfigured specifications.
 
-The finally composed access specification has to be returned as JSON doocument
+The finally composed access specification has to be returned as JSON document
 on *stdout*.
 
 This command is only used, if for an access method descriptor configuration
@@ -41,6 +41,7 @@ The following predefined option types can be used:
   - <code>accessRepository</code>: [*string*] repository URL
   - <code>accessVersion</code>: [*string*] version for access specification
   - <code>bucket</code>: [*string*] bucket name
+  - <code>comment</code>: [*string*] comment field value
   - <code>commit</code>: [*string*] git commit id
   - <code>digest</code>: [*string*] blob digest
   - <code>globalAccess</code>: [*map[string]YAML*] access specification for global access

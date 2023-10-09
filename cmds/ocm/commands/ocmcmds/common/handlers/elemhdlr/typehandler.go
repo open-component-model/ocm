@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
@@ -18,7 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Object struct {
@@ -99,24 +97,9 @@ type TypeHandler struct {
 }
 
 func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor, hopts ...Option) (utils.TypeHandler, error) {
-	copts := MapToCompHandlerOptions(hopts...)
-	h := comphdlr.NewTypeHandler(octx, session, repobase, copts...)
-
-	comps := output.NewElementOutput(octx.Context().LoggingContext(), nil, closureoption.Closure(oopts, comphdlr.ClosureExplode, comphdlr.Sort))
-	err := utils.HandleOutput(comps, h, utils.StringElemSpecs(compspecs...)...)
+	components, err := comphdlr.Evaluate(octx, session, repobase, compspecs, oopts, MapToCompHandlerOptions(hopts...)...)
 	if err != nil {
 		return nil, err
-	}
-	components := []*comphdlr.Object{}
-	i := comps.Elems.Iterator()
-	for i.HasNext() {
-		components = append(components, i.Next().(*comphdlr.Object))
-	}
-	if len(components) == 0 {
-		if len(compspecs) == 0 {
-			return nil, errors.Newf("no component version specified")
-		}
-		return nil, errors.Newf("no component version found")
 	}
 
 	t := &TypeHandler{

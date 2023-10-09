@@ -18,4 +18,5 @@ var (
 	Versions               = []string{"versions", "vers", "v"}
 	Plugins                = []string{"plugins", "plugin", "p"}
 	Action                 = []string{"action"}
+	RoutingSlips           = []string{"routingslips", "routingslip", "rs"}
 )

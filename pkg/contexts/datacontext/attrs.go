@@ -20,11 +20,19 @@ type AttributeType interface {
 	Description() string
 }
 
+// Converter is an optional interface an AttributeType can implement to
+// normalize an attribute value. It is called by the Attributes.SetAttribute
+// method.
+type Converter interface {
+	Convert(interface{}) (interface{}, error)
+}
+
 type AttributeScheme interface {
 	Register(name string, typ AttributeType, short ...string) error
 
 	Decode(attr string, data []byte, unmarshaler runtime.Unmarshaler) (interface{}, error)
 	Encode(attr string, v interface{}, marshaller runtime.Marshaler) ([]byte, error)
+	Convert(attr string, v interface{}) (interface{}, error)
 	GetType(attr string) (AttributeType, error)
 
 	AddKnownTypes(scheme AttributeScheme)
@@ -33,7 +41,7 @@ type AttributeScheme interface {
 	KnownTypeNames() []string
 }
 
-var DefaultAttributeScheme = NewDefaulAttritutetScheme()
+var DefaultAttributeScheme = NewDefaultAttributeScheme()
 
 // KnownTypes is a set of known type names mapped to appropriate object decoders.
 type KnownTypes map[string]AttributeType
@@ -63,7 +71,7 @@ type defaultScheme struct {
 	short common.Properties
 }
 
-func NewDefaulAttritutetScheme() AttributeScheme {
+func NewDefaultAttributeScheme() AttributeScheme {
 	return &defaultScheme{
 		types: KnownTypes{},
 		short: common.Properties{},
@@ -141,6 +149,19 @@ func (d *defaultScheme) GetType(attr string) (AttributeType, error) {
 		return nil, errors.ErrUnknown("attribute", attr)
 	}
 	return t, nil
+}
+
+func (d *defaultScheme) Convert(attr string, value interface{}) (interface{}, error) {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+	t := d.getType(attr)
+	if t == nil {
+		return value, errors.ErrUnknown("attribute", attr)
+	}
+	if c, ok := t.(Converter); ok {
+		return c.Convert(value)
+	}
+	return value, nil
 }
 
 func (d *defaultScheme) Encode(attr string, value interface{}, marshaler runtime.Marshaler) ([]byte, error) {

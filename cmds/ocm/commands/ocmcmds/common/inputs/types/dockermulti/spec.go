@@ -7,6 +7,7 @@ package dockermulti
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 	. "github.com/open-component-model/ocm/pkg/finalizer"
 
 	"github.com/opencontainers/go-digest"
@@ -102,6 +103,8 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 	index := artdesc.NewIndexArtifact()
 	i := 0
 
+	index.SetAnnotation(annotations.COMPVERS_ANNOTATION, info.ComponentVersion.String())
+
 	feedback := func(blob accessio.BlobAccess, art cpi.ArtifactAccess) error {
 		desc := artdesc.DefaultBlobDescriptor(blob)
 		if art.IsManifest() {
@@ -157,6 +160,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 			art, err = s.getVariant(ctx, &finalize, s.Variants[i])
 
 			if err == nil {
+				art.Artifact().SetAnnotation(annotations.COMPVERS_ANNOTATION, info.ComponentVersion.String())
 				blob, err = art.Blob()
 				if err == nil {
 					finalize.Close(art)

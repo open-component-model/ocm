@@ -27,5 +27,6 @@ ocm get [<options>] <sub command> ...
 * [ocm get <b>plugins</b>](ocm_get_plugins.md)	 &mdash; get plugins
 * [ocm get <b>references</b>](ocm_get_references.md)	 &mdash; get references of a component version
 * [ocm get <b>resources</b>](ocm_get_resources.md)	 &mdash; get resources of a component version
+* [ocm get <b>routingslips</b>](ocm_get_routingslips.md)	 &mdash; get routings slips for a component version
 * [ocm get <b>sources</b>](ocm_get_sources.md)	 &mdash; get sources of a component version
 

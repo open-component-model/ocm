@@ -28,6 +28,7 @@ ocm ocm [<options>] <sub command> ...
 * ocm ocm <b>references</b>	 &mdash; Commands related to component references in component versions
 * ocm ocm <b>resource-configuration</b>	 &mdash; Commands acting on component resource specifications
 * ocm ocm <b>resources</b>	 &mdash; Commands acting on component resources
+* ocm ocm <b>routingslips</b>	 &mdash; Commands working on routing slips
 * ocm ocm <b>source-configuration</b>	 &mdash; Commands acting on component source specifications
 * ocm ocm <b>sources</b>	 &mdash; Commands acting on component sources
 * ocm ocm <b>versions</b>	 &mdash; Commands acting on component version names

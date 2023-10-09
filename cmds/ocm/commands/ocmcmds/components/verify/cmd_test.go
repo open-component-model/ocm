@@ -29,7 +29,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
@@ -129,12 +128,12 @@ var _ = Describe("access method", func() {
 		closer := session.AddCloser(cv)
 
 		opts := NewOptions(
-			Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+			Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
 			Resolver(resolver),
 			PrivateKey(SIGNATURE, priv),
 			Update(), VerifyDigests(),
 		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+		Expect(opts.Complete(DefaultContext)).To(Succeed())
 		dig, err := Apply(nil, nil, cv, opts)
 		Expect(err).To(Succeed())
 		closer.Close()

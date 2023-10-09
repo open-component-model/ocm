@@ -9,6 +9,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -16,10 +17,19 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/blob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/env"
+	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
@@ -81,6 +91,27 @@ var _ = Describe("Repository", func() {
 		Expect(bufferA).To(Equal(bufferB))
 	})
 
+	It("creates component archive", func() {
+		octx := ocm.DefaultContext()
+		memfs := memoryfs.New()
+
+		arch := Must(comparch.Create(octx, accessobj.ACC_WRITABLE, "test", 0o0700, accessio.PathFileSystem(memfs)))
+		defer Close(arch, "comparch)")
+
+		arch.SetName("acme.org/test")
+		arch.SetVersion("v1.0.1")
+
+		MustBeSuccessful(arch.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
+			accessio.BlobAccessForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
+
+		res := Must(arch.GetResourcesByName("blob"))
+		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
+			HashAlgorithm:          sha256.Algorithm,
+			NormalisationAlgorithm: blob.GenericBlobDigestV1,
+			Value:                  D_TESTDATA,
+		}))
+	})
+
 	It("closing a resource before actually reading it", func() {
 		octx := ocm.DefaultContext()
 		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, TAR_COMPARCH))
@@ -91,5 +122,27 @@ var _ = Describe("Repository", func() {
 		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
 		acc := Must(res[0].AccessMethod())
 		defer Close(acc)
+	})
+
+	It("modifies component archive from spec", func() {
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize, "finalizer")
+
+		env := env.NewEnvironment(env.ModifiableTestData())
+		octx := env.OCMContext()
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH, accessio.PathFileSystem(env)))
+		repo := Must(spec.Repository(octx, nil))
+		finalize.Close(repo, "repo")
+		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
+		finalize.Close(cv, "cv")
+		cv.GetDescriptor().Provider.Name = "modified provider"
+		MustBeSuccessful(finalize.Finalize())
+
+		spec = Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, TAR_COMPARCH, accessio.PathFileSystem(env)))
+		repo = Must(spec.Repository(octx, nil))
+		finalize.Close(repo, "repo")
+		cv = Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
+		finalize.Close(cv, "cv")
+		Expect(cv.GetDescriptor().Provider.Name).To(Equal(metav1.ProviderName("modified provider")))
 	})
 })

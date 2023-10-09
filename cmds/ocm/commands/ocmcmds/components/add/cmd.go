@@ -24,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
 	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -72,7 +73,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "[<options>] [--version <version>] [<ctf archive>] {<components.yaml>}",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add component version(s) to a (new) transport archive",
@@ -140,8 +141,14 @@ The optional field <code>meta.configuredSchemaVersion</code> for a component
 entry can be used to specify a dedicated serialization format to use for the
 component descriptor. If given it overrides the <code>--schema</code> option
 of the command. By default, v2 is used.
+
+Various elements support to add arbirary information by using labels
+(see <CMD>ocm ocm-labels</CMD>).
 `,
 	}
+
+	cmd.AddCommand(topicocmlabels.New(o.Context))
+	return cmd
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
@@ -194,7 +201,7 @@ func (o *Command) Run() error {
 
 	printer := common2.NewPrinter(o.Context.StdOut())
 	fs := o.Context.FileSystem()
-	h := comp.NewResourceSpecHandler(o.Version, schemaoption.From(o).Schema)
+	h := comp.New(o.Version, schemaoption.From(o).Schema)
 	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, templateroption.From(o).Options, h, o.Elements)
 	if err != nil {
 		return err

@@ -80,7 +80,7 @@ changelog:
       - '^test:'
 brews:
   - name: ocm
-    tap:
+    repository:
       owner: open-component-model
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"

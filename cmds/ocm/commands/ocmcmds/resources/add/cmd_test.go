@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -34,14 +35,16 @@ import (
 
 const ARCH = "/tmp/ca"
 const VERSION = "v1"
+const OCIPATH = "/tmp/oci"
+const OCIHOST = "ghcr.io"
 
 func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, ff ...func(r compdesc.Resource)) {
-	rblob := accessio.BlobAccessForFile("text/plain", "/testdata/testcontent", env)
+	rblob := accessio.BlobAccessForFile(mime.MIME_TEXT, "/testdata/testcontent", env)
 	CheckTextResourceBlob(env, cd, name, rblob, ff...)
 }
 
 func CheckTextResourceWith(env *TestEnv, cd *compdesc.ComponentDescriptor, name, txt string) {
-	rblob := accessio.BlobAccessForString("text/plain", txt)
+	rblob := accessio.BlobAccessForString(mime.MIME_TEXT, txt)
 	CheckTextResourceBlob(env, cd, name, rblob)
 }
 
@@ -73,7 +76,7 @@ func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name 
 		}
 	} else {
 		Expect(r.Version).To(Equal(VERSION))
-		Expect(r.Type).To(Equal("PlainText"))
+		Expect(r.Type).To(Equal(resourcetypes.PLAIN_TEXT))
 	}
 
 	spec, err := env.OCMContext().AccessSpecForSpec(cd.Resources[0].Access)
@@ -97,6 +100,14 @@ var _ = Describe("Add resources", func() {
 
 	BeforeEach(func() {
 		env = NewTestEnv(TestData())
+
+		// fake OCI registry
+		FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
+
+		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+			OCIManifest1For(env.Builder, "mandelsoft/pause", "v0.1.0")
+		})
+
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "--provider", "mandelsoft", "--file", ARCH)).To(Succeed())
 	})
 
@@ -126,7 +137,7 @@ var _ = Describe("Add resources", func() {
 		CheckTextResource(env, cd, "testdata", func(r compdesc.Resource) {
 			Expect(r.Relation).To(Equal(metav1.LocalRelation))
 			Expect(r.Version).To(Equal("3.3.3"))
-			Expect(r.Type).To(Equal("PlainText"))
+			Expect(r.Type).To(Equal(resourcetypes.PLAIN_TEXT))
 		})
 	})
 
@@ -163,7 +174,7 @@ var _ = Describe("Add resources", func() {
 		CheckTextResource(env, cd, "testdata")
 	})
 
-	It("add helm chart from rpo", func() {
+	It("add helm chart from repo", func() {
 		resp, err := http.Get("https://charts.helm.sh/stable")
 		if err == nil { // only if connected to internet
 			resp.Body.Close()
@@ -185,7 +196,7 @@ var _ = Describe("Add resources", func() {
 	})
 
 	DescribeTable("adds helm chart", func(rsc string) {
-		Expect(env.Execute("add", "resources", "--file", ARCH, rsc)).To(Succeed())
+		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, rsc)).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -243,7 +254,7 @@ var _ = Describe("Add resources", func() {
 		Expect(r.Type).To(Equal("ociImage"))
 		Expect(r.Version).To(Equal("v0.1.0"))
 		Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
-
+		Expect(r.GetDigest()).To(Equal(DS_OCIMANIFEST1))
 		Expect(r.Access.GetType()).To(Equal(ociartifact.Type))
 
 		acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
@@ -256,7 +267,7 @@ var _ = Describe("Add resources", func() {
 		It("adds simple text blob", func() {
 			meta := `
 name: testdata
-type: PlainText
+type: plainText
 `
 			input := `
 type: file
@@ -276,7 +287,7 @@ mediaType: text/plain
 		It("adds simple text blob by cli variable", func() {
 			meta := `
 name: testdata
-type: PlainText
+type: plainText
 `
 			input := `
 type: file
@@ -329,7 +340,7 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 			input := `
 { "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }
 `
-			Expect(env.Execute("add", "resources", "--file", ARCH, "--name", "testdata", "--type", "PlainText", "--input", input)).To(Succeed())
+			Expect(env.Execute("add", "resources", "--file", ARCH, "--name", "testdata", "--type", "plainText", "--input", input)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -342,7 +353,7 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 		It("adds simple text blob by dedicated input options", func() {
 			meta := `
 name: testdata
-type: PlainText
+type: plainText
 `
 			Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "file", "--inputPath", "testdata/testcontent", "--"+options.MediatypeOption.GetName(), "text/plain")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
@@ -354,10 +365,18 @@ type: PlainText
 			CheckTextResource(env, cd, "testdata")
 		})
 
+		It("fail for non-matching input options", func() {
+			meta := `
+name: testdata
+type: plainText
+`
+			Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "file", "--inputHelmRepository=x", "--inputPath", "testdata/testcontent", "--"+options.MediatypeOption.GetName(), "text/plain")).To(MatchError(`resource (by options): input specification: option "inputHelmRepository" given, but not possible for input type file`))
+		})
+
 		It("adds spiff processed text blob by dedicated input options", func() {
 			meta := `
 name: testdata
-type: PlainText
+type: plainText
 `
 			Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "spiff", "--inputPath", "testdata/spiffcontent", "--"+options.MediatypeOption.GetName(), "text/plain", "IMAGE=test")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))

@@ -5,7 +5,6 @@
 package directory
 
 import (
-	"compress/gzip"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -13,8 +12,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/utils/tarutils"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dirtree"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Spec struct {
@@ -69,33 +68,14 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 		return nil, "", fmt.Errorf("resource type is dir but a file was provided")
 	}
 
-	opts := tarutils.TarFileSystemOptions{
-		IncludeFiles:   s.IncludeFiles,
-		ExcludeFiles:   s.ExcludeFiles,
-		PreserveDir:    s.PreserveDir != nil && *s.PreserveDir,
-		FollowSymlinks: s.FollowSymlinks != nil && *s.FollowSymlinks,
-	}
-
-	temp, err := accessio.NewTempFile(fs, "", "resourceblob*.tgz")
-	if err != nil {
-		return nil, "", err
-	}
-	defer temp.Close()
-
-	if s.Compress() {
-		s.SetMediaTypeIfNotDefined(mime.MIME_TGZ)
-		gw := gzip.NewWriter(temp.Writer())
-		if err := tarutils.PackFsIntoTar(fs, inputPath, gw, opts); err != nil {
-			return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)
-		}
-		if err := gw.Close(); err != nil {
-			return nil, "", fmt.Errorf("unable to close gzip writer: %w", err)
-		}
-	} else {
-		s.SetMediaTypeIfNotDefined(mime.MIME_TAR)
-		if err := tarutils.PackFsIntoTar(fs, inputPath, temp.Writer(), opts); err != nil {
-			return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)
-		}
-	}
-	return temp.AsBlob(s.MediaType), "", nil
+	access, err := dirtree.BlobAccessForDirTree(inputPath,
+		dirtree.WithMimeType(s.MediaType),
+		dirtree.WithFileSystem(fs),
+		dirtree.WithCompressWithGzip(s.Compress()),
+		dirtree.WithIncludeFiles(s.IncludeFiles),
+		dirtree.WithExcludeFiles(s.ExcludeFiles),
+		dirtree.WithFollowSymlinks(utils.AsBool(s.FollowSymlinks)),
+		dirtree.WithPreserveDir(utils.AsBool(s.PreserveDir)),
+	)
+	return access, "", err
 }

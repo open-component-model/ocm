@@ -5,6 +5,7 @@
 package plugin
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,9 +27,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action/execute"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler"
+	merge "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler/execute"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/put"
 	uplval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/validate"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/valueset"
+	vscompose "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/valueset/compose"
+	vsval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/valueset/validate"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -70,6 +77,41 @@ func (p *pluginImpl) SetConfig(config json.RawMessage) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	p.config = config
+}
+
+func (p *pluginImpl) MergeValue(specification *valuemergehandler.Specification, local, inbound valuemergehandler.Value) (bool, *valuemergehandler.Value, error) {
+	desc := p.GetValueMappingDescriptor(specification.Algorithm)
+	if desc == nil {
+		return false, nil, errors.ErrNotSupported(valuemergehandler.KIND_VALUE_MERGE_ALGORITHM, specification.Algorithm, KIND_PLUGIN, p.Name())
+	}
+	input, err := json.Marshal(ppi.ValueMergeData{
+		Local:   local,
+		Inbound: inbound,
+	})
+	if err != nil {
+		return false, nil, err
+	}
+
+	args := []string{mergehandler.Name, merge.Name, specification.Algorithm}
+	if len(specification.Config) > 0 {
+		args = append(args, string(specification.Config))
+	}
+
+	var buf bytes.Buffer
+	_, err = p.Exec(bytes.NewReader(input), &buf, args...)
+	if err != nil {
+		return false, nil, errors.Wrapf(err, "plugin %s", p.Name())
+	}
+	var r ppi.ValueMergeResult
+
+	err = json.Unmarshal(buf.Bytes(), &r)
+	if err != nil {
+		if r.Message != "" {
+			return false, nil, fmt.Errorf("%w: %s", err, r.Message)
+		}
+		return false, nil, err
+	}
+	return r.Modified, &r.Value, nil
 }
 
 func (p *pluginImpl) Action(spec ppi.ActionSpec, creds json.RawMessage) (ppi.ActionResult, error) {
@@ -261,4 +303,50 @@ func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) ([]byte, err
 		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args, "config", p.config)
 	}
 	return cache.Exec(p.Path(), p.config, r, w, args...)
+}
+
+func (p *pluginImpl) ValidateValueSet(purpose string, spec []byte) (*ppi.ValueSetInfo, error) {
+	result, err := p.Exec(nil, nil, valueset.Name, vsval.Name, purpose, string(spec))
+	if err != nil {
+		return nil, errors.Wrapf(err, "plugin %s", p.Name())
+	}
+
+	var info ppi.ValueSetInfo
+	err = json.Unmarshal(result, &info)
+	if err != nil {
+		return nil, errors.Wrapf(err, "plugin %s: cannot unmarshal value set info", p.Name())
+	}
+	return &info, nil
+}
+
+func (p *pluginImpl) ComposeValueSet(purpose, name string, opts flagsets.ConfigOptions, base flagsets.Config) error {
+	cfg := flagsets.Config{}
+	for _, o := range opts.Options() {
+		cfg[o.GetName()] = o.Value()
+	}
+	optsdata, err := json.Marshal(cfg)
+	if err != nil {
+		return errors.Wrapf(err, "cannot marshal option values")
+	}
+	basedata, err := json.Marshal(base)
+	if err != nil {
+		return errors.Wrapf(err, "cannot marshal access specification base value")
+	}
+	result, err := p.Exec(nil, nil, valueset.Name, vscompose.Name, purpose, name, string(optsdata), string(basedata))
+	if err != nil {
+		return err
+	}
+	var r flagsets.Config
+	err = json.Unmarshal(result, &r)
+	if err != nil {
+		return errors.Wrapf(err, "cannot unmarshal composition result")
+	}
+
+	for k := range base {
+		delete(base, k)
+	}
+	for k, v := range r {
+		base[k] = v
+	}
+	return nil
 }

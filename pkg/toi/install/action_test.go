@@ -51,7 +51,7 @@ var _ = Describe("Transfer handler", func() {
 	creds1 := credentials.NewCredentials(common.Properties{"user": "test", "password": "pw"})
 
 	BeforeEach(func() {
-		env = NewBuilder(NewEnvironment(FileSystem(memoryfs.New(), "")))
+		env = NewBuilder(FileSystem(memoryfs.New(), ""))
 
 		env.OCMCommonTransport("ctf", accessio.FormatDirectory, func() {
 			env.ComponentVersion(COMPONENT, VERSION, func() {

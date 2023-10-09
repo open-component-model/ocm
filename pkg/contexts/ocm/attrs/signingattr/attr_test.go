@@ -12,6 +12,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 )
 
@@ -19,11 +20,13 @@ const NAME = "test"
 
 var _ = Describe("attribute", func() {
 	var cfgctx config.Context
+	var ocmctx ocm.Context
 
 	BeforeEach(func() {
-		cfgctx = config.WithSharedAttributes(datacontext.New(nil)).New()
-		_ = cfgctx
+		ocmctx = ocm.New(datacontext.MODE_EXTENDED)
+		cfgctx = ocmctx.ConfigContext()
 	})
+
 	It("marshal/unmarshal", func() {
 		cfg := signingattr.New()
 		cfg.AddPublicKeyData(NAME, []byte("keydata"))
@@ -41,7 +44,7 @@ var _ = Describe("attribute", func() {
 		cfg.AddPublicKeyData(NAME, []byte("keydata"))
 
 		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())
-		Expect(signingattr.Get(cfgctx).GetPublicKey(NAME)).To(Equal([]byte("keydata")))
+		Expect(signingattr.Get(ocmctx).GetPublicKey(NAME)).To(Equal([]byte("keydata")))
 	})
 
 })

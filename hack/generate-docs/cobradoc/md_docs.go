@@ -297,3 +297,22 @@ func GenMarkdownTreeCustom(cmd *cobra.Command, dir string, filePrepender, linkHa
 	}
 	return nil
 }
+
+func GetCommandForPath(cmd *cobra.Command, path string) *cobra.Command {
+	seq := strings.Split(path, " ")
+	if len(seq) > 1 {
+		seq = seq[1:]
+	}
+	cmd = cmd.Root()
+outer:
+	for _, s := range seq {
+		for _, c := range cmd.Commands() {
+			if c.Name() == s {
+				cmd = c
+				continue outer
+			}
+		}
+		return nil
+	}
+	return cmd
+}

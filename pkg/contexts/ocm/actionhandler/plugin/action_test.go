@@ -56,8 +56,7 @@ var _ = Describe("plugin action handler", func() {
 	It("used default registration", func() {
 		registration.RegisterExtensions(ctx)
 		opts := handlers.NewOptions(handlers.ForAction(oci_repository_prepare.Type), handlers.ForAction("test"), handlers.ForSelectors("mandelsoft.org"))
-		MustFailWithMessage(plugin.RegisterActionHandler(ctx.AttributesContext(), "action", ctx, opts),
-			"action \"test\" is unknown for plugin action")
+		MustFailWithMessage(plugin.RegisterActionHandler(ctx.AttributesContext(), "action", ctx, opts), "action \"test\" is unknown for plugin action")
 	})
 
 	It("uses default registration", func() {

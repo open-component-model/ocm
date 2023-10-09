@@ -5,9 +5,12 @@
 package transfer
 
 import (
+	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
@@ -19,12 +22,14 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/skipupdateoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -34,6 +39,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 var (
@@ -46,6 +52,7 @@ type Command struct {
 
 	Refs       []string
 	TargetName string
+	BOMFile    string
 }
 
 // NewCommand creates a new ctf command.
@@ -57,6 +64,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		closureoption.New("component reference"),
 		lookupoption.New(),
 		overwriteoption.New(),
+		skipupdateoption.New(),
 		rscbyvalueoption.New(),
 		srcbyvalueoption.New(),
 		omitaccesstypeoption.New(),
@@ -81,6 +89,11 @@ $ ocm transfer components -t tgz ghcr.io/mandelsoft/kubelink ctf.tgz
 $ ocm transfer components -t tgz --repo OCIRegistry::ghcr.io mandelsoft/kubelink ctf.tgz
 `,
 	}
+}
+
+func (o *Command) AddFlags(fs *pflag.FlagSet) {
+	o.BaseCommand.AddFlags(fs)
+	fs.StringVarP(&o.BOMFile, "bom-file", "B", "", "file name to write the component version BOM")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -114,18 +127,10 @@ func (o *Command) Run() error {
 
 	transferopts := &spiff.Options{}
 	transferhandler.From(o.ConfigContext(), transferopts)
-	transferhandler.ApplyOptions(transferopts,
-		lookupoption.From(o),
-
-		closureoption.From(o),
-		overwriteoption.From(o),
-		rscbyvalueoption.From(o),
-		srcbyvalueoption.From(o),
-		stoponexistingoption.From(o),
-		omitaccesstypeoption.From(o),
+	transferhandler.ApplyOptions(transferopts, append(options.FindOptions[transferhandler.TransferOption](o),
 		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),
-	)
+	)...)
 	thdlr, err := spiff.New(transferopts)
 
 	if err != nil {
@@ -181,5 +186,31 @@ func (a *action) Out() error {
 	if a.errors.Result() != nil {
 		return fmt.Errorf("transfer finished with %d error(s)", a.errors.Len())
 	}
+
+	if a.cmd.BOMFile != "" {
+		bom := BOM{}
+		for _, nv := range generics.KeyList(a.closure) {
+			bom.List = append(bom.List, BomEntry{
+				Component: nv.GetName(),
+				Version:   nv.GetVersion(),
+			})
+		}
+		data, err := json.Marshal(&bom)
+		if err != nil {
+			return errors.Wrapf(err, "cannot marshal BOM")
+		}
+		err = vfs.WriteFile(a.cmd.FileSystem(), a.cmd.BOMFile, data, 0o640)
+		if err != nil {
+			return errors.Wrapf(err, "cannot write BOM")
+		}
+	}
 	return nil
+}
+
+type BomEntry struct {
+	Component string `json:"component"`
+	Version   string `json:"version"`
+}
+type BOM struct {
+	List []BomEntry `json:"componentVersions"`
 }

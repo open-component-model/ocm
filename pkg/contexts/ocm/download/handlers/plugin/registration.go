@@ -135,6 +135,10 @@ func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.Handler
 	}
 
 	for _, name := range set.PluginNames() {
+		p := set.Get(name)
+		if !p.IsValid() {
+			continue
+		}
 		for _, d := range set.Get(name).GetDescriptor().Downloaders {
 			i := registrations.HandlerInfo{
 				Name:        name + "/" + d.GetName(),
