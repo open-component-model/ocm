@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
@@ -20,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-func SimpleWriteWithCredentials() error {
+func SimpleWriteWithCredentials() (ferr error) {
 	cfg, err := helper.ReadConfig(CFG)
 	if err != nil {
 		return err
@@ -53,7 +54,7 @@ func SimpleWriteWithCredentials() error {
 	if err != nil {
 		return errors.Wrapf(err, "cannot create new version %s", cfg.Version)
 	}
-	defer compvers.Close()
+	defer errors.PropagateError(&ferr, compvers.Close)
 
 	// add provider information
 	compvers.GetDescriptor().Provider = metav1.Provider{Name: "mandelsoft"}
@@ -74,10 +75,24 @@ func SimpleWriteWithCredentials() error {
 		return errors.Wrapf(err, "cannot add resource")
 	}
 
+	imageAccess := ociartifact.New("ghcr.io/open-component-model/ocm/ocm.software/toi/installers/helminstaller/helminstaller:0.4.0")
+	err = compvers.SetResource(&compdesc.ResourceMeta{
+		ElementMeta: compdesc.ElementMeta{
+			Name:    "helminstaller",
+			Version: "0.4.0",
+		},
+		Type:     resourcetypes.OCI_IMAGE,
+		Relation: metav1.ExternalRelation,
+	}, imageAccess)
+
+	if err != nil {
+		return errors.Wrapf(err, "cannot add image resource")
+	}
+
 	// finally push the new component version
 	if err = comp.AddVersion(compvers); err != nil {
 		return errors.Wrapf(err, "cannot add new version")
 	}
-	fmt.Printf("added component %s version %s\n", cfg.Component, cfg.Version)
+	fmt.Printf("added component %s version %s to %s\n", cfg.Component, cfg.Version, cfg.Repository)
 	return nil
 }
