@@ -63,16 +63,24 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 	return newComponentVersionAccess(c, version, true)
 }
 
+func (c *componentAccessImpl) versionContainer(access cpi.ComponentVersionAccess) *ComponentVersionContainer {
+	mine, _ := support.GetComponentVersionContainer[*ComponentVersionContainer](access)
+	if mine == nil || mine.comp != c {
+		return nil
+	}
+	return mine
+}
+
+func (c *componentAccessImpl) IsOwned(access cpi.ComponentVersionAccess) bool {
+	return c.versionContainer(access) != nil
+}
+
 func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
 	if access.GetName() != c.GetName() {
 		return errors.ErrInvalid("component name", access.GetName())
 	}
-	cont, err := support.GetComponentVersionContainer(access)
-	if err != nil {
-		return fmt.Errorf("cannot add component version: component version access %s not created for target", access.GetName()+":"+access.GetVersion())
-	}
-	mine, ok := cont.(*ComponentVersionContainer)
-	if !ok || mine.comp != c {
+	mine := c.versionContainer(access)
+	if mine == nil {
 		return fmt.Errorf("cannot add component version: component version access %s not created for target", access.GetName()+":"+access.GetVersion())
 	}
 	mine.impl.EnablePersistence()

@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -160,6 +161,8 @@ type ComponentAccessImpl interface {
 
 	IsReadOnly() bool
 	GetName() string
+
+	IsOwned(access ComponentVersionAccess) bool
 }
 
 type _ComponentAccessImplBase = resource.ResourceImplBase[ComponentAccess]
@@ -479,7 +482,19 @@ func (c *componentVersionAccessView) AccessMethod(spec AccessSpec) (meth AccessM
 			// fall back to original version
 			meth, err = spec.AccessMethod(c)
 		} else {
-			meth, err = c.impl.AccessMethod(c, spec)
+			if compose.Is(spec) {
+				b := c.impl.GetBlobCache().GetBlobFor(spec)
+				if b == nil {
+					return errors.ErrNotFound(blobaccess.KIND_BLOB, spec.Describe(c.GetContext()))
+				}
+				if a, ok := spec.(*compose.AccessSpec); ok {
+					meth, err = compose.NewMethod(a, b)
+				} else {
+					return errors.ErrInvalid(errors.KIND_ACCESSMETHOD, fmt.Sprintf("%T", spec))
+				}
+			} else {
+				meth, err = c.impl.AccessMethod(c, spec)
+			}
 		}
 		return err
 	})

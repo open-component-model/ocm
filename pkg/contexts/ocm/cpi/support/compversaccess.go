@@ -28,15 +28,21 @@ type componentVersionAccessImpl struct {
 
 var _ ComponentVersionAccessImpl = (*componentVersionAccessImpl)(nil)
 
-func GetComponentVersionContainer(cv cpi.ComponentVersionAccess) (ComponentVersionContainer, error) {
+func GetComponentVersionContainer[T ComponentVersionContainer](cv cpi.ComponentVersionAccess) (T, error) {
+	var _nil T
+
 	impl, err := cpi.GetComponentVersionAccessImplementation(cv)
 	if err != nil {
-		return nil, err
+		return _nil, err
 	}
 	if mine, ok := impl.(*componentVersionAccessImpl); ok {
-		return mine.base, nil
+		cont, ok := mine.base.(T)
+		if ok {
+			return cont, nil
+		}
+		return _nil, errors.Newf("non-matching component version implementation %T", mine.base)
 	}
-	return nil, errors.Newf("non-matching component version implementation %T", impl)
+	return _nil, errors.Newf("non-matching component version implementation %T", impl)
 }
 
 func NewComponentVersionAccessImpl(name, version string, container ComponentVersionContainer, lazy bool, persistent bool) (cpi.ComponentVersionAccessImpl, error) {

@@ -2,15 +2,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package github
+package compose
 
 import (
 	"fmt"
 	"io"
+	"sync/atomic"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
+	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/internal" // avoid cycle
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -52,6 +52,9 @@ var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 // New creates a new GitHub registry access spec version v1.
 func New(id, hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
+	if id == "" {
+		id = fmt.Sprintf("compose-%d", number.Add(1))
+	}
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Id:                  id,
@@ -61,6 +64,8 @@ func New(id, hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
 	}
 	return s
 }
+
+var number atomic.Int64
 
 func (a *AccessSpec) Describe(ctx cpi.Context) string {
 	return fmt.Sprintf("Composition blob %s", a.Id)
@@ -94,8 +99,18 @@ type accessMethod struct {
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
 
-func NewMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, error) {
-	return nil, errors.ErrNotImplemented(errors.KIND_ACCESSMETHOD, Type)
+func NewMethod(spec *AccessSpec, blob blobaccess.BlobAccess) (cpi.AccessMethod, error) {
+	if blob.MimeType() != spec.MediaType {
+		return nil, fmt.Errorf("mimetype mismatch (spec=%s, blob=%s)", spec.MediaType, blob.MimeType())
+	}
+	b, err := blob.Dup()
+	if err != nil {
+		return nil, err
+	}
+	return &accessMethod{
+		access: b,
+		spec:   spec,
+	}, nil
 }
 
 func (m *accessMethod) GetKind() string {

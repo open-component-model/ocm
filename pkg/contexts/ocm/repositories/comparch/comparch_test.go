@@ -59,12 +59,12 @@ var _ = Describe("Repository", func() {
 		octx := ocm.DefaultContext()
 		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, TAR_COMPARCH))
 		repo := Must(spec.Repository(octx, nil))
-		defer Close(repo)
+		defer Close(repo, "repo")
 		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
-		defer Close(cv)
+		defer Close(cv, "compvers")
 		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
 		acc := Must(res[0].AccessMethod())
-		defer Close(acc)
+		defer Close(acc, "method")
 		bytesA := Must(acc.Get())
 
 		bytesB := Must(vfs.ReadFile(osfs.New(), filepath.Join(TAR_COMPARCH, "blobs", "sha256.3ed99e50092c619823e2c07941c175ea2452f1455f570c55510586b387ec2ff2")))
@@ -96,8 +96,11 @@ var _ = Describe("Repository", func() {
 		octx := ocm.DefaultContext()
 		memfs := memoryfs.New()
 
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
 		arch := Must(comparch.Create(octx, accessobj.ACC_WRITABLE, "test", 0o0700, accessio.PathFileSystem(memfs)))
-		defer Close(arch, "comparch)")
+		finalize.Close(arch, "comparch)")
 
 		arch.SetName("acme.org/test")
 		arch.SetVersion("v1.0.1")
@@ -106,6 +109,18 @@ var _ = Describe("Repository", func() {
 			blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
 
 		res := Must(arch.GetResourcesByName("blob"))
+		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
+			HashAlgorithm:          sha256.Algorithm,
+			NormalisationAlgorithm: blob.GenericBlobDigestV1,
+			Value:                  D_TESTDATA,
+		}))
+
+		MustBeSuccessful(finalize.Finalize())
+
+		arch = Must(comparch.Open(octx, accessobj.ACC_WRITABLE, "test", 0o0700, accessio.PathFileSystem(memfs)))
+		finalize.Close(arch, "comparch)")
+
+		res = Must(arch.GetResourcesByName("blob"))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
 			HashAlgorithm:          sha256.Algorithm,
 			NormalisationAlgorithm: blob.GenericBlobDigestV1,
@@ -145,5 +160,69 @@ var _ = Describe("Repository", func() {
 		cv = Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
 		finalize.Close(cv, "cv")
 		Expect(cv.GetDescriptor().Provider.Name).To(Equal(metav1.ProviderName("modified provider")))
+	})
+
+	It("component archive from spec with New/AddVersion", func() {
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
+		env := env.NewEnvironment(env.ModifiableTestData())
+		octx := env.OCMContext()
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH, accessio.PathFileSystem(env)))
+		repo := Must(spec.Repository(octx, nil))
+		finalize.Close(repo, "repo")
+		comp := Must(repo.LookupComponent(COMPONENT_NAME))
+		finalize.Close(comp, "component")
+		cv := Must(comp.NewVersion(COMPONENT_VERSION, true))
+		finalize.Close(cv, "compvers")
+
+		MustBeSuccessful(cv.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
+			blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil))
+
+		MustBeSuccessful(comp.AddVersion(cv))
+
+		MustBeSuccessful(finalize.Finalize())
+
+		arch := Must(comparch.Open(octx, accessobj.ACC_READONLY, TAR_COMPARCH, 0o0700, accessio.PathFileSystem(env)))
+		finalize.Close(arch, "comparch)")
+
+		res := Must(arch.GetResourcesByName("blob"))
+		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
+			HashAlgorithm:          sha256.Algorithm,
+			NormalisationAlgorithm: blob.GenericBlobDigestV1,
+			Value:                  D_OTHERDATA,
+		}))
+	})
+
+	It("handle multiple lookups", func() {
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
+		env := env.NewEnvironment(env.ModifiableTestData())
+		octx := env.OCMContext()
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH, accessio.PathFileSystem(env)))
+		repo := Must(spec.Repository(octx, nil))
+		finalize.Close(repo, "repo")
+		cv1 := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
+		finalize.Close(cv1, "version1")
+
+		cv2 := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
+
+		MustBeSuccessful(cv2.Close())
+
+		MustBeSuccessful(cv1.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
+			blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil))
+
+		MustBeSuccessful(finalize.Finalize())
+
+		arch := Must(comparch.Open(octx, accessobj.ACC_READONLY, TAR_COMPARCH, 0o0700, accessio.PathFileSystem(env)))
+		finalize.Close(arch, "comparch)")
+
+		res := Must(arch.GetResourcesByName("blob"))
+		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
+			HashAlgorithm:          sha256.Algorithm,
+			NormalisationAlgorithm: blob.GenericBlobDigestV1,
+			Value:                  D_OTHERDATA,
+		}))
 	})
 })
