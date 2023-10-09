@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -72,7 +71,7 @@ func PrintManifest(pr common.Printer, m cpi.ManifestAccess, listFiles bool) {
 	}
 }
 
-func PrintLayer(pr common.Printer, blob accessio.BlobAccess, listFiles bool) {
+func PrintLayer(pr common.Printer, blob blobaccess.BlobAccess, listFiles bool) {
 	reader, err := blob.Reader()
 	if err != nil {
 		pr.Printf("cannot read blob: %s\n", err.Error())

@@ -216,7 +216,7 @@ func (n *namespaceHandler) HasArtifact(vers string) (bool, error) {
 	return false, nil
 }
 
-func (n *namespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
+func (n *namespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) (access blobaccess.BlobAccess, err error) {
 	tag := "latest"
 	if len(tags) > 0 {
 		tag = tags[0]

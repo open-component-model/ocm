@@ -12,6 +12,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -243,8 +244,12 @@ func (c *componentAccessView) AddVersion(acc ComponentVersionAccess) error {
 		return errors.ErrInvalid("component name", acc.GetName())
 	}
 	return c.Execute(func() error {
-		return c.impl.AddVersion(acc)
+		return c.addVersion(acc)
 	})
+}
+
+func (c *componentAccessView) addVersion(acc ComponentVersionAccess) error {
+	return c.impl.AddVersion(acc)
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc ComponentVersionAccess, err error) {
@@ -304,7 +309,7 @@ type ComponentVersionAccessImpl interface {
 	GetBlobCache() BlobCache
 }
 
-type BlobCacheEntry = accessio.BlobAccess
+type BlobCacheEntry = blobaccess.BlobAccess
 
 type BlobCache interface {
 	// AddBlobFor stores blobs for added blobs not yet accessible
@@ -602,7 +607,7 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAc
 
 type fakeMethod struct {
 	AccessMethod
-	blob accessio.BlobAccess
+	blob blobaccess.BlobAccess
 }
 
 func (f *fakeMethod) Reader() (io.ReadCloser, error) {

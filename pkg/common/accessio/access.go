@@ -63,14 +63,14 @@ type NopCloser = iotools.NopCloser
 ////////////////////////////////////////////////////////////////////////////////
 
 // Deprecated: use blobaccess.DataAccessForReaderFunction.
-func DataAccessForReaderFunction(reader func() (io.ReadCloser, error), origin string) DataAccess {
+func DataAccessForReaderFunction(reader func() (io.ReadCloser, error), origin string) blobaccess.DataAccess {
 	return blobaccess.DataAccessForReaderFunction(reader, origin)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Deprecated: use blobaccess.DataAccessForFile.
-func DataAccessForFile(fs vfs.FileSystem, path string) DataAccess {
+func DataAccessForFile(fs vfs.FileSystem, path string) blobaccess.DataAccess {
 	return blobaccess.DataAccessForFile(fs, path)
 }
 
@@ -131,19 +131,19 @@ func BlobAccessForFile(mimeType string, path string, fss ...vfs.FileSystem) blob
 }
 
 // Deprecated: use blobaccess.ForFileWithCloser.
-func BlobAccessForFileWithCloser(closer io.Closer, mimeType string, path string, fss ...vfs.FileSystem) BlobAccess {
+func BlobAccessForFileWithCloser(closer io.Closer, mimeType string, path string, fss ...vfs.FileSystem) blobaccess.BlobAccess {
 	return blobaccess.ForFileWithCloser(closer, mimeType, path, fss...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Deprecated: use blobaccess.ForTemporaryFile.
-func BlobAccessForTemporaryFile(mime string, temp vfs.File, fss ...vfs.FileSystem) BlobAccess {
+func BlobAccessForTemporaryFile(mime string, temp vfs.File, fss ...vfs.FileSystem) blobaccess.BlobAccess {
 	return blobaccess.ForTemporaryFile(mime, temp, fss...)
 }
 
 // Deprecated: use blobaccess.ForTemporaryFilePath.
-func BlobAccessForTemporaryFilePath(mime string, temp string, fss ...vfs.FileSystem) BlobAccess {
+func BlobAccessForTemporaryFilePath(mime string, temp string, fss ...vfs.FileSystem) blobaccess.BlobAccess {
 	return blobaccess.ForTemporaryFilePath(mime, temp, fss...)
 }
 

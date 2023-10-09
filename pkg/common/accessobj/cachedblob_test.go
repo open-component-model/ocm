@@ -28,7 +28,7 @@ type Source struct {
 }
 
 func NewData(data string) *Source {
-	return &Source{accessio.DataAccessForString(data), 0}
+	return &Source{blobaccess.DataAccessForString(data), 0}
 }
 
 func (s *Source) Reader() (io.ReadCloser, error) {

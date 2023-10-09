@@ -24,7 +24,7 @@ import (
 const SynthesizedBlobFormat = "+tar+gzip"
 
 type ArtifactBlob interface {
-	accessio.BlobAccess
+	blobaccess.BlobAccess
 }
 
 type Producer func(set *ArtifactSet) (string, error)
@@ -115,7 +115,7 @@ type ArtifactFactory func(set *ArtifactSet) (digest.Digest, string, error)
 type ArtifactIterator func() (ArtifactFactory, bool, error)
 
 // ArtifactFeedback is called after an artifact has successfully be added.
-type ArtifactFeedback func(blob accessio.BlobAccess, art cpi.ArtifactAccess) error
+type ArtifactFeedback func(blob blobaccess.BlobAccess, art cpi.ArtifactAccess) error
 
 // ArtifactTransferCreator provides an ArtifactFactory transferring the given artifact.
 func ArtifactTransferCreator(art cpi.ArtifactAccess, finalizer *Finalizer, feedback ...ArtifactFeedback) ArtifactFactory {

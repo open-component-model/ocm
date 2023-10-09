@@ -8,7 +8,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	registry "github.com/open-component-model/ocm/pkg/contexts/ocm/download"
@@ -25,7 +25,7 @@ const (
 	CONFIG_MIME_TYPE = "application/vnd.gardener.landscaper.blueprint.config.v1"
 )
 
-type Extractor func(pr common.Printer, handler *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (bool, error)
+type Extractor func(pr common.Printer, handler *Handler, access blobaccess.DataAccess, path string, fs vfs.FileSystem) (bool, error)
 
 var (
 	supportedArtifactTypes    []string

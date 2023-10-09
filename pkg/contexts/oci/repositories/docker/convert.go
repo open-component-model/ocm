@@ -74,7 +74,7 @@ func (a *artBlobCache) Unref() error {
 	return nil
 }
 
-func (a *artBlobCache) GetBlobData(digest digest.Digest) (int64, accessio.DataAccess, error) {
+func (a *artBlobCache) GetBlobData(digest digest.Digest) (int64, blobaccess.DataAccess, error) {
 	blob, err := a.access.GetBlob(digest)
 	if err != nil {
 		return -1, nil, err
@@ -82,7 +82,7 @@ func (a *artBlobCache) GetBlobData(digest digest.Digest) (int64, accessio.DataAc
 	return blob.Size(), blob, err
 }
 
-func (a *artBlobCache) AddBlob(blob accessio.BlobAccess) (int64, digest.Digest, error) {
+func (a *artBlobCache) AddBlob(blob blobaccess.BlobAccess) (int64, digest.Digest, error) {
 	err := a.access.AddBlob(blob)
 	if err != nil {
 		return -1, "", err

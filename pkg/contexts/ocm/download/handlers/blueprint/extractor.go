@@ -10,6 +10,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
@@ -24,7 +25,7 @@ const (
 	BLUEPRINT_MIMETYPE_COMPRESSED        = "application/vnd.gardener.landscaper.blueprint.v1+tar+gzip"
 )
 
-func ExtractArchive(pr common.Printer, _ *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
+func ExtractArchive(pr common.Printer, _ *Handler, access blobaccess.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&rerr, "extracting archived (and compressed) blueprint")
 
@@ -57,7 +58,7 @@ func ExtractArchive(pr common.Printer, _ *Handler, access accessio.DataAccess, p
 	return true, nil
 }
 
-func ExtractArtifact(pr common.Printer, handler *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
+func ExtractArtifact(pr common.Printer, handler *Handler, access blobaccess.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&rerr, "extracting oci artifact containing a blueprint")
 

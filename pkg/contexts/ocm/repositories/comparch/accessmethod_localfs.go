@@ -22,7 +22,7 @@ type localFilesystemBlobAccessMethod struct {
 	closed     bool
 	spec       *localblob.AccessSpec
 	base       support.ComponentVersionContainer
-	blobAccess accessio.DataAccess
+	blobAccess blobaccess.DataAccess
 }
 
 var _ cpi.AccessMethod = (*localFilesystemBlobAccessMethod)(nil)

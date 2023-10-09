@@ -5,13 +5,13 @@
 package ocm
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type BlobSink interface {
-	AddBlob(blob accessio.BlobAccess) (string, error)
+	AddBlob(blob blobaccess.BlobAccess) (string, error)
 }
 
 // StorageContext is the context information passed for Blobhandler
@@ -35,6 +35,6 @@ func New(repo cpi.Repository, vers cpi.ComponentVersionAccess, access BlobSink, 
 	}
 }
 
-func (c *DefaultStorageContext) AddBlob(blob accessio.BlobAccess) (string, error) {
+func (c *DefaultStorageContext) AddBlob(blob blobaccess.BlobAccess) (string, error) {
 	return c.Sink.AddBlob(blob)
 }

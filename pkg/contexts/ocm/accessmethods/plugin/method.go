@@ -9,7 +9,6 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -66,7 +65,7 @@ func (s *AccessSpec) Handler() *PluginHandler {
 
 type accessMethod struct {
 	lock sync.Mutex
-	blob accessio.BlobAccess
+	blob blobaccess.BlobAccess
 	ctx  ocm.Context
 
 	handler *PluginHandler

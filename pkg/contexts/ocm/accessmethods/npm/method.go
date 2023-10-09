@@ -122,7 +122,7 @@ func (a *AccessSpec) getPackageMeta(ctx cpi.Context) (*meta, error) {
 ////////////////////////////////////////////////////////////////////////////////
 
 func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, error) {
-	factory := func() (accessio.BlobAccess, error) {
+	factory := func() (blobaccess.BlobAccess, error) {
 		meta, err := a.getPackageMeta(c.GetContext())
 		if err != nil {
 			return nil, err

@@ -84,7 +84,7 @@ func (a *FileSystemBlobAccess) GetBlobData(digest digest.Digest) (int64, blobacc
 	}
 }
 
-func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (accessio.DataAccess, error) {
+func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (blobaccess.DataAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}

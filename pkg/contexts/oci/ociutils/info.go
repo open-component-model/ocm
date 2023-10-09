@@ -15,7 +15,6 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -106,7 +105,7 @@ type LayerInfo struct {
 	Content     interface{} `json:"content,omitempty"`
 }
 
-func GetLayerInfo(blob accessio.BlobAccess, layerFiles bool) *LayerInfo {
+func GetLayerInfo(blob blobaccess.BlobAccess, layerFiles bool) *LayerInfo {
 	info := &LayerInfo{}
 
 	if mime.IsJSON(blob.MimeType()) {

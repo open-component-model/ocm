@@ -8,7 +8,6 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -16,7 +15,7 @@ import (
 
 type localBlobAccessMethod struct {
 	lock   sync.Mutex
-	data   accessio.DataAccess
+	data   blobaccess.DataAccess
 	spec   *localblob.AccessSpec
 	access VersionAccess
 }

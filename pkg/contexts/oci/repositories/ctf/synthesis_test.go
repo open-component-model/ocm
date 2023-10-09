@@ -32,7 +32,7 @@ import (
 )
 
 type DummyMethod struct {
-	accessio.BlobAccess
+	blobaccess.BlobAccess
 }
 
 var _ ocm.AccessMethod = (*DummyMethod)(nil)
@@ -46,7 +46,7 @@ func (d *DummyMethod) AccessSpec() cpi.AccessSpec {
 	return nil
 }
 
-func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
+func CheckBlob(blob blobaccess.BlobAccess) oci.NamespaceAccess {
 	set := Must(artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob))
 	defer func() {
 		if set != nil {

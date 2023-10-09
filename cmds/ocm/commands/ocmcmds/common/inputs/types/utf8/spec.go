@@ -11,7 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -110,7 +110,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
 	data, err := Plain([]byte(s.Text))
 
 	if s.Json != nil {
@@ -125,7 +125,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 	if err != nil {
 		return nil, "", err
 	}
-	return s.ProcessBlob(ctx, accessio.DataAccessForBytes(data), ctx.FileSystem())
+	return s.ProcessBlob(ctx, blobaccess.DataAccessForBytes(data), ctx.FileSystem())
 }
 
 func Prepare(raw []byte) (interface{}, error) {

@@ -11,7 +11,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	ocihelm "github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -92,7 +92,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blob accessio.BlobAccess, hint string, err error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blob blobaccess.BlobAccess, hint string, err error) {
 	var chartLoader loader.Loader
 	if s.HelmRepository == "" {
 		_, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)

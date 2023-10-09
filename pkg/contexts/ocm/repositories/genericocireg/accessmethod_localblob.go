@@ -10,7 +10,6 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -21,7 +20,7 @@ import (
 
 type localBlobAccessMethod struct {
 	lock      sync.Mutex
-	data      accessio.DataAccess
+	data      blobaccess.DataAccess
 	spec      *localblob.AccessSpec
 	namespace oci.NamespaceAccess
 	artifact  oci.ArtifactAccess

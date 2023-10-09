@@ -10,6 +10,7 @@ import (
 	"github.com/onsi/ginkgo/v2"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -59,7 +60,7 @@ type state struct {
 	ocm_acc     *compdesc.AccessSpec
 	ocm_modopts *ocm.ModificationOptions
 
-	blob *accessio.BlobAccess
+	blob *blobaccess.BlobAccess
 	hint *string
 
 	oci_repo          oci.Repository

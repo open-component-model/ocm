@@ -11,6 +11,7 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -66,7 +67,7 @@ func NewDigestReaderWithHash(hash crypto.Hash, r io.Reader) *DigestReader {
 	}
 }
 
-func Digest(access DataAccess) (digest.Digest, error) {
+func Digest(access blobaccess.DataAccess) (digest.Digest, error) {
 	reader, err := access.Reader()
 	if err != nil {
 		return "", err

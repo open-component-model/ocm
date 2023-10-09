@@ -14,6 +14,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 )
 
 var _ = Describe("cache management", func() {
@@ -34,7 +35,7 @@ var _ = Describe("cache management", func() {
 		source, err = accessio.NewDefaultBlobCache()
 		Expect(err).To(Succeed())
 
-		td1_size, td1_digest, err = source.AddData(accessio.DataAccessForBytes([]byte("testdata")))
+		td1_size, td1_digest, err = source.AddData(blobaccess.DataAccessForBytes([]byte("testdata")))
 		Expect(err).To(Succeed())
 
 		cache, err = accessio.CachedAccess(source, nil, local)
