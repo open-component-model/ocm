@@ -1,7 +1,7 @@
 $id: 'https://gardener.cloud/schemas/component-descriptor-v2'
 $schema: 'https://json-schema.org/draft/2020-12/schema'
 description: 'Open Component Model v2 schema'
-definitions:
+$defs:
   meta:
     type: 'object'
     description: 'component descriptor metadata'
@@ -32,7 +32,7 @@ definitions:
       signing:
         type: 'boolean'
       merge:
-        $ref: '#/definitions/merge'
+        $ref: '#/$defs/merge'
 
   componentName:
     type: 'string'
@@ -60,7 +60,7 @@ definitions:
 
   identityAttribute:
     type: 'object'
-    propertyNames: { $ref: '#/definitions/identityAttributeKey' }
+    propertyNames: { $ref: '#/$defs/identityAttributeKey' }
 
   repositoryContext:
     type: 'object'
@@ -72,7 +72,7 @@ definitions:
 
   ociRepositoryContext:
     allOf:
-      - $ref: '#/definitions/repositoryContext'
+      - $ref: '#/$defs/repositoryContext'
       - required:
           - 'baseUrl'
         properties:
@@ -127,22 +127,22 @@ definitions:
     properties:
       name:
         type: 'string'
-        $ref: '#/definitions/identityAttributeKey'
+        $ref: '#/$defs/identityAttributeKey'
       extraIdentity:
-        $ref: '#/definitions/identityAttribute'
+        $ref: '#/$defs/identityAttribute'
       version:
-        $ref: '#/definitions/relaxedSemver'
+        $ref: '#/$defs/relaxedSemver'
       type:
         type: 'string'
       labels:
         type: 'array'
         items:
-          $ref: '#/definitions/label'
+          $ref: '#/$defs/label'
       access:
         anyOf:
-          - $ref: '#/definitions/access'
-          - $ref: '#/definitions/githubAccess'
-          - $ref: '#/definitions/httpAccess'
+          - $ref: '#/$defs/access'
+          - $ref: '#/$defs/githubAccess'
+          - $ref: '#/$defs/httpAccess'
 
   digestSpec:
     type: 'object'
@@ -182,9 +182,9 @@ definitions:
       name:
         type: string
       digest:
-        $ref: '#/definitions/digestSpec'
+        $ref: '#/$defs/digestSpec'
       signature:
-        $ref: '#/definitions/signatureSpec'
+        $ref: '#/$defs/signatureSpec'
 
   nestedDigestSpec:
     type: 'object'
@@ -196,9 +196,9 @@ definitions:
       version:
         type: string
       extraIdentity:
-        $ref: '#/definitions/identityAttribute'
+        $ref: '#/$defs/identityAttribute'
       digest:
-        $ref: '#/definitions/digestSpec'
+        $ref: '#/$defs/digestSpec'
 
   nestedComponentDigests:
     type: 'object'
@@ -207,26 +207,26 @@ definitions:
       - version
     properties:
       name:
-        $ref: '#/definitions/componentName'
+        $ref: '#/$defs/componentName'
       version:
-        $ref: '#/definitions/relaxedSemver'
+        $ref: '#/$defs/relaxedSemver'
       digest:
-        $ref: '#/definitions/digestSpec'
+        $ref: '#/$defs/digestSpec'
       resourceDigests:
         type: 'array'
         items:
-          $ref: '#/definitions/nestedDigestSpec'
+          $ref: '#/$defs/nestedDigestSpec'
 
   srcRef:
     type: 'object'
     description: 'a reference to a (component-local) source'
     properties:
       identitySelector:
-        $ref: '#/definitions/identityAttribute'
+        $ref: '#/$defs/identityAttribute'
       labels:
         type: 'array'
         items:
-          $ref: '#/definitions/label'
+          $ref: '#/$defs/label'
 
   componentReference:
     type: 'object'
@@ -237,22 +237,22 @@ definitions:
       - 'version'
     properties:
       componentName:
-        $ref: '#/definitions/componentName'
+        $ref: '#/$defs/componentName'
       name:
         type: 'string' # actually: component-type w/ special restrictions
-        $ref: '#/definitions/identityAttributeKey'
+        $ref: '#/$defs/identityAttributeKey'
       extraIdentity:
-        $ref: '#/definitions/identityAttribute'
+        $ref: '#/$defs/identityAttribute'
       version:
-        $ref: '#/definitions/relaxedSemver'
+        $ref: '#/$defs/relaxedSemver'
       labels:
         type: 'array'
         items:
-          $ref: '#/definitions/label'
+          $ref: '#/$defs/label'
       digest:
         oneOf:
           - type: 'null'
-          - $ref: '#/definitions/digestSpec'
+          - $ref: '#/$defs/digestSpec'
 
   resourceType:
     type: 'object'
@@ -266,34 +266,34 @@ definitions:
     properties:
       name:
         type: 'string'
-        $ref: '#/definitions/identityAttributeKey'
+        $ref: '#/$defs/identityAttributeKey'
       extraIdentity:
-        $ref: '#/definitions/identityAttribute'
+        $ref: '#/$defs/identityAttribute'
       version:
-        $ref: '#/definitions/relaxedSemver'
+        $ref: '#/$defs/relaxedSemver'
       type:
         type: 'string'
       srcRefs:
         type: 'array'
         items:
-          $ref: '#/definitions/srcRef'
+          $ref: '#/$defs/srcRef'
       relation:
         type: 'string'
         enum: ['local', 'external']
       labels:
         type: 'array'
         items:
-          $ref: '#/definitions/label'
+          $ref: '#/$defs/label'
       access:
         anyOf:
-          - $ref: '#/definitions/access'
-          - $ref: '#/definitions/ociBlobAccess'
-          - $ref: '#/definitions/localFilesystemBlobAccess'
-          - $ref: '#/definitions/localOciBlobAccess'
+          - $ref: '#/$defs/access'
+          - $ref: '#/$defs/ociBlobAccess'
+          - $ref: '#/$defs/localFilesystemBlobAccess'
+          - $ref: '#/$defs/localOciBlobAccess'
       digest:
         oneOf:
           - type: 'null'
-          - $ref: '#/definitions/digestSpec'
+          - $ref: '#/$defs/digestSpec'
 
   ociImageAccess:
     type: 'object'
@@ -365,24 +365,24 @@ definitions:
     properties:
       name:
         type: 'string'
-        $ref: '#/definitions/identityAttributeKey'
+        $ref: '#/$defs/identityAttributeKey'
       extraIdentity:
-        $ref: '#/definitions/identityAttribute'
+        $ref: '#/$defs/identityAttribute'
       version:
-        $ref: '#/definitions/relaxedSemver'
+        $ref: '#/$defs/relaxedSemver'
       type:
         type: 'string'
         enum: ['ociImage']
       labels:
         type: 'array'
         items:
-          $ref: '#/definitions/label'
+          $ref: '#/$defs/label'
       access:
-        $ref: '#/definitions/ociImageAccess'
+        $ref: '#/$defs/ociImageAccess'
       digest:
         oneOf:
           - type: 'null'
-          - $ref: '#/definitions/digestSpec'
+          - $ref: '#/$defs/digestSpec'
 
 
   httpAccess:
@@ -416,24 +416,24 @@ definitions:
     properties:
       name:
         type: 'string'
-        $ref: '#/definitions/identityAttributeKey'
+        $ref: '#/$defs/identityAttributeKey'
       extraIdentity:
-        $ref: '#/definitions/identityAttribute'
+        $ref: '#/$defs/identityAttribute'
       version:
-        $ref: '#/definitions/relaxedSemver'
+        $ref: '#/$defs/relaxedSemver'
       type:
         type: 'string'
         enum: ['generic']
       labels:
         type: 'array'
         items:
-          $ref: '#/definitions/label'
+          $ref: '#/$defs/label'
       access:
-        $ref: '#/definitions/genericAccess'
+        $ref: '#/$defs/genericAccess'
       digest:
         oneOf:
           - type: 'null'
-          - $ref: '#/definitions/digestSpec'
+          - $ref: '#/$defs/digestSpec'
 
   component:
     type: 'object'
@@ -448,9 +448,9 @@ definitions:
       - 'resources'
     properties:
       name:
-        $ref: '#/definitions/componentName'
+        $ref: '#/$defs/componentName'
       version:
-        $ref: '#/definitions/relaxedSemver'
+        $ref: '#/$defs/relaxedSemver'
       creationTime:
         type: ['string', 'null']
         format: date-time
@@ -458,28 +458,28 @@ definitions:
         type: 'array'
         items:
           anyOf:
-            - $ref: '#/definitions/ociRepositoryContext' # currently, we only allow this one
+            - $ref: '#/$defs/ociRepositoryContext' # currently, we only allow this one
       provider:
         type: 'string'
       labels:
         type: 'array'
         items:
-          $ref: '#/definitions/label'
+          $ref: '#/$defs/label'
       sources:
         type: 'array'
         items:
-          $ref: '#/definitions/sourceDefinition'
+          $ref: '#/$defs/sourceDefinition'
       componentReferences:
         type: 'array'
         items:
-          $ref: '#/definitions/componentReference'
+          $ref: '#/$defs/componentReference'
       resources:
         type: 'array'
         items:
           anyOf:
-            - $ref: '#/definitions/resourceType'
-            - $ref: '#/definitions/ociImageResource'
-            - $ref: '#/definitions/genericResource'
+            - $ref: '#/$defs/resourceType'
+            - $ref: '#/$defs/ociImageResource'
+            - $ref: '#/$defs/genericResource'
 
     componentReferences: {}
 
@@ -490,14 +490,14 @@ required:
   - 'component'
 properties:
   meta:
-    $ref: '#/definitions/meta'
+    $ref: '#/$defs/meta'
   component:
-    $ref: '#/definitions/component'
+    $ref: '#/$defs/component'
   signatures:
     type: 'array'
     items:
-      $ref: '#/definitions/signature'
+      $ref: '#/$defs/signature'
   nestedDigests:
     type: 'array'
     items:
-      $ref: '#/definitions/nestedComponentDigests'
+      $ref: '#/$defs/nestedComponentDigests'

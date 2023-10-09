@@ -6,7 +6,7 @@ imageRef:
   resource:
     name: toiimage
 configScheme:
-  definitions:
+  $defs:
     resourceRef:
       type: object
       description: resource reference for charts
@@ -29,12 +29,12 @@ configScheme:
     - imageMapping
   properties:
     chart:
-      $ref: '#/definitions/resourceRef'
+      $ref: '#/$defs/resourceRef'
       additionalProperties: false
     subcharts:
       type: object
       additionalProperties:
-        $ref: '#/definitions/resourceRef'
+        $ref: '#/$defs/resourceRef'
     release:
       type: string
     createNamespace:
