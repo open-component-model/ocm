@@ -40,15 +40,6 @@ jobs:
           ### Uncomment below configuration if Synopsys Bridge diagnostic files needs to be uploaded
           include_diagnostics: true  
 
-      - name: Create Black Duck Policy
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: blackducksoftware/create-policy-action@v0.0.1
-        with:
-          blackduck-url: ${{ secrets.BLACKDUCK_URL }}
-          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
-          policy-name: 'My Black Duck Policy For GitHub Actions'
-          no-fail-if-policy-exists: true
-
       - name: Black Duck PR Scan
         if: ${{ github.event_name == 'pull_request' }}
         uses: synopsys-sig/synopsys-action@v1.4.1
