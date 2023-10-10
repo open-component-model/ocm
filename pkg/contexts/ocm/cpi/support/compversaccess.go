@@ -21,6 +21,7 @@ type ComponentVersionAccessImpl interface {
 type componentVersionAccessImpl struct {
 	*_ComponentVersionAccessImplBase
 	lazy           bool
+	directAccess   bool
 	persistent     bool
 	discardChanges bool
 	base           ComponentVersionContainer
@@ -45,7 +46,7 @@ func GetComponentVersionContainer[T ComponentVersionContainer](cv cpi.ComponentV
 	return _nil, errors.Newf("non-matching component version implementation %T", impl)
 }
 
-func NewComponentVersionAccessImpl(name, version string, container ComponentVersionContainer, lazy bool, persistent bool) (cpi.ComponentVersionAccessImpl, error) {
+func NewComponentVersionAccessImpl(name, version string, container ComponentVersionContainer, lazy, persistent, direct bool) (cpi.ComponentVersionAccessImpl, error) {
 	base, err := cpi.NewComponentVersionAccessImplBase(container.GetContext(), name, version, container.GetParentViewManager())
 	if err != nil {
 		return nil, err
@@ -54,6 +55,7 @@ func NewComponentVersionAccessImpl(name, version string, container ComponentVers
 		_ComponentVersionAccessImplBase: base,
 		lazy:                            lazy,
 		persistent:                      persistent,
+		directAccess:                    direct,
 		base:                            container,
 	}
 	container.SetImplementation(impl)
@@ -72,12 +74,20 @@ func (a *componentVersionAccessImpl) IsPersistent() bool {
 	return a.persistent
 }
 
+func (d *componentVersionAccessImpl) UseDirectAccess() bool {
+	return d.directAccess
+}
+
 func (a *componentVersionAccessImpl) DiscardChanges() {
 	a.discardChanges = true
 }
 
 func (a *componentVersionAccessImpl) Close() error {
-	return errors.ErrListf("closing component version access %s/%s", a.GetName(), a.GetVersion()).Add(a.Update(true), a.base.Close(), a._ComponentVersionAccessImplBase.Close()).Result()
+	list := errors.ErrListf("closing component version access %s/%s", a.GetName(), a.GetVersion())
+	if a.UseDirectAccess() {
+		list.Add(a.Update(true))
+	}
+	return list.Add(a.base.Close(), a._ComponentVersionAccessImplBase.Close()).Result()
 }
 
 func (a *componentVersionAccessImpl) Repository() cpi.Repository {

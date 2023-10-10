@@ -32,6 +32,16 @@ func AccessMethodAsView(acc AccessMethod, closer ...io.Closer) AccessMethodView 
 	return refmgmt.WithView[AccessMethod, AccessMethodView](acc, accessMethodViewCreator, closer...)
 }
 
+// BlobAccessForAccessSpec provide a blob access for an access specification.
+func BlobAccessForAccessSpec(spec AccessSpec, cv ComponentVersionAccess) (blobaccess.BlobAccess, error) {
+	m, err := AccessMethodViewForSpec(spec, cv)
+	if err != nil {
+		return nil, err
+	}
+	defer m.Close()
+	return BlobAccessForAccessMethod(m)
+}
+
 func AccessMethodViewForSpec(spec AccessSpec, cv ComponentVersionAccess) (AccessMethodView, error) {
 	m, err := spec.AccessMethod(cv)
 	if err != nil {

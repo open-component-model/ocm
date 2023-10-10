@@ -64,6 +64,12 @@ type HintProvider interface {
 	GetReferenceHint(cv ComponentVersionAccess) string
 }
 
+// GlobalAccessProvider is used to provide a non-local access specification.
+// It may optionally be provided by an access spec.
+type GlobalAccessProvider interface {
+	GlobalAccessSpec(ctx Context) AccessSpec
+}
+
 // AccessMethod described the access to a dedicated resource
 // It can allocate external resources, which should be released
 // with the Close() call.

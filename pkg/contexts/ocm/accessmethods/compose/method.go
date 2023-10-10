@@ -17,7 +17,7 @@ import (
 
 // Type is the access type of GitHub registry.
 const (
-	Type   = "ocm.software/compose"
+	Type   = "compose"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
@@ -48,13 +48,15 @@ type AccessSpec struct {
 	ReferenceName string `json:"referenceName,omitempty"`
 }
 
-var _ cpi.AccessSpec = (*AccessSpec)(nil)
+var (
+	_ cpi.AccessSpec           = (*AccessSpec)(nil)
+	_ cpi.HintProvider         = (*AccessSpec)(nil)
+	_ cpi.GlobalAccessProvider = (*AccessSpec)(nil)
+)
 
 // New creates a new GitHub registry access spec version v1.
-func New(id, hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
-	if id == "" {
-		id = fmt.Sprintf("compose-%d", number.Add(1))
-	}
+func New(hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
+	id := fmt.Sprintf("compose-%d", number.Add(1))
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Id:                  id,
@@ -73,6 +75,10 @@ func (a *AccessSpec) Describe(ctx cpi.Context) string {
 
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return true
+}
+
+func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
+	return a.ReferenceName
 }
 
 func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {

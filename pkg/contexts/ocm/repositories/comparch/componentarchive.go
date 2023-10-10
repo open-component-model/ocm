@@ -50,7 +50,7 @@ func _Wrap(ctx cpi.ContextProvider, obj *accessobj.AccessObject, spec *Repositor
 		ctx:  ctx.OCMContext(),
 		base: accessobj.NewFileSystemBlobAccess(obj),
 	}
-	impl, err := support.NewComponentVersionAccessImpl(s.GetDescriptor().GetName(), s.GetDescriptor().GetVersion(), s, false, true)
+	impl, err := support.NewComponentVersionAccessImpl(s.GetDescriptor().GetName(), s.GetDescriptor().GetVersion(), s, false, true, true)
 	if err != nil {
 		return nil, err
 	}

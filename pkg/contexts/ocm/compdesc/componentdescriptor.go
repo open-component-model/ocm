@@ -343,6 +343,7 @@ type ElementAccessor interface {
 // ElementArtifactAccessor provides access to generic artifact information of an element.
 type ElementArtifactAccessor interface {
 	ElementMetaAccessor
+	GetType() string
 	GetAccess() AccessSpec
 	SetAccess(a AccessSpec)
 }
