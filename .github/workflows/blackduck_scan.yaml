@@ -38,7 +38,7 @@ jobs:
           # blackduck_automation_fixpr: true 
           # github_token: ${{ secrets.GITHUB_TOKEN }} # Mandatory when blackduck_automation_fixpr is set to 'true'
           ### Uncomment below configuration if Synopsys Bridge diagnostic files needs to be uploaded
-          # include_diagnostics: true  
+          include_diagnostics: true  
 
       - name: Black Duck PR Scan
         if: ${{ github.event_name == 'pull_request' }}
@@ -46,12 +46,11 @@ jobs:
         ### Use below configuration to set specific detect environment variables
         env:
           #DETECT_PROJECT_NAME: ${{ github.event.repository.name }}
-          DETECT_PROJECT_NAME: open-component-model/ocm
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
-          #BLACKDUCK_TRUST_CERT: true
-          #NODE_TLS_REJECT_UNAUTHORIZED: true
+          BLACKDUCK_TRUST_CERT: true
+          NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
           blackduck_url: ${{ secrets.BLACKDUCK_URL }}
           blackduck_apiToken: ${{ secrets.BLACKDUCK_API_TOKEN }}
@@ -61,4 +60,4 @@ jobs:
           blackduck_automation_prcomment: true
           github_token: ${{ secrets.GITHUB_TOKEN }} # Mandatory when blackduck_automation_prcomment is set to 'true'
           ### Uncomment below configuration if Synopsys Bridge diagnostic files needs to be uploaded
-          # include_diagnostics: true
+          include_diagnostics: true
