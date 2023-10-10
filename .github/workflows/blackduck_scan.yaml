@@ -28,7 +28,9 @@ jobs:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
+          DETECT_PARALLEL_PROCESSORS: 0
           NODE_TLS_REJECT_UNAUTHORIZED: true
+          BLACKDUCK_OFFLINE_MODE: true
         with:
           scan-mode: INTELLIGENT
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -44,7 +46,9 @@ jobs:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
+          DETECT_PARALLEL_PROCESSORS: 0 
           NODE_TLS_REJECT_UNAUTHORIZED: true
+          BLACKDUCK_OFFLINE_MODE: true
         with:
           scan-mode: RAPID
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -75,6 +79,7 @@ jobs:
 #           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
 #           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
 #           DETECT_SOURCE_PATH: ./
+          DETECT_PARALLEL_PROCESSORS: 0
 #           #BLACKDUCK_TRUST_CERT: true
 #           #NODE_TLS_REJECT_UNAUTHORIZED: true
 #         with:
@@ -98,6 +103,7 @@ jobs:
 #           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
 #           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
 #           DETECT_SOURCE_PATH: ./
+            DETECT_PARALLEL_PROCESSORS: 0
 #           #BLACKDUCK_TRUST_CERT: true
 #           #NODE_TLS_REJECT_UNAUTHORIZED: true
 #         with:
