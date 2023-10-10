@@ -28,26 +28,30 @@ jobs:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
+          NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
           scan-mode: INTELLIGENT
           github-token: ${{ secrets.GITHUB_TOKEN }}
           detect-version: 8.11.0
           blackduck-url: ${{ secrets.BLACKDUCK_URL }}
           blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+          include_diagnostics: true
 
-      - name: Blackduck Full Scan
+      - name: Blackduck PR Scan
         if: ${{ github.event_name == 'pull_request' }}
         uses: mercedesbenzio/detect-action@v1
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
+          NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
-          scan-mode: INTELLIGENT
+          scan-mode: RAPID
           github-token: ${{ secrets.GITHUB_TOKEN }}
           detect-version: 8.11.0
           blackduck-url: ${{ secrets.BLACKDUCK_URL }}
           blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+          include_diagnostics: true
 
 
 
