@@ -11,53 +11,98 @@ permissions:
 
 jobs:
   blackduck:
-    name: Black Duck SCA
     runs-on: [ubuntu-latest]
     steps:
-      - name: Checkout Source
+      - name: Checkout code
         uses: actions/checkout@v3
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: Black Duck Full Scan
+      - name: Blackduck Full Scan
         if: ${{ github.event_name != 'pull_request' }}
-        uses: synopsys-sig/synopsys-action@v1.4.1
-        ### Use below configuration to set specific detect environment variables
+        uses: mercedesbenzio/detect-action@v1
         env:
-          #DETECT_PROJECT_NAME: ${{ github.event.repository.name }}
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
-          #BLACKDUCK_TRUST_CERT: true
-          #NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
-          blackduck_url: ${{ secrets.BLACKDUCK_URL }}
-          blackduck_apiToken: ${{ secrets.BLACKDUCK_API_TOKEN }}
-          blackduck_scan_full: true
-          ### Accepts Multiple Values
-          blackduck_scan_failure_severities: 'BLOCKER,CRITICAL'
-          ### Uncomment below configuration to enable automatic fix pull request creation if vulnerabilities are reported
-          # blackduck_automation_fixpr: true 
-          # github_token: ${{ secrets.GITHUB_TOKEN }} # Mandatory when blackduck_automation_fixpr is set to 'true'
-          ### Uncomment below configuration if Synopsys Bridge diagnostic files needs to be uploaded
-          include_diagnostics: true  
-
-      - name: Black Duck PR Scan
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: synopsys-sig/synopsys-action@v1.4.1
-        ### Use below configuration to set specific detect environment variables
-        env:
-          #DETECT_PROJECT_NAME: ${{ github.event.repository.name }}
-          DETECT_PROJECT_USER_GROUPS: opencomponentmodel
-          DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
-          DETECT_SOURCE_PATH: ./
-          #BLACKDUCK_TRUST_CERT: true
-          #NODE_TLS_REJECT_UNAUTHORIZED: true
-        with:
-          blackduck_url: ${{ secrets.BLACKDUCK_URL }}
-          blackduck_apiToken: ${{ secrets.BLACKDUCK_API_TOKEN }}
-          blackduck_scan_full: false
+          scan-mode: INTELLIGENT
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           detect-version: 8.11.0
-          ### Below configuration is used to enable automatic pull request comment based on Black Duck scan result
-          blackduck_automation_prcomment: true
-          github_token: ${{ secrets.GITHUB_TOKEN }} # Mandatory when blackduck_automation_prcomment is set to 'true'
-          ### Uncomment below configuration if Synopsys Bridge diagnostic files needs to be uploaded
-          include_diagnostics: true
+          blackduck-url: ${{ secrets.BLACKDUCK_URL }}
+          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+
+      - name: Blackduck Full Scan
+        if: ${{ github.event_name = 'pull_request' }}
+        uses: mercedesbenzio/detect-action@v1
+        env:
+          DETECT_PROJECT_USER_GROUPS: opencomponentmodel
+          DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
+          DETECT_SOURCE_PATH: ./
+        with:
+          scan-mode: INTELLIGENT
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          detect-version: 8.11.0
+          blackduck-url: ${{ secrets.BLACKDUCK_URL }}
+          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+
+
+
+
+
+
+# jobs:
+#   blackduck:
+#     name: Black Duck SCA
+#     runs-on: [ubuntu-latest]
+#     steps:
+#       - name: Checkout Source
+#         uses: actions/checkout@v3
+
+#       - name: Black Duck Full Scan
+#         if: ${{ github.event_name != 'pull_request' }}
+#         uses: synopsys-sig/synopsys-action@v1.4.1
+#         ### Use below configuration to set specific detect environment variables
+#         env:
+#           #DETECT_PROJECT_NAME: ${{ github.event.repository.name }}
+#           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
+#           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
+#           DETECT_SOURCE_PATH: ./
+#           #BLACKDUCK_TRUST_CERT: true
+#           #NODE_TLS_REJECT_UNAUTHORIZED: true
+#         with:
+#           blackduck_url: ${{ secrets.BLACKDUCK_URL }}
+#           blackduck_apiToken: ${{ secrets.BLACKDUCK_API_TOKEN }}
+#           blackduck_scan_full: true
+#           ### Accepts Multiple Values
+#           blackduck_scan_failure_severities: 'BLOCKER,CRITICAL'
+#           ### Uncomment below configuration to enable automatic fix pull request creation if vulnerabilities are reported
+#           # blackduck_automation_fixpr: true 
+#           # github_token: ${{ secrets.GITHUB_TOKEN }} # Mandatory when blackduck_automation_fixpr is set to 'true'
+#           ### Uncomment below configuration if Synopsys Bridge diagnostic files needs to be uploaded
+#           include_diagnostics: true  
+
+#       - name: Black Duck PR Scan
+#         if: ${{ github.event_name == 'pull_request' }}
+#         uses: synopsys-sig/synopsys-action@v1.4.1
+#         ### Use below configuration to set specific detect environment variables
+#         env:
+#           #DETECT_PROJECT_NAME: ${{ github.event.repository.name }}
+#           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
+#           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
+#           DETECT_SOURCE_PATH: ./
+#           #BLACKDUCK_TRUST_CERT: true
+#           #NODE_TLS_REJECT_UNAUTHORIZED: true
+#         with:
+#           blackduck_url: ${{ secrets.BLACKDUCK_URL }}
+#           blackduck_apiToken: ${{ secrets.BLACKDUCK_API_TOKEN }}
+#           blackduck_scan_full: false
+#           detect-version: 8.11.0
+#           ### Below configuration is used to enable automatic pull request comment based on Black Duck scan result
+#           blackduck_automation_prcomment: true
+#           github_token: ${{ secrets.GITHUB_TOKEN }} # Mandatory when blackduck_automation_prcomment is set to 'true'
+#           ### Uncomment below configuration if Synopsys Bridge diagnostic files needs to be uploaded
+#           include_diagnostics: true
