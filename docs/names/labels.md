@@ -32,7 +32,7 @@ of label names:
   Their format is described by the following regexp:
 
   ```regex
-  [a-z][a-zA-Z0-9]*
+  [a-z][-a-zA-Z0-9]*
   ```
 
 - vendor specific labels
@@ -53,7 +53,7 @@ of label names:
   So, the complete pattern looks as follows:
 
   ```
-  <DNS domain name>/[a-z][a-zA-Z0-9]*
+  <DNS domain name>/[a-z][-a-zA-Z0-9]*
   ```
   
 Every label must define a specification of its attributes,

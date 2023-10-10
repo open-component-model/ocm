@@ -1,4 +1,4 @@
-name: Blackduck Scan
+name: Blackduck Scan PR
 on:
   pull_request:
     branches: [main]
@@ -10,8 +10,10 @@ permissions:
   checks: write
 
 jobs:
-  build:
-    runs-on: [ ubuntu-latest ]
+  blackduck:
+    name: Black Duck SCA
+    runs-on: [ubuntu-latest]
+      - ubuntu-latest
     steps:
       - name: Checkout Source
         uses: actions/checkout@v3
