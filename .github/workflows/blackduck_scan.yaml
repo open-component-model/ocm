@@ -40,53 +40,56 @@ permissions:
 #           --detect.source.path=$DETECT_SOURCE_PATH
 
 
-# jobs:
-#   blackduck:
-#     runs-on: [ubuntu-latest]
-    # steps:
-    #   - name: Checkout code
-    #     uses: actions/checkout@v3
-    #   - name: Set up Java 17
-    #     uses: actions/setup-java@v3
-    #     with:
-    #       java-version: '17'
-    #       distribution: 'temurin'
+jobs:
+  blackduck:
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    #   - name: Blackduck Full Scan
-    #     if: ${{ github.event_name != 'pull_request' }}
-    #     uses: mercedesbenzio/detect-action@v1
-    #     env:
-    #       DETECT_PROJECT_USER_GROUPS: opencomponentmodel
-    #       DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
-    #       DETECT_SOURCE_PATH: ./
-    #       DETECT_PARALLEL_PROCESSORS: 0
-    #       NODE_TLS_REJECT_UNAUTHORIZED: true
-    #       BLACKDUCK_OFFLINE_MODE: true
-    #     with:
-    #       scan-mode: INTELLIGENT
-    #       github-token: ${{ secrets.GITHUB_TOKEN }}
-    #       detect-version: 8.11.0
-    #       blackduck-url: ${{ secrets.BLACKDUCK_URL }}
-    #       blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
-    #       include_diagnostics: true
+      - name: Blackduck Full Scan
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: mercedesbenzio/detect-action@v1
+        env:
+          DETECT_PROJECT_USER_GROUPS: opencomponentmodel
+          DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
+          DETECT_SOURCE_PATH: ./
+          DETECT_PARALLEL_PROCESSORS: 0
+          NODE_TLS_REJECT_UNAUTHORIZED: true
+          BLACKDUCK_OFFLINE_MODE: true
+          INCLUDE_DIAGNOSTICS: TRUE
+        with:
+          scan-mode: INTELLIGENT
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          detect-version: 8.11.0
+          blackduck-url: ${{ secrets.BLACKDUCK_URL }}
+          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
 
-    #   - name: Blackduck PR Scan
-    #     if: ${{ github.event_name == 'pull_request' }}
-    #     uses: mercedesbenzio/detect-action@v1
-    #     env:
-    #       DETECT_PROJECT_USER_GROUPS: opencomponentmodel
-    #       DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
-    #       DETECT_SOURCE_PATH: ./
-    #       DETECT_PARALLEL_PROCESSORS: 0 
-    #       NODE_TLS_REJECT_UNAUTHORIZED: true
-    #       BLACKDUCK_OFFLINE_MODE: true
-    #     with:
-    #       scan-mode: RAPID
-    #       github-token: ${{ secrets.GITHUB_TOKEN }}
-    #       detect-version: 8.11.0
-    #       blackduck-url: ${{ secrets.BLACKDUCK_URL }}
-    #       blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
-    #       include_diagnostics: true
+      - name: Blackduck PR Scan
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: mercedesbenzio/detect-action@v1
+        env:
+          DETECT_PROJECT_USER_GROUPS: opencomponentmodel
+          DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
+          DETECT_SOURCE_PATH: ./
+          DETECT_PARALLEL_PROCESSORS: 0 
+          NODE_TLS_REJECT_UNAUTHORIZED: true
+          BLACKDUCK_OFFLINE_MODE: true
+          SYNOPSYS_SKIP_PHONE_HOME: true
+          BLACKDUCK_SKIP_PHONE_HOME: true
+          INCLUDE_DIAGNOSTICS: TRUE
+        with:
+          scan-mode: RAPID
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          detect-version: 8.11.0
+          blackduck-url: ${{ secrets.BLACKDUCK_URL }}
+          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+          
 
 
 jobs:
@@ -139,7 +142,7 @@ jobs:
           blackduck_url: ${{ secrets.BLACKDUCK_URL }}
           blackduck_apiToken: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackduck_scan_full: false
-          detect-version: 8.11.0
+          #detect-version: 8.11.0
           ### Below configuration is used to enable automatic pull request comment based on Black Duck scan result
           blackduck_automation_prcomment: true
           github_token: ${{ secrets.GITHUB_TOKEN }} # Mandatory when blackduck_automation_prcomment is set to 'true'
