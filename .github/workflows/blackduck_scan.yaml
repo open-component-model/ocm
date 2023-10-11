@@ -61,8 +61,7 @@ jobs:
           DETECT_SOURCE_PATH: ./
           DETECT_PARALLEL_PROCESSORS: 0
           NODE_TLS_REJECT_UNAUTHORIZED: true
-          BLACKDUCK_OFFLINE_MODE: true
-          INCLUDE_DIAGNOSTICS: TRUE
+          #BLACKDUCK_OFFLINE_MODE: true
         with:
           scan-mode: INTELLIGENT
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -79,10 +78,10 @@ jobs:
           DETECT_SOURCE_PATH: ./
           DETECT_PARALLEL_PROCESSORS: 0 
           NODE_TLS_REJECT_UNAUTHORIZED: true
-          BLACKDUCK_OFFLINE_MODE: true
-          SYNOPSYS_SKIP_PHONE_HOME: true
+          #BLACKDUCK_OFFLINE_MODE: true
+          #SYNOPSYS_SKIP_PHONE_HOME: true
           BLACKDUCK_SKIP_PHONE_HOME: true
-          LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: DEBUG
+          #LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: DEBUG
         with:
           scan-mode: RAPID
           github-token: ${{ secrets.GITHUB_TOKEN }}
