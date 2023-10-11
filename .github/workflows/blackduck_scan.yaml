@@ -42,7 +42,7 @@ permissions:
 #           --detect.source.path=$DETECT_SOURCE_PATH
 
 
-invoke forked detect-action as the one from synopsys is deprecated: https://github.com/mercedesbenzio/detect-action
+#invoke forked detect-action as the one from synopsys is deprecated: https://github.com/mercedesbenzio/detect-action
 jobs:
   blackduck:
     runs-on: [ubuntu-latest]
@@ -63,7 +63,6 @@ jobs:
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
           NODE_TLS_REJECT_UNAUTHORIZED: true
-          #BLACKDUCK_OFFLINE_MODE: true
         with:
           scan-mode: INTELLIGENT
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -78,8 +77,6 @@ jobs:
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
           NODE_TLS_REJECT_UNAUTHORIZED: true
-          #BLACKDUCK_OFFLINE_MODE: true
-          #SYNOPSYS_SKIP_PHONE_HOME: true
           BLACKDUCK_SKIP_PHONE_HOME: true
           LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: INFO
         with:
