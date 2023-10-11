@@ -82,7 +82,7 @@ jobs:
           BLACKDUCK_OFFLINE_MODE: true
           SYNOPSYS_SKIP_PHONE_HOME: true
           BLACKDUCK_SKIP_PHONE_HOME: true
-          INCLUDE_DIAGNOSTICS: TRUE
+          LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: DEBUG
         with:
           scan-mode: RAPID
           github-token: ${{ secrets.GITHUB_TOKEN }}
