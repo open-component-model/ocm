@@ -78,7 +78,7 @@ jobs:
           DETECT_SOURCE_PATH: ./
           NODE_TLS_REJECT_UNAUTHORIZED: true
           BLACKDUCK_SKIP_PHONE_HOME: true
-          LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: INFO
+          #LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: DEBUG
         with:
           scan-mode: RAPID
           github-token: ${{ secrets.GITHUB_TOKEN }}
