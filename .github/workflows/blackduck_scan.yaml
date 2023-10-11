@@ -76,12 +76,11 @@ jobs:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
-          DETECT_PARALLEL_PROCESSORS: 0 
           NODE_TLS_REJECT_UNAUTHORIZED: true
           #BLACKDUCK_OFFLINE_MODE: true
           #SYNOPSYS_SKIP_PHONE_HOME: true
           BLACKDUCK_SKIP_PHONE_HOME: true
-          #LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: DEBUG
+          LOGGING_LEVEL_COM_SYNOPSYS_INTEGRATION: INFO
         with:
           scan-mode: RAPID
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -135,8 +134,8 @@ jobs:
 #           DETECT_SOURCE_PATH: ./
 #           BLACKDUCK_TRUST_CERT: true
 #           NODE_TLS_REJECT_UNAUTHORIZED: true
-#           SYNOPSYS_SKIP_PHONE_HOME: true
 #           BLACKDUCK_SKIP_PHONE_HOME: true
+#           BLACKDUCK_OFFLINE_MODE: true
 #         with:
 #           blackduck_url: ${{ secrets.BLACKDUCK_URL }}
 #           blackduck_apiToken: ${{ secrets.BLACKDUCK_API_TOKEN }}
