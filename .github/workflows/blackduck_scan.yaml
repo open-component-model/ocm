@@ -135,7 +135,6 @@ jobs:
           DETECT_SOURCE_PATH: ./
           BLACKDUCK_TRUST_CERT: true
           NODE_TLS_REJECT_UNAUTHORIZED: true
-          BLACKDUCK_SKIP_PHONE_HOME: true
           BLACKDUCK_OFFLINE_MODE: true
         with:
           blackduck_url: ${{ secrets.BLACKDUCK_URL }}
