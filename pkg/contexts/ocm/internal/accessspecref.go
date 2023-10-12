@@ -55,6 +55,13 @@ func (a *AccessSpecRef) Set(spec AccessSpec) {
 	}
 }
 
+func (a *AccessSpecRef) Unwrap() AccessSpec {
+	if a == nil {
+		return nil
+	}
+	return a
+}
+
 func (a *AccessSpecRef) Describe(ctx Context) string {
 	err := a.assure(ctx)
 	if a.evaluated != nil {

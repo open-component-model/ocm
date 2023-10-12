@@ -11,7 +11,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/internal" // avoid cycle
-	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -82,7 +81,10 @@ func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
 }
 
 func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
-	return a
+	if g, err := ctx.AccessSpecForSpec(a.GlobalAccess); err == nil {
+		return g
+	}
+	return a.GlobalAccess.Unwrap()
 }
 
 func (_ *AccessSpec) GetType() string {
@@ -124,7 +126,7 @@ func (m *accessMethod) GetKind() string {
 }
 
 func (m *accessMethod) MimeType() string {
-	return mime.MIME_TGZ
+	return m.access.MimeType()
 }
 
 func (m *accessMethod) AccessSpec() cpi.AccessSpec {

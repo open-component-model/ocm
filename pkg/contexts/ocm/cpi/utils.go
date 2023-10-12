@@ -67,8 +67,9 @@ func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) string {
 }
 
 func GlobalAccess(spec AccessSpec, ctx Context) AccessSpec {
-	if h, ok := spec.(internal.GlobalAccessProvider); ok {
-		return h.GlobalAccessSpec(ctx)
+	g := spec.GlobalAccessSpec(ctx)
+	if g != nil && g.IsLocal(ctx) {
+		g = nil
 	}
-	return nil
+	return g
 }

@@ -566,14 +566,24 @@ func (c *componentVersionAccessView) GetDescriptor() *compdesc.ComponentDescript
 
 func (c *componentVersionAccessView) AccessMethod(spec AccessSpec) (meth AccessMethod, err error) {
 	err = c.Execute(func() error {
-		if !spec.IsLocal(c.GetContext()) || compose.Is(spec) {
-			cspec := spec.(*compose.AccessSpec)
+		switch {
+		case compose.Is(spec):
+			spec, err = c.GetContext().AccessSpecForSpec(spec)
+			if err != nil {
+				return err
+			}
+			cspec, ok := spec.(*compose.AccessSpec)
+			if !ok {
+				return fmt.Errorf("invalid implementation (%T) for access method compose", spec)
+			}
 			blob := c.impl.GetBlobCache().GetBlobFor(cspec.Id)
 			if blob == nil {
 				return errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, common.VersionedElementKey(c).String())
 			}
 			meth, err = compose.NewMethod(cspec, blob)
-		} else {
+		case !spec.IsLocal(c.GetContext()):
+			meth, err = spec.AccessMethod(c)
+		default:
 			meth, err = c.impl.AccessMethod(c, spec)
 		}
 		return err

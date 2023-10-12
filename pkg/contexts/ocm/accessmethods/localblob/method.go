@@ -127,7 +127,7 @@ func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
 	if g, err := ctx.AccessSpecForSpec(a.GlobalAccess); err == nil {
 		return g
 	}
-	return a.GlobalAccess
+	return a.GlobalAccess.Unwrap()
 }
 
 func (a *AccessSpec) GetMimeType() string {
