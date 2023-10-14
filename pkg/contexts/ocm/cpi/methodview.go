@@ -15,12 +15,7 @@ import (
 // AccessMethodView can be used map wrap an access method
 // into a managed method with multiple views. The original method
 // object is closed once the last view is closed.
-type AccessMethodView interface {
-	AccessMethod
-
-	Base() interface{}
-	Dup() (AccessMethodView, error)
-}
+type AccessMethodView = internal.AccessMethodView
 
 // AccessMethodAsView wrap an access method object into
 // a multi-view version. The original method is closed when

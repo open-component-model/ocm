@@ -74,9 +74,11 @@ type (
 )
 
 type AccessProvider interface {
-	ComponentVersion() ComponentVersionAccess
+	GetOCMContext() Context
+	ReferenceHint() string
 	Access() (AccessSpec, error)
 	AccessMethod() (AccessMethod, error)
+	BlobAccess() (BlobAccess, error)
 }
 
 type ResourceAccess interface {

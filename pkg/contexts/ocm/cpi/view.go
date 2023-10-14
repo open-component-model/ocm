@@ -1018,7 +1018,7 @@ func (c *componentVersionAccessView) GetResource(id metav1.Identity) (ResourceAc
 	if err != nil {
 		return nil, err
 	}
-	return newResourceAccess(c, r.Access, r.ResourceMeta), nil
+	return NewResourceAccess(c, r.Access, r.ResourceMeta), nil
 }
 
 func (c *componentVersionAccessView) GetResourceIndex(id metav1.Identity) int {
@@ -1030,7 +1030,7 @@ func (c *componentVersionAccessView) GetResourceByIndex(i int) (ResourceAccess, 
 		return nil, errors.ErrInvalid("resource index", strconv.Itoa(i))
 	}
 	r := c.GetDescriptor().Resources[i]
-	return newResourceAccess(c, r.Access, r.ResourceMeta), nil
+	return NewResourceAccess(c, r.Access, r.ResourceMeta), nil
 }
 
 func (c *componentVersionAccessView) GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error) {
@@ -1041,7 +1041,7 @@ func (c *componentVersionAccessView) GetResourcesByName(name string, selectors .
 
 	result := []ResourceAccess{}
 	for _, resource := range resources {
-		result = append(result, newResourceAccess(c, resource.Access, resource.ResourceMeta))
+		result = append(result, NewResourceAccess(c, resource.Access, resource.ResourceMeta))
 	}
 	return result, nil
 }
@@ -1049,7 +1049,7 @@ func (c *componentVersionAccessView) GetResourcesByName(name string, selectors .
 func (c *componentVersionAccessView) GetResources() []ResourceAccess {
 	result := []ResourceAccess{}
 	for _, r := range c.GetDescriptor().Resources {
-		result = append(result, newResourceAccess(c, r.Access, r.ResourceMeta))
+		result = append(result, NewResourceAccess(c, r.Access, r.ResourceMeta))
 	}
 	return result
 }
@@ -1103,7 +1103,7 @@ func (c *componentVersionAccessView) GetSource(id metav1.Identity) (SourceAccess
 	if err != nil {
 		return nil, err
 	}
-	return newSourceAccess(c, r.Access, r.SourceMeta), nil
+	return NewSourceAccess(c, r.Access, r.SourceMeta), nil
 }
 
 func (c *componentVersionAccessView) GetSourceIndex(id metav1.Identity) int {
@@ -1115,13 +1115,13 @@ func (c *componentVersionAccessView) GetSourceByIndex(i int) (SourceAccess, erro
 		return nil, errors.ErrInvalid("source index", strconv.Itoa(i))
 	}
 	r := c.GetDescriptor().Sources[i]
-	return newSourceAccess(c, r.Access, r.SourceMeta), nil
+	return NewSourceAccess(c, r.Access, r.SourceMeta), nil
 }
 
 func (c *componentVersionAccessView) GetSources() []SourceAccess {
 	result := []SourceAccess{}
 	for _, r := range c.GetDescriptor().Sources {
-		result = append(result, newSourceAccess(c, r.Access, r.SourceMeta))
+		result = append(result, NewSourceAccess(c, r.Access, r.SourceMeta))
 	}
 	return result
 }

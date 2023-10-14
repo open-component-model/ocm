@@ -22,15 +22,15 @@ func NewBaseAccess(cv ComponentVersionAccess, acc compdesc.AccessSpec) *BaseAcce
 	return &BaseAccess{vers: cv, access: acc}
 }
 
+func (r *BaseAccess) GetOCMContext() Context {
+	return r.vers.GetContext()
+}
+
 func (r *BaseAccess) ReferenceHint() string {
 	if hp, ok := r.access.(cpi.HintProvider); ok {
 		return hp.GetReferenceHint(r.vers)
 	}
 	return ""
-}
-
-func (r *BaseAccess) ComponentVersion() ComponentVersionAccess {
-	return r.vers
 }
 
 func (r *BaseAccess) Access() (AccessSpec, error) {
@@ -42,45 +42,53 @@ func (r *BaseAccess) AccessMethod() (AccessMethod, error) {
 	if err != nil {
 		return nil, err
 	}
-	return r.vers.AccessMethod(acc)
+	return acc.AccessMethod(r.vers)
+}
+
+func (r *BaseAccess) BlobAccess() (BlobAccess, error) {
+	m, err := r.AccessMethod()
+	if err != nil {
+		return nil, err
+	}
+	return BlobAccessForAccessMethod(AccessMethodAsView(m))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ResourceAccessImpl struct {
+type resourceAccessImpl struct {
 	*baseAccess
 	meta ResourceMeta
 }
 
-var _ ResourceAccess = (*ResourceAccessImpl)(nil)
+var _ ResourceAccess = (*resourceAccessImpl)(nil)
 
-func newResourceAccess(componentVersion ComponentVersionAccess, accessSpec compdesc.AccessSpec, meta ResourceMeta) *ResourceAccessImpl {
-	return &ResourceAccessImpl{
+func NewResourceAccess(componentVersion ComponentVersionAccess, accessSpec compdesc.AccessSpec, meta ResourceMeta) ResourceAccess {
+	return &resourceAccessImpl{
 		baseAccess: NewBaseAccess(componentVersion, accessSpec),
 		meta:       meta,
 	}
 }
 
-func (r *ResourceAccessImpl) Meta() *ResourceMeta {
+func (r *resourceAccessImpl) Meta() *ResourceMeta {
 	return &r.meta
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type SourceAccessImpl struct {
+type sourceAccessImpl struct {
 	*baseAccess
 	meta SourceMeta
 }
 
-var _ SourceAccess = (*SourceAccessImpl)(nil)
+var _ SourceAccess = (*sourceAccessImpl)(nil)
 
-func newSourceAccess(componentVersion ComponentVersionAccess, accessSpec compdesc.AccessSpec, meta SourceMeta) *SourceAccessImpl {
-	return &SourceAccessImpl{
+func NewSourceAccess(componentVersion ComponentVersionAccess, accessSpec compdesc.AccessSpec, meta SourceMeta) SourceAccess {
+	return &sourceAccessImpl{
 		baseAccess: NewBaseAccess(componentVersion, accessSpec),
 		meta:       meta,
 	}
 }
 
-func (r SourceAccessImpl) Meta() *SourceMeta {
+func (r sourceAccessImpl) Meta() *SourceMeta {
 	return &r.meta
 }

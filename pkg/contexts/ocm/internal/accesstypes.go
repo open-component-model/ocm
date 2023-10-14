@@ -7,6 +7,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/modern-go/reflect2"
 
@@ -77,12 +78,22 @@ type GlobalAccessProvider interface {
 // via the DataAccess interface to avoid unnecessary effort
 // if the method object is just used to access meta data.
 type AccessMethod interface {
+	io.Closer
 	DataAccess
+	MimeType
 
 	GetKind() string
 	AccessSpec() AccessSpec
-	MimeType
-	Close() error
+}
+
+// AccessMethodView can be used map wrap an access method
+// into a managed method with multiple views. The original method
+// object is closed once the last view is closed.
+type AccessMethodView interface {
+	AccessMethod
+
+	Base() interface{}
+	Dup() (AccessMethodView, error)
 }
 
 type AccessTypeScheme flagsetscheme.TypeScheme[AccessSpec, AccessType]
