@@ -28,9 +28,11 @@ var _ = Describe("attribute", func() {
 		ctx = ocm.WithOCIRepositories(ocictx).New()
 	})
 	It("local setting", func() {
-		Expect(me.Get(ctx)).To(BeFalse())
+		Expect(me.Get(ctx)).To(Equal(me.UseCompositionMode))
 		Expect(me.Set(ctx, true)).To(Succeed())
 		Expect(me.Get(ctx)).To(BeTrue())
+		Expect(me.Set(ctx, false)).To(Succeed())
+		Expect(me.Get(ctx)).To(BeFalse())
 	})
 
 	It("global setting", func() {

@@ -15,7 +15,6 @@ type _ComponentVersionAccessImplBase = cpi.ComponentVersionAccessImplBase
 type ComponentVersionAccessImpl interface {
 	cpi.ComponentVersionAccessImpl
 	EnablePersistence() bool
-	Update(final bool) error
 }
 
 type componentVersionAccessImpl struct {
@@ -84,9 +83,6 @@ func (a *componentVersionAccessImpl) DiscardChanges() {
 
 func (a *componentVersionAccessImpl) Close() error {
 	list := errors.ErrListf("closing component version access %s/%s", a.GetName(), a.GetVersion())
-	if a.UseDirectAccess() {
-		list.Add(a.Update(true))
-	}
 	return list.Add(a.base.Close(), a._ComponentVersionAccessImplBase.Close()).Result()
 }
 
@@ -121,9 +117,16 @@ func (a *componentVersionAccessImpl) AddBlobFor(storagectx cpi.StorageContext, b
 	return a.base.AddBlobFor(storagectx, blob, refName, global)
 }
 
-func (a *componentVersionAccessImpl) Update(final bool) error {
-	if (final || !a.lazy) && !a.discardChanges && a.persistent {
-		return a.base.Update()
+func (a *componentVersionAccessImpl) ShouldUpdate(final bool) bool {
+	if a.discardChanges {
+		return false
 	}
-	return nil
+	if final {
+		return true
+	}
+	return !a.lazy && a.directAccess && a.persistent
+}
+
+func (a *componentVersionAccessImpl) Update() error {
+	return a.base.Update()
 }

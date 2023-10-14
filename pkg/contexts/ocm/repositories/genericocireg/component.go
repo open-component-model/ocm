@@ -164,8 +164,11 @@ func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) erro
 		return fmt.Errorf("version has been discarded")
 	}
 	// delayed update in close is not done for composition mode,
-	// so, we have to do the update, here
-	return mine.impl.Update(!mine.impl.UseDirectAccess())
+	// so, we have to do the update, here.
+	if !mine.impl.UseDirectAccess() || mine.impl.ShouldUpdate(false) {
+		return mine.impl.Update()
+	}
+	return nil
 }
 
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {

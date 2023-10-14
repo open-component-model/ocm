@@ -423,7 +423,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 	})
 
 	It("it should copy signatures", func() {
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 		Expect(err).To(Succeed())
 		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
 		Expect(err).To(Succeed())

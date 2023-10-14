@@ -17,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -294,9 +295,9 @@ func (c *componentAccessView) addVersion(acc ComponentVersionAccess) (ferr error
 		eff = acc
 	}
 
-	err = setupLocalBobs(ctx, "resource", acc, eff, impl, d.Resources, sel)
+	err = setupLocalBobs(ctx, "resource", acc, eff, nil, impl, d.Resources, sel)
 	if err == nil {
-		err = setupLocalBobs(ctx, "source", acc, eff, impl, d.Sources, sel)
+		err = setupLocalBobs(ctx, "source", acc, eff, nil, impl, d.Sources, sel)
 	}
 	if err != nil {
 		return err
@@ -305,7 +306,7 @@ func (c *componentAccessView) addVersion(acc ComponentVersionAccess) (ferr error
 	return c.impl.AddVersion(eff)
 }
 
-func setupLocalBobs(ctx Context, kind string, src, tgt ComponentVersionAccess, impl ComponentVersionAccessImpl, it compdesc.ArtifactAccessor, sel func(AccessSpec) bool) (ferr error) {
+func setupLocalBobs(ctx Context, kind string, src, tgt ComponentVersionAccess, srcimpl, tgtimpl ComponentVersionAccessImpl, it compdesc.ArtifactAccessor, sel func(AccessSpec) bool) (ferr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 
@@ -317,12 +318,12 @@ func setupLocalBobs(ctx Context, kind string, src, tgt ComponentVersionAccess, i
 			return errors.Wrapf(err, "%s %d", kind, i)
 		}
 		if sel(spec) {
-			blob, err := BlobAccessForAccessSpec(spec, src)
+			blob, err := blobAccessForLocalAccessSpec(spec, src, srcimpl)
 			if err != nil {
 				return errors.Wrapf(err, "%s %d", kind, i)
 			}
 			nested.Close(blob)
-			effspec, err := addBlob(impl, tgt, a.GetType(), ReferenceHint(spec, src), blob, GlobalAccess(spec, src.GetContext()))
+			effspec, err := addBlob(tgtimpl, tgt, a.GetType(), ReferenceHint(spec, src), blob, GlobalAccess(spec, ctx))
 			if err != nil {
 				return errors.Wrapf(err, "cannot store %s %d", kind, i)
 			}
@@ -334,6 +335,26 @@ func setupLocalBobs(ctx Context, kind string, src, tgt ComponentVersionAccess, i
 		}
 	}
 	return nil
+}
+
+func blobAccessForLocalAccessSpec(spec AccessSpec, cv ComponentVersionAccess, impl ComponentVersionAccessImpl) (blobaccess.BlobAccess, error) {
+	var m AccessMethod
+	var err error
+	if impl != nil {
+		m, err = impl.AccessMethod(cv, spec)
+	} else {
+		m, err = spec.AccessMethod(cv)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	v := AccessMethodAsView(m)
+	defer v.Close()
+	return BlobAccessForAccessMethod(v)
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc ComponentVersionAccess, err error) {
@@ -385,7 +406,11 @@ type ComponentVersionAccessImpl interface {
 	AddBlobFor(storagectx StorageContext, blob BlobAccess, refName string, global AccessSpec) (AccessSpec, error)
 
 	IsReadOnly() bool
-	Update(final bool) error
+
+	// ShouldUpdate checks, whether an update is indicated
+	// by the state of object, considering persistence, lazy, discard
+	// and update mode state
+	ShouldUpdate(final bool) bool
 
 	// GetBlobCache retieves the blob cache used to store preliminary
 	// blob accesses for freshly generated local access specs not directly
@@ -395,6 +420,10 @@ type ComponentVersionAccessImpl interface {
 	// UseDirectAccess returns true if composition should be directly
 	// forwarded to the repository backend.,
 	UseDirectAccess() bool
+
+	// Update persists the current state of the component version to the
+	// underlying repository backend.
+	Update() error
 }
 
 type (
@@ -541,6 +570,23 @@ func NewComponentVersionAccess(impl ComponentVersionAccessImpl) ComponentVersion
 }
 
 func (c *componentVersionAccessView) Close() error {
+	err := c.Execute(func() error {
+		// executed under local lock, if refcount is one, I'm the last user.
+		if c.impl.RefCount() == 1 {
+			// prepare artifact access for final close in
+			// direct access mode.
+			if !compositionmodeattr.Get(c.GetContext()) {
+				err := c.update(true)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
 	return c._ComponentVersionAccessView.Close()
 }
 
@@ -603,6 +649,36 @@ func (c *componentVersionAccessView) GetInexpensiveContentVersionIdentity(spec A
 		return nil
 	})
 	return id
+}
+
+func (c *componentVersionAccessView) Update() error {
+	return c.Execute(func() error { return c.update(true) })
+}
+
+func (c *componentVersionAccessView) update(final bool) error {
+	if !c.impl.ShouldUpdate(final) {
+		return nil
+	}
+
+	ctx := c.GetContext()
+	d := c.GetDescriptor()
+	impl, err := GetComponentVersionAccessImplementation(c)
+	if err != nil {
+		return err
+	}
+	err = setupLocalBobs(ctx, "resource", c, c, impl, impl, d.Resources, compose.Is)
+	if err == nil {
+		err = setupLocalBobs(ctx, "source", c, c, impl, impl, d.Sources, compose.Is)
+	}
+	if err != nil {
+		return err
+	}
+
+	err = c.impl.Update()
+	if err != nil {
+		return err
+	}
+	return c.impl.GetBlobCache().Clear()
 }
 
 func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error) {
@@ -847,7 +923,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		} else {
 			cd.Resources[idx] = *res
 		}
-		return c.impl.Update(false)
+		return c.update(false)
 	})
 }
 
@@ -906,7 +982,7 @@ func (c *componentVersionAccessView) SetSource(meta *internal.SourceMeta, acc co
 		} else {
 			cd.Sources[idx] = *res
 		}
-		return c.impl.Update(false)
+		return c.update(false)
 	})
 }
 
@@ -918,7 +994,7 @@ func (c *componentVersionAccessView) SetReference(ref *internal.ComponentReferen
 		} else {
 			cd.References[idx] = *ref
 		}
-		return c.impl.Update(false)
+		return c.update(false)
 	})
 }
 

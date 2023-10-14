@@ -156,6 +156,9 @@ type ComponentVersionAccess interface {
 	// calculating the digest from the bytes), which would defeat the purpose of caching.
 	// It follows the same contract as AccessMethod.
 	GetInexpensiveContentVersionIdentity(spec AccessSpec) string
+
+	// Update adds the version with all changes to the component instance it has been created for.
+	Update() error
 }
 
 // ComponentLister provides the optional repository list functionality of

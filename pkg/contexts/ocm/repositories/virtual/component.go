@@ -84,7 +84,13 @@ func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) erro
 		return fmt.Errorf("cannot add component version: component version access %s not created for target", access.GetName()+":"+access.GetVersion())
 	}
 	mine.impl.EnablePersistence()
-	return mine.impl.Update(false)
+
+	// delayed update in close is not done for composition mode,
+	// so, we have to do the update, here.
+	if !mine.impl.UseDirectAccess() || mine.impl.ShouldUpdate(false) {
+		return mine.impl.Update()
+	}
+	return nil
 }
 
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {

@@ -6,6 +6,7 @@ package cpi
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -19,6 +20,13 @@ type baseAccess = BaseAccess
 
 func NewBaseAccess(cv ComponentVersionAccess, acc compdesc.AccessSpec) *BaseAccess {
 	return &BaseAccess{vers: cv, access: acc}
+}
+
+func (r *BaseAccess) ReferenceHint() string {
+	if hp, ok := r.access.(cpi.HintProvider); ok {
+		return hp.GetReferenceHint(r.vers)
+	}
+	return ""
 }
 
 func (r *BaseAccess) ComponentVersion() ComponentVersionAccess {

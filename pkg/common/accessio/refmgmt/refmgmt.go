@@ -25,6 +25,7 @@ type RefMgmt interface {
 	Allocatable
 	UnrefLast() error
 	IsClosed() bool
+	RefCount() int
 
 	WithName(name string) RefMgmt
 }
@@ -93,6 +94,12 @@ func (c *refMgmt) Unref() error {
 	}
 
 	return nil
+}
+
+func (c *refMgmt) RefCount() int {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	return c.refcount
 }
 
 func (c *refMgmt) UnrefLast() error {

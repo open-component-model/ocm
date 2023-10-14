@@ -17,6 +17,8 @@ var ErrClosed = errors.ErrClosed()
 // If the last view is closed, the basic closer is finally closed.
 type ReferencableCloser interface {
 	Allocatable
+
+	RefCount() int
 	UnrefLast() error
 	IsClosed() bool
 
