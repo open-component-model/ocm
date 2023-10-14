@@ -19,18 +19,21 @@ A context provides access to a set of basic root elements of the functional
 area it is responsible for. The root elements can then be used to access
 nested or dependent objects.
 
+![context](functionalarea.png)
+
 The basic elements of most context types are *Specifications* and
 *Repositories*.  A specification object provides serializable attributes
 used to describe dedicated elements in the functional area. They are typed.
 There might be different types (with different attribute sets) used to
-describe instances provided by different implementations.
+describe instances provided by different implementations. Those descriptions
+are called descriptors.
 
 The root element below the context object is typically a *Repository*
 object, which provides access to elements hosted by this repository.
 
 The context itself manages all the specification and element types and
-acts as an entry point to deserialize JSON/YAML based specification
-descriptions and to gain access to the described effective root elements.
+acts as a central entry point to deserialize JSON/YAML based specification
+descriptors and to gain access to the described effective root elements.
 Those context extension points are managed by *Registries* used to 
 configure implementations and specification types by globally
 unique names. These registration features are provided for every extension
@@ -52,7 +55,7 @@ complex object ecosystem, including more kinds of specification and object
 types.
 
 Typically, a context is based on contexts of required functional areas,
-for example an OCI contexts uses a credential context to gain access to
+for example an OCI context uses a credential context to gain access to
 required credentials, which again uses a configuration context to
 configure itself from a central configuration provided by a shared configuration context.
 
@@ -61,10 +64,31 @@ configure itself from a central configuration provided by a shared configuration
 The following context types are provided:
 
 - `config`: configuration management of all parts of the OCM library.
-- `credentials`: credential management
-- `oci`: working with OCI registries
-- `ocm`: working withOCM repositories
-- `clictx`: command line interface
+   It provides a uniform but generic way to manage configuration and its
+   serialized form for all kinds of configuration cosumers by supporting
+   typed descriptors which, are mapped to objects capable to configure
+   dedicated configuration targets.
+- `credentials`: credential management. It acts as factory to provide
+   credentials for consumption targets in various environments (for example,
+   GitHub, OCI registries, S3 repositories, etc). Those targets are described
+   by so-called *comsumer ids*, which are mapped to credentials by the credentials context.
+
+   It includes a *config* context.
+- `oci`: working with OCI registries.
+   It acts as central access point to instantiate OCI registry view for
+   different backends hosting OCI images and OCU artifacts, like an
+    OCI registry, a filesystem representation or a docker daemon.
+
+   It includes a *credentials* context.
+
+- **`ocm`**: working withOCM repositories.
+   This is the central context type providing access to the elements
+   of the open component model.
+
+   It includes an *oci* context.
+- `clictx`: command line interface.
+   It acts as configuration container for the OCM command line client,
+   hosting an OCM context.
 - `datacontext`: base context functionality used for all kinds of contexts.
 
 To just use the library without special configuration the complete standard
@@ -78,7 +102,8 @@ All functional areas supported by contexts can be found as sub packages of
 `github.com/open-component-model/ocm/pkg/contexts`.
 
 A context package directly contains the typical user API for the functional
-area. The most important interface is the interface `Context`. It acts as main entry point to access the functionality of the functional area.
+area. The most important interface is the interface `Context`. It acts as main
+entry point to access the functionality of the functional area.
 
 Elements required to provide own extension point implementations
 (for example new specification and repository types) can be found in the
@@ -99,6 +124,51 @@ context  usage relation (for example ocm -> oci -> credentials -> config).
 If a context type supports multiple extension types there is typically
 a dedicated sub package for this type (for example `github.com/open-component-model/pkg/contexts/ocm/accessmethods`), which again
 contains the various implementation types in sub packages.
+
+### The OCM context organization
+
+The following diagram shows the element structured used for the OCM context as
+an instance of the general context blueprint described above.
+
+![ocm context](area-ocm.png)
+
+Besides the standard sub packages, there are extension packages for
+
+- `blobhandler`: Handlers responsible to upload local blobs. By default,
+  local blobs are kept as local blobs when addedd to an OCM repository.
+  *Upload handlers* can be used to influence this behaviour and export
+  the content of dedicated blobs again into local repositories according
+  to their native technologies, for example OCI images, S3 blobs, etc.
+
+- `download`: Handlers understanding dedicated artifact and mime types
+  capable to provide then as filesystem content consumable by their
+  native tool set, for example Helm charts.
+
+- `labels`: The handling of predefined label content.
+- `valuemergehandler`: Merge algorithms used to support the merge
+  of volatile labels during a transport step (used by the transport tool)
+
+The package `plugin` contains the plugin interface of the library,
+which can be used to provide various kinds of extension points in form of
+separate executables.
+The embedding of handlers provided by plugins can always be found
+in the package `plugin` below the dedicated extension point handler 
+package.
+
+Additionally, there are more functional
+packages hosting predefined applications based on the open component model:
+
+- `transfer`: A generic transport tool, which can be used to transport
+  component versions from one repository environment to another one.
+  It is completely configurable by *transport handler* and *blob upload handlers* (configured as extensions in the used OCM context). A transport
+  handler may control the recursion behaviour for following component
+  references and the way described artifacts are transported into the target
+  environment.
+- `signing`: a standard tool used to sign and verify component versions using different
+  signing, hashing and normalization procedures.
+
+- `routingslip`: A standard application using OCM labels to implement
+  routing slips.
 
 ## Getting access to a context object
 
