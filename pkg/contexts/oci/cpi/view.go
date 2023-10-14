@@ -10,6 +10,7 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -343,6 +344,9 @@ func (a *artifactAccessView) GetBlobData(digest digest.Digest) (size int64, acc 
 }
 
 func (a *artifactAccessView) AddBlob(access internal.BlobAccess) error {
+	if err := accessio.ValidateObject(access); err != nil {
+		return err
+	}
 	return a.Execute(func() error {
 		return a.impl.AddBlob(access)
 	})
@@ -381,6 +385,10 @@ func (a *artifactAccessView) NewArtifact(art ...*artdesc.Artifact) (acc Artifact
 }
 
 func (a *artifactAccessView) AddLayer(access internal.BlobAccess, descriptor *artdesc.Descriptor) (index int, err error) {
+	if err := accessio.ValidateObject(access); err != nil {
+		return -1, err
+	}
+
 	index = -1
 	err = a.Execute(func() error {
 		index, err = a.impl.AddLayer(access, descriptor)

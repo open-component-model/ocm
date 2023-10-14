@@ -8,6 +8,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -15,7 +16,7 @@ import (
 
 // BlobProvider manages the technical access to blobs.
 type BlobProvider interface {
-	accessio.Allocatable
+	refmgmt.Allocatable
 	cpi.BlobSource
 	cpi.BlobSink
 }

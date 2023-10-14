@@ -15,7 +15,7 @@ import (
 	"github.com/containerd/containerd/remotes/docker/config"
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -204,7 +204,7 @@ func (r *RepositoryImpl) LookupArtifact(name string, version string) (acc cpi.Ar
 	if err != nil {
 		return nil, err
 	}
-	defer accessio.PropagateCloseTemporary(&err, ns) // temporary namespace object not exposed.
+	defer refmgmt.PropagateCloseTemporary(&err, ns) // temporary namespace object not exposed.
 
 	return ns.GetArtifact(version)
 }

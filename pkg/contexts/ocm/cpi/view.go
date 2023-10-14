@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"sync"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -287,8 +289,7 @@ type ComponentVersionAccessImpl interface {
 	GetStorageContext(cv ComponentVersionAccess) StorageContext
 
 	// AddBlobFor stores a local blob together with the component and
-	// potentially provides a global reference according to the OCI distribution spec
-	// if the blob described an oci artifact.
+	// potentially provides a global reference.
 	// The resulting access information (global and local) is provided as
 	// an access method specification usable in a component descriptor.
 	// This is the direct technical storage, without caring about any handler.
@@ -296,6 +297,78 @@ type ComponentVersionAccessImpl interface {
 
 	IsReadOnly() bool
 	Update(final bool) error
+
+	// GetBlobCache retieves the blob cache used to store preliminary
+	// blob accesses for freshly generated local access specs not directly
+	// usable until a component version is finally added to the repository.
+	GetBlobCache() BlobCache
+}
+
+type BlobCacheEntry = accessio.BlobAccess
+
+type BlobCache interface {
+	// AddBlobFor stores blobs for added blobs not yet accessible
+	// by generated access method until version is finally added.
+	AddBlobFor(acc compdesc.AccessSpec, blob BlobCacheEntry) error
+
+	// GetBlobFor retrieves the original blob access for
+	// a given access specification.
+	GetBlobFor(acc compdesc.AccessSpec) BlobCacheEntry
+
+	RemoveBlobFor(acc compdesc.AccessSpec)
+	Clear() error
+}
+
+type blobCache struct {
+	lock      sync.Mutex
+	blobcache map[interface{}]BlobCacheEntry
+}
+
+func NewBlobCache() BlobCache {
+	return &blobCache{
+		blobcache: map[interface{}]BlobCacheEntry{},
+	}
+}
+
+func (c *blobCache) RemoveBlobFor(acc compdesc.AccessSpec) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if b := c.blobcache[acc]; b != nil {
+		b.Close()
+		delete(c.blobcache, acc)
+	}
+}
+
+func (c *blobCache) AddBlobFor(acc compdesc.AccessSpec, blob BlobCacheEntry) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if c.blobcache[acc] == nil {
+		l, err := blob.Dup()
+		if err != nil {
+			return err
+		}
+		c.blobcache[acc] = l
+	}
+	return nil
+}
+
+func (c *blobCache) GetBlobFor(acc compdesc.AccessSpec) BlobCacheEntry {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	return c.blobcache[acc]
+}
+
+func (c *blobCache) Clear() error {
+	list := errors.ErrList()
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	for _, b := range c.blobcache {
+		list.Add(b.Close())
+	}
+	c.blobcache = map[interface{}]BlobCacheEntry{}
+	return list.Result()
 }
 
 type _ComponentVersionAccessImplBase = resource.ResourceImplBase[ComponentVersionAccess]
@@ -305,6 +378,8 @@ type ComponentVersionAccessImplBase struct {
 	ctx     Context
 	name    string
 	version string
+
+	blobcache BlobCache
 }
 
 func NewComponentVersionAccessImplBase(ctx Context, name, version string, repo ComponentAccessViewManager, closer ...io.Closer) (*ComponentVersionAccessImplBase, error) {
@@ -317,11 +392,15 @@ func NewComponentVersionAccessImplBase(ctx Context, name, version string, repo C
 		ctx:                             ctx,
 		name:                            name,
 		version:                         version,
+		blobcache:                       NewBlobCache(),
 	}, nil
 }
 
 func (b *ComponentVersionAccessImplBase) Close() error {
-	return b._ComponentVersionAccessImplBase.Close() // just for debugger to catch Close on this type
+	list := errors.ErrListf("closing %s", common.VersionedElementKey(b))
+	list.Add(b._ComponentVersionAccessImplBase.Close())
+	list.Add(b.blobcache.Clear())
+	return list.Result()
 }
 
 func (b *ComponentVersionAccessImplBase) GetContext() Context {
@@ -334,6 +413,10 @@ func (b *ComponentVersionAccessImplBase) GetName() string {
 
 func (b *ComponentVersionAccessImplBase) GetVersion() string {
 	return b.version
+}
+
+func (b *ComponentVersionAccessImplBase) GetBlobCache() BlobCache {
+	return b.blobcache
 }
 
 type componentVersionAccessView struct {
@@ -359,6 +442,10 @@ func artifactAccessViewCreator(i ComponentVersionAccessImpl, v resource.CloserVi
 
 func NewComponentVersionAccess(impl ComponentVersionAccessImpl) ComponentVersionAccess {
 	return resource.NewResource[ComponentVersionAccess](impl, artifactAccessViewCreator, fmt.Sprintf("component version  %s/%s", impl.GetName(), impl.GetVersion()), true)
+}
+
+func (c *componentVersionAccessView) Close() error {
+	return c._ComponentVersionAccessView.Close()
 }
 
 func (c *componentVersionAccessView) Repository() Repository {
@@ -415,6 +502,16 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	if c.impl.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
+	blob, err := blob.Dup()
+	if err != nil {
+		return nil, errors.Wrapf(err, "inavlid blob access")
+	}
+	defer blob.Close()
+	err = accessio.ValidateObject(blob)
+	if err != nil {
+		return nil, errors.Wrapf(err, "inavlid blob access")
+	}
+
 	storagectx := c.impl.GetStorageContext(c)
 	h := c.GetContext().BlobHandlers().LookupHandler(storagectx.GetImplementationRepositoryType(), artType, blob.MimeType())
 	if h != nil {
@@ -424,12 +521,30 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 		}
 		if acc != nil {
 			if !keepblobattr.Get(c.GetContext()) || acc.IsLocal(c.GetContext()) {
-				return acc, nil
+				return c.cacheBlob(acc, blob)
 			}
 			global = acc
 		}
 	}
-	return c.impl.AddBlobFor(storagectx, blob, refName, global)
+	acc, err := c.impl.AddBlobFor(storagectx, blob, refName, global)
+	if err != nil {
+		return nil, err
+	}
+	return c.cacheBlob(acc, blob)
+}
+
+func (c *componentVersionAccessView) cacheBlob(acc AccessSpec, blob BlobAccess) (AccessSpec, error) {
+	if acc.IsLocal(c.GetContext()) {
+		// local blobs might not be accessible from the underlying
+		// repository implementation if the component version is not
+		// finally added (for example ghcr.io as OCI repository).
+		// Therefore, we keep a copy of the blo access for further usage.
+		err := c.impl.GetBlobCache().AddBlobFor(acc, blob)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return acc, nil
 }
 
 func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...internal.ModificationOption) error {
@@ -443,10 +558,14 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, ac
 // SetResourceBlob adds a blob resource to the component version.
 func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.ModificationOption) error {
 	Logger(c).Info("adding resource blob", "resource", meta.Name)
+	if err := accessio.ValidateObject(blob); err != nil {
+		return err
+	}
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
+	defer c.impl.GetBlobCache().RemoveBlobFor(acc)
 
 	if err := c.SetResource(meta, acc, append(opts, internal.ModifyResource())...); err != nil {
 		return fmt.Errorf("unable to set resource: %w", err)
@@ -465,16 +584,52 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *SourceMeta, acc co
 
 func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refName string, global AccessSpec) error {
 	Logger(c).Info("adding source blob", "source", meta.Name)
+	if err := accessio.ValidateObject(blob); err != nil {
+		return err
+	}
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob: (component %s:%s source %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
+	defer c.impl.GetBlobCache().RemoveBlobFor(acc)
 
 	if err := c.SetSource(meta, acc); err != nil {
 		return fmt.Errorf("unable to set source: %w", err)
 	}
 
 	return nil
+}
+
+type fakeMethod struct {
+	AccessMethod
+	blob accessio.BlobAccess
+}
+
+func (f *fakeMethod) Reader() (io.ReadCloser, error) {
+	return f.blob.Reader()
+}
+
+func (f *fakeMethod) Get() ([]byte, error) {
+	return f.blob.Get()
+}
+
+func (c *componentVersionAccessView) getMethod(acc compdesc.AccessSpec) (AccessMethod, error) {
+	spec, err := c.impl.GetContext().AccessSpecForSpec(acc)
+	if err != nil {
+		return nil, err
+	}
+
+	meth, err := c.AccessMethod(spec)
+	if err != nil {
+		return nil, err
+	}
+	if b := c.impl.GetBlobCache().GetBlobFor(acc); b != nil {
+		meth = &fakeMethod{
+			AccessMethod: meth,
+			blob:         b,
+		}
+	}
+	return meth, nil
 }
 
 func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...internal.ModificationOption) error {
@@ -491,11 +646,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 	opts := internal.NewModificationOptions(modopts...)
 	CompleteModificationOptions(ctx, opts)
 
-	spec, err := ctx.AccessSpecForSpec(acc)
-	if err != nil {
-		return err
-	}
-	meth, err := c.AccessMethod(spec)
+	meth, err := c.getMethod(acc)
 	if err != nil {
 		return err
 	}

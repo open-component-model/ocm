@@ -87,7 +87,7 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 		"mediatype", blob.MimeType(),
 		"hint", hint,
 	}
-	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethod]); ok {
+	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethodView]); ok {
 		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci blob handler with ocm access source",
 			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
@@ -150,12 +150,12 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	keep := keepblobattr.Get(ctx.GetContext())
 
-	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethod]); ok {
+	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethodView]); ok {
 		// prepare for optimized point to point implementation
 		log.Debug("oci artifact handler with ocm access source",
 			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
-		if ocimeth, ok := m.Source().(ociartifact.AccessMethod); !keep && ok {
+		if ocimeth, ok := m.Source().Base().(ociartifact.AccessMethod); !keep && ok {
 			art, _, err = ocimeth.GetArtifact(&finalizer)
 			if err != nil {
 				return nil, errors.Wrapf(err, "cannot access source artifact")

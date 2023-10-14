@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 )
 
 type CloserView interface {
@@ -17,7 +18,7 @@ type CloserView interface {
 	Lazy()
 }
 
-var _ CloserView = accessio.CloserView(nil)
+var _ CloserView = refmgmt.CloserView(nil)
 
 var ErrClosed = accessio.ErrClosed
 
@@ -64,7 +65,7 @@ type ViewManager[T any] interface {
 type ResourceViewCreator[T any, I io.Closer] func(I, CloserView, ViewManager[T]) T
 
 type viewManager[T any, I ResourceImplementation[T]] struct {
-	refs    accessio.ReferencableCloser
+	refs    refmgmt.ReferencableCloser
 	creator ResourceViewCreator[T, I]
 	impl    I
 }
@@ -81,7 +82,7 @@ type ResourceImplementation[T any] interface {
 // function.
 func NewResource[T any, I ResourceImplementation[T]](impl I, c ResourceViewCreator[T, I], name string, main ...bool) T {
 	i := &viewManager[T, I]{
-		refs:    accessio.NewRefCloser(impl, true).WithName(name),
+		refs:    refmgmt.NewRefCloser(impl, true).WithName(name),
 		creator: c,
 		impl:    impl,
 	}

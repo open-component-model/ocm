@@ -115,22 +115,27 @@ var _ = Describe("syntheses", func() {
 		n = Must(r.LookupNamespace("mandelsoft/test"))
 		defer Close(n, "namespace")
 		blob := Must(artifactset.SynthesizeArtifactBlob(n, TAG))
-		defer Close(blob, "blob")
-		path := blob.Path()
-		Expect(path).To(MatchRegexp(filepath.Join(blob.FileSystem().FSTempDir(), "artifactblob.*\\.tgz")))
-		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeTrue())
+
+		blobcloser := accessio.OnceCloser(blob)
+
+		defer Close(blobcloser, "blob")
+
+		info := accessio.CastBlobAccess[accessio.FileLocation](blob)
+		path := info.Path()
+		Expect(path).To(MatchRegexp(filepath.Join(info.FileSystem().FSTempDir(), "artifactblob.*\\.tgz")))
+		Expect(vfs.Exists(info.FileSystem(), path)).To(BeTrue())
 
 		set := CheckBlob(blob)
 		defer Close(set, "set")
 
-		Expect(blob.Close()).To(Succeed())
-		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeFalse())
+		Expect(blobcloser.Close()).To(Succeed())
+		Expect(vfs.Exists(info.FileSystem(), path)).To(BeFalse())
 
 		// use syntesized blob to extract new blob, useless but should work
 		newblob := Must(artifactset.SynthesizeArtifactBlob(set, TAG))
 		defer Close(newblob, "newblob")
 
-		Expect(CheckBlob(newblob).Close()).To(Succeed())
+		CheckBlob(newblob)
 
 		meth := &DummyMethod{newblob}
 		digest := Must(artifact.New(sha256.Algorithm).DetermineDigest("", meth, nil))

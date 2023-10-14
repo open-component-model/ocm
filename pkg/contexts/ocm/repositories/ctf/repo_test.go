@@ -90,4 +90,21 @@ var _ = Describe("access method", func() {
 		Expect(err).To(MatchError(ContainSubstring("component version \"github.com/mandelsoft/ocm:1.0.0\" not found: oci artifact \"1.0.0\" not found in component-descriptors/github.com/mandelsoft/ocm")))
 	})
 
+	It("provided error for invalid bloc access", func() {
+		final := Finalizer{}
+		defer Defer(final.Finalize)
+
+		a := Must(ctf.Create(ctx, accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, "ctf", 0o700, accessio.PathFileSystem(fs)))
+		final.Close(a)
+		c := Must(a.LookupComponent(COMPONENT))
+		final.Close(c)
+
+		cv := Must(c.NewVersion(VERSION))
+		final.Close(cv)
+
+		// add resource
+		Expect(ErrorFrom((cv.SetResourceBlob(compdesc.NewResourceMeta("text1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), accessio.BlobAccessForFile(mime.MIME_TEXT, "non-existing-file"), "", nil)))).To(MatchError(`file "non-existing-file" not found`))
+
+		MustBeSuccessful(final.Finalize())
+	})
 })
