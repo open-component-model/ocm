@@ -234,6 +234,10 @@ func getCreds(serverurl, path string, cctx credentials.Context) (string, error) 
 	return creds.GetProperty(credentials.ATTR_TOKEN), nil
 }
 
+func (_ *accessMethod) IsLocal() bool {
+	return false
+}
+
 func (m *accessMethod) GetKind() string {
 	return Type
 }

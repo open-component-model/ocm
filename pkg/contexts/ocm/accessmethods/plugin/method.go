@@ -86,6 +86,10 @@ func newMethod(p *PluginHandler, spec *AccessSpec, ctx ocm.Context, info *ppi.Ac
 	}
 }
 
+func (_ *accessMethod) IsLocal() bool {
+	return false
+}
+
 func (m *accessMethod) GetKind() string {
 	return m.spec.GetKind()
 }

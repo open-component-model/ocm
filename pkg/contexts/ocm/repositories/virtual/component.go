@@ -85,12 +85,8 @@ func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) erro
 	}
 	mine.impl.EnablePersistence()
 
-	// delayed update in close is not done for composition mode,
-	// so, we have to do the update, here.
-	if !mine.impl.UseDirectAccess() || mine.impl.ShouldUpdate(false) {
-		return mine.impl.Update()
-	}
-	return nil
+	// delayed update in close is not done for composition mode
+	return mine.impl.Update(!mine.impl.UseDirectAccess())
 }
 
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {

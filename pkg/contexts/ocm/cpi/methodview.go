@@ -66,6 +66,10 @@ func (a *accessMethodView) Base() interface{} {
 	return a.access
 }
 
+func (a *accessMethodView) IsLocal() bool {
+	return a.access.IsLocal()
+}
+
 func (a *accessMethodView) Get() ([]byte, error) {
 	var result []byte
 	err := a.Execute(func() (err error) {

@@ -74,6 +74,10 @@ type accessMethod struct {
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
 
+func (_ *accessMethod) IsLocal() bool {
+	return false
+}
+
 func (m *accessMethod) GetKind() string {
 	return Type
 }

@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -21,18 +22,20 @@ type DefaultAccessMethod struct {
 	comp    ComponentVersionAccess
 	spec    AccessSpec
 	mime    string
+	local   bool
 }
 
 var _ AccessMethod = (*DefaultAccessMethod)(nil)
 
 type BlobAccessFactory func() (BlobAccess, error)
 
-func NewDefaultMethod(c ComponentVersionAccess, a AccessSpec, mime string, fac BlobAccessFactory) AccessMethod {
+func NewDefaultMethod(c ComponentVersionAccess, a AccessSpec, mime string, fac BlobAccessFactory, local ...bool) AccessMethod {
 	return &DefaultAccessMethod{
 		spec:    a,
 		comp:    c,
 		mime:    mime,
 		factory: fac,
+		local:   utils.Optional(local...),
 	}
 }
 
@@ -47,6 +50,10 @@ func (m *DefaultAccessMethod) getAccess() (blobaccess.BlobAccess, error) {
 		m.access = acc
 	}
 	return m.access, nil
+}
+
+func (m *DefaultAccessMethod) IsLocal() bool {
+	return m.local
 }
 
 func (m *DefaultAccessMethod) GetKind() string {

@@ -16,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -63,7 +62,7 @@ func (d *Digester) GetType() cpi.DigesterType {
 }
 
 func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferred signing.Hasher) (*cpi.DigestDescriptor, error) {
-	if acc.GetKind() == localblob.Type {
+	if acc.IsLocal() {
 		mime := acc.MimeType()
 		if !artdesc.IsOCIMediaType(mime) {
 			return nil, nil

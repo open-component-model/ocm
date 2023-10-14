@@ -100,6 +100,10 @@ type AccessMethod struct {
 
 var _ internal.AccessMethod = (*AccessMethod)(nil)
 
+func (_ AccessMethod) IsLocal() bool {
+	return false
+}
+
 func (a AccessMethod) GetKind() string {
 	return "demo"
 }

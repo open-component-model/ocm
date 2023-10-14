@@ -82,6 +82,7 @@ type AccessMethod interface {
 	DataAccess
 	MimeType
 
+	IsLocal() bool
 	GetKind() string
 	AccessSpec() AccessSpec
 }

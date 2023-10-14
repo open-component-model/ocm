@@ -24,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -578,11 +579,12 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 			})
 		}
 
-		DescribeTable("hashes unsigned", func(c EntryCheck, mopts ...ocm.ModificationOption) {
+		DescribeTable("hashes unsigned", func(mode bool, c EntryCheck, mopts ...ocm.ModificationOption) {
 			var finalizer Finalizer
 			defer Defer(finalizer.Finalize)
 
 			{
+				compositionmodeattr.Set(env.OCMContext(), mode)
 				setup(mopts...)
 				arch := finalizer.Nested()
 				src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
@@ -649,11 +651,17 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("github.com/mandelsoft/top:v1: failed applying to component reference refb[github.com/mandelsoft/ref:v1]: github.com/mandelsoft/top:v1->github.com/mandelsoft/ref:v1: failed applying to component reference ref[github.com/mandelsoft/test:v1]: github.com/mandelsoft/top:v1->github.com/mandelsoft/ref:v1->github.com/mandelsoft/test:v1: calculated resource digest ([{HashAlgorithm:SHA-256 NormalisationAlgorithm:genericBlobDigest/v1 Value:" + D_DATAA + "}]) mismatches existing digest (SHA-256:" + wrongDigest + "[genericBlobDigest/v1]) for data_a:v1 (Local blob sha256:" + D_DATAA + "[])"))
 		},
-			Entry(DIGESTMODE_TOP, &EntryTop{}),
-			Entry(DIGESTMODE_LOCAL, &EntryLocal{}),
+			Entry(DIGESTMODE_TOP, false, &EntryTop{}),
+			Entry(DIGESTMODE_LOCAL, false, &EntryLocal{}),
 
-			Entry("legacy "+DIGESTMODE_TOP, &EntryTop{}, ocm.SkipDigest()),
-			Entry("legacy "+DIGESTMODE_LOCAL, &EntryLocal{}, ocm.SkipDigest()),
+			Entry("legacy "+DIGESTMODE_TOP, false, &EntryTop{}, ocm.SkipDigest()),
+			Entry("legacy "+DIGESTMODE_LOCAL, false, &EntryLocal{}, ocm.SkipDigest()),
+
+			Entry(DIGESTMODE_TOP+" with composition mode", true, &EntryTop{}),
+			Entry(DIGESTMODE_LOCAL+" with composition mode", true, &EntryLocal{}),
+
+			Entry("legacy "+DIGESTMODE_TOP+" with composition mode", true, &EntryTop{}, ocm.SkipDigest()),
+			Entry("legacy "+DIGESTMODE_LOCAL+" with composition mode", true, &EntryLocal{}, ocm.SkipDigest()),
 		)
 
 		DescribeTable("signs unsigned", func(c EntryCheck, mopts ...ocm.ModificationOption) {
@@ -1209,6 +1217,7 @@ func (*EntryLocal) Check1CheckA(cva ocm.ComponentVersionAccess, d *metav1.Digest
 
 func (*EntryLocal) Check1Corrupt(cva ocm.ComponentVersionAccess, f *Finalizer, _ ocm.ComponentVersionAccess) {
 	cva.GetDescriptor().Resources[0].Digest.Value = wrongDigest
+	MustBeSuccessful(cva.Update())
 	Check(f.Finalize)
 
 }

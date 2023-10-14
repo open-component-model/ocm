@@ -29,6 +29,10 @@ func newLocalBlobAccessMethod(a *localblob.AccessSpec, acc VersionAccess) *local
 	}
 }
 
+func (_ *localBlobAccessMethod) IsLocal() bool {
+	return true
+}
+
 func (m *localBlobAccessMethod) GetKind() string {
 	return m.spec.GetKind()
 }

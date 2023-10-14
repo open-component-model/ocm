@@ -67,7 +67,7 @@ var _ = Describe("access method", func() {
 
 		Expect(Must(cv.GetResourcesByName("text1"))[0].Meta().Digest).To(Equal(DS_TESTDATA))
 	},
-		FEntry("direct", false),
+		Entry("direct", false),
 		Entry("compose", true),
 	)
 

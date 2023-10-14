@@ -34,6 +34,10 @@ func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.Co
 	}
 }
 
+func (_ *localFilesystemBlobAccessMethod) IsLocal() bool {
+	return true
+}
+
 func (m *localFilesystemBlobAccessMethod) AccessSpec() cpi.AccessSpec {
 	return m.spec
 }

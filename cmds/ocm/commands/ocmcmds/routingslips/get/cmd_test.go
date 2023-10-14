@@ -49,6 +49,7 @@ var _ = Describe("Test Environment", func() {
 		defer Close(cv)
 
 		e1a = Must(routingslip.AddEntry(cv, PROVIDER, rsa.Algorithm, comment.New("first entry"), nil))
+		MustBeSuccessful(cv.Update())
 	})
 
 	AfterEach(func() {
@@ -66,6 +67,7 @@ var _ = Describe("Test Environment", func() {
 		slip := Must(routingslip.GetSlip(cv, PROVIDER))
 		slip.Get(0).Signature.Value = slip.Get(0).Signature.Value[1:] + "0"
 		MustBeSuccessful(routingslip.SetSlip(cv, slip))
+		MustBeSuccessful(cv.Update())
 		MustBeSuccessful(finalize.Finalize())
 
 		buf := bytes.NewBuffer(nil)
@@ -110,6 +112,8 @@ test.de/x:v1      acme.org comment ` + e1a.Timestamp.String() + ` Comment: first
 				"status", "passed",
 			))
 			e2c = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, te, nil))
+
+			MustBeSuccessful(cv.Update())
 		})
 
 		It("gets different slips", func() {
@@ -168,6 +172,7 @@ acme.org/test ` + digests(e2c, e2b) + `       name: unit-tests, status: passed
 					Name:   PROVIDER,
 					Digest: e1a.Digest,
 				}}))
+				MustBeSuccessful(cv.Update())
 			})
 			It("gets dedicated wide slip with link", func() {
 				buf := bytes.NewBuffer(nil)

@@ -36,6 +36,10 @@ func newLocalBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, a
 	}
 }
 
+func (_ *localBlobAccessMethod) IsLocal() bool {
+	return true
+}
+
 func (m *localBlobAccessMethod) GetKind() string {
 	return m.spec.GetKind()
 }

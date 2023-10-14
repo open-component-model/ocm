@@ -42,6 +42,10 @@ func (d *DummyMethod) GetKind() string {
 	return localblob.Type
 }
 
+func (d *DummyMethod) IsLocal() bool {
+	return true
+}
+
 func (d *DummyMethod) AccessSpec() cpi.AccessSpec {
 	return nil
 }

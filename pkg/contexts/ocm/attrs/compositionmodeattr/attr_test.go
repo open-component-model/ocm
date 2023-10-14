@@ -36,9 +36,11 @@ var _ = Describe("attribute", func() {
 	})
 
 	It("global setting", func() {
+		Expect(me.Get(cfgctx)).To(Equal(me.UseCompositionMode))
+		Expect(me.Set(cfgctx, true)).To(Succeed())
+		Expect(me.Get(cfgctx)).To(BeTrue())
+		Expect(me.Set(cfgctx, false)).To(Succeed())
 		Expect(me.Get(cfgctx)).To(BeFalse())
-		Expect(me.Set(ctx, true)).To(Succeed())
-		Expect(me.Get(ctx)).To(BeTrue())
 	})
 
 	It("parses string", func() {

@@ -161,6 +161,10 @@ func getCreds(a *AccessSpec, cctx credentials.Context) (credentials.Credentials,
 	return identity.GetCredentials(cctx, "", a.Bucket, a.Key, a.Version)
 }
 
+func (_ *accessMethod) IsLocal() bool {
+	return false
+}
+
 func (m *accessMethod) GetKind() string {
 	return Type
 }

@@ -122,11 +122,14 @@ func (a *componentVersionAccessImpl) ShouldUpdate(final bool) bool {
 		return false
 	}
 	if final {
-		return true
+		return a.persistent
 	}
 	return !a.lazy && a.directAccess && a.persistent
 }
 
-func (a *componentVersionAccessImpl) Update() error {
-	return a.base.Update()
+func (a *componentVersionAccessImpl) Update(final bool) error {
+	if a.ShouldUpdate(final) {
+		return a.base.Update()
+	}
+	return nil
 }

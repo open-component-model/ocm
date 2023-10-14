@@ -121,6 +121,10 @@ func NewMethod(spec *AccessSpec, blob blobaccess.BlobAccess) (cpi.AccessMethod, 
 	}, nil
 }
 
+func (_ *accessMethod) IsLocal() bool {
+	return true
+}
+
 func (m *accessMethod) GetKind() string {
 	return Type
 }
