@@ -16,7 +16,7 @@ import (
 // to the underlying repository. Instead, an explicit call to AddVersion call
 // s required to persist a composed change on a new as well as queried
 // component version object.
-const UseCompositionMode = true
+const UseCompositionMode = false
 
 const (
 	ATTR_KEY   = "ocm.software/compositionmode"

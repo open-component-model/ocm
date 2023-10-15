@@ -10,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/spi"
 	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -44,14 +45,56 @@ func Validate(o BlobAccess) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type blobprovider struct {
+	blob BlobAccess
+}
+
+var _ BlobAccessProvider = (*blobprovider)(nil)
+
+func (b *blobprovider) BlobAccess() (BlobAccess, error) {
+	return b.blob.Dup()
+}
+
+func (b *blobprovider) Close() error {
+	return b.blob.Close()
+}
+
+// ProviderForBlobAccess provides subsequent bloc accesses
+// as long as the given blob access is not closed.
+// If required the blob can be closed with the additionally
+// provided Close method.
+func ProviderForBlobAccess(blob BlobAccess) *blobprovider {
+	return &blobprovider{blob}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 // ForString wraps a string into a BlobAccess, which does not need a close.
-func ForString(mime string, data string) BlobAccess {
-	return ForData(mime, []byte(data))
+func ForString(media string, data string) BlobAccess {
+	if media == "" {
+		media = mime.MIME_TEXT
+	}
+	return ForData(media, []byte(data))
+}
+
+func ProviderForString(mime, data string) BlobAccessProvider {
+	return spi.BlobAccessProviderFunction(func() (spi.BlobAccess, error) {
+		return ForString(mime, data), nil
+	})
 }
 
 // ForData wraps data into a BlobAccess, which does not need a close.
-func ForData(mime string, data []byte) BlobAccess {
-	return spi.ForStaticDataAccessAndMeta(mime, DataAccessForBytes(data), digest.FromBytes(data), int64(len(data)))
+func ForData(media string, data []byte) BlobAccess {
+	if media == "" {
+		media = mime.MIME_OCTET
+	}
+	return spi.ForStaticDataAccessAndMeta(media, DataAccessForBytes(data), digest.FromBytes(data), int64(len(data)))
+}
+
+func ProviderForData(mime string, data []byte) BlobAccessProvider {
+	return spi.BlobAccessProviderFunction(func() (spi.BlobAccess, error) {
+		return ForData(mime, data), nil
+	})
 }
 
 type (
@@ -119,6 +162,12 @@ func ForFile(mime string, path string, fss ...vfs.FileSystem) BlobAccess {
 		mimeType:       mime,
 		fileDataAccess: fileDataAccess{fs: utils.FileSystem(fss...), path: path},
 	}
+}
+
+func ProviderForFile(mime string, path string, fss ...vfs.FileSystem) BlobAccessProvider {
+	return spi.BlobAccessProviderFunction(func() (spi.BlobAccess, error) {
+		return ForFile(mime, path, fss...), nil
+	})
 }
 
 type fileBlobAccessView struct {

@@ -68,47 +68,54 @@ type ComponentAccess interface {
 	ComponentAccessImpl
 }
 
-type (
-	ResourceMeta       = compdesc.ResourceMeta
-	ComponentReference = compdesc.ComponentReference
-)
-
+// AccessProvider assembled methods provided
+// and used for access methods.
+// It is provided for resources in a component version
+// with the base support implementation in package cpi.
+// But it can also be provided by resource provisioners
+// used to feed the ComponentVersionAccess.SetResourceByAccess
+// or the ComponentVersionAccessSetSourceByAccess
+// method.
 type AccessProvider interface {
 	GetOCMContext() Context
 	ReferenceHint() string
+
 	Access() (AccessSpec, error)
 	AccessMethod() (AccessMethod, error)
-	BlobAccess() (BlobAccess, error)
+
+	GlobalAccess() AccessSpec
+
+	blobaccess.BlobAccessProvider
 }
 
-type ResourceAccess interface {
-	Meta() *ResourceMeta
+type ArtifactAccess[M any] interface {
+	Meta() *M
 	AccessProvider
 }
 
-type SourceMeta = compdesc.SourceMeta
+type (
+	ResourceMeta   = compdesc.ResourceMeta
+	ResourceAccess = ArtifactAccess[ResourceMeta]
+)
 
-type SourceAccess interface {
-	Meta() *SourceMeta
-	AccessProvider
-}
+type (
+	SourceMeta   = compdesc.SourceMeta
+	SourceAccess = ArtifactAccess[SourceMeta]
+)
 
-type ComponentVersionAccessImpl interface {
-	common.VersionedElement
-
-	Repository() Repository
-	GetContext() Context
-	GetDescriptor() *compdesc.ComponentDescriptor
-	DiscardChanges()
-	IsPersistent() bool
-
-	io.Closer
-}
+type ComponentReference = compdesc.ComponentReference
 
 type ComponentVersionAccess interface {
 	resource.ResourceView[ComponentVersionAccess]
+	common.VersionedElement
+	io.Closer
 
-	ComponentVersionAccessImpl
+	GetContext() Context
+	Repository() Repository
+	GetDescriptor() *compdesc.ComponentDescriptor
+
+	DiscardChanges()
+	IsPersistent() bool
 
 	GetResources() []ResourceAccess
 	GetResource(meta metav1.Identity) (ResourceAccess, error)
@@ -118,12 +125,14 @@ type ComponentVersionAccess interface {
 	GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
 	GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error)
 	SetResource(*ResourceMeta, compdesc.AccessSpec, ...ModificationOption) error
+	SetResourceByAccess(art ResourceAccess, modopts ...ModificationOption) error
 
 	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)
 	GetSourceIndex(meta metav1.Identity) int
 	GetSourceByIndex(i int) (SourceAccess, error)
 	SetSource(*SourceMeta, compdesc.AccessSpec) error
+	SetSourceByAccess(art SourceAccess) error
 
 	GetReference(meta metav1.Identity) (ComponentReference, error)
 	GetReferenceIndex(meta metav1.Identity) int

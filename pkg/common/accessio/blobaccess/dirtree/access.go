@@ -71,3 +71,9 @@ func BlobAccessForDirTree(path string, opts ...Option) (_ spi.BlobAccess, rerr e
 	}
 	return temp.AsBlob(eff.MimeType), nil
 }
+
+func BlobAccessProviderForDirTree(path string, opts ...Option) spi.BlobAccessProvider {
+	return spi.BlobAccessProviderFunction(func() (spi.BlobAccess, error) {
+		return BlobAccessForDirTree(path, opts...)
+	})
+}

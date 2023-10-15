@@ -131,11 +131,19 @@ func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compd
 	panic("implement me")
 }
 
+func (d *DummyComponentVersionAccess) SetResourceByAccess(art ResourceAccess, modopts ...ModificationOption) error {
+	panic("implement me")
+}
+
 func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error {
 	panic("implement me")
 }
 
 func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.AccessSpec) error {
+	panic("implement me")
+}
+
+func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess) error {
 	panic("implement me")
 }
 

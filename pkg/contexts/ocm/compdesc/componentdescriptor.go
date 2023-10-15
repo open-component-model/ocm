@@ -128,6 +128,13 @@ type ElementMetaAccess interface {
 type ArtifactMetaAccess interface {
 	ElementMetaAccess
 	GetType() string
+	SetType(string)
+}
+
+// ArtifactMetaPointer is a pointer to an artifact meta object.
+type ArtifactMetaPointer[P any] interface {
+	ArtifactMetaAccess
+	*P
 }
 
 // ElementMeta defines a object that is uniquely identified by its identity.
@@ -664,22 +671,19 @@ func (o *ResourceMeta) GetType() string {
 }
 
 // SetType sets the type of the object.
-func (o *ResourceMeta) SetType(ttype string) *ResourceMeta {
+func (o *ResourceMeta) SetType(ttype string) {
 	o.Type = ttype
-	return o
 }
 
 // SetDigest sets the digest of the object.
-func (o *ResourceMeta) SetDigest(d *metav1.DigestSpec) *ResourceMeta {
+func (o *ResourceMeta) SetDigest(d *metav1.DigestSpec) {
 	o.Digest = d
-	return o
 }
 
 // SetLabel sets a label of the object.
-func (o *ResourceMeta) SetLabel(name string, value interface{}, opts ...metav1.LabelOption) *ResourceMeta {
+func (o *ResourceMeta) SetLabel(name string, value interface{}, opts ...metav1.LabelOption) {
 	// assure chainability
 	_ = o.Labels.Set(name, value, opts...)
-	return o
 }
 
 // Copy copies a resource meta.

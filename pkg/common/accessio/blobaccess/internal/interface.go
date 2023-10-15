@@ -80,3 +80,7 @@ type FileLocation interface {
 	FileSystem() vfs.FileSystem
 	Path() string
 }
+
+type BlobAccessProvider interface {
+	BlobAccess() (BlobAccess, error)
+}

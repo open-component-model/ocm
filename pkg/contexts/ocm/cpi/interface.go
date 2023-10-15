@@ -73,6 +73,8 @@ type (
 	ComponentReference               = internal.ComponentReference
 )
 
+type ArtifactAccess[M any] internal.ArtifactAccess[M]
+
 type (
 	BlobHandler                  = internal.BlobHandler
 	BlobHandlerOption            = internal.BlobHandlerOption

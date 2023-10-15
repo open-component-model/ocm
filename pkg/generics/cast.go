@@ -42,7 +42,7 @@ func AsE[T any](o interface{}, err error) (T, error) {
 	return o.(T), err
 }
 
-// AsI converts a struct pointetr to an appropriat interface type
+// AsI converts a struct pointer to an appropriate interface type
 // given as type parameter.
 // In Go this cannot be done directly, because returning a nil pinter
 // for an interface return type, would result is a typed nil value for

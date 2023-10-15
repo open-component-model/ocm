@@ -22,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -113,15 +114,15 @@ func (r *repositoryView) GetIdentityMatcher() string {
 	return credentials.GetProvidedIdentityMatcher(r.impl)
 }
 
-func (r *repositoryView) GetSpecification() internal.RepositorySpec {
+func (r *repositoryView) GetSpecification() RepositorySpec {
 	return r.impl.GetSpecification()
 }
 
-func (r *repositoryView) GetContext() internal.Context {
+func (r *repositoryView) GetContext() Context {
 	return r.impl.GetContext()
 }
 
-func (r *repositoryView) ComponentLister() internal.ComponentLister {
+func (r *repositoryView) ComponentLister() ComponentLister {
 	return r.impl.ComponentLister()
 }
 
@@ -386,7 +387,16 @@ type ComponentVersionAccessViewManager = resource.ViewManager[ComponentVersionAc
 
 type ComponentVersionAccessImpl interface {
 	resource.ResourceImplementation[ComponentVersionAccess]
-	internal.ComponentVersionAccessImpl
+	common.VersionedElement
+	io.Closer
+
+	GetContext() Context
+	Repository() Repository
+
+	DiscardChanges()
+	IsPersistent() bool
+
+	GetDescriptor() *compdesc.ComponentDescriptor
 
 	AccessMethod(ComponentVersionAccess, AccessSpec) (AccessMethod, error)
 
@@ -849,7 +859,70 @@ func (f *fakeMethod) Get() ([]byte, error) {
 	return f.blob.Get()
 }
 
-func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...internal.ModificationOption) error {
+func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessView, kind string, art A,
+	set func(*T, compdesc.AccessSpec) error,
+	setblob func(*T, BlobAccess, string, AccessSpec) error,
+) error {
+	if c.impl.IsReadOnly() {
+		return accessio.ErrReadOnly
+	}
+	meta := art.Meta()
+	if meta == nil {
+		return errors.Newf("no meta data provided by %s access", kind)
+	}
+	acc, err := art.Access()
+	if err != nil && !errors.IsErrNotFoundElem(err, "", descriptor.KIND_ACCESSMETHOD) {
+		return err
+	}
+
+	var (
+		blob   BlobAccess
+		hint   string
+		global AccessSpec
+	)
+
+	if acc != nil {
+		if !acc.IsLocal(c.GetContext()) {
+			return set(meta, acc)
+		}
+
+		blob, err = BlobAccessForAccessSpec(acc, c)
+		if err != nil && errors.IsErrNotFoundElem(err, "", blobaccess.KIND_BLOB) {
+			return err
+		}
+		hint = ReferenceHint(acc, c)
+		global = GlobalAccess(acc, c.GetContext())
+	}
+	if blob == nil {
+		blob, err = art.BlobAccess()
+		if err != nil {
+			return err
+		}
+		defer blob.Close()
+	}
+	if blob == nil {
+		return errors.Newf("neither access nor blob specified in %s access", kind)
+	}
+	if v := art.ReferenceHint(); v != "" {
+		hint = v
+	}
+	if v := art.GlobalAccess(); v != nil {
+		global = v
+	}
+	return setblob(meta, blob, hint, global)
+}
+
+func (c *componentVersionAccessView) SetResourceByAccess(art ResourceAccess, modopts ...ModificationOption) error {
+	return setAccess(c, "resource", art,
+		func(meta *ResourceMeta, acc compdesc.AccessSpec) error {
+			return c.SetResource(meta, acc, modopts...)
+		},
+		func(meta *ResourceMeta, blob BlobAccess, hint string, global AccessSpec) error {
+			return c.SetResourceBlob(meta, blob, hint, global, modopts...)
+		})
+}
+
+func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...ModificationOption) error {
 	if c.impl.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -952,7 +1025,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 }
 
 // evaluateResourceDigest evaluate given potentially partly set digest to determine defaults.
-func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.Resource, opts internal.ModificationOptions) (string, DigesterType, string) {
+func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.Resource, opts ModificationOptions) (string, DigesterType, string) {
 	var digester DigesterType
 
 	hashAlgo := opts.DefaultHashAlgorithm
@@ -987,7 +1060,12 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 	return hashAlgo, digester, value
 }
 
-func (c *componentVersionAccessView) SetSource(meta *internal.SourceMeta, acc compdesc.AccessSpec) error {
+func (c *componentVersionAccessView) SetSourceByAccess(art SourceAccess) error {
+	return setAccess(c, "source", art,
+		c.SetSource, c.SetSourceBlob)
+}
+
+func (c *componentVersionAccessView) SetSource(meta *SourceMeta, acc compdesc.AccessSpec) error {
 	if c.impl.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -1010,7 +1088,7 @@ func (c *componentVersionAccessView) SetSource(meta *internal.SourceMeta, acc co
 	})
 }
 
-func (c *componentVersionAccessView) SetReference(ref *internal.ComponentReference) error {
+func (c *componentVersionAccessView) SetReference(ref *ComponentReference) error {
 	return c.Execute(func() error {
 		cd := c.impl.GetDescriptor()
 		if idx := cd.GetComponentReferenceIndex(*ref); idx == -1 {
