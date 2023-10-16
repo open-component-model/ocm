@@ -20,7 +20,8 @@ import (
 const (
 	BLUEPRINT_MIMETYPE_LEGACY            = "application/vnd.gardener.landscaper.blueprint.layer.v1.tar"
 	BLUEPRINT_MIMETYPE_LEGACY_COMPRESSED = "application/vnd.gardener.landscaper.blueprint.layer.v1.tar+gzip"
-	BLUEPRINT_MIMETYPE                   = "application/vnd.gardener.landscaper.blueprint.v1+tar+gzip"
+	BLUEPRINT_MIMETYPE                   = "application/vnd.gardener.landscaper.blueprint.v1+tar"
+	BLUEPRINT_MIMETYPE_COMPRESSED        = "application/vnd.gardener.landscaper.blueprint.v1+tar+gzip"
 )
 
 func ExtractArchive(pr common.Printer, _ *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
@@ -80,7 +81,10 @@ func ExtractArtifact(pr common.Printer, handler *Handler, access accessio.DataAc
 
 	desc := art.ManifestAccess().GetDescriptor().Layers[0]
 	if !handler.ociConfigMimeTypes.Contains(art.ManifestAccess().GetDescriptor().Config.MediaType) {
-		if desc.MediaType != BLUEPRINT_MIMETYPE && desc.MediaType != BLUEPRINT_MIMETYPE_LEGACY {
+		if desc.MediaType != BLUEPRINT_MIMETYPE &&
+			desc.MediaType != BLUEPRINT_MIMETYPE_COMPRESSED &&
+			desc.MediaType != BLUEPRINT_MIMETYPE_LEGACY &&
+			desc.MediaType != BLUEPRINT_MIMETYPE_LEGACY_COMPRESSED {
 			return false, nil
 		}
 	}
