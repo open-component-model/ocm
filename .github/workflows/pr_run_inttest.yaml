@@ -1,6 +1,6 @@
 name: pr_run_inttest
 on:
-  pull_request:
+  pull_request_target:
 permissions:
   pull-requests: write
   id-token: write
