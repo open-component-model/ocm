@@ -84,6 +84,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           blackduck-url: ${{ secrets.BLACKDUCK_URL }}
           blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+          detect-version: 8.8.0
           
 
 # # use new synopsis action using bridge 
