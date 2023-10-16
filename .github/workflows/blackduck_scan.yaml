@@ -56,7 +56,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Blackduck Full Scan
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.event_name != 'pull_request_target' }}
         uses: mercedesbenzio/detect-action@v1
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
@@ -70,7 +70,7 @@ jobs:
           blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
 
       - name: Blackduck PR Scan
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request_target' }}
         uses: mercedesbenzio/detect-action@v1
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
