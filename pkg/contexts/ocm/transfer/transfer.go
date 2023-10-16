@@ -215,11 +215,11 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 	*t.GetDescriptor() = *prep
 	log.Info("  transferring resources")
 	for i, r := range src.GetResources() {
-		var m ocm.AccessMethod
+		var m ocmcpi.AccessMethodView
 
 		a, err := r.Access()
 		if err == nil {
-			m, err = r.AccessMethod()
+			m, err = ocmcpi.AccessMethodViewForSpec(a, src)
 		}
 		if err == nil {
 			ok := a.IsLocal(src.GetContext())
@@ -243,7 +243,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 					var msgs []interface{}
 					if !errors.IsErrNotFound(err) {
 						if err != nil {
-							return err
+							return errors.Join(err, m.Close())
 						}
 						if !changed && valueNeeded {
 							msgs = []interface{}{"copy"}
@@ -272,11 +272,11 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 
 	log.Info("  transferring sources")
 	for i, r := range src.GetSources() {
-		var m ocm.AccessMethod
+		var m ocmcpi.AccessMethodView
 
 		a, err := r.Access()
 		if err == nil {
-			m, err = r.AccessMethod()
+			m, err = ocmcpi.AccessMethodViewForSpec(a, src)
 		}
 		if err == nil {
 			ok := a.IsLocal(src.GetContext())

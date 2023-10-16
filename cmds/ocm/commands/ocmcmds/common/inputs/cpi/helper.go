@@ -80,12 +80,12 @@ func (s *ProcessSpec) SetMediaTypeIfNotDefined(mediaType string) {
 	s.MediaType = mediaType
 }
 
-func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc accessio.DataAccess, fs vfs.FileSystem) (accessio.TemporaryBlobAccess, string, error) {
+func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc accessio.DataAccess, fs vfs.FileSystem) (accessio.BlobAccess, string, error) {
 	if !s.Compress() {
 		if s.MediaType == "" {
 			s.MediaType = mime.MIME_OCTET
 		}
-		return accessio.TemporaryBlobAccessFor(accessio.BlobAccessForDataAccess(accessio.BLOB_UNKNOWN_DIGEST, accessio.BLOB_UNKNOWN_SIZE, s.MediaType, acc)), "", nil
+		return accessio.BlobAccessForDataAccess(accessio.BLOB_UNKNOWN_DIGEST, accessio.BLOB_UNKNOWN_SIZE, s.MediaType, acc), "", nil
 	}
 
 	reader, err := acc.Reader()

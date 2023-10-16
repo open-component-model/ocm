@@ -55,6 +55,7 @@ type (
 	GenericAccessSpec                = internal.GenericAccessSpec
 	AccessMethod                     = internal.AccessMethod
 	AccessMethodSupport              = internal.AccessMethodSupport
+	AccessProvider                   = internal.AccessProvider
 	AccessType                       = internal.AccessType
 	AccessTypeProvider               = internal.AccessTypeProvider
 	AccessTypeScheme                 = internal.AccessTypeScheme

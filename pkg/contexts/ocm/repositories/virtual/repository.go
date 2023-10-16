@@ -5,7 +5,7 @@
 package virtual
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
@@ -67,6 +67,6 @@ func (r *RepositoryImpl) LookupComponentVersion(name string, version string) (cp
 	if err != nil {
 		return nil, err
 	}
-	defer accessio.PropagateCloseTemporary(&err, c) // temporary component object not exposed.
+	defer refmgmt.PropagateCloseTemporary(&err, c) // temporary component object not exposed.
 	return c.LookupVersion(version)
 }

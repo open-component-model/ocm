@@ -24,7 +24,7 @@ import (
 const SynthesizedBlobFormat = "+tar+gzip"
 
 type ArtifactBlob interface {
-	accessio.TemporaryFileSystemBlobAccess
+	accessio.BlobAccess
 }
 
 type Producer func(set *ArtifactSet) (string, error)

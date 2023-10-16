@@ -21,7 +21,7 @@ func DataAccessForDirTree(path string, opts ...Option) (accessio.DataAccess, err
 	return blobAccess, nil
 }
 
-func BlobAccessForDirTree(path string, opts ...Option) (_ accessio.TemporaryBlobAccess, rerr error) {
+func BlobAccessForDirTree(path string, opts ...Option) (_ accessio.BlobAccess, rerr error) {
 	var eff Options
 	for _, opt := range opts {
 		opt.ApplyToDirtreeOptions(&eff)

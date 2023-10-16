@@ -8,6 +8,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -132,7 +133,7 @@ func (r *RepositoryImpl) LookupArtifact(name string, ref string) (acc cpi.Artifa
 		return nil, err
 	}
 
-	defer accessio.PropagateCloseTemporary(&err, ns) // temporary namespace object not exposed.
+	defer refmgmt.PropagateCloseTemporary(&err, ns) // temporary namespace object not exposed.
 
 	a := r.getIndex().GetArtifactInfo(name, ref)
 	if a == nil {

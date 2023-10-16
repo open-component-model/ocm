@@ -87,7 +87,7 @@ type InputResourceInfo struct {
 type InputSpec interface {
 	runtime.VersionedTypedObject
 	Validate(fldPath *field.Path, ctx Context, inputFilePath string) field.ErrorList
-	GetBlob(ctx Context, info InputResourceInfo) (accessio.TemporaryBlobAccess, string, error)
+	GetBlob(ctx Context, info InputResourceInfo) (accessio.BlobAccess, string, error)
 	GetInputVersion(ctx Context) string
 }
 
@@ -272,7 +272,7 @@ func (r *UnknownInputSpec) Validate(fldPath *field.Path, ctx Context, inputFileP
 	return field.ErrorList{field.Invalid(fldPath.Child("type"), r.GetType(), "unknown type")}
 }
 
-func (r *UnknownInputSpec) GetBlob(ctx Context, info InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
+func (r *UnknownInputSpec) GetBlob(ctx Context, info InputResourceInfo) (accessio.BlobAccess, string, error) {
 	return nil, "", errors.ErrUnknown("input type", r.GetType())
 }
 
@@ -329,7 +329,7 @@ func (s *GenericInputSpec) Validate(fldPath *field.Path, ctx Context, inputFileP
 	return s.effective.Validate(fldPath, ctx, inputFilePath)
 }
 
-func (s *GenericInputSpec) GetBlob(ctx Context, info InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
+func (s *GenericInputSpec) GetBlob(ctx Context, info InputResourceInfo) (accessio.BlobAccess, string, error) {
 	if s.effective == nil {
 		var err error
 		s.effective, err = s.Evaluate(For(ctx))

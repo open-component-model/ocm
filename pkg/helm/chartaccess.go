@@ -14,6 +14,7 @@ import (
 	"helm.sh/helm/v3/pkg/registry"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -25,14 +26,14 @@ const (
 
 type ChartAccess interface {
 	io.Closer
-	Chart() (accessio.TemporaryBlobAccess, error)
-	Prov() (accessio.TemporaryBlobAccess, error)
-	ArtefactSet() (accessio.TemporaryBlobAccess, error)
+	Chart() (accessio.BlobAccess, error)
+	Prov() (accessio.BlobAccess, error)
+	ArtefactSet() (accessio.BlobAccess, error)
 }
 
-func newFileAccess(c *chartAccess, path string, mime string) accessio.TemporaryBlobAccess {
+func newFileAccess(c *chartAccess, path string, mime string) accessio.BlobAccess {
 	c.refcnt++
-	return accessio.ReferencingBlobAccess(accessio.BlobAccessForFile(mime, path, c.fs), c.unref)
+	return accessio.BlobAccessForFileWithCloser(refmgmt.CloserFunc(c.unref), mime, path, c.fs)
 }
 
 type chartAccess struct {
@@ -97,7 +98,7 @@ func (c *chartAccess) Close() error {
 	return nil
 }
 
-func (c *chartAccess) Chart() (accessio.TemporaryBlobAccess, error) {
+func (c *chartAccess) Chart() (accessio.BlobAccess, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -108,7 +109,7 @@ func (c *chartAccess) Chart() (accessio.TemporaryBlobAccess, error) {
 	return newFileAccess(c, c.chart, ChartMediaType), nil
 }
 
-func (c *chartAccess) Prov() (accessio.TemporaryBlobAccess, error) {
+func (c *chartAccess) Prov() (accessio.BlobAccess, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -121,7 +122,7 @@ func (c *chartAccess) Prov() (accessio.TemporaryBlobAccess, error) {
 	return newFileAccess(c, c.prov, ProvenanceMediaType), nil
 }
 
-func (c *chartAccess) ArtefactSet() (accessio.TemporaryBlobAccess, error) {
+func (c *chartAccess) ArtefactSet() (accessio.BlobAccess, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 

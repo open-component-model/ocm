@@ -253,7 +253,7 @@ func (s *state) HasChanged() bool {
 
 func (s *state) GetBlob() (accessio.BlobAccess, error) {
 	if !s.HasChanged() {
-		return s.originalBlob, nil
+		return s.originalBlob.Dup()
 	}
 	data, err := s.handler.Encode(s.current)
 	if err != nil {
