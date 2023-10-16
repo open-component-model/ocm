@@ -61,7 +61,7 @@ var _ = Describe("download blueprint", func() {
 						env.BlobStringData(blueprint.CONFIG_MIME_TYPE, "{}")
 					})
 					env.Layer(func() {
-						env.BlobFromFile(blueprint.BLUEPRINT_MIMETYPE, ARCHIVE_PATH)
+						env.BlobFromFile(blueprint.BLUEPRINT_MIMETYPE_COMPRESSED, ARCHIVE_PATH)
 					})
 				})
 			})
@@ -74,7 +74,7 @@ var _ = Describe("download blueprint", func() {
 					env.Access(ociartifact.New(OCIHOST + ".alias/" + OCINAMESPACE + ":" + OCIVERSION))
 				})
 				env.Resource(LOCAL_ARTIFACT_NAME, ARTIFACT_VERSION, blueprint.TYPE, v1.LocalRelation, func() {
-					env.BlobFromFile(blueprint.BLUEPRINT_MIMETYPE, ARCHIVE_PATH)
+					env.BlobFromFile(blueprint.BLUEPRINT_MIMETYPE_COMPRESSED, ARCHIVE_PATH)
 				})
 			})
 		})

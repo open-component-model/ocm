@@ -43,6 +43,7 @@ func init() {
 		mime.MIME_TGZ:                        ExtractArchive,
 		mime.MIME_TGZ_ALT:                    ExtractArchive,
 		BLUEPRINT_MIMETYPE:                   ExtractArchive,
+		BLUEPRINT_MIMETYPE_COMPRESSED:        ExtractArchive,
 		BLUEPRINT_MIMETYPE_LEGACY:            ExtractArchive,
 		BLUEPRINT_MIMETYPE_LEGACY_COMPRESSED: ExtractArchive,
 	}
