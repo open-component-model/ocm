@@ -7,23 +7,24 @@ package dirtree
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dirtree"
+	base "github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dirtree"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes/rpi"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
-type Option = rpi.ResourceOption[*Options]
+type Option = optionutils.Option[*Options]
 
 type Options struct {
 	rpi.Options
-	DirTree dirtree.Options
+	Blob base.Options
 }
 
 var _ rpi.GeneralOptionsProvider = (*Options)(nil)
 
 func (o *Options) Apply(opts *Options) {
 	o.Options.ApplyTo(&opts.Options)
-	o.DirTree.ApplyToDirtreeOptions(&opts.DirTree)
+	o.Blob.ApplyTo(&opts.Blob)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,34 +41,34 @@ func WithGlobalAccess(a cpi.AccessSpec) Option {
 ////////////////////////////////////////////////////////////////////////////////
 // DirTree BlobAccess Options
 
-type blobaccessoption struct {
-	opt dirtree.Option
+func mapBaseOption(opts *Options) *base.Options {
+	return &opts.Blob
 }
 
-func (w blobaccessoption) ApplyTo(opts *Options) {
-	w.opt.ApplyToDirtreeOptions(&opts.DirTree)
+func wrapBase(o base.Option) Option {
+	return optionutils.OptionWrapperFunc[*base.Options, *Options](o, mapBaseOption)
 }
 
 func WithFileSystem(fs vfs.FileSystem) Option {
-	return blobaccessoption{dirtree.WithFileSystem(fs)}
+	return wrapBase(base.WithFileSystem(fs))
 }
 
 func WithExcludeFiles(files []string) Option {
-	return blobaccessoption{dirtree.WithExcludeFiles(files)}
+	return wrapBase(base.WithExcludeFiles(files))
 }
 
 func WithIncludeFiles(files []string) Option {
-	return blobaccessoption{dirtree.WithIncludeFiles(files)}
+	return wrapBase(base.WithIncludeFiles(files))
 }
 
 func WithFollowSymlinks(b ...bool) Option {
-	return blobaccessoption{dirtree.WithFollowSymlinks(b...)}
+	return wrapBase(base.WithFollowSymlinks(b...))
 }
 
 func WithPreserveDir(b ...bool) Option {
-	return blobaccessoption{dirtree.WithPreserveDir(b...)}
+	return wrapBase(base.WithPreserveDir(b...))
 }
 
 func WithCompressWithGzip(b ...bool) Option {
-	return blobaccessoption{dirtree.WithCompressWithGzip(b...)}
+	return wrapBase(base.WithCompressWithGzip(b...))
 }

@@ -6,20 +6,25 @@ package rpi
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
-type GeneralOptionsProvider interface {
-	GeneralOptions() *Options
-}
-
-type Option = ResourceOption[*Options]
+type (
+	Option                 = optionutils.Option[*Options]
+	GeneralOptionsProvider = optionutils.NestedOptionsProvider[*Options]
+)
 
 type Options struct {
 	Global cpi.AccessSpec
 	Hint   string
 }
 
-func (w *Options) GeneralOptions() *Options {
+var (
+	_ optionutils.NestedOptionsProvider[*Options] = (*Options)(nil)
+	_ optionutils.Option[*Options]                = (*Options)(nil)
+)
+
+func (w *Options) NestedOptions() *Options {
 	return w
 }
 
@@ -42,8 +47,8 @@ func WithHint(h string) Option {
 	return hint(h)
 }
 
-func WrapHint[O any, P OptionTargetProvider[O]](h string) ResourceOption[P] {
-	return OptionWrapper[O, P](WithHint(h))
+func WrapHint[O any, P optionutils.OptionTargetProvider[*Options, O]](h string) optionutils.Option[P] {
+	return optionutils.OptionWrapper[*Options, O, P](WithHint(h))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,39 +65,6 @@ func WithGlobalAccess(a cpi.AccessSpec) Option {
 	return global{a}
 }
 
-func WrapGlobalAccess[O any, P OptionTargetProvider[O]](a cpi.AccessSpec) ResourceOption[P] {
-	return OptionWrapper[O, P](WithGlobalAccess(a))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type ResourceOption[T any] interface {
-	ApplyTo(T)
-}
-
-type OptionTargetProvider[O any] interface {
-	GeneralOptionsProvider
-	*O
-}
-
-func OptionWrapper[O any, P OptionTargetProvider[O]](o Option) ResourceOption[P] {
-	return optionWrapper[O, P]{o}
-}
-
-type optionWrapper[O any, P OptionTargetProvider[O]] struct {
-	opt Option
-}
-
-func (w optionWrapper[O, P]) ApplyTo(opts P) {
-	w.opt.ApplyTo(opts.GeneralOptions())
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-func EvalOptions[O any](opts ...ResourceOption[*O]) *O {
-	var eff O
-	for _, opt := range opts {
-		opt.ApplyTo(&eff)
-	}
-	return &eff
+func WrapGlobalAccess[O any, P optionutils.OptionTargetProvider[*Options, O]](a cpi.AccessSpec) optionutils.Option[P] {
+	return optionutils.OptionWrapper[*Options, O, P](WithGlobalAccess(a))
 }

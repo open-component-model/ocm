@@ -9,9 +9,10 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes/rpi"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
-type Option = rpi.ResourceOption[*Options]
+type Option = optionutils.Option[*Options]
 
 type Options struct {
 	rpi.Options

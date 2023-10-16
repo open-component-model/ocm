@@ -69,6 +69,5 @@ var _ = Describe("dir tree resource access", func() {
 
 		MustBeSuccessful(v.SetResourceByAccess(acc))
 		MustBeSuccessful(c.AddVersion(v))
-
 	})
 })

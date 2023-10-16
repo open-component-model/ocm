@@ -53,11 +53,15 @@ var _ = Describe("access method", func() {
 		Expect(Must(cv.GetResource(compdesc.NewIdentity("text1"))).Meta().Digest).To(Equal(DS_TESTDATA))
 
 		// add resource with digest
-		MustBeSuccessful(cv.SetResourceBlob(compdesc.NewResourceMeta("text2", resourcetypes.PLAIN_TEXT, metav1.LocalRelation).SetDigest(DS_TESTDATA), blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
+		meta := compdesc.NewResourceMeta("text2", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
+		meta.SetDigest(DS_TESTDATA)
+		MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
 		Expect(Must(cv.GetResource(compdesc.NewIdentity("text2"))).Meta().Digest).To(Equal(DS_TESTDATA))
 
 		// reject resource with wrong digest
-		Expect(cv.SetResourceBlob(compdesc.NewResourceMeta("text3", resourcetypes.PLAIN_TEXT, metav1.LocalRelation).SetDigest(TextResourceDigestSpec("fake")), blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil)).To(MatchError("unable to set resource: digest mismatch: " + D_TESTDATA + " != fake"))
+		meta = compdesc.NewResourceMeta("text3", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
+		meta.SetDigest(TextResourceDigestSpec("fake"))
+		Expect(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil)).To(MatchError("unable to set resource: digest mismatch: " + D_TESTDATA + " != fake"))
 
 		MustBeSuccessful(c.AddVersion(cv))
 		MustBeSuccessful(final.Finalize())

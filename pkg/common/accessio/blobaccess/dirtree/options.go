@@ -4,12 +4,11 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"golang.org/x/exp/slices"
 
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type Option interface {
-	ApplyToDirtreeOptions(*Options)
-}
+type Option = optionutils.Option[*Options]
 
 type Options struct {
 	// FileSystem defines the file system that contains the specified directory.
@@ -31,7 +30,7 @@ type Options struct {
 	FollowSymlinks *bool `json:"followSymlinks,omitempty"`
 }
 
-func (o *Options) ApplyToDirtreeOptions(opts *Options) {
+func (o *Options) ApplyTo(opts *Options) {
 	if opts == nil {
 		return
 	}
@@ -62,7 +61,7 @@ type fileSystem struct {
 	fs vfs.FileSystem
 }
 
-func (o *fileSystem) ApplyToDirtreeOptions(opts *Options) {
+func (o *fileSystem) ApplyTo(opts *Options) {
 	opts.FileSystem = o.fs
 }
 
@@ -72,7 +71,7 @@ func WithFileSystem(fs vfs.FileSystem) Option {
 
 type mimeType string
 
-func (o mimeType) ApplyToDirtreeOptions(opts *Options) {
+func (o mimeType) ApplyTo(opts *Options) {
 	opts.MimeType = string(o)
 }
 
@@ -82,7 +81,7 @@ func WithMimeType(mime string) Option {
 
 type compressWithGzip bool
 
-func (o compressWithGzip) ApplyToDirtreeOptions(opts *Options) {
+func (o compressWithGzip) ApplyTo(opts *Options) {
 	opts.CompressWithGzip = utils.BoolP(o)
 }
 
@@ -92,7 +91,7 @@ func WithCompressWithGzip(b ...bool) Option {
 
 type preserveDir bool
 
-func (o preserveDir) ApplyToDirtreeOptions(opts *Options) {
+func (o preserveDir) ApplyTo(opts *Options) {
 	opts.PreserveDir = utils.BoolP(o)
 }
 
@@ -102,7 +101,7 @@ func WithPreserveDir(b ...bool) Option {
 
 type includeFiles []string
 
-func (o includeFiles) ApplyToDirtreeOptions(opts *Options) {
+func (o includeFiles) ApplyTo(opts *Options) {
 	opts.IncludeFiles = slices.Clone(o)
 }
 
@@ -112,7 +111,7 @@ func WithIncludeFiles(files []string) Option {
 
 type excludeFiles []string
 
-func (o excludeFiles) ApplyToDirtreeOptions(opts *Options) {
+func (o excludeFiles) ApplyTo(opts *Options) {
 	opts.ExcludeFiles = slices.Clone(o)
 }
 
@@ -122,7 +121,7 @@ func WithExcludeFiles(files []string) Option {
 
 type followSymlinks bool
 
-func (o followSymlinks) ApplyToDirtreeOptions(opts *Options) {
+func (o followSymlinks) ApplyTo(opts *Options) {
 	opts.FollowSymlinks = utils.BoolP(o)
 }
 

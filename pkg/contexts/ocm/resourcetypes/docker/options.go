@@ -2,9 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package data
+package docker
 
 import (
+	"github.com/open-component-model/ocm/pkg/common"
+	base "github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/docker"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes/rpi"
 	"github.com/open-component-model/ocm/pkg/optionutils"
@@ -14,16 +16,14 @@ type Option = optionutils.Option[*Options]
 
 type Options struct {
 	rpi.Options
-	MimeType string
+	Blob base.Options
 }
 
 var _ rpi.GeneralOptionsProvider = (*Options)(nil)
 
 func (o *Options) Apply(opts *Options) {
 	o.Options.ApplyTo(&opts.Options)
-	if o.MimeType != "" {
-		opts.MimeType = o.MimeType
-	}
+	o.Blob.ApplyTo(&opts.Blob)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,16 +38,28 @@ func WithGlobalAccess(a cpi.AccessSpec) Option {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Local Options
+// Docker BlobAccess Options
 
-type mimetype struct {
-	mime string
+func mapBaseOption(opts *Options) *base.Options {
+	return &opts.Blob
 }
 
-func (o mimetype) ApplyTo(opts *Options) {
-	opts.MimeType = o.mime
+func wrapBase(o base.Option) Option {
+	return optionutils.OptionWrapperFunc[*base.Options, *Options](o, mapBaseOption)
 }
 
-func WithMimeType(mime string) Option {
-	return mimetype{mime}
+func WithName(n string) Option {
+	return wrapBase(base.WithName(n))
+}
+
+func WithVersion(v string) Option {
+	return wrapBase(base.WithVersion(v))
+}
+
+func WithVersionOverride(v string, flag ...bool) Option {
+	return wrapBase(base.WithVersionOverride(v, flag...))
+}
+
+func WithOrigin(o common.NameVersion) Option {
+	return wrapBase(base.WithOrigin(o))
 }

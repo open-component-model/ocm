@@ -186,8 +186,8 @@ func (o *ElementMeta) SetLabels(labels []metav1.Label) {
 
 // SetLabel sets a single label to an effective value.
 // If the value is no byte slice, it is marshaled.
-func (o *ElementMeta) SetLabel(name string, value interface{}) error {
-	return o.Labels.Set(name, value)
+func (o *ElementMeta) SetLabel(name string, value interface{}, opts ...metav1.LabelOption) error {
+	return o.Labels.Set(name, value, opts...)
 }
 
 // RemoveLabel removes a single label.
@@ -678,12 +678,6 @@ func (o *ResourceMeta) SetType(ttype string) {
 // SetDigest sets the digest of the object.
 func (o *ResourceMeta) SetDigest(d *metav1.DigestSpec) {
 	o.Digest = d
-}
-
-// SetLabel sets a label of the object.
-func (o *ResourceMeta) SetLabel(name string, value interface{}, opts ...metav1.LabelOption) {
-	// assure chainability
-	_ = o.Labels.Set(name, value, opts...)
 }
 
 // Copy copies a resource meta.

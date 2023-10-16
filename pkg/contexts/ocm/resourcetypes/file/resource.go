@@ -9,15 +9,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes/rpi"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 const TYPE = "blob"
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, media string, meta P, path string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := rpi.EvalOptions[Options](opts...)
+	eff := optionutils.EvalOptions(opts...)
 
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)
