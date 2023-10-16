@@ -10,38 +10,6 @@ permissions:
   checks: write
   pull-requests: write
 
-## directly invoke command line 
-# jobs:
-#   blackduck:
-#     runs-on: [ubuntu-latest]
-#     steps: 
-#       - name: Blackduck PR scan on commandline
-#         if: ${{ github.event_name == 'pull_request' }}
-#         env:
-#           NODE_TLS_REJECT_UNAUTHORIZED: true
-#           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
-#           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
-#           DETECT_SOURCE_PATH: ./
-#           DETECT_BLACKDUCK_SCAN_MODE: RAPID
-#           SYNOPSYS_SKIP_PHONE_HOME: true
-#           BLACKDUCK_SKIP_PHONE_HOME: true
-#         run: |
-#           bash ./detect8.sh  \
-#           --logging.level.com.synopsys.integration=DEBUG  \
-#           --blackduck.url=${{ secrets.BLACKDUCK_URL }} \
-#           --blackduck.api.token=${{ secrets.BLACKDUCK_API_TOKEN }}  \
-#           --detect.project.version.distribution=$DETECT_PROJECT_VERSION_DISTRIBUTION \
-#           --detect.blackduck.signature.scanner.memory=4096  \
-#           --detect.timeout=6000 \
-#           --blackduck.trust.cert=true \
-#           --detect.project.user.groups=$DETECT_PROJECT_USER_GROUPS  \
-#           --detect.blackduck.scan.mode=$SDETECT_BLACKDUCK_SCAN_MODE
-#           #--detect.project.name=$ProjectName \
-#           #--detect.project.version.name=$ProjectVersion \
-#           #--detect.code.location.name=$ProjectName/$ProjectVersion \
-#           --detect.source.path=$DETECT_SOURCE_PATH
-
-
 #invoke forked detect-action as the one from synopsys is deprecated: https://github.com/mercedesbenzio/detect-action
 jobs:
   blackduck:
@@ -140,3 +108,35 @@ jobs:
 #           github_token: ${{ secrets.GITHUB_TOKEN }} # Mandatory when blackduck_automation_prcomment is set to 'true'
 #           ### Uncomment below configuration if Synopsys Bridge diagnostic files needs to be uploaded
 #           include_diagnostics: true
+
+
+## directly invoke DETECT using command line 
+# jobs:
+#   blackduck:
+#     runs-on: [ubuntu-latest]
+#     steps: 
+#       - name: Blackduck PR scan on commandline
+#         if: ${{ github.event_name == 'pull_request' }}
+#         env:
+#           NODE_TLS_REJECT_UNAUTHORIZED: true
+#           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
+#           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
+#           DETECT_SOURCE_PATH: ./
+#           DETECT_BLACKDUCK_SCAN_MODE: RAPID
+#           SYNOPSYS_SKIP_PHONE_HOME: true
+#           BLACKDUCK_SKIP_PHONE_HOME: true
+#         run: |
+#           bash ./detect8.sh  \
+#           --logging.level.com.synopsys.integration=DEBUG  \
+#           --blackduck.url=${{ secrets.BLACKDUCK_URL }} \
+#           --blackduck.api.token=${{ secrets.BLACKDUCK_API_TOKEN }}  \
+#           --detect.project.version.distribution=$DETECT_PROJECT_VERSION_DISTRIBUTION \
+#           --detect.blackduck.signature.scanner.memory=4096  \
+#           --detect.timeout=6000 \
+#           --blackduck.trust.cert=true \
+#           --detect.project.user.groups=$DETECT_PROJECT_USER_GROUPS  \
+#           --detect.blackduck.scan.mode=$SDETECT_BLACKDUCK_SCAN_MODE
+#           #--detect.project.name=$ProjectName \
+#           #--detect.project.version.name=$ProjectVersion \
+#           #--detect.code.location.name=$ProjectName/$ProjectVersion \
+#           --detect.source.path=$DETECT_SOURCE_PATH
