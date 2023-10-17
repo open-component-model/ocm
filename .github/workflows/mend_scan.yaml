@@ -14,7 +14,10 @@ jobs:
 
     - name: Run Whitesource Action
       uses: TheAxZim/Whitesource-Scan-Action@v1.0.0
+      env:
       with:
         wssURL: ${{ secrets.MEND_URL }}
         apiKey: ${{ secrets.MEND_API_TOKEN }}
+        userKey: ${{ secrets.MEND_USER_KEY }}
+        productKey: ${{ secrets.MEND_SHC_PRODUCT_TOKEN }}
         configFile: './github/workflows/mend.config'
