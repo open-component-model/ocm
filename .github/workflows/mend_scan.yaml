@@ -26,7 +26,7 @@ jobs:
         go-version: 1.19.x
 
     - name: Download Mend Universal Agent
-      run: curl https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar -o .
+      run: curl https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar -o ./wss-unified-agent.jar
 
     - name: Run Mend Scan 
       run: java -jar ./wss-unified-agent.jar -c $CONFIG_FILE -wss.url $WSS_URL -apiKey $API_KEY -userKey $USER_KEY -productToken $PRODUCT_TOKEN
