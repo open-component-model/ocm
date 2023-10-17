@@ -17,8 +17,9 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: 1.19.x
-      run: |
-        PATH=$PATH:$(go env GOPATH)/bin
+
+    - run: go version
+    - run: echo $PATH
 
 
     - name: Run Whitesource Action
@@ -30,3 +31,4 @@ jobs:
         wssURL: ${{ secrets.MEND_URL }}
         apiKey: ${{ secrets.MEND_API_TOKEN }}
         configFile: './.github/workflows/mend.config'
+        
