@@ -11,24 +11,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Code  
+      uses: actions/checkout@v4
+
+    - name: Set up Java 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
     - name: Setup Go
       uses: actions/setup-go@v4
       with:
         go-version: 1.19.x
 
-    - run: go version
-    - run: echo $PATH
+    - name: Download Mend Universal Agent
+      run: curl https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar -o .
 
-
-    - name: Run Whitesource Action
-      uses: TheAxZim/Whitesource-Scan-Action@v1.0.0
+    - name: Run Mend Scan 
+      run: java -jar ./wss-unified-agent.jar -c $CONFIG_FILE -wss.url $WSS_URL -apiKey $API_KEY -userKey $USER_KEY -productToken $PRODUCT_TOKEN
       env:
-        userKey: ${{ secrets.MEND_USER_KEY }}
-        productKey: ${{ secrets.MEND_SHC_PRODUCT_TOKEN }}
-      with:
-        wssURL: ${{ secrets.MEND_URL }}
-        apiKey: ${{ secrets.MEND_API_TOKEN }}
-        configFile: './.github/workflows/mend.config'
+        USER_KEY: ${{ secrets.MEND_USER_KEY }}
+        PRODUCT_TOKEN: ${{ secrets.MEND_SHC_PRODUCT_TOKEN }}
+        WSS_URL: ${{ secrets.MEND_URL }}
+        API_KEY: ${{ secrets.MEND_API_TOKEN }}
+        CONFIG_FILE: './.github/workflows/mend.config'
         
