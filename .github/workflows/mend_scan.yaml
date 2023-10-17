@@ -9,6 +9,7 @@ on:
 jobs:
   mend-scan:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v4
 
@@ -16,6 +17,9 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: 1.19.x
+      run: |
+        PATH=$PATH:$(go env GOPATH)/bin
+
 
     - name: Run Whitesource Action
       uses: TheAxZim/Whitesource-Scan-Action@v1.0.0
