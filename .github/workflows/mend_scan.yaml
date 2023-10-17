@@ -1,0 +1,20 @@
+name: Mend Security Scan
+
+on:
+  push:
+    branches: [ mend-scan ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  mend-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Whitesource Action
+      uses: TheAxZim/Whitesource-Scan-Action@v1.0.0
+      with:
+        wssURL: ${{ secrets.MEND_URL }}
+        apiKey: ${{ secrets.MEND_API_KEY }}
+        configFile: './github/workflows/mend.config'
