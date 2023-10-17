@@ -19,4 +19,4 @@ jobs:
         apiKey: ${{ secrets.MEND_API_TOKEN }}
         userKey: ${{ secrets.MEND_USER_KEY }}
         productKey: ${{ secrets.MEND_SHC_PRODUCT_TOKEN }}
-        configFile: './github/workflows/mend.config'
+        configFile: './.github/workflows/mend.config'
