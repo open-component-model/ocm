@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package docker
+package dockerdaemon
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
-	base "github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/docker"
+	base "github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dockerdaemon"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes/rpi"
 	"github.com/open-component-model/ocm/pkg/optionutils"

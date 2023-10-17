@@ -6,14 +6,13 @@ package artifact
 
 import (
 	"archive/tar"
-	"compress/gzip"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
@@ -73,13 +72,12 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 		}
 		defer r.Close()
 
-		var reader io.Reader = r
-		if strings.HasSuffix(mime, "+gzip") {
-			reader, err = gzip.NewReader(reader)
-			if err != nil {
-				return nil, err
-			}
+		var reader io.ReadCloser
+		reader, _, err = compression.AutoDecompress(r)
+		if err != nil {
+			return nil, err
 		}
+		defer reader.Close()
 		tr := tar.NewReader(reader)
 
 		var desc *cpi.DigestDescriptor
@@ -123,7 +121,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 					if index == nil {
 						return nil, fmt.Errorf("no main artifact found")
 					}
-					main := artifactset.RetrieveMainArtifact(index.Annotations)
+					main := artifactset.RetrieveMainArtifactFromIndex(index)
 					if main == "" {
 						return nil, fmt.Errorf("no main artifact found")
 					}

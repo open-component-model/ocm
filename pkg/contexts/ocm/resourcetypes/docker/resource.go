@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package docker
+package dockerdaemon
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/docker"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dockerdaemon"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -22,12 +22,12 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, n
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)
 	}
-	locator, version, err := docker.ImageInfoFor(name, &eff.Blob)
+	locator, version, err := dockerdaemon.ImageInfoFor(name, &eff.Blob)
 	if err == nil {
 		version = eff.Blob.Version
 	}
 	hint := ociartifact.Hint(optionutils.AsValue(eff.Blob.Origin), locator, eff.Hint, version)
-	blobprov := docker.BlobAccessProviderForDocker(name, &eff.Blob)
+	blobprov := dockerdaemon.BlobAccessProviderForImageFromDockerDaemon(name, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
 	return cpi.NewArtifactAccessForProvider(generics.As[*M](meta), accprov)

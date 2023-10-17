@@ -51,7 +51,7 @@ the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 		attrs)
 }
 
-var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
+var identityMatcher = hostpath.IdentityMatcher("")
 
 func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 	return identityMatcher(pattern, cur, id)
