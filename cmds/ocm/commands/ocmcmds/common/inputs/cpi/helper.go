@@ -157,7 +157,7 @@ func (s *MediaFileSpec) ValidateFile(fldPath *field.Path, ctx clictx.Context, in
 		pathField := fldPath.Child("path")
 		fileInfo, filePath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
+			allErrs = append(allErrs, field.Invalid(pathField, s.Path, err.Error()))
 		}
 		return fileInfo, filePath, allErrs
 	}

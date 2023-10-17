@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package docker
+package dockerdaemon
 
 import (
 	"fmt"
@@ -14,13 +14,43 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/optionutils"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-func BlobAccessForDocker(name string, opts ...Option) (blobaccess.BlobAccess, string, error) {
+func (o *Options) OCIContext() oci.Context {
+	if o.Context == nil {
+		return oci.DefaultContext()
+	}
+	return o.Context
+}
+
+func ImageInfoFor(name string, opts ...Option) (locator string, version string, err error) {
 	eff := optionutils.EvalOptions(opts...)
 
-	ctx := oci.DefaultContext()
+	locator, version, err = docker.ParseGenericRef(name)
+	if err != nil {
+		return "", "", err
+	}
+
+	if version == "" || version == "latest" || optionutils.AsValue(eff.OverrideVersion) {
+		version = eff.Version
+	}
+	if version == "" {
+		return "", "", fmt.Errorf("no version specified")
+	}
+	return locator, version, nil
+}
+
+func BlobAccessProviderForImageFromDockerDaemon(name string, opts ...Option) spi.BlobAccessProvider {
+	return spi.BlobAccessProviderFunction(func() (spi.BlobAccess, error) {
+		b, _, err := BlobAccessForImageFromDockerDaemon(name, opts...)
+		return b, err
+	})
+}
+
+func BlobAccessForImageFromDockerDaemon(name string, opts ...Option) (blobaccess.BlobAccess, string, error) {
+	eff := optionutils.EvalOptions(opts...)
+	ctx := eff.OCIContext()
+
 	locator, version, err := ImageInfoFor(name, eff)
 	if err != nil {
 		return nil, "", err
@@ -46,28 +76,4 @@ func BlobAccessForDocker(name string, opts ...Option) (blobaccess.BlobAccess, st
 		return nil, "", err
 	}
 	return blob, version, nil
-}
-
-func ImageInfoFor(name string, opts ...Option) (locator string, version string, err error) {
-	eff := optionutils.EvalOptions(opts...)
-
-	locator, version, err = docker.ParseGenericRef(name)
-	if err != nil {
-		return "", "", err
-	}
-
-	if version == "" || version == "latest" || utils.AsBool(eff.OverrideVersion) {
-		version = eff.Version
-	}
-	if version == "" {
-		return "", "", fmt.Errorf("no version specified")
-	}
-	return locator, version, nil
-}
-
-func BlobAccessProviderForDocker(name string, opts ...Option) spi.BlobAccessProvider {
-	return spi.BlobAccessProviderFunction(func() (spi.BlobAccess, error) {
-		b, _, err := BlobAccessForDocker(name, opts...)
-		return b, err
-	})
 }

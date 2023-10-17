@@ -11,7 +11,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	docker2 "github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/docker"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dockerdaemon"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 )
@@ -51,7 +51,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	if err != nil {
 		return nil, "", err
 	}
-	blob, version, err := docker2.BlobAccessForDocker(s.Path, docker2.WithVersion(info.ComponentVersion.GetVersion()), docker2.WithOrigin(info.ComponentVersion))
+	blob, version, err := dockerdaemon.BlobAccessForImageFromDockerDaemon(s.Path, dockerdaemon.WithVersion(info.ComponentVersion.GetVersion()), dockerdaemon.WithOrigin(info.ComponentVersion))
 	if err != nil {
 		return nil, "", err
 	}

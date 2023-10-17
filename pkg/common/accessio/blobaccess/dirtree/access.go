@@ -25,8 +25,8 @@ func DataAccessForDirTree(path string, opts ...Option) (spi.DataAccess, error) {
 
 func BlobAccessForDirTree(path string, opts ...Option) (_ spi.BlobAccess, rerr error) {
 	eff := optionutils.EvalOptions(opts...)
-
 	fs := utils.FileSystem(eff.FileSystem)
+
 	ok, err := vfs.IsDir(fs, path)
 	if err != nil {
 		return nil, err

@@ -1,7 +1,8 @@
-package docker
+package dockerdaemon
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -9,6 +10,7 @@ import (
 type Option = optionutils.Option[*Options]
 
 type Options struct {
+	Context         oci.Context
 	Name            string
 	Version         string
 	OverrideVersion *bool
@@ -19,13 +21,38 @@ func (o *Options) ApplyTo(opts *Options) {
 	if opts == nil {
 		return
 	}
+	if o.Context != nil {
+		opts.Context = o.Context
+	}
 	if o.Name != "" {
 		opts.Name = o.Name
 	}
 	if o.Version != "" {
 		opts.Version = o.Version
 	}
+	if o.OverrideVersion != nil {
+		opts.OverrideVersion = o.OverrideVersion
+	}
+	if o.Origin != nil {
+		opts.Origin = o.Origin
+	}
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type context struct {
+	oci.Context
+}
+
+func (o context) ApplyTo(opts *Options) {
+	opts.Context = o
+}
+
+func WithContext(ctx oci.ContextProvider) Option {
+	return context{ctx.OCIContext()}
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type name string
 
@@ -36,6 +63,8 @@ func (o name) ApplyTo(opts *Options) {
 func WithName(n string) Option {
 	return name(n)
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type version string
 

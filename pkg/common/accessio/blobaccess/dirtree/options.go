@@ -57,6 +57,8 @@ func (o *Options) ApplyTo(opts *Options) {
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type fileSystem struct {
 	fs vfs.FileSystem
 }
@@ -68,6 +70,8 @@ func (o *fileSystem) ApplyTo(opts *Options) {
 func WithFileSystem(fs vfs.FileSystem) Option {
 	return &fileSystem{fs: fs}
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type mimeType string
 
