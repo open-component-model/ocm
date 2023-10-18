@@ -11,6 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type localBlobAccessMethod struct {
@@ -76,8 +77,13 @@ func (m *localBlobAccessMethod) Reader() (io.ReadCloser, error) {
 	return blob.Reader()
 }
 
-func (m *localBlobAccessMethod) Get() ([]byte, error) {
-	return blobaccess.BlobData(m.getBlob())
+func (m *localBlobAccessMethod) Get() (data []byte, ferr error) {
+	b, err := m.getBlob()
+	if ferr != nil {
+		return nil, err
+	}
+	defer errors.PropagateError(&ferr, b.Close)
+	return blobaccess.BlobData(b)
 }
 
 func (m *localBlobAccessMethod) MimeType() string {

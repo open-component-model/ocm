@@ -496,6 +496,13 @@ func (o *SourceMeta) Copy() *SourceMeta {
 	}
 }
 
+func NewSourceMeta(name, typ string) *SourceMeta {
+	return &SourceMeta{
+		ElementMeta: ElementMeta{Name: name},
+		Type:        typ,
+	}
+}
+
 // SourceRef defines a reference to a source
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true

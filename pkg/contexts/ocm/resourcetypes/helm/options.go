@@ -6,10 +6,10 @@ package helm
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	base "github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/helm"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes/rpi"
 	"github.com/open-component-model/ocm/pkg/optionutils"
