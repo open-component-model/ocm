@@ -14,6 +14,12 @@ type (
 	Options = data.Options
 )
 
+const (
+	COMPRESSION   = data.COMPRESSION
+	DECOMPRESSION = data.DECOMPRESSION
+	NONE          = data.NONE
+)
+
 ////////////////////////////////////////////////////////////////////////////////
 // General Options
 
@@ -30,4 +36,12 @@ func WithGlobalAccess(a cpi.AccessSpec) Option {
 
 func WithimeType(mime string) Option {
 	return data.WithMimeType(mime)
+}
+
+func WithCompression() Option {
+	return data.WithCompression()
+}
+
+func WithDecompression() Option {
+	return data.WithDecompression()
 }

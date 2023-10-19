@@ -14,9 +14,18 @@ import (
 
 type Option = optionutils.Option[*Options]
 
+type compressionMode string
+
+const (
+	COMPRESSION   = compressionMode("compression")
+	DECOMPRESSION = compressionMode("decompression")
+	NONE          = compressionMode("")
+)
+
 type Options struct {
 	rpi.Options
-	FileSystem vfs.FileSystem
+	FileSystem  vfs.FileSystem
+	Compression compressionMode
 }
 
 var _ rpi.GeneralOptionsProvider = (*Options)(nil)
@@ -52,4 +61,22 @@ func (o filesystem) ApplyTo(opts *Options) {
 
 func WithFileSystem(fs vfs.FileSystem) Option {
 	return filesystem{fs}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type compression struct {
+	mode compressionMode
+}
+
+func (o compression) ApplyTo(opts *Options) {
+	opts.Compression = o.mode
+}
+
+func WithCompression() Option {
+	return compression{COMPRESSION}
+}
+
+func WithDecompression() Option {
+	return compression{DECOMPRESSION}
 }

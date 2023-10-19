@@ -68,7 +68,23 @@ type LazyMode interface {
 	Lazy()
 }
 
+// ToLazy resets the main view flag
+// of closer views to enable
+// dark release of resources even if the
+// first/main view has been closed.
+// Otherwise, closing the main view will
+// fail, if there are still subsequent views.
+func ToLazy[T any](o T, err error) (T, error) {
+	if err == nil {
+		Lazy(o)
+	}
+	return o, err
+}
+
 func Lazy(o interface{}) bool {
+	if o == nil {
+		return false
+	}
 	if l, ok := o.(LazyMode); ok {
 		l.Lazy()
 		return true
@@ -125,6 +141,9 @@ func (v *view) Execute(f func() error) error {
 	return f()
 }
 
+// Release will release the view.
+// With releasing the last view
+// the underlying object will be closed.
 func (v *view) Release() error {
 	v.lock.Lock()
 	defer v.lock.Unlock()
@@ -135,6 +154,10 @@ func (v *view) Release() error {
 	return v.ref.Unref()
 }
 
+// Finalize will try to finalize the
+// underlying object. This is only
+// possible if no further view is
+// still pending.
 func (v *view) Finalize() error {
 	v.lock.Lock()
 	defer v.lock.Unlock()

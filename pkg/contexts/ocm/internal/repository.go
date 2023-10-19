@@ -34,8 +34,10 @@ type RepositoryImpl interface {
 
 type Repository interface {
 	resource.ResourceView[Repository]
-
 	RepositoryImpl
+
+	NewVersion(comp, version string, overrides ...bool) (ComponentVersionAccess, error)
+	AddVersion(cv ComponentVersionAccess, overrides ...bool) error
 }
 
 // ConsumerIdentityProvider is an interface for object requiring
@@ -56,7 +58,6 @@ type ComponentAccessImpl interface {
 	ListVersions() ([]string, error)
 	LookupVersion(version string) (ComponentVersionAccess, error)
 	HasVersion(vers string) (bool, error)
-	AddVersion(ComponentVersionAccess) error
 	NewVersion(version string, overrides ...bool) (ComponentVersionAccess, error)
 
 	Close() error
@@ -66,6 +67,7 @@ type ComponentAccess interface {
 	resource.ResourceView[ComponentAccess]
 
 	ComponentAccessImpl
+	AddVersion(cv ComponentVersionAccess, overrides ...bool) error
 }
 
 // AccessProvider assembled methods provided

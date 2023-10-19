@@ -12,9 +12,18 @@ import (
 
 type Option = optionutils.Option[*Options]
 
+type compressionMode string
+
+const (
+	COMPRESSION   = compressionMode("compression")
+	DECOMPRESSION = compressionMode("decompression")
+	NONE          = compressionMode("")
+)
+
 type Options struct {
 	rpi.Options
-	MimeType string
+	MimeType    string
+	Compression compressionMode
 }
 
 var _ rpi.GeneralOptionsProvider = (*Options)(nil)
@@ -50,4 +59,22 @@ func (o mimetype) ApplyTo(opts *Options) {
 
 func WithMimeType(mime string) Option {
 	return mimetype{mime}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type compression struct {
+	mode compressionMode
+}
+
+func (o compression) ApplyTo(opts *Options) {
+	opts.Compression = o.mode
+}
+
+func WithCompression() Option {
+	return compression{COMPRESSION}
+}
+
+func WithDecompression() Option {
+	return compression{DECOMPRESSION}
 }

@@ -26,7 +26,22 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, media str
 		media = mime.MIME_OCTET
 	}
 
-	blobprov := blobaccess.ProviderForFile(media, path, eff.FileSystem)
+	var blobprov blobaccess.BlobAccessProvider
+	switch eff.Compression {
+	case NONE:
+		blobprov = blobaccess.ProviderForFile(media, path, eff.FileSystem)
+	case COMPRESSION:
+		blob := blobaccess.ForFile(media, path, eff.FileSystem)
+		defer blob.Close()
+		blob, _ = blobaccess.WithCompression(blob)
+		blobprov = blobaccess.ProviderForBlobAccess(blob)
+	case DECOMPRESSION:
+		blob := blobaccess.ForFile(media, path, eff.FileSystem)
+		defer blob.Close()
+		blob, _ = blobaccess.WithDecompression(blob)
+		blobprov = blobaccess.ProviderForBlobAccess(blob)
+	}
+
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, eff.Hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
 	return cpi.NewArtifactAccessForProvider(generics.As[*M](meta), accprov)

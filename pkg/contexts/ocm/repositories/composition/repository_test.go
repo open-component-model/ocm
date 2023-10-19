@@ -23,7 +23,7 @@ import (
 const COMPONENT = "acme.org/testcomp"
 const VERSION = "1.0.0"
 
-var _ = Describe("access method", func() {
+var _ = Describe("repository", func() {
 	var ctx = ocm.DefaultContext()
 
 	It("handles cvs", func() {

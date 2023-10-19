@@ -20,7 +20,7 @@ func NewComponentVersion(ctx cpi.ContextProvider, name, vers string) cpi.Compone
 		panic("wrong composition repo implementation: " + err.Error())
 	}
 	defer c.Close()
-	cv, err := c.LookupVersion(vers)
+	cv, err := c.NewVersion(vers)
 	if err != nil {
 		panic("wrong composition repo implementation: " + err.Error())
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -150,6 +151,26 @@ func (r *repositoryView) LookupComponent(name string) (acc ComponentAccess, err 
 	return acc, err
 }
 
+func (r *repositoryView) NewVersion(comp, vers string, overrides ...bool) (ComponentVersionAccess, error) {
+	c, err := refmgmt.ToLazy(r.LookupComponent(comp))
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+
+	return c.NewVersion(vers, overrides...)
+}
+
+func (r *repositoryView) AddVersion(cv ComponentVersionAccess, overrides ...bool) error {
+	c, err := refmgmt.ToLazy(r.LookupComponent(cv.GetName()))
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	return c.AddVersion(cv, overrides...)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type _ComponentAccessView interface {
@@ -166,6 +187,8 @@ type ComponentAccessImpl interface {
 	GetName() string
 
 	IsOwned(access ComponentVersionAccess) bool
+
+	AddVersion(cv ComponentVersionAccess) error
 }
 
 type _ComponentAccessImplBase = resource.ResourceImplBase[ComponentAccess]
@@ -245,16 +268,16 @@ func (c *componentAccessView) LookupVersion(version string) (acc ComponentVersio
 	return acc, err
 }
 
-func (c *componentAccessView) AddVersion(acc ComponentVersionAccess) error {
+func (c *componentAccessView) AddVersion(acc ComponentVersionAccess, overrides ...bool) error {
 	if acc.GetName() != c.GetName() {
 		return errors.ErrInvalid("component name", acc.GetName())
 	}
 	return c.Execute(func() error {
-		return c.addVersion(acc)
+		return c.addVersion(acc, overrides...)
 	})
 }
 
-func (c *componentAccessView) addVersion(acc ComponentVersionAccess) (ferr error) {
+func (c *componentAccessView) addVersion(acc ComponentVersionAccess, overrides ...bool) (ferr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 
@@ -275,7 +298,7 @@ func (c *componentAccessView) addVersion(acc ComponentVersionAccess) (ferr error
 		// transfer all local blobs into a new owned version.
 		sel = func(spec AccessSpec) bool { return spec.IsLocal(ctx) }
 
-		eff, err = c.impl.NewVersion(acc.GetVersion(), true)
+		eff, err = c.impl.NewVersion(acc.GetVersion(), overrides...)
 		if err != nil {
 			return err
 		}
@@ -654,10 +677,7 @@ func (c *componentVersionAccessView) accessMethod(spec AccessSpec) (meth AccessM
 		meth, err = c.impl.AccessMethod(c, spec)
 		if err == nil {
 			if blob := c.getLocalBlob(spec); blob != nil {
-				meth = &fakeMethod{
-					AccessMethod: meth,
-					blob:         blob,
-				}
+				meth, err = newFakeMethod(meth, blob)
 			}
 		}
 	}
@@ -847,8 +867,51 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAc
 }
 
 type fakeMethod struct {
-	AccessMethod `json:",inline"`
-	blob         blobaccess.BlobAccess
+	spec  AccessSpec
+	local bool
+	mime  string
+	blob  blobaccess.BlobAccess
+}
+
+var _ AccessMethod = (*fakeMethod)(nil)
+
+func newFakeMethod(m AccessMethod, blob BlobAccess) (AccessMethod, error) {
+	b, err := blob.Dup()
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot remember blob for access method")
+	}
+	f := &fakeMethod{
+		spec:  m.AccessSpec(),
+		local: m.IsLocal(),
+		mime:  m.MimeType(),
+		blob:  b,
+	}
+	err = m.Close()
+	if err != nil {
+		_ = b.Close()
+		return nil, errors.Wrapf(err, "closing access method")
+	}
+	return f, nil
+}
+
+func (f *fakeMethod) MimeType() string {
+	return f.mime
+}
+
+func (f *fakeMethod) IsLocal() bool {
+	return f.local
+}
+
+func (f *fakeMethod) GetKind() string {
+	return f.spec.GetKind()
+}
+
+func (f *fakeMethod) AccessSpec() internal.AccessSpec {
+	return f.spec
+}
+
+func (f *fakeMethod) Close() error {
+	return f.blob.Close()
 }
 
 func (f *fakeMethod) Reader() (io.ReadCloser, error) {
