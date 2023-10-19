@@ -7,7 +7,6 @@ package dockermulti
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 	. "github.com/open-component-model/ocm/pkg/finalizer"
 
 	"github.com/opencontainers/go-digest"
@@ -15,9 +14,10 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
@@ -99,13 +99,13 @@ func (s *Spec) getVariant(ctx clictx.Context, finalize *Finalizer, variant strin
 	return art, nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
 	index := artdesc.NewIndexArtifact()
 	i := 0
 
 	index.SetAnnotation(annotations.COMPVERS_ANNOTATION, info.ComponentVersion.String())
 
-	feedback := func(blob accessio.BlobAccess, art cpi.ArtifactAccess) error {
+	feedback := func(blob blobaccess.BlobAccess, art cpi.ArtifactAccess) error {
 		desc := artdesc.DefaultBlobDescriptor(blob)
 		if art.IsManifest() {
 			cfgBlob, err := art.ManifestAccess().GetConfigBlob()
@@ -130,7 +130,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 
 	blob, err := artifactset.SynthesizeArtifactBlobFor(info.ComponentVersion.GetVersion(), func() (fac artifactset.ArtifactFactory, main bool, err error) {
 		var art cpi.ArtifactAccess
-		var blob accessio.BlobAccess
+		var blob blobaccess.BlobAccess
 
 		switch {
 		case i > len(s.Variants):

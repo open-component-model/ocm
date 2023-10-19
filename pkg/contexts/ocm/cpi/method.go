@@ -8,14 +8,14 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type DefaultAccessMethod struct {
 	lock   sync.Mutex
-	access accessio.BlobAccess
+	access blobaccess.BlobAccess
 
 	factory BlobAccessFactory
 	comp    ComponentVersionAccess
@@ -36,7 +36,7 @@ func NewDefaultMethod(c ComponentVersionAccess, a AccessSpec, mime string, fac B
 	}
 }
 
-func (m *DefaultAccessMethod) getAccess() (accessio.BlobAccess, error) {
+func (m *DefaultAccessMethod) getAccess() (blobaccess.BlobAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	if m.access == nil {

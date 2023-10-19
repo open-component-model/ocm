@@ -1,57 +1,32 @@
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package blobaccess
 
 import (
-	"io"
-
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dirtree"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/internal"
 )
 
-type BlobAccess = accessio.BlobAccess
+const (
+	KIND_BLOB      = internal.KIND_BLOB
+	KIND_MEDIATYPE = internal.KIND_MEDIATYPE
 
-func ForString(mime string, data string) BlobAccess {
-	return accessio.BlobAccessForString(mime, data)
-}
+	BLOB_UNKNOWN_SIZE   = internal.BLOB_UNKNOWN_SIZE
+	BLOB_UNKNOWN_DIGEST = internal.BLOB_UNKNOWN_DIGEST
+)
 
-func ForData(mime string, data []byte) BlobAccess {
-	return accessio.BlobAccessForData(mime, data)
-}
+type (
+	DataAccess = internal.DataAccess
+	DataReader = internal.DataReader
+	DataGetter = internal.DataGetter
+)
 
-func ForFile(mime string, path string, fss ...vfs.FileSystem) BlobAccess {
-	return accessio.BlobAccessForFile(mime, path, fss...)
-}
+type (
+	BlobAccess = internal.BlobAccess
 
-func ForFileWithCLoser(closer io.Closer, mime string, path string, fss ...vfs.FileSystem) BlobAccess {
-	return accessio.BlobAccessForFileWithCloser(closer, mime, path, fss...)
-}
+	DigestSource = internal.DigestSource
+	MimeType     = internal.MimeType
+)
 
-func ForTemporaryFile(mime string, file vfs.File, fss ...vfs.FileSystem) BlobAccess {
-	return accessio.BlobAccessForTemporaryFile(mime, file, fss...)
-}
-
-func ForTemporaryFilePath(mime string, path string, fss ...vfs.FileSystem) BlobAccess {
-	return accessio.BlobAccessForTemporaryFilePath(mime, path, fss...)
-}
-
-func ForDirTree(path string, opts ...dirtree.Option) (BlobAccess, error) {
-	return dirtree.BlobAccessForDirTree(path, opts...)
-}
-
-// Validatable is an optional interface for DataAccess
-// implementations or any other object, which might reach
-// an error state. The error can then be queried with
-// the method ErrorProvider.Validate.
-// This is used to support objects with access methods not
-// returning an error. If the object is not valid,
-// those methods return an unknown/default state, but
-// the object should be queryable for its state.
-type Validatable = accessio.Validatable
-
-// Validate checks whether a blob access
-// is in error state. If yes, an appropriate
-// error is returned.
-func Validate(o BlobAccess) error {
-	return accessio.ValidateObject(o)
-}
+type FileLocation = internal.FileLocation

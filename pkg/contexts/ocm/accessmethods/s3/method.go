@@ -10,6 +10,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/exception"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader/s3"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -109,7 +110,7 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(c cpi.ComponentVersion
 ////////////////////////////////////////////////////////////////////////////////
 
 type accessMethod struct {
-	accessio.BlobAccess
+	blobaccess.BlobAccess
 
 	comp cpi.ComponentVersionAccess
 	spec *AccessSpec

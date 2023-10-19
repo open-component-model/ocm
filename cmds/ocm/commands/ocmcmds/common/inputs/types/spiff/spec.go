@@ -15,7 +15,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/file"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -62,7 +62,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
 	return (&file.FileProcessSpec{s.MediaFileSpec, s.process}).GetBlob(ctx, info)
 }
 

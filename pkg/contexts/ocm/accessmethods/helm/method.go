@@ -12,7 +12,7 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/helm"
@@ -106,7 +106,7 @@ func (s *AccessSpec) GetChartName() string {
 
 type accessMethod struct {
 	lock sync.Mutex
-	blob accessio.BlobAccess
+	blob blobaccess.BlobAccess
 	comp cpi.ComponentVersionAccess
 	spec *AccessSpec
 
@@ -135,11 +135,11 @@ func (m *accessMethod) Close() error {
 }
 
 func (m *accessMethod) Get() ([]byte, error) {
-	return accessio.BlobData(m.getBlob())
+	return blobaccess.BlobData(m.getBlob())
 }
 
 func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	return accessio.BlobReader(m.getBlob())
+	return blobaccess.BlobReader(m.getBlob())
 }
 
 func (m *accessMethod) MimeType() string {

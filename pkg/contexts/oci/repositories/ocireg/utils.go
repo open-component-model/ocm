@@ -17,6 +17,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
@@ -84,12 +85,12 @@ func readAll(reader io.ReadCloser, err error) ([]byte, error) {
 	return data, nil
 }
 
-func push(ctx context.Context, p resolve.Pusher, blob accessio.BlobAccess) error {
+func push(ctx context.Context, p resolve.Pusher, blob blobaccess.BlobAccess) error {
 	desc := *artdesc.DefaultBlobDescriptor(blob)
 	return pushData(ctx, p, desc, blob)
 }
 
-func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, data accessio.DataAccess) error {
+func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, data blobaccess.DataAccess) error {
 	key := remotes.MakeRefKey(ctx, desc)
 	if desc.Size == 0 {
 		desc.Size = -1

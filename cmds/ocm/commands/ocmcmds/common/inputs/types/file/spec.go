@@ -9,7 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 )
 
 type Spec struct {
@@ -28,6 +28,6 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return (&FileProcessSpec{s.MediaFileSpec, nil}).Validate(fldPath, ctx, inputFilePath)
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
 	return (&FileProcessSpec{s.MediaFileSpec, nil}).GetBlob(ctx, info)
 }

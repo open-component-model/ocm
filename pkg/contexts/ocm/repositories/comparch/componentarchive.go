@@ -9,6 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -155,7 +156,7 @@ type BlobSink struct {
 	Sink ocicpi.BlobSink
 }
 
-func (s *BlobSink) AddBlob(blob accessio.BlobAccess) (string, error) {
+func (s *BlobSink) AddBlob(blob blobaccess.BlobAccess) (string, error) {
 	err := s.Sink.AddBlob(blob)
 	if err != nil {
 		return "", err

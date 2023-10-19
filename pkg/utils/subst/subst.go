@@ -10,10 +10,9 @@ import (
 	"github.com/goccy/go-yaml/parser"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type SubstitutionTarget interface {
@@ -24,9 +23,9 @@ type SubstitutionTarget interface {
 }
 
 func ParseFile(file string, fss ...vfs.FileSystem) (SubstitutionTarget, error) {
-	fs := accessio.FileSystem(fss...)
+	fs := utils.FileSystem(fss...)
 
-	data, err := utils2.ReadFile(file, fs)
+	data, err := utils.ReadFile(file, fs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot read file %q", file)
 	}

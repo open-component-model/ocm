@@ -12,6 +12,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -107,7 +108,7 @@ func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.File
 	return chart, prov, err
 }
 
-func write(p common.Printer, blob accessio.BlobAccess, path string, fs vfs.FileSystem) (err error) {
+func write(p common.Printer, blob blobaccess.BlobAccess, path string, fs vfs.FileSystem) (err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 

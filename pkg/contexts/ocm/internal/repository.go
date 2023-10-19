@@ -8,7 +8,7 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -44,9 +44,9 @@ type Repository interface {
 type ConsumerIdentityProvider = credentials.ConsumerIdentityProvider
 
 type (
-	DataAccess = accessio.DataAccess
-	BlobAccess = accessio.BlobAccess
-	MimeType   = accessio.MimeType
+	DataAccess = blobaccess.DataAccess
+	BlobAccess = blobaccess.BlobAccess
+	MimeType   = blobaccess.MimeType
 )
 
 type ComponentAccessImpl interface {

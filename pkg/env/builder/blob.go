@@ -5,8 +5,9 @@
 package builder
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dirtree"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const T_BLOBACCESS = "blob access"
@@ -16,7 +17,7 @@ func (b *Builder) BlobStringData(mime string, data string) {
 	if b.ocm_acc != nil && *b.ocm_acc != nil {
 		b.fail("access already set")
 	}
-	*(b.blob) = accessio.BlobAccessForData(mime, []byte(data))
+	*(b.blob) = blobaccess.ForData(mime, []byte(data))
 }
 
 func (b *Builder) BlobData(mime string, data []byte) {
@@ -24,7 +25,7 @@ func (b *Builder) BlobData(mime string, data []byte) {
 	if b.ocm_acc != nil && *b.ocm_acc != nil {
 		b.fail("access already set")
 	}
-	*(b.blob) = accessio.BlobAccessForData(mime, data)
+	*(b.blob) = blobaccess.ForData(mime, data)
 }
 
 func (b *Builder) BlobFromFile(mime string, path string) {
@@ -32,8 +33,8 @@ func (b *Builder) BlobFromFile(mime string, path string) {
 	if b.ocm_acc != nil && *b.ocm_acc != nil {
 		b.fail("access already set")
 	}
-	*(b.blob) = accessio.BlobAccessForFile(mime, path, b.FileSystem())
-	b.failOn(accessio.ValidateObject(*(b.blob)))
+	*(b.blob) = blobaccess.ForFile(mime, path, b.FileSystem())
+	b.failOn(utils.ValidateObject(*(b.blob)))
 }
 
 func (b *Builder) BlobFromDirTree(path string, opts ...dirtree.Option) {

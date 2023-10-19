@@ -13,10 +13,11 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/registry"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -26,14 +27,14 @@ const (
 
 type ChartAccess interface {
 	io.Closer
-	Chart() (accessio.BlobAccess, error)
-	Prov() (accessio.BlobAccess, error)
-	ArtefactSet() (accessio.BlobAccess, error)
+	Chart() (blobaccess.BlobAccess, error)
+	Prov() (blobaccess.BlobAccess, error)
+	ArtefactSet() (blobaccess.BlobAccess, error)
 }
 
-func newFileAccess(c *chartAccess, path string, mime string) accessio.BlobAccess {
+func newFileAccess(c *chartAccess, path string, mime string) blobaccess.BlobAccess {
 	c.refcnt++
-	return accessio.BlobAccessForFileWithCloser(refmgmt.CloserFunc(c.unref), mime, path, c.fs)
+	return blobaccess.ForFileWithCloser(refmgmt.CloserFunc(c.unref), mime, path, c.fs)
 }
 
 type chartAccess struct {
@@ -52,7 +53,7 @@ type chartAccess struct {
 var _ ChartAccess = (*chartAccess)(nil)
 
 func newTempChartAccess(fss ...vfs.FileSystem) (*chartAccess, error) {
-	fs := accessio.FileSystem(fss...)
+	fs := utils.FileSystem(fss...)
 
 	temp, err := vfs.TempDir(fs, "", "helmchart")
 	if err != nil {
@@ -66,7 +67,7 @@ func newTempChartAccess(fss ...vfs.FileSystem) (*chartAccess, error) {
 
 func NewChartAccessByFiles(chart, prov string, fss ...vfs.FileSystem) ChartAccess {
 	return &chartAccess{
-		fs:    accessio.FileSystem(fss...),
+		fs:    utils.FileSystem(fss...),
 		chart: chart,
 		prov:  prov,
 	}
@@ -98,23 +99,23 @@ func (c *chartAccess) Close() error {
 	return nil
 }
 
-func (c *chartAccess) Chart() (accessio.BlobAccess, error) {
+func (c *chartAccess) Chart() (blobaccess.BlobAccess, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	if c.closed {
-		return nil, accessio.ErrClosed
+		return nil, blobaccess.ErrClosed
 	}
 
 	return newFileAccess(c, c.chart, ChartMediaType), nil
 }
 
-func (c *chartAccess) Prov() (accessio.BlobAccess, error) {
+func (c *chartAccess) Prov() (blobaccess.BlobAccess, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	if c.closed {
-		return nil, accessio.ErrClosed
+		return nil, blobaccess.ErrClosed
 	}
 	if c.prov == "" {
 		return nil, nil
@@ -122,12 +123,12 @@ func (c *chartAccess) Prov() (accessio.BlobAccess, error) {
 	return newFileAccess(c, c.prov, ProvenanceMediaType), nil
 }
 
-func (c *chartAccess) ArtefactSet() (accessio.BlobAccess, error) {
+func (c *chartAccess) ArtefactSet() (blobaccess.BlobAccess, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	if c.closed {
-		return nil, accessio.ErrClosed
+		return nil, blobaccess.ErrClosed
 	}
 	if c.aset == "" {
 		return nil, nil

@@ -9,7 +9,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -65,7 +65,7 @@ func (s *AccessSpec) Handler() *PluginHandler {
 
 type accessMethod struct {
 	lock sync.Mutex
-	blob accessio.BlobAccess
+	blob blobaccess.BlobAccess
 	ctx  ocm.Context
 
 	handler *PluginHandler
@@ -105,11 +105,11 @@ func (m *accessMethod) Close() error {
 }
 
 func (m *accessMethod) Get() ([]byte, error) {
-	return accessio.BlobData(m.getBlob())
+	return blobaccess.BlobData(m.getBlob())
 }
 
 func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	return accessio.BlobReader(m.getBlob())
+	return blobaccess.BlobReader(m.getBlob())
 }
 
 func (m *accessMethod) MimeType() string {

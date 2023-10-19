@@ -7,7 +7,7 @@ package cpi
 import (
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 )
@@ -93,10 +93,10 @@ func (a accessMethodView) MimeType() string {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func BlobAccessForAccessMethod(m AccessMethodView) (accessio.AnnotatedBlobAccess[AccessMethodView], error) {
+func BlobAccessForAccessMethod(m AccessMethodView) (blobaccess.AnnotatedBlobAccess[AccessMethodView], error) {
 	m, err := m.Dup()
 	if err != nil {
 		return nil, err
 	}
-	return accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), nil
+	return blobaccess.ForDataAccess("", -1, m.MimeType(), m), nil
 }

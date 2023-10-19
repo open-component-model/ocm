@@ -21,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -57,8 +57,8 @@ type Command struct {
 	CredentialsFile string
 	ParameterFile   string
 	OutputFile      string
-	Credentials     accessio.DataSource
-	Parameters      accessio.DataSource
+	Credentials     blobaccess.DataSource
+	Parameters      blobaccess.DataSource
 	Config          map[string]string
 	EnvDir          string
 }
@@ -199,7 +199,7 @@ func (o *Command) Complete(args []string) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed reading credentials file %q", o.CredentialsFile)
 		}
-		o.Credentials = accessio.DataAccessForBytes(data, o.CredentialsFile)
+		o.Credentials = blobaccess.DataAccessForBytes(data, o.CredentialsFile)
 	}
 	if len(o.ParameterFile) == 0 {
 		if ok, _ := vfs.FileExists(o.FileSystem(), DEFAULT_PARAMETER_FILE); ok {
@@ -211,7 +211,7 @@ func (o *Command) Complete(args []string) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed reading parameter file %q", o.ParameterFile)
 		}
-		o.Parameters = accessio.DataAccessForBytes(data, o.ParameterFile)
+		o.Parameters = blobaccess.DataAccessForBytes(data, o.ParameterFile)
 	}
 	return nil
 }

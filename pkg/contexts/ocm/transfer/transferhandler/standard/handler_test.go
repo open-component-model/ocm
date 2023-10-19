@@ -17,6 +17,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -185,7 +186,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		MustBeSuccessful(nested.Finalize())
 
 		// modify one artifact and overwrite
-		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), accessio.BlobAccessForString(mime.MIME_TEXT, "otherdata"), "", nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), "", nil))
 		tcd.Resources[0].Digest = DS_OTHERDATA
 		tcd.Resources[0].Access = Must(runtime.ToUnstructuredVersionedTypedObject(localblob.New("sha256:"+D_OTHERDATA, "", mime.MIME_TEXT, nil)))
 		buf.Reset()
@@ -310,7 +311,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		MustBeSuccessful(nested.Finalize())
 
 		// modify one artifact and overwrite
-		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), accessio.BlobAccessForString(mime.MIME_TEXT, "otherdata"), "", nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), "", nil))
 		tcd.Resources[0].Digest = DS_OTHERDATA
 		tcd.Resources[0].Access = Must(runtime.ToUnstructuredVersionedTypedObject(localblob.New("sha256:"+D_OTHERDATA, "", mime.MIME_TEXT, nil)))
 		buf.Reset()

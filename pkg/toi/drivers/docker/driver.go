@@ -25,7 +25,7 @@ import (
 	"github.com/docker/docker/registry"
 	"github.com/mitchellh/copystructure"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/toi"
@@ -444,7 +444,7 @@ func (d *Driver) fetchOutputs(ctx context.Context, container string, op *install
 // generateTar creates a tarfile containing the specified files, with the owner
 // set to the uid that the container runs as so that it is guaranteed to have
 // read access to the files we copy into the container.
-func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, func() error, error) {
+func generateTar(files map[string]blobaccess.BlobAccess, uid int) (io.ReadCloser, func() error, error) {
 	r, w := io.Pipe()
 	tw := tar.NewWriter(w)
 	for path := range files {

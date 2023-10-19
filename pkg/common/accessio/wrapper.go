@@ -9,6 +9,7 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -42,10 +43,10 @@ func (d *readerWriter) WriteTo(w Writer) (size int64, dig digest.Digest, err err
 }
 
 type dataAccessWriter struct {
-	access DataAccess
+	access blobaccess.DataAccess
 }
 
-func NewDataAccessWriter(acc DataAccess) DataWriter {
+func NewDataAccessWriter(acc blobaccess.DataAccess) DataWriter {
 	return &dataAccessWriter{acc}
 }
 

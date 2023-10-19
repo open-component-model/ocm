@@ -12,6 +12,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -243,8 +244,12 @@ func (c *componentAccessView) AddVersion(acc ComponentVersionAccess) error {
 		return errors.ErrInvalid("component name", acc.GetName())
 	}
 	return c.Execute(func() error {
-		return c.impl.AddVersion(acc)
+		return c.addVersion(acc)
 	})
+}
+
+func (c *componentAccessView) addVersion(acc ComponentVersionAccess) error {
+	return c.impl.AddVersion(acc)
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc ComponentVersionAccess, err error) {
@@ -304,7 +309,7 @@ type ComponentVersionAccessImpl interface {
 	GetBlobCache() BlobCache
 }
 
-type BlobCacheEntry = accessio.BlobAccess
+type BlobCacheEntry = blobaccess.BlobAccess
 
 type BlobCache interface {
 	// AddBlobFor stores blobs for added blobs not yet accessible
@@ -507,7 +512,7 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 		return nil, errors.Wrapf(err, "inavlid blob access")
 	}
 	defer blob.Close()
-	err = accessio.ValidateObject(blob)
+	err = utils.ValidateObject(blob)
 	if err != nil {
 		return nil, errors.Wrapf(err, "inavlid blob access")
 	}
@@ -558,7 +563,7 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, ac
 // SetResourceBlob adds a blob resource to the component version.
 func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.ModificationOption) error {
 	Logger(c).Info("adding resource blob", "resource", meta.Name)
-	if err := accessio.ValidateObject(blob); err != nil {
+	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
@@ -584,7 +589,7 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *SourceMeta, acc co
 
 func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refName string, global AccessSpec) error {
 	Logger(c).Info("adding source blob", "source", meta.Name)
-	if err := accessio.ValidateObject(blob); err != nil {
+	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
@@ -602,7 +607,7 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAc
 
 type fakeMethod struct {
 	AccessMethod
-	blob accessio.BlobAccess
+	blob blobaccess.BlobAccess
 }
 
 func (f *fakeMethod) Reader() (io.ReadCloser, error) {

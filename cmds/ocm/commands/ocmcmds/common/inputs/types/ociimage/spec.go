@@ -11,7 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
@@ -47,7 +47,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
 	ctx.Printf("image %s\n", s.Path)
 	ref, err := oci.ParseRef(s.Path)
 	if err != nil {

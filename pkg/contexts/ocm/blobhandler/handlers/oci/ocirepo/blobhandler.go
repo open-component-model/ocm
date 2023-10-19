@@ -13,7 +13,7 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -87,7 +87,7 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 		"mediatype", blob.MimeType(),
 		"hint", hint,
 	}
-	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethodView]); ok {
+	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[cpi.AccessMethodView]); ok {
 		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci blob handler with ocm access source",
 			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
@@ -150,7 +150,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	keep := keepblobattr.Get(ctx.GetContext())
 
-	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethodView]); ok {
+	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[cpi.AccessMethodView]); ok {
 		// prepare for optimized point to point implementation
 		log.Debug("oci artifact handler with ocm access source",
 			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,

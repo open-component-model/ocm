@@ -16,6 +16,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -31,11 +32,11 @@ import (
 )
 
 type DummyMethod struct {
-	accessio.BlobAccess
+	blobaccess.BlobAccess
 }
 
 var _ ocm.AccessMethod = (*DummyMethod)(nil)
-var _ accessio.DigestSource = (*DummyMethod)(nil)
+var _ blobaccess.DigestSource = (*DummyMethod)(nil)
 
 func (d *DummyMethod) GetKind() string {
 	return localblob.Type
@@ -45,7 +46,7 @@ func (d *DummyMethod) AccessSpec() cpi.AccessSpec {
 	return nil
 }
 
-func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
+func CheckBlob(blob blobaccess.BlobAccess) oci.NamespaceAccess {
 	set := Must(artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob))
 	defer func() {
 		if set != nil {
@@ -120,7 +121,7 @@ var _ = Describe("syntheses", func() {
 
 		defer Close(blobcloser, "blob")
 
-		info := accessio.CastBlobAccess[accessio.FileLocation](blob)
+		info := blobaccess.Cast[blobaccess.FileLocation](blob)
 		path := info.Path()
 		Expect(path).To(MatchRegexp(filepath.Join(info.FileSystem().FSTempDir(), "artifactblob.*\\.tgz")))
 		Expect(vfs.Exists(info.FileSystem(), path)).To(BeTrue())

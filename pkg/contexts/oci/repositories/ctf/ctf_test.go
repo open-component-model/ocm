@@ -20,6 +20,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -187,7 +188,7 @@ var _ = Describe("ctf management", func() {
 			_, err = n.GetArtifact("dummy")
 			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTIFACT, "dummy", "mandelsoft/test")))
 
-			Expect(n.AddBlob(accessio.BlobAccessForString("", "dummy"))).To(Equal(accessobj.ErrReadOnly))
+			Expect(n.AddBlob(blobaccess.ForString("", "dummy"))).To(Equal(accessobj.ErrReadOnly))
 
 			n, err = r.LookupNamespace("mandelsoft/other")
 			Expect(err).To(Succeed())

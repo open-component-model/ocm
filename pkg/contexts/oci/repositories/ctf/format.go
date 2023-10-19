@@ -12,6 +12,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
@@ -93,7 +94,7 @@ func SupportedFormats() []accessio.FileFormat {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func OpenFromBlob(ctx cpi.ContextProvider, acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...accessio.Option) (*Object, error) {
+func OpenFromBlob(ctx cpi.ContextProvider, acc accessobj.AccessMode, blob blobaccess.BlobAccess, opts ...accessio.Option) (*Object, error) {
 	o, err := accessio.AccessOptions(nil, opts...)
 	if err != nil {
 		return nil, err

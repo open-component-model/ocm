@@ -18,6 +18,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -102,7 +103,7 @@ var _ = Describe("Repository", func() {
 		arch.SetVersion("v1.0.1")
 
 		MustBeSuccessful(arch.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
-			accessio.BlobAccessForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
+			blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
 
 		res := Must(arch.GetResourcesByName("blob"))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
