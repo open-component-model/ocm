@@ -5,6 +5,8 @@
 package cpi
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/context"
@@ -112,6 +114,49 @@ func (b *blobAccessProvider) AccessMethod() (cpi.AccessMethod, error) {
 
 func NewArtifactAccessProviderForBlobAccessProvider[M any](ctx Context, meta *M, src blobAccessProvider, hint string, global AccessSpec) cpi.ArtifactAccess[M] {
 	return NewArtifactAccessForProvider(meta, NewAccessProviderForBlobAccessProvider(ctx, src, hint, global))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type accessAccessProvider struct {
+	ctx  ocm.Context
+	spec AccessSpec
+}
+
+var _ AccessProvider = (*accessAccessProvider)(nil)
+
+func NewAccessProviderForExternalAccessSpec(ctx ocm.Context, spec AccessSpec) (AccessProvider, error) {
+	if spec.IsLocal(ctx) {
+		return nil, fmt.Errorf("access spec describes a repository specific local access method")
+	}
+	return &accessAccessProvider{
+		ctx:  ctx,
+		spec: spec,
+	}, nil
+}
+
+func (b *accessAccessProvider) GetOCMContext() cpi.Context {
+	return b.ctx
+}
+
+func (b *accessAccessProvider) ReferenceHint() string {
+	return ""
+}
+
+func (b *accessAccessProvider) GlobalAccess() cpi.AccessSpec {
+	return nil
+}
+
+func (b *accessAccessProvider) Access() (cpi.AccessSpec, error) {
+	return b.spec, nil
+}
+
+func (b *accessAccessProvider) AccessMethod() (cpi.AccessMethod, error) {
+	return nil, errors.ErrNotFound(descriptor.KIND_ACCESSMETHOD)
+}
+
+func (b *accessAccessProvider) BlobAccess() (blobaccess.BlobAccess, error) {
+	return BlobAccessForAccessSpec(b.spec, &DummyComponentVersionAccess{b.ctx})
 }
 
 ////////////////////////////////////////////////////////////////////////////////

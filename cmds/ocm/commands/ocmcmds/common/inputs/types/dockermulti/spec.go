@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
+	ociartifact2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/dockermulti"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -48,7 +48,7 @@ func New(pathtags ...string) *Spec {
 
 func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	allErrs := field.ErrorList{}
-	allErrs = ociimage.ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
+	allErrs = ociartifact2.ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
 	variantsField := fldPath.Child("variants")
 	if len(s.Variants) == 0 {
 		allErrs = append(allErrs, field.Required(variantsField, fmt.Sprintf("variants is required for input of type %q and must has at least one entry", s.GetType())))

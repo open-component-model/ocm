@@ -2,16 +2,18 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package docker
+package ociartifact
 
 import (
+	"strings"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	ociartifact2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/blobaccess/dockerdaemon"
+	ociartifact2 "github.com/open-component-model/ocm/pkg/blobaccess/ociartifact"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 )
@@ -33,8 +35,7 @@ func New(pathtag string) *Spec {
 
 func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	allErrs := s.PathSpec.Validate(fldPath, ctx, inputFilePath)
-	allErrs = ociartifact2.ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
-
+	allErrs = ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
 	if s.Path != "" {
 		pathField := fldPath.Child("path")
 		_, _, err := docker.ParseGenericRef(s.Path)
@@ -46,14 +47,27 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
-	ctx.Printf("image %s\n", s.Path)
-	locator, version, err := docker.ParseGenericRef(s.Path)
+	blob, version, err := ociartifact2.BlobAccessForOCIArtifact(s.Path,
+		ociartifact2.WithContext(ctx),
+		ociartifact2.WithPrinter(ctx.Printer()),
+		ociartifact2.WithVersion(info.ComponentVersion.GetVersion()),
+	)
 	if err != nil {
 		return nil, "", err
 	}
-	blob, version, err := dockerdaemon.BlobAccessForImageFromDockerDaemon(s.Path, dockerdaemon.WithVersion(info.ComponentVersion.GetVersion()), dockerdaemon.WithOrigin(info.ComponentVersion))
-	if err != nil {
-		return nil, "", err
+	return blob, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, version), nil
+}
+
+func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo string) field.ErrorList {
+	if repo == "" {
+		return allErrs
 	}
-	return blob, ociartifact.Hint(info.ComponentVersion, locator, s.Repository, version), nil
+	if strings.Contains(repo, grammar.DigestSeparator) || strings.Contains(repo, grammar.TagSeparator) {
+		return append(allErrs, field.Invalid(fldPath, repo, "unexpected digest or tag"))
+	}
+
+	if !grammar.AnchoredRepositoryRegexp.MatchString(strings.TrimPrefix(repo, "/")) {
+		return append(allErrs, field.Invalid(fldPath, repo, "no repository name"))
+	}
+	return allErrs
 }
