@@ -9,8 +9,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/spi"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
@@ -43,7 +43,7 @@ var _ = Describe("repository", func() {
 
 		cv.GetDescriptor().Provider.Name = "acme.org"
 		// wrap a non-closer access into a ref counting access to check cleanup
-		blob := spi.NewBlobAccessForBase(blobaccess.ForString(mime.MIME_TEXT, "testdata"))
+		blob := bpi.NewBlobAccessForBase(blobaccess.ForString(mime.MIME_TEXT, "testdata"))
 		nested.Close(blob, "blob")
 		MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blob, "", nil))
 		MustBeSuccessful(c.AddVersion(cv))

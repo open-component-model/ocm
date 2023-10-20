@@ -15,6 +15,7 @@ const CONSUMER_TYPE = "OCIRegistry"
 
 // used identity properties.
 const (
+	ID_TYPE       = hostpath.ID_TYPE
 	ID_HOSTNAME   = hostpath.ID_HOSTNAME
 	ID_PORT       = hostpath.ID_PORT
 	ID_PATHPREFIX = hostpath.ID_PATHPREFIX

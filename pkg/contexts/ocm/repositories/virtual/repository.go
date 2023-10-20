@@ -5,8 +5,8 @@
 package virtual
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 type _RepositoryImplBase = cpi.RepositoryImplBase

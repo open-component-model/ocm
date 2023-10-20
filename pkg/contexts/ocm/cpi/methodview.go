@@ -7,9 +7,9 @@ package cpi
 import (
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 // AccessMethodView can be used map wrap an access method

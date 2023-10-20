@@ -9,7 +9,7 @@ import (
 	"io"
 	"sync/atomic"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/internal" // avoid cycle
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
