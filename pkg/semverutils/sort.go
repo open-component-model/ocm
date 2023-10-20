@@ -2,12 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package runtime
+package semverutils
 
 import (
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
+	"golang.org/x/exp/slices"
 )
 
 type VersionCache map[string]*semver.Version
@@ -39,4 +40,16 @@ func SortVersions(vers []string) error {
 		return va.Compare(vb) < 0
 	})
 	return nil
+}
+
+func Latest(vers []string) (string, error) {
+	if len(vers) == 0 {
+		return "", nil
+	}
+	vers = slices.Clone(vers)
+	err := SortVersions(vers)
+	if err != nil {
+		return "", err
+	}
+	return vers[len(vers)-1], nil
 }

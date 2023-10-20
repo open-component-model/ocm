@@ -7,7 +7,7 @@ package cpi
 import (
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 )
 
@@ -45,7 +45,7 @@ func ResourceReaderForMethod(meth AccessMethod) (io.ReadCloser, error) {
 		meth.Close()
 		return nil, err
 	}
-	return accessio.AddCloser(r, meth, "access method"), nil
+	return iotools.AddCloser(r, meth, "access method"), nil
 }
 
 // ResourceData extracts the data for a given resource/source access.

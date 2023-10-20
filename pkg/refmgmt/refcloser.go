@@ -68,6 +68,10 @@ type LazyMode interface {
 	Lazy()
 }
 
+type RefCountProvider interface {
+	RefCount() int
+}
+
 // ToLazy resets the main view flag
 // of closer views to enable
 // dark release of resources even if the
@@ -92,6 +96,15 @@ func Lazy(o interface{}) bool {
 	return false
 }
 
+func ReferenceCount(o interface{}) int {
+	if o != nil {
+		if l, ok := o.(RefCountProvider); ok {
+			return l.RefCount()
+		}
+	}
+	return -1
+}
+
 func CloseTemporary(c io.Closer) error {
 	if !Lazy(c) {
 		return errors.ErrNotSupported("lazy mode")
@@ -106,6 +119,7 @@ func PropagateCloseTemporary(errp *error, c io.Closer) {
 type CloserView interface {
 	io.Closer
 	LazyMode
+	RefCountProvider
 
 	IsClosed() bool
 
@@ -130,6 +144,10 @@ var _ CloserView = (*view)(nil)
 
 func (v *view) Lazy() {
 	v.main = false
+}
+
+func (v *view) RefCount() int {
+	return v.ref.RefCount()
 }
 
 func (v *view) Execute(f func() error) error {

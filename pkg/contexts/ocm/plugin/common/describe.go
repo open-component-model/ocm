@@ -16,7 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/semverutils"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -188,7 +188,7 @@ func GetActionInfo(reg api.ActionTypeRegistry, actions []descriptor.ActionDescri
 				Selectors:    slices.Clone(a.DefaultSelectors),
 				ConsumerType: a.ConsumerType,
 			}
-			if err := runtime.SortVersions(i.Versions); err != nil {
+			if err := semverutils.SortVersions(i.Versions); err != nil {
 				sort.Strings(i.Versions)
 			}
 			sort.Strings(i.Selectors)

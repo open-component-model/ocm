@@ -7,7 +7,7 @@ package utils
 import (
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
@@ -44,7 +44,11 @@ func GetResourceReader(acc ocm.ResourceAccess) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return m.Reader()
+	reader, err := m.Reader()
+	if err != nil {
+		return nil, err
+	}
+	return iotools.AddCloser(reader, m), nil
 }
 
 func GetResourceReaderForPath(cv ocm.ComponentVersionAccess, id metav1.Identity, path []metav1.Identity, resolvers ...ocm.ComponentVersionResolver) (io.ReadCloser, error) {
@@ -66,5 +70,5 @@ func GetResourceReaderForRef(cv ocm.ComponentVersionAccess, ref metav1.ResourceR
 		c.Close()
 		return nil, err
 	}
-	return accessio.AddCloser(reader, c), nil
+	return iotools.AddCloser(reader, c), nil
 }

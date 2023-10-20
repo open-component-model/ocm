@@ -15,7 +15,8 @@ type CloserView interface {
 	Close() error
 	IsClosed() bool
 	Execute(func() error) error
-	Lazy()
+	refmgmt.LazyMode
+	refmgmt.RefCountProvider
 }
 
 var _ CloserView = refmgmt.CloserView(nil)
@@ -39,11 +40,13 @@ type ResourceView[T resourceViewInterface[T]] interface {
 
 // ResourceViewInt can be used to execute an operation on a non-closed
 // view.
+// Execute call a synchronized function on a non-closed view.
 type ResourceViewInt[T resourceViewInterface[T]] interface {
+	refmgmt.LazyMode
+	refmgmt.RefCountProvider
 	resourceViewInterface[T]
-	// Execute call a synchronized function on a non-closed view
+
 	Execute(func() error) error
-	Lazy()
 }
 
 type Dup[T any] interface {
@@ -145,6 +148,10 @@ func (n *noneRefCloser[T]) Execute(f func() error) error {
 func (n *noneRefCloser[T]) Lazy() {
 }
 
+func (n *noneRefCloser[T]) RefCount() int {
+	return n.mgr.RefCount()
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type resourceView[T any] struct {
@@ -194,6 +201,10 @@ func (v *resourceView[T]) Dup() (t T, err error) {
 
 func (v *resourceView[T]) Lazy() {
 	v.view.Lazy()
+}
+
+func (v *resourceView[T]) RefCount() int {
+	return v.view.RefCount()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
