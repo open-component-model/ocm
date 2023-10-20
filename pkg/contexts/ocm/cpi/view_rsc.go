@@ -17,12 +17,24 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// ComponentVersionProvider should be implemented
+// by Accesses based on component version instances.
+// It is used to determine access type specific
+// information. For example, OCI based access types
+// may provide global OCI artifact references.
+type ComponentVersionProvider interface {
+	GetComponentVersion() (ComponentVersionAccess, error)
+}
+
 type ComponentVersionBasedAccessProvider struct {
 	vers   ComponentVersionAccess
 	access compdesc.AccessSpec
 }
 
-var _ AccessProvider = (*ComponentVersionBasedAccessProvider)(nil)
+var (
+	_ AccessProvider           = (*ComponentVersionBasedAccessProvider)(nil)
+	_ ComponentVersionProvider = (*ComponentVersionBasedAccessProvider)(nil)
+)
 
 // Deprecated: use ComponentVersionBasedAccessProvider.
 type BaseAccess = ComponentVersionBasedAccessProvider
@@ -33,6 +45,10 @@ func NewBaseAccess(cv ComponentVersionAccess, acc compdesc.AccessSpec) *Componen
 
 func (r *ComponentVersionBasedAccessProvider) GetOCMContext() Context {
 	return r.vers.GetContext()
+}
+
+func (r *ComponentVersionBasedAccessProvider) GetComponentVersion() (ComponentVersionAccess, error) {
+	return r.vers.Dup()
 }
 
 func (r *ComponentVersionBasedAccessProvider) ReferenceHint() string {
@@ -161,18 +177,33 @@ func (b *accessAccessProvider) BlobAccess() (blobaccess.BlobAccess, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type accessProvider = AccessProvider
+type (
+	accessProvider           = AccessProvider
+	componentVersionProvider = ComponentVersionProvider
+)
 
 type artifactAccessProvider[M any] struct {
 	accessProvider
 	meta *M
 }
 
+type artifactCVAccessProvider[M any] struct {
+	artifactAccessProvider[M]
+	componentVersionProvider
+}
+
 func NewArtifactAccessForProvider[M any](meta *M, prov AccessProvider) cpi.ArtifactAccess[M] {
-	return &artifactAccessProvider[M]{
+	aa := &artifactAccessProvider[M]{
 		accessProvider: prov,
 		meta:           meta,
 	}
+	if p, ok := prov.(ComponentVersionProvider); ok {
+		return &artifactCVAccessProvider[M]{
+			artifactAccessProvider:   *aa,
+			componentVersionProvider: p,
+		}
+	}
+	return aa
 }
 
 func (r *artifactAccessProvider[M]) Meta() *M {

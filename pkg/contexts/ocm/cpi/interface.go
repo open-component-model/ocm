@@ -225,13 +225,6 @@ type HintProvider internal.HintProvider
 // GlobalAccessProvider is able to provide a non-local access specification.
 type GlobalAccessProvider internal.GlobalAccessProvider
 
-func ArtifactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
-	if h, ok := spec.(HintProvider); ok {
-		return h.GetReferenceHint(cv)
-	}
-	return ""
-}
-
 // provide context interface for other files to avoid diffs in imports.
 var (
 	newStrictRepositoryTypeScheme = internal.NewStrictRepositoryTypeScheme

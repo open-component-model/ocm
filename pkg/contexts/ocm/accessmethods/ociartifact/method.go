@@ -100,6 +100,10 @@ func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
 	return hint
 }
 
+func (a *AccessSpec) GetOCIReference(cv cpi.ComponentVersionAccess) (string, error) {
+	return a.ImageReference, nil
+}
+
 func (_ *AccessSpec) GetType() string {
 	return Type
 }
@@ -154,6 +158,10 @@ func NewMethod(ctx cpi.ContextProvider, a cpi.AccessSpec, ref string, repo ...oc
 
 func (_ *accessMethod) IsLocal() bool {
 	return false
+}
+
+func (m *accessMethod) GetOCIReference(cv cpi.ComponentVersionAccess) (string, error) {
+	return m.reference, nil
 }
 
 func (m *accessMethod) GetKind() string {

@@ -59,6 +59,15 @@ func ResourceData(s AccessMethodSource) ([]byte, error) {
 	return meth.Get()
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+func ArtifactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
+	if h, ok := spec.(HintProvider); ok {
+		return h.GetReferenceHint(cv)
+	}
+	return ""
+}
+
 func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) string {
 	if h, ok := spec.(internal.HintProvider); ok {
 		return h.GetReferenceHint(cv)

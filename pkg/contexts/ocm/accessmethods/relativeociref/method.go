@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -80,4 +81,20 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv cpi.ComponentVersio
 
 func (a *AccessSpec) GetReferenceHint(cv internal.ComponentVersionAccess) string {
 	return a.Reference
+}
+
+func (a *AccessSpec) GetOCIReference(cv cpi.ComponentVersionAccess) (string, error) {
+	if cv == nil {
+		return "", fmt.Errorf("component version required to determine OCI reference")
+	}
+	m, err := a.AccessMethod(cv)
+	if err != nil {
+		return "", err
+	}
+	defer m.Close()
+
+	if o, ok := m.(ociartifact.OCIArtifactReferenceProvider); ok {
+		return o.GetOCIReference(nil)
+	}
+	return "", nil
 }
