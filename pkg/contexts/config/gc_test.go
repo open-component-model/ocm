@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package credentials_test
+package config_test
 
 import (
 	"runtime"
@@ -11,13 +11,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	me "github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 
 var _ = Describe("area test", func() {
-	It("can access the default context", func() {
-		ctx := credentials.New()
+	It("can be garbage collected", func() {
+		ctx := me.New()
 
 		r := finalizer.GetRuntimeFinalizationRecorder(ctx)
 		Expect(r).NotTo(BeNil())
@@ -28,9 +28,11 @@ var _ = Describe("area test", func() {
 		Expect(r.Get()).To(BeNil())
 
 		ctx = nil
-		runtime.GC()
-		time.Sleep(time.Second)
+		for i := 0; i < 100; i++ {
+			runtime.GC()
+			time.Sleep(time.Millisecond)
+		}
 
-		Expect(r.Get()).To(ContainElement(ContainSubstring(credentials.CONTEXT_TYPE)))
+		Expect(r.Get()).To(ContainElement(ContainSubstring(me.CONTEXT_TYPE)))
 	})
 })

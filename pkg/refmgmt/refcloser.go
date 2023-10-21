@@ -85,6 +85,11 @@ func ToLazy[T any](o T, err error) (T, error) {
 	return o, err
 }
 
+func AsLazy[T any](o T) T {
+	Lazy(o)
+	return o
+}
+
 func Lazy(o interface{}) bool {
 	if o == nil {
 		return false
