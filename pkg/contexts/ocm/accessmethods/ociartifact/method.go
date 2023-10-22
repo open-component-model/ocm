@@ -175,8 +175,9 @@ func (m *accessMethod) AccessSpec() cpi.AccessSpec {
 func (m *accessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-
 	m.blob = nil
+	m.art = nil
+	m.repo = nil
 	return m.finalizer.Finalize()
 }
 
@@ -192,6 +193,7 @@ func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
 			spec = ocireg.NewRepositorySpec(ref.Host)
 		}
 		repo, err := ocictx.RepositoryForSpec(spec)
+		m.finalizer.Close(repo, "repository for accessing %s", m.reference)
 		return repo, &ref, err
 	}
 
@@ -206,22 +208,30 @@ func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
 	return m.repo, &ref, err
 }
 
-func (m *accessMethod) GetArtifact(finalizer *Finalizer) (oci.ArtifactAccess, *oci.RefSpec, error) {
-	repo, ref, err := m.eval()
+func (m *accessMethod) GetArtifact() (oci.ArtifactAccess, *oci.RefSpec, error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	art, ref, err := m.getArtifact()
+	if err != nil {
+		return nil, nil, m.err
+	}
+	a, err := art.Dup()
 	if err != nil {
 		return nil, nil, err
 	}
-	finalizer.Close(repo)
-	art, err := repo.LookupArtifact(ref.Repository, ref.Version())
-	return art, ref, err
+	return a, ref, err
 }
 
 func (m *accessMethod) getArtifact() (oci.ArtifactAccess, *oci.RefSpec, error) {
 	if m.art == nil && m.err == nil {
-		m.art, m.ref, m.err = m.GetArtifact(&m.finalizer)
-		if m.err == nil {
-			m.finalizer.Close(m.art)
+		repo, ref, err := m.eval()
+		if err != nil {
+			return nil, nil, err
 		}
+		art, err := repo.LookupArtifact(ref.Repository, ref.Version())
+		m.finalizer.Close(art, "artifact for accessing %s", m.reference)
+		m.art, m.ref, m.err = art, ref, err
 	}
 	return m.art, m.ref, m.err
 }

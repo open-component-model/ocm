@@ -37,6 +37,10 @@ var _ = Describe("management", func() {
 		env.RSAKeyPair(ORG, OTHER)
 	})
 
+	AfterEach(func() {
+		env.Cleanup()
+	})
+
 	It("normalizes", func() {
 		e := comment.New("start of routing slip")
 

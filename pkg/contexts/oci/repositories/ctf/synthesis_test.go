@@ -26,6 +26,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
@@ -109,21 +110,27 @@ var _ = Describe("syntheses", func() {
 	})
 
 	It("synthesize", func() {
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
+		nested := finalize.Nested()
+
+		// setup the scene
 		r := Must(ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700))
+		nested.Close(r, "create ctf")
 		n := Must(r.LookupNamespace("mandelsoft/test"))
+		nested.Close(n, "ns")
 		DefaultManifestFill(n)
-		Expect(n.Close()).To(Succeed())
-		Expect(r.Close()).To(Succeed())
+		MustBeSuccessful(nested.Finalize())
 
 		r = Must(ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, &spec.StandardOptions))
-		defer Close(r, "ctf")
+		finalize.Close(r, "ctf")
 		n = Must(r.LookupNamespace("mandelsoft/test"))
-		defer Close(n, "namespace")
+		finalize.Close(n, "names.pace")
+
+		nested = finalize.Nested()
 		blob := Must(artifactset.SynthesizeArtifactBlob(n, TAG))
-
-		blobcloser := accessio.OnceCloser(blob)
-
-		defer Close(blobcloser, "blob")
+		nested.Close(blob, "blob")
 
 		info := blobaccess.Cast[blobaccess.FileLocation](blob)
 		path := info.Path()
@@ -131,16 +138,16 @@ var _ = Describe("syntheses", func() {
 		Expect(vfs.Exists(info.FileSystem(), path)).To(BeTrue())
 
 		set := CheckBlob(blob)
-		defer Close(set, "set")
+		finalize.Close(set, "set")
 
-		Expect(blobcloser.Close()).To(Succeed())
+		MustBeSuccessful(nested.Finalize())
 		Expect(vfs.Exists(info.FileSystem(), path)).To(BeFalse())
 
 		// use syntesized blob to extract new blob, useless but should work
 		newblob := Must(artifactset.SynthesizeArtifactBlob(set, TAG))
-		defer Close(newblob, "newblob")
+		finalize.Close(newblob, "newblob")
 
-		CheckBlob(newblob)
+		finalize.Close(CheckBlob(newblob), "newset")
 
 		meth := &DummyMethod{newblob}
 		digest := Must(artifact.New(sha256.Algorithm).DetermineDigest("", meth, nil))

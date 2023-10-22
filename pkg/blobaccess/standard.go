@@ -243,7 +243,7 @@ func (a *annotatedBlobAccessView[T]) Source() T {
 // If the wrapped data access does not need a close, the BlobAccess
 // does not need a close, also.
 func ForDataAccess[T DataAccess](digest digest.Digest, size int64, mimeType string, access T) AnnotatedBlobAccess[T] {
-	a := bpi.ForStaticDataAccessAndMeta(mimeType, access, digest, size)
+	a := bpi.BaseAccessForDataAccessAndMeta(mimeType, access, digest, size)
 
 	return &annotatedBlobAccessView[T]{
 		_blobAccess: bpi.NewBlobAccessForBase(a),

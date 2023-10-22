@@ -41,7 +41,7 @@ var _ = Describe("Method", func() {
 
 	It("accesses artifact", func() {
 		var finalize finalizer.Finalizer
-		Defer(finalize.Finalize)
+		defer Defer(finalize.Finalize)
 
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 			OCIManifest1(env)
@@ -62,7 +62,9 @@ var _ = Describe("Method", func() {
 		finalize.Close(vers)
 		res := Must(vers.GetResourceByIndex(0))
 		m := Must(res.AccessMethod())
-		finalize.Close(m)
+		finalize.With(func() error {
+			return m.Close()
+		})
 		data := Must(m.Get())
 		Expect(len(data)).To(Equal(628))
 		Expect(m.(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"))

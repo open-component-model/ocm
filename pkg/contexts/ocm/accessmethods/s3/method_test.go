@@ -156,6 +156,7 @@ var _ = Describe("Method", func() {
 		It("downloads s3 objects", func() {
 			m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{context: mcc})
 			Expect(err).ToNot(HaveOccurred())
+			defer Close(m, "method")
 			blob, err := m.Get()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(blob).To(Equal(expectedContent))

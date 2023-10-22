@@ -43,6 +43,10 @@ var _ = Describe("management", func() {
 		env.RSAKeyPair(ORG, LOCAL)
 	})
 
+	AfterEach(func() {
+		env.Cleanup()
+	})
+
 	DescribeTable("transfers and updates", func(mode bool) {
 		var finalize finalizer.Finalizer
 

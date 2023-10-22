@@ -46,7 +46,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	if err != nil {
 		return false, "", err
 	}
-	finalize.Close(m)
+	finalize.Close(m, "access method for download")
 
 	mediaType := m.MimeType()
 
@@ -97,7 +97,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		if err != nil {
 			return true, "", err
 		}
-		finalize.Close(repo)
+		finalize.Close(repo, "repository for downloading OCI artifact")
 		artspec = ref.ArtSpec
 	} else {
 		log.Debug("evaluating config")
@@ -152,7 +152,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	}
 	if ocimeth, ok := cand.(ociartifact.AccessMethod); ok {
 		// prepare for optimized point to point implementation
-		art, _, err = ocimeth.GetArtifact(&finalize)
+		art, _, err = ocimeth.GetArtifact()
 		if err != nil {
 			return true, "", errors.Wrapf(err, "cannot access source artifact")
 		}

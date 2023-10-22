@@ -15,15 +15,23 @@ import (
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/elements/localartifacts/dirtree"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/env"
+	testenv "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 var _ = Describe("dir tree resource access", func() {
-	It("creates resource", func() {
-		env := env.NewEnvironment(env.TestData())
+	var env *testenv.Environment
 
+	BeforeEach(func() {
+		env = testenv.NewEnvironment(testenv.TestData())
+	})
+
+	AfterEach(func() {
+		env.Cleanup()
+	})
+
+	It("creates resource", func() {
 		global := ociartifact.New("ghcr.io/mandelsoft/demo:v1.0.0")
 
 		acc := me.ResourceAccess(env.OCMContext(), compdesc.NewResourceMeta("test", "", compdesc.LocalRelation), "testdata",
@@ -52,8 +60,6 @@ var _ = Describe("dir tree resource access", func() {
 	})
 
 	It("adds resource", func() {
-		env := env.NewEnvironment(env.TestData())
-
 		global := ociartifact.New("ghcr.io/mandelsoft/demo:v1.0.0")
 
 		acc := me.ResourceAccess(env.OCMContext(), compdesc.NewResourceMeta("test", "", compdesc.LocalRelation), "testdata",

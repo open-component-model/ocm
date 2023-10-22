@@ -145,6 +145,8 @@ var _ = Describe("Repository", func() {
 		defer Defer(finalize.Finalize, "finalizer")
 
 		env := env.NewEnvironment(env.ModifiableTestData())
+		finalize.With(env.Cleanup)
+
 		octx := env.OCMContext()
 		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH, accessio.PathFileSystem(env)))
 		repo := Must(spec.Repository(octx, nil))
@@ -167,6 +169,8 @@ var _ = Describe("Repository", func() {
 		defer Defer(finalize.Finalize)
 
 		env := env.NewEnvironment(env.ModifiableTestData())
+		finalize.With(env.Cleanup)
+
 		octx := env.OCMContext()
 		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH, accessio.PathFileSystem(env)))
 		repo := Must(spec.Repository(octx, nil))
@@ -199,6 +203,8 @@ var _ = Describe("Repository", func() {
 		defer Defer(finalize.Finalize)
 
 		env := env.NewEnvironment(env.ModifiableTestData())
+		finalize.With(env.Cleanup)
+
 		octx := env.OCMContext()
 		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH, accessio.PathFileSystem(env)))
 		repo := Must(spec.Repository(octx, nil))

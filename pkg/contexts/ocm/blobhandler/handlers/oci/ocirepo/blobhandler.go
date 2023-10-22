@@ -156,7 +156,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
 		if ocimeth, ok := m.Source().Base().(ociartifact.AccessMethod); !keep && ok {
-			art, _, err = ocimeth.GetArtifact(&finalizer)
+			art, _, err = ocimeth.GetArtifact()
 			if err != nil {
 				return nil, errors.Wrapf(err, "cannot access source artifact")
 			}

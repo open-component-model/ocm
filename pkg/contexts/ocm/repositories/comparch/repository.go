@@ -324,7 +324,9 @@ func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 		if err != nil {
 			return ""
 		}
-		digest, _ := accessio.Digest(newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c))
+		m := newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c)
+		defer m.Close()
+		digest, _ := accessio.Digest(m)
 		return digest.String()
 	}
 	return ""
