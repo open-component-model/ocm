@@ -20,11 +20,18 @@ type Options struct {
 	Blob base.Options
 }
 
-var _ api.GeneralOptionsProvider = (*Options)(nil)
+var (
+	_ api.GeneralOptionsProvider = (*Options)(nil)
+	_ Option                     = (*Options)(nil)
+)
 
-func (o *Options) Apply(opts *Options) {
+func (o *Options) ApplyTo(opts *Options) {
 	o.Options.ApplyTo(&opts.Options)
 	o.Blob.ApplyTo(&opts.Blob)
+}
+
+func (o *Options) Apply(opts ...Option) {
+	optionutils.ApplyOptions(o, opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

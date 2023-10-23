@@ -28,13 +28,20 @@ type Options struct {
 	Compression compressionMode
 }
 
-var _ api.GeneralOptionsProvider = (*Options)(nil)
+var (
+	_ api.GeneralOptionsProvider = (*Options)(nil)
+	_ Option                     = (*Options)(nil)
+)
 
-func (o *Options) Apply(opts *Options) {
+func (o *Options) ApplyTo(opts *Options) {
 	o.Options.ApplyTo(&opts.Options)
 	if o.FileSystem != nil {
 		opts.FileSystem = o.FileSystem
 	}
+}
+
+func (o *Options) Apply(opts ...Option) {
+	optionutils.ApplyOptions(o, opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

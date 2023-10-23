@@ -73,7 +73,7 @@ var _ = Describe("dir tree resource access", func() {
 		c := Must(arch.LookupComponent("arcme.org/test"))
 		v := Must(c.NewVersion("v1.0.0"))
 
-		MustBeSuccessful(v.SetResourceByAccess(acc))
+		MustBeSuccessful(v.SetResourceAccess(acc))
 		MustBeSuccessful(c.AddVersion(v))
 	})
 })

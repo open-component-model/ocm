@@ -37,6 +37,10 @@ func (o *Options) ApplyTo(opts *Options) {
 	}
 }
 
+func (o *Options) Apply(opts ...Option) {
+	optionutils.ApplyOptions(o, opts...)
+}
+
 type hint string
 
 func (o hint) ApplyTo(opts *Options) {

@@ -16,7 +16,9 @@ type Options struct {
 	MediaType string
 }
 
-func (o *Options) Apply(opts *Options) {
+var _ Option = (*Options)(nil)
+
+func (o *Options) ApplyTo(opts *Options) {
 	if o.Region != "" {
 		opts.Region = o.Region
 	}
@@ -26,6 +28,10 @@ func (o *Options) Apply(opts *Options) {
 	if o.MediaType != "" {
 		opts.MediaType = o.MediaType
 	}
+}
+
+func (o *Options) Apply(opts ...Option) {
+	optionutils.ApplyOptions(o, opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

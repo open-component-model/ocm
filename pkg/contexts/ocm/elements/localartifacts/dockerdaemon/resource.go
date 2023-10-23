@@ -22,6 +22,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, n
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)
 	}
+	eff.Blob.Context = ctx.OCIContext()
 	locator, version, err := dockerdaemon.ImageInfoFor(name, &eff.Blob)
 	if err == nil {
 		version = eff.Blob.Version

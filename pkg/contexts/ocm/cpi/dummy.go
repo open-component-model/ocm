@@ -35,6 +35,14 @@ func (d *DummyComponentVersionAccess) Dup() (ComponentVersionAccess, error) {
 	return d, nil
 }
 
+func (d *DummyComponentVersionAccess) GetProvider() *compdesc.Provider {
+	panic("implement me")
+}
+
+func (d *DummyComponentVersionAccess) SetProvider(p *compdesc.Provider) error {
+	panic("implement me")
+}
+
 func (d *DummyComponentVersionAccess) AdjustSourceAccess(meta *internal.SourceMeta, acc compdesc.AccessSpec) error {
 	panic("implement me")
 }
@@ -131,7 +139,7 @@ func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compd
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) SetResourceByAccess(art ResourceAccess, modopts ...ModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResourceAccess(art ResourceAccess, modopts ...ModificationOption) error {
 	panic("implement me")
 }
 

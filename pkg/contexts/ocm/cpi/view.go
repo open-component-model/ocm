@@ -646,6 +646,17 @@ func (c *componentVersionAccessView) GetDescriptor() *compdesc.ComponentDescript
 	return c.impl.GetDescriptor()
 }
 
+func (c *componentVersionAccessView) GetProvider() *compdesc.Provider {
+	return c.GetDescriptor().Provider.Copy()
+}
+
+func (c *componentVersionAccessView) SetProvider(p *compdesc.Provider) error {
+	return c.Execute(func() error {
+		c.GetDescriptor().Provider = *p.Copy()
+		return nil
+	})
+}
+
 func (c *componentVersionAccessView) AccessMethod(spec AccessSpec) (meth AccessMethod, err error) {
 	spec, err = c.GetContext().AccessSpecForSpec(spec)
 	if err != nil {
@@ -825,7 +836,7 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, ac
 
 // SetResourceBlob adds a blob resource to the component version.
 func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.ModificationOption) error {
-	Logger(c).Info("adding resource blob", "resource", meta.Name)
+	Logger(c).Debug("adding resource blob", "resource", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
@@ -850,7 +861,7 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *SourceMeta, acc co
 }
 
 func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refName string, global AccessSpec) error {
-	Logger(c).Info("adding source blob", "source", meta.Name)
+	Logger(c).Debug("adding source blob", "source", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
@@ -975,7 +986,7 @@ func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessVie
 	return setblob(meta, blob, hint, global)
 }
 
-func (c *componentVersionAccessView) SetResourceByAccess(art ResourceAccess, modopts ...ModificationOption) error {
+func (c *componentVersionAccessView) SetResourceAccess(art ResourceAccess, modopts ...ModificationOption) error {
 	return setAccess(c, "resource", art,
 		func(meta *ResourceMeta, acc compdesc.AccessSpec) error {
 			return c.SetResource(meta, acc, modopts...)

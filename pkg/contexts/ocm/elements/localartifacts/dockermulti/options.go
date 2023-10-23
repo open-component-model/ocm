@@ -2,12 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package dirtree
+package dockermulti
 
 import (
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
-	base "github.com/open-component-model/ocm/pkg/blobaccess/dirtree"
+	base "github.com/open-component-model/ocm/pkg/blobaccess/dockermulti"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/localartifacts/api"
 	"github.com/open-component-model/ocm/pkg/optionutils"
@@ -46,7 +45,7 @@ func WithGlobalAccess(a cpi.AccessSpec) Option {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// DirTree BlobAccess Options
+// Docker BlobAccess Options
 
 func mapBaseOption(opts *Options) *base.Options {
 	return &opts.Blob
@@ -56,26 +55,18 @@ func wrapBase(o base.Option) Option {
 	return optionutils.OptionWrapperFunc[*base.Options, *Options](o, mapBaseOption)
 }
 
-func WithFileSystem(fs vfs.FileSystem) Option {
-	return wrapBase(base.WithFileSystem(fs))
+func WithVariants(names ...string) Option {
+	return wrapBase(base.WithVariants(names...))
 }
 
-func WithExcludeFiles(files []string) Option {
-	return wrapBase(base.WithExcludeFiles(files))
+func WithVersion(v string) Option {
+	return wrapBase(base.WithVersion(v))
 }
 
-func WithIncludeFiles(files []string) Option {
-	return wrapBase(base.WithIncludeFiles(files))
+func WithOrigin(o common.NameVersion) Option {
+	return wrapBase(base.WithOrigin(o))
 }
 
-func WithFollowSymlinks(b ...bool) Option {
-	return wrapBase(base.WithFollowSymlinks(b...))
-}
-
-func WithPreserveDir(b ...bool) Option {
-	return wrapBase(base.WithPreserveDir(b...))
-}
-
-func WithCompressWithGzip(b ...bool) Option {
-	return wrapBase(base.WithCompressWithGzip(b...))
+func WithPrinter(p common.Printer) Option {
+	return wrapBase(base.WithPrinter(p))
 }

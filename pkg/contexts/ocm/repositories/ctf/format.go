@@ -36,6 +36,12 @@ func GetFormat(name accessio.FileFormat) FormatHandler {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+const (
+	ACC_CREATE   = accessobj.ACC_CREATE
+	ACC_WRITABLE = accessobj.ACC_WRITABLE
+	ACC_READONLY = accessobj.ACC_READONLY
+)
+
 func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (cpi.Repository, error) {
 	r, err := ctf.Open(cpi.FromProvider(ctx), acc, path, mode, opts...)
 	if err != nil {

@@ -39,7 +39,20 @@ func GettingStarted() error {
 	// repository providing the standard OCM
 	// components.
 
+	// for every storage technology used to store
+	// OCM components, there is a serializable
+	// descriptor object, the repository specification.
+	// It describes the information required to access
+	// the repository and can be used to store the serialized
+	// form as part of other resources, for example
+	// Kubernetes resources.
+	// The available repository implementations can be found
+	// under .../pkg/contexts/ocm/repositories.
 	spec := ocireg.NewRepositorySpec("ghcr.io/open-component-model/ocm")
+
+	// And the context can now be used to map the descriptor
+	// into a repository object, which then provides access
+	// to the OCM elements stored in this repository.
 	repo, err := ctx.RepositoryForSpec(spec)
 	if err != nil {
 		return errors.Wrapf(err, "cannot setup repository")
@@ -82,19 +95,19 @@ func GettingStarted() error {
 	// Have a look at the component descriptor
 	cd := cv.GetDescriptor()
 	fmt.Printf("resources of the latest version:\n")
-	fmt.Printf("version:  %s\n", cv.GetVersion())
-	fmt.Printf("provider: %s\n", cd.Provider.Name)
+	fmt.Printf("  version:  %s\n", cv.GetVersion())
+	fmt.Printf("  provider: %s\n", cd.Provider.Name)
 
 	// and list all the included resources.
 	for i, r := range cv.GetResources() {
-		fmt.Printf("%2d: name:           %s\n", i+1, r.Meta().GetName())
-		fmt.Printf("    extra identity: %s\n", r.Meta().GetExtraIdentity())
-		fmt.Printf("    resource type:  %s\n", r.Meta().GetType())
+		fmt.Printf("  %2d: name:           %s\n", i+1, r.Meta().GetName())
+		fmt.Printf("      extra identity: %s\n", r.Meta().GetExtraIdentity())
+		fmt.Printf("      resource type:  %s\n", r.Meta().GetType())
 		acc, err := r.Access()
 		if err != nil {
-			fmt.Printf("    access:         error: %s\n", err)
+			fmt.Printf("      access:         error: %s\n", err)
 		} else {
-			fmt.Printf("    access:         %s\n", acc.Describe(ctx))
+			fmt.Printf("      access:         %s\n", acc.Describe(ctx))
 		}
 	}
 
@@ -115,7 +128,41 @@ func GettingStarted() error {
 	// download to /tmp/ocmcli using basic model
 	// operations.
 	fmt.Printf("downloading OCM cli resource %s...\n", id)
-	reader, err := utils.GetResourceReader(res)
+	basic := true
+
+	var reader io.ReadCloser
+	if basic {
+		// these are the basic model operations to get a reader
+		// for the resource blob.
+		// First, get the access method for the resource.
+		// Second, request a reader for the blob.
+		var m ocm.AccessMethod
+		m, err = res.AccessMethod()
+		if err != nil {
+			return errors.Wrapf(err, "cannot get access method")
+		}
+		// the method needs to be closed, because the method
+		// object may cache the technical blob representation
+		// generated accessing the underlying access technology.
+		// (for example, accessing an OCI image requires a sequence of
+		// backend accesses for the manifest, the layers, etc which will
+		// then be packaged into a tar archive returned as blob).
+		// This caching may not be required, if the backend directly
+		// returns a blob.
+		defer m.Close()
+
+		// the method now also provides information abount the returned
+		// blob format in form of a mime type.
+		fmt.Printf("  found blob with mime type %s\n", m.MimeType())
+		reader, err = m.Reader()
+	} else {
+		// because this is a common operation, there is a
+		// utility function handling this sequence.
+		reader, err = utils.GetResourceReader(res)
+	}
+	if err != nil {
+		return errors.Wrapf(err, "cannot get resource reader")
+	}
 	defer reader.Close()
 
 	file, err := os.OpenFile("/tmp/ocmcli", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0766)

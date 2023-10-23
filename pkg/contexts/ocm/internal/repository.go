@@ -119,6 +119,9 @@ type ComponentVersionAccess interface {
 	DiscardChanges()
 	IsPersistent() bool
 
+	GetProvider() *compdesc.Provider
+	SetProvider(provider *compdesc.Provider) error
+
 	GetResources() []ResourceAccess
 	GetResource(meta metav1.Identity) (ResourceAccess, error)
 	GetResourceIndex(meta metav1.Identity) int
@@ -127,7 +130,7 @@ type ComponentVersionAccess interface {
 	GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
 	GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error)
 	SetResource(*ResourceMeta, compdesc.AccessSpec, ...ModificationOption) error
-	SetResourceByAccess(art ResourceAccess, modopts ...ModificationOption) error
+	SetResourceAccess(art ResourceAccess, modopts ...ModificationOption) error
 
 	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)

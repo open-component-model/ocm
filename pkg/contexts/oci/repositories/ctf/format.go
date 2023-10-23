@@ -94,6 +94,12 @@ func SupportedFormats() []accessio.FileFormat {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+const (
+	ACC_CREATE   = accessobj.ACC_CREATE
+	ACC_WRITABLE = accessobj.ACC_WRITABLE
+	ACC_READONLY = accessobj.ACC_READONLY
+)
+
 func OpenFromBlob(ctx cpi.ContextProvider, acc accessobj.AccessMode, blob blobaccess.BlobAccess, opts ...accessio.Option) (*Object, error) {
 	o, err := accessio.AccessOptions(nil, opts...)
 	if err != nil {

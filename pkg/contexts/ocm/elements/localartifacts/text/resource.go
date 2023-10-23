@@ -9,16 +9,22 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/localartifacts/data"
+	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, blob string, opts ...Option) cpi.ArtifactAccess[M] {
-	return data.Access(ctx, meta, []byte(blob), opts...)
+	eff := optionutils.EvalOptions(opts...)
+	if eff.MimeType == "" {
+		eff.MimeType = mime.MIME_TEXT
+	}
+	return data.Access(ctx, meta, []byte(blob), eff)
 }
 
-func ResourceAccess(ctx ocm.Context, media string, meta *ocm.ResourceMeta, blob string, opts ...Option) cpi.ResourceAccess {
+func ResourceAccess(ctx ocm.Context, meta *ocm.ResourceMeta, blob string, opts ...Option) cpi.ResourceAccess {
 	return Access(ctx, meta, blob, opts...)
 }
 
-func SourceAccess(ctx ocm.Context, media string, meta *ocm.SourceMeta, blob string, opts ...Option) cpi.SourceAccess {
+func SourceAccess(ctx ocm.Context, meta *ocm.SourceMeta, blob string, opts ...Option) cpi.SourceAccess {
 	return Access(ctx, meta, blob, opts...)
 }

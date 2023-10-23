@@ -14,10 +14,16 @@ type Options struct {
 	APIHostName string
 }
 
-func (o *Options) Apply(opts *Options) {
+var _ Option = (*Options)(nil)
+
+func (o *Options) ApplyTo(opts *Options) {
 	if o.APIHostName != "" {
 		opts.APIHostName = o.APIHostName
 	}
+}
+
+func (o *Options) Apply(opts ...Option) {
+	optionutils.ApplyOptions(o, opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

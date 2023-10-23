@@ -22,8 +22,20 @@ func (o *Options) ApplyTo(opts *Options) {
 	if opts == nil {
 		return
 	}
+	if o.Context != nil {
+		opts.Context = o.Context
+	}
 	if o.Version != "" {
 		opts.Version = o.Version
+	}
+	if o.Variants != nil {
+		opts.Variants = append(opts.Variants, o.Variants...)
+	}
+	if o.Origin != nil {
+		opts.Origin = o.Origin
+	}
+	if o.Printer != nil {
+		opts.Printer = o.Printer
 	}
 }
 
