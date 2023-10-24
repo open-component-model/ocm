@@ -226,7 +226,7 @@ NESTING COMPONENT VERSION PROVIDER   IDENTITY
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				fmt.Sprintf(`
 ---
-apiVersion: ocm.software/%s
+apiVersion: %s
 kind: ComponentVersion
 metadata:
   name: test.de/y
@@ -239,7 +239,7 @@ spec:
   - componentName: test.de/x
     name: xx
     version: v1
-`, compdescv3.VersionName)))
+`, compdescv3.SchemaVersion)))
 		})
 	})
 })

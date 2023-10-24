@@ -86,7 +86,7 @@ var _ = Describe("serialization", func() {
 `)
 
 	var CDv3 = NormalizeYAML(fmt.Sprintf(`
-apiVersion: ocm.software/%s
+apiVersion: %s
 kind: ComponentVersion
 metadata:
   name: github.com/vasu1124/introspect
@@ -144,7 +144,7 @@ spec:
     name: introspect
     type: git
     version: 1.0.0
-`, compdescv3.VersionName))
+`, compdescv3.SchemaVersion))
 
 	It("deserializes v2", func() {
 		cd, err := compdesc.Decode([]byte(CDv2))
