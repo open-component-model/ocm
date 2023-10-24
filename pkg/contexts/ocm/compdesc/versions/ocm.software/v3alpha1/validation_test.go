@@ -67,7 +67,7 @@ var _ = Describe("Validation", func() {
 
 			comp = &ComponentDescriptor{
 				TypeMeta: meta.TypeMeta{
-					APIVersion: GroupVersion,
+					APIVersion: SchemaVersion,
 					Kind:       Kind,
 				},
 				ObjectMeta: meta.ObjectMeta{
