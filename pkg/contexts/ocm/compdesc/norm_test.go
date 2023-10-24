@@ -272,7 +272,7 @@ var _ = Describe("Normalization", func() {
 
 	It("hashes v1 with complex provider for CD/v3", func() {
 		cd := cd1.Copy()
-		cd.Metadata.ConfiguredVersion = v3alpha1.GroupVersion
+		cd.Metadata.ConfiguredVersion = v3alpha1.SchemaVersion
 		cd.References = nil
 		cd.Resources = nil
 		cd.Sources = nil

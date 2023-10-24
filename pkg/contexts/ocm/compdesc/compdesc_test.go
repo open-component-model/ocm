@@ -144,7 +144,7 @@ spec:
     name: introspect
     type: git
     version: 1.0.0
-`, compdescv3.SchemaVersion))
+`, compdescv3.VersionName))
 
 	It("deserializes v2", func() {
 		cd, err := compdesc.Decode([]byte(CDv2))
@@ -156,11 +156,11 @@ spec:
 		Expect(string(data)).To(Equal(CDv2))
 	})
 
-	It("deserializes "+compdescv3.SchemaVersion, func() {
+	It("deserializes "+compdescv3.VersionName, func() {
 		cd, err := compdesc.Decode([]byte(CDv2))
 		Expect(err).To(Succeed())
 
-		cd.Metadata.ConfiguredVersion = compdescv3.GroupVersion
+		cd.Metadata.ConfiguredVersion = compdescv3.SchemaVersion
 		data, err := compdesc.Encode(cd)
 		Expect(err).To(Succeed())
 		Expect(string(data)).To(StringEqualWithContext(CDv3))
