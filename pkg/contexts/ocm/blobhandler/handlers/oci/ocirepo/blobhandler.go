@@ -181,7 +181,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		namespace = ocictx.Namespace
 	} else {
 		prefix := cpi.RepositoryPrefix(ctx.TargetComponentRepository().GetSpecification())
-		i := strings.LastIndex(hint, ":")
+		i := strings.LastIndex(hint, "@")
+		if i >= 0 {
+			hint = hint[:i] // remove digest
+		}
+		i = strings.LastIndex(hint, ":")
 		if i > 0 {
 			version = hint[i:]
 			tag = version[1:] // remove colon

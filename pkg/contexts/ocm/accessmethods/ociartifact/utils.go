@@ -13,6 +13,9 @@ import (
 )
 
 func Hint(nv common.NameVersion, locator, repo, version string) string {
+	if i := strings.LastIndex(version, "@"); i >= 0 {
+		version = version[:i] // remove digest
+	}
 	repository := fmt.Sprintf("%s/%s", nv.GetName(), locator)
 	if repo != "" {
 		if strings.HasPrefix(repo, grammar.RepositorySeparator) {
