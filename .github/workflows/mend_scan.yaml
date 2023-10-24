@@ -1,10 +1,8 @@
 name: Mend Security Scan
 
 on:
-  push:
-    branches: [ mend-scan ]
-  pull_request:
-    branches: [ master ]
+  schedule:
+    - cron:  '5 0 * * 0'
 
 jobs:
   mend-scan:
