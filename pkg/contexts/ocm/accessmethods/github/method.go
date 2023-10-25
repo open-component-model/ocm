@@ -158,6 +158,7 @@ type accessMethod struct {
 	repositoryService RepositoryService
 	owner             string
 	repo              string
+	cid               credentials.ConsumerIdentity
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
@@ -182,7 +183,7 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 		return nil, errors.ErrInvalid("repository path", path, a.RepoURL)
 	}
 
-	token, err := getCreds(unparsed, path, c.GetContext().CredentialsContext())
+	token, cid, err := getCreds(unparsed, path, c.GetContext().CredentialsContext())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get creds: %w", err)
 	}
@@ -210,6 +211,7 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 		compvers:          c,
 		owner:             pathcomps[0],
 		repo:              pathcomps[1],
+		cid:               cid,
 		repositoryService: client.Repositories,
 	}, nil
 }
@@ -226,12 +228,13 @@ func validateCommit(commit string) error {
 	return nil
 }
 
-func getCreds(serverurl, path string, cctx credentials.Context) (string, error) {
-	creds, err := identity.GetCredentials(cctx, serverurl, path)
+func getCreds(serverurl, path string, cctx credentials.Context) (string, credentials.ConsumerIdentity, error) {
+	id := identity.GetConsumerId(serverurl, path)
+	creds, err := credentials.CredentialsForConsumer(cctx.CredentialsContext(), id, identity.IdentityMatcher)
 	if creds == nil || err != nil {
-		return "", err
+		return "", id, err
 	}
-	return creds.GetProperty(credentials.ATTR_TOKEN), nil
+	return creds.GetProperty(credentials.ATTR_TOKEN), id, nil
 }
 
 func (_ *accessMethod) IsLocal() bool {
@@ -308,4 +311,12 @@ func (m *accessMethod) getDownloadLink() (string, error) {
 	defer resp.Body.Close()
 
 	return link.String(), nil
+}
+
+func (m *accessMethod) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	return m.cid
+}
+
+func (m *accessMethod) GetIdentityMatcher() string {
+	return identity.CONSUMER_TYPE
 }

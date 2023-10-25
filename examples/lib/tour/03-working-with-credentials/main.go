@@ -49,7 +49,9 @@ func main() {
 		case "basic":
 			err = UsingCredentialsA(cfg)
 		case "context":
-			err = UsingCredentialsB(cfg)
+			err = UsingCredentialsB(cfg, true)
+		case "read":
+			err = UsingCredentialsB(cfg, false)
 		default:
 			err = fmt.Errorf("unknown example %q", cmd)
 		}

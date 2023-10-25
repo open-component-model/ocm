@@ -63,5 +63,6 @@ func UsingCredentialsA(cfg *helper.Config) error {
 	if err != nil {
 		return errors.Wrapf(err, "added version not found")
 	}
-	return describeVersion(cv)
+	defer cv.Close()
+	return errors.Wrapf(describeVersion(cv), "describe failed")
 }

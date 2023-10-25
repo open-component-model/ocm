@@ -15,6 +15,8 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
@@ -141,26 +143,28 @@ type accessMethod struct {
 	lock      sync.Mutex
 	ctx       cpi.Context
 	spec      cpi.AccessSpec
-	repo      oci.Repository
+	relto     oci.Repository
 	reference string
 
 	finalizer Finalizer
 	err       error
+	repo      oci.Repository
 	art       oci.ArtifactAccess
 	ref       *oci.RefSpec
 	blob      artifactset.ArtifactBlob
 }
 
 var (
-	_ cpi.AccessMethod        = (*accessMethod)(nil)
-	_ blobaccess.DigestSource = (*accessMethod)(nil)
+	_ cpi.AccessMethod                     = (*accessMethod)(nil)
+	_ blobaccess.DigestSource              = (*accessMethod)(nil)
+	_ credentials.ConsumerIdentityProvider = (*accessMethod)(nil)
 )
 
 func NewMethod(ctx cpi.ContextProvider, a cpi.AccessSpec, ref string, repo ...oci.Repository) (*accessMethod, error) {
 	return &accessMethod{
 		spec:      a,
 		reference: ref,
-		repo:      utils.Optional(repo...),
+		relto:     utils.Optional(repo...),
 		ctx:       ctx.OCMContext(),
 	}, nil
 }
@@ -186,12 +190,12 @@ func (m *accessMethod) Close() error {
 	defer m.lock.Unlock()
 	m.blob = nil
 	m.art = nil
-	m.repo = nil
+	m.relto = nil
 	return m.finalizer.Finalize()
 }
 
 func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
-	if m.repo == nil {
+	if m.relto == nil {
 		ref, err := oci.ParseRef(m.reference)
 		if err != nil {
 			return nil, nil, err
@@ -203,6 +207,7 @@ func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
 		}
 		repo, err := ocictx.RepositoryForSpec(spec)
 		m.finalizer.Close(repo, "repository for accessing %s", m.reference)
+		m.repo = repo
 		return repo, &ref, err
 	}
 
@@ -211,9 +216,10 @@ func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
 		return nil, nil, err
 	}
 	ref := oci.RefSpec{
-		UniformRepositorySpec: *m.repo.GetSpecification().UniformRepositorySpec(),
+		UniformRepositorySpec: *m.relto.GetSpecification().UniformRepositorySpec(),
 		ArtSpec:               art,
 	}
+	m.repo = m.relto
 	return m.repo, &ref, err
 }
 
@@ -243,6 +249,21 @@ func (m *accessMethod) getArtifact() (oci.ArtifactAccess, *oci.RefSpec, error) {
 		m.art, m.ref, m.err = art, ref, err
 	}
 	return m.art, m.ref, m.err
+}
+
+func (m *accessMethod) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	repo, ref, err := m.eval()
+	if err != nil {
+		return nil
+	}
+	return credentials.GetProvidedConsumerId(repo, credentials.StringUsageContext(ref.Repository))
+}
+
+func (m *accessMethod) GetIdentityMatcher() string {
+	return ociidentity.CONSUMER_TYPE
 }
 
 func (m *accessMethod) Digest() digest.Digest {
