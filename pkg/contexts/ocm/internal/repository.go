@@ -130,7 +130,7 @@ type ComponentVersionAccess interface {
 	GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
 	GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error)
 	SetResource(*ResourceMeta, compdesc.AccessSpec, ...ModificationOption) error
-	SetResourceAccess(art ResourceAccess, modopts ...ModificationOption) error
+	SetResourceAccess(art ResourceAccess, modopts ...BlobModificationOption) error
 
 	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)
@@ -148,11 +148,11 @@ type ComponentVersionAccess interface {
 	SetReference(ref *ComponentReference) error
 
 	// AddBlob adds a local blob and returns an appropriate local access spec.
-	AddBlob(blob BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error)
+	AddBlob(blob BlobAccess, artType, refName string, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error)
 
 	// AdjustResourceAccess is used to modify the access spec. The old and new one MUST refer to the same content.
 	AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error
-	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...ModificationOption) error
+	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...BlobModificationOption) error
 	AdjustSourceAccess(meta *SourceMeta, acc compdesc.AccessSpec) error
 	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error
 

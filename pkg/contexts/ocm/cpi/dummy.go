@@ -123,23 +123,23 @@ func (d *DummyComponentVersionAccess) Update() error {
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype, refName string, global AccessSpec) (AccessSpec, error) {
+func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype, refName string, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error) {
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...internal.ModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...BlobModificationOption) error {
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *internal.ResourceMeta, acc compdesc.AccessSpec, opts ...internal.ModificationOption) error {
+func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *internal.ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error {
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compdesc.AccessSpec, opts ...internal.ModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compdesc.AccessSpec, opts ...ModificationOption) error {
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) SetResourceAccess(art ResourceAccess, modopts ...ModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResourceAccess(art ResourceAccess, modopts ...BlobModificationOption) error {
 	panic("implement me")
 }
 

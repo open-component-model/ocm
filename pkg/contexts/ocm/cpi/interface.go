@@ -77,6 +77,7 @@ type ArtifactAccess[M any] internal.ArtifactAccess[M]
 
 type (
 	BlobHandler                  = internal.BlobHandler
+	BlobHandlerProvider          = internal.BlobHandlerProvider
 	BlobHandlerOption            = internal.BlobHandlerOption
 	BlobHandlerOptions           = internal.BlobHandlerOptions
 	BlobHandlerKey               = internal.BlobHandlerKey
@@ -109,6 +110,10 @@ func FromProvider(p ContextProvider) Context {
 
 func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {
 	return internal.NewBlobHandlerOptions(olist...)
+}
+
+func DefaultBlobHandlerProvider(ctx Context) BlobHandlerProvider {
+	return internal.DefaultBlobHandlerProvider(ctx)
 }
 
 func New() Context {

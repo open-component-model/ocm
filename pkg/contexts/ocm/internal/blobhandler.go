@@ -200,6 +200,32 @@ func NewRegistrationHandlerInfo(path string, handler BlobHandlerRegistrationHand
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// BlobHandlerProvider is used to find a blob handler to use adding a resource
+// blob to a component version.
+// The task of the BlobHandler is to reject the upload, provide an (external)
+// access method for the blob or state not to be responsible.
+type BlobHandlerProvider interface {
+	LookupHandler(sctx StorageContext, artifacttype, mimeType string) BlobHandler
+}
+
+type registryBasedProvider struct {
+	registry BlobHandlerRegistry
+}
+
+func (p *registryBasedProvider) LookupHandler(sctx StorageContext, artifacttype, mimeType string) BlobHandler {
+	return p.registry.LookupHandler(sctx.GetImplementationRepositoryType(), artifacttype, mimeType)
+}
+
+func BlobHandlerProviderForRegistry(r BlobHandlerRegistry) BlobHandlerProvider {
+	return &registryBasedProvider{r}
+}
+
+func DefaultBlobHandlerProvider(ctx Context) BlobHandlerProvider {
+	return BlobHandlerProviderForRegistry(ctx.BlobHandlers())
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 // BlobHandlerRegistry registers blob handlers to use in a dedicated ocm context.
 type BlobHandlerRegistry interface {
 	AsHandlerRegistrationRegistry() registrations.HandlerRegistrationRegistry[Context, BlobHandlerOption]

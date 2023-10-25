@@ -762,7 +762,7 @@ func (c *componentVersionAccessView) update(final bool) error {
 	return c.impl.GetBlobCache().Clear()
 }
 
-func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error) {
+func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global AccessSpec, opts ...internal.BlobUploadOption) (AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -777,6 +777,11 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	err = utils.ValidateObject(blob)
 	if err != nil {
 		return nil, errors.Wrapf(err, "inavlid blob access")
+	}
+
+	eff := NewBlobUploadOptions(opts...)
+	if !eff.UseNoDefaultIfNotSet && eff.BlobHandlerProvider == nil {
+		eff.BlobHandlerProvider = internal.DefaultBlobHandlerProvider(c.GetContext())
 	}
 
 	var acc AccessSpec
@@ -853,17 +858,18 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, ac
 }
 
 // SetResourceBlob adds a blob resource to the component version.
-func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.ModificationOption) error {
+func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.BlobModificationOption) error {
 	Logger(c).Debug("adding resource blob", "resource", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
-	acc, err := c.AddBlob(blob, meta.Type, refName, global)
+	eff := NewBlobModificationOptions(opts...)
+	acc, err := c.AddBlob(blob, meta.Type, refName, global, eff)
 	if err != nil {
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
-	if err := c.SetResource(meta, acc, append(opts, internal.ModifyResource())...); err != nil {
+	if err := c.SetResource(meta, acc, eff, ModifyResource()); err != nil {
 		return fmt.Errorf("unable to set resource: %w", err)
 	}
 
@@ -1004,10 +1010,10 @@ func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessVie
 	return setblob(meta, blob, hint, global)
 }
 
-func (c *componentVersionAccessView) SetResourceAccess(art ResourceAccess, modopts ...ModificationOption) error {
+func (c *componentVersionAccessView) SetResourceAccess(art ResourceAccess, modopts ...BlobModificationOption) error {
 	return setAccess(c, "resource", art,
 		func(meta *ResourceMeta, acc compdesc.AccessSpec) error {
-			return c.SetResource(meta, acc, modopts...)
+			return c.SetResource(meta, acc, NewBlobModificationOptions(modopts...))
 		},
 		func(meta *ResourceMeta, blob BlobAccess, hint string, global AccessSpec) error {
 			return c.SetResourceBlob(meta, blob, hint, global, modopts...)
