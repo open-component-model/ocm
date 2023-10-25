@@ -8,6 +8,8 @@ import (
 	"io"
 	"sync"
 
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -22,21 +24,42 @@ type DefaultAccessMethod struct {
 	comp    ComponentVersionAccess
 	spec    AccessSpec
 	mime    string
+	digest  digest.Digest
 	local   bool
 }
 
-var _ AccessMethod = (*DefaultAccessMethod)(nil)
+var (
+	_ AccessMethod            = (*DefaultAccessMethod)(nil)
+	_ blobaccess.DigestSource = (*DefaultAccessMethod)(nil)
+)
 
 type BlobAccessFactory func() (BlobAccess, error)
 
-func NewDefaultMethod(c ComponentVersionAccess, a AccessSpec, mime string, fac BlobAccessFactory, local ...bool) AccessMethod {
+func NewDefaultMethod(c ComponentVersionAccess, a AccessSpec, digest digest.Digest, mime string, fac BlobAccessFactory, local ...bool) AccessMethod {
 	return &DefaultAccessMethod{
 		spec:    a,
 		comp:    c,
 		mime:    mime,
+		digest:  digest,
 		factory: fac,
 		local:   utils.Optional(local...),
 	}
+}
+
+func NewDefaultMethodForBlobAccess(c ComponentVersionAccess, a AccessSpec, digest digest.Digest, blob blobaccess.BlobAccess, local ...bool) (AccessMethod, error) {
+	blob, err := blob.Dup()
+	if err != nil {
+		return nil, err
+	}
+	return &DefaultAccessMethod{
+		spec:    a,
+		access:  blob,
+		comp:    c,
+		mime:    blob.MimeType(),
+		digest:  digest,
+		factory: nil,
+		local:   utils.Optional(local...),
+	}, nil
 }
 
 func (m *DefaultAccessMethod) getAccess() (blobaccess.BlobAccess, error) {
@@ -50,6 +73,10 @@ func (m *DefaultAccessMethod) getAccess() (blobaccess.BlobAccess, error) {
 		m.access = acc
 	}
 	return m.access, nil
+}
+
+func (m *DefaultAccessMethod) Digest() digest.Digest {
+	return m.digest
 }
 
 func (m *DefaultAccessMethod) IsLocal() bool {

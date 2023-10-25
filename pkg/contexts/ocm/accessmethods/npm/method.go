@@ -144,7 +144,7 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 		acc := blobaccess.DataAccessForReaderFunction(f, meta.Dist.Tarball)
 		return accessobj.CachedBlobAccessForWriter(c.GetContext(), mime.MIME_TGZ, accessio.NewDataAccessWriter(acc)), nil
 	}
-	return cpi.NewDefaultMethod(c, a, mime.MIME_TGZ, factory), nil
+	return cpi.NewDefaultMethod(c, a, "", mime.MIME_TGZ, factory), nil
 }
 
 type meta struct {

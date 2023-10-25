@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/open-component-model/ocm/examples/lib/helper"
 )
 
 // CFG is the path to the file containing the credentials
@@ -24,20 +26,35 @@ func init() {
 }
 
 func main() {
-	cmd := "basic"
-
+	arg := 1
 	if len(os.Args) > 1 {
-		cmd = os.Args[1]
+		if os.Args[1] == "--config" {
+			if len(os.Args) > 2 {
+				CFG = os.Args[2]
+				arg = 3
+			} else {
+				fmt.Fprintf(os.Stderr, "error: config file missing\n")
+				os.Exit(1)
+			}
+		}
 	}
-	var err error
-	switch cmd {
-	case "basic":
-		err = ComposingAComponentVersionA()
-	case "compose":
-		err = ComposingAComponentVersionB()
-	default:
-		err = fmt.Errorf("unknown example %q", cmd)
+	cfg, err := helper.ReadConfig(CFG)
+	if err == nil {
+		cmd := "basic"
+
+		if len(os.Args) > arg {
+			cmd = os.Args[arg]
+		}
+		switch cmd {
+		case "basic":
+			err = UsingCredentialsA(cfg)
+		case "context":
+			err = UsingCredentialsB(cfg)
+		default:
+			err = fmt.Errorf("unknown example %q", cmd)
+		}
 	}
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		os.Exit(1)

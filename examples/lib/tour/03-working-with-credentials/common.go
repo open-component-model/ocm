@@ -16,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/localartifacts/dockermulti"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/localartifacts/text"
-	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
@@ -25,7 +24,7 @@ import (
 )
 
 // setupVersion configures a component version.
-// This can be called on any component version, regardless of
+// This can be called on any omponent version, regardless of
 // its origin.
 func setupVersion(cv ocm.ComponentVersionAccess) error {
 	provider := &compdesc.Provider{
@@ -278,34 +277,4 @@ func listVersions(repo ocm.Repository, list ...string) error {
 		nested.Finalize()
 	}
 	return nil
-}
-func ComposingAComponentVersionA() error {
-	// yes, we need an OCM context, again
-	ctx := ocm.DefaultContext()
-
-	// To compose and store a new component version
-	// we finally need some OCM repository to
-	// store the component, The most simple
-	// external repository could be the filesystem.
-	// OCM defines a distribution format, the
-	// Common Transport Format (CTF) for this,
-	// which is an extension of the OCI distribution
-	// specification.
-	// There are three flavours, Directory, Tar or TGZ.
-	// The implementation provides a regular OCM repository
-	// interface, like used in the previous example.
-	repo, err := ctfocm.Open(ctx, ctfocm.ACC_WRITABLE|ctfocm.ACC_CREATE, "/tmp/example02.ctf", 0o0744, ctfocm.FormatDirectory)
-	if err != nil {
-		return errors.Wrapf(err, "cannot create transport repository")
-	}
-	defer repo.Close()
-
-	// now we create a first component version in this repository.
-	err = addVersion(repo, "acme.org/example02", "v0.1.0")
-	if err != nil {
-		return err
-	}
-
-	// list the versions as known from example 1
-	return listVersions(repo)
 }

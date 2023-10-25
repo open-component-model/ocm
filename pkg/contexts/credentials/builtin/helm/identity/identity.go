@@ -11,9 +11,9 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
-	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/listformat"
 )
 
@@ -73,6 +73,13 @@ func OCIRepoURL(repourl string, chartname string) string {
 		repourl += "/" + chartname
 	}
 	return repourl
+}
+
+func SimpleCredentials(user, passwd string) cpi.Credentials {
+	return credentials.DirectCredentials{
+		ATTR_USERNAME: user,
+		ATTR_PASSWORD: passwd,
+	}
 }
 
 func GetConsumerId(repourl string, chartname string) cpi.ConsumerIdentity {

@@ -18,11 +18,11 @@ import (
 	"helm.sh/helm/v3/pkg/repo"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/helm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocihelm "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/helm"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/helm/identity"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

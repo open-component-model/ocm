@@ -58,8 +58,9 @@ type AccessSpec struct {
 }
 
 var (
-	_ cpi.AccessSpec   = (*AccessSpec)(nil)
-	_ cpi.HintProvider = (*AccessSpec)(nil)
+	_ cpi.AccessSpec          = (*AccessSpec)(nil)
+	_ cpi.HintProvider        = (*AccessSpec)(nil)
+	_ blobaccess.DigestSource = (*AccessSpec)(nil)
 )
 
 // New creates a new oci registry access spec version v1.
@@ -76,6 +77,14 @@ func (a *AccessSpec) Describe(ctx cpi.Context) string {
 
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
+}
+
+func (a *AccessSpec) Digest() digest.Digest {
+	ref, err := oci.ParseRef(a.ImageReference)
+	if err != nil || ref.Digest == nil {
+		return ""
+	}
+	return *ref.Digest
 }
 
 func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {

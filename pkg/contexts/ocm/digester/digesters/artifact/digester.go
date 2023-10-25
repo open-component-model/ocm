@@ -147,12 +147,18 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 			err error
 		)
 
-		// first: check for error providing interface
-		if s, ok := acc.(DigestSource); ok {
-			dig, err = s.GetDigest()
-		} else {
-			// second: fallback to standard digest interface
-			dig = acc.(blobaccess.DigestSource).Digest()
+		// first, ask access specification (inexpensive)
+		if s, ok := acc.AccessSpec().(blobaccess.DigestSource); ok {
+			dig = s.Digest()
+		}
+		if dig == "" {
+			// second: check for error providing interface
+			if s, ok := acc.(DigestSource); ok {
+				dig, err = s.GetDigest()
+			} else {
+				// third: fallback to standard digest interface
+				dig = acc.(blobaccess.DigestSource).Digest()
+			}
 		}
 
 		if dig != "" {
