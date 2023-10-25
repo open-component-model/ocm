@@ -5,6 +5,7 @@
 package helper
 
 import (
+	"encoding/json"
 	"io/ioutil"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -19,6 +20,8 @@ type Config struct {
 	Component  string `json:"component"`
 	Repository string `json:"repository"`
 	Version    string `json:"version"`
+
+	Target json.RawMessage `json:"targetRepository"`
 }
 
 func ReadConfig(path string) (*Config, error) {

@@ -12,6 +12,8 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -169,4 +171,29 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 	}
 	m.blob = blobaccess.ForDataAccess(m.spec.Digest, m.spec.Size, m.spec.MediaType, acc)
 	return m.blob, nil
+}
+
+func (m *accessMethod) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	ref, err := oci.ParseRef(m.spec.Reference)
+	if err != nil {
+		return nil
+	}
+
+	ocictx := m.comp.GetContext().OCIContext()
+	spec := ocictx.GetAlias(ref.Host)
+	if spec == nil {
+		spec = ocireg.NewRepositorySpec(ref.Host)
+	}
+	ocirepo, err := m.comp.GetContext().OCIContext().RepositoryForSpec(spec)
+	if err != nil {
+		return nil
+	}
+	return credentials.GetProvidedConsumerId(ocirepo, credentials.StringUsageContext(ref.Repository))
+}
+
+func (m *accessMethod) GetIdentityMatcher() string {
+	return ociidentity.CONSUMER_TYPE
 }

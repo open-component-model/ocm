@@ -13,6 +13,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/helm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -188,4 +189,12 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 	}
 	m.acc = acc
 	return m.blob, nil
+}
+
+func (m *accessMethod) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	return identity.GetConsumerId(m.spec.HelmRepository, m.spec.GetChartName())
+}
+
+func (m *accessMethod) GetIdentityMatcher() string {
+	return identity.CONSUMER_TYPE
 }
