@@ -8,11 +8,13 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func Download(cfg *helper.Config) error {
@@ -22,16 +24,6 @@ func Download(cfg *helper.Config) error {
 	if err != nil {
 		return errors.Wrapf(err, "cannot register credentials")
 	}
-
-	err = DownloadHelmChart(ctx, cfg)
-	if err != nil {
-		return errors.Wrapf(err, "download failed")
-	}
-	return nil
-}
-
-func DownloadHelmChart(ctx ocm.Context, cfg *helper.Config) error {
-	fmt.Printf("*** download helm chart\n")
 
 	// use the generic form here to enable the specification of any
 	// supported repository type as target.
@@ -49,21 +41,15 @@ func DownloadHelmChart(ctx ocm.Context, cfg *helper.Config) error {
 	}
 	defer cv.Close()
 
-	res, err := cv.GetResource(metav1.NewIdentity("helmchart"))
-	if err != nil {
-		return errors.Wrapf(err, "resource for helmchart not found")
-	}
+	fs := memoryfs.New()
 
-	targetfs := memoryfs.New()
-
-	// helm downloader registered by default.
-	path, err := download.DownloadResource(ctx, res, "chart", download.WithFileSystem(targetfs))
+	path, err := DownloadHelmChart(cv, "chart", fs)
 	if err != nil {
-		return errors.Wrapf(err, "cannot download helm chart")
+		return errors.Wrapf(err, "download failed")
 	}
 
 	// report found files
-	files, err := ListFiles(path, targetfs)
+	files, err := ListFiles(path, fs)
 	if err != nil {
 		return errors.Wrapf(err, "cannot list files for helm chart")
 	}
@@ -72,4 +58,23 @@ func DownloadHelmChart(ctx ocm.Context, cfg *helper.Config) error {
 		fmt.Printf("- %s\n", f)
 	}
 	return nil
+}
+
+func DownloadHelmChart(cv ocm.ComponentVersionAccess, path string, fss ...vfs.FileSystem) (string, error) {
+	fmt.Printf("*** download helm chart\n")
+
+	res, err := cv.GetResource(metav1.NewIdentity("helmchart"))
+	if err != nil {
+		return "", errors.Wrapf(err, "resource for helmchart not found")
+	}
+
+	targetfs := utils.FileSystem(fss...)
+
+	// helm downloader registered by default.
+	effPath, err := download.DownloadResource(cv.GetContext(), res, path, download.WithFileSystem(targetfs))
+	if err != nil {
+		return "", errors.Wrapf(err, "cannot download helm chart")
+	}
+
+	return effPath, nil
 }

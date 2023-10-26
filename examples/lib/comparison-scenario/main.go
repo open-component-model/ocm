@@ -15,7 +15,7 @@ const COMPONENT_NAME = "acme.org/podinfo"
 const COMPONENT_VERSION = "0.1.0"
 
 // CFG is the path to the file containing the credentials
-var CFG = "config.yaml"
+var CFG = "config/config.yaml"
 
 func main() {
 	arg := 1
@@ -54,6 +54,11 @@ func main() {
 			err = GetRef(cfg)
 		case "deployscript":
 			err = GetDeployScript(cfg)
+
+		case "provider":
+			err = Provider(cfg)
+		case "consumer":
+			err = Consumer(cfg)
 		default:
 			err = fmt.Errorf("unknown scenario %q", cmd)
 		}

@@ -31,9 +31,8 @@ func Write(cfg *helper.Config) error {
 	}
 	err = WriteComponentVersion(cfg, cv)
 
-	pubkey := signingattr.Get(ctx).GetPublicKey("acme.org")
-
 	fmt.Printf("persisting public key to %s", KEYFILE)
+	pubkey := signingattr.Get(ctx).GetPublicKey("acme.org")
 	file, err := os.OpenFile(KEYFILE, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot persist public key")

@@ -48,6 +48,7 @@ func DownloadDeployScript(ctx ocm.Context, cfg *helper.Config) error {
 	}
 	defer cv.Close()
 
+	// get resource and blob content
 	res, err := cv.GetResource(metav1.NewIdentity(RSC_DEPLOY))
 	if err != nil {
 		return errors.Wrapf(err, "resource for podinfo-image not found")

@@ -35,7 +35,7 @@ func TransportComponentVersion(ctx ocm.Context, cfg *helper.Config) error {
 	fmt.Printf("*** transporting component version %s:%s\n", COMPONENT_NAME, COMPONENT_VERSION)
 
 	// get the access to the source repository
-	fmt.Printf("source OCI repository is %s\n", string(cfg.Target))
+	fmt.Printf("source OCI repository is %s\n", string(cfg.Repository))
 	spec := ocireg.NewRepositorySpec(cfg.Repository, nil)
 	repo, err := ctx.RepositoryForSpec(spec)
 	if err != nil {
