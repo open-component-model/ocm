@@ -393,7 +393,7 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 		}
 		err = verifier.Verify(sig.Digest.Value, hasher.Crypto(), sig.ConvertToSigning(), pub)
 		if err != nil {
-			return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, sig.Signature.Algorithm)
+			return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, n)
 		}
 		found = append(found, n)
 		if opts.SignatureName() == sig.Name {
