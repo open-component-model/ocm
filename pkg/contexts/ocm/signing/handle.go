@@ -320,7 +320,7 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 			ctx.Signed = true
 		}
 		err := cv.Update()
-		if err != nil {
+		if err != nil && !errors.Is(err, ocm.ErrTempVersion) {
 			return nil, err
 		}
 	}

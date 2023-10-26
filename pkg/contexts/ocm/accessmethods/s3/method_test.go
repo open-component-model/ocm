@@ -28,6 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/generics"
 )
 
@@ -151,6 +152,13 @@ var _ = Describe("Method", func() {
 		AfterEach(func() {
 			env.Cleanup()
 			vfs.Cleanup(fs)
+		})
+
+		It("provides comsumer id", func() {
+			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: env.OCMContext()})
+			Expect(err).ToNot(HaveOccurred())
+			Expect(credentials.GetProvidedConsumerId(m)).To(Equal(credentials.NewConsumerIdentity(identity.CONSUMER_TYPE,
+				identity.ID_PATHPREFIX, "bucket/key/version")))
 		})
 
 		It("downloads s3 objects", func() {

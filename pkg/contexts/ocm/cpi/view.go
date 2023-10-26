@@ -39,7 +39,10 @@ import (
 // Additionally, they are used to implement interface functionality which is
 // common to all implementations and NOT dependent on the backend system technology.
 
-var ErrClosed = resource.ErrClosed
+var (
+	ErrClosed      = resource.ErrClosed
+	ErrTempVersion = fmt.Errorf("temporary component version cannot be updated")
+)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -729,7 +732,7 @@ func (c *componentVersionAccessView) getInexpensiveContentVersionIdentity(spec A
 func (c *componentVersionAccessView) Update() error {
 	return c.Execute(func() error {
 		if !c.impl.IsPersistent() {
-			return fmt.Errorf("temporary component version cannot be updated")
+			return ErrTempVersion
 		}
 		return c.update(true)
 	})

@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader/s3"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -171,4 +172,12 @@ func (m *accessMethod) GetKind() string {
 
 func (m *accessMethod) AccessSpec() cpi.AccessSpec {
 	return m.spec
+}
+
+func (m *accessMethod) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	return identity.GetConsumerId("", m.spec.Bucket, m.spec.Key, m.spec.Version)
+}
+
+func (m *accessMethod) GetIdentityMatcher() string {
+	return hostpath.IDENTITY_TYPE
 }

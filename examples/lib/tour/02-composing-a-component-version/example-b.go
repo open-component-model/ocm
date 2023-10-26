@@ -21,7 +21,7 @@ func ComposingAComponentVersionB() error {
 
 	cv := composition.NewComponentVersion(ctx, "acme.org/example2", "v0.1.0")
 
-	// just use the same scomponent version setup from variant A
+	// just use the same component version setup from variant A
 	err := setupVersion(cv)
 	if err != nil {
 		return errors.Wrapf(err, "version composition")

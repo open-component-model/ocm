@@ -17,6 +17,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
+// ErrTempVersion indicates an ignored update in the backend because the
+// current version has not yet been added to the repository.
+var ErrTempVersion = cpi.ErrTempVersion
+
 const (
 	KIND_COMPONENTVERSION   = internal.KIND_COMPONENTVERSION
 	KIND_COMPONENTREFERENCE = "component reference"
