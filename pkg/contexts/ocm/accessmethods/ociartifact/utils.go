@@ -16,16 +16,29 @@ func Hint(nv common.NameVersion, locator, repo, version string) string {
 	if i := strings.LastIndex(version, "@"); i >= 0 {
 		version = version[:i] // remove digest
 	}
-	repository := fmt.Sprintf("%s/%s", nv.GetName(), locator)
+	repository := repoName(nv, locator)
 	if repo != "" {
 		if strings.HasPrefix(repo, grammar.RepositorySeparator) {
 			repository = repo[1:]
 		} else {
-			repository = fmt.Sprintf("%s/%s", nv.GetName(), repo)
+			repository = repoName(nv, repo)
 		}
 	}
-	if !strings.Contains(repository, ":") {
-		repository = fmt.Sprintf("%s:%s", repository, version)
+	if repository != "" && version != "" {
+		if !strings.Contains(repository, ":") {
+			repository = fmt.Sprintf("%s:%s", repository, version)
+		}
 	}
 	return repository
+}
+
+func repoName(nv common.NameVersion, locator string) string {
+	if nv.GetName() == "" {
+		return locator
+	} else {
+		if locator == "" {
+			return nv.GetName()
+		}
+		return fmt.Sprintf("%s/%s", nv.GetName(), locator)
+	}
 }

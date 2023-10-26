@@ -223,5 +223,5 @@ func (a *action) Out() error {
 	} else {
 		_, err = routingslip.AddEntry(cv, a.cmd.Name, a.cmd.Algorithm, a.cmd.Entry, links, digest.Digest(a.cmd.Digest))
 	}
-	return err
+	return cv.Update()
 }

@@ -15,12 +15,7 @@ import (
 // AccessMethodView can be used map wrap an access method
 // into a managed method with multiple views. The original method
 // object is closed once the last view is closed.
-type AccessMethodView interface {
-	AccessMethod
-
-	Base() interface{}
-	Dup() (AccessMethodView, error)
-}
+type AccessMethodView = internal.AccessMethodView
 
 // AccessMethodAsView wrap an access method object into
 // a multi-view version. The original method is closed when
@@ -30,6 +25,16 @@ type AccessMethodView interface {
 // functioning.
 func AccessMethodAsView(acc AccessMethod, closer ...io.Closer) AccessMethodView {
 	return refmgmt.WithView[AccessMethod, AccessMethodView](acc, accessMethodViewCreator, closer...)
+}
+
+// BlobAccessForAccessSpec provide a blob access for an access specification.
+func BlobAccessForAccessSpec(spec AccessSpec, cv ComponentVersionAccess) (blobaccess.BlobAccess, error) {
+	m, err := AccessMethodViewForSpec(spec, cv)
+	if err != nil {
+		return nil, err
+	}
+	defer m.Close()
+	return BlobAccessForAccessMethod(m)
 }
 
 func AccessMethodViewForSpec(spec AccessSpec, cv ComponentVersionAccess) (AccessMethodView, error) {
@@ -59,6 +64,10 @@ type accessMethodView struct {
 
 func (a *accessMethodView) Base() interface{} {
 	return a.access
+}
+
+func (a *accessMethodView) IsLocal() bool {
+	return a.access.IsLocal()
 }
 
 func (a *accessMethodView) Get() ([]byte, error) {

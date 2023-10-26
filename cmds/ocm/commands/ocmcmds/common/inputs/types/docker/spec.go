@@ -11,9 +11,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/dockerdaemon"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 )
@@ -53,25 +51,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	if err != nil {
 		return nil, "", err
 	}
-	spec := docker.NewRepositorySpec()
-	repo, err := ctx.OCIContext().RepositoryForSpec(spec)
-	if err != nil {
-		return nil, "", err
-	}
-	ns, err := repo.LookupNamespace(locator)
-	if err != nil {
-		return nil, "", err
-	}
-
-	if version == "" || version == "latest" {
-		version = info.ComponentVersion.GetVersion()
-	}
-	blob, err := artifactset.SynthesizeArtifactBlob(ns, version,
-		func(art oci.ArtifactAccess) error {
-			art.Artifact().SetAnnotation(annotations.COMPVERS_ANNOTATION, info.ComponentVersion.String())
-			return nil
-		},
-	)
+	blob, version, err := dockerdaemon.BlobAccessForImageFromDockerDaemon(s.Path, dockerdaemon.WithVersion(info.ComponentVersion.GetVersion()), dockerdaemon.WithOrigin(info.ComponentVersion))
 	if err != nil {
 		return nil, "", err
 	}

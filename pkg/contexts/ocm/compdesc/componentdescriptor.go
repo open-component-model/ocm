@@ -128,6 +128,13 @@ type ElementMetaAccess interface {
 type ArtifactMetaAccess interface {
 	ElementMetaAccess
 	GetType() string
+	SetType(string)
+}
+
+// ArtifactMetaPointer is a pointer to an artifact meta object.
+type ArtifactMetaPointer[P any] interface {
+	ArtifactMetaAccess
+	*P
 }
 
 // ElementMeta defines a object that is uniquely identified by its identity.
@@ -179,8 +186,8 @@ func (o *ElementMeta) SetLabels(labels []metav1.Label) {
 
 // SetLabel sets a single label to an effective value.
 // If the value is no byte slice, it is marshaled.
-func (o *ElementMeta) SetLabel(name string, value interface{}) error {
-	return o.Labels.Set(name, value)
+func (o *ElementMeta) SetLabel(name string, value interface{}, opts ...metav1.LabelOption) error {
+	return o.Labels.Set(name, value, opts...)
 }
 
 // RemoveLabel removes a single label.
@@ -343,6 +350,7 @@ type ElementAccessor interface {
 // ElementArtifactAccessor provides access to generic artifact information of an element.
 type ElementArtifactAccessor interface {
 	ElementMetaAccessor
+	GetType() string
 	GetAccess() AccessSpec
 	SetAccess(a AccessSpec)
 }
@@ -485,6 +493,13 @@ func (o *SourceMeta) Copy() *SourceMeta {
 	return &SourceMeta{
 		ElementMeta: *o.ElementMeta.Copy(),
 		Type:        o.Type,
+	}
+}
+
+func NewSourceMeta(name, typ string) *SourceMeta {
+	return &SourceMeta{
+		ElementMeta: ElementMeta{Name: name},
+		Type:        typ,
 	}
 }
 
@@ -663,22 +678,13 @@ func (o *ResourceMeta) GetType() string {
 }
 
 // SetType sets the type of the object.
-func (o *ResourceMeta) SetType(ttype string) *ResourceMeta {
+func (o *ResourceMeta) SetType(ttype string) {
 	o.Type = ttype
-	return o
 }
 
 // SetDigest sets the digest of the object.
-func (o *ResourceMeta) SetDigest(d *metav1.DigestSpec) *ResourceMeta {
+func (o *ResourceMeta) SetDigest(d *metav1.DigestSpec) {
 	o.Digest = d
-	return o
-}
-
-// SetLabel sets a label of the object.
-func (o *ResourceMeta) SetLabel(name string, value interface{}, opts ...metav1.LabelOption) *ResourceMeta {
-	// assure chainability
-	_ = o.Labels.Set(name, value, opts...)
-	return o
 }
 
 // Copy copies a resource meta.

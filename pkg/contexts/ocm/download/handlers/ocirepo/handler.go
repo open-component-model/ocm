@@ -41,7 +41,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&err, "upload to OCI registry")
 
-	ctx := racc.ComponentVersion().GetContext()
+	ctx := racc.GetOCMContext()
 	m, err := racc.AccessMethod()
 	if err != nil {
 		return false, "", err
@@ -58,13 +58,11 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 
 	var repo oci.Repository
 
-	var namespace string
 	var version string = "latest"
 
 	aspec := m.AccessSpec()
-	if hp, ok := aspec.(cpi.HintProvider); ok {
-		namespace = hp.GetReferenceHint(racc.ComponentVersion())
-	} else if l, ok := aspec.(*localblob.AccessSpec); ok {
+	namespace := racc.ReferenceHint()
+	if l, ok := aspec.(*localblob.AccessSpec); namespace == "" && ok {
 		namespace = l.ReferenceName
 	}
 

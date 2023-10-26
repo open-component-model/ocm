@@ -5,6 +5,7 @@
 package helm
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -33,6 +34,9 @@ type chartDownloader struct {
 }
 
 func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, repourl string, opts ...Option) (ChartAccess, error) {
+	if version == "" {
+		return nil, fmt.Errorf("version required")
+	}
 	repourl = strings.TrimSuffix(repourl, "/")
 
 	acc, err := newTempChartAccess(osfs.New())

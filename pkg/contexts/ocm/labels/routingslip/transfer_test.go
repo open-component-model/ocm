@@ -17,6 +17,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/types/comment"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -42,11 +43,12 @@ var _ = Describe("management", func() {
 		env.RSAKeyPair(ORG, LOCAL)
 	})
 
-	It("transfers and updates", func() {
+	DescribeTable("transfers and updates", func(mode bool) {
 		var finalize finalizer.Finalizer
 
 		defer Defer(finalize.Finalize, "finalizer")
 
+		compositionmodeattr.Set(env.OCMContext(), mode)
 		e1 := comment.New("start of routing slip")
 		e2 := comment.New("additional entry")
 
@@ -71,13 +73,18 @@ var _ = Describe("management", func() {
 transferring version "acme.org/routingslip:1.0.0"...
 ...adding component version...
 `))
-		tcv := Must(target.LookupComponentVersion(COMPONENT, VERSION))
-		slip, err := routingslip.GetSlip(tcv, ORG)
-		MustBeSuccessful(routingslip.AddEntry(tcv, LOCAL, rsa.Algorithm, e1, nil))
-		MustBeSuccessful(tcv.Close())
-		MustBeSuccessful(err)
+		nested := finalize.Nested()
+		tc := Must(target.LookupComponent(COMPONENT))
+		nested.Close(tc, "target comp")
+		tcv := Must(tc.LookupVersion(VERSION))
+		nested.Close(tcv)
 
+		slip := Must(routingslip.GetSlip(tcv, ORG))
+		MustBeSuccessful(routingslip.AddEntry(tcv, LOCAL, rsa.Algorithm, e1, nil))
 		Expect(slip.Len()).To(Equal(1))
+
+		MustBeSuccessful(tc.AddVersion(tcv))
+		MustBeSuccessful(nested.Finalize())
 
 		buf.Reset()
 		MustBeSuccessful(routingslip.AddEntry(cv, ORG, rsa.Algorithm, e2, nil))
@@ -95,5 +102,8 @@ transferring version "acme.org/routingslip:1.0.0"...
 		Expect(len(label[ORG])).To(Equal(2))
 		Expect(len(label[LOCAL])).To(Equal(1))
 		fmt.Printf("*** routing slips:\n%s\n", Must(runtime.DefaultYAMLEncoding.Marshal(label)))
-	})
+	},
+		Entry("with direct mode", false),
+		Entry("with composition mode", true),
+	)
 })

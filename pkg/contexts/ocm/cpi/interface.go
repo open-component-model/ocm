@@ -73,6 +73,8 @@ type (
 	ComponentReference               = internal.ComponentReference
 )
 
+type ArtifactAccess[M any] internal.ArtifactAccess[M]
+
 type (
 	BlobHandler                  = internal.BlobHandler
 	BlobHandlerOption            = internal.BlobHandlerOption
@@ -219,6 +221,9 @@ func RepositoryPrefix(spec RepositorySpec) string {
 // HintProvider is able to provide a name hint for globalization of local
 // artifacts.
 type HintProvider internal.HintProvider
+
+// GlobalAccessProvider is able to provide a non-local access specification.
+type GlobalAccessProvider internal.GlobalAccessProvider
 
 func ArtifactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
 	if h, ok := spec.(HintProvider); ok {

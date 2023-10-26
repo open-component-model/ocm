@@ -8,6 +8,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	ocmhdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -25,7 +26,7 @@ func newComponentVersionAccess(comp *componentAccessImpl, version string, persis
 	if err != nil {
 		return nil, err
 	}
-	impl, err := support.NewComponentVersionAccessImpl(comp.GetName(), version, c, true, persistent)
+	impl, err := support.NewComponentVersionAccessImpl(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
 	if err != nil {
 		c.Close()
 		return nil, err

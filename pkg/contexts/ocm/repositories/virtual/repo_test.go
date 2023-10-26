@@ -16,7 +16,9 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/virtual"
@@ -80,10 +82,11 @@ var _ = Describe("virtual repo", func() {
 			repo = virtual.NewRepository(env.OCMContext(), access)
 		})
 
-		It("handles put", func() {
+		DescribeTable("handles put", func(mode bool, typ string) {
 			var finalize finalizer.Finalizer
 			defer Defer(finalize.Finalize)
 
+			compositionmodeattr.Set(env.OCMContext(), mode)
 			comp := Must(repo.LookupComponent("acme.org/component/new"))
 			finalize.Close(comp, "component")
 			Expect(comp.ListVersions()).To(ConsistOf([]string{}))
@@ -95,6 +98,11 @@ var _ = Describe("virtual repo", func() {
 
 			r := Must(vers.GetResourceByIndex(0))
 			a := Must(r.Access())
+			Expect(a.GetKind()).To(Equal(typ))
+
+			comp.AddVersion(vers)
+			r = Must(vers.GetResourceByIndex(0)) // re-read resource from component descriptor.
+			a = Must(r.Access())
 			Expect(a.GetKind()).To(Equal(localblob.Type))
 
 			dig := "fe81d80611e39a10f1d7d12f98ce0bc6fe745d08fef007d8eebddc0a21d17827"
@@ -118,6 +126,9 @@ var _ = Describe("virtual repo", func() {
 			a = Must(r.Access())
 			Expect(a.GetInexpensiveContentVersionIdentity(vers)).To(Equal("sha256:" + dig))
 
-		})
+		},
+			Entry("with direct mode", false, localblob.Type),
+			Entry("with composition mode", true, compose.Type),
+		)
 	})
 })

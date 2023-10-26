@@ -22,11 +22,18 @@ var ErrClosed = refmgmt.ErrClosed
 type DataAccess = internal.DataAccess
 
 type (
-	BlobAccess     = internal.BlobAccess
-	BlobAccessBase = internal.BlobAccessBase
+	BlobAccess         = internal.BlobAccess
+	BlobAccessBase     = internal.BlobAccessBase
+	BlobAccessProvider = internal.BlobAccessProvider
 
 	DigestSource = internal.DigestSource
 	MimeType     = internal.MimeType
 )
 
 type FileLocation = internal.FileLocation
+
+type BlobAccessProviderFunction func() (BlobAccess, error)
+
+func (p BlobAccessProviderFunction) BlobAccess() (BlobAccess, error) {
+	return p()
+}

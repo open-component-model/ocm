@@ -5,19 +5,14 @@
 package helm
 
 import (
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	ocihelm "github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
+	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/helm"
-	"github.com/open-component-model/ocm/pkg/helm/identity"
-	"github.com/open-component-model/ocm/pkg/helm/loader"
 )
 
 type Spec struct {
@@ -93,60 +88,34 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blob blobaccess.BlobAccess, hint string, err error) {
-	var chartLoader loader.Loader
+	path := s.Path
 	if s.HelmRepository == "" {
-		_, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
+		_, inputPath, err := inputs.FileInfo(ctx, path, info.InputFilePath)
 		if err != nil {
 			return nil, "", errors.Wrapf(err, "cannot handle input path %q", s.Path)
 		}
-		chartLoader = loader.VFSLoader(inputPath, ctx.FileSystem())
-
-	} else {
-		cert := []byte(s.CACert)
-		if s.CACertFile != "" {
-			_, certPath, err := inputs.FileInfo(ctx, s.CACertFile, info.InputFilePath)
-			if err != nil {
-				return nil, "", err
-			}
-			cert, err = vfs.ReadFile(ctx.FileSystem(), certPath)
-			if err != nil {
-				return nil, "", errors.Wrapf(err, "cannot read root certificates from %q", s.CACertFile)
-			}
-		}
-
-		acc, err := helm.DownloadChart(common.NewPrinter(ctx.StdOut()), ctx, s.Path, s.Version, s.HelmRepository,
-			helm.WithCredentials(identity.GetCredentials(ctx, s.HelmRepository, s.Path)),
-			helm.WithRootCert([]byte(cert)))
-		if err != nil {
-			return nil, "", errors.Wrapf(err, "cannot download chart %s:%s from %s", s.Path, s.Version, s.HelmRepository)
-		}
-		chartLoader = loader.AccessLoader(acc)
+		path = inputPath
+	}
+	vers := s.Version
+	override := true
+	if vers == "" {
+		vers = info.ComponentVersion.GetVersion()
+		override = false
 	}
 
-	defer errors.PropagateError(&err, chartLoader.Close)
-
-	chart, err := chartLoader.Chart()
+	blob, name, vers, err := helm.BlobAccessForHelmChart(path,
+		helm.WithContext(ctx),
+		helm.WithFileSystem(ctx.FileSystem()),
+		helm.WithPrinter(ctx.Printer()),
+		helm.WithVersionOverride(vers, override),
+		helm.WithCACert(s.CACert),
+		helm.WithCACertFile(s.CACertFile),
+		helm.WithHelmRepository(s.HelmRepository),
+	)
 	if err != nil {
 		return nil, "", err
 	}
-	vers := chart.Metadata.Version
-	if s.Version != "" {
-		vers = s.Version
-	}
-	if vers == "" {
-		vers = info.ComponentVersion.GetVersion()
-	}
-
-	hint = ociartifact.Hint(info.ComponentVersion, chart.Name(), s.Repository, vers)
-	blob, err = chartLoader.ChartArtefactSet()
-	if err != nil || blob != nil {
-		return blob, hint, err
-	}
-	blob, err = ocihelm.SynthesizeArtifactBlob(chartLoader)
-	if err != nil {
-		return nil, "", errors.Wrapf(err, "cannot synthesize artifact blob")
-	}
-
+	hint = ociartifact.Hint(info.ComponentVersion, name, s.Repository, vers)
 	return blob, hint, err
 }
 

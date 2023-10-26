@@ -111,6 +111,10 @@ func (d *DummyComponentVersionAccess) GetInexpensiveContentVersionIdentity(spec 
 	panic("implement me")
 }
 
+func (d *DummyComponentVersionAccess) Update() error {
+	panic("implement me")
+}
+
 func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype, refName string, global AccessSpec) (AccessSpec, error) {
 	panic("implement me")
 }
@@ -127,11 +131,19 @@ func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compd
 	panic("implement me")
 }
 
+func (d *DummyComponentVersionAccess) SetResourceByAccess(art ResourceAccess, modopts ...ModificationOption) error {
+	panic("implement me")
+}
+
 func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error {
 	panic("implement me")
 }
 
 func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.AccessSpec) error {
+	panic("implement me")
+}
+
+func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess) error {
 	panic("implement me")
 }
 
@@ -144,6 +156,10 @@ func (d *DummyComponentVersionAccess) DiscardChanges() {
 
 func (d *DummyComponentVersionAccess) IsPersistent() bool {
 	return false
+}
+
+func (d *DummyComponentVersionAccess) UseDirectAccess() bool {
+	return true
 }
 
 func (d *DummyComponentVersionAccess) GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]internal.ResourceAccess, error) {

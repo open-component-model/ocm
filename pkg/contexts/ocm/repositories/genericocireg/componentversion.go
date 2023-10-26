@@ -22,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/relativeociref"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -36,7 +37,7 @@ func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessI
 	if err != nil {
 		return nil, err
 	}
-	impl, err := support.NewComponentVersionAccessImpl(comp.GetName(), version, c, true, persistent)
+	impl, err := support.NewComponentVersionAccessImpl(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
 	if err != nil {
 		c.Close()
 		return nil, err

@@ -207,6 +207,8 @@ var _ = Describe("transport and signing", func() {
 
 		// change volatile data in origin
 		modify(cv, tcv, merged)
+		MustBeSuccessful(tcv.Update())
+
 		MustBeSuccessful(targetfinal.Finalize())
 
 		// transfer changed volatile data

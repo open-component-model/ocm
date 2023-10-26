@@ -55,6 +55,7 @@ type Dup[T any] interface {
 // ViewManager is the interface of the reference manager, which
 // can be used to gain new views to a managed resource.
 type ViewManager[T any] interface {
+	RefCount() int
 	View(main ...bool) (T, error)
 	IsClosed() bool
 }
@@ -89,6 +90,10 @@ func NewResource[T any, I ResourceImplementation[T]](impl I, c ResourceViewCreat
 	impl.SetViewManager(i)
 	t, _ := i.View(main...)
 	return t
+}
+
+func (i *viewManager[T, I]) RefCount() int {
+	return i.refs.RefCount()
 }
 
 func (i *viewManager[T, I]) View(main ...bool) (T, error) {
@@ -215,6 +220,10 @@ func NewResourceImplBase[T any, M io.Closer](m ViewManager[M], closer ...io.Clos
 
 func (b *ResourceImplBase[T]) SetViewManager(m ViewManager[T]) {
 	b.refs = m
+}
+
+func (b *ResourceImplBase[T]) RefCount() int {
+	return b.refs.RefCount()
 }
 
 func (b *ResourceImplBase[T]) View(main ...bool) (T, error) {

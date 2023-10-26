@@ -104,9 +104,10 @@ type AccessSpec struct {
 }
 
 var (
-	_ json.Marshaler   = (*AccessSpec)(nil)
-	_ cpi.HintProvider = (*AccessSpec)(nil)
-	_ cpi.AccessSpec   = (*AccessSpec)(nil)
+	_ json.Marshaler           = (*AccessSpec)(nil)
+	_ cpi.HintProvider         = (*AccessSpec)(nil)
+	_ cpi.GlobalAccessProvider = (*AccessSpec)(nil)
+	_ cpi.AccessSpec           = (*AccessSpec)(nil)
 )
 
 func (a AccessSpec) MarshalJSON() ([]byte, error) {
@@ -126,7 +127,7 @@ func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
 	if g, err := ctx.AccessSpecForSpec(a.GlobalAccess); err == nil {
 		return g
 	}
-	return a.GlobalAccess
+	return a.GlobalAccess.Unwrap()
 }
 
 func (a *AccessSpec) GetMimeType() string {

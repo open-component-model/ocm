@@ -10,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/spi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
@@ -23,12 +24,9 @@ func DataAccessForDirTree(path string, opts ...Option) (spi.DataAccess, error) {
 }
 
 func BlobAccessForDirTree(path string, opts ...Option) (_ spi.BlobAccess, rerr error) {
-	var eff Options
-	for _, opt := range opts {
-		opt.ApplyToDirtreeOptions(&eff)
-	}
-
+	eff := optionutils.EvalOptions(opts...)
 	fs := utils.FileSystem(eff.FileSystem)
+
 	ok, err := vfs.IsDir(fs, path)
 	if err != nil {
 		return nil, err
@@ -70,4 +68,10 @@ func BlobAccessForDirTree(path string, opts ...Option) (_ spi.BlobAccess, rerr e
 		}
 	}
 	return temp.AsBlob(eff.MimeType), nil
+}
+
+func BlobAccessProviderForDirTree(path string, opts ...Option) spi.BlobAccessProvider {
+	return spi.BlobAccessProviderFunction(func() (spi.BlobAccess, error) {
+		return BlobAccessForDirTree(path, opts...)
+	})
 }

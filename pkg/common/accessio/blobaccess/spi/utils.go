@@ -187,6 +187,10 @@ func (s *staticBlobAccess) Dup() (BlobAccess, error) {
 	return s, nil
 }
 
+func (s *staticBlobAccess) Close() error {
+	return nil
+}
+
 // ForStaticDataAccess is used for a data access using no closer.
 // They don't require a finalization and can be used
 // as long as they exist. Therefore, no ref counting

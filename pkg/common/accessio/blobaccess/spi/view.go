@@ -33,6 +33,10 @@ func (b *blobAccessView) base() BlobAccessBase {
 	return b.access
 }
 
+func (b *blobAccessView) Close() error {
+	return b.View.Close()
+}
+
 func (b *blobAccessView) Validate() error {
 	return utils.ValidateObject(b.access)
 }
@@ -41,9 +45,8 @@ func (b *blobAccessView) Get() (result []byte, err error) {
 	return result, b.Execute(func() error {
 		result, err = b.access.Get()
 		if err != nil {
-			return fmt.Errorf("unable to get access: %w", err)
+			return err
 		}
-
 		return nil
 	})
 }

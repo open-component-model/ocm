@@ -29,6 +29,10 @@ func newLocalBlobAccessMethod(a *localblob.AccessSpec, acc VersionAccess) *local
 	}
 }
 
+func (_ *localBlobAccessMethod) IsLocal() bool {
+	return true
+}
+
 func (m *localBlobAccessMethod) GetKind() string {
 	return m.spec.GetKind()
 }
@@ -72,8 +76,12 @@ func (m *localBlobAccessMethod) Reader() (io.ReadCloser, error) {
 	return blob.Reader()
 }
 
-func (m *localBlobAccessMethod) Get() ([]byte, error) {
-	return blobaccess.BlobData(m.getBlob())
+func (m *localBlobAccessMethod) Get() (data []byte, ferr error) {
+	b, err := m.getBlob()
+	if ferr != nil {
+		return nil, err
+	}
+	return blobaccess.BlobData(b)
 }
 
 func (m *localBlobAccessMethod) MimeType() string {

@@ -34,8 +34,10 @@ type RepositoryImpl interface {
 
 type Repository interface {
 	resource.ResourceView[Repository]
-
 	RepositoryImpl
+
+	NewVersion(comp, version string, overrides ...bool) (ComponentVersionAccess, error)
+	AddVersion(cv ComponentVersionAccess, overrides ...bool) error
 }
 
 // ConsumerIdentityProvider is an interface for object requiring
@@ -56,7 +58,6 @@ type ComponentAccessImpl interface {
 	ListVersions() ([]string, error)
 	LookupVersion(version string) (ComponentVersionAccess, error)
 	HasVersion(vers string) (bool, error)
-	AddVersion(ComponentVersionAccess) error
 	NewVersion(version string, overrides ...bool) (ComponentVersionAccess, error)
 
 	Close() error
@@ -66,47 +67,57 @@ type ComponentAccess interface {
 	resource.ResourceView[ComponentAccess]
 
 	ComponentAccessImpl
+	AddVersion(cv ComponentVersionAccess, overrides ...bool) error
+}
+
+// AccessProvider assembled methods provided
+// and used for access methods.
+// It is provided for resources in a component version
+// with the base support implementation in package cpi.
+// But it can also be provided by resource provisioners
+// used to feed the ComponentVersionAccess.SetResourceByAccess
+// or the ComponentVersionAccessSetSourceByAccess
+// method.
+type AccessProvider interface {
+	GetOCMContext() Context
+	ReferenceHint() string
+
+	Access() (AccessSpec, error)
+	AccessMethod() (AccessMethod, error)
+
+	GlobalAccess() AccessSpec
+
+	blobaccess.BlobAccessProvider
+}
+
+type ArtifactAccess[M any] interface {
+	Meta() *M
+	AccessProvider
 }
 
 type (
-	ResourceMeta       = compdesc.ResourceMeta
-	ComponentReference = compdesc.ComponentReference
+	ResourceMeta   = compdesc.ResourceMeta
+	ResourceAccess = ArtifactAccess[ResourceMeta]
 )
 
-type AccessProvider interface {
-	ComponentVersion() ComponentVersionAccess
-	Access() (AccessSpec, error)
-	AccessMethod() (AccessMethod, error)
-}
+type (
+	SourceMeta   = compdesc.SourceMeta
+	SourceAccess = ArtifactAccess[SourceMeta]
+)
 
-type ResourceAccess interface {
-	Meta() *ResourceMeta
-	AccessProvider
-}
-
-type SourceMeta = compdesc.SourceMeta
-
-type SourceAccess interface {
-	Meta() *SourceMeta
-	AccessProvider
-}
-
-type ComponentVersionAccessImpl interface {
-	common.VersionedElement
-
-	Repository() Repository
-	GetContext() Context
-	GetDescriptor() *compdesc.ComponentDescriptor
-	DiscardChanges()
-	IsPersistent() bool
-
-	io.Closer
-}
+type ComponentReference = compdesc.ComponentReference
 
 type ComponentVersionAccess interface {
 	resource.ResourceView[ComponentVersionAccess]
+	common.VersionedElement
+	io.Closer
 
-	ComponentVersionAccessImpl
+	GetContext() Context
+	Repository() Repository
+	GetDescriptor() *compdesc.ComponentDescriptor
+
+	DiscardChanges()
+	IsPersistent() bool
 
 	GetResources() []ResourceAccess
 	GetResource(meta metav1.Identity) (ResourceAccess, error)
@@ -116,12 +127,14 @@ type ComponentVersionAccess interface {
 	GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
 	GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error)
 	SetResource(*ResourceMeta, compdesc.AccessSpec, ...ModificationOption) error
+	SetResourceByAccess(art ResourceAccess, modopts ...ModificationOption) error
 
 	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)
 	GetSourceIndex(meta metav1.Identity) int
 	GetSourceByIndex(i int) (SourceAccess, error)
 	SetSource(*SourceMeta, compdesc.AccessSpec) error
+	SetSourceByAccess(art SourceAccess) error
 
 	GetReference(meta metav1.Identity) (ComponentReference, error)
 	GetReferenceIndex(meta metav1.Identity) int
@@ -156,6 +169,9 @@ type ComponentVersionAccess interface {
 	// calculating the digest from the bytes), which would defeat the purpose of caching.
 	// It follows the same contract as AccessMethod.
 	GetInexpensiveContentVersionIdentity(spec AccessSpec) string
+
+	// Update adds the version with all changes to the component instance it has been created for.
+	Update() error
 }
 
 // ComponentLister provides the optional repository list functionality of

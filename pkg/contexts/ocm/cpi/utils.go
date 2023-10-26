@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 )
 
 type AccessMethodSource interface {
@@ -56,4 +57,19 @@ func ResourceData(s AccessMethodSource) ([]byte, error) {
 	}
 	defer meth.Close()
 	return meth.Get()
+}
+
+func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) string {
+	if h, ok := spec.(internal.HintProvider); ok {
+		return h.GetReferenceHint(cv)
+	}
+	return ""
+}
+
+func GlobalAccess(spec AccessSpec, ctx Context) AccessSpec {
+	g := spec.GlobalAccessSpec(ctx)
+	if g != nil && g.IsLocal(ctx) {
+		g = nil
+	}
+	return g
 }

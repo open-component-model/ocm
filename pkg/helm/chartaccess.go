@@ -16,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -80,21 +79,27 @@ func (c *chartAccess) unref() error {
 		return fmt.Errorf("oops: refcount is already zero")
 	}
 	c.refcnt--
+	if c.refcnt == 0 && c.closed {
+		return c.cleanup()
+	}
 	return nil
 }
 
 func (c *chartAccess) Close() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-
-	if c.refcnt > 0 {
-		return errors.ErrStillInUse("chart access")
-	}
-
 	defer func() { c.closed = true }()
+	if c.refcnt == 0 {
+		return c.cleanup()
+	}
+	return nil
+}
 
-	if c.root != "" && !c.closed {
-		return os.RemoveAll(c.root)
+func (c *chartAccess) cleanup() error {
+	if c.root != "" {
+		err := os.RemoveAll(c.root)
+		c.root = ""
+		return err
 	}
 	return nil
 }

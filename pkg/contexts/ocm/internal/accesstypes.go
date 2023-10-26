@@ -7,6 +7,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/modern-go/reflect2"
 
@@ -64,6 +65,12 @@ type HintProvider interface {
 	GetReferenceHint(cv ComponentVersionAccess) string
 }
 
+// GlobalAccessProvider is used to provide a non-local access specification.
+// It may optionally be provided by an access spec.
+type GlobalAccessProvider interface {
+	GlobalAccessSpec(ctx Context) AccessSpec
+}
+
 // AccessMethod described the access to a dedicated resource
 // It can allocate external resources, which should be released
 // with the Close() call.
@@ -71,12 +78,23 @@ type HintProvider interface {
 // via the DataAccess interface to avoid unnecessary effort
 // if the method object is just used to access meta data.
 type AccessMethod interface {
+	io.Closer
 	DataAccess
+	MimeType
 
+	IsLocal() bool
 	GetKind() string
 	AccessSpec() AccessSpec
-	MimeType
-	Close() error
+}
+
+// AccessMethodView can be used map wrap an access method
+// into a managed method with multiple views. The original method
+// object is closed once the last view is closed.
+type AccessMethodView interface {
+	AccessMethod
+
+	Base() interface{}
+	Dup() (AccessMethodView, error)
 }
 
 type AccessTypeScheme flagsetscheme.TypeScheme[AccessSpec, AccessType]

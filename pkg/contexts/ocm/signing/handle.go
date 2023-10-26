@@ -319,6 +319,10 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 			orig.Signatures = cd.Signatures
 			ctx.Signed = true
 		}
+		err := cv.Update()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return ctx, nil
 }

@@ -15,12 +15,12 @@ type _ComponentVersionAccessImplBase = cpi.ComponentVersionAccessImplBase
 type ComponentVersionAccessImpl interface {
 	cpi.ComponentVersionAccessImpl
 	EnablePersistence() bool
-	Update(final bool) error
 }
 
 type componentVersionAccessImpl struct {
 	*_ComponentVersionAccessImplBase
 	lazy           bool
+	directAccess   bool
 	persistent     bool
 	discardChanges bool
 	base           ComponentVersionContainer
@@ -28,18 +28,24 @@ type componentVersionAccessImpl struct {
 
 var _ ComponentVersionAccessImpl = (*componentVersionAccessImpl)(nil)
 
-func GetComponentVersionContainer(cv cpi.ComponentVersionAccess) (ComponentVersionContainer, error) {
+func GetComponentVersionContainer[T ComponentVersionContainer](cv cpi.ComponentVersionAccess) (T, error) {
+	var _nil T
+
 	impl, err := cpi.GetComponentVersionAccessImplementation(cv)
 	if err != nil {
-		return nil, err
+		return _nil, err
 	}
 	if mine, ok := impl.(*componentVersionAccessImpl); ok {
-		return mine.base, nil
+		cont, ok := mine.base.(T)
+		if ok {
+			return cont, nil
+		}
+		return _nil, errors.Newf("non-matching component version implementation %T", mine.base)
 	}
-	return nil, errors.Newf("non-matching component version implementation %T", impl)
+	return _nil, errors.Newf("non-matching component version implementation %T", impl)
 }
 
-func NewComponentVersionAccessImpl(name, version string, container ComponentVersionContainer, lazy bool, persistent bool) (cpi.ComponentVersionAccessImpl, error) {
+func NewComponentVersionAccessImpl(name, version string, container ComponentVersionContainer, lazy, persistent, direct bool) (cpi.ComponentVersionAccessImpl, error) {
 	base, err := cpi.NewComponentVersionAccessImplBase(container.GetContext(), name, version, container.GetParentViewManager())
 	if err != nil {
 		return nil, err
@@ -48,6 +54,7 @@ func NewComponentVersionAccessImpl(name, version string, container ComponentVers
 		_ComponentVersionAccessImplBase: base,
 		lazy:                            lazy,
 		persistent:                      persistent,
+		directAccess:                    direct,
 		base:                            container,
 	}
 	container.SetImplementation(impl)
@@ -66,12 +73,17 @@ func (a *componentVersionAccessImpl) IsPersistent() bool {
 	return a.persistent
 }
 
+func (d *componentVersionAccessImpl) UseDirectAccess() bool {
+	return d.directAccess
+}
+
 func (a *componentVersionAccessImpl) DiscardChanges() {
 	a.discardChanges = true
 }
 
 func (a *componentVersionAccessImpl) Close() error {
-	return errors.ErrListf("closing component version access %s/%s", a.GetName(), a.GetVersion()).Add(a.Update(true), a.base.Close(), a._ComponentVersionAccessImplBase.Close()).Result()
+	list := errors.ErrListf("closing component version access %s/%s", a.GetName(), a.GetVersion())
+	return list.Add(a.base.Close(), a._ComponentVersionAccessImplBase.Close()).Result()
 }
 
 func (a *componentVersionAccessImpl) Repository() cpi.Repository {
@@ -105,8 +117,18 @@ func (a *componentVersionAccessImpl) AddBlobFor(storagectx cpi.StorageContext, b
 	return a.base.AddBlobFor(storagectx, blob, refName, global)
 }
 
+func (a *componentVersionAccessImpl) ShouldUpdate(final bool) bool {
+	if a.discardChanges {
+		return false
+	}
+	if final {
+		return a.persistent
+	}
+	return !a.lazy && a.directAccess && a.persistent
+}
+
 func (a *componentVersionAccessImpl) Update(final bool) error {
-	if (final || !a.lazy) && !a.discardChanges && a.persistent {
+	if a.ShouldUpdate(final) {
 		return a.base.Update()
 	}
 	return nil

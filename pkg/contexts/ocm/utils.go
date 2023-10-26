@@ -125,3 +125,17 @@ func IsUnknownAccessSpec(s AccessSpec) bool {
 func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
 	return internal.WrapContextProvider(ctx)
 }
+
+func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) string {
+	if h, ok := spec.(internal.HintProvider); ok {
+		return h.GetReferenceHint(cv)
+	}
+	return ""
+}
+
+func GlobalAccess(spec AccessSpec, ctx Context) AccessSpec {
+	if h, ok := spec.(internal.GlobalAccessProvider); ok {
+		return h.GlobalAccessSpec(ctx)
+	}
+	return nil
+}

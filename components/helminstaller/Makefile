@@ -56,7 +56,7 @@ $(GEN)/ca: $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) resources.yaml executor
 
 .PHONY: plain-ca
 plain-ca: $(GEN)/.exists
-	$(OCM) create ca -f $(COMPONENT) "$(VERSION)"--provider  $(PROVIDER) --file $(GEN)/ca
+	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider  $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add resources --templater spiff $(GEN)/ca $(ATTRIBUTES) resources.yaml
 	@touch $(GEN)/ca
 

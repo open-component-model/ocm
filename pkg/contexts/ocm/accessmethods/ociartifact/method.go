@@ -152,6 +152,10 @@ func NewMethod(ctx cpi.ContextProvider, a cpi.AccessSpec, ref string, repo ...oc
 	}, nil
 }
 
+func (_ *accessMethod) IsLocal() bool {
+	return false
+}
+
 func (m *accessMethod) GetKind() string {
 	return m.spec.GetKind()
 }

@@ -27,6 +27,19 @@ const (
 	OCITAG_ANNOTATION = "org.opencontainers.image.ref.name"
 )
 
+func RetrieveMainArtifactFromIndex(index *artdesc.Index) string {
+	if index.Annotations != nil {
+		main := index.Annotations[MAINARTIFACT_ANNOTATION]
+		if main != "" {
+			return main
+		}
+	}
+	if len(index.Manifests) == 1 {
+		return index.Manifests[0].Digest.String()
+	}
+	return ""
+}
+
 func RetrieveMainArtifact(m map[string]string) string {
 	return m[MAINARTIFACT_ANNOTATION]
 }
@@ -86,6 +99,12 @@ func (a *ArtifactSet) GetAnnotation(name string) string {
 
 func (a *ArtifactSet) HasAnnotation(name string) bool {
 	return a.container.HasAnnotation(name)
+}
+
+func (a *ArtifactSet) SetMainArtifact(version string) {
+	if version != "" {
+		a.Annotate(MAINARTIFACT_ANNOTATION, version)
+	}
 }
 
 func AsArtifactSet(ns cpi.NamespaceAccess) (*ArtifactSet, error) {
