@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package dirtree
+package file
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"

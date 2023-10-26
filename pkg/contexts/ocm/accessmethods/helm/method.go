@@ -7,7 +7,6 @@ package helm
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"sync"
 
@@ -176,7 +175,7 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 		return nil, errors.ErrInvalid("helm chart", m.spec.HelmChart)
 	}
 
-	acc, err := helm.DownloadChart(common.NewPrinter(os.Stdout), m.comp.GetContext(), name, vers, m.spec.HelmRepository,
+	acc, err := helm.DownloadChart(common.NonePrinter, m.comp.GetContext(), name, vers, m.spec.HelmRepository,
 		helm.WithCredentials(identity.GetCredentials(m.comp.GetContext(), m.spec.HelmRepository, m.spec.GetChartName())),
 		helm.WithKeyring([]byte(m.spec.Keyring)),
 		helm.WithRootCert([]byte(m.spec.CACert)))

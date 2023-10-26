@@ -184,7 +184,7 @@ func addVersion(repo ocm.Repository, name, version string) error {
 
 	// now we compose a new component version, first we create
 	// a new version backed by this repository.
-	cv, err := repo.NewVersion(name, version)
+	cv, err := repo.NewComponentVersion(name, version)
 	if err != nil {
 		return errors.Wrapf(err, "cannot create new version")
 	}
@@ -197,7 +197,7 @@ func addVersion(repo ocm.Repository, name, version string) error {
 
 	// finally, wee add the new version to the repository.
 	fmt.Printf("adding component version\n")
-	err = repo.AddVersion(cv)
+	err = repo.AddComponentVersion(cv)
 	if err != nil {
 		return errors.Wrapf(err, "cannot save version")
 	}
@@ -249,6 +249,7 @@ func displayDigest(d *metav1.DigestSpec) {
 		fmt.Printf("        value:         %s\n", d.Value)
 	}
 }
+
 func listVersions(repo ocm.Repository, list ...string) error {
 	// now we just list the found components and their latest version.
 

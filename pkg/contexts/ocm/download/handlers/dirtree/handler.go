@@ -173,7 +173,9 @@ func (h *Handler) GetForResource(racc cpi.ResourceAccess) (fs vfs.FileSystem, re
 	case mime.MIME_TGZ, mime.MIME_TAR:
 	case MimeOCIImageArtifact:
 	default:
-		return nil, nil, nil
+		if !h.ociConfigtypes.Contains(media) && !h.ociConfigtypes.Contains(meth.MimeType()) {
+			return nil, nil, nil
+		}
 	}
 
 	r, err := meth.Reader()

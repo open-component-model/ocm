@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package ociartifact
+package external
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"

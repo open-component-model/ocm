@@ -157,7 +157,7 @@ func (r *repositoryView) LookupComponent(name string) (acc ComponentAccess, err 
 	return acc, err
 }
 
-func (r *repositoryView) NewVersion(comp, vers string, overrides ...bool) (ComponentVersionAccess, error) {
+func (r *repositoryView) NewComponentVersion(comp, vers string, overrides ...bool) (ComponentVersionAccess, error) {
 	c, err := refmgmt.ToLazy(r.LookupComponent(comp))
 	if err != nil {
 		return nil, err
@@ -167,7 +167,7 @@ func (r *repositoryView) NewVersion(comp, vers string, overrides ...bool) (Compo
 	return c.NewVersion(vers, overrides...)
 }
 
-func (r *repositoryView) AddVersion(cv ComponentVersionAccess, overrides ...bool) error {
+func (r *repositoryView) AddComponentVersion(cv ComponentVersionAccess, overrides ...bool) error {
 	c, err := refmgmt.ToLazy(r.LookupComponent(cv.GetName()))
 	if err != nil {
 		return err

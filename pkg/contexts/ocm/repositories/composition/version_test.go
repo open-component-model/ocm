@@ -58,7 +58,7 @@ var _ = Describe("version", func() {
 		// add this version again
 		repo2 := me.NewRepository(ctx)
 		finalize.Close(repo2, "target repo2")
-		MustBeSuccessful(repo2.AddVersion(cv))
+		MustBeSuccessful(repo2.AddComponentVersion(cv))
 		MustBeSuccessful(nested.Finalize())
 
 		// check result

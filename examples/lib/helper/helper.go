@@ -21,7 +21,8 @@ type Config struct {
 	Repository string `json:"repository"`
 	Version    string `json:"version"`
 
-	Target json.RawMessage `json:"targetRepository"`
+	Target    json.RawMessage `json:"targetRepository"`
+	OCMConfig json.RawMessage `json:"ocmConfig"`
 }
 
 func ReadConfig(path string) (*Config, error) {

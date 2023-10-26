@@ -64,7 +64,7 @@ func SigningComponentVersions(cfg *helper.Config) error {
 	}
 	defer target.Close()
 
-	err = target.AddVersion(cv, true)
+	err = target.AddComponentVersion(cv, true)
 	if err != nil {
 		return errors.Wrapf(err, "cannot store signed version")
 	}

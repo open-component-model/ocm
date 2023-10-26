@@ -2,13 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package blob
+package helm
 
 import (
 	"io"
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	helmregistry "helm.sh/helm/v3/pkg/registry"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -19,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	registry "github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/dirtree"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
@@ -30,7 +32,9 @@ const TYPE = resourcetypes.HELM_CHART
 type Handler struct{}
 
 func init() {
+	basetype := mime.BaseType(helmregistry.ChartLayerMediaType)
 	registry.Register(&Handler{}, registry.ForArtifactType(TYPE))
+	registry.Register(dirtree.New(basetype), registry.ForCombi(TYPE, basetype))
 }
 
 func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {

@@ -28,6 +28,7 @@ func Flush(o interface{}) error {
 var (
 	StdoutPrinter = NewPrinter(os.Stdout)
 	StderrPrinter = NewPrinter(os.Stderr)
+	NonePrinter   = NewPrinter(nil)
 )
 
 type Printer interface {

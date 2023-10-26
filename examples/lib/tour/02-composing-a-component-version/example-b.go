@@ -39,7 +39,7 @@ func ComposingAComponentVersionB() error {
 	// to any other repository (see example 4)
 
 	repo := composition.NewRepository(ctx)
-	err = repo.AddVersion(cv)
+	err = repo.AddComponentVersion(cv)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add version")
 	}

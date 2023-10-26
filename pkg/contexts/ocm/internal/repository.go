@@ -36,8 +36,8 @@ type Repository interface {
 	resource.ResourceView[Repository]
 	RepositoryImpl
 
-	NewVersion(comp, version string, overrides ...bool) (ComponentVersionAccess, error)
-	AddVersion(cv ComponentVersionAccess, overrides ...bool) error
+	NewComponentVersion(comp, version string, overrides ...bool) (ComponentVersionAccess, error)
+	AddComponentVersion(cv ComponentVersionAccess, overrides ...bool) error
 }
 
 // ConsumerIdentityProvider is an interface for object requiring
