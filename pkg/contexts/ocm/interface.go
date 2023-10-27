@@ -197,7 +197,7 @@ func BlobAccessForAccessMethod(m AccessMethodView) (blobaccess.AnnotatedBlobAcce
 // a multi-view version. The original method is closed when
 // the last view is closed.
 // After an access method is used as base object, it should not
-// explicitly closed anymore, because the the views will stop
+// explicitly closed anymore, because the views will stop
 // functioning.
 func AccessMethodAsView(acc ocm.AccessMethod, closer ...io.Closer) AccessMethodView {
 	return cpi.AccessMethodAsView(acc, closer...)

@@ -9,7 +9,9 @@ PROJECT_ROOT="${CURRENT_DIR}"/..
 
 echo "> Install Go packages/binaries"
 
-curl -sfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b $(go env GOPATH)/bin  v1.49.0
+curl -sfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b $(go env GOPATH)/bin v1.54.2
+
+GO111MODULE=off go get -u github.com/go-bindata/go-bindata/...
 
 go install github.com/go-bindata/go-bindata/v3/go-bindata@v3.1.3
 go install golang.org/x/tools/cmd/goimports@latest

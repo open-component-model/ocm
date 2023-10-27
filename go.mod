@@ -1,6 +1,6 @@
 module github.com/open-component-model/ocm
 
-go 1.19
+go 1.20
 
 replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 

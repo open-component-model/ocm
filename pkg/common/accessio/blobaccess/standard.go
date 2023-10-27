@@ -103,10 +103,7 @@ func ProviderForData(mime string, data []byte) BlobAccessProvider {
 	})
 }
 
-type (
-	_blobAccess     = BlobAccess
-	_blobAccessBase = spi.BlobAccessBase
-)
+type _blobAccess = BlobAccess
 
 ////////////////////////////////////////////////////////////////////////////////
 

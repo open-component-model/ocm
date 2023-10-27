@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+//nolint:gosec // digests of test manifests
 package testhelper
 
 import (

@@ -158,7 +158,7 @@ It uses the following fields:
   an option. If required, new options can be defined by additionally specifying
   a type and a description. New options should be used very carefully. The
   chosen names MUST not conflict with names provided by other plugins. Therefore
-  it is highly recommended to use use names prefixed by the plugin name.
+  it is highly recommended to use names prefixed by the plugin name.
 
 ` + options.DefaultRegistry.Usage() + `
 
@@ -254,7 +254,7 @@ The descriptor for an action has the following fields:
   element the action should work on. But it might be, that other credentials
   are required to fulfill its task. Therefore, the action can request a dedicated
   consumer type used to lookup the credentials. The consumer attributes are
-  derived from the the action specification and cannot be influenced by the
+  derived from the action specification and cannot be influenced by the
   plugin.
 
 ### Value Merge Handler Descriptor

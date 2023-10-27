@@ -9,8 +9,8 @@ import (
 )
 
 type AccessSpecInfo struct {
-	Short      string
-	MediaType  string
-	Hint       string
-	ConsumerId credentials.ConsumerIdentity
+	Short      string                       `json:"short"`
+	MediaType  string                       `json:"mediaType"`
+	Hint       string                       `json:"hint"`
+	ConsumerId credentials.ConsumerIdentity `json:"consumerId"`
 }
