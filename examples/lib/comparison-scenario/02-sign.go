@@ -32,21 +32,6 @@ func Sign(cfg *helper.Config) error {
 	return nil
 }
 
-func PrintSignatures(cv ocm.ComponentVersionAccess) {
-	fmt.Printf("signatures:\n")
-	for i, s := range cv.GetDescriptor().Signatures {
-		fmt.Printf("%2d    name: %s\n", i, s.Name)
-		fmt.Printf("      digest:\n")
-		fmt.Printf("        algorithm:     %s\n", s.Digest.HashAlgorithm)
-		fmt.Printf("        normalization: %s\n", s.Digest.NormalisationAlgorithm)
-		fmt.Printf("        value:         %s\n", s.Digest.Value)
-		fmt.Printf("      signature:\n")
-		fmt.Printf("        algorithm: %s\n", s.Signature.Algorithm)
-		fmt.Printf("        mediaType: %s\n", s.Signature.MediaType)
-		fmt.Printf("        value:     %s\n", s.Signature.Value)
-	}
-}
-
 // SignComponentVersion creates a key pair, registered it for
 // further use and signs the component version.
 func SignComponentVersion(cv ocm.ComponentVersionAccess) error {

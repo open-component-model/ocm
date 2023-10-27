@@ -5,34 +5,15 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
-
-func PrintPublicKey(ctx ocm.Context, name string) {
-	info := signingattr.Get(ctx)
-	key := info.GetPublicKey(name)
-	if key == nil {
-		fmt.Printf("public key for %s not found\n", name)
-	} else {
-		buf := bytes.NewBuffer(nil)
-		err := rsa.WriteKeyData(key, buf)
-		if err != nil {
-			fmt.Printf("key error: %s\n", err)
-		} else {
-			fmt.Printf("public key for %s:\n%s\n", name, buf.String())
-		}
-	}
-}
 
 func ReadConfiguration(ctx ocm.Context, cfg *helper.Config) error {
 	////////////////////////////////////////////////////////////////////////////
@@ -56,9 +37,6 @@ func Provider(cfg *helper.Config) error {
 	if err != nil {
 		return errors.Wrapf(err, "cannot compose component version")
 	}
-
-	////////////////////////////////////////////////////////////////////////////
-	fmt.Printf("*** publishing component version %s:%s\n", COMPONENT_NAME, COMPONENT_VERSION)
 
 	_, err = signing.SignComponentVersion(cv, SIGNATURE_NAME)
 	if err != nil {

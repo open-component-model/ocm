@@ -1,1 +1,12 @@
-some content
+values:
+  images:
+    podinfo:
+  default: some config value
+chartResource:
+  resource:
+    name: helmchart
+imageMappings:
+  - name: podinfo
+    resource:
+      name: podinfo-image
+    image: images.podinfo

@@ -59,6 +59,9 @@ func main() {
 			err = Provider(cfg)
 		case "consumer":
 			err = Consumer(cfg)
+		case "localize":
+			err = Localize(cfg)
+
 		default:
 			err = fmt.Errorf("unknown scenario %q", cmd)
 		}
