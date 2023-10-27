@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"sigs.k8s.io/yaml"
 )
 
 func MustProtoType(proto interface{}) reflect.Type {
@@ -32,6 +33,15 @@ func ProtoType(proto interface{}) (reflect.Type, error) {
 		return nil, errors.Newf("prototype %q must be a struct", t)
 	}
 	return t, nil
+}
+
+func ToYAML(data []byte) ([]byte, error) {
+	var m interface{}
+	err := yaml.Unmarshal(data, &m)
+	if err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(m)
 }
 
 func TypedObjectFactory(proto TypedObject) func() TypedObject {

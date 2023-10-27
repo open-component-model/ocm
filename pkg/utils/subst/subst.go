@@ -112,6 +112,7 @@ func (f *fileinfo) substituteByData(path string, value []byte) error {
 	if err != nil {
 		return errors.Wrapf(err, "invalid substitution path")
 	}
+
 	return p.ReplaceWithFile(f.content, file)
 }
 
