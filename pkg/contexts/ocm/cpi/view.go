@@ -1072,10 +1072,12 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 
 		if old != nil {
 			eq := res.Equivalent(old)
-			if !eq.IsLocalHashEqual() && !opts.IsModifyResource() && c.impl.IsPersistent() {
-				return fmt.Errorf("resource would invalidate signature")
+			if !eq.IsLocalHashEqual() && c.impl.IsPersistent() {
+				if !opts.IsModifyResource() {
+					return fmt.Errorf("resource would invalidate signature")
+				}
+				cd.Signatures = nil
 			}
-			cd.Signatures = nil
 		}
 
 		if old == nil {
