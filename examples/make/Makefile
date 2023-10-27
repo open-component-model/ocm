@@ -76,7 +76,7 @@ release: commit push ## Release component
 .PHONY: info
 info: ## Display information about the component
 	@echo "VERSION:  $(VERSION)"
-	@echo "COMMIT;   $(COMMIT)"
+	@echo "COMMIT:   $(COMMIT)"
 
 .PHONY: clean
 clean: ## Delete generated content
