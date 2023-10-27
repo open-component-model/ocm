@@ -1,5 +1,5 @@
 repository: ghcr.io/mandelsoft/test
-ocmconfig: /home/d021770/dev/go/ocm/src/github.com/open-component-model/ocm/local/comparison/ocmconfig.yaml
+ocmconfig: /home/mandelsoft/comparison/ocmconfig.yaml
 #targetRepository:
 #  type: CommonTransportFormat
 #  filePath: /tmp/comparison.ctf
