@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 func TransportTo(target ocm.Repository, src string) error {
@@ -110,7 +111,7 @@ func Consumer(cfg *helper.Config) error {
 		return errors.Wrapf(err, "cannot download helm chart")
 	}
 	// report found files
-	files, err := ListFiles(effPath, targetfs)
+	files, err := tarutils.ListArchiveContent(effPath, targetfs)
 	if err != nil {
 		return errors.Wrapf(err, "cannot list files for helm chart")
 	}

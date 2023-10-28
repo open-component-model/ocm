@@ -106,8 +106,14 @@ Then there are aggregated scenarios:
 
   It handles the complete provisioning side, from composition of
   the component version to its publishing to an OCI registry.
+
 - `consumer` (*requires `config-OO.yaml`*)
 
   It handles the complete scenario to import and verify the component
   version into the target environment. Additionally,  its prints
   all the information from 6-8. It prepares the scene for the `locatize` scenario.
+
+- `deploy` (*requires `config-OO.yaml`*)
+
+  It handles the localize scenario and uses the provided information
+  to execute a helm install action.

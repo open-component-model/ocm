@@ -7,12 +7,14 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"os"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 func PrintPublicKey(ctx ocm.Context, name string) {
@@ -46,12 +48,25 @@ func PrintSignatures(cv ocm.ComponentVersionAccess) {
 	}
 }
 
-func ListFiles(path string, fss ...vfs.FileSystem) ([]string, error) {
-	var result []string
-	fs := utils.FileSystem(fss...)
-	err := vfs.Walk(fs, path, func(path string, info vfs.FileInfo, err error) error {
-		result = append(result, path)
-		return nil
-	})
-	return result, err
+func InstallChart(chart *chart.Chart, release, namespace string) error {
+	settings := cli.New()
+	settings.SetNamespace(namespace)
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(
+		settings.RESTClientGetter(),
+		namespace,
+		os.Getenv("HELM_DRIVER"),
+		func(msg string, args ...interface{}) { fmt.Printf(msg, args...) },
+	); err != nil {
+		return err
+	}
+
+	client := action.NewInstall(actionConfig)
+	client.ReleaseName = release
+	client.Namespace = namespace
+	if _, err := client.Run(chart, nil); err != nil {
+		return err
+	}
+
+	return nil
 }

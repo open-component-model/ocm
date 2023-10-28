@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
+	"github.com/open-component-model/ocm/pkg/utils/template"
 )
 
 const COMPONENT_NAME = "acme.org/podinfo"
@@ -60,7 +61,17 @@ func main() {
 		case "consumer":
 			err = Consumer(cfg)
 		case "localize":
-			err = Localize(cfg)
+			err = Localize(cfg, template.Values{
+				"ui": map[string]interface{}{
+					"color": "#1010c0",
+				},
+			}, "", "")
+		case "deploy":
+			err = Localize(cfg, template.Values{
+				"ui": map[string]interface{}{
+					"color": "#1010c0",
+				},
+			}, "podinfo", "default")
 
 		default:
 			err = fmt.Errorf("unknown scenario %q", cmd)

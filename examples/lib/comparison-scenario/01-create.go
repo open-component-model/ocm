@@ -84,6 +84,7 @@ func CreateComponentVersion(ctx ocm.Context) (ocm.ComponentVersionAccess, error)
 		return nil, errors.Wrapf(err, "cannot create resource meta for podinfo-image")
 	}
 	script_res := localfile.ResourceAccess(ctx, mime.MIME_YAML, script_meta, "resources/deployscript")
+
 	err = cv.SetResourceAccess(script_res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot add resource helmchart")

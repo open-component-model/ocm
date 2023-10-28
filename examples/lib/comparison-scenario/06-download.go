@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 func Download(cfg *helper.Config) error {
@@ -49,7 +50,7 @@ func Download(cfg *helper.Config) error {
 	}
 
 	// report found files
-	files, err := ListFiles(path, fs)
+	files, err := tarutils.ListArchiveContent(path, fs)
 	if err != nil {
 		return errors.Wrapf(err, "cannot list files for helm chart")
 	}
