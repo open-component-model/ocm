@@ -52,7 +52,6 @@ require (
 	github.com/klauspost/compress v1.16.5
 	github.com/klauspost/pgzip v1.2.5
 	github.com/mandelsoft/logging v0.0.0-20230905123808-7042ee3aae45
-	github.com/mandelsoft/vfs v0.0.0-20230713123140-269aa4fb1338
 	github.com/marstr/guid v1.1.0
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mittwald/go-helm-client v0.12.3
@@ -225,6 +224,7 @@ require (
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mandelsoft/vfs v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
