@@ -78,12 +78,14 @@ func (r *ComponentVersionBasedAccessProvider) AccessMethod() (AccessMethod, erro
 	return acc.AccessMethod(r.vers)
 }
 
-func (r *ComponentVersionBasedAccessProvider) BlobAccess() (BlobAccess, error) {
+func (r *ComponentVersionBasedAccessProvider) BlobAccess() (blob BlobAccess, rerr error) {
 	m, err := r.AccessMethod()
 	if err != nil {
 		return nil, err
 	}
-	return BlobAccessForAccessMethod(AccessMethodAsView(m))
+	v := AccessMethodAsView(m)
+	defer errors.PropagateError(&err, v.Close)
+	return BlobAccessForAccessMethod(v)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

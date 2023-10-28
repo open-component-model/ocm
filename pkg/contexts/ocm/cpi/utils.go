@@ -48,17 +48,6 @@ func ResourceReaderForMethod(meth AccessMethod) (io.ReadCloser, error) {
 	return iotools.AddCloser(r, meth, "access method"), nil
 }
 
-// ResourceData extracts the data for a given resource/source access.
-// It handles the Close contract for the access method for a singular use.
-func ResourceData(s AccessMethodSource) ([]byte, error) {
-	meth, err := s.AccessMethod()
-	if err != nil {
-		return nil, err
-	}
-	defer meth.Close()
-	return meth.Get()
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 func ArtifactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {

@@ -220,7 +220,7 @@ type AnnotatedBlobAccess[T DataAccess] interface {
 
 type annotatedBlobAccessView[T DataAccess] struct {
 	_blobAccess
-	access T
+	annotation T
 }
 
 func (a *annotatedBlobAccessView[T]) Dup() (BlobAccess, error) {
@@ -230,12 +230,12 @@ func (a *annotatedBlobAccessView[T]) Dup() (BlobAccess, error) {
 	}
 	return &annotatedBlobAccessView[T]{
 		_blobAccess: b,
-		access:      a.access,
+		annotation:  a.annotation,
 	}, nil
 }
 
 func (a *annotatedBlobAccessView[T]) Source() T {
-	return a.access
+	return a.annotation
 }
 
 // ForDataAccess wraps the general access object into a blob access.
@@ -247,7 +247,7 @@ func ForDataAccess[T DataAccess](digest digest.Digest, size int64, mimeType stri
 
 	return &annotatedBlobAccessView[T]{
 		_blobAccess: bpi.NewBlobAccessForBase(a),
-		access:      access,
+		annotation:  access,
 	}
 }
 

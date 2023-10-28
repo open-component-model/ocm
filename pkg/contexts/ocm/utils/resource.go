@@ -7,18 +7,14 @@ package utils
 import (
 	"io"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
 func GetResourceData(acc ocm.ResourceAccess) ([]byte, error) {
-	m, err := acc.AccessMethod()
-	if err != nil {
-		return nil, err
-	}
-	defer m.Close()
-	return m.Get()
+	return blobaccess.DataFromProvider(acc)
 }
 
 func GetResourceDataForPath(cv ocm.ComponentVersionAccess, id metav1.Identity, path []metav1.Identity, resolvers ...ocm.ComponentVersionResolver) ([]byte, error) {
@@ -40,15 +36,7 @@ func GetResourceDataForRef(cv ocm.ComponentVersionAccess, ref metav1.ResourceRef
 }
 
 func GetResourceReader(acc ocm.ResourceAccess) (io.ReadCloser, error) {
-	m, err := acc.AccessMethod()
-	if err != nil {
-		return nil, err
-	}
-	reader, err := m.Reader()
-	if err != nil {
-		return nil, err
-	}
-	return iotools.AddCloser(reader, m), nil
+	return blobaccess.ReaderFromProvider(acc)
 }
 
 func GetResourceReaderForPath(cv ocm.ComponentVersionAccess, id metav1.Identity, path []metav1.Identity, resolvers ...ocm.ComponentVersionResolver) (io.ReadCloser, error) {

@@ -32,9 +32,9 @@ var _ = Describe("Test Environment", func() {
 
 		cctx.SetCredentialsForConsumer(ids, creds)
 
-		ids = credentials.NewConsumerIdentity(creds.CONSUMER_TYPE,
-			creds.ID_HOSTNAME, "ghcr.io",
-			creds.ID_PATHPREFIX, "a",
+		ids = credentials.NewConsumerIdentity(identity.CONSUMER_TYPE,
+			identity.ID_HOSTNAME, "ghcr.io",
+			identity.ID_PATHPREFIX, "a",
 		)
 		creds = credentials.DirectCredentials{
 			"username": "testuser",

@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -69,4 +70,11 @@ func InstallChart(chart *chart.Chart, release, namespace string) error {
 	}
 
 	return nil
+}
+
+func Close(c io.Closer) {
+	err := c.Close()
+	if err != nil {
+		panic(err)
+	}
 }

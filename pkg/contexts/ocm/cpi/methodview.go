@@ -59,21 +59,21 @@ func accessMethodViewCreator(acc AccessMethod, view *refmgmt.View[AccessMethodVi
 
 type accessMethodView struct {
 	*refmgmt.View[AccessMethodView]
-	access AccessMethod
+	method AccessMethod
 }
 
 func (a *accessMethodView) Base() interface{} {
-	return a.access
+	return a.method
 }
 
 func (a *accessMethodView) IsLocal() bool {
-	return a.access.IsLocal()
+	return a.method.IsLocal()
 }
 
 func (a *accessMethodView) Get() ([]byte, error) {
 	var result []byte
 	err := a.Execute(func() (err error) {
-		result, err = a.access.Get()
+		result, err = a.method.Get()
 		return
 	})
 	return result, err
@@ -82,22 +82,22 @@ func (a *accessMethodView) Get() ([]byte, error) {
 func (a *accessMethodView) Reader() (io.ReadCloser, error) {
 	var result io.ReadCloser
 	err := a.Execute(func() (err error) {
-		result, err = a.access.Reader()
+		result, err = a.method.Reader()
 		return
 	})
 	return result, err
 }
 
 func (a *accessMethodView) GetKind() string {
-	return a.access.GetKind()
+	return a.method.GetKind()
 }
 
 func (a accessMethodView) AccessSpec() internal.AccessSpec {
-	return a.access.AccessSpec()
+	return a.method.AccessSpec()
 }
 
 func (a accessMethodView) MimeType() string {
-	return a.access.MimeType()
+	return a.method.MimeType()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

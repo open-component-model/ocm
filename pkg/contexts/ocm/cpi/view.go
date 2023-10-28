@@ -1055,6 +1055,10 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		if s, ok := meth.(blobaccess.DigestSource); ok {
 			dig = s.Digest()
 		}
+		err = meth.Close()
+		if err != nil {
+			return errors.Wrapf(err, "clsoing shadowed method")
+		}
 		meth, err = NewDefaultMethodForBlobAccess(c, spec, dig, blob, spec.IsLocal(c.GetContext()))
 		if err != nil {
 			return err

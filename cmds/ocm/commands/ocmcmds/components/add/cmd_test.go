@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -57,7 +58,7 @@ func CheckComponent(env *TestEnv, handler func(ocm.Repository)) {
 	Expect(cd.Labels).To(Equal(clabels))
 
 	r := Must(cv.GetResource(metav1.Identity{"name": "data"}))
-	data := Must(ocm.ResourceData(r))
+	data := Must(ocmutils.GetResourceData(r))
 	Expect(string(data)).To(Equal("!stringdata"))
 
 	r = Must(cv.GetResource(metav1.Identity{"name": "text"}))

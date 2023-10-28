@@ -89,20 +89,6 @@ func ResourceReader(s AccessMethodSource) (io.ReadCloser, error) {
 	return cpi.ResourceReader(s)
 }
 
-// ResourceMimeReader gets a Reader for a given resource/source access.
-// It provides a Reader handling the Close contract for the access method
-// by connecting the access method's Close method to the Readers Close method.
-// Additionally, the mime type is returned.
-func ResourceMimeReader(s AccessMethodSource) (io.ReadCloser, string, error) {
-	return cpi.ResourceMimeReader(s)
-}
-
-// ResourceData extracts the data for a given resource/source access.
-// It handles the Close contract for the access method for a singular use.
-func ResourceData(s AccessMethodSource) ([]byte, error) {
-	return cpi.ResourceData(s)
-}
-
 func IsIntermediate(spec RepositorySpec) bool {
 	if s, ok := spec.(IntermediateRepositorySpecAspect); ok {
 		return s.IsIntermediate()

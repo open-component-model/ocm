@@ -11,6 +11,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -119,4 +120,29 @@ func BlobReader(blob DataReader, err ...error) (io.ReadCloser, error) {
 		return nil, err[0]
 	}
 	return blob.Reader()
+}
+
+// DataFromProvider extracts the data for a given BlobAccess provider.
+func DataFromProvider(s BlobAccessProvider) ([]byte, error) {
+	blob, err := s.BlobAccess()
+	if err != nil {
+		return nil, err
+	}
+	defer blob.Close()
+	return blob.Get()
+}
+
+// ReaderFromProvider gets a reader for a BlobAccess provides by
+// a BlobAccesssProvider. Closing the Reader also closes the BlobAccess.
+func ReaderFromProvider(s BlobAccessProvider) (io.ReadCloser, error) {
+	blob, err := s.BlobAccess()
+	if err != nil {
+		return nil, err
+	}
+	r, err := blob.Reader()
+	if err != nil {
+		blob.Close()
+		return nil, err
+	}
+	return iotools.AddCloser(r, blob), nil
 }
