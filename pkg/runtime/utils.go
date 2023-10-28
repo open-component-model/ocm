@@ -9,8 +9,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"sigs.k8s.io/yaml"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func MustProtoType(proto interface{}) reflect.Type {
@@ -35,11 +36,16 @@ func ProtoType(proto interface{}) (reflect.Type, error) {
 	return t, nil
 }
 
-func ToYAML(data []byte) ([]byte, error) {
+func ToYAML(data interface{}) ([]byte, error) {
 	var m interface{}
-	err := yaml.Unmarshal(data, &m)
-	if err != nil {
-		return nil, err
+
+	if bytes, ok := data.([]byte); ok {
+		err := yaml.Unmarshal(bytes, &m)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		m = data
 	}
 	return yaml.Marshal(m)
 }

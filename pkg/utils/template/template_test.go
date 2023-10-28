@@ -9,10 +9,12 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
+	"gopkg.in/yaml.v3"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
+	"github.com/open-component-model/ocm/pkg/utils/template"
 )
 
 func TestConfig(t *testing.T) {
@@ -259,6 +261,34 @@ b: bob (( values.MY_VAR ))
 			res, err := opts.Execute(s)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(res).To(Equal("a: alice miller\n---\nb: bob miller\n"))
+		})
+	})
+
+	Context("nerge", func() {
+		b := `{"a":{"c":"vc"},"b":"vb"}`
+
+		It("merges json", func() {
+			var vb map[string]interface{}
+			MustBeSuccessful(yaml.Unmarshal([]byte(b), &vb))
+			m := template.NewMerge()
+			a := `{"a":{"b":"vb"}}`
+			r := Must(m.Process(a, vb))
+			Expect(r).To(Equal(`{"a":{"b":"vb","c":"vc"},"b":"vb"}`))
+		})
+		It("merges yaml", func() {
+			var vb map[string]interface{}
+			MustBeSuccessful(yaml.Unmarshal([]byte(b), &vb))
+			m := template.NewMerge()
+			a := `
+a:
+ b: vc`
+			r := Must(m.Process(a, vb))
+			Expect(r).To(StringEqualTrimmedWithContext(`
+a:
+  b: vc
+  c: vc
+b: vb
+`))
 		})
 	})
 })

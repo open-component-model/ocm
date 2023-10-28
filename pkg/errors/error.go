@@ -111,8 +111,8 @@ func NewEf(cause error, msg string, args ...interface{}) error {
 }
 
 func Wrapf(err error, msg string, args ...interface{}) error {
-	if err == nil {
-		return nil
+	if err == nil || msg == "" {
+		return err
 	}
 	if len(args) > 0 {
 		msg = fmt.Sprintf(msg, args...)
