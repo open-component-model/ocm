@@ -24,13 +24,13 @@ func blobAccessViewCreator(blob BlobAccessBase, view *refmgmt.View[BlobAccess]) 
 
 type blobAccessView struct {
 	*refmgmt.View[BlobAccess]
-	access BlobAccessBase
+	baseblob BlobAccessBase
 }
 
 var _ utils.Validatable = (*blobAccessView)(nil)
 
 func (b *blobAccessView) base() BlobAccessBase {
-	return b.access
+	return b.baseblob
 }
 
 func (b *blobAccessView) Close() error {
@@ -38,12 +38,12 @@ func (b *blobAccessView) Close() error {
 }
 
 func (b *blobAccessView) Validate() error {
-	return utils.ValidateObject(b.access)
+	return utils.ValidateObject(b.baseblob)
 }
 
 func (b *blobAccessView) Get() (result []byte, err error) {
 	return result, b.Execute(func() error {
-		result, err = b.access.Get()
+		result, err = b.baseblob.Get()
 		if err != nil {
 			return err
 		}
@@ -53,7 +53,7 @@ func (b *blobAccessView) Get() (result []byte, err error) {
 
 func (b *blobAccessView) Reader() (result io.ReadCloser, err error) {
 	return result, b.Execute(func() error {
-		result, err = b.access.Reader()
+		result, err = b.baseblob.Reader()
 		if err != nil {
 			return fmt.Errorf("unable to read access: %w", err)
 		}
@@ -64,7 +64,7 @@ func (b *blobAccessView) Reader() (result io.ReadCloser, err error) {
 
 func (b *blobAccessView) Digest() (result digest.Digest) {
 	err := b.Execute(func() error {
-		result = b.access.Digest()
+		result = b.baseblob.Digest()
 		return nil
 	})
 	if err != nil {
@@ -74,16 +74,16 @@ func (b *blobAccessView) Digest() (result digest.Digest) {
 }
 
 func (b *blobAccessView) MimeType() string {
-	return b.access.MimeType()
+	return b.baseblob.MimeType()
 }
 
 func (b *blobAccessView) DigestKnown() bool {
-	return b.access.DigestKnown()
+	return b.baseblob.DigestKnown()
 }
 
 func (b *blobAccessView) Size() (result int64) {
 	err := b.Execute(func() error {
-		result = b.access.Size()
+		result = b.baseblob.Size()
 		return nil
 	})
 	if err != nil {
