@@ -11,9 +11,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
-	exthelm "github.com/open-component-model/ocm/pkg/contexts/ocm/elements/externalartifacts/helm"
-	extociartifact "github.com/open-component-model/ocm/pkg/contexts/ocm/elements/externalartifacts/ociartifact"
-	localfile "github.com/open-component-model/ocm/pkg/contexts/ocm/elements/localartifacts/file"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactaccess/helmaccess"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactaccess/ociartifactaccess"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/fileblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -61,7 +61,7 @@ func CreateComponentVersion(ctx ocm.Context) (ocm.ComponentVersionAccess, error)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot create resource meta for podinfo-image")
 	}
-	image_res := extociartifact.ResourceAccess(ctx, image_meta, PODINFO_IMAGE)
+	image_res := ociartifactaccess.ResourceAccess(ctx, image_meta, PODINFO_IMAGE)
 	err = cv.SetResourceAccess(image_res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot add resource podinfo-image")
@@ -72,7 +72,7 @@ func CreateComponentVersion(ctx ocm.Context) (ocm.ComponentVersionAccess, error)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot create resource meta for helmchart")
 	}
-	helm_res := exthelm.ResourceAccess(ctx, helm_meta, HELMCHART_NAME, HELMCHART_REPO)
+	helm_res := helmaccess.ResourceAccess(ctx, helm_meta, HELMCHART_NAME, HELMCHART_REPO)
 	err = cv.SetResourceAccess(helm_res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot add resource helmchart")
@@ -83,7 +83,7 @@ func CreateComponentVersion(ctx ocm.Context) (ocm.ComponentVersionAccess, error)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot create resource meta for podinfo-image")
 	}
-	script_res := localfile.ResourceAccess(ctx, mime.MIME_YAML, script_meta, "resources/deployscript")
+	script_res := fileblob.ResourceAccess(ctx, mime.MIME_YAML, script_meta, "resources/deployscript")
 
 	err = cv.SetResourceAccess(script_res)
 	if err != nil {

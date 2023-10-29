@@ -14,8 +14,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/localartifacts/dockermulti"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/localartifacts/text"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/dockermultiblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/textblob"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -138,8 +138,8 @@ data: some very important data required to understand this component
 		// Such objects can directly be used to add/modify a resource in a
 		// component version.
 		// The above case could be written as follows, also:
-		res := text.ResourceAccess(cv.GetContext(), meta, yamldata,
-			text.WithimeType(mime.MIME_YAML))
+		res := textblob.ResourceAccess(cv.GetContext(), meta, yamldata,
+			textblob.WithimeType(mime.MIME_YAML))
 		err = cv.SetResourceAccess(res)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")
@@ -158,11 +158,11 @@ data: some very important data required to understand this component
 	if err != nil {
 		return errors.Wrapf(err, "invalid resource meta")
 	}
-	res := dockermulti.ResourceAccess(cv.GetContext(), meta,
-		dockermulti.WithPrinter(common.StdoutPrinter),
-		dockermulti.WithHint("ocm.software/ocmci"),
-		dockermulti.WithVersion(current_version),
-		dockermulti.WithVariants(
+	res := dockermultiblob.ResourceAccess(cv.GetContext(), meta,
+		dockermultiblob.WithPrinter(common.StdoutPrinter),
+		dockermultiblob.WithHint("ocm.software/ocmci"),
+		dockermultiblob.WithVersion(current_version),
+		dockermultiblob.WithVariants(
 			fmt.Sprintf("ocmcli-image:%s-linux-amd64", current_version),
 			fmt.Sprintf("ocmcli-image:%s-linux-arm64", current_version),
 		),
