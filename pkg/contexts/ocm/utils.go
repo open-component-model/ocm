@@ -85,6 +85,9 @@ type AccessMethodSource = cpi.AccessMethodSource
 // ResourceReader gets a Reader for a given resource/source access.
 // It provides a Reader handling the Close contract for the access method
 // by connecting the access method's Close method to the Readers Close method .
+// Deprecated: use ocmutils.GetResourceReader.
+// It must be deprecated because of the support of free-floating ReSourceAccess
+// implementations, they not necessarily provide an AccessMethod.
 func ResourceReader(s AccessMethodSource) (io.ReadCloser, error) {
 	return cpi.ResourceReader(s)
 }

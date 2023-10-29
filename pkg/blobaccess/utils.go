@@ -11,7 +11,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
-	"github.com/open-component-model/ocm/pkg/common/iotools"
+	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -132,7 +132,7 @@ func DataFromProvider(s BlobAccessProvider) ([]byte, error) {
 	return blob.Get()
 }
 
-// ReaderFromProvider gets a reader for a BlobAccess provides by
+// ReaderFromProvider gets a reader for a BlobAccess provided by
 // a BlobAccesssProvider. Closing the Reader also closes the BlobAccess.
 func ReaderFromProvider(s BlobAccessProvider) (io.ReadCloser, error) {
 	blob, err := s.BlobAccess()
@@ -144,5 +144,22 @@ func ReaderFromProvider(s BlobAccessProvider) (io.ReadCloser, error) {
 		blob.Close()
 		return nil, err
 	}
-	return iotools.AddCloser(r, blob), nil
+	return iotools.AddReaderCloser(r, blob), nil
+}
+
+// MimeReaderFromProvider gets a reader for a BlobAccess provided by
+// a BlobAccesssProvider. Closing the Reader also closes the BlobAccess.
+// Additionally, the mime type of the blob is returned.
+func MimeReaderFromProvider(s BlobAccessProvider) (io.ReadCloser, string, error) {
+	blob, err := s.BlobAccess()
+	if err != nil {
+		return nil, "", err
+	}
+	mime := blob.MimeType()
+	r, err := blob.Reader()
+	if err != nil {
+		blob.Close()
+		return nil, "", err
+	}
+	return iotools.AddReaderCloser(r, blob), mime, nil
 }

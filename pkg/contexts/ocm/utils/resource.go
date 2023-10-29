@@ -8,12 +8,12 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/iotools"
 )
 
-func GetResourceData(acc ocm.ResourceAccess) ([]byte, error) {
+func GetResourceData(acc ocm.AccessProvider) ([]byte, error) {
 	return blobaccess.DataFromProvider(acc)
 }
 
@@ -35,7 +35,7 @@ func GetResourceDataForRef(cv ocm.ComponentVersionAccess, ref metav1.ResourceRef
 	return GetResourceData(a)
 }
 
-func GetResourceReader(acc ocm.ResourceAccess) (io.ReadCloser, error) {
+func GetResourceReader(acc ocm.AccessProvider) (io.ReadCloser, error) {
 	return blobaccess.ReaderFromProvider(acc)
 }
 
@@ -58,5 +58,5 @@ func GetResourceReaderForRef(cv ocm.ComponentVersionAccess, ref metav1.ResourceR
 		c.Close()
 		return nil, err
 	}
-	return iotools.AddCloser(reader, c), nil
+	return iotools.AddReaderCloser(reader, c), nil
 }
