@@ -14,7 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -26,9 +26,14 @@ type localBlobAccessMethod struct {
 	artifact  oci.ArtifactAccess
 }
 
-var _ cpi.AccessMethod = (*localBlobAccessMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*localBlobAccessMethod)(nil)
 
-func newLocalBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess) *localBlobAccessMethod {
+func newLocalBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess) accspeccpi.AccessMethod {
+	m, _ := accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethodImpl(a, ns, art), nil)
+	return m
+}
+
+func newLocalBlobAccessMethodImpl(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess) *localBlobAccessMethod {
 	return &localBlobAccessMethod{
 		spec:      a,
 		namespace: ns,
@@ -44,7 +49,7 @@ func (m *localBlobAccessMethod) GetKind() string {
 	return m.spec.GetKind()
 }
 
-func (m *localBlobAccessMethod) AccessSpec() cpi.AccessSpec {
+func (m *localBlobAccessMethod) AccessSpec() accspeccpi.AccessSpec {
 	return m.spec
 }
 
@@ -60,7 +65,7 @@ func (m *localBlobAccessMethod) Close() error {
 	return nil
 }
 
-func (m *localBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
+func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 

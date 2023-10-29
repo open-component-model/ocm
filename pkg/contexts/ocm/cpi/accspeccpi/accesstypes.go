@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package cpi
+package accspeccpi
 
 import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets/flagsetscheme"

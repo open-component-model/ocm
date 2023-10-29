@@ -56,7 +56,6 @@ type (
 	AccessMethod                     = internal.AccessMethod
 	AccessMethodSupport              = internal.AccessMethodSupport
 	AccessProvider                   = internal.AccessProvider
-	AccessType                       = internal.AccessType
 	AccessTypeProvider               = internal.AccessTypeProvider
 	AccessTypeScheme                 = internal.AccessTypeScheme
 	DataAccess                       = internal.DataAccess
@@ -234,9 +233,6 @@ type GlobalAccessProvider internal.GlobalAccessProvider
 var (
 	newStrictRepositoryTypeScheme = internal.NewStrictRepositoryTypeScheme
 	defaultRepositoryTypeScheme   = internal.DefaultRepositoryTypeScheme
-
-	newStrictAccessTypeScheme = internal.NewStrictAccessTypeScheme
-	defaultAccessTypeScheme   = internal.DefaultAccessTypeScheme
 )
 
 func WrapContextProvider(ctx LocalContextProvider) ContextProvider {

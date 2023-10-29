@@ -24,7 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/github/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -44,13 +44,13 @@ const (
 const ShaLength = 40
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](Type, cpi.WithDescription(usage)))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](TypeV1, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](LegacyType))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](LegacyTypeV1))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyTypeV1))
 }
 
-func Is(spec cpi.AccessSpec) bool {
+func Is(spec accspeccpi.AccessSpec) bool {
 	return spec != nil && spec.GetKind() == Type || spec.GetKind() == LegacyType
 }
 
@@ -72,7 +72,7 @@ type AccessSpec struct {
 	downloader downloader.Downloader
 }
 
-var _ cpi.AccessSpec = (*AccessSpec)(nil)
+var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
 // AccessSpecOptions defines a set of options which can be applied to the access spec.
 type AccessSpecOptions func(s *AccessSpec)
@@ -105,15 +105,15 @@ func New(repoURL, apiHostname, commit string, opts ...AccessSpecOptions) *Access
 	return s
 }
 
-func (a *AccessSpec) Describe(ctx cpi.Context) string {
+func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("GitHub commit %s[%s]", a.RepoURL, a.Commit)
 }
 
-func (_ *AccessSpec) IsLocal(cpi.Context) bool {
+func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return false
 }
 
-func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
+func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessSpec {
 	return a
 }
 
@@ -121,11 +121,11 @@ func (_ *AccessSpec) GetType() string {
 	return Type
 }
 
-func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
-	return newMethod(c, a)
+func (a *AccessSpec) AccessMethod(c accspeccpi.ComponentVersionAccess) (accspeccpi.AccessMethod, error) {
+	return accspeccpi.AccessMethodForImplementation(newMethod(c, a))
 }
 
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access cpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.ComponentVersionAccess) string {
 	return a.Commit
 }
 
@@ -153,7 +153,7 @@ type accessMethod struct {
 	lock   sync.Mutex
 	access blobaccess.BlobAccess
 
-	compvers          cpi.ComponentVersionAccess
+	compvers          accspeccpi.ComponentVersionAccess
 	spec              *AccessSpec
 	repositoryService RepositoryService
 	owner             string
@@ -161,9 +161,9 @@ type accessMethod struct {
 	cid               credentials.ConsumerIdentity
 }
 
-var _ cpi.AccessMethod = (*accessMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*accessMethod)(nil)
 
-func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, error) {
+func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, error) {
 	if err := validateCommit(a.Commit); err != nil {
 		return nil, fmt.Errorf("failed to validate commit: %w", err)
 	}
@@ -249,7 +249,7 @@ func (m *accessMethod) MimeType() string {
 	return mime.MIME_TGZ
 }
 
-func (m *accessMethod) AccessSpec() cpi.AccessSpec {
+func (m *accessMethod) AccessSpec() accspeccpi.AccessSpec {
 	return m.spec
 }
 

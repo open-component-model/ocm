@@ -28,7 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
@@ -124,10 +124,10 @@ var _ = Describe("Transfer handler", func() {
 		res := Must(cv.GetResource(metav1.NewIdentity("artifact")))
 		acc := Must(res.Access())
 
-		m := Must(cpi.AccessMethodViewForSpec(acc, cv))
+		m := Must(acc.AccessMethod(cv))
 		defer Close(m, "method")
 
-		blob := Must(cpi.BlobAccessForAccessMethod(m))
+		blob := Must(accspeccpi.BlobAccessForAccessMethod(m))
 		defer Close(blob, "blob")
 		MustBeSuccessful(tcv.SetResourceBlob(res.Meta(), blob, "", nil, ocm.SkipVerify()))
 

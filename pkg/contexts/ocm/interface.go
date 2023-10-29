@@ -6,13 +6,12 @@ package ocm
 
 import (
 	"context"
-	"io"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/context"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -158,26 +157,6 @@ func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) 
 
 ///////////////////////////////////////////////////////
 
-type AccessMethodView = cpi.AccessMethodView
-
-func BlobAccessForAccessMethod(m AccessMethodView) (blobaccess.AnnotatedBlobAccess[AccessMethodView], error) {
-	return cpi.BlobAccessForAccessMethod(m)
-}
-
-// AccessMethodAsView wrap an access method object into
-// a multi-view version. The original method is closed when
-// the last view is closed.
-// After an access method is used as base object, it should not
-// explicitly closed anymore, because the views will stop
-// functioning.
-func AccessMethodAsView(acc ocm.AccessMethod, closer ...io.Closer) AccessMethodView {
-	return cpi.AccessMethodAsView(acc, closer...)
-}
-
-func AccessMethodViewForSpec(spec ocm.AccessSpec, cv ocm.ComponentVersionAccess) (AccessMethodView, error) {
-	return cpi.AccessMethodViewForSpec(spec, cv)
-}
-
-func AccessMethodViewForAccessProvider(p AccessProvider) (AccessMethodView, error) {
-	return cpi.AccessMethodViewForAccessProvider(p)
+func BlobAccessForAccessMethod(m AccessMethod) (blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView], error) {
+	return accspeccpi.BlobAccessForAccessMethod(m)
 }

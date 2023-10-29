@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 )
 
 const OCIPATH = "/tmp/oci"
@@ -46,6 +47,6 @@ var _ = Describe("Method", func() {
 
 		// no credentials required for CTF as fake OCI registry.
 		Expect(credentials.GetProvidedConsumerId(m)).To(BeNil())
-		Expect(m.(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"))
+		Expect(accspeccpi.GetAccessMethodImplementation(m).(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"))
 	})
 })

@@ -23,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -382,9 +383,7 @@ func blobAccessForLocalAccessSpec(spec AccessSpec, cv ComponentVersionAccess, ac
 	if err != nil {
 		return nil, err
 	}
-	v := AccessMethodAsView(m)
-	defer v.Close()
-	return BlobAccessForAccessMethod(v)
+	return accspeccpi.BlobAccessForAccessMethod(m)
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc ComponentVersionAccess, err error) {
@@ -911,7 +910,7 @@ type fakeMethod struct {
 	blob  blobaccess.BlobAccess
 }
 
-var _ AccessMethod = (*fakeMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*fakeMethod)(nil)
 
 func newFakeMethod(m AccessMethod, blob BlobAccess) (AccessMethod, error) {
 	b, err := blob.Dup()
@@ -929,7 +928,7 @@ func newFakeMethod(m AccessMethod, blob BlobAccess) (AccessMethod, error) {
 		_ = b.Close()
 		return nil, errors.Wrapf(err, "closing access method")
 	}
-	return f, nil
+	return accspeccpi.AccessMethodForImplementation(f, nil)
 }
 
 func (f *fakeMethod) MimeType() string {
@@ -987,7 +986,7 @@ func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessVie
 			return set(meta, acc)
 		}
 
-		blob, err = BlobAccessForAccessSpec(acc, c)
+		blob, err = accspeccpi.BlobAccessForAccessSpec(acc, c)
 		if err != nil && errors.IsErrNotFoundElem(err, "", blobaccess.KIND_BLOB) {
 			return err
 		}
@@ -1059,7 +1058,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		if err != nil {
 			return errors.Wrapf(err, "clsoing shadowed method")
 		}
-		meth, err = NewDefaultMethodForBlobAccess(c, spec, dig, blob, spec.IsLocal(c.GetContext()))
+		meth, err = accspeccpi.NewDefaultMethodForBlobAccess(c, spec, dig, blob, spec.IsLocal(c.GetContext()))
 		if err != nil {
 			return err
 		}

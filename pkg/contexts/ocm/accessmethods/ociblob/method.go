@@ -16,7 +16,7 @@ import (
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -28,8 +28,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](Type, cpi.WithDescription(usage)))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](TypeV1, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 }
 
 // New creates a new OCIBlob accessor.
@@ -60,17 +60,17 @@ type AccessSpec struct {
 	Size int64 `json:"size"`
 }
 
-var _ cpi.AccessSpec = (*AccessSpec)(nil)
+var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
-func (a *AccessSpec) Describe(ctx cpi.Context) string {
+func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("OCI blob %s in repository %s", a.Digest, a.Reference)
 }
 
-func (s *AccessSpec) IsLocal(context cpi.Context) bool {
+func (s *AccessSpec) IsLocal(context accspeccpi.Context) bool {
 	return false
 }
 
-func (s *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
+func (s *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessSpec {
 	return s
 }
 
@@ -78,11 +78,11 @@ func (s *AccessSpec) GetMimeType() string {
 	return s.MediaType
 }
 
-func (s *AccessSpec) AccessMethod(access cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
-	return &accessMethod{comp: access, spec: s}, nil
+func (s *AccessSpec) AccessMethod(access accspeccpi.ComponentVersionAccess) (accspeccpi.AccessMethod, error) {
+	return accspeccpi.AccessMethodForImplementation(&accessMethod{comp: access, spec: s}, nil)
 }
 
-func (s *AccessSpec) GetInexpensiveContentVersionIdentity(access cpi.ComponentVersionAccess) string {
+func (s *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.ComponentVersionAccess) string {
 	return s.Digest.String()
 }
 
@@ -93,11 +93,11 @@ func (s *AccessSpec) GetInexpensiveContentVersionIdentity(access cpi.ComponentVe
 type accessMethod struct {
 	lock sync.Mutex
 	blob blobaccess.BlobAccess
-	comp cpi.ComponentVersionAccess
+	comp accspeccpi.ComponentVersionAccess
 	spec *AccessSpec
 }
 
-var _ cpi.AccessMethod = (*accessMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*accessMethod)(nil)
 
 func (_ *accessMethod) IsLocal() bool {
 	return false
@@ -107,7 +107,7 @@ func (m *accessMethod) GetKind() string {
 	return Type
 }
 
-func (m *accessMethod) AccessSpec() cpi.AccessSpec {
+func (m *accessMethod) AccessSpec() accspeccpi.AccessSpec {
 	return m.spec
 }
 
@@ -133,7 +133,7 @@ func (m *accessMethod) MimeType() string {
 	return m.spec.MediaType
 }
 
-func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
+func (m *accessMethod) getBlob() (blobaccess.BlobAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 

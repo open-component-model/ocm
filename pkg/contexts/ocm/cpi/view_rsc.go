@@ -10,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/context"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -83,9 +84,8 @@ func (r *ComponentVersionBasedAccessProvider) BlobAccess() (blob BlobAccess, rer
 	if err != nil {
 		return nil, err
 	}
-	v := AccessMethodAsView(m)
-	defer errors.PropagateError(&err, v.Close)
-	return BlobAccessForAccessMethod(v)
+	defer errors.PropagateError(&err, m.Close)
+	return accspeccpi.BlobAccessForAccessMethod(m)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +174,7 @@ func (b *accessAccessProvider) AccessMethod() (cpi.AccessMethod, error) {
 }
 
 func (b *accessAccessProvider) BlobAccess() (blobaccess.BlobAccess, error) {
-	return BlobAccessForAccessSpec(b.spec, &DummyComponentVersionAccess{b.ctx})
+	return accspeccpi.BlobAccessForAccessSpec(b.spec, &DummyComponentVersionAccess{b.ctx})
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
@@ -150,7 +151,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 			}
 		}
 	}
-	if ocimeth, ok := cand.(ociartifact.AccessMethod); ok {
+	if ocimeth, ok := accspeccpi.GetAccessMethodImplementation(cand).(ociartifact.AccessMethodImpl); ok {
 		// prepare for optimized point to point implementation
 		art, _, err = ocimeth.GetArtifact()
 		if err != nil {

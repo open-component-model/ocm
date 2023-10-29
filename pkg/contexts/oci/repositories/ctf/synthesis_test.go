@@ -25,6 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -32,23 +33,27 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
-type DummyMethod struct {
+type dummyMethod struct {
 	blobaccess.BlobAccess
 }
 
-var _ ocm.AccessMethod = (*DummyMethod)(nil)
-var _ blobaccess.DigestSource = (*DummyMethod)(nil)
+var _ blobaccess.DigestSource = (*dummyMethod)(nil)
 
-func (d *DummyMethod) GetKind() string {
+func (d *dummyMethod) GetKind() string {
 	return localblob.Type
 }
 
-func (d *DummyMethod) IsLocal() bool {
+func (d *dummyMethod) IsLocal() bool {
 	return true
 }
 
-func (d *DummyMethod) AccessSpec() cpi.AccessSpec {
+func (d *dummyMethod) AccessSpec() cpi.AccessSpec {
 	return nil
+}
+
+func NewDummyMethod(blob blobaccess.BlobAccess) ocm.AccessMethod {
+	m, _ := accspeccpi.AccessMethodForImplementation(&dummyMethod{blob}, nil)
+	return m
 }
 
 func CheckBlob(blob blobaccess.BlobAccess) oci.NamespaceAccess {
@@ -149,7 +154,7 @@ var _ = Describe("syntheses", func() {
 
 		finalize.Close(CheckBlob(newblob), "newset")
 
-		meth := &DummyMethod{newblob}
+		meth := NewDummyMethod(newblob)
 		digest := Must(artifact.New(sha256.Algorithm).DetermineDigest("", meth, nil))
 		Expect(digest).NotTo(BeNil())
 		Expect(digest.Value).To(Equal(DIGEST_MANIFEST))

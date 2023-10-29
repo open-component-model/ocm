@@ -12,6 +12,7 @@ import (
 	ocmhdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -107,7 +108,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 	case localfsblob.Type:
 		fallthrough
 	case localblob.Type:
-		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.access), nil
+		return accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.access), nil)
 	}
 
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "virtual registry")

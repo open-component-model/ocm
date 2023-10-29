@@ -220,13 +220,13 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 	*t.GetDescriptor() = *prep
 	log.Info("  transferring resources")
 	for i, r := range src.GetResources() {
-		var m ocmcpi.AccessMethodView
+		var m ocmcpi.AccessMethod
 
 		nested := finalize.Nested()
 
 		a, err := r.Access()
 		if err == nil {
-			m, err = ocmcpi.AccessMethodViewForSpec(a, src)
+			m, err = a.AccessMethod(src)
 			nested.Close(m, fmt.Sprintf("%s: transferring resource %d: closing access method", hist, i))
 		}
 		if err == nil {
@@ -283,11 +283,11 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 
 	log.Info("  transferring sources")
 	for i, r := range src.GetSources() {
-		var m ocmcpi.AccessMethodView
+		var m ocmcpi.AccessMethod
 
 		a, err := r.Access()
 		if err == nil {
-			m, err = ocmcpi.AccessMethodViewForSpec(a, src)
+			m, err = a.AccessMethod(src)
 		}
 		if err == nil {
 			ok := a.IsLocal(src.GetContext())

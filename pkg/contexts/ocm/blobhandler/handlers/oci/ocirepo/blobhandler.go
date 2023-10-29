@@ -29,6 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/mapocirepoattr"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 )
@@ -87,7 +88,7 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 		"mediatype", blob.MimeType(),
 		"hint", hint,
 	}
-	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[cpi.AccessMethodView]); ok {
+	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView]); ok {
 		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci blob handler with ocm access source",
 			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
@@ -150,12 +151,12 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	keep := keepblobattr.Get(ctx.GetContext())
 
-	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[cpi.AccessMethodView]); ok {
+	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView]); ok {
 		// prepare for optimized point to point implementation
 		log.Debug("oci artifact handler with ocm access source",
 			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
-		if ocimeth, ok := m.Source().Base().(ociartifact.AccessMethod); !keep && ok {
+		if ocimeth, ok := m.Source().Base().(ociartifact.AccessMethodImpl); !keep && ok {
 			art, _, err = ocimeth.GetArtifact()
 			if err != nil {
 				return nil, errors.Wrapf(err, "cannot access source artifact")

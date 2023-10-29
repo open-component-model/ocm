@@ -11,6 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
@@ -63,7 +64,7 @@ func (p *PluginHandler) AccessMethod(spec *AccessSpec, cv cpi.ComponentVersionAc
 	if err != nil {
 		return nil, err
 	}
-	return newMethod(p, spec, cv.GetContext(), info, creddata), nil
+	return accspeccpi.AccessMethodForImplementation(newMethod(p, spec, cv.GetContext(), info, creddata), nil)
 }
 
 func (p *PluginHandler) GetInexpensiveContentVersionIdentity(spec *AccessSpec, cv cpi.ComponentVersionAccess) string {

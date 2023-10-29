@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package cpi
+package accspeccpi
 
 import (
 	"io"
@@ -16,9 +16,9 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type DefaultAccessMethod struct {
-	lock   sync.Mutex
-	access blobaccess.BlobAccess
+type DefaultAccessMethodImpl struct {
+	lock sync.Mutex
+	blob blobaccess.BlobAccess
 
 	factory BlobAccessFactory
 	comp    ComponentVersionAccess
@@ -29,14 +29,19 @@ type DefaultAccessMethod struct {
 }
 
 var (
-	_ AccessMethod            = (*DefaultAccessMethod)(nil)
-	_ blobaccess.DigestSource = (*DefaultAccessMethod)(nil)
+	_ AccessMethodImpl        = (*DefaultAccessMethodImpl)(nil)
+	_ blobaccess.DigestSource = (*DefaultAccessMethodImpl)(nil)
 )
 
-type BlobAccessFactory func() (BlobAccess, error)
+type BlobAccessFactory func() (blobaccess.BlobAccess, error)
 
 func NewDefaultMethod(c ComponentVersionAccess, a AccessSpec, digest digest.Digest, mime string, fac BlobAccessFactory, local ...bool) AccessMethod {
-	return &DefaultAccessMethod{
+	m, _ := AccessMethodForImplementation(NewDefaultMethodImpl(c, a, digest, mime, fac, local...), nil)
+	return m
+}
+
+func NewDefaultMethodImpl(c ComponentVersionAccess, a AccessSpec, digest digest.Digest, mime string, fac BlobAccessFactory, local ...bool) AccessMethodImpl {
+	return &DefaultAccessMethodImpl{
 		spec:    a,
 		comp:    c,
 		mime:    mime,
@@ -47,13 +52,17 @@ func NewDefaultMethod(c ComponentVersionAccess, a AccessSpec, digest digest.Dige
 }
 
 func NewDefaultMethodForBlobAccess(c ComponentVersionAccess, a AccessSpec, digest digest.Digest, blob blobaccess.BlobAccess, local ...bool) (AccessMethod, error) {
+	return AccessMethodForImplementation(NewDefaultMethodImplForBlobAccess(c, a, digest, blob, local...))
+}
+
+func NewDefaultMethodImplForBlobAccess(c ComponentVersionAccess, a AccessSpec, digest digest.Digest, blob blobaccess.BlobAccess, local ...bool) (AccessMethodImpl, error) {
 	blob, err := blob.Dup()
 	if err != nil {
 		return nil, err
 	}
-	return &DefaultAccessMethod{
+	return &DefaultAccessMethodImpl{
 		spec:    a,
-		access:  blob,
+		blob:    blob,
 		comp:    c,
 		mime:    blob.MimeType(),
 		digest:  digest,
@@ -62,36 +71,36 @@ func NewDefaultMethodForBlobAccess(c ComponentVersionAccess, a AccessSpec, diges
 	}, nil
 }
 
-func (m *DefaultAccessMethod) getAccess() (blobaccess.BlobAccess, error) {
+func (m *DefaultAccessMethodImpl) getAccess() (blobaccess.BlobAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if m.access == nil {
+	if m.blob == nil {
 		acc, err := m.factory()
 		if err != nil {
 			return nil, err
 		}
-		m.access = acc
+		m.blob = acc
 	}
-	return m.access, nil
+	return m.blob, nil
 }
 
-func (m *DefaultAccessMethod) Digest() digest.Digest {
+func (m *DefaultAccessMethodImpl) Digest() digest.Digest {
 	return m.digest
 }
 
-func (m *DefaultAccessMethod) IsLocal() bool {
+func (m *DefaultAccessMethodImpl) IsLocal() bool {
 	return m.local
 }
 
-func (m *DefaultAccessMethod) GetKind() string {
+func (m *DefaultAccessMethodImpl) GetKind() string {
 	return m.spec.GetKind()
 }
 
-func (m *DefaultAccessMethod) AccessSpec() AccessSpec {
+func (m *DefaultAccessMethodImpl) AccessSpec() AccessSpec {
 	return m.spec
 }
 
-func (m *DefaultAccessMethod) Get() ([]byte, error) {
+func (m *DefaultAccessMethodImpl) Get() ([]byte, error) {
 	a, err := m.getAccess()
 	if err != nil {
 		return nil, err
@@ -99,7 +108,7 @@ func (m *DefaultAccessMethod) Get() ([]byte, error) {
 	return a.Get()
 }
 
-func (m *DefaultAccessMethod) Reader() (io.ReadCloser, error) {
+func (m *DefaultAccessMethodImpl) Reader() (io.ReadCloser, error) {
 	a, err := m.getAccess()
 	if err != nil {
 		return nil, err
@@ -107,15 +116,15 @@ func (m *DefaultAccessMethod) Reader() (io.ReadCloser, error) {
 	return a.Reader()
 }
 
-func (m *DefaultAccessMethod) Close() error {
+func (m *DefaultAccessMethodImpl) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if m.access != nil {
-		return m.access.Close()
+	if m.blob != nil {
+		return m.blob.Close()
 	}
 	return nil
 }
 
-func (m *DefaultAccessMethod) MimeType() string {
+func (m *DefaultAccessMethodImpl) MimeType() string {
 	return m.mime
 }

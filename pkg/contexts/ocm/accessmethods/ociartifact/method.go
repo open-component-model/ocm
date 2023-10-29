@@ -22,7 +22,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -40,14 +41,14 @@ const (
 )
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](Type, cpi.WithDescription(usage)))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](TypeV1, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](LegacyType))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](LegacyTypeV1))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyTypeV1))
 }
 
-func Is(spec cpi.AccessSpec) bool {
+func Is(spec accspeccpi.AccessSpec) bool {
 	return spec != nil && (spec.GetKind() == Type || spec.GetKind() == LegacyType)
 }
 
@@ -60,8 +61,8 @@ type AccessSpec struct {
 }
 
 var (
-	_ cpi.AccessSpec          = (*AccessSpec)(nil)
-	_ cpi.HintProvider        = (*AccessSpec)(nil)
+	_ accspeccpi.AccessSpec   = (*AccessSpec)(nil)
+	_ accspeccpi.HintProvider = (*AccessSpec)(nil)
 	_ blobaccess.DigestSource = (*AccessSpec)(nil)
 )
 
@@ -73,11 +74,11 @@ func New(ref string) *AccessSpec {
 	}
 }
 
-func (a *AccessSpec) Describe(ctx cpi.Context) string {
+func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("OCI artifact %s", a.ImageReference)
 }
 
-func (_ *AccessSpec) IsLocal(cpi.Context) bool {
+func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return false
 }
 
@@ -89,16 +90,16 @@ func (a *AccessSpec) Digest() digest.Digest {
 	return *ref.Digest
 }
 
-func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
+func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessSpec {
 	return a
 }
 
-func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) string {
 	ref, err := oci.ParseRef(a.ImageReference)
 	if err != nil {
 		return ""
 	}
-	prefix := cpi.RepositoryPrefix(cv.Repository().GetSpecification())
+	prefix := ocmcpi.RepositoryPrefix(cv.Repository().GetSpecification())
 	hint := ref.Repository
 	if strings.HasPrefix(hint, prefix+grammar.RepositorySeparator) {
 		// try to keep hint identical, even across intermediate
@@ -111,7 +112,7 @@ func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
 	return hint
 }
 
-func (a *AccessSpec) GetOCIReference(cv cpi.ComponentVersionAccess) (string, error) {
+func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (string, error) {
 	return a.ImageReference, nil
 }
 
@@ -119,11 +120,11 @@ func (_ *AccessSpec) GetType() string {
 	return Type
 }
 
-func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
+func (a *AccessSpec) AccessMethod(c accspeccpi.ComponentVersionAccess) (accspeccpi.AccessMethod, error) {
 	return NewMethod(c.GetContext(), a, a.ImageReference)
 }
 
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv cpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv accspeccpi.ComponentVersionAccess) string {
 	ref, err := oci.ParseRef(a.ImageReference)
 	if err != nil {
 		return ""
@@ -137,12 +138,12 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv cpi.ComponentVersio
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type AccessMethod = *accessMethod
+type AccessMethodImpl = *accessMethod
 
 type accessMethod struct {
 	lock      sync.Mutex
-	ctx       cpi.Context
-	spec      cpi.AccessSpec
+	ctx       accspeccpi.Context
+	spec      accspeccpi.AccessSpec
 	relto     oci.Repository
 	reference string
 
@@ -155,25 +156,26 @@ type accessMethod struct {
 }
 
 var (
-	_ cpi.AccessMethod                     = (*accessMethod)(nil)
+	_ accspeccpi.AccessMethodImpl          = (*accessMethod)(nil)
 	_ blobaccess.DigestSource              = (*accessMethod)(nil)
+	_ accspeccpi.DigestSource              = (*accessMethod)(nil)
 	_ credentials.ConsumerIdentityProvider = (*accessMethod)(nil)
 )
 
-func NewMethod(ctx cpi.ContextProvider, a cpi.AccessSpec, ref string, repo ...oci.Repository) (*accessMethod, error) {
-	return &accessMethod{
+func NewMethod(ctx accspeccpi.ContextProvider, a accspeccpi.AccessSpec, ref string, repo ...oci.Repository) (accspeccpi.AccessMethod, error) {
+	return accspeccpi.AccessMethodForImplementation(&accessMethod{
 		spec:      a,
 		reference: ref,
 		relto:     utils.Optional(repo...),
 		ctx:       ctx.OCMContext(),
-	}, nil
+	}, nil)
 }
 
 func (_ *accessMethod) IsLocal() bool {
 	return false
 }
 
-func (m *accessMethod) GetOCIReference(cv cpi.ComponentVersionAccess) (string, error) {
+func (m *accessMethod) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (string, error) {
 	return m.reference, nil
 }
 
@@ -181,7 +183,7 @@ func (m *accessMethod) GetKind() string {
 	return m.spec.GetKind()
 }
 
-func (m *accessMethod) AccessSpec() cpi.AccessSpec {
+func (m *accessMethod) AccessSpec() accspeccpi.AccessSpec {
 	return m.spec
 }
 

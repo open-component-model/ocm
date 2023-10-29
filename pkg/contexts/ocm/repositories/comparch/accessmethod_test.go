@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -77,7 +78,7 @@ var _ = Describe("access method", func() {
 			m, err := spec.AccessMethod(ca)
 			Expect(err).To(Succeed())
 			Expect(m).To(Not(BeNil()))
-			Expect(reflect.TypeOf(m).String()).To(Equal("*comparch.localFilesystemBlobAccessMethod"))
+			Expect(reflect.TypeOf(accspeccpi.GetAccessMethodImplementation(m)).String()).To(Equal("*comparch.localFilesystemBlobAccessMethod"))
 			Expect(m.GetKind()).To(Equal("localBlob"))
 
 			Expect(ca.Close()).To(Succeed())

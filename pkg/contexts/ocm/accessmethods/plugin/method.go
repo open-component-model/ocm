@@ -14,7 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -76,7 +76,7 @@ type accessMethod struct {
 	creds   json.RawMessage
 }
 
-var _ cpi.AccessMethod = (*accessMethod)(nil)
+var _ cpi.AccessMethodImpl = (*accessMethod)(nil)
 
 func newMethod(p *PluginHandler, spec *AccessSpec, ctx ocm.Context, info *ppi.AccessSpecInfo, creds json.RawMessage) *accessMethod {
 	return &accessMethod{
@@ -122,7 +122,7 @@ func (m *accessMethod) MimeType() string {
 	return m.info.MediaType
 }
 
-func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
+func (m *accessMethod) getBlob() (blobaccess.BlobAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 

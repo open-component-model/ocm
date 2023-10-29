@@ -9,19 +9,20 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 )
 
 type localOCIBlobAccessMethod struct {
 	*localBlobAccessMethod
 }
 
-var _ cpi.AccessMethod = (*localOCIBlobAccessMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*localOCIBlobAccessMethod)(nil)
 
-func newLocalOCIBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess) cpi.AccessMethod {
-	return &localOCIBlobAccessMethod{
-		localBlobAccessMethod: newLocalBlobAccessMethod(a, ns, art),
-	}
+func newLocalOCIBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess) accspeccpi.AccessMethod {
+	m, _ := accspeccpi.AccessMethodForImplementation(&localOCIBlobAccessMethod{
+		localBlobAccessMethod: newLocalBlobAccessMethodImpl(a, ns, art),
+	}, nil)
+	return m
 }
 
 func (m *localOCIBlobAccessMethod) MimeType() string {

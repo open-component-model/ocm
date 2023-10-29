@@ -5,9 +5,9 @@
 package s3
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 )
 
-func Versions() cpi.AccessTypeVersionScheme {
+func Versions() accspeccpi.AccessTypeVersionScheme {
 	return versions
 }
