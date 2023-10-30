@@ -92,6 +92,7 @@ The following standard identity matchers are supported:
 
     - *<code>type</code>* (required if set in pattern): the identity type
     - *<code>hostname</code>* (required if set in pattern): the hostname of a server
+    - *<code>scheme</code>* (optional): the URL scheme of a server
     - *<code>port</code>* (optional): the port of a server
     - *<code>pathprefix</code>* (optional): a path prefix to match. The
       element with the most matching path components is selected (separator is <code>/</code>).
