@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
@@ -46,6 +47,16 @@ func PrintSignatures(cv ocm.ComponentVersionAccess) {
 		fmt.Printf("        algorithm: %s\n", s.Signature.Algorithm)
 		fmt.Printf("        mediaType: %s\n", s.Signature.MediaType)
 		fmt.Printf("        value:     %s\n", s.Signature.Value)
+	}
+}
+
+func PrintConsumerId(o interface{}, msg string) {
+	// register credentials for given OCI registry in context.
+	id := credentials.GetProvidedConsumerId(o)
+	if id == nil {
+		fmt.Printf("no consumer id for %s\n", msg)
+	} else {
+		fmt.Printf("consumer id for %s: %s\n", msg, id)
 	}
 }
 

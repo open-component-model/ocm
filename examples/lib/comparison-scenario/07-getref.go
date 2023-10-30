@@ -69,5 +69,12 @@ func GetOCIReference(ctx ocm.Context, cfg *helper.Config) error {
 	} else {
 		fmt.Printf("no OCI reference found\n")
 	}
+
+	meth, err := res.AccessMethod()
+	if err != nil {
+		return err
+	}
+	defer meth.Close()
+	PrintConsumerId(meth, "OCI image")
 	return nil
 }

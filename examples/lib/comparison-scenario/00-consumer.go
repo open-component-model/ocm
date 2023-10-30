@@ -34,6 +34,7 @@ func TransportTo(target ocm.Repository, src string) error {
 		return errors.Wrapf(err, "cannot get repository access for %s", src)
 	}
 	defer repo.Close()
+	PrintConsumerId(repo, "source repository")
 
 	// lookup component version to be transported
 	cv, err := repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION)
@@ -69,6 +70,7 @@ func Consumer(cfg *helper.Config) error {
 		return errors.Wrapf(err, "cannot open local repository")
 	}
 	defer repo.Close()
+	PrintConsumerId(repo, "local repository")
 
 	////////////////////////////////////////////////////////////////////////////
 	fmt.Printf("*** transfer compoment version\n")
