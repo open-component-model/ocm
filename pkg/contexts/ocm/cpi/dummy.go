@@ -112,43 +112,49 @@ func (d *DummyComponentVersionAccess) GetReferenceByIndex(i int) (ComponentRefer
 }
 
 func (d *DummyComponentVersionAccess) AccessMethod(spec AccessSpec) (AccessMethod, error) {
-	panic("implement me")
+	if spec.IsLocal(d.Context) {
+		return nil, errors.ErrNotSupported("local access method")
+	}
+	return spec.AccessMethod(d)
 }
 
 func (d *DummyComponentVersionAccess) GetInexpensiveContentVersionIdentity(spec AccessSpec) string {
-	panic("implement me")
+	if spec.IsLocal(d.Context) {
+		return ""
+	}
+	return spec.GetInexpensiveContentVersionIdentity(d)
 }
 
 func (d *DummyComponentVersionAccess) Update() error {
-	panic("implement me")
+	return errors.ErrNotSupported("update")
 }
 
 func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype, refName string, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error) {
-	panic("implement me")
+	return nil, errors.ErrNotSupported("adding blobs")
 }
 
 func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...BlobModificationOption) error {
-	panic("implement me")
+	return errors.ErrNotSupported("adding blobs")
 }
 
 func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *internal.ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error {
-	panic("implement me")
+	return errors.ErrNotSupported("resource modification")
 }
 
 func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compdesc.AccessSpec, opts ...ModificationOption) error {
-	panic("implement me")
+	return errors.ErrNotSupported("resource modification")
 }
 
 func (d *DummyComponentVersionAccess) SetResourceAccess(art ResourceAccess, modopts ...BlobModificationOption) error {
-	panic("implement me")
+	return errors.ErrNotSupported("resource modification")
 }
 
 func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error {
-	panic("implement me")
+	return errors.ErrNotSupported("source modification")
 }
 
 func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.AccessSpec) error {
-	panic("implement me")
+	return errors.ErrNotSupported("source modification")
 }
 
 func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess) error {

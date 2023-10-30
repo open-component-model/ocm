@@ -85,6 +85,7 @@ type repositoryView struct {
 var (
 	_ Repository                           = (*repositoryView)(nil)
 	_ credentials.ConsumerIdentityProvider = (*repositoryView)(nil)
+	_ utils.Unwrappable                    = (*repositoryView)(nil)
 )
 
 func GetRepositoryImplementation(n Repository) (RepositoryImpl, error) {
@@ -112,6 +113,10 @@ func NewNoneRefRepositoryView(i RepositoryImpl) Repository {
 
 func NewRepository(impl RepositoryImpl, name ...string) Repository {
 	return resource.NewResource[Repository](impl, repositoryViewCreator, utils.OptionalDefaulted("OCM repo", name...), true)
+}
+
+func (r *repositoryView) Unwrap() interface{} {
+	return r.impl
 }
 
 func (r *repositoryView) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
@@ -231,7 +236,10 @@ type componentAccessView struct {
 	impl ComponentAccessImpl
 }
 
-var _ ComponentAccess = (*componentAccessView)(nil)
+var (
+	_ ComponentAccess   = (*componentAccessView)(nil)
+	_ utils.Unwrappable = (*componentAccessView)(nil)
+)
 
 func GetComponentAccessImplementation(n ComponentAccess) (ComponentAccessImpl, error) {
 	if v, ok := n.(*componentAccessView); ok {
@@ -249,6 +257,10 @@ func componentAccessViewCreator(i ComponentAccessImpl, v resource.CloserView, d 
 
 func NewComponentAccess(impl ComponentAccessImpl, kind ...string) ComponentAccess {
 	return resource.NewResource[ComponentAccess](impl, componentAccessViewCreator, fmt.Sprintf("%s %s", utils.OptionalDefaulted("component", kind...), impl.GetName()), true)
+}
+
+func (c *componentAccessView) Unwrap() interface{} {
+	return c.impl
 }
 
 func (c *componentAccessView) GetContext() Context {
@@ -590,7 +602,10 @@ type componentVersionAccessView struct {
 	impl ComponentVersionAccessImpl
 }
 
-var _ ComponentVersionAccess = (*componentVersionAccessView)(nil)
+var (
+	_ ComponentVersionAccess = (*componentVersionAccessView)(nil)
+	_ utils.Unwrappable      = (*componentVersionAccessView)(nil)
+)
 
 func GetComponentVersionAccessImplementation(n ComponentVersionAccess) (ComponentVersionAccessImpl, error) {
 	if v, ok := n.(*componentVersionAccessView); ok {
@@ -608,6 +623,10 @@ func artifactAccessViewCreator(i ComponentVersionAccessImpl, v resource.CloserVi
 
 func NewComponentVersionAccess(impl ComponentVersionAccessImpl) ComponentVersionAccess {
 	return resource.NewResource[ComponentVersionAccess](impl, artifactAccessViewCreator, fmt.Sprintf("component version  %s/%s", impl.GetName(), impl.GetVersion()), true)
+}
+
+func (c *componentVersionAccessView) Unwrap() interface{} {
+	return c.impl
 }
 
 func (c *componentVersionAccessView) Close() error {

@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/context"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
@@ -189,6 +190,8 @@ type artifactAccessProvider[M any] struct {
 	meta *M
 }
 
+var _ credentials.ConsumerIdentityProvider = (*artifactAccessProvider[any])(nil)
+
 type artifactCVAccessProvider[M any] struct {
 	artifactAccessProvider[M]
 	componentVersionProvider
@@ -210,6 +213,24 @@ func NewArtifactAccessForProvider[M any](meta *M, prov AccessProvider) cpi.Artif
 
 func (r *artifactAccessProvider[M]) Meta() *M {
 	return r.meta
+}
+
+func (b *artifactAccessProvider[M]) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	m, err := b.AccessMethod()
+	if err != nil {
+		return nil
+	}
+	defer m.Close()
+	return credentials.GetProvidedConsumerId(m, uctx...)
+}
+
+func (b *artifactAccessProvider[M]) GetIdentityMatcher() string {
+	m, err := b.AccessMethod()
+	if err != nil {
+		return ""
+	}
+	defer m.Close()
+	return credentials.GetProvidedIdentityMatcher(m)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -94,7 +94,7 @@ type AccessMethodImpl interface {
 
 // AccessMethod is used to support independently closable
 // views on an access method implementation, which can
-// be passed arround and stored. The original method implementation
+// be passed around and stored. The original method implementation
 // object is closed once the last view is closed.
 type AccessMethod interface {
 	refmgmt.Dup[AccessMethod]

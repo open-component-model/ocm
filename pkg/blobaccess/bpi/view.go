@@ -27,9 +27,16 @@ type blobAccessView struct {
 	baseblob BlobAccessBase
 }
 
-var _ utils.Validatable = (*blobAccessView)(nil)
+var (
+	_ utils.Validatable = (*blobAccessView)(nil)
+	_ utils.Unwrappable = (*blobAccessView)(nil)
+)
 
 func (b *blobAccessView) base() BlobAccessBase {
+	return b.baseblob
+}
+
+func (b *blobAccessView) Unwrap() interface{} {
 	return b.baseblob
 }
 

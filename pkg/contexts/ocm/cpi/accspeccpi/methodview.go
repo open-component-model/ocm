@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type DigestSource interface {
@@ -22,9 +23,8 @@ type DigestSource interface {
 // into a managed method with multiple views. The original method
 // object is closed once the last view is closed.
 type AccessMethodView interface {
+	utils.Unwrappable
 	AccessMethod
-
-	Base() interface{}
 }
 
 // AccessMethodForImplementation wrap an access method implementation object
@@ -61,7 +61,7 @@ var (
 	_ credentials.ConsumerIdentityProvider = (*accessMethodView)(nil)
 )
 
-func (a *accessMethodView) Base() interface{} {
+func (a *accessMethodView) Unwrap() interface{} {
 	return a.methodimpl
 }
 
@@ -125,7 +125,7 @@ func BlobAccessForAccessMethod(m AccessMethod) (blobaccess.AnnotatedBlobAccess[A
 
 func GetAccessMethodImplementation(m AccessMethod) interface{} {
 	if v, ok := m.(AccessMethodView); ok {
-		return v.Base()
+		return v.Unwrap()
 	}
 	return nil
 }

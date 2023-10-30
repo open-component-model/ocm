@@ -156,7 +156,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		log.Debug("oci artifact handler with ocm access source",
 			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
-		if ocimeth, ok := m.Source().Base().(ociartifact.AccessMethodImpl); !keep && ok {
+		if ocimeth, ok := m.Source().Unwrap().(ociartifact.AccessMethodImpl); !keep && ok {
 			art, _, err = ocimeth.GetArtifact()
 			if err != nil {
 				return nil, errors.Wrapf(err, "cannot access source artifact")
