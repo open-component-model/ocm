@@ -81,7 +81,7 @@
 // It implements the minimal implementation interface and offers with
 // the method View a way to create additional views. It can just be
 // instantiated for the base usage.
-// Using the creator NewResourceImplBase is is possible to support
+// Using the creator NewResourceImplBase it is possible to support
 //   - nested use-cases, where an implementations hold a reference
 //     on a parent object
 //   - additional closers are required.

@@ -10,8 +10,6 @@ import (
 
 type NopCloser struct{}
 
-type _nopCloser = NopCloser
-
 func (NopCloser) Close() error {
 	return nil
 }

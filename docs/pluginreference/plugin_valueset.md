@@ -14,7 +14,7 @@ plugin valueset [<options>] <sub command> ...
 
 ### Description
 
-This command group provides all commands used to implement a a value set
+This command group provides all commands used to implement a value set
 described by a value set descriptor ([plugin descriptor](plugin_descriptor.md).
 
 ### SEE ALSO

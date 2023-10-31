@@ -33,7 +33,7 @@ ifeq ("v$(JQ)","v0.0")
 	deps += $(detected_OS)_jq
 endif
 
-GOLANGCILINT_VERSION := "v1.49.0"
+GOLANGCILINT_VERSION := "v1.54.2"
 GOLANGCILINTV := $(shell (golangci-lint --version 2>/dev/null || echo 0.0.0) | sed 's/.*v\([0-9\.]*\) .*/\1/')
 ifneq ("v$(GOLANGCILINTV)",$(GOLANGCILINT_VERSION))
   deps += golangci-lint
@@ -50,7 +50,13 @@ install-requirements: $(deps) $(GOPATH)/bin/goimports
 
 .PHONY: golangci-lint
 golangci-lint:
-	go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCILINT_VERSION)
+	@# no recommended by website
+	@# go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCILINT_VERSION)
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin $(GOLANGCILINT_VERSION)
+
+.PHONY: golangci-lint-version
+golangci-lint-version:
+	@echo "$(GOLANGCILINT_VERSION)"
 
 .PHONY: go-bindata
 go-bindata:
