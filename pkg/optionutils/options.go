@@ -10,10 +10,14 @@ type Option[T any] interface {
 
 func EvalOptions[O any](opts ...Option[*O]) *O {
 	var eff O
-	for _, opt := range opts {
+	ApplyOptions(&eff, opts...)
+	return &eff
+}
+
+func ApplyOptions[O any](opts *O, list ...Option[*O]) {
+	for _, opt := range list {
 		if opt != nil {
-			opt.ApplyTo(&eff)
+			opt.ApplyTo(opts)
 		}
 	}
-	return &eff
 }
