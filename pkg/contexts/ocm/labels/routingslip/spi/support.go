@@ -5,7 +5,7 @@
 package spi
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/clitypes"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets/flagsetscheme"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -30,15 +30,15 @@ func MustNewEntryMultiFormatVersion(kind string, formats EntryFormatVersionRegis
 ////////////////////////////////////////////////////////////////////////////////
 
 func NewEntryType[I Entry](name string, opts ...EntryTypeOption) EntryType {
-	return clitypes.NewCLITypedObjectTypeObject[Entry](runtime.NewVersionedTypedObjectType[Entry, I](name), opts...)
+	return flagsetscheme.NewTypedObjectTypeObject[Entry](runtime.NewVersionedTypedObjectType[Entry, I](name), opts...)
 }
 
 func NewEntryTypeByConverter[I Entry, V runtime.VersionedTypedObject](name string, converter runtime.Converter[I, V], opts ...EntryTypeOption) EntryType {
-	return clitypes.NewCLITypedObjectTypeObject[Entry](runtime.NewVersionedTypedObjectTypeByConverter[Entry, I, V](name, converter), opts...)
+	return flagsetscheme.NewTypedObjectTypeObject[Entry](runtime.NewVersionedTypedObjectTypeByConverter[Entry, I, V](name, converter), opts...)
 }
 
 func NewEntryTypeByFormatVersion(name string, fmt runtime.FormatVersion[Entry], opts ...EntryTypeOption) EntryType {
-	return clitypes.NewCLITypedObjectTypeObject[Entry](runtime.NewVersionedTypedObjectTypeByFormatVersion[Entry](name, fmt), opts...)
+	return flagsetscheme.NewTypedObjectTypeObject[Entry](runtime.NewVersionedTypedObjectTypeByFormatVersion[Entry](name, fmt), opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
