@@ -7,20 +7,39 @@ package vault
 import (
 	"golang.org/x/exp/slices"
 
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type Option interface {
-	ApplyTo(*Options)
-}
+type Option = optionutils.Option[*Options]
 
 type Options struct {
-	Namespace                string   `json:"namespace"`
+	Namespace                string   `json:"namespace,omitempty"`
 	SearchEngine             string   `json:"searchEngine,omitempty"`
 	Path                     string   `json:"path,omitempty"`
-	Secrets                  []string `json:"secrets"`
+	Secrets                  []string `json:"secrets,omitempty"`
 	PropgateConsumerIdentity bool     `json:"propagateConsumerIdentity,omitempty"`
 }
+
+var _ Option = (*Options)(nil)
+
+func (o *Options) ApplyTo(opts *Options) {
+	if o.Namespace != "" {
+		opts.Namespace = o.Namespace
+	}
+	if o.SearchEngine != "" {
+		opts.SearchEngine = o.SearchEngine
+	}
+	if o.Path != "" {
+		opts.Path = o.Path
+	}
+	if o.Secrets != nil {
+		opts.Secrets = slices.Clone(o.Secrets)
+	}
+	opts.PropgateConsumerIdentity = o.PropgateConsumerIdentity
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type ns string
 

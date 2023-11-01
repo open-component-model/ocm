@@ -11,6 +11,7 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -33,14 +34,10 @@ type RepositorySpec struct {
 
 // NewRepositorySpec creates a new memory RepositorySpec.
 func NewRepositorySpec(url string, opts ...Option) *RepositorySpec {
-	var eff Options
-	for _, o := range opts {
-		o.ApplyTo(&eff)
-	}
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		ServerURL:           url,
-		Options:             eff,
+		Options:             *optionutils.EvalOptions(opts...),
 	}
 }
 
