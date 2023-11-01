@@ -53,8 +53,8 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi
 	}
 	spec := *a
 	spec.Secrets = slices.Clone(a.Secrets)
-	if spec.SearchEngine == "" {
-		spec.SearchEngine = "secrets"
+	if spec.SecretsEngine == "" {
+		spec.SecretsEngine = "secrets"
 	}
 	return repos.GetRepository(ctx, &spec)
 }

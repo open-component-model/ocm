@@ -102,6 +102,19 @@ func (p *ConsumerProvider) update() error {
 	}
 
 	secrets := slices.Clone(p.repository.spec.Secrets)
+	if len(secrets) == 0 {
+		s, err := client.Secrets.KvV2List(ctx, p.repository.spec.Path,
+			vault.WithNamespace(p.repository.spec.Namespace),
+			vault.WithMountPath(p.repository.spec.SecretsEngine))
+		if err != nil {
+			return err
+		}
+		for _, k := range s.Data.Keys {
+			if !strings.HasSuffix(k, "/") {
+				secrets = append(secrets, k)
+			}
+		}
+	}
 	for i := 0; i < len(secrets); i++ {
 		n := secrets[i]
 		creds, id, list, err := p.read(ctx, client, n)
@@ -150,7 +163,7 @@ func (p *ConsumerProvider) error(err error, msg string, secret string, keypairs 
 	log.Error(msg, append(keypairs,
 		"server", p.repository.spec.ServerURL,
 		"namespace", p.repository.spec.Namespace,
-		"engine", p.repository.spec.SearchEngine,
+		"engine", p.repository.spec.SecretsEngine,
 		"path", path.Join(p.repository.spec.Path, secret),
 		"error", err.Error(),
 	)...,
@@ -163,7 +176,7 @@ func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secre
 	secret = path.Join(p.repository.spec.Path, secret)
 	s, err := client.Secrets.KvV2Read(ctx, secret,
 		vault.WithNamespace(p.repository.spec.Namespace),
-		vault.WithMountPath(p.repository.spec.SearchEngine))
+		vault.WithMountPath(p.repository.spec.SecretsEngine))
 	if err != nil {
 		return nil, nil, nil, err
 	}

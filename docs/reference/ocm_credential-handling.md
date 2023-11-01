@@ -278,10 +278,13 @@ behaviours are described in the following list:
     The repository specification supports the following fields:
       - <code>serverURL</code>: *string* (required): the URL of the vault instance
       - <code>namespace</code>: *string* (optional): the namespace used to evaluate secrets
-      - <code>searchEngine</code>: *string* (optional): the search engine to use (default: secrets)
+      - <code>secretsEngine</code>: *string* (optional): the secrets engine to use (default: secrets)
       - <code>path</code>: *string* (optional): the path prefix used to lookup secrets
       - <code>secrets</code>: *[]string* (optional): list of secrets
       - <code>propagateConsumerIdentity</code>: *bool*(optional): evaluate metadata for consumer id propagation
+
+    If the secrets list is empty, all secret entries found in the given path
+    is read.
 
 
 
