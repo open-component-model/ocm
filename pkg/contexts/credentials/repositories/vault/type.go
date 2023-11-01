@@ -22,7 +22,7 @@ const (
 
 func init() {
 	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type))
-	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1, cpi.WithDescription(usage), cpi.WithFormatSpec(format)))
 }
 
 // RepositorySpec describes a docker config based credential repository interface.

@@ -68,9 +68,10 @@ func init() {
 		`HashiCorp Vault credential matcher
 
 This matcher matches credentials for a HashiCorp vault instance.
-It uses the following identity attributes:\n`+ids,
+It uses the following identity attributes:
+`+ids,
 		attrs+`
-The oly supported auth methods, so far, are <code>token</code> and <code>approle</code>.
+The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
 `)
 }
 

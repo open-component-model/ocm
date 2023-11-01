@@ -23,6 +23,11 @@ import (
 
 const PROVIDER = "ocm.software/credentialprovider/" + Type
 
+const (
+	CUSTOM_SECRETS    = "secrets"
+	CUSTOM_CONSUMERID = "consumerId"
+)
+
 type mapping struct {
 	Id   cpi.ConsumerIdentity
 	Name string
@@ -79,7 +84,7 @@ func (p *ConsumerProvider) update() error {
 	ctx := context.Background()
 
 	client, err := vault.New(
-		vault.WithAddress("https://vault.tools.sap"),
+		vault.WithAddress(p.repository.spec.ServerURL),
 		vault.WithRequestTimeout(30*time.Second),
 	)
 	if err != nil {
@@ -169,15 +174,15 @@ func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secre
 
 	if meta, ok := s.Data.Metadata["custom_metadata"].(map[string]interface{}); ok {
 		sub := false
-		if cid := meta["consumerId"]; cid != nil {
+		if cid := meta[CUSTOM_CONSUMERID]; cid != nil {
 			id = common.Properties{}
 			if err := json.Unmarshal([]byte(cid.(string)), &id); err != nil {
 				id = nil
 			}
 			sub = true
 		}
-		if cid := meta["secrets"]; cid != nil {
-			if s, ok := meta["secrets"].(string); ok {
+		if cid := meta[CUSTOM_SECRETS]; cid != nil {
+			if s, ok := meta[CUSTOM_SECRETS].(string); ok {
 				for _, e := range strings.Split(s, ",") {
 					e = strings.TrimSpace(e)
 					if e != "" {

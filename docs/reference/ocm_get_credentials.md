@@ -45,6 +45,28 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>token</code>: GitHub personal access token
 
 
+  - <code>HashiCorpVault</code>: HashiCorp Vault credential matcher
+
+    This matcher matches credentials for a HashiCorp vault instance.
+    It uses the following identity attributes:
+      - <code>hostname</code>: vault server host
+      - <code>scheme</code>: (optional) URL scheme
+      - <code>port</code>: (optional) server port
+      - <code>namespace</code>: vault namespace
+      - <code>pathprefix</code>: path prefix for secret
+
+
+    Credential consumers of the consumer type HashiCorpVault evaluate the following credential properties:
+
+      - <code>authmeth</code>: auth method
+      - <code>token</code>: vault token
+      - <code>roleid</code>: applrole role id
+      - <code>secretid</code>: applrole secret id
+      - <code>secretid</code>: applrole secret id
+
+    The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
+
+
   - <code>HelmChartRepository</code>: Helm chart repository
 
     It matches the <code>HelmChartRepository</code> consumer type and additionally acts like
