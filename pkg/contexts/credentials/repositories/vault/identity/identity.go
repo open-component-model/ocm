@@ -7,7 +7,6 @@ package identity
 import (
 	"net"
 	"net/url"
-	"path"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -20,11 +19,12 @@ const CONSUMER_TYPE = "HashiCorpVault"
 
 // identity properties.
 const (
-	ID_HOSTNAME   = hostpath.ID_HOSTNAME
-	ID_SCHEMA     = hostpath.ID_SCHEME
-	ID_PORT       = hostpath.ID_PORT
-	ID_PATHPREFIX = hostpath.ID_PATHPREFIX
-	ID_NAMESPACE  = "namespace"
+	ID_HOSTNAME     = hostpath.ID_HOSTNAME
+	ID_SCHEMA       = hostpath.ID_SCHEME
+	ID_PORT         = hostpath.ID_PORT
+	ID_PATHPREFIX   = hostpath.ID_PATHPREFIX
+	ID_SECRETENGINE = "secretEngine"
+	ID_NAMESPACE    = "namespace"
 )
 
 // credential properties.
@@ -46,6 +46,9 @@ func IdentityMatcher(request, cur, id cpi.ConsumerIdentity) bool {
 	if id[ID_NAMESPACE] != request[ID_NAMESPACE] {
 		return false
 	}
+	if id[ID_SECRETENGINE] != "" && id[ID_SECRETENGINE] != request[ID_SECRETENGINE] {
+		return false
+	}
 	return identityMatcher(request, cur, id)
 }
 
@@ -62,6 +65,7 @@ func init() {
 		ID_SCHEMA, "(optional) URL scheme",
 		ID_PORT, "(optional) server port",
 		ID_NAMESPACE, "vault namespace",
+		ID_SECRETENGINE, "secret engine",
 		ID_PATHPREFIX, "path prefix for secret",
 	})
 	cpi.RegisterStandardIdentity(CONSUMER_TYPE, identityMatcher,
@@ -75,7 +79,7 @@ The only supported auth methods, so far, are <code>token</code> and <code>approl
 `)
 }
 
-func GetConsumerId(serverurl string, namespace string, secretpath ...string) (cpi.ConsumerIdentity, error) {
+func GetConsumerId(serverurl string, namespace string, secretengine string, secretpath string) (cpi.ConsumerIdentity, error) {
 	if serverurl == "" {
 		return nil, errors.Newf("server address must be given")
 	}
@@ -105,16 +109,18 @@ func GetConsumerId(serverurl string, namespace string, secretpath ...string) (cp
 	if namespace != "" {
 		id[ID_NAMESPACE] = namespace
 	}
+	if secretengine != "" {
+		id[ID_SECRETENGINE] = secretengine
+	}
 
-	p := path.Join(secretpath...)
-	if p != "" {
-		id[ID_PATHPREFIX] = p
+	if secretpath != "" {
+		id[ID_PATHPREFIX] = secretpath
 	}
 	return id, nil
 }
 
-func GetCredentials(ctx cpi.ContextProvider, serverurl, namespace string, secretpath ...string) (cpi.Credentials, error) {
-	id, err := GetConsumerId(serverurl, namespace, secretpath...)
+func GetCredentials(ctx cpi.ContextProvider, serverurl, namespace string, secretengine, secretpath string) (cpi.Credentials, error) {
+	id, err := GetConsumerId(serverurl, namespace, secretengine, secretpath)
 	if err != nil {
 		return nil, err
 	}

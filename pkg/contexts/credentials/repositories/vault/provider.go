@@ -100,11 +100,14 @@ func (p *ConsumerProvider) update() error {
 	if err := client.SetToken(token); err != nil {
 		return err
 	}
+	if err := client.SetNamespace(p.repository.spec.Namespace); err != nil {
+		return err
+	}
 
+	// TODO: support for pure path based access for other secret engine types
 	secrets := slices.Clone(p.repository.spec.Secrets)
 	if len(secrets) == 0 {
 		s, err := client.Secrets.KvV2List(ctx, p.repository.spec.Path,
-			vault.WithNamespace(p.repository.spec.Namespace),
 			vault.WithMountPath(p.repository.spec.SecretsEngine))
 		if err != nil {
 			return err
@@ -175,7 +178,6 @@ func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secre
 
 	secret = path.Join(p.repository.spec.Path, secret)
 	s, err := client.Secrets.KvV2Read(ctx, secret,
-		vault.WithNamespace(p.repository.spec.Namespace),
 		vault.WithMountPath(p.repository.spec.SecretsEngine))
 	if err != nil {
 		return nil, nil, nil, err

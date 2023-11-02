@@ -24,7 +24,7 @@ var (
 )
 
 func NewRepository(ctx cpi.Context, spec *RepositorySpec) (*Repository, error) {
-	id, err := identity.GetConsumerId(spec.ServerURL, spec.Namespace, spec.Path)
+	id, err := identity.GetConsumerId(spec.ServerURL, spec.Namespace, spec.SecretsEngine, spec.Path)
 	if err != nil {
 		return nil, err
 	}

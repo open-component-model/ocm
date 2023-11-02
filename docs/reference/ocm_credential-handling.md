@@ -128,6 +128,7 @@ The following credential consumer types are used/supported:
       - <code>scheme</code>: (optional) URL scheme
       - <code>port</code>: (optional) server port
       - <code>namespace</code>: vault namespace
+      - <code>secretEngine</code>: secret engine
       - <code>pathprefix</code>: path prefix for secret
 
 
@@ -259,6 +260,7 @@ behaviours are described in the following list:
     - <code>scheme</code>: (optional) URL scheme
     - <code>port</code>: (optional) server port
     - <code>namespace</code>: vault namespace
+    - <code>secretEngine</code>: secret engine
     - <code>pathprefix</code>: path prefix for secret
 
 

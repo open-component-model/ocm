@@ -53,6 +53,7 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>scheme</code>: (optional) URL scheme
       - <code>port</code>: (optional) server port
       - <code>namespace</code>: vault namespace
+      - <code>secretEngine</code>: secret engine
       - <code>pathprefix</code>: path prefix for secret
 
 
