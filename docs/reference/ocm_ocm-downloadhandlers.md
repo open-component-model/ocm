@@ -93,6 +93,7 @@ The following handler names are possible:
       - <code>application/vnd.docker.distribution.manifest.v2+tar+gzip</code>
       - <code>application/vnd.gardener.landscaper.blueprint.layer.v1.tar</code>
       - <code>application/vnd.gardener.landscaper.blueprint.layer.v1.tar+gzip</code>
+      - <code>application/vnd.gardener.landscaper.blueprint.v1+tar</code>
       - <code>application/vnd.gardener.landscaper.blueprint.v1+tar+gzip</code>
       - <code>application/vnd.oci.image.manifest.v1+tar</code>
       - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>

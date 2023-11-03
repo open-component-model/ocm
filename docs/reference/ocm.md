@@ -253,6 +253,16 @@ The value can be a simple type or a JSON/YAML string for complex values
   The are temporarily stored in the filesystem, instead of the memory, to avoid
   blowing up the memory consumption.
 
+- <code>ocm.software/compositionmode</code> [<code>compositionmode</code>]: *bool* (default: false
+
+  Composition mode decouples a component version provided by a repository
+  implemention from the backened persistence. Added local blobs will
+  and other changes witll not be forwarded to the backend repository until
+  an AddVersion is called on the component.
+  If composition mode is disabled blobs will directly be forwarded to
+  the backend and descriptor updated will be persisted on AddVersion
+  or closing a provided existing component version.
+
 - <code>ocm.software/signing/sigstore</code> [<code>sigstore</code>]: *sigstore config* Configuration to use for sigstore based signing.
 
   The following fields are used.

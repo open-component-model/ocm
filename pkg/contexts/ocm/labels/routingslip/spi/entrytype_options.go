@@ -6,19 +6,19 @@ package spi
 
 import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/clitypes"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets/flagsetscheme"
 )
 
-type EntryTypeOption = clitypes.CLITypeOption
+type EntryTypeOption = flagsetscheme.TypeOption
 
 func WithFormatSpec(value string) EntryTypeOption {
-	return clitypes.WithFormatSpec(value)
+	return flagsetscheme.WithFormatSpec(value)
 }
 
 func WithDescription(value string) EntryTypeOption {
-	return clitypes.WithDescription(value)
+	return flagsetscheme.WithDescription(value)
 }
 
 func WithConfigHandler(value flagsets.ConfigOptionTypeSetHandler) EntryTypeOption {
-	return clitypes.WithConfigHandler(value)
+	return flagsetscheme.WithConfigHandler(value)
 }
