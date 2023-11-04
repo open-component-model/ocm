@@ -19,9 +19,9 @@ type DigestSource interface {
 	GetDigest() (digest.Digest, error)
 }
 
-// AccessMethodView can be used map wrap an access method
-// into a managed method with multiple views. The original method
-// object is closed once the last view is closed.
+// AccessMethodView provides access
+// to the implementation object behind an
+// access method.
 type AccessMethodView interface {
 	utils.Unwrappable
 	AccessMethod
@@ -43,8 +43,7 @@ func BlobAccessForAccessSpec(spec AccessSpec, cv ComponentVersionAccess) (blobac
 	if err != nil {
 		return nil, err
 	}
-	defer m.Close()
-	return BlobAccessForAccessMethod(m)
+	return m.AsBlobAccess(), nil
 }
 
 func accessMethodViewCreator(impl AccessMethodImpl, view *refmgmt.View[AccessMethod]) AccessMethod {
@@ -63,6 +62,10 @@ var (
 
 func (a *accessMethodView) Unwrap() interface{} {
 	return a.methodimpl
+}
+
+func (a *accessMethodView) AsBlobAccess() blobaccess.BlobAccess {
+	return blobaccess.ForDataAccess("", -1, a.MimeType(), a)
 }
 
 func (a *accessMethodView) IsLocal() bool {

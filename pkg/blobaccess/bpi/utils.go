@@ -179,11 +179,23 @@ func BaseAccessForDataAccessAndMeta(mime string, acc DataAccess, dig digest.Dige
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// StaticBlobAccess is a BlobAccess which does not
+// require finalization, therefore it can be used
+// as BlobAccessProvider, also.
+type StaticBlobAccess interface {
+	BlobAccess
+	BlobAccessProvider
+}
+
 type staticBlobAccess struct {
 	blobAccess
 }
 
 func (s *staticBlobAccess) Dup() (BlobAccess, error) {
+	return s, nil
+}
+
+func (s *staticBlobAccess) BlobAccess() (BlobAccess, error) {
 	return s, nil
 }
 
@@ -194,14 +206,14 @@ func (s *staticBlobAccess) Close() error {
 // ForStaticDataAccess is used for a data access using no closer.
 // They don't require a finalization and can be used
 // as long as they exist. Therefore, no ref counting
-// is required.
-func ForStaticDataAccess(mime string, acc DataAccess) BlobAccess {
+// is required and they can be used as BlobAccessProvider, also.
+func ForStaticDataAccess(mime string, acc DataAccess) StaticBlobAccess {
 	return &staticBlobAccess{
 		blobAccess: blobAccess{mimeType: mime, _dataAccess: acc, digest: BLOB_UNKNOWN_DIGEST, size: BLOB_UNKNOWN_SIZE},
 	}
 }
 
-func ForStaticDataAccessAndMeta(mime string, acc DataAccess, dig digest.Digest, size int64) BlobAccess {
+func ForStaticDataAccessAndMeta(mime string, acc DataAccess, dig digest.Digest, size int64) StaticBlobAccess {
 	return &staticBlobAccess{
 		blobAccess: blobAccess{mimeType: mime, _dataAccess: acc, digest: dig, size: size},
 	}
