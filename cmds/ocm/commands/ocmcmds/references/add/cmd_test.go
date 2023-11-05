@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
+	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const ARCH = "/tmp/ca"
@@ -173,6 +174,14 @@ labels:
 			CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
 				Expect(r.GetLabels()).To(Equal(labels))
 			})
+		})
+	})
+
+	Context("failures", func() {
+		It("rejects adding duplicate ref", func() {
+			testutils.ExpectError(env.Execute("add", "references", "--file", ARCH, "/testdata/references-dup.yaml")).To(
+				MatchError(`duplicate reference identity "name"="testdata","version"="v1.1.1" (/testdata/references-dup.yaml[1][2] and /testdata/references-dup.yaml[1][1])`),
+			)
 		})
 	})
 })

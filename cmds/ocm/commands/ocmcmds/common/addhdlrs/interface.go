@@ -10,6 +10,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
@@ -79,6 +80,7 @@ type ElementSpec interface {
 	GetName() string
 	GetVersion() string
 	SetVersion(string)
+	GetRawIdentity() metav1.Identity
 	Info() string
 	Validate(ctx clictx.Context, input *ResourceInput) error
 }
