@@ -13,12 +13,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type localFilesystemBlobAccessMethod struct {
 	sync.Mutex
+	ref        refmgmt.Allocatable
 	closed     bool
 	spec       *localblob.AccessSpec
 	base       support.ComponentVersionContainer
@@ -27,12 +30,18 @@ type localFilesystemBlobAccessMethod struct {
 
 var _ accspeccpi.AccessMethodImpl = (*localFilesystemBlobAccessMethod)(nil)
 
-func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer) accspeccpi.AccessMethod {
+func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer, ref refmgmt.Allocatable) (accspeccpi.AccessMethod, error) {
+	err := ref.Ref()
+	if err != nil {
+		return nil, err
+	}
+
 	m, _ := accspeccpi.AccessMethodForImplementation(&localFilesystemBlobAccessMethod{
 		spec: a,
 		base: base,
+		ref:  ref,
 	}, nil)
-	return m
+	return m, nil
 }
 
 func (_ *localFilesystemBlobAccessMethod) IsLocal() bool {
@@ -95,13 +104,12 @@ func (m *localFilesystemBlobAccessMethod) Close() error {
 		return accessio.ErrClosed
 	}
 
+	list := errors.ErrorList{}
 	if m.blobAccess != nil {
-		err := m.blobAccess.Close()
+		list.Add(m.blobAccess.Close())
 		m.blobAccess = nil
-		m.closed = true
-		if err != nil {
-			return err
-		}
 	}
-	return nil
+	list.Add(m.ref.Unref())
+	m.closed = true
+	return list.Result()
 }

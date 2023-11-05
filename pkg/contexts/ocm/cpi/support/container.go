@@ -9,6 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 // BlobContainer is the interface for an element capable to store blobs.
@@ -44,8 +45,8 @@ type ComponentVersionContainer interface {
 
 	GetDescriptor() *compdesc.ComponentDescriptor
 	BlobContainer
-	AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error)
-	GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string
+	AccessMethod(a cpi.AccessSpec, cv refmgmt.Allocatable) (cpi.AccessMethod, error)
+	GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.Allocatable) string
 
 	io.Closer
 }

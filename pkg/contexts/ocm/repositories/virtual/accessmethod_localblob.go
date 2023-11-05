@@ -11,22 +11,30 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 type localBlobAccessMethod struct {
 	lock   sync.Mutex
 	data   blobaccess.DataAccess
 	spec   *localblob.AccessSpec
+	ref    refmgmt.Allocatable
 	access VersionAccess
 }
 
 var _ accspeccpi.AccessMethodImpl = (*localBlobAccessMethod)(nil)
 
-func newLocalBlobAccessMethod(a *localblob.AccessSpec, acc VersionAccess) *localBlobAccessMethod {
+func newLocalBlobAccessMethod(a *localblob.AccessSpec, acc VersionAccess, ref refmgmt.Allocatable) (*localBlobAccessMethod, error) {
+	err := ref.Ref()
+	if err != nil {
+		return nil, err
+	}
 	return &localBlobAccessMethod{
 		spec:   a,
+		ref:    ref,
 		access: acc,
-	}
+	}, nil
 }
 
 func (_ *localBlobAccessMethod) IsLocal() bool {
@@ -45,12 +53,15 @@ func (m *localBlobAccessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
+	list := errors.ErrorList{}
+
 	if m.data != nil {
 		tmp := m.data
 		m.data = nil
-		return tmp.Close()
+		list.Add(tmp.Close())
 	}
-	return nil
+	list.Add(m.ref.Unref())
+	return list.Result()
 }
 
 func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {

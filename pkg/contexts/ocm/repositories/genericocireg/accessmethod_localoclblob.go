@@ -10,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 type localOCIBlobAccessMethod struct {
@@ -18,11 +19,11 @@ type localOCIBlobAccessMethod struct {
 
 var _ accspeccpi.AccessMethodImpl = (*localOCIBlobAccessMethod)(nil)
 
-func newLocalOCIBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess) accspeccpi.AccessMethod {
-	m, _ := accspeccpi.AccessMethodForImplementation(&localOCIBlobAccessMethod{
-		localBlobAccessMethod: newLocalBlobAccessMethodImpl(a, ns, art),
-	}, nil)
-	return m
+func newLocalOCIBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess, ref refmgmt.Allocatable) (accspeccpi.AccessMethod, error) {
+	m, err := newLocalBlobAccessMethodImpl(a, ns, art, ref)
+	return accspeccpi.AccessMethodForImplementation(&localOCIBlobAccessMethod{
+		localBlobAccessMethod: m,
+	}, err)
 }
 
 func (m *localOCIBlobAccessMethod) MimeType() string {

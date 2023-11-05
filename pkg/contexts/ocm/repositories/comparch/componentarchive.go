@@ -19,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -175,24 +176,29 @@ func (c *componentArchiveContainer) AddBlobFor(storagectx cpi.StorageContext, bl
 	return localblob.New(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
-func (c *componentArchiveContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
+func (c *componentArchiveContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Allocatable) (cpi.AccessMethod, error) {
 	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
 		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err
 		}
-		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c), nil
+		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
 	}
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "component archive")
 }
 
-func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {
+func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.Allocatable) string {
 	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
 		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return ""
 		}
-		digest, _ := accessio.Digest(newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c))
+		m, err := newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
+		if err != nil {
+			return ""
+		}
+		defer m.Close()
+		digest, _ := accessio.Digest(m)
 		return digest.String()
 	}
 	return ""

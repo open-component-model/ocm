@@ -391,11 +391,7 @@ func blobAccessForLocalAccessSpec(spec AccessSpec, cv ComponentVersionAccess, ac
 	if err != nil {
 		return nil, err
 	}
-
-	if err != nil {
-		return nil, err
-	}
-	return accspeccpi.BlobAccessForAccessMethod(m)
+	return m.AsBlobAccess(), nil
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc ComponentVersionAccess, err error) {
@@ -438,9 +434,8 @@ type ComponentVersionAccessImpl interface {
 
 	GetDescriptor() *compdesc.ComponentDescriptor
 
-	AccessMethod(ComponentVersionAccess, AccessSpec) (AccessMethod, error)
-
-	GetInexpensiveContentVersionIdentity(ComponentVersionAccess, AccessSpec) string
+	AccessMethod(AccessSpec, refmgmt.Allocatable) (AccessMethod, error)
+	GetInexpensiveContentVersionIdentity(AccessSpec, refmgmt.Allocatable) string
 
 	// GetStorageContext creates a storage context for blobs
 	// that is used to feed blob handlers for specific blob storage methods.
@@ -709,7 +704,7 @@ func (c *componentVersionAccessView) accessMethod(spec AccessSpec) (meth AccessM
 	case !spec.IsLocal(c.GetContext()):
 		meth, err = spec.AccessMethod(c)
 	default:
-		meth, err = c.impl.AccessMethod(c, spec)
+		meth, err = c.impl.AccessMethod(spec, c.Allocatable())
 		if err == nil {
 			if blob := c.getLocalBlob(spec); blob != nil {
 				meth, err = newFakeMethod(meth, blob)
@@ -743,7 +738,7 @@ func (c *componentVersionAccessView) getInexpensiveContentVersionIdentity(spec A
 		// fall back to original version
 		return spec.GetInexpensiveContentVersionIdentity(c)
 	default:
-		return c.impl.GetInexpensiveContentVersionIdentity(c, spec)
+		return c.impl.GetInexpensiveContentVersionIdentity(spec, c.Allocatable())
 	}
 }
 

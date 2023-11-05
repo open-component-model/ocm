@@ -15,6 +15,7 @@ type CloserView interface {
 	Close() error
 	IsClosed() bool
 	Execute(func() error) error
+	Allocatable() refmgmt.Allocatable
 	refmgmt.LazyMode
 	refmgmt.RefCountProvider
 }
@@ -47,6 +48,7 @@ type ResourceViewInt[T resourceViewInterface[T]] interface {
 	resourceViewInterface[T]
 
 	Execute(func() error) error
+	Allocatable() refmgmt.Allocatable
 }
 
 type Dup[T any] interface {
@@ -59,6 +61,7 @@ type Dup[T any] interface {
 // can be used to gain new views to a managed resource.
 type ViewManager[T any] interface {
 	RefCount() int
+	Allocatable() refmgmt.Allocatable
 	View(main ...bool) (T, error)
 	IsClosed() bool
 }
@@ -97,6 +100,10 @@ func NewResource[T any, I ResourceImplementation[T]](impl I, c ResourceViewCreat
 
 func (i *viewManager[T, I]) RefCount() int {
 	return i.refs.RefCount()
+}
+
+func (i *viewManager[T, I]) Allocatable() refmgmt.Allocatable {
+	return i.refs
 }
 
 func (i *viewManager[T, I]) View(main ...bool) (T, error) {
@@ -152,6 +159,10 @@ func (n *noneRefCloser[T]) RefCount() int {
 	return n.mgr.RefCount()
 }
 
+func (n *noneRefCloser[T]) Allocatable() refmgmt.Allocatable {
+	return n.mgr.Allocatable()
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type resourceView[T any] struct {
@@ -189,6 +200,10 @@ func (v *resourceView[T]) Close() error {
 
 func (v *resourceView[T]) Execute(f func() error) error {
 	return v.view.Execute(f)
+}
+
+func (v *resourceView[T]) Allocatable() refmgmt.Allocatable {
+	return v.view.Allocatable()
 }
 
 func (v *resourceView[T]) Dup() (t T, err error) {
@@ -235,6 +250,10 @@ func (b *ResourceImplBase[T]) SetViewManager(m ViewManager[T]) {
 
 func (b *ResourceImplBase[T]) RefCount() int {
 	return b.refs.RefCount()
+}
+
+func (b *ResourceImplBase[T]) Allocatable() refmgmt.Allocatable {
+	return b.refs.Allocatable()
 }
 
 func (b *ResourceImplBase[T]) View(main ...bool) (T, error) {

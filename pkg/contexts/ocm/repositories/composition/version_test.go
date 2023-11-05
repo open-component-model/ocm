@@ -18,6 +18,7 @@ import (
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 var _ = Describe("version", func() {
@@ -32,7 +33,7 @@ var _ = Describe("version", func() {
 		// compose new version
 		cv := me.NewComponentVersion(ctx, COMPONENT, VERSION)
 		cv.GetDescriptor().Provider.Name = "acme.org"
-		nested.Close(cv, "composed version")
+		finalize.Close(cv, "composed version")
 
 		// wrap a non-closer access into a ref counting access to check cleanup
 		blob := bpi.NewBlobAccessForBase(blobaccess.ForString(mime.MIME_TEXT, "testdata"))
@@ -49,16 +50,19 @@ var _ = Describe("version", func() {
 
 		// check result
 		cv = Must(c.LookupVersion(VERSION))
+		Expect(refmgmt.ReferenceCount(cv)).To(Equal(1))
 		nested.Close(cv, "query")
 		rs := Must(cv.GetResourcesByName("test"))
 		Expect(len(rs)).To(Equal(1))
 		data := Must(ocmutils.GetResourceData(rs[0]))
 		Expect(string(data)).To(Equal("testdata"))
+		Expect(refmgmt.ReferenceCount(cv)).To(Equal(1))
 
 		// add this version again
 		repo2 := me.NewRepository(ctx)
 		finalize.Close(repo2, "target repo2")
 		MustBeSuccessful(repo2.AddComponentVersion(cv))
+		Expect(refmgmt.ReferenceCount(cv)).To(Equal(1))
 		MustBeSuccessful(nested.Finalize())
 
 		// check result

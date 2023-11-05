@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 // newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact acess is closed.
@@ -98,7 +99,7 @@ func (c *ComponentVersionContainer) IsClosed() bool {
 	return c.access == nil
 }
 
-func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
+func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Allocatable) (cpi.AccessMethod, error) {
 	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 	if err != nil {
 		return nil, err
@@ -108,13 +109,13 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 	case localfsblob.Type:
 		fallthrough
 	case localblob.Type:
-		return accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.access), nil)
+		return accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.access, c.comp.repo.Allocatable()))
 	}
 
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "virtual registry")
 }
 
-func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {
+func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.Allocatable) string {
 	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 	if err != nil {
 		return ""

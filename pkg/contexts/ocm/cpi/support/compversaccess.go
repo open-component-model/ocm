@@ -8,6 +8,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 type _ComponentVersionAccessImplBase = cpi.ComponentVersionAccessImplBase
@@ -97,12 +98,12 @@ func (a *componentVersionAccessImpl) IsReadOnly() bool {
 ////////////////////////////////////////////////////////////////////////////////
 // with access to actual view
 
-func (a *componentVersionAccessImpl) AccessMethod(cv cpi.ComponentVersionAccess, acc cpi.AccessSpec) (cpi.AccessMethod, error) {
-	return a.base.AccessMethod(acc)
+func (a *componentVersionAccessImpl) AccessMethod(acc cpi.AccessSpec, cv refmgmt.Allocatable) (cpi.AccessMethod, error) {
+	return a.base.AccessMethod(acc, cv)
 }
 
-func (a *componentVersionAccessImpl) GetInexpensiveContentVersionIdentity(cv cpi.ComponentVersionAccess, acc cpi.AccessSpec) string {
-	return a.base.GetInexpensiveContentVersionIdentity(acc)
+func (a *componentVersionAccessImpl) GetInexpensiveContentVersionIdentity(acc cpi.AccessSpec, cv refmgmt.Allocatable) string {
+	return a.base.GetInexpensiveContentVersionIdentity(acc, cv)
 }
 
 func (a *componentVersionAccessImpl) GetDescriptor() *compdesc.ComponentDescriptor {

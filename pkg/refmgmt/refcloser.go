@@ -136,6 +136,7 @@ type CloserView interface {
 	Closer() io.Closer
 
 	Execute(f func() error) error
+	Allocatable() Allocatable
 }
 
 type view struct {
@@ -153,6 +154,10 @@ func (v *view) Lazy() {
 
 func (v *view) RefCount() int {
 	return v.ref.RefCount()
+}
+
+func (v *view) Allocatable() Allocatable {
+	return v.ref
 }
 
 func (v *view) Execute(f func() error) error {

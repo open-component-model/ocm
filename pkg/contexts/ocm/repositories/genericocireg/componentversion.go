@@ -29,6 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 // newComponentVersionAccess creates an component access for the artifact access, if this fails the artifact acess is closed.
@@ -121,7 +122,7 @@ func (c *ComponentVersionContainer) IsClosed() bool {
 	return c.manifest == nil
 }
 
-func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
+func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Allocatable) (cpi.AccessMethod, error) {
 	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 	if err != nil {
 		return nil, err
@@ -129,9 +130,9 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 
 	switch a.GetKind() {
 	case localblob.Type:
-		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access), nil
+		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access, cv)
 	case localociblob.Type:
-		return newLocalOCIBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access), nil
+		return newLocalOCIBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access, cv)
 	case relativeociref.Type:
 		return ociartifact.NewMethod(c.GetContext(), a, accessSpec.(*relativeociref.AccessSpec).Reference, view(c.comp.repo.ocirepo))
 	}
@@ -139,7 +140,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "oci registry")
 }
 
-func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {
+func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.Allocatable) string {
 	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 	if err != nil {
 		return ""
