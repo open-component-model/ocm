@@ -338,9 +338,9 @@ func (c *componentAccessView) addVersion(acc ComponentVersionAccess, overrides .
 		eff = acc
 	}
 
-	err = setupLocalBobs(ctx, "resource", acc, eff, nil, impl, d.Resources, sel)
+	err = setupLocalBobs(ctx, "resource", acc, nil, impl, d.Resources, sel)
 	if err == nil {
-		err = setupLocalBobs(ctx, "source", acc, eff, nil, impl, d.Sources, sel)
+		err = setupLocalBobs(ctx, "source", acc, nil, impl, d.Sources, sel)
 	}
 	if err != nil {
 		return err
@@ -349,7 +349,7 @@ func (c *componentAccessView) addVersion(acc ComponentVersionAccess, overrides .
 	return c.impl.AddVersion(eff)
 }
 
-func setupLocalBobs(ctx Context, kind string, src, tgt ComponentVersionAccess, accprov func(AccessSpec) (AccessMethod, error), tgtimpl ComponentVersionAccessImpl, it compdesc.ArtifactAccessor, sel func(AccessSpec) bool) (ferr error) {
+func setupLocalBobs(ctx Context, kind string, src ComponentVersionAccess, accprov func(AccessSpec) (AccessMethod, error), tgtimpl ComponentVersionAccessImpl, it compdesc.ArtifactAccessor, sel func(AccessSpec) bool) (ferr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 
@@ -366,7 +366,7 @@ func setupLocalBobs(ctx Context, kind string, src, tgt ComponentVersionAccess, a
 				return errors.Wrapf(err, "%s %d", kind, i)
 			}
 			nested.Close(blob)
-			effspec, err := addBlob(tgtimpl, tgt, a.GetType(), ReferenceHint(spec, src), blob, GlobalAccess(spec, ctx))
+			effspec, err := addBlob(tgtimpl, a.GetType(), ReferenceHint(spec, src), blob, GlobalAccess(spec, ctx))
 			if err != nil {
 				return errors.Wrapf(err, "cannot store %s %d", kind, i)
 			}
@@ -441,7 +441,7 @@ type ComponentVersionAccessImpl interface {
 	// that is used to feed blob handlers for specific blob storage methods.
 	// If no handler accepts the blob, the AddBlobFor method will
 	// be used to store the blob
-	GetStorageContext(cv ComponentVersionAccess) StorageContext
+	GetStorageContext() StorageContext
 
 	// AddBlobFor stores a local blob together with the component and
 	// potentially provides a global reference.
@@ -763,9 +763,9 @@ func (c *componentVersionAccessView) update(final bool) error {
 		return err
 	}
 	// TODO: exceute for separately lockable view
-	err = setupLocalBobs(ctx, "resource", c, c, c.accessMethod, impl, d.Resources, compose.Is)
+	err = setupLocalBobs(ctx, "resource", c, c.accessMethod, impl, d.Resources, compose.Is)
 	if err == nil {
-		err = setupLocalBobs(ctx, "source", c, c, c.accessMethod, impl, d.Sources, compose.Is)
+		err = setupLocalBobs(ctx, "source", c, c.accessMethod, impl, d.Sources, compose.Is)
 	}
 	if err != nil {
 		return err
@@ -802,7 +802,7 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 
 	var acc AccessSpec
 	if c.impl.UseDirectAccess() {
-		acc, err = addBlob(c.impl, c, artType, refName, blob, global)
+		acc, err = addBlob(c.impl, artType, refName, blob, global)
 	} else {
 		// use local composition access to be added to the repository with AddVersion.
 		acc = compose.New(refName, blob.MimeType(), global)
@@ -813,9 +813,9 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	return acc, err
 }
 
-func addBlob(impl ComponentVersionAccessImpl, cv ComponentVersionAccess, artType, refName string, blob BlobAccess, global AccessSpec) (AccessSpec, error) {
-	storagectx := impl.GetStorageContext(cv)
-	ctx := cv.GetContext()
+func addBlob(impl ComponentVersionAccessImpl, artType, refName string, blob BlobAccess, global AccessSpec) (AccessSpec, error) {
+	storagectx := impl.GetStorageContext()
+	ctx := impl.GetContext()
 	h := ctx.BlobHandlers().LookupHandler(storagectx.GetImplementationRepositoryType(), artType, blob.MimeType())
 	if h != nil {
 		acc, err := h.StoreBlob(blob, artType, refName, nil, storagectx)

@@ -9,7 +9,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -27,6 +26,7 @@ import (
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
@@ -138,7 +138,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 		m, err := ociartifact.NewMethod(c.GetContext(), a, accessSpec.(*relativeociref.AccessSpec).Reference, c.comp.repo.ocirepo)
 		if err == nil {
 			impl := accspeccpi.GetAccessMethodImplementation(m).(ociartifact.AccessMethodImpl)
-			cv.BeforeCleanup(impl.Cache)
+			cv.BeforeCleanup(refmgmt.CleanupHandlerFunc(impl.Cache))
 		}
 		return m, err
 	}
@@ -268,8 +268,8 @@ func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, er
 	return c.manifest.GetBlob(digest.Digest(name))
 }
 
-func (c *ComponentVersionContainer) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
-	return ocihdlr.New(cv, c.comp.repo.ocirepo.GetSpecification().GetKind(), c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
+func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
+	return ocihdlr.New(c.comp.GetName(), c.Repository(), c.comp.repo.ocirepo.GetSpecification().GetKind(), c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
 }
 
 func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {

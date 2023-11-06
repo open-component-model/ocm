@@ -149,8 +149,8 @@ func (c *componentArchiveContainer) GetBlobData(name string) (cpi.DataAccess, er
 	return c.base.GetBlobDataByName(name)
 }
 
-func (c *componentArchiveContainer) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
-	return ocmhdlr.New(c.Repository(), cv, &BlobSink{c.base}, Type)
+func (c *componentArchiveContainer) GetStorageContext() cpi.StorageContext {
+	return ocmhdlr.New(c.Repository(), c.impl.GetName(), &BlobSink{c.base}, Type)
 }
 
 type BlobSink struct {

@@ -67,6 +67,7 @@ func (a *componentVersionAccessImpl) EnablePersistence() bool {
 		return false
 	}
 	a.persistent = true
+	a.GetStorageContext()
 	return true
 }
 
@@ -110,8 +111,8 @@ func (a *componentVersionAccessImpl) GetDescriptor() *compdesc.ComponentDescript
 	return a.base.GetDescriptor()
 }
 
-func (a *componentVersionAccessImpl) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
-	return a.base.GetStorageContext(cv)
+func (a *componentVersionAccessImpl) GetStorageContext() cpi.StorageContext {
+	return a.base.GetStorageContext()
 }
 
 func (a *componentVersionAccessImpl) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {

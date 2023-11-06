@@ -40,7 +40,7 @@ func newLocalBlobAccessMethodImpl(a *localblob.AccessSpec, ns oci.NamespaceAcces
 		namespace: ns,
 		artifact:  art,
 	}
-	ref.BeforeCleanup(m.cache)
+	ref.BeforeCleanup(refmgmt.CleanupHandlerFunc(m.cache))
 	return m, nil
 }
 

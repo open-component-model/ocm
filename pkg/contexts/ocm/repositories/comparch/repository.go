@@ -292,8 +292,8 @@ func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, er
 	return c.comp.repo.arch.container.GetBlobData(name)
 }
 
-func (c *ComponentVersionContainer) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
-	return ocmhdlr.New(c.Repository(), cv, &BlobSink{c.comp.repo.arch.container.base}, Type)
+func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
+	return ocmhdlr.New(c.Repository(), c.comp.GetName(), &BlobSink{c.comp.repo.arch.container.base}, Type)
 }
 
 func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {

@@ -10,7 +10,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	. "github.com/open-component-model/ocm/pkg/finalizer"
 
 	"github.com/opencontainers/go-digest"
@@ -25,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"

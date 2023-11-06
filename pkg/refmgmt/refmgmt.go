@@ -21,8 +21,18 @@ type Allocatable interface {
 	Unref() error
 }
 
+type CleanupHandler interface {
+	Cleanup()
+}
+
+type CleanupHandlerFunc func()
+
+func (f CleanupHandlerFunc) Cleanup() {
+	f()
+}
+
 type ExtendedAllocatable interface {
-	BeforeCleanup(f func())
+	BeforeCleanup(f CleanupHandler)
 	Ref() error
 	Unref() error
 }
@@ -40,7 +50,7 @@ type refMgmt struct {
 	lock     sync.Mutex
 	refcount int
 	closed   bool
-	before   []func()
+	before   []CleanupHandler
 	cleanup  func() error
 	name     string
 }
@@ -90,7 +100,7 @@ func (c *refMgmt) Unref() error {
 	allocLog.Trace("unref", "name", c.name, "refcnt", c.refcount)
 	if c.refcount <= 0 {
 		for _, f := range c.before {
-			f()
+			f.Cleanup()
 		}
 		if c.cleanup != nil {
 			err = c.cleanup()
@@ -111,7 +121,7 @@ func (c *refMgmt) RefCount() int {
 	return c.refcount
 }
 
-func (c *refMgmt) BeforeCleanup(f func()) {
+func (c *refMgmt) BeforeCleanup(f CleanupHandler) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.before = append(c.before, f)
@@ -134,7 +144,7 @@ func (c *refMgmt) UnrefLast() error {
 	allocLog.Trace("unref last", "name", c.name, "refcnt", c.refcount)
 	if c.refcount <= 0 {
 		for _, f := range c.before {
-			f()
+			f.Cleanup()
 		}
 		if c.cleanup != nil {
 			err = c.cleanup()

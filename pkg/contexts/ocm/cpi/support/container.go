@@ -20,7 +20,7 @@ type BlobContainer interface {
 	// that is used to feed blob handlers for specific blob storage methods.
 	// If no handler accepts the blob, the AddBlobFor method will
 	// be used to store the blob
-	GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext
+	GetStorageContext() cpi.StorageContext
 
 	// AddBlobFor stores a local blob together with the component and
 	// potentially provides a global reference according to the OCI distribution spec

@@ -32,7 +32,7 @@ func (t ImplementationRepositoryType) IsInitial() bool {
 // It depends on the Context type of the used base repository.
 type StorageContext interface {
 	GetContext() Context
-	TargetComponentVersion() ComponentVersionAccess
+	TargetComponentName() string
 	TargetComponentRepository() Repository
 	GetImplementationRepositoryType() ImplementationRepositoryType
 }

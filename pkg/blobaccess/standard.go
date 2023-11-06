@@ -220,6 +220,10 @@ type annotatedBlobAccessView[T DataAccess] struct {
 	annotation T
 }
 
+func (a *annotatedBlobAccessView[T]) Close() error {
+	return a._blobAccess.Close()
+}
+
 func (a *annotatedBlobAccessView[T]) Dup() (BlobAccess, error) {
 	b, err := a._blobAccess.Dup()
 	if err != nil {
