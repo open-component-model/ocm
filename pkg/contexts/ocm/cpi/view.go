@@ -434,8 +434,8 @@ type ComponentVersionAccessImpl interface {
 
 	GetDescriptor() *compdesc.ComponentDescriptor
 
-	AccessMethod(AccessSpec, refmgmt.Allocatable) (AccessMethod, error)
-	GetInexpensiveContentVersionIdentity(AccessSpec, refmgmt.Allocatable) string
+	AccessMethod(AccessSpec, refmgmt.ExtendedAllocatable) (AccessMethod, error)
+	GetInexpensiveContentVersionIdentity(AccessSpec, refmgmt.ExtendedAllocatable) string
 
 	// GetStorageContext creates a storage context for blobs
 	// that is used to feed blob handlers for specific blob storage methods.

@@ -99,7 +99,7 @@ func (c *ComponentVersionContainer) IsClosed() bool {
 	return c.access == nil
 }
 
-func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Allocatable) (cpi.AccessMethod, error) {
+func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error) {
 	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 	if err != nil {
 		return nil, err
@@ -109,13 +109,18 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Al
 	case localfsblob.Type:
 		fallthrough
 	case localblob.Type:
-		return accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.access, c.comp.repo.Allocatable()))
+		blob, err := c.access.GetBlob(accessSpec.(*localblob.AccessSpec).LocalReference)
+		if err != nil {
+			return nil, err
+		}
+
+		return accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), blob))
 	}
 
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "virtual registry")
 }
 
-func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.Allocatable) string {
+func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
 	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 	if err != nil {
 		return ""

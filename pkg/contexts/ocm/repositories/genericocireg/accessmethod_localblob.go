@@ -21,30 +21,33 @@ import (
 
 type localBlobAccessMethod struct {
 	lock      sync.Mutex
+	err       error
 	data      blobaccess.DataAccess
 	spec      *localblob.AccessSpec
-	ref       refmgmt.Allocatable
 	namespace oci.NamespaceAccess
 	artifact  oci.ArtifactAccess
 }
 
 var _ accspeccpi.AccessMethodImpl = (*localBlobAccessMethod)(nil)
 
-func newLocalBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess, ref refmgmt.Allocatable) (accspeccpi.AccessMethod, error) {
+func newLocalBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess, ref refmgmt.ExtendedAllocatable) (accspeccpi.AccessMethod, error) {
 	return accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethodImpl(a, ns, art, ref))
 }
 
-func newLocalBlobAccessMethodImpl(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess, ref refmgmt.Allocatable) (*localBlobAccessMethod, error) {
-	err := ref.Ref()
-	if err != nil {
-		return nil, err
-	}
-	return &localBlobAccessMethod{
+func newLocalBlobAccessMethodImpl(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess, ref refmgmt.ExtendedAllocatable) (*localBlobAccessMethod, error) {
+	m := &localBlobAccessMethod{
 		spec:      a,
-		ref:       ref,
 		namespace: ns,
 		artifact:  art,
-	}, nil
+	}
+	ref.BeforeCleanup(m.cache)
+	return m, nil
+}
+
+func (m *localBlobAccessMethod) cache() {
+	if m.artifact != nil {
+		_, m.err = m.getBlob()
+	}
 }
 
 func (_ *localBlobAccessMethod) IsLocal() bool {
@@ -63,14 +66,14 @@ func (m *localBlobAccessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	list := errors.ErrorList{}
+	m.artifact = nil
+	m.namespace = nil
 	if m.data != nil {
 		tmp := m.data
 		m.data = nil
-		list.Add(tmp.Close())
+		return tmp.Close()
 	}
-	list.Add(m.ref.Unref())
-	return list.Result()
+	return nil
 }
 
 func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {

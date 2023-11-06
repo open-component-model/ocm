@@ -307,7 +307,7 @@ func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, bl
 	return localblob.New(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
-func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Allocatable) (cpi.AccessMethod, error) {
+func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error) {
 	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
 		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {
@@ -318,7 +318,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Al
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "component archive")
 }
 
-func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.Allocatable) string {
+func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
 	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
 		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {

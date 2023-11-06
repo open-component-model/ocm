@@ -30,7 +30,7 @@ type localFilesystemBlobAccessMethod struct {
 
 var _ accspeccpi.AccessMethodImpl = (*localFilesystemBlobAccessMethod)(nil)
 
-func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer, ref refmgmt.Allocatable) (accspeccpi.AccessMethod, error) {
+func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer, ref refmgmt.ExtendedAllocatable) (accspeccpi.AccessMethod, error) {
 	err := ref.Ref()
 	if err != nil {
 		return nil, err

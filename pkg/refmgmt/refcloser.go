@@ -16,7 +16,7 @@ var ErrClosed = errors.ErrClosed()
 // ReferencableCloser manages closable views to a basic closer.
 // If the last view is closed, the basic closer is finally closed.
 type ReferencableCloser interface {
-	Allocatable
+	ExtendedAllocatable
 
 	RefCount() int
 	UnrefLast() error
@@ -136,7 +136,7 @@ type CloserView interface {
 	Closer() io.Closer
 
 	Execute(f func() error) error
-	Allocatable() Allocatable
+	Allocatable() ExtendedAllocatable
 }
 
 type view struct {
@@ -156,7 +156,7 @@ func (v *view) RefCount() int {
 	return v.ref.RefCount()
 }
 
-func (v *view) Allocatable() Allocatable {
+func (v *view) Allocatable() ExtendedAllocatable {
 	return v.ref
 }
 

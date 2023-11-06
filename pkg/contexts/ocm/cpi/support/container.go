@@ -45,8 +45,8 @@ type ComponentVersionContainer interface {
 
 	GetDescriptor() *compdesc.ComponentDescriptor
 	BlobContainer
-	AccessMethod(a cpi.AccessSpec, cv refmgmt.Allocatable) (cpi.AccessMethod, error)
-	GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.Allocatable) string
+	AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
+	GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string
 
 	io.Closer
 }

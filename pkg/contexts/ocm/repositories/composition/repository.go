@@ -48,6 +48,8 @@ type Access struct {
 	blobs map[string]blobaccess.BlobAccess
 }
 
+var _ virtual.Access = (*Access)(nil)
+
 func NewAccess() *Access {
 	return &Access{
 		index: virtual.NewIndex[common.NameVersion](),

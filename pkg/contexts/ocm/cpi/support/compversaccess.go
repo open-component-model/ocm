@@ -98,11 +98,11 @@ func (a *componentVersionAccessImpl) IsReadOnly() bool {
 ////////////////////////////////////////////////////////////////////////////////
 // with access to actual view
 
-func (a *componentVersionAccessImpl) AccessMethod(acc cpi.AccessSpec, cv refmgmt.Allocatable) (cpi.AccessMethod, error) {
+func (a *componentVersionAccessImpl) AccessMethod(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error) {
 	return a.base.AccessMethod(acc, cv)
 }
 
-func (a *componentVersionAccessImpl) GetInexpensiveContentVersionIdentity(acc cpi.AccessSpec, cv refmgmt.Allocatable) string {
+func (a *componentVersionAccessImpl) GetInexpensiveContentVersionIdentity(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
 	return a.base.GetInexpensiveContentVersionIdentity(acc, cv)
 }
 

@@ -12,28 +12,20 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 type localBlobAccessMethod struct {
-	lock   sync.Mutex
-	data   blobaccess.DataAccess
-	spec   *localblob.AccessSpec
-	ref    refmgmt.Allocatable
-	access VersionAccess
+	lock sync.Mutex
+	data blobaccess.DataAccess
+	spec *localblob.AccessSpec
 }
 
 var _ accspeccpi.AccessMethodImpl = (*localBlobAccessMethod)(nil)
 
-func newLocalBlobAccessMethod(a *localblob.AccessSpec, acc VersionAccess, ref refmgmt.Allocatable) (*localBlobAccessMethod, error) {
-	err := ref.Ref()
-	if err != nil {
-		return nil, err
-	}
+func newLocalBlobAccessMethod(a *localblob.AccessSpec, data blobaccess.DataAccess) (*localBlobAccessMethod, error) {
 	return &localBlobAccessMethod{
-		spec:   a,
-		ref:    ref,
-		access: acc,
+		spec: a,
+		data: data,
 	}, nil
 }
 
@@ -53,46 +45,21 @@ func (m *localBlobAccessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	list := errors.ErrorList{}
-
-	if m.data != nil {
-		tmp := m.data
-		m.data = nil
-		list.Add(tmp.Close())
+	if m.data == nil {
+		return blobaccess.ErrClosed
 	}
-	list.Add(m.ref.Unref())
+	list := errors.ErrorList{}
+	list.Add(m.data.Close())
+	m.data = nil
 	return list.Result()
 }
 
-func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-
-	if m.data != nil {
-		return m.data, nil
-	}
-	data, err := m.access.GetBlob(m.spec.LocalReference)
-	if err != nil {
-		return nil, err
-	}
-	m.data = data
-	return m.data, err
-}
-
 func (m *localBlobAccessMethod) Reader() (io.ReadCloser, error) {
-	blob, err := m.getBlob()
-	if err != nil {
-		return nil, err
-	}
-	return blob.Reader()
+	return m.data.Reader()
 }
 
 func (m *localBlobAccessMethod) Get() (data []byte, ferr error) {
-	b, err := m.getBlob()
-	if ferr != nil {
-		return nil, err
-	}
-	return blobaccess.BlobData(b)
+	return blobaccess.BlobData(m.data)
 }
 
 func (m *localBlobAccessMethod) MimeType() string {

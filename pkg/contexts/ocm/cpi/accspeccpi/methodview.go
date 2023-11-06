@@ -7,6 +7,7 @@ package accspeccpi
 import (
 	"io"
 
+	"github.com/modern-go/reflect2"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -32,6 +33,9 @@ type AccessMethodView interface {
 // closed when the last view is closed.
 func AccessMethodForImplementation(acc AccessMethodImpl, err error) (AccessMethod, error) {
 	if err != nil {
+		if !reflect2.IsNil(acc) {
+			acc.Close()
+		}
 		return nil, err
 	}
 	return refmgmt.WithView[AccessMethodImpl, AccessMethod](acc, accessMethodViewCreator), err

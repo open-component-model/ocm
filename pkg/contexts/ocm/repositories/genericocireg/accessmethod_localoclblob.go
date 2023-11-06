@@ -19,7 +19,7 @@ type localOCIBlobAccessMethod struct {
 
 var _ accspeccpi.AccessMethodImpl = (*localOCIBlobAccessMethod)(nil)
 
-func newLocalOCIBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess, ref refmgmt.Allocatable) (accspeccpi.AccessMethod, error) {
+func newLocalOCIBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess, ref refmgmt.ExtendedAllocatable) (accspeccpi.AccessMethod, error) {
 	m, err := newLocalBlobAccessMethodImpl(a, ns, art, ref)
 	return accspeccpi.AccessMethodForImplementation(&localOCIBlobAccessMethod{
 		localBlobAccessMethod: m,
