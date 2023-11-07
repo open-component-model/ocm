@@ -23,9 +23,9 @@ func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Reposit
 
 	for _, elem := range elems {
 		if r, ok := elem.Spec().(*ResourceSpec); ok {
-			list.Add(addhdlrs.ValdateElementSpecIdentities("resource", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.Resources)))
-			list.Add(addhdlrs.ValdateElementSpecIdentities("source", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.Sources)))
-			list.Add(addhdlrs.ValdateElementSpecIdentities("reference", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.References)))
+			list.Add(addhdlrs.ValidateElementSpecIdentities("resource", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.Resources)))
+			list.Add(addhdlrs.ValidateElementSpecIdentities("source", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.Sources)))
+			list.Add(addhdlrs.ValidateElementSpecIdentities("reference", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.References)))
 		}
 	}
 	if err := list.Result(); err != nil {

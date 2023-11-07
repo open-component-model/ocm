@@ -37,7 +37,7 @@ func ProcessDescriptions(ctx clictx.Context, printer common2.Printer, templ temp
 		}
 		elems = append(elems, tmp...)
 	}
-	err := ValdateElementIdentities(h.Key(), elems)
+	err := ValidateElementIdentities(h.Key(), elems)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -283,7 +283,7 @@ func Validate(r *ResourceInput, ctx inputs.Context, inputFilePath string) error 
 	return allErrs.ToAggregate()
 }
 
-func ValdateElementIdentities(kind string, elems []Element) error {
+func ValidateElementIdentities(kind string, elems []Element) error {
 	list := errors.ErrList()
 	ids := map[string]SourceInfo{}
 	for _, r := range elems {
@@ -302,7 +302,11 @@ func ValdateElementIdentities(kind string, elems []Element) error {
 	return list.Result()
 }
 
-func ValdateElementSpecIdentities(kind string, src string, elems []ElementSpec) error {
+// ValidateElementSpecIdentities validate the element specifications
+// taken from some source (for example a resources.yaml or components.yaml).
+// The parameter src somehow identifies the element source, for example
+// the path of the parsed file.
+func ValidateElementSpecIdentities(kind string, src string, elems []ElementSpec) error {
 	list := errors.ErrList()
 	ids := map[string]int{}
 	for i, r := range elems {

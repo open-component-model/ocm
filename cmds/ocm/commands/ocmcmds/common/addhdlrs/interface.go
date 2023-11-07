@@ -16,12 +16,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/generics"
 )
 
+// ResourceInput describe the source for the content of
+// a content based element (sources or resources).
+// It is either an input or access specification.
 type ResourceInput struct {
 	Access *cpi.GenericAccessSpec `json:"access"`
 	// Input  *inputs.BlobInput                `json:"input,omitempty"`
 	Input *inputs.GenericInputSpec `json:"input,omitempty"`
 }
 
+// ElementSpecHandler is the interface for a handler
+// responsible to handle a dedicated kind of element specification.
 type ElementSpecHandler interface {
 	Key() string
 	RequireInputs() bool
@@ -29,7 +34,10 @@ type ElementSpecHandler interface {
 }
 
 type ElementSource interface {
+	// Origin provides access to the source
+	// specification used to provide elements.
 	Origin() SourceInfo
+	// Get provides access to the content of the element source.
 	Get() (string, error)
 }
 
@@ -76,6 +84,9 @@ func (s *sourceInfo) Id() string {
 	return id
 }
 
+// ElementSpec is the specification of
+// the model element. It provides access to
+// common attributes, like the identity.
 type ElementSpec interface {
 	GetName() string
 	GetVersion() string
@@ -85,11 +96,21 @@ type ElementSpec interface {
 	Validate(ctx clictx.Context, input *ResourceInput) error
 }
 
+// Element is the abstraction over model elements handled by
+// the add handler, for example, resources, sources, references or complete
+// component versions.
 type Element interface {
+	// Source provides info about the source the element has been
+	// derived from. (for example a component.yaml or resources.yaml).
 	Source() SourceInfo
+	// Spec provides access to the element specification.
 	Spec() ElementSpec
+	// Type is used for types elements, like sources and resources.
 	Type() string
+	// Data provides access to the element descriptor representation.
 	Data() []byte
+	// Input provides access to the underlying data specification.
+	// It is either an access specification or an input specification.
 	Input() *ResourceInput
 }
 
