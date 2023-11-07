@@ -8,30 +8,30 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type _ComponentAccessImplBase = cpi.ComponentAccessImplBase
+type _componentAccessImplBase = repocpi.ComponentAccessImplBase
 
 type componentAccessImpl struct {
-	_ComponentAccessImplBase
+	_componentAccessImplBase
 	repo *RepositoryImpl
 	name string
 }
 
 func newComponentAccess(repo *RepositoryImpl, name string, main bool) (cpi.ComponentAccess, error) {
-	base, err := cpi.NewComponentAccessImplBase(repo.GetContext(), name, repo)
+	base, err := repocpi.NewComponentAccessImplBase(repo.GetContext(), name, repo)
 	if err != nil {
 		return nil, err
 	}
 	impl := &componentAccessImpl{
-		_ComponentAccessImplBase: *base,
+		_componentAccessImplBase: *base,
 		repo:                     repo,
 		name:                     name,
 	}
-	return cpi.NewComponentAccess(impl, "OCM component[Simple]"), nil
+	return repocpi.NewComponentAccess(impl, "OCM component[Simple]"), nil
 }
 
 func (c *componentAccessImpl) ListVersions() ([]string, error) {
@@ -54,7 +54,7 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 	if !ok {
 		return nil, cpi.ErrComponentVersionNotFoundWrap(err, c.name, version)
 	}
-	v, err := c._ComponentAccessImplBase.View()
+	v, err := c._componentAccessImplBase.View()
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 }
 
 func (c *componentAccessImpl) versionContainer(access cpi.ComponentVersionAccess) *ComponentVersionContainer {
-	mine, _ := support.GetComponentVersionContainer[*ComponentVersionContainer](access)
+	mine, _ := repocpi.GetComponentVersionImpl[*ComponentVersionContainer](access)
 	if mine == nil || mine.comp != c {
 		return nil
 	}

@@ -6,10 +6,11 @@ package virtual
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
-type _RepositoryImplBase = cpi.RepositoryImplBase
+type _RepositoryImplBase = repocpi.RepositoryImplBase
 
 type RepositoryImpl struct {
 	_RepositoryImplBase
@@ -17,15 +18,15 @@ type RepositoryImpl struct {
 	nonref cpi.Repository
 }
 
-var _ cpi.RepositoryImpl = (*RepositoryImpl)(nil)
+var _ repocpi.RepositoryImpl = (*RepositoryImpl)(nil)
 
 func NewRepository(ctx cpi.Context, acc Access) cpi.Repository {
 	impl := &RepositoryImpl{
-		_RepositoryImplBase: *cpi.NewRepositoryImplBase(ctx.OCMContext()),
+		_RepositoryImplBase: *repocpi.NewRepositoryImplBase(ctx.OCMContext()),
 		access:              acc,
 	}
-	impl.nonref = cpi.NewNoneRefRepositoryView(impl)
-	r := cpi.NewRepository(impl, "OCM repo[Simple]")
+	impl.nonref = repocpi.NewNoneRefRepositoryView(impl)
+	r := repocpi.NewRepository(impl, "OCM repo[Simple]")
 	return r
 }
 

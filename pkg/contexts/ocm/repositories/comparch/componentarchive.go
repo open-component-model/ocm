@@ -6,7 +6,6 @@ package comparch
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -16,7 +15,7 @@ import (
 	ocmhdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
@@ -50,7 +49,7 @@ func _Wrap(ctx cpi.ContextProvider, obj *accessobj.AccessObject, spec *Repositor
 		ctx:  ctx.OCMContext(),
 		base: accessobj.NewFileSystemBlobAccess(obj),
 	}
-	impl, err := support.NewComponentVersionAccessImpl(s.GetDescriptor().GetName(), s.GetDescriptor().GetVersion(), s, false, true, true)
+	impl, err := repocpi.NewComponentVersionAccessBase(s.GetDescriptor().GetName(), s.GetDescriptor().GetVersion(), s, false, true, true)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +58,7 @@ func _Wrap(ctx cpi.ContextProvider, obj *accessobj.AccessObject, spec *Repositor
 		spec:      spec,
 		container: s,
 	}
-	arch.ComponentVersionAccess = cpi.NewComponentVersionAccess(impl)
+	arch.ComponentVersionAccess = repocpi.NewComponentVersionAccess(impl)
 	arch.main, arch.nonref = newRepository(arch)
 	s.repo = arch.nonref
 	return arch, nil
@@ -100,19 +99,19 @@ func (c *ComponentArchive) SetVersion(v string) {
 
 type componentArchiveContainer struct {
 	ctx  cpi.Context
-	impl support.ComponentVersionAccessImpl
+	impl repocpi.ComponentVersionAccessBase
 	base *accessobj.FileSystemBlobAccess
 	spec *RepositorySpec
 	repo cpi.Repository
 }
 
-var _ support.ComponentVersionContainer = (*componentArchiveContainer)(nil)
+var _ repocpi.ComponentVersionAccessImpl = (*componentArchiveContainer)(nil)
 
-func (c *componentArchiveContainer) SetImplementation(impl support.ComponentVersionAccessImpl) {
+func (c *componentArchiveContainer) SetImplementation(impl repocpi.ComponentVersionAccessBase) {
 	c.impl = impl
 }
 
-func (c *componentArchiveContainer) GetParentViewManager() cpi.ComponentAccessViewManager {
+func (c *componentArchiveContainer) GetParentViewManager() repocpi.ComponentAccessViewManager {
 	return nil
 }
 

@@ -9,13 +9,14 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -24,7 +25,7 @@ const META_SEPARATOR = ".build-"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type _ComponentAccessImplBase = cpi.ComponentAccessImplBase
+type _ComponentAccessImplBase = repocpi.ComponentAccessImplBase
 
 type componentAccessImpl struct {
 	_ComponentAccessImplBase
@@ -39,7 +40,7 @@ func newComponentAccess(repo *RepositoryImpl, name string, main bool) (cpi.Compo
 		return nil, err
 	}
 
-	base, err := cpi.NewComponentAccessImplBase(repo.GetContext(), name, repo)
+	base, err := repocpi.NewComponentAccessImplBase(repo.GetContext(), name, repo)
 	if err != nil {
 		return nil, err
 	}
@@ -54,11 +55,14 @@ func newComponentAccess(repo *RepositoryImpl, name string, main bool) (cpi.Compo
 		name:                     name,
 		namespace:                namespace,
 	}
-	return cpi.NewComponentAccess(impl, "OCM component[OCI]"), nil
+	return repocpi.NewComponentAccess(impl, "OCM component[OCI]"), nil
 }
 
 func (c *componentAccessImpl) Close() error {
-	return accessio.Close(c.namespace, c._ComponentAccessImplBase)
+	refmgmt.AllocLog.Trace("closing component [OCI]", "name", c.name)
+	err := accessio.Close(c.namespace, c._ComponentAccessImplBase)
+	refmgmt.AllocLog.Trace("closed component [OCI]", "name", c.name)
+	return err
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +144,7 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 }
 
 func (c *componentAccessImpl) versionContainer(access cpi.ComponentVersionAccess) *ComponentVersionContainer {
-	mine, _ := support.GetComponentVersionContainer[*ComponentVersionContainer](access)
+	mine, _ := repocpi.GetComponentVersionImpl[*ComponentVersionContainer](access)
 	if mine == nil || mine.comp != c {
 		return nil
 	}

@@ -1,15 +1,11 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package support
+package repocpi
 
 import (
-	"io"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 // BlobContainer is the interface for an element capable to store blobs.
@@ -29,24 +25,4 @@ type BlobContainer interface {
 	// an access method specification usable in a component descriptor.
 	// This is the direct technical storage, without caring about any handler.
 	AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
-}
-
-// ComponentVersionContainer is the interface of an element hosting a component version.
-type ComponentVersionContainer interface {
-	SetImplementation(impl ComponentVersionAccessImpl)
-
-	GetParentViewManager() cpi.ComponentAccessViewManager
-
-	GetContext() cpi.Context
-	Repository() cpi.Repository
-
-	IsReadOnly() bool
-	Update() error
-
-	GetDescriptor() *compdesc.ComponentDescriptor
-	BlobContainer
-	AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
-	GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string
-
-	io.Closer
 }

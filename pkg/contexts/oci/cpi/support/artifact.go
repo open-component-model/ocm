@@ -38,7 +38,6 @@ func NewArtifactForBlob(container NamespaceAccessImpl, blob blobaccess.BlobAcces
 	if err != nil {
 		return nil, err
 	}
-
 	return newArtifact(container, state, closer...)
 }
 

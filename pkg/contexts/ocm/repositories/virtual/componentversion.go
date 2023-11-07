@@ -13,7 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
@@ -28,25 +28,25 @@ func newComponentVersionAccess(comp *componentAccessImpl, version string, persis
 	if err != nil {
 		return nil, err
 	}
-	impl, err := support.NewComponentVersionAccessImpl(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
+	impl, err := repocpi.NewComponentVersionAccessBase(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
 	if err != nil {
 		c.Close()
 		return nil, err
 	}
-	return cpi.NewComponentVersionAccess(impl), nil
+	return repocpi.NewComponentVersionAccess(impl), nil
 }
 
 // //////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
-	impl support.ComponentVersionAccessImpl
+	impl repocpi.ComponentVersionAccessBase
 
 	comp    *componentAccessImpl
 	version string
 	access  VersionAccess
 }
 
-var _ support.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
+var _ repocpi.ComponentVersionAccessImpl = (*ComponentVersionContainer)(nil)
 
 func newComponentVersionContainer(comp *componentAccessImpl, version string, access VersionAccess) (*ComponentVersionContainer, error) {
 	return &ComponentVersionContainer{
@@ -56,11 +56,11 @@ func newComponentVersionContainer(comp *componentAccessImpl, version string, acc
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetImplementation(impl support.ComponentVersionAccessImpl) {
+func (c *ComponentVersionContainer) SetImplementation(impl repocpi.ComponentVersionAccessBase) {
 	c.impl = impl
 }
 
-func (c *ComponentVersionContainer) GetParentViewManager() cpi.ComponentAccessViewManager {
+func (c *ComponentVersionContainer) GetParentViewManager() repocpi.ComponentAccessViewManager {
 	return c.comp
 }
 

@@ -11,6 +11,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -83,7 +84,7 @@ var _ = Describe("component repository mapping", func() {
 		defer Defer(finalize.Finalize)
 
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
@@ -123,7 +124,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
@@ -172,7 +173,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
@@ -222,7 +223,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 		ocirepo := genericocireg.GetOCIRepository(repo)
 		Expect(ocirepo).NotTo(BeNil())
@@ -278,7 +279,7 @@ var _ = Describe("component repository mapping", func() {
 		defer Defer(finalize.Finalize, "finalize open elements")
 
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		nested := finalize.Nested()

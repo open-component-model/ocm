@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
@@ -29,7 +30,7 @@ func GetOCIRepository(r cpi.Repository) ocicpi.Repository {
 	if o, ok := r.(OCIBasedRepository); ok {
 		return o.OCIRepository()
 	}
-	impl, err := cpi.GetRepositoryImplementation(r)
+	impl, err := repocpi.GetRepositoryImplementation(r)
 	if err != nil {
 		return nil
 	}
@@ -39,7 +40,7 @@ func GetOCIRepository(r cpi.Repository) ocicpi.Repository {
 	return nil
 }
 
-type _RepositoryImplBase = cpi.RepositoryImplBase
+type _RepositoryImplBase = repocpi.RepositoryImplBase
 
 type RepositoryImpl struct {
 	_RepositoryImplBase
@@ -49,18 +50,18 @@ type RepositoryImpl struct {
 }
 
 var (
-	_ cpi.RepositoryImpl                   = (*RepositoryImpl)(nil)
+	_ repocpi.RepositoryImpl               = (*RepositoryImpl)(nil)
 	_ credentials.ConsumerIdentityProvider = (*RepositoryImpl)(nil)
 )
 
 func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
 	impl := &RepositoryImpl{
-		_RepositoryImplBase: *cpi.NewRepositoryImplBase(ctx.OCMContext()),
+		_RepositoryImplBase: *repocpi.NewRepositoryImplBase(ctx.OCMContext()),
 		meta:                *DefaultComponentRepositoryMeta(meta),
 		ocirepo:             ocirepo,
 	}
-	impl.nonref = cpi.NewNoneRefRepositoryView(impl)
-	r := cpi.NewRepository(impl, "OCM repo[OCI]")
+	impl.nonref = repocpi.NewNoneRefRepositoryView(impl)
+	r := repocpi.NewRepository(impl, "OCM repo[OCI]")
 	return r, nil
 }
 
@@ -179,6 +180,7 @@ func (r *RepositoryImpl) LookupComponentVersion(name string, version string) (cp
 		return nil, err
 	}
 	defer refmgmt.PropagateCloseTemporary(&err, c) // temporary component object not exposed.
+	refmgmt.AllocLog.Trace("OCM Repo[OCI]: lookup version for temporary component ref", "component", name, "version", version)
 	return c.LookupVersion(version)
 }
 

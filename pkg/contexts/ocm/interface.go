@@ -12,13 +12,14 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // ErrTempVersion indicates an ignored update in the backend because the
 // current version has not yet been added to the repository.
-var ErrTempVersion = cpi.ErrTempVersion
+var ErrTempVersion = repocpi.ErrTempVersion
 
 const (
 	KIND_COMPONENTVERSION   = internal.KIND_COMPONENTVERSION
