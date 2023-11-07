@@ -115,8 +115,8 @@ func (a *componentVersionAccessImpl) GetStorageContext() cpi.StorageContext {
 	return a.base.GetStorageContext()
 }
 
-func (a *componentVersionAccessImpl) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
-	return a.base.AddBlobFor(storagectx, blob, refName, global)
+func (a *componentVersionAccessImpl) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+	return a.base.AddBlobFor(blob, refName, global)
 }
 
 func (a *componentVersionAccessImpl) ShouldUpdate(final bool) bool {

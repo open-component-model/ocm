@@ -230,7 +230,7 @@ func (v *VersionAccess) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) s
 			return ""
 		}
 		defer blob.Close()
-		dig, err := accessio.Digest(blob)
+		dig, err := blobaccess.Digest(blob)
 		if err != nil {
 			return ""
 		}

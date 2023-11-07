@@ -9,7 +9,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -118,8 +117,8 @@ func (c *componentArchiveContainer) GetParentViewManager() cpi.ComponentAccessVi
 }
 
 func (c *componentArchiveContainer) Close() error {
-	c.Update()
-	return c.base.Close()
+	var list errors.ErrorList
+	return list.Add(c.Update(), c.base.Close()).Result()
 }
 
 func (c *componentArchiveContainer) GetContext() cpi.Context {
@@ -165,7 +164,7 @@ func (s *BlobSink) AddBlob(blob blobaccess.BlobAccess) (string, error) {
 	return blob.Digest().String(), nil
 }
 
-func (c *componentArchiveContainer) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *componentArchiveContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -198,7 +197,7 @@ func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 			return ""
 		}
 		defer m.Close()
-		digest, _ := accessio.Digest(m)
+		digest, _ := blobaccess.Digest(m)
 		return digest.String()
 	}
 	return ""

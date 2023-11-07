@@ -117,12 +117,15 @@ func (m *DefaultAccessMethodImpl) Reader() (io.ReadCloser, error) {
 }
 
 func (m *DefaultAccessMethodImpl) Close() error {
+	var err error
 	m.lock.Lock()
 	defer m.lock.Unlock()
+
 	if m.blob != nil {
-		return m.blob.Close()
+		err = m.blob.Close()
+		m.blob = nil
 	}
-	return nil
+	return err
 }
 
 func (m *DefaultAccessMethodImpl) MimeType() string {

@@ -52,8 +52,11 @@ func (s *StorageContext) TargetComponentName() string {
 }
 
 func (s *StorageContext) AssureLayer(blob cpi.BlobAccess) error {
+	return AssureLayer(s.Manifest.GetDescriptor(), blob)
+}
+
+func AssureLayer(desc *artdesc.Manifest, blob cpi.BlobAccess) error {
 	d := artdesc.DefaultBlobDescriptor(blob)
-	desc := s.Manifest.GetDescriptor()
 
 	found := -1
 	for i, l := range desc.Layers {

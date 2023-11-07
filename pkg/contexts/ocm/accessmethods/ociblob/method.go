@@ -112,13 +112,15 @@ func (m *accessMethod) AccessSpec() accspeccpi.AccessSpec {
 }
 
 func (m *accessMethod) Close() error {
+	var err error
 	m.lock.Lock()
 	defer m.lock.Unlock()
+
 	if m.blob != nil {
-		m.blob.Close()
+		err = m.blob.Close()
 		m.blob = nil
 	}
-	return nil
+	return err
 }
 
 func (m *accessMethod) Get() ([]byte, error) {

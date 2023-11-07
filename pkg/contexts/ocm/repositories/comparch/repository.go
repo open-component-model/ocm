@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
@@ -296,7 +297,7 @@ func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
 	return ocmhdlr.New(c.Repository(), c.comp.GetName(), &BlobSink{c.comp.repo.arch.container.base}, Type)
 }
 
-func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -329,7 +330,7 @@ func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 			return ""
 		}
 		defer m.Close()
-		digest, _ := accessio.Digest(m)
+		digest, _ := blobaccess.Digest(m)
 		return digest.String()
 	}
 	return ""

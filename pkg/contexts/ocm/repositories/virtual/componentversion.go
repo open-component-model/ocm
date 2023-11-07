@@ -152,7 +152,7 @@ func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
 	return ocmhdlr.New(c.Repository(), c.comp.GetName(), c.access, Type, c.access)
 }
 
-func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if c.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

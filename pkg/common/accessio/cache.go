@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
@@ -209,7 +210,7 @@ func (c *blobCache) AddBlob(blob blobaccess.BlobAccess) (int64, digest.Digest, e
 	}
 	defer c.Unref()
 
-	var digester *DigestReader
+	var digester *iotools.DigestReader
 
 	if blob.DigestKnown() {
 		c.lock.RLock()
@@ -231,7 +232,7 @@ func (c *blobCache) AddBlob(blob blobaccess.BlobAccess) (int64, digest.Digest, e
 
 	reader := io.Reader(br)
 	if !blob.DigestKnown() {
-		digester = NewDefaultDigestReader(reader)
+		digester = iotools.NewDefaultDigestReader(reader)
 		reader = digester
 	}
 
