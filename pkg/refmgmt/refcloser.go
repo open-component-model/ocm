@@ -7,6 +7,7 @@ package refmgmt
 import (
 	"io"
 	"sync"
+	"sync/atomic"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -143,7 +144,7 @@ type view struct {
 	lock   sync.Mutex
 	ref    ReferencableCloser
 	main   bool
-	closed bool
+	closed atomic.Bool
 }
 
 var _ CloserView = (*view)(nil)
@@ -163,7 +164,7 @@ func (v *view) Allocatable() ExtendedAllocatable {
 func (v *view) Execute(f func() error) error {
 	v.lock.Lock()
 	defer v.lock.Unlock()
-	if v.closed {
+	if v.closed.Load() {
 		return ErrClosed
 	}
 	return f()
@@ -175,11 +176,12 @@ func (v *view) Execute(f func() error) error {
 func (v *view) Release() error {
 	v.lock.Lock()
 	defer v.lock.Unlock()
-	if v.closed {
+	if v.closed.Load() {
 		return ErrClosed
 	}
-	v.closed = true
-	return v.ref.Unref()
+	err := v.ref.Unref()
+	v.closed.Store(true)
+	return err
 }
 
 // Finalize will try to finalize the
@@ -190,14 +192,14 @@ func (v *view) Finalize() error {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 
-	if v.closed {
+	if v.closed.Load() {
 		return ErrClosed
 	}
 
 	if err := v.ref.UnrefLast(); err != nil {
 		return errors.Wrapf(err, "unable to unref last")
 	}
-	v.closed = true
+	v.closed.Store(true)
 	return nil
 }
 
@@ -210,10 +212,7 @@ func (v *view) Close() error {
 }
 
 func (v *view) IsClosed() bool {
-	v.lock.Lock()
-	defer v.lock.Unlock()
-
-	return v.closed
+	return v.closed.Load()
 }
 
 func (v *view) View() (CloserView, error) {

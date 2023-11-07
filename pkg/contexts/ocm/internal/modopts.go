@@ -18,8 +18,8 @@ type BlobOptionImpl interface {
 }
 
 type BlobUploadOptions struct {
-	UseNoDefaultIfNotSet bool
-	BlobHandlerProvider  BlobHandlerProvider
+	UseNoDefaultIfNotSet bool                `json:"noDefaultUpload,omitempty"`
+	BlobHandlerProvider  BlobHandlerProvider `json:"-"`
 }
 
 var _ BlobUploadOption = (*BlobUploadOptions)(nil)

@@ -595,6 +595,7 @@ func (b *ComponentVersionAccessImplBase) GetBlobCache() BlobCache {
 type componentVersionAccessView struct {
 	_ComponentVersionAccessView
 	impl ComponentVersionAccessImpl
+	err  error
 }
 
 var (
@@ -610,10 +611,12 @@ func GetComponentVersionAccessImplementation(n ComponentVersionAccess) (Componen
 }
 
 func artifactAccessViewCreator(i ComponentVersionAccessImpl, v resource.CloserView, d resource.ViewManager[ComponentVersionAccess]) ComponentVersionAccess {
-	return &componentVersionAccessView{
+	cv := &componentVersionAccessView{
 		_ComponentVersionAccessView: resource.NewView[ComponentVersionAccess](v, d),
 		impl:                        i,
 	}
+	v.Allocatable().BeforeCleanup(refmgmt.CleanupHandlerFunc(cv.finish))
+	return cv
 }
 
 func NewComponentVersionAccess(impl ComponentVersionAccessImpl) ComponentVersionAccess {
@@ -625,24 +628,19 @@ func (c *componentVersionAccessView) Unwrap() interface{} {
 }
 
 func (c *componentVersionAccessView) Close() error {
-	err := c.Execute(func() error {
-		// executed under local lock, if refcount is one, I'm the last user.
-		if c.impl.RefCount() == 1 {
-			// prepare artifact access for final close in
-			// direct access mode.
-			if !compositionmodeattr.Get(c.GetContext()) {
-				err := c.update(true)
-				if err != nil {
-					return err
-				}
-			}
+	list := errors.ErrListf("closing %s", common.VersionedElementKey(c))
+	err := c._ComponentVersionAccessView.Close()
+	return list.Add(c.err, err).Result()
+}
+
+func (c *componentVersionAccessView) finish() {
+	if !c.IsClosed() {
+		// prepare artifact access for final close in
+		// direct access mode.
+		if !compositionmodeattr.Get(c.GetContext()) {
+			c.err = c.update(true)
 		}
-		return nil
-	})
-	if err != nil {
-		return err
 	}
-	return c._ComponentVersionAccessView.Close()
 }
 
 func (c *componentVersionAccessView) Repository() Repository {
@@ -793,11 +791,6 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	err = utils.ValidateObject(blob)
 	if err != nil {
 		return nil, errors.Wrapf(err, "inavlid blob access")
-	}
-
-	eff := NewBlobUploadOptions(opts...)
-	if !eff.UseNoDefaultIfNotSet && eff.BlobHandlerProvider == nil {
-		eff.BlobHandlerProvider = internal.DefaultBlobHandlerProvider(c.GetContext())
 	}
 
 	var acc AccessSpec
