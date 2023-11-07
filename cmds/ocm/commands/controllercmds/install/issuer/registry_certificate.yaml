@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ocm-system
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: ocm-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ocm-registry-certificate
+  namespace: ocm-system
+spec:
+  isCA: true
+  secretName: ocm-registry-tls-certs
+  dnsNames:
+    - registry.ocm-system.svc.cluster.local
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: ocm-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
