@@ -5,7 +5,15 @@
 package repocpi
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
+)
+
+var (
+	ErrClosed      = resource.ErrClosed
+	ErrTempVersion = fmt.Errorf("temporary component version cannot be updated")
 )
 
 // BlobContainer is the interface for an element capable to store blobs.
