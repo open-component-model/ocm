@@ -20,6 +20,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -L, --copy-local-resources        transfer referenced local resources by-value
   -V, --copy-resources              transfer referenced resources by-value
       --copy-sources                transfer referenced sources by-value
+      --disable-uploads             disable standard upload handlers for transport
   -h, --help                        help for componentversions
       --latest                      restrict component versions to latest
       --lookup stringArray          repository name or spec for closure lookup fallback

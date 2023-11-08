@@ -21,5 +21,5 @@ ocm controller [<options>] <sub command> ...
 
 ##### Sub Commands
 
-* [ocm controller <b>install</b>](ocm_controller_install.md)	 &mdash; Install either a specific or latest version of the ocm-controller.
+* [ocm controller <b>install</b>](ocm_controller_install.md)	 &mdash; Install either a specific or latest version of the ocm-controller. Optionally install prerequisites required by the controller.
 

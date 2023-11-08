@@ -40,6 +40,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/out"
 )
 
 var (
@@ -50,9 +51,10 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	Refs       []string
-	TargetName string
-	BOMFile    string
+	Refs                []string
+	TargetName          string
+	BOMFile             string
+	DisableBlobHandlers bool
 }
 
 // NewCommand creates a new ctf command.
@@ -94,6 +96,7 @@ $ ocm transfer components -t tgz --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.StringVarP(&o.BOMFile, "bom-file", "B", "", "file name to write the component version BOM")
+	fs.BoolVarP(&o.DisableBlobHandlers, "disable-uploads", "", false, "disable standard upload handlers for transport")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -110,6 +113,10 @@ func (o *Command) Run() error {
 	defer session.Close()
 	session.Finalize(o.OCMContext())
 
+	if o.DisableBlobHandlers {
+		out.Outln(o.Context, "standard blob upload handlers are disabled.")
+		o.Context.OCMContext().DisableBlobHandlers()
+	}
 	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
