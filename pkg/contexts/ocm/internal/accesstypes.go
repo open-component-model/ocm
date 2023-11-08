@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -35,7 +36,7 @@ type AccessSpec interface {
 	Describe(Context) string
 	IsLocal(Context) bool
 	GlobalAccessSpec(Context) AccessSpec
-	// AccessMethod provides an access method implementation for
+	// AccessMethodImpl provides an access method implementation for
 	// an access spec. This might be a repository local implementation
 	// or a global one. It might be implemented directly by the AccessSpec
 	// for global AccessMethods or forwarded to the ComponentVersion for
@@ -47,7 +48,7 @@ type AccessSpec interface {
 	// GetInexpensiveContentVersionIdentity implements a method that attempts to provide an inexpensive identity.
 	// Therefore, an identity that can be provided without requiring the entire object (e.g. calculating the digest from
 	// the bytes), which would defeat the purpose of caching.
-	// It follows the same contract as AccessMethod.
+	// It follows the same contract as AccessMethodImpl.
 	GetInexpensiveContentVersionIdentity(access ComponentVersionAccess) string
 }
 
@@ -71,13 +72,17 @@ type GlobalAccessProvider interface {
 	GlobalAccessSpec(ctx Context) AccessSpec
 }
 
-// AccessMethod described the access to a dedicated resource
+// AccessMethodImpl is the implementation interface
+// for access methods provided by access types. It describes
+// the access to a dedicated resource
 // It can allocate external resources, which should be released
 // with the Close() call.
 // Resources SHOULD only be allocated, if the content is accessed
 // via the DataAccess interface to avoid unnecessary effort
 // if the method object is just used to access meta data.
-type AccessMethod interface {
+// It is always wrapped by a view model enabling Dup
+// operations to pass and keep instances on demand.
+type AccessMethodImpl interface {
 	io.Closer
 	DataAccess
 	MimeType
@@ -87,14 +92,13 @@ type AccessMethod interface {
 	AccessSpec() AccessSpec
 }
 
-// AccessMethodView can be used map wrap an access method
-// into a managed method with multiple views. The original method
+// AccessMethod is used to support independently closable
+// views on an access method implementation, which can
+// be passed around and stored. The original method implementation
 // object is closed once the last view is closed.
-type AccessMethodView interface {
-	AccessMethod
-
-	Base() interface{}
-	Dup() (AccessMethodView, error)
+type AccessMethod interface {
+	refmgmt.Dup[AccessMethod]
+	AccessMethodImpl
 }
 
 type AccessTypeScheme flagsetscheme.TypeScheme[AccessSpec, AccessType]

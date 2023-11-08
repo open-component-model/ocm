@@ -90,6 +90,7 @@ V[3] ctxinfo realm ocm realm test
 V[2] ctxwarn realm ocm realm test
 ERROR <nil> ctxerror realm ocm realm test
 `))
+		ocmlog.Context().SetDefaultLevel(logging.WarnLevel)
 	})
 
 	It("sets logging by config", func() {

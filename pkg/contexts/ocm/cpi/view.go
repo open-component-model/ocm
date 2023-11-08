@@ -5,16 +5,17 @@
 package cpi
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
 	"sync"
 
+	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common/accessio/refmgmt"
-	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
@@ -22,10 +23,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
+	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/selector"
 )
@@ -36,7 +40,10 @@ import (
 // Additionally, they are used to implement interface functionality which is
 // common to all implementations and NOT dependent on the backend system technology.
 
-var ErrClosed = resource.ErrClosed
+var (
+	ErrClosed      = resource.ErrClosed
+	ErrTempVersion = fmt.Errorf("temporary component version cannot be updated")
+)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -78,6 +85,7 @@ type repositoryView struct {
 var (
 	_ Repository                           = (*repositoryView)(nil)
 	_ credentials.ConsumerIdentityProvider = (*repositoryView)(nil)
+	_ utils.Unwrappable                    = (*repositoryView)(nil)
 )
 
 func GetRepositoryImplementation(n Repository) (RepositoryImpl, error) {
@@ -105,6 +113,10 @@ func NewNoneRefRepositoryView(i RepositoryImpl) Repository {
 
 func NewRepository(impl RepositoryImpl, name ...string) Repository {
 	return resource.NewResource[Repository](impl, repositoryViewCreator, utils.OptionalDefaulted("OCM repo", name...), true)
+}
+
+func (r *repositoryView) Unwrap() interface{} {
+	return r.impl
 }
 
 func (r *repositoryView) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
@@ -151,7 +163,7 @@ func (r *repositoryView) LookupComponent(name string) (acc ComponentAccess, err 
 	return acc, err
 }
 
-func (r *repositoryView) NewVersion(comp, vers string, overrides ...bool) (ComponentVersionAccess, error) {
+func (r *repositoryView) NewComponentVersion(comp, vers string, overrides ...bool) (ComponentVersionAccess, error) {
 	c, err := refmgmt.ToLazy(r.LookupComponent(comp))
 	if err != nil {
 		return nil, err
@@ -161,7 +173,7 @@ func (r *repositoryView) NewVersion(comp, vers string, overrides ...bool) (Compo
 	return c.NewVersion(vers, overrides...)
 }
 
-func (r *repositoryView) AddVersion(cv ComponentVersionAccess, overrides ...bool) error {
+func (r *repositoryView) AddComponentVersion(cv ComponentVersionAccess, overrides ...bool) error {
 	c, err := refmgmt.ToLazy(r.LookupComponent(cv.GetName()))
 	if err != nil {
 		return err
@@ -224,7 +236,10 @@ type componentAccessView struct {
 	impl ComponentAccessImpl
 }
 
-var _ ComponentAccess = (*componentAccessView)(nil)
+var (
+	_ ComponentAccess   = (*componentAccessView)(nil)
+	_ utils.Unwrappable = (*componentAccessView)(nil)
+)
 
 func GetComponentAccessImplementation(n ComponentAccess) (ComponentAccessImpl, error) {
 	if v, ok := n.(*componentAccessView); ok {
@@ -242,6 +257,10 @@ func componentAccessViewCreator(i ComponentAccessImpl, v resource.CloserView, d 
 
 func NewComponentAccess(impl ComponentAccessImpl, kind ...string) ComponentAccess {
 	return resource.NewResource[ComponentAccess](impl, componentAccessViewCreator, fmt.Sprintf("%s %s", utils.OptionalDefaulted("component", kind...), impl.GetName()), true)
+}
+
+func (c *componentAccessView) Unwrap() interface{} {
+	return c.impl
 }
 
 func (c *componentAccessView) GetContext() Context {
@@ -376,9 +395,7 @@ func blobAccessForLocalAccessSpec(spec AccessSpec, cv ComponentVersionAccess, ac
 	if err != nil {
 		return nil, err
 	}
-	v := AccessMethodAsView(m)
-	defer v.Close()
-	return BlobAccessForAccessMethod(v)
+	return accspeccpi.BlobAccessForAccessMethod(m)
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc ComponentVersionAccess, err error) {
@@ -585,7 +602,10 @@ type componentVersionAccessView struct {
 	impl ComponentVersionAccessImpl
 }
 
-var _ ComponentVersionAccess = (*componentVersionAccessView)(nil)
+var (
+	_ ComponentVersionAccess = (*componentVersionAccessView)(nil)
+	_ utils.Unwrappable      = (*componentVersionAccessView)(nil)
+)
 
 func GetComponentVersionAccessImplementation(n ComponentVersionAccess) (ComponentVersionAccessImpl, error) {
 	if v, ok := n.(*componentVersionAccessView); ok {
@@ -603,6 +623,10 @@ func artifactAccessViewCreator(i ComponentVersionAccessImpl, v resource.CloserVi
 
 func NewComponentVersionAccess(impl ComponentVersionAccessImpl) ComponentVersionAccess {
 	return resource.NewResource[ComponentVersionAccess](impl, artifactAccessViewCreator, fmt.Sprintf("component version  %s/%s", impl.GetName(), impl.GetVersion()), true)
+}
+
+func (c *componentVersionAccessView) Unwrap() interface{} {
+	return c.impl
 }
 
 func (c *componentVersionAccessView) Close() error {
@@ -644,6 +668,17 @@ func (c *componentVersionAccessView) GetVersion() string {
 
 func (c *componentVersionAccessView) GetDescriptor() *compdesc.ComponentDescriptor {
 	return c.impl.GetDescriptor()
+}
+
+func (c *componentVersionAccessView) GetProvider() *compdesc.Provider {
+	return c.GetDescriptor().Provider.Copy()
+}
+
+func (c *componentVersionAccessView) SetProvider(p *compdesc.Provider) error {
+	return c.Execute(func() error {
+		c.GetDescriptor().Provider = *p.Copy()
+		return nil
+	})
 }
 
 func (c *componentVersionAccessView) AccessMethod(spec AccessSpec) (meth AccessMethod, err error) {
@@ -715,7 +750,7 @@ func (c *componentVersionAccessView) getInexpensiveContentVersionIdentity(spec A
 func (c *componentVersionAccessView) Update() error {
 	return c.Execute(func() error {
 		if !c.impl.IsPersistent() {
-			return fmt.Errorf("temporary component version cannot be updated")
+			return ErrTempVersion
 		}
 		return c.update(true)
 	})
@@ -748,7 +783,7 @@ func (c *componentVersionAccessView) update(final bool) error {
 	return c.impl.GetBlobCache().Clear()
 }
 
-func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error) {
+func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global AccessSpec, opts ...internal.BlobUploadOption) (AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -763,6 +798,11 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	err = utils.ValidateObject(blob)
 	if err != nil {
 		return nil, errors.Wrapf(err, "inavlid blob access")
+	}
+
+	eff := NewBlobUploadOptions(opts...)
+	if !eff.UseNoDefaultIfNotSet && eff.BlobHandlerProvider == nil {
+		eff.BlobHandlerProvider = internal.DefaultBlobHandlerProvider(c.GetContext())
 	}
 
 	var acc AccessSpec
@@ -798,19 +838,34 @@ func addBlob(impl ComponentVersionAccessImpl, cv ComponentVersionAccess, artType
 }
 
 func (c *componentVersionAccessView) getLocalBlob(acc AccessSpec) BlobAccess {
-	return c.impl.GetBlobCache().GetBlobFor(c.getInexpensiveContentVersionIdentity(acc))
+	key, err := json.Marshal(acc)
+	if err != nil {
+		return nil
+	}
+	return c.impl.GetBlobCache().GetBlobFor(string(key))
 }
 
 func (c *componentVersionAccessView) cacheLocalBlob(acc AccessSpec, blob BlobAccess) (AccessSpec, error) {
-	if acc.IsLocal(c.GetContext()) {
-		// local blobs might not be accessible from the underlying
-		// repository implementation if the component version is not
-		// finally added (for example ghcr.io as OCI repository).
-		// Therefore, we keep a copy of the blob access for further usage.
-		err := c.impl.GetBlobCache().AddBlobFor(c.getInexpensiveContentVersionIdentity(acc), blob)
-		if err != nil {
-			return nil, err
-		}
+	key, err := json.Marshal(acc)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot marshal access spec")
+	}
+	// local blobs might not be accessible from the underlying
+	// repository implementation if the component version is not
+	// finally added (for example ghcr.io as OCI repository).
+	// Therefore, we keep a copy of the blob access for further usage.
+
+	// if a local blob is uploader and the access method is replaced
+	// we have to handle the case that the technical upload repo
+	// is the same as the storage backend of the OCM repository, which
+	// might have been configured with local credentials, which were
+	// reused by the uploader.
+	// The access spec is independent of the actual repo, so it does
+	// not have access to those credentials. Therefore, we have to
+	// keep the original blob for further usage, also.
+	err = c.impl.GetBlobCache().AddBlobFor(string(key), blob)
+	if err != nil {
+		return nil, err
 	}
 	return acc, nil
 }
@@ -824,17 +879,18 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, ac
 }
 
 // SetResourceBlob adds a blob resource to the component version.
-func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.ModificationOption) error {
-	Logger(c).Info("adding resource blob", "resource", meta.Name)
+func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.BlobModificationOption) error {
+	Logger(c).Debug("adding resource blob", "resource", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
-	acc, err := c.AddBlob(blob, meta.Type, refName, global)
+	eff := NewBlobModificationOptions(opts...)
+	acc, err := c.AddBlob(blob, meta.Type, refName, global, eff)
 	if err != nil {
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
-	if err := c.SetResource(meta, acc, append(opts, internal.ModifyResource())...); err != nil {
+	if err := c.SetResource(meta, acc, eff, ModifyResource()); err != nil {
 		return fmt.Errorf("unable to set resource: %w", err)
 	}
 
@@ -850,7 +906,7 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *SourceMeta, acc co
 }
 
 func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refName string, global AccessSpec) error {
-	Logger(c).Info("adding source blob", "source", meta.Name)
+	Logger(c).Debug("adding source blob", "source", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
@@ -873,7 +929,7 @@ type fakeMethod struct {
 	blob  blobaccess.BlobAccess
 }
 
-var _ AccessMethod = (*fakeMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*fakeMethod)(nil)
 
 func newFakeMethod(m AccessMethod, blob BlobAccess) (AccessMethod, error) {
 	b, err := blob.Dup()
@@ -891,7 +947,7 @@ func newFakeMethod(m AccessMethod, blob BlobAccess) (AccessMethod, error) {
 		_ = b.Close()
 		return nil, errors.Wrapf(err, "closing access method")
 	}
-	return f, nil
+	return accspeccpi.AccessMethodForImplementation(f, nil)
 }
 
 func (f *fakeMethod) MimeType() string {
@@ -949,7 +1005,7 @@ func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessVie
 			return set(meta, acc)
 		}
 
-		blob, err = BlobAccessForAccessSpec(acc, c)
+		blob, err = accspeccpi.BlobAccessForAccessSpec(acc, c)
 		if err != nil && errors.IsErrNotFoundElem(err, "", blobaccess.KIND_BLOB) {
 			return err
 		}
@@ -975,10 +1031,10 @@ func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessVie
 	return setblob(meta, blob, hint, global)
 }
 
-func (c *componentVersionAccessView) SetResourceByAccess(art ResourceAccess, modopts ...ModificationOption) error {
+func (c *componentVersionAccessView) SetResourceAccess(art ResourceAccess, modopts ...BlobModificationOption) error {
 	return setAccess(c, "resource", art,
 		func(meta *ResourceMeta, acc compdesc.AccessSpec) error {
-			return c.SetResource(meta, acc, modopts...)
+			return c.SetResource(meta, acc, NewBlobModificationOptions(modopts...))
 		},
 		func(meta *ResourceMeta, blob BlobAccess, hint string, global AccessSpec) error {
 			return c.SetResourceBlob(meta, blob, hint, global, modopts...)
@@ -1004,9 +1060,27 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		return err
 	}
 
+	// if the blob described by the access spec has been added
+	// as local blob, just reuse the stored blob access
+	// to calculate the digest to circumvent credential problems
+	// for access specs generated by an uploader.
 	meth, err := c.AccessMethod(spec)
 	if err != nil {
 		return err
+	}
+	if blob := c.getLocalBlob(spec); blob != nil {
+		var dig digest.Digest
+		if s, ok := meth.(blobaccess.DigestSource); ok {
+			dig = s.Digest()
+		}
+		err = meth.Close()
+		if err != nil {
+			return errors.Wrapf(err, "clsoing shadowed method")
+		}
+		meth, err = accspeccpi.NewDefaultMethodForBlobAccess(c, spec, dig, blob, spec.IsLocal(c.GetContext()))
+		if err != nil {
+			return err
+		}
 	}
 	defer meth.Close()
 

@@ -8,7 +8,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 var _ = Describe("Environment", func() {
@@ -20,4 +23,11 @@ var _ = Describe("Environment", func() {
 		Expect(err).To(Succeed())
 		Expect(string(data)).To(Equal("this is some test data"))
 	})
+
+	It("reuses context", func() {
+		ctx := ocm.New()
+		h := NewEnvironment(OCMContext(ctx), FileSystem(osfs.OsFs))
+		Expect(h.OCMContext()).To(BeIdenticalTo(ctx))
+	})
+
 })

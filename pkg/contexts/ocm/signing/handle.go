@@ -320,7 +320,7 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 			ctx.Signed = true
 		}
 		err := cv.Update()
-		if err != nil {
+		if err != nil && !errors.Is(err, ocm.ErrTempVersion) {
 			return nil, err
 		}
 	}
@@ -393,7 +393,7 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 		}
 		err = verifier.Verify(sig.Digest.Value, hasher.Crypto(), sig.ConvertToSigning(), pub)
 		if err != nil {
-			return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, sig.Signature.Algorithm)
+			return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, n)
 		}
 		found = append(found, n)
 		if opts.SignatureName() == sig.Name {

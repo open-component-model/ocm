@@ -19,7 +19,7 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"

@@ -9,8 +9,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/spi"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
@@ -35,7 +35,7 @@ var _ = Describe("version", func() {
 		nested.Close(cv, "composed version")
 
 		// wrap a non-closer access into a ref counting access to check cleanup
-		blob := spi.NewBlobAccessForBase(blobaccess.ForString(mime.MIME_TEXT, "testdata"))
+		blob := bpi.NewBlobAccessForBase(blobaccess.ForString(mime.MIME_TEXT, "testdata"))
 		nested.Close(blob, "blob")
 		MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blob, "", nil))
 
@@ -58,7 +58,7 @@ var _ = Describe("version", func() {
 		// add this version again
 		repo2 := me.NewRepository(ctx)
 		finalize.Close(repo2, "target repo2")
-		MustBeSuccessful(repo2.AddVersion(cv))
+		MustBeSuccessful(repo2.AddComponentVersion(cv))
 		MustBeSuccessful(nested.Finalize())
 
 		// check result

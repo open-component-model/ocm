@@ -159,6 +159,14 @@ func (o *ElementMeta) GetName() string {
 	return o.Name
 }
 
+// GetExtraIdentity returns the extra identity of the object.
+func (o *ElementMeta) GetExtraIdentity() metav1.Identity {
+	if o.ExtraIdentity == nil {
+		return metav1.Identity{}
+	}
+	return o.ExtraIdentity.Copy()
+}
+
 // SetName sets the name of the object.
 func (o *ElementMeta) SetName(name string) {
 	o.Name = name

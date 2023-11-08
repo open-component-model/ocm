@@ -19,12 +19,12 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

@@ -8,10 +8,10 @@ import (
 	"io"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 )
 
@@ -25,20 +25,21 @@ type localFilesystemBlobAccessMethod struct {
 	blobAccess blobaccess.DataAccess
 }
 
-var _ cpi.AccessMethod = (*localFilesystemBlobAccessMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*localFilesystemBlobAccessMethod)(nil)
 
-func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer) cpi.AccessMethod {
-	return &localFilesystemBlobAccessMethod{
+func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer) accspeccpi.AccessMethod {
+	m, _ := accspeccpi.AccessMethodForImplementation(&localFilesystemBlobAccessMethod{
 		spec: a,
 		base: base,
-	}
+	}, nil)
+	return m
 }
 
 func (_ *localFilesystemBlobAccessMethod) IsLocal() bool {
 	return true
 }
 
-func (m *localFilesystemBlobAccessMethod) AccessSpec() cpi.AccessSpec {
+func (m *localFilesystemBlobAccessMethod) AccessSpec() accspeccpi.AccessSpec {
 	return m.spec
 }
 

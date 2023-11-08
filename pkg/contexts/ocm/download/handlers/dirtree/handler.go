@@ -19,7 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/common/compression"
-	"github.com/open-component-model/ocm/pkg/common/iotools"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
@@ -29,6 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
@@ -173,7 +173,9 @@ func (h *Handler) GetForResource(racc cpi.ResourceAccess) (fs vfs.FileSystem, re
 	case mime.MIME_TGZ, mime.MIME_TAR:
 	case MimeOCIImageArtifact:
 	default:
-		return nil, nil, nil
+		if !h.ociConfigtypes.Contains(media) && !h.ociConfigtypes.Contains(meth.MimeType()) {
+			return nil, nil, nil
+		}
 	}
 
 	r, err := meth.Reader()

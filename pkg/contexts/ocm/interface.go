@@ -6,16 +6,19 @@ package ocm
 
 import (
 	"context"
-	"io"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/context"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
+
+// ErrTempVersion indicates an ignored update in the backend because the
+// current version has not yet been added to the repository.
+var ErrTempVersion = cpi.ErrTempVersion
 
 const (
 	KIND_COMPONENTVERSION   = internal.KIND_COMPONENTVERSION
@@ -76,6 +79,7 @@ type (
 type (
 	BlobHandlerRegistry = internal.BlobHandlerRegistry
 	BlobHandler         = internal.BlobHandler
+	BlobHandlerProvider = internal.BlobHandlerProvider
 )
 
 func NewDigestDescriptor(digest, hashAlgo, normAlgo string) *DigestDescriptor {
@@ -89,6 +93,10 @@ func DefaultContext() internal.Context {
 
 func DefaultBlobHandlers() BlobHandlerRegistry {
 	return internal.DefaultBlobHandlerRegistry
+}
+
+func DefaultBlobHandlerProvider(ctx Context) BlobHandlerProvider {
+	return internal.DefaultBlobHandlerProvider(ctx)
 }
 
 func DefaultRepositoryDelegationRegistry() RepositoryDelegationRegistry {
@@ -149,64 +157,6 @@ func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) 
 
 ///////////////////////////////////////////////////////
 
-type (
-	ModificationOption  = internal.ModificationOption
-	ModificationOptions = internal.ModificationOptions
-)
-
-func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
-	return internal.NewModificationOptions(list...)
-}
-
-func ModifyResource(flag ...bool) ModificationOption {
-	return internal.ModifyResource(flag...)
-}
-
-func AcceptExistentDigests(flag ...bool) ModificationOption {
-	return internal.AcceptExistentDigests(flag...)
-}
-
-func WithDefaultHashAlgorithm(algo ...string) ModificationOption {
-	return internal.WithDefaultHashAlgorithm(algo...)
-}
-
-func WithHasherProvider(prov HasherProvider) ModificationOption {
-	return internal.WithHasherProvider(prov)
-}
-
-func SkipVerify(flag ...bool) ModificationOption {
-	return internal.SkipVerify(flag...)
-}
-
-// SkipDigest disables digest creation if enabled.
-//
-// Deprecated: for legacy code, only.
-func SkipDigest(flag ...bool) ModificationOption {
-	return internal.SkipDigest(flag...)
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-
-type AccessMethodView = cpi.AccessMethodView
-
-func BlobAccessForAccessMethod(m AccessMethodView) (blobaccess.AnnotatedBlobAccess[AccessMethodView], error) {
-	return cpi.BlobAccessForAccessMethod(m)
-}
-
-// AccessMethodAsView wrap an access method object into
-// a multi-view version. The original method is closed when
-// the last view is closed.
-// After an access method is used as base object, it should not
-// explicitly closed anymore, because the views will stop
-// functioning.
-func AccessMethodAsView(acc ocm.AccessMethod, closer ...io.Closer) AccessMethodView {
-	return cpi.AccessMethodAsView(acc, closer...)
-}
-
-func AccessMethodViewForSpec(spec ocm.AccessSpec, cv ocm.ComponentVersionAccess) (AccessMethodView, error) {
-	return cpi.AccessMethodViewForSpec(spec, cv)
-}
-
-func AccessMethodViewForAccessProvider(p AccessProvider) (AccessMethodView, error) {
-	return cpi.AccessMethodViewForAccessProvider(p)
+func BlobAccessForAccessMethod(m AccessMethod) (blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView], error) {
+	return accspeccpi.BlobAccessForAccessMethod(m)
 }

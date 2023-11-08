@@ -5,9 +5,13 @@
 package cpi
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"fmt"
+
+	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/context"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -15,12 +19,24 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// ComponentVersionProvider should be implemented
+// by Accesses based on component version instances.
+// It is used to determine access type specific
+// information. For example, OCI based access types
+// may provide global OCI artifact references.
+type ComponentVersionProvider interface {
+	GetComponentVersion() (ComponentVersionAccess, error)
+}
+
 type ComponentVersionBasedAccessProvider struct {
 	vers   ComponentVersionAccess
 	access compdesc.AccessSpec
 }
 
-var _ AccessProvider = (*ComponentVersionBasedAccessProvider)(nil)
+var (
+	_ AccessProvider           = (*ComponentVersionBasedAccessProvider)(nil)
+	_ ComponentVersionProvider = (*ComponentVersionBasedAccessProvider)(nil)
+)
 
 // Deprecated: use ComponentVersionBasedAccessProvider.
 type BaseAccess = ComponentVersionBasedAccessProvider
@@ -31,6 +47,10 @@ func NewBaseAccess(cv ComponentVersionAccess, acc compdesc.AccessSpec) *Componen
 
 func (r *ComponentVersionBasedAccessProvider) GetOCMContext() Context {
 	return r.vers.GetContext()
+}
+
+func (r *ComponentVersionBasedAccessProvider) GetComponentVersion() (ComponentVersionAccess, error) {
+	return r.vers.Dup()
 }
 
 func (r *ComponentVersionBasedAccessProvider) ReferenceHint() string {
@@ -60,12 +80,13 @@ func (r *ComponentVersionBasedAccessProvider) AccessMethod() (AccessMethod, erro
 	return acc.AccessMethod(r.vers)
 }
 
-func (r *ComponentVersionBasedAccessProvider) BlobAccess() (BlobAccess, error) {
+func (r *ComponentVersionBasedAccessProvider) BlobAccess() (blob BlobAccess, rerr error) {
 	m, err := r.AccessMethod()
 	if err != nil {
 		return nil, err
 	}
-	return BlobAccessForAccessMethod(AccessMethodAsView(m))
+	defer errors.PropagateError(&err, m.Close)
+	return accspeccpi.BlobAccessForAccessMethod(m)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,22 +137,100 @@ func NewArtifactAccessProviderForBlobAccessProvider[M any](ctx Context, meta *M,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type accessProvider = AccessProvider
+type accessAccessProvider struct {
+	ctx  ocm.Context
+	spec AccessSpec
+}
+
+var _ AccessProvider = (*accessAccessProvider)(nil)
+
+func NewAccessProviderForExternalAccessSpec(ctx ocm.Context, spec AccessSpec) (AccessProvider, error) {
+	if spec.IsLocal(ctx) {
+		return nil, fmt.Errorf("access spec describes a repository specific local access method")
+	}
+	return &accessAccessProvider{
+		ctx:  ctx,
+		spec: spec,
+	}, nil
+}
+
+func (b *accessAccessProvider) GetOCMContext() cpi.Context {
+	return b.ctx
+}
+
+func (b *accessAccessProvider) ReferenceHint() string {
+	return ""
+}
+
+func (b *accessAccessProvider) GlobalAccess() cpi.AccessSpec {
+	return nil
+}
+
+func (b *accessAccessProvider) Access() (cpi.AccessSpec, error) {
+	return b.spec, nil
+}
+
+func (b *accessAccessProvider) AccessMethod() (cpi.AccessMethod, error) {
+	return nil, errors.ErrNotFound(descriptor.KIND_ACCESSMETHOD)
+}
+
+func (b *accessAccessProvider) BlobAccess() (blobaccess.BlobAccess, error) {
+	return accspeccpi.BlobAccessForAccessSpec(b.spec, &DummyComponentVersionAccess{b.ctx})
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type (
+	accessProvider           = AccessProvider
+	componentVersionProvider = ComponentVersionProvider
+)
 
 type artifactAccessProvider[M any] struct {
 	accessProvider
 	meta *M
 }
 
+var _ credentials.ConsumerIdentityProvider = (*artifactAccessProvider[any])(nil)
+
+type artifactCVAccessProvider[M any] struct {
+	artifactAccessProvider[M]
+	componentVersionProvider
+}
+
 func NewArtifactAccessForProvider[M any](meta *M, prov AccessProvider) cpi.ArtifactAccess[M] {
-	return &artifactAccessProvider[M]{
+	aa := &artifactAccessProvider[M]{
 		accessProvider: prov,
 		meta:           meta,
 	}
+	if p, ok := prov.(ComponentVersionProvider); ok {
+		return &artifactCVAccessProvider[M]{
+			artifactAccessProvider:   *aa,
+			componentVersionProvider: p,
+		}
+	}
+	return aa
 }
 
 func (r *artifactAccessProvider[M]) Meta() *M {
 	return r.meta
+}
+
+func (b *artifactAccessProvider[M]) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	m, err := b.AccessMethod()
+	if err != nil {
+		return nil
+	}
+	defer m.Close()
+	return credentials.GetProvidedConsumerId(m, uctx...)
+}
+
+func (b *artifactAccessProvider[M]) GetIdentityMatcher() string {
+	m, err := b.AccessMethod()
+	if err != nil {
+		return ""
+	}
+	defer m.Close()
+	return credentials.GetProvidedIdentityMatcher(m)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,6 @@
+username: mandelsoft
+password: ghp_xxxxxx
+repository: ghcr.io/mandelsoft/test
+targetRepository:
+  type: OCIRegistry
+  baseUrl: ghcr.io/mandelsoft/testtarget

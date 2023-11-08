@@ -132,7 +132,10 @@ var _ = Describe("transport and signing", func() {
 				OCIArtifactResource1(env, "image", OCIHOST)
 			})
 		})
+	})
 
+	AfterEach(func() {
+		env.Cleanup()
 	})
 
 	It("provides expected base component", func() {

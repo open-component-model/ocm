@@ -9,10 +9,12 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -74,7 +76,7 @@ type accessMethod struct {
 	creds   json.RawMessage
 }
 
-var _ cpi.AccessMethod = (*accessMethod)(nil)
+var _ cpi.AccessMethodImpl = (*accessMethod)(nil)
 
 func newMethod(p *PluginHandler, spec *AccessSpec, ctx ocm.Context, info *ppi.AccessSpecInfo, creds json.RawMessage) *accessMethod {
 	return &accessMethod{
@@ -120,7 +122,7 @@ func (m *accessMethod) MimeType() string {
 	return m.info.MediaType
 }
 
-func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
+func (m *accessMethod) getBlob() (blobaccess.BlobAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -134,4 +136,15 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 	}
 	m.blob = accessobj.CachedBlobAccessForWriter(m.ctx, m.MimeType(), plugin.NewAccessDataWriter(m.handler.plug, m.creds, spec))
 	return m.blob, nil
+}
+
+func (m *accessMethod) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	if len(m.info.ConsumerId) == 0 {
+		return nil
+	}
+	return m.info.ConsumerId
+}
+
+func (m *accessMethod) GetIdentityMatcher() string {
+	return hostpath.IDENTITY_TYPE
 }

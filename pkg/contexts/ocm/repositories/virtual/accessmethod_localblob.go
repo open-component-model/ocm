@@ -8,9 +8,9 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 )
 
 type localBlobAccessMethod struct {
@@ -20,7 +20,7 @@ type localBlobAccessMethod struct {
 	access VersionAccess
 }
 
-var _ cpi.AccessMethod = (*localBlobAccessMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*localBlobAccessMethod)(nil)
 
 func newLocalBlobAccessMethod(a *localblob.AccessSpec, acc VersionAccess) *localBlobAccessMethod {
 	return &localBlobAccessMethod{
@@ -37,7 +37,7 @@ func (m *localBlobAccessMethod) GetKind() string {
 	return m.spec.GetKind()
 }
 
-func (m *localBlobAccessMethod) AccessSpec() cpi.AccessSpec {
+func (m *localBlobAccessMethod) AccessSpec() accspeccpi.AccessSpec {
 	return m.spec
 }
 
@@ -53,7 +53,7 @@ func (m *localBlobAccessMethod) Close() error {
 	return nil
 }
 
-func (m *localBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
+func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 

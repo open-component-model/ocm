@@ -5,9 +5,11 @@
 package helper
 
 import (
+	"encoding/json"
 	"io/ioutil"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -18,6 +20,9 @@ type Config struct {
 	Component  string `json:"component"`
 	Repository string `json:"repository"`
 	Version    string `json:"version"`
+
+	Target    json.RawMessage `json:"targetRepository"`
+	OCMConfig string          `json:"ocmConfig"`
 }
 
 func ReadConfig(path string) (*Config, error) {
@@ -35,8 +40,5 @@ func ReadConfig(path string) (*Config, error) {
 }
 
 func (c *Config) GetCredentials() credentials.Credentials {
-	return credentials.DirectCredentials{
-		credentials.ATTR_USERNAME: c.Username,
-		credentials.ATTR_PASSWORD: c.Password,
-	}
+	return identity.SimpleCredentials(c.Username, c.Password)
 }

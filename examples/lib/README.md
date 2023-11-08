@@ -132,3 +132,23 @@ typicaly require more configuration:
 - [creating content and credential handling](creds.md)
 - [dealing with configuration](config.md)
 - [creating OCM content in temporary CTFs and publishing it](transfer.md)
+
+## End-to-end Scenario.
+
+In folder [`comparison-scenario`](comparison-scenario/README.md) there is
+an example for an end-to-end scenario,
+from building a component version to publishing, consuming and deploying 
+it in a separate environment. It shows the usage of the OCM library to
+implement all the required process steps.
+
+It builds a component version for the [podinfo helm chart](https://artifacthub.io/packages/helm/podinfo/podinfo).
+There are two scenarios:
+- provisioning
+  - building a component version with a helm based deployment description 
+  - signing it and
+  - publishing it
+- consumption in a separate repository environment
+  - tranferring the component version into a separate repository environment.
+  - using the deployment description to localize the helm chart value - preparing
+    values to refer to the podinfo OCI image available in the local environment.
+  - finally deploying it with helm.

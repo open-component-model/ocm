@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -206,6 +207,10 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 
 // copyVersion (purely internal) expects an already prepared target comp desc for t given as prep.
 func copyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler) (rerr error) {
+	var finalize finalizer.Finalizer
+
+	defer errors.PropagateError(&rerr, finalize.Finalize)
+
 	if handler == nil {
 		handler = standard.NewDefaultHandler(nil)
 	}
@@ -215,11 +220,14 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 	*t.GetDescriptor() = *prep
 	log.Info("  transferring resources")
 	for i, r := range src.GetResources() {
-		var m ocmcpi.AccessMethodView
+		var m ocmcpi.AccessMethod
+
+		nested := finalize.Nested()
 
 		a, err := r.Access()
 		if err == nil {
-			m, err = ocmcpi.AccessMethodViewForSpec(a, src)
+			m, err = a.AccessMethod(src)
+			nested.Close(m, fmt.Sprintf("%s: transferring resource %d: closing access method", hist, i))
 		}
 		if err == nil {
 			ok := a.IsLocal(src.GetContext())
@@ -243,7 +251,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 					var msgs []interface{}
 					if !errors.IsErrNotFound(err) {
 						if err != nil {
-							return errors.Join(err, m.Close())
+							return err
 						}
 						if !changed && valueNeeded {
 							msgs = []interface{}{"copy"}
@@ -260,7 +268,6 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
 				}
 			}
-			err = errors.Join(err, m.Close())
 		}
 		if err != nil {
 			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
@@ -268,15 +275,19 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 			}
 			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)\n", hist, i, err)
 		}
+		err = nested.Finalize()
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Info("  transferring sources")
 	for i, r := range src.GetSources() {
-		var m ocmcpi.AccessMethodView
+		var m ocmcpi.AccessMethod
 
 		a, err := r.Access()
 		if err == nil {
-			m, err = ocmcpi.AccessMethodViewForSpec(a, src)
+			m, err = a.AccessMethod(src)
 		}
 		if err == nil {
 			ok := a.IsLocal(src.GetContext())

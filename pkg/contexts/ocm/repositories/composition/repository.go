@@ -9,19 +9,35 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/virtual"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func NewRepository(ctx cpi.ContextProvider) cpi.Repository {
-	return virtual.NewRepository(ctx.OCMContext(), NewAccess())
+func NewRepository(ctx cpi.ContextProvider, names ...string) cpi.Repository {
+	var repositories *Repositories
+
+	name := utils.Optional(names...)
+	if name != "" {
+		repositories = ctx.OCMContext().GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
+		if repo := repositories.GetRepository(name); repo != nil {
+			repo, _ = repo.Dup()
+			return repo
+		}
+	}
+	repo := virtual.NewRepository(ctx.OCMContext(), NewAccess())
+	if repositories != nil {
+		repositories.SetRepository(name, repo)
+		repo, _ = repo.Dup()
+	}
+	return repo
 }
 
 type Index = virtual.Index[common.NameVersion]

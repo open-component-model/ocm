@@ -28,7 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/extraid"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/out"
 )
@@ -107,8 +107,8 @@ func (o *Command) Complete(args []string) error {
 			}
 		}
 		for _, id := range o.Ids {
-			id[consts.ExecutableOperatingSystem] = runtime.GOOS
-			id[consts.ExecutableArchitecture] = runtime.GOARCH
+			id[extraid.ExecutableOperatingSystem] = runtime.GOOS
+			id[extraid.ExecutableArchitecture] = runtime.GOARCH
 		}
 	}
 

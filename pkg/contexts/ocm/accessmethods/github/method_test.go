@@ -112,6 +112,14 @@ var _ = Describe("Method", func() {
 		vfs.Cleanup(fs)
 	})
 
+	It("provides comsumer id", func() {
+		m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+		Expect(err).ToNot(HaveOccurred())
+		Expect(credentials.GetProvidedConsumerId(m)).To(Equal(credentials.NewConsumerIdentity(identity.CONSUMER_TYPE,
+			identity.ID_HOSTNAME, "github.com",
+			identity.ID_PATHPREFIX, "test/test")))
+	})
+
 	It("downloads artifacts", func() {
 		m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 		Expect(err).ToNot(HaveOccurred())

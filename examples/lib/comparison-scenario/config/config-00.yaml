@@ -1,0 +1,10 @@
+repository: ghcr.io/mandelsoft/test
+ocmconfig: /home/mandelsoft/comparison/ocmconfig.yaml
+#targetRepository:
+#  type: CommonTransportFormat
+#  filePath: /tmp/comparison.ctf
+#  fileFormat: directory
+#  accessMode: 2
+targetRepository:
+  type: OCIRegistry
+  baseUrl: ghcr.io/mandelsoft/testtarget
