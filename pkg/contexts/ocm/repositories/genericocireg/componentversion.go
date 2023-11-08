@@ -81,7 +81,7 @@ func (c *ComponentVersionContainer) SetImplementation(impl repocpi.ComponentVers
 }
 
 func (c *ComponentVersionContainer) GetParentViewManager() repocpi.ComponentAccessViewManager {
-	return c.comp
+	return c.comp.base
 }
 
 func (c *ComponentVersionContainer) Close() error {

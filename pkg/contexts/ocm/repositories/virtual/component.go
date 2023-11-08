@@ -13,25 +13,41 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type _componentAccessImplBase = repocpi.ComponentAccessImplBase
-
 type componentAccessImpl struct {
-	_componentAccessImplBase
+	base repocpi.ComponentAccessBase
+
 	repo *RepositoryImpl
 	name string
 }
 
+var _ repocpi.ComponentAccessImpl = (*componentAccessImpl)(nil)
+
 func newComponentAccess(repo *RepositoryImpl, name string, main bool) (cpi.ComponentAccess, error) {
-	base, err := repocpi.NewComponentAccessImplBase(repo.GetContext(), name, repo)
-	if err != nil {
-		return nil, err
-	}
 	impl := &componentAccessImpl{
-		_componentAccessImplBase: *base,
-		repo:                     repo,
-		name:                     name,
+		repo: repo,
+		name: name,
 	}
-	return repocpi.NewComponentAccess(impl, "OCM component[Simple]"), nil
+	return repocpi.NewComponentAccess(impl, "OCM component[Simple]")
+}
+
+func (c *componentAccessImpl) Close() error {
+	return nil
+}
+
+func (c *componentAccessImpl) SetImplementation(base repocpi.ComponentAccessBase) {
+	c.base = base
+}
+
+func (c *componentAccessImpl) GetParentViewManager() repocpi.RepositoryViewManager {
+	return c.repo
+}
+
+func (c *componentAccessImpl) GetContext() cpi.Context {
+	return c.repo.GetContext()
+}
+
+func (c *componentAccessImpl) GetName() string {
+	return c.name
 }
 
 func (c *componentAccessImpl) ListVersions() ([]string, error) {
@@ -54,7 +70,7 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 	if !ok {
 		return nil, cpi.ErrComponentVersionNotFoundWrap(err, c.name, version)
 	}
-	v, err := c._componentAccessImplBase.View()
+	v, err := c.base.View()
 	if err != nil {
 		return nil, err
 	}
@@ -71,10 +87,6 @@ func (c *componentAccessImpl) versionContainer(access cpi.ComponentVersionAccess
 	return mine
 }
 
-func (c *componentAccessImpl) IsOwned(access cpi.ComponentVersionAccess) bool {
-	return c.versionContainer(access) != nil
-}
-
 func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
 	if access.GetName() != c.GetName() {
 		return errors.ErrInvalid("component name", access.GetName())
@@ -83,14 +95,14 @@ func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) erro
 	if mine == nil {
 		return fmt.Errorf("cannot add component version: component version access %s not created for target", access.GetName()+":"+access.GetVersion())
 	}
-	mine.impl.EnablePersistence()
+	mine.base.EnablePersistence()
 
 	// delayed update in close is not done for composition mode
-	return mine.impl.Update(!mine.impl.UseDirectAccess())
+	return mine.base.Update(!mine.base.UseDirectAccess())
 }
 
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
-	v, err := c.View(false)
+	v, err := c.base.View(false)
 	if err != nil {
 		return nil, err
 	}

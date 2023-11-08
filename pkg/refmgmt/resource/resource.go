@@ -256,6 +256,10 @@ func (b *ResourceImplBase[T]) Allocatable() refmgmt.ExtendedAllocatable {
 	return b.refs.Allocatable()
 }
 
+func (b *ResourceImplBase[T]) ViewManager() ViewManager[T] {
+	return b.refs
+}
+
 func (b *ResourceImplBase[T]) View(main ...bool) (T, error) {
 	return b.refs.View(main...)
 }

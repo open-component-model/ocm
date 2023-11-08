@@ -150,25 +150,38 @@ func (r *RepositoryImpl) LookupComponent(name string) (cpi.ComponentAccess, erro
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type _ComponentAccessImplBase = repocpi.ComponentAccessImplBase
-
 type ComponentAccessImpl struct {
-	_ComponentAccessImplBase
+	base repocpi.ComponentAccessBase
 	repo *RepositoryImpl
 }
 
-var _ repocpi.ComponentAccessBase = (*ComponentAccessImpl)(nil)
+var _ repocpi.ComponentAccessImpl = (*ComponentAccessImpl)(nil)
 
 func newComponentAccess(r *RepositoryImpl) (cpi.ComponentAccess, error) {
-	base, err := repocpi.NewComponentAccessImplBase(r.GetContext(), r.arch.GetName(), r)
-	if err != nil {
-		return nil, err
-	}
 	impl := &ComponentAccessImpl{
-		_ComponentAccessImplBase: *base,
-		repo:                     r,
+		repo: r,
 	}
-	return repocpi.NewComponentAccess(impl, "component archive"), nil
+	return repocpi.NewComponentAccess(impl, "component archive")
+}
+
+func (c *ComponentAccessImpl) Close() error {
+	return nil
+}
+
+func (c *ComponentAccessImpl) SetImplementation(base repocpi.ComponentAccessBase) {
+	c.base = base
+}
+
+func (c *ComponentAccessImpl) GetParentViewManager() repocpi.RepositoryViewManager {
+	return c.repo
+}
+
+func (c *ComponentAccessImpl) GetContext() cpi.Context {
+	return c.repo.GetContext()
+}
+
+func (c *ComponentAccessImpl) GetName() string {
+	return c.repo.arch.GetName()
 }
 
 func (c *ComponentAccessImpl) IsReadOnly() bool {
@@ -196,10 +209,6 @@ func (c *ComponentAccessImpl) container(access cpi.ComponentVersionAccess) *comp
 		return nil
 	}
 	return mine.comp.repo.arch.container
-}
-
-func (c *ComponentAccessImpl) IsOwned(access cpi.ComponentVersionAccess) bool {
-	return c.container(access) == c.repo.arch.container
 }
 
 func (c *ComponentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
@@ -255,7 +264,7 @@ func (c *ComponentVersionContainer) SetImplementation(impl repocpi.ComponentVers
 }
 
 func (c *ComponentVersionContainer) GetParentViewManager() repocpi.ComponentAccessViewManager {
-	return c.comp
+	return c.comp.base
 }
 
 func (c *ComponentVersionContainer) Close() error {

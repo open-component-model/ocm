@@ -12,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -25,10 +24,8 @@ const META_SEPARATOR = ".build-"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type _ComponentAccessImplBase = repocpi.ComponentAccessImplBase
-
 type componentAccessImpl struct {
-	_ComponentAccessImplBase
+	base      repocpi.ComponentAccessBase
 	repo      *RepositoryImpl
 	name      string
 	namespace oci.NamespaceAccess
@@ -39,30 +36,39 @@ func newComponentAccess(repo *RepositoryImpl, name string, main bool) (cpi.Compo
 	if err != nil {
 		return nil, err
 	}
-
-	base, err := repocpi.NewComponentAccessImplBase(repo.GetContext(), name, repo)
-	if err != nil {
-		return nil, err
-	}
 	namespace, err := repo.ocirepo.LookupNamespace(mapped)
 	if err != nil {
-		base.Close()
 		return nil, err
 	}
 	impl := &componentAccessImpl{
-		_ComponentAccessImplBase: *base,
-		repo:                     repo,
-		name:                     name,
-		namespace:                namespace,
+		repo:      repo,
+		name:      name,
+		namespace: namespace,
 	}
-	return repocpi.NewComponentAccess(impl, "OCM component[OCI]"), nil
+	return repocpi.NewComponentAccess(impl, "OCM component[OCI]")
 }
 
 func (c *componentAccessImpl) Close() error {
 	refmgmt.AllocLog.Trace("closing component [OCI]", "name", c.name)
-	err := accessio.Close(c.namespace, c._ComponentAccessImplBase)
+	err := c.namespace.Close()
 	refmgmt.AllocLog.Trace("closed component [OCI]", "name", c.name)
 	return err
+}
+
+func (c *componentAccessImpl) SetImplementation(base repocpi.ComponentAccessBase) {
+	c.base = base
+}
+
+func (c *componentAccessImpl) GetParentViewManager() repocpi.RepositoryViewManager {
+	return c.repo
+}
+
+func (c *componentAccessImpl) GetContext() cpi.Context {
+	return c.repo.GetContext()
+}
+
+func (c *componentAccessImpl) GetName() string {
+	return c.name
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,10 +157,6 @@ func (c *componentAccessImpl) versionContainer(access cpi.ComponentVersionAccess
 	return mine
 }
 
-func (c *componentAccessImpl) IsOwned(access cpi.ComponentVersionAccess) bool {
-	return c.versionContainer(access) != nil
-}
-
 func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
 	if access.GetName() != c.GetName() {
 		return errors.ErrInvalid("component name", access.GetName())
@@ -172,7 +174,7 @@ func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) erro
 }
 
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
-	v, err := c.View(false)
+	v, err := c.base.View(false)
 	if err != nil {
 		return nil, err
 	}

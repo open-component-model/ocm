@@ -34,7 +34,7 @@ func newComponentVersionAccess(comp *componentAccessImpl, version string, persis
 // //////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
-	impl repocpi.ComponentVersionAccessBase
+	base repocpi.ComponentVersionAccessBase
 
 	comp    *componentAccessImpl
 	version string
@@ -51,12 +51,12 @@ func newComponentVersionContainer(comp *componentAccessImpl, version string, acc
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetImplementation(impl repocpi.ComponentVersionAccessBase) {
-	c.impl = impl
+func (c *ComponentVersionContainer) SetImplementation(base repocpi.ComponentVersionAccessBase) {
+	c.base = base
 }
 
 func (c *ComponentVersionContainer) GetParentViewManager() repocpi.ComponentAccessViewManager {
-	return c.comp
+	return c.comp.base
 }
 
 func (c *ComponentVersionContainer) Close() error {

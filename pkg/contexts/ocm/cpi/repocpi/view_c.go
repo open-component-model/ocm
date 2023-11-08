@@ -6,6 +6,7 @@ package repocpi
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
@@ -60,8 +61,16 @@ func componentAccessViewCreator(i ComponentAccessBase, v resource.CloserView, d 
 	}
 }
 
-func NewComponentAccess(impl ComponentAccessBase, kind ...string) cpi.ComponentAccess {
-	return resource.NewResource[cpi.ComponentAccess](impl, componentAccessViewCreator, fmt.Sprintf("%s %s", utils.OptionalDefaulted("component", kind...), impl.GetName()), true)
+func NewComponentAccess(impl ComponentAccessImpl, kind string, closer ...io.Closer) (cpi.ComponentAccess, error) {
+	base, err := newComponentAccessImplBase(impl, closer...)
+	if err != nil {
+		return nil, errors.Join(err, impl.Close())
+	}
+	if kind == "" {
+		kind = "component"
+	}
+	cv := resource.NewResource[cpi.ComponentAccess](base, componentAccessViewCreator, fmt.Sprintf("%s %s", kind, impl.GetName()), true)
+	return cv, nil
 }
 
 func (c *componentAccessView) Unwrap() interface{} {
