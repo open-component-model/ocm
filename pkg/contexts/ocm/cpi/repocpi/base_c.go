@@ -17,8 +17,8 @@ import (
 // ComponentAccessImpl is the provider implementation
 // interface for component versions.
 type ComponentAccessImpl interface {
-	SetImplementation(base ComponentAccessBase)
-	GetParentViewManager() RepositoryViewManager
+	SetBase(base ComponentAccessBase)
+	GetParentBase() RepositoryViewManager
 
 	GetContext() cpi.Context
 	GetName() string
@@ -43,7 +43,7 @@ type componentAccessBase struct {
 }
 
 func newComponentAccessImplBase(impl ComponentAccessImpl, closer ...io.Closer) (ComponentAccessBase, error) {
-	base, err := resource.NewResourceImplBase[cpi.ComponentAccess](impl.GetParentViewManager(), closer...)
+	base, err := resource.NewResourceImplBase[cpi.ComponentAccess, cpi.Repository](impl.GetParentBase(), closer...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func newComponentAccessImplBase(impl ComponentAccessImpl, closer ...io.Closer) (
 		name:                     impl.GetName(),
 		impl:                     impl,
 	}
-	impl.SetImplementation(b)
+	impl.SetBase(b)
 	return b, nil
 }
 
@@ -81,9 +81,8 @@ func (c *componentAccessBase) IsOwned(cv cpi.ComponentVersionAccess) bool {
 	}
 
 	impl := base.(*componentVersionAccessBase).impl
-	cvcompmgr := impl.GetParentViewManager()
-	mymgr := c._componentAccessImplBase
-	return mymgr == cvcompmgr
+	cvcompmgr := impl.GetParentBase()
+	return c == cvcompmgr
 }
 
 func (c *componentAccessBase) AddVersion(cv cpi.ComponentVersionAccess) error {

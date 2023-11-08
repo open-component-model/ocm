@@ -34,11 +34,11 @@ func (c *componentAccessImpl) Close() error {
 	return nil
 }
 
-func (c *componentAccessImpl) SetImplementation(base repocpi.ComponentAccessBase) {
+func (c *componentAccessImpl) SetBase(base repocpi.ComponentAccessBase) {
 	c.base = base
 }
 
-func (c *componentAccessImpl) GetParentViewManager() repocpi.RepositoryViewManager {
+func (c *componentAccessImpl) GetParentBase() repocpi.RepositoryViewManager {
 	return c.repo
 }
 

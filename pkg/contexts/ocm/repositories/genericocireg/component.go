@@ -9,14 +9,14 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
-	"github.com/open-component-model/ocm/pkg/refmgmt"
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -55,11 +55,11 @@ func (c *componentAccessImpl) Close() error {
 	return err
 }
 
-func (c *componentAccessImpl) SetImplementation(base repocpi.ComponentAccessBase) {
+func (c *componentAccessImpl) SetBase(base repocpi.ComponentAccessBase) {
 	c.base = base
 }
 
-func (c *componentAccessImpl) GetParentViewManager() repocpi.RepositoryViewManager {
+func (c *componentAccessImpl) GetParentBase() repocpi.RepositoryViewManager {
 	return c.repo
 }
 

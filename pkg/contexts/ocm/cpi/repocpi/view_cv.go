@@ -10,7 +10,6 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -26,6 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/utils"

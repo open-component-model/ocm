@@ -51,11 +51,11 @@ func newComponentVersionContainer(comp *componentAccessImpl, version string, acc
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetImplementation(base repocpi.ComponentVersionAccessBase) {
+func (c *ComponentVersionContainer) SetBase(base repocpi.ComponentVersionAccessBase) {
 	c.base = base
 }
 
-func (c *ComponentVersionContainer) GetParentViewManager() repocpi.ComponentAccessViewManager {
+func (c *ComponentVersionContainer) GetParentBase() repocpi.ComponentAccessBase {
 	return c.comp.base
 }
 

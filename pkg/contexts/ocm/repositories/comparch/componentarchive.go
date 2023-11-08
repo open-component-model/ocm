@@ -6,6 +6,7 @@ package comparch
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -108,11 +109,11 @@ type componentArchiveContainer struct {
 
 var _ repocpi.ComponentVersionAccessImpl = (*componentArchiveContainer)(nil)
 
-func (c *componentArchiveContainer) SetImplementation(impl repocpi.ComponentVersionAccessBase) {
+func (c *componentArchiveContainer) SetBase(impl repocpi.ComponentVersionAccessBase) {
 	c.impl = impl
 }
 
-func (c *componentArchiveContainer) GetParentViewManager() repocpi.ComponentAccessViewManager {
+func (c *componentArchiveContainer) GetParentBase() repocpi.ComponentAccessBase {
 	return nil
 }
 

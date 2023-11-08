@@ -22,8 +22,8 @@ import (
 // interface for component versions.
 type ComponentVersionAccessImpl interface {
 	GetContext() cpi.Context
-	SetImplementation(base ComponentVersionAccessBase)
-	GetParentViewManager() ComponentAccessViewManager
+	SetBase(base ComponentVersionAccessBase)
+	GetParentBase() ComponentAccessBase
 
 	Repository() cpi.Repository
 
@@ -65,7 +65,7 @@ type componentVersionAccessBase struct {
 var _ ComponentVersionAccessBase = (*componentVersionAccessBase)(nil)
 
 func newComponentVersionAccessBase(name, version string, impl ComponentVersionAccessImpl, lazy, persistent, direct bool, closer ...io.Closer) (ComponentVersionAccessBase, error) {
-	base, err := resource.NewResourceImplBase[cpi.ComponentVersionAccess](impl.GetParentViewManager(), closer...)
+	base, err := resource.NewResourceImplBase[cpi.ComponentVersionAccess, cpi.ComponentAccess](impl.GetParentBase(), closer...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func newComponentVersionAccessBase(name, version string, impl ComponentVersionAc
 		directAccess:                    direct,
 		impl:                            impl,
 	}
-	impl.SetImplementation(b)
+	impl.SetBase(b)
 	return b, nil
 }
 

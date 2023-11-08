@@ -168,11 +168,11 @@ func (c *ComponentAccessImpl) Close() error {
 	return nil
 }
 
-func (c *ComponentAccessImpl) SetImplementation(base repocpi.ComponentAccessBase) {
+func (c *ComponentAccessImpl) SetBase(base repocpi.ComponentAccessBase) {
 	c.base = base
 }
 
-func (c *ComponentAccessImpl) GetParentViewManager() repocpi.RepositoryViewManager {
+func (c *ComponentAccessImpl) GetParentBase() repocpi.RepositoryViewManager {
 	return c.repo
 }
 
@@ -259,11 +259,11 @@ func newComponentVersionContainer(comp *ComponentAccessImpl) (*ComponentVersionC
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetImplementation(impl repocpi.ComponentVersionAccessBase) {
+func (c *ComponentVersionContainer) SetBase(impl repocpi.ComponentVersionAccessBase) {
 	c.impl = impl
 }
 
-func (c *ComponentVersionContainer) GetParentViewManager() repocpi.ComponentAccessViewManager {
+func (c *ComponentVersionContainer) GetParentBase() repocpi.ComponentAccessBase {
 	return c.comp.base
 }
 

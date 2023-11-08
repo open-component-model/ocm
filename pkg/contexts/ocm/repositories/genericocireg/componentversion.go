@@ -9,7 +9,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -28,6 +27,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
@@ -76,11 +76,11 @@ func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAcce
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetImplementation(impl repocpi.ComponentVersionAccessBase) {
+func (c *ComponentVersionContainer) SetBase(impl repocpi.ComponentVersionAccessBase) {
 	c.impl = impl
 }
 
-func (c *ComponentVersionContainer) GetParentViewManager() repocpi.ComponentAccessViewManager {
+func (c *ComponentVersionContainer) GetParentBase() repocpi.ComponentAccessBase {
 	return c.comp.base
 }
 
