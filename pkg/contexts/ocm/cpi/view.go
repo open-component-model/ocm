@@ -313,7 +313,10 @@ func (c *componentAccessView) addVersion(acc ComponentVersionAccess, overrides .
 		eff ComponentVersionAccess
 	)
 
-	if !c.impl.IsOwned(acc) {
+	opts := NewBlobUploadOptions()
+
+	forcestore := c.impl.IsOwned(acc)
+	if !forcestore {
 		// transfer all local blobs into a new owned version.
 		sel = func(spec AccessSpec) bool { return spec.IsLocal(ctx) }
 
@@ -333,14 +336,16 @@ func (c *componentAccessView) addVersion(acc ComponentVersionAccess, overrides .
 		*d = *acc.GetDescriptor().Copy()
 	} else {
 		// transfer composition blobs into local blobs
+		opts.UseNoDefaultIfNotSet = true
+		opts.BlobHandlerProvider = nil
 		sel = compose.Is
 		d = acc.GetDescriptor()
 		eff = acc
 	}
 
-	err = setupLocalBobs(ctx, "resource", acc, eff, nil, impl, d.Resources, sel)
+	err = setupLocalBobs(ctx, "resource", acc, nil, impl, d.Resources, sel, forcestore, opts)
 	if err == nil {
-		err = setupLocalBobs(ctx, "source", acc, eff, nil, impl, d.Sources, sel)
+		err = setupLocalBobs(ctx, "source", acc, nil, impl, d.Sources, sel, forcestore, opts)
 	}
 	if err != nil {
 		return err
@@ -349,7 +354,7 @@ func (c *componentAccessView) addVersion(acc ComponentVersionAccess, overrides .
 	return c.impl.AddVersion(eff)
 }
 
-func setupLocalBobs(ctx Context, kind string, src, tgt ComponentVersionAccess, accprov func(AccessSpec) (AccessMethod, error), tgtimpl ComponentVersionAccessImpl, it compdesc.ArtifactAccessor, sel func(AccessSpec) bool) (ferr error) {
+func setupLocalBobs(ctx Context, kind string, src ComponentVersionAccess, accprov func(AccessSpec) (AccessMethod, error), tgtimpl ComponentVersionAccessImpl, it compdesc.ArtifactAccessor, sel func(AccessSpec) bool, forcestore bool, opts *BlobUploadOptions) (ferr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 
@@ -366,7 +371,13 @@ func setupLocalBobs(ctx Context, kind string, src, tgt ComponentVersionAccess, a
 				return errors.Wrapf(err, "%s %d", kind, i)
 			}
 			nested.Close(blob)
-			effspec, err := addBlob(tgtimpl, tgt, a.GetType(), ReferenceHint(spec, src), blob, GlobalAccess(spec, ctx))
+
+			var effspec AccessSpec
+			if forcestore {
+				effspec, err = tgtimpl.AddBlobFor(blob, ReferenceHint(spec, src), GlobalAccess(spec, ctx))
+			} else {
+				effspec, err = addBlob(tgtimpl, a.GetType(), ReferenceHint(spec, src), blob, GlobalAccess(spec, ctx))
+			}
 			if err != nil {
 				return errors.Wrapf(err, "cannot store %s %d", kind, i)
 			}
@@ -391,11 +402,7 @@ func blobAccessForLocalAccessSpec(spec AccessSpec, cv ComponentVersionAccess, ac
 	if err != nil {
 		return nil, err
 	}
-
-	if err != nil {
-		return nil, err
-	}
-	return accspeccpi.BlobAccessForAccessMethod(m)
+	return m.AsBlobAccess(), nil
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc ComponentVersionAccess, err error) {
@@ -438,22 +445,21 @@ type ComponentVersionAccessImpl interface {
 
 	GetDescriptor() *compdesc.ComponentDescriptor
 
-	AccessMethod(ComponentVersionAccess, AccessSpec) (AccessMethod, error)
-
-	GetInexpensiveContentVersionIdentity(ComponentVersionAccess, AccessSpec) string
+	AccessMethod(AccessSpec, refmgmt.ExtendedAllocatable) (AccessMethod, error)
+	GetInexpensiveContentVersionIdentity(AccessSpec, refmgmt.ExtendedAllocatable) string
 
 	// GetStorageContext creates a storage context for blobs
 	// that is used to feed blob handlers for specific blob storage methods.
 	// If no handler accepts the blob, the AddBlobFor method will
 	// be used to store the blob
-	GetStorageContext(cv ComponentVersionAccess) StorageContext
+	GetStorageContext() StorageContext
 
 	// AddBlobFor stores a local blob together with the component and
 	// potentially provides a global reference.
 	// The resulting access information (global and local) is provided as
 	// an access method specification usable in a component descriptor.
 	// This is the direct technical storage, without caring about any handler.
-	AddBlobFor(storagectx StorageContext, blob BlobAccess, refName string, global AccessSpec) (AccessSpec, error)
+	AddBlobFor(blob BlobAccess, refName string, global AccessSpec) (AccessSpec, error)
 
 	IsReadOnly() bool
 
@@ -600,6 +606,7 @@ func (b *ComponentVersionAccessImplBase) GetBlobCache() BlobCache {
 type componentVersionAccessView struct {
 	_ComponentVersionAccessView
 	impl ComponentVersionAccessImpl
+	err  error
 }
 
 var (
@@ -615,10 +622,12 @@ func GetComponentVersionAccessImplementation(n ComponentVersionAccess) (Componen
 }
 
 func artifactAccessViewCreator(i ComponentVersionAccessImpl, v resource.CloserView, d resource.ViewManager[ComponentVersionAccess]) ComponentVersionAccess {
-	return &componentVersionAccessView{
+	cv := &componentVersionAccessView{
 		_ComponentVersionAccessView: resource.NewView[ComponentVersionAccess](v, d),
 		impl:                        i,
 	}
+	v.Allocatable().BeforeCleanup(refmgmt.CleanupHandlerFunc(cv.finish))
+	return cv
 }
 
 func NewComponentVersionAccess(impl ComponentVersionAccessImpl) ComponentVersionAccess {
@@ -630,24 +639,19 @@ func (c *componentVersionAccessView) Unwrap() interface{} {
 }
 
 func (c *componentVersionAccessView) Close() error {
-	err := c.Execute(func() error {
-		// executed under local lock, if refcount is one, I'm the last user.
-		if c.impl.RefCount() == 1 {
-			// prepare artifact access for final close in
-			// direct access mode.
-			if !compositionmodeattr.Get(c.GetContext()) {
-				err := c.update(true)
-				if err != nil {
-					return err
-				}
-			}
+	list := errors.ErrListf("closing %s", common.VersionedElementKey(c))
+	err := c._ComponentVersionAccessView.Close()
+	return list.Add(c.err, err).Result()
+}
+
+func (c *componentVersionAccessView) finish() {
+	if !c.IsClosed() {
+		// prepare artifact access for final close in
+		// direct access mode.
+		if !compositionmodeattr.Get(c.GetContext()) {
+			c.err = c.update(true)
 		}
-		return nil
-	})
-	if err != nil {
-		return err
 	}
-	return c._ComponentVersionAccessView.Close()
 }
 
 func (c *componentVersionAccessView) Repository() Repository {
@@ -709,7 +713,7 @@ func (c *componentVersionAccessView) accessMethod(spec AccessSpec) (meth AccessM
 	case !spec.IsLocal(c.GetContext()):
 		meth, err = spec.AccessMethod(c)
 	default:
-		meth, err = c.impl.AccessMethod(c, spec)
+		meth, err = c.impl.AccessMethod(spec, c.Allocatable())
 		if err == nil {
 			if blob := c.getLocalBlob(spec); blob != nil {
 				meth, err = newFakeMethod(meth, blob)
@@ -743,7 +747,7 @@ func (c *componentVersionAccessView) getInexpensiveContentVersionIdentity(spec A
 		// fall back to original version
 		return spec.GetInexpensiveContentVersionIdentity(c)
 	default:
-		return c.impl.GetInexpensiveContentVersionIdentity(c, spec)
+		return c.impl.GetInexpensiveContentVersionIdentity(spec, c.Allocatable())
 	}
 }
 
@@ -768,9 +772,9 @@ func (c *componentVersionAccessView) update(final bool) error {
 		return err
 	}
 	// TODO: exceute for separately lockable view
-	err = setupLocalBobs(ctx, "resource", c, c, c.accessMethod, impl, d.Resources, compose.Is)
+	err = setupLocalBobs(ctx, "resource", c, c.accessMethod, impl, d.Resources, compose.Is, true, nil)
 	if err == nil {
-		err = setupLocalBobs(ctx, "source", c, c, c.accessMethod, impl, d.Sources, compose.Is)
+		err = setupLocalBobs(ctx, "source", c, c.accessMethod, impl, d.Sources, compose.Is, true, nil)
 	}
 	if err != nil {
 		return err
@@ -792,35 +796,20 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	}
 	blob, err := blob.Dup()
 	if err != nil {
-		return nil, errors.Wrapf(err, "inavlid blob access")
+		return nil, errors.Wrapf(err, "invalid blob access")
 	}
 	defer blob.Close()
 	err = utils.ValidateObject(blob)
 	if err != nil {
-		return nil, errors.Wrapf(err, "inavlid blob access")
+		return nil, errors.Wrapf(err, "invalid blob access")
 	}
 
-	eff := NewBlobUploadOptions(opts...)
-	if !eff.UseNoDefaultIfNotSet && eff.BlobHandlerProvider == nil {
-		eff.BlobHandlerProvider = internal.DefaultBlobHandlerProvider(c.GetContext())
-	}
-
-	var acc AccessSpec
-	if c.impl.UseDirectAccess() {
-		acc, err = addBlob(c.impl, c, artType, refName, blob, global)
-	} else {
-		// use local composition access to be added to the repository with AddVersion.
-		acc = compose.New(refName, blob.MimeType(), global)
-	}
-	if err == nil {
-		return c.cacheLocalBlob(acc, blob)
-	}
-	return acc, err
+	return addBlob(c.impl, artType, refName, blob, global)
 }
 
-func addBlob(impl ComponentVersionAccessImpl, cv ComponentVersionAccess, artType, refName string, blob BlobAccess, global AccessSpec) (AccessSpec, error) {
-	storagectx := impl.GetStorageContext(cv)
-	ctx := cv.GetContext()
+func addBlob(impl ComponentVersionAccessImpl, artType, refName string, blob BlobAccess, global AccessSpec) (AccessSpec, error) {
+	storagectx := impl.GetStorageContext()
+	ctx := impl.GetContext()
 	h := ctx.BlobHandlers().LookupHandler(storagectx.GetImplementationRepositoryType(), artType, blob.MimeType())
 	if h != nil {
 		acc, err := h.StoreBlob(blob, artType, refName, nil, storagectx)
@@ -834,7 +823,12 @@ func addBlob(impl ComponentVersionAccessImpl, cv ComponentVersionAccess, artType
 			global = acc
 		}
 	}
-	return impl.AddBlobFor(storagectx, blob, refName, global)
+	if impl.UseDirectAccess() {
+		return impl.AddBlobFor(blob, refName, global)
+	}
+	// use local composition access to be added to the repository with AddVersion.
+	acc := compose.New(refName, blob.MimeType(), global)
+	return cacheLocalBlob(impl, acc, blob)
 }
 
 func (c *componentVersionAccessView) getLocalBlob(acc AccessSpec) BlobAccess {
@@ -845,7 +839,7 @@ func (c *componentVersionAccessView) getLocalBlob(acc AccessSpec) BlobAccess {
 	return c.impl.GetBlobCache().GetBlobFor(string(key))
 }
 
-func (c *componentVersionAccessView) cacheLocalBlob(acc AccessSpec, blob BlobAccess) (AccessSpec, error) {
+func cacheLocalBlob(impl ComponentVersionAccessImpl, acc AccessSpec, blob BlobAccess) (AccessSpec, error) {
 	key, err := json.Marshal(acc)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot marshal access spec")
@@ -863,7 +857,7 @@ func (c *componentVersionAccessView) cacheLocalBlob(acc AccessSpec, blob BlobAcc
 	// The access spec is independent of the actual repo, so it does
 	// not have access to those credentials. Therefore, we have to
 	// keep the original blob for further usage, also.
-	err = c.impl.GetBlobCache().AddBlobFor(string(key), blob)
+	err = impl.GetBlobCache().AddBlobFor(string(key), blob)
 	if err != nil {
 		return nil, err
 	}

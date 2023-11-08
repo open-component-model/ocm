@@ -6,24 +6,23 @@ package genericblob
 
 import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
-func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, blob blobaccess.BlobAccess, opts ...Option) cpi.ArtifactAccess[M] {
+func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx cpi.Context, meta P, blob blobaccess.BlobAccessProvider, opts ...Option) cpi.ArtifactAccess[M] {
 	eff := optionutils.EvalOptions(opts...)
-	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobaccess.ProviderForBlobAccess(blob), eff.Hint, eff.Global)
+	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blob, eff.Hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
 	return cpi.NewArtifactAccessForProvider(generics.As[*M](meta), accprov)
 }
 
-func ResourceAccess(ctx ocm.Context, media string, meta *ocm.ResourceMeta, blob blobaccess.BlobAccess, opts ...Option) cpi.ResourceAccess {
+func ResourceAccess(ctx cpi.Context, media string, meta *cpi.ResourceMeta, blob blobaccess.BlobAccessProvider, opts ...Option) cpi.ResourceAccess {
 	return Access(ctx, meta, blob, opts...)
 }
 
-func SourceAccess(ctx ocm.Context, media string, meta *ocm.SourceMeta, blob blobaccess.BlobAccess, opts ...Option) cpi.SourceAccess {
+func SourceAccess(ctx cpi.Context, media string, meta *cpi.SourceMeta, blob blobaccess.BlobAccessProvider, opts ...Option) cpi.SourceAccess {
 	return Access(ctx, meta, blob, opts...)
 }

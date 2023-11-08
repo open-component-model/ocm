@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 // newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact acess is closed.
@@ -98,7 +99,7 @@ func (c *ComponentVersionContainer) IsClosed() bool {
 	return c.access == nil
 }
 
-func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
+func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error) {
 	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 	if err != nil {
 		return nil, err
@@ -108,13 +109,18 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 	case localfsblob.Type:
 		fallthrough
 	case localblob.Type:
-		return accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.access), nil)
+		blob, err := c.access.GetBlob(accessSpec.(*localblob.AccessSpec).LocalReference)
+		if err != nil {
+			return nil, err
+		}
+
+		return accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), blob))
 	}
 
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "virtual registry")
 }
 
-func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {
+func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
 	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 	if err != nil {
 		return ""
@@ -142,11 +148,11 @@ func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, er
 	return c.access.GetBlob(name)
 }
 
-func (c *ComponentVersionContainer) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
-	return ocmhdlr.New(c.Repository(), cv, c.access, Type, c.access)
+func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
+	return ocmhdlr.New(c.Repository(), c.comp.GetName(), c.access, Type, c.access)
 }
 
-func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if c.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

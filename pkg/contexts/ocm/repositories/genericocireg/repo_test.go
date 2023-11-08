@@ -72,7 +72,6 @@ var _ = Describe("component repository mapping", func() {
 		ocispec, err = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
 		Expect(err).To(Succeed())
 		spec = genericocireg.NewRepositorySpec(ocispec, nil)
-
 	})
 
 	AfterEach(func() {

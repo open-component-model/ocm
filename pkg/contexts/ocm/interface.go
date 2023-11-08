@@ -91,6 +91,14 @@ func DefaultContext() internal.Context {
 	return internal.DefaultContext
 }
 
+// NoComponentVersion provides a dummy component version
+// providing access to the context.
+// It can be used to instantiate external access methods
+// (not based on any component version).
+func NoComponentVersion(ctx ContextProvider) ComponentVersionAccess {
+	return &cpi.DummyComponentVersionAccess{ctx.OCMContext()}
+}
+
 func DefaultBlobHandlers() BlobHandlerRegistry {
 	return internal.DefaultBlobHandlerRegistry
 }

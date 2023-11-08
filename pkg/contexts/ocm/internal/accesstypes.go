@@ -22,11 +22,6 @@ import (
 
 type AccessType flagsetscheme.VersionTypedObjectType[AccessSpec]
 
-type AccessMethodSupport interface {
-	GetContext() Context
-	LocalSupportForAccessSpec(spec AccessSpec) bool
-}
-
 // AccessSpec is the interface access method specifications
 // must fulfill. The main task is to map the specification
 // to a concrete implementation of the access method for a dedicated
@@ -99,6 +94,13 @@ type AccessMethodImpl interface {
 type AccessMethod interface {
 	refmgmt.Dup[AccessMethod]
 	AccessMethodImpl
+
+	// AsBlobAccess maps a method object into a
+	// basic blob access interface.
+	// It does not provide a separate reference,
+	// closing the blob access with close the
+	// access method.
+	AsBlobAccess() BlobAccess
 }
 
 type AccessTypeScheme flagsetscheme.TypeScheme[AccessSpec, AccessType]

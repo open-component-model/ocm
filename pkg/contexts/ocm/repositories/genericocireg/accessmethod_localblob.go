@@ -16,10 +16,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 type localBlobAccessMethod struct {
 	lock      sync.Mutex
+	err       error
 	data      blobaccess.DataAccess
 	spec      *localblob.AccessSpec
 	namespace oci.NamespaceAccess
@@ -28,16 +30,23 @@ type localBlobAccessMethod struct {
 
 var _ accspeccpi.AccessMethodImpl = (*localBlobAccessMethod)(nil)
 
-func newLocalBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess) accspeccpi.AccessMethod {
-	m, _ := accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethodImpl(a, ns, art), nil)
-	return m
+func newLocalBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess, ref refmgmt.ExtendedAllocatable) (accspeccpi.AccessMethod, error) {
+	return accspeccpi.AccessMethodForImplementation(newLocalBlobAccessMethodImpl(a, ns, art, ref))
 }
 
-func newLocalBlobAccessMethodImpl(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess) *localBlobAccessMethod {
-	return &localBlobAccessMethod{
+func newLocalBlobAccessMethodImpl(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess, ref refmgmt.ExtendedAllocatable) (*localBlobAccessMethod, error) {
+	m := &localBlobAccessMethod{
 		spec:      a,
 		namespace: ns,
 		artifact:  art,
+	}
+	ref.BeforeCleanup(refmgmt.CleanupHandlerFunc(m.cache))
+	return m, nil
+}
+
+func (m *localBlobAccessMethod) cache() {
+	if m.artifact != nil {
+		_, m.err = m.getBlob()
 	}
 }
 
@@ -57,6 +66,8 @@ func (m *localBlobAccessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
+	m.artifact = nil
+	m.namespace = nil
 	if m.data != nil {
 		tmp := m.data
 		m.data = nil

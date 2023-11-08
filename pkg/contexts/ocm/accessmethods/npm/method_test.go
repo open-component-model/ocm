@@ -13,10 +13,10 @@ import (
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -46,7 +46,7 @@ var _ = Describe("Method", func() {
 
 		r := Must(m.Reader())
 		defer r.Close()
-		dr := accessio.NewDigestReaderWithHash(crypto.SHA1, r)
+		dr := iotools.NewDigestReaderWithHash(crypto.SHA1, r)
 		for {
 			var buf [8096]byte
 			_, err := dr.Read(buf[:])

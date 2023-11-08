@@ -86,7 +86,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	var tag string
 
 	if hint == "" {
-		name = path.Join(prefix, ctx.TargetComponentVersion().GetName())
+		name = path.Join(prefix, ctx.TargetComponentName())
 	} else {
 		i := strings.LastIndex(hint, ":")
 		if i > 0 {

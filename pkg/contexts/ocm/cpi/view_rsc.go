@@ -80,13 +80,12 @@ func (r *ComponentVersionBasedAccessProvider) AccessMethod() (AccessMethod, erro
 	return acc.AccessMethod(r.vers)
 }
 
-func (r *ComponentVersionBasedAccessProvider) BlobAccess() (blob BlobAccess, rerr error) {
+func (r *ComponentVersionBasedAccessProvider) BlobAccess() (BlobAccess, error) {
 	m, err := r.AccessMethod()
 	if err != nil {
 		return nil, err
 	}
-	defer errors.PropagateError(&err, m.Close)
-	return accspeccpi.BlobAccessForAccessMethod(m)
+	return m.AsBlobAccess(), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +170,7 @@ func (b *accessAccessProvider) Access() (cpi.AccessSpec, error) {
 }
 
 func (b *accessAccessProvider) AccessMethod() (cpi.AccessMethod, error) {
-	return nil, errors.ErrNotFound(descriptor.KIND_ACCESSMETHOD)
+	return b.spec.AccessMethod(&DummyComponentVersionAccess{b.ctx})
 }
 
 func (b *accessAccessProvider) BlobAccess() (blobaccess.BlobAccess, error) {

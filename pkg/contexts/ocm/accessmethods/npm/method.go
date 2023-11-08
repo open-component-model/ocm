@@ -23,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -138,7 +139,7 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 				if err != nil {
 					return nil, err
 				}
-				return accessio.VerifyingReaderWithHash(r, crypto.SHA1, meta.Dist.Shasum), nil
+				return iotools.VerifyingReaderWithHash(r, crypto.SHA1, meta.Dist.Shasum), nil
 			}
 		}
 		acc := blobaccess.DataAccessForReaderFunction(f, meta.Dist.Tarball)

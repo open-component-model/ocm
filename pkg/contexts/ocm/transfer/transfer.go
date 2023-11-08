@@ -10,7 +10,6 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -34,7 +33,7 @@ func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcp
 	return transferVersion(common.AssurePrinter(printer), Logger(src), state, src, tgt, handler)
 }
 
-func transferVersion(printer common.Printer, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
+func transferVersion(printer common.Printer, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) (rerr error) {
 	nv := common.VersionedElementKey(src)
 	log = log.WithValues("history", state.History.String(), "version", nv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
@@ -50,17 +49,20 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		}
 	}
 
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagation(&rerr)
+
 	d := src.GetDescriptor()
 
 	comp, err := tgt.LookupComponent(src.GetName())
 	if err != nil {
 		return errors.Wrapf(err, "%s: lookup target component", state.History)
 	}
-	defer comp.Close()
+	finalize.Close(comp, "closing target component")
 
 	var ok bool
 	t, err := comp.LookupVersion(src.GetVersion())
-	defer accessio.Close(t)
+	finalize.Close(t, "existing target version")
 
 	// references have always to be handled, because of potentially different
 	// transport modes, which could affect the desired access methods in
@@ -80,7 +82,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			t, err = comp.NewVersion(src.GetVersion())
-			defer accessio.Close(t)
+			finalize.Close(t, "new target version")
 		}
 	} else {
 		if eq := d.Equivalent(t.GetDescriptor()); eq.IsHashEqual() {
@@ -155,7 +157,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		}
 		if cv != nil {
 			list.Add(transferVersion(subp, log.WithValues("ref", r.Name), state, cv, tgt, shdlr))
-			cv.Close()
+			list.Addf(nil, cv.Close(), "closing reference %s", r.Name)
 		}
 	}
 
