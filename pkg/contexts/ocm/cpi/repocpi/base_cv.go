@@ -64,7 +64,7 @@ type componentVersionAccessBase struct {
 
 var _ ComponentVersionAccessBase = (*componentVersionAccessBase)(nil)
 
-func NewComponentVersionAccessBase(name, version string, impl ComponentVersionAccessImpl, lazy, persistent, direct bool, closer ...io.Closer) (ComponentVersionAccessBase, error) {
+func newComponentVersionAccessBase(name, version string, impl ComponentVersionAccessImpl, lazy, persistent, direct bool, closer ...io.Closer) (ComponentVersionAccessBase, error) {
 	base, err := resource.NewResourceImplBase[cpi.ComponentVersionAccess](impl.GetParentViewManager(), closer...)
 	if err != nil {
 		return nil, err

@@ -48,17 +48,18 @@ func _Wrap(ctx cpi.ContextProvider, obj *accessobj.AccessObject, spec *Repositor
 	s := &componentArchiveContainer{
 		ctx:  ctx.OCMContext(),
 		base: accessobj.NewFileSystemBlobAccess(obj),
+		spec: spec,
 	}
-	impl, err := repocpi.NewComponentVersionAccessBase(s.GetDescriptor().GetName(), s.GetDescriptor().GetVersion(), s, false, true, true)
+	cv, err := repocpi.NewComponentVersionAccess(s.GetDescriptor().GetName(), s.GetDescriptor().GetVersion(), s, false, true, true)
 	if err != nil {
 		return nil, err
 	}
-	s.spec = spec
+
 	arch := &ComponentArchive{
 		spec:      spec,
 		container: s,
 	}
-	arch.ComponentVersionAccess = repocpi.NewComponentVersionAccess(impl)
+	arch.ComponentVersionAccess = cv
 	arch.main, arch.nonref = newRepository(arch)
 	s.repo = arch.nonref
 	return arch, nil

@@ -125,8 +125,12 @@ func artifactAccessViewCreator(i ComponentVersionAccessBase, v resource.CloserVi
 	return cv
 }
 
-func NewComponentVersionAccess(impl ComponentVersionAccessBase) cpi.ComponentVersionAccess {
-	return resource.NewResource[cpi.ComponentVersionAccess](impl, artifactAccessViewCreator, fmt.Sprintf("component version  %s/%s", impl.GetName(), impl.GetVersion()), true)
+func NewComponentVersionAccess(name, version string, impl ComponentVersionAccessImpl, lazy, persistent, direct bool, closer ...io.Closer) (cpi.ComponentVersionAccess, error) {
+	base, err := newComponentVersionAccessBase(name, version, impl, lazy, persistent, direct, closer...)
+	if err != nil {
+		return nil, errors.Join(err, impl.Close())
+	}
+	return resource.NewResource[cpi.ComponentVersionAccess](base, artifactAccessViewCreator, fmt.Sprintf("component version  %s/%s", name, version), true), nil
 }
 
 func (c *componentVersionAccessView) Unwrap() interface{} {

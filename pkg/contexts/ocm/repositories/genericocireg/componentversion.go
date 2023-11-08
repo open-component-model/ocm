@@ -39,12 +39,7 @@ func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessI
 	if err != nil {
 		return nil, err
 	}
-	impl, err := repocpi.NewComponentVersionAccessBase(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
-	if err != nil {
-		c.Close()
-		return nil, err
-	}
-	return repocpi.NewComponentVersionAccess(impl), nil
+	return repocpi.NewComponentVersionAccess(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
 }
 
 // //////////////////////////////////////////////////////////////////////////////
