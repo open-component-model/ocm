@@ -19,6 +19,19 @@ import (
 )
 
 func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Repository, complete ocm.ComponentVersionResolver, thdlr transferhandler.TransferHandler, h *ResourceSpecHandler, elems []addhdlrs.Element) (err error) {
+	list := errors.ErrorList{}
+
+	for _, elem := range elems {
+		if r, ok := elem.Spec().(*ResourceSpec); ok {
+			list.Add(addhdlrs.ValidateElementSpecIdentities("resource", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.Resources)))
+			list.Add(addhdlrs.ValidateElementSpecIdentities("source", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.Sources)))
+			list.Add(addhdlrs.ValidateElementSpecIdentities("reference", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.References)))
+		}
+	}
+	if err := list.Result(); err != nil {
+		return err
+	}
+
 	index := generics.Set[common.NameVersion]{}
 	for _, elem := range elems {
 		if r, ok := elem.Spec().(*ResourceSpec); ok {
