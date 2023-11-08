@@ -60,6 +60,7 @@ type Context interface {
 	RepositorySpecHandlers() RepositorySpecHandlers
 	MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error)
 
+	DisableBlobHandlers()
 	BlobHandlers() BlobHandlerRegistry
 	BlobDigesters() BlobDigesterRegistry
 
@@ -214,6 +215,10 @@ func (c *_context) RepositorySpecHandlers() RepositorySpecHandlers {
 
 func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error) {
 	return c.specHandlers.MapUniformRepositorySpec(c, u)
+}
+
+func (c *_context) DisableBlobHandlers() {
+	c.blobHandlers = NewBlobHandlerRegistry(nil)
 }
 
 func (c *_context) BlobHandlers() BlobHandlerRegistry {

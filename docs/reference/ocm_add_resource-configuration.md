@@ -354,7 +354,7 @@ with the field <code>type</code> in the <code>input</code> field:
 
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputHelmRepository</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
 
-- Input type <code>ociImage</code>
+- Input type <code>ociArtifact</code>
 
   The path must denote an OCI image reference.
 
@@ -369,6 +369,12 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property can be used to specify the repository hint for the
     generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
+
+  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
+
+- Input type <code>ociImage</code>
+
+  DEPRECATED: This type is deprecated, please use ociArtifact instead.
 
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
