@@ -40,6 +40,14 @@ type ComponentVersionAccessImpl interface {
 	io.Closer
 }
 
+type ComponentVersionAccessImplSupport struct {
+	Base ComponentVersionAccessBase
+}
+
+func (b *ComponentVersionAccessImplSupport) SetBase(base ComponentVersionAccessBase) {
+	b.Base = base
+}
+
 type _componentVersionAccessImplBase = resource.ResourceImplBase[cpi.ComponentVersionAccess]
 
 // componentVersionAccessBase is the counterpart to views, all views

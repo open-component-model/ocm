@@ -23,13 +23,15 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type _componentVersionAccess = cpi.ComponentVersionAccess
+
 // ComponentArchive is the go representation for a component artifact.
 type ComponentArchive struct {
+	_componentVersionAccess
 	spec      *RepositorySpec
 	container *componentArchiveContainer
 	main      cpi.Repository
 	nonref    cpi.Repository
-	cpi.ComponentVersionAccess
 }
 
 // New returns a new representation based element.
@@ -60,7 +62,7 @@ func _Wrap(ctx cpi.ContextProvider, obj *accessobj.AccessObject, spec *Repositor
 		spec:      spec,
 		container: s,
 	}
-	arch.ComponentVersionAccess = cv
+	arch._componentVersionAccess = cv
 	arch.main, arch.nonref = newRepository(arch)
 	s.repo = arch.nonref
 	return arch, nil

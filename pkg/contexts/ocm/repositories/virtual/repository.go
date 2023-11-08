@@ -10,10 +10,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
-type _RepositoryImplBase = repocpi.RepositoryImplBase
-
 type RepositoryImpl struct {
-	_RepositoryImplBase
+	base   repocpi.RepositoryBase
+	ctx    cpi.Context
 	access Access
 	nonref cpi.Repository
 }
@@ -22,26 +21,23 @@ var _ repocpi.RepositoryImpl = (*RepositoryImpl)(nil)
 
 func NewRepository(ctx cpi.Context, acc Access) cpi.Repository {
 	impl := &RepositoryImpl{
-		_RepositoryImplBase: *repocpi.NewRepositoryImplBase(ctx.OCMContext()),
-		access:              acc,
+		ctx:    ctx,
+		access: acc,
 	}
-	impl.nonref = repocpi.NewNoneRefRepositoryView(impl)
-	r := repocpi.NewRepository(impl, "OCM repo[Simple]")
-	return r
+	return repocpi.NewRepository(impl, "OCM repo[Simple]")
 }
-
-/*
-func (r *RepositoryImpl) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
-	return nil
-}
-
-func (r *RepositoryImpl) GetIdentityMatcher() string {
-	return ""
-}
-*/
 
 func (r *RepositoryImpl) Close() error {
 	return r.access.Close()
+}
+
+func (r *RepositoryImpl) SetBase(base repocpi.RepositoryBase) {
+	r.base = base
+	r.nonref = repocpi.NewNoneRefRepositoryView(base)
+}
+
+func (r *RepositoryImpl) GetContext() cpi.Context {
+	return r.ctx
 }
 
 func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {

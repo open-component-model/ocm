@@ -6,10 +6,10 @@ package repocpi
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
@@ -32,12 +32,22 @@ type RepositoryViewManager = resource.ViewManager[cpi.Repository] // here you ha
 
 type RepositoryBase interface {
 	resource.ResourceImplementation[cpi.Repository]
-	internal.RepositoryImpl
+
+	GetContext() cpi.Context
+
+	GetSpecification() cpi.RepositorySpec
+	ComponentLister() cpi.ComponentLister
+
+	ExistsComponentVersion(name string, version string) (bool, error)
+	LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error)
+	LookupComponent(name string) (cpi.ComponentAccess, error)
+
+	io.Closer
 }
 
 type repositoryView struct {
 	_repositoryView
-	base RepositoryImpl
+	base RepositoryBase
 }
 
 var (
@@ -46,9 +56,19 @@ var (
 	_ utils.Unwrappable                    = (*repositoryView)(nil)
 )
 
-func GetRepositoryImplementation(n cpi.Repository) (RepositoryImpl, error) {
+func GetRepositoryBase(n cpi.Repository) (RepositoryBase, error) {
 	if v, ok := n.(*repositoryView); ok {
 		return v.base, nil
+	}
+	return nil, errors.ErrNotSupported("repository implementation type", fmt.Sprintf("%T", n))
+}
+
+func GetRepositoryImplementation(n cpi.Repository) (RepositoryImpl, error) {
+	if v, ok := n.(*repositoryView); ok {
+		if b, ok := v.base.(*repositoryBase); ok {
+			return b.impl, nil
+		}
+		return nil, errors.ErrNotSupported("repository base type", fmt.Sprintf("%T", v.base))
 	}
 	return nil, errors.ErrNotSupported("repository implementation type", fmt.Sprintf("%T", n))
 }
@@ -69,8 +89,12 @@ func NewNoneRefRepositoryView(i RepositoryBase) cpi.Repository {
 	}
 }
 
-func NewRepository(impl RepositoryBase, name ...string) cpi.Repository {
-	return resource.NewResource[cpi.Repository](impl, repositoryViewCreator, utils.OptionalDefaulted("OCM repo", name...), true)
+func NewRepository(impl RepositoryImpl, kind string, closer ...io.Closer) cpi.Repository {
+	base := newRepositoryImplBase(impl, kind, closer...)
+	if kind == "" {
+		kind = "OCM repository"
+	}
+	return resource.NewResource[cpi.Repository](base, repositoryViewCreator, kind, true)
 }
 
 func (r *repositoryView) Unwrap() interface{} {

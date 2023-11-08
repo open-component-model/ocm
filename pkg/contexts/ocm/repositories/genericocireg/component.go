@@ -60,7 +60,7 @@ func (c *componentAccessImpl) SetBase(base repocpi.ComponentAccessBase) {
 }
 
 func (c *componentAccessImpl) GetParentBase() repocpi.RepositoryViewManager {
-	return c.repo
+	return c.repo.base
 }
 
 func (c *componentAccessImpl) GetContext() cpi.Context {
@@ -133,7 +133,7 @@ func (c *componentAccessImpl) HasVersion(vers string) (bool, error) {
 }
 
 func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
-	v, err := c.repo.View()
+	v, err := c.repo.base.View()
 	if err != nil {
 		return nil, err
 	}

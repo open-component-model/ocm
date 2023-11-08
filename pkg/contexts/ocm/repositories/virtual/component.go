@@ -39,7 +39,7 @@ func (c *componentAccessImpl) SetBase(base repocpi.ComponentAccessBase) {
 }
 
 func (c *componentAccessImpl) GetParentBase() repocpi.RepositoryViewManager {
-	return c.repo
+	return c.repo.base
 }
 
 func (c *componentAccessImpl) GetContext() cpi.Context {

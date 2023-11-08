@@ -54,6 +54,16 @@ func GetComponentAccessBase(n cpi.ComponentAccess) (ComponentAccessBase, error) 
 	return nil, errors.ErrNotSupported("component base type", fmt.Sprintf("%T", n))
 }
 
+func GetComponentAccessImplementation(n cpi.ComponentAccess) (ComponentAccessImpl, error) {
+	if v, ok := n.(*componentAccessView); ok {
+		if b, ok := v.base.(*componentAccessBase); ok {
+			return b.impl, nil
+		}
+		return nil, errors.ErrNotSupported("component base type", fmt.Sprintf("%T", v.base))
+	}
+	return nil, errors.ErrNotSupported("component implementation type", fmt.Sprintf("%T", n))
+}
+
 func componentAccessViewCreator(i ComponentAccessBase, v resource.CloserView, d ComponentAccessViewManager) cpi.ComponentAccess {
 	return &componentAccessView{
 		_componentAccessView: resource.NewView[cpi.ComponentAccess](v, d),

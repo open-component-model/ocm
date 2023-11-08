@@ -116,6 +116,16 @@ func GetComponentVersionAccessBase(n cpi.ComponentVersionAccess) (ComponentVersi
 	return nil, errors.ErrNotSupported("component version base type", fmt.Sprintf("%T", n))
 }
 
+func GetComponentVersionAccessImplementation(n cpi.ComponentVersionAccess) (ComponentVersionAccessImpl, error) {
+	if v, ok := n.(*componentVersionAccessView); ok {
+		if b, ok := v.base.(*componentVersionAccessBase); ok {
+			return b.impl, nil
+		}
+		return nil, errors.ErrNotSupported("component version base type", fmt.Sprintf("%T", v.base))
+	}
+	return nil, errors.ErrNotSupported("component version implementation type", fmt.Sprintf("%T", n))
+}
+
 func artifactAccessViewCreator(i ComponentVersionAccessBase, v resource.CloserView, d resource.ViewManager[cpi.ComponentVersionAccess]) cpi.ComponentVersionAccess {
 	cv := &componentVersionAccessView{
 		_componentVersionAccessView: resource.NewView[cpi.ComponentVersionAccess](v, d),

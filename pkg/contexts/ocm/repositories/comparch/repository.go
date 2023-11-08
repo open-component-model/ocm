@@ -25,12 +25,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type _RepositoryImplBase = repocpi.RepositoryImplBase
-
 type RepositoryImpl struct {
-	_RepositoryImplBase
-	lock sync.RWMutex
-	arch *ComponentArchive
+	lock   sync.RWMutex
+	base   repocpi.RepositoryBase
+	arch   *ComponentArchive
+	nonref cpi.Repository
 }
 
 var _ repocpi.RepositoryImpl = (*RepositoryImpl)(nil)
@@ -46,14 +45,26 @@ func NewRepository(ctx cpi.Context, s *RepositorySpec) (cpi.Repository, error) {
 	return a.AsRepository(), nil
 }
 
-func newRepository(a *ComponentArchive) (main cpi.Repository, nonref cpi.Repository) {
+func newRepository(a *ComponentArchive) (main, nonref cpi.Repository) {
 	// close main cv abstraction on repository close -------v
-	base := repocpi.NewRepositoryImplBase(a.GetContext(), a.ComponentVersionAccess)
 	impl := &RepositoryImpl{
-		_RepositoryImplBase: *base,
-		arch:                a,
+		arch: a,
 	}
-	return repocpi.NewRepository(impl), repocpi.NewNoneRefRepositoryView(impl)
+	r := repocpi.NewRepository(impl, "comparch")
+	return r, impl.nonref
+}
+
+func (r *RepositoryImpl) Close() error {
+	return r.arch.container.Close()
+}
+
+func (r *RepositoryImpl) SetBase(base repocpi.RepositoryBase) {
+	r.base = base
+	r.nonref = repocpi.NewNoneRefRepositoryView(base)
+}
+
+func (r *RepositoryImpl) GetContext() cpi.Context {
+	return r.arch.GetContext()
 }
 
 func (r *RepositoryImpl) ComponentLister() cpi.ComponentLister {
@@ -173,7 +184,7 @@ func (c *ComponentAccessImpl) SetBase(base repocpi.ComponentAccessBase) {
 }
 
 func (c *ComponentAccessImpl) GetParentBase() repocpi.RepositoryViewManager {
-	return c.repo
+	return c.repo.base
 }
 
 func (c *ComponentAccessImpl) GetContext() cpi.Context {

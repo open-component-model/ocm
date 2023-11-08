@@ -244,6 +244,12 @@ func NewResourceImplBase[T any, M io.Closer](m ViewManager[M], closer ...io.Clos
 	}, nil
 }
 
+func NewSimpleResourceImplBase[T any](closer ...io.Closer) *ResourceImplBase[T] {
+	return &ResourceImplBase[T]{
+		closer: closer,
+	}
+}
+
 func (b *ResourceImplBase[T]) SetViewManager(m ViewManager[T]) {
 	b.refs = m
 }

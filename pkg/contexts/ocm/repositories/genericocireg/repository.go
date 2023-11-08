@@ -40,10 +40,9 @@ func GetOCIRepository(r cpi.Repository) ocicpi.Repository {
 	return nil
 }
 
-type _RepositoryImplBase = repocpi.RepositoryImplBase
-
 type RepositoryImpl struct {
-	_RepositoryImplBase
+	base    repocpi.RepositoryBase
+	ctx     cpi.Context
 	meta    ComponentRepositoryMeta
 	nonref  cpi.Repository
 	ocirepo oci.Repository
@@ -54,15 +53,26 @@ var (
 	_ credentials.ConsumerIdentityProvider = (*RepositoryImpl)(nil)
 )
 
-func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
+func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) cpi.Repository {
 	impl := &RepositoryImpl{
-		_RepositoryImplBase: *repocpi.NewRepositoryImplBase(ctx.OCMContext()),
-		meta:                *DefaultComponentRepositoryMeta(meta),
-		ocirepo:             ocirepo,
+		ctx:     ctx,
+		meta:    *DefaultComponentRepositoryMeta(meta),
+		ocirepo: ocirepo,
 	}
-	impl.nonref = repocpi.NewNoneRefRepositoryView(impl)
-	r := repocpi.NewRepository(impl, "OCM repo[OCI]")
-	return r, nil
+	return repocpi.NewRepository(impl, "OCM repo[OCI]")
+}
+
+func (r *RepositoryImpl) Close() error {
+	return r.ocirepo.Close()
+}
+
+func (r *RepositoryImpl) SetBase(base repocpi.RepositoryBase) {
+	r.base = base
+	r.nonref = repocpi.NewNoneRefRepositoryView(base)
+}
+
+func (r *RepositoryImpl) GetContext() cpi.Context {
+	return r.ctx
 }
 
 func (r *RepositoryImpl) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
@@ -81,10 +91,6 @@ func (r *RepositoryImpl) GetIdentityMatcher() string {
 		return p.GetIdentityMatcher()
 	}
 	return ""
-}
-
-func (r *RepositoryImpl) Close() error {
-	return r.ocirepo.Close()
 }
 
 func (r *RepositoryImpl) OCIRepository() ocicpi.Repository {
