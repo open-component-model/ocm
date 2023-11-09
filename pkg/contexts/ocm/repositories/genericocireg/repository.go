@@ -18,7 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -176,18 +175,8 @@ func (r *RepositoryImpl) ExistsComponentVersion(name string, version string) (bo
 	return false, nil
 }
 
-func (r *RepositoryImpl) LookupComponent(name string) (cpi.ComponentAccess, error) {
+func (r *RepositoryImpl) LookupComponent(name string) (*repocpi.ComponentAccessInfo, error) {
 	return newComponentAccess(r, name, true)
-}
-
-func (r *RepositoryImpl) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
-	c, err := newComponentAccess(r, name, false)
-	if err != nil {
-		return nil, err
-	}
-	defer refmgmt.PropagateCloseTemporary(&err, c) // temporary component object not exposed.
-	refmgmt.AllocLog.Trace("OCM Repo[OCI]: lookup version for temporary component ref", "component", name, "version", version)
-	return c.LookupVersion(version)
 }
 
 func (r *RepositoryImpl) MapComponentNameToNamespace(name string) (string, error) {

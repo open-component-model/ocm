@@ -30,7 +30,7 @@ type componentAccessImpl struct {
 	namespace oci.NamespaceAccess
 }
 
-func newComponentAccess(repo *RepositoryImpl, name string, main bool) (cpi.ComponentAccess, error) {
+func newComponentAccess(repo *RepositoryImpl, name string, main bool) (*repocpi.ComponentAccessInfo, error) {
 	mapped, err := repo.MapComponentNameToNamespace(name)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func newComponentAccess(repo *RepositoryImpl, name string, main bool) (cpi.Compo
 		name:      name,
 		namespace: namespace,
 	}
-	return repocpi.NewComponentAccess(impl, "OCM component[OCI]")
+	return &repocpi.ComponentAccessInfo{impl, "OCM component[OCI]", main}, nil
 }
 
 func (c *componentAccessImpl) Close() error {
@@ -131,13 +131,7 @@ func (c *componentAccessImpl) HasVersion(vers string) (bool, error) {
 	return false, err
 }
 
-func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
-	v, err := c.repo.base.View()
-	if err != nil {
-		return nil, err
-	}
-	defer v.Close()
-
+func (c *componentAccessImpl) LookupVersion(version string) (*repocpi.ComponentVersionAccessInfo, error) {
 	acc, err := c.namespace.GetArtifact(toTag(version))
 	if err != nil {
 		if errors.IsErrNotFound(err) {
@@ -148,13 +142,7 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 	return newComponentVersionAccess(accessobj.ACC_WRITABLE, c, version, acc, true)
 }
 
-func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
-	v, err := c.base.View(false)
-	if err != nil {
-		return nil, err
-	}
-	defer v.Close()
-
+func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	override := utils.Optional(overrides...)
 	acc, err := c.namespace.GetArtifact(toTag(version))
 	if err == nil {

@@ -8,7 +8,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	ocmhdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -19,7 +18,7 @@ import (
 )
 
 // newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact acess is closed.
-func newComponentVersionAccess(comp *componentAccessImpl, version string, persistent bool) (cpi.ComponentVersionAccess, error) {
+func newComponentVersionAccess(comp *componentAccessImpl, version string, persistent bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	access, err := comp.repo.access.GetComponentVersion(comp.GetName(), version)
 	if err != nil {
 		return nil, err
@@ -28,7 +27,7 @@ func newComponentVersionAccess(comp *componentAccessImpl, version string, persis
 	if err != nil {
 		return nil, err
 	}
-	return repocpi.NewComponentVersionAccess(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
+	return &repocpi.ComponentVersionAccessInfo{c, true, persistent}, nil
 }
 
 // //////////////////////////////////////////////////////////////////////////////

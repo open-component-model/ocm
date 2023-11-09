@@ -20,12 +20,12 @@ type componentAccessImpl struct {
 
 var _ repocpi.ComponentAccessImpl = (*componentAccessImpl)(nil)
 
-func newComponentAccess(repo *RepositoryImpl, name string, main bool) (cpi.ComponentAccess, error) {
+func newComponentAccess(repo *RepositoryImpl, name string, main bool) (*repocpi.ComponentAccessInfo, error) {
 	impl := &componentAccessImpl{
 		repo: repo,
 		name: name,
 	}
-	return repocpi.NewComponentAccess(impl, "OCM component[Simple]")
+	return &repocpi.ComponentAccessInfo{impl, "OCM component[Simple]", main}, nil
 }
 
 func (c *componentAccessImpl) Close() error {
@@ -60,7 +60,7 @@ func (c *componentAccessImpl) IsReadOnly() bool {
 	return c.repo.access.IsReadOnly()
 }
 
-func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
+func (c *componentAccessImpl) LookupVersion(version string) (*repocpi.ComponentVersionAccessInfo, error) {
 	ok, err := c.HasVersion(version)
 	if err != nil {
 		return nil, err
@@ -68,22 +68,10 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 	if !ok {
 		return nil, cpi.ErrComponentVersionNotFoundWrap(err, c.name, version)
 	}
-	v, err := c.base.View()
-	if err != nil {
-		return nil, err
-	}
-	defer v.Close()
-
 	return newComponentVersionAccess(c, version, true)
 }
 
-func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
-	v, err := c.base.View(false)
-	if err != nil {
-		return nil, err
-	}
-	defer v.Close()
-
+func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	override := utils.Optional(overrides...)
 	ok, err := c.HasVersion(version)
 	if err == nil && ok {

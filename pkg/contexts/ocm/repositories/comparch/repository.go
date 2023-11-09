@@ -15,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	ocmhdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -129,25 +128,7 @@ func (r *RepositoryImpl) ExistsComponentVersion(name string, ref string) (bool, 
 	return r.arch.GetName() == name && r.arch.GetVersion() == ref, nil
 }
 
-func (r *RepositoryImpl) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-	ok, err := r.ExistsComponentVersion(name, version)
-	if !ok {
-		if err == nil {
-			err = errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, common.NewNameVersion(name, version).String(), Type)
-		}
-		return nil, err
-	}
-	c, err := newComponentAccess(r)
-	if err != nil {
-		return nil, err
-	}
-	defer refmgmt.PropagateCloseTemporary(&err, c) // temporary component object not exposed.
-	return c.LookupVersion(version)
-}
-
-func (r *RepositoryImpl) LookupComponent(name string) (cpi.ComponentAccess, error) {
+func (r *RepositoryImpl) LookupComponent(name string) (*repocpi.ComponentAccessInfo, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	if r.arch == nil {
@@ -168,11 +149,11 @@ type ComponentAccessImpl struct {
 
 var _ repocpi.ComponentAccessImpl = (*ComponentAccessImpl)(nil)
 
-func newComponentAccess(r *RepositoryImpl) (cpi.ComponentAccess, error) {
+func newComponentAccess(r *RepositoryImpl) (*repocpi.ComponentAccessInfo, error) {
 	impl := &ComponentAccessImpl{
 		repo: r,
 	}
-	return repocpi.NewComponentAccess(impl, "component archive")
+	return &repocpi.ComponentAccessInfo{impl, "component archive", true}, nil
 }
 
 func (c *ComponentAccessImpl) Close() error {
@@ -207,14 +188,14 @@ func (c *ComponentAccessImpl) HasVersion(vers string) (bool, error) {
 	return vers == c.repo.arch.GetVersion(), nil
 }
 
-func (c *ComponentAccessImpl) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
+func (c *ComponentAccessImpl) LookupVersion(version string) (*repocpi.ComponentVersionAccessInfo, error) {
 	if version != c.repo.arch.GetVersion() {
 		return nil, errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, fmt.Sprintf("%s:%s", c.GetName(), c.repo.arch.GetVersion()))
 	}
 	return newComponentVersionAccess(c, version, false)
 }
 
-func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
+func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	if version != c.repo.arch.GetVersion() {
 		return nil, errors.ErrNotSupported(cpi.KIND_COMPONENTVERSION, version, fmt.Sprintf("component archive %s:%s", c.GetName(), c.repo.arch.GetVersion()))
 	}
@@ -236,12 +217,12 @@ type ComponentVersionContainer struct {
 
 var _ repocpi.ComponentVersionAccessImpl = (*ComponentVersionContainer)(nil)
 
-func newComponentVersionAccess(comp *ComponentAccessImpl, version string, persistent bool) (cpi.ComponentVersionAccess, error) {
+func newComponentVersionAccess(comp *ComponentAccessImpl, version string, persistent bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	c, err := newComponentVersionContainer(comp)
 	if err != nil {
 		return nil, err
 	}
-	return repocpi.NewComponentVersionAccess(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
+	return &repocpi.ComponentVersionAccessInfo{c, true, persistent}, nil
 }
 
 func newComponentVersionContainer(comp *ComponentAccessImpl) (*ComponentVersionContainer, error) {

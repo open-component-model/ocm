@@ -13,6 +13,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 )
 
+type ComponentAccessInfo struct {
+	Impl ComponentAccessImpl
+	Kind string
+	Main bool
+}
+
 type RepositoryImpl interface {
 	SetBase(base RepositoryBase)
 
@@ -22,8 +28,7 @@ type RepositoryImpl interface {
 	ComponentLister() cpi.ComponentLister
 
 	ExistsComponentVersion(name string, version string) (bool, error)
-	LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error)
-	LookupComponent(name string) (cpi.ComponentAccess, error)
+	LookupComponent(name string) (*ComponentAccessInfo, error)
 
 	io.Closer
 }
@@ -73,10 +78,20 @@ func (b *repositoryBase) ExistsComponentVersion(name string, version string) (bo
 	return b.impl.ExistsComponentVersion(name, version)
 }
 
-func (b *repositoryBase) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
-	return b.impl.LookupComponentVersion(name, version)
+func (b *repositoryBase) LookupComponentVersion(name string, version string) (cv cpi.ComponentVersionAccess, rerr error) {
+	c, err := b.LookupComponent(name)
+	if err != nil {
+		return nil, err
+	}
+	defer refmgmt.PropagateCloseTemporary(&rerr, c) // temporary component object not exposed.
+	refmgmt.AllocLog.Trace("lookup version for temporary component ref", "component", name, "version", version)
+	return c.LookupVersion(version)
 }
 
 func (b *repositoryBase) LookupComponent(name string) (cpi.ComponentAccess, error) {
-	return b.impl.LookupComponent(name)
+	i, err := b.impl.LookupComponent(name)
+	if err != nil {
+		return nil, err
+	}
+	return NewComponentAccess(i.Impl, i.Kind, i.Main)
 }

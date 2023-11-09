@@ -22,7 +22,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/relativeociref"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -33,13 +32,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
-// newComponentVersionAccess creates an component access for the artifact access, if this fails the artifact acess is closed.
-func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtifactAccess, persistent bool) (cpi.ComponentVersionAccess, error) {
+// newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact acess is closed.
+func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtifactAccess, persistent bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	c, err := newComponentVersionContainer(mode, comp, version, access)
 	if err != nil {
 		return nil, err
 	}
-	return repocpi.NewComponentVersionAccess(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
+	return &repocpi.ComponentVersionAccessInfo{c, true, persistent}, nil
 }
 
 // //////////////////////////////////////////////////////////////////////////////

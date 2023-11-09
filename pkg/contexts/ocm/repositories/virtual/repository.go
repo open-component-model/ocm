@@ -7,7 +7,6 @@ package virtual
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
-	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 type RepositoryImpl struct {
@@ -55,15 +54,6 @@ func (r *RepositoryImpl) ExistsComponentVersion(name string, version string) (bo
 	return r.access.ExistsComponentVersion(name, version)
 }
 
-func (r *RepositoryImpl) LookupComponent(name string) (cpi.ComponentAccess, error) {
+func (r *RepositoryImpl) LookupComponent(name string) (*repocpi.ComponentAccessInfo, error) {
 	return newComponentAccess(r, name, true)
-}
-
-func (r *RepositoryImpl) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
-	c, err := newComponentAccess(r, name, false)
-	if err != nil {
-		return nil, err
-	}
-	defer refmgmt.PropagateCloseTemporary(&err, c) // temporary component object not exposed.
-	return c.LookupVersion(version)
 }

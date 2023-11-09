@@ -7,12 +7,18 @@ package repocpi
 import (
 	"io"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 )
+
+type ComponentVersionAccessInfo struct {
+	Impl       ComponentVersionAccessImpl
+	Lazy       bool
+	Persistent bool
+}
 
 // ComponentAccessImpl is the provider implementation
 // interface for component versions.
@@ -25,9 +31,9 @@ type ComponentAccessImpl interface {
 	IsReadOnly() bool
 
 	ListVersions() ([]string, error)
-	LookupVersion(version string) (cpi.ComponentVersionAccess, error)
 	HasVersion(vers string) (bool, error)
-	NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error)
+	LookupVersion(version string) (*ComponentVersionAccessInfo, error)
+	NewVersion(version string, overrides ...bool) (*ComponentVersionAccessInfo, error)
 
 	io.Closer
 }
@@ -88,16 +94,30 @@ func (b *componentAccessBase) ListVersions() ([]string, error) {
 	return b.impl.ListVersions()
 }
 
-func (b *componentAccessBase) LookupVersion(version string) (internal.ComponentVersionAccess, error) {
-	return b.impl.LookupVersion(version)
+func (b *componentAccessBase) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
+	i, err := b.impl.LookupVersion(version)
+	if err != nil {
+		return nil, err
+	}
+	if i == nil || i.Impl == nil {
+		return nil, errors.ErrInvalid("component implementation behaviour", "LookupVersion")
+	}
+	return NewComponentVersionAccess(b.GetName(), version, i.Impl, i.Lazy, i.Persistent, !compositionmodeattr.Get(b.GetContext()))
 }
 
 func (b *componentAccessBase) HasVersion(vers string) (bool, error) {
 	return b.impl.HasVersion(vers)
 }
 
-func (b *componentAccessBase) NewVersion(version string, overrides ...bool) (internal.ComponentVersionAccess, error) {
-	return b.impl.NewVersion(version, overrides...)
+func (b *componentAccessBase) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
+	i, err := b.impl.NewVersion(version, overrides...)
+	if err != nil {
+		return nil, err
+	}
+	if i == nil || i.Impl == nil {
+		return nil, errors.ErrInvalid("component implementation behaviour", "NewVersion")
+	}
+	return NewComponentVersionAccess(b.GetName(), version, i.Impl, i.Lazy, false, !compositionmodeattr.Get(b.GetContext()))
 }
 
 func (b *componentAccessBase) IsReadOnly() bool {

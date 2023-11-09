@@ -69,7 +69,7 @@ func componentAccessViewCreator(i ComponentAccessBase, v resource.CloserView, d 
 	}
 }
 
-func NewComponentAccess(impl ComponentAccessImpl, kind string, closer ...io.Closer) (cpi.ComponentAccess, error) {
+func NewComponentAccess(impl ComponentAccessImpl, kind string, main bool, closer ...io.Closer) (cpi.ComponentAccess, error) {
 	base, err := newComponentAccessImplBase(impl, closer...)
 	if err != nil {
 		return nil, errors.Join(err, impl.Close())
@@ -77,7 +77,7 @@ func NewComponentAccess(impl ComponentAccessImpl, kind string, closer ...io.Clos
 	if kind == "" {
 		kind = "component"
 	}
-	cv := resource.NewResource[cpi.ComponentAccess](base, componentAccessViewCreator, fmt.Sprintf("%s %s", kind, impl.GetName()), true)
+	cv := resource.NewResource[cpi.ComponentAccess](base, componentAccessViewCreator, fmt.Sprintf("%s %s", kind, impl.GetName()), main)
 	return cv, nil
 }
 
