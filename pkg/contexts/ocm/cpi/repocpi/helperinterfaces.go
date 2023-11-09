@@ -18,7 +18,7 @@ var (
 
 // BlobContainer is the interface for an element capable to store blobs.
 type BlobContainer interface {
-	GetBlobData(name string) (cpi.DataAccess, error)
+	GetBlob(name string) (cpi.DataAccess, error)
 
 	// GetStorageContext creates a storage context for blobs
 	// that is used to feed blob handlers for specific blob storage methods.
@@ -26,11 +26,11 @@ type BlobContainer interface {
 	// be used to store the blob
 	GetStorageContext() cpi.StorageContext
 
-	// AddBlobFor stores a local blob together with the component and
+	// AddBlob stores a local blob together with the component and
 	// potentially provides a global reference according to the OCI distribution spec
 	// if the blob described an oci artifact.
 	// The resulting access information (global and local) is provided as
 	// an access method specification usable in a component descriptor.
 	// This is the direct technical storage, without caring about any handler.
-	AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
+	AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
 }

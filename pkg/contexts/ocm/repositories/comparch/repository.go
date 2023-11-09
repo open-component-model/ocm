@@ -214,14 +214,6 @@ func (c *ComponentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 	return newComponentVersionAccess(c, version, false)
 }
 
-func (c *ComponentAccessImpl) container(access cpi.ComponentVersionAccess) *componentArchiveContainer {
-	mine, _ := repocpi.GetComponentVersionImpl[*ComponentVersionContainer](access)
-	if mine == nil || mine.comp != c {
-		return nil
-	}
-	return mine.comp.repo.arch.container
-}
-
 func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
 	if version != c.repo.arch.GetVersion() {
 		return nil, errors.ErrNotSupported(cpi.KIND_COMPONENTVERSION, version, fmt.Sprintf("component archive %s:%s", c.GetName(), c.repo.arch.GetVersion()))
@@ -289,23 +281,28 @@ func (c *ComponentVersionContainer) Update() error {
 	return c.comp.repo.arch.container.Update()
 }
 
+func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) error {
+	*c.descriptor = *cd
+	return c.Update()
+}
+
 func (c *ComponentVersionContainer) GetDescriptor() *compdesc.ComponentDescriptor {
 	return c.descriptor
 }
 
-func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, error) {
-	return c.comp.repo.arch.container.GetBlobData(name)
+func (c *ComponentVersionContainer) GetBlob(name string) (cpi.DataAccess, error) {
+	return c.comp.repo.arch.container.GetBlob(name)
 }
 
 func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
-	return ocmhdlr.New(c.Repository(), c.comp.GetName(), &BlobSink{c.comp.repo.arch.container.base}, Type)
+	return ocmhdlr.New(c.Repository(), c.comp.GetName(), &BlobSink{c.comp.repo.arch.container.fsacc}, Type)
 }
 
-func (c *ComponentVersionContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
-	err := c.comp.repo.arch.container.base.AddBlob(blob)
+	err := c.comp.repo.arch.container.fsacc.AddBlob(blob)
 	if err != nil {
 		return nil, err
 	}

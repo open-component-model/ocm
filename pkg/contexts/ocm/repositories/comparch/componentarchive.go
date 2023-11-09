@@ -49,9 +49,9 @@ func _Wrap(ctx cpi.ContextProvider, obj *accessobj.AccessObject, spec *Repositor
 		return nil, err
 	}
 	s := &componentArchiveContainer{
-		ctx:  ctx.OCMContext(),
-		base: accessobj.NewFileSystemBlobAccess(obj),
-		spec: spec,
+		ctx:   ctx.OCMContext(),
+		fsacc: accessobj.NewFileSystemBlobAccess(obj),
+		spec:  spec,
 	}
 	cv, err := repocpi.NewComponentVersionAccess(s.GetDescriptor().GetName(), s.GetDescriptor().GetVersion(), s, false, true, true)
 	if err != nil {
@@ -102,17 +102,17 @@ func (c *ComponentArchive) SetVersion(v string) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type componentArchiveContainer struct {
-	ctx  cpi.Context
-	impl repocpi.ComponentVersionAccessBase
-	base *accessobj.FileSystemBlobAccess
-	spec *RepositorySpec
-	repo cpi.Repository
+	ctx   cpi.Context
+	base  repocpi.ComponentVersionAccessBase
+	fsacc *accessobj.FileSystemBlobAccess
+	spec  *RepositorySpec
+	repo  cpi.Repository
 }
 
 var _ repocpi.ComponentVersionAccessImpl = (*componentArchiveContainer)(nil)
 
-func (c *componentArchiveContainer) SetBase(impl repocpi.ComponentVersionAccessBase) {
-	c.impl = impl
+func (c *componentArchiveContainer) SetBase(base repocpi.ComponentVersionAccessBase) {
+	c.base = base
 }
 
 func (c *componentArchiveContainer) GetParentBase() repocpi.ComponentAccessBase {
@@ -121,7 +121,7 @@ func (c *componentArchiveContainer) GetParentBase() repocpi.ComponentAccessBase 
 
 func (c *componentArchiveContainer) Close() error {
 	var list errors.ErrorList
-	return list.Add(c.Update(), c.base.Close()).Result()
+	return list.Add(c.Update(), c.fsacc.Close()).Result()
 }
 
 func (c *componentArchiveContainer) GetContext() cpi.Context {
@@ -133,26 +133,35 @@ func (c *componentArchiveContainer) Repository() cpi.Repository {
 }
 
 func (c *componentArchiveContainer) IsReadOnly() bool {
-	return c.base.IsReadOnly()
+	return c.fsacc.IsReadOnly()
 }
 
 func (c *componentArchiveContainer) Update() error {
-	return c.base.Update()
+	return c.fsacc.Update()
+}
+
+func (c *componentArchiveContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) error {
+	if c.fsacc.IsReadOnly() {
+		return accessobj.ErrReadOnly
+	}
+	cur := c.fsacc.GetState().GetState().(*compdesc.ComponentDescriptor)
+	*cur = *cd.Copy()
+	return c.fsacc.Update()
 }
 
 func (c *componentArchiveContainer) GetDescriptor() *compdesc.ComponentDescriptor {
-	if c.base.IsReadOnly() {
-		return c.base.GetState().GetOriginalState().(*compdesc.ComponentDescriptor)
+	if c.fsacc.IsReadOnly() {
+		return c.fsacc.GetState().GetOriginalState().(*compdesc.ComponentDescriptor)
 	}
-	return c.base.GetState().GetState().(*compdesc.ComponentDescriptor)
+	return c.fsacc.GetState().GetState().(*compdesc.ComponentDescriptor)
 }
 
-func (c *componentArchiveContainer) GetBlobData(name string) (cpi.DataAccess, error) {
-	return c.base.GetBlobDataByName(name)
+func (c *componentArchiveContainer) GetBlob(name string) (cpi.DataAccess, error) {
+	return c.fsacc.GetBlobDataByName(name)
 }
 
 func (c *componentArchiveContainer) GetStorageContext() cpi.StorageContext {
-	return ocmhdlr.New(c.Repository(), c.impl.GetName(), &BlobSink{c.base}, Type)
+	return ocmhdlr.New(c.Repository(), c.base.GetName(), &BlobSink{c.fsacc}, Type)
 }
 
 type BlobSink struct {
@@ -167,11 +176,11 @@ func (s *BlobSink) AddBlob(blob blobaccess.BlobAccess) (string, error) {
 	return blob.Digest().String(), nil
 }
 
-func (c *componentArchiveContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *componentArchiveContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
-	err := c.base.AddBlob(blob)
+	err := c.fsacc.AddBlob(blob)
 	if err != nil {
 		return nil, err
 	}

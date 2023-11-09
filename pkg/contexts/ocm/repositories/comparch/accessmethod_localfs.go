@@ -86,7 +86,7 @@ func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
 
 func (m *localFilesystemBlobAccessMethod) getBlob() (blobaccess.BlobAccess, error) {
 	if m.blobAccess == nil {
-		data, err := m.base.GetBlobData(m.spec.LocalReference)
+		data, err := m.base.GetBlob(m.spec.LocalReference)
 		if err != nil {
 			return nil, err
 		}

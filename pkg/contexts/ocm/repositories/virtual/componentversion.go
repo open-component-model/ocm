@@ -135,11 +135,17 @@ func (c *ComponentVersionContainer) Update() error {
 	return c.access.Update()
 }
 
+func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) error {
+	cur := c.access.GetDescriptor()
+	*cur = *cd
+	return c.access.Update()
+}
+
 func (c *ComponentVersionContainer) GetDescriptor() *compdesc.ComponentDescriptor {
 	return c.access.GetDescriptor()
 }
 
-func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, error) {
+func (c *ComponentVersionContainer) GetBlob(name string) (cpi.DataAccess, error) {
 	return c.access.GetBlob(name)
 }
 
@@ -147,7 +153,7 @@ func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
 	return ocmhdlr.New(c.Repository(), c.comp.GetName(), c.access, Type, c.access)
 }
 
-func (c *ComponentVersionContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if c.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

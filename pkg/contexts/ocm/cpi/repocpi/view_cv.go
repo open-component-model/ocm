@@ -55,6 +55,8 @@ type ComponentVersionAccessBase interface {
 	GetContext() cpi.Context
 	Repository() cpi.Repository
 
+	GetImplementation() ComponentVersionAccessImpl
+
 	EnablePersistence() bool
 	DiscardChanges()
 	IsPersistent() bool

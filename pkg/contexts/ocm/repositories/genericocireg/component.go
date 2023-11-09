@@ -148,14 +148,6 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 	return newComponentVersionAccess(accessobj.ACC_WRITABLE, c, version, acc, true)
 }
 
-func (c *componentAccessImpl) versionContainer(access cpi.ComponentVersionAccess) *ComponentVersionContainer {
-	mine, _ := repocpi.GetComponentVersionImpl[*ComponentVersionContainer](access)
-	if mine == nil || mine.comp != c {
-		return nil
-	}
-	return mine
-}
-
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
 	v, err := c.base.View(false)
 	if err != nil {

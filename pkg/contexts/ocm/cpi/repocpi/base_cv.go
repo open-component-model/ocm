@@ -6,6 +6,7 @@ package repocpi
 
 import (
 	"io"
+	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -30,11 +31,10 @@ type ComponentVersionAccessImpl interface {
 	IsReadOnly() bool
 
 	GetDescriptor() *compdesc.ComponentDescriptor
+	SetDescriptor(*compdesc.ComponentDescriptor) error
 
 	AccessMethod(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
 	GetInexpensiveContentVersionIdentity(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string
-
-	Update() error
 
 	BlobContainer
 	io.Closer
@@ -55,12 +55,15 @@ type _componentVersionAccessImplBase = resource.ResourceImplBase[cpi.ComponentVe
 // Besides some functionality covered by view objects these base objects
 // implement provider-agnostic parts of the ComponentVersionAccess API.
 type componentVersionAccessBase struct {
+	lock sync.Mutex
+
 	*_componentVersionAccessImplBase
 	ctx     cpi.Context
 	name    string
 	version string
 
-	blobcache BlobCache
+	descriptor *compdesc.ComponentDescriptor
+	blobcache  BlobCache
 
 	lazy           bool
 	directAccess   bool
@@ -131,6 +134,10 @@ func (b *componentVersionAccessBase) GetVersion() string {
 	return b.version
 }
 
+func (b *componentVersionAccessBase) GetImplementation() ComponentVersionAccessImpl {
+	return b.impl
+}
+
 func (b *componentVersionAccessBase) GetBlobCache() BlobCache {
 	return b.blobcache
 }
@@ -176,7 +183,13 @@ func (b *componentVersionAccessBase) GetInexpensiveContentVersionIdentity(acc cp
 }
 
 func (b *componentVersionAccessBase) GetDescriptor() *compdesc.ComponentDescriptor {
-	return b.impl.GetDescriptor()
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	if b.descriptor == nil {
+		b.descriptor = b.impl.GetDescriptor()
+	}
+	return b.descriptor
 }
 
 func (b *componentVersionAccessBase) GetStorageContext() cpi.StorageContext {
@@ -184,10 +197,16 @@ func (b *componentVersionAccessBase) GetStorageContext() cpi.StorageContext {
 }
 
 func (b *componentVersionAccessBase) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
-	return b.impl.AddBlobFor(blob, refName, global)
+	return b.impl.AddBlob(blob, refName, global)
 }
 
 func (b *componentVersionAccessBase) ShouldUpdate(final bool) bool {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	return b.shouldUpdate(final)
+}
+
+func (b *componentVersionAccessBase) shouldUpdate(final bool) bool {
 	if b.discardChanges {
 		return false
 	}
@@ -198,8 +217,11 @@ func (b *componentVersionAccessBase) ShouldUpdate(final bool) bool {
 }
 
 func (b *componentVersionAccessBase) Update(final bool) error {
-	if b.ShouldUpdate(final) {
-		return b.impl.Update()
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	if b.shouldUpdate(final) {
+		return b.impl.SetDescriptor(b.descriptor.Copy())
 	}
 	return nil
 }

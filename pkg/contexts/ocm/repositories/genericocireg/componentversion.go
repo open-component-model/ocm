@@ -160,6 +160,12 @@ func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 	return ""
 }
 
+func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) error {
+	cur := c.GetDescriptor()
+	*cur = *cd
+	return c.Update()
+}
+
 func (c *ComponentVersionContainer) Update() error {
 	logger := Logger(c.GetContext()).WithValues("cv", common.NewNameVersion(c.comp.name, c.version))
 	err := c.Check()
@@ -259,7 +265,7 @@ func (c *ComponentVersionContainer) GetDescriptor() *compdesc.ComponentDescripto
 	return c.state.GetState().(*compdesc.ComponentDescriptor)
 }
 
-func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, error) {
+func (c *ComponentVersionContainer) GetBlob(name string) (cpi.DataAccess, error) {
 	return c.manifest.GetBlob(digest.Digest(name))
 }
 
@@ -267,7 +273,7 @@ func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
 	return ocihdlr.New(c.comp.GetName(), c.Repository(), c.comp.repo.ocirepo.GetSpecification().GetKind(), c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
 }
 
-func (c *ComponentVersionContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
