@@ -5,8 +5,6 @@
 package virtual
 
 import (
-	"fmt"
-
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -85,20 +83,6 @@ func (c *componentAccessImpl) versionContainer(access cpi.ComponentVersionAccess
 		return nil
 	}
 	return mine
-}
-
-func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
-	if access.GetName() != c.GetName() {
-		return errors.ErrInvalid("component name", access.GetName())
-	}
-	mine := c.versionContainer(access)
-	if mine == nil {
-		return fmt.Errorf("cannot add component version: component version access %s not created for target", access.GetName()+":"+access.GetVersion())
-	}
-	mine.base.EnablePersistence()
-
-	// delayed update in close is not done for composition mode
-	return mine.base.Update(!mine.base.UseDirectAccess())
 }
 
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {

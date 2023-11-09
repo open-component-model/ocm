@@ -33,8 +33,6 @@ type ComponentAccessBase interface {
 	GetName() string
 
 	IsOwned(access cpi.ComponentVersionAccess) bool
-
-	AddVersion(cv cpi.ComponentVersionAccess) error
 }
 
 type componentAccessView struct {
@@ -126,7 +124,7 @@ func (c *componentAccessView) addVersion(acc cpi.ComponentVersionAccess, overrid
 
 	ctx := acc.GetContext()
 
-	impl, err := GetComponentVersionAccessBase(acc)
+	cvbase, err := GetComponentVersionAccessBase(acc)
 	if err != nil {
 		return err
 	}
@@ -151,7 +149,7 @@ func (c *componentAccessView) addVersion(acc cpi.ComponentVersionAccess, overrid
 		finalize.With(func() error {
 			return eff.Close()
 		})
-		impl, err = GetComponentVersionAccessBase(eff)
+		cvbase, err = GetComponentVersionAccessBase(eff)
 		if err != nil {
 			return err
 		}
@@ -167,15 +165,16 @@ func (c *componentAccessView) addVersion(acc cpi.ComponentVersionAccess, overrid
 		eff = acc
 	}
 
-	err = setupLocalBlobs(ctx, "resource", acc, nil, impl, d.Resources, sel, forcestore, opts)
+	err = setupLocalBlobs(ctx, "resource", acc, nil, cvbase, d.Resources, sel, forcestore, opts)
 	if err == nil {
-		err = setupLocalBlobs(ctx, "source", acc, nil, impl, d.Sources, sel, forcestore, opts)
+		err = setupLocalBlobs(ctx, "source", acc, nil, cvbase, d.Sources, sel, forcestore, opts)
 	}
 	if err != nil {
 		return err
 	}
 
-	return c.base.AddVersion(eff)
+	cvbase.EnablePersistence()
+	return cvbase.Update(!cvbase.UseDirectAccess())
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc cpi.ComponentVersionAccess, err error) {

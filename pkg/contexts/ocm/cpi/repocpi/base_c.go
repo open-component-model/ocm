@@ -28,7 +28,6 @@ type ComponentAccessImpl interface {
 	LookupVersion(version string) (cpi.ComponentVersionAccess, error)
 	HasVersion(vers string) (bool, error)
 	NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error)
-	AddVersion(cv cpi.ComponentVersionAccess) error
 
 	io.Closer
 }
@@ -83,10 +82,6 @@ func (c *componentAccessBase) IsOwned(cv cpi.ComponentVersionAccess) bool {
 	impl := base.(*componentVersionAccessBase).impl
 	cvcompmgr := impl.GetParentBase()
 	return c == cvcompmgr
-}
-
-func (c *componentAccessBase) AddVersion(cv cpi.ComponentVersionAccess) error {
-	return c.impl.AddVersion(cv)
 }
 
 func (b *componentAccessBase) ListVersions() ([]string, error) {

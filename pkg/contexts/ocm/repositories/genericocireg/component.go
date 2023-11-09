@@ -5,7 +5,6 @@
 package genericocireg
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
@@ -155,22 +154,6 @@ func (c *componentAccessImpl) versionContainer(access cpi.ComponentVersionAccess
 		return nil
 	}
 	return mine
-}
-
-func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
-	if access.GetName() != c.GetName() {
-		return errors.ErrInvalid("component name", access.GetName())
-	}
-	mine := c.versionContainer(access)
-	if mine == nil {
-		return fmt.Errorf("cannot add component version: component version access %s not created for target", access.GetName()+":"+access.GetVersion())
-	}
-	ok := mine.impl.EnablePersistence()
-	if !ok {
-		return fmt.Errorf("version has been discarded")
-	}
-	// delayed update in close is not done for composition mode
-	return mine.impl.Update(!mine.impl.UseDirectAccess())
 }
 
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {

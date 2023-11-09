@@ -222,17 +222,6 @@ func (c *ComponentAccessImpl) container(access cpi.ComponentVersionAccess) *comp
 	return mine.comp.repo.arch.container
 }
 
-func (c *ComponentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
-	if access.GetName() != c.GetName() {
-		return errors.ErrInvalid("component name", access.GetName())
-	}
-	mine := c.container(access)
-	if mine == nil {
-		return errors.Newf("component version not owned by component archive")
-	}
-	return nil
-}
-
 func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
 	if version != c.repo.arch.GetVersion() {
 		return nil, errors.ErrNotSupported(cpi.KIND_COMPONENTVERSION, version, fmt.Sprintf("component archive %s:%s", c.GetName(), c.repo.arch.GetVersion()))
