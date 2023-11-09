@@ -108,7 +108,9 @@ func (d *chartDownloader) complete(ctx oci.ContextProvider, ref, repourl string)
 	creds := d.creds
 	if d.creds == nil {
 		d.creds = identity.GetCredentials(ctx.OCIContext(), repourl, ref)
-		if d.creds == nil {
+		if d.creds != nil {
+			creds = d.creds
+		} else {
 			creds = common.Properties{}
 		}
 	}
