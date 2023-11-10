@@ -105,12 +105,12 @@ func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, re
 func (d *chartDownloader) complete(ctx oci.ContextProvider, ref, repourl string) error {
 	rf := repo.NewFile()
 
-	creds := d.creds
 	if d.creds == nil {
 		d.creds = identity.GetCredentials(ctx.OCIContext(), repourl, ref)
-		if d.creds == nil {
-			creds = common.Properties{}
-		}
+	}
+	creds := d.creds
+	if creds == nil {
+		creds = common.Properties{}
 	}
 
 	config := vfs.Join(d.fs, d.root, ".config")
