@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -158,7 +159,7 @@ func (c *componentAccessView) addVersion(acc cpi.ComponentVersionAccess, overrid
 		*d = *acc.GetDescriptor().Copy()
 	} else {
 		// transfer composition blobs into local blobs
-		opts.UseNoDefaultIfNotSet = true
+		opts.UseNoDefaultIfNotSet = optionutils.PointerTo(true)
 		opts.BlobHandlerProvider = nil
 		sel = compose.Is
 		d = acc.GetDescriptor()

@@ -5,15 +5,22 @@
 package repocpi
 
 import (
+	"encoding/json"
 	"io"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // here, we define the common implementation agnostic parts
@@ -196,10 +203,6 @@ func (b *componentVersionAccessBase) GetStorageContext() cpi.StorageContext {
 	return b.impl.GetStorageContext()
 }
 
-func (b *componentVersionAccessBase) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
-	return b.impl.AddBlob(blob, refName, global)
-}
-
 func (b *componentVersionAccessBase) ShouldUpdate(final bool) bool {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -224,4 +227,91 @@ func (b *componentVersionAccessBase) Update(final bool) error {
 		return b.impl.SetDescriptor(b.descriptor.Copy())
 	}
 	return nil
+}
+
+func (c *componentVersionAccessBase) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error) {
+	if blob == nil {
+		return nil, errors.New("a resource has to be defined")
+	}
+	if c.IsReadOnly() {
+		return nil, accessio.ErrReadOnly
+	}
+	blob, err := blob.Dup()
+	if err != nil {
+		return nil, errors.Wrapf(err, "invalid blob access")
+	}
+	defer blob.Close()
+	err = utils.ValidateObject(blob)
+	if err != nil {
+		return nil, errors.Wrapf(err, "invalid blob access")
+	}
+
+	storagectx := c.GetStorageContext()
+	ctx := c.GetContext()
+
+	// handle foreign blob upload
+	var prov cpi.BlobHandlerProvider
+	if opts.BlobHandlerProvider != nil {
+		prov = opts.BlobHandlerProvider
+	} else {
+		if !optionutils.AsValue(opts.UseNoDefaultIfNotSet) {
+			prov = internal.BlobHandlerProviderForRegistry(ctx.BlobHandlers())
+		} else {
+			//nolint: staticcheck // yes
+			// use no blob uploader
+		}
+	}
+	if prov != nil {
+		h := prov.LookupHandler(storagectx, artType, blob.MimeType())
+		if h != nil {
+			acc, err := h.StoreBlob(blob, artType, refName, nil, storagectx)
+			if err != nil {
+				return nil, err
+			}
+			if acc != nil {
+				if !keepblobattr.Get(ctx) || acc.IsLocal(ctx) {
+					return acc, nil
+				}
+				global = acc
+			}
+		}
+	}
+
+	var acc cpi.AccessSpec
+
+	if final || c.UseDirectAccess() {
+		acc, err = c.impl.AddBlob(blob, refName, global)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// use local composition access to be added to the repository with AddVersion.
+		acc = compose.New(refName, blob.MimeType(), global)
+	}
+	return c.cacheLocalBlob(acc, blob)
+}
+
+func (c *componentVersionAccessBase) cacheLocalBlob(acc cpi.AccessSpec, blob cpi.BlobAccess) (cpi.AccessSpec, error) {
+	key, err := json.Marshal(acc)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot marshal access spec")
+	}
+	// local blobs might not be accessible from the underlying
+	// repository implementation if the component version is not
+	// finally added (for example ghcr.io as OCI repository).
+	// Therefore, we keep a copy of the blob access for further usage.
+
+	// if a local blob is uploader and the access method is replaced
+	// we have to handle the case that the technical upload repo
+	// is the same as the storage backend of the OCM repository, which
+	// might have been configured with local credentials, which were
+	// reused by the uploader.
+	// The access spec is independent of the actual repo, so it does
+	// not have access to those credentials. Therefore, we have to
+	// keep the original blob for further usage, also.
+	err = c.GetBlobCache().AddBlobFor(string(key), blob)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
 }
