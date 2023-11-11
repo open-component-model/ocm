@@ -9,13 +9,8 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -28,12 +23,20 @@ type ComponentAccessViewManager = resource.ViewManager[cpi.ComponentAccess] // h
 
 type ComponentAccessBase interface {
 	resource.ResourceImplementation[cpi.ComponentAccess]
-	internal.ComponentAccessImpl
 
+	GetContext() cpi.Context
 	IsReadOnly() bool
 	GetName() string
 
 	IsOwned(access cpi.ComponentVersionAccess) bool
+
+	ListVersions() ([]string, error)
+	LookupVersion(version string) (cpi.ComponentVersionAccess, error)
+	HasVersion(vers string) (bool, error)
+	NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error)
+
+	Close() error
+	AddVersion(cv cpi.ComponentVersionAccess, opts *cpi.AddVersionOptions) (ferr error)
 }
 
 type componentAccessView struct {
@@ -110,72 +113,23 @@ func (c *componentAccessView) LookupVersion(version string) (acc cpi.ComponentVe
 	return acc, err
 }
 
-func (c *componentAccessView) AddVersion(acc cpi.ComponentVersionAccess, overrides ...bool) error {
+func (c *componentAccessView) AddVersion(acc cpi.ComponentVersionAccess, overwrite ...bool) error {
+	if acc.GetName() != c.GetName() {
+		return errors.ErrInvalid("component name", acc.GetName())
+	}
+
+	return c.Execute(func() error {
+		return c.base.AddVersion(acc, cpi.NewAddVersionOptions(cpi.Overwrite(utils.Optional(overwrite...))))
+	})
+}
+
+func (c *componentAccessView) AddVersionOpt(acc cpi.ComponentVersionAccess, opts ...cpi.AddVersionOption) error {
 	if acc.GetName() != c.GetName() {
 		return errors.ErrInvalid("component name", acc.GetName())
 	}
 	return c.Execute(func() error {
-		return c.addVersion(acc, overrides...)
+		return c.base.AddVersion(acc, cpi.NewAddVersionOptions(opts...))
 	})
-}
-
-func (c *componentAccessView) addVersion(acc cpi.ComponentVersionAccess, overrides ...bool) (ferr error) {
-	var finalize finalizer.Finalizer
-	defer finalize.FinalizeWithErrorPropagation(&ferr)
-
-	ctx := acc.GetContext()
-
-	cvbase, err := GetComponentVersionAccessBase(acc)
-	if err != nil {
-		return err
-	}
-
-	var (
-		d   *compdesc.ComponentDescriptor
-		sel func(cpi.AccessSpec) bool
-		eff cpi.ComponentVersionAccess
-	)
-
-	opts := cpi.NewBlobUploadOptions()
-
-	forcestore := c.base.IsOwned(acc)
-	if !forcestore {
-		// transfer all local blobs into a new owned version.
-		sel = func(spec cpi.AccessSpec) bool { return spec.IsLocal(ctx) }
-
-		eff, err = c.base.NewVersion(acc.GetVersion(), overrides...)
-		if err != nil {
-			return err
-		}
-		finalize.With(func() error {
-			return eff.Close()
-		})
-		cvbase, err = GetComponentVersionAccessBase(eff)
-		if err != nil {
-			return err
-		}
-
-		d = eff.GetDescriptor()
-		*d = *acc.GetDescriptor().Copy()
-	} else {
-		// transfer composition blobs into local blobs
-		opts.UseNoDefaultIfNotSet = optionutils.PointerTo(true)
-		opts.BlobHandlerProvider = nil
-		sel = compose.Is
-		d = acc.GetDescriptor()
-		eff = acc
-	}
-
-	err = setupLocalBlobs(ctx, "resource", acc, nil, cvbase, d.Resources, sel, forcestore, opts)
-	if err == nil {
-		err = setupLocalBlobs(ctx, "source", acc, nil, cvbase, d.Sources, sel, forcestore, opts)
-	}
-	if err != nil {
-		return err
-	}
-
-	cvbase.EnablePersistence()
-	return cvbase.Update(!cvbase.UseDirectAccess())
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc cpi.ComponentVersionAccess, err error) {

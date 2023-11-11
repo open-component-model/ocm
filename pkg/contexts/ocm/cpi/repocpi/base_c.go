@@ -7,9 +7,13 @@ package repocpi
 import (
 	"io"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 )
@@ -79,6 +83,10 @@ func (b *componentAccessBase) GetName() string {
 	return b.name
 }
 
+func (b *componentAccessBase) IsReadOnly() bool {
+	return b.impl.IsReadOnly()
+}
+
 func (c *componentAccessBase) IsOwned(cv cpi.ComponentVersionAccess) bool {
 	base, err := GetComponentVersionAccessBase(cv)
 	if err != nil {
@@ -120,6 +128,58 @@ func (b *componentAccessBase) NewVersion(version string, overrides ...bool) (cpi
 	return NewComponentVersionAccess(b.GetName(), version, i.Impl, i.Lazy, false, !compositionmodeattr.Get(b.GetContext()))
 }
 
-func (b *componentAccessBase) IsReadOnly() bool {
-	return b.impl.IsReadOnly()
+func (c *componentAccessBase) AddVersion(cv cpi.ComponentVersionAccess, opts *cpi.AddVersionOptions) (ferr error) {
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagation(&ferr)
+
+	ctx := c.GetContext()
+	cvbase, err := GetComponentVersionAccessBase(cv)
+	if err != nil {
+		return err
+	}
+
+	var (
+		d   *compdesc.ComponentDescriptor
+		sel func(cpi.AccessSpec) bool
+		eff cpi.ComponentVersionAccess
+	)
+
+	forcestore := c.IsOwned(cv)
+	if !forcestore {
+		// transfer all local blobs into a new owned version.
+		sel = func(spec cpi.AccessSpec) bool { return spec.IsLocal(ctx) }
+
+		eff, err = c.NewVersion(cv.GetVersion(), optionutils.AsValue(opts.Overwrite))
+		if err != nil {
+			return err
+		}
+		finalize.With(func() error {
+			return eff.Close()
+		})
+		cvbase, err = GetComponentVersionAccessBase(eff)
+		if err != nil {
+			return err
+		}
+
+		d = eff.GetDescriptor()
+		*d = *cv.GetDescriptor().Copy()
+	} else {
+		// transfer composition blobs into local blobs
+		opts.UseNoDefaultIfNotSet = optionutils.PointerTo(true)
+		opts.BlobHandlerProvider = nil
+		sel = compose.Is
+		d = cv.GetDescriptor()
+		eff = cv
+	}
+
+	err = setupLocalBlobs(ctx, "resource", cv, nil, cvbase, d.Resources, sel, forcestore, &opts.BlobUploadOptions)
+	if err == nil {
+		err = setupLocalBlobs(ctx, "source", cv, nil, cvbase, d.Sources, sel, forcestore, &opts.BlobUploadOptions)
+	}
+	if err != nil {
+		return err
+	}
+
+	cvbase.EnablePersistence()
+	return cvbase.Update(!cvbase.UseDirectAccess())
 }

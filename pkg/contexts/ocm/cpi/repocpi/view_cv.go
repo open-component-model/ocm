@@ -24,7 +24,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
@@ -879,52 +878,4 @@ func (c *componentVersionAccessView) GetReferencesBySelectors(selectors []compde
 		return references, compdesc.NotFound
 	}
 	return references, nil
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-func setupLocalBlobs(ctx cpi.Context, kind string, src cpi.ComponentVersionAccess, accprov func(cpi.AccessSpec) (cpi.AccessMethod, error), tgtbase ComponentVersionAccessBase, it compdesc.ArtifactAccessor, sel func(cpi.AccessSpec) bool, final bool, opts *cpi.BlobUploadOptions) (ferr error) {
-	var finalize finalizer.Finalizer
-	defer finalize.FinalizeWithErrorPropagation(&ferr)
-
-	for i := 0; i < it.Len(); i++ {
-		nested := finalize.Nested()
-		a := it.GetArtifact(i)
-		spec, err := ctx.AccessSpecForSpec(a.GetAccess())
-		if err != nil {
-			return errors.Wrapf(err, "%s %d", kind, i)
-		}
-		if sel(spec) {
-			blob, err := blobAccessForLocalAccessSpec(spec, src, accprov)
-			if err != nil {
-				return errors.Wrapf(err, "%s %d", kind, i)
-			}
-			nested.Close(blob)
-
-			effspec, err := tgtbase.AddBlob(blob, a.GetType(), cpi.ReferenceHint(spec, src), cpi.GlobalAccess(spec, ctx), final, opts)
-			if err != nil {
-				return errors.Wrapf(err, "cannot store %s %d", kind, i)
-			}
-			a.SetAccess(effspec)
-		}
-		err = nested.Finalize()
-		if err != nil {
-			return errors.Wrapf(err, "%s %d", kind, i)
-		}
-	}
-	return nil
-}
-
-func blobAccessForLocalAccessSpec(spec cpi.AccessSpec, cv cpi.ComponentVersionAccess, accprov func(cpi.AccessSpec) (cpi.AccessMethod, error)) (blobaccess.BlobAccess, error) {
-	var m cpi.AccessMethod
-	var err error
-	if accprov != nil {
-		m, err = accprov(spec)
-	} else {
-		m, err = spec.AccessMethod(cv)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return m.AsBlobAccess(), nil
 }

@@ -51,7 +51,9 @@ type (
 	MimeType   = blobaccess.MimeType
 )
 
-type ComponentAccessImpl interface {
+type ComponentAccess interface {
+	resource.ResourceView[ComponentAccess]
+
 	GetContext() Context
 	GetName() string
 
@@ -59,15 +61,10 @@ type ComponentAccessImpl interface {
 	LookupVersion(version string) (ComponentVersionAccess, error)
 	HasVersion(vers string) (bool, error)
 	NewVersion(version string, overrides ...bool) (ComponentVersionAccess, error)
-
-	Close() error
-}
-
-type ComponentAccess interface {
-	resource.ResourceView[ComponentAccess]
-
-	ComponentAccessImpl
 	AddVersion(cv ComponentVersionAccess, overrides ...bool) error
+	AddVersionOpt(cv ComponentVersionAccess, opts ...AddVersionOption) error
+
+	io.Closer
 }
 
 // AccessProvider assembled methods provided
