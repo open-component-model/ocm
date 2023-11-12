@@ -41,5 +41,14 @@
 // and their descriptors. The keep a reference to component implementations, which are
 // again based of repository implementations. The task of repository implementations is
 // to provide component objects. Their implementations are the responsible to provide
-// component version objects,
+// component version objects.
+//
+// Besides this basic implementation interface with separated object for a
+// repository, component and component version, there is support for a simplified
+// implementation interface (StorageBackendImpl). This is a single interface
+// bundling all required functionality to implement the object for the three
+// concerned elements. With NewStorageBackend it is possible to instantiate
+// a new kind of repository based on this single interface. The required
+// objects for components and component versions are generically provided
+// based on the methods provided by this interface.
 package repocpi

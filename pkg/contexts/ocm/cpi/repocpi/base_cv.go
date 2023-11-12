@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
@@ -434,4 +435,62 @@ func (b *componentVersionAccessBase) setupLocalBlobs(kind string, accprov func(c
 		}
 	}
 	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type fakeMethod struct {
+	spec  cpi.AccessSpec
+	local bool
+	mime  string
+	blob  blobaccess.BlobAccess
+}
+
+var _ accspeccpi.AccessMethodImpl = (*fakeMethod)(nil)
+
+func newFakeMethod(m cpi.AccessMethod, blob cpi.BlobAccess) (cpi.AccessMethod, error) {
+	b, err := blob.Dup()
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot remember blob for access method")
+	}
+	f := &fakeMethod{
+		spec:  m.AccessSpec(),
+		local: m.IsLocal(),
+		mime:  m.MimeType(),
+		blob:  b,
+	}
+	err = m.Close()
+	if err != nil {
+		_ = b.Close()
+		return nil, errors.Wrapf(err, "closing access method")
+	}
+	return accspeccpi.AccessMethodForImplementation(f, nil)
+}
+
+func (f *fakeMethod) MimeType() string {
+	return f.mime
+}
+
+func (f *fakeMethod) IsLocal() bool {
+	return f.local
+}
+
+func (f *fakeMethod) GetKind() string {
+	return f.spec.GetKind()
+}
+
+func (f *fakeMethod) AccessSpec() internal.AccessSpec {
+	return f.spec
+}
+
+func (f *fakeMethod) Close() error {
+	return f.blob.Close()
+}
+
+func (f *fakeMethod) Reader() (io.ReadCloser, error) {
+	return f.blob.Reader()
+}
+
+func (f *fakeMethod) Get() ([]byte, error) {
+	return f.blob.Get()
 }

@@ -302,62 +302,6 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cp
 	return nil
 }
 
-type fakeMethod struct {
-	spec  cpi.AccessSpec
-	local bool
-	mime  string
-	blob  blobaccess.BlobAccess
-}
-
-var _ accspeccpi.AccessMethodImpl = (*fakeMethod)(nil)
-
-func newFakeMethod(m cpi.AccessMethod, blob cpi.BlobAccess) (cpi.AccessMethod, error) {
-	b, err := blob.Dup()
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot remember blob for access method")
-	}
-	f := &fakeMethod{
-		spec:  m.AccessSpec(),
-		local: m.IsLocal(),
-		mime:  m.MimeType(),
-		blob:  b,
-	}
-	err = m.Close()
-	if err != nil {
-		_ = b.Close()
-		return nil, errors.Wrapf(err, "closing access method")
-	}
-	return accspeccpi.AccessMethodForImplementation(f, nil)
-}
-
-func (f *fakeMethod) MimeType() string {
-	return f.mime
-}
-
-func (f *fakeMethod) IsLocal() bool {
-	return f.local
-}
-
-func (f *fakeMethod) GetKind() string {
-	return f.spec.GetKind()
-}
-
-func (f *fakeMethod) AccessSpec() internal.AccessSpec {
-	return f.spec
-}
-
-func (f *fakeMethod) Close() error {
-	return f.blob.Close()
-}
-
-func (f *fakeMethod) Reader() (io.ReadCloser, error) {
-	return f.blob.Reader()
-}
-
-func (f *fakeMethod) Get() ([]byte, error) {
-	return f.blob.Get()
-}
-
 func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessView, kind string, art A,
 	set func(*T, compdesc.AccessSpec) error,
 	setblob func(*T, cpi.BlobAccess, string, cpi.AccessSpec) error,
