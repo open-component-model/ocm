@@ -7,7 +7,7 @@ package repocpi
 import (
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -132,24 +132,14 @@ func (c *componentAccessBase) AddVersion(cv cpi.ComponentVersionAccess, opts *cp
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 
-	ctx := c.GetContext()
 	cvbase, err := GetComponentVersionAccessBase(cv)
 	if err != nil {
 		return err
 	}
 
-	var (
-		d   *compdesc.ComponentDescriptor
-		sel func(cpi.AccessSpec) bool
-		eff cpi.ComponentVersionAccess
-	)
-
 	forcestore := c.IsOwned(cv)
 	if !forcestore {
-		// transfer all local blobs into a new owned version.
-		sel = func(spec cpi.AccessSpec) bool { return spec.IsLocal(ctx) }
-
-		eff, err = c.NewVersion(cv.GetVersion(), optionutils.AsValue(opts.Overwrite))
+		eff, err := c.NewVersion(cv.GetVersion(), optionutils.AsValue(opts.Overwrite))
 		if err != nil {
 			return err
 		}
@@ -161,25 +151,35 @@ func (c *componentAccessBase) AddVersion(cv cpi.ComponentVersionAccess, opts *cp
 			return err
 		}
 
-		d = eff.GetDescriptor()
+		d := eff.GetDescriptor()
 		*d = *cv.GetDescriptor().Copy()
-	} else {
-		// transfer composition blobs into local blobs
-		opts.UseNoDefaultIfNotSet = optionutils.PointerTo(true)
-		opts.BlobHandlerProvider = nil
-		sel = compose.Is
-		d = cv.GetDescriptor()
-		eff = cv
-	}
 
-	err = setupLocalBlobs(ctx, "resource", cv, nil, cvbase, d.Resources, sel, forcestore, &opts.BlobUploadOptions)
-	if err == nil {
-		err = setupLocalBlobs(ctx, "source", cv, nil, cvbase, d.Sources, sel, forcestore, &opts.BlobUploadOptions)
+		err = c.setupLocalBlobs("resource", cv, cvbase, d.Resources, &opts.BlobUploadOptions)
+		if err == nil {
+			err = c.setupLocalBlobs("source", cv, cvbase, d.Sources, &opts.BlobUploadOptions)
+		}
+		if err != nil {
+			return err
+		}
 	}
-	if err != nil {
-		return err
-	}
-
 	cvbase.EnablePersistence()
-	return cvbase.Update(!cvbase.UseDirectAccess())
+	err = cvbase.Update(!cvbase.UseDirectAccess())
+	return err
+}
+
+func (c *componentAccessBase) setupLocalBlobs(kind string, src cpi.ComponentVersionAccess, tgtbase ComponentVersionAccessBase, it compdesc.ArtifactAccessor, opts *cpi.BlobUploadOptions) (ferr error) {
+	ctx := src.GetContext()
+	// transfer all local blobs
+	prov := func(spec cpi.AccessSpec) (blob blobaccess.BlobAccess, ref string, global cpi.AccessSpec, err error) {
+		if spec.IsLocal(ctx) {
+			m, err := spec.AccessMethod(src)
+			if err != nil {
+				return nil, "", nil, err
+			}
+			return m.AsBlobAccess(), cpi.ReferenceHint(spec, src), cpi.GlobalAccess(spec, tgtbase.GetContext()), nil
+		}
+		return nil, "", nil, nil
+	}
+
+	return tgtbase.(*componentVersionAccessBase).setupLocalBlobs(kind, prov, it, false, opts)
 }

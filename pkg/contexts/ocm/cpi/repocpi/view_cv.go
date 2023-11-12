@@ -5,18 +5,14 @@
 package repocpi
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
-
-	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -24,7 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -67,7 +62,7 @@ type ComponentVersionAccessBase interface {
 
 	// GetStorageContext creates a storage context for blobs
 	// that is used to feed blob handlers for specific blob storage methods.
-	// If no handler accepts the blob, the AddBlobFor method will
+	// If no handler accepts the blob, the AddBlob method will
 	// be used to store the blob
 	GetStorageContext() cpi.StorageContext
 
@@ -132,7 +127,6 @@ func artifactAccessViewCreator(i ComponentVersionAccessBase, v resource.CloserVi
 		_componentVersionAccessView: resource.NewView[cpi.ComponentVersionAccess](v, d),
 		base:                        i,
 	}
-	v.Allocatable().BeforeCleanup(refmgmt.CleanupHandlerFunc(cv.finish))
 	return cv
 }
 
@@ -152,16 +146,6 @@ func (c *componentVersionAccessView) Close() error {
 	list := errors.ErrListf("closing %s", common.VersionedElementKey(c))
 	err := c._componentVersionAccessView.Close()
 	return list.Add(c.err, err).Result()
-}
-
-func (c *componentVersionAccessView) finish() {
-	if !c.IsClosed() {
-		// prepare artifact access for final close in
-		// direct access mode.
-		if !compositionmodeattr.Get(c.GetContext()) {
-			c.err = c.update(true)
-		}
-	}
 }
 
 func (c *componentVersionAccessView) Repository() cpi.Repository {
@@ -210,35 +194,11 @@ func (c *componentVersionAccessView) AccessMethod(spec cpi.AccessSpec) (meth cpi
 
 func (c *componentVersionAccessView) accessMethod(spec cpi.AccessSpec) (meth cpi.AccessMethod, err error) {
 	switch {
-	case compose.Is(spec):
-		cspec, ok := spec.(*compose.AccessSpec)
-		if !ok {
-			return nil, fmt.Errorf("invalid implementation (%T) for access method compose", spec)
-		}
-		blob := c.getLocalBlob(cspec)
-		if blob == nil {
-			return nil, errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, common.VersionedElementKey(c).String())
-		}
-		meth, err = compose.NewMethod(cspec, blob)
-	case !spec.IsLocal(c.GetContext()):
-		meth, err = spec.AccessMethod(c)
+	case spec.IsLocal(c.GetContext()):
+		return c.base.AccessMethod(spec, c.Allocatable())
 	default:
-		meth, err = c.base.AccessMethod(spec, c.Allocatable())
-		if err == nil {
-			if blob := c.getLocalBlob(spec); blob != nil {
-				meth, err = newFakeMethod(meth, blob)
-			}
-		}
+		return spec.AccessMethod(c)
 	}
-	return meth, err
-}
-
-func (c *componentVersionAccessView) getLocalBlob(acc cpi.AccessSpec) cpi.BlobAccess {
-	key, err := json.Marshal(acc)
-	if err != nil {
-		return nil
-	}
-	return c.base.GetBlobCache().GetBlobFor(string(key))
 }
 
 func (c *componentVersionAccessView) GetInexpensiveContentVersionIdentity(spec cpi.AccessSpec) string {
@@ -274,38 +234,8 @@ func (c *componentVersionAccessView) Update() error {
 		if !c.base.IsPersistent() {
 			return ErrTempVersion
 		}
-		return c.update(true)
+		return c.base.Update(true)
 	})
-}
-
-func (c *componentVersionAccessView) update(final bool) error {
-	if !c.base.ShouldUpdate(final) {
-		return nil
-	}
-
-	ctx := c.GetContext()
-	d := c.GetDescriptor()
-	impl, err := GetComponentVersionAccessBase(c)
-	if err != nil {
-		return err
-	}
-	opts := &cpi.BlobUploadOptions{
-		UseNoDefaultIfNotSet: optionutils.PointerTo(true),
-	}
-	// TODO: exceute for separately lockable view
-	err = setupLocalBlobs(ctx, "resource", c, c.accessMethod, impl, d.Resources, compose.Is, true, opts)
-	if err == nil {
-		err = setupLocalBlobs(ctx, "source", c, c.accessMethod, impl, d.Sources, compose.Is, true, opts)
-	}
-	if err != nil {
-		return err
-	}
-
-	err = c.base.Update(true)
-	if err != nil {
-		return err
-	}
-	return c.base.GetBlobCache().Clear()
 }
 
 func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec, opts ...internal.BlobUploadOption) (cpi.AccessSpec, error) {
@@ -518,20 +448,6 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 	if err != nil {
 		return err
 	}
-	if blob := c.getLocalBlob(spec); blob != nil {
-		var dig digest.Digest
-		if s, ok := meth.(blobaccess.DigestSource); ok {
-			dig = s.Digest()
-		}
-		err = meth.Close()
-		if err != nil {
-			return errors.Wrapf(err, "clsoing shadowed method")
-		}
-		meth, err = accspeccpi.NewDefaultMethodForBlobAccess(c, spec, dig, blob, spec.IsLocal(c.GetContext()))
-		if err != nil {
-			return err
-		}
-	}
 	defer meth.Close()
 
 	return c.Execute(func() error {
@@ -609,7 +525,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		} else {
 			cd.Resources[idx] = *res
 		}
-		return c.update(false)
+		return c.base.Update(false)
 	})
 }
 
@@ -673,7 +589,7 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		} else {
 			cd.Sources[idx] = *res
 		}
-		return c.update(false)
+		return c.base.Update(false)
 	})
 }
 
@@ -685,7 +601,7 @@ func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference) e
 		} else {
 			cd.References[idx] = *ref
 		}
-		return c.update(false)
+		return c.base.Update(false)
 	})
 }
 
