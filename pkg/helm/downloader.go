@@ -6,7 +6,6 @@ package helm
 
 import (
 	"fmt"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -19,6 +18,7 @@ import (
 	"helm.sh/helm/v3/pkg/repo"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/helm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
