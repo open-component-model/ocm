@@ -41,6 +41,9 @@ func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 	for _, e := range prop {
 		p = p || e
 	}
+	if path == "" {
+		path = "~/.docker/config.json"
+	}
 	return &RepositorySpec{
 		ObjectVersionedType:      runtime.NewVersionedTypedObject(Type),
 		DockerConfigFile:         path,

@@ -15,14 +15,14 @@ import (
 )
 
 type Config struct {
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	Component  string `json:"component"`
-	Repository string `json:"repository"`
-	Version    string `json:"version"`
+	Username   string `json:"username,omitempty"`
+	Password   string `json:"password,omitempty"`
+	Component  string `json:"component,omitempty"`
+	Repository string `json:"repository,omitempty"`
+	Version    string `json:"version,omitempty"`
 
-	Target    json.RawMessage `json:"targetRepository"`
-	OCMConfig string          `json:"ocmConfig"`
+	Target    json.RawMessage `json:"targetRepository,omitempty"`
+	OCMConfig string          `json:"ocmConfig,omitempty"`
 }
 
 func ReadConfig(path string) (*Config, error) {

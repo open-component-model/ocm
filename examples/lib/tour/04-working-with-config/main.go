@@ -47,13 +47,15 @@ func main() {
 		}
 		switch cmd {
 		case "basic":
-			err = UsingCredentialsA(cfg)
-		case "context":
-			err = UsingCredentialsB(cfg, true)
-		case "read":
-			err = UsingCredentialsB(cfg, false)
-		case "credrepo":
-			err = UsingCredentialsRepositories(cfg)
+			err = BasicConfigurationHandling(cfg)
+		case "generic":
+			err = HandleArbitraryConfiguration(cfg)
+		case "ocm":
+			err = HandleOCMConfig(cfg)
+		case "provide":
+			err = WriteConfigType(cfg)
+		case "consume":
+			err = WriteConfigTargets(cfg)
 		default:
 			err = fmt.Errorf("unknown example %q", cmd)
 		}

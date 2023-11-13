@@ -54,7 +54,7 @@ func SigningComponentVersionInRepo(cfg *helper.Config) error {
 		return errors.Wrapf(err, "cannot prepare component version in target repo")
 	}
 
-	// evrey context features a signing registry, which provides available
+	// every context features a signing registry, which provides available
 	// signers and  hashers, but also keys for various purposes.
 	// It is always asked, if a key is required for a purpose, which is
 	// not explicitly given to a signing/verification call.
