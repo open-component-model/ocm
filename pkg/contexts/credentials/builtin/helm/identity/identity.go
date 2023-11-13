@@ -10,7 +10,6 @@ import (
 	"helm.sh/helm/v3/pkg/registry"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -60,11 +59,11 @@ func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 // used credential attributes
 
 const (
-	ATTR_USERNAME              = credentials.ATTR_USERNAME
-	ATTR_PASSWORD              = credentials.ATTR_PASSWORD
-	ATTR_CERTIFICATE_AUTHORITY = credentials.ATTR_CERTIFICATE_AUTHORITY
-	ATTR_CERTIFICATE           = credentials.ATTR_CERTIFICATE
-	ATTR_PRIVATE_KEY           = credentials.ATTR_PRIVATE_KEY
+	ATTR_USERNAME              = cpi.ATTR_USERNAME
+	ATTR_PASSWORD              = cpi.ATTR_PASSWORD
+	ATTR_CERTIFICATE_AUTHORITY = cpi.ATTR_CERTIFICATE_AUTHORITY
+	ATTR_CERTIFICATE           = cpi.ATTR_CERTIFICATE
+	ATTR_PRIVATE_KEY           = cpi.ATTR_PRIVATE_KEY
 )
 
 func OCIRepoURL(repourl string, chartname string) string {
@@ -76,7 +75,7 @@ func OCIRepoURL(repourl string, chartname string) string {
 }
 
 func SimpleCredentials(user, passwd string) cpi.Credentials {
-	return credentials.DirectCredentials{
+	return cpi.DirectCredentials{
 		ATTR_USERNAME: user,
 		ATTR_PASSWORD: passwd,
 	}
@@ -95,12 +94,12 @@ func GetConsumerId(repourl string, chartname string) cpi.ConsumerIdentity {
 	}
 }
 
-func GetCredentials(ctx credentials.ContextProvider, repourl string, chartname string) common.Properties {
+func GetCredentials(ctx cpi.ContextProvider, repourl string, chartname string) common.Properties {
 	id := GetConsumerId(repourl, chartname)
 	if id == nil {
 		return nil
 	}
-	creds, err := credentials.CredentialsForConsumer(ctx.CredentialsContext(), id)
+	creds, err := cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
 	if creds == nil || err != nil {
 		return nil
 	}
