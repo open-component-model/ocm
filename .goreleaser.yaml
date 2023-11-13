@@ -70,6 +70,7 @@ signs:
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
+      - '--yes'
     artifacts: checksum
     output: true
 changelog:
