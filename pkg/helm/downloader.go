@@ -78,10 +78,12 @@ func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, re
 	if registry.IsOCI(repourl) {
 		fs := osfs.New()
 		chart = vfs.Join(fs, dl.root, filepath.Base(ref)+".tgz")
-		var creds credentials.CredentialsSpec
+
+		var creds credentials.CredentialsSource
 		if dl.creds != nil {
 			creds = directcreds.NewCredentials(dl.creds)
 		}
+
 		chart, prov, aset, err = ocihelm.Download2(out, ctx.OCIContext(), identity.OCIRepoURL(repourl, ref)+":"+version, chart, osfs.New(), true, creds)
 		if prov != "" && dl.Verify > downloader.VerifyNever && dl.Verify != downloader.VerifyLater {
 			_, err = downloader.VerifyChart(chart, dl.Keyring)
