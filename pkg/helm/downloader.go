@@ -17,6 +17,7 @@ import (
 	"helm.sh/helm/v3/pkg/repo"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocihelm "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/helm"
@@ -73,7 +74,12 @@ func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, re
 	if registry.IsOCI(repourl) {
 		fs := osfs.New()
 		chart = vfs.Join(fs, dl.root, filepath.Base(ref)+".tgz")
-		creds := directcreds.NewCredentials(dl.creds)
+
+		var creds credentials.CredentialsSource
+		if dl.creds != nil {
+			creds = directcreds.NewCredentials(dl.creds)
+		}
+
 		chart, prov, aset, err = ocihelm.Download2(out, ctx.OCIContext(), identity.OCIRepoURL(repourl, ref)+":"+version, chart, osfs.New(), true, creds)
 		if prov != "" && dl.Verify > downloader.VerifyNever && dl.Verify != downloader.VerifyLater {
 			_, err = downloader.VerifyChart(chart, dl.Keyring)
