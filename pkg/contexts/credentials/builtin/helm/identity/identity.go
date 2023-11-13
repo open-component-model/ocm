@@ -83,6 +83,10 @@ func SimpleCredentials(user, passwd string) cpi.Credentials {
 }
 
 func GetConsumerId(repourl string, chartname string) cpi.ConsumerIdentity {
+	i := strings.LastIndex(chartname, ":")
+	if i >= 0 {
+		chartname = chartname[:i]
+	}
 	if registry.IsOCI(repourl) {
 		repourl = strings.TrimSuffix(repourl, "/")
 		return ociidentity.GetConsumerId(OCIRepoURL(repourl, ""), chartname)
@@ -96,7 +100,7 @@ func GetCredentials(ctx credentials.ContextProvider, repourl string, chartname s
 	if id == nil {
 		return nil
 	}
-	creds, err := credentials.CredentialsForConsumer(ctx.CredentialsContext(), id, identityMatcher)
+	creds, err := credentials.CredentialsForConsumer(ctx.CredentialsContext(), id)
 	if creds == nil || err != nil {
 		return nil
 	}
