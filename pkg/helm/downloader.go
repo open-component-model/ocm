@@ -6,6 +6,7 @@ package helm
 
 import (
 	"fmt"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -77,7 +78,10 @@ func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, re
 	if registry.IsOCI(repourl) {
 		fs := osfs.New()
 		chart = vfs.Join(fs, dl.root, filepath.Base(ref)+".tgz")
-		creds := directcreds.NewCredentials(dl.creds)
+		var creds credentials.CredentialsSpec
+		if dl.creds != nil {
+			creds = directcreds.NewCredentials(dl.creds)
+		}
 		chart, prov, aset, err = ocihelm.Download2(out, ctx.OCIContext(), identity.OCIRepoURL(repourl, ref)+":"+version, chart, osfs.New(), true, creds)
 		if prov != "" && dl.Verify > downloader.VerifyNever && dl.Verify != downloader.VerifyLater {
 			_, err = downloader.VerifyChart(chart, dl.Keyring)
