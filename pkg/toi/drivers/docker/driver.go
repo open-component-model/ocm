@@ -15,10 +15,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/distribution/reference"
 	"github.com/docker/cli/cli/command"
-	"github.com/docker/distribution/reference"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	registrytypes "github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -169,7 +170,7 @@ func pullImage(ctx context.Context, cli command.Cli, image string) error {
 
 	authConfig := command.ResolveAuthConfig(ctx, cli, repoInfo.Index)
 
-	encodedAuth, err := command.EncodeAuthToBase64(authConfig)
+	encodedAuth, err := registrytypes.EncodeAuthConfig(authConfig)
 	if err != nil {
 		return fmt.Errorf("unable encode auth: %w", err)
 	}
