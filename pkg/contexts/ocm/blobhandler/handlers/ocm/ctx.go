@@ -5,7 +5,7 @@
 package ocm
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -27,9 +27,9 @@ type DefaultStorageContext struct {
 	Payload interface{}
 }
 
-func New(repo cpi.Repository, vers cpi.ComponentVersionAccess, access BlobSink, impltyp string, payload ...interface{}) StorageContext {
+func New(repo cpi.Repository, compname string, access BlobSink, impltyp string, payload ...interface{}) StorageContext {
 	return &DefaultStorageContext{
-		DefaultStorageContext: *cpi.NewDefaultStorageContext(repo, vers, cpi.ImplementationRepositoryType{cpi.CONTEXT_TYPE, impltyp}),
+		DefaultStorageContext: *cpi.NewDefaultStorageContext(repo, compname, cpi.ImplementationRepositoryType{cpi.CONTEXT_TYPE, impltyp}),
 		Sink:                  access,
 		Payload:               utils.Optional(payload...),
 	}

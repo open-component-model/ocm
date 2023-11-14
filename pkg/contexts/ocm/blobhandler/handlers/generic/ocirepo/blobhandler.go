@@ -9,7 +9,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -86,7 +86,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	var tag string
 
 	if hint == "" {
-		name = path.Join(prefix, ctx.TargetComponentVersion().GetName())
+		name = path.Join(prefix, ctx.TargetComponentName())
 	} else {
 		i := strings.LastIndex(hint, ":")
 		if i > 0 {

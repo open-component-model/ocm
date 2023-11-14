@@ -11,6 +11,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
@@ -87,7 +89,7 @@ var _ = Describe("blob digester registry test", func() {
 			}}
 			reg.Register(mine, "arttype")
 
-			descs := Must((*eff).DetermineDigests("arttype", hasher, signing.DefaultRegistry(), &AccessMethod{}))
+			descs := Must((*eff).DetermineDigests("arttype", hasher, signing.DefaultRegistry(), NewDummyMethod()))
 			Expect(descs).To(Equal([]internal.DigestDescriptor{*digest}))
 		},
 		Entry("plain", &reg),
@@ -95,35 +97,40 @@ var _ = Describe("blob digester registry test", func() {
 	)
 })
 
-type AccessMethod struct {
+type accessMethod struct {
 }
 
-var _ internal.AccessMethod = (*AccessMethod)(nil)
+var _ internal.AccessMethodImpl = (*accessMethod)(nil)
 
-func (_ AccessMethod) IsLocal() bool {
+func (_ accessMethod) IsLocal() bool {
 	return false
 }
 
-func (a AccessMethod) GetKind() string {
+func (a accessMethod) GetKind() string {
 	return "demo"
 }
 
-func (a AccessMethod) AccessSpec() internal.AccessSpec {
+func (a accessMethod) AccessSpec() internal.AccessSpec {
 	return nil
 }
 
-func (a AccessMethod) Get() ([]byte, error) {
+func (a accessMethod) Get() ([]byte, error) {
 	return nil, nil
 }
 
-func (a AccessMethod) Reader() (io.ReadCloser, error) {
+func (a accessMethod) Reader() (io.ReadCloser, error) {
 	return nil, nil
 }
 
-func (a AccessMethod) Close() error {
+func (a accessMethod) Close() error {
 	return nil
 }
 
-func (a AccessMethod) MimeType() string {
+func (a accessMethod) MimeType() string {
 	return "application/demo"
+}
+
+func NewDummyMethod() ocm.AccessMethod {
+	m, _ := accspeccpi.AccessMethodForImplementation(&accessMethod{}, nil)
+	return m
 }

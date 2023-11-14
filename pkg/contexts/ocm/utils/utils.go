@@ -6,28 +6,27 @@ package utils
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func GetOCIArtifactRef(ctx ocm.Context, r ocm.ResourceAccess) (string, error) {
+func GetOCIArtifactRef(ctxp ocm.ContextProvider, r ocm.ResourceAccess) (string, error) {
+	ctx := ctxp.OCMContext()
+
 	acc, err := r.Access()
-	if err != nil {
+	if err != nil || acc == nil {
 		return "", err
 	}
 
-	if localblob.Is(acc) {
-		g := acc.(*localblob.AccessSpec).GlobalAccess
-		if g != nil {
-			acc, err = ctx.AccessSpecForSpec(g)
-			if err != nil {
-				return "", errors.Wrapf(err, "global access spec")
-			}
+	var cv cpi.ComponentVersionAccess
+	if p, ok := r.(cpi.ComponentVersionProvider); ok {
+		cv, err = p.GetComponentVersion()
+		if err != nil {
+			return "", errors.Wrapf(err, "cannot access component version for re/source")
 		}
+		defer cv.Close()
 	}
-	if ociartifact.Is(acc) {
-		return acc.(*ociartifact.AccessSpec).ImageReference, nil
-	}
-	return "", errors.Newf("cannot map access to external image reference")
+
+	return ociartifact.GetOCIArtifactReference(ctx, acc, cv)
 }

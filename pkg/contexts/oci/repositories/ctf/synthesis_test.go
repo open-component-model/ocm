@@ -15,8 +15,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -25,29 +25,35 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
-type DummyMethod struct {
+type dummyMethod struct {
 	blobaccess.BlobAccess
 }
 
-var _ ocm.AccessMethod = (*DummyMethod)(nil)
-var _ blobaccess.DigestSource = (*DummyMethod)(nil)
+var _ blobaccess.DigestSource = (*dummyMethod)(nil)
 
-func (d *DummyMethod) GetKind() string {
+func (d *dummyMethod) GetKind() string {
 	return localblob.Type
 }
 
-func (d *DummyMethod) IsLocal() bool {
+func (d *dummyMethod) IsLocal() bool {
 	return true
 }
 
-func (d *DummyMethod) AccessSpec() cpi.AccessSpec {
+func (d *dummyMethod) AccessSpec() cpi.AccessSpec {
 	return nil
+}
+
+func NewDummyMethod(blob blobaccess.BlobAccess) ocm.AccessMethod {
+	m, _ := accspeccpi.AccessMethodForImplementation(&dummyMethod{blob}, nil)
+	return m
 }
 
 func CheckBlob(blob blobaccess.BlobAccess) oci.NamespaceAccess {
@@ -109,21 +115,27 @@ var _ = Describe("syntheses", func() {
 	})
 
 	It("synthesize", func() {
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
+		nested := finalize.Nested()
+
+		// setup the scene
 		r := Must(ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700))
+		nested.Close(r, "create ctf")
 		n := Must(r.LookupNamespace("mandelsoft/test"))
+		nested.Close(n, "ns")
 		DefaultManifestFill(n)
-		Expect(n.Close()).To(Succeed())
-		Expect(r.Close()).To(Succeed())
+		MustBeSuccessful(nested.Finalize())
 
 		r = Must(ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, &spec.StandardOptions))
-		defer Close(r, "ctf")
+		finalize.Close(r, "ctf")
 		n = Must(r.LookupNamespace("mandelsoft/test"))
-		defer Close(n, "namespace")
+		finalize.Close(n, "names.pace")
+
+		nested = finalize.Nested()
 		blob := Must(artifactset.SynthesizeArtifactBlob(n, TAG))
-
-		blobcloser := accessio.OnceCloser(blob)
-
-		defer Close(blobcloser, "blob")
+		nested.Close(blob, "blob")
 
 		info := blobaccess.Cast[blobaccess.FileLocation](blob)
 		path := info.Path()
@@ -131,18 +143,18 @@ var _ = Describe("syntheses", func() {
 		Expect(vfs.Exists(info.FileSystem(), path)).To(BeTrue())
 
 		set := CheckBlob(blob)
-		defer Close(set, "set")
+		finalize.Close(set, "set")
 
-		Expect(blobcloser.Close()).To(Succeed())
+		MustBeSuccessful(nested.Finalize())
 		Expect(vfs.Exists(info.FileSystem(), path)).To(BeFalse())
 
 		// use syntesized blob to extract new blob, useless but should work
 		newblob := Must(artifactset.SynthesizeArtifactBlob(set, TAG))
-		defer Close(newblob, "newblob")
+		finalize.Close(newblob, "newblob")
 
-		CheckBlob(newblob)
+		finalize.Close(CheckBlob(newblob), "newset")
 
-		meth := &DummyMethod{newblob}
+		meth := NewDummyMethod(newblob)
 		digest := Must(artifact.New(sha256.Algorithm).DetermineDigest("", meth, nil))
 		Expect(digest).NotTo(BeNil())
 		Expect(digest.Value).To(Equal(DIGEST_MANIFEST))

@@ -58,9 +58,9 @@ func (m *ImageMapping) Evaluate(idx int, cv ocm.ComponentVersionAccess, resolver
 	}
 	acc, rcv, err := utils.ResolveResourceReference(cv, m.ResourceReference, resolver)
 	if err != nil {
-		return nil, errors.ErrNotFoundWrap(err, "mapping", fmt.Sprintf("%s (%s)", name, &m.ResourceReference))
+		return nil, errors.Wrapf(err, "mapping", fmt.Sprintf("%s (%s)", name, &m.ResourceReference))
 	}
-	rcv.Close()
+	defer rcv.Close()
 	ref, err := utils.GetOCIArtifactRef(cv.GetContext(), acc)
 	if err != nil {
 		return nil, errors.Wrapf(err, "mapping %s: cannot resolve resource %s to an OCI Reference", name, &m.ResourceReference)

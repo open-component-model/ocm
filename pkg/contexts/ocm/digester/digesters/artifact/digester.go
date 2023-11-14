@@ -11,12 +11,13 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
@@ -60,13 +61,13 @@ func (d *Digester) GetType() cpi.DigesterType {
 	return d.typ
 }
 
-func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferred signing.Hasher) (*cpi.DigestDescriptor, error) {
-	if acc.IsLocal() {
-		mime := acc.MimeType()
+func (d *Digester) DetermineDigest(reftyp string, method cpi.AccessMethod, preferred signing.Hasher) (*cpi.DigestDescriptor, error) {
+	if method.IsLocal() {
+		mime := method.MimeType()
 		if !artdesc.IsOCIMediaType(mime) {
 			return nil, nil
 		}
-		r, err := acc.Reader()
+		r, err := method.Reader()
 		if err != nil {
 			return nil, err
 		}
@@ -141,18 +142,28 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 		}
 		// not reached (endless for)
 	}
-	if ociartifact.Is(acc.AccessSpec()) {
+	if ociartifact.Is(method.AccessSpec()) {
 		var (
 			dig digest.Digest
 			err error
 		)
 
-		// first: check for error providing interface
-		if s, ok := acc.(DigestSource); ok {
-			dig, err = s.GetDigest()
-		} else {
-			// second: fallback to standard digest interface
-			dig = acc.(blobaccess.DigestSource).Digest()
+		impl := accspeccpi.GetAccessMethodImplementation(method)
+		// first, ask access specification (inexpensive)
+		if s, ok := method.AccessSpec().(blobaccess.DigestSource); ok {
+			dig = s.Digest()
+		}
+		if dig == "" {
+			// second: check for error providing interface
+			if s, ok := impl.(accspeccpi.DigestSource); ok {
+				dig, err = s.GetDigest()
+			}
+		}
+		if dig == "" && err == nil {
+			// third: fallback to standard digest interface
+			if s, ok := impl.(blobaccess.DigestSource); ok {
+				dig = s.Digest()
+			}
 		}
 
 		if dig != "" {
@@ -164,8 +175,4 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 		return nil, errors.NewEf(err, "cannot determine digest")
 	}
 	return nil, nil
-}
-
-type DigestSource interface {
-	GetDigest() (digest.Digest, error)
 }

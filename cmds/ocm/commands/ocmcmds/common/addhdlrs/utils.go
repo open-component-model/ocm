@@ -15,7 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -24,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils/template"
 )
 
 func ProcessDescriptions(ctx clictx.Context, printer common2.Printer, templ template.Options, h ElementSpecHandler, sources []ElementSource) ([]Element, inputs.Context, error) {
@@ -36,6 +36,10 @@ func ProcessDescriptions(ctx clictx.Context, printer common2.Printer, templ temp
 			return nil, nil, errors.Wrapf(err, "%s", source.Origin())
 		}
 		elems = append(elems, tmp...)
+	}
+	err := ValidateElementIdentities(h.Key(), elems)
+	if err != nil {
+		return nil, nil, err
 	}
 	ictx.Printf("found %d %s\n", len(elems), utils.Plural(h.Key(), len(elems)))
 	return elems, ictx, nil
@@ -277,6 +281,43 @@ func Validate(r *ResourceInput, ctx inputs.Context, inputFilePath string) error 
 		}
 	}
 	return allErrs.ToAggregate()
+}
+
+func ValidateElementIdentities(kind string, elems []Element) error {
+	list := errors.ErrList()
+	ids := map[string]SourceInfo{}
+	for _, r := range elems {
+		var i interface{}
+		err := runtime.DefaultYAMLEncoding.Unmarshal(r.Data(), &i)
+		if err != nil {
+			return errors.Wrapf(err, "cannot eval data %q", string(r.Data()))
+		}
+		id := r.Spec().GetRawIdentity()
+		dig := id.Digest()
+		if s, ok := ids[string(dig)]; ok {
+			list.Add(fmt.Errorf("duplicate %s identity %s (%s and %s)", kind, id, r.Source(), s))
+		}
+		ids[string(dig)] = r.Source()
+	}
+	return list.Result()
+}
+
+// ValidateElementSpecIdentities validate the element specifications
+// taken from some source (for example a resources.yaml or components.yaml).
+// The parameter src somehow identifies the element source, for example
+// the path of the parsed file.
+func ValidateElementSpecIdentities(kind string, src string, elems []ElementSpec) error {
+	list := errors.ErrList()
+	ids := map[string]int{}
+	for i, r := range elems {
+		id := r.GetRawIdentity()
+		dig := id.Digest()
+		if s, ok := ids[string(dig)]; ok {
+			list.Add(fmt.Errorf("duplicate %s identity %s (%s index %d and %d)", kind, id, src, i+1, s+1))
+		}
+		ids[string(dig)] = i
+	}
+	return list.Result()
 }
 
 func PrintElements(p common2.Printer, elems []Element, outfile string, fss ...vfs.FileSystem) error {

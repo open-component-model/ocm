@@ -9,8 +9,9 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/iotools"
 )
 
 type Writer interface {
@@ -34,7 +35,7 @@ func NewReaderWriter(r io.ReadCloser) DataWriter {
 
 func (d *readerWriter) WriteTo(w Writer) (size int64, dig digest.Digest, err error) {
 	defer errors.PropagateError(&err, d.reader.Close)
-	dr := NewDefaultDigestReader(d.reader)
+	dr := iotools.NewDefaultDigestReader(d.reader)
 	_, err = io.Copy(w, dr)
 	if err != nil {
 		return BLOB_UNKNOWN_SIZE, BLOB_UNKNOWN_DIGEST, err

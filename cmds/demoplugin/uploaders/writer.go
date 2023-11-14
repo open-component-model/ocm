@@ -11,13 +11,13 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/demoplugin/accessmethods"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type writer = accessio.DigestWriter
+type writer = iotools.DigestWriter
 
 type Writer struct {
 	*writer
@@ -32,7 +32,7 @@ type Writer struct {
 
 func NewWriter(file *os.File, path string, media string, rename bool, name, version string) *Writer {
 	return &Writer{
-		writer:  accessio.NewDefaultDigestWriter(file),
+		writer:  iotools.NewDefaultDigestWriter(file),
 		file:    file,
 		path:    path,
 		rename:  rename,

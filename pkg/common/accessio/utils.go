@@ -10,10 +10,11 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -41,36 +42,9 @@ func NopWriteCloser(w io.Writer) io.WriteCloser {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type additionalCloser struct {
-	msg              []string
-	reader           io.ReadCloser
-	additionalCloser io.Closer
-}
-
-var _ io.ReadCloser = (*additionalCloser)(nil)
-
+// Deprecated: use iotools.BlobData.
 func AddCloser(reader io.ReadCloser, closer io.Closer, msg ...string) io.ReadCloser {
-	return &additionalCloser{
-		msg:              msg,
-		reader:           reader,
-		additionalCloser: closer,
-	}
-}
-
-func (c *additionalCloser) Close() error {
-	var list *errors.ErrorList
-	if len(c.msg) == 0 {
-		list = errors.ErrListf("close")
-	} else {
-		list = errors.ErrListf(c.msg[0], common.IterfaceSlice(c.msg[1:])...)
-	}
-	list.Add(c.reader.Close())
-	list.Add(c.additionalCloser.Close())
-	return list.Result()
-}
-
-func (c *additionalCloser) Read(p []byte) (n int, err error) {
-	return c.reader.Read(p)
+	return iotools.AddReaderCloser(reader, closer, generics.ConvertSliceTo[any](msg)...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

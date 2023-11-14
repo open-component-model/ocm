@@ -15,9 +15,9 @@ import (
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -230,7 +230,7 @@ func (v *VersionAccess) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) s
 			return ""
 		}
 		defer blob.Close()
-		dig, err := accessio.Digest(blob)
+		dig, err := blobaccess.Digest(blob)
 		if err != nil {
 			return ""
 		}

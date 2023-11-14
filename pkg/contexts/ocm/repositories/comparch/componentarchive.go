@@ -7,9 +7,8 @@ package comparch
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -19,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -117,8 +117,8 @@ func (c *componentArchiveContainer) GetParentViewManager() cpi.ComponentAccessVi
 }
 
 func (c *componentArchiveContainer) Close() error {
-	c.Update()
-	return c.base.Close()
+	var list errors.ErrorList
+	return list.Add(c.Update(), c.base.Close()).Result()
 }
 
 func (c *componentArchiveContainer) GetContext() cpi.Context {
@@ -148,8 +148,8 @@ func (c *componentArchiveContainer) GetBlobData(name string) (cpi.DataAccess, er
 	return c.base.GetBlobDataByName(name)
 }
 
-func (c *componentArchiveContainer) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
-	return ocmhdlr.New(c.Repository(), cv, &BlobSink{c.base}, Type)
+func (c *componentArchiveContainer) GetStorageContext() cpi.StorageContext {
+	return ocmhdlr.New(c.Repository(), c.impl.GetName(), &BlobSink{c.base}, Type)
 }
 
 type BlobSink struct {
@@ -164,7 +164,7 @@ func (s *BlobSink) AddBlob(blob blobaccess.BlobAccess) (string, error) {
 	return blob.Digest().String(), nil
 }
 
-func (c *componentArchiveContainer) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *componentArchiveContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -175,24 +175,29 @@ func (c *componentArchiveContainer) AddBlobFor(storagectx cpi.StorageContext, bl
 	return localblob.New(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
-func (c *componentArchiveContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
+func (c *componentArchiveContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error) {
 	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
 		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err
 		}
-		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c), nil
+		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
 	}
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "component archive")
 }
 
-func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {
+func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
 	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
 		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return ""
 		}
-		digest, _ := accessio.Digest(newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c))
+		m, err := newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
+		if err != nil {
+			return ""
+		}
+		defer m.Close()
+		digest, _ := blobaccess.Digest(m)
 		return digest.String()
 	}
 	return ""

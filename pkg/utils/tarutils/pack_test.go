@@ -35,7 +35,7 @@ var _ = Describe("tar utils mapping", func() {
 		file := Must(os.CreateTemp("", "tar*"))
 		defer func() {
 			file.Close()
-			// os.Remove(file.Name())
+			os.Remove(file.Name())
 		}()
 
 		MustBeSuccessful(tarutils.PackFsIntoTar(osfs.OsFs, "testdata", file, tarutils.TarFileSystemOptions{FollowSymlinks: true}))

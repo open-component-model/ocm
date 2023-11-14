@@ -29,6 +29,7 @@ import (
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	handlercfg "github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/config"
+	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -72,7 +73,7 @@ func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository)
 
 	racc, err := comp.GetResourceByIndex(1)
 	Expect(err).To(Succeed())
-	reader, err := ocm.ResourceReader(racc)
+	reader, err := ocmutils.GetResourceReader(racc)
 	Expect(err).To(Succeed())
 	defer reader.Close()
 	set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))

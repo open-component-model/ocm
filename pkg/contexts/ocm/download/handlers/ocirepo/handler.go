@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
@@ -46,7 +47,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	if err != nil {
 		return false, "", err
 	}
-	finalize.Close(m)
+	finalize.Close(m, "access method for download")
 
 	mediaType := m.MimeType()
 
@@ -97,7 +98,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		if err != nil {
 			return true, "", err
 		}
-		finalize.Close(repo)
+		finalize.Close(repo, "repository for downloading OCI artifact")
 		artspec = ref.ArtSpec
 	} else {
 		log.Debug("evaluating config")
@@ -150,9 +151,9 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 			}
 		}
 	}
-	if ocimeth, ok := cand.(ociartifact.AccessMethod); ok {
+	if ocimeth, ok := accspeccpi.GetAccessMethodImplementation(cand).(ociartifact.AccessMethodImpl); ok {
 		// prepare for optimized point to point implementation
-		art, _, err = ocimeth.GetArtifact(&finalize)
+		art, _, err = ocimeth.GetArtifact()
 		if err != nil {
 			return true, "", errors.Wrapf(err, "cannot access source artifact")
 		}

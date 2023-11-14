@@ -9,8 +9,8 @@ import (
 	"io"
 	"sync/atomic"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/internal" // avoid cycle
+	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -20,7 +20,7 @@ const (
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
-func Is(spec cpi.AccessSpec) bool {
+func Is(spec accspeccpi.AccessSpec) bool {
 	return spec != nil && spec.GetKind() == Type
 }
 
@@ -36,7 +36,7 @@ type AccessSpec struct {
 
 	// GlobalAccess is an optional field describing a possibility
 	// for a global access. If given, it MUST describe a global access method.
-	GlobalAccess *cpi.AccessSpecRef `json:"globalAccess,omitempty"`
+	GlobalAccess *accspeccpi.AccessSpecRef `json:"globalAccess,omitempty"`
 	// ReferenceName is an optional static name the object should be
 	// use in a local repository context. It is use by a repository
 	// to optionally determine a globally referencable access according
@@ -48,39 +48,39 @@ type AccessSpec struct {
 }
 
 var (
-	_ cpi.AccessSpec           = (*AccessSpec)(nil)
-	_ cpi.HintProvider         = (*AccessSpec)(nil)
-	_ cpi.GlobalAccessProvider = (*AccessSpec)(nil)
+	_ accspeccpi.AccessSpec           = (*AccessSpec)(nil)
+	_ accspeccpi.HintProvider         = (*AccessSpec)(nil)
+	_ accspeccpi.GlobalAccessProvider = (*AccessSpec)(nil)
 )
 
 // New creates a new GitHub registry access spec version v1.
-func New(hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
+func New(hint string, mediaType string, global accspeccpi.AccessSpec) *AccessSpec {
 	id := fmt.Sprintf("compose-%d", number.Add(1))
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Id:                  id,
 		ReferenceName:       hint,
 		MediaType:           mediaType,
-		GlobalAccess:        cpi.NewAccessSpecRef(global),
+		GlobalAccess:        accspeccpi.NewAccessSpecRef(global),
 	}
 	return s
 }
 
 var number atomic.Int64
 
-func (a *AccessSpec) Describe(ctx cpi.Context) string {
+func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("Composition blob %s", a.Id)
 }
 
-func (_ *AccessSpec) IsLocal(cpi.Context) bool {
+func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return true
 }
 
-func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) string {
 	return a.ReferenceName
 }
 
-func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
+func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessSpec {
 	if g, err := ctx.AccessSpecForSpec(a.GlobalAccess); err == nil {
 		return g
 	}
@@ -91,11 +91,11 @@ func (_ *AccessSpec) GetType() string {
 	return Type
 }
 
-func (a *AccessSpec) AccessMethod(cv cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
+func (a *AccessSpec) AccessMethod(cv accspeccpi.ComponentVersionAccess) (accspeccpi.AccessMethod, error) {
 	return cv.AccessMethod(a)
 }
 
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access cpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.ComponentVersionAccess) string {
 	return a.Id
 }
 
@@ -105,9 +105,9 @@ type accessMethod struct {
 	spec *AccessSpec
 }
 
-var _ cpi.AccessMethod = (*accessMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*accessMethod)(nil)
 
-func NewMethod(spec *AccessSpec, blob blobaccess.BlobAccess) (cpi.AccessMethod, error) {
+func NewMethod(spec *AccessSpec, blob blobaccess.BlobAccess) (accspeccpi.AccessMethod, error) {
 	if blob.MimeType() != spec.MediaType {
 		return nil, fmt.Errorf("mimetype mismatch (spec=%s, blob=%s)", spec.MediaType, blob.MimeType())
 	}
@@ -115,10 +115,10 @@ func NewMethod(spec *AccessSpec, blob blobaccess.BlobAccess) (cpi.AccessMethod, 
 	if err != nil {
 		return nil, err
 	}
-	return &accessMethod{
+	return accspeccpi.AccessMethodForImplementation(&accessMethod{
 		access: b,
 		spec:   spec,
-	}, nil
+	}, nil)
 }
 
 func (_ *accessMethod) IsLocal() bool {
@@ -133,7 +133,7 @@ func (m *accessMethod) MimeType() string {
 	return m.access.MimeType()
 }
 
-func (m *accessMethod) AccessSpec() cpi.AccessSpec {
+func (m *accessMethod) AccessSpec() accspeccpi.AccessSpec {
 	return m.spec
 }
 

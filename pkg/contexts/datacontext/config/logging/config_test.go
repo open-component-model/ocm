@@ -25,8 +25,10 @@ var _ = Describe("logging configuration", func() {
 	var ctx datacontext.AttributesContext
 	var cfg config.Context
 	var buf bytes.Buffer
+	var orig logging.Context
 
 	BeforeEach(func() {
+		orig = logging.DefaultContext().(*logging.ContextReference).Context
 		logging.SetDefaultContext(logging.NewDefault())
 		log.SetContext(nil)
 		ctx = datacontext.New(nil)
@@ -37,7 +39,11 @@ var _ = Describe("logging configuration", func() {
 		ctx.LoggingContext().SetBaseLogger(def)
 	})
 
+	AfterEach(func() {
+		//logging.SetDefaultContext(orig)
+	})
 	_ = cfg
+	_ = orig
 
 	It("just logs with defaults", func() {
 		LogTest(ctx)

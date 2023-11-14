@@ -8,11 +8,13 @@ import (
 	"io"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,23 +24,43 @@ type localFilesystemBlobAccessMethod struct {
 	closed     bool
 	spec       *localblob.AccessSpec
 	base       support.ComponentVersionContainer
-	blobAccess blobaccess.DataAccess
+	err        error
+	blobAccess blobaccess.BlobAccess
 }
 
-var _ cpi.AccessMethod = (*localFilesystemBlobAccessMethod)(nil)
+var _ accspeccpi.AccessMethodImpl = (*localFilesystemBlobAccessMethod)(nil)
 
-func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer) cpi.AccessMethod {
-	return &localFilesystemBlobAccessMethod{
+func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer, ref refmgmt.ExtendedAllocatable) (accspeccpi.AccessMethod, error) {
+	m := &localFilesystemBlobAccessMethod{
 		spec: a,
 		base: base,
 	}
+	ref.BeforeCleanup(refmgmt.CleanupHandlerFunc(m.Cache))
+	return accspeccpi.AccessMethodForImplementation(m, nil)
+}
+
+func (m *localFilesystemBlobAccessMethod) Cache() {
+	m.Lock()
+	defer m.Unlock()
+
+	if m.closed {
+		return
+	}
+
+	blob, err := m.getBlob()
+	if err == nil {
+		blob, err = blobaccess.ForCachedBlobAccess(blob, vfsattr.Get(m.base.GetContext()))
+	}
+	m.blobAccess.Close()
+	m.blobAccess = blob
+	m.err = err
 }
 
 func (_ *localFilesystemBlobAccessMethod) IsLocal() bool {
 	return true
 }
 
-func (m *localFilesystemBlobAccessMethod) AccessSpec() cpi.AccessSpec {
+func (m *localFilesystemBlobAccessMethod) AccessSpec() accspeccpi.AccessSpec {
 	return m.spec
 }
 
@@ -54,14 +76,23 @@ func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
 		return nil, accessio.ErrClosed
 	}
 
-	if m.blobAccess == nil {
-		var err error
-		m.blobAccess, err = m.base.GetBlobData(m.spec.LocalReference)
-		if err != nil {
-			return blobaccess.BlobReader(m.blobAccess, err)
-		}
+	blob, err := m.getBlob()
+	if err != nil {
+		return nil, err
 	}
-	return blobaccess.BlobReader(m.blobAccess, nil)
+
+	return blob.Reader()
+}
+
+func (m *localFilesystemBlobAccessMethod) getBlob() (blobaccess.BlobAccess, error) {
+	if m.blobAccess == nil {
+		data, err := m.base.GetBlobData(m.spec.LocalReference)
+		if err != nil {
+			return nil, err
+		}
+		m.blobAccess = blobaccess.ForDataAccess(blobaccess.BLOB_UNKNOWN_DIGEST, blobaccess.BLOB_UNKNOWN_SIZE, m.MimeType(), data)
+	}
+	return m.blobAccess, m.err
 }
 
 func (m *localFilesystemBlobAccessMethod) Get() ([]byte, error) {
@@ -72,14 +103,11 @@ func (m *localFilesystemBlobAccessMethod) Get() ([]byte, error) {
 		return nil, accessio.ErrClosed
 	}
 
-	if m.blobAccess == nil {
-		var err error
-		m.blobAccess, err = m.base.GetBlobData(m.spec.LocalReference)
-		if err != nil {
-			return blobaccess.BlobData(m.blobAccess, err)
-		}
+	blob, err := m.getBlob()
+	if err != nil {
+		return nil, err
 	}
-	return blobaccess.BlobData(m.blobAccess, nil)
+	return blob.Get()
 }
 
 func (m *localFilesystemBlobAccessMethod) MimeType() string {
@@ -94,13 +122,10 @@ func (m *localFilesystemBlobAccessMethod) Close() error {
 		return accessio.ErrClosed
 	}
 
+	m.closed = true
 	if m.blobAccess != nil {
 		err := m.blobAccess.Close()
-		m.blobAccess = nil
-		m.closed = true
-		if err != nil {
-			return err
-		}
+		return err
 	}
 	return nil
 }

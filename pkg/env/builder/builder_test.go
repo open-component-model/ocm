@@ -14,17 +14,24 @@ import (
 )
 
 var _ = Describe("Builder", func() {
+	var env *Builder
 
-	It("catches bilder error", func() {
-		env := NewBuilder()
+	BeforeEach(func() {
+		env = NewBuilder()
+	})
+
+	AfterEach(func() {
+		env.Cleanup()
+	})
+
+	It("catches builder error", func() {
 		err := env.Build(func(e *Builder) {
 			e.ExtraIdentity("a", "b")
 		})
-		Expect(err).To(MatchError("builder.(*Builder).ExtraIdentity(21): element with metadata required"))
+		Expect(err).To(MatchError("builder.(*Builder).ExtraIdentity(29): element with metadata required"))
 	})
 
 	It("catches explicit error", func() {
-		env := NewBuilder()
 		err := env.Build(func(e *Builder) {
 			exception.Throw(fmt.Errorf("dedicated"))
 		})
@@ -32,25 +39,23 @@ var _ = Describe("Builder", func() {
 	})
 
 	It("catches explicit env error", func() {
-		env := NewBuilder()
 		err := env.Build(func(e *Builder) {
 			env.Fail("dedicated")
 		})
-		Expect(err).To(MatchError("env.(*Environment).Fail(37): dedicated"))
+		Expect(err).To(MatchError("env.(*Environment).Fail(43): dedicated"))
 	})
 
 	It("catches explicit env error", func() {
-		env := NewBuilder()
 		err := env.Build(func(e *Builder) {
 			env.FailOnErr(fmt.Errorf("dedicated"), "context")
 		})
-		Expect(err).To(MatchError("env.(*Environment).FailOnErr(45): context: dedicated"))
+		Expect(err).To(MatchError("env.(*Environment).FailOnErr(50): context: dedicated"))
 	})
 
 	It("catches outer error", func() {
 		Expect(Build(func(e *Builder) {
 			e.ExtraIdentity("a", "b")
-		})).To(MatchError("builder.(*Builder).ExtraIdentity(52): element with metadata required"))
+		})).To(MatchError("builder.(*Builder).ExtraIdentity(57): element with metadata required"))
 	})
 
 	/*
@@ -62,6 +67,7 @@ var _ = Describe("Builder", func() {
 
 func Build(funcs ...func(e *Builder)) (err error) {
 	env := New()
+	defer env.Cleanup()
 	defer env.PropagateError(&err)
 	for _, f := range funcs {
 		f(env)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 // BlobContainer is the interface for an element capable to store blobs.
@@ -19,7 +20,7 @@ type BlobContainer interface {
 	// that is used to feed blob handlers for specific blob storage methods.
 	// If no handler accepts the blob, the AddBlobFor method will
 	// be used to store the blob
-	GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext
+	GetStorageContext() cpi.StorageContext
 
 	// AddBlobFor stores a local blob together with the component and
 	// potentially provides a global reference according to the OCI distribution spec
@@ -27,7 +28,7 @@ type BlobContainer interface {
 	// The resulting access information (global and local) is provided as
 	// an access method specification usable in a component descriptor.
 	// This is the direct technical storage, without caring about any handler.
-	AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
+	AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
 }
 
 // ComponentVersionContainer is the interface of an element hosting a component version.
@@ -44,8 +45,8 @@ type ComponentVersionContainer interface {
 
 	GetDescriptor() *compdesc.ComponentDescriptor
 	BlobContainer
-	AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error)
-	GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string
+	AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
+	GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string
 
 	io.Closer
 }

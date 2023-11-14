@@ -199,7 +199,7 @@ var _ = Describe("upload", func() {
 			defer Close(src, "source ctf")
 
 			cv := Must(src.LookupComponentVersion(COMP, VERS))
-			defer Close(cv)
+			defer Close(cv, "version")
 
 			racc := Must(cv.GetResourceByIndex(0))
 
@@ -207,11 +207,10 @@ var _ = Describe("upload", func() {
 			Expect(ok).To(BeTrue())
 			Expect(path).To(Equal("target.alias/ocm.software/upload:1.0.0"))
 
-			env.OCMContext().Finalize()
+			MustBeSuccessful(env.OCMContext().Finalize())
 
-			target, err := ctfoci.Open(env.OCIContext(), accessobj.ACC_READONLY, TARGETPATH, 0, env)
-			Expect(err).To(Succeed())
-			defer Close(target)
+			target := Must(ctfoci.Open(env.OCIContext(), accessobj.ACC_READONLY, TARGETPATH, 0, env))
+			defer Close(target, "download target")
 			Expect(target.ExistsArtifact(path[strings.Index(path, grammar.RepositorySeparator)+1:strings.Index(path, ":")], VERS)).To(BeTrue())
 		})
 	})

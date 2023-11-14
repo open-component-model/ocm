@@ -11,9 +11,9 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common/accessio/blobaccess/spi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
 )
@@ -30,10 +30,10 @@ type CachedBlobAccess struct {
 	effective blobaccess.BlobAccess
 }
 
-var _ spi.BlobAccessBase = (*CachedBlobAccess)(nil)
+var _ bpi.BlobAccessBase = (*CachedBlobAccess)(nil)
 
 func CachedBlobAccessForWriter(ctx datacontext.Context, mime string, src accessio.DataWriter) blobaccess.BlobAccess {
-	return spi.NewBlobAccessForBase(&CachedBlobAccess{
+	return bpi.NewBlobAccessForBase(&CachedBlobAccess{
 		source: src,
 		mime:   mime,
 		cache:  tmpcache.Get(ctx),

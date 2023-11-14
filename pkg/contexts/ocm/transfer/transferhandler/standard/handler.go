@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -77,8 +78,8 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 	return h.opts.IsSourcesByValue(), nil
 }
 
-func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMethodView, hint string, t ocm.ComponentVersionAccess) error {
-	blob, err := cpi.BlobAccessForAccessMethod(m)
+func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
+	blob, err := accspeccpi.BlobAccessForAccessMethod(m)
 	if err != nil {
 		return err
 	}
@@ -88,8 +89,8 @@ func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMetho
 	})
 }
 
-func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m cpi.AccessMethodView, hint string, t ocm.ComponentVersionAccess) error {
-	blob, err := cpi.BlobAccessForAccessMethod(m)
+func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m cpi.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
+	blob, err := accspeccpi.BlobAccessForAccessMethod(m)
 	if err != nil {
 		return err
 	}
