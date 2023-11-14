@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -18,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/dockermultiblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/textblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -297,6 +299,18 @@ func listVersions(repo ocm.Repository, list ...string) error {
 		nested.Close(cv, "component version", common.VersionedElementKey(cv).String())
 
 		nested.Finalize()
+	}
+	return nil
+}
+
+func ReadConfiguration(ctx ocm.Context, cfg *helper.Config) error {
+	if cfg.OCMConfig != "" {
+		fmt.Printf("*** applying config from %s\n", cfg.OCMConfig)
+
+		_, err := utils.Configure(ctx, cfg.OCMConfig)
+		if err != nil {
+			return errors.Wrapf(err, "error in ocm config %s", cfg.OCMConfig)
+		}
 	}
 	return nil
 }

@@ -24,7 +24,7 @@ func UsingCredentialsRepositories(cfg *helper.Config) error {
 	// backend technologies, for OCM meta data as well
 	// as for artifacts described by a component version.
 	// All those technologies typically have their own
-	// way to configure crednetials for command line
+	// way to configure credentials for command line
 	// tools or servers.
 	//
 	// The credential management provides so-called

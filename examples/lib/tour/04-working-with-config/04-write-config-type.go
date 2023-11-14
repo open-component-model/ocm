@@ -60,7 +60,7 @@ func (c *ExampleConfigSpec) ApplyTo(_ cpi.Context, tgt interface{}) error {
 		if err != nil {
 			return errors.Wrapf(err, "invalid consumer")
 		}
-		// create the crednetials.
+		// create the credentials.
 		creds := c.GetCredentials()
 
 		// configure the targeted credential context with

@@ -35,25 +35,25 @@ func HandleOCMConfig(cfg *helper.Config) error {
 
 	// It is typically such a generic configuration specification,
 	// enriched with specialized config specifications for
-	// crednetials, default repositories signing keys and any
+	// credentials, default repositories signing keys and any
 	// other configuration specification.
-	// Most important are here the crednetials.
+	// Most important are here the credentials.
 	// Because OCM embraces lots of storage technologies
 	// for artifact storage as well as storing OCM meta data,
 	// tzere are typically multiple technology specific ways
 	// to configure credentials for command line tools.
-	// Using the crednetials settings shown in the previous examples,
-	// it ius possible to specify crednetials for all
+	// Using the credentials settings shown in the previous examples,
+	// it ius possible to specify credentials for all
 	// required purposes, but the configuration mangement provides
 	// an extensible way to embed native technology specific ways
-	// to provide crednetials just by adding an appropriate type
+	// to provide credentials just by adding an appropriate type
 	// of config objects, which reads the specialized stoarge and
-	// feeds it into the crednetial context.
+	// feeds it into the credential context.
 	//
 	// One such config object type is the docker config type. It
-	// reads a dockerconfig.json file and fed in the crednetials.
-	// because it is sed for a dedicated purpose (crednetials for
-	// OCI registires), it not only can feed the crednetials, but
+	// reads a dockerconfig.json file and fed in the credentials.
+	// because it is sed for a dedicated purpose (credentials for
+	// OCI registries), it not only can feed the credentials, but
 	// also their mapping to consumer ids.
 
 	// create the specification for a new credential repository of

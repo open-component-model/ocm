@@ -49,7 +49,14 @@ func prepareComponentInRepo(ctx ocm.Context, cfg *helper.Config) error {
 func SigningComponentVersionInRepo(cfg *helper.Config) error {
 	ctx := ocm.DefaultContext()
 
-	err := prepareComponentInRepo(ctx, cfg)
+	// Configure context with optional ocm config.
+	// See OCM config scenario in tour 04.
+	err := ReadConfiguration(ctx, cfg)
+	if err != nil {
+		return err
+	}
+
+	err = prepareComponentInRepo(ctx, cfg)
 	if err != nil {
 		return errors.Wrapf(err, "cannot prepare component version in target repo")
 	}

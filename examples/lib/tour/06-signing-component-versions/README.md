@@ -16,4 +16,11 @@ targetRepository:
   filePath: /tmp/example06.target.ctf
   fileFormat: directory
   accessMode: 2
+ocmConfig: <your ocm config file>
 ```
+
+The actual version of the example just works with the filesystem
+target, because it is not possible to specify credentials for the
+target repository in this simple config file. But, if you specific an [OCM config file](../04-working-with-config/README.md) you can
+add more credential settings to make target repositories possible
+requiring credentials.
