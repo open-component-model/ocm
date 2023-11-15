@@ -89,6 +89,7 @@ type AccessProvider interface {
 
 type ArtifactAccess[M any] interface {
 	Meta() *M
+	GetComponentVersion() (ComponentVersionAccess, error)
 	AccessProvider
 }
 

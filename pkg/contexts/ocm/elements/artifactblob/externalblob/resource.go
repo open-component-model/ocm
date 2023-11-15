@@ -8,7 +8,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactaccess/genericaccess"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
@@ -24,43 +25,41 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, a
 		global = ocm.GlobalAccess(access, ctx)
 	}
 
-	a, err := genericaccess.Access(ctx, meta, access)
+	prov, err := cpi.NewAccessProviderForExternalAccessSpec(ctx, access)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "invalid external access method %q", access.GetKind())
 	}
-	return newAccessProvider[M](a, hint, global), nil
+	return cpi.NewArtifactAccessForProvider(generics.As[*M](meta), newAccessProvider(prov, hint, global)), nil
 }
 
-type accessProvider[M any] struct {
-	cpi.ArtifactAccess[M]
+type _accessProvider = cpi.AccessProvider
+
+type accessProvider struct {
+	_accessProvider
 	hint   string
 	global cpi.AccessSpec
 }
 
-func newAccessProvider[M any](prov cpi.ArtifactAccess[M], hint string, global cpi.AccessSpec) cpi.ArtifactAccess[M] {
-	return &accessProvider[M]{
-		ArtifactAccess: prov,
-		hint:           hint,
-		global:         global,
+func newAccessProvider(prov cpi.AccessProvider, hint string, global cpi.AccessSpec) cpi.AccessProvider {
+	return &accessProvider{
+		_accessProvider: prov,
+		hint:            hint,
+		global:          global,
 	}
 }
 
-func (p *accessProvider[M]) AccessSpec() cpi.AccessSpec {
-	return nil
-}
-
-func (p *accessProvider[M]) ReferenceHint() string {
+func (p *accessProvider) ReferenceHint() string {
 	if p.hint != "" {
 		return p.hint
 	}
-	return p.ArtifactAccess.ReferenceHint()
+	return p._accessProvider.ReferenceHint()
 }
 
-func (p *accessProvider[M]) GlobalAccess() cpi.AccessSpec {
+func (p *accessProvider) GlobalAccess() cpi.AccessSpec {
 	if p.global != nil {
 		return p.global
 	}
-	return p.ArtifactAccess.GlobalAccess()
+	return p._accessProvider.GlobalAccess()
 }
 
 func ResourceAccess(ctx ocm.Context, meta *cpi.ResourceMeta, access cpi.AccessSpec, opts ...Option) (cpi.ResourceAccess, error) {
