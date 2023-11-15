@@ -12,3 +12,11 @@ updates:
     schedule:
       # By default, this will be on a monday.
       interval: "weekly"
+  - package-ecosystem: gomod
+    directory: /
+    labels:
+      - dependencies
+      - go
+    schedule:
+      interval: weekly
+      day: sunday
