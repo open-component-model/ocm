@@ -10,13 +10,14 @@ updates:
         patterns:
           - "*"
     schedule:
-      # By default, this will be on a monday.
       interval: "weekly"
-  - package-ecosystem: gomod
-    directory: /
-    labels:
-      - dependencies
-      - go
+      day: "sunday"
+  - package-ecosystem: "gomod"
+    directory: "/"
+    labels: ["dependencies","go"]
+    groups:
+      go:
+        update-types:  ["minor","patch"]
     schedule:
-      interval: weekly
-      day: sunday
+      interval: "weekly"
+      day: "sunday"
