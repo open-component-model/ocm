@@ -3,7 +3,20 @@ name: Mend Security Scan
 on:
   schedule:
     - cron:  '0 0 * * 0'
-
+  push:
+    branches:
+      - feature/test-mend
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
 jobs:
   mend-scan:
     runs-on: ubuntu-latest
@@ -23,6 +36,11 @@ jobs:
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
 
+    - name: 'Setup jq'
+      uses: dcarbone/install-jq-action@v2.1.0
+      with:
+        version: '1.7'
+        
     - name: Download Mend Universal Agent
       run: curl https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar -o ./wss-unified-agent.jar
 
@@ -34,4 +52,73 @@ jobs:
         WSS_URL: ${{ secrets.MEND_URL }}
         API_KEY: ${{ secrets.MEND_API_TOKEN }}
         CONFIG_FILE: './.github/workflows/mend.config'
+ 
+    - name: Generate Report
+      env:
+        USER_KEY: ${{ secrets.MEND_API_USER_KEY }}
+        PROJECT_TOKEN: ${{ secrets.MEND_PROJECT_TOKEN_OCM }}
+        API_KEY: ${{ secrets.MEND_API_ORG_TOKEN }}
+        EMAIL: ${{ secrets.MEND_API_EMAIL }}
+      run: |
+        data=$(cat <<EOF
+        {
+            "email": "${EMAIL}", 
+            "orgToken": "${API_KEY}", 
+            "userKey": "${USER_KEY}"
+        }
+        EOF
+        )
+        
+        login_token=$(curl -X POST 'https://api-sap.whitesourcesoftware.com/api/v2.0/login' \
+        --header 'Content-Type: application/json' --silent \
+        --data "${data}" | jq -r .retVal.jwtToken )
+        
+        security_vulnerability=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/alerts/security?search=status%3Aequals%3AACTIVE%3Bscore%3Abetween%3A6%2C10%3B" \
+        --header 'Content-Type: application/json' --silent --header "Authorization: Bearer ${login_token}")
+        
+        major_updates_pending=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/alerts/legal?search=status%3Aequals%3AACTIVE%3BavailableVersionType%3Aequals%3AMAJOR" \
+        --header 'Content-Type: application/json' --silent --header "Authorization: Bearer ${login_token}" )
+        
+        requires_review=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/libraries/licenses?search=license%3Aequals%3ARequires%20Review" \
+        --header 'Content-Type: application/json' --silent --header "Authorization: Bearer ${login_token}")
+        
+        high_license_risk=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/libraries/licenses?pageSize=1000" \
+        --header 'Content-Type: application/json' --silent --header "Authorization: Bearer ${login_token}")
+        security_vulnerability_no=$(echo "${security_vulnerability}" | jq .additionalData.totalItems )
+        major_updates_pending_no=$(echo "${major_updates_pending}" | jq -r .additionalData.totalItems )
+        requires_review_no=$(echo "${requires_review}" | jq -r .additionalData.totalItems )
+        high_license_risk_no=$(echo "${high_license_risk}" | jq -r '.retVal[].riskScore.riskScore | select( . != null ) >52  | select(.==true)'| wc -l )
+  
+        function print {
+          printf "############################################\n$1\n############################################\n"
+        }
+
+        print "HIGH/CRITICAL SECURITY VULNERABILITIES: ${security_vulnerability_no}"
+        if [[ $security_vulnerability_no -gt 0 ]]
+        then
+          echo "${security_vulnerability}" | jq -r .retVal[]
+        fi
+
+        print "MAJOR UPDATES AVAILABLE: ${major_updates_pending_no}"
+        if [[ $major_updates_pending_no -gt 0 ]]
+        then
+          echo "${major_updates_pending}" | jq -r .retVal[]
+        fi
+
+        print "LICENSE REQUIRES REVIEW: ${requires_review_no}" "Visit the Mend UI and add correct license"
+        if [[ $requires_review_no -gt 0 ]]
+        then
+          echo "${requires_review}" | jq -r .retVal[]
+        fi
+
+        print "LICENSE RISK HIGH: ${high_license_risk_no}"
+        if [[ high_license_risk_no -gt 0 ]]
+        then
+          echo "Visit the Mend UI and check High Risk Licenses. Understand Risk Score: https://docs.mend.io/bundle/sca_user_guide/page/understanding_risk_score_attribution_and_license_analysis.html"
+        fi
+
+        if [[ $security_vulnerability_no -gt 0 ]] || [[ $major_updates_pending_no -gt 0 ]] || [[ $requires_review_no -gt 0 ]] || [[ high_license_risk_no -gt 0 ]]
+        then
+          exit 1
+        fi
         
