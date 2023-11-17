@@ -32,7 +32,7 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	}
 	fs := vfsattr.Get(ctx)
 
-	hint := u.TypeHint
+	hint := accessio.TypeForType(u.TypeHint)
 	if !u.CreateIfMissing {
 		hint = ""
 	}
@@ -47,8 +47,10 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	}
 
 	mode := accessobj.ACC_WRITABLE
+	createHint := accessio.FileFormat("")
 	if create {
 		mode |= accessobj.ACC_CREATE
+		createHint = accessio.FileFormatForType(u.TypeHint, u.Type)
 	}
-	return NewRepositorySpec(mode, path, accessio.FileFormatForType(u.Type), accessio.PathFileSystem(fs))
+	return NewRepositorySpec(mode, path, createHint, accessio.PathFileSystem(fs))
 }

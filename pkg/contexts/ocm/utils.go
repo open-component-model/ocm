@@ -49,16 +49,23 @@ func AssureTargetRepository(session Session, ctx Context, targetref string, opts
 		return nil, err
 	}
 	if ref.Type != "" {
-		format = accessio.FileFormat(ref.Type)
-	}
-	if archive != "" && format != "" {
+		format = accessio.FileFormatForType(ref.Type)
+		// map pseudo types to format
 		for _, f := range ctf.SupportedFormats() {
-			if f == format {
-				ref.Type = archive + "+" + format.String()
+			if f == accessio.FileFormat(ref.Type) {
+				format = f
+				ref.Type = ctf.Type
 			}
 		}
 	}
 	ref.TypeHint = archive
+	if format != "" {
+		for _, f := range ctf.SupportedFormats() {
+			if f == format {
+				ref.TypeHint = archive + "+" + format.String()
+			}
+		}
+	}
 	ref.CreateIfMissing = true
 	target, err := session.DetermineRepositoryBySpec(ctx, &ref)
 	if err != nil {
