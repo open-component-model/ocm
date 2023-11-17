@@ -5,7 +5,7 @@ on:
     - cron:  '0 0 * * 0'
   push:
     branches:
-      - main
+      - feature/test-mend
   workflow_dispatch:
     inputs:
       logLevel:
@@ -62,8 +62,8 @@ jobs:
       run: |
         data=$(cat <<EOF
         {
-            "email": "${EMAIL}", 
-            "orgToken": "${API_KEY}", 
+            "email": "${EMAIL}",
+            "orgToken": "${API_KEY}",
             "userKey": "${USER_KEY}"
         }
         EOF
@@ -74,51 +74,84 @@ jobs:
         --data "${data}" | jq -r .retVal.jwtToken )
         
         security_vulnerability=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/alerts/security?search=status%3Aequals%3AACTIVE%3Bscore%3Abetween%3A6%2C10%3B" \
-        --header 'Content-Type: application/json' --silent --header "Authorization: Bearer ${login_token}")
+        --header 'Content-Type: application/json' --silent \
+        --header "Authorization: Bearer ${login_token}")
         
         major_updates_pending=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/alerts/legal?search=status%3Aequals%3AACTIVE%3BavailableVersionType%3Aequals%3AMAJOR" \
-        --header 'Content-Type: application/json' --silent --header "Authorization: Bearer ${login_token}" )
+        --header 'Content-Type: application/json' --silent \
+        --header "Authorization: Bearer ${login_token}" )
         
         requires_review=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/libraries/licenses?search=license%3Aequals%3ARequires%20Review" \
-        --header 'Content-Type: application/json' --silent --header "Authorization: Bearer ${login_token}")
+        --header 'Content-Type: application/json' --silent \
+        --header "Authorization: Bearer ${login_token}")
         
         high_license_risk=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/libraries/licenses?pageSize=1000" \
-        --header 'Content-Type: application/json' --silent --header "Authorization: Bearer ${login_token}")
+        --header 'Content-Type: application/json' --silent \
+        --header "Authorization: Bearer ${login_token}")
+        
         security_vulnerability_no=$(echo "${security_vulnerability}" | jq .additionalData.totalItems )
         major_updates_pending_no=$(echo "${major_updates_pending}" | jq -r .additionalData.totalItems )
-        requires_review_no=$(echo "${requires_review}" | jq -r .additionalData.totalItems )
-        high_license_risk_no=$(echo "${high_license_risk}" | jq -r '.retVal[].riskScore.riskScore | select( . != null ) >52  | select(.==true)'| wc -l )
-  
+        requires_review_no=$(echo "${requires_review}" |jq -r .additionalData.totalItems )
+        high_license_risk_no=$(echo "${high_license_risk}" | jq -r '.retVal[].riskScore.riskScore | select( . != null ) > 52 | select(.==true)'| wc -l )
+        
         function print {
           printf "############################################\n$1\n############################################\n"
         }
-
+        
+        function restricted_license {
+          declare -a sap_restricted_licenses=("LGPL" "GPL" "Affero%20GPL" "MPL" "CDDL" "EPL")
+          ret_val=""
+          issue_count=0
+          for key in "${!sap_restricted_licenses[@]}"; do
+            api_resp=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/libraries/licenses?search=license%3Aequals%3A${sap_restricted_licenses[$key]}" \
+              --header 'Content-Type: application/json' --silent \
+              --header "Authorization: Bearer ${login_token}")
+        
+            api_resp_no=$(echo "${api_resp}" | jq .additionalData.totalItems )
+            issue_count=$((issue_count+api_resp_no))
+        
+            if [[ $api_resp_no -gt 0 ]]
+            then
+              val=$(echo "${api_resp}" | jq -r .retVal[] )
+              ret_val="$ret_val$val"
+            fi
+          done
+          print "RESTRICTIED LICENSE FOR ON-PREMISE DELIVERY: ${issue_count}"
+          if [[ issue_count -gt 0 ]]
+          then
+            echo "${ret_val}" | jq .
+          fi
+        
+          return $issue_count
+        }
+        
         print "HIGH/CRITICAL SECURITY VULNERABILITIES: ${security_vulnerability_no}"
         if [[ $security_vulnerability_no -gt 0 ]]
         then
           echo "${security_vulnerability}" | jq -r .retVal[]
         fi
-
+        
         print "MAJOR UPDATES AVAILABLE: ${major_updates_pending_no}"
         if [[ $major_updates_pending_no -gt 0 ]]
         then
           echo "${major_updates_pending}" | jq -r .retVal[]
         fi
-
+        
         print "LICENSE REQUIRES REVIEW: ${requires_review_no}" "Visit the Mend UI and add correct license"
         if [[ $requires_review_no -gt 0 ]]
         then
           echo "${requires_review}" | jq -r .retVal[]
         fi
-
+        
         print "LICENSE RISK HIGH: ${high_license_risk_no}"
         if [[ high_license_risk_no -gt 0 ]]
         then
           echo "Visit the Mend UI and check High Risk Licenses. Understand Risk Score: https://docs.mend.io/bundle/sca_user_guide/page/understanding_risk_score_attribution_and_license_analysis.html"
         fi
-
-        if [[ $security_vulnerability_no -gt 0 ]] || [[ $major_updates_pending_no -gt 0 ]] || [[ $requires_review_no -gt 0 ]] || [[ high_license_risk_no -gt 0 ]]
+        
+        restricted_license
+        
+        if [[ $security_vulnerability_no -gt 0 ]] || [[ $major_updates_pending_no -gt 0 ]] || [[ $requires_review_no -gt 0 ]] || [[ high_license_risk_no -gt 0 ]] || [[ violations -gt 0 ]]
         then
           exit 1
         fi
-        
