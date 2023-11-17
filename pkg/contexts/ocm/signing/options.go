@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -553,11 +554,11 @@ func (o *Options) Complete(ctx interface{}) error {
 }
 
 func (o *Options) checkCert(data interface{}, name string) error {
-	cert, err := signing.GetCertificate(data)
+	cert, pool, err := signutils.GetCertificate(data, false)
 	if err != nil {
 		return nil
 	}
-	err = signing.VerifyCert(nil, o.RootCerts, "", cert)
+	err = signing.VerifyCert(pool, o.RootCerts, name, cert)
 	if err != nil {
 		return errors.Wrapf(err, "public key %q", name)
 	}

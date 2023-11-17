@@ -8,6 +8,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"strings"
 	"time"
 
@@ -27,6 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -44,13 +46,16 @@ type Command struct {
 	pub         string
 	ekey        string
 
-	attrs  map[string]string
-	cacert string
-	cakey  string
+	attrs     map[string]string
+	rootcerts string
+	cacert    string
+	cakey     string
 
 	Validity time.Duration
-	CACert   *x509.Certificate
-	CAKey    interface{}
+
+	RootCertPool *x509.CertPool
+	CACert       *x509.Certificate
+	CAKey        interface{}
 
 	Encrypt             string
 	CreateEncryptionKey bool
@@ -95,6 +100,7 @@ $ ocm create rsakeypair mandelsoft.priv mandelsoft.cert issuer=mandelsoft
 }
 
 func (o *Command) AddFlags(set *pflag.FlagSet) {
+	set.StringVarP(&o.rootcerts, "rootcerts", "", "", "root certificates used to validate used certificate authority")
 	set.StringVarP(&o.cacert, "cacert", "", "", "certificate authority to sign public key")
 	set.StringVarP(&o.cakey, "cakey", "", "", "private key for certificate authority")
 	set.DurationVarP(&o.Validity, "validity", "", 10*24*365*time.Hour, "certificate validity")
@@ -117,6 +123,22 @@ func (o *Command) Complete(args []string) error {
 		return errors.Newf("only one of --encrypt or --encryptionKey is possible")
 	}
 
+	if o.rootcerts != "" {
+		pool, err := signutils.GetCertPool(o.rootcerts, false)
+		if err != nil {
+			path, _ := utils2.ResolvePath(o.rootcerts)
+			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
+			if err != nil {
+				return errors.Wrapf(err, "cannot read root cert file %q", o.rootcerts)
+			}
+			pool, err = signutils.GetCertPool(data, false)
+			if err != nil {
+				return errors.Wrapf(err, "no root cert in file %q", o.rootcerts)
+			}
+		}
+		o.RootCertPool = pool
+	}
+
 	if o.attrs != nil && len(o.attrs) > 0 {
 		var subject pkix.Name
 		for k, v := range o.attrs {
@@ -125,7 +147,7 @@ func (o *Command) Complete(args []string) error {
 				if subject.CommonName == "" {
 					subject.CommonName = v
 				} else {
-					o.MoreIssuers = append(o.MoreIssuers, v)
+					return fmt.Errorf("issuer already set")
 				}
 			case "street":
 				subject.StreetAddress = append(subject.StreetAddress, v)
@@ -149,16 +171,29 @@ func (o *Command) Complete(args []string) error {
 	}
 
 	if o.cacert != "" {
-		cert, err := parse.ParseCertificate(o.cacert)
+		cert, pool, err := signutils.GetCertificate(o.cacert, false)
 		if err != nil {
 			path, _ := utils2.ResolvePath(o.cacert)
 			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read ca cert file %q", o.cacert)
 			}
-			cert, err = parse.ParseCertificate(string(data))
+			cert, pool, err = signutils.GetCertificate(data, false)
 			if err != nil {
 				return errors.Wrapf(err, "no cert in file %q", o.cacert)
+			}
+		}
+
+		if o.RootCertPool != nil || !signutils.IsSelfSigned(cert) {
+			opts := x509.VerifyOptions{
+				Intermediates: pool,
+				Roots:         o.RootCertPool,
+				CurrentTime:   time.Time{},
+				KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning},
+			}
+			_, err = cert.Verify(opts)
+			if err != nil {
+				return err
 			}
 		}
 		o.CACert = cert
@@ -217,6 +252,8 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
+	raw := false
+
 	priv, pub, err := rsa.Handler{}.CreateKeyPair()
 	if err != nil {
 		return err
@@ -227,10 +264,23 @@ func (o *Command) Run() error {
 		if o.CAKey == nil {
 			key = priv
 		}
-		pub, err = signing.CreateCertificate(*o.Subject, nil, o.Validity, pub, o.CACert, key, false, o.MoreIssuers...)
-		if err != nil {
-			return errors.Wrapf(err, "signing failed")
+
+		spec := &signutils.Specification{
+			RootCAs:      nil,
+			IsCA:         false,
+			PublicKey:    pub,
+			CAPrivateKey: key,
+			CAChain:      o.CACert,
+			Subject:      *o.Subject,
+			Usages:       signutils.Usages{x509.ExtKeyUsageCodeSigning},
+			Validity:     o.Validity,
+			NotBefore:    nil,
 		}
+		_, pub, err = signutils.CreateCertificate(spec)
+		if err != nil {
+			return errors.Wrapf(err, "signing of key pair failed")
+		}
+		raw = true
 	}
 
 	var key []byte
@@ -274,7 +324,7 @@ func (o *Command) Run() error {
 	if err := o.WriteKey(priv, o.priv, key != nil); err != nil {
 		return errors.Wrapf(err, "failed to write private key file %q", o.priv)
 	}
-	if err := o.WriteKey(pub, o.pub, false); err != nil {
+	if err := o.WriteKey(pub, o.pub, raw); err != nil {
 		return errors.Wrapf(err, "failed to write public key file %q", o.pub)
 	}
 	msg := ""

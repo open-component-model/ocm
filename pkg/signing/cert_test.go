@@ -14,7 +14,28 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
+
+func CreateCertificate(subject pkix.Name, validFrom *time.Time, validity time.Duration,
+	pub interface{}, ca *x509.Certificate, priv interface{}, isCA bool, names ...string,
+) ([]byte, error) {
+
+	spec := &signutils.Specification{
+		RootCAs:      nil,
+		IsCA:         isCA,
+		PublicKey:    pub,
+		CAPrivateKey: priv,
+		CAChain:      ca,
+		Subject:      subject,
+		Usages:       signutils.Usages{x509.ExtKeyUsageCodeSigning},
+		Validity:     validity,
+		NotBefore:    validFrom,
+		Hosts:        names,
+	}
+	_, data, err := signutils.CreateCertificate(spec)
+	return data, err
+}
 
 var _ = Describe("normalization", func() {
 
@@ -24,7 +45,7 @@ var _ = Describe("normalization", func() {
 	subject := pkix.Name{
 		CommonName: "ca-authority",
 	}
-	caData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, capub, nil, capriv, true)
+	caData, err := CreateCertificate(subject, nil, 10*time.Hour, capub, nil, capriv, true)
 	Expect(err).To(Succeed())
 	ca, err := x509.ParseCertificate(caData)
 	Expect(err).To(Succeed())
@@ -38,7 +59,7 @@ var _ = Describe("normalization", func() {
 	}
 
 	Context("foreignly signed", func() {
-		certData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, pub, ca, capriv, false)
+		certData, err := CreateCertificate(subject, nil, 10*time.Hour, pub, ca, capriv, false)
 		Expect(err).To(Succeed())
 
 		cert, err := x509.ParseCertificate(certData)
@@ -61,7 +82,7 @@ var _ = Describe("normalization", func() {
 		})
 	})
 	Context("self signed", func() {
-		certData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, pub, nil, priv, false)
+		certData, err := CreateCertificate(subject, nil, 10*time.Hour, pub, nil, priv, false)
 		Expect(err).To(Succeed())
 
 		cert, err := x509.ParseCertificate(certData)
