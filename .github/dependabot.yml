@@ -3,7 +3,6 @@ version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
-    labels: ["dependencies"]
     groups:
       # xref: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups
       ci:
@@ -14,7 +13,6 @@ updates:
       day: "sunday"
   - package-ecosystem: "gomod"
     directory: "/"
-    labels: ["dependencies","go"]
     groups:
       go:
         update-types:  ["minor","patch"]
