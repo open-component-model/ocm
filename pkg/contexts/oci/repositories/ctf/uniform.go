@@ -36,12 +36,13 @@ func MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.Repository
 	}
 	fs := vfsattr.Get(ctx)
 
-	hint := accessio.TypeForType(u.TypeHint)
+	typ, _ := accessobj.MapType(u.Type, Type, accessio.FormatNone, true, "ctf")
+	hint, f := accessobj.MapType(u.TypeHint, Type, accessio.FormatDirectory, true, "ctf")
 	if !u.CreateIfMissing {
 		hint = ""
 	}
-	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) != "", path, fs, ArtifactIndexFileName)
-	if !ok || err != nil {
+	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForType(typ) == Type, path, fs, ArtifactIndexFileName)
+	if !ok || (err != nil && typ == "") {
 		if err != nil {
 			return nil, err
 		}
@@ -50,10 +51,13 @@ func MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.Repository
 		}
 	}
 	mode := accessobj.ACC_WRITABLE
-	createHint := accessio.FileFormat("")
+	createHint := accessio.FormatNone
 	if create {
 		mode |= accessobj.ACC_CREATE
 		createHint = accessio.FileFormatForType(u.TypeHint, u.Type)
+		if createHint == "" {
+			createHint = f
+		}
 	}
 	return NewRepositorySpec(mode, path, createHint, accessio.PathFileSystem(fs))
 }

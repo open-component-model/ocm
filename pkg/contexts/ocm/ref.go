@@ -37,14 +37,18 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 		if match == nil {
 			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
 		}
+		t, h := grammar.SplitType(string(match[1]))
 		return cpi.HandleRef(UniformRepositorySpec{
-			Type:            string(match[1]),
+			Type:            t,
+			TypeHint:        h,
 			Info:            string(match[2]),
 			CreateIfMissing: create,
 		})
 	}
+	t, h := grammar.SplitType(string(match[1]))
 	return cpi.HandleRef(UniformRepositorySpec{
-		Type:            string(match[1]),
+		Type:            t,
+		TypeHint:        h,
 		Host:            string(match[2]),
 		SubPath:         string(match[3]),
 		CreateIfMissing: create,
@@ -86,9 +90,11 @@ func ParseRef(ref string) (RefSpec, error) {
 			return RefSpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
 		}
 		v = string(match[4])
+		t, h := grammar.SplitType(string(match[1]))
 		spec = RefSpec{
 			UniformRepositorySpec{
-				Type:            string(match[1]),
+				Type:            t,
+				TypeHint:        h,
 				Info:            string(match[2]),
 				CreateIfMissing: create,
 			},
@@ -99,9 +105,11 @@ func ParseRef(ref string) (RefSpec, error) {
 		}
 	} else {
 		v = string(match[5])
+		t, h := grammar.SplitType(string(match[1]))
 		spec = RefSpec{
 			UniformRepositorySpec{
-				Type:            string(match[1]),
+				Type:            t,
+				TypeHint:        h,
 				Host:            string(match[2]),
 				SubPath:         string(match[3]),
 				CreateIfMissing: create,

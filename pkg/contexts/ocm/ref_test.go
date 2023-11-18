@@ -13,6 +13,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func Type(t string) string {
@@ -34,10 +35,13 @@ func Vers(t string) string {
 	return ":" + t
 }
 
-func CheckRef(ref, ut, h, us, c, uv, i string) {
+func CheckRef(ref, ut, h, us, c, uv, i string, th ...string) {
 	var v *string
 	if uv != "" {
 		v = &uv
+	}
+	if len(th) == 0 && ut != "" {
+		th = []string{ut}
 	}
 	spec, err := ocm.ParseRef(ref)
 	Expect(err).WithOffset(1).To(Succeed())
@@ -47,6 +51,7 @@ func CheckRef(ref, ut, h, us, c, uv, i string) {
 			Host:            h,
 			SubPath:         us,
 			Info:            i,
+			TypeHint:        utils.Optional(th...),
 			CreateIfMissing: ref[0] == '+',
 		},
 		CompSpec: ocm.CompSpec{
@@ -101,8 +106,8 @@ var _ = Describe("ref parsing", func() {
 		})
 
 		It("dir ref", func() {
-			CheckRef("+ctf+directory::./file//bla.blob/comp", "ctf+directory", "", "", "bla.blob/comp", "", "./file")
-			CheckRef("ctf+directory::./file//bla.blob/comp", "ctf+directory", "", "", "bla.blob/comp", "", "./file")
+			CheckRef("+ctf+directory::./file//bla.blob/comp", "ctf", "", "", "bla.blob/comp", "", "./file", "ctf+directory")
+			CheckRef("ctf+directory::./file//bla.blob/comp", "ctf", "", "", "bla.blob/comp", "", "./file", "ctf+directory")
 			CheckRef("directory::./file//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "./file")
 			CheckRef("directory::file//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "file")
 			CheckRef("directory::./file.io//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "./file.io")
@@ -120,7 +125,7 @@ var _ = Describe("ref parsing", func() {
 					SubPath:         "dev/v1",
 					Info:            "",
 					CreateIfMissing: false,
-					TypeHint:        "",
+					TypeHint:        "OCIRegistry",
 				},
 				CompSpec: ocm.CompSpec{
 					Component: "github.wdf.sap.corp/kubernetes/landscape-setup-dependencies",

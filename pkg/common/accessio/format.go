@@ -42,6 +42,7 @@ const (
 	FormatTar       FileFormat = "tar"
 	FormatTGZ       FileFormat = "tgz"
 	FormatDirectory FileFormat = "directory"
+	FormatNone      FileFormat = ""
 )
 
 var suffixes = map[FileFormat]string{

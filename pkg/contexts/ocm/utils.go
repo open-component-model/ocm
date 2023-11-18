@@ -7,6 +7,7 @@ package ocm
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -48,21 +49,13 @@ func AssureTargetRepository(session Session, ctx Context, targetref string, opts
 	if err != nil {
 		return nil, err
 	}
-	if ref.Type != "" {
-		format = accessio.FileFormatForType(ref.Type)
-		// map pseudo types to format
-		for _, f := range ctf.SupportedFormats() {
-			if f == accessio.FileFormat(ref.Type) {
-				format = f
-				ref.Type = ctf.Type
-			}
-		}
+	if ref.TypeHint == "" {
+		ref.TypeHint = archive
 	}
-	ref.TypeHint = archive
-	if format != "" {
+	if format != "" && ref.TypeHint != "" && !strings.Contains(ref.TypeHint, "+") {
 		for _, f := range ctf.SupportedFormats() {
 			if f == format {
-				ref.TypeHint = archive + "+" + format.String()
+				ref.TypeHint += "+" + format.String()
 			}
 		}
 	}
