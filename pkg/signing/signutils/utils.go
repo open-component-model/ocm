@@ -105,6 +105,17 @@ func ParsePrivateKey(data []byte) (interface{}, error) {
 	return privateKey(block)
 }
 
+func ParseCertificate(data []byte) (*x509.Certificate, error) {
+	block, _ := pem.Decode(data)
+	if block != nil {
+		if block.Type != "CERTIFICATE" {
+			return nil, fmt.Errorf("unexpected pem block type for certificate: %q", block.Type)
+		}
+		return x509.ParseCertificate(block.Bytes)
+	}
+	return nil, fmt.Errorf("invalid certificate format (expected CERTIFICATE pem block)")
+}
+
 func ParseCertificateChain(data []byte, filter bool) ([]*x509.Certificate, error) {
 	var chain []*x509.Certificate
 	for {

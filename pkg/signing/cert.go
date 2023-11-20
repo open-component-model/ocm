@@ -17,7 +17,7 @@ func VerifyCert(intermediate, root *x509.CertPool, cn string, cert *x509.Certifi
 	opts := x509.VerifyOptions{
 		Intermediates: intermediate,
 		Roots:         root,
-		CurrentTime:   time.Now(),
+		CurrentTime:   cert.NotBefore,
 		KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning},
 	}
 	_, err := cert.Verify(opts)

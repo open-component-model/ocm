@@ -6,6 +6,7 @@ package signing
 
 import (
 	"crypto"
+	"crypto/x509/pkix"
 	"encoding/json"
 	"hash"
 
@@ -33,8 +34,14 @@ func (s *Signature) String() string {
 // Signer interface is used to implement different signing algorithms.
 // Each Signer should have a matching Verifier.
 type Signer interface {
-	// Sign returns the signature for the given digest
-	Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer string, privatekey interface{}) (*Signature, error)
+	// Sign returns the signature for the given digest.
+	// If known a given public key can be passed. The signer may
+	// decide to put a trusted public key into the signature,
+	// for example for public keys provided by organization validated
+	// certificates.
+	// If used the key and/or certificate must be validated, for certificates
+	// the distinguished name must match the issuer.
+	Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer *pkix.Name, privatekey interface{}, publicKey interface{}) (*Signature, error)
 	// Algorithm is the name of the finally used signature algorithm.
 	// A signer might be registered using a logical name, so there might
 	// be multiple signer registration providing the same signature algorithm

@@ -7,6 +7,7 @@ package signutils_test
 import (
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"fmt"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -99,7 +100,12 @@ var _ = Describe("normalization", func() {
 
 		spec = &signutils.Specification{
 			Subject: pkix.Name{
-				CommonName: "mandelsoft",
+				CommonName:    "mandelsoft",
+				Country:       []string{"DE", "US"},
+				Locality:      []string{"Walldorf d"},
+				StreetAddress: []string{"x y"},
+				PostalCode:    []string{"69169"},
+				Province:      []string{"BW"},
 			},
 			RootCAs:      ca,
 			CAChain:      []*x509.Certificate{intercert, ca},
@@ -132,6 +138,7 @@ var _ = Describe("normalization", func() {
 		})
 
 		It("verifies", func() {
+			fmt.Printf("%s\n", cert.Subject.String())
 			_, err = cert.Verify(opts)
 			Expect(err).To(Succeed())
 		})

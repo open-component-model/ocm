@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 const (
@@ -183,6 +184,16 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 	if handler == nil {
 		return nil, errors.ErrUnknown(compdesc.KIND_SIGN_ALGORITHM, algo)
 	}
+
+	dn, err := signutils.ParseDN(name)
+	if err != nil {
+		return nil, err
+	}
+	if dn.CommonName != name {
+		// normalize DN string representation
+		name = dn.String()
+	}
+
 	key, err := signing.ResolvePrivateKey(registry, name)
 	if err != nil {
 		return nil, err
@@ -190,6 +201,7 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 	if key == nil {
 		return nil, errors.ErrUnknown(compdesc.KIND_PRIVATE_KEY, name)
 	}
+	pub := registry.GetPublicKey(name)
 
 	err = s.Verify(ctx, name, true)
 	if err != nil {
@@ -258,7 +270,7 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 	}
 	entry.Digest = d
 
-	sig, err := handler.Sign(ctx.CredentialsContext(), d.Encoded(), sha256.Handler{}.Crypto(), name, key)
+	sig, err := handler.Sign(ctx.CredentialsContext(), d.Encoded(), sha256.Handler{}.Crypto(), dn, key, pub)
 	if err != nil {
 		return nil, err
 	}

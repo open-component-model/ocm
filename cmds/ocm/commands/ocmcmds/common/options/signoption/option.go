@@ -6,8 +6,10 @@ package signoption
 
 import (
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/keyoption"
@@ -41,11 +43,13 @@ func New(sign bool) *Option {
 type Option struct {
 	keyoption.Option
 
-	rootca        []string
-	local         bool
+	rootca []string
+	local  bool
+	issuer string
+
 	SignMode      bool
 	signAlgorithm string
-	Issuer        string
+	Issuer        *pkix.Name
 	RootCerts     *x509.CertPool
 	// Verify the digests
 	Verify bool
@@ -69,7 +73,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	if o.SignMode {
 		o.Hash.AddFlags(fs)
 		fs.StringVarP(&o.signAlgorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
-		fs.StringVarP(&o.Issuer, "issuer", "I", "", "issuer name")
+		fs.StringVarP(&o.issuer, "issuer", "I", "", "issuer name or distinguished name (DN)")
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
 		fs.BoolVarP(&o.Recursively, "recursive", "R", false, "recursively sign component versions")
 	} else {
@@ -134,6 +138,14 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		}
 		o.RootCerts = pool
 	}
+
+	if o.issuer != "" {
+		dn, err := signutils.ParseDN(o.issuer)
+		if err != nil {
+			return err
+		}
+		o.Issuer = dn
+	}
 	return nil
 }
 
@@ -187,7 +199,7 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	opts.Keys = o.Keys
 	opts.NormalizationAlgo = o.Hash.NormAlgorithm
 	opts.Hasher = o.Hash.Hasher
-	if o.Issuer != "" {
+	if o.Issuer != nil {
 		opts.Issuer = o.Issuer
 	}
 	if o.RootCerts != nil {

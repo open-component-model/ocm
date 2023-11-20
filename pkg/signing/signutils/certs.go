@@ -35,6 +35,8 @@ type Specification struct {
 	Hosts []string
 }
 
+// CreateCertificate creates a certificate and additionally returns a PEM encoded
+// representation.
 func CreateCertificate(spec *Specification) (*x509.Certificate, []byte, error) {
 	var err error
 
@@ -97,6 +99,9 @@ func CreateCertificate(spec *Specification) (*x509.Certificate, []byte, error) {
 			if err != nil {
 				return nil, nil, err
 			}
+			if IsSelfSigned(caChain[0]) {
+				rootCerts.AddCert(caChain[0])
+			}
 		}
 
 		intermediates, err := GetCertPool(caChain, false)
@@ -107,7 +112,6 @@ func CreateCertificate(spec *Specification) (*x509.Certificate, []byte, error) {
 		opts := x509.VerifyOptions{
 			Intermediates:             intermediates,
 			Roots:                     rootCerts,
-			CurrentTime:               time.Time{},
 			KeyUsages:                 []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
 			MaxConstraintComparisions: 0,
 		}

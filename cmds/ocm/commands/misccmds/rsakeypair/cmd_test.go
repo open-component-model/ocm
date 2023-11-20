@@ -6,6 +6,7 @@ package rsakeypair_test
 
 import (
 	"bytes"
+	"crypto/x509/pkix"
 	"encoding/pem"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -22,7 +23,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-const ISSUER = "mandelsoft"
+var ISSUER = &pkix.Name{CommonName: "mandelsoft"}
+
 const KEYNAME = "test"
 
 var _ = Describe("Test Environment", func() {
@@ -51,11 +53,11 @@ created rsa key pair key.priv[key.pub]
 		Expect(err).To(Succeed())
 
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), 0, ISSUER, priv)
+		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), 0, ISSUER, priv, nil)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
-		Expect(sig.Issuer).To(Equal(ISSUER))
+		Expect(sig.Issuer).To(Equal(ISSUER.CommonName))
 
 		err = rsa.Handler{}.Verify(d.Hex(), 0, sig, pub)
 		Expect(err).To(Succeed())
@@ -74,11 +76,11 @@ created rsa key pair key.priv[key.cert]
 		Expect(err).To(Succeed())
 
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), 0, "mandelsoft", priv)
+		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), 0, ISSUER, priv, nil)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
-		Expect(sig.Issuer).To(Equal(ISSUER))
+		Expect(sig.Issuer).To(Equal(ISSUER.CommonName))
 
 		err = rsa.Handler{}.Verify(d.Hex(), 0, sig, pub)
 		Expect(err).To(Succeed())
@@ -115,7 +117,7 @@ created encrypted rsa key pair key.priv[key.pub][key.priv.ekey]
 			Expect(key).NotTo(BeNil())
 
 			d := digest.FromBytes([]byte("digest"))
-			Must(rsa.Handler{}.Sign(defaultContext, d.Hex(), 0, "mandelsoft", key))
+			Must(rsa.Handler{}.Sign(defaultContext, d.Hex(), 0, ISSUER, key, nil))
 
 			buf.Reset()
 			Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "-e", KEYNAME, "other.priv")).To(Succeed())

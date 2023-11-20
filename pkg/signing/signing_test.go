@@ -5,6 +5,8 @@
 package signing_test
 
 import (
+	"crypto/x509/pkix"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -17,6 +19,8 @@ import (
 var registry = signing.DefaultRegistry()
 
 const NAME = "testsignature"
+
+var ISSUER = &pkix.Name{CommonName: "mandelsoft"}
 
 var _ = Describe("normalization", func() {
 	var defaultContext credentials.Context
@@ -35,7 +39,7 @@ var _ = Describe("normalization", func() {
 		registry.RegisterPublicKey(NAME, pub)
 		registry.RegisterPrivateKey(NAME, priv)
 
-		sig, err := registry.GetSigner(rsa.Algorithm).Sign(defaultContext, hash, hasher.Crypto(), "mandelsoft", registry.GetPrivateKey(NAME))
+		sig, err := registry.GetSigner(rsa.Algorithm).Sign(defaultContext, hash, hasher.Crypto(), ISSUER, registry.GetPrivateKey(NAME), nil)
 
 		Expect(err).To(Succeed())
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))

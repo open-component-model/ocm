@@ -5,9 +5,11 @@
 package hash
 
 import (
+	"crypto/x509/pkix"
 	"fmt"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -32,12 +34,16 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	stype  string
-	priv   []byte
-	htype  string
-	hash   string
-	issuer string
+	pubFile  string
+	rootFile string
 
+	stype string
+	priv  []byte
+	pub   []byte
+	htype string
+	hash  string
+
+	issuer *pkix.Name
 	hasher signing.Hasher
 	signer signing.Signer
 }
@@ -64,6 +70,8 @@ $ ocm sign hash key.priv SHA-256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6c
 
 func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.stype, "algorithm", "S", rsa.Algorithm, "signature algorithm")
+	set.StringVarP(&o.pubFile, "publicKey", "", "", "public key certificate file")
+	set.StringVarP(&o.rootFile, "rootCerts", "", "", "root certificates file")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -76,8 +84,19 @@ func (o *Command) Complete(args []string) error {
 		return fmt.Errorf("too many arguments")
 	}
 	if len(args) == 3 {
-		o.issuer = args[2]
+		o.issuer, err = signutils.ParseDN(args[2])
+		if err != nil {
+			return errors.Wrapf(err, "issuer")
+		}
 	}
+
+	if o.pubFile != "" {
+		o.pub, err = utils2.ReadFile(o.pubFile, o.FileSystem())
+		if err != nil {
+			return err
+		}
+	}
+
 	o.priv, err = utils2.ReadFile(args[0], o.FileSystem())
 	if err != nil {
 		return err
@@ -103,7 +122,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	sig, err := o.signer.Sign(o.Context.CredentialsContext(), o.hash, o.hasher.Crypto(), o.issuer, o.priv)
+	sig, err := o.signer.Sign(o.Context.CredentialsContext(), o.hash, o.hasher.Crypto(), o.issuer, o.priv, o.pub)
 	if err != nil {
 		return err
 	}

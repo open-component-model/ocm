@@ -6,6 +6,7 @@ package signing
 
 import (
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"fmt"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
@@ -304,17 +306,28 @@ func (o *signame) ApplySigningOption(opts *Options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type issuer struct {
-	name string
+	issuer pkix.Name
+	err    error
 }
 
 // Issuer provides an option requesting to use a dedicated issuer name
 // for a signing operation.
 func Issuer(name string) Option {
-	return &issuer{name}
+	dn, err := signutils.ParseDN(name)
+	if err != nil {
+		return &issuer{err: err}
+	}
+	return &issuer{issuer: *dn}
+}
+
+// PKIXIssuer provides an option requesting to use a dedicated issuer name
+// for a signing operation.
+func PKIXIssuer(name pkix.Name) Option {
+	return &issuer{issuer: name}
 }
 
 func (o *issuer) ApplySigningOption(opts *Options) {
-	opts.Issuer = o.name
+	opts.Issuer = generics.Pointer(o.issuer)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -389,7 +402,7 @@ type Options struct {
 	Verify            bool
 	SignAlgo          string
 	Signer            signing.Signer
-	Issuer            string
+	Issuer            *pkix.Name
 	VerifySignature   bool
 	RootCerts         *x509.CertPool
 	HashAlgo          string
@@ -451,7 +464,7 @@ func (o *Options) ApplySigningOption(opts *Options) {
 			opts.SkipAccessTypes[k] = v
 		}
 	}
-	if o.Issuer != "" {
+	if o.Issuer != nil {
 		opts.Issuer = o.Issuer
 	}
 	opts.Recursively = o.Recursively

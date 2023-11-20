@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -272,16 +273,20 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		if err != nil {
 			return nil, err
 		}
-		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), ctx.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, priv)
+		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), ctx.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, priv, nil)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor")
 		}
 		if sig.Issuer != "" {
-			if opts.Issuer != "" && opts.Issuer != sig.Issuer {
-				return nil, errors.Newf("signature issuer %q does not match intended issuer %q", sig.Issuer, opts.Issuer)
+			iss, err := signutils.ParseDN(sig.Issuer)
+			if err != nil {
+				return nil, errors.Wrapf(err, "signature issuer")
 			}
-		} else {
-			sig.Issuer = opts.Issuer
+			if opts.Issuer != nil {
+				if err := signutils.MatchDN(*iss, *opts.Issuer); err != nil {
+					return nil, errors.Newf("signature issuer %q does not match intended issuer %q", sig.Issuer, opts.Issuer)
+				}
+			}
 		}
 		signature := metav1.Signature{
 			Name:   opts.SignatureName(),

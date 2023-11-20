@@ -8,6 +8,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509/pkix"
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 // Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
@@ -51,8 +53,8 @@ func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
-func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer string, key interface{}) (signature *signing.Signature, err error) {
-	privateKey, err := GetPrivateKey(key)
+func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer *pkix.Name, priv interface{}, pub interface{}) (signature *signing.Signature, err error) {
+	privateKey, err := GetPrivateKey(priv)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid rsa private key")
 	}
@@ -64,11 +66,19 @@ func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash,
 	if err != nil {
 		return nil, fmt.Errorf("failed signing hash, %w", err)
 	}
+
+	var iss string
+	if issuer != nil {
+		n := *issuer
+		n.SerialNumber = ""
+		iss = signutils.DNAsString(n)
+	}
+
 	return &signing.Signature{
 		Value:     hex.EncodeToString(sig),
 		MediaType: MediaType,
 		Algorithm: Algorithm,
-		Issuer:    issuer,
+		Issuer:    iss,
 	}, nil
 }
 
@@ -76,7 +86,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash,
 func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Signature, key interface{}) (err error) {
 	var signatureBytes []byte
 
-	publicKey, names, err := GetPublicKey(key)
+	publicKey, name, err := GetPublicKey(key)
 	if err != nil {
 		return fmt.Errorf("failed to get public key: %w", err)
 	}
@@ -105,19 +115,14 @@ func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Sign
 		return fmt.Errorf("failed decoding hash %s: %w", digest, err)
 	}
 
-	if names != nil {
+	if name != nil {
 		if signature.Issuer != "" {
-			found := false
-
-			for _, n := range names {
-				if n == signature.Issuer {
-					found = true
-					break
-				}
+			iss, err := signutils.ParseDN(signature.Issuer)
+			if err != nil {
+				return errors.Wrapf(err, "signature issuer")
 			}
-
-			if !found {
-				return fmt.Errorf("issuer %q does not match %v", signature.Issuer, names)
+			if signutils.MatchDN(*iss, *name) != nil {
+				return fmt.Errorf("issuer %s does not match %s", signature.Issuer, name)
 			}
 		}
 	}

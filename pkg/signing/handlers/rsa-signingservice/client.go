@@ -10,6 +10,7 @@ import (
 	"crypto"
 	"crypto/tls"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
@@ -47,7 +48,7 @@ func NewSigningClient(serverURL string) (*SigningServerSigner, error) {
 	return &signer, nil
 }
 
-func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo string, hashAlgo crypto.Hash, digest string, issuer string, key interface{}) (*signing.Signature, error) {
+func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo string, hashAlgo crypto.Hash, digest string, issuer *pkix.Name, key interface{}) (*signing.Signature, error) {
 	decodedHash, err := hex.DecodeString(digest)
 	if err != nil {
 		return nil, fmt.Errorf("unable to hex decode hash: %w", err)
@@ -164,10 +165,15 @@ func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo 
 
 	encodedSignature := pem.EncodeToMemory(signatureBlock)
 
+	var iss string
+	if issuer != nil {
+		iss = issuer.String()
+		// TODO: match issuer
+	}
 	return &signing.Signature{
 		Value:     string(encodedSignature),
 		MediaType: MediaTypePEM,
 		Algorithm: algorithm,
-		Issuer:    issuer,
+		Issuer:    iss,
 	}, nil
 }

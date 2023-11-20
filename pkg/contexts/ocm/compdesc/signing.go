@@ -13,6 +13,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 const (
@@ -91,7 +92,12 @@ func Sign(cctx credentials.Context, cd *ComponentDescriptor, privateKey interfac
 		return fmt.Errorf("failed getting hash for cd: %w", err)
 	}
 
-	signature, err := signer.Sign(cctx, digest, hasher.Crypto(), issuer, privateKey)
+	iss, err := signutils.ParseDN(issuer)
+	if err != nil {
+		return err
+	}
+
+	signature, err := signer.Sign(cctx, digest, hasher.Crypto(), iss, privateKey, nil)
 	if err != nil {
 		return fmt.Errorf("failed signing hash of normalised component descriptor, %w", err)
 	}
