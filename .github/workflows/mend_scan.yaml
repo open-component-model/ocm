@@ -6,6 +6,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:    
+      - main
   workflow_dispatch:
     inputs:
       logLevel:
@@ -20,7 +23,8 @@ on:
 jobs:
   mend-scan:
     runs-on: ubuntu-latest
-
+    permissions:
+      pull-requests: write
     steps:
     - name: Checkout Code  
       uses: actions/checkout@v4
@@ -95,7 +99,7 @@ jobs:
         high_license_risk_no=$(echo "${high_license_risk}" | jq -r '.retVal[].riskScore.riskScore | select( . != null ) > 52 | select(.==true)'| wc -l )
         
         function print {
-          printf "############################################\n$1\n############################################\n"
+          printf "############################################\n$1\n############################################\nMend Scan Tool: https://sap.whitesourcesoftware.com/Wss/WSS.html#!login \n"
         }
         
         function restricted_license {
@@ -116,13 +120,8 @@ jobs:
               ret_val="$ret_val$val"
             fi
           done
-          print "RESTRICTIED LICENSE FOR ON-PREMISE DELIVERY: ${issue_count}"
-          if [[ issue_count -gt 0 ]]
-          then
-            echo "${ret_val}" | jq .
-          fi
-        
-          return $issue_count
+          export VIOLATIONS_VERBOSE="${ret_val}"
+          export VIOLATIONS="${issue_count}"
         }
         
         print "HIGH/CRITICAL SECURITY VULNERABILITIES: ${security_vulnerability_no}"
@@ -151,7 +150,38 @@ jobs:
         
         restricted_license
         
+        print "RESTRICTIED LICENSE FOR ON-PREMISE DELIVERY: ${VIOLATIONS}"
+        if [[ $VIOLATIONS -gt 0 ]]
+        then
+          echo "${VIOLATIONS_VERBOSE}" | jq .
+        fi
+        
+        echo "security_vulnerability_no=$security_vulnerability_no" >> $GITHUB_OUTPUT 
+        echo "major_updates_pending_no=$major_updates_pending_no" >> $GITHUB_OUTPUT
+        echo "requires_review_no=$requires_review_no" >> $GITHUB_OUTPUT
+        echo "high_license_risk_no=$high_license_risk_no" >> $GITHUB_OUTPUT
+        echo "violations=$VIOLATIONS" >> $GITHUB_OUTPUT
+        
         if [[ $security_vulnerability_no -gt 0 ]] || [[ $major_updates_pending_no -gt 0 ]] || [[ $requires_review_no -gt 0 ]] || [[ high_license_risk_no -gt 0 ]] || [[ violations -gt 0 ]]
         then
-          exit 1
+          echo "status=x" >> $GITHUB_OUTPUT
+        else 
+          echo "status=white_check_mark" >> $GITHUB_OUTPUT
         fi
+        
+    - name: Comment Mend Status on PR
+      uses: thollander/actions-comment-pull-request@v2.4.3
+      with:
+        message: |
+          # Mend Scan Summary: :${{ steps.report.outputs.status }}:
+          | VIOLATION DESCRIPTION                        | NUMBER OF VIOLATIONS        |
+          | -------------------------------------------- | --------------------------- |
+          | HIGH/CRITICAL SECURITY VULNERABILITIES       | ${{ steps.report.outputs.security_vulnerability_no }} |
+          | MAJOR UPDATES AVAILABLE                      | ${{ steps.report.outputs.major_updates_pending_no }}  |
+          | LICENSE REQUIRES REVIEW                      | ${{ steps.report.outputs.requires_review_no }}        |
+          | LICENSE RISK HIGH                            | ${{ steps.report.outputs.high_license_risk_no }}      |
+          | RESTRICTIED LICENSE FOR ON-PREMISE DELIVERY  | ${{ steps.report.outputs.VIOLATIONS }}                |
+          
+          [Detailed Logs: mend-scan-> Generate Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          [Mend UI](https://sap.whitesourcesoftware.com/Wss/WSS.html#!login)
+        comment_tag: tag_mend_scan
