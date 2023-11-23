@@ -63,6 +63,7 @@ jobs:
         PROJECT_TOKEN: ${{ secrets.MEND_PROJECT_TOKEN_OCM }}
         API_KEY: ${{ secrets.MEND_API_ORG_TOKEN }}
         EMAIL: ${{ secrets.MEND_API_EMAIL }}
+      id: report
       run: |
         data=$(cat <<EOF
         {
