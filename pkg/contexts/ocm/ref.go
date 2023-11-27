@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/grammar"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -37,7 +38,8 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 		if match == nil {
 			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
 		}
-		t, h := grammar.SplitType(string(match[1]))
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
 		return cpi.HandleRef(UniformRepositorySpec{
 			Type:            t,
 			TypeHint:        h,
@@ -45,7 +47,8 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 			CreateIfMissing: create,
 		})
 	}
-	t, h := grammar.SplitType(string(match[1]))
+	h := string(match[1])
+	t, _ := grammar.SplitTypeSpec(h)
 	return cpi.HandleRef(UniformRepositorySpec{
 		Type:            t,
 		TypeHint:        h,
@@ -55,10 +58,13 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 	})
 }
 
-func ParseRepoToSpec(ctx Context, ref string) (RepositorySpec, error) {
+func ParseRepoToSpec(ctx Context, ref string, create ...bool) (RepositorySpec, error) {
 	uni, err := ParseRepo(ref)
 	if err != nil {
 		return nil, errors.ErrInvalidWrap(err, KIND_REPOSITORYSPEC, ref)
+	}
+	if !uni.CreateIfMissing {
+		uni.CreateIfMissing = utils.Optional(create...)
 	}
 	repoSpec, err := ctx.MapUniformRepositorySpec(&uni)
 	if err != nil {
@@ -90,7 +96,8 @@ func ParseRef(ref string) (RefSpec, error) {
 			return RefSpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
 		}
 		v = string(match[4])
-		t, h := grammar.SplitType(string(match[1]))
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
 		spec = RefSpec{
 			UniformRepositorySpec{
 				Type:            t,
@@ -105,7 +112,8 @@ func ParseRef(ref string) (RefSpec, error) {
 		}
 	} else {
 		v = string(match[5])
-		t, h := grammar.SplitType(string(match[1]))
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
 		spec = RefSpec{
 			UniformRepositorySpec{
 				Type:            t,

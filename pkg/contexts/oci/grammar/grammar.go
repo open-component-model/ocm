@@ -220,10 +220,10 @@ var (
 	AnchoredIdentifierRegexp = Anchored(IdentifierRegexp)
 )
 
-func SplitType(t string) (string, string) {
+func SplitTypeSpec(t string) (string, string) {
 	i := strings.Index(t, "+")
 	if i < 0 {
-		return t, t
+		return t, ""
 	}
-	return t[:i], t
+	return t[:i], t[i+1:]
 }

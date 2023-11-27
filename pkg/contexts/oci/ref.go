@@ -36,7 +36,8 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 		if match == nil {
 			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE, ref)
 		}
-		t, h := grammar.SplitType(string(match[1]))
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
 		return UniformRepositorySpec{
 			Type:            t,
 			TypeHint:        h,
@@ -44,7 +45,8 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 			CreateIfMissing: create,
 		}, nil
 	}
-	t, h := grammar.SplitType(string(match[1]))
+	h := string(match[1])
+	t, _ := grammar.SplitTypeSpec(h)
 	return UniformRepositorySpec{
 		Type:            t,
 		TypeHint:        h,

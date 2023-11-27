@@ -68,6 +68,6 @@ var (
 	)
 )
 
-func SplitType(t string) (string, string) {
-	return grammar.SplitType(t)
+func SplitTypeSpec(t string) (string, string) {
+	return grammar.SplitTypeSpec(t)
 }

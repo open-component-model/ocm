@@ -15,7 +15,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
@@ -79,14 +78,10 @@ func GetFormatsFor[T any](fileFormats map[FileFormat]T) []string {
 	return list
 }
 
-func FileFormatForType(t string, hint ...string) FileFormat {
-	h := utils.Optional(hint...)
-	if h != "" {
-		f := FileFormatForType(h)
-		if f != "" {
-			return f
-		}
-	}
+// FileFormatForTypeSpec returns the format hint provided
+// by a type specification.The format hint is an optional
+// suffix separated by a +.
+func FileFormatForTypeSpec(t string) FileFormat {
 	i := strings.Index(t, "+")
 	if i < 0 {
 		return ""
@@ -94,7 +89,10 @@ func FileFormatForType(t string, hint ...string) FileFormat {
 	return FileFormat(t[i+1:])
 }
 
-func TypeForType(t string) string {
+// TypeForTypeSpec returns the pure type info provided
+// by a type specification.The format hint is an optional
+// suffix separated by a +.
+func TypeForTypeSpec(t string) string {
 	i := strings.Index(t, "+")
 	if i < 0 {
 		return t

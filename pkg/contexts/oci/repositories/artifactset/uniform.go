@@ -34,9 +34,9 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 		hint = ""
 	}
 
-	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) == Type, path, fs, ArtifactSetDescriptorFileName)
+	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForTypeSpec(u.Type) == Type, path, fs, ArtifactSetDescriptorFileName)
 	if err == nil && !ok {
-		create, ok, err = accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) == Type, path, fs, OCIArtifactSetDescriptorFileName)
+		create, ok, err = accessobj.CheckFile(Type, hint, accessio.TypeForTypeSpec(u.Type) == Type, path, fs, OCIArtifactSetDescriptorFileName)
 	}
 
 	if !ok || err != nil {
@@ -47,10 +47,7 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	createHint := accessio.FormatNone
 	if create {
 		mode |= accessobj.ACC_CREATE
-		createHint = accessio.FileFormatForType(u.TypeHint, u.Type)
-		if createHint == "" {
-			createHint = f
-		}
+		createHint = f
 	}
 	return NewRepositorySpec(mode, path, createHint, accessio.PathFileSystem(fs))
 }

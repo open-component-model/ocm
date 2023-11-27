@@ -154,8 +154,8 @@ func DefaultCreateOptsFileHandling(kind string, info AccessObjectInfo, path stri
 
 // MapType maps a given type name to an effective type and a format.
 func MapType(hint string, efftyp string, deffmt accessio.FileFormat, useFormats bool, alt ...string) (string, accessio.FileFormat) {
-	typ := accessio.TypeForType(hint)
-	f := accessio.FileFormatForType(hint)
+	typ := accessio.TypeForTypeSpec(hint)
+	f := accessio.FileFormatForTypeSpec(hint)
 	if f != "" {
 		deffmt = f
 	}
