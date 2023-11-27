@@ -39,7 +39,14 @@ var _ = Describe("normalization", func() {
 		registry.RegisterPublicKey(NAME, pub)
 		registry.RegisterPrivateKey(NAME, priv)
 
-		sig, err := registry.GetSigner(rsa.Algorithm).Sign(defaultContext, hash, hasher.Crypto(), ISSUER, registry.GetPrivateKey(NAME), nil)
+		sctx := &signing.DefaultSigningContext{
+			Hash:       hasher.Crypto(),
+			PrivateKey: registry.GetPrivateKey(NAME),
+			PublicKey:  pub,
+			RootCerts:  nil,
+			Issuer:     ISSUER,
+		}
+		sig, err := registry.GetSigner(rsa.Algorithm).Sign(defaultContext, hash, sctx)
 
 		Expect(err).To(Succeed())
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))

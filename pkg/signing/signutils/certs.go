@@ -24,8 +24,8 @@ type Usages []interface{}
 type Specification struct {
 	RootCAs      interface{}
 	IsCA         bool
-	PublicKey    interface{}
-	CAPrivateKey interface{}
+	PublicKey    GenericPublicKey
+	CAPrivateKey GenericPrivateKey
 	CAChain      interface{}
 	Subject      pkix.Name
 	Usages       Usages
@@ -188,6 +188,33 @@ func CreateCertificate(spec *Specification) (*x509.Certificate, []byte, error) {
 		pemBytes = append(pemBytes, CertificateToPem(c)...)
 	}
 	return cert, pemBytes, nil
+}
+
+func VerifyCertificate(cert *x509.Certificate, intermediates *x509.CertPool, rootCerts *x509.CertPool, name *pkix.Name) error {
+	opts := x509.VerifyOptions{
+		Intermediates:             intermediates,
+		Roots:                     rootCerts,
+		CurrentTime:               cert.NotBefore, // TODO: tsa timestamp
+		KeyUsages:                 []x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning},
+		MaxConstraintComparisions: 0,
+	}
+
+	_, err := cert.Verify(opts)
+	if err != nil {
+		return err
+	}
+	if name != nil {
+		return MatchDN(cert.Subject, *name)
+	}
+	return nil
+}
+
+func CertificateChainToPem(certs []*x509.Certificate) []byte {
+	var data []byte
+	for _, c := range certs {
+		data = append(data, CertificateToPem(c)...)
+	}
+	return data
 }
 
 func CertificateToPem(c *x509.Certificate) []byte {

@@ -270,7 +270,14 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 	}
 	entry.Digest = d
 
-	sig, err := handler.Sign(ctx.CredentialsContext(), d.Encoded(), sha256.Handler{}.Crypto(), dn, key, pub)
+	sctx := &signing.DefaultSigningContext{
+		Hash:       sha256.Handler{}.Crypto(),
+		PrivateKey: key,
+		PublicKey:  pub,
+		RootCerts:  nil,
+		Issuer:     dn,
+	}
+	sig, err := handler.Sign(ctx.CredentialsContext(), d.Encoded(), sctx)
 	if err != nil {
 		return nil, err
 	}

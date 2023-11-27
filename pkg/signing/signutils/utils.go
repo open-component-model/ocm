@@ -149,7 +149,7 @@ type PublicKeySource interface {
 	Public() crypto.PublicKey
 }
 
-func GetPrivateKey(key interface{}) (interface{}, error) {
+func GetPrivateKey(key GenericPrivateKey) (interface{}, error) {
 	switch k := key.(type) {
 	case []byte:
 		return ParsePrivateKey(k)
@@ -164,7 +164,7 @@ func GetPrivateKey(key interface{}) (interface{}, error) {
 	}
 }
 
-func GetPublicKey(key interface{}) (interface{}, error) {
+func GetPublicKey(key GenericPublicKey) (interface{}, error) {
 	switch k := key.(type) {
 	case []byte:
 		return ParsePublicKey(k)
@@ -183,7 +183,7 @@ func GetPublicKey(key interface{}) (interface{}, error) {
 	}
 }
 
-func GetCertificateChain(in interface{}, filter bool) ([]*x509.Certificate, error) {
+func GetCertificateChain(in GenericCertificateChain, filter bool) ([]*x509.Certificate, error) {
 	switch k := in.(type) {
 	case []byte:
 		return ParseCertificateChain(k, filter)
@@ -234,7 +234,7 @@ func RootPoolFromFile(pemfile string, useOS bool, fss ...vfs.FileSystem) (*x509.
 	return pool, err
 }
 
-func GetCertPool(in interface{}, filter bool) (*x509.CertPool, error) {
+func GetCertPool(in GenericCertificatePool, filter bool) (*x509.CertPool, error) {
 	var certs []*x509.Certificate
 	var err error
 
@@ -264,7 +264,7 @@ func GetCertPool(in interface{}, filter bool) (*x509.CertPool, error) {
 	return pool, nil
 }
 
-func GetCertificate(in interface{}, filter bool) (*x509.Certificate, *x509.CertPool, error) {
+func GetCertificate(in GenericCertificate, filter bool) (*x509.Certificate, *x509.CertPool, error) {
 	var certs []*x509.Certificate
 	var err error
 

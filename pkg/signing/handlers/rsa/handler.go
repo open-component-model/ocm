@@ -8,7 +8,6 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/x509/pkix"
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
@@ -53,8 +52,8 @@ func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
-func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer *pkix.Name, priv interface{}, pub interface{}) (signature *signing.Signature, err error) {
-	privateKey, err := GetPrivateKey(priv)
+func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (signature *signing.Signature, err error) {
+	privateKey, err := GetPrivateKey(sctx.GetPrivateKey())
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid rsa private key")
 	}
@@ -62,14 +61,38 @@ func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash,
 	if err != nil {
 		return nil, fmt.Errorf("failed decoding hash to bytes")
 	}
-	sig, err := rsa.SignPKCS1v15(rand.Reader, privateKey, hash, decodedHash)
+	sig, err := rsa.SignPKCS1v15(rand.Reader, privateKey, sctx.GetHash(), decodedHash)
 	if err != nil {
 		return nil, fmt.Errorf("failed signing hash, %w", err)
 	}
 
+	pub := sctx.GetPublicKey()
+	if pub != nil {
+		var pubKey signutils.GenericPublicKey
+		cert, pool, err := signutils.GetCertificate(pub, false)
+		if err == nil {
+			pubKey, _, err = GetPublicKey(cert.PublicKey)
+			if err != nil {
+				return nil, errors.ErrInvalidWrap(err, "public key")
+			}
+			err = signutils.VerifyCertificate(cert, pool, nil, sctx.GetIssuer())
+			if err != nil {
+				return nil, errors.Wrapf(err, "public key certificate")
+			}
+		} else {
+			pubKey, _, err = GetPublicKey(pub)
+			if err != nil {
+				return nil, errors.ErrInvalidWrap(err, "public key")
+			}
+		}
+		if !privateKey.PublicKey.Equal(pubKey) {
+			return nil, fmt.Errorf("invalid public key for private key")
+		}
+	}
+
 	var iss string
-	if issuer != nil {
-		n := *issuer
+	if sctx.GetIssuer() != nil {
+		n := *sctx.GetIssuer()
 		n.SerialNumber = ""
 		iss = signutils.DNAsString(n)
 	}

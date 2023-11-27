@@ -19,9 +19,9 @@ const SignaturePEMBlockType = "SIGNATURE"
 // SignaturePEMBlockAlgorithmHeader defines the header in a signature pem block where the signature algorithm is defined.
 const SignaturePEMBlockAlgorithmHeader = "Signature Algorithm"
 
-// GetSignatureFromPEM returns a signature and certificated contained
+// GetSignatureFromPem returns a signature and certificated contained
 // in a PEM block list.
-func GetSignatureFromPEM(pemData []byte) ([]byte, string, []*x509.Certificate, error) {
+func GetSignatureFromPem(pemData []byte) ([]byte, string, []*x509.Certificate, error) {
 	var signature []byte
 	var algo string
 
@@ -45,4 +45,14 @@ func GetSignatureFromPEM(pemData []byte) ([]byte, string, []*x509.Certificate, e
 		return nil, "", nil, err
 	}
 	return signature, algo, caChain, nil
+}
+
+func SignatureBytesToPem(algo string, data []byte, certs ...*x509.Certificate) []byte {
+	block := &pem.Block{Type: "CERTIFICATE", Bytes: data}
+	if algo != "" {
+		block.Headers = map[string]string{
+			SignaturePEMBlockAlgorithmHeader: algo,
+		}
+	}
+	return append(pem.EncodeToMemory(block), CertificateChainToPem(certs)...)
 }

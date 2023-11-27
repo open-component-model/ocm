@@ -86,7 +86,7 @@ func NormHash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) ([]byte,
 
 // Sign signs the given component-descriptor with the signer.
 // The component-descriptor has to contain digests for componentReferences and resources.
-func Sign(cctx credentials.Context, cd *ComponentDescriptor, privateKey interface{}, signer signing.Signer, hasher signing.Hasher, signatureName, issuer string) error {
+func Sign(cctx credentials.Context, cd *ComponentDescriptor, privateKey signutils.GenericPrivateKey, signer signing.Signer, hasher signing.Hasher, signatureName, issuer string) error {
 	digest, err := Hash(cd, JsonNormalisationV1, hasher.Create())
 	if err != nil {
 		return fmt.Errorf("failed getting hash for cd: %w", err)
@@ -97,7 +97,15 @@ func Sign(cctx credentials.Context, cd *ComponentDescriptor, privateKey interfac
 		return err
 	}
 
-	signature, err := signer.Sign(cctx, digest, hasher.Crypto(), iss, privateKey, nil)
+	sctx := &signing.DefaultSigningContext{
+		Hash:       hasher.Crypto(),
+		PrivateKey: privateKey,
+		PublicKey:  nil,
+		RootCerts:  nil,
+		Issuer:     iss,
+	}
+
+	signature, err := signer.Sign(cctx, digest, sctx)
 	if err != nil {
 		return fmt.Errorf("failed signing hash of normalised component descriptor, %w", err)
 	}

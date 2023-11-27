@@ -273,7 +273,14 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		if err != nil {
 			return nil, err
 		}
-		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), ctx.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, priv, nil)
+		sctx := &signing.DefaultSigningContext{
+			Hash:       opts.Hasher.Crypto(),
+			PrivateKey: priv,
+			PublicKey:  opts.PublicKey(opts.SignatureName()),
+			RootCerts:  opts.RootCerts,
+			Issuer:     opts.Issuer,
+		}
+		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), ctx.Digest.Value, sctx)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor")
 		}

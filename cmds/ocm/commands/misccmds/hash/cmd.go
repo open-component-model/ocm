@@ -38,8 +38,9 @@ type Command struct {
 	rootFile string
 
 	stype string
-	priv  []byte
-	pub   []byte
+	priv  signutils.GenericPrivateKey
+	pub   signutils.GenericPublicKey
+	roots signutils.GenericCertificatePool
 	htype string
 	hash  string
 
@@ -97,6 +98,17 @@ func (o *Command) Complete(args []string) error {
 		}
 	}
 
+	if o.rootFile != "" {
+		roots, err := utils2.ReadFile(o.rootFile, o.FileSystem())
+		if err != nil {
+			return err
+		}
+		o.roots, err = signutils.GetCertPool(roots, false)
+		if err != nil {
+			return err
+		}
+	}
+
 	o.priv, err = utils2.ReadFile(args[0], o.FileSystem())
 	if err != nil {
 		return err
@@ -122,7 +134,14 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	sig, err := o.signer.Sign(o.Context.CredentialsContext(), o.hash, o.hasher.Crypto(), o.issuer, o.priv, o.pub)
+	sctx := &signing.DefaultSigningContext{
+		Hash:       o.hasher.Crypto(),
+		PrivateKey: o.priv,
+		PublicKey:  o.pub,
+		RootCerts:  o.roots,
+		Issuer:     o.issuer,
+	}
+	sig, err := o.signer.Sign(o.Context.CredentialsContext(), o.hash, sctx)
 	if err != nil {
 		return err
 	}

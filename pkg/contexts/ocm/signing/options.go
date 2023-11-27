@@ -610,11 +610,11 @@ func (o *Options) SignatureConfigured(name string) bool {
 	return false
 }
 
-func (o *Options) PublicKey(sig string) interface{} {
+func (o *Options) PublicKey(sig string) signutils.GenericPublicKey {
 	return o.effectiveRegistry.GetPublicKey(sig)
 }
 
-func (o *Options) PrivateKey() (interface{}, error) {
+func (o *Options) PrivateKey() (signutils.GenericPrivateKey, error) {
 	return signing.ResolvePrivateKey(o.effectiveRegistry, o.SignatureName())
 }
 

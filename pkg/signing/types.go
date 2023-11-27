@@ -10,10 +10,49 @@ import (
 	"encoding/json"
 	"hash"
 
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 )
+
+type SigningContext interface {
+	GetHash() crypto.Hash
+	GetPrivateKey() signutils.GenericPrivateKey
+	GetPublicKey() signutils.GenericPublicKey
+	GetRootCerts() signutils.GenericCertificatePool
+	GetIssuer() *pkix.Name
+}
+
+type DefaultSigningContext struct {
+	Hash       crypto.Hash
+	PrivateKey signutils.GenericPrivateKey
+	PublicKey  signutils.GenericPublicKey
+	RootCerts  signutils.GenericCertificatePool
+	Issuer     *pkix.Name
+}
+
+var _ SigningContext = (*DefaultSigningContext)(nil)
+
+func (d *DefaultSigningContext) GetHash() crypto.Hash {
+	return d.Hash
+}
+
+func (d *DefaultSigningContext) GetPrivateKey() signutils.GenericPrivateKey {
+	return d.PrivateKey
+}
+
+func (d *DefaultSigningContext) GetPublicKey() signutils.GenericPublicKey {
+	return d.PublicKey
+}
+
+func (d *DefaultSigningContext) GetRootCerts() signutils.GenericCertificatePool {
+	return d.RootCerts
+}
+
+func (d *DefaultSigningContext) GetIssuer() *pkix.Name {
+	return d.Issuer
+}
 
 type Signature struct { //nolint: musttag // only for string output
 	Value     string
@@ -41,7 +80,7 @@ type Signer interface {
 	// certificates.
 	// If used the key and/or certificate must be validated, for certificates
 	// the distinguished name must match the issuer.
-	Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer *pkix.Name, privatekey interface{}, publicKey interface{}) (*Signature, error)
+	Sign(cctx credentials.Context, digest string, sctx SigningContext) (*Signature, error)
 	// Algorithm is the name of the finally used signature algorithm.
 	// A signer might be registered using a logical name, so there might
 	// be multiple signer registration providing the same signature algorithm

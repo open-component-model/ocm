@@ -52,8 +52,15 @@ created rsa key pair key.priv[key.pub]
 		pub, err := env.ReadFile("key.pub")
 		Expect(err).To(Succeed())
 
+		sctx := &signing.DefaultSigningContext{
+			Hash:       0,
+			PrivateKey: priv,
+			PublicKey:  nil,
+			RootCerts:  nil,
+			Issuer:     ISSUER,
+		}
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), 0, ISSUER, priv, nil)
+		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), sctx)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
@@ -75,8 +82,15 @@ created rsa key pair key.priv[key.cert]
 		pub, err := env.ReadFile("key.cert")
 		Expect(err).To(Succeed())
 
+		sctx := &signing.DefaultSigningContext{
+			Hash:       0,
+			PrivateKey: priv,
+			PublicKey:  nil,
+			RootCerts:  nil,
+			Issuer:     ISSUER,
+		}
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), 0, ISSUER, priv, nil)
+		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), sctx)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
@@ -116,8 +130,15 @@ created encrypted rsa key pair key.priv[key.pub][key.priv.ekey]
 			key := Must(signing.ResolvePrivateKey(reg, KEYNAME))
 			Expect(key).NotTo(BeNil())
 
+			sctx := &signing.DefaultSigningContext{
+				Hash:       0,
+				PrivateKey: key,
+				PublicKey:  nil,
+				RootCerts:  nil,
+				Issuer:     ISSUER,
+			}
 			d := digest.FromBytes([]byte("digest"))
-			Must(rsa.Handler{}.Sign(defaultContext, d.Hex(), 0, ISSUER, key, nil))
+			Must(rsa.Handler{}.Sign(defaultContext, d.Hex(), sctx))
 
 			buf.Reset()
 			Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "-e", KEYNAME, "other.priv")).To(Succeed())
