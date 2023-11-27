@@ -170,7 +170,15 @@ jobs:
           echo "status=white_check_mark" >> $GITHUB_OUTPUT
         fi
         
+    - name: Check if PR exists
+      uses: 8BitJonny/gh-get-current-pr@2.2.0
+      id: pr_exists
+      with:
+        filterOutClosed: true
+        sha: ${{ github.event.pull_request.head.sha }}
+        
     - name: Comment Mend Status on PR
+      if: ${{ github.event_name != 'schedule' && steps.pr_exists.outputs.pr_found == 'true' }}
       uses: thollander/actions-comment-pull-request@v2.4.3
       with:
         message: |
