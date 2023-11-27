@@ -204,8 +204,9 @@ var _ = Describe("ref parsing", func() {
 			Info: "alias",
 		})
 		CheckRepo("tar::a/b.tar", &oci.UniformRepositorySpec{
-			Type: "tar",
-			Info: "a/b.tar",
+			Type:     "tar",
+			Info:     "a/b.tar",
+			TypeHint: "tar",
 		})
 		CheckRepo("a/b.tar", &oci.UniformRepositorySpec{
 			Info: "a/b.tar",
