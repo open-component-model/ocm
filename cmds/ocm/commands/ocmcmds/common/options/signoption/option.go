@@ -9,7 +9,6 @@ import (
 	"crypto/x509/pkix"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/keyoption"
@@ -25,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

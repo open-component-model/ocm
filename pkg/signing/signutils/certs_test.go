@@ -22,39 +22,10 @@ import (
 var _ = Describe("normalization", func() {
 
 	// root
-	capriv, _, err := rsa.Handler{}.CreateKeyPair()
-	Expect(err).To(Succeed())
-
-	spec := &signutils.Specification{
-		Subject: pkix.Name{
-			CommonName: "ca-authority",
-		},
-		Validity:     10 * time.Hour,
-		CAPrivateKey: capriv,
-		IsCA:         true,
-		Usages:       []interface{}{x509.ExtKeyUsageCodeSigning, x509.KeyUsageDigitalSignature},
-	}
-
-	ca, _, err := signutils.CreateCertificate(spec)
-	Expect(err).To(Succeed())
-
-	// leaf
-	_, pub, err := rsa.Handler{}.CreateKeyPair()
-	Expect(err).To(Succeed())
+	ca, capriv := Must2(rsa.CreateRootCertificate(signutils.CommonName("ca-authority"), 10*time.Hour))
 
 	Context("direct", func() {
-		spec := &signutils.Specification{
-			Subject: pkix.Name{
-				CommonName: "mandelsoft",
-			},
-			RootCAs:      ca,
-			CAChain:      ca,
-			CAPrivateKey: capriv,
-			PublicKey:    pub,
-			Usages:       []interface{}{x509.ExtKeyUsageCodeSigning, x509.KeyUsageDigitalSignature},
-		}
-		cert, _, err := signutils.CreateCertificate(spec)
-		Expect(err).To(Succeed())
+		cert, _, _ := Must3(rsa.CreateSigningCertificate(signutils.CommonName("mandelsoft"), ca, ca, capriv, 1*time.Hour))
 
 		pool := x509.NewCertPool()
 		pool.AddCert(ca)
@@ -64,60 +35,31 @@ var _ = Describe("normalization", func() {
 		})
 
 		It("verifies for issuer", func() {
-			err = signing.VerifyCert(nil, pool, "mandelsoft", cert)
-			Expect(err).To(Succeed())
+			MustBeSuccessful(signing.VerifyCert(nil, pool, "mandelsoft", cert))
 		})
 		It("verifies for anonymous", func() {
-			err = signing.VerifyCert(nil, pool, "", cert)
-			Expect(err).To(Succeed())
+			MustBeSuccessful(signing.VerifyCert(nil, pool, "", cert))
 		})
 		It("fails for wrong issuer", func() {
-			err = signing.VerifyCert(nil, pool, "x", cert)
-			Expect(err).To(HaveOccurred())
+			MustFailWithMessage(signing.VerifyCert(nil, pool, "x", cert), `common name "mandelsoft" is invalid`)
 		})
 	})
 
 	Context("chain", func() {
 		defer GinkgoRecover()
 
-		interpriv, _, err := rsa.Handler{}.CreateKeyPair()
-		Expect(err).To(Succeed())
+		intercert, interBytes, interpriv := Must3(rsa.CreateSigningCertificate(signutils.CommonName("acme.org"), ca, ca, capriv, 1*time.Hour, true))
 
-		spec := &signutils.Specification{
-			IsCA: true,
-			Subject: pkix.Name{
-				CommonName: "acme.org",
-			},
-			RootCAs:      ca,
-			CAChain:      ca,
-			CAPrivateKey: capriv,
-			PublicKey:    interpriv,
-			Usages:       []interface{}{x509.ExtKeyUsageCodeSigning, x509.KeyUsageDigitalSignature},
-		}
-
-		intercert, _, err := signutils.CreateCertificate(spec)
-		Expect(err).To(Succeed())
-
-		spec = &signutils.Specification{
-			Subject: pkix.Name{
-				CommonName:    "mandelsoft",
-				Country:       []string{"DE", "US"},
-				Locality:      []string{"Walldorf d"},
-				StreetAddress: []string{"x y"},
-				PostalCode:    []string{"69169"},
-				Province:      []string{"BW"},
-			},
-			RootCAs:      ca,
-			CAChain:      []*x509.Certificate{intercert, ca},
-			CAPrivateKey: interpriv,
-			PublicKey:    pub,
-			Usages:       []interface{}{x509.ExtKeyUsageCodeSigning, x509.KeyUsageDigitalSignature},
-		}
-		cert, pemBytes, err := signutils.CreateCertificate(spec)
-		Expect(err).To(Succeed())
+		cert, pemBytes, _ := Must3(rsa.CreateSigningCertificate(&pkix.Name{
+			CommonName:    "mandelsoft",
+			Country:       []string{"DE", "US"},
+			Locality:      []string{"Walldorf d"},
+			StreetAddress: []string{"x y"},
+			PostalCode:    []string{"69169"},
+			Province:      []string{"BW"},
+		}, interBytes, ca, interpriv, 1*time.Hour))
 
 		certs := Must(signutils.GetCertificateChain(pemBytes, false))
-
 		Expect(len(certs)).To(Equal(3))
 
 		pool := x509.NewCertPool()
@@ -139,8 +81,7 @@ var _ = Describe("normalization", func() {
 
 		It("verifies", func() {
 			fmt.Printf("%s\n", cert.Subject.String())
-			_, err = cert.Verify(opts)
-			Expect(err).To(Succeed())
+			MustBeSuccessful(cert.Verify(opts))
 		})
 	})
 })

@@ -22,14 +22,14 @@ const NAME = "testsignature"
 
 var ISSUER = &pkix.Name{CommonName: "mandelsoft"}
 
-var _ = Describe("normalization", func() {
+var _ = Describe("signing", func() {
 	var defaultContext credentials.Context
 
 	BeforeEach(func() {
 		defaultContext = credentials.New()
 	})
 
-	It("Normalizes struct without excludes", func() {
+	It("uses rsa signer", func() {
 		hasher := registry.GetHasher(sha256.Algorithm)
 		hash, _ := signing.Hash(hasher.Create(), []byte("test"))
 

@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -108,12 +109,12 @@ func ParsePrivateKey(data []byte) (interface{}, error) {
 func ParseCertificate(data []byte) (*x509.Certificate, error) {
 	block, _ := pem.Decode(data)
 	if block != nil {
-		if block.Type != "CERTIFICATE" {
+		if block.Type != CertificatePEMBlockType {
 			return nil, fmt.Errorf("unexpected pem block type for certificate: %q", block.Type)
 		}
 		return x509.ParseCertificate(block.Bytes)
 	}
-	return nil, fmt.Errorf("invalid certificate format (expected CERTIFICATE pem block)")
+	return nil, fmt.Errorf("invalid certificate format (expected %s pem block)", CertificatePEMBlockType)
 }
 
 func ParseCertificateChain(data []byte, filter bool) ([]*x509.Certificate, error) {
@@ -123,7 +124,7 @@ func ParseCertificateChain(data []byte, filter bool) ([]*x509.Certificate, error
 		if block == nil {
 			break
 		}
-		if block.Type != "CERTIFICATE" {
+		if block.Type != CertificatePEMBlockType {
 			if !filter {
 				return nil, fmt.Errorf("unexpected pem block type for certificate: %q", block.Type)
 			}
@@ -184,6 +185,8 @@ func GetPublicKey(key GenericPublicKey) (interface{}, error) {
 }
 
 func GetCertificateChain(in GenericCertificateChain, filter bool) ([]*x509.Certificate, error) {
+	// unfortunately it is not possible to get certificates from a x509.CertPool
+
 	switch k := in.(type) {
 	case []byte:
 		return ParseCertificateChain(k, filter)
@@ -238,6 +241,9 @@ func GetCertPool(in GenericCertificatePool, filter bool) (*x509.CertPool, error)
 	var certs []*x509.Certificate
 	var err error
 
+	if reflect2.IsNil(in) {
+		return nil, nil
+	}
 	switch k := in.(type) {
 	case []byte:
 		certs, err = ParseCertificateChain(k, filter)

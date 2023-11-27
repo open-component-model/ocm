@@ -164,7 +164,7 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 			}
 		} else {
 			var err error
-			opts, err = ctx.determineSignatureInfo(state, opts)
+			opts, err = ctx.determineSignatureInfo(state, cv, opts)
 			if err != nil {
 				return nil, fmt.Errorf("failed to determine signature info: %w", err)
 			}
@@ -365,24 +365,33 @@ func resMsg(ref *compdesc.Resource, acc string, msg string, args ...interface{})
 
 func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNames []string, opts *Options) (*metav1.DigestSpec, error) {
 	var spec *metav1.DigestSpec
+
+	sctx := &signing.DefaultSigningContext{
+		Hash:      opts.Hasher.Crypto(),
+		RootCerts: opts.RootCerts,
+		Issuer:    opts.Issuer,
+	}
+
 	found := []string{}
 	for _, n := range signatureNames {
 		f := cd.GetSignatureIndex(n)
 		if f < 0 {
 			continue
 		}
-		var pub any
+		sig := &cd.Signatures[f]
+
 		if !opts.Keyless {
-			pub = opts.PublicKey(n)
-			if pub == nil {
-				if opts.SignatureConfigured(n) {
-					return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
+			sctx.PublicKey = opts.PublicKey(n)
+			if sctx.PublicKey == nil {
+				var err error
+
+				opts.Printer.Printf("no public key found for signature %q -> extract key from signature\n")
+				sctx.PublicKey, err = GetPublicKeyFromSignature(sig, sctx)
+				if err != nil {
+					return nil, errors.Wrapf(err, "public key from signature")
 				}
-				opts.Printer.Printf("Warning: no public key for signature %q in %s\n", n, state.History)
-				continue
 			}
 		}
-		sig := &cd.Signatures[f]
 		verifier := opts.Registry.GetVerifier(sig.Signature.Algorithm)
 		if verifier == nil {
 			if opts.SignatureConfigured(n) {
@@ -403,9 +412,9 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 		if sig.Digest.Value != digest {
 			return nil, errors.Newf("signature digest (%s) does not match found digest (%s)", sig.Digest.Value, digest)
 		}
-		err = verifier.Verify(sig.Digest.Value, hasher.Crypto(), sig.ConvertToSigning(), pub)
+		err = verifier.Verify(sig.Digest.Value, hasher.Crypto(), sig.ConvertToSigning(), sctx.PublicKey)
 		if err != nil {
-			return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, n)
+			return nil, errors.Wrapf(err, "signature %q", n)
 		}
 		found = append(found, n)
 		if opts.SignatureName() == sig.Name {
@@ -421,6 +430,29 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 	}
 
 	return spec, nil
+}
+
+func GetPublicKeyFromSignature(sig *compdesc.Signature, sctx signing.SigningContext) (signutils.GenericPublicKey, error) {
+	if sig.Signature.MediaType != signutils.MediaTypePEM {
+		return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY)
+	}
+	_, _, certs, err := signutils.GetSignatureFromPem([]byte(sig.Signature.Value))
+	if err != nil {
+		return nil, err
+	}
+	if len(certs) == 0 {
+		return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY)
+	}
+
+	cert, pool, err := signutils.GetCertificate(certs, false)
+	if err != nil {
+		return nil, err
+	}
+	err = signutils.VerifyCertificate(cert, pool, sctx.GetRootCerts(), sctx.GetIssuer())
+	if err != nil {
+		return nil, errors.Wrapf(err, "public key certificate")
+	}
+	return cert.PublicKey, nil
 }
 
 func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) (rerr error) {

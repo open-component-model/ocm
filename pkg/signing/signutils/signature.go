@@ -10,11 +10,14 @@ import (
 	"fmt"
 )
 
-// MediaTypePEM defines the media type for PEM formatted data.
+// MediaTypePEM defines the media type for PEM formatted signature data.
 const MediaTypePEM = "application/x-pem-file"
 
 // SignaturePEMBlockType defines the type of a signature pem block.
 const SignaturePEMBlockType = "SIGNATURE"
+
+// CertificatePEMBlockType defines the type of a certificate pem block.
+const CertificatePEMBlockType = "CERTIFICATE"
 
 // SignaturePEMBlockAlgorithmHeader defines the header in a signature pem block where the signature algorithm is defined.
 const SignaturePEMBlockAlgorithmHeader = "Signature Algorithm"
@@ -29,18 +32,24 @@ func GetSignatureFromPem(pemData []byte) ([]byte, string, []*x509.Certificate, e
 		return nil, "", nil, nil
 	}
 
-	var currentBlock *pem.Block
-	currentBlock, pemData = pem.Decode(pemData)
-	if currentBlock == nil && len(pemData) > 0 {
-		return nil, "", nil, fmt.Errorf("unable to decode pem block %s", string(pemData))
+	data := pemData
+	for {
+		block, rest := pem.Decode(data)
+		if block == nil {
+			return nil, "", nil, fmt.Errorf("PEM des not contain signature")
+		}
+		if block == nil && len(data) > 0 {
+			return nil, "", nil, fmt.Errorf("unable to decode pem block %s", string(data))
+		}
+		if block.Type == SignaturePEMBlockType {
+			signature = block.Bytes
+			algo = block.Headers[SignaturePEMBlockAlgorithmHeader]
+			break
+		}
+		data = rest
 	}
 
-	if currentBlock.Type == SignaturePEMBlockType {
-		signature = currentBlock.Bytes
-		algo = currentBlock.Headers[SignaturePEMBlockAlgorithmHeader]
-	}
-
-	caChain, err := ParseCertificateChain(pemData, false)
+	caChain, err := ParseCertificateChain(pemData, true)
 	if err != nil {
 		return nil, "", nil, err
 	}
@@ -48,7 +57,7 @@ func GetSignatureFromPem(pemData []byte) ([]byte, string, []*x509.Certificate, e
 }
 
 func SignatureBytesToPem(algo string, data []byte, certs ...*x509.Certificate) []byte {
-	block := &pem.Block{Type: "CERTIFICATE", Bytes: data}
+	block := &pem.Block{Type: SignaturePEMBlockType, Bytes: data}
 	if algo != "" {
 		block.Headers = map[string]string{
 			SignaturePEMBlockAlgorithmHeader: algo,

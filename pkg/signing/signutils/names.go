@@ -11,6 +11,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+func CommonName(n string) *pkix.Name {
+	return &pkix.Name{CommonName: n}
+}
+
 var dnRegexp = regexp.MustCompile(`[/;,+]([^=]+)=([^/;,+]+)`)
 
 func ParseDN(dn string) (*pkix.Name, error) {

@@ -24,14 +24,8 @@ const Algorithm = "RSASSA-PKCS1-V1_5"
 // MediaType defines the media type for a plain RSA signature.
 const MediaType = "application/vnd.ocm.signature.rsa"
 
-// MediaTypePEM defines the media type for PEM formatted data.
-const MediaTypePEM = "application/x-pem-file"
-
-// SignaturePEMBlockType defines the type of a signature pem block.
-const SignaturePEMBlockType = "SIGNATURE"
-
-// SignaturePEMBlockAlgorithmHeader defines the header in a signature pem block where the signature algorithm is defined.
-const SignaturePEMBlockAlgorithmHeader = "Signature Algorithm"
+// MediaTypePEM is used if the signature contains the public key certificate chain.
+const MediaTypePEM = signutils.MediaTypePEM
 
 func init() {
 	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{})
@@ -66,19 +60,24 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 		return nil, fmt.Errorf("failed signing hash, %w", err)
 	}
 
+	media := MediaType
+	value := hex.EncodeToString(sig)
+
 	pub := sctx.GetPublicKey()
 	if pub != nil {
 		var pubKey signutils.GenericPublicKey
-		cert, pool, err := signutils.GetCertificate(pub, false)
-		if err == nil {
-			pubKey, _, err = GetPublicKey(cert.PublicKey)
+		certs, err := signutils.GetCertificateChain(pub, false)
+		if err == nil && len(certs) > 0 {
+			pubKey, _, err = GetPublicKey(certs[0].PublicKey)
 			if err != nil {
 				return nil, errors.ErrInvalidWrap(err, "public key")
 			}
-			err = signutils.VerifyCertificate(cert, pool, nil, sctx.GetIssuer())
+			err = signutils.VerifyCertificate(certs[0], certs[1:], sctx.GetRootCerts(), sctx.GetIssuer())
 			if err != nil {
 				return nil, errors.Wrapf(err, "public key certificate")
 			}
+			media = MediaTypePEM
+			value = string(signutils.SignatureBytesToPem(Algorithm, sig, certs...))
 		} else {
 			pubKey, _, err = GetPublicKey(pub)
 			if err != nil {
@@ -98,8 +97,8 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	}
 
 	return &signing.Signature{
-		Value:     hex.EncodeToString(sig),
-		MediaType: MediaType,
+		Value:     value,
+		MediaType: media,
 		Algorithm: Algorithm,
 		Issuer:    iss,
 	}, nil
@@ -120,7 +119,7 @@ func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Sign
 		if err != nil {
 			return fmt.Errorf("unable to get signature value: failed decoding hash %s: %w", digest, err)
 		}
-	case MediaTypePEM:
+	case signutils.MediaTypePEM:
 		signaturePemBlocks, err := GetSignaturePEMBlocks([]byte(signature.Value))
 		if err != nil {
 			return fmt.Errorf("unable to get signature pem blocks: %w", err)
@@ -170,7 +169,7 @@ func GetSignaturePEMBlocks(pemData []byte) ([]*pem.Block, error) {
 			return nil, fmt.Errorf("unable to decode pem block %s", string(pemData))
 		}
 
-		if currentBlock.Type == SignaturePEMBlockType {
+		if currentBlock.Type == signutils.SignaturePEMBlockType {
 			signatureBlocks = append(signatureBlocks, currentBlock)
 		}
 
@@ -182,11 +181,11 @@ func GetSignaturePEMBlocks(pemData []byte) ([]*pem.Block, error) {
 	return signatureBlocks, nil
 }
 
-func (_ Handler) CreateKeyPair() (priv interface{}, pub interface{}, err error) {
+func (_ Handler) CreateKeyPair() (priv signutils.GenericPublicKey, pub signutils.GenericPublicKey, err error) {
 	return CreateKeyPair()
 }
 
-func CreateKeyPair() (priv interface{}, pub interface{}, err error) {
+func CreateKeyPair() (priv signutils.GenericPublicKey, pub signutils.GenericPublicKey, err error) {
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, nil, err

@@ -24,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 const (
@@ -158,9 +159,9 @@ func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo 
 		return nil, errors.New("invalid response: signature block doesn't contain signature")
 	}
 
-	algorithm := signatureBlock.Headers[rsa.SignaturePEMBlockAlgorithmHeader]
+	algorithm := signatureBlock.Headers[signutils.SignaturePEMBlockAlgorithmHeader]
 	if algorithm == "" {
-		return nil, fmt.Errorf("invalid response: %s header is empty: %s", rsa.SignaturePEMBlockAlgorithmHeader, string(responseBodyBytes))
+		return nil, fmt.Errorf("invalid response: %s header is empty: %s", signutils.SignaturePEMBlockAlgorithmHeader, string(responseBodyBytes))
 	}
 
 	encodedSignature := pem.EncodeToMemory(signatureBlock)

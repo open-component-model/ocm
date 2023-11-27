@@ -5,7 +5,6 @@
 package signing
 
 import (
-	"crypto/x509"
 	"crypto/x509/pkix"
 	"fmt"
 	"strings"
@@ -333,12 +332,12 @@ func (o *issuer) ApplySigningOption(opts *Options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type rootverts struct {
-	pool *x509.CertPool
+	pool signutils.GenericCertificatePool
 }
 
 // RootCertificates provides an option requesting to dedicated root certificates
 // for a signing/verification operation using certificates.
-func RootCertificates(pool *x509.CertPool) Option {
+func RootCertificates(pool signutils.GenericCertificatePool) Option {
 	return &rootverts{pool}
 }
 
@@ -404,7 +403,7 @@ type Options struct {
 	Signer            signing.Signer
 	Issuer            *pkix.Name
 	VerifySignature   bool
-	RootCerts         *x509.CertPool
+	RootCerts         signutils.GenericCertificatePool
 	HashAlgo          string
 	Hasher            signing.Hasher
 	Keys              signing.KeyRegistry
@@ -434,6 +433,9 @@ func (opts *Options) Eval(list ...Option) *Options {
 func (o *Options) ApplySigningOption(opts *Options) {
 	if o.Printer != nil {
 		opts.Printer = o.Printer
+	}
+	if o.RootCerts != nil {
+		opts.RootCerts = o.RootCerts
 	}
 	if o.Signer != nil {
 		opts.Signer = o.Signer
@@ -485,6 +487,16 @@ func (o *Options) Complete(ctx interface{}) error {
 	if ctx == nil {
 		ctx = ocm.DefaultContext()
 	}
+
+	if o.RootCerts != nil {
+		// check root certificates
+		pool, err := signutils.GetCertPool(o.RootCerts, false)
+		if err != nil {
+			return err
+		}
+		o.RootCerts = pool
+	}
+
 	switch t := ctx.(type) {
 	case ocm.ContextProvider:
 		reg = signingattr.Get(t.OCMContext())
@@ -534,18 +546,20 @@ func (o *Options) Complete(ctx interface{}) error {
 		if o.Signer != nil && !o.VerifySignature {
 			if pub := o.PublicKey(o.SignatureName()); pub != nil {
 				o.VerifySignature = true
-				if err := o.checkCert(pub, o.SignatureName()); err != nil {
+				if err := o.checkCert(pub, o.Issuer); err != nil {
 					return fmt.Errorf("public key not valid: %w", err)
 				}
 			}
 		} else if o.VerifySignature {
 			for _, n := range o.SignatureNames {
 				pub := o.PublicKey(n)
-				if pub == nil {
-					return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
-				}
-				if err := o.checkCert(pub, n); err != nil {
-					return fmt.Errorf("public key not valid: %w", err)
+				// don't check for public key here, anymore,
+				// because the key might be provided via certificate together with
+				// the signature. An early failure is therefore not possible anymore.
+				if pub != nil {
+					if err := o.checkCert(pub, nil); err != nil {
+						return fmt.Errorf("public key not valid: %w", err)
+					}
 				}
 			}
 		}
@@ -566,12 +580,12 @@ func (o *Options) Complete(ctx interface{}) error {
 	return nil
 }
 
-func (o *Options) checkCert(data interface{}, name string) error {
+func (o *Options) checkCert(data interface{}, name *pkix.Name) error {
 	cert, pool, err := signutils.GetCertificate(data, false)
 	if err != nil {
 		return nil
 	}
-	err = signing.VerifyCert(pool, o.RootCerts, name, cert)
+	err = signing.VerifyCertDN(pool, o.RootCerts, name, cert)
 	if err != nil {
 		return errors.Wrapf(err, "public key %q", name)
 	}

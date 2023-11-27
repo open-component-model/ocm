@@ -13,19 +13,33 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
-func VerifyCert(intermediate, root *x509.CertPool, cn string, cert *x509.Certificate) error {
-	opts := x509.VerifyOptions{
-		Intermediates: intermediate,
-		Roots:         root,
-		CurrentTime:   cert.NotBefore,
-		KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning},
-	}
-	_, err := cert.Verify(opts)
+func VerifyCert(intermediate signutils.GenericCertificateChain, root signutils.GenericCertificatePool, name string, cert *x509.Certificate) error {
+	return VerifyCertDN(intermediate, root, signutils.CommonName(name), cert)
+}
+
+func VerifyCertDN(intermediate signutils.GenericCertificateChain, root signutils.GenericCertificatePool, name *pkix.Name, cert *x509.Certificate) error {
+	rootPool, err := signutils.GetCertPool(root, false)
 	if err != nil {
 		return err
 	}
-	if cn != "" && cert.Subject.CommonName != cn {
-		return errors.ErrInvalid("common name", cn)
+	interPool, err := signutils.GetCertPool(intermediate, false)
+	if err != nil {
+		return err
+	}
+	opts := x509.VerifyOptions{
+		Intermediates: interPool,
+		Roots:         rootPool,
+		CurrentTime:   cert.NotBefore,
+		KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning},
+	}
+	_, err = cert.Verify(opts)
+	if err != nil {
+		return err
+	}
+	if name != nil {
+		if err := signutils.MatchDN(cert.Subject, *name); err != nil {
+			return err
+		}
 	}
 	if cert.KeyUsage&x509.KeyUsageDigitalSignature != 0 {
 		return nil

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -23,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 

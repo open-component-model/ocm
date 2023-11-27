@@ -10,10 +10,10 @@ import (
 	"encoding/json"
 	"hash"
 
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 type SigningContext interface {

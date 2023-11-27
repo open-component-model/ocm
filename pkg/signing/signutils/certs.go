@@ -22,11 +22,11 @@ import (
 type Usages []interface{}
 
 type Specification struct {
-	RootCAs      interface{}
+	RootCAs      GenericCertificatePool
 	IsCA         bool
 	PublicKey    GenericPublicKey
 	CAPrivateKey GenericPrivateKey
-	CAChain      interface{}
+	CAChain      GenericCertificateChain
 	Subject      pkix.Name
 	Usages       Usages
 	Validity     time.Duration
@@ -190,21 +190,29 @@ func CreateCertificate(spec *Specification) (*x509.Certificate, []byte, error) {
 	return cert, pemBytes, nil
 }
 
-func VerifyCertificate(cert *x509.Certificate, intermediates *x509.CertPool, rootCerts *x509.CertPool, name *pkix.Name) error {
+func VerifyCertificate(cert *x509.Certificate, intermediates GenericCertificateChain, rootCerts GenericCertificatePool, name *pkix.Name) error {
+	rootPool, err := GetCertPool(rootCerts, false)
+	if err != nil {
+		return err
+	}
+	interPool, err := GetCertPool(intermediates, false)
+	if err != nil {
+		return err
+	}
 	opts := x509.VerifyOptions{
-		Intermediates:             intermediates,
-		Roots:                     rootCerts,
+		Intermediates:             interPool,
+		Roots:                     rootPool,
 		CurrentTime:               cert.NotBefore, // TODO: tsa timestamp
 		KeyUsages:                 []x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning},
 		MaxConstraintComparisions: 0,
 	}
 
-	_, err := cert.Verify(opts)
+	_, err = cert.Verify(opts)
 	if err != nil {
 		return err
 	}
 	if name != nil {
-		return MatchDN(cert.Subject, *name)
+		return errors.Wrapf(MatchDN(cert.Subject, *name), "issuer mismatch in public key certificate")
 	}
 	return nil
 }
@@ -222,5 +230,5 @@ func CertificateToPem(c *x509.Certificate) []byte {
 }
 
 func CertificateBytesToPem(derBytes []byte) []byte {
-	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	return pem.EncodeToMemory(&pem.Block{Type: CertificatePEMBlockType, Bytes: derBytes})
 }
