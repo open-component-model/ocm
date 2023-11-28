@@ -20,7 +20,7 @@ type ComponentAccessInfo struct {
 }
 
 type RepositoryImpl interface {
-	SetProxy(proxy RepositoryProxy)
+	SetBridge(bridge RepositoryBridge)
 
 	GetContext() cpi.Context
 
@@ -33,52 +33,52 @@ type RepositoryImpl interface {
 	io.Closer
 }
 
-type _repositoryProxyBase = resource.ResourceImplBase[cpi.Repository]
+type _repositoryBridgeBase = resource.ResourceImplBase[cpi.Repository]
 
-type repositoryProxy struct {
-	*_repositoryProxyBase
+type repositoryBridge struct {
+	*_repositoryBridgeBase
 	ctx  cpi.Context
 	kind string
 	impl RepositoryImpl
 }
 
-func newRepositoryProxy(impl RepositoryImpl, kind string, closer ...io.Closer) RepositoryProxy {
+func newRepositoryBridge(impl RepositoryImpl, kind string, closer ...io.Closer) RepositoryBridge {
 	base := resource.NewSimpleResourceImplBase[cpi.Repository](closer...)
-	b := &repositoryProxy{
-		_repositoryProxyBase: base,
-		ctx:                  impl.GetContext(),
-		impl:                 impl,
+	b := &repositoryBridge{
+		_repositoryBridgeBase: base,
+		ctx:                   impl.GetContext(),
+		impl:                  impl,
 	}
-	impl.SetProxy(b)
+	impl.SetBridge(b)
 	return b
 }
 
-func (b *repositoryProxy) Close() error {
+func (b *repositoryBridge) Close() error {
 	list := errors.ErrListf("closing %s", b.kind)
-	refmgmt.AllocLog.Trace("closing repository proxy", "kind", b.kind)
+	refmgmt.AllocLog.Trace("closing repository bridge", "kind", b.kind)
 	list.Add(b.impl.Close())
-	list.Add(b._repositoryProxyBase.Close())
-	refmgmt.AllocLog.Trace("closed repository proxy", "kind", b.kind)
+	list.Add(b._repositoryBridgeBase.Close())
+	refmgmt.AllocLog.Trace("closed repository bridge", "kind", b.kind)
 	return list.Result()
 }
 
-func (b *repositoryProxy) GetContext() cpi.Context {
+func (b *repositoryBridge) GetContext() cpi.Context {
 	return b.ctx
 }
 
-func (b *repositoryProxy) GetSpecification() cpi.RepositorySpec {
+func (b *repositoryBridge) GetSpecification() cpi.RepositorySpec {
 	return b.impl.GetSpecification()
 }
 
-func (b *repositoryProxy) ComponentLister() cpi.ComponentLister {
+func (b *repositoryBridge) ComponentLister() cpi.ComponentLister {
 	return b.impl.ComponentLister()
 }
 
-func (b *repositoryProxy) ExistsComponentVersion(name string, version string) (bool, error) {
+func (b *repositoryBridge) ExistsComponentVersion(name string, version string) (bool, error) {
 	return b.impl.ExistsComponentVersion(name, version)
 }
 
-func (b *repositoryProxy) LookupComponentVersion(name string, version string) (cv cpi.ComponentVersionAccess, rerr error) {
+func (b *repositoryBridge) LookupComponentVersion(name string, version string) (cv cpi.ComponentVersionAccess, rerr error) {
 	c, err := b.LookupComponent(name)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (b *repositoryProxy) LookupComponentVersion(name string, version string) (c
 	return c.LookupVersion(version)
 }
 
-func (b *repositoryProxy) LookupComponent(name string) (cpi.ComponentAccess, error) {
+func (b *repositoryBridge) LookupComponent(name string) (cpi.ComponentAccess, error) {
 	i, err := b.impl.LookupComponent(name)
 	if err != nil {
 		return nil, err

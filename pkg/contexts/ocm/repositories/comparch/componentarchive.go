@@ -103,7 +103,7 @@ func (c *ComponentArchive) SetVersion(v string) {
 
 type componentArchiveContainer struct {
 	ctx   cpi.Context
-	base  repocpi.ComponentVersionAccessProxy
+	base  repocpi.ComponentVersionAccessBridge
 	fsacc *accessobj.FileSystemBlobAccess
 	spec  *RepositorySpec
 	repo  cpi.Repository
@@ -111,11 +111,11 @@ type componentArchiveContainer struct {
 
 var _ repocpi.ComponentVersionAccessImpl = (*componentArchiveContainer)(nil)
 
-func (c *componentArchiveContainer) SetProxy(base repocpi.ComponentVersionAccessProxy) {
+func (c *componentArchiveContainer) SetBridge(base repocpi.ComponentVersionAccessBridge) {
 	c.base = base
 }
 
-func (c *componentArchiveContainer) GetParentProxy() repocpi.ComponentAccessProxy {
+func (c *componentArchiveContainer) GetParentBridge() repocpi.ComponentAccessBridge {
 	return nil
 }
 

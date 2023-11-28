@@ -21,7 +21,7 @@ type _componentAccessView interface {
 
 type ComponentAccessViewManager = resource.ViewManager[cpi.ComponentAccess] // here you have to use an alias
 
-type ComponentAccessProxy interface {
+type ComponentAccessBridge interface {
 	resource.ResourceImplementation[cpi.ComponentAccess]
 
 	GetContext() cpi.Context
@@ -41,7 +41,7 @@ type ComponentAccessProxy interface {
 
 type componentAccessView struct {
 	_componentAccessView
-	proxy ComponentAccessProxy
+	bridge ComponentAccessBridge
 }
 
 var (
@@ -49,57 +49,57 @@ var (
 	_ utils.Unwrappable   = (*componentAccessView)(nil)
 )
 
-func GetComponentAccessProxy(n cpi.ComponentAccess) (ComponentAccessProxy, error) {
+func GetComponentAccessBridge(n cpi.ComponentAccess) (ComponentAccessBridge, error) {
 	if v, ok := n.(*componentAccessView); ok {
-		return v.proxy, nil
+		return v.bridge, nil
 	}
 	return nil, errors.ErrNotSupported("component base type", fmt.Sprintf("%T", n))
 }
 
 func GetComponentAccessImplementation(n cpi.ComponentAccess) (ComponentAccessImpl, error) {
 	if v, ok := n.(*componentAccessView); ok {
-		if b, ok := v.proxy.(*componentAccessProxy); ok {
+		if b, ok := v.bridge.(*componentAccessBridge); ok {
 			return b.impl, nil
 		}
-		return nil, errors.ErrNotSupported("component base type", fmt.Sprintf("%T", v.proxy))
+		return nil, errors.ErrNotSupported("component base type", fmt.Sprintf("%T", v.bridge))
 	}
 	return nil, errors.ErrNotSupported("component implementation type", fmt.Sprintf("%T", n))
 }
 
-func componentAccessViewCreator(i ComponentAccessProxy, v resource.CloserView, d ComponentAccessViewManager) cpi.ComponentAccess {
+func componentAccessViewCreator(i ComponentAccessBridge, v resource.CloserView, d ComponentAccessViewManager) cpi.ComponentAccess {
 	return &componentAccessView{
 		_componentAccessView: resource.NewView[cpi.ComponentAccess](v, d),
-		proxy:                i,
+		bridge:               i,
 	}
 }
 
 func NewComponentAccess(impl ComponentAccessImpl, kind string, main bool, closer ...io.Closer) (cpi.ComponentAccess, error) {
-	proxy, err := newComponentAccessProxy(impl, closer...)
+	bridge, err := newComponentAccessBridge(impl, closer...)
 	if err != nil {
 		return nil, errors.Join(err, impl.Close())
 	}
 	if kind == "" {
 		kind = "component"
 	}
-	cv := resource.NewResource[cpi.ComponentAccess](proxy, componentAccessViewCreator, fmt.Sprintf("%s %s", kind, impl.GetName()), main)
+	cv := resource.NewResource[cpi.ComponentAccess](bridge, componentAccessViewCreator, fmt.Sprintf("%s %s", kind, impl.GetName()), main)
 	return cv, nil
 }
 
 func (c *componentAccessView) Unwrap() interface{} {
-	return c.proxy
+	return c.bridge
 }
 
 func (c *componentAccessView) GetContext() cpi.Context {
-	return c.proxy.GetContext()
+	return c.bridge.GetContext()
 }
 
 func (c *componentAccessView) GetName() string {
-	return c.proxy.GetName()
+	return c.bridge.GetName()
 }
 
 func (c *componentAccessView) ListVersions() (list []string, err error) {
 	err = c.Execute(func() error {
-		list, err = c.proxy.ListVersions()
+		list, err = c.bridge.ListVersions()
 		return err
 	})
 	return list, err
@@ -107,7 +107,7 @@ func (c *componentAccessView) ListVersions() (list []string, err error) {
 
 func (c *componentAccessView) LookupVersion(version string) (acc cpi.ComponentVersionAccess, err error) {
 	err = c.Execute(func() error {
-		acc, err = c.proxy.LookupVersion(version)
+		acc, err = c.bridge.LookupVersion(version)
 		return err
 	})
 	return acc, err
@@ -119,7 +119,7 @@ func (c *componentAccessView) AddVersion(acc cpi.ComponentVersionAccess, overwri
 	}
 
 	return c.Execute(func() error {
-		return c.proxy.AddVersion(acc, cpi.NewAddVersionOptions(cpi.Overwrite(utils.Optional(overwrite...))))
+		return c.bridge.AddVersion(acc, cpi.NewAddVersionOptions(cpi.Overwrite(utils.Optional(overwrite...))))
 	})
 }
 
@@ -128,16 +128,16 @@ func (c *componentAccessView) AddVersionOpt(acc cpi.ComponentVersionAccess, opts
 		return errors.ErrInvalid("component name", acc.GetName())
 	}
 	return c.Execute(func() error {
-		return c.proxy.AddVersion(acc, cpi.NewAddVersionOptions(opts...))
+		return c.bridge.AddVersion(acc, cpi.NewAddVersionOptions(opts...))
 	})
 }
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc cpi.ComponentVersionAccess, err error) {
 	err = c.Execute(func() error {
-		if c.proxy.IsReadOnly() {
+		if c.bridge.IsReadOnly() {
 			return accessio.ErrReadOnly
 		}
-		acc, err = c.proxy.NewVersion(version, overrides...)
+		acc, err = c.bridge.NewVersion(version, overrides...)
 		return err
 	})
 	return acc, err
@@ -145,7 +145,7 @@ func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc
 
 func (c *componentAccessView) HasVersion(vers string) (ok bool, err error) {
 	err = c.Execute(func() error {
-		ok, err = c.proxy.HasVersion(vers)
+		ok, err = c.bridge.HasVersion(vers)
 		return err
 	})
 	return ok, err

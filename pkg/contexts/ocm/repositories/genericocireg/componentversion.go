@@ -44,7 +44,7 @@ func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessI
 // //////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
-	impl repocpi.ComponentVersionAccessProxy
+	bridge repocpi.ComponentVersionAccessBridge
 
 	comp     *componentAccessImpl
 	version  string
@@ -75,12 +75,12 @@ func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAcce
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetProxy(impl repocpi.ComponentVersionAccessProxy) {
-	c.impl = impl
+func (c *ComponentVersionContainer) SetBridge(impl repocpi.ComponentVersionAccessBridge) {
+	c.bridge = impl
 }
 
-func (c *ComponentVersionContainer) GetParentProxy() repocpi.ComponentAccessProxy {
-	return c.comp.base
+func (c *ComponentVersionContainer) GetParentBridge() repocpi.ComponentAccessBridge {
+	return c.comp.bridge
 }
 
 func (c *ComponentVersionContainer) Close() error {

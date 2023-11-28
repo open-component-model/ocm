@@ -10,7 +10,7 @@ import (
 )
 
 type RepositoryImpl struct {
-	base   repocpi.RepositoryProxy
+	bridge repocpi.RepositoryBridge
 	ctx    cpi.Context
 	access Access
 	nonref cpi.Repository
@@ -30,8 +30,8 @@ func (r *RepositoryImpl) Close() error {
 	return r.access.Close()
 }
 
-func (r *RepositoryImpl) SetProxy(base repocpi.RepositoryProxy) {
-	r.base = base
+func (r *RepositoryImpl) SetBridge(base repocpi.RepositoryBridge) {
+	r.bridge = base
 	r.nonref = repocpi.NewNoneRefRepositoryView(base)
 }
 

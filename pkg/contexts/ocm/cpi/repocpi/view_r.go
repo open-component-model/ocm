@@ -30,7 +30,7 @@ type _repositoryView interface {
 
 type RepositoryViewManager = resource.ViewManager[cpi.Repository] // here you have to use an alias
 
-type RepositoryProxy interface {
+type RepositoryBridge interface {
 	resource.ResourceImplementation[cpi.Repository]
 
 	GetContext() cpi.Context
@@ -47,7 +47,7 @@ type RepositoryProxy interface {
 
 type repositoryView struct {
 	_repositoryView
-	proxy RepositoryProxy
+	bridge RepositoryBridge
 }
 
 var (
@@ -56,74 +56,74 @@ var (
 	_ utils.Unwrappable                    = (*repositoryView)(nil)
 )
 
-func GetRepositoryProxy(n cpi.Repository) (RepositoryProxy, error) {
+func GetRepositoryBridge(n cpi.Repository) (RepositoryBridge, error) {
 	if v, ok := n.(*repositoryView); ok {
-		return v.proxy, nil
+		return v.bridge, nil
 	}
 	return nil, errors.ErrNotSupported("repository implementation type", fmt.Sprintf("%T", n))
 }
 
 func GetRepositoryImplementation(n cpi.Repository) (RepositoryImpl, error) {
 	if v, ok := n.(*repositoryView); ok {
-		if b, ok := v.proxy.(*repositoryProxy); ok {
+		if b, ok := v.bridge.(*repositoryBridge); ok {
 			return b.impl, nil
 		}
-		return nil, errors.ErrNotSupported("repository base type", fmt.Sprintf("%T", v.proxy))
+		return nil, errors.ErrNotSupported("repository base type", fmt.Sprintf("%T", v.bridge))
 	}
 	return nil, errors.ErrNotSupported("repository implementation type", fmt.Sprintf("%T", n))
 }
 
-func repositoryViewCreator(i RepositoryProxy, v resource.CloserView, d RepositoryViewManager) cpi.Repository {
+func repositoryViewCreator(i RepositoryBridge, v resource.CloserView, d RepositoryViewManager) cpi.Repository {
 	return &repositoryView{
 		_repositoryView: resource.NewView[cpi.Repository](v, d),
-		proxy:           i,
+		bridge:          i,
 	}
 }
 
 // NewNoneRefRepositoryView provides a repository reflecting the state of the
 // view manager without holding an additional reference.
-func NewNoneRefRepositoryView(i RepositoryProxy) cpi.Repository {
+func NewNoneRefRepositoryView(i RepositoryBridge) cpi.Repository {
 	return &repositoryView{
 		_repositoryView: resource.NewView[cpi.Repository](resource.NewNonRefView[cpi.Repository](i), i),
-		proxy:           i,
+		bridge:          i,
 	}
 }
 
 func NewRepository(impl RepositoryImpl, kind string, closer ...io.Closer) cpi.Repository {
-	proxy := newRepositoryProxy(impl, kind, closer...)
+	bridge := newRepositoryBridge(impl, kind, closer...)
 	if kind == "" {
 		kind = "OCM repository"
 	}
-	return resource.NewResource[cpi.Repository](proxy, repositoryViewCreator, kind, true)
+	return resource.NewResource[cpi.Repository](bridge, repositoryViewCreator, kind, true)
 }
 
 func (r *repositoryView) Unwrap() interface{} {
-	return r.proxy
+	return r.bridge
 }
 
 func (r *repositoryView) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
-	return credentials.GetProvidedConsumerId(r.proxy, uctx...)
+	return credentials.GetProvidedConsumerId(r.bridge, uctx...)
 }
 
 func (r *repositoryView) GetIdentityMatcher() string {
-	return credentials.GetProvidedIdentityMatcher(r.proxy)
+	return credentials.GetProvidedIdentityMatcher(r.bridge)
 }
 
 func (r *repositoryView) GetSpecification() cpi.RepositorySpec {
-	return r.proxy.GetSpecification()
+	return r.bridge.GetSpecification()
 }
 
 func (r *repositoryView) GetContext() cpi.Context {
-	return r.proxy.GetContext()
+	return r.bridge.GetContext()
 }
 
 func (r *repositoryView) ComponentLister() cpi.ComponentLister {
-	return r.proxy.ComponentLister()
+	return r.bridge.ComponentLister()
 }
 
 func (r *repositoryView) ExistsComponentVersion(name string, version string) (ok bool, err error) {
 	err = r.Execute(func() error {
-		ok, err = r.proxy.ExistsComponentVersion(name, version)
+		ok, err = r.bridge.ExistsComponentVersion(name, version)
 		return err
 	})
 	return ok, err
@@ -131,7 +131,7 @@ func (r *repositoryView) ExistsComponentVersion(name string, version string) (ok
 
 func (r *repositoryView) LookupComponentVersion(name string, version string) (acc cpi.ComponentVersionAccess, err error) {
 	err = r.Execute(func() error {
-		acc, err = r.proxy.LookupComponentVersion(name, version)
+		acc, err = r.bridge.LookupComponentVersion(name, version)
 		return err
 	})
 	return acc, err
@@ -139,7 +139,7 @@ func (r *repositoryView) LookupComponentVersion(name string, version string) (ac
 
 func (r *repositoryView) LookupComponent(name string) (acc cpi.ComponentAccess, err error) {
 	err = r.Execute(func() error {
-		acc, err = r.proxy.LookupComponent(name)
+		acc, err = r.bridge.LookupComponent(name)
 		return err
 	})
 	return acc, err

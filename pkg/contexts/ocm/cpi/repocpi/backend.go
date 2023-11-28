@@ -52,7 +52,7 @@ type StorageBackendImpl interface {
 }
 
 type storageBackendRepository struct {
-	proxy  RepositoryProxy
+	bridge RepositoryBridge
 	closed atomic.Bool
 	noref  cpi.Repository
 	kind   string
@@ -78,9 +78,9 @@ func NewStorageBackend(kind string, impl StorageBackendImpl) cpi.Repository {
 	return NewRepository(backend, kind)
 }
 
-func (s *storageBackendRepository) SetProxy(proxy RepositoryProxy) {
-	s.proxy = proxy
-	s.noref = NewNoneRefRepositoryView(proxy)
+func (s *storageBackendRepository) SetBridge(bridge RepositoryBridge) {
+	s.bridge = bridge
+	s.noref = NewNoneRefRepositoryView(bridge)
 }
 
 func (s *storageBackendRepository) Close() error {
@@ -124,19 +124,19 @@ func (s *storageBackendRepository) LookupComponent(name string) (*ComponentAcces
 ////////////////////////////////////////////////////////////////////////////////
 
 type storageBackendComponent struct {
-	proxy ComponentAccessProxy
-	repo  *storageBackendRepository
-	name  string
+	bridge ComponentAccessBridge
+	repo   *storageBackendRepository
+	name   string
 }
 
 var _ ComponentAccessImpl = (*storageBackendComponent)(nil)
 
-func (s *storageBackendComponent) SetProxy(proxy ComponentAccessProxy) {
-	s.proxy = proxy
+func (s *storageBackendComponent) SetBridge(bridge ComponentAccessBridge) {
+	s.bridge = bridge
 }
 
-func (s *storageBackendComponent) GetParentProxy() RepositoryViewManager {
-	return s.repo.proxy
+func (s *storageBackendComponent) GetParentBridge() RepositoryViewManager {
+	return s.repo.bridge
 }
 
 func (s *storageBackendComponent) Close() error {
@@ -213,7 +213,7 @@ func (s *storageBackendComponent) NewVersion(version string, overwrite ...bool) 
 ////////////////////////////////////////////////////////////////////////////////
 
 type storageBackendComponentVersion struct {
-	proxy      ComponentVersionAccessProxy
+	bridge     ComponentVersionAccessBridge
 	comp       *storageBackendComponent
 	name       common.NameVersion
 	descriptor *compdesc.ComponentDescriptor
@@ -229,12 +229,12 @@ func (s *storageBackendComponentVersion) GetContext() cpi.Context {
 	return s.comp.repo.impl.GetContext()
 }
 
-func (s *storageBackendComponentVersion) SetProxy(proxy ComponentVersionAccessProxy) {
-	s.proxy = proxy
+func (s *storageBackendComponentVersion) SetBridge(bridge ComponentVersionAccessBridge) {
+	s.bridge = bridge
 }
 
-func (s *storageBackendComponentVersion) GetParentProxy() ComponentAccessProxy {
-	return s.comp.proxy
+func (s *storageBackendComponentVersion) GetParentBridge() ComponentAccessBridge {
+	return s.comp.bridge
 }
 
 func (s *storageBackendComponentVersion) Repository() cpi.Repository {

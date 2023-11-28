@@ -26,7 +26,7 @@ import (
 
 type RepositoryImpl struct {
 	lock   sync.RWMutex
-	base   repocpi.RepositoryProxy
+	bridge repocpi.RepositoryBridge
 	arch   *ComponentArchive
 	nonref cpi.Repository
 }
@@ -57,8 +57,8 @@ func (r *RepositoryImpl) Close() error {
 	return r.arch.container.Close()
 }
 
-func (r *RepositoryImpl) SetProxy(base repocpi.RepositoryProxy) {
-	r.base = base
+func (r *RepositoryImpl) SetBridge(base repocpi.RepositoryBridge) {
+	r.bridge = base
 	r.nonref = repocpi.NewNoneRefRepositoryView(base)
 }
 
@@ -143,7 +143,7 @@ func (r *RepositoryImpl) LookupComponent(name string) (*repocpi.ComponentAccessI
 ////////////////////////////////////////////////////////////////////////////////
 
 type ComponentAccessImpl struct {
-	base repocpi.ComponentAccessProxy
+	base repocpi.ComponentAccessBridge
 	repo *RepositoryImpl
 }
 
@@ -160,12 +160,12 @@ func (c *ComponentAccessImpl) Close() error {
 	return nil
 }
 
-func (c *ComponentAccessImpl) SetProxy(base repocpi.ComponentAccessProxy) {
+func (c *ComponentAccessImpl) SetBridge(base repocpi.ComponentAccessBridge) {
 	c.base = base
 }
 
-func (c *ComponentAccessImpl) GetParentProxy() repocpi.RepositoryViewManager {
-	return c.repo.base
+func (c *ComponentAccessImpl) GetParentBridge() repocpi.RepositoryViewManager {
+	return c.repo.bridge
 }
 
 func (c *ComponentAccessImpl) GetContext() cpi.Context {
@@ -208,7 +208,7 @@ func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (*re
 ////////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
-	impl repocpi.ComponentVersionAccessProxy
+	impl repocpi.ComponentVersionAccessBridge
 
 	comp *ComponentAccessImpl
 
@@ -232,11 +232,11 @@ func newComponentVersionContainer(comp *ComponentAccessImpl) (*ComponentVersionC
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetProxy(impl repocpi.ComponentVersionAccessProxy) {
+func (c *ComponentVersionContainer) SetBridge(impl repocpi.ComponentVersionAccessBridge) {
 	c.impl = impl
 }
 
-func (c *ComponentVersionContainer) GetParentProxy() repocpi.ComponentAccessProxy {
+func (c *ComponentVersionContainer) GetParentBridge() repocpi.ComponentAccessBridge {
 	return c.comp.base
 }
 
