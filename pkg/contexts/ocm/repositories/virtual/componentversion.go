@@ -33,7 +33,7 @@ func newComponentVersionAccess(comp *componentAccessImpl, version string, persis
 // //////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
-	base repocpi.ComponentVersionAccessBase
+	base repocpi.ComponentVersionAccessProxy
 
 	comp    *componentAccessImpl
 	version string
@@ -50,11 +50,11 @@ func newComponentVersionContainer(comp *componentAccessImpl, version string, acc
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetBase(base repocpi.ComponentVersionAccessBase) {
+func (c *ComponentVersionContainer) SetProxy(base repocpi.ComponentVersionAccessProxy) {
 	c.base = base
 }
 
-func (c *ComponentVersionContainer) GetParentBase() repocpi.ComponentAccessBase {
+func (c *ComponentVersionContainer) GetParentProxy() repocpi.ComponentAccessProxy {
 	return c.comp.base
 }
 

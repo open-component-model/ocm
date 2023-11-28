@@ -13,11 +13,15 @@
 //     in package [github.com/open-component-model/ocm/pkg/contexts/ocm].
 //
 //   - on layer 2 (this package) there is a backend agnostic
-//     implementation od standard functionality based on layer 3.
+//     implementation of standard functionality based on layer 3.
 //     This is divided into two parts
 //
 //     a) the view objects provided by the Dup() calls of the layer 1 API.
 //     All dups are internally based on a single base object.
+//     These objects are called proxy. They act as base object
+//     for the views and as wrapper for the implementation objects
+//     providing generic implementations potentially based on
+//     the implementation functionality.
 //
 //     b) the base object for all dup views is used to implement some
 //     common functionality like the view management. The base object

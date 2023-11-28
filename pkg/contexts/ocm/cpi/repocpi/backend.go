@@ -21,7 +21,7 @@ import (
 // and component version objects, which are generically implemented
 // based on the methods of this interface.
 //
-// A repositotry interface based on this implementation interface can be
+// A repository interface based on this implementation interface can be
 // created using the function NewStorageBackend.
 type StorageBackendImpl interface {
 	// repository related methods.
@@ -52,7 +52,7 @@ type StorageBackendImpl interface {
 }
 
 type storageBackendRepository struct {
-	base   RepositoryBase
+	proxy  RepositoryProxy
 	closed atomic.Bool
 	noref  cpi.Repository
 	kind   string
@@ -78,9 +78,9 @@ func NewStorageBackend(kind string, impl StorageBackendImpl) cpi.Repository {
 	return NewRepository(backend, kind)
 }
 
-func (s *storageBackendRepository) SetBase(base RepositoryBase) {
-	s.base = base
-	s.noref = NewNoneRefRepositoryView(base)
+func (s *storageBackendRepository) SetProxy(proxy RepositoryProxy) {
+	s.proxy = proxy
+	s.noref = NewNoneRefRepositoryView(proxy)
 }
 
 func (s *storageBackendRepository) Close() error {
@@ -124,19 +124,19 @@ func (s *storageBackendRepository) LookupComponent(name string) (*ComponentAcces
 ////////////////////////////////////////////////////////////////////////////////
 
 type storageBackendComponent struct {
-	base ComponentAccessBase
-	repo *storageBackendRepository
-	name string
+	proxy ComponentAccessProxy
+	repo  *storageBackendRepository
+	name  string
 }
 
 var _ ComponentAccessImpl = (*storageBackendComponent)(nil)
 
-func (s *storageBackendComponent) SetBase(base ComponentAccessBase) {
-	s.base = base
+func (s *storageBackendComponent) SetProxy(proxy ComponentAccessProxy) {
+	s.proxy = proxy
 }
 
-func (s *storageBackendComponent) GetParentBase() RepositoryViewManager {
-	return s.repo.base
+func (s *storageBackendComponent) GetParentProxy() RepositoryViewManager {
+	return s.repo.proxy
 }
 
 func (s *storageBackendComponent) Close() error {
@@ -213,7 +213,7 @@ func (s *storageBackendComponent) NewVersion(version string, overwrite ...bool) 
 ////////////////////////////////////////////////////////////////////////////////
 
 type storageBackendComponentVersion struct {
-	base       ComponentVersionAccessBase
+	proxy      ComponentVersionAccessProxy
 	comp       *storageBackendComponent
 	name       common.NameVersion
 	descriptor *compdesc.ComponentDescriptor
@@ -229,12 +229,12 @@ func (s *storageBackendComponentVersion) GetContext() cpi.Context {
 	return s.comp.repo.impl.GetContext()
 }
 
-func (s *storageBackendComponentVersion) SetBase(base ComponentVersionAccessBase) {
-	s.base = base
+func (s *storageBackendComponentVersion) SetProxy(proxy ComponentVersionAccessProxy) {
+	s.proxy = proxy
 }
 
-func (s *storageBackendComponentVersion) GetParentBase() ComponentAccessBase {
-	return s.comp.base
+func (s *storageBackendComponentVersion) GetParentProxy() ComponentAccessProxy {
+	return s.comp.proxy
 }
 
 func (s *storageBackendComponentVersion) Repository() cpi.Repository {

@@ -26,7 +26,7 @@ import (
 
 type RepositoryImpl struct {
 	lock   sync.RWMutex
-	base   repocpi.RepositoryBase
+	base   repocpi.RepositoryProxy
 	arch   *ComponentArchive
 	nonref cpi.Repository
 }
@@ -57,7 +57,7 @@ func (r *RepositoryImpl) Close() error {
 	return r.arch.container.Close()
 }
 
-func (r *RepositoryImpl) SetBase(base repocpi.RepositoryBase) {
+func (r *RepositoryImpl) SetProxy(base repocpi.RepositoryProxy) {
 	r.base = base
 	r.nonref = repocpi.NewNoneRefRepositoryView(base)
 }
@@ -143,7 +143,7 @@ func (r *RepositoryImpl) LookupComponent(name string) (*repocpi.ComponentAccessI
 ////////////////////////////////////////////////////////////////////////////////
 
 type ComponentAccessImpl struct {
-	base repocpi.ComponentAccessBase
+	base repocpi.ComponentAccessProxy
 	repo *RepositoryImpl
 }
 
@@ -160,11 +160,11 @@ func (c *ComponentAccessImpl) Close() error {
 	return nil
 }
 
-func (c *ComponentAccessImpl) SetBase(base repocpi.ComponentAccessBase) {
+func (c *ComponentAccessImpl) SetProxy(base repocpi.ComponentAccessProxy) {
 	c.base = base
 }
 
-func (c *ComponentAccessImpl) GetParentBase() repocpi.RepositoryViewManager {
+func (c *ComponentAccessImpl) GetParentProxy() repocpi.RepositoryViewManager {
 	return c.repo.base
 }
 
@@ -208,7 +208,7 @@ func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (*re
 ////////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
-	impl repocpi.ComponentVersionAccessBase
+	impl repocpi.ComponentVersionAccessProxy
 
 	comp *ComponentAccessImpl
 
@@ -232,11 +232,11 @@ func newComponentVersionContainer(comp *ComponentAccessImpl) (*ComponentVersionC
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetBase(impl repocpi.ComponentVersionAccessBase) {
+func (c *ComponentVersionContainer) SetProxy(impl repocpi.ComponentVersionAccessProxy) {
 	c.impl = impl
 }
 
-func (c *ComponentVersionContainer) GetParentBase() repocpi.ComponentAccessBase {
+func (c *ComponentVersionContainer) GetParentProxy() repocpi.ComponentAccessProxy {
 	return c.comp.base
 }
 

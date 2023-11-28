@@ -12,7 +12,7 @@ import (
 )
 
 type componentAccessImpl struct {
-	base repocpi.ComponentAccessBase
+	base repocpi.ComponentAccessProxy
 
 	repo *RepositoryImpl
 	name string
@@ -32,11 +32,11 @@ func (c *componentAccessImpl) Close() error {
 	return nil
 }
 
-func (c *componentAccessImpl) SetBase(base repocpi.ComponentAccessBase) {
+func (c *componentAccessImpl) SetProxy(base repocpi.ComponentAccessProxy) {
 	c.base = base
 }
 
-func (c *componentAccessImpl) GetParentBase() repocpi.RepositoryViewManager {
+func (c *componentAccessImpl) GetParentProxy() repocpi.RepositoryViewManager {
 	return c.repo.base
 }
 

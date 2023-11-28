@@ -41,7 +41,7 @@ type _componentVersionAccessView interface {
 
 type ComponentVersionAccessViewManager = resource.ViewManager[cpi.ComponentVersionAccess]
 
-type ComponentVersionAccessBase interface {
+type ComponentVersionAccessProxy interface {
 	resource.ResourceImplementation[cpi.ComponentVersionAccess]
 	common.VersionedElement
 	io.Closer
@@ -96,8 +96,8 @@ type ComponentVersionAccessBase interface {
 
 type componentVersionAccessView struct {
 	_componentVersionAccessView
-	base ComponentVersionAccessBase
-	err  error
+	proxy ComponentVersionAccessProxy
+	err   error
 }
 
 var (
@@ -105,41 +105,41 @@ var (
 	_ utils.Unwrappable          = (*componentVersionAccessView)(nil)
 )
 
-func GetComponentVersionAccessBase(n cpi.ComponentVersionAccess) (ComponentVersionAccessBase, error) {
+func GetComponentVersionAccessProxy(n cpi.ComponentVersionAccess) (ComponentVersionAccessProxy, error) {
 	if v, ok := n.(*componentVersionAccessView); ok {
-		return v.base, nil
+		return v.proxy, nil
 	}
-	return nil, errors.ErrNotSupported("component version base type", fmt.Sprintf("%T", n))
+	return nil, errors.ErrNotSupported("component version proxy type", fmt.Sprintf("%T", n))
 }
 
 func GetComponentVersionAccessImplementation(n cpi.ComponentVersionAccess) (ComponentVersionAccessImpl, error) {
 	if v, ok := n.(*componentVersionAccessView); ok {
-		if b, ok := v.base.(*componentVersionAccessBase); ok {
+		if b, ok := v.proxy.(*componentVersionAccessProxy); ok {
 			return b.impl, nil
 		}
-		return nil, errors.ErrNotSupported("component version base type", fmt.Sprintf("%T", v.base))
+		return nil, errors.ErrNotSupported("component version proxy type", fmt.Sprintf("%T", v.proxy))
 	}
 	return nil, errors.ErrNotSupported("component version implementation type", fmt.Sprintf("%T", n))
 }
 
-func artifactAccessViewCreator(i ComponentVersionAccessBase, v resource.CloserView, d resource.ViewManager[cpi.ComponentVersionAccess]) cpi.ComponentVersionAccess {
+func artifactAccessViewCreator(i ComponentVersionAccessProxy, v resource.CloserView, d resource.ViewManager[cpi.ComponentVersionAccess]) cpi.ComponentVersionAccess {
 	cv := &componentVersionAccessView{
 		_componentVersionAccessView: resource.NewView[cpi.ComponentVersionAccess](v, d),
-		base:                        i,
+		proxy:                       i,
 	}
 	return cv
 }
 
 func NewComponentVersionAccess(name, version string, impl ComponentVersionAccessImpl, lazy, persistent, direct bool, closer ...io.Closer) (cpi.ComponentVersionAccess, error) {
-	base, err := newComponentVersionAccessBase(name, version, impl, lazy, persistent, direct, closer...)
+	proxy, err := newComponentVersionAccessProxy(name, version, impl, lazy, persistent, direct, closer...)
 	if err != nil {
 		return nil, errors.Join(err, impl.Close())
 	}
-	return resource.NewResource[cpi.ComponentVersionAccess](base, artifactAccessViewCreator, fmt.Sprintf("component version  %s/%s", name, version), true), nil
+	return resource.NewResource[cpi.ComponentVersionAccess](proxy, artifactAccessViewCreator, fmt.Sprintf("component version  %s/%s", name, version), true), nil
 }
 
 func (c *componentVersionAccessView) Unwrap() interface{} {
-	return c.base
+	return c.proxy
 }
 
 func (c *componentVersionAccessView) Close() error {
@@ -149,23 +149,23 @@ func (c *componentVersionAccessView) Close() error {
 }
 
 func (c *componentVersionAccessView) Repository() cpi.Repository {
-	return c.base.Repository()
+	return c.proxy.Repository()
 }
 
 func (c *componentVersionAccessView) GetContext() internal.Context {
-	return c.base.GetContext()
+	return c.proxy.GetContext()
 }
 
 func (c *componentVersionAccessView) GetName() string {
-	return c.base.GetName()
+	return c.proxy.GetName()
 }
 
 func (c *componentVersionAccessView) GetVersion() string {
-	return c.base.GetVersion()
+	return c.proxy.GetVersion()
 }
 
 func (c *componentVersionAccessView) GetDescriptor() *compdesc.ComponentDescriptor {
-	return c.base.GetDescriptor()
+	return c.proxy.GetDescriptor()
 }
 
 func (c *componentVersionAccessView) GetProvider() *compdesc.Provider {
@@ -195,7 +195,7 @@ func (c *componentVersionAccessView) AccessMethod(spec cpi.AccessSpec) (meth cpi
 func (c *componentVersionAccessView) accessMethod(spec cpi.AccessSpec) (meth cpi.AccessMethod, err error) {
 	switch {
 	case spec.IsLocal(c.GetContext()):
-		return c.base.AccessMethod(spec, c.Allocatable())
+		return c.proxy.AccessMethod(spec, c.Allocatable())
 	default:
 		return spec.AccessMethod(c)
 	}
@@ -225,16 +225,16 @@ func (c *componentVersionAccessView) getInexpensiveContentVersionIdentity(spec c
 		// fall back to original version
 		return spec.GetInexpensiveContentVersionIdentity(c)
 	default:
-		return c.base.GetInexpensiveContentVersionIdentity(spec, c.Allocatable())
+		return c.proxy.GetInexpensiveContentVersionIdentity(spec, c.Allocatable())
 	}
 }
 
 func (c *componentVersionAccessView) Update() error {
 	return c.Execute(func() error {
-		if !c.base.IsPersistent() {
+		if !c.proxy.IsPersistent() {
 			return ErrTempVersion
 		}
-		return c.base.Update(true)
+		return c.proxy.Update(true)
 	})
 }
 
@@ -243,7 +243,7 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	eff := cpi.NewBlobUploadOptions(opts...)
 	err := c.Execute(func() error {
 		var err error
-		spec, err = c.base.AddBlob(blob, artType, refName, global, false, eff)
+		spec, err = c.proxy.AddBlob(blob, artType, refName, global, false, eff)
 		return err
 	})
 
@@ -306,7 +306,7 @@ func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessVie
 	set func(*T, compdesc.AccessSpec) error,
 	setblob func(*T, cpi.BlobAccess, string, cpi.AccessSpec) error,
 ) error {
-	if c.base.IsReadOnly() {
+	if c.proxy.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
 	meta := art.Meta()
@@ -366,7 +366,7 @@ func (c *componentVersionAccessView) SetResourceAccess(art cpi.ResourceAccess, m
 }
 
 func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...cpi.ModificationOption) error {
-	if c.base.IsReadOnly() {
+	if c.proxy.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
 
@@ -375,11 +375,11 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		Access:       acc,
 	}
 
-	ctx := c.base.GetContext()
+	ctx := c.proxy.GetContext()
 	opts := internal.NewModificationOptions(modopts...)
 	cpi.CompleteModificationOptions(ctx, opts)
 
-	spec, err := c.base.GetContext().AccessSpecForSpec(acc)
+	spec, err := c.proxy.GetContext().AccessSpecForSpec(acc)
 	if err != nil {
 		return err
 	}
@@ -403,14 +403,14 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 			}
 		}
 
-		cd := c.base.GetDescriptor()
+		cd := c.proxy.GetDescriptor()
 		idx := cd.GetResourceIndex(&res.ResourceMeta)
 		if idx >= 0 {
 			old = &cd.Resources[idx]
 		}
 
 		if old == nil {
-			if !opts.IsModifyResource() && c.base.IsPersistent() {
+			if !opts.IsModifyResource() && c.proxy.IsPersistent() {
 				return fmt.Errorf("new resource would invalidate signature")
 			}
 		}
@@ -456,7 +456,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 
 		if old != nil {
 			eq := res.Equivalent(old)
-			if !eq.IsLocalHashEqual() && c.base.IsPersistent() {
+			if !eq.IsLocalHashEqual() && c.proxy.IsPersistent() {
 				if !opts.IsModifyResource() {
 					return fmt.Errorf("resource would invalidate signature")
 				}
@@ -469,7 +469,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		} else {
 			cd.Resources[idx] = *res
 		}
-		return c.base.Update(false)
+		return c.proxy.Update(false)
 	})
 }
 
@@ -500,7 +500,7 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 		if !old.Digest.IsNone() {
 			digester.HashAlgorithm = old.Digest.HashAlgorithm
 			digester.NormalizationAlgorithm = old.Digest.NormalisationAlgorithm
-			if opts.IsAcceptExistentDigests() && !opts.IsModifyResource() && c.base.IsPersistent() {
+			if opts.IsAcceptExistentDigests() && !opts.IsModifyResource() && c.proxy.IsPersistent() {
 				res.Digest = old.Digest
 				value = old.Digest.Value
 			}
@@ -515,7 +515,7 @@ func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess) err
 }
 
 func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
-	if c.base.IsReadOnly() {
+	if c.proxy.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
 
@@ -525,40 +525,40 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 	}
 	return c.Execute(func() error {
 		if res.Version == "" {
-			res.Version = c.base.GetVersion()
+			res.Version = c.proxy.GetVersion()
 		}
-		cd := c.base.GetDescriptor()
+		cd := c.proxy.GetDescriptor()
 		if idx := cd.GetSourceIndex(&res.SourceMeta); idx == -1 {
 			cd.Sources = append(cd.Sources, *res)
 		} else {
 			cd.Sources[idx] = *res
 		}
-		return c.base.Update(false)
+		return c.proxy.Update(false)
 	})
 }
 
 func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference) error {
 	return c.Execute(func() error {
-		cd := c.base.GetDescriptor()
+		cd := c.proxy.GetDescriptor()
 		if idx := cd.GetComponentReferenceIndex(*ref); idx == -1 {
 			cd.References = append(cd.References, *ref)
 		} else {
 			cd.References[idx] = *ref
 		}
-		return c.base.Update(false)
+		return c.proxy.Update(false)
 	})
 }
 
 func (c *componentVersionAccessView) DiscardChanges() {
-	c.base.DiscardChanges()
+	c.proxy.DiscardChanges()
 }
 
 func (c *componentVersionAccessView) IsPersistent() bool {
-	return c.base.IsPersistent()
+	return c.proxy.IsPersistent()
 }
 
 func (c *componentVersionAccessView) UseDirectAccess() bool {
-	return c.base.UseDirectAccess()
+	return c.proxy.UseDirectAccess()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

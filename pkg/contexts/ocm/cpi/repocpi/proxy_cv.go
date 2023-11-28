@@ -35,8 +35,8 @@ import (
 // interface for component versions.
 type ComponentVersionAccessImpl interface {
 	GetContext() cpi.Context
-	SetBase(base ComponentVersionAccessBase)
-	GetParentBase() ComponentAccessBase
+	SetProxy(proxy ComponentVersionAccessProxy)
+	GetParentProxy() ComponentAccessProxy
 
 	Repository() cpi.Repository
 
@@ -52,25 +52,17 @@ type ComponentVersionAccessImpl interface {
 	io.Closer
 }
 
-type ComponentVersionAccessImplSupport struct {
-	Base ComponentVersionAccessBase
-}
+type _componentVersionAccessProxyBase = resource.ResourceImplBase[cpi.ComponentVersionAccess]
 
-func (b *ComponentVersionAccessImplSupport) SetBase(base ComponentVersionAccessBase) {
-	b.Base = base
-}
-
-type _componentVersionAccessImplBase = resource.ResourceImplBase[cpi.ComponentVersionAccess]
-
-// componentVersionAccessBase is the counterpart to views, all views
+// componentVersionAccessProxy is the counterpart to views, all views
 // created by Dup calls use this base object to work on.
 // Besides some functionality covered by view objects these base objects
 // implement provider-agnostic parts of the ComponentVersionAccess API.
-type componentVersionAccessBase struct {
+type componentVersionAccessProxy struct {
 	lock sync.Mutex
 	id   finalizer.ObjectIdentity
 
-	*_componentVersionAccessImplBase
+	*_componentVersionAccessProxyBase
 	ctx     cpi.Context
 	name    string
 	version string
@@ -86,37 +78,37 @@ type componentVersionAccessBase struct {
 	impl ComponentVersionAccessImpl
 }
 
-var _ ComponentVersionAccessBase = (*componentVersionAccessBase)(nil)
+var _ ComponentVersionAccessProxy = (*componentVersionAccessProxy)(nil)
 
-func newComponentVersionAccessBase(name, version string, impl ComponentVersionAccessImpl, lazy, persistent, direct bool, closer ...io.Closer) (ComponentVersionAccessBase, error) {
-	base, err := resource.NewResourceImplBase[cpi.ComponentVersionAccess, cpi.ComponentAccess](impl.GetParentBase(), closer...)
+func newComponentVersionAccessProxy(name, version string, impl ComponentVersionAccessImpl, lazy, persistent, direct bool, closer ...io.Closer) (ComponentVersionAccessProxy, error) {
+	base, err := resource.NewResourceImplBase[cpi.ComponentVersionAccess, cpi.ComponentAccess](impl.GetParentProxy(), closer...)
 	if err != nil {
 		return nil, err
 	}
-	b := &componentVersionAccessBase{
-		_componentVersionAccessImplBase: base,
-		id:                              finalizer.NewObjectIdentity(fmt.Sprintf("%s:%s", name, version)),
-		ctx:                             impl.GetContext(),
-		name:                            name,
-		version:                         version,
-		blobcache:                       NewBlobCache(),
-		lazy:                            lazy,
-		persistent:                      persistent,
-		directAccess:                    direct,
-		impl:                            impl,
+	b := &componentVersionAccessProxy{
+		_componentVersionAccessProxyBase: base,
+		id:                               finalizer.NewObjectIdentity(fmt.Sprintf("%s:%s", name, version)),
+		ctx:                              impl.GetContext(),
+		name:                             name,
+		version:                          version,
+		blobcache:                        NewBlobCache(),
+		lazy:                             lazy,
+		persistent:                       persistent,
+		directAccess:                     direct,
+		impl:                             impl,
 	}
-	impl.SetBase(b)
+	impl.SetProxy(b)
 	return b, nil
 }
 
 func GetComponentVersionImpl[T ComponentVersionAccessImpl](cv cpi.ComponentVersionAccess) (T, error) {
 	var _nil T
 
-	impl, err := GetComponentVersionAccessBase(cv)
+	impl, err := GetComponentVersionAccessProxy(cv)
 	if err != nil {
 		return _nil, err
 	}
-	if mine, ok := impl.(*componentVersionAccessBase); ok {
+	if mine, ok := impl.(*componentVersionAccessProxy); ok {
 		cont, ok := mine.impl.(T)
 		if ok {
 			return cont, nil
@@ -126,7 +118,7 @@ func GetComponentVersionImpl[T ComponentVersionAccessImpl](cv cpi.ComponentVersi
 	return _nil, errors.Newf("non-matching component version implementation %T", impl)
 }
 
-func (b *componentVersionAccessBase) Close() error {
+func (b *componentVersionAccessProxy) Close() error {
 	list := errors.ErrListf("closing component version %s", common.VersionedElementKey(b))
 	refmgmt.AllocLog.Trace("closing component version base", "name", common.VersionedElementKey(b))
 	// prepare artifact access for final close in
@@ -135,33 +127,33 @@ func (b *componentVersionAccessBase) Close() error {
 		list.Add(b.update(true))
 	}
 	list.Add(b.impl.Close())
-	list.Add(b._componentVersionAccessImplBase.Close())
+	list.Add(b._componentVersionAccessProxyBase.Close())
 	list.Add(b.blobcache.Clear())
 	refmgmt.AllocLog.Trace("closed component version base", "name", common.VersionedElementKey(b))
 	return list.Result()
 }
 
-func (b *componentVersionAccessBase) GetContext() cpi.Context {
+func (b *componentVersionAccessProxy) GetContext() cpi.Context {
 	return b.ctx
 }
 
-func (b *componentVersionAccessBase) GetName() string {
+func (b *componentVersionAccessProxy) GetName() string {
 	return b.name
 }
 
-func (b *componentVersionAccessBase) GetVersion() string {
+func (b *componentVersionAccessProxy) GetVersion() string {
 	return b.version
 }
 
-func (b *componentVersionAccessBase) GetImplementation() ComponentVersionAccessImpl {
+func (b *componentVersionAccessProxy) GetImplementation() ComponentVersionAccessImpl {
 	return b.impl
 }
 
-func (b *componentVersionAccessBase) GetBlobCache() BlobCache {
+func (b *componentVersionAccessProxy) GetBlobCache() BlobCache {
 	return b.blobcache
 }
 
-func (b *componentVersionAccessBase) EnablePersistence() bool {
+func (b *componentVersionAccessProxy) EnablePersistence() bool {
 	if b.discardChanges {
 		return false
 	}
@@ -170,30 +162,30 @@ func (b *componentVersionAccessBase) EnablePersistence() bool {
 	return true
 }
 
-func (b *componentVersionAccessBase) IsPersistent() bool {
+func (b *componentVersionAccessProxy) IsPersistent() bool {
 	return b.persistent
 }
 
-func (b *componentVersionAccessBase) UseDirectAccess() bool {
+func (b *componentVersionAccessProxy) UseDirectAccess() bool {
 	return b.directAccess
 }
 
-func (b *componentVersionAccessBase) DiscardChanges() {
+func (b *componentVersionAccessProxy) DiscardChanges() {
 	b.discardChanges = true
 }
 
-func (b *componentVersionAccessBase) Repository() cpi.Repository {
+func (b *componentVersionAccessProxy) Repository() cpi.Repository {
 	return b.impl.Repository()
 }
 
-func (b *componentVersionAccessBase) IsReadOnly() bool {
+func (b *componentVersionAccessProxy) IsReadOnly() bool {
 	return b.impl.IsReadOnly()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // with access to actual view
 
-func (b *componentVersionAccessBase) AccessMethod(spec cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (meth cpi.AccessMethod, err error) {
+func (b *componentVersionAccessProxy) AccessMethod(spec cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (meth cpi.AccessMethod, err error) {
 	switch {
 	case compose.Is(spec):
 		cspec, ok := spec.(*compose.AccessSpec)
@@ -216,36 +208,36 @@ func (b *componentVersionAccessBase) AccessMethod(spec cpi.AccessSpec, cv refmgm
 	return meth, err
 }
 
-func (b *componentVersionAccessBase) GetInexpensiveContentVersionIdentity(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
+func (b *componentVersionAccessProxy) GetInexpensiveContentVersionIdentity(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
 	return b.impl.GetInexpensiveContentVersionIdentity(acc, cv)
 }
 
-func (b *componentVersionAccessBase) GetDescriptor() *compdesc.ComponentDescriptor {
+func (b *componentVersionAccessProxy) GetDescriptor() *compdesc.ComponentDescriptor {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.getDescriptor()
 }
 
-func (b *componentVersionAccessBase) getDescriptor() *compdesc.ComponentDescriptor {
+func (b *componentVersionAccessProxy) getDescriptor() *compdesc.ComponentDescriptor {
 	if b.descriptor == nil {
 		b.descriptor = b.impl.GetDescriptor()
 	}
 	return b.descriptor
 }
 
-func (b *componentVersionAccessBase) GetStorageContext() cpi.StorageContext {
+func (b *componentVersionAccessProxy) GetStorageContext() cpi.StorageContext {
 	return b.impl.GetStorageContext()
 }
 
-func (b *componentVersionAccessBase) ShouldUpdate(final bool) bool {
+func (b *componentVersionAccessProxy) ShouldUpdate(final bool) bool {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.shouldUpdate(final)
 }
 
-func (b *componentVersionAccessBase) shouldUpdate(final bool) bool {
+func (b *componentVersionAccessProxy) shouldUpdate(final bool) bool {
 	if b.discardChanges {
 		return false
 	}
@@ -255,14 +247,14 @@ func (b *componentVersionAccessBase) shouldUpdate(final bool) bool {
 	return !b.lazy && b.directAccess && b.persistent
 }
 
-func (b *componentVersionAccessBase) Update(final bool) error {
+func (b *componentVersionAccessProxy) Update(final bool) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.update(final)
 }
 
-func (b *componentVersionAccessBase) update(final bool) error {
+func (b *componentVersionAccessProxy) update(final bool) error {
 	if !b.shouldUpdate(final) {
 		return nil
 	}
@@ -288,7 +280,7 @@ func (b *componentVersionAccessBase) update(final bool) error {
 	return err
 }
 
-func (b *componentVersionAccessBase) getLocalBlob(acc cpi.AccessSpec) cpi.BlobAccess {
+func (b *componentVersionAccessProxy) getLocalBlob(acc cpi.AccessSpec) cpi.BlobAccess {
 	key, err := json.Marshal(acc)
 	if err != nil {
 		return nil
@@ -296,7 +288,7 @@ func (b *componentVersionAccessBase) getLocalBlob(acc cpi.AccessSpec) cpi.BlobAc
 	return b.blobcache.GetBlobFor(string(key))
 }
 
-func (b *componentVersionAccessBase) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error) {
+func (b *componentVersionAccessProxy) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -357,7 +349,7 @@ func (b *componentVersionAccessBase) AddBlob(blob cpi.BlobAccess, artType, refNa
 	return b.cacheLocalBlob(acc, blob)
 }
 
-func (b *componentVersionAccessBase) cacheLocalBlob(acc cpi.AccessSpec, blob cpi.BlobAccess) (cpi.AccessSpec, error) {
+func (b *componentVersionAccessProxy) cacheLocalBlob(acc cpi.AccessSpec, blob cpi.BlobAccess) (cpi.AccessSpec, error) {
 	key, err := json.Marshal(acc)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot marshal access spec")
@@ -385,7 +377,7 @@ func (b *componentVersionAccessBase) cacheLocalBlob(acc cpi.AccessSpec, blob cpi
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *componentVersionAccessBase) composeAccess(spec cpi.AccessSpec) (blobaccess.BlobAccess, string, cpi.AccessSpec, error) {
+func (b *componentVersionAccessProxy) composeAccess(spec cpi.AccessSpec) (blobaccess.BlobAccess, string, cpi.AccessSpec, error) {
 	if !compose.Is(spec) {
 		return nil, "", nil, nil
 	}
@@ -405,7 +397,7 @@ func (b *componentVersionAccessBase) composeAccess(spec cpi.AccessSpec) (blobacc
 	return blob, cspec.ReferenceName, cspec.GlobalAccess.Get(), nil
 }
 
-func (b *componentVersionAccessBase) setupLocalBlobs(kind string, accprov func(cpi.AccessSpec) (blobaccess.BlobAccess, string, cpi.AccessSpec, error), it compdesc.ArtifactAccessor, final bool, opts *cpi.BlobUploadOptions) (ferr error) {
+func (b *componentVersionAccessProxy) setupLocalBlobs(kind string, accprov func(cpi.AccessSpec) (blobaccess.BlobAccess, string, cpi.AccessSpec, error), it compdesc.ArtifactAccessor, final bool, opts *cpi.BlobUploadOptions) (ferr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 

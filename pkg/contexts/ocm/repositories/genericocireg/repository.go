@@ -40,7 +40,7 @@ func GetOCIRepository(r cpi.Repository) ocicpi.Repository {
 }
 
 type RepositoryImpl struct {
-	base    repocpi.RepositoryBase
+	base    repocpi.RepositoryProxy
 	ctx     cpi.Context
 	meta    ComponentRepositoryMeta
 	nonref  cpi.Repository
@@ -65,7 +65,7 @@ func (r *RepositoryImpl) Close() error {
 	return r.ocirepo.Close()
 }
 
-func (r *RepositoryImpl) SetBase(base repocpi.RepositoryBase) {
+func (r *RepositoryImpl) SetProxy(base repocpi.RepositoryProxy) {
 	r.base = base
 	r.nonref = repocpi.NewNoneRefRepositoryView(base)
 }

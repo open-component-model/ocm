@@ -24,7 +24,7 @@ const META_SEPARATOR = ".build-"
 ////////////////////////////////////////////////////////////////////////////////
 
 type componentAccessImpl struct {
-	base      repocpi.ComponentAccessBase
+	base      repocpi.ComponentAccessProxy
 	repo      *RepositoryImpl
 	name      string
 	namespace oci.NamespaceAccess
@@ -54,11 +54,11 @@ func (c *componentAccessImpl) Close() error {
 	return err
 }
 
-func (c *componentAccessImpl) SetBase(base repocpi.ComponentAccessBase) {
+func (c *componentAccessImpl) SetProxy(base repocpi.ComponentAccessProxy) {
 	c.base = base
 }
 
-func (c *componentAccessImpl) GetParentBase() repocpi.RepositoryViewManager {
+func (c *componentAccessImpl) GetParentProxy() repocpi.RepositoryViewManager {
 	return c.repo.base
 }
 

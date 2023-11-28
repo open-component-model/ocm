@@ -27,8 +27,8 @@ type ComponentVersionAccessInfo struct {
 // ComponentAccessImpl is the provider implementation
 // interface for component versions.
 type ComponentAccessImpl interface {
-	SetBase(base ComponentAccessBase)
-	GetParentBase() RepositoryViewManager
+	SetProxy(proxy ComponentAccessProxy)
+	GetParentProxy() RepositoryViewManager
 
 	GetContext() cpi.Context
 	GetName() string
@@ -42,67 +42,67 @@ type ComponentAccessImpl interface {
 	io.Closer
 }
 
-type _componentAccessImplBase = resource.ResourceImplBase[cpi.ComponentAccess]
+type _componentAccessProxyBase = resource.ResourceImplBase[cpi.ComponentAccess]
 
-type componentAccessBase struct {
-	*_componentAccessImplBase
+type componentAccessProxy struct {
+	*_componentAccessProxyBase
 	ctx  cpi.Context
 	name string
 	impl ComponentAccessImpl
 }
 
-func newComponentAccessImplBase(impl ComponentAccessImpl, closer ...io.Closer) (ComponentAccessBase, error) {
-	base, err := resource.NewResourceImplBase[cpi.ComponentAccess, cpi.Repository](impl.GetParentBase(), closer...)
+func newComponentAccessProxy(impl ComponentAccessImpl, closer ...io.Closer) (ComponentAccessProxy, error) {
+	base, err := resource.NewResourceImplBase[cpi.ComponentAccess, cpi.Repository](impl.GetParentProxy(), closer...)
 	if err != nil {
 		return nil, err
 	}
-	b := &componentAccessBase{
-		_componentAccessImplBase: base,
-		ctx:                      impl.GetContext(),
-		name:                     impl.GetName(),
-		impl:                     impl,
+	b := &componentAccessProxy{
+		_componentAccessProxyBase: base,
+		ctx:                       impl.GetContext(),
+		name:                      impl.GetName(),
+		impl:                      impl,
 	}
-	impl.SetBase(b)
+	impl.SetProxy(b)
 	return b, nil
 }
 
-func (b *componentAccessBase) Close() error {
+func (b *componentAccessProxy) Close() error {
 	list := errors.ErrListf("closing component %s", b.name)
-	refmgmt.AllocLog.Trace("closing component base", "name", b.name)
+	refmgmt.AllocLog.Trace("closing component proxy", "name", b.name)
 	list.Add(b.impl.Close())
-	list.Add(b._componentAccessImplBase.Close())
-	refmgmt.AllocLog.Trace("closed component base", "name", b.name)
+	list.Add(b._componentAccessProxyBase.Close())
+	refmgmt.AllocLog.Trace("closed component proxy", "name", b.name)
 	return list.Result()
 }
 
-func (b *componentAccessBase) GetContext() cpi.Context {
+func (b *componentAccessProxy) GetContext() cpi.Context {
 	return b.ctx
 }
 
-func (b *componentAccessBase) GetName() string {
+func (b *componentAccessProxy) GetName() string {
 	return b.name
 }
 
-func (b *componentAccessBase) IsReadOnly() bool {
+func (b *componentAccessProxy) IsReadOnly() bool {
 	return b.impl.IsReadOnly()
 }
 
-func (c *componentAccessBase) IsOwned(cv cpi.ComponentVersionAccess) bool {
-	base, err := GetComponentVersionAccessBase(cv)
+func (c *componentAccessProxy) IsOwned(cv cpi.ComponentVersionAccess) bool {
+	proxy, err := GetComponentVersionAccessProxy(cv)
 	if err != nil {
 		return false
 	}
 
-	impl := base.(*componentVersionAccessBase).impl
-	cvcompmgr := impl.GetParentBase()
+	impl := proxy.(*componentVersionAccessProxy).impl
+	cvcompmgr := impl.GetParentProxy()
 	return c == cvcompmgr
 }
 
-func (b *componentAccessBase) ListVersions() ([]string, error) {
+func (b *componentAccessProxy) ListVersions() ([]string, error) {
 	return b.impl.ListVersions()
 }
 
-func (b *componentAccessBase) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
+func (b *componentAccessProxy) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
 	i, err := b.impl.LookupVersion(version)
 	if err != nil {
 		return nil, err
@@ -113,11 +113,11 @@ func (b *componentAccessBase) LookupVersion(version string) (cpi.ComponentVersio
 	return NewComponentVersionAccess(b.GetName(), version, i.Impl, i.Lazy, i.Persistent, !compositionmodeattr.Get(b.GetContext()))
 }
 
-func (b *componentAccessBase) HasVersion(vers string) (bool, error) {
+func (b *componentAccessProxy) HasVersion(vers string) (bool, error) {
 	return b.impl.HasVersion(vers)
 }
 
-func (b *componentAccessBase) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
+func (b *componentAccessProxy) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
 	i, err := b.impl.NewVersion(version, overrides...)
 	if err != nil {
 		return nil, err
@@ -128,11 +128,11 @@ func (b *componentAccessBase) NewVersion(version string, overrides ...bool) (cpi
 	return NewComponentVersionAccess(b.GetName(), version, i.Impl, i.Lazy, false, !compositionmodeattr.Get(b.GetContext()))
 }
 
-func (c *componentAccessBase) AddVersion(cv cpi.ComponentVersionAccess, opts *cpi.AddVersionOptions) (ferr error) {
+func (c *componentAccessProxy) AddVersion(cv cpi.ComponentVersionAccess, opts *cpi.AddVersionOptions) (ferr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 
-	cvbase, err := GetComponentVersionAccessBase(cv)
+	cvproxy, err := GetComponentVersionAccessProxy(cv)
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (c *componentAccessBase) AddVersion(cv cpi.ComponentVersionAccess, opts *cp
 		finalize.With(func() error {
 			return eff.Close()
 		})
-		cvbase, err = GetComponentVersionAccessBase(eff)
+		cvproxy, err = GetComponentVersionAccessProxy(eff)
 		if err != nil {
 			return err
 		}
@@ -154,20 +154,20 @@ func (c *componentAccessBase) AddVersion(cv cpi.ComponentVersionAccess, opts *cp
 		d := eff.GetDescriptor()
 		*d = *cv.GetDescriptor().Copy()
 
-		err = c.setupLocalBlobs("resource", cv, cvbase, d.Resources, &opts.BlobUploadOptions)
+		err = c.setupLocalBlobs("resource", cv, cvproxy, d.Resources, &opts.BlobUploadOptions)
 		if err == nil {
-			err = c.setupLocalBlobs("source", cv, cvbase, d.Sources, &opts.BlobUploadOptions)
+			err = c.setupLocalBlobs("source", cv, cvproxy, d.Sources, &opts.BlobUploadOptions)
 		}
 		if err != nil {
 			return err
 		}
 	}
-	cvbase.EnablePersistence()
-	err = cvbase.Update(!cvbase.UseDirectAccess())
+	cvproxy.EnablePersistence()
+	err = cvproxy.Update(!cvproxy.UseDirectAccess())
 	return err
 }
 
-func (c *componentAccessBase) setupLocalBlobs(kind string, src cpi.ComponentVersionAccess, tgtbase ComponentVersionAccessBase, it compdesc.ArtifactAccessor, opts *cpi.BlobUploadOptions) (ferr error) {
+func (c *componentAccessProxy) setupLocalBlobs(kind string, src cpi.ComponentVersionAccess, tgtproxy ComponentVersionAccessProxy, it compdesc.ArtifactAccessor, opts *cpi.BlobUploadOptions) (ferr error) {
 	ctx := src.GetContext()
 	// transfer all local blobs
 	prov := func(spec cpi.AccessSpec) (blob blobaccess.BlobAccess, ref string, global cpi.AccessSpec, err error) {
@@ -176,10 +176,10 @@ func (c *componentAccessBase) setupLocalBlobs(kind string, src cpi.ComponentVers
 			if err != nil {
 				return nil, "", nil, err
 			}
-			return m.AsBlobAccess(), cpi.ReferenceHint(spec, src), cpi.GlobalAccess(spec, tgtbase.GetContext()), nil
+			return m.AsBlobAccess(), cpi.ReferenceHint(spec, src), cpi.GlobalAccess(spec, tgtproxy.GetContext()), nil
 		}
 		return nil, "", nil, nil
 	}
 
-	return tgtbase.(*componentVersionAccessBase).setupLocalBlobs(kind, prov, it, false, opts)
+	return tgtproxy.(*componentVersionAccessProxy).setupLocalBlobs(kind, prov, it, false, opts)
 }
