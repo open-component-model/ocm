@@ -36,39 +36,39 @@ func (d *DummyComponentVersionAccess) Dup() (ComponentVersionAccess, error) {
 }
 
 func (d *DummyComponentVersionAccess) GetProvider() *compdesc.Provider {
-	panic("implement me")
+	return nil
 }
 
 func (d *DummyComponentVersionAccess) SetProvider(p *compdesc.Provider) error {
-	panic("implement me")
+	return errors.ErrNotSupported()
 }
 
 func (d *DummyComponentVersionAccess) AdjustSourceAccess(meta *internal.SourceMeta, acc compdesc.AccessSpec) error {
-	panic("implement me")
+	return errors.ErrNotSupported()
 }
 
 func (c *DummyComponentVersionAccess) Repository() Repository {
-	panic("implement me")
+	return nil
 }
 
 func (d *DummyComponentVersionAccess) GetName() string {
-	panic("implement me")
+	return ""
 }
 
 func (d *DummyComponentVersionAccess) GetVersion() string {
-	panic("implement me")
+	return ""
 }
 
 func (d *DummyComponentVersionAccess) GetDescriptor() *compdesc.ComponentDescriptor {
-	panic("implement me")
+	return nil
 }
 
 func (d *DummyComponentVersionAccess) GetResources() []ResourceAccess {
 	return nil
 }
 
-func (d *DummyComponentVersionAccess) GetResource(meta metav1.Identity) (ResourceAccess, error) {
-	return nil, errors.ErrNotFound("resource", meta.String())
+func (d *DummyComponentVersionAccess) GetResource(id metav1.Identity) (ResourceAccess, error) {
+	return nil, errors.ErrNotFound("resource", id.String())
 }
 
 func (d *DummyComponentVersionAccess) GetResourceIndex(metav1.Identity) int {
@@ -84,11 +84,11 @@ func (d *DummyComponentVersionAccess) GetResourcesByName(name string, selectors 
 }
 
 func (d *DummyComponentVersionAccess) GetSources() []SourceAccess {
-	panic("implement me")
+	return nil
 }
 
-func (d *DummyComponentVersionAccess) GetSource(meta metav1.Identity) (SourceAccess, error) {
-	panic("implement me")
+func (d *DummyComponentVersionAccess) GetSource(id metav1.Identity) (SourceAccess, error) {
+	return nil, errors.ErrNotFound(KIND_SOURCE, id.String())
 }
 
 func (d *DummyComponentVersionAccess) GetSourceIndex(metav1.Identity) int {
@@ -158,11 +158,11 @@ func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.
 }
 
 func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess) error {
-	panic("implement me")
+	return errors.ErrNotSupported()
 }
 
 func (d *DummyComponentVersionAccess) SetReference(ref *ComponentReference) error {
-	panic("implement me")
+	return errors.ErrNotSupported()
 }
 
 func (d *DummyComponentVersionAccess) DiscardChanges() {

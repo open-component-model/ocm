@@ -14,11 +14,31 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+func ReadConfiguration(ctx ocm.Context, cfg *helper.Config) error {
+	if cfg.OCMConfig != "" {
+		fmt.Printf("*** applying config from %s\n", cfg.OCMConfig)
+
+		_, err := utils.Configure(ctx, cfg.OCMConfig)
+		if err != nil {
+			return errors.Wrapf(err, "error in ocm config %s", cfg.OCMConfig)
+		}
+	}
+	return nil
+}
+
 func TransportingComponentVersions(cfg *helper.Config) error {
 	ctx := ocm.DefaultContext()
+
+	// Configure context with optional ocm config.
+	// See OCM config scenario in tour 04.
+	err := ReadConfiguration(ctx, cfg)
+	if err != nil {
+		return err
+	}
 
 	// the context acts as factory for various model types based on
 	// specification descriptor serialization formats in YAML or JSON.

@@ -13,7 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
@@ -23,14 +23,14 @@ type localFilesystemBlobAccessMethod struct {
 	sync.Mutex
 	closed     bool
 	spec       *localblob.AccessSpec
-	base       support.ComponentVersionContainer
+	base       repocpi.ComponentVersionAccessImpl
 	err        error
 	blobAccess blobaccess.BlobAccess
 }
 
 var _ accspeccpi.AccessMethodImpl = (*localFilesystemBlobAccessMethod)(nil)
 
-func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer, ref refmgmt.ExtendedAllocatable) (accspeccpi.AccessMethod, error) {
+func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base repocpi.ComponentVersionAccessImpl, ref refmgmt.ExtendedAllocatable) (accspeccpi.AccessMethod, error) {
 	m := &localFilesystemBlobAccessMethod{
 		spec: a,
 		base: base,
@@ -86,7 +86,7 @@ func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
 
 func (m *localFilesystemBlobAccessMethod) getBlob() (blobaccess.BlobAccess, error) {
 	if m.blobAccess == nil {
-		data, err := m.base.GetBlobData(m.spec.LocalReference)
+		data, err := m.base.GetBlob(m.spec.LocalReference)
 		if err != nil {
 			return nil, err
 		}

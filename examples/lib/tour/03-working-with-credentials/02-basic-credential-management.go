@@ -10,7 +10,6 @@ import (
 	"os"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -18,19 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
-
-func obfuscate(props common.Properties) string {
-	if pw, ok := props[credentials.ATTR_PASSWORD]; ok {
-		if len(pw) > 5 {
-			pw = pw[:5] + "***"
-		} else {
-			pw = "***"
-		}
-		props = props.Copy()
-		props[credentials.ATTR_PASSWORD] = pw
-	}
-	return props.String()
-}
 
 func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	ctx := ocm.DefaultContext()
@@ -136,6 +122,11 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	creds, err = credentials.CredentialsForConsumer(credctx, id, ociidentity.IdentityMatcher)
 	if err != nil {
 		return errors.Wrapf(err, "no credentials")
+	}
+	// an error is only provided if something went wrong while determining
+	// the credentials. Delivering NO credentials is a valid result.
+	if creds == nil {
+		return fmt.Errorf("no credentials found")
 	}
 	fmt.Printf("credentials: %s\n", obfuscate(creds.Properties()))
 

@@ -158,6 +158,9 @@ func (b *accessAccessProvider) GetOCMContext() cpi.Context {
 }
 
 func (b *accessAccessProvider) ReferenceHint() string {
+	if h, ok := b.spec.(HintProvider); ok {
+		return h.GetReferenceHint(&DummyComponentVersionAccess{b.ctx})
+	}
 	return ""
 }
 
@@ -180,21 +183,16 @@ func (b *accessAccessProvider) BlobAccess() (blobaccess.BlobAccess, error) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type (
-	accessProvider           = AccessProvider
-	componentVersionProvider = ComponentVersionProvider
+	accessProvider = AccessProvider
 )
 
 type artifactAccessProvider[M any] struct {
 	accessProvider
-	meta *M
+	componentVersionProvider ComponentVersionProvider
+	meta                     *M
 }
 
 var _ credentials.ConsumerIdentityProvider = (*artifactAccessProvider[any])(nil)
-
-type artifactCVAccessProvider[M any] struct {
-	artifactAccessProvider[M]
-	componentVersionProvider
-}
 
 func NewArtifactAccessForProvider[M any](meta *M, prov AccessProvider) cpi.ArtifactAccess[M] {
 	aa := &artifactAccessProvider[M]{
@@ -202,10 +200,7 @@ func NewArtifactAccessForProvider[M any](meta *M, prov AccessProvider) cpi.Artif
 		meta:           meta,
 	}
 	if p, ok := prov.(ComponentVersionProvider); ok {
-		return &artifactCVAccessProvider[M]{
-			artifactAccessProvider:   *aa,
-			componentVersionProvider: p,
-		}
+		aa.componentVersionProvider = p
 	}
 	return aa
 }
@@ -230,6 +225,13 @@ func (b *artifactAccessProvider[M]) GetIdentityMatcher() string {
 	}
 	defer m.Close()
 	return credentials.GetProvidedIdentityMatcher(m)
+}
+
+func (b *artifactAccessProvider[M]) GetComponentVersion() (ComponentVersionAccess, error) {
+	if b.componentVersionProvider != nil {
+		return b.componentVersionProvider.GetComponentVersion()
+	}
+	return nil, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
