@@ -20,7 +20,21 @@ type (
 
 	BlobUploadOption  = internal.BlobUploadOption
 	BlobUploadOptions = internal.BlobUploadOptions
+
+	AddVersionOption  = internal.AddVersionOption
+	AddVersionOptions = internal.AddVersionOptions
 )
+
+////////////////////////////////////////////////////////////////////////////////
+
+func NewAddVersionOptions(list ...AddVersionOption) *AddVersionOptions {
+	return internal.NewAddVersionOptions(list...)
+}
+
+// Overwrite enabled the overwrite mode for adding a component version.
+func Overwrite(flag ...bool) AddVersionOption {
+	return internal.Overwrite(flag...)
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

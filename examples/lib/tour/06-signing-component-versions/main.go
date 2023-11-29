@@ -46,7 +46,7 @@ func main() {
 			cmd = os.Args[arg]
 		}
 		switch cmd {
-		case "basic":
+		case "sign":
 			err = SigningComponentVersions(cfg)
 		case "repo":
 			err = SigningComponentVersionInRepo(cfg)

@@ -1,0 +1,8 @@
+type: generic.config.ocm.software
+configurations:
+- type: credentials.config.ocm.software
+  repositories:
+  - repository:
+      type: DockerConfig
+      dockerConfigFile: ~/.docker/config.json
+      propagateConsumerIdentity: true

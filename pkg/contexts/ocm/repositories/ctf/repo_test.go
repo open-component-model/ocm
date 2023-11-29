@@ -23,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 const COMPONENT = "github.com/mandelsoft/ocm"
@@ -34,6 +35,64 @@ var _ = Describe("access method", func() {
 
 	BeforeEach(func() {
 		fs = memoryfs.New()
+	})
+
+	It("adds naked component version and later lookup", func() {
+		final := Finalizer{}
+		defer Defer(final.Finalize)
+
+		a := Must(ctf.Create(ctx, accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, "ctf", 0o700, accessio.PathFileSystem(fs)))
+		final.Close(a, "repository")
+		c := Must(a.LookupComponent(COMPONENT))
+		final.Close(c, "component")
+
+		cv := Must(c.NewVersion(VERSION))
+		final.Close(cv, "version")
+
+		MustBeSuccessful(c.AddVersion(cv))
+		MustBeSuccessful(final.Finalize())
+
+		refmgmt.AllocLog.Trace("opening ctf")
+		a = Must(ctf.Open(ctx, accessobj.ACC_READONLY, "ctf", 0o700, accessio.PathFileSystem(fs)))
+		final.Close(a)
+
+		refmgmt.AllocLog.Trace("lookup component")
+		c = Must(a.LookupComponent(COMPONENT))
+		final.Close(c)
+
+		refmgmt.AllocLog.Trace("lookup version")
+		cv = Must(c.LookupVersion(VERSION))
+		final.Close(cv)
+
+		refmgmt.AllocLog.Trace("closing")
+		MustBeSuccessful(final.Finalize())
+	})
+
+	It("adds naked component version and later shortcut lookup", func() {
+		final := Finalizer{}
+		defer Defer(final.Finalize)
+
+		a := Must(ctf.Create(ctx, accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, "ctf", 0o700, accessio.PathFileSystem(fs)))
+		final.Close(a, "repository")
+		c := Must(a.LookupComponent(COMPONENT))
+		final.Close(c, "component")
+
+		cv := Must(c.NewVersion(VERSION))
+		final.Close(cv, "version")
+
+		MustBeSuccessful(c.AddVersion(cv))
+		MustBeSuccessful(final.Finalize())
+
+		refmgmt.AllocLog.Trace("opening ctf")
+		a = Must(ctf.Open(ctx, accessobj.ACC_READONLY, "ctf", 0o700, accessio.PathFileSystem(fs)))
+		final.Close(a)
+
+		refmgmt.AllocLog.Trace("lookup component version")
+		cv = Must(a.LookupComponentVersion(COMPONENT, VERSION))
+		final.Close(cv)
+
+		refmgmt.AllocLog.Trace("closing")
+		MustBeSuccessful(final.Finalize())
 	})
 
 	It("adds component version", func() {
