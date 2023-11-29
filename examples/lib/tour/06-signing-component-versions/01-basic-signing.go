@@ -19,6 +19,13 @@ func SigningComponentVersions(cfg *helper.Config) error {
 
 	ctx := ocm.DefaultContext()
 
+	// Configure context with optional ocm config.
+	// See OCM config scenario in tour 04.
+	err := ReadConfiguration(ctx, cfg)
+	if err != nil {
+		return err
+	}
+
 	// siginfo := signingattr.Get(ctx)
 
 	// to sign a component version we need a private key.

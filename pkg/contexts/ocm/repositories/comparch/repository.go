@@ -15,25 +15,23 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	ocmhdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type _RepositoryImplBase = cpi.RepositoryImplBase
-
 type RepositoryImpl struct {
-	_RepositoryImplBase
-	lock sync.RWMutex
-	arch *ComponentArchive
+	lock   sync.RWMutex
+	bridge repocpi.RepositoryBridge
+	arch   *ComponentArchive
+	nonref cpi.Repository
 }
 
-var _ cpi.RepositoryImpl = (*RepositoryImpl)(nil)
+var _ repocpi.RepositoryImpl = (*RepositoryImpl)(nil)
 
 func NewRepository(ctx cpi.Context, s *RepositorySpec) (cpi.Repository, error) {
 	if s.GetPathFileSystem() == nil {
@@ -46,14 +44,26 @@ func NewRepository(ctx cpi.Context, s *RepositorySpec) (cpi.Repository, error) {
 	return a.AsRepository(), nil
 }
 
-func newRepository(a *ComponentArchive) (main cpi.Repository, nonref cpi.Repository) {
+func newRepository(a *ComponentArchive) (main, nonref cpi.Repository) {
 	// close main cv abstraction on repository close -------v
-	base := cpi.NewRepositoryImplBase(a.GetContext(), a.ComponentVersionAccess)
 	impl := &RepositoryImpl{
-		_RepositoryImplBase: *base,
-		arch:                a,
+		arch: a,
 	}
-	return cpi.NewRepository(impl), cpi.NewNoneRefRepositoryView(impl)
+	r := repocpi.NewRepository(impl, "comparch")
+	return r, impl.nonref
+}
+
+func (r *RepositoryImpl) Close() error {
+	return r.arch.container.Close()
+}
+
+func (r *RepositoryImpl) SetBridge(base repocpi.RepositoryBridge) {
+	r.bridge = base
+	r.nonref = repocpi.NewNoneRefRepositoryView(base)
+}
+
+func (r *RepositoryImpl) GetContext() cpi.Context {
+	return r.arch.GetContext()
 }
 
 func (r *RepositoryImpl) ComponentLister() cpi.ComponentLister {
@@ -118,25 +128,7 @@ func (r *RepositoryImpl) ExistsComponentVersion(name string, ref string) (bool, 
 	return r.arch.GetName() == name && r.arch.GetVersion() == ref, nil
 }
 
-func (r *RepositoryImpl) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-	ok, err := r.ExistsComponentVersion(name, version)
-	if !ok {
-		if err == nil {
-			err = errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, common.NewNameVersion(name, version).String(), Type)
-		}
-		return nil, err
-	}
-	c, err := newComponentAccess(r)
-	if err != nil {
-		return nil, err
-	}
-	defer refmgmt.PropagateCloseTemporary(&err, c) // temporary component object not exposed.
-	return c.LookupVersion(version)
-}
-
-func (r *RepositoryImpl) LookupComponent(name string) (cpi.ComponentAccess, error) {
+func (r *RepositoryImpl) LookupComponent(name string) (*repocpi.ComponentAccessInfo, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	if r.arch == nil {
@@ -150,25 +142,38 @@ func (r *RepositoryImpl) LookupComponent(name string) (cpi.ComponentAccess, erro
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type _ComponentAccessImplBase = cpi.ComponentAccessImplBase
-
 type ComponentAccessImpl struct {
-	_ComponentAccessImplBase
+	base repocpi.ComponentAccessBridge
 	repo *RepositoryImpl
 }
 
-var _ cpi.ComponentAccessImpl = (*ComponentAccessImpl)(nil)
+var _ repocpi.ComponentAccessImpl = (*ComponentAccessImpl)(nil)
 
-func newComponentAccess(r *RepositoryImpl) (cpi.ComponentAccess, error) {
-	base, err := cpi.NewComponentAccessImplBase(r.GetContext(), r.arch.GetName(), r)
-	if err != nil {
-		return nil, err
-	}
+func newComponentAccess(r *RepositoryImpl) (*repocpi.ComponentAccessInfo, error) {
 	impl := &ComponentAccessImpl{
-		_ComponentAccessImplBase: *base,
-		repo:                     r,
+		repo: r,
 	}
-	return cpi.NewComponentAccess(impl, "component archive"), nil
+	return &repocpi.ComponentAccessInfo{impl, "component archive", true}, nil
+}
+
+func (c *ComponentAccessImpl) Close() error {
+	return nil
+}
+
+func (c *ComponentAccessImpl) SetBridge(base repocpi.ComponentAccessBridge) {
+	c.base = base
+}
+
+func (c *ComponentAccessImpl) GetParentBridge() repocpi.RepositoryViewManager {
+	return c.repo.bridge
+}
+
+func (c *ComponentAccessImpl) GetContext() cpi.Context {
+	return c.repo.GetContext()
+}
+
+func (c *ComponentAccessImpl) GetName() string {
+	return c.repo.arch.GetName()
 }
 
 func (c *ComponentAccessImpl) IsReadOnly() bool {
@@ -183,37 +188,14 @@ func (c *ComponentAccessImpl) HasVersion(vers string) (bool, error) {
 	return vers == c.repo.arch.GetVersion(), nil
 }
 
-func (c *ComponentAccessImpl) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
+func (c *ComponentAccessImpl) LookupVersion(version string) (*repocpi.ComponentVersionAccessInfo, error) {
 	if version != c.repo.arch.GetVersion() {
 		return nil, errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, fmt.Sprintf("%s:%s", c.GetName(), c.repo.arch.GetVersion()))
 	}
 	return newComponentVersionAccess(c, version, false)
 }
 
-func (c *ComponentAccessImpl) container(access cpi.ComponentVersionAccess) *componentArchiveContainer {
-	mine, _ := support.GetComponentVersionContainer[*ComponentVersionContainer](access)
-	if mine == nil || mine.comp != c {
-		return nil
-	}
-	return mine.comp.repo.arch.container
-}
-
-func (c *ComponentAccessImpl) IsOwned(access cpi.ComponentVersionAccess) bool {
-	return c.container(access) == c.repo.arch.container
-}
-
-func (c *ComponentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
-	if access.GetName() != c.GetName() {
-		return errors.ErrInvalid("component name", access.GetName())
-	}
-	mine := c.container(access)
-	if mine == nil {
-		return errors.Newf("component version not owned by component archive")
-	}
-	return nil
-}
-
-func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
+func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	if version != c.repo.arch.GetVersion() {
 		return nil, errors.ErrNotSupported(cpi.KIND_COMPONENTVERSION, version, fmt.Sprintf("component archive %s:%s", c.GetName(), c.repo.arch.GetVersion()))
 	}
@@ -226,26 +208,21 @@ func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (cpi
 ////////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
-	impl support.ComponentVersionAccessImpl
+	impl repocpi.ComponentVersionAccessBridge
 
 	comp *ComponentAccessImpl
 
 	descriptor *compdesc.ComponentDescriptor
 }
 
-var _ support.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
+var _ repocpi.ComponentVersionAccessImpl = (*ComponentVersionContainer)(nil)
 
-func newComponentVersionAccess(comp *ComponentAccessImpl, version string, persistent bool) (cpi.ComponentVersionAccess, error) {
+func newComponentVersionAccess(comp *ComponentAccessImpl, version string, persistent bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	c, err := newComponentVersionContainer(comp)
 	if err != nil {
 		return nil, err
 	}
-	impl, err := support.NewComponentVersionAccessImpl(comp.GetName(), version, c, true, persistent, !compositionmodeattr.Get(comp.GetContext()))
-	if err != nil {
-		c.Close()
-		return nil, err
-	}
-	return cpi.NewComponentVersionAccess(impl), nil
+	return &repocpi.ComponentVersionAccessInfo{c, true, persistent}, nil
 }
 
 func newComponentVersionContainer(comp *ComponentAccessImpl) (*ComponentVersionContainer, error) {
@@ -255,12 +232,12 @@ func newComponentVersionContainer(comp *ComponentAccessImpl) (*ComponentVersionC
 	}, nil
 }
 
-func (c *ComponentVersionContainer) SetImplementation(impl support.ComponentVersionAccessImpl) {
+func (c *ComponentVersionContainer) SetBridge(impl repocpi.ComponentVersionAccessBridge) {
 	c.impl = impl
 }
 
-func (c *ComponentVersionContainer) GetParentViewManager() cpi.ComponentAccessViewManager {
-	return c.comp
+func (c *ComponentVersionContainer) GetParentBridge() repocpi.ComponentAccessBridge {
+	return c.comp.base
 }
 
 func (c *ComponentVersionContainer) Close() error {
@@ -285,23 +262,28 @@ func (c *ComponentVersionContainer) Update() error {
 	return c.comp.repo.arch.container.Update()
 }
 
+func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) error {
+	*c.descriptor = *cd
+	return c.Update()
+}
+
 func (c *ComponentVersionContainer) GetDescriptor() *compdesc.ComponentDescriptor {
 	return c.descriptor
 }
 
-func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, error) {
-	return c.comp.repo.arch.container.GetBlobData(name)
+func (c *ComponentVersionContainer) GetBlob(name string) (cpi.DataAccess, error) {
+	return c.comp.repo.arch.container.GetBlob(name)
 }
 
 func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
-	return ocmhdlr.New(c.Repository(), c.comp.GetName(), &BlobSink{c.comp.repo.arch.container.base}, Type)
+	return ocmhdlr.New(c.Repository(), c.comp.GetName(), &BlobSink{c.comp.repo.arch.container.fsacc}, Type)
 }
 
-func (c *ComponentVersionContainer) AddBlobFor(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
-	err := c.comp.repo.arch.container.base.AddBlob(blob)
+	err := c.comp.repo.arch.container.fsacc.AddBlob(blob)
 	if err != nil {
 		return nil, err
 	}

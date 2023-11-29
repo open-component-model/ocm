@@ -279,6 +279,7 @@ func listVersions(repo ocm.Repository, list ...string) error {
 	}
 	return nil
 }
+
 func ComposingAComponentVersionA() error {
 	// yes, we need an OCM context, again
 	ctx := ocm.DefaultContext()

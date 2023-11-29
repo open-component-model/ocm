@@ -16,3 +16,9 @@ func AsValue[T any](p *T) T {
 	}
 	return r
 }
+
+func ApplyOption[T any](opt *T, tgt **T) {
+	if opt != nil {
+		*tgt = opt
+	}
+}

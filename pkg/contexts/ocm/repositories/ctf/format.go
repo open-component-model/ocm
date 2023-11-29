@@ -47,7 +47,7 @@ func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode v
 	if err != nil {
 		return nil, err
 	}
-	return genericocireg.NewRepository(cpi.FromProvider(ctx), nil, r)
+	return genericocireg.NewRepository(cpi.FromProvider(ctx), nil, r), nil
 }
 
 func Create(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (cpi.Repository, error) {
@@ -55,7 +55,7 @@ func Create(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode
 	if err != nil {
 		return nil, err
 	}
-	return genericocireg.NewRepository(cpi.FromProvider(ctx), nil, r)
+	return genericocireg.NewRepository(cpi.FromProvider(ctx), nil, r), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -115,6 +115,7 @@ func CloseTemporary(c io.Closer) error {
 	if !Lazy(c) {
 		return errors.ErrNotSupported("lazy mode")
 	}
+	AllocLog.Trace("close temporary ref")
 	return c.Close()
 }
 

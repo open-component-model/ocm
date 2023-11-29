@@ -52,6 +52,8 @@ func main() {
 			err = UsingCredentialsB(cfg, true)
 		case "read":
 			err = UsingCredentialsB(cfg, false)
+		case "credrepo":
+			err = UsingCredentialsRepositories(cfg)
 		default:
 			err = fmt.Errorf("unknown example %q", cmd)
 		}

@@ -100,12 +100,15 @@ func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) stri
 	if err != nil {
 		return ""
 	}
-	prefix := ocmcpi.RepositoryPrefix(cv.Repository().GetSpecification())
 	hint := ref.Repository
-	if strings.HasPrefix(hint, prefix+grammar.RepositorySeparator) {
-		// try to keep hint identical, even across intermediate
-		// artifact globalizations
-		hint = hint[len(prefix)+1:]
+	r := cv.Repository()
+	if r != nil {
+		prefix := ocmcpi.RepositoryPrefix(cv.Repository().GetSpecification())
+		if strings.HasPrefix(hint, prefix+grammar.RepositorySeparator) {
+			// try to keep hint identical, even across intermediate
+			// artifact globalizations
+			hint = hint[len(prefix)+1:]
+		}
 	}
 	if ref.Tag != nil {
 		hint += grammar.TagSeparator + *ref.Tag

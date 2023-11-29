@@ -238,7 +238,7 @@ Error: signing: github.com/mandelsoft/ref:v1: failed resolving component referen
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(HaveOccurred())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-Error: signing: github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: ocm reference "github.com/mandelsoft/test:v1" not found
+Error: signing: github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: component "github.com/mandelsoft/test" not found in ComponentArchive
 `))
 		})
 
@@ -246,7 +246,7 @@ Error: signing: github.com/mandelsoft/ref:v1: failed resolving component referen
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, ARCH)).To(HaveOccurred())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-Error: signing: github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: ocm reference "github.com/mandelsoft/test:v1" not found
+Error: signing: github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: component "github.com/mandelsoft/test" not found in ComponentArchive
 `))
 		})
 	})
