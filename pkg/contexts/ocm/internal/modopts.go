@@ -5,6 +5,7 @@
 package internal
 
 import (
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -18,7 +19,7 @@ type BlobOptionImpl interface {
 }
 
 type BlobUploadOptions struct {
-	UseNoDefaultIfNotSet bool                `json:"noDefaultUpload,omitempty"`
+	UseNoDefaultIfNotSet *bool               `json:"noDefaultUpload,omitempty"`
 	BlobHandlerProvider  BlobHandlerProvider `json:"-"`
 }
 
@@ -43,12 +44,30 @@ func (o *BlobUploadOptions) ApplyBlobModificationOption(opts *BlobModificationOp
 }
 
 func (o *BlobUploadOptions) ApplyBlobUploadOption(opts *BlobUploadOptions) {
+	optionutils.ApplyOption(o.UseNoDefaultIfNotSet, &opts.UseNoDefaultIfNotSet)
 	if o.BlobHandlerProvider != nil {
 		opts.BlobHandlerProvider = o.BlobHandlerProvider
-	} else {
-		opts.UseNoDefaultIfNotSet = true
+		opts.UseNoDefaultIfNotSet = utils.BoolP(true)
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type nodefaulthandler bool
+
+func (o nodefaulthandler) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	o.ApplyBlobUploadOption(&opts.BlobUploadOptions)
+}
+
+func (o nodefaulthandler) ApplyBlobUploadOption(opts *BlobUploadOptions) {
+	opts.UseNoDefaultIfNotSet = optionutils.PointerTo(bool(o))
+}
+
+func UseNoDefaultBlobHandlers(b ...bool) BlobOptionImpl {
+	return nodefaulthandler(utils.OptionalDefaultedBool(true, b...))
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type handler struct {
 	blobHandlerProvider BlobHandlerProvider
@@ -131,21 +150,15 @@ func (m *ModificationOptions) ApplyBlobModificationOption(opts *BlobModification
 }
 
 func (m *ModificationOptions) ApplyModificationOption(opts *ModificationOptions) {
-	applyBool(m.ModifyResource, &opts.ModifyResource)
-	applyBool(m.AcceptExistentDigests, &opts.AcceptExistentDigests)
-	applyBool(m.SkipDigest, &opts.SkipDigest)
-	applyBool(m.SkipVerify, &opts.SkipVerify)
+	optionutils.ApplyOption(m.ModifyResource, &opts.ModifyResource)
+	optionutils.ApplyOption(m.AcceptExistentDigests, &opts.AcceptExistentDigests)
+	optionutils.ApplyOption(m.SkipDigest, &opts.SkipDigest)
+	optionutils.ApplyOption(m.SkipVerify, &opts.SkipVerify)
 	if m.HasherProvider != nil {
 		opts.HasherProvider = m.HasherProvider
 	}
 	if m.DefaultHashAlgorithm != "" {
 		opts.DefaultHashAlgorithm = m.DefaultHashAlgorithm
-	}
-}
-
-func applyBool(m *bool, t **bool) {
-	if m != nil {
-		*t = utils.BoolP(*m)
 	}
 }
 
@@ -298,4 +311,49 @@ func (o *BlobModificationOptions) ApplyBlobUploadOption(opts *BlobUploadOptions)
 
 func (o *BlobModificationOptions) ApplyModificationOption(opts *ModificationOptions) {
 	o.ModificationOptions.ApplyModificationOption(opts)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// BlobModificationOption is used for option list allowing both,
+// blob upload and modification options.
+type AddVersionOption interface {
+	ApplyAddVersionOption(*AddVersionOptions)
+}
+
+type AddVersionOptions struct {
+	Overwrite *bool
+	BlobUploadOptions
+}
+
+func NewAddVersionOptions(list ...AddVersionOption) *AddVersionOptions {
+	var m AddVersionOptions
+	m.ApplyAddVersionOptions(list...)
+	return &m
+}
+
+func (m *AddVersionOptions) ApplyAddVersionOptions(list ...AddVersionOption) {
+	for _, o := range list {
+		if o != nil {
+			o.ApplyAddVersionOption(m)
+		}
+	}
+}
+
+func (o *AddVersionOptions) ApplyAddVersionOption(opts *AddVersionOptions) {
+	optionutils.ApplyOption(o.Overwrite, &opts.Overwrite)
+	o.BlobUploadOptions.ApplyBlobUploadOption(&opts.BlobUploadOptions)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type overwrite bool
+
+func (m overwrite) ApplyAddVersionOption(opts *AddVersionOptions) {
+	opts.Overwrite = utils.BoolP(m)
+}
+
+// Overwrite enabled the overwrite mode for adding a component version.
+func Overwrite(flag ...bool) AddVersionOption {
+	return overwrite(utils.OptionalDefaultedBool(true, flag...))
 }

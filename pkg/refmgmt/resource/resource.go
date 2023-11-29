@@ -244,6 +244,12 @@ func NewResourceImplBase[T any, M io.Closer](m ViewManager[M], closer ...io.Clos
 	}, nil
 }
 
+func NewSimpleResourceImplBase[T any](closer ...io.Closer) *ResourceImplBase[T] {
+	return &ResourceImplBase[T]{
+		closer: closer,
+	}
+}
+
 func (b *ResourceImplBase[T]) SetViewManager(m ViewManager[T]) {
 	b.refs = m
 }
@@ -254,6 +260,10 @@ func (b *ResourceImplBase[T]) RefCount() int {
 
 func (b *ResourceImplBase[T]) Allocatable() refmgmt.ExtendedAllocatable {
 	return b.refs.Allocatable()
+}
+
+func (b *ResourceImplBase[T]) ViewManager() ViewManager[T] {
+	return b.refs
 }
 
 func (b *ResourceImplBase[T]) View(main ...bool) (T, error) {

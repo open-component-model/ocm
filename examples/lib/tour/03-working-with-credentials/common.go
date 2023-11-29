@@ -10,6 +10,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -277,4 +278,17 @@ func listVersions(repo ocm.Repository, list ...string) error {
 		nested.Finalize()
 	}
 	return nil
+}
+
+func obfuscate(props common.Properties) string {
+	if pw, ok := props[credentials.ATTR_PASSWORD]; ok {
+		if len(pw) > 5 {
+			pw = pw[:5] + "***"
+		} else {
+			pw = "***"
+		}
+		props = props.Copy()
+		props[credentials.ATTR_PASSWORD] = pw
+	}
+	return props.String()
 }
