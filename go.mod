@@ -20,7 +20,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.17.0
 	golang.org/x/sys v0.13.0 // indirect
-	k8s.io/apimachinery v0.28.3
+	k8s.io/apimachinery v0.28.4
 	sigs.k8s.io/yaml v1.4.0
 )
 
@@ -71,7 +71,7 @@ require (
 	google.golang.org/api v0.149.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.12.2
-	k8s.io/api v0.28.3
+	k8s.io/api v0.28.4
 	k8s.io/apiextensions-apiserver v0.27.2
 	k8s.io/cli-runtime v0.27.2
 	sigs.k8s.io/cli-utils v0.34.0
@@ -82,7 +82,7 @@ require (
 	github.com/distribution/reference v0.5.0
 	github.com/imdario/mergo v0.3.16
 	github.com/mandelsoft/vfs v0.4.0
-	k8s.io/client-go v0.28.3
+	k8s.io/client-go v0.28.4
 )
 
 require (
