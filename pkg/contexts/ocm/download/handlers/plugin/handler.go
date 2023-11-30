@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 
 // pluginHandler delegates download format of artifacts to a plugin based handler.
@@ -36,14 +37,17 @@ func New(p plugin.Plugin, name string, config []byte) (download.Handler, error) 
 	}, nil
 }
 
-func (b *pluginHandler) Download(_ common.Printer, racc cpi.ResourceAccess, path string, _ vfs.FileSystem) (bool, string, error) {
+func (b *pluginHandler) Download(_ common.Printer, racc cpi.ResourceAccess, path string, _ vfs.FileSystem) (resp bool, eff string, rerr error) {
 	m, err := racc.AccessMethod()
 	if err != nil {
 		return true, "", err
 	}
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
+	finalize.Close(m, "method for download")
 	r := accessio.NewOndemandReader(m)
-	defer errors.PropagateError(&err, r.Close)
+	finalize.Close(r, "reader for downlowd download")
 
 	return b.plugin.Download(b.name, r, racc.Meta().Type, m.MimeType(), path, b.config)
 }

@@ -81,6 +81,37 @@ var _ = Describe("upload", func() {
 		env.Cleanup()
 	})
 
+	It("validated original oci manifest", func() {
+		ctx := env.OCMContext()
+
+		ocirepo := Must(ctfoci.Open(ctx, accessobj.ACC_READONLY, OCIPATH, 0700, env))
+		defer Close(ocirepo, "ocoirepo")
+
+		ns := Must(ocirepo.LookupNamespace(OCINAMESPACE))
+		defer Close(ns, "namespace")
+
+		art := Must(ns.GetArtifact(OCIVERSION))
+		defer Close(art, "artifact")
+
+		Expect(art.Digest().Encoded()).To(Equal(D_OCIMANIFEST1))
+	})
+
+	It("validated original digest", func() {
+		ctx := env.OCMContext()
+
+		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0700, env))
+		defer Close(ctf, "ctf")
+
+		cv := Must(ctf.LookupComponentVersion(COMP, VERS))
+		defer Close(cv, "component version")
+
+		ra := Must(cv.GetResourceByIndex(0))
+		acc := Must(ra.Access())
+		Expect(acc.GetKind()).To(Equal(localblob.Type))
+
+		Expect(ra.Meta().Digest).To(Equal(DS_OCIMANIFEST1))
+	})
+
 	It("transfers oci artifact", func() {
 		ctx := env.OCMContext()
 

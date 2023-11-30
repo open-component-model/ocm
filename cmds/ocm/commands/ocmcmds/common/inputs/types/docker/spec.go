@@ -5,15 +5,13 @@
 package docker
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
+	ociartifact2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/dockerdaemon"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 )
@@ -35,7 +33,7 @@ func New(pathtag string) *Spec {
 
 func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	allErrs := s.PathSpec.Validate(fldPath, ctx, inputFilePath)
-	allErrs = ociimage.ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
+	allErrs = ociartifact2.ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
 
 	if s.Path != "" {
 		pathField := fldPath.Child("path")
@@ -47,31 +45,13 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
 	ctx.Printf("image %s\n", s.Path)
 	locator, version, err := docker.ParseGenericRef(s.Path)
 	if err != nil {
 		return nil, "", err
 	}
-	spec := docker.NewRepositorySpec()
-	repo, err := ctx.OCIContext().RepositoryForSpec(spec)
-	if err != nil {
-		return nil, "", err
-	}
-	ns, err := repo.LookupNamespace(locator)
-	if err != nil {
-		return nil, "", err
-	}
-
-	if version == "" || version == "latest" {
-		version = info.ComponentVersion.GetVersion()
-	}
-	blob, err := artifactset.SynthesizeArtifactBlob(ns, version,
-		func(art oci.ArtifactAccess) error {
-			art.Artifact().SetAnnotation(annotations.COMPVERS_ANNOTATION, info.ComponentVersion.String())
-			return nil
-		},
-	)
+	blob, version, err := dockerdaemon.BlobAccessForImageFromDockerDaemon(s.Path, dockerdaemon.WithVersion(info.ComponentVersion.GetVersion()), dockerdaemon.WithOrigin(info.ComponentVersion))
 	if err != nil {
 		return nil, "", err
 	}

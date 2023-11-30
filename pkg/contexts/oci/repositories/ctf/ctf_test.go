@@ -19,6 +19,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -28,6 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
 var _ = Describe("ctf management", func() {
@@ -35,7 +37,7 @@ var _ = Describe("ctf management", func() {
 
 	var spec *ctf.RepositorySpec
 
-	ocmlog.Context().AddRule(logging.NewConditionRule(logging.TraceLevel, accessio.ALLOC_REALM))
+	ocmlog.Context().AddRule(logging.NewConditionRule(logging.TraceLevel, refmgmt.ALLOC_REALM))
 
 	BeforeEach(func() {
 		t, err := osfs.NewTempFileSystem()
@@ -186,7 +188,7 @@ var _ = Describe("ctf management", func() {
 			_, err = n.GetArtifact("dummy")
 			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTIFACT, "dummy", "mandelsoft/test")))
 
-			Expect(n.AddBlob(accessio.BlobAccessForString("", "dummy"))).To(Equal(accessobj.ErrReadOnly))
+			Expect(n.AddBlob(blobaccess.ForString("", "dummy"))).To(Equal(accessobj.ErrReadOnly))
 
 			n, err = r.LookupNamespace("mandelsoft/other")
 			Expect(err).To(Succeed())

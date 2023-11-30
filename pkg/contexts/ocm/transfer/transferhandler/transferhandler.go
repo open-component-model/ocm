@@ -8,6 +8,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -98,9 +99,9 @@ type TransferHandler interface {
 	TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.SourceAccess) (bool, error)
 
 	// HandleTransferResource technically transfers a resource.
-	HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
+	HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
 	// HandleTransferSource technically transfers a source.
-	HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
+	HandleTransferSource(r ocm.SourceAccess, m cpi.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
 }
 
 func ApplyOptions(set TransferOptions, opts ...TransferOption) error {

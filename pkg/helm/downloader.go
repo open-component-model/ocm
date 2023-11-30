@@ -5,6 +5,7 @@
 package helm
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -17,11 +18,12 @@ import (
 	"helm.sh/helm/v3/pkg/repo"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/helm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocihelm "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/helm"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/helm/identity"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -33,6 +35,9 @@ type chartDownloader struct {
 }
 
 func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, repourl string, opts ...Option) (ChartAccess, error) {
+	if version == "" {
+		return nil, fmt.Errorf("version required")
+	}
 	repourl = strings.TrimSuffix(repourl, "/")
 
 	acc, err := newTempChartAccess(osfs.New())
@@ -73,7 +78,12 @@ func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, re
 	if registry.IsOCI(repourl) {
 		fs := osfs.New()
 		chart = vfs.Join(fs, dl.root, filepath.Base(ref)+".tgz")
-		creds := directcreds.NewCredentials(dl.creds)
+
+		var creds credentials.CredentialsSource
+		if dl.creds != nil {
+			creds = directcreds.NewCredentials(dl.creds)
+		}
+
 		chart, prov, aset, err = ocihelm.Download2(out, ctx.OCIContext(), identity.OCIRepoURL(repourl, ref)+":"+version, chart, osfs.New(), true, creds)
 		if prov != "" && dl.Verify > downloader.VerifyNever && dl.Verify != downloader.VerifyLater {
 			_, err = downloader.VerifyChart(chart, dl.Keyring)
@@ -101,12 +111,12 @@ func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, re
 func (d *chartDownloader) complete(ctx oci.ContextProvider, ref, repourl string) error {
 	rf := repo.NewFile()
 
-	creds := d.creds
 	if d.creds == nil {
 		d.creds = identity.GetCredentials(ctx.OCIContext(), repourl, ref)
-		if d.creds == nil {
-			creds = common.Properties{}
-		}
+	}
+	creds := d.creds
+	if creds == nil {
+		creds = common.Properties{}
 	}
 
 	config := vfs.Join(d.fs, d.root, ".config")

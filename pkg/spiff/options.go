@@ -11,11 +11,11 @@ import (
 	"github.com/mandelsoft/vfs/pkg/cwdfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Option interface {
@@ -60,7 +60,7 @@ func (f OptionFunction) ApplyToRequest(r *Request) error {
 
 func FileSystem(fs vfs.FileSystem) OptionFunction {
 	return func(r *Request) error {
-		r.FileSystem = accessio.FileSystem(fs)
+		r.FileSystem = utils.FileSystem(fs)
 		return nil
 	}
 }
@@ -111,14 +111,14 @@ func TemplateData(name string, data []byte) OptionFunction {
 
 func StubFile(path string, fss ...vfs.FileSystem) OptionFunction {
 	return func(r *Request) error {
-		r.Stubs = append(r.Stubs, spiffing.NewSourceFile(path, accessio.FileSystem(generics.AppendedSlice(fss, r.FileSystem)...)))
+		r.Stubs = append(r.Stubs, spiffing.NewSourceFile(path, utils.FileSystem(generics.AppendedSlice(fss, r.FileSystem)...)))
 		return nil
 	}
 }
 
 func TemplateFile(path string, fss ...vfs.FileSystem) OptionFunction {
 	return func(r *Request) error {
-		r.Template = spiffing.NewSourceFile(path, accessio.FileSystem(generics.AppendedSlice(fss, r.FileSystem)...))
+		r.Template = spiffing.NewSourceFile(path, utils.FileSystem(generics.AppendedSlice(fss, r.FileSystem)...))
 		return nil
 	}
 }

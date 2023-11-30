@@ -15,6 +15,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -165,7 +166,7 @@ func (v *VersionAccess) GetBlob(name string) (cpi.DataAccess, error) {
 	if ok, err := vfs.FileExists(v.access.fs, p); !ok || err != nil {
 		return nil, vfs.ErrNotExist
 	}
-	return accessio.DataAccessForFile(v.access.fs, p), nil
+	return blobaccess.DataAccessForFile(v.access.fs, p), nil
 }
 
 func (v *VersionAccess) AddBlob(blob cpi.BlobAccess) (string, error) {
@@ -229,7 +230,7 @@ func (v *VersionAccess) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) s
 			return ""
 		}
 		defer blob.Close()
-		dig, err := accessio.Digest(blob)
+		dig, err := blobaccess.Digest(blob)
 		if err != nil {
 			return ""
 		}

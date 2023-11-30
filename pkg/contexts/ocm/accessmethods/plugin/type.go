@@ -7,20 +7,20 @@ package plugin
 import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type accessType struct {
-	cpi.AccessType
+	accspeccpi.AccessType
 	plug    plugin.Plugin
 	cliopts flagsets.ConfigOptionTypeSet
 }
 
-var _ cpi.AccessType = (*accessType)(nil)
+var _ accspeccpi.AccessType = (*accessType)(nil)
 
-func NewType(name string, p plugin.Plugin, desc *plugin.AccessMethodDescriptor) cpi.AccessType {
+func NewType(name string, p plugin.Plugin, desc *plugin.AccessMethodDescriptor) accspeccpi.AccessType {
 	format := desc.Format
 	if format != "" {
 		format = "\n" + format
@@ -49,16 +49,16 @@ func NewType(name string, p plugin.Plugin, desc *plugin.AccessMethodDescriptor) 
 			cfghdlr.AddOptionType(opt)
 		}
 	}
-	aopts := []cpi.AccessSpecTypeOption{cpi.WithDescription(desc.Description), cpi.WithFormatSpec(format)}
+	aopts := []accspeccpi.AccessSpecTypeOption{accspeccpi.WithDescription(desc.Description), accspeccpi.WithFormatSpec(format)}
 	if cfghdlr.Size() > 0 {
-		aopts = append(aopts, cpi.WithConfigHandler(cfghdlr))
+		aopts = append(aopts, accspeccpi.WithConfigHandler(cfghdlr))
 		t.cliopts = cfghdlr
 	}
-	t.AccessType = cpi.NewAccessSpecType[*AccessSpec](name, aopts...)
+	t.AccessType = accspeccpi.NewAccessSpecType[*AccessSpec](name, aopts...)
 	return t
 }
 
-func (t *accessType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (cpi.AccessSpec, error) {
+func (t *accessType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (accspeccpi.AccessSpec, error) {
 	spec, err := t.AccessType.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err

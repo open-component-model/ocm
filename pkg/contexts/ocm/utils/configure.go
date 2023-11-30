@@ -16,12 +16,12 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const DEFAULT_OCM_CONFIG = ".ocmconfig"
@@ -29,7 +29,7 @@ const DEFAULT_OCM_CONFIG = ".ocmconfig"
 const DEFAULT_OCM_CONFIG_DIR = ".ocm"
 
 func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context, error) {
-	fs := accessio.FileSystem(fss...)
+	fs := utils.FileSystem(fss...)
 	if ctx == nil {
 		ctx = ocm.DefaultContext()
 	}

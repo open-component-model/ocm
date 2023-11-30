@@ -7,7 +7,7 @@ package install
 import (
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/toi"
 )
 
@@ -40,7 +40,7 @@ type Operation struct {
 	// Environment contains environment variables that should be injected into the container execution
 	Environment map[string]string
 	// Files contains files that should be injected into the invocation image.
-	Files map[string]accessio.BlobAccess
+	Files map[string]blobaccess.BlobAccess
 	// Outputs map of output (sub)paths (e.g. NAME) to the name of the output.
 	// Indicates which outputs the driver should return the contents of in the OperationResult.
 	Outputs map[string]string

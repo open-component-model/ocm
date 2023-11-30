@@ -15,17 +15,18 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/distribution/reference"
 	"github.com/docker/cli/cli/command"
-	"github.com/docker/distribution/reference"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	registrytypes "github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/docker/registry"
 	"github.com/mitchellh/copystructure"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/toi"
@@ -169,7 +170,7 @@ func pullImage(ctx context.Context, cli command.Cli, image string) error {
 
 	authConfig := command.ResolveAuthConfig(ctx, cli, repoInfo.Index)
 
-	encodedAuth, err := command.EncodeAuthToBase64(authConfig)
+	encodedAuth, err := registrytypes.EncodeAuthConfig(authConfig)
 	if err != nil {
 		return fmt.Errorf("unable encode auth: %w", err)
 	}
@@ -444,7 +445,7 @@ func (d *Driver) fetchOutputs(ctx context.Context, container string, op *install
 // generateTar creates a tarfile containing the specified files, with the owner
 // set to the uid that the container runs as so that it is guaranteed to have
 // read access to the files we copy into the container.
-func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, func() error, error) {
+func generateTar(files map[string]blobaccess.BlobAccess, uid int) (io.ReadCloser, func() error, error) {
 	r, w := io.Pipe()
 	tw := tar.NewWriter(w)
 	for path := range files {

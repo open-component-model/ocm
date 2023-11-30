@@ -18,7 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/cli/download"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/extraid"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	env2 "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -42,8 +42,8 @@ var _ = Describe("Test Environment", func() {
 					env.Provider("ocm.software")
 					env.Resource(download.RESOURCE, "1.0.0", resourcetypes.EXECUTABLE, metav1.LocalRelation, func() {
 						env.BlobStringData(mime.MIME_OCTET, "ocm script")
-						env.ExtraIdentity(consts.ExecutableOperatingSystem, runtime.GOOS)
-						env.ExtraIdentity(consts.ExecutableArchitecture, runtime.GOARCH)
+						env.ExtraIdentity(extraid.ExecutableOperatingSystem, runtime.GOOS)
+						env.ExtraIdentity(extraid.ExecutableArchitecture, runtime.GOARCH)
 					})
 				})
 			})

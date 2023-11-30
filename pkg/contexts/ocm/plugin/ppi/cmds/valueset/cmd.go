@@ -18,7 +18,7 @@ func New(p ppi.Plugin) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   Name,
 		Short: "valueset operations",
-		Long: `This command group provides all commands used to implement a a value set
+		Long: `This command group provides all commands used to implement a value set
 described by a value set descriptor (<CMD>` + p.Name() + ` descriptor</CMD>.`,
 	}
 

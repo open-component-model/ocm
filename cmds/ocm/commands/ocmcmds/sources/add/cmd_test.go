@@ -14,8 +14,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -69,7 +69,7 @@ func CheckArchiveSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name str
 }
 
 func CheckTextSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
-	rblob := accessio.BlobAccessForFile(mime.MIME_TEXT, "/testdata/testcontent", env)
+	rblob := blobaccess.ForFile(mime.MIME_TEXT, "/testdata/testcontent", env)
 	dig := rblob.Digest()
 	data, err := rblob.Get()
 	Expect(err).To(Succeed())

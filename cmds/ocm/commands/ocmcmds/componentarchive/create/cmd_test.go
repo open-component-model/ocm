@@ -79,18 +79,18 @@ var _ = Describe("Test Environment", func() {
 		}))
 	})
 
-	It("creates comp arch with "+compdescv3.SchemaVersion, func() {
+	It("creates comp arch with "+compdescv3.VersionName, func() {
 
 		plabels := metav1.Labels{}
 		plabels.Set("email", "info@mandelsoft.de")
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", "v1", "--provider", "mandelsoft", "--file", "/tmp/ca",
-			"l1=value", "l2={\"name\":\"value\"}", "-p", "email=info@mandelsoft.de", "-S", compdescv3.SchemaVersion)).To(Succeed())
+			"l1=value", "l2={\"name\":\"value\"}", "-p", "email=info@mandelsoft.de", "-S", compdescv3.VersionName)).To(Succeed())
 		Expect(env.DirExists("/tmp/ca")).To(BeTrue())
 		data, err := env.ReadFile("/tmp/ca/" + comparch.ComponentDescriptorFileName)
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
-		Expect(cd.Metadata.ConfiguredVersion).To(Equal(compdescv3.GroupVersion))
+		Expect(cd.Metadata.ConfiguredVersion).To(Equal(compdescv3.SchemaVersion))
 		Expect(cd.Name).To(Equal("test.de/x"))
 		Expect(cd.Version).To(Equal("v1"))
 		Expect(string(cd.Provider.Name)).To(Equal("mandelsoft"))

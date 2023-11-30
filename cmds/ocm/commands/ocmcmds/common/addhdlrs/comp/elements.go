@@ -155,6 +155,10 @@ type ResourceSpec struct {
 
 var _ addhdlrs.ElementSpec = (*ResourceSpec)(nil)
 
+func (r *ResourceSpec) GetRawIdentity() metav1.Identity {
+	return metav1.NewIdentity(r.Name, metav1.SystemIdentityVersion, r.Version)
+}
+
 func (r *ResourceSpec) Info() string {
 	return fmt.Sprintf("component %s:%s", r.Name, r.Version)
 }

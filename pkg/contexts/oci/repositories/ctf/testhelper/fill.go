@@ -9,7 +9,7 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
+//nolint:gosec // digests of test manifests
 const (
 	TAG             = "v1"
 	DIGEST_MANIFEST = "3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
@@ -37,7 +38,7 @@ func DefaultManifestFill(n cpi.NamespaceAccess) {
 func NewArtifact(n cpi.NamespaceAccess, finalize *finalizer.Finalizer) cpi.ArtifactAccess {
 	art := testutils.Must(n.NewArtifact())
 	finalize.Close(art)
-	Expect(art.AddLayer(accessio.BlobAccessForString(mime.MIME_OCTET, "testdata"), nil)).To(Equal(0))
+	Expect(art.AddLayer(blobaccess.ForString(mime.MIME_OCTET, "testdata"), nil)).To(Equal(0))
 	desc := testutils.Must(art.Manifest())
 	Expect(desc).NotTo(BeNil())
 
@@ -45,7 +46,7 @@ func NewArtifact(n cpi.NamespaceAccess, finalize *finalizer.Finalizer) cpi.Artif
 	Expect(desc.Layers[0].MediaType).To(Equal(mime.MIME_OCTET))
 	Expect(desc.Layers[0].Size).To(Equal(int64(8)))
 
-	config := accessio.BlobAccessForData(mime.MIME_OCTET, []byte("{}"))
+	config := blobaccess.ForData(mime.MIME_OCTET, []byte("{}"))
 	testutils.MustBeSuccessful(n.AddBlob(config))
 	desc.Config = *artdesc.DefaultBlobDescriptor(config)
 	return art

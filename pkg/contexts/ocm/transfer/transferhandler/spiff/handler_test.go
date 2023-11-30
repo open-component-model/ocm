@@ -18,7 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -26,6 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/testutils"
 )
@@ -212,7 +212,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 
 			racc, err := comp.GetResourceByIndex(1)
 			Expect(err).To(Succeed())
-			reader, err := ocm.ResourceReader(racc)
+			reader, err := ocmutils.GetResourceReader(racc)
 			Expect(err).To(Succeed())
 			defer reader.Close()
 			set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))
@@ -261,7 +261,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 
 			racc, err := comp.GetResourceByIndex(1)
 			Expect(err).To(Succeed())
-			reader, err := ocm.ResourceReader(racc)
+			reader, err := ocmutils.GetResourceReader(racc)
 			Expect(err).To(Succeed())
 			defer reader.Close()
 			set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))

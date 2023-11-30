@@ -11,11 +11,14 @@ import (
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/relativeociref"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 
@@ -39,7 +42,7 @@ var _ = Describe("Method", func() {
 
 	It("accesses artifact", func() {
 		var finalize finalizer.Finalizer
-		Defer(finalize.Finalize)
+		defer Defer(finalize.Finalize)
 
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 			OCIManifest1(env)
@@ -60,9 +63,12 @@ var _ = Describe("Method", func() {
 		finalize.Close(vers)
 		res := Must(vers.GetResourceByIndex(0))
 		m := Must(res.AccessMethod())
-		finalize.Close(m)
+		finalize.With(func() error {
+			return m.Close()
+		})
 		data := Must(m.Get())
 		Expect(len(data)).To(Equal(628))
-		Expect(m.(accessio.DigestSource).Digest().String()).To(Equal("sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"))
+		Expect(accspeccpi.GetAccessMethodImplementation(m).(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"))
+		Expect(utils.GetOCIArtifactRef(env, res)).To(Equal("ocm/value:v2.0"))
 	})
 })

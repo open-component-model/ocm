@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	compdescv2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -69,6 +70,10 @@ type ResourceSpec struct {
 }
 
 var _ addhdlrs.ElementSpec = (*ResourceSpec)(nil)
+
+func (r *ResourceSpec) GetRawIdentity() metav1.Identity {
+	return r.ElementMeta.GetRawIdentity()
+}
 
 func (r *ResourceSpec) Info() string {
 	return fmt.Sprintf("source %s: %s", r.Type, r.GetRawIdentity())

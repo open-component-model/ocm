@@ -9,7 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/access"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
 func needsResourceTransport(cv ocm.ComponentVersionAccess, s, t *compdesc.ComponentDescriptor, handler TransferHandler) bool {
@@ -19,7 +19,7 @@ func needsResourceTransport(cv ocm.ComponentVersionAccess, s, t *compdesc.Compon
 			return true
 		}
 
-		sa := access.NewResourceAccess(cv, &r)
+		sa := cpi.NewResourceAccess(cv, r.Access, r.ResourceMeta)
 		sacc, err := sa.Access()
 		if err != nil {
 			return true
@@ -36,7 +36,7 @@ func needsResourceTransport(cv ocm.ComponentVersionAccess, s, t *compdesc.Compon
 			return true
 		}
 
-		sa := access.NewSourceAccess(cv, &r)
+		sa := cpi.NewSourceAccess(cv, r.Access, r.SourceMeta)
 
 		sacc, err := sa.Access()
 		if err != nil {

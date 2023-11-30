@@ -14,7 +14,7 @@ import (
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/registry"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
@@ -57,7 +57,7 @@ func TransferAsArtifact(loader loader.Loader, ns oci.NamespaceAccess) (*chart.Ch
 		return nil, nil, err
 	}
 
-	var blob accessio.BlobAccess
+	var blob blobaccess.BlobAccess
 	blob, err = loader.ChartArchive()
 	if err != nil {
 		return nil, nil, err
@@ -72,7 +72,7 @@ func TransferAsArtifact(loader loader.Loader, ns oci.NamespaceAccess) (*chart.Ch
 		if err != nil {
 			return chart, nil, err
 		}
-		blob = accessio.BlobAccessForFile(registry.ChartLayerMediaType, path, osfs.New())
+		blob = blobaccess.ForFile(registry.ChartLayerMediaType, path, osfs.New())
 	} else {
 		defer blob.Close()
 	}
@@ -90,7 +90,7 @@ func TransferAsArtifact(loader loader.Loader, ns oci.NamespaceAccess) (*chart.Ch
 	defer art.Close()
 	m := art.ManifestAccess()
 
-	err = m.SetConfigBlob(accessio.BlobAccessForData(registry.ConfigMediaType, configData), nil)
+	err = m.SetConfigBlob(blobaccess.ForData(registry.ConfigMediaType, configData), nil)
 	if err != nil {
 		return chart, nil, err
 	}
@@ -99,7 +99,7 @@ func TransferAsArtifact(loader loader.Loader, ns oci.NamespaceAccess) (*chart.Ch
 		return chart, nil, err
 	}
 	if provData != nil {
-		_, err = m.AddLayer(accessio.BlobAccessForData(registry.ProvLayerMediaType, provData), nil)
+		_, err = m.AddLayer(blobaccess.ForData(registry.ProvLayerMediaType, provData), nil)
 		if err != nil {
 			return chart, nil, err
 		}

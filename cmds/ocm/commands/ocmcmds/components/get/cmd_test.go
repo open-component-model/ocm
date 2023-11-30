@@ -222,11 +222,11 @@ NESTING COMPONENT VERSION PROVIDER   IDENTITY
 		It("lists converted yaml", func() {
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "components", "-S", compdescv3.SchemaVersion, "-o", "yaml", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-S", compdescv3.VersionName, "-o", "yaml", "--repo", ARCH, COMP2)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				fmt.Sprintf(`
 ---
-apiVersion: ocm.software/%s
+apiVersion: %s
 kind: ComponentVersion
 metadata:
   name: test.de/y

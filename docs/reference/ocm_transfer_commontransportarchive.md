@@ -111,7 +111,7 @@ The uploader name may be a path expression with the following possibilities:
 
   - <code>ocm/ociArtifacts</code>: downloading OCI artifacts
 
-    The <code>ociArtifacts</code> downloader is able to to download OCI artifacts
+    The <code>ociArtifacts</code> downloader is able to download OCI artifacts
     as artifact archive according to the OCI distribution spec.
     The following artifact media types are supported:
       - <code>application/vnd.oci.image.manifest.v1+tar</code>

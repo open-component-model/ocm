@@ -5,6 +5,7 @@
 package genericocireg_test
 
 import (
+	"fmt"
 	"path"
 	"reflect"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -37,6 +39,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
@@ -70,7 +73,6 @@ var _ = Describe("component repository mapping", func() {
 		ocispec, err = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
 		Expect(err).To(Succeed())
 		spec = genericocireg.NewRepositorySpec(ocispec, nil)
-
 	})
 
 	AfterEach(func() {
@@ -82,7 +84,7 @@ var _ = Describe("component repository mapping", func() {
 		defer Defer(finalize.Finalize)
 
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
@@ -118,16 +120,22 @@ var _ = Describe("component repository mapping", func() {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)
 
-		blob := accessio.BlobAccessForString(mime.MIME_OCTET, "anydata")
+		blob := blobaccess.ForString(mime.MIME_OCTET, "anydata")
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
 		acc := Must(vers.AddBlob(blob, "", "", nil))
+
+		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
+		MustBeSuccessful(comp.AddVersion(vers))
+
+		rs := Must(vers.GetResourceByIndex(0))
+		acc = Must(rs.Access())
 
 		// check provided actual access to be local blob
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
@@ -141,9 +149,9 @@ var _ = Describe("component repository mapping", func() {
 		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
 
-		rs := Must(vers.GetResourceByIndex(0))
-
+		rs = Must(vers.GetResourceByIndex(0))
 		spec := Must(rs.Access())
+
 		Expect(spec.GetType()).To(Equal(localociblob.Type))
 
 		m := Must(rs.AccessMethod())
@@ -161,16 +169,21 @@ var _ = Describe("component repository mapping", func() {
 			return TESTBASE
 		}
 		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(handler.NewBlobHandler(base))).New()
-		blob := accessio.BlobAccessForString(mime.MIME_OCTET, ocmtesthelper.S_TESTDATA)
+		blob := blobaccess.ForString(mime.MIME_OCTET, ocmtesthelper.S_TESTDATA)
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
 		acc := Must(vers.AddBlob(blob, "", "", nil))
+		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
+		MustBeSuccessful(comp.AddVersion(vers))
+
+		res := Must(vers.GetResourceByIndex(0))
+		acc = Must(res.Access())
 
 		// check provided actual access to be local blob
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
@@ -185,10 +198,7 @@ var _ = Describe("component repository mapping", func() {
 		Expect(ok).To(BeTrue())
 		Expect(o.Digest).To(Equal(blob.Digest()))
 		Expect(o.Reference).To(Equal(TESTBASE + "/" + componentmapping.ComponentDescriptorNamespace + "/" + COMPONENT))
-		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
-		MustBeSuccessful(comp.AddVersion(vers))
 
-		res := Must(vers.GetResourceByIndex(0))
 		Expect(res.Meta().Digest).NotTo(BeNil())
 		Expect(res.Meta().Digest.Value).To(Equal(ocmtesthelper.D_TESTDATA))
 	})
@@ -213,7 +223,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 		ocirepo := genericocireg.GetOCIRepository(repo)
 		Expect(ocirepo).NotTo(BeNil())
@@ -221,13 +231,16 @@ var _ = Describe("component repository mapping", func() {
 		nested := finalize.Nested()
 		comp := finalizer.ClosingWith(nested, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(nested, Must(comp.NewVersion("v1")))
-		blob := accessio.BlobAccessForFile(mime, "test.tgz", tempfs)
+		blob := blobaccess.ForFile(mime, "test.tgz", tempfs)
 
+		fmt.Printf("physical digest: %s\n", blob.Digest())
 		acc := Must(vers.AddBlob(blob, "", "artifact1", nil))
-		Expect(acc.GetKind()).To(Equal(localblob.Type))
-
 		MustBeSuccessful(vers.SetResource(cpi.NewResourceMeta("image", resourcetypes.OCI_IMAGE, metav1.LocalRelation), acc))
+		MustBeSuccessful(comp.AddVersion(vers))
+
 		res := Must(vers.GetResourceByIndex(0))
+		acc = Must(res.Access())
+		Expect(acc.GetKind()).To(Equal(localblob.Type))
 		rd := res.Meta().Digest
 		Expect(rd).NotTo(BeNil())
 		Expect(rd.Value).To(Equal(testhelper.DIGEST_MANIFEST))
@@ -239,16 +252,18 @@ var _ = Describe("component repository mapping", func() {
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		o := acc.(*ociartifact.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact1@sha256:" + testhelper.DIGEST_MANIFEST))
-		MustBeSuccessful(comp.AddVersion(vers))
 
 		acc = Must(vers.AddBlob(blob, "", "artifact2:v1", nil))
+		MustBeSuccessful(vers.SetResource(cpi.NewResourceMeta("image2", resourcetypes.OCI_IMAGE, metav1.LocalRelation), acc, cpi.ModifyResource()))
+		MustBeSuccessful(comp.AddVersion(vers))
 
+		res = Must(vers.GetResourceByIndex(1))
+		acc = Must(res.Access())
 		acc = acc.GlobalAccessSpec(ctx)
 		Expect(acc).NotTo(BeNil())
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		o = acc.(*ociartifact.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact2:v1"))
-		MustBeSuccessful(comp.AddVersion(vers))
 
 		MustBeSuccessful(nested.Finalize())
 
@@ -264,7 +279,7 @@ var _ = Describe("component repository mapping", func() {
 		defer Defer(finalize.Finalize, "finalize open elements")
 
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
-		impl := Must(cpi.GetRepositoryImplementation(repo))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		nested := finalize.Nested()
@@ -273,17 +288,18 @@ var _ = Describe("component repository mapping", func() {
 		vers := finalizer.ClosingWith(nested, Must(comp.NewVersion("v1")))
 
 		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
-		blob := accessio.BlobAccessForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
+		blob := blobaccess.ForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
 
 		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
 		MustBeSuccessful(comp.AddVersion(vers))
 
 		MustBeSuccessful(nested.Finalize())
 
-		// modify rsource in component
+		// modify resource in component
 		vers = finalizer.ClosingWith(nested, Must(repo.LookupComponentVersion(COMPONENT, "v1")))
-		blob = accessio.BlobAccessForString(mime.MIME_TEXT, "otherdata")
+		blob = blobaccess.ForString(mime.MIME_TEXT, "otherdata")
 		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
+		MustBeSuccessful(vers.Update())
 		MustBeSuccessful(nested.Finalize())
 
 		// check content

@@ -13,6 +13,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -22,12 +23,12 @@ import (
 )
 
 type Source struct {
-	accessio.DataSource
+	blobaccess.DataSource
 	count int
 }
 
 func NewData(data string) *Source {
-	return &Source{accessio.DataAccessForString(data), 0}
+	return &Source{blobaccess.DataAccessForString(data), 0}
 }
 
 func (s *Source) Reader() (io.ReadCloser, error) {

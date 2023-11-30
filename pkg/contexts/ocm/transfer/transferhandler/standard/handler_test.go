@@ -15,6 +15,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -24,8 +25,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
@@ -107,7 +110,71 @@ var _ = Describe("Transfer handler", func() {
 		env.Cleanup()
 	})
 
-	DescribeTable("it should copy a resource by value to a ctf file", func(acc string, topts ...transferhandler.TransferOption) {
+	It("test", func() {
+		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+		defer Close(src, "source")
+		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+		defer Close(cv, "source cv")
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		defer Close(tgt, "target")
+
+		tcv := Must(tgt.NewComponentVersion(cv.GetName(), cv.GetVersion()))
+		defer Close(tcv, "target version")
+
+		res := Must(cv.GetResource(metav1.NewIdentity("artifact")))
+		acc := Must(res.Access())
+
+		m := Must(acc.AccessMethod(cv))
+		defer Close(m, "method")
+
+		blob := Must(accspeccpi.BlobAccessForAccessMethod(m))
+		defer Close(blob, "blob")
+		MustBeSuccessful(tcv.SetResourceBlob(res.Meta(), blob, "", nil, ocm.SkipVerify()))
+
+		MustBeSuccessful(tgt.AddComponentVersion(tcv))
+	})
+
+	DescribeTable("it should copy a resource by value to a ctf file", func(acc string, compose bool, topts ...transferhandler.TransferOption) {
+		compositionmodeattr.Set(env.OCMContext(), compose)
+		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+		defer Close(src, "source")
+		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+		defer Close(cv, "source cv")
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		defer Close(tgt, "target")
+
+		// handler, err := standard.New(standard.ResourcesByValue())
+		p, buf := common.NewBufferedPrinter()
+		opts := append(topts, standard.ResourcesByValue(), transfer.WithPrinter(p), &optionsChecker{})
+		MustBeSuccessful(transfer.Transfer(cv, tgt, opts...))
+		Expect(env.DirExists(OUT)).To(BeTrue())
+
+		Expect(string(buf.Bytes())).To(StringEqualTrimmedWithContext(`
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0 testdata[PlainText]...
+...resource 1 artifact[ociImage](ocm/value:v2.0)...
+...adding component version...
+`))
+	},
+		Entry("without preserve global",
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			false),
+		Entry("with preserve global",
+			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			false,
+			standard.KeepGlobalAccess()),
+
+		Entry("with composition and without preserve global",
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			true),
+		Entry("with composition and with preserve global",
+			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			true,
+			standard.KeepGlobalAccess()),
+	)
+
+	DescribeTable("it should copy a resource by value to a ctf file", func(acc string, compose bool, topts ...transferhandler.TransferOption) {
+		compositionmodeattr.Set(env.OCMContext(), compose)
 		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 		defer Close(src, "source")
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
@@ -185,7 +252,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		MustBeSuccessful(nested.Finalize())
 
 		// modify one artifact and overwrite
-		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), accessio.BlobAccessForString(mime.MIME_TEXT, "otherdata"), "", nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), "", nil))
 		tcd.Resources[0].Digest = DS_OTHERDATA
 		tcd.Resources[0].Access = Must(runtime.ToUnstructuredVersionedTypedObject(localblob.New("sha256:"+D_OTHERDATA, "", mime.MIME_TEXT, nil)))
 		buf.Reset()
@@ -204,13 +271,24 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 
 	},
 		Entry("without preserve global",
-			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}"),
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			false),
 		Entry("with preserve global",
 			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			false,
+			standard.KeepGlobalAccess()),
+
+		Entry("with composition and without preserve global",
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			true),
+		Entry("with composition and with preserve global",
+			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			true,
 			standard.KeepGlobalAccess()),
 	)
 
-	DescribeTable("it should copy a resource by value to a ctf file for re-transport", func(acc string, topts ...transferhandler.TransferOption) {
+	DescribeTable("it should copy a resource by value to a ctf file for re-transport", func(acc string, mode bool, topts ...transferhandler.TransferOption) {
+		compositionmodeattr.Set(env.OCMContext(), mode)
 		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 		defer Close(src, "source")
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
@@ -310,7 +388,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		MustBeSuccessful(nested.Finalize())
 
 		// modify one artifact and overwrite
-		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), accessio.BlobAccessForString(mime.MIME_TEXT, "otherdata"), "", nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), "", nil))
 		tcd.Resources[0].Digest = DS_OTHERDATA
 		tcd.Resources[0].Access = Must(runtime.ToUnstructuredVersionedTypedObject(localblob.New("sha256:"+D_OTHERDATA, "", mime.MIME_TEXT, nil)))
 		buf.Reset()
@@ -332,9 +410,18 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 
 	},
 		Entry("without preserve global",
-			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}"),
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			false),
 		Entry("with preserve global",
 			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			false,
+			standard.KeepGlobalAccess()),
+		Entry("with composition and without preserve global",
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			true),
+		Entry("with composition and with preserve global",
+			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			true,
 			standard.KeepGlobalAccess()),
 	)
 
@@ -400,7 +487,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 	})
 
 	It("it should copy signatures", func() {
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 		Expect(err).To(Succeed())
 		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
 		Expect(err).To(Succeed())

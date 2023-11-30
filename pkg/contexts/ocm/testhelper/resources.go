@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+//nolint:gosec // digests of test manifests
 package testhelper
 
 import (
@@ -34,7 +35,7 @@ var DS_TESTDATA = TextResourceDigestSpec(D_TESTDATA)
 
 func TestDataResource(env *builder.Builder, funcs ...func()) {
 	env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-		env.BlobStringData(mime.MIME_TEXT, "testdata")
+		env.BlobStringData(mime.MIME_TEXT, S_TESTDATA)
 		env.Configure(funcs...)
 	})
 }

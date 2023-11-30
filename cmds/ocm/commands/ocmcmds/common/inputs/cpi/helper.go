@@ -15,8 +15,8 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -80,12 +80,12 @@ func (s *ProcessSpec) SetMediaTypeIfNotDefined(mediaType string) {
 	s.MediaType = mediaType
 }
 
-func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc accessio.DataAccess, fs vfs.FileSystem) (accessio.TemporaryBlobAccess, string, error) {
+func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc blobaccess.DataAccess, fs vfs.FileSystem) (blobaccess.BlobAccess, string, error) {
 	if !s.Compress() {
 		if s.MediaType == "" {
 			s.MediaType = mime.MIME_OCTET
 		}
-		return accessio.TemporaryBlobAccessFor(accessio.BlobAccessForDataAccess(accessio.BLOB_UNKNOWN_DIGEST, accessio.BLOB_UNKNOWN_SIZE, s.MediaType, acc)), "", nil
+		return blobaccess.ForDataAccess(blobaccess.BLOB_UNKNOWN_DIGEST, blobaccess.BLOB_UNKNOWN_SIZE, s.MediaType, acc), "", nil
 	}
 
 	reader, err := acc.Reader()
@@ -94,7 +94,7 @@ func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc accessio.DataAccess, f
 	}
 	defer reader.Close()
 
-	temp, err := accessio.NewTempFile(fs, "", "compressed*.gzip")
+	temp, err := blobaccess.NewTempFile("", "compressed*.gzip", fs)
 	if err != nil {
 		return nil, "", err
 	}
@@ -157,7 +157,7 @@ func (s *MediaFileSpec) ValidateFile(fldPath *field.Path, ctx clictx.Context, in
 		pathField := fldPath.Child("path")
 		fileInfo, filePath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
+			allErrs = append(allErrs, field.Invalid(pathField, s.Path, err.Error()))
 		}
 		return fileInfo, filePath, allErrs
 	}

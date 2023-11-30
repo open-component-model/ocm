@@ -11,12 +11,12 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -319,6 +319,10 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 			orig.Signatures = cd.Signatures
 			ctx.Signed = true
 		}
+		err := cv.Update()
+		if err != nil && !errors.Is(err, ocm.ErrTempVersion) {
+			return nil, err
+		}
 	}
 	return ctx, nil
 }
@@ -389,7 +393,7 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 		}
 		err = verifier.Verify(sig.Digest.Value, hasher.Crypto(), sig.ConvertToSigning(), pub)
 		if err != nil {
-			return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, sig.Signature.Algorithm)
+			return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, n)
 		}
 		found = append(found, n)
 		if opts.SignatureName() == sig.Name {
@@ -407,10 +411,15 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 	return spec, nil
 }
 
-func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) error {
+func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) (rerr error) {
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagation(&rerr)
+
 	ctx := state.Context
 	cd := ctx.Descriptor
 	for i, reference := range cd.References {
+		loop := finalize.Nested()
+
 		rnv := ocm.ComponentRefKey(&reference)
 		nctx := state.GetContext(rnv, state.Context.CtxKey)
 
@@ -422,11 +431,11 @@ func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) e
 		if err != nil {
 			return errors.Wrapf(err, refMsg(reference, "failed resolving component reference"))
 		}
+		loop.Close(nested)
+
 		if nctx == nil || opts.Recursively || opts.Verify {
-			closer := accessio.OnceCloser(nested)
-			defer closer.Close()
 			digestOpts := opts.Nested()
-			nctx, err = apply(state, nested, digestOpts, true)
+			nctx, err = apply(state, nested, digestOpts, false)
 			if err != nil {
 				return errors.Wrapf(err, refMsg(reference, "failed applying to component reference"))
 			}
@@ -461,14 +470,23 @@ func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) e
 		ctx.Refs[nctx.Key] = nctx.Digest
 		state.Logger.Debug("reference digest", "index", i, "reference", common.NewNameVersion(reference.ComponentName, reference.Version), "hashalgo", nctx.Digest.HashAlgorithm, "normalgo", nctx.Digest.NormalisationAlgorithm, "digest", nctx.Digest.Value)
 		opts.Printer.Printf("  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, nctx.Digest)
+
+		if err := loop.Finalize(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) error {
+func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) (rerr error) {
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagation(&rerr)
+
 	octx := cv.GetContext()
 	blobdigesters := octx.BlobDigesters()
 	for i, res := range cv.GetResources() {
+		loop := finalize.Nested()
+
 		meta := res.Meta()
 		preset := preset.Lookup(meta.Name, meta.Version, meta.ExtraIdentity)
 		raw := &cd.Resources[i]
@@ -489,6 +507,9 @@ func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 		}
 		// special digest notation indicates to not digest the content
 		if cd.Resources[i].Digest.IsExcluded() {
+			if err := loop.Finalize(); err != nil {
+				return err
+			}
 			continue
 		}
 
@@ -496,6 +517,7 @@ func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 		if err != nil {
 			return errors.Wrapf(err, resMsg(raw, acc.Describe(octx), "failed creating access for resource"))
 		}
+		loop.Close(meth, "method for resource "+res.Meta().Name)
 
 		var rdigest *metav1.DigestSpec
 		if raw.Digest != nil &&
@@ -536,6 +558,10 @@ func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 		rid := res.Meta().GetIdentity(cv.GetDescriptor().Resources)
 		state.Logger.Debug("resource digest", "index", i, "id", rid, "hashalgo", digest[0].HashAlgorithm, "normalgo", digest[0].NormalisationAlgorithm, "digest", digest[0].Value)
 		opts.Printer.Printf("  resource %d:  %s: digest %s\n", i, rid, &digest[0])
+
+		if err := loop.Finalize(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

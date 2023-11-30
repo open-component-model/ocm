@@ -1,5 +1,5 @@
 run:
-  go: "1.19"
+  go: "1.21"
   timeout: 10m
   tests: false
   allow-parallel-runners: true
@@ -73,6 +73,9 @@ linters:
 
 
     # Disabled with reason
+    - nakedret
+    - depguard
+    - mirror
     - dogsled
     - exhaustruct      # Doesn't really make sense.
     - exhaustive       # Doesn't really make sense.
@@ -106,9 +109,9 @@ linters-settings:
       - prefix(github.com/open-component-model/ocm)
     custom-order: true
   staticcheck:
-    go: "1.18"
+    go: "1.21"
   stylecheck:
-    go: "1.18"
+    go: "1.21"
   funlen:
     lines: 110
     statements: 60

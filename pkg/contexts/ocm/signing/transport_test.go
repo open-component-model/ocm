@@ -132,7 +132,10 @@ var _ = Describe("transport and signing", func() {
 				OCIArtifactResource1(env, "image", OCIHOST)
 			})
 		})
+	})
 
+	AfterEach(func() {
+		env.Cleanup()
 	})
 
 	It("provides expected base component", func() {
@@ -207,6 +210,8 @@ var _ = Describe("transport and signing", func() {
 
 		// change volatile data in origin
 		modify(cv, tcv, merged)
+		MustBeSuccessful(tcv.Update())
+
 		MustBeSuccessful(targetfinal.Finalize())
 
 		// transfer changed volatile data

@@ -22,6 +22,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
@@ -57,7 +58,7 @@ func CheckComponent(env *TestEnv, handler func(ocm.Repository)) {
 	Expect(cd.Labels).To(Equal(clabels))
 
 	r := Must(cv.GetResource(metav1.Identity{"name": "data"}))
-	data := Must(ocm.ResourceData(r))
+	data := Must(ocmutils.GetResourceData(r))
 	Expect(string(data)).To(Equal("!stringdata"))
 
 	r = Must(cv.GetResource(metav1.Identity{"name": "text"}))
@@ -97,6 +98,29 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/components.yaml")).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
 		CheckComponent(env, nil)
+	})
+
+	Context("failures", func() {
+		It("rejects adding duplicate components", func() {
+			ExpectError(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/components-dup.yaml")).To(
+				MatchError(`duplicate component identity "name"="ocm.software/demo/test","version"="1.0.0" (testdata/components-dup.yaml[1][2] and testdata/components-dup.yaml[1][1])`),
+			)
+		})
+		It("rejects adding duplicate resources", func() {
+			ExpectError(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/component-dup-res.yaml")).To(
+				MatchError(`duplicate resource identity "name"="text" (testdata/component-dup-res.yaml[1][1] index 3 and 1)`),
+			)
+		})
+		It("rejects adding duplicate source", func() {
+			ExpectError(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/component-dup-src.yaml")).To(
+				MatchError(`duplicate source identity "name"="source" (testdata/component-dup-src.yaml[1][1] index 2 and 1)`),
+			)
+		})
+		It("rejects adding duplicate reference", func() {
+			ExpectError(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/component-dup-ref.yaml")).To(
+				MatchError(`duplicate reference identity "name"="ref","version"="v1" (testdata/component-dup-ref.yaml[1][1] index 2 and 1)`),
+			)
+		})
 	})
 
 	Context("with completion", func() {

@@ -11,7 +11,9 @@ import (
 	// "github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/examples/lib/helper"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -54,7 +56,7 @@ func setupComponents(repo ocm.Repository) (rerr error) {
 
 	cv.GetDescriptor().Provider.Name = "acne.org"
 	err = cv.SetResourceBlob(compdesc.NewResourceMeta(resourceName, resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
-		accessio.BlobAccessForString(mime.MIME_TEXT, "test data"),
+		blobaccess.ForString(mime.MIME_TEXT, "test data"),
 		"", nil)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add resource test")

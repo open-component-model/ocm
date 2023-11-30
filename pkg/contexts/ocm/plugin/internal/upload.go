@@ -9,5 +9,5 @@ import (
 )
 
 type UploadTargetSpecInfo struct {
-	ConsumerId credentials.ConsumerIdentity
+	ConsumerId credentials.ConsumerIdentity `json:"consumerId"`
 }

@@ -45,11 +45,11 @@ type (
 type EntryTypeScheme = flagsetscheme.TypeScheme[Entry, EntryType]
 
 func NewEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
-	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("entry", "", "routing slip entry specification", "Entry Specification Options", &UnknownEntry{}, true, base...)
+	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", &UnknownEntry{}, true, base...)
 }
 
 func NewStrictEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
-	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("entry", "", "routing slip entry specification", "Entry Specification Options", nil, false, base...)
+	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", nil, false, base...)
 }
 
 func CreateEntry(t runtime.TypedObject) (Entry, error) {
