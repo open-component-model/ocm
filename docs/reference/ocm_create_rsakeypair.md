@@ -20,6 +20,7 @@ rsakeypair, rsa
   -E, --encrypt                encrypt private key with new key
   -e, --encryptionKey string   encrypt private key with given key
   -h, --help                   help for rsakeypair
+      --rootcerts string       root certificates used to validate used certificate authority
       --validity duration      certificate validity (default 87600h0m0s)
 ```
 

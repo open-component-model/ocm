@@ -52,8 +52,9 @@ var _ = Describe("signing", func() {
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 		Expect(sig.Issuer).To(Equal("mandelsoft"))
 
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, hasher.Crypto(), sig, registry.GetPublicKey(NAME))).To(Succeed())
+		sctx.PublicKey = registry.GetPublicKey(NAME)
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, sig, sctx)).To(Succeed())
 		hash = "A" + hash[1:]
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, hasher.Crypto(), sig, registry.GetPublicKey(NAME))).To(HaveOccurred())
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, sig, sctx)).To(HaveOccurred())
 	})
 })

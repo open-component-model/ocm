@@ -5,11 +5,9 @@
 package rsa
 
 import (
-	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/hex"
-	"encoding/pem"
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -105,10 +103,10 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 }
 
 // Verify checks the signature, returns an error on verification failure.
-func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Signature, key interface{}) (err error) {
+func (h Handler) Verify(digest string, signature *signing.Signature, sctx signing.SigningContext) (err error) {
 	var signatureBytes []byte
 
-	publicKey, name, err := GetPublicKey(key)
+	publicKey, name, err := GetPublicKey(sctx.GetPublicKey())
 	if err != nil {
 		return fmt.Errorf("failed to get public key: %w", err)
 	}
@@ -120,14 +118,14 @@ func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Sign
 			return fmt.Errorf("unable to get signature value: failed decoding hash %s: %w", digest, err)
 		}
 	case signutils.MediaTypePEM:
-		signaturePemBlocks, err := GetSignaturePEMBlocks([]byte(signature.Value))
+		sig, algo, _, err := signutils.GetSignatureFromPem([]byte(signature.Value))
 		if err != nil {
-			return fmt.Errorf("unable to get signature pem blocks: %w", err)
+			return fmt.Errorf("unable to get signature from pem: %w", err)
 		}
-		if len(signaturePemBlocks) != 1 {
-			return fmt.Errorf("expected 1 signature pem block, found %d", len(signaturePemBlocks))
+		if algo != "" && algo != Algorithm {
+			return errors.ErrInvalid(signutils.KIND_SIGN_ALGORITHM, algo)
 		}
-		signatureBytes = signaturePemBlocks[0].Bytes
+		signatureBytes = sig
 	default:
 		return fmt.Errorf("invalid signature mediaType %s", signature.MediaType)
 	}
@@ -148,37 +146,11 @@ func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Sign
 			}
 		}
 	}
-	if err := rsa.VerifyPKCS1v15(publicKey, hash, decodedHash, signatureBytes); err != nil {
+	if err := rsa.VerifyPKCS1v15(publicKey, sctx.GetHash(), decodedHash, signatureBytes); err != nil {
 		return fmt.Errorf("signature verification failed, %w", err)
 	}
 
 	return nil
-}
-
-// GetSignaturePEMBlocks returns all signature pem blocks from a list of pem blocks.
-func GetSignaturePEMBlocks(pemData []byte) ([]*pem.Block, error) {
-	if len(pemData) == 0 {
-		return []*pem.Block{}, nil
-	}
-
-	signatureBlocks := []*pem.Block{}
-	for {
-		var currentBlock *pem.Block
-		currentBlock, pemData = pem.Decode(pemData)
-		if currentBlock == nil && len(pemData) > 0 {
-			return nil, fmt.Errorf("unable to decode pem block %s", string(pemData))
-		}
-
-		if currentBlock.Type == signutils.SignaturePEMBlockType {
-			signatureBlocks = append(signatureBlocks, currentBlock)
-		}
-
-		if len(pemData) == 0 {
-			break
-		}
-	}
-
-	return signatureBlocks, nil
 }
 
 func (_ Handler) CreateKeyPair() (priv signutils.GenericPublicKey, pub signutils.GenericPublicKey, err error) {

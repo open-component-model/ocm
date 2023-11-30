@@ -182,7 +182,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 }
 
 // Verify checks the signature, returns an error on verification failure.
-func (h Handler) Verify(digest string, hash crypto.Hash, sig *signing.Signature, key interface{}) (err error) {
+func (h Handler) Verify(digest string, sig *signing.Signature, sctx signing.SigningContext) (err error) {
 	ctx := context.Background()
 
 	data, err := base64.StdEncoding.DecodeString(sig.Value)

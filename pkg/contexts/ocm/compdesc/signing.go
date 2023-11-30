@@ -14,16 +14,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
-	KIND_HASH_ALGORITHM   = "hash algorithm"
-	KIND_SIGN_ALGORITHM   = "signing algorithm"
-	KIND_NORM_ALGORITHM   = "normalization algorithm"
-	KIND_VERIFY_ALGORITHM = "signature verification algorithm"
-	KIND_PUBLIC_KEY       = "public key"
-	KIND_PRIVATE_KEY      = "private key"
-	KIND_SIGNATURE        = "signature"
+	KIND_HASH_ALGORITHM   = signutils.KIND_HASH_ALGORITHM
+	KIND_SIGN_ALGORITHM   = signutils.KIND_SIGN_ALGORITHM
+	KIND_NORM_ALGORITHM   = signutils.KIND_NORM_ALGORITHM
+	KIND_VERIFY_ALGORITHM = signutils.KIND_VERIFY_ALGORITHM
+	KIND_PUBLIC_KEY       = signutils.KIND_PUBLIC_KEY
+	KIND_PRIVATE_KEY      = signutils.KIND_PRIVATE_KEY
+	KIND_SIGNATURE        = signutils.KIND_SIGNATURE
 )
 
 // IsNormalizeable checks if componentReferences and resources contain digest.
@@ -130,7 +131,7 @@ func Sign(cctx credentials.Context, cd *ComponentDescriptor, privateKey signutil
 // Verify verifies the signature (selected by signatureName) and hash of the component-descriptor (as specified in the signature).
 // Does NOT resolve resources or referenced component-descriptors.
 // Returns error if verification fails.
-func Verify(cd *ComponentDescriptor, registry signing.Registry, signatureName string) error {
+func Verify(cd *ComponentDescriptor, registry signing.Registry, signatureName string, rootCA ...signutils.GenericCertificatePool) error {
 	// find matching signature
 	matchingSignature := cd.SelectSignatureByName(signatureName)
 	if matchingSignature == nil {
@@ -149,7 +150,13 @@ func Verify(cd *ComponentDescriptor, registry signing.Registry, signatureName st
 		return errors.ErrUnknown(KIND_HASH_ALGORITHM, matchingSignature.Digest.HashAlgorithm)
 	}
 	// Verify author of signature
-	err := verifier.Verify(matchingSignature.Digest.Value, hasher.Crypto(), matchingSignature.ConvertToSigning(), publicKey)
+	sctx := &signing.DefaultSigningContext{
+		Hash:      hasher.Crypto(),
+		PublicKey: publicKey,
+		RootCerts: utils.Optional(rootCA),
+		Issuer:    registry.GetIssuer(signatureName),
+	}
+	err := verifier.Verify(matchingSignature.Digest.Value, matchingSignature.ConvertToSigning(), sctx)
 	if err != nil {
 		return fmt.Errorf("failed verifying: %w", err)
 	}

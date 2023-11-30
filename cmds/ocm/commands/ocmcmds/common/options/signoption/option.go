@@ -6,7 +6,6 @@ package signoption
 
 import (
 	"crypto/x509"
-	"crypto/x509/pkix"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -24,8 +23,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -43,13 +40,10 @@ func New(sign bool) *Option {
 type Option struct {
 	keyoption.Option
 
-	rootca []string
-	local  bool
-	issuer string
+	local bool
 
 	SignMode      bool
 	signAlgorithm string
-	Issuer        *pkix.Name
 	RootCerts     *x509.CertPool
 	// Verify the digests
 	Verify bool
@@ -73,14 +67,12 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	if o.SignMode {
 		o.Hash.AddFlags(fs)
 		fs.StringVarP(&o.signAlgorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
-		fs.StringVarP(&o.issuer, "issuer", "I", "", "issuer name or distinguished name (DN)")
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
 		fs.BoolVarP(&o.Recursively, "recursive", "R", false, "recursively sign component versions")
 	} else {
 		fs.BoolVarP(&o.local, "local", "L", false, "verification based on information found in component versions, only")
 	}
 	fs.BoolVarP(&o.Verify, "verify", "V", o.SignMode, "verify existing digests")
-	fs.StringArrayVarP(&o.rootca, "ca-cert", "", o.rootca, "additional root certificates")
 	fs.BoolVar(&o.Keyless, "keyless", false, "use keyless signing")
 }
 
@@ -121,30 +113,8 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		return err
 	}
 
-	if len(o.rootca) > 0 {
-		pool, err := signing.BaseRootPool()
-		if err != nil {
-			return err
-		}
-		for _, r := range o.rootca {
-			data, err := utils.ReadFile(r, ctx.FileSystem())
-			if err != nil {
-				return errors.Wrapf(err, "cannot read ca file %q", r)
-			}
-			ok := pool.AppendCertsFromPEM(data)
-			if !ok {
-				return errors.Newf("cannot add rot certs from %q", r)
-			}
-		}
-		o.RootCerts = pool
-	}
-
-	if o.issuer != "" {
-		dn, err := signutils.ParseDN(o.issuer)
-		if err != nil {
-			return err
-		}
-		o.Issuer = dn
+	if o.Keys.HasRootCertificates() {
+		o.RootCerts = o.Keys.GetRootCertPool(true)
 	}
 	return nil
 }
@@ -199,8 +169,12 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	opts.Keys = o.Keys
 	opts.NormalizationAlgo = o.Hash.NormAlgorithm
 	opts.Hasher = o.Hash.Hasher
-	if o.Issuer != nil {
-		opts.Issuer = o.Issuer
+
+	if o.Keys != nil {
+		def := o.Keys.GetIssuer("")
+		if def != nil {
+			opts.Issuer = def
+		}
 	}
 	if o.RootCerts != nil {
 		opts.RootCerts = o.RootCerts

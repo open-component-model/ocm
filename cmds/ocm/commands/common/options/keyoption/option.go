@@ -5,8 +5,10 @@
 package keyoption
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -33,12 +35,16 @@ type Option struct {
 	DefaultName string
 	publicKeys  []string
 	privateKeys []string
+	issuers     []string
+	rootCAs     []string
 	Keys        signing.KeyRegistry
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
 	fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
+	fs.StringArrayVarP(&o.issuers, "issuer", "I", nil, "issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>")
+	fs.StringArrayVarP(&o.rootCAs, "ca-cert", "", nil, "additional root certificate authorities")
 }
 
 func (o *Option) Configure(ctx clictx.Context) error {
@@ -52,6 +58,35 @@ func (o *Option) Configure(ctx clictx.Context) error {
 	err = o.HandleKeys(ctx, "private key", o.privateKeys, o.Keys.RegisterPrivateKey)
 	if err != nil {
 		return err
+	}
+	for _, i := range o.issuers {
+		name := o.DefaultName
+		is := i
+		sep := strings.Index(i, ":=")
+		if sep >= 0 {
+			name = i[:sep]
+			is = i[sep+1:]
+		}
+		if o.Keys.GetIssuer(name) != nil {
+			return fmt.Errorf("issuer already set (%s)", i)
+		}
+		dn, err := signutils.ParseDN(is)
+		if err != nil {
+			return errors.Wrapf(err, "issuer %q", i)
+		}
+
+		o.Keys.RegisterIssuer(name, dn)
+	}
+
+	for _, r := range o.rootCAs {
+		data, err := utils.ResolveData(r, ctx.FileSystem())
+		if err != nil {
+			return errors.Wrapf(err, "root CA")
+		}
+		err = o.Keys.RegisterRootCertificates(data)
+		if err != nil {
+			return errors.Wrapf(err, "root CA")
+		}
 	}
 	return nil
 }
@@ -98,6 +133,15 @@ name of a component version)
 Alternatively a key can be specified as base64 encoded string if the argument
 start with the prefix <code>!</code> or as direct string with the prefix
 <code>=</code>.
+
+With <code>--issuer</code> it is possible to declare expected issuer 
+constraints for public key certificates provided as part of a signature
+required to accept the provisioned public key (besides the successful
+validation of the certificate).
+
+With <code>--ca-cert</code> it is possible to define additional root
+certificates for signature verification, if public keys are provided
+by a certificate delivered with the signature.
 `
 	return s
 }

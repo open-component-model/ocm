@@ -66,7 +66,7 @@ created rsa key pair key.priv[key.pub]
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 		Expect(sig.Issuer).To(Equal(ISSUER.CommonName))
 
-		err = rsa.Handler{}.Verify(d.Hex(), 0, sig, pub)
+		err = rsa.Handler{}.Verify(d.Hex(), sig, &signing.DefaultSigningContext{PublicKey: pub})
 		Expect(err).To(Succeed())
 	})
 
@@ -96,7 +96,7 @@ created rsa key pair key.priv[key.cert]
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 		Expect(sig.Issuer).To(Equal(ISSUER.CommonName))
 
-		err = rsa.Handler{}.Verify(d.Hex(), 0, sig, pub)
+		err = rsa.Handler{}.Verify(d.Hex(), sig, &signing.DefaultSigningContext{PublicKey: pub})
 		Expect(err).To(Succeed())
 	})
 

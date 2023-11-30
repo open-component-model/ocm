@@ -278,7 +278,7 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 			PrivateKey: priv,
 			PublicKey:  opts.PublicKey(opts.SignatureName()),
 			RootCerts:  opts.RootCerts,
-			Issuer:     opts.Issuer,
+			Issuer:     opts.GetIssuer(),
 		}
 		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), ctx.Digest.Value, sctx)
 		if err != nil {
@@ -289,9 +289,9 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 			if err != nil {
 				return nil, errors.Wrapf(err, "signature issuer")
 			}
-			if opts.Issuer != nil {
-				if err := signutils.MatchDN(*iss, *opts.Issuer); err != nil {
-					return nil, errors.Newf("signature issuer %q does not match intended issuer %q", sig.Issuer, opts.Issuer)
+			if sctx.Issuer != nil {
+				if err := signutils.MatchDN(*iss, *sctx.Issuer); err != nil {
+					return nil, errors.Newf("signature issuer %q does not match intended issuer %q", sig.Issuer, sctx.Issuer)
 				}
 			}
 		}
@@ -369,7 +369,6 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 	sctx := &signing.DefaultSigningContext{
 		Hash:      opts.Hasher.Crypto(),
 		RootCerts: opts.RootCerts,
-		Issuer:    opts.Issuer,
 	}
 
 	found := []string{}
@@ -380,6 +379,7 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 		}
 		sig := &cd.Signatures[f]
 
+		sctx.Issuer = opts.IssuerFor(n)
 		if !opts.Keyless {
 			sctx.PublicKey = opts.PublicKey(n)
 			if sctx.PublicKey == nil {
@@ -405,6 +405,8 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 		if hasher == nil {
 			return nil, errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, sig.Digest.HashAlgorithm)
 		}
+		sctx.Hash = hasher.Crypto()
+
 		digest, err := compdesc.Hash(cd, sig.Digest.NormalisationAlgorithm, hasher.Create())
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed hashing component descriptor")
@@ -412,7 +414,8 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 		if sig.Digest.Value != digest {
 			return nil, errors.Newf("signature digest (%s) does not match found digest (%s)", sig.Digest.Value, digest)
 		}
-		err = verifier.Verify(sig.Digest.Value, hasher.Crypto(), sig.ConvertToSigning(), sctx.PublicKey)
+
+		err = verifier.Verify(sig.Digest.Value, sig.ConvertToSigning(), sctx)
 		if err != nil {
 			return nil, errors.Wrapf(err, "signature %q", n)
 		}

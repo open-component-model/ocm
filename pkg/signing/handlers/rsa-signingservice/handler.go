@@ -50,7 +50,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	if err != nil {
 		return nil, err
 	}
-	return server.Sign(cctx, h.Algorithm(), sctx.GetHash(), digest, sctx.GetIssuer(), sctx.GetPrivateKey())
+	return server.Sign(cctx, h.Algorithm(), sctx.GetHash(), digest, sctx)
 }
 
 func PrivateKey(k interface{}) (*Key, error) {

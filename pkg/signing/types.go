@@ -91,7 +91,7 @@ type Signer interface {
 // Each Verifier should have a matching Signer.
 type Verifier interface {
 	// Verify checks the signature, returns an error on verification failure
-	Verify(digest string, hash crypto.Hash, sig *Signature, publickey interface{}) error
+	Verify(digest string, sig *Signature, sctx SigningContext) error
 	Algorithm() string
 }
 

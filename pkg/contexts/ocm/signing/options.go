@@ -306,42 +306,62 @@ func (o *signame) ApplySigningOption(opts *Options) {
 
 type issuer struct {
 	issuer pkix.Name
+	name   string
 	err    error
 }
 
 // Issuer provides an option requesting to use a dedicated issuer name
 // for a signing operation.
-func Issuer(name string) Option {
-	dn, err := signutils.ParseDN(name)
+func Issuer(is string) Option {
+	dn, err := signutils.ParseDN(is)
 	if err != nil {
 		return &issuer{err: err}
 	}
 	return &issuer{issuer: *dn}
 }
 
+func IssuerFor(name string, is string) Option {
+	dn, err := signutils.ParseDN(is)
+	if err != nil {
+		return &issuer{err: err}
+	}
+	return PKIXIssuerFor(name, *dn)
+}
+
 // PKIXIssuer provides an option requesting to use a dedicated issuer name
 // for a signing operation.
-func PKIXIssuer(name pkix.Name) Option {
-	return &issuer{issuer: name}
+func PKIXIssuer(is pkix.Name) Option {
+	return &issuer{issuer: is}
+}
+
+func PKIXIssuerFor(name string, is pkix.Name) Option {
+	return &issuer{issuer: is, name: name}
 }
 
 func (o *issuer) ApplySigningOption(opts *Options) {
-	opts.Issuer = generics.Pointer(o.issuer)
+	if o.name != "" {
+		if opts.Keys == nil {
+			opts.Keys = signing.NewKeyRegistry()
+		}
+		opts.Keys.RegisterIssuer(o.name, generics.Pointer(o.issuer))
+	} else {
+		opts.Issuer = generics.Pointer(o.issuer)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type rootverts struct {
+type rootcerts struct {
 	pool signutils.GenericCertificatePool
 }
 
 // RootCertificates provides an option requesting to dedicated root certificates
 // for a signing/verification operation using certificates.
 func RootCertificates(pool signutils.GenericCertificatePool) Option {
-	return &rootverts{pool}
+	return &rootcerts{pool}
 }
 
-func (o *rootverts) ApplySigningOption(opts *Options) {
+func (o *rootcerts) ApplySigningOption(opts *Options) {
 	opts.RootCerts = o.pool
 }
 
@@ -434,8 +454,8 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	if o.Printer != nil {
 		opts.Printer = o.Printer
 	}
-	if o.RootCerts != nil {
-		opts.RootCerts = o.RootCerts
+	if o.Keys != nil {
+		opts.Keys = o.Keys
 	}
 	if o.Signer != nil {
 		opts.Signer = o.Signer
@@ -488,15 +508,6 @@ func (o *Options) Complete(ctx interface{}) error {
 		ctx = ocm.DefaultContext()
 	}
 
-	if o.RootCerts != nil {
-		// check root certificates
-		pool, err := signutils.GetCertPool(o.RootCerts, false)
-		if err != nil {
-			return err
-		}
-		o.RootCerts = pool
-	}
-
 	switch t := ctx.(type) {
 	case ocm.ContextProvider:
 		reg = signingattr.Get(t.OCMContext())
@@ -513,8 +524,21 @@ func (o *Options) Complete(ctx interface{}) error {
 	}
 
 	o.effectiveRegistry = o.Registry
-	if o.Keys != nil && o.Keys.HasKeys() {
+	if o.Keys != nil && (o.Keys.HasKeys() || o.Keys.HasIssuers() || o.Keys.HasRootCertificates()) {
 		o.effectiveRegistry = signing.RegistryWithPreferredKeys(o.Registry, o.Keys)
+	}
+
+	if o.RootCerts == nil && o.effectiveRegistry.HasRootCertificates() {
+		o.RootCerts = o.effectiveRegistry.GetRootCertPool(true)
+	}
+
+	if o.RootCerts != nil {
+		// check root certificates
+		pool, err := signutils.GetCertPool(o.RootCerts, false)
+		if err != nil {
+			return err
+		}
+		o.RootCerts = pool
 	}
 
 	if o.SkipAccessTypes == nil {
@@ -613,6 +637,26 @@ func (o *Options) SignatureName() string {
 		return o.SignatureNames[0]
 	}
 	return ""
+}
+
+func (o *Options) GetIssuer() *pkix.Name {
+	if o.Issuer != nil {
+		return o.Issuer
+	}
+	if o.effectiveRegistry != nil {
+		return o.effectiveRegistry.GetIssuer(o.SignatureName())
+	}
+	return nil
+}
+
+func (o *Options) IssuerFor(name string) *pkix.Name {
+	if o.Issuer != nil && name == o.SignatureName() {
+		return o.Issuer
+	}
+	if o.effectiveRegistry != nil {
+		return o.effectiveRegistry.GetIssuer(name)
+	}
+	return nil
 }
 
 func (o *Options) SignatureConfigured(name string) bool {

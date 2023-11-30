@@ -11,6 +11,8 @@ ocm sign hash <private key file> <hash> [<issuer>]
 ```
   -S, --algorithm string   signature algorithm (default "RSASSA-PKCS1-V1_5")
   -h, --help               help for hash
+      --publicKey string   public key certificate file
+      --rootCerts string   root certificates file
 ```
 
 ### Description

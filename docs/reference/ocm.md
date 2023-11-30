@@ -10,10 +10,12 @@ ocm [<options>] <sub command> ...
 
 ```
   -X, --attribute stringArray     attribute setting
+      --ca-cert stringArray       additional root certificate authorities
       --config string             configuration file
       --config-set strings        apply configuration set
   -C, --cred stringArray          credential setting
   -h, --help                      help for ocm
+  -I, --issuer stringArray        issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>
       --logconfig string          log config
   -L, --logfile string            set log file
       --logkeys stringArray       log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])
@@ -297,6 +299,15 @@ name of a component version)
 Alternatively a key can be specified as base64 encoded string if the argument
 start with the prefix <code>!</code> or as direct string with the prefix
 <code>=</code>.
+
+With <code>--issuer</code> it is possible to declare expected issuer
+constraints for public key certificates provided as part of a signature
+required to accept the provisioned public key (besides the successful
+validation of the certificate).
+
+With <code>--ca-cert</code> it is possible to define additional root
+certificates for signature verification, if public keys are provided
+by a certificate delivered with the signature.
 
 
 ### SEE ALSO

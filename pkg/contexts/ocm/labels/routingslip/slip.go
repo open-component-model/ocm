@@ -67,7 +67,11 @@ func (s RoutingSlipIndex) Verify(ctx Context, name string, sig bool, acc SlipAcc
 			if handler == nil {
 				return errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, last.Signature.Algorithm)
 			}
-			err := handler.Verify(last.Digest.Encoded(), sha256.Handler{}.Crypto(), last.Signature.ConvertToSigning(), key)
+			sctx := &signing.DefaultSigningContext{
+				Hash:      sha256.Handler{}.Crypto(),
+				PublicKey: key,
+			}
+			err := handler.Verify(last.Digest.Encoded(), last.Signature.ConvertToSigning(), sctx)
 			if err != nil {
 				return errors.Wrapf(err, "cannot verify entry %s", d)
 			}
