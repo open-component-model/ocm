@@ -581,7 +581,7 @@ func (o *Options) Complete(ctx interface{}) error {
 				// because the key might be provided via certificate together with
 				// the signature. An early failure is therefore not possible anymore.
 				if pub != nil {
-					if err := o.checkCert(pub, nil); err != nil {
+					if err := o.checkCert(pub, o.IssuerFor(n)); err != nil {
 						return fmt.Errorf("public key not valid: %w", err)
 					}
 				}
@@ -611,7 +611,10 @@ func (o *Options) checkCert(data interface{}, name *pkix.Name) error {
 	}
 	err = signing.VerifyCertDN(pool, o.RootCerts, name, cert)
 	if err != nil {
-		return errors.Wrapf(err, "public key %q", name)
+		if name != nil {
+			return errors.Wrapf(err, "issuer [%s]", name)
+		}
+		return err
 	}
 	return nil
 }

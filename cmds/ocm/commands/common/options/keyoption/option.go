@@ -6,9 +6,9 @@ package keyoption
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -16,6 +16,7 @@ import (
 	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -67,19 +68,20 @@ func (o *Option) Configure(ctx clictx.Context) error {
 			name = i[:sep]
 			is = i[sep+1:]
 		}
-		if o.Keys.GetIssuer(name) != nil {
-			return fmt.Errorf("issuer already set (%s)", i)
-		}
+		old := o.Keys.GetIssuer(name)
 		dn, err := signutils.ParseDN(is)
 		if err != nil {
 			return errors.Wrapf(err, "issuer %q", i)
+		}
+		if old != nil && !reflect.DeepEqual(old, dn) {
+			return fmt.Errorf("issuer already set (%s)", i)
 		}
 
 		o.Keys.RegisterIssuer(name, dn)
 	}
 
 	for _, r := range o.rootCAs {
-		data, err := utils.ResolveData(r, ctx.FileSystem())
+		data, err := utils.ReadFile(r, ctx.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "root CA")
 		}

@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/encrypt"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 var ISSUER = &pkix.Name{CommonName: "mandelsoft"}
@@ -154,6 +155,46 @@ created encrypted rsa key pair other.priv[other.pub]
 			Expect(len(rest)).To(Equal(0))
 			Expect(block).NotTo(BeNil())
 			Expect(block.Type).To(Equal(encrypt.PEM_ENCRYPTED_DATA))
+		})
+	})
+
+	Context("certificate handling", func() {
+		It("creates chain", func() {
+			buf := bytes.NewBuffer(nil)
+
+			// create Root CA
+			Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=cerificate-authority", "root.priv")).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+created rsa key pair root.priv[root.cert]
+`))
+			Expect(env.FileExists("root.priv")).To(BeTrue())
+			Expect(env.FileExists("root.cert")).To(BeTrue())
+
+			// create CA used to create signing certificates
+			buf.Reset()
+			Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=acme.org", "--cakey", "root.priv", "--cacert", "root.cert", "ca.priv")).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+created rsa key pair ca.priv[ca.cert]
+`))
+			Expect(env.FileExists("ca.priv")).To(BeTrue())
+			Expect(env.FileExists("ca.cert")).To(BeTrue())
+
+			// create signing vcertificate from CA
+			buf.Reset()
+			Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=mandelsoft", "C=DE", "--cakey", "ca.priv", "--cacert", "ca.cert", "--rootcerts", "root.cert", "key.priv")).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+created rsa key pair key.priv[key.cert]
+`))
+			Expect(env.FileExists("key.priv")).To(BeTrue())
+			Expect(env.FileExists("key.cert")).To(BeTrue())
+
+			root := Must(env.ReadFile("root.cert"))
+			certs := Must(env.ReadFile("key.cert"))
+
+			chain := Must(signutils.GetCertificateChain(certs, false))
+			Expect(len(chain)).To(Equal(3))
+			MustBeSuccessful(signing.VerifyCertDN(chain[1:], root, &pkix.Name{CommonName: "mandelsoft", Country: []string{"DE"}}, chain[0]))
+			ExpectError(signing.VerifyCertDN(chain[1:], root, &pkix.Name{CommonName: "mandelsoft", Country: []string{"US"}}, chain[0])).To(MatchError(`country "US" not found`))
 		})
 	})
 })

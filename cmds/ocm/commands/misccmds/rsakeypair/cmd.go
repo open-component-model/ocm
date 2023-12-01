@@ -47,6 +47,7 @@ type Command struct {
 	ekey        string
 
 	attrs     map[string]string
+	ca        bool
 	rootcerts string
 	cacert    string
 	cakey     string
@@ -54,7 +55,7 @@ type Command struct {
 	Validity time.Duration
 
 	RootCertPool *x509.CertPool
-	CACert       *x509.Certificate
+	CAChain      []*x509.Certificate
 	CAKey        interface{}
 
 	Encrypt             string
@@ -100,6 +101,7 @@ $ ocm create rsakeypair mandelsoft.priv mandelsoft.cert issuer=mandelsoft
 }
 
 func (o *Command) AddFlags(set *pflag.FlagSet) {
+	set.BoolVarP(&o.ca, "ca", "", false, "create certificate for a signing authority")
 	set.StringVarP(&o.rootcerts, "rootcerts", "", "", "root certificates used to validate used certificate authority")
 	set.StringVarP(&o.cacert, "cacert", "", "", "certificate authority to sign public key")
 	set.StringVarP(&o.cakey, "cakey", "", "", "private key for certificate authority")
@@ -171,6 +173,7 @@ func (o *Command) Complete(args []string) error {
 	}
 
 	if o.cacert != "" {
+		raw := []byte(o.cacert)
 		cert, pool, err := signutils.GetCertificate(o.cacert, false)
 		if err != nil {
 			path, _ := utils2.ResolvePath(o.cacert)
@@ -182,6 +185,7 @@ func (o *Command) Complete(args []string) error {
 			if err != nil {
 				return errors.Wrapf(err, "no cert in file %q", o.cacert)
 			}
+			raw = data
 		}
 
 		if o.RootCertPool != nil || !signutils.IsSelfSigned(cert) {
@@ -196,27 +200,30 @@ func (o *Command) Complete(args []string) error {
 				return err
 			}
 		}
-		o.CACert = cert
+		o.CAChain, err = signutils.GetCertificateChain(raw, false)
+		if err != nil {
+			return err
+		}
 	}
 	if o.cakey != "" {
 		key, err := parse.ParsePrivateKey(o.cakey)
 		if err != nil {
-			path, _ := utils2.ResolvePath(o.cacert)
+			path, _ := utils2.ResolvePath(o.cakey)
 			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
 			if err != nil {
-				return errors.Wrapf(err, "cannot read private key file %q", o.cacert)
+				return errors.Wrapf(err, "cannot read private key file %q", o.cakey)
 			}
 			key, err = parse.ParsePrivateKey(string(data))
 			if err != nil {
-				return errors.Wrapf(err, "unknown private key in file %q", o.cacert)
+				return errors.Wrapf(err, "unknown private key in file %q", o.cakey)
 			}
 		}
 		o.CAKey = key
 	}
-	if o.CACert != nil && o.CAKey == nil {
+	if len(o.CAChain) != 0 && o.CAKey == nil {
 		return errors.Newf("private key required for signing public key")
 	}
-	if o.CACert == nil && o.CAKey != nil {
+	if len(o.CAChain) == 0 && o.CAKey != nil {
 		return errors.Newf("ca certificate required for signing public key")
 	}
 
@@ -266,11 +273,11 @@ func (o *Command) Run() error {
 		}
 
 		spec := &signutils.Specification{
-			RootCAs:      nil,
-			IsCA:         false,
+			RootCAs:      o.RootCertPool,
+			IsCA:         o.ca,
 			PublicKey:    pub,
 			CAPrivateKey: key,
-			CAChain:      o.CACert,
+			CAChain:      o.CAChain,
 			Subject:      *o.Subject,
 			Usages:       signutils.Usages{x509.ExtKeyUsageCodeSigning},
 			Validity:     o.Validity,

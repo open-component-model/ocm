@@ -223,7 +223,7 @@ func (dc *DigestContext) determineSignatureInfo(state WalkingState, cv ocm.Compo
 				opts.Printer.Printf("Warning: digest type %s for signature %q in %s does not match (signature ignored)\n", dc.DigestType.String(), sig.Name, state.History)
 			}
 		} else {
-			if opts.SignatureConfigured(sig.Name) {
+			if opts.SignatureConfigured(sig.Name) || opts.SignatureName() == "" {
 				i := cv.GetDescriptor().GetSignatureIndex(sig.Name)
 				if i < 0 {
 					return nil, errors.ErrNotFound(compdesc.KIND_SIGNATURE, sig.Name)
@@ -235,8 +235,11 @@ func (dc *DigestContext) determineSignatureInfo(state WalkingState, cv ocm.Compo
 						return nil, errors.Wrapf(err, "cannot decode signature PEM for %q", sig.Name)
 					}
 					signatures = append(signatures, sig.Name)
+					dc.DigestType = DigesterType(&sig.Digest)
 				} else {
-					return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, sig.Name)
+					if opts.SignatureName() != "" {
+						return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, sig.Name)
+					}
 				}
 			}
 		}

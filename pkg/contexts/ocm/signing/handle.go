@@ -224,6 +224,8 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		}
 	}
 
+	digests := compdesc.NewCompDescDigests(cd)
+
 	var spec *metav1.DigestSpec
 	legacy := signing.IsLegacyHashAlgorithm(ctx.RootContextInfo.DigestType.HashAlgorithm) && !opts.DoSign()
 	if ctx.Digest == nil {
@@ -241,7 +243,7 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		if hasher == nil {
 			return nil, fmt.Errorf("unknown hash algorithm %q", dt.HashAlgorithm)
 		}
-		norm, digest, err := compdesc.NormHash(cd, dt.NormalizationAlgorithm, hasher.Create())
+		norm, digest, err := digests.Get(dt.NormalizationAlgorithm, hasher)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed hashing component descriptor")
 		}
@@ -254,7 +256,7 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 	}
 
 	if opts.DoVerify() {
-		dig, err := doVerify(cd, state, signatureNames, opts)
+		dig, err := doVerify(digests, state, signatureNames, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -363,7 +365,7 @@ func resMsg(ref *compdesc.Resource, acc string, msg string, args ...interface{})
 	return fmt.Sprintf("%s %s:%s", fmt.Sprintf(msg, args...), ref.Name, ref.Version)
 }
 
-func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNames []string, opts *Options) (*metav1.DigestSpec, error) {
+func doVerify(digests *compdesc.CompDescDigests, state WalkingState, signatureNames []string, opts *Options) (*metav1.DigestSpec, error) {
 	var spec *metav1.DigestSpec
 
 	sctx := &signing.DefaultSigningContext{
@@ -373,11 +375,11 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 
 	found := []string{}
 	for _, n := range signatureNames {
-		f := cd.GetSignatureIndex(n)
+		f := digests.Descriptor().GetSignatureIndex(n)
 		if f < 0 {
 			continue
 		}
-		sig := &cd.Signatures[f]
+		sig := &digests.Descriptor().Signatures[f]
 
 		sctx.Issuer = opts.IssuerFor(n)
 		if !opts.Keyless {
@@ -385,7 +387,7 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 			if sctx.PublicKey == nil {
 				var err error
 
-				opts.Printer.Printf("no public key found for signature %q -> extract key from signature\n")
+				opts.Printer.Printf("no public key found for signature %q -> extract key from signature\n", n)
 				sctx.PublicKey, err = GetPublicKeyFromSignature(sig, sctx)
 				if err != nil {
 					return nil, errors.Wrapf(err, "public key from signature")
@@ -405,9 +407,8 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 		if hasher == nil {
 			return nil, errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, sig.Digest.HashAlgorithm)
 		}
-		sctx.Hash = hasher.Crypto()
 
-		digest, err := compdesc.Hash(cd, sig.Digest.NormalisationAlgorithm, hasher.Create())
+		_, digest, err := digests.Get(sig.Digest.NormalisationAlgorithm, hasher)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed hashing component descriptor")
 		}
@@ -415,6 +416,7 @@ func doVerify(cd *compdesc.ComponentDescriptor, state WalkingState, signatureNam
 			return nil, errors.Newf("signature digest (%s) does not match found digest (%s)", sig.Digest.Value, digest)
 		}
 
+		sctx.Hash = hasher.Crypto()
 		err = verifier.Verify(sig.Digest.Value, sig.ConvertToSigning(), sctx)
 		if err != nil {
 			return nil, errors.Wrapf(err, "signature %q", n)

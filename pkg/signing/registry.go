@@ -10,9 +10,11 @@ import (
 	"sort"
 	"sync"
 
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
+
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
-	"golang.org/x/exp/maps"
 )
 
 type Registry interface {

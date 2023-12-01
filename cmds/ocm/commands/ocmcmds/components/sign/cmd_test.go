@@ -27,6 +27,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 const ARCH = "/tmp/ctf"
@@ -249,6 +250,74 @@ Error: signing: github.com/mandelsoft/ref:v1: failed resolving component referen
 Error: signing: github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: component "github.com/mandelsoft/test" not found in ComponentArchive
 `))
 		})
+	})
+
+	It("keyless verification", func() {
+		buf := bytes.NewBuffer(nil)
+
+		// create Root CA
+		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=cerificate-authority", "root.priv")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+created rsa key pair root.priv[root.cert]
+`))
+		Expect(env.FileExists("root.priv")).To(BeTrue())
+		Expect(env.FileExists("root.cert")).To(BeTrue())
+
+		// create CA used to create signing certificates
+		buf.Reset()
+		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=acme.org", "--cakey", "root.priv", "--cacert", "root.cert", "ca.priv")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+created rsa key pair ca.priv[ca.cert]
+`))
+		Expect(env.FileExists("ca.priv")).To(BeTrue())
+		Expect(env.FileExists("ca.cert")).To(BeTrue())
+
+		// create signing vcertificate from CA
+		buf.Reset()
+		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=mandelsoft", "C=DE", "--cakey", "ca.priv", "--cacert", "ca.cert", "--rootcerts", "root.cert", "key.priv")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+created rsa key pair key.priv[key.cert]
+`))
+		Expect(env.FileExists("key.priv")).To(BeTrue())
+		Expect(env.FileExists("key.cert")).To(BeTrue())
+
+		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+			env.ComponentVersion(COMPONENTA, VERSION, func() {
+				env.Provider("mandelsoft")
+			})
+		})
+
+		// sigh component with certificate
+		buf.Reset()
+		Expect(env.CatchOutput(buf).Execute("sign", "component", ARCH, "-K", "key.priv", "-k", "key.cert", "--ca-cert", "root.cert", "-s", "mandelsoft", "-I", "CN=mandelsoft")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
+successfully signed github.com/mandelsoft/test:v1 (digest SHA-256:5ed8bb27309c3c2fff43f3b0f3ebb56a5737ad6db4bc8ace73c5455cb86faf54)
+`))
+		// verify component without key
+		buf.Reset()
+		Expect(env.CatchOutput(buf).Execute("verify", "component", ARCH, "--ca-cert", "root.cert", "-I", "CN=mandelsoft")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
+no public key found for signature "mandelsoft" -> extract key from signature
+successfully verified github.com/mandelsoft/test:v1 (digest SHA-256:5ed8bb27309c3c2fff43f3b0f3ebb56a5737ad6db4bc8ace73c5455cb86faf54)
+`))
+
+		repo := Must(ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env))
+		defer Close(repo, "repo")
+		cv := Must(repo.LookupComponentVersion(COMPONENTA, VERSION))
+		defer Close(cv, "cv")
+
+		Expect(len(cv.GetDescriptor().Signatures)).To(Equal(1))
+
+		sig := cv.GetDescriptor().Signatures[0].Signature
+
+		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
+		Expect(sig.MediaType).To(Equal(signutils.MediaTypePEM))
+
+		_, algo, certs := Must3(signutils.GetSignatureFromPem([]byte(sig.Value)))
+		Expect(len(certs)).To(Equal(3))
+		Expect(algo).To(Equal(rsa.Algorithm))
 	})
 })
 

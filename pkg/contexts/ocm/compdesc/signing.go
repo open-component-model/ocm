@@ -68,6 +68,62 @@ func Hash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) (string, err
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
+type CompDescDigest struct {
+	normAlgo   string
+	hashAlgo   string
+	normalized []byte
+	digest     string
+}
+
+type CompDescDigests struct {
+	cd      *ComponentDescriptor
+	digests []*CompDescDigest
+}
+
+func NewCompDescDigests(cd *ComponentDescriptor) *CompDescDigests {
+	return &CompDescDigests{
+		cd: cd,
+	}
+}
+
+func (d *CompDescDigests) Descriptor() *ComponentDescriptor {
+	return d.cd
+}
+
+func (d *CompDescDigests) Get(normAlgo string, hasher signing.Hasher) ([]byte, string, error) {
+	var normalized []byte
+
+	for _, e := range d.digests {
+		if e.normAlgo == normAlgo {
+			normalized = e.normalized
+			if e.hashAlgo == hasher.Algorithm() {
+				return e.normalized, e.digest, nil
+			}
+		}
+	}
+
+	var err error
+	if normalized == nil {
+		normalized, err = Normalize(d.cd, normAlgo)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed normalising component descriptor %w", err)
+		}
+	}
+	hash := hasher.Create()
+	if _, err = hash.Write(normalized); err != nil {
+		return nil, "", fmt.Errorf("failed hashing the normalisedComponentDescriptorJson: %w", err)
+	}
+
+	e := &CompDescDigest{
+		normAlgo:   normAlgo,
+		hashAlgo:   hasher.Algorithm(),
+		normalized: normalized,
+		digest:     hex.EncodeToString(hash.Sum(nil)),
+	}
+	d.digests = append(d.digests, e)
+	return normalized, e.digest, nil
+}
+
 func NormHash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) ([]byte, string, error) {
 	if hash == nil {
 		return nil, metav1.NoDigest, nil
