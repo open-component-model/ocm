@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/encrypt"
@@ -78,10 +79,17 @@ Create an RSA public key pair and save to files.
 
 The default for the filename to store the private key is <code>rsa.priv</code>.
 If no public key file is specified, its name will be derived from the filename for
-the private key (suffix <code>.pub</code> for public key or <code>.cert</code> for certificate).
-If a certificate authority is given (<code>--cacert</code>) the public key
-will be signed. In this case a subject (at least common name/issuer) and a private
-key (<code>--cakey</code>) is required. If only a subject is given, the public key will be self-signed.
+the private key (suffix <code>.pub</code> for public key or <code>.cert</code>
+for certificate). If a certificate authority is given (<code>--ca-cert</code>)
+the public key will be signed. In this case a subject (at least common 
+name/issuer) and a private key (<code>--ca-key</code>) for the ca used to sign the
+key is required.
+
+If only a subject is given and no ca, the public key will be self-signed.
+A signed public key always contains the complete certificate chain. If a
+non-self-signed ca is used to sign the key, its certificate chain is verified.
+Therefore, an additional root certificate (<code>--root-certs</code>) is required,
+if no public root certificate was used to create the used ca.
 
 For signing the public key the following subject attributes are supported:
 - <code>CN</code>, <code>common-name</code>, <code>issuer</code>: Common Name/Issuer
@@ -102,12 +110,15 @@ $ ocm create rsakeypair mandelsoft.priv mandelsoft.cert issuer=mandelsoft
 
 func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.BoolVarP(&o.ca, "ca", "", false, "create certificate for a signing authority")
-	set.StringVarP(&o.rootcerts, "rootcerts", "", "", "root certificates used to validate used certificate authority")
-	set.StringVarP(&o.cacert, "cacert", "", "", "certificate authority to sign public key")
-	set.StringVarP(&o.cakey, "cakey", "", "", "private key for certificate authority")
+	set.StringVarP(&o.rootcerts, "root-certs", "", "", "root certificates used to validate used certificate authority")
+	set.StringVarP(&o.cacert, "ca-cert", "", "", "certificate authority to sign public key")
+	set.StringVarP(&o.cakey, "ca-key", "", "", "private key for certificate authority")
 	set.DurationVarP(&o.Validity, "validity", "", 10*24*365*time.Hour, "certificate validity")
 	set.StringVarP(&o.Encrypt, "encryptionKey", "e", "", "encrypt private key with given key")
 	set.BoolVarP(&o.CreateEncryptionKey, "encrypt", "E", false, "encrypt private key with new key")
+
+	flag.StringVarPF(set, &o.cacert, "cacert", "", "", "certificate authority to sign public key").Hidden = true
+	flag.StringVarPF(set, &o.cakey, "cakey", "", "", "private key for certificate authority").Hidden = true
 }
 
 func (o *Command) FilterSettings(args ...string) []string {
@@ -139,6 +150,8 @@ func (o *Command) Complete(args []string) error {
 			}
 		}
 		o.RootCertPool = pool
+	} else {
+		o.RootCertPool = signingattr.Get(o.Context.OCMContext()).GetRootCertPool(true)
 	}
 
 	if o.attrs != nil && len(o.attrs) > 0 {
@@ -188,7 +201,7 @@ func (o *Command) Complete(args []string) error {
 			raw = data
 		}
 
-		if o.RootCertPool != nil || !signutils.IsSelfSigned(cert) {
+		if !signutils.IsSelfSigned(cert) {
 			opts := x509.VerifyOptions{
 				Intermediates: pool,
 				Roots:         o.RootCertPool,
@@ -283,6 +296,10 @@ func (o *Command) Run() error {
 			Validity:     o.Validity,
 			NotBefore:    nil,
 		}
+		if len(o.CAChain) == 1 && signutils.IsSelfSigned(o.CAChain[0]) {
+			o.RootCertPool.AddCert(o.CAChain[0])
+		}
+
 		_, pub, err = signutils.CreateCertificate(spec)
 		if err != nil {
 			return errors.Wrapf(err, "signing of key pair failed")

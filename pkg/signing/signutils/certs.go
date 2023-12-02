@@ -5,6 +5,7 @@
 package signutils
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -12,6 +13,7 @@ import (
 	"fmt"
 	"math/big"
 	"net"
+	"reflect"
 	"time"
 
 	"github.com/modern-go/reflect2"
@@ -21,16 +23,32 @@ import (
 
 type Usages []interface{}
 
+// Specification specified the xontext for the certificate creation.
 type Specification struct {
-	RootCAs      GenericCertificatePool
-	IsCA         bool
-	PublicKey    GenericPublicKey
+	// RootCAs is used to verify a certificate chain.
+	// Self-signed CAs must be added here to be accepted as part
+	// of a chain.
+	RootCAs GenericCertificatePool
+
+	// IsCA requests a certificate for a CA.
+	IsCA bool
+
+	PublicKey GenericPublicKey
+
+	// CAPrivateKey is the provate key used for signing.
+	// It must be the key for the first certificate in the chain
+	// (if given).
 	CAPrivateKey GenericPrivateKey
 	CAChain      GenericCertificateChain
-	Subject      pkix.Name
-	Usages       Usages
-	Validity     time.Duration
-	NotBefore    *time.Time
+
+	// SkipVerify can be set to true to skip the verification
+	// of the given certificate chain.
+	SkipVerify bool
+
+	Subject   pkix.Name
+	Usages    Usages
+	Validity  time.Duration
+	NotBefore *time.Time
 
 	Hosts []string
 }
@@ -94,31 +112,37 @@ func CreateCertificate(spec *Specification) (*x509.Certificate, []byte, error) {
 	}
 
 	if len(caChain) > 0 {
-		if rootCerts == nil {
-			rootCerts, err = x509.SystemCertPool()
+		key, ok := caPrivKey.(crypto.Signer)
+		if !ok {
+			return nil, nil, errors.Newf("x509: certificate private key does not implement crypto.Signer")
+		}
+		if !reflect.DeepEqual(key.Public(), caChain[0].PublicKey) {
+			return nil, nil, errors.Newf("private key does not match ca certificate")
+		}
+		if !spec.SkipVerify {
+			if rootCerts == nil {
+				rootCerts, err = x509.SystemCertPool()
+				if err != nil {
+					return nil, nil, err
+				}
+			}
+
+			intermediates, err := GetCertPool(caChain, false)
 			if err != nil {
 				return nil, nil, err
 			}
-			if IsSelfSigned(caChain[0]) {
-				rootCerts.AddCert(caChain[0])
+
+			opts := x509.VerifyOptions{
+				Intermediates:             intermediates,
+				Roots:                     rootCerts,
+				KeyUsages:                 []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
+				MaxConstraintComparisions: 0,
 			}
-		}
 
-		intermediates, err := GetCertPool(caChain, false)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		opts := x509.VerifyOptions{
-			Intermediates:             intermediates,
-			Roots:                     rootCerts,
-			KeyUsages:                 []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
-			MaxConstraintComparisions: 0,
-		}
-
-		_, err = caChain[0].Verify(opts)
-		if err != nil {
-			return nil, nil, err
+			_, err = caChain[0].Verify(opts)
+			if err != nil {
+				return nil, nil, err
+			}
 		}
 	}
 

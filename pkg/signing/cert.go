@@ -58,7 +58,7 @@ func CreateCertificate(subject pkix.Name, validFrom *time.Time,
 	ca *x509.Certificate, priv interface{}, isCA bool, names ...string,
 ) ([]byte, error) {
 	spec := &signutils.Specification{
-		RootCAs:      nil,
+		RootCAs:      ca,
 		IsCA:         isCA,
 		PublicKey:    pub,
 		CAPrivateKey: priv,

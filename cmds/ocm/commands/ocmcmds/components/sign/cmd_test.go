@@ -265,7 +265,7 @@ created rsa key pair root.priv[root.cert]
 
 		// create CA used to create signing certificates
 		buf.Reset()
-		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=acme.org", "--cakey", "root.priv", "--cacert", "root.cert", "ca.priv")).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=acme.org", "--ca-key", "root.priv", "--ca-cert", "root.cert", "ca.priv")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 created rsa key pair ca.priv[ca.cert]
 `))
@@ -274,7 +274,7 @@ created rsa key pair ca.priv[ca.cert]
 
 		// create signing vcertificate from CA
 		buf.Reset()
-		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=mandelsoft", "C=DE", "--cakey", "ca.priv", "--cacert", "ca.cert", "--rootcerts", "root.cert", "key.priv")).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=mandelsoft", "C=DE", "--ca-key", "ca.priv", "--ca-cert", "ca.cert", "--root-certs", "root.cert", "key.priv")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 created rsa key pair key.priv[key.cert]
 `))
