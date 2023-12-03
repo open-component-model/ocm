@@ -43,4 +43,5 @@ const (
 	KIND_PUBLIC_KEY       = "public key"
 	KIND_PRIVATE_KEY      = "private key"
 	KIND_SIGNATURE        = "signature"
+	KIND_DIGEST           = "digest"
 )

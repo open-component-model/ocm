@@ -6,6 +6,7 @@ package signoption
 
 import (
 	"crypto/x509"
+	"fmt"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -56,6 +57,9 @@ type Option struct {
 	Update         bool
 	Signer         signing.Signer
 
+	UseTSA bool
+	TSAUrl string
+
 	Hash hashoption.Option
 
 	Keyless bool
@@ -69,6 +73,8 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 		fs.StringVarP(&o.signAlgorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
 		fs.BoolVarP(&o.Recursively, "recursive", "R", false, "recursively sign component versions")
+		fs.BoolVarP(&o.UseTSA, "tsa", "", false, fmt.Sprintf("use timestamp authority (default server: %s)", signing.DEFAULT_TSA_URL))
+		fs.StringVarP(&o.TSAUrl, "tsa-url", "", "", "TSA server URL")
 	} else {
 		fs.BoolVarP(&o.local, "local", "L", false, "verification based on information found in component versions, only")
 	}
@@ -170,6 +176,12 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	opts.NormalizationAlgo = o.Hash.NormAlgorithm
 	opts.Hasher = o.Hash.Hasher
 
+	if o.UseTSA || o.TSAUrl != "" {
+		opts.UseTSA = true
+		if o.TSAUrl != "" {
+			opts.TSAUrl = o.TSAUrl
+		}
+	}
 	if o.Keys != nil {
 		def := o.Keys.GetIssuer("")
 		if def != nil {

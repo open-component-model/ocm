@@ -8,11 +8,13 @@ import (
 	"crypto"
 	"crypto/x509/pkix"
 	"fmt"
+	"time"
 
 	cms "github.com/InfiniteLoopSpace/go_S-MIME/cms/protocol"
 	"github.com/InfiniteLoopSpace/go_S-MIME/oid"
 	tsa "github.com/InfiniteLoopSpace/go_S-MIME/timestamp"
 	"github.com/go-test/deep"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -65,26 +67,26 @@ func Request(url string, mi *tsa.MessageImprint) (*TimeStamp, error) {
 
 	sd, err := resp.TimeStampToken.SignedDataContent()
 	if err != nil {
-		return nil, errors.Wrapf(err, "unexpected answer timestamp respone from %s", url)
+		return nil, errors.Wrapf(err, "unexpected answer timestamp response from %s", url)
 	}
 
-	err = Verify(mi, sd, true)
+	_, err = Verify(mi, sd, true)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot verify timestamp response")
 	}
 	return sd, nil
 }
 
-func Verify(mi *tsa.MessageImprint, sd *TimeStamp, now bool, rootpool ...signutils.GenericCertificatePool) error {
+func Verify(mi *tsa.MessageImprint, sd *TimeStamp, now bool, rootpool ...signutils.GenericCertificatePool) (*time.Time, error) {
 	info, err := tsa.ParseInfo(sd.EncapContentInfo)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if diff := deep.Equal(info.MessageImprint.HashAlgorithm.Algorithm, mi.HashAlgorithm.Algorithm); diff != nil {
-		return fmt.Errorf("hash algorithm mismatch: %s", diff)
+		return nil, fmt.Errorf("hash algorithm mismatch: %s", diff)
 	}
 	if diff := deep.Equal(info.MessageImprint.HashedMessage, mi.HashedMessage); diff != nil {
-		return fmt.Errorf("digest mismatch: %s", diff)
+		return nil, fmt.Errorf("digest mismatch: %s", diff)
 	}
 	opts := tsa.Opts
 	if !now {
@@ -92,11 +94,11 @@ func Verify(mi *tsa.MessageImprint, sd *TimeStamp, now bool, rootpool ...signuti
 	}
 	opts.Roots, err = signutils.GetCertPool(utils.Optional(rootpool...), false)
 	if err != nil {
-		return errors.Wrapf(err, "root cert pool")
+		return nil, errors.Wrapf(err, "root cert pool")
 	}
 	_, err = sd.Verify(opts, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &info.GenTime, nil
 }

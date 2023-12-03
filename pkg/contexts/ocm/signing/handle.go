@@ -5,8 +5,11 @@
 package signing
 
 import (
+	"crypto"
+	"encoding/hex"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/mandelsoft/logging"
 
@@ -19,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
+	"github.com/open-component-model/ocm/pkg/signing/tsa"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -307,6 +311,26 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 				Issuer:    sig.Issuer,
 			},
 		}
+
+		if url := opts.EffectiveTSAUrl(); url != "" {
+			h, d, err := DigestInfo(opts, ctx.Digest)
+			if err != nil {
+				return nil, err
+			}
+			mi, err := tsa.NewMessageImprint(h, d)
+			if err != nil {
+				return nil, err
+			}
+			ts, err := tsa.Request(url, mi)
+			if err != nil {
+				return nil, err
+			}
+			data, err := tsa.ToPem(ts)
+			if err != nil {
+				return nil, err
+			}
+			signature.Timestamp = string(data)
+		}
 		if found >= 0 {
 			cd.Signatures[found] = signature
 		} else {
@@ -365,6 +389,18 @@ func resMsg(ref *compdesc.Resource, acc string, msg string, args ...interface{})
 	return fmt.Sprintf("%s %s:%s", fmt.Sprintf(msg, args...), ref.Name, ref.Version)
 }
 
+func DigestInfo(opts *Options, d *metav1.DigestSpec) (crypto.Hash, []byte, error) {
+	hasher := opts.Registry.GetHasher(d.HashAlgorithm)
+	if hasher == nil {
+		return 0, nil, errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, d.HashAlgorithm)
+	}
+	data, err := hex.DecodeString(d.Value)
+	if err != nil {
+		return 0, nil, errors.ErrInvalid(compdesc.KIND_DIGEST, d.Value)
+	}
+	return hasher.Crypto(), data, nil
+}
+
 func doVerify(digests *compdesc.CompDescDigests, state WalkingState, signatureNames []string, opts *Options) (*metav1.DigestSpec, error) {
 	var spec *metav1.DigestSpec
 
@@ -388,7 +424,7 @@ func doVerify(digests *compdesc.CompDescDigests, state WalkingState, signatureNa
 				var err error
 
 				opts.Printer.Printf("no public key found for signature %q -> extract key from signature\n", n)
-				sctx.PublicKey, err = GetPublicKeyFromSignature(sig, sctx)
+				sctx.PublicKey, err = GetPublicKeyFromSignature(sig, sctx, opts)
 				if err != nil {
 					return nil, errors.Wrapf(err, "public key from signature")
 				}
@@ -437,7 +473,7 @@ func doVerify(digests *compdesc.CompDescDigests, state WalkingState, signatureNa
 	return spec, nil
 }
 
-func GetPublicKeyFromSignature(sig *compdesc.Signature, sctx signing.SigningContext) (signutils.GenericPublicKey, error) {
+func GetPublicKeyFromSignature(sig *compdesc.Signature, sctx signing.SigningContext, opts *Options) (signutils.GenericPublicKey, error) {
 	if sig.Signature.MediaType != signutils.MediaTypePEM {
 		return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY)
 	}
@@ -453,7 +489,28 @@ func GetPublicKeyFromSignature(sig *compdesc.Signature, sctx signing.SigningCont
 	if err != nil {
 		return nil, err
 	}
-	err = signutils.VerifyCertificate(cert, pool, sctx.GetRootCerts(), sctx.GetIssuer())
+
+	var timestamp *time.Time
+	if sig.Timestamp != "" {
+		ts, err := tsa.FromPem([]byte(sig.Timestamp))
+		if err != nil {
+			return nil, errors.Wrapf(err, "signature timestamp")
+		}
+		h, d, err := DigestInfo(opts, &sig.Digest)
+		if err != nil {
+			return nil, errors.Wrapf(err, "signature digest")
+		}
+		mi, err := tsa.NewMessageImprint(h, d)
+		if err != nil {
+			return nil, errors.Wrapf(err, "signature digest")
+		}
+		timestamp, err = tsa.Verify(mi, ts, false, sctx.GetRootCerts())
+		if err != nil {
+			return nil, errors.Wrapf(err, "signature timestamp verification")
+		}
+	}
+
+	err = signutils.VerifyCertificate(cert, pool, sctx.GetRootCerts(), sctx.GetIssuer(), timestamp)
 	if err != nil {
 		return nil, errors.Wrapf(err, "public key certificate")
 	}

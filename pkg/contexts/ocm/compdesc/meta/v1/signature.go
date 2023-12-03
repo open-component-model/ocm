@@ -173,6 +173,7 @@ type Signature struct {
 	Name      string        `json:"name"`
 	Digest    DigestSpec    `json:"digest"`
 	Signature SignatureSpec `json:"signature"`
+	Timestamp string        `json:"timestamp,omitempty"`
 }
 
 // Copy provides a copy of the signature data.

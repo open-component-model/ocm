@@ -177,7 +177,9 @@ definitions:
     type: 'object'
     required:
       - name
+      - digest
       - signature
+    additionalProperties: false
     properties:
       name:
         type: string
@@ -185,6 +187,8 @@ definitions:
         $ref: '#/definitions/digestSpec'
       signature:
         $ref: '#/definitions/signatureSpec'
+      timestamp:
+        type: string
 
   nestedDigestSpec:
     type: 'object'

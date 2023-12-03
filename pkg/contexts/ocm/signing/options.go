@@ -413,6 +413,32 @@ func (o *pubkey) ApplySigningOption(opts *Options) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type tsaOpt struct {
+	url string
+	use *bool
+}
+
+// UseTSA enables the usage of a timestamp server authority.
+func UseTSA(flag ...bool) Option {
+	return &tsaOpt{use: utils.BoolP(utils.GetOptionFlag(flag...))}
+}
+
+// TSAUrl selects the TSA server URL to use, if TSA mode is enabled.
+func TSAUrl(url string) Option {
+	return &tsaOpt{url: url}
+}
+
+func (o *tsaOpt) ApplySigningOption(opts *Options) {
+	if o.url != "" {
+		opts.TSAUrl = o.url
+	}
+	if o.use != nil {
+		opts.UseTSA = *o.use
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type Options struct {
 	Printer           common.Printer
 	Update            bool
@@ -433,6 +459,8 @@ type Options struct {
 	SignatureNames    []string
 	NormalizationAlgo string
 	Keyless           bool
+	TSAUrl            string
+	UseTSA            bool
 
 	effectiveRegistry signing.Registry
 }
@@ -495,6 +523,12 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	opts.Keyless = o.Keyless
 	if o.NormalizationAlgo != "" {
 		opts.NormalizationAlgo = o.NormalizationAlgo
+	}
+	if o.TSAUrl != "" {
+		opts.TSAUrl = o.TSAUrl
+	}
+	if o.UseTSA {
+		opts.UseTSA = o.UseTSA
 	}
 }
 
@@ -677,6 +711,16 @@ func (o *Options) PublicKey(sig string) signutils.GenericPublicKey {
 
 func (o *Options) PrivateKey() (signutils.GenericPrivateKey, error) {
 	return signing.ResolvePrivateKey(o.effectiveRegistry, o.SignatureName())
+}
+
+func (o *Options) EffectiveTSAUrl() string {
+	if o.UseTSA {
+		if o.TSAUrl != "" {
+			return o.TSAUrl
+		}
+		return o.effectiveRegistry.TSAUrl()
+	}
+	return ""
 }
 
 func (o *Options) Dup() *Options {

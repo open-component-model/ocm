@@ -9,6 +9,7 @@ import (
 
 	"github.com/InfiniteLoopSpace/go_S-MIME/asn1"
 	cms "github.com/InfiniteLoopSpace/go_S-MIME/cms/protocol"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 

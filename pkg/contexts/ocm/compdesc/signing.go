@@ -25,6 +25,7 @@ const (
 	KIND_PUBLIC_KEY       = signutils.KIND_PUBLIC_KEY
 	KIND_PRIVATE_KEY      = signutils.KIND_PRIVATE_KEY
 	KIND_SIGNATURE        = signutils.KIND_SIGNATURE
+	KIND_DIGEST           = signutils.KIND_DIGEST
 )
 
 // IsNormalizeable checks if componentReferences and resources contain digest.

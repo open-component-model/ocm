@@ -1096,7 +1096,6 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 	})
 
 	Context("keyless verification", func() {
-
 		ca, capriv := Must2(rsa.CreateRootCertificate(signutils.CommonName("ca-authority"), 10*time.Hour))
 		intercert, interpem, interpriv := Must3(rsa.CreateSigningCertificate(signutils.CommonName("acme.org"), ca, ca, capriv, 5*time.Hour, true))
 		cert, pemBytes, priv := Must3(rsa.CreateSigningCertificate(&pkix.Name{
@@ -1124,7 +1123,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 			MustBeSuccessful(signutils.VerifyCertificate(cert, pemBytes, ca, nil))
 		})
 
-		It("signs with certifictate", func() {
+		It("signs with certificate", func() {
 			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
 			res := ocm.NewDedicatedResolver(cv)
 
@@ -1144,7 +1143,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			VerifyComponent(res, COMPONENTA, digest, RootCertificates(ca))
 		})
 
-		It("signs with certifictate and issuer", func() {
+		It("signs with certificate and issuer", func() {
 			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
 			res := ocm.NewDedicatedResolver(cv)
 			issuer := &pkix.Name{
@@ -1167,6 +1166,38 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			dn := Must(signutils.ParseDN(sig.Issuer))
 			Expect(dn).To(Equal(issuer))
 
+			VerifyComponent(res, COMPONENTA, digest, RootCertificates(ca), PKIXIssuer(*issuer))
+
+			issuer.Country = []string{"XX"}
+			FailVerifyComponent(res, COMPONENTA, digest,
+				`github.com/mandelsoft/test:v1: public key from signature: public key certificate: issuer mismatch in public key certificate: country "XX" not found`,
+				RootCertificates(ca), PKIXIssuer(*issuer))
+		})
+
+		It("signs with certificate, issuer and tsa", func() {
+			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
+			res := ocm.NewDedicatedResolver(cv)
+			issuer := &pkix.Name{
+				CommonName: "mandelsoft",
+				Country:    []string{"DE"},
+			}
+
+			buf := SignComponent(res, COMPONENTA, digest, PrivateKey(SIGNATURE, priv), PublicKey(SIGNATURE, pemBytes), RootCertificates(ca), PKIXIssuer(*issuer), UseTSA())
+			Expect(buf).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
+`))
+
+			i := cv.GetDescriptor().GetSignatureIndex(SIGNATURE)
+			Expect(i).To(BeNumerically(">=", 0))
+			sig := cv.GetDescriptor().Signatures[i]
+			Expect(sig.Signature.MediaType).To(Equal(signutils.MediaTypePEM))
+			_, algo, chain := Must3(signutils.GetSignatureFromPem([]byte(sig.Signature.Value)))
+			Expect(algo).To(Equal(rsa.Algorithm))
+			Expect(len(chain)).To(Equal(3))
+			dn := Must(signutils.ParseDN(sig.Signature.Issuer))
+			Expect(dn).To(Equal(issuer))
+
+			Expect(sig.Timestamp).NotTo(Equal(""))
 			VerifyComponent(res, COMPONENTA, digest, RootCertificates(ca), PKIXIssuer(*issuer))
 
 			issuer.Country = []string{"XX"}

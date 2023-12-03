@@ -17,14 +17,23 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
+const DEFAULT_TSA_URL = "http://timestamp.digicert.com"
+
 type Registry interface {
+	RegistryFuncs
+
+	Copy() Registry
+}
+
+type RegistryFuncs interface {
 	HandlerRegistryFuncs
 	KeyRegistryFuncs
 
 	HandlerRegistryProvider
 	KeyRegistryProvider
 
-	Copy() Registry
+	TSAUrl() string
+	SetTSAUrl(url string)
 }
 
 type HasherProvider interface {
@@ -564,6 +573,8 @@ type (
 type registry struct {
 	_HandlerRegistry
 	_KeyRegistry
+
+	tsaUrl string
 }
 
 var _ Registry = (*registry)(nil)
@@ -587,7 +598,19 @@ func (r *registry) Copy() Registry {
 	return &registry{
 		_HandlerRegistry: r.HandlerRegistry().Copy(),
 		_KeyRegistry:     r.KeyRegistry().Copy(),
+		tsaUrl:           r.tsaUrl,
 	}
+}
+
+func (r *registry) TSAUrl() string {
+	if r.tsaUrl == "" {
+		return DEFAULT_TSA_URL
+	}
+	return r.tsaUrl
+}
+
+func (r *registry) SetTSAUrl(url string) {
+	r.tsaUrl = url
 }
 
 func RegistryWithPreferredKeys(reg Registry, keys KeyRegistry) Registry {

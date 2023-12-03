@@ -203,6 +203,8 @@ definitions:
         $ref: '#/definitions/digestSpec'
       signature:
         $ref: '#/definitions/signatureSpec'
+      timestamp:
+        type: string
 
   nestedDigestSpec:
     type: 'object'

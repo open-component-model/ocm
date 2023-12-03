@@ -71,9 +71,10 @@ func (i *Issuer) Set(issuer *pkix.Name) {
 // Config describes a memory based repository interface.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	PublicKeys                  map[string]KeySpec `json:"publicKeys"`
-	PrivateKeys                 map[string]KeySpec `json:"privateKeys"`
-	Issuers                     map[string]Issuer  `json:"issuers"`
+	PublicKeys                  map[string]KeySpec `json:"publicKeys,omitempty"`
+	PrivateKeys                 map[string]KeySpec `json:"privateKeys,omitempty"`
+	Issuers                     map[string]Issuer  `json:"issuers,omitempty"`
+	TSAUrl                      string             `json:"tsaURL,omitempty"`
 }
 
 type RawData []byte
@@ -206,7 +207,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	return errors.Wrapf(a.ApplyToRegistry(Get(t)), "applying config failed")
 }
 
-func (a *Config) ApplyToRegistry(registry signing.KeyRegistryFuncs) error {
+func (a *Config) ApplyToRegistry(registry signing.Registry) error {
 	for n, k := range a.PublicKeys {
 		key, err := k.Get()
 		if err != nil {
@@ -223,6 +224,9 @@ func (a *Config) ApplyToRegistry(registry signing.KeyRegistryFuncs) error {
 	}
 	for n, k := range a.Issuers {
 		registry.RegisterIssuer(n, k.Get())
+	}
+	if a.TSAUrl != "" {
+		registry.SetTSAUrl(a.TSAUrl)
 	}
 	return nil
 }

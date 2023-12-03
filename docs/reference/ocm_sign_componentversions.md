@@ -30,6 +30,8 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -R, --recursive                 recursively sign component versions
       --repo string               repository name or spec
   -s, --signature stringArray     signature name
+      --tsa                       use timestamp authority (default server: http://timestamp.digicert.com)
+      --tsa-url string            TSA server URL
       --update                    update digest in component versions (default true)
   -V, --verify                    verify existing digests (default true)
 ```

@@ -19,6 +19,7 @@ import (
 	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Usages []interface{}
@@ -214,7 +215,7 @@ func CreateCertificate(spec *Specification) (*x509.Certificate, []byte, error) {
 	return cert, pemBytes, nil
 }
 
-func VerifyCertificate(cert *x509.Certificate, intermediates GenericCertificateChain, rootCerts GenericCertificatePool, name *pkix.Name) error {
+func VerifyCertificate(cert *x509.Certificate, intermediates GenericCertificateChain, rootCerts GenericCertificatePool, name *pkix.Name, ts ...*time.Time) error {
 	rootPool, err := GetCertPool(rootCerts, false)
 	if err != nil {
 		return err
@@ -223,10 +224,14 @@ func VerifyCertificate(cert *x509.Certificate, intermediates GenericCertificateC
 	if err != nil {
 		return err
 	}
+	timestamp := cert.NotBefore
+	if ts := utils.Optional(ts...); ts != nil && !ts.IsZero() {
+		timestamp = *ts
+	}
 	opts := x509.VerifyOptions{
 		Intermediates:             interPool,
 		Roots:                     rootPool,
-		CurrentTime:               cert.NotBefore, // TODO: tsa timestamp
+		CurrentTime:               timestamp,
 		KeyUsages:                 []x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning},
 		MaxConstraintComparisions: 0,
 	}
