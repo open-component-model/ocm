@@ -184,11 +184,13 @@ func addVersion(repo ocm.Repository, name, version string) error {
 
 	// now we compose a new component version, first we create
 	// a new version backed by this repository.
+	// --- begin new version ---
 	cv, err := repo.NewComponentVersion(name, version)
 	if err != nil {
 		return errors.Wrapf(err, "cannot create new version")
 	}
 	defer cv.Close()
+	// --- end new version ---
 
 	err = setupVersion(cv)
 	if err != nil {
@@ -282,7 +284,9 @@ func listVersions(repo ocm.Repository, list ...string) error {
 
 func ComposingAComponentVersionA() error {
 	// yes, we need an OCM context, again
+	// --- begin default context ---
 	ctx := ocm.DefaultContext()
+	// --- end default context ---
 
 	// To compose and store a new component version
 	// we finally need some OCM repository to
@@ -295,11 +299,13 @@ func ComposingAComponentVersionA() error {
 	// There are three flavours, Directory, Tar or TGZ.
 	// The implementation provides a regular OCM repository
 	// interface, like used in the previous example.
+	// --- begin create ctf ---
 	repo, err := ctfocm.Open(ctx, ctfocm.ACC_WRITABLE|ctfocm.ACC_CREATE, "/tmp/example02.ctf", 0o0744, ctfocm.FormatDirectory)
 	if err != nil {
 		return errors.Wrapf(err, "cannot create transport repository")
 	}
 	defer repo.Close()
+	// --- end create ctf ---
 
 	// now we create a first component version in this repository.
 	err = addVersion(repo, "acme.org/example02", "v0.1.0")

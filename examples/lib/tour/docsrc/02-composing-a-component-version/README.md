@@ -1,3 +1,4 @@
+{{compose-compvers}}
 # Composing a Component Version
 
 This tour illustrates the basic usage of the API to
@@ -25,7 +26,7 @@ As usual, we start with getting access to an OCM context
 object
 
 ```go
-	ctx := ocm.DefaultContext()
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{default context}}
 ```
 
 To compose and store a new component version
@@ -41,11 +42,7 @@ The implementation provides a regular OCM repository
 interface, like used in the previous example.
 
 ```go
-	repo, err := ctfocm.Open(ctx, ctfocm.ACC_WRITABLE|ctfocm.ACC_CREATE, "/tmp/example02.ctf", 0o0744, ctfocm.FormatDirectory)
-	if err != nil {
-		return errors.Wrapf(err, "cannot create transport repository")
-	}
-	defer repo.Close()
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{create ctf}}
 ```
 
 Once we have a repository we can compose a new version.
@@ -53,11 +50,7 @@ First we create a new version backed by this repository.
 The result is a memory based representation not yet persisted.
 
 ```go
-	cv, err := repo.NewComponentVersion(name, version)
-	if err != nil {
-		return errors.Wrapf(err, "cannot create new version")
-	}
-	defer cv.Close()
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{new version}}
 ```
 
 
