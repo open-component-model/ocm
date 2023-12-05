@@ -82,9 +82,14 @@ func ParsePublicKey(data []byte) (interface{}, error) {
 	if err != nil {
 		pub, err = x509.ParsePKCS1PublicKey(block.Bytes)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to parse DER encoded public key")
+			cert, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to parse DER encoded public key")
+			}
+			pub = cert.PublicKey
+		} else {
+			return pub, nil
 		}
-		return pub, nil
 	}
 	switch pub := pub.(type) {
 	case *rsa.PublicKey:
@@ -172,6 +177,8 @@ func GetPublicKey(key GenericPublicKey) (interface{}, error) {
 	case string:
 		return ParsePublicKey([]byte(k))
 	case *rsa.PublicKey:
+		return k, nil
+	case *dsa.PublicKey:
 		return k, nil
 	case *ecdsa.PublicKey:
 		return k, nil

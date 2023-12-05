@@ -24,7 +24,7 @@ import (
 
 type Usages []interface{}
 
-// Specification specified the xontext for the certificate creation.
+// Specification specified the context for the certificate creation.
 type Specification struct {
 	// RootCAs is used to verify a certificate chain.
 	// Self-signed CAs must be added here to be accepted as part
@@ -36,7 +36,7 @@ type Specification struct {
 
 	PublicKey GenericPublicKey
 
-	// CAPrivateKey is the provate key used for signing.
+	// CAPrivateKey is the private key used for signing.
 	// It must be the key for the first certificate in the chain
 	// (if given).
 	CAPrivateKey GenericPrivateKey
@@ -136,7 +136,7 @@ func CreateCertificate(spec *Specification) (*x509.Certificate, []byte, error) {
 			opts := x509.VerifyOptions{
 				Intermediates:             intermediates,
 				Roots:                     rootCerts,
-				KeyUsages:                 []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
+				KeyUsages:                 []x509.ExtKeyUsage{x509.ExtKeyUsageAny}, // x509.ExtKeyUsageCodeSigning ???
 				MaxConstraintComparisions: 0,
 			}
 

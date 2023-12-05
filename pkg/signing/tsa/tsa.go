@@ -49,9 +49,9 @@ func NewMessageImprintForData(data []byte, hash crypto.Hash) (*MessageImprint, e
 	return &mi, nil
 }
 
-func Request(url string, mi *tsa.MessageImprint) (*TimeStamp, error) {
+func Request(url string, mi *tsa.MessageImprint) (*TimeStamp, time.Time, error) {
 	if mi == nil {
-		return nil, fmt.Errorf("message imprint required")
+		return nil, time.Time{}, fmt.Errorf("message imprint required")
 	}
 	req := tsa.TimeStampReq{
 		Version:        1,
@@ -62,19 +62,19 @@ func Request(url string, mi *tsa.MessageImprint) (*TimeStamp, error) {
 
 	resp, err := req.Do(url)
 	if err != nil {
-		return nil, errors.Wrapf(err, "requesting timestamp from %s", url)
+		return nil, time.Time{}, errors.Wrapf(err, "requesting timestamp from %s", url)
 	}
 
 	sd, err := resp.TimeStampToken.SignedDataContent()
 	if err != nil {
-		return nil, errors.Wrapf(err, "unexpected answer timestamp response from %s", url)
+		return nil, time.Time{}, errors.Wrapf(err, "unexpected answer timestamp response from %s", url)
 	}
 
-	_, err = Verify(mi, sd, true)
+	t, err := Verify(mi, sd, true)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot verify timestamp response")
+		return nil, time.Time{}, errors.Wrapf(err, "cannot verify timestamp response")
 	}
-	return sd, nil
+	return sd, *t, nil
 }
 
 func Verify(mi *tsa.MessageImprint, sd *TimeStamp, now bool, rootpool ...signutils.GenericCertificatePool) (*time.Time, error) {
@@ -101,4 +101,12 @@ func Verify(mi *tsa.MessageImprint, sd *TimeStamp, now bool, rootpool ...signuti
 		return nil, err
 	}
 	return &info.GenTime, nil
+}
+
+func GetTimestamp(ts *TimeStamp) (time.Time, error) {
+	info, err := tsa.ParseInfo(ts.EncapContentInfo)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return info.GenTime, nil
 }

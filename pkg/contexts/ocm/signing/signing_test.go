@@ -1197,7 +1197,10 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			dn := Must(signutils.ParseDN(sig.Signature.Issuer))
 			Expect(dn).To(Equal(issuer))
 
-			Expect(sig.Timestamp).NotTo(Equal(""))
+			Expect(sig.Timestamp).NotTo(BeNil())
+			Expect(sig.Timestamp.Value).NotTo(Equal(""))
+			Expect(sig.Timestamp.Time).NotTo(BeNil())
+			Expect(time.Now().Sub(sig.Timestamp.Time.Time()).Minutes()).To(BeNumerically("<", 2))
 			VerifyComponent(res, COMPONENTA, digest, RootCertificates(ca), PKIXIssuer(*issuer))
 
 			issuer.Country = []string{"XX"}

@@ -20,6 +20,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/signing/tsa"
@@ -321,7 +322,8 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 			if err != nil {
 				return nil, err
 			}
-			ts, err := tsa.Request(url, mi)
+
+			ts, t, err := tsa.Request(url, mi)
 			if err != nil {
 				return nil, err
 			}
@@ -329,7 +331,10 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 			if err != nil {
 				return nil, err
 			}
-			signature.Timestamp = string(data)
+			signature.Timestamp = &metav1.TimestampSpec{
+				Value: string(data),
+				Time:  generics.Pointer(compdesc.NewTimestampFor(t)),
+			}
 		}
 		if found >= 0 {
 			cd.Signatures[found] = signature
@@ -491,8 +496,8 @@ func GetPublicKeyFromSignature(sig *compdesc.Signature, sctx signing.SigningCont
 	}
 
 	var timestamp *time.Time
-	if sig.Timestamp != "" {
-		ts, err := tsa.FromPem([]byte(sig.Timestamp))
+	if sig.Timestamp != nil {
+		ts, err := tsa.FromPem([]byte(sig.Timestamp.Value))
 		if err != nil {
 			return nil, errors.Wrapf(err, "signature timestamp")
 		}

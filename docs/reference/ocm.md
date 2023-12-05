@@ -339,6 +339,7 @@ by a certificate delivered with the signature.
 
 * [ocm <b>cache</b>](ocm_cache.md)	 &mdash; Cache related commands
 * [ocm <b>credentials</b>](ocm_credentials.md)	 &mdash; Commands acting on credentials
+* [ocm <b>hash</b>](ocm_hash.md)	 &mdash; Commands acting on hashes
 * [ocm <b>oci</b>](ocm_oci.md)	 &mdash; Dedicated command flavors for the OCI layer
 * [ocm <b>ocm</b>](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
 * [ocm <b>toi</b>](ocm_toi.md)	 &mdash; Dedicated command flavors for the TOI layer

@@ -173,6 +173,15 @@ definitions:
       value:
         type: string
 
+  timestampSpec:
+    type: object
+    properties:
+      value:
+        type: string
+      time:
+        type: string
+        format: date-time
+
   signatureSpec:
     type: 'object'
     required:
@@ -204,7 +213,7 @@ definitions:
       signature:
         $ref: '#/definitions/signatureSpec'
       timestamp:
-        type: string
+        $ref: '#/definitions/timestampSpec'
 
   nestedDigestSpec:
     type: 'object'
