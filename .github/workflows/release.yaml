@@ -135,12 +135,12 @@ jobs:
         token: ${{ steps.generate_token.outputs.token }}
 
     - name: Setup Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@fd74a6fb98a204a1ad35bbfae0122c1a302ff88b # v0.15.0
+      uses: anchore/sbom-action/download-syft@5ecf649a417b8ae17dc8383dc32d46c03f2312df # v0.15.1
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.2.0
