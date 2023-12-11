@@ -32,7 +32,7 @@ jobs:
           restore-keys: |
             go-
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version-file: '${{ github.workspace }}/go.mod'
       - name: Unit test
@@ -58,7 +58,7 @@ jobs:
           restore-keys: |
             go-
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version-file: '${{ github.workspace }}/go.mod'
       - name: Install goimports
@@ -90,7 +90,7 @@ jobs:
           restore-keys: |
             go-
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version-file: '${{ github.workspace }}/go.mod'
       - name: Generate DeepCopy
