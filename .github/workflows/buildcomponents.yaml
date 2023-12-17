@@ -60,7 +60,7 @@ jobs:
           make ctf
 
       - name: Upload OCM Archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ocm.ctf
           path: gen/ctf
