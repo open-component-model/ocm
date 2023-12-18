@@ -107,7 +107,7 @@ is set to <code>true</code>.
 This blob type specification supports the following fields: 
 - **<code>path</code>** *string*
 
-  This REQUIRED property describes the file path to the helm chart relative to the
+  This REQUIRED property describes the path to the file relative to the
   resource file location.
 ` + cpi.ProcessSpecUsage
 }

@@ -67,7 +67,7 @@ func NewProcessSpec(mediatype string, compress bool) ProcessSpec {
 // Compress returns if the blob should be compressed using gzip.
 func (s *ProcessSpec) Compress() bool {
 	if s.CompressWithGzip == nil {
-		return mime.IsGZip(s.MediaType)
+		return false
 	}
 	return *s.CompressWithGzip
 }
