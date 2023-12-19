@@ -604,7 +604,7 @@ func (o *Options) Complete(ctx interface{}) error {
 		if o.Signer != nil && !o.VerifySignature {
 			if pub := o.PublicKey(o.SignatureName()); pub != nil {
 				o.VerifySignature = true
-				if err := o.checkCert(pub, o.Issuer); err != nil {
+				if err := o.checkCert(pub, o.IssuerFor(o.SignatureName())); err != nil {
 					return fmt.Errorf("public key not valid: %w", err)
 				}
 			}

@@ -7,6 +7,8 @@ package signutils
 import (
 	"crypto/x509/pkix"
 	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -15,16 +17,22 @@ func CommonName(n string) *pkix.Name {
 	return &pkix.Name{CommonName: n}
 }
 
-var dnRegexp = regexp.MustCompile(`[/;,+]([^=]+)=([^/;,+]+)`)
+var (
+	dnRegexp    = regexp.MustCompile(`[/;,+]([^=]+)=([^/;,+]+)`)
+	allDNRegexp = regexp.MustCompile(`^[^=]+=[^/;,+]+([/;,+][^=]+=[^/;,+]+)*$`)
+)
 
 func ParseDN(dn string) (*pkix.Name, error) {
 	name := pkix.Name{}
 
-	matches := dnRegexp.FindAllStringSubmatch("+"+dn, -1)
-
-	if len(matches) == 0 {
+	dn = strings.TrimSpace(dn)
+	if len(dn) == 0 {
+		return nil, errors.ErrInvalid("distinguished name", dn)
+	}
+	if !allDNRegexp.MatchString(dn) {
 		name.CommonName = dn
 	} else {
+		matches := dnRegexp.FindAllStringSubmatch("+"+dn, -1)
 		for _, match := range matches {
 			val := match[2]
 			if val == "" {
@@ -57,6 +65,17 @@ func ParseDN(dn string) (*pkix.Name, error) {
 	}
 
 	return &name, nil
+}
+
+func NormalizeDN(dn pkix.Name) string {
+	sort.Strings(dn.StreetAddress)
+	sort.Strings(dn.Locality)
+	sort.Strings(dn.OrganizationalUnit)
+	sort.Strings(dn.Organization)
+	sort.Strings(dn.Country)
+	sort.Strings(dn.Province)
+	sort.Strings(dn.PostalCode)
+	return dn.String()
 }
 
 func DNAsString(dn pkix.Name) string {

@@ -156,6 +156,7 @@ acme.org/test ` + digests(e2c, e2b) + `       name: unit-tests, status: passed
 		It("gets dedicated yaml slip", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "routingslip", ARCH, "a.company.com", "-ojson")).To(Succeed())
+			fmt.Printf("%s\n", buf.String())
 			Expect(len(buf.String())).To(Equal(3470))
 		})
 

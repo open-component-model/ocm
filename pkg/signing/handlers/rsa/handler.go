@@ -61,6 +61,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	media := MediaType
 	value := hex.EncodeToString(sig)
 
+	var iss string
 	pub := sctx.GetPublicKey()
 	if pub != nil {
 		var pubKey signutils.GenericPublicKey
@@ -76,6 +77,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 			}
 			media = MediaTypePEM
 			value = string(signutils.SignatureBytesToPem(Algorithm, sig, certs...))
+			iss = certs[0].Subject.String()
 		} else {
 			pubKey, _, err = GetPublicKey(pub)
 			if err != nil {
@@ -85,13 +87,6 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 		if !privateKey.PublicKey.Equal(pubKey) {
 			return nil, fmt.Errorf("invalid public key for private key")
 		}
-	}
-
-	var iss string
-	if sctx.GetIssuer() != nil {
-		n := *sctx.GetIssuer()
-		n.SerialNumber = ""
-		iss = signutils.DNAsString(n)
 	}
 
 	return &signing.Signature{

@@ -474,6 +474,12 @@ func (r *keyRegistry) GetIssuer(name string) *pkix.Name {
 			return i
 		}
 	}
+	// if not explicitly overwritten, the signature name
+	// is interpreted as expected distinguished name for the issuer.
+	dn, err := signutils.ParseDN(name)
+	if err == nil {
+		return dn
+	}
 	return nil
 }
 

@@ -681,7 +681,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 
 				resolver := ocm.NewCompoundResolver(src)
 
-				log := SignComponent(resolver, COMPONENTD, D_COMPD, DigestMode(c.Mode()))
+				log := SignComponent(resolver, SIGNATURE, COMPONENTD, D_COMPD, DigestMode(c.Mode()))
 
 				Expect(log).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]...
@@ -732,7 +732,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 			Expect(len(cvb.GetDescriptor().Signatures)).To(Equal(0))
 			c.Check2Ref(cvb, "ref", D_COMPA)
 
-			VerifyComponent(src, COMPONENTD, D_COMPD)
+			VerifyComponent(src, SIGNATURE, COMPONENTD, D_COMPD)
 		},
 			Entry(DIGESTMODE_TOP, &EntryTop{}),
 			Entry(DIGESTMODE_LOCAL, &EntryLocal{}),
@@ -759,7 +759,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 
 				resolver := ocm.NewCompoundResolver(src)
 
-				log := SignComponent(resolver, COMPONENTB, subst["D_COMPB_X"], DigestMode(DIGESTMODE_TOP), HashByAlgo(sha512.Algorithm))
+				log := SignComponent(resolver, SIGNATURE, COMPONENTB, subst["D_COMPB_X"], DigestMode(DIGESTMODE_TOP), HashByAlgo(sha512.Algorithm))
 				Expect(log).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
   no digest found for "github.com/mandelsoft/test:v1"
@@ -769,8 +769,8 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
   resource 0:  "name"="data_b": digest ${HASH}:${D_DATAB_X}[genericBlobDigest/v1]
 
 `, MergeSubst(localDigests, subst)))
-				VerifyComponent(resolver, COMPONENTB, subst["D_COMPB_X"])
-				log = SignComponent(resolver, COMPONENTD, subst["D_COMPD_X"], DigestMode(DIGESTMODE_TOP))
+				VerifyComponent(resolver, SIGNATURE, COMPONENTB, subst["D_COMPB_X"])
+				log = SignComponent(resolver, SIGNATURE, COMPONENTD, subst["D_COMPD_X"], DigestMode(DIGESTMODE_TOP))
 
 				Expect(log).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]...
@@ -815,7 +815,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 
 			////////
 
-			VerifyComponent(src, COMPONENTD, subst["D_COMPD_X"])
+			VerifyComponent(src, SIGNATURE, COMPONENTD, subst["D_COMPD_X"])
 		}),
 			Entry("legacy", Substitutions{
 				"HASH":      "SHA-512",
@@ -852,7 +852,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				resolver := ocm.NewCompoundResolver(src)
 
 				fmt.Printf("SIGN D\n")
-				log := SignComponent(resolver, COMPONENTD, digestD, DigestMode(DIGESTMODE_TOP))
+				log := SignComponent(resolver, SIGNATURE, COMPONENTD, digestD, DigestMode(DIGESTMODE_TOP))
 
 				Expect(log).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]...
@@ -873,9 +873,9 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 `, MergeSubst(localDigests, subst)))
 
 				fmt.Printf("SIGN B\n")
-				SignComponent(resolver, COMPONENTB, subst["D_COMPB_X"], HashByAlgo(sha512.Algorithm), DigestMode(DIGESTMODE_TOP))
+				SignComponent(resolver, SIGNATURE, COMPONENTB, subst["D_COMPB_X"], HashByAlgo(sha512.Algorithm), DigestMode(DIGESTMODE_TOP))
 				fmt.Printf("VERIFY B\n")
-				VerifyComponent(resolver, COMPONENTB, subst["D_COMPB_X"])
+				VerifyComponent(resolver, SIGNATURE, COMPONENTB, subst["D_COMPB_X"])
 
 				Defer(arch.Finalize)
 			}
@@ -904,7 +904,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 
 			////////
 			fmt.Printf("VERIFY D\n")
-			VerifyComponent(src, COMPONENTD, digestD)
+			VerifyComponent(src, SIGNATURE, COMPONENTD, digestD)
 		},
 			Entry("legacy", Substitutions{
 				"D_COMPB_X": D_COMPB512,
@@ -928,8 +928,8 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				resolver := ocm.NewCompoundResolver(src)
 
 				fmt.Printf("SIGN B\n")
-				_ = SignComponent(resolver, COMPONENTB, D_COMPB, DigestMode(DIGESTMODE_LOCAL))
-				VerifyComponent(src, COMPONENTB, D_COMPB)
+				_ = SignComponent(resolver, SIGNATURE, COMPONENTB, D_COMPB, DigestMode(DIGESTMODE_LOCAL))
+				VerifyComponent(src, SIGNATURE, COMPONENTB, D_COMPB)
 				Check(finalizer.Finalize)
 			}
 			{ // check mode
@@ -950,8 +950,8 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				resolver := ocm.NewCompoundResolver(src)
 
 				fmt.Printf("RESIGN B\n")
-				_ = SignComponent(resolver, COMPONENTB, D_COMPB, DigestMode(DIGESTMODE_TOP), SignatureName(SIGNATURE2, true))
-				VerifyComponent(src, COMPONENTB, D_COMPB, SignatureName(SIGNATURE2, true))
+				_ = SignComponent(resolver, SIGNATURE, COMPONENTB, D_COMPB, DigestMode(DIGESTMODE_TOP), SignatureName(SIGNATURE2, true))
+				VerifyComponent(src, SIGNATURE, COMPONENTB, D_COMPB, SignatureName(SIGNATURE2, true))
 				Check(finalizer.Finalize)
 			}
 			{ // check mode
@@ -988,8 +988,8 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				resolver := ocm.NewCompoundResolver(src)
 
 				fmt.Printf("SIGN B\n")
-				_ = SignComponent(resolver, COMPONENTB, D_COMPB, DigestMode(DIGESTMODE_TOP), SignatureName(SIGNATURE2, true))
-				VerifyComponent(src, COMPONENTB, D_COMPB, SignatureName(SIGNATURE2, true))
+				_ = SignComponent(resolver, SIGNATURE, COMPONENTB, D_COMPB, DigestMode(DIGESTMODE_TOP), SignatureName(SIGNATURE2, true))
+				VerifyComponent(src, SIGNATURE, COMPONENTB, D_COMPB, SignatureName(SIGNATURE2, true))
 				Check(finalizer.Finalize)
 			}
 			{ // check mode
@@ -1010,8 +1010,8 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				resolver := ocm.NewCompoundResolver(src)
 
 				fmt.Printf("SIGN D\n")
-				_ = SignComponent(resolver, COMPONENTD, D_COMPD, Recursive(), DigestMode(DIGESTMODE_LOCAL))
-				VerifyComponent(src, COMPONENTD, D_COMPD)
+				_ = SignComponent(resolver, SIGNATURE, COMPONENTD, D_COMPD, Recursive(), DigestMode(DIGESTMODE_LOCAL))
+				VerifyComponent(src, SIGNATURE, COMPONENTD, D_COMPD)
 				Check(finalizer.Finalize)
 			}
 			{ // check mode
@@ -1098,14 +1098,15 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 	Context("keyless verification", func() {
 		ca, capriv := Must2(rsa.CreateRootCertificate(signutils.CommonName("ca-authority"), 10*time.Hour))
 		intercert, interpem, interpriv := Must3(rsa.CreateSigningCertificate(signutils.CommonName("acme.org"), ca, ca, capriv, 5*time.Hour, true))
-		cert, pemBytes, priv := Must3(rsa.CreateSigningCertificate(&pkix.Name{
-			CommonName:    "mandelsoft",
+		certIssuer := &pkix.Name{
+			CommonName:    PROVIDER,
 			Country:       []string{"DE", "US"},
 			Locality:      []string{"Walldorf d"},
 			StreetAddress: []string{"x y"},
 			PostalCode:    []string{"69169"},
 			Province:      []string{"BW"},
-		}, interpem, ca, interpriv, time.Hour))
+		}
+		cert, pemBytes, priv := Must3(rsa.CreateSigningCertificate(certIssuer, interpem, ca, interpriv, time.Hour))
 
 		certs := Must(signutils.GetCertificateChain(pemBytes, false))
 		Expect(len(certs)).To(Equal(3))
@@ -1123,11 +1124,31 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 			MustBeSuccessful(signutils.VerifyCertificate(cert, pemBytes, ca, nil))
 		})
 
-		It("signs with certificate", func() {
+		It("signs with certificate and default issuer", func() {
 			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
 			res := ocm.NewDedicatedResolver(cv)
 
-			buf := SignComponent(res, COMPONENTA, digest, PrivateKey(SIGNATURE, priv), PublicKey(SIGNATURE, pemBytes), RootCertificates(ca))
+			buf := SignComponent(res, PROVIDER, COMPONENTA, digest, PrivateKey(PROVIDER, priv), PublicKey(PROVIDER, pemBytes), RootCertificates(ca))
+			Expect(buf).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
+`))
+
+			i := cv.GetDescriptor().GetSignatureIndex(PROVIDER)
+			Expect(i).To(BeNumerically(">=", 0))
+			sig := cv.GetDescriptor().Signatures[i].Signature
+			Expect(sig.MediaType).To(Equal(signutils.MediaTypePEM))
+			_, algo, chain := Must3(signutils.GetSignatureFromPem([]byte(sig.Value)))
+			Expect(algo).To(Equal(rsa.Algorithm))
+			Expect(len(chain)).To(Equal(3))
+
+			VerifyComponent(res, PROVIDER, COMPONENTA, digest, RootCertificates(ca))
+		})
+
+		It("signs with certificate and explicit CN issuer", func() {
+			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
+			res := ocm.NewDedicatedResolver(cv)
+
+			buf := SignComponent(res, SIGNATURE, COMPONENTA, digest, PrivateKey(SIGNATURE, priv), PublicKey(SIGNATURE, pemBytes), RootCertificates(ca), Issuer(PROVIDER))
 			Expect(buf).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
 `))
@@ -1140,18 +1161,22 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			Expect(algo).To(Equal(rsa.Algorithm))
 			Expect(len(chain)).To(Equal(3))
 
-			VerifyComponent(res, COMPONENTA, digest, RootCertificates(ca))
+			VerifyComponent(res, SIGNATURE, COMPONENTA, digest, RootCertificates(ca), Issuer(PROVIDER))
+
+			FailVerifyComponent(res, SIGNATURE, COMPONENTA, digest,
+				`github.com/mandelsoft/test:v1: public key from signature: public key certificate: issuer mismatch in public key certificate: common name "mandelsoft" is invalid`,
+				RootCertificates(ca))
 		})
 
 		It("signs with certificate and issuer", func() {
 			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
 			res := ocm.NewDedicatedResolver(cv)
 			issuer := &pkix.Name{
-				CommonName: "mandelsoft",
+				CommonName: PROVIDER,
 				Country:    []string{"DE"},
 			}
 
-			buf := SignComponent(res, COMPONENTA, digest, PrivateKey(SIGNATURE, priv), PublicKey(SIGNATURE, pemBytes), RootCertificates(ca), PKIXIssuer(*issuer))
+			buf := SignComponent(res, SIGNATURE, COMPONENTA, digest, PrivateKey(SIGNATURE, priv), PublicKey(SIGNATURE, pemBytes), RootCertificates(ca), PKIXIssuer(*issuer))
 			Expect(buf).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
 `))
@@ -1164,12 +1189,12 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			Expect(algo).To(Equal(rsa.Algorithm))
 			Expect(len(chain)).To(Equal(3))
 			dn := Must(signutils.ParseDN(sig.Issuer))
-			Expect(dn).To(Equal(issuer))
+			Expect(dn).To(Equal(certIssuer))
 
-			VerifyComponent(res, COMPONENTA, digest, RootCertificates(ca), PKIXIssuer(*issuer))
+			VerifyComponent(res, SIGNATURE, COMPONENTA, digest, RootCertificates(ca), PKIXIssuer(*issuer))
 
 			issuer.Country = []string{"XX"}
-			FailVerifyComponent(res, COMPONENTA, digest,
+			FailVerifyComponent(res, SIGNATURE, COMPONENTA, digest,
 				`github.com/mandelsoft/test:v1: public key from signature: public key certificate: issuer mismatch in public key certificate: country "XX" not found`,
 				RootCertificates(ca), PKIXIssuer(*issuer))
 		})
@@ -1182,7 +1207,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 				Country:    []string{"DE"},
 			}
 
-			buf := SignComponent(res, COMPONENTA, digest, PrivateKey(SIGNATURE, priv), PublicKey(SIGNATURE, pemBytes), RootCertificates(ca), PKIXIssuer(*issuer), UseTSA())
+			buf := SignComponent(res, SIGNATURE, COMPONENTA, digest, PrivateKey(SIGNATURE, priv), PublicKey(SIGNATURE, pemBytes), RootCertificates(ca), PKIXIssuer(*issuer), UseTSA())
 			Expect(buf).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
 `))
@@ -1195,16 +1220,16 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			Expect(algo).To(Equal(rsa.Algorithm))
 			Expect(len(chain)).To(Equal(3))
 			dn := Must(signutils.ParseDN(sig.Signature.Issuer))
-			Expect(dn).To(Equal(issuer))
+			Expect(dn).To(Equal(certIssuer))
 
 			Expect(sig.Timestamp).NotTo(BeNil())
 			Expect(sig.Timestamp.Value).NotTo(Equal(""))
 			Expect(sig.Timestamp.Time).NotTo(BeNil())
 			Expect(time.Now().Sub(sig.Timestamp.Time.Time()).Minutes()).To(BeNumerically("<", 2))
-			VerifyComponent(res, COMPONENTA, digest, RootCertificates(ca), PKIXIssuer(*issuer))
+			VerifyComponent(res, SIGNATURE, COMPONENTA, digest, RootCertificates(ca), PKIXIssuer(*issuer))
 
 			issuer.Country = []string{"XX"}
-			FailVerifyComponent(res, COMPONENTA, digest,
+			FailVerifyComponent(res, SIGNATURE, COMPONENTA, digest,
 				`github.com/mandelsoft/test:v1: public key from signature: public key certificate: issuer mismatch in public key certificate: country "XX" not found`,
 				RootCertificates(ca), PKIXIssuer(*issuer))
 		})
@@ -1245,13 +1270,13 @@ func VerifyHashes(resolver ocm.ComponentVersionResolver, name string, digest str
 	ExpectWithOffset(1, dig.Value).To(Equal(digest))
 }
 
-func SignComponent(resolver ocm.ComponentVersionResolver, name string, digest string, other ...Option) string {
+func SignComponent(resolver ocm.ComponentVersionResolver, signame, name string, digest string, other ...Option) string {
 	cv, err := resolver.LookupComponentVersion(name, VERSION)
 	Expect(err).To(Succeed())
 	defer cv.Close()
 
 	opts := NewOptions(
-		Sign(signingattr.Get(cv.GetContext()).GetSigner(SIGN_ALGO), SIGNATURE),
+		Sign(signingattr.Get(cv.GetContext()).GetSigner(SIGN_ALGO), signame),
 		Resolver(resolver),
 		VerifyDigests(),
 	)
@@ -1265,13 +1290,13 @@ func SignComponent(resolver ocm.ComponentVersionResolver, name string, digest st
 	return buf.String()
 }
 
-func VerifyComponent(resolver ocm.ComponentVersionResolver, name string, digest string, other ...Option) {
+func VerifyComponent(resolver ocm.ComponentVersionResolver, signame, name string, digest string, other ...Option) {
 	cv, err := resolver.LookupComponentVersion(name, VERSION)
 	ExpectWithOffset(1, err).To(Succeed())
 	defer cv.Close()
 
 	opts := NewOptions(
-		VerifySignature(SIGNATURE),
+		VerifySignature(signame),
 		Resolver(resolver),
 		VerifyDigests(),
 	)
@@ -1282,13 +1307,13 @@ func VerifyComponent(resolver ocm.ComponentVersionResolver, name string, digest 
 	ExpectWithOffset(1, dig.Value).To(Equal(digest))
 }
 
-func FailVerifyComponent(resolver ocm.ComponentVersionResolver, name string, digest string, msg string, other ...Option) {
+func FailVerifyComponent(resolver ocm.ComponentVersionResolver, signame, name string, digest string, msg string, other ...Option) {
 	cv, err := resolver.LookupComponentVersion(name, VERSION)
 	ExpectWithOffset(1, err).To(Succeed())
 	defer cv.Close()
 
 	opts := NewOptions(
-		VerifySignature(SIGNATURE),
+		VerifySignature(signame),
 		Resolver(resolver),
 		VerifyDigests(),
 	)

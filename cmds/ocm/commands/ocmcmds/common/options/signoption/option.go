@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/keyoption"
@@ -86,7 +87,11 @@ func (o *Option) Configure(ctx clictx.Context) error {
 	if len(o.SignatureNames) > 0 {
 		for i, n := range o.SignatureNames {
 			n = strings.TrimSpace(n)
-			o.SignatureNames[i] = n
+			dn, err := signutils.ParseDN(n)
+			if err != nil {
+				return err
+			}
+			o.SignatureNames[i] = signutils.NormalizeDN(*dn)
 			if n == "" {
 				return errors.Newf("empty signature name (name %d) not possible", i)
 			}

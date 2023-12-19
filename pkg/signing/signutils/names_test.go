@@ -36,6 +36,14 @@ var _ = Describe("normalization", func() {
 			dn := Must(signutils.ParseDN("CN=mandelsoft,C=DE+C=US"))
 			Expect(dn.String()).To(Equal("CN=mandelsoft,C=DE+C=US"))
 		})
+		It("double fields", func() {
+			dn := Must(signutils.ParseDN("C=DE+C=US,CN=mandelsoft"))
+			Expect(dn.String()).To(Equal("CN=mandelsoft,C=DE+C=US"))
+		})
+		It("double fields", func() {
+			dn := Must(signutils.ParseDN("C=DE+C=US,CN=mandelsoft,L=Walldorf,O=mandelsoft"))
+			Expect(dn.String()).To(Equal("CN=mandelsoft,O=mandelsoft,L=Walldorf,C=DE+C=US"))
+		})
 	})
 
 	Context("match", func() {

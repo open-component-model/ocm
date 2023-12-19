@@ -139,7 +139,9 @@ start with the prefix <code>!</code> or as direct string with the prefix
 With <code>--issuer</code> it is possible to declare expected issuer 
 constraints for public key certificates provided as part of a signature
 required to accept the provisioned public key (besides the successful
-validation of the certificate).
+validation of the certificate). By default, the issuer constraint is
+derived from the signature name. If it is not a formal distinguished name,
+it is assumed to be a plain common name.
 
 With <code>--ca-cert</code> it is possible to define additional root
 certificates for signature verification, if public keys are provided
