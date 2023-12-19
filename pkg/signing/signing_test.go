@@ -50,7 +50,6 @@ var _ = Describe("signing", func() {
 
 		Expect(err).To(Succeed())
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
-		Expect(sig.Issuer).To(Equal("mandelsoft"))
 
 		sctx.PublicKey = registry.GetPublicKey(NAME)
 		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, sig, sctx)).To(Succeed())

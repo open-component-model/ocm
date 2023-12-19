@@ -59,12 +59,12 @@ var excludes = signing.MapExcludes{
 type HistoryEntries = []HistoryEntry
 
 type HistoryEntry struct {
-	Payload   *GenericEntry        `json:"payload"`
-	Timestamp metav1.Timestamp     `json:"timestamp"`
-	Parent    *digest.Digest       `json:"parent,omitempty"`
-	Links     []Link               `json:"links,omitempty"`
-	Digest    digest.Digest        `json:"digest"`
-	Signature metav1.SignatureSpec `json:"signature"`
+	Payload   *GenericEntry         `json:"payload"`
+	Timestamp metav1.Timestamp      `json:"timestamp"`
+	Parent    *digest.Digest        `json:"parent,omitempty"`
+	Links     []Link                `json:"links,omitempty"`
+	Digest    digest.Digest         `json:"digest"`
+	Signature *metav1.SignatureSpec `json:"signature,omitempty"`
 }
 
 func (e *HistoryEntry) Normalize() ([]byte, error) {

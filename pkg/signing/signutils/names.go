@@ -75,7 +75,7 @@ func NormalizeDN(dn pkix.Name) string {
 	sort.Strings(dn.Country)
 	sort.Strings(dn.Province)
 	sort.Strings(dn.PostalCode)
-	return dn.String()
+	return DNAsString(dn)
 }
 
 func DNAsString(dn pkix.Name) string {

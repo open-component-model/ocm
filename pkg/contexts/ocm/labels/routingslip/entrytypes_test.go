@@ -50,7 +50,7 @@ var _ = Describe("routing slip", func() {
 			Payload:   Must(internal.ToGenericEntry(New("test"))),
 			Digest:    "sha:digest",
 			Timestamp: now,
-			Signature: metav1.SignatureSpec{
+			Signature: &metav1.SignatureSpec{
 				Algorithm: "algo",
 				Value:     "value",
 				MediaType: "mime",
