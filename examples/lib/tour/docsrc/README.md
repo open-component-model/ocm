@@ -9,7 +9,7 @@ of extension points of the library.
 
 - [Basic Usage of OCM Repositories]({{getting-started}})
 - [Composing Component Versions]({{compose-compvers}})
-- [Working with Credentials](03-working-with-credentials/README.md)
+- [Working with Credentials]({{credentials}})
 - [Working with Configuration](04-working-with-config/README.md)
 - [Transporting Component Versions](05-transporting-component-versions/README.md)
 - [Signing Component Versions](06-signing-component-versions/README.md)

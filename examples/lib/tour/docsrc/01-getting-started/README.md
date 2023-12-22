@@ -95,6 +95,8 @@ the last one in the list.
 {{include}{../../01-getting-started/example.go}{lookup version}}
 ```
 
+{{describe-version}}
+
 The component version object provides access
 to the component descriptor
 

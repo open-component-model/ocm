@@ -108,6 +108,8 @@ the last one in the list.
 	defer cv.Close()
 ```
 
+<a id="describe-version"></a>
+
 The component version object provides access
 to the component descriptor
 

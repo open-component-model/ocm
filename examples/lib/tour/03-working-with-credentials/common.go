@@ -184,6 +184,7 @@ func addVersion(repo ocm.Repository, name, version string) error {
 
 	// now we compose a new component version, first we create
 	// a new version backed by this repository.
+	// --- begin create version ---
 	cv, err := repo.NewComponentVersion(name, version)
 	if err != nil {
 		return errors.Wrapf(err, "cannot create new version")
@@ -201,6 +202,7 @@ func addVersion(repo ocm.Repository, name, version string) error {
 	if err != nil {
 		return errors.Wrapf(err, "cannot save version")
 	}
+	// --- end create version ---
 	return nil
 }
 

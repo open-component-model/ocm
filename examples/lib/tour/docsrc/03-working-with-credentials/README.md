@@ -1,3 +1,4 @@
+{{credentials}}
 # Working with Credentials
 
 This tour illustrates the basic handling of credentials
@@ -32,7 +33,7 @@ As usual, we start with getting access to an OCM context
 object.
 
 ```go
-	ctx := ocm.DefaultContext()
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{default context}}
 ```
 
 So far, we just used memory or filesystem based
@@ -54,7 +55,7 @@ The example config file provides such credentials
 for an OCI registry.
 
 ```go
-	creds := ociidentity.SimpleCredentials(cfg.Username, cfg.Password)
+{{include}{../../03-working-with-credentials/01-using-credentials.go}{new credentials}}
 ```
 
 Now, we can use the OCI repository access creation from the [first tour](../01-getting-started/README.md#walkthrough),
@@ -63,13 +64,7 @@ To give you the chance to specify your own registry the URL
 is taken from the config file.
 
 ```go
-	spec := ocireg.NewRepositorySpec(cfg.Repository, nil)
-
-	repo, err := ctx.RepositoryForSpec(spec, creds)
-	if err != nil {
-		return err
-	}
-	defer repo.Close()
+{{include}{../../03-working-with-credentials/01-using-credentials.go}{repository access}}
 ```
 
 If registry name and credentials are fine, we should be able
@@ -79,23 +74,7 @@ of a memory or filesystem based one. This coding is in function `addVersion`
 in `common.go` (It is shared by the other examples, also).
 
 ```go
-	cv, err := repo.NewComponentVersion(name, version)
-	if err != nil {
-		return errors.Wrapf(err, "cannot create new version")
-	}
-	defer cv.Close()
-
-	err = setupVersion(cv)
-	if err != nil {
-		return errors.Wrapf(err, "cannot setup new version")
-	}
-
-	// finally, wee add the new version to the repository.
-	fmt.Printf("adding component version\n")
-	err = repo.AddComponentVersion(cv)
-	if err != nil {
-		return errors.Wrapf(err, "cannot save version")
-	}
+{{include}{../../03-working-with-credentials/common.go}{create version}}
 ```
 
 In contract to our [first tour](../01-getting-started/README.md#walkthrough)
@@ -104,15 +83,10 @@ OCI registries do not support component listers, therefore we
 just lookup the actually added version to verify the result.
 
 ```go
-	cv, err := repo.LookupComponentVersion("acme.org/example03", "v0.1.0")
-	if err != nil {
-		return errors.Wrapf(err, "added version not found")
-	}
-	defer cv.Close()
-	return errors.Wrapf(describeVersion(cv), "describe failed")
+{{include}{../../03-working-with-credentials/01-using-credentials.go}{lookup}}
 ```
 
-The coding for `describeVersion` is similar to the one shown in the [first tour](../01-getting-started/README.md#describe-version).
+The coding for `describeVersion` is similar to the one shown in the [first tour]({{describe-version}}).
 
 ### Using the Credential Management
 
@@ -134,7 +108,7 @@ by a sub context, the *Credentials context*.
 As usual, we start with the default OCM context.
 
 ```go
-	ctx := ocm.DefaultContext()
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{default context}}
 ```
 
 It is now used to gain access to the appropriate
@@ -142,7 +116,7 @@ credential context.
 
 
 ```go
-	credctx := ctx.CredentialsContext()
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{cred context}}
 ```
 
 The credentials context brings together
@@ -190,7 +164,7 @@ provide an explicit mapping for our use case.
 First, we create our credentials object as before.
 
 ```go
-	creds := ociidentity.SimpleCredentials(cfg.Username, cfg.Password)
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{new credentials}}
 ```
 
 Then we determine the consumer id for our use case.
@@ -199,10 +173,7 @@ for this task. It provides the most common property
 set (no repository path) for an OCI based OCM repository.
 
 ```go
-	id, err := oci.GetConsumerIdForRef(cfg.Repository)
-	if err != nil {
-		return errors.Wrapf(err, "invalid consumer")
-	}
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{consumer id}}
 ```
 
 The used functions above are just convenience wrappers
@@ -215,7 +186,7 @@ Once we have the id we can finnaly set the credentials for this
 id.
 
 ```go
-	credctx.SetCredentialsForConsumer(id, creds)
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{set credentials}}
 ```
 
 Now, the context is prepared to provide credentials 
@@ -226,12 +197,7 @@ for storing our component version.
 First, we get the repository object for our OCM repository.
 
 ```go
-	spec := ocireg.NewRepositorySpec(cfg.Repository, nil)
-	repo, err := ctx.RepositoryForSpec(spec, creds)
-	if err != nil {
-		return err
-	}
-	defer repo.Close()
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{get repository}}
 ```
 
 Second, we determine the consumer id for our intended repository acccess.
@@ -241,11 +207,7 @@ This is supported by the OCM repo implementation for OCI registries.
 The usage context is here the component name.
 
 ```go
-	id = credentials.GetProvidedConsumerId(repo, credentials.StringUsageContext("acme.org/example03"))
-	if id == nil {
-		return fmt.Errorf("repository does not support consumer id queries")
-	}
-	fmt.Printf("usage context: %s\n", id)
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{get access id}}
 ```
 
 Third, we ask the credential context for appropriate credentials.
@@ -260,14 +222,7 @@ the returned interface then offers access to the credential properties.
 via various methods.
 
 ```go
-	creds, err = credentials.CredentialsForConsumer(credctx, id, ociidentity.IdentityMatcher)
-	if err != nil {
-		return errors.Wrapf(err, "no credentials")
-	}
-	if creds == nil {
-		return fmt.Errorf("no credentials found")
-	}
-	fmt.Printf("credentials: %s\n", obfuscate(creds.Properties()))
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{get credentials}}
 ```
 
 Now, we can continue with our basic component version composition
@@ -278,13 +233,7 @@ creating a new version, the `read` variant just omits the version creation.
 The rest of the example is then the same.
 
 ```go
-	if create {
-		// now we create a component version in this repository.
-		err = addVersion(repo, "acme.org/example03", "v0.1.0")
-		if err != nil {
-			return err
-		}
-	}
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{add version}}
 ```
 
 Let's verify the created content and list the versions as known from tour 1.
@@ -292,16 +241,7 @@ OCI registries do not support component listers, therefore we
 just get and describe the actually added version.
 
 ```go
-	cv, err := repo.LookupComponentVersion("acme.org/example03", "v0.1.0")
-	if err != nil {
-		return errors.Wrapf(err, "added version not found")
-	}
-	defer cv.Close()
-
-	err = describeVersion(cv)
-	if err != nil {
-		return errors.Wrapf(err, "describe failed")
-	}
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{show version}}
 ```
 
 As we can see in the resource list, our image artifact has been
@@ -309,20 +249,7 @@ uploaded to the OCI registry as OCI artifact and the access method has be change
 to `ociArtifact`. It is not longer a local blob.
 
 ```go
-	res, err := cv.GetResourcesByName("ocmcli")
-	if err != nil {
-		return errors.Wrapf(err, "accessing ocmcli resource")
-	}
-	if len(res) != 1 {
-		return fmt.Errorf("oops, there are %d entries for ocmcli", len(res))
-	}
-	meth, err := res[0].AccessMethod()
-	if err != nil {
-		return errors.Wrapf(err, "cannot get access method")
-	}
-	defer meth.Close()
-
-	fmt.Printf("accessing oci image now with %s\n", meth.AccessSpec().Describe(ctx))
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{examine cli}}
 ```
 
 This resource access points effectively to the same OCI registry,
@@ -335,34 +262,14 @@ Optionally, an access method can act as provider for a consumer id, so that
 it is possible to query the used consumer id from the method object.
 
 ```go
-	id = credentials.GetProvidedConsumerId(meth, credentials.StringUsageContext("acme.org/example3"))
-	if id == nil {
-		fmt.Printf("no consumer id info for access method\n")
-	} else {
-		fmt.Printf("usage context: %s\n", id)
-	}
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{image credentials}}
 ```
 
 Because the credentials context now knows the required credentials,
 the access method as credential consumer can access the blob.
 
 ```go
-	writer, err := os.OpenFile("/tmp/example3", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
-	if err != nil {
-		return errors.Wrapf(err, "cannot write output file")
-	}
-	defer writer.Name()
-
-	reader, err := meth.Reader()
-	if err != nil {
-		return errors.Wrapf(err, "cannot get reader")
-	}
-	defer reader.Close()
-	n, err := io.Copy(writer, reader)
-	if err != nil {
-		return errors.Wrapf(err, "cannot copy content")
-	}
-	fmt.Printf("blob has %d bytes\n", n)
+{{include}{../../03-working-with-credentials/02-basic-credential-management.go}{image access}}
 ```
 
 ### Providing credentials via credential repositories
@@ -391,8 +298,7 @@ OCM context and the connected credential context.
 
 
 ```go
-	ctx := ocm.DefaultContext()
-	credctx := ctx.CredentialsContext()
+{{include}{../../03-working-with-credentials/03-credential-repositories.go}{context}}
 ```
 
 In package `.../contexts/credentials/repositories` you can find
@@ -400,7 +306,7 @@ packages for predefined implementations for some standard credential repositorie
 for example `dockerconfig`.
 
 ```go
-	dspec := dockerconfig.NewRepositorySpec("~/.docker/config.json")
+{{include}{../../03-working-with-credentials/03-credential-repositories.go}{docker config}}
 ```
 
 There are general credential stores, like a HashiCorp Vault
@@ -420,7 +326,7 @@ mappings. This feature is typically enabled by a dedicated specfication
 option.
 
 ```go
-	dspec = dspec.WithConsumerPropagation(true)
+{{include}{../../03-working-with-credentials/03-credential-repositories.go}{propagation}}
 ```
 
 Implementations for more generic credential repositories can also use this
@@ -433,10 +339,7 @@ the credential context by getting the repository object for our
 specification.
 
 ```go
-	_, err := credctx.RepositoryForSpec(dspec)
-	if err != nil {
-		return errors.Wrapf(err, "invalid credential repository")
-	}
+{{include}{../../03-working-with-credentials/03-credential-repositories.go}{add repo}}
 ```
 
 We are not interested in the repository object, so we just ignore
@@ -449,23 +352,11 @@ for the configured repository.
 We first query the consumer id for the repository, again.
 
 ```go
-	id, err := oci.GetConsumerIdForRef(cfg.Repository)
-	if err != nil {
-		return errors.Wrapf(err, "invalid consumer")
-	}
+{{include}{../../03-working-with-credentials/03-credential-repositories.go}{get consumer id}}
 ```
 
 and then get the credentials from the credentials context like in the previous example.
 
 ```go
-	creds, err := credentials.CredentialsForConsumer(credctx, id, ociidentity.IdentityMatcher)
-	if err != nil {
-		return errors.Wrapf(err, "no credentials")
-	}
-	// an error is only provided if something went wrong while determining
-	// the credentials. Delivering NO credentials is a valid result.
-	if creds == nil {
-		return fmt.Errorf("no credentials found")
-	}
-	fmt.Printf("credentials: %s\n", obfuscate(creds.Properties()))
+{{include}{../../03-working-with-credentials/03-credential-repositories.go}{get credentials}}
 ```
