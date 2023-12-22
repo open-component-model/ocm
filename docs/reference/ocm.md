@@ -45,7 +45,7 @@ The command accepts some top level options, they can only be given before the su
 
 With the option <code>--cred</code> it is possible to specify arbitrary credentials
 for various environments on the command line. Nevertheless it is always preferrable
-to use the CLI [config file](./ocm_configfile.md).
+to use the cli config file.
 Every credential setting is related to a dedicated consumer and provides a set of
 credential attributes. All this can be specified by a sequence of <code>--cred</code>
 options.
@@ -198,7 +198,7 @@ The value can be a simple type or a JSON/YAML string for complex values
   Note that the host name part of the transfer target <code>ghcr.io/acme</code> is excluded from the
   prefix but the path <code>acme</code> is considered.
 
-  The same using a [config file](./ocm_configfile.md) <code>.ocmconfig</code>:
+  The same using a config file <code>.ocmconfig</code>:
   <pre>
   type: generic.config.ocm.software/v1
   configurations:
@@ -303,7 +303,9 @@ start with the prefix <code>!</code> or as direct string with the prefix
 With <code>--issuer</code> it is possible to declare expected issuer
 constraints for public key certificates provided as part of a signature
 required to accept the provisioned public key (besides the successful
-validation of the certificate).
+validation of the certificate). By default, the issuer constraint is
+derived from the signature name. If it is not a formal distinguished name,
+it is assumed to be a plain common name.
 
 With <code>--ca-cert</code> it is possible to define additional root
 certificates for signature verification, if public keys are provided
@@ -339,7 +341,6 @@ by a certificate delivered with the signature.
 
 * [ocm <b>cache</b>](ocm_cache.md)	 &mdash; Cache related commands
 * [ocm <b>credentials</b>](ocm_credentials.md)	 &mdash; Commands acting on credentials
-* [ocm <b>hash</b>](ocm_hash.md)	 &mdash; Commands acting on hashes
 * [ocm <b>oci</b>](ocm_oci.md)	 &mdash; Dedicated command flavors for the OCI layer
 * [ocm <b>ocm</b>](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
 * [ocm <b>toi</b>](ocm_toi.md)	 &mdash; Dedicated command flavors for the TOI layer
