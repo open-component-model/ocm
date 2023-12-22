@@ -112,7 +112,25 @@ The following configuration types are supported:
          &lt;name>:
            data: &lt;base64 encoded key representation>
          ...
+      issuers:
+         &lt;name>:
+           commonName: acme.org
   </pre>
+
+  Issuers define an expected distinguished name for
+  public key certificates optionally provided together with
+  signatures. They support the following fields:
+  - <code>commonName</code> *string*
+  - <code>organization</code> *string array*
+  - <code>organizationalUnit</code> *string array*
+  - <code>country</code> *string array*
+  - <code>locality</code> *string array*
+  - <code>province</code> *string array*
+  - <code>streetAddress</code> *string array*
+  - <code>postalCode</code> *string array*
+
+  At least the given values must be present in the certificate
+  to be accepted for a successful signature validation.
 - <code>logging.config.ocm.software</code>
   The config type <code>logging.config.ocm.software</code> can be used to configure the logging
   aspect of a dedicated context type:

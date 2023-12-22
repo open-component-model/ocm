@@ -79,6 +79,7 @@ require (
 )
 
 require (
+	github.com/InfiniteLoopSpace/go_S-MIME v0.0.0-20181221134359-3f58f9a4b2b6
 	github.com/distribution/reference v0.5.0
 	github.com/imdario/mergo v0.3.16
 	github.com/mandelsoft/vfs v0.4.0

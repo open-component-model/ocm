@@ -18,7 +18,7 @@ type (
 )
 
 type SlipAccess interface {
-	Get(name string) *RoutingSlip
+	Get(name string) (*RoutingSlip, error)
 }
 
 func DefaultEntryTypeScheme() EntryTypeScheme {
