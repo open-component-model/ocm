@@ -288,7 +288,7 @@ with the field <code>type</code> in the <code>input</code> field:
   This blob type specification supports the following fields:
   - **<code>path</code>** *string*
 
-    This REQUIRED property describes the file path to the helm chart relative to the
+    This REQUIRED property describes the path to the file relative to the
     resource file location.
 
   - **<code>mediaType</code>** *string*
@@ -387,7 +387,7 @@ with the field <code>type</code> in the <code>input</code> field:
   This blob type specification supports the following fields:
   - **<code>path</code>** *string*
 
-    This REQUIRED property describes the file path to the helm chart relative to the
+    This REQUIRED property describes the path to the file relative to the
     resource file location.
 
   - **<code>mediaType</code>** *string*
