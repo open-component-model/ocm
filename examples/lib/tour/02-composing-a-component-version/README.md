@@ -13,9 +13,8 @@ You can just call the main program with the scenario as argument. Configuration 
 
 ## Walkthrought
 
-
-
 ### Basic Component Version Creation
+
 The first variant just creates a new component version
 in an OCM repository. To avoid the requirement for 
 credentials a filesystem based repository is created, using
@@ -60,5 +59,238 @@ The result is a memory based representation not yet persisted.
 	defer cv.Close()
 ```
 
+Now, we can configure the component version. It exists in memory, only,
+so far, but is already connected to the repository.
+
+The setup of the component version is put into a 
+separate method (`setupVersion`), so it can be reused for the second variant.
+
+First, we configure the component version provider.
+
+```go
+	provider := &compdesc.Provider{
+		Name: "acme.org",
+	}
+	fmt.Printf("  setting provider...\n")
+	err := cv.SetProvider(provider)
+	if err != nil {
+		return errors.Wrapf(err, "cannot set provider")
+	}
+```
+
+The provider is a structure with a name and some labels, we just set
+the name, here.
+
+Now, we fill the component version with content.
+First, we add some resource already located in
+some external registry. We use an OCI image here.
+A resources has some metadata, like an identity
+and a type.
+The identity is just a set of string properties,
+with at least containing the name property.
+Additional identity properties can be added via
+options.
+The type represents the logical meaning of the
+resource, here an `ociImage`.
+
+```go
+	meta, err := elements.ResourceMeta("image", resourcetypes.OCI_IMAGE)
+	if err != nil {
+		// without metadata options, there will be never be an error,
+		// bit to be complete, we just handle the error case, here.
+		return errors.Wrapf(err, "invalid resource meta")
+	}
+```
+
+In this example, we just use the name property.
+
+And most important a resource requires content.
+Content can be already present in some external
+repository. As long, as there is an access type
+for this kind of repository, we can just refer to it.
+Here, we just use an image provided by the
+OCM ecosystem.
+Supported access types can be found under
+.../pkg/contexts/ocm/accessmethods.
+
+```go
+	acc := ociartifact.New("ghcr.io/open-component-model/ocm/ocm.software/toi/installers/helminstaller/helminstaller:0.4.0")
+```
+
+Once we have both, the metadata and the content specification,
+we can now add the resource. 
+The `SetResource` methods will replace an existing resource with the same
+identity, or add the resource, if no such resource exists in the component
+version.
+
+```go
+	err = cv.SetResource(meta, acc)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add access to ocmcli-image)")
+	}
+```
+
+Now, we will add a second resource, some unspecific yaml data.
+Therefore, we use the generic YAML resource type.
+In practice, you should always use a resource type describing
+the real meaning of the content, for example something like
+`kubernetesManifest`, This enables tools working with specific content
+to understand the resource set of a component version.
+
+```go
+	meta, err = elements.ResourceMeta("descriptor", resourcetypes.OCM_YAML)
+	if err != nil {
+		return errors.Wrapf(err, "invalid resource meta")
+	}
+```
+
+Besides referring to external resources, another possibility
+to add content is to directly provide the content blob. The
+used abstraction here is `blobaccess.BlobAccess`.
+Any blob content provided by an implementation of this
+interface can be added as resource.
+There are various access implementations for blobs
+taken from the local host, for example, from the filesystem,
+or from other repositories (for example by mapping
+an access type specification into a blob access).
+The most simple form is to directly provide a byte sequence,
+for example some YAML data.
+A blob always must provide a mime type, describing the
+technical format of the blob's byte sequence. This is different
+from the resource type. A logical resource, like a helm chart can be
+represented in different technical formats, for example a helm chart
+archive or as OCI image archive. While the type described the
+logical content, the meaning of the resource, its mime type
+described the technical blob format used to represent
+the resource as byte sequence.
+
+```go
+		blob := blobaccess.ForString(mime.MIME_YAML, yamldata)
+```
+
+When storing the blob, it is possible to provide some
+optional additional information:
+- a name of the resource described by the blob, which could
+  be used to do a later upload into an external repository
+  (for example the image repository of an OCI image stored
+  as local blob)
+- an additional access type, which provides an alternative
+  global technology specific access to the same content.
+  we don't use it, here.
+
+```go
+		err = cv.SetResourceBlob(meta, blob, "", nil)
+		if err != nil {
+			return errors.Wrapf(err, "cannot add yaml document")
+		}
+```
+
+Resources added by blobs will be stored along with the component
+version metadata in the same repository, no external
+repository is required.
+
+The above blob example describes the basic operations,
+which can be used to compose any kind of resource 
+from any kind of source.
+For selected use cases there are convenience helpers,
+which can be used to compose a resource access object.
+This is basically the same interface returned by `GetResource`
+functions on the component version from the last example.
+Such objects can directly be used to add/modify a resource in a
+component version.
+The above case could be written as follows, also:
+
+```go
+		res := textblob.ResourceAccess(cv.GetContext(), meta, yamldata,
+			textblob.WithimeType(mime.MIME_YAML))
+		err = cv.SetResourceAccess(res)
+		if err != nil {
+			return errors.Wrapf(err, "cannot add yaml document")
+		}
+```
+
+The resource access is an abstraction of external access via access
+methods or direct blob access objects and additionally
+contain all the required resource metadata.
+
+There are even more complex blob sources, for example
+for helm charts stored in the filesystem, or even for images
+generated by docker builds.
+Here, we just compose a multi-platform image built with buildx
+from these sources (components/ocmcli) featuring two flavors.
+(you have to execute `make image.multi` in components/ocmcli
+before executing this example.
+
+```go
+	meta, err = elements.ResourceMeta("ocmcli", resourcetypes.OCI_IMAGE)
+	if err != nil {
+		return errors.Wrapf(err, "invalid resource meta")
+	}
+	res := dockermultiblob.ResourceAccess(cv.GetContext(), meta,
+		dockermultiblob.WithPrinter(common.StdoutPrinter),
+		dockermultiblob.WithHint("ocm.software/ocmci"),
+		dockermultiblob.WithVersion(current_version),
+		dockermultiblob.WithVariants(
+			fmt.Sprintf("ocmcli-image:%s-linux-amd64", current_version),
+			fmt.Sprintf("ocmcli-image:%s-linux-arm64", current_version),
+		),
+	)
+	err = cv.SetResourceAccess(res)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add ocmcli")
+	}
+```
 
 ### Composition Environment
+
+The second variant just creates a new component version
+in a memory based composition environment, no persistence is 
+required. Like all component versions, such component versions
+can be added to any repository, later.
+
+As usual, we start with getting access to an OCM context
+object
+
+```go
+	ctx := ocm.DefaultContext()
+```
+
+Now, we can create a new component version in the composition
+environment. It does not require a repository or component object.
+
+```go
+	cv := composition.NewComponentVersion(ctx, "acme.org/example2", "v0.1.0")
+```
+
+To configure the component version, we can just reuse the coding
+from the example above, the component version interface is just the same.
+We just call the `setupversion` function on the created component version access.
+
+```go
+	err := setupVersion(cv)
+	if err != nil {
+		return errors.Wrapf(err, "version composition")
+	}
+```
+
+The resulting component version can be added to any OCM repository,
+like gthe onw from the previous example.
+Here, we use another feature of the composition environment. It also provides
+complete memory based OCM repositories.
+It has no storage backend and can be used to internally compose
+a set of component versions, which can then be transferred
+to any other repository (see example 4)
+
+```go
+	repo := composition.NewRepository(ctx)
+```
+
+This repository object behaves like any other OCM repository object. We can just
+add the new component version.
+
+```go
+	err = repo.AddComponentVersion(cv)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add version")
+	}
+```

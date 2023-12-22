@@ -28,6 +28,7 @@ import (
 // This can be called on any component version, regardless of
 // its origin.
 func setupVersion(cv ocm.ComponentVersionAccess) error {
+	// --- begin setup provider ---
 	provider := &compdesc.Provider{
 		Name: "acme.org",
 	}
@@ -36,6 +37,7 @@ func setupVersion(cv ocm.ComponentVersionAccess) error {
 	if err != nil {
 		return errors.Wrapf(err, "cannot set provider")
 	}
+	// --- end setup provider ---
 
 	////////////////////////////////////////////////////////////////////////////
 	// Ok, a component version not describing any resources
@@ -51,12 +53,16 @@ func setupVersion(cv ocm.ComponentVersionAccess) error {
 	// with at least containing the name property.
 	// additional identity properties can be added via
 	// options.
+	// The type represents the logical meaning of the
+	// resource, here an `ociImage`.
+	// --- begin setup resource meta ---
 	meta, err := elements.ResourceMeta("image", resourcetypes.OCI_IMAGE)
 	if err != nil {
 		// without metadata options, there will be never be an error,
 		// bit to be complete, we just handle the error case, here.
 		return errors.Wrapf(err, "invalid resource meta")
 	}
+	// --- end setup resource meta ---
 
 	// And most important it requires content.
 	// Content can be already present in some external
@@ -66,17 +72,21 @@ func setupVersion(cv ocm.ComponentVersionAccess) error {
 	// OCM ecosystem.
 	// Supported access types can be found under
 	// .../pkg/contexts/ocm/accessmethods.
+	// --- begin setup image access ---
 	acc := ociartifact.New("ghcr.io/open-component-model/ocm/ocm.software/toi/installers/helminstaller/helminstaller:0.4.0")
+	// --- end setup image access ---
 
 	// Once we have both, the metadata and the content specification,
 	// we can now add the resource.
 	// The SetResource methods will replace an existing resource with the same
 	// identity, or add the resource, if no such resource exists in the component
 	// version.
+	// --- begin setup resource ---
 	err = cv.SetResource(meta, acc)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add access to ocmcli-image)")
 	}
+	// --- end setup resource ---
 
 	////////////////////////////////////////////////////////////////////////////
 	// Now, we will add a second resource, some unspecific yaml data.
@@ -87,10 +97,12 @@ func setupVersion(cv ocm.ComponentVersionAccess) error {
 	// to understand the resource set of a component version.
 
 	fmt.Printf("  setting blob resource 'descriptor'...\n")
+	// --- begin setup second meta ---
 	meta, err = elements.ResourceMeta("descriptor", resourcetypes.OCM_YAML)
 	if err != nil {
 		return errors.Wrapf(err, "invalid resource meta")
 	}
+	// --- end setup second meta ---
 
 	basic := true
 	yamldata := `
@@ -112,7 +124,17 @@ data: some very important data required to understand this component
 		// for example some YAML data.
 		// A blob always must provide a mime type, describing the
 		// technical format of the blob's byte sequence.
+		// This is different
+		// from the resource type. A logical resource, like a helm chart can be
+		// represented
+		// in different technical formats, for example a helm chart archive
+		// or as OCI image archive. While the type described the
+		// logical content, the meaning of the resource, its mime type
+		// described the technical blob format used to represent
+		// the resource as byte sequence.
+		// --- begin string blob access ---
 		blob := blobaccess.ForString(mime.MIME_YAML, yamldata)
+		// --- end string blob access ---
 
 		// when storing the blob, it is possible to provide some
 		// optional additional information:
@@ -123,10 +145,16 @@ data: some very important data required to understand this component
 		// - an additional access type, which provides an alternative
 		//   global technology specific access to the same content.
 		// we don't use it, here.
+		// --- begin setup by blob access ---
 		err = cv.SetResourceBlob(meta, blob, "", nil)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")
 		}
+		// --- end setup by blob access ---
+
+		// Resources added by blobs will be stored along with the component
+		// version metadata in the same repository, no external
+		// repository is required.
 	} else {
 		// The above blob example describes the basic operations,
 		// which can be used to compose any kind of resource
@@ -138,12 +166,18 @@ data: some very important data required to understand this component
 		// Such objects can directly be used to add/modify a resource in a
 		// component version.
 		// The above case could be written as follows, also:
+		// --- begin setup by access ---
 		res := textblob.ResourceAccess(cv.GetContext(), meta, yamldata,
 			textblob.WithimeType(mime.MIME_YAML))
 		err = cv.SetResourceAccess(res)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")
 		}
+		// --- end setup by access ---
+
+		// The resource access is an abstraction of external access via access
+		// methods or direct blob access objects and additionally
+		// contain all the required resource metadata.
 	}
 
 	// There are even more complex blob sources, for example
@@ -154,6 +188,7 @@ data: some very important data required to understand this component
 	// (you have to execute `make image.multi` in components/ocmcli
 	// before executing this example.
 	fmt.Printf("  setting blob resource 'ocmcli'...\n")
+	// --- begin setup by docker ---
 	meta, err = elements.ResourceMeta("ocmcli", resourcetypes.OCI_IMAGE)
 	if err != nil {
 		return errors.Wrapf(err, "invalid resource meta")
@@ -171,6 +206,7 @@ data: some very important data required to understand this component
 	if err != nil {
 		return errors.Wrapf(err, "cannot add ocmcli")
 	}
+	// --- end setup by docker ---
 	return err
 }
 

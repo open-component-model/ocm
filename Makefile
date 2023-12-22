@@ -68,7 +68,7 @@ test:
 
 .PHONY: generate
 generate:
-	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminst/...
+	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminst/... $(REPO_ROOT)/examples/...
 
 .PHONY: generate-deepcopy
 generate-deepcopy: controller-gen
