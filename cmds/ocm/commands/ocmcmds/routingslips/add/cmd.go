@@ -181,7 +181,10 @@ func (a *action) Out() error {
 				links = v.Leaves()
 				break
 			} else {
-				slip := v.Query(l)
+				slip, err := v.Query(l)
+				if err != nil {
+					return errors.ErrInvalid(routingslip.KIND_ROUTING_SLIP, l)
+				}
 				if slip != nil {
 					for _, d := range slip.Leaves() {
 						links = append(links, routingslip.Link{
@@ -197,7 +200,10 @@ func (a *action) Out() error {
 		}
 		n := l[:i]
 		d := l[i+1:]
-		slip := v.Query(n)
+		slip, err := v.Query(n)
+		if err != nil {
+			return errors.ErrInvalid(routingslip.KIND_ROUTING_SLIP, n)
+		}
 		if slip == nil {
 			return fmt.Errorf("link %q: slip %q not found", l, n)
 		}

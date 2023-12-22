@@ -11,7 +11,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
-	"encoding/pem"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 const (
@@ -47,7 +46,7 @@ func NewSigningClient(serverURL string) (*SigningServerSigner, error) {
 	return &signer, nil
 }
 
-func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo string, hashAlgo crypto.Hash, digest string, issuer string, key interface{}) (*signing.Signature, error) {
+func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo string, hashAlgo crypto.Hash, digest string, sctx signing.SigningContext) (*signing.Signature, error) {
 	decodedHash, err := hex.DecodeString(digest)
 	if err != nil {
 		return nil, fmt.Errorf("unable to hex decode hash: %w", err)
@@ -142,32 +141,42 @@ func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo 
 		return nil, fmt.Errorf("request returned with status code %d: %s", res.StatusCode, string(responseBodyBytes))
 	}
 
-	signaturePemBlocks, err := rsa.GetSignaturePEMBlocks(responseBodyBytes)
+	signature, algorithm, certs, err := signutils.GetSignatureFromPem(responseBodyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get signature pem block from response: %w", err)
 	}
-
-	if len(signaturePemBlocks) != 1 {
-		return nil, fmt.Errorf("expected 1 signature pem block, found %d", len(signaturePemBlocks))
-	}
-	signatureBlock := signaturePemBlocks[0]
-
-	signature := signatureBlock.Bytes
 	if len(signature) == 0 {
 		return nil, errors.New("invalid response: signature block doesn't contain signature")
 	}
 
-	algorithm := signatureBlock.Headers[rsa.SignaturePEMBlockAlgorithmHeader]
 	if algorithm == "" {
-		return nil, fmt.Errorf("invalid response: %s header is empty: %s", rsa.SignaturePEMBlockAlgorithmHeader, string(responseBodyBytes))
+		return nil, fmt.Errorf("invalid response: %s header is empty: %s", signutils.SignaturePEMBlockAlgorithmHeader, string(responseBodyBytes))
 	}
 
-	encodedSignature := pem.EncodeToMemory(signatureBlock)
+	encodedSignature := responseBodyBytes
+
+	issuer := sctx.GetIssuer()
+	var iss string
+	if issuer != nil {
+		if len(certs) == 0 {
+			return nil, errors.Newf("certificates missing in signing response")
+		}
+		if err := signutils.MatchDN(certs[0].Subject, *issuer); err != nil {
+			return nil, errors.Wrapf(err, "unexpected issuer in signing response")
+		}
+		iss = issuer.String()
+	}
+	if len(certs) > 0 {
+		err = signutils.VerifyCertificate(certs[0], certs, sctx.GetRootCerts(), issuer)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return &signing.Signature{
 		Value:     string(encodedSignature),
 		MediaType: MediaTypePEM,
 		Algorithm: algorithm,
-		Issuer:    issuer,
+		Issuer:    iss,
 	}, nil
 }

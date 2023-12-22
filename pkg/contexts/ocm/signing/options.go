@@ -5,7 +5,7 @@
 package signing
 
 import (
-	"crypto/x509"
+	"crypto/x509/pkix"
 	"fmt"
 	"strings"
 
@@ -14,8 +14,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -303,32 +305,63 @@ func (o *signame) ApplySigningOption(opts *Options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type issuer struct {
-	name string
+	issuer pkix.Name
+	name   string
+	err    error
 }
 
 // Issuer provides an option requesting to use a dedicated issuer name
 // for a signing operation.
-func Issuer(name string) Option {
-	return &issuer{name}
+func Issuer(is string) Option {
+	dn, err := signutils.ParseDN(is)
+	if err != nil {
+		return &issuer{err: err}
+	}
+	return &issuer{issuer: *dn}
+}
+
+func IssuerFor(name string, is string) Option {
+	dn, err := signutils.ParseDN(is)
+	if err != nil {
+		return &issuer{err: err}
+	}
+	return PKIXIssuerFor(name, *dn)
+}
+
+// PKIXIssuer provides an option requesting to use a dedicated issuer name
+// for a signing operation.
+func PKIXIssuer(is pkix.Name) Option {
+	return &issuer{issuer: is}
+}
+
+func PKIXIssuerFor(name string, is pkix.Name) Option {
+	return &issuer{issuer: is, name: name}
 }
 
 func (o *issuer) ApplySigningOption(opts *Options) {
-	opts.Issuer = o.name
+	if o.name != "" {
+		if opts.Keys == nil {
+			opts.Keys = signing.NewKeyRegistry()
+		}
+		opts.Keys.RegisterIssuer(o.name, generics.Pointer(o.issuer))
+	} else {
+		opts.Issuer = generics.Pointer(o.issuer)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type rootverts struct {
-	pool *x509.CertPool
+type rootcerts struct {
+	pool signutils.GenericCertificatePool
 }
 
 // RootCertificates provides an option requesting to dedicated root certificates
 // for a signing/verification operation using certificates.
-func RootCertificates(pool *x509.CertPool) Option {
-	return &rootverts{pool}
+func RootCertificates(pool signutils.GenericCertificatePool) Option {
+	return &rootcerts{pool}
 }
 
-func (o *rootverts) ApplySigningOption(opts *Options) {
+func (o *rootcerts) ApplySigningOption(opts *Options) {
 	opts.RootCerts = o.pool
 }
 
@@ -380,6 +413,32 @@ func (o *pubkey) ApplySigningOption(opts *Options) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type tsaOpt struct {
+	url string
+	use *bool
+}
+
+// UseTSA enables the usage of a timestamp server authority.
+func UseTSA(flag ...bool) Option {
+	return &tsaOpt{use: utils.BoolP(utils.GetOptionFlag(flag...))}
+}
+
+// TSAUrl selects the TSA server URL to use, if TSA mode is enabled.
+func TSAUrl(url string) Option {
+	return &tsaOpt{url: url}
+}
+
+func (o *tsaOpt) ApplySigningOption(opts *Options) {
+	if o.url != "" {
+		opts.TSAUrl = o.url
+	}
+	if o.use != nil {
+		opts.UseTSA = *o.use
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type Options struct {
 	Printer           common.Printer
 	Update            bool
@@ -388,9 +447,9 @@ type Options struct {
 	Verify            bool
 	SignAlgo          string
 	Signer            signing.Signer
-	Issuer            string
+	Issuer            *pkix.Name
 	VerifySignature   bool
-	RootCerts         *x509.CertPool
+	RootCerts         signutils.GenericCertificatePool
 	HashAlgo          string
 	Hasher            signing.Hasher
 	Keys              signing.KeyRegistry
@@ -400,6 +459,8 @@ type Options struct {
 	SignatureNames    []string
 	NormalizationAlgo string
 	Keyless           bool
+	TSAUrl            string
+	UseTSA            bool
 
 	effectiveRegistry signing.Registry
 }
@@ -420,6 +481,9 @@ func (opts *Options) Eval(list ...Option) *Options {
 func (o *Options) ApplySigningOption(opts *Options) {
 	if o.Printer != nil {
 		opts.Printer = o.Printer
+	}
+	if o.Keys != nil {
+		opts.Keys = o.Keys
 	}
 	if o.Signer != nil {
 		opts.Signer = o.Signer
@@ -450,7 +514,7 @@ func (o *Options) ApplySigningOption(opts *Options) {
 			opts.SkipAccessTypes[k] = v
 		}
 	}
-	if o.Issuer != "" {
+	if o.Issuer != nil {
 		opts.Issuer = o.Issuer
 	}
 	opts.Recursively = o.Recursively
@@ -459,6 +523,12 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	opts.Keyless = o.Keyless
 	if o.NormalizationAlgo != "" {
 		opts.NormalizationAlgo = o.NormalizationAlgo
+	}
+	if o.TSAUrl != "" {
+		opts.TSAUrl = o.TSAUrl
+	}
+	if o.UseTSA {
+		opts.UseTSA = o.UseTSA
 	}
 }
 
@@ -471,6 +541,7 @@ func (o *Options) Complete(ctx interface{}) error {
 	if ctx == nil {
 		ctx = ocm.DefaultContext()
 	}
+
 	switch t := ctx.(type) {
 	case ocm.ContextProvider:
 		reg = signingattr.Get(t.OCMContext())
@@ -487,8 +558,21 @@ func (o *Options) Complete(ctx interface{}) error {
 	}
 
 	o.effectiveRegistry = o.Registry
-	if o.Keys != nil && o.Keys.HasKeys() {
+	if o.Keys != nil && (o.Keys.HasKeys() || o.Keys.HasIssuers() || o.Keys.HasRootCertificates()) {
 		o.effectiveRegistry = signing.RegistryWithPreferredKeys(o.Registry, o.Keys)
+	}
+
+	if o.RootCerts == nil && o.effectiveRegistry.HasRootCertificates() {
+		o.RootCerts = o.effectiveRegistry.GetRootCertPool(true)
+	}
+
+	if o.RootCerts != nil {
+		// check root certificates
+		pool, err := signutils.GetCertPool(o.RootCerts, false)
+		if err != nil {
+			return err
+		}
+		o.RootCerts = pool
 	}
 
 	if o.SkipAccessTypes == nil {
@@ -520,18 +604,20 @@ func (o *Options) Complete(ctx interface{}) error {
 		if o.Signer != nil && !o.VerifySignature {
 			if pub := o.PublicKey(o.SignatureName()); pub != nil {
 				o.VerifySignature = true
-				if err := o.checkCert(pub, o.SignatureName()); err != nil {
+				if err := o.checkCert(pub, o.IssuerFor(o.SignatureName())); err != nil {
 					return fmt.Errorf("public key not valid: %w", err)
 				}
 			}
 		} else if o.VerifySignature {
 			for _, n := range o.SignatureNames {
 				pub := o.PublicKey(n)
-				if pub == nil {
-					return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
-				}
-				if err := o.checkCert(pub, n); err != nil {
-					return fmt.Errorf("public key not valid: %w", err)
+				// don't check for public key here, anymore,
+				// because the key might be provided via certificate together with
+				// the signature. An early failure is therefore not possible anymore.
+				if pub != nil {
+					if err := o.checkCert(pub, o.IssuerFor(n)); err != nil {
+						return fmt.Errorf("public key not valid: %w", err)
+					}
 				}
 			}
 		}
@@ -552,14 +638,17 @@ func (o *Options) Complete(ctx interface{}) error {
 	return nil
 }
 
-func (o *Options) checkCert(data interface{}, name string) error {
-	cert, err := signing.GetCertificate(data)
+func (o *Options) checkCert(data interface{}, name *pkix.Name) error {
+	cert, pool, err := signutils.GetCertificate(data, false)
 	if err != nil {
 		return nil
 	}
-	err = signing.VerifyCert(nil, o.RootCerts, "", cert)
+	err = signing.VerifyCertDN(pool, o.RootCerts, name, cert)
 	if err != nil {
-		return errors.Wrapf(err, "public key %q", name)
+		if name != nil {
+			return errors.Wrapf(err, "issuer [%s]", name)
+		}
+		return err
 	}
 	return nil
 }
@@ -587,6 +676,26 @@ func (o *Options) SignatureName() string {
 	return ""
 }
 
+func (o *Options) GetIssuer() *pkix.Name {
+	if o.Issuer != nil {
+		return o.Issuer
+	}
+	if o.effectiveRegistry != nil {
+		return o.effectiveRegistry.GetIssuer(o.SignatureName())
+	}
+	return nil
+}
+
+func (o *Options) IssuerFor(name string) *pkix.Name {
+	if o.Issuer != nil && name == o.SignatureName() {
+		return o.Issuer
+	}
+	if o.effectiveRegistry != nil {
+		return o.effectiveRegistry.GetIssuer(name)
+	}
+	return nil
+}
+
 func (o *Options) SignatureConfigured(name string) bool {
 	for _, n := range o.SignatureNames {
 		if n == name {
@@ -596,12 +705,22 @@ func (o *Options) SignatureConfigured(name string) bool {
 	return false
 }
 
-func (o *Options) PublicKey(sig string) interface{} {
+func (o *Options) PublicKey(sig string) signutils.GenericPublicKey {
 	return o.effectiveRegistry.GetPublicKey(sig)
 }
 
-func (o *Options) PrivateKey() (interface{}, error) {
+func (o *Options) PrivateKey() (signutils.GenericPrivateKey, error) {
 	return signing.ResolvePrivateKey(o.effectiveRegistry, o.SignatureName())
+}
+
+func (o *Options) EffectiveTSAUrl() string {
+	if o.UseTSA {
+		if o.TSAUrl != "" {
+			return o.TSAUrl
+		}
+		return o.effectiveRegistry.TSAUrl()
+	}
+	return ""
 }
 
 func (o *Options) Dup() *Options {

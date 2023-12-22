@@ -5,6 +5,8 @@
 package signing_test
 
 import (
+	"crypto/x509/pkix"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -18,14 +20,16 @@ var registry = signing.DefaultRegistry()
 
 const NAME = "testsignature"
 
-var _ = Describe("normalization", func() {
+var ISSUER = &pkix.Name{CommonName: "mandelsoft"}
+
+var _ = Describe("signing", func() {
 	var defaultContext credentials.Context
 
 	BeforeEach(func() {
 		defaultContext = credentials.New()
 	})
 
-	It("Normalizes struct without excludes", func() {
+	It("uses rsa signer", func() {
 		hasher := registry.GetHasher(sha256.Algorithm)
 		hash, _ := signing.Hash(hasher.Create(), []byte("test"))
 
@@ -35,14 +39,21 @@ var _ = Describe("normalization", func() {
 		registry.RegisterPublicKey(NAME, pub)
 		registry.RegisterPrivateKey(NAME, priv)
 
-		sig, err := registry.GetSigner(rsa.Algorithm).Sign(defaultContext, hash, hasher.Crypto(), "mandelsoft", registry.GetPrivateKey(NAME))
+		sctx := &signing.DefaultSigningContext{
+			Hash:       hasher.Crypto(),
+			PrivateKey: registry.GetPrivateKey(NAME),
+			PublicKey:  pub,
+			RootCerts:  nil,
+			Issuer:     ISSUER,
+		}
+		sig, err := registry.GetSigner(rsa.Algorithm).Sign(defaultContext, hash, sctx)
 
 		Expect(err).To(Succeed())
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
-		Expect(sig.Issuer).To(Equal("mandelsoft"))
 
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, hasher.Crypto(), sig, registry.GetPublicKey(NAME))).To(Succeed())
+		sctx.PublicKey = registry.GetPublicKey(NAME)
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, sig, sctx)).To(Succeed())
 		hash = "A" + hash[1:]
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, hasher.Crypto(), sig, registry.GetPublicKey(NAME))).To(HaveOccurred())
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, sig, sctx)).To(HaveOccurred())
 	})
 })
