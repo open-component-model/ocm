@@ -1,8 +1,8 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package hash_test
+package sign_test
 
 import (
 	"bytes"
@@ -19,7 +19,7 @@ var _ = Describe("Test Environment", func() {
 	var env *TestEnv
 
 	BeforeEach(func() {
-		env = NewTestEnv(TestData("../../../../../pkg/contexts/ocm/signing/testdata"))
+		env = NewTestEnv(TestData("../../../../../../pkg/contexts/ocm/signing/testdata"))
 	})
 
 	AfterEach(func() {

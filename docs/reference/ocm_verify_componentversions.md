@@ -15,9 +15,10 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Options
 
 ```
-      --ca-cert stringArray       additional root certificates
+      --ca-cert stringArray       additional root certificate authorities
   -c, --constraints constraints   version constraint
   -h, --help                      help for componentversions
+  -I, --issuer stringArray        issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>
       --keyless                   use keyless signing
       --latest                    restrict component versions to latest
   -L, --local                     verification based on information found in component versions, only

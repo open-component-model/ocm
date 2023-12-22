@@ -16,11 +16,11 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ```
   -S, --algorithm string          signature handler (default "RSASSA-PKCS1-V1_5")
-      --ca-cert stringArray       additional root certificates
+      --ca-cert stringArray       additional root certificate authorities
   -c, --constraints constraints   version constraint
   -H, --hash string               hash algorithm (default "SHA-256")
   -h, --help                      help for componentversions
-  -I, --issuer string             issuer name
+  -I, --issuer stringArray        issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>
       --keyless                   use keyless signing
       --latest                    restrict component versions to latest
       --lookup stringArray        repository name or spec for closure lookup fallback
@@ -30,6 +30,8 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -R, --recursive                 recursively sign component versions
       --repo string               repository name or spec
   -s, --signature stringArray     signature name
+      --tsa                       use timestamp authority (default server: http://timestamp.digicert.com)
+      --tsa-url string            TSA server URL
       --update                    update digest in component versions (default true)
   -V, --verify                    verify existing digests (default true)
 ```

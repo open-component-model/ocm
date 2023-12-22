@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
+	"github.com/open-component-model/ocm/pkg/errors"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -151,7 +152,11 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 			})
 		} else {
 			for _, n := range utils2.StringMapKeys(slips) {
-				h.addEntries(&result, c, slips.Get(n))
+				s, err := slips.Get(n)
+				if err != nil {
+					return nil, errors.ErrInvalid(routingslip.KIND_ROUTING_SLIP, n)
+				}
+				h.addEntries(&result, c, s)
 			}
 		}
 	}
