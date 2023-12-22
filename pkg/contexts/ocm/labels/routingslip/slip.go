@@ -5,6 +5,7 @@
 package routingslip
 
 import (
+	"crypto/x509/pkix"
 	"fmt"
 
 	"github.com/opencontainers/go-digest"
@@ -18,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 const (
@@ -41,7 +43,7 @@ func (s RoutingSlipIndex) Leaves() []digest.Digest {
 	return found.AsArray()
 }
 
-func (s RoutingSlipIndex) Verify(ctx Context, name string, sig bool, acc SlipAccess) error {
+func (s RoutingSlipIndex) Verify(ctx Context, name string, issuer *pkix.Name, sig bool, acc SlipAccess) error {
 	if len(s) == 0 {
 		return nil
 	}
@@ -66,7 +68,12 @@ func (s RoutingSlipIndex) Verify(ctx Context, name string, sig bool, acc SlipAcc
 			if handler == nil {
 				return errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, last.Signature.Algorithm)
 			}
-			err := handler.Verify(last.Digest.Encoded(), sha256.Handler{}.Crypto(), last.Signature.ConvertToSigning(), key)
+			sctx := &signing.DefaultSigningContext{
+				Hash:      sha256.Handler{}.Crypto(),
+				PublicKey: key,
+				Issuer:    issuer,
+			}
+			err := handler.Verify(last.Digest.Encoded(), last.Signature.ConvertToSigning(), sctx)
 			if err != nil {
 				return errors.Wrapf(err, "cannot verify entry %s", d)
 			}
@@ -104,11 +111,14 @@ func (s RoutingSlipIndex) verify(ctx Context, name string, id digest.Digest, acc
 					return err
 				}
 			} else {
-				slip := acc.Get(l.Name)
+				slip, err := acc.Get(l.Name)
+				if err != nil {
+					return errors.ErrInvalidWrap(err, KIND_ROUTING_SLIP, l.Name)
+				}
 				if slip == nil {
 					return errors.ErrNotFound(KIND_ROUTING_SLIP, l.Name)
 				}
-				err := slip.Index().verify(ctx, l.Name, l.Digest, acc, found)
+				err = slip.Index().verify(ctx, l.Name, l.Digest, acc, found)
 				if err != nil {
 					return err
 				}
@@ -128,18 +138,31 @@ func (s RoutingSlipIndex) verify(ctx Context, name string, id digest.Digest, acc
 
 type RoutingSlip struct {
 	name    string
+	issuer  pkix.Name
 	entries []HistoryEntry
 
 	index  RoutingSlipIndex
 	access SlipAccess
 }
 
-func NewRoutingSlip(name string, acc SlipAccess, entries ...HistoryEntry) *RoutingSlip {
+func NewRoutingSlip(name string, acc LabelValue) (*RoutingSlip, error) {
+	var entries HistoryEntries
+	dn, err := signutils.ParseDN(name)
+	if err != nil {
+		return nil, err
+	}
+	name = signutils.NormalizeDN(*dn)
+	if acc != nil {
+		entries = acc[name]
+	}
+	if err != nil {
+		return nil, err
+	}
 	index := RoutingSlipIndex{}
 	for i := range entries {
 		index[entries[i].Digest] = &entries[i]
 	}
-	return &RoutingSlip{name: name, access: acc, entries: entries, index: index}
+	return &RoutingSlip{name: name, issuer: *dn, access: acc, entries: entries, index: index}, nil
 }
 
 func (s *RoutingSlip) GetName() string {
@@ -174,7 +197,7 @@ func (s *RoutingSlip) Verify(ctx Context, name string, sig bool) error {
 	if len(s.entries) == 0 {
 		return nil
 	}
-	return s.index.Verify(ctx, name, sig, s.access)
+	return s.index.Verify(ctx, name, &s.issuer, sig, s.access)
 }
 
 func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links []Link, parent ...digest.Digest) (*HistoryEntry, error) {
@@ -183,6 +206,13 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 	if handler == nil {
 		return nil, errors.ErrUnknown(compdesc.KIND_SIGN_ALGORITHM, algo)
 	}
+
+	dn, err := signutils.ParseDN(name)
+	if err != nil {
+		return nil, err
+	}
+	name = signutils.NormalizeDN(*dn)
+
 	key, err := signing.ResolvePrivateKey(registry, name)
 	if err != nil {
 		return nil, err
@@ -190,6 +220,7 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 	if key == nil {
 		return nil, errors.ErrUnknown(compdesc.KIND_PRIVATE_KEY, name)
 	}
+	pub := registry.GetPublicKey(name)
 
 	err = s.Verify(ctx, name, true)
 	if err != nil {
@@ -229,8 +260,8 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 		Payload:   gen,
 		Timestamp: metav1.NewTimestamp(),
 		Digest:    "",
-		Signature: metav1.SignatureSpec{},
 	}
+
 	if base != nil {
 		entry.Parent = &base.Digest
 		if entry.Parent.String() == "" {
@@ -239,7 +270,10 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 	}
 
 	for _, l := range links {
-		slip := s.access.Get(l.Name)
+		slip, err := s.access.Get(l.Name)
+		if err != nil {
+			return nil, errors.ErrInvalidWrap(err, KIND_ROUTING_SLIP, l.Name)
+		}
 		if slip == nil {
 			return nil, errors.ErrNotFound(KIND_ROUTING_SLIP, l.Name)
 		}
@@ -258,11 +292,22 @@ func (s *RoutingSlip) Add(ctx Context, name string, algo string, e Entry, links 
 	}
 	entry.Digest = d
 
-	sig, err := handler.Sign(ctx.CredentialsContext(), d.Encoded(), sha256.Handler{}.Crypto(), name, key)
+	sctx := &signing.DefaultSigningContext{
+		Hash:       sha256.Handler{}.Crypto(),
+		PrivateKey: key,
+		PublicKey:  pub,
+		RootCerts:  nil,
+		Issuer:     dn,
+	}
+	sig, err := handler.Sign(ctx.CredentialsContext(), d.Encoded(), sctx)
 	if err != nil {
 		return nil, err
 	}
-	entry.Signature = *metav1.SignatureSpecFor(sig)
+	if base != nil {
+		// keep signatures for leaves, only.
+		base.Signature = nil
+	}
+	entry.Signature = metav1.SignatureSpecFor(sig)
 	s.entries = append(s.entries, *entry)
 	s.index[entry.Digest] = entry
 	return entry, nil
@@ -275,11 +320,7 @@ func GetSlip(cv cpi.ComponentVersionAccess, name string) (*RoutingSlip, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RoutingSlip{
-		name:    name,
-		entries: label[name],
-		access:  label,
-	}, nil
+	return NewRoutingSlip(name, label)
 }
 
 func SetSlip(cv cpi.ComponentVersionAccess, slip *RoutingSlip) error {

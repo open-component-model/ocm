@@ -10,7 +10,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/simplelistmerge"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/maplistmerge"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/simplemapmerge"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -25,8 +25,8 @@ var spec = utils.Must(hpi.NewSpecification(
 	simplemapmerge.NewConfig(
 		"",
 		utils.Must(hpi.NewSpecification(
-			simplelistmerge.ALGORITHM,
-			simplelistmerge.NewConfig(),
+			maplistmerge.ALGORITHM,
+			maplistmerge.NewConfig("digest", maplistmerge.MODE_INBOUND),
 		)),
 	)),
 )
@@ -39,14 +39,14 @@ func (l LabelValue) Has(name string) bool {
 	return l[name] != nil
 }
 
-func (l LabelValue) Get(name string) *RoutingSlip {
-	return NewRoutingSlip(name, l, l[name]...)
+func (l LabelValue) Get(name string) (*RoutingSlip, error) {
+	return NewRoutingSlip(name, l)
 }
 
-func (l LabelValue) Query(name string) *RoutingSlip {
+func (l LabelValue) Query(name string) (*RoutingSlip, error) {
 	a := l[name]
 	if a == nil {
-		return nil
+		return nil, nil
 	}
 	return l.Get(name)
 }
@@ -55,11 +55,14 @@ func (l LabelValue) Leaves() []Link {
 	var links []Link
 
 	for k := range l {
-		for _, d := range l.Get(k).Leaves() {
-			links = append(links, Link{
-				Name:   k,
-				Digest: d,
-			})
+		s, err := l.Get(k)
+		if err == nil {
+			for _, d := range s.Leaves() {
+				links = append(links, Link{
+					Name:   k,
+					Digest: d,
+				})
+			}
 		}
 	}
 	sort.Slice(links, func(i, j int) bool { return links[i].Compare(links[j]) < 0 })
@@ -79,7 +82,10 @@ func AddEntry(cv cpi.ComponentVersionAccess, name string, algo string, e Entry, 
 	if label == nil {
 		label = LabelValue{}
 	}
-	slip := label.Get(name)
+	slip, err := label.Get(name)
+	if err != nil {
+		return nil, err
+	}
 	entry, err := slip.Add(cv.GetContext(), name, algo, e, links, parent...)
 	if err != nil {
 		return nil, err

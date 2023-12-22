@@ -16,33 +16,47 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
-const NAME = "test"
+const NAME = "mandelsoft"
 
 var _ = Describe("options", func() {
+	defer GinkgoRecover()
+
 	capriv, capub, err := rsa.Handler{}.CreateKeyPair()
 	Expect(err).To(Succeed())
 
-	subject := pkix.Name{
-		CommonName: "ca-authority",
+	spec := &signutils.Specification{
+		RootCAs:      nil,
+		IsCA:         true,
+		PublicKey:    capub,
+		CAPrivateKey: capriv,
+		CAChain:      nil,
+		Subject: pkix.Name{
+			CommonName: "ca-authority",
+		},
+		Usages:    signutils.Usages{x509.ExtKeyUsageCodeSigning},
+		Validity:  10 * time.Hour,
+		NotBefore: nil,
 	}
-	caData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, capub, nil, capriv, true)
-	Expect(err).To(Succeed())
-	ca, err := x509.ParseCertificate(caData)
+
+	ca, _, err := signutils.CreateCertificate(spec)
 	Expect(err).To(Succeed())
 
 	priv, pub, err := rsa.Handler{}.CreateKeyPair()
 	Expect(err).To(Succeed())
 
-	subject = pkix.Name{
-		CommonName:    "mandelsoft",
+	spec.Subject = pkix.Name{
+		CommonName:    NAME,
 		StreetAddress: []string{"some street 21"},
 	}
-	certData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, pub, ca, capriv, false)
-	Expect(err).To(Succeed())
+	spec.RootCAs = ca
+	spec.CAChain = ca
+	spec.PublicKey = pub
+	spec.IsCA = false
 
-	cert, err := x509.ParseCertificate(certData)
+	cert, _, err := signutils.CreateCertificate(spec)
 	Expect(err).To(Succeed())
 
 	pool := x509.NewCertPool()

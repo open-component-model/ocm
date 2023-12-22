@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package hash_test
+package signutils_test
 
 import (
 	"testing"
@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Sign Hash")
+	RunSpecs(t, "Signing utils")
 }

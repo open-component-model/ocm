@@ -88,6 +88,9 @@ func (o *SignatureCommand) Run() (rerr error) {
 	lookup := lookupoption.From(o)
 	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repo, comphdlr.OptionsFor(o))
 	sopts := signing.NewOptions(sign, signing.Resolver(repo, lookup.Resolver))
+	if !o.spec.sign {
+		sopts.VerifySignature = true
+	}
 	err = sopts.Complete(o.Context.OCMContext())
 	if err != nil {
 		return err
