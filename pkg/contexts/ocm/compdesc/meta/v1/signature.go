@@ -166,6 +166,10 @@ func (s *SignatureSpec) ConvertToSigning() *signing.Signature {
 	}
 }
 
+// TimestampSpec provides a timestamp and the
+// appropriate pem encoded TSA value.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
 type TimestampSpec struct {
 	// Value contains the PEM encoded TSA value.
 	Value string     `json:"value"`
