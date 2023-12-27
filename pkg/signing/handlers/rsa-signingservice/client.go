@@ -92,24 +92,24 @@ func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo 
 			return nil, fmt.Errorf("unable to get credentials from credential source: %w", err)
 		}
 
-		if !cred.ExistsProperty(CLIENT_CERT) {
-			return nil, fmt.Errorf("credential for consumer %+v is missing property %q", consumerId, CLIENT_CERT)
+		if !cred.ExistsProperty(ATTR_CLIENT_CERT) {
+			return nil, fmt.Errorf("credential for consumer %+v is missing property %q", consumerId, ATTR_CLIENT_CERT)
 		}
-		if !cred.ExistsProperty(PRIVATE_KEY) {
-			return nil, fmt.Errorf("credential for consumer %+v is missing property %q", consumerId, PRIVATE_KEY)
+		if !cred.ExistsProperty(ATTR_PRIVATE_KEY) {
+			return nil, fmt.Errorf("credential for consumer %+v is missing property %q", consumerId, ATTR_PRIVATE_KEY)
 		}
 
-		rawClientCert := []byte(cred.GetProperty(CLIENT_CERT))
-		rawPrivateKey := []byte(cred.GetProperty(PRIVATE_KEY))
+		rawClientCert := []byte(cred.GetProperty(ATTR_CLIENT_CERT))
+		rawPrivateKey := []byte(cred.GetProperty(ATTR_PRIVATE_KEY))
 		clientCert, err := tls.X509KeyPair(rawClientCert, rawPrivateKey)
 		if err != nil {
 			return nil, fmt.Errorf("unable to build client certificate: %w", err)
 		}
 		clientCerts = append(clientCerts, clientCert)
 
-		if cred.ExistsProperty(CA_CERTS) {
+		if cred.ExistsProperty(ATTR_CA_CERTS) {
 			caCertPool = x509.NewCertPool()
-			rawCaCerts := []byte(cred.GetProperty(CA_CERTS))
+			rawCaCerts := []byte(cred.GetProperty(ATTR_CA_CERTS))
 			if ok := caCertPool.AppendCertsFromPEM(rawCaCerts); !ok {
 				return nil, fmt.Errorf("unable to append ca certificates to cert pool")
 			}
