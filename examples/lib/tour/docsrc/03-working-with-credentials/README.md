@@ -25,7 +25,7 @@ password:
 
 Set your favorite OCI registry and don't forget to add the repository prefix for your OCM repository hosted in this registry.
 
-## Walkthrought
+## Walkthrough
 
 ### Writing to a repository with directly specified credentials.
 

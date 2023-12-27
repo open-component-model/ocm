@@ -20,19 +20,28 @@ import (
 
 func BasicConfigurationHandling(cfg *helper.Config) error {
 	// configuration is handled by the configuration context.
+	// --- begin default context ---
 	ctx := config.DefaultContext()
+	// --- end default context ---
 
 	// the configuration context handles configuration objects.
 	// a configuration object is any object implementing
-	// the config.Config interface.
+	// the config.Config interface. The task of a config object
+	// is to apply configuration to some target object.
 
 	// one such object is the configuration object for
 	// credentials.
 
+	// --- begin cred config ---
 	creds := credcfg.New()
+	// --- end cred config ---
 
-	// here we can configure credential settings:
-	// credential repositories and consumer is mappings.
+	// here, we can configure credential settings:
+	// credential repositories and consumer id mappings.
+	// We do this by setting the credentials provided
+	// by our config file for the consumer id used
+	// by our configured OCI registry.
+	// --- begin configure creds ---
 	id, err := oci.GetConsumerIdForRef(cfg.Repository)
 	if err != nil {
 		return errors.Wrapf(err, "invalid consumer")
@@ -41,21 +50,25 @@ func BasicConfigurationHandling(cfg *helper.Config) error {
 		id,
 		directcreds.NewRepositorySpec(cfg.GetCredentials().Properties()),
 	)
+	// --- end configure creds ---
 
-	// credential objects are typically serializable and deserializable.
+	// configuration objects are typically serializable and deserializable.
 
+	// --- begin marshal ---
 	spec, err := json.MarshalIndent(creds, "  ", "  ")
 	if err != nil {
 		return errors.Wrapf(err, "marshal credential config")
 	}
 
 	fmt.Printf("this a a credential configuration object:\n%s\n", string(spec))
+	// --- end marshal ---
 
-	// like all the other maifest based description this format always includes
+	// like all the other manifest based descriptions this format always includes
 	// a type field, which can be used to deserialize a specification into
 	// the appropriate object.
-	// This can ebe done by the config context. It accepts YAML or JSON.
+	// This can be done by the config context. It accepts YAML or JSON.
 
+	// --- begin unmarshal ---
 	o, err := ctx.GetConfigForData(spec, nil)
 	if err != nil {
 		return errors.Wrapf(err, "deserialize config")
@@ -65,13 +78,16 @@ func BasicConfigurationHandling(cfg *helper.Config) error {
 		fmt.Printf("diff:\n%v\n", diff)
 		return fmt.Errorf("invalid des/erialization")
 	}
+	// --- end unmarshal ---
 
 	// regardless what variant is used (direct object or descriptor)
 	// the config object can be added to a config context.
+	// --- begin apply config ---
 	err = ctx.ApplyConfig(creds, "explicit cred setting")
 	if err != nil {
 		return errors.Wrapf(err, "cannot apply config")
 	}
+	// --- end apply config ---
 
 	// Every config object implements the
 	// ApplyTo(ctx config.Context, target interface{}) error method.
@@ -85,13 +101,14 @@ func BasicConfigurationHandling(cfg *helper.Config) error {
 	// an object, which wants to be configured calls the config
 	// context to apply pending configs.
 	// The config context manages a queue of config objects
-	// and applys them to an object to be configured.
+	// and applies them to an object to be configured.
 
-	// If ask he credential context now for credentials,
+	// If the credential context is asked now for credentials,
 	// it asks the config context for pending config objects
-	// and apply them.
-	// Theregore, we now should the  configured creentials, here.
+	// and applies them.
+	// Therefore, we now should get the configured credentials, here.
 
+	// --- begin get credentials ---
 	credctx := credentials.DefaultContext()
 
 	found, err := credentials.CredentialsForConsumer(credctx, id)
@@ -112,5 +129,6 @@ func BasicConfigurationHandling(cfg *helper.Config) error {
 	if found.GetProperty(credentials.ATTR_PASSWORD) != cfg.Password {
 		return fmt.Errorf("password mismatch")
 	}
+	// --- end get credentials ---
 	return nil
 }

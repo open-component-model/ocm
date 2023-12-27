@@ -1,3 +1,4 @@
+{{config}}
 # Working with Configurations
 
 This tour illustrates the basic configuration management
@@ -33,7 +34,7 @@ Similar to the other context areas, Configuration is handled by the configuratio
 Therefore, for the example, we just get the default configuration context.
 
 ```go
-	ctx := config.DefaultContext()
+{{include}{../../04-working-with-config/01-basic-config-management.go}{default context}}
 ```
 
 The configuration context handles configuration objects.
@@ -45,7 +46,7 @@ One such object is the configuration object for
 credentials provided by the credentials context.
 
 ```go
-	creds := credcfg.New()
+{{include}{../../04-working-with-config/01-basic-config-management.go}{cred config}}
 ```
 
 Here, we can configure credential settings:
@@ -55,25 +56,13 @@ by our config file for the consumer id used
 by our configured OCI registry.
 
 ```go
-	id, err := oci.GetConsumerIdForRef(cfg.Repository)
-	if err != nil {
-		return errors.Wrapf(err, "invalid consumer")
-	}
-	creds.AddConsumer(
-		id,
-		directcreds.NewRepositorySpec(cfg.GetCredentials().Properties()),
-	)
+{{include}{../../04-working-with-config/01-basic-config-management.go}{configure creds}}
 ```
 
 (Credential) Configuration objects are typically serializable and deserializable.
 
 ```go
-	spec, err := json.MarshalIndent(creds, "  ", "  ")
-	if err != nil {
-		return errors.Wrapf(err, "marshal credential config")
-	}
-
-	fmt.Printf("this a a credential configuration object:\n%s\n", string(spec))
+{{include}{../../04-working-with-config/01-basic-config-management.go}{marshal}}
 ```
 
 Like all the other manifest based descriptions this format always includes
@@ -82,25 +71,14 @@ the appropriate object.
 This can be done by the config context. It accepts YAML or JSON.
 
 ```go
-	o, err := ctx.GetConfigForData(spec, nil)
-	if err != nil {
-		return errors.Wrapf(err, "deserialize config")
-	}
-
-	if diff := deep.Equal(o, creds); len(diff) != 0 {
-		fmt.Printf("diff:\n%v\n", diff)
-		return fmt.Errorf("invalid des/erialization")
-	}
+{{include}{../../04-working-with-config/01-basic-config-management.go}{unmarshal}}
 ```
 
 Regardless what variant is used (direct specification object or descriptor)
 the config object can be added to a config context.
 
 ```go
-	err = ctx.ApplyConfig(creds, "explicit cred setting")
-	if err != nil {
-		return errors.Wrapf(err, "cannot apply config")
-	}
+{{include}{../../04-working-with-config/01-basic-config-management.go}{apply config}}
 ```
 
 Every config object implements the
@@ -115,16 +93,7 @@ Here, the code snippet from the apply method of the credential
 config object ([.../pkg/contexts/credentials/config/type.go](../../../../../pkg/contexts/credentials/config/type.go)):
 
 ```go
-
-func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
-	list := errors.ErrListf("applying config")
-	t, ok := target.(cpi.Context)
-	if !ok {
-		return cfgcpi.ErrNoContext(ConfigType)
-	}
-	for _, e := range a.Consumers {
-		t.SetCredentialsForConsumer(e.Identity, CredentialsChain(e.Credentials...))
-	}
+{{include}{../../../../../pkg/contexts/credentials/config/type.go}{apply}}
         ...
 ```
 
@@ -141,24 +110,5 @@ and applies them.
 Therefore, we now should get the configured credentials, here.
 
 ```go
-	credctx := credentials.DefaultContext()
-
-	found, err := credentials.CredentialsForConsumer(credctx, id)
-	if err != nil {
-		return errors.Wrapf(err, "cannot get credentials")
-	}
-	// an error is only provided if something went wrong while determining
-	// the credentials. Delivering NO credentials is a valid result.
-	if found == nil {
-		return fmt.Errorf("no credentials found")
-	}
-	fmt.Printf("consumer id: %s\n", id)
-	fmt.Printf("credentials: %s\n", obfuscate(found))
-
-	if found.GetProperty(credentials.ATTR_USERNAME) != cfg.Username {
-		return fmt.Errorf("password mismatch")
-	}
-	if found.GetProperty(credentials.ATTR_PASSWORD) != cfg.Password {
-		return fmt.Errorf("password mismatch")
-	}
+{{include}{../../04-working-with-config/01-basic-config-management.go}{get credentials}}
 ```

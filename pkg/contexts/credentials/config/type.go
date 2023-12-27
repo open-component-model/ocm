@@ -126,6 +126,8 @@ func (a *Config) AddAlias(name string, repo cpi.RepositorySpec, creds ...cpi.Cre
 	return nil
 }
 
+// --- begin apply ---
+
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	list := errors.ErrListf("applying config")
 	t, ok := target.(cpi.Context)
@@ -135,6 +137,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	for _, e := range a.Consumers {
 		t.SetCredentialsForConsumer(e.Identity, CredentialsChain(e.Credentials...))
 	}
+	// --- end apply ---
 	sub := errors.ErrListf("applying aliases")
 	for n, e := range a.Aliases {
 		sub.Add(t.SetAlias(n, &e.Repository, CredentialsChain(e.Credentials...)))

@@ -12,7 +12,7 @@ It covers two basic scenarios:
 
 You can just call the main program with the scenario as argument. Configuration is not required.
 
-## Walkthrought
+## Walkthrough
 
 ### Basic Component Version Creation
 
