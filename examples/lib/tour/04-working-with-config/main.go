@@ -20,7 +20,10 @@ var current_version string
 func init() {
 	data, err := os.ReadFile("VERSION")
 	if err != nil {
-		panic("VERSION not found")
+		data, err = os.ReadFile("../../../../../VERSION")
+		if err != nil {
+			panic("VERSION not found")
+		}
 	}
 	current_version = strings.TrimSpace(string(data))
 }

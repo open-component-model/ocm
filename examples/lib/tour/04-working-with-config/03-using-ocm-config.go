@@ -27,37 +27,47 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	// library function, which can be used to configure an OCM
 	// context and all related other contexts with a single call
 	// based on a central configuration file (~/.ocmconfig)
+
+	// --- begin central config ---
 	ctx := ocm.DefaultContext()
 	_, err := utils.Configure(ctx, "")
 	if err != nil {
 		return errors.Wrapf(err, "configuration")
 	}
+	// --- end central config ---
 
-	// It is typically such a generic configuration specification,
+	// IThis file typically contains the serialization of such a generic
+	// configuration specification (or any other serialized configuration object),
 	// enriched with specialized config specifications for
-	// credentials, default repositories signing keys and any
+	// credentials, default repositories, signing keys and any
 	// other configuration specification.
+	//
 	// Most important are here the credentials.
-	// Because OCM embraces lots of storage technologies
-	// for artifact storage as well as storing OCM meta data,
-	// tzere are typically multiple technology specific ways
+	// Because OCM embraces lots of storage technologies for artifact
+	// storage as well as storing OCM component version metadata,
+	// there are typically multiple technology specific ways
 	// to configure credentials for command line tools.
-	// Using the credentials settings shown in the previous examples,
-	// it ius possible to specify credentials for all
-	// required purposes, but the configuration mangement provides
+	// Using the credentials settings shown in the previous tour,
+	// it is possible to specify credentials for all
+	// required purposes, and the configuration management provides
 	// an extensible way to embed native technology specific ways
 	// to provide credentials just by adding an appropriate type
-	// of config objects, which reads the specialized stoarge and
-	// feeds it into the credential context.
+	// of credential repository, which reads the specialized stoarge and
+	// feeds it into the credential context. Those specifications
+	// can be added via the credengtial configuration object to
+	// the central configuration.
 	//
-	// One such config object type is the docker config type. It
-	// reads a dockerconfig.json file and fed in the credentials.
-	// because it is sed for a dedicated purpose (credentials for
+	// One such repository type is the docker config type. It
+	// reads a `dockerconfig.json` file and feeds in the credentials.
+	// Because it is used for a dedicated purpose (credentials for
 	// OCI registries), it not only can feed the credentials, but
 	// also their mapping to consumer ids.
 
-	// create the specification for a new credential repository of
-	// type dockerconfig.
+	// We first create the specification for a new credential repository of
+	// type `dockerconfig` describing the default location
+	// of the standard docker config file.
+
+	// --- begin docker config ---
 	credspec := dockerconfig.NewRepositorySpec("~/.docker/config.json", true)
 
 	// add this repository specification to a credential configuration.
@@ -66,13 +76,18 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	if err != nil {
 		return errors.Wrapf(err, "invalid credential config")
 	}
+	// --- end docker config ---
 
 	// By adding the default location for the standard docker config
 	// file, all credentials provided by the <code>docker login</code>
 	// are available in the OCM toolset, also.
 
 	// A typical minimal <code>.ocmconfig</code> file can be composed as follows.
+	// We add this config object to an empty generic configuration object
+	// and print the serialized form. The result can be used as
+	// default initial OCM configuration file.
 
+	// --- begin default config ---
 	ocmcfg := configcfg.New()
 	err = ocmcfg.AddConfig(ccfg)
 
@@ -84,19 +99,23 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	// the result is a typical minimal ocm configuration file
 	// just providing the credentials configured with
 	// <code>doicker login</code>.
-	fmt.Printf("this a typical ocm config file:\n%s\n", string(spec))
+	fmt.Printf("this a typical ocm config file:\n--- begin ocmconfig ---\n%s--- end ocmconfig ---\n", string(spec))
+	// --- end default config ---
 
 	// Besides from a file, such a config can be provided as data, also,
 	// taken from any other source, for example from a Kubernetes secret
 
+	// --- begin by data ---
 	err = utils.ConfigureByData(ctx, spec, "from data")
 	if err != nil {
 		return errors.Wrapf(err, "configuration")
 	}
+	// --- end by data ---
 
 	// If you have provided your OCI credentials with
 	// docker login, they should now be available.
 
+	// --- begin query ---
 	id, err := oci.GetConsumerIdForRef(cfg.Repository)
 	if err != nil {
 		return errors.Wrapf(err, "invalid consumer")
@@ -107,5 +126,35 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	}
 	fmt.Printf("consumer id: %s\n", id)
 	fmt.Printf("credentials: %s\n", obfuscate(found))
+	// --- end query ---
+
+	// the configuration library function not only reads the
+	// ocm config file, it applies [*spiff*](github.com/mandelsoft/spiff)
+	// processing to the provided YAML/JSON content. *Spiff* is an
+	// in-domain yaml-based templating engine. Therefore, you can use
+	// any spiff dynaml expression to define values or even complete
+	// sub structures.
+
+	// --- begin spiff ---
+	ocmcfg = configcfg.New()
+	ccfg = credcfg.New()
+	cspec := credentials.CredentialsSpecFromList("clientCert", `(( read("~/ocm/keys/myClientCert.pem") ))`)
+	id = credentials.NewConsumerIdentity("ApplicationServer.acme.org", "hostname", "app.acme.org")
+	ccfg.AddConsumer(id, cspec)
+	ocmcfg.AddConfig(ccfg)
+	// --- end spiff ---
+
+	spec, err = yaml.Marshal(ocmcfg)
+	if err != nil {
+		return errors.Wrapf(err, "marshal ocm config")
+	}
+	fmt.Printf("this a typical ocm config file using spiff file operations:\n--- begin spiffocmconfig ---\n%s--- end spiffocmconfig ---\n", string(spec))
+
+	// this config object is not directly usable, because the cert value is not
+	// a valid certificate. We use it here just tp generate the serialized form.
+	// if this is used with the above library functions, the finally generated
+	// config object will contain the read file content, which is hopefully a
+	// valid certificate.
+
 	return nil
 }

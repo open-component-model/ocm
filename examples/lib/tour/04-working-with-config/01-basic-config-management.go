@@ -31,6 +31,7 @@ func BasicConfigurationHandling(cfg *helper.Config) error {
 
 	// one such object is the configuration object for
 	// credentials.
+	// It finally applies settings to a credential context.
 
 	// --- begin cred config ---
 	creds := credcfg.New()
