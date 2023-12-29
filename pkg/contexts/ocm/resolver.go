@@ -64,7 +64,7 @@ func (c *CompoundResolver) LookupComponentVersion(name string, version string) (
 		if err == nil && cv != nil {
 			return cv, nil
 		}
-		if !errors.IsErrNotFoundKind(err, KIND_COMPONENTVERSION) {
+		if !errors.IsErrNotFoundKind(err, KIND_COMPONENTVERSION) && !errors.IsErrNotFoundKind(err, KIND_COMPONENT) {
 			return nil, err
 		}
 	}
