@@ -76,6 +76,7 @@ type Config struct {
 	PublicKeys                  map[string]KeySpec `json:"publicKeys,omitempty"`
 	PrivateKeys                 map[string]KeySpec `json:"privateKeys,omitempty"`
 	Issuers                     map[string]Issuer  `json:"issuers,omitempty"`
+	RootCertificates            []KeySpec          `json:"rootCertificates,omitempty"`
 	TSAUrl                      string             `json:"tsaURL,omitempty"`
 }
 
@@ -202,6 +203,10 @@ func (a *Config) AddPrivateKeyFile(name, path string, fss ...vfs.FileSystem) {
 	a.addKeyFile(&a.PrivateKeys, name, path, fss...)
 }
 
+func (a *Config) AddRootCertifacteFile(name string, fss ...vfs.FileSystem) {
+	a.RootCertificates = append(a.RootCertificates, KeySpec{Path: name, FileSystem: utils.Optional(fss...)})
+}
+
 func (a *Config) addKeyData(set *map[string]KeySpec, name string, data []byte) {
 	if *set == nil {
 		*set = map[string]KeySpec{}
@@ -215,6 +220,10 @@ func (a *Config) AddPublicKeyData(name string, data []byte) {
 
 func (a *Config) AddPrivateKeyData(name string, data []byte) {
 	a.addKeyData(&a.PrivateKeys, name, data)
+}
+
+func (a *Config) AddRootCertifacteData(data []byte) {
+	a.RootCertificates = append(a.RootCertificates, KeySpec{Data: data})
 }
 
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
@@ -239,6 +248,16 @@ func (a *Config) ApplyToRegistry(registry signing.Registry) error {
 			return errors.Wrapf(err, "cannot get private key %s", n)
 		}
 		registry.RegisterPrivateKey(n, key)
+	}
+	for i, k := range a.RootCertificates {
+		key, err := k.Get()
+		if err != nil {
+			return errors.Wrapf(err, "cannot get root certificate %d", i)
+		}
+		err = registry.RegisterRootCertificates(key)
+		if err != nil {
+			return errors.Wrapf(err, "invalid certificate %d", i)
+		}
 	}
 	for n, k := range a.Issuers {
 		registry.RegisterIssuer(n, k.Get())
@@ -266,6 +285,9 @@ public and private keys. A key value might be given by one of the fields:
        &lt;name>:
          data: &lt;base64 encoded key representation>
        ...
+    rootCertificates:
+      - path: &lt;file path>
+
     issuers:
        &lt;name>:
          commonName: acme.org
