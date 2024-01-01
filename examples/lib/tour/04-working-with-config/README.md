@@ -765,12 +765,174 @@ used. Our simple repository target is just an example
 for some kind of ad-hoc configuration.
 A complete scenario is shown in the next example.
 
-#preparing-objects-to-be-configured-by-the-config-management
 ### Preparing Objects to be Configured by the Config Management
 
 We already have our new acme.org config object type,
-and a target interface which must be implemeneted by a target
+and a target interface which must be implemented by a target
 object to be configurable. The last example showed how
-such an object can be configured in an ad-hoc manner.
+such an object can be configured in an ad-hoc manner
+by directly requesting it to be configured by the config
+management.
+
 Now, we want to provide an object, which configures
 itself when used.
+Therefore, we introduce a Go type `RepositoryProvider`,
+which should be an object, which is
+able to provide an OCI repository reference.
+It has a setter and a getter (the setter is
+provided by our ad-hoc `SimpleRepositoryTarget`).
+
+To be able to configure itself, the object must know about
+the config context it should use to configure itself.
+
+Therefore, our type contains an additional field `updater`.
+Its type `cpi.Updater` is a utility provided by the configuration
+management, which holds a reference to a configuration context 
+and is able to
+configure an object based on a managed configuration
+watermark. It remembers which config objects from the
+config queue are already applied, and replays
+the config objects applied to the config context
+after the last update.
+
+Finally, a mutex field is contained, which is used to
+synchronize updates later.
+
+```go
+type RepositoryProvider struct {
+	lock sync.Mutex
+	// cpi.Updater is a utility, which is able to
+	// configure an object based on a managed configuration
+	// watermark. It remembers which config objects from the
+	// config queue are already applied, and replays
+	// the config objects applied to the config context
+	// after the last update.
+	updater cpi.Updater
+	SimpleRepositoryTarget
+}
+
+```
+
+For this type a constructor is provided, which initializes
+the `updater` field with the desired configuration context.
+
+```go
+func NewRepositoryProvider(ctx cpi.ContextProvider) *RepositoryProvider {
+	p := &RepositoryProvider{}
+	// To do its work, the updater needs a connection to
+	// the config context to use and the object, which should be
+	// configured.
+	p.updater = cpi.NewUpdater(ctx.ConfigContext(), p)
+	return p
+}
+
+```
+
+The magic now happens in the methods provided
+by our configurable object.
+The first step for methods of configurable objects
+dependent on potential configuration is always
+to update itself using the embedded updater.
+
+Please note, the config management reverses the
+request direction. Applying a config object to
+the config context does not configure dependent objects,
+it just manages a config queue, which is used by potential
+configuration targets to configure themselves.
+The actual configuration action is always initiated
+by the object, which want to be configured.
+The reason for this is to avoid references from the
+management to managed objects. This would prohibit
+the garbage collection of all configurable objects
+as long as the configuration context exists.
+
+```go
+func (p *RepositoryProvider) GetRepository() (string, error) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	err := p.updater.Update()
+	if err != nil {
+		return "", err
+	}
+	// now, we can do our regular function, aka
+	// providing a repository ref.
+	return p.repository, nil
+}
+
+```
+
+After defining our repository provider type we can now start to use it
+together with the configuration management and out configuration object.
+
+As usual, we first determine out context to use.
+
+```go
+	credctx := credentials.DefaultContext()
+```
+
+New, we create our provide configurable object by binding it
+to the config context.
+
+```go
+	prov := NewRepositoryProvider(credctx)
+```
+
+If we ask now for a repository we will get the empty 
+answer, because nothing is configured, yet.
+
+```go
+	repo, err := prov.GetRepository()
+	if err != nil {
+		errors.Wrapf(err, "get repo")
+	}
+	if repo != "" {
+		return fmt.Errorf("Oops, found repository %q", repo)
+	}
+```
+
+Now, we apply our config from the last example. Therefore, we create and initialize
+the config object with our program settings and apply it to the config
+context.
+
+```go
+	ctx := credctx.ConfigContext()
+	examplecfg := NewConfig(cfg)
+	err = ctx.ApplyConfig(examplecfg, "special acme config")
+	if err != nil {
+		errors.Wrapf(err, "apply config")
+	}
+```
+
+Without any further action, asking for a repository now will return the
+configured ref. The configurable object automatically catches the
+new configuration from the config context.
+
+```go
+	repo, err = prov.GetRepository()
+	if err != nil {
+		errors.Wrapf(err, "get repo")
+	}
+	if repo == "" {
+		return fmt.Errorf("no repository provided")
+	}
+	fmt.Printf("using repository: %s\n", repo)
+```
+
+Now, we should also be prepared to get the credentials,
+our config object configures the provider as well as
+the credential context.
+
+```go
+	id, err := oci.GetConsumerIdForRef(repo)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get consumer id")
+	}
+	fmt.Printf("usage context: %s\n", id)
+
+	creds, err := credentials.CredentialsForConsumer(credctx, id, ociidentity.IdentityMatcher)
+	if err != nil {
+		return errors.Wrapf(err, "credentials")
+	}
+	fmt.Printf("credentials: %s\n", obfuscate(creds))
+```

@@ -43,35 +43,21 @@ requiring credentials.
 As usual, we start gwith getting access to an OCM context
 
 ```go
-	ctx := ocm.DefaultContext()
+{{include}{../../05-transporting-component-versions/example.go}{default context}}
 ```
 
 Then we configure this context with optional ocm config defined in our config file.
-See [OCM config scenario in tour 04](../04-working-with-config/README.md#standard-configuration-file).
+See [OCM config scenario in tour 04]({{ocm-config-file}}).
 
 ```go
-	err := ReadConfiguration(ctx, cfg)
-	if err != nil {
-		return err
-	}
+{{include}{../../05-transporting-component-versions/example.go}{configure}}
 ```
 
 This function simply applies the config file using the utility function
 provided by the config management:
 
 ```go
-func ReadConfiguration(ctx ocm.Context, cfg *helper.Config) error {
-	if cfg.OCMConfig != "" {
-		fmt.Printf("*** applying config from %s\n", cfg.OCMConfig)
-
-		_, err := utils.Configure(ctx, cfg.OCMConfig)
-		if err != nil {
-			return errors.Wrapf(err, "error in ocm config %s", cfg.OCMConfig)
-		}
-	}
-	return nil
-}
-
+{{include}{../../05-transporting-component-versions/example.go}{read config}}
 ```
 
 The context acts as factory for various model types based on
@@ -84,26 +70,16 @@ determine the target repository for a transport from our yaml
 configuration file.
 
 ```go
-	fmt.Printf("target repository is %s\n", string(cfg.Target))
-	target, err := ctx.RepositoryForConfig(cfg.Target, nil)
-	if err != nil {
-		return errors.Wrapf(err, "cannot open repository")
-	}
-	defer target.Close()
+{{include}{../../05-transporting-component-versions/example.go}{target}}
 ```
 
 For our source we just use the component version provided by the last examples
 in a remote repository.
 Therefore, we set up the credentials context, again, as has
-been shown in [tour 03](../03-working-with-credentials/README.md#using-the-credential-management).
+been shown in [tour 03]({{using-cred-management}}).
 
 ```go
-	id, err := oci.GetConsumerIdForRef(cfg.Repository)
-	if err != nil {
-		return errors.Wrapf(err, "invalid consumer")
-	}
-	creds := ociidentity.SimpleCredentials(cfg.Username, cfg.Password)
-	ctx.CredentialsContext().SetCredentialsForConsumer(id, creds)
+{{include}{../../05-transporting-component-versions/example.go}{set credentials}}
 ```
 
 For the transport, we first get access to the component version
@@ -111,18 +87,7 @@ we want to transport, by getting the source repository and looking up
 the desired component version.
 
 ```go
-	spec := ocireg.NewRepositorySpec(cfg.Repository, nil)
-	repo, err := ctx.RepositoryForSpec(spec, creds)
-	if err != nil {
-		return err
-	}
-	defer repo.Close()
-
-	cv, err := repo.LookupComponentVersion("acme.org/example03", "v0.1.0")
-	if err != nil {
-		return errors.Wrapf(err, "added version not found")
-	}
-	defer cv.Close()
+{{include}{../../05-transporting-component-versions/example.go}{source}}
 ```
 
 We could just add this version to the target repository, but this
@@ -141,10 +106,7 @@ configured handlers, by default. Therefore, all resources will
 be migrated to local blobs.
 
 ```go
-	err = transfer.Transfer(cv, target, standard.ResourcesByValue(), standard.Overwrite())
-	if err != nil {
-		return errors.Wrapf(err, "transport failed")
-	}
+{{include}{../../05-transporting-component-versions/example.go}{transfer}}
 ```
 
 Now, we check the result of our transport action in the target
@@ -152,16 +114,8 @@ repository.
 
 
 ```go
-	tcv, err := target.LookupComponentVersion("acme.org/example03", "v0.1.0")
-	if err != nil {
-		return errors.Wrapf(err, "transported version not found")
-	}
-	defer tcv.Close()
-	fmt.Printf("*** target version in transportation target\n")
-	err = describeVersion(tcv)
-	if err != nil {
-		return errors.Wrapf(err, "describe failed")
-	}
+{{include}{../../05-transporting-component-versions/example.go}{verify-a}}
+{{include}{../../05-transporting-component-versions/example.go}{verify-b}}
 ```
 
 Please be aware that the all resources in the target now are `localBlob`s,

@@ -194,6 +194,7 @@ enriched with specialized config specifications for
 credentials, default repositories, signing keys and any
 other configuration specification.
 
+{{ocm-config-file}}
 #### Standard Configuration File
 
 Most important are here the credentials.
@@ -490,8 +491,112 @@ A complete scenario is shown in the next example.
 ### Preparing Objects to be Configured by the Config Management
 
 We already have our new acme.org config object type,
-and a target interface which must be implemeneted by a target
+and a target interface which must be implemented by a target
 object to be configurable. The last example showed how
-such an object can be configured in an ad-hoc manner.
+such an object can be configured in an ad-hoc manner
+by directly requesting it to be configured by the config
+management.
+
 Now, we want to provide an object, which configures
 itself when used.
+Therefore, we introduce a Go type `RepositoryProvider`,
+which should be an object, which is
+able to provide an OCI repository reference.
+It has a setter and a getter (the setter is
+provided by our ad-hoc `SimpleRepositoryTarget`).
+
+To be able to configure itself, the object must know about
+the config context it should use to configure itself.
+
+Therefore, our type contains an additional field `updater`.
+Its type `cpi.Updater` is a utility provided by the configuration
+management, which holds a reference to a configuration context 
+and is able to
+configure an object based on a managed configuration
+watermark. It remembers which config objects from the
+config queue are already applied, and replays
+the config objects applied to the config context
+after the last update.
+
+Finally, a mutex field is contained, which is used to
+synchronize updates later.
+
+```go
+{{include}{../../04-working-with-config/05-write-config-consumer.go}{type}}
+```
+
+For this type a constructor is provided, which initializes
+the `updater` field with the desired configuration context.
+
+```go
+{{include}{../../04-working-with-config/05-write-config-consumer.go}{constructor}}
+```
+
+The magic now happens in the methods provided
+by our configurable object.
+The first step for methods of configurable objects
+dependent on potential configuration is always
+to update itself using the embedded updater.
+
+Please note, the config management reverses the
+request direction. Applying a config object to
+the config context does not configure dependent objects,
+it just manages a config queue, which is used by potential
+configuration targets to configure themselves.
+The actual configuration action is always initiated
+by the object, which want to be configured.
+The reason for this is to avoid references from the
+management to managed objects. This would prohibit
+the garbage collection of all configurable objects
+as long as the configuration context exists.
+
+```go
+{{include}{../../04-working-with-config/05-write-config-consumer.go}{method}}
+```
+
+After defining our repository provider type we can now start to use it
+together with the configuration management and out configuration object.
+
+As usual, we first determine out context to use.
+
+```go
+{{include}{../../04-working-with-config/05-write-config-consumer.go}{default context}}
+```
+
+New, we create our provide configurable object by binding it
+to the config context.
+
+```go
+{{include}{../../04-working-with-config/05-write-config-consumer.go}{object}}
+```
+
+If we ask now for a repository we will get the empty 
+answer, because nothing is configured, yet.
+
+```go
+{{include}{../../04-working-with-config/05-write-config-consumer.go}{initial query}}
+```
+
+Now, we apply our config from the last example. Therefore, we create and initialize
+the config object with our program settings and apply it to the config
+context.
+
+```go
+{{include}{../../04-working-with-config/05-write-config-consumer.go}{apply config}}
+```
+
+Without any further action, asking for a repository now will return the
+configured ref. The configurable object automatically catches the
+new configuration from the config context.
+
+```go
+{{include}{../../04-working-with-config/05-write-config-consumer.go}{query}}
+```
+
+Now, we should also be prepared to get the credentials,
+our config object configures the provider as well as
+the credential context.
+
+```go
+{{include}{../../04-working-with-config/05-write-config-consumer.go}{credentials}}
+```
