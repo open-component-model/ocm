@@ -110,6 +110,13 @@ and the resources described by the component version.
 {{include}{../../01-getting-started/example.go}{resources}}
 ```
 
+This results in the following output (the shown version might
+differ, because the code always describes the latest version):
+
+```
+{{execute}{go}{run}{../../01-getting-started}{<extract>}{version}}
+```
+
 Resources have some metadata, like the resource identity and a resource type.
 And they describe how the content of the resource (as blob) can be accessed.
 This is done by an *access specification*, again a serializable descriptor,

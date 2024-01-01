@@ -136,6 +136,27 @@ and the resources described by the component version.
 	}
 ```
 
+This results in the following output (the shown version might
+differ, because the code always describes the latest version):
+
+```
+resources of the latest version:
+  version:  0.6.0
+  provider: ocm.software
+   1: name:           ocmcli
+      extra identity: "architecture"="amd64","os"="linux"
+      resource type:  executable
+      access:         Local blob sha256:6672528b57fd77cefa4c5a3395431b6a5aa14dc3ddad3ffe52343a7a518c2cd3[]
+   2: name:           ocmcli
+      extra identity: "architecture"="arm64","os"="linux"
+      resource type:  executable
+      access:         Local blob sha256:9088cb8bbef1593b905d6bd3af6652165ff82cebd0d86540a7be9637324d036b[]
+   3: name:           ocmcli-image
+      extra identity: 
+      resource type:  ociImage
+      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.6.0
+```
+
 Resources have some metadata, like the resource identity and a resource type.
 And they describe how the content of the resource (as blob) can be accessed.
 This is done by an *access specification*, again a serializable descriptor,

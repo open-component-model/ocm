@@ -88,6 +88,7 @@ just lookup the actually added version to verify the result.
 
 The coding for `describeVersion` is similar to the one shown in the [first tour]({{describe-version}}).
 
+{{using-cred-management}}
 ### Using the Credential Management
 
 Passing credentials directly at the repository

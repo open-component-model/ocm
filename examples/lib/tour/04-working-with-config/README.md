@@ -288,9 +288,9 @@ it is possible to specify credentials for all
 required purposes, and the configuration management provides
 an extensible way to embed native technology specific ways
 to provide credentials just by adding an appropriate type
-of credential repository, which reads the specialized stoarge and
+of credential repository, which reads the specialized storage and
 feeds it into the credential context. Those specifications
-can be added via the credengtial configuration object to
+can be added via the credential configuration object to
 the central configuration.
 
 One such repository type is the docker config type. It
@@ -338,7 +338,7 @@ default initial OCM configuration file.
 	fmt.Printf("this a typical ocm config file:\n--- begin ocmconfig ---\n%s--- end ocmconfig ---\n", string(spec))
 ```
 
-The result should look similar to (but with reorderd fields):
+The result should look similar to (but with reordered fields):
 ```yaml
 type: generic.config.ocm.software
 configurations:
@@ -428,3 +428,349 @@ type: generic.config.ocm.software
 If this is used with the above library functions, the finally generated
 config object will contain the read file content, which is hopefully a
 valid certificate.
+
+### Providing new config object types
+
+So far, we just used existing config types to configure existing objects.
+But the configuration management is highly extensible, and it is quite
+simple to provide new config types, which can be used to configure
+any new or existing object, which is prepared to consume configuration.
+
+The next [chapter](#preparing-objects-to-be-configured-by-the-config-management) will show how to prepare an
+object to be configurable by
+the configuration management. Here, we focus on the implementation of
+new config object types. Therefore, we want to configure the
+credential context by a new configuration object.
+
+#### The Configuration Object Type
+
+Typically, very kind of configuration object lives in its own package,
+which always have the same layout.
+
+A configuration object has a *type*, the configuration type. Therefore,
+the package declares a constant `TYPE`.
+
+It is the name of our new configuration object type.
+To be globally unique, it should always end with a
+DNS domain owned by the provider of the new type.
+
+```go
+const TYPE = "example.config.acme.org"
+
+```
+
+Next, we need a Go type. `ExampleConfigSpec` is the new Go type for the
+config specification covering our example configuration.
+It just encapsulates our simple configuration structure
+used to configure the examples of our tour.
+
+```go
+type ExampleConfigSpec struct {
+	// ObjectVersionedType is the base type providing the type feature
+	// for (config) specifications.
+	runtime.ObjectVersionedType `json:",inline"`
+	// Config is our example config representation.
+	helper.Config `json:",inline"`
+}
+
+```
+
+Every config type structure must contain a field (and the appropriate methods)
+for storing the config type name. This is done by embedding the
+type `runtime.ObjectVersionedType` from the `runtime` package. This package
+contains everything to work with specification objects and
+serialization/deserialization.
+
+As second field we just embed the config structure used to read the tour
+config. This way any kind of configuration information can be mapped
+to the configuration management.
+
+A config type typically provide a constructor for a config object of
+this type:
+
+```go
+func NewConfig(cfg *helper.Config) cpi.Config {
+	return &ExampleConfigSpec{
+		ObjectVersionedType: runtime.NewVersionedTypedObject(TYPE),
+		Config:              *cfg,
+	}
+}
+
+```
+
+Additional setters can be used to configure the configuration object.
+Here, programmatic objects (like an `ocm.RepositorySpec`) are
+converted to a form storable in the configuration object.
+
+```go
+
+// SetTargetRepository takes a repository specification
+// and adds its serialized form to the config object.
+func (c *ExampleConfigSpec) SetTargetRepository(target ocm.RepositorySpec) error {
+	data, err := json.Marshal(target)
+	if err != nil {
+		return err
+	}
+	c.Target = data
+	return nil
+}
+
+// SetTargetRepositoryData sets the target repository specification
+// from a byte sequence.
+func (c *ExampleConfigSpec) SetTargetRepositoryData(data []byte) error {
+	err := runtime.CheckSpecification(data)
+	if err != nil {
+		return err
+	}
+	c.Target = data
+	return nil
+}
+
+```
+
+The utility function `runtime.CheckSpecification` can be used to 
+check a byte sequence to be a valid specification.
+It just checks for a valid YAML document featuring a non-empty
+`type` field:
+
+```go
+
+// CheckSpecification checks a byte sequence to describe a
+// valid minimum specification object.
+func CheckSpecification(data []byte) error {
+	var obj ObjectTypedObject
+
+	err := DefaultYAMLEncoding.Unmarshal(data, &obj)
+	if err != nil {
+		return errors.ErrInvalidWrap(err, "repository specification", string(data))
+	}
+	if obj.GetType() == "" {
+		return errors.ErrInvalidWrap(fmt.Errorf("non-empty type field required"), "repository specification", string(data))
+	}
+	return nil
+}
+
+```
+
+The most important method to implement is `ApplyTo(_ cpi.Context, tgt interface{}) error`,
+which must be implemented by all configuration objects.
+Its task is to apply the described configuration settings to a dedicated
+object.
+
+```go
+func (c *ExampleConfigSpec) ApplyTo(_ cpi.Context, tgt interface{}) error {
+
+	switch t := tgt.(type) {
+	// if the target is a credentials context
+	// configure the credentials to be used for the
+	// described OCI repository.
+	case credentials.Context:
+		// determine the consumer id for our target repository-
+		id, err := oci.GetConsumerIdForRef(c.Repository)
+		if err != nil {
+			return errors.Wrapf(err, "invalid consumer")
+		}
+		// create the credentials.
+		creds := c.GetCredentials()
+
+		// configure the targeted credential context with
+		// the provided credentials (see previous examples).
+		t.SetCredentialsForConsumer(id, creds)
+
+	// if the target consumes an OCI repository, propagate
+	// the provided OCI repository ref.
+	case RepositoryTarget:
+		t.SetRepository(c.Repository)
+
+	// all other targets are ignored, we don't have
+	// something to set at these objects.
+	default:
+		return cpi.ErrNoContext(TYPE)
+	}
+	return nil
+}
+
+```
+
+Therefor it decides, whether it is able to handle a dedicated type of target
+object and how to configure it. This way a configuration object
+may apply is settings or even parts of its setting to any kind of target object.
+
+Our configuration object supports two kinds of target objects:
+if the target is a credentials context
+it configures the credentials to be used for the
+described OCI repository similar to our [credential management example](../03-working-with-credentials/README.md#using-the-credential-management).
+
+But we want to accept more types of target objects. Therefore, we 
+introduce an own interface declaring the methods required for applying
+some configuration settings.
+
+```go
+
+// RepositoryTarget consumes a repository name.
+type RepositoryTarget interface {
+	SetRepository(r string)
+}
+
+```
+
+By checking the target object against this interface, we are able 
+to configure any kind of object, as long as it provides the necessary
+configuration methods.
+
+Now, we are nearly prepared to use our new configuration, there is just one step
+missing. To enable the automatic recognition of our new type (for example
+in the ocm config file), we have to tell the configuration management
+about the new type. This is done by an `init()` function in our config package.
+
+Here, we call a registration function,
+which gets called with a dedicated type object for the new config type.
+A *type object* describes the config type, its type name, how 
+it is serialized and deserialized and some description.
+We use a standard type object, here, instead of implementing
+an own one. It is parameterized by the Go pointer type (`*ExampleConfigSpec`) for
+our specification object.
+
+```go
+func init() {
+	// register the new config type, so that is can be used
+	// by the config management to deserialize appropriately
+	// typed specifications.
+	cpi.RegisterConfigType(cpi.NewConfigType[*ExampleConfigSpec](TYPE, "this ia config object type based on the example config data."))
+}
+
+```
+
+#### Using our new Config Object
+
+After preparing a new special config type
+we can feed it into the config management.
+Because of the registration the config management
+now knows about this new type.
+
+A usual, we gain access to our required contexts.
+
+```go
+	credctx := credentials.DefaultContext()
+
+	// the credential context is based on a config context
+	// used to configure it.
+	ctx := credctx.ConfigContext()
+```
+
+To setup our environment we create our new config based on the actual settings 
+and apply it to the config context.
+
+```go
+	examplecfg := NewConfig(cfg)
+	ctx.ApplyConfig(examplecfg, "special acme config")
+```
+
+Now, we should be prepared to get the credentials
+the usual way.
+
+```go
+	id, err := oci.GetConsumerIdForRef(cfg.Repository)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get consumer id")
+	}
+	fmt.Printf("usage context: %s\n", id)
+
+	// the returned credentials are provided via an interface, which might change its
+	// content, if the underlying credential source changes.
+	creds, err := credentials.CredentialsForConsumer(credctx, id, ociidentity.IdentityMatcher)
+	if err != nil {
+		return errors.Wrapf(err, "credentials")
+	}
+	fmt.Printf("credentials: %s\n", obfuscate(creds))
+```
+
+#### Using in the OCM Configuration
+
+Because of the new credential type, such a specification can
+now be added to the ocm config, also.
+So, we could use our special tour config file content
+directly as part of the ocm config.
+
+```go
+	ocmcfg := configcfg.New()
+	err = ocmcfg.AddConfig(examplecfg)
+
+	spec, err := yaml.Marshal(ocmcfg)
+	if err != nil {
+		return errors.Wrapf(err, "marshal ocm config")
+	}
+
+	// the result is a minimal ocm configuration file
+	// just providing our new example configuration.
+	fmt.Printf("this a typical ocm config file:\n--- begin ocmconfig ---\n%s--- end ocmconfig ---\n", string(spec))
+```
+
+The resulting config file looks as follows:
+
+```yaml
+configurations:
+- component: github.com/mandelsoft/examples/cred1
+  password: ghp_xyz
+  type: example.config.acme.org
+  username: mandelsoft
+  version: 0.1.0
+type: generic.config.ocm.software
+```
+
+#### Applying to our Configuration Interface
+
+Above, we added a new kind of target, the `RepositoryTarget` interface.
+By providing an implementation for this interface, we can
+configure such an object using the config management.
+We just provide a simple implementation for this interface, just storing the configured
+repository specification.
+
+```go
+
+// SimpleRepositoryTarget is demo target object
+// just implementing our new configuration interface.
+type SimpleRepositoryTarget struct {
+	repository string
+}
+
+var _ RepositoryTarget = (*SimpleRepositoryTarget)(nil)
+
+func (t *SimpleRepositoryTarget) SetRepository(repo string) {
+	t.repository = repo
+}
+
+```
+
+The context management now is able to apply our config to such an object.
+
+```go
+	target := &SimpleRepositoryTarget{}
+
+	_, err = ctx.ApplyTo(0, target)
+	if err != nil {
+		return errors.Wrapf(err, "applying to new target")
+	}
+	fmt.Printf("repository for target: %s\n", target.repository)
+```
+
+This way any specialized configuration object can be added
+by a user of the OCM library. It can be used to configure
+existing objects or even new object types, even in combination.
+
+What is still required is a way
+to implement new config targets, objects, which want
+to be configured and which autoconfigure themselves when
+used. Our simple repository target is just an example
+for some kind of ad-hoc configuration.
+A complete scenario is shown in the next example.
+
+#preparing-objects-to-be-configured-by-the-config-management
+### Preparing Objects to be Configured by the Config Management
+
+We already have our new acme.org config object type,
+and a target interface which must be implemeneted by a target
+object to be configurable. The last example showed how
+such an object can be configured in an ad-hoc manner.
+Now, we want to provide an object, which configures
+itself when used.

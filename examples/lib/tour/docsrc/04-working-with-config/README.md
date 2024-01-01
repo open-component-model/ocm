@@ -206,9 +206,9 @@ it is possible to specify credentials for all
 required purposes, and the configuration management provides
 an extensible way to embed native technology specific ways
 to provide credentials just by adding an appropriate type
-of credential repository, which reads the specialized stoarge and
+of credential repository, which reads the specialized storage and
 feeds it into the credential context. Those specifications
-can be added via the credengtial configuration object to
+can be added via the credential configuration object to
 the central configuration.
 
 One such repository type is the docker config type. It
@@ -238,7 +238,7 @@ default initial OCM configuration file.
 {{include}{../../04-working-with-config/03-using-ocm-config.go}{default config}}
 ```
 
-The result should look similar to (but with reorderd fields):
+The result should look similar to (but with reordered fields):
 ```yaml
 type: generic.config.ocm.software
 configurations:
@@ -293,3 +293,205 @@ a valid certificate. We use it here just to generate the serialized form.
 If this is used with the above library functions, the finally generated
 config object will contain the read file content, which is hopefully a
 valid certificate.
+
+### Providing new config object types
+
+So far, we just used existing config types to configure existing objects.
+But the configuration management is highly extensible, and it is quite
+simple to provide new config types, which can be used to configure
+any new or existing object, which is prepared to consume configuration.
+
+The next [chapter]({{consume-config}}) will show how to prepare an
+object to be configurable by
+the configuration management. Here, we focus on the implementation of
+new config object types. Therefore, we want to configure the
+credential context by a new configuration object.
+
+#### The Configuration Object Type
+
+Typically, very kind of configuration object lives in its own package,
+which always have the same layout.
+
+A configuration object has a *type*, the configuration type. Therefore,
+the package declares a constant `TYPE`.
+
+It is the name of our new configuration object type.
+To be globally unique, it should always end with a
+DNS domain owned by the provider of the new type.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{type name}}
+```
+
+Next, we need a Go type. `ExampleConfigSpec` is the new Go type for the
+config specification covering our example configuration.
+It just encapsulates our simple configuration structure
+used to configure the examples of our tour.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{config type}}
+```
+
+Every config type structure must contain a field (and the appropriate methods)
+for storing the config type name. This is done by embedding the
+type `runtime.ObjectVersionedType` from the `runtime` package. This package
+contains everything to work with specification objects and
+serialization/deserialization.
+
+As second field we just embed the config structure used to read the tour
+config. This way any kind of configuration information can be mapped
+to the configuration management.
+
+A config type typically provide a constructor for a config object of
+this type:
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{constructor}}
+```
+
+Additional setters can be used to configure the configuration object.
+Here, programmatic objects (like an `ocm.RepositorySpec`) are
+converted to a form storable in the configuration object.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{setters}}
+```
+
+The utility function `runtime.CheckSpecification` can be used to 
+check a byte sequence to be a valid specification.
+It just checks for a valid YAML document featuring a non-empty
+`type` field:
+
+```go
+{{include}{../../../../../pkg/runtime/utils.go}{check}}
+```
+
+The most important method to implement is `ApplyTo(_ cpi.Context, tgt interface{}) error`,
+which must be implemented by all configuration objects.
+Its task is to apply the described configuration settings to a dedicated
+object.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{method apply}}
+```
+
+Therefor it decides, whether it is able to handle a dedicated type of target
+object and how to configure it. This way a configuration object
+may apply is settings or even parts of its setting to any kind of target object.
+
+Our configuration object supports two kinds of target objects:
+if the target is a credentials context
+it configures the credentials to be used for the
+described OCI repository similar to our [credential management example]({{using-cred-management}}).
+
+But we want to accept more types of target objects. Therefore, we 
+introduce an own interface declaring the methods required for applying
+some configuration settings.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{config interface}}
+```
+
+By checking the target object against this interface, we are able 
+to configure any kind of object, as long as it provides the necessary
+configuration methods.
+
+Now, we are nearly prepared to use our new configuration, there is just one step
+missing. To enable the automatic recognition of our new type (for example
+in the ocm config file), we have to tell the configuration management
+about the new type. This is done by an `init()` function in our config package.
+
+Here, we call a registration function,
+which gets called with a dedicated type object for the new config type.
+A *type object* describes the config type, its type name, how 
+it is serialized and deserialized and some description.
+We use a standard type object, here, instead of implementing
+an own one. It is parameterized by the Go pointer type (`*ExampleConfigSpec`) for
+our specification object.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{init}}
+```
+
+#### Using our new Config Object
+
+After preparing a new special config type
+we can feed it into the config management.
+Because of the registration the config management
+now knows about this new type.
+
+A usual, we gain access to our required contexts.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{default context}}
+```
+
+To setup our environment we create our new config based on the actual settings 
+and apply it to the config context.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{apply}}
+```
+
+Now, we should be prepared to get the credentials
+the usual way.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{query credentials}}
+```
+
+#### Using in the OCM Configuration
+
+Because of the new credential type, such a specification can
+now be added to the ocm config, also.
+So, we could use our special tour config file content
+directly as part of the ocm config.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{in ocmconfig}}
+```
+
+The resulting config file looks as follows:
+
+```yaml
+{{execute}{go}{run}{../../04-working-with-config}{--config}{settings.yaml}{provide}{<extract>}{ocmconfig}}
+```
+
+#### Applying to our Configuration Interface
+
+Above, we added a new kind of target, the `RepositoryTarget` interface.
+By providing an implementation for this interface, we can
+configure such an object using the config management.
+We just provide a simple implementation for this interface, just storing the configured
+repository specification.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{demo target}}
+```
+
+The context management now is able to apply our config to such an object.
+
+```go
+{{include}{../../04-working-with-config/04-write-config-type.go}{apply interface}}
+```
+
+This way any specialized configuration object can be added
+by a user of the OCM library. It can be used to configure
+existing objects or even new object types, even in combination.
+
+What is still required is a way
+to implement new config targets, objects, which want
+to be configured and which autoconfigure themselves when
+used. Our simple repository target is just an example
+for some kind of ad-hoc configuration.
+A complete scenario is shown in the next example.
+
+{{consume-config}}
+### Preparing Objects to be Configured by the Config Management
+
+We already have our new acme.org config object type,
+and a target interface which must be implemeneted by a target
+object to be configurable. The last example showed how
+such an object can be configured in an ad-hoc manner.
+Now, we want to provide an object, which configures
+itself when used.

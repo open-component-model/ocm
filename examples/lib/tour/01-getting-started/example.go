@@ -110,6 +110,7 @@ func GettingStarted() error {
 	defer cv.Close()
 	// --- end lookup version ---
 
+	fmt.Printf("--- begin version ---\n")
 	// The component version object provides access
 	// to the component descriptor.
 	// --- begin component descriptor ---
@@ -137,6 +138,7 @@ func GettingStarted() error {
 		}
 	}
 	// --- end resources ---
+	fmt.Printf("--- end version ---\n")
 
 	// Get the executable for the actual environment.
 	// The identity of a resource described by a component version
