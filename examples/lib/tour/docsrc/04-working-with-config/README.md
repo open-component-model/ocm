@@ -295,6 +295,7 @@ If this is used with the above library functions, the finally generated
 config object will contain the read file content, which is hopefully a
 valid certificate.
 
+{{tour04-arbitrary}}
 ### Providing new config object types
 
 So far, we just used existing config types to configure existing objects.

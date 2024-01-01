@@ -192,6 +192,7 @@ before executing this example.
 {{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup by docker}}
 ```
 
+{{composition-environment}}
 ### Composition Environment
 
 The second variant just creates a new component version

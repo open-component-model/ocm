@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -46,7 +45,6 @@ func PemBlockForPrivateKey(priv interface{}) *pem.Block {
 		}
 		return &pem.Block{Type: "EC PRIVATE KEY", Bytes: b}
 	default:
-		log.Fatal("invalid key")
 		return nil
 	}
 }

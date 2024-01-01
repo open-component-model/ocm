@@ -40,7 +40,7 @@ requiring credentials.
 
 ## Walkthrough
 
-As usual, we start gwith getting access to an OCM context
+As usual, we start with getting access to an OCM context
 
 ```go
 	ctx := ocm.DefaultContext()
