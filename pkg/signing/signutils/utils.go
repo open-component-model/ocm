@@ -149,6 +149,15 @@ func ParseCertificateChain(data []byte, filter bool) ([]*x509.Certificate, error
 	return chain, nil
 }
 
+func PemBlockForCertificate(cert interface{}) *pem.Block {
+	switch k := cert.(type) {
+	case *x509.Certificate:
+		return &pem.Block{Type: CertificatePEMBlockType, Bytes: k.Raw}
+	default:
+		return nil
+	}
+}
+
 type PublicKeySource interface {
 	Public() crypto.PublicKey
 }

@@ -226,6 +226,15 @@ func (a *Config) AddRootCertifacteData(data []byte) {
 	a.RootCertificates = append(a.RootCertificates, KeySpec{Data: data})
 }
 
+func (a *Config) AddRootCertifacte(chain signutils.GenericCertificateChain) error {
+	certs, err := signutils.GetCertificateChain(chain, false)
+	if err != nil {
+		return err
+	}
+	a.RootCertificates = append(a.RootCertificates, KeySpec{Data: signutils.CertificateChainToPem(certs), Parsed: certs})
+	return nil
+}
+
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	t, ok := target.(Context)
 	if !ok {
