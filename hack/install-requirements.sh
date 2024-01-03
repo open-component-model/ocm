@@ -16,7 +16,7 @@ GO111MODULE=off go get -u github.com/go-bindata/go-bindata/...
 go install github.com/go-bindata/go-bindata/v3/go-bindata@v3.1.3
 go install golang.org/x/tools/cmd/goimports@latest
 go install github.com/daixiang0/gci@v0.7.0
-go install github.com/mandelsoft/mdref@master
+go install github.com/mandelsoft/mdref@latest
 
 echo "> Install Registry test binaries"
 
