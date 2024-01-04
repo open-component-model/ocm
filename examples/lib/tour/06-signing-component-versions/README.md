@@ -305,42 +305,42 @@ configurations:
     acme.org:
       stringdata: |
         -----BEGIN RSA PRIVATE KEY-----
-        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
+        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
         -----END RSA PRIVATE KEY-----
   publicKeys:
     acme.org:
       stringdata: |
         -----BEGIN RSA PUBLIC KEY-----
-        MIIBCgKCAQEA0WWihUjkEyApssQncH3QrgQrdRjkZW2w1AlPYCf+caOyjjhNEUrE
-        c4ZwCvCVnpAZ8+jCXUNPG+/fKQMYWClkHxA8DAzLehetajLWQ6aj3la3q3FPdQDN
-        JVh6f7mnMelpvFHYElcFhHgHln6ZpJHP2vS30Z7R9wLXWoaW2vn45R4iw3id9l/S
-        2SnuAagsz/X4Sr/8gMOspJdjgdt094RU5vyow8q4NN8S/XNxepvpjcHVmbEJRM81
-        ubvuH/g4sUPOwQG7qNvR1kvYD3QT8jLVMi+weOAZOQaaDIVCvFYrCJSeMoCEcuQL
-        whhOd/tc8FqAVWgTuJasn9sRp1cpPUqi4QIDAQAB
+        MIIBCgKCAQEAx0v6JLoV1mrYpX1H86G5bMVBF2ftyxy/IJh1WJMv6xp6q3aKy+WQ
+        EJu/O6Lnh9XdZWRpz36dTJ9AnraEF/kNktJW9zMQQjWpXqjM3nwL5Eczc1ekjkK6
+        Xa5NZ+HC2lhgPXAsYhkF93EDPd4lKn9g+E68KKPrBy/FDdFnu1YL3tSERF65FIJK
+        LftKEPTJEjlHtG0bxdLWvEaTgLg4yxiw8ZMBBO1A1nyqf5zdQkxAEbpNuSGhtinv
+        qZ1CNhhbnechWxFp3XgDV+rKT5s1PWdgNgM4b26v4ocH+4b3iugi53WDcdD11TrI
+        eh3Tv5gCVyd3qdrJVOr4/JH4Ut8Pmrx3SwIDAQAB
         -----END RSA PUBLIC KEY-----
   type: keys.config.ocm.software
 type: generic.config.ocm.software
