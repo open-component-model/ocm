@@ -19,7 +19,7 @@ func ComposingAComponentVersionB() error {
 	// --- end default context ---
 
 	// now we compose a component version without a repository.
-	// later we add this to a new repository.
+	// later, we add this to a new repository.
 	// --- begin new version ---
 	cv := composition.NewComponentVersion(ctx, "acme.org/example2", "v0.1.0")
 	// --- end new version ---
@@ -41,7 +41,7 @@ func ComposingAComponentVersionB() error {
 	// Here, we are using an internal composition repository.
 	// It has no storage backend and can be used to internally compose
 	// a set of component versions, which can then be transferred
-	// to any other repository (see example 4)
+	// to any other repository (see tour 5)
 
 	// --- begin create composition repository ---
 	repo := composition.NewRepository(ctx)

@@ -17,7 +17,7 @@ It covers five basic scenarios:
 
 ## Running the example
 
-You can just call the main program with some config file option (`--config <file>`) and the name of the scenario.
+You can call the main program with a config file option (`--config <file>`) and the name of the scenario.
 The config file should have the following content:
 
 ```yaml
@@ -141,7 +141,7 @@ and applies them to an object to be configured.
 If the credential context is asked now for credentials,
 it asks the config context for pending config objects
 and applies them.
-Therefore, we now should get the configured credentials, here.
+Therefore, we now should be able to get the configured credentials.
 
 ```go
 	credctx := credentials.DefaultContext()
@@ -203,7 +203,7 @@ our generic config list.
 	}
 ```
 
-As we have seen in our previous example config objects are typically
+As we have seen in our previous example, config objects are typically
 serializable and deserializable. This also holds for the generic config
 object of the config context.
 
@@ -296,7 +296,7 @@ feeds it into the credential context. Those specifications
 can be added via the credential configuration object to
 the central configuration.
 
-One such repository type is the docker config type. It
+One such repository type is the Docker config type. It
 reads a `dockerconfig.json` file and feeds in the credentials.
 Because it is used for a dedicated purpose (credentials for 
 OCI registries), it not only can feed the credentials, but
@@ -304,7 +304,7 @@ also their mapping to consumer ids.
 
 We first create the specification for a new credential repository of
 type `dockerconfig` describing the default location
-of the standard docker config file.
+of the standard Docker config file.
 
 ```go
 	credspec := dockerconfig.NewRepositorySpec("~/.docker/config.json", true)
@@ -317,8 +317,8 @@ of the standard docker config file.
 	}
 ```
 
-By adding the default location for the standard docker config
-file, all credentials provided by the <code>docker login</code>
+By adding the default location for the standard Docker config
+file, all credentials provided by the `docker login` command
 are available in the OCM toolset, also.
 
 A typical minimal <code>.ocmconfig</code> file can be composed as follows.
@@ -377,7 +377,7 @@ taken from any other source, for example from a Kubernetes secret.
 ```
 
 If you have provided your OCI credentials with
-docker login, they should now be available.
+`docker login`, they should now be available.
 
 ```go
 	id, err := oci.GetConsumerIdForRef(cfg.Repository)
@@ -394,8 +394,8 @@ docker login, they should now be available.
 
 #### Templating
 
-The configuration library function not only reads the
-ocm config file, it applies [*spiff*](github.com/mandelsoft/spiff)
+The configuration library function does not only read the
+ocm config file, it also applies [*spiff*](github.com/mandelsoft/spiff)
 processing to the provided YAML/JSON content. *Spiff* is an
 in-domain yaml-based templating engine. Therefore, you can use
 any spiff dynaml expression to define values or even complete
@@ -440,14 +440,14 @@ simple to provide new config types, which can be used to configure
 any new or existing object, which is prepared to consume configuration.
 
 The next [chapter](#preparing-objects-to-be-configured-by-the-config-management) will show how to prepare an
-object to be configurable by
+object to be automatically configurable by
 the configuration management. Here, we focus on the implementation of
 new config object types. Therefore, we want to configure the
 credential context by a new configuration object.
 
 #### The Configuration Object Type
 
-Typically, very kind of configuration object lives in its own package,
+Typically, every kind of configuration object lives in its own package,
 which always have the same layout.
 
 A configuration object has a *type*, the configuration type. Therefore,
@@ -595,7 +595,7 @@ func (c *ExampleConfigSpec) ApplyTo(_ cpi.Context, tgt interface{}) error {
 
 ```
 
-Therefor it decides, whether it is able to handle a dedicated type of target
+Therefore, it decides, whether it is able to handle a dedicated type of target
 object and how to configure it. This way a configuration object
 may apply is settings or even parts of its setting to any kind of target object.
 
@@ -762,7 +762,7 @@ by a user of the OCM library. It can be used to configure
 existing objects or even new object types, even in combination.
 
 What is still required is a way
-to implement new config targets, objects, which want
+to implement new config targets, objects, which wants
 to be configured and which autoconfigure themselves when
 used. Our simple repository target is just an example
 for some kind of ad-hoc configuration.

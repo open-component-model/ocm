@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/go-test/deep"
+
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -107,7 +108,7 @@ func BasicConfigurationHandling(cfg *helper.Config) error {
 	// If the credential context is asked now for credentials,
 	// it asks the config context for pending config objects
 	// and applies them.
-	// Therefore, we now should get the configured credentials, here.
+	// Therefore, we now should be able to get the configured credentials.
 
 	// --- begin get credentials ---
 	credctx := credentials.DefaultContext()

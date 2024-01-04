@@ -65,7 +65,7 @@ func HandleArbitraryConfiguration(cfg *helper.Config) error {
 	}
 	// --- end add config ---
 
-	// as we have seen in the previous example config objects are typically
+	// as we have seen in the previous example, config objects are typically
 	// serializable and deserializable.
 	// this also holds for the generic config object of the config context.
 

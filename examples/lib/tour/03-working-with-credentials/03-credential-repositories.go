@@ -52,9 +52,9 @@ func UsingCredentialsRepositories(cfg *helper.Config) error {
 	// Those specialized repository implementation are not only able to
 	// provide credential sets, they also know about the usage context
 	// of the provided credentials
-	// Therefore, such repository implementations are able to provide credential
-	// mappings for consumer ids, also. This is supported by the credential repository
-	// API provided by this library.
+	// Therefore, such repository implementations are also able to provide
+	// credential mappings for consumer ids. This is supported by the credential
+	// repository API provided by this library.
 
 	// The docker config is such a case, so we can instruct the
 	// repository to automatically propagate appropriate the consumer id

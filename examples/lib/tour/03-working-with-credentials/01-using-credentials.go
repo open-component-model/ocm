@@ -18,7 +18,7 @@ func UsingCredentialsA(cfg *helper.Config) error {
 	ctx := ocm.DefaultContext()
 	// --- end default context ---
 
-	// So far, we just used memory or filesystem based
+	// So far, we just used memory or file system based
 	// OCM repositories to create component versions.
 	// If we want to store something in a remotely accessible
 	// repository typically some credentials are required
@@ -26,7 +26,7 @@ func UsingCredentialsA(cfg *helper.Config) error {
 	//
 	// The OCM library uses a generic abstraction for credentials.
 	// It is just set of properties. To offer various credential sources
-	// There is an interface credentials.Credentials provided,
+	// there is an interface credentials.Credentials provided,
 	// whose implementations provide access to those properties.
 	// A simple property based implementation is credentials.DirectCredentials.
 	//
@@ -41,7 +41,7 @@ func UsingCredentialsA(cfg *helper.Config) error {
 
 	// now we can use the OCI repository access creation from the first tour,
 	// but we pass the credentials as additional parameter.
-	// To give you the chance to specify your own registry the URL
+	// To give you the chance to specify your own registry, the URL
 	// is taken from the config file.
 	// --- begin repository access ---
 	spec := ocireg.NewRepositorySpec(cfg.Repository, nil)
@@ -56,7 +56,7 @@ func UsingCredentialsA(cfg *helper.Config) error {
 	// if registry name and credentials are fine, we should be able
 	// now to add a new component version using the coding
 	// from the previous example, but now we use a public repository, instead
-	// of a memory or filesystem based one.
+	// of a memory or file system based one.
 
 	// now we create a component version in this repository.
 	err = addVersion(repo, "acme.org/example03", "v0.1.0")
@@ -64,9 +64,9 @@ func UsingCredentialsA(cfg *helper.Config) error {
 		return err
 	}
 
-	// In contract to our first tour we cannot list components, here.
+	// In contrast to our first tour we cannot list components, here.
 	// OCI registries do not support component listers, therefore we
-	// just lookup the actually added version to verify the result.
+	// just look up the actually added version to verify the result.
 	// --- begin lookup ---
 	cv, err := repo.LookupComponentVersion("acme.org/example03", "v0.1.0")
 	if err != nil {

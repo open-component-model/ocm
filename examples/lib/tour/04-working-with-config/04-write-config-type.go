@@ -154,7 +154,7 @@ func WriteConfigType(cfg *helper.Config) error {
 
 	// after preparing a new special config type
 	// we can feed it into the config management.
-	// because of the registration the co nfig management
+	// because of the registration the config management
 	// now knows about this new type.
 
 	// A usual, we gain access to our required

@@ -105,10 +105,10 @@ func TransportingComponentVersions(cfg *helper.Config) error {
 
 	// transfer the component version with value mode.
 	// Here, all resources are transported per value, all external
-	// references will be inlined as localBlobs and imported into
+	// references will be inlined as `localBlob` and imported into
 	// the target environment, applying blob upload handlers
-	// where possible. For a CTF Archive as target, there are no
-	// configured handlers, by default.
+	// where possible. For a CTF archive as target, there are no
+	// configured handlers by default.
 	// --- begin transfer ---
 	err = transfer.Transfer(cv, target, standard.ResourcesByValue(), standard.Overwrite())
 	if err != nil {
@@ -126,7 +126,7 @@ func TransportingComponentVersions(cfg *helper.Config) error {
 	defer tcv.Close()
 	// --- end verify-a ---
 
-	// please be aware that the all resources in the target now are localBlobs,
+	// please be aware that all resources in the target now are localBlobs,
 	// if the target is a CTF archive. If it is an OCI registry, all the OCI
 	// artifact resources will be uploaded as OCI artifacts into the target
 	// repository and the access specifications are adapted to type `ociArtifact`.

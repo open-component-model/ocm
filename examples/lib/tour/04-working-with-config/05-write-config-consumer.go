@@ -63,7 +63,7 @@ func NewRepositoryProvider(ctx cpi.ContextProvider) *RepositoryProvider {
 // it just manages a config queue, which is used by potential
 // configuration targets to configure themselves.
 // The actual configuration action is always initiated
-// by the object, which want to be configured.
+// by the object, which wants to be configured.
 // The reason for this is to avoid references from the
 // management to managed objects. This would prohibit
 // the garbage collection of all configurable objects.

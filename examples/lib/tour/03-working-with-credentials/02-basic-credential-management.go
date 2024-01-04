@@ -35,7 +35,7 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	//
 	// To solve this problem of passing any set
 	// of credentials the OCM context object is
-	// used to store credentials. This handled
+	// used to store credentials. This is handled
 	// by a sub context, the Credentials context.
 
 	// --- begin cred context ---
@@ -44,7 +44,7 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 
 	// The credentials context brings together
 	// providers of credentials, for example a
-	// vault or a local docker/config.json
+	// Vault or a local Docker config.json
 	// and credential consumers like GitHub or
 	// OCI registries.
 	// It must be able to distinguish various kinds
@@ -59,26 +59,26 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	// a repository path.
 	//
 	// A credential provider like a vault just provides
-	// named credential set and typically does not
+	// named credential sets and typically does not
 	// know anything about the use case for these sets.
-	// The task of the credential context is now to
+	// The task of the credential context is to
 	// provide credentials for a dedicated consumer.
 	// Therefore, it maintains a configurable
 	// mapping of credential sources (credentials in
 	// a credential repository) and a dedicated consumer.
 	//
-	// This mapping defines a usecase, also based on
+	// This mapping defines a use case, also based on
 	// a property set and dedicated credentials.
 	// If credentials are required for a dedicated
 	// consumer, it matches the defined mappings and
 	// returned the best matching entry.
 	//
-	// Matching? Let's take GitHub OCI registry as an
+	// Matching? Let's take the GitHub OCI registry as an
 	// example. There are different owners for
-	// different repository path (the GitHub org/user).
-	// Therefore, different credentials needs to be provided
+	// different repository paths (the GitHub org/user).
+	// Therefore, different credentials need to be provided
 	// for different repository paths.
-	// For example credentials for ghcr.io/acme can be used
+	// For example, credentials for ghcr.io/acme can be used
 	// for a repository ghcr.io/acme/ocm/myimage.
 
 	// To start with the credentials context we just
@@ -89,9 +89,9 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	creds := ociidentity.SimpleCredentials(cfg.Username, cfg.Password)
 	// --- end new credentials ---
 
-	// Then we determine the cosumer id for our use case.
+	// Then we determine the consumer id for our use case.
 	// The repository implementation provides a function
-	// for this task. It provided the most common property
+	// for this task. It provides the most general property
 	// set for an OCI based OCM repository.
 	// --- begin consumer id ---
 	id, err := oci.GetConsumerIdForRef(cfg.Repository)
@@ -113,7 +113,7 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	// for any usage of our OCI registry, regardless
 	// of its type.
 
-	// lets test, whether it could provide credentials
+	// let's test, whether it could provide credentials
 	// for storing our component version.
 
 	// first we get the repository object for our OCM repository.
@@ -127,7 +127,7 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	// --- end get repository ---
 
 	// second, we determine the consumer id for our intended repository access.
-	// a credential consumer may provide might provide consumer id information
+	// a credential consumer may provide consumer id information
 	// for a dedicated sub user context.
 	// This is supported by the OCM repo implementation for OCI registries.
 	// The usage context is here the component name.
@@ -144,7 +144,7 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	// the basic context method `credctx.GetCredentialsForConsumer` returns
 	// a credentials source interface able to provide credentials
 	// for a changing credentials source. Here, we use a convenience
-	// function directly providing a credentials interface for the
+	// function, which directly provides a credentials interface for the
 	// actually valid credentials.
 	// an error is only provided if something went wrong while determining
 	// the credentials. Delivering NO credentials is a valid result.
@@ -213,7 +213,7 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	fmt.Printf("accessing oci image now with %s\n", meth.AccessSpec().Describe(ctx))
 	// --- end examine cli ---
 
-	// this resource access points effectively to the ame OCI registry,
+	// this resource access effectively points to the ame OCI registry,
 	// but a completely different repository.
 	// If you are using ghcr.io, this freshly created repo is private,
 	// therefore, you need credentials for accessing the content.

@@ -36,7 +36,7 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	}
 	// --- end central config ---
 
-	// IThis file typically contains the serialization of such a generic
+	// This file typically contains the serialization of such a generic
 	// configuration specification (or any other serialized configuration object),
 	// enriched with specialized config specifications for
 	// credentials, default repositories, signing keys and any
@@ -52,12 +52,12 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	// required purposes, and the configuration management provides
 	// an extensible way to embed native technology specific ways
 	// to provide credentials just by adding an appropriate type
-	// of credential repository, which reads the specialized stoarge and
+	// of credential repository, which reads the specialized storage and
 	// feeds it into the credential context. Those specifications
-	// can be added via the credengtial configuration object to
+	// can be added via the credential configuration object to
 	// the central configuration.
 	//
-	// One such repository type is the docker config type. It
+	// One such repository type is the Docker config type. It
 	// reads a `dockerconfig.json` file and feeds in the credentials.
 	// Because it is used for a dedicated purpose (credentials for
 	// OCI registries), it not only can feed the credentials, but
@@ -65,7 +65,7 @@ func HandleOCMConfig(cfg *helper.Config) error {
 
 	// We first create the specification for a new credential repository of
 	// type `dockerconfig` describing the default location
-	// of the standard docker config file.
+	// of the standard Docker config file.
 
 	// --- begin docker config ---
 	credspec := dockerconfig.NewRepositorySpec("~/.docker/config.json", true)
@@ -78,8 +78,8 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	}
 	// --- end docker config ---
 
-	// By adding the default location for the standard docker config
-	// file, all credentials provided by the <code>docker login</code>
+	// By adding the default location for the standard Docker config
+	// file, all credentials provided by the `docker login` command
 	// are available in the OCM toolset, also.
 
 	// A typical minimal <code>.ocmconfig</code> file can be composed as follows.
@@ -113,7 +113,7 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	// --- end by data ---
 
 	// If you have provided your OCI credentials with
-	// docker login, they should now be available.
+	// `docker login`, they should now be available.
 
 	// --- begin query ---
 	id, err := oci.GetConsumerIdForRef(cfg.Repository)
@@ -128,8 +128,8 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	fmt.Printf("credentials: %s\n", obfuscate(found))
 	// --- end query ---
 
-	// the configuration library function not only reads the
-	// ocm config file, it applies [*spiff*](github.com/mandelsoft/spiff)
+	// the configuration library function does not only read the
+	// ocm config file, it also applies [*spiff*](github.com/mandelsoft/spiff)
 	// processing to the provided YAML/JSON content. *Spiff* is an
 	// in-domain yaml-based templating engine. Therefore, you can use
 	// any spiff dynaml expression to define values or even complete
@@ -151,7 +151,7 @@ func HandleOCMConfig(cfg *helper.Config) error {
 	fmt.Printf("this a typical ocm config file using spiff file operations:\n--- begin spiffocmconfig ---\n%s--- end spiffocmconfig ---\n", string(spec))
 
 	// this config object is not directly usable, because the cert value is not
-	// a valid certificate. We use it here just tp generate the serialized form.
+	// a valid certificate. We use it here just to generate the serialized form.
 	// if this is used with the above library functions, the finally generated
 	// config object will contain the read file content, which is hopefully a
 	// valid certificate.

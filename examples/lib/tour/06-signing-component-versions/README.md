@@ -12,7 +12,7 @@ It covers two basic scenarios:
 
 ## Running the examples
 
-You can just call the main program with some config file option (`--config <file>`) and the name of the scenario.
+You can call the main program with a config file option (`--config <file>`) and the name of the scenario.
 The config file should have the following content:
 
 ```yaml
@@ -24,7 +24,7 @@ targetRepository:
 ocmConfig: <your ocm config file>
 ```
 
-The actual version of the example just works with the filesystem
+The actual version of the example just works with the file system
 target, because it is not possible to specify credentials for the
 target repository in this simple config file. But, if you specific an [OCM config file](../04-working-with-config/README.md) you can
 add more credential settings to make target repositories possible
@@ -63,7 +63,7 @@ but here we do all this in a single program.
 
 <a id="tour06-compose"></a>
 And we need a component version to sign.
-We compose a component version without a repository, again
+We again compose a component version without a repository
 (see [tour02 example 2](../02-composing-a-component-version/README.md#composition-environment)).
 
 ```go
@@ -263,7 +263,8 @@ Manually adding keys to the signing attribute
 might simplify the call to possibly multiple signing/verification
 calls, but it does not help to provide keys via an external
 configuration (for example for using the OCM CLI).
-In [tour04](../04-working-with-config/README.md#providing-new-config-object-types) we have seen how arbitrary configuration
+In [tour04](../04-working-with-config/README.md#providing-new-config-object-types)
+we have seen how arbitrary configuration
 possibilities can be added. The signing attribute uses
 this mechanism to configure itself by providing an own
 configuration object, which can be used to feed keys (and certificates)
@@ -304,42 +305,42 @@ configurations:
     acme.org:
       stringdata: |
         -----BEGIN RSA PRIVATE KEY-----
-        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
+        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
         -----END RSA PRIVATE KEY-----
   publicKeys:
     acme.org:
       stringdata: |
         -----BEGIN RSA PUBLIC KEY-----
-        MIIBCgKCAQEA4oNWlKpnuVbmlnIUtwTlM/o0NMWBmfcBU7kMNJiyCJEL12iq5cuj
-        oeQemcSGg68OFTDhbtD4oVObLxpRgO7quAch3uP2i83KVi3zALJjJOewUeWw6EkA
-        INKiYop+jCpoJMeHZ8MazWvgUnPzUsF3+Qftw/iCiofFLkdSycYdU+K7b2jt5DhI
-        KS518GT8vpVWsE234ccQLgl9IqHCqYA4iZ8DMNPn6d15A4VkhjYUc9j8zPaQi/Je
-        MBYcJmn3r7JjPb7t1edg7+VJa+ZpDoOJRsGPsBzCCRPI8TibwuF3DhHQopChtWhS
-        l/mViXEfug+3l6L8s2rdVqqyyKGp0xe1BQIDAQAB
+        MIIBCgKCAQEAqcTYOwDJe1osQVw1pbVTwwvpqME/q0ACkAlsK3BtQaUo+SUI/B31
+        DcsooMdM+SVBVLDx3Pa30j1Ud6Kf5l1tGTeGycT6X+l8hAP5KM2GKAa0Z8glegE5
+        lPejlx8++SXEqSMZv39EjMuWPQwATTS6ws0/SMP9H+RbSaeHhscL4UBCQpPgb1AN
+        kpl37opx5zEx/NhhCesDffE30h7fXD7Uu57lLhkP2HJDTjf7mBfmWVQ8QDDKcILC
+        shOw8qZvpdhWYaSaUsCQ9W0NJ7sKhQZHIf9MoX3EsY+7g2V1USbNfNXsQskq+Wvv
+        9mY5gKGP+j4h6tKeTeBNNoiGHPTk6rdCLQIDAQAB
         -----END RSA PUBLIC KEY-----
   type: keys.config.ocm.software
 type: generic.config.ocm.software

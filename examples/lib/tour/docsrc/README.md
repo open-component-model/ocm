@@ -11,5 +11,5 @@ of extension points of the library.
 - [Composing Component Versions]({{compose-compvers}})
 - [Working with Credentials]({{credentials}})
 - [Working with Configuration]({{config}})
-- [Transporting Component Versions](05-transporting-component-versions/README.md)
-- [Signing Component Versions](06-signing-component-versions/README.md)
+- [Transporting Component Versions]({{transport}})
+- [Signing Component Versions]({{signing}})

@@ -155,7 +155,7 @@ func createOCMConfig(privkey signutils.GenericPrivateKey, pubkey signutils.Gener
 	// manually adding keys to the signing attribute
 	// might simplify the call to possibly multiple signing/verification
 	// calls, but it does not help to provide keys via an external
-	// configuration (vor example for using the OCM CLI).
+	// configuration (for example for using the OCM CLI).
 	// in tour05 we have seen how arbitrary configuration
 	// possibilities can be added. The signing attribute uses
 	// this mechanism to configure itself by providing an own

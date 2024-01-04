@@ -1,3 +1,4 @@
+{{signing}}
 # Signing Component Versions
 
 This tour illustrates the basic functionality to
@@ -9,7 +10,7 @@ It covers two basic scenarios:
 
 ## Running the examples
 
-You can just call the main program with some config file option (`--config <file>`) and the name of the scenario.
+You can call the main program with a config file option (`--config <file>`) and the name of the scenario.
 The config file should have the following content:
 
 ```yaml
@@ -21,7 +22,7 @@ targetRepository:
 ocmConfig: <your ocm config file>
 ```
 
-The actual version of the example just works with the filesystem
+The actual version of the example just works with the file system
 target, because it is not possible to specify credentials for the
 target repository in this simple config file. But, if you specific an [OCM config file](../04-working-with-config/README.md) you can
 add more credential settings to make target repositories possible
@@ -54,7 +55,7 @@ but here we do all this in a single program.
 
 {{tour06-compose}}
 And we need a component version to sign.
-We compose a component version without a repository, again
+We again compose a component version without a repository
 (see [tour02 example 2]({{composition-environment}})).
 
 ```go
@@ -186,7 +187,8 @@ Manually adding keys to the signing attribute
 might simplify the call to possibly multiple signing/verification
 calls, but it does not help to provide keys via an external
 configuration (for example for using the OCM CLI).
-In [tour04]({{tour04-arbitrary}}) we have seen how arbitrary configuration
+In [tour04]({{tour04-arbitrary}})
+we have seen how arbitrary configuration
 possibilities can be added. The signing attribute uses
 this mechanism to configure itself by providing an own
 configuration object, which can be used to feed keys (and certificates)
