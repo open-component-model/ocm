@@ -112,6 +112,9 @@ The following configuration types are supported:
          &lt;name>:
            data: &lt;base64 encoded key representation>
          ...
+      rootCertificates:
+        - path: &lt;file path>
+
       issuers:
          &lt;name>:
            commonName: acme.org

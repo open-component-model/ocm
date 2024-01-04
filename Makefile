@@ -32,6 +32,7 @@ BUILD_FLAGS := "-s -w \
 
 COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
 
+.PHONY: build
 build: ${SOURCES}
 	mkdir -p bin
 	go build ./pkg/...
