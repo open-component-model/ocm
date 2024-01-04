@@ -14,16 +14,19 @@ import (
 
 func UsingCredentialsA(cfg *helper.Config) error {
 	// yes, we need an OCM context, again
+	// --- begin default context ---
 	ctx := ocm.DefaultContext()
+	// --- end default context ---
 
-	// So far, we just use memory or filesystem based
+	// So far, we just used memory or file system based
 	// OCM repositories to create component versions.
 	// If we want to store something in a remotely accessible
-	// repository typically some credentials are required.
+	// repository typically some credentials are required
+	// for write access.
 	//
-	// The OCM library uses a generic abstraction for credentials-
+	// The OCM library uses a generic abstraction for credentials.
 	// It is just set of properties. To offer various credential sources
-	// There is an interface credentials.Credentials provides,
+	// there is an interface credentials.Credentials provided,
 	// whose implementations provide access to those properties.
 	// A simple property based implementation is credentials.DirectCredentials.
 	//
@@ -32,12 +35,15 @@ func UsingCredentialsA(cfg *helper.Config) error {
 	// The example config file provides such credentials
 	// for an OCI registry.
 
+	// --- begin new credentials ---
 	creds := ociidentity.SimpleCredentials(cfg.Username, cfg.Password)
+	// --- end new credentials ---
 
-	// now we can use the OCI repository access creation from
-	// example, but we pass the credentials as additional parameter.
-	// To give you the chance to specify your own registry the URL
+	// now we can use the OCI repository access creation from the first tour,
+	// but we pass the credentials as additional parameter.
+	// To give you the chance to specify your own registry, the URL
 	// is taken from the config file.
+	// --- begin repository access ---
 	spec := ocireg.NewRepositorySpec(cfg.Repository, nil)
 
 	repo, err := ctx.RepositoryForSpec(spec, creds)
@@ -45,10 +51,12 @@ func UsingCredentialsA(cfg *helper.Config) error {
 		return err
 	}
 	defer repo.Close()
+	// --- end repository access ---
 
 	// if registry name and credentials are fine, we should be able
 	// now to add a new component version using the coding
-	// from the previous example.
+	// from the previous example, but now we use a public repository, instead
+	// of a memory or file system based one.
 
 	// now we create a component version in this repository.
 	err = addVersion(repo, "acme.org/example03", "v0.1.0")
@@ -56,13 +64,15 @@ func UsingCredentialsA(cfg *helper.Config) error {
 		return err
 	}
 
-	// list the versions as known from example 1
+	// In contrast to our first tour we cannot list components, here.
 	// OCI registries do not support component listers, therefore we
-	// just list the actually added version.
+	// just look up the actually added version to verify the result.
+	// --- begin lookup ---
 	cv, err := repo.LookupComponentVersion("acme.org/example03", "v0.1.0")
 	if err != nil {
 		return errors.Wrapf(err, "added version not found")
 	}
 	defer cv.Close()
 	return errors.Wrapf(describeVersion(cv), "describe failed")
+	// --- end lookup ---
 }

@@ -45,7 +45,7 @@ ifneq ("v$(GO_BINDATA)",$(GO_BINDATA_VERSION))
 endif
 
 .PHONY: install-requirements
-install-requirements: $(deps) $(GOPATH)/bin/goimports
+install-requirements: $(deps) $(GOPATH)/bin/goimports mdref
 #	@$(REPO_ROOT)/hack/install-requirements.sh
 
 .PHONY: golangci-lint
@@ -64,6 +64,11 @@ go-bindata:
 
 $(GOPATH)/bin/goimports:
 	go install -v golang.org/x/tools/cmd/goimports@latest
+
+.PHONY: mdref
+mdref:
+	go install -v github.com/mandelsoft/mdref@master
+
 
 Linux_jq:
 	$(info -> jq is missing)

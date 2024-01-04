@@ -8,6 +8,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -17,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -148,19 +150,35 @@ func (a *Config) AddIssuer(name string, issuer *pkix.Name) {
 	a.Issuers[name] = i
 }
 
-func (a *Config) addKey(set *map[string]KeySpec, name string, key interface{}) {
+func (a *Config) addKey(set *map[string]KeySpec, name string, key interface{}, conv func(interface{}) *pem.Block) error {
 	if *set == nil {
 		*set = map[string]KeySpec{}
 	}
-	(*set)[name] = KeySpec{Parsed: key}
+	switch data := key.(type) {
+	case []byte:
+		(*set)[name] = KeySpec{Data: data}
+	case string:
+		(*set)[name] = KeySpec{StringData: data}
+	default:
+		if conv != nil {
+			block := conv(key)
+			if block == nil {
+				return errors.ErrUnknown("format")
+			}
+			(*set)[name] = KeySpec{Parsed: key, StringData: string(pem.EncodeToMemory(block))}
+		} else {
+			(*set)[name] = KeySpec{Parsed: key}
+		}
+	}
+	return nil
 }
 
-func (a *Config) AddPublicKey(name string, key interface{}) {
-	a.addKey(&a.PublicKeys, name, key)
+func (a *Config) AddPublicKey(name string, key interface{}) error {
+	return a.addKey(&a.PublicKeys, name, key, func(key interface{}) *pem.Block { return signutils.PemBlockForPublicKey(key) })
 }
 
-func (a *Config) AddPrivateKey(name string, key interface{}) {
-	a.addKey(&a.PrivateKeys, name, key)
+func (a *Config) AddPrivateKey(name string, key interface{}) error {
+	return a.addKey(&a.PrivateKeys, name, key, signutils.PemBlockForPrivateKey)
 }
 
 func (a *Config) addKeyFile(set *map[string]KeySpec, name, path string, fss ...vfs.FileSystem) {

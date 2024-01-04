@@ -30,7 +30,9 @@ func GettingStarted() error {
 	// configuration settings, like credentials,
 	// which should be used when working with the OCM
 	// ecosystem.
+	// --- begin default context ---
 	ctx := ocm.DefaultContext()
+	// --- end default context ---
 
 	// The context acts as the central entry
 	// point to get access to OCM elements.
@@ -48,19 +50,28 @@ func GettingStarted() error {
 	// Kubernetes resources.
 	// The available repository implementations can be found
 	// under .../pkg/contexts/ocm/repositories.
+	// --- begin repository spec ---
 	spec := ocireg.NewRepositorySpec("ghcr.io/open-component-model/ocm")
+	// --- end repository spec ---
 
 	// And the context can now be used to map the descriptor
 	// into a repository object, which then provides access
 	// to the OCM elements stored in this repository.
+	// --- begin repository ---
 	repo, err := ctx.RepositoryForSpec(spec)
 	if err != nil {
 		return errors.Wrapf(err, "cannot setup repository")
 	}
+	// --- end repository ---
 
+	// to release potentially allocated temporary resources,
 	// many objects must be closed, if they should not be used
-	// anymore, to release potentially allocated temporary resources.
+	// anymore.
+	// This is typically done by a `defer` statement placed after a
+	// successful object retrieval.
+	// --- begin close ---
 	defer repo.Close()
+	// --- end close ---
 
 	// Now, we look up the OCM CLI component.
 	// All kinds of repositories, regardless of their type
@@ -73,32 +84,49 @@ func GettingStarted() error {
 
 	// Now we look for the versions of the component
 	// available in this repository.
+	// --- begin versions ---
 	versions, err := c.ListVersions()
 	if err != nil {
 		return errors.Wrapf(err, "cannot query version names")
 	}
+	// --- end versions ---
 
-	// OCM version names must follow the semver rules.
+	// OCM version names must follow the SemVer rules.
+	// Therefore, we can simply order the versions and print them.
+	// --- begin semver ---
 	err = semverutils.SortVersions(versions)
 	if err != nil {
 		return errors.Wrapf(err, "cannot sort versions")
 	}
 	fmt.Printf("versions for component ocm.software/ocmcli: %s\n", strings.Join(versions, ", "))
+	// --- end semver ---
 
-	// Now, we have a look at the latest version
+	// Now, we have a look at the latest version. it is
+	// the last one in the list.
+	// --- begin lookup version ---
 	cv, err := c.LookupVersion(versions[len(versions)-1])
 	if err != nil {
 		return errors.Wrapf(err, "cannot get latest version")
 	}
 	defer cv.Close()
+	// --- end lookup version ---
 
-	// Have a look at the component descriptor
+	fmt.Printf("--- begin version ---\n")
+	// The component version object provides access
+	// to the component descriptor.
+	// --- begin component descriptor ---
 	cd := cv.GetDescriptor()
 	fmt.Printf("resources of the latest version:\n")
 	fmt.Printf("  version:  %s\n", cv.GetVersion())
 	fmt.Printf("  provider: %s\n", cd.Provider.Name)
+	// --- end component descriptor ---
 
 	// and list all the included resources.
+	// Resources have some metadata, like the resource identity and a resource type.
+	// And they describe how the content of the resource (as blob) can be accessed.
+	// This is done by an *access specification*, again a serializable descriptor,
+	// like the repository specification.
+	// --- begin resources ---
 	for i, r := range cv.GetResources() {
 		fmt.Printf("  %2d: name:           %s\n", i+1, r.Meta().GetName())
 		fmt.Printf("      extra identity: %s\n", r.Meta().GetExtraIdentity())
@@ -110,11 +138,17 @@ func GettingStarted() error {
 			fmt.Printf("      access:         %s\n", acc.Describe(ctx))
 		}
 	}
+	// --- end resources ---
+	fmt.Printf("--- end version ---\n")
 
 	// Get the executable for the actual environment.
 	// The identity of a resource described by a component version
-	// consists of a set of properties. The property name must
-	// always be given.
+	// consists of a set of properties. The property `name` is mandatory.
+	// But there may be more identity attributes
+	// finally stored as ``extraIdentity` in the component descriptor.
+	// A convention is to use dedicated identity properties to indicate the
+	// operating system and the architecture for executables.
+	// --- begin find executable ---
 	id := metav1.NewIdentity("ocmcli",
 		extraid.ExecutableOperatingSystem, runtime.GOOS,
 		extraid.ExecutableArchitecture, runtime.GOARCH,
@@ -124,6 +158,7 @@ func GettingStarted() error {
 	if err != nil {
 		return errors.Wrapf(err, "resource %s", id)
 	}
+	// --- end find executable ---
 
 	// download to /tmp/ocmcli using basic model
 	// operations.
@@ -136,35 +171,47 @@ func GettingStarted() error {
 		// for the resource blob.
 		// First, get the access method for the resource.
 		// Second, request a reader for the blob.
+		// --- begin getting access ---
 		var m ocm.AccessMethod
 		m, err = res.AccessMethod()
 		if err != nil {
 			return errors.Wrapf(err, "cannot get access method")
 		}
+		// --- end getting access ---
+
 		// the method needs to be closed, because the method
 		// object may cache the technical blob representation
-		// generated accessing the underlying access technology.
+		// generated by accessing the underlying access technology.
 		// (for example, accessing an OCI image requires a sequence of
-		// backend accesses for the manifest, the layers, etc which will
+		// backend requests for the manifest, the layers, etc, which will
 		// then be packaged into a tar archive returned as blob).
 		// This caching may not be required, if the backend directly
 		// returns a blob.
+		// --- begin closing access ---
 		defer m.Close()
+		// --- end closing access ---
 
 		// the method now also provides information abount the returned
 		// blob format in form of a mime type.
+		// --- begin getting reader ---
 		fmt.Printf("  found blob with mime type %s\n", m.MimeType())
 		reader, err = m.Reader()
+		// --- end getting reader ---
 	} else {
 		// because this is a common operation, there is a
-		// utility function handling this sequence.
+		// utility function handling this code sequence.
+		// --- begin utility function ---
 		reader, err = utils.GetResourceReader(res)
+		// --- end utility function ---
 	}
+	// --- begin closing reader ---
 	if err != nil {
 		return errors.Wrapf(err, "cannot get resource reader")
 	}
 	defer reader.Close()
+	// --- end closing reader ---
 
+	// --- begin copy ---
 	file, err := os.OpenFile("/tmp/ocmcli", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0766)
 	if err != nil {
 		return errors.Wrapf(err, "cannot open output file")
@@ -176,16 +223,19 @@ func GettingStarted() error {
 		return errors.Wrapf(err, "write executable")
 	}
 	fmt.Printf("%d bytes written\n", n)
+	// --- end copy ---
 
 	// alternatively, a registered downloader for executables can be used.
-	// Download is used to download resources with specific handlers for the
+	// download.DownloadResource is used to download resources with specific handlers for the
 	// selected resource and mime type combinations.
 	// The executable downloader is registered by default and automatically
-	// sets the X flag.
+	// sets the `X `flag for the written file.
+	// --- begin download ---
 	_, err = download.DownloadResource(ctx, res, "/tmp/ocmcli", download.WithPrinter(common.NewPrinter(os.Stdout)))
 	if err != nil {
 		return errors.Wrapf(err, "download failed")
 	}
+	// --- end download ---
 
 	return nil
 }

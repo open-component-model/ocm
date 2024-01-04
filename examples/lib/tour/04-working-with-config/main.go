@@ -13,14 +13,17 @@ import (
 )
 
 // CFG is the path to the file containing the credentials
-var CFG = "../examples/lib/cred.yaml"
+var CFG = "examples/lib/cred.yaml"
 
 var current_version string
 
 func init() {
 	data, err := os.ReadFile("VERSION")
 	if err != nil {
-		panic("VERSION not found")
+		data, err = os.ReadFile("../../../../../VERSION")
+		if err != nil {
+			panic("VERSION not found")
+		}
 	}
 	current_version = strings.TrimSpace(string(data))
 }
