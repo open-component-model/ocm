@@ -2,12 +2,23 @@
 
 The complete library is arranged around area specific [`Context` objects](contexts.md),
 which bundle all the settings and supported [extension points](../../docs/ocm/interoperability.md#support-library)
-of the Open Component Model.
+of the *Open Component Model*.
 Extension points are implemented by handlers that can be registered at dedicated
 context objects or at the default runtime environment.
 The context then provides all the methods required to access elements
 managed in the dedicated area.
 
+The examples shown here provide an overview of the library.
+A more detailed annotated tour through various aspects of the library
+with ready-to work examples can be for [here](tour/READ;E.md).
+
+In the [comparison scenario](comparison-scenario/README.md) there is
+an example for an end-to-end scenario, from providing a component version
+by a software provider, over its publishing up to the consumption in an
+air-gapped environment, and the final deployment in this environment.
+Especially the deployment part just wants to illustrate the basic
+workflow using a Helm chart based example. It is not intended to be used
+as productive environment.
 
 ## Working with OCM repositories
 
