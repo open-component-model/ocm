@@ -318,7 +318,8 @@ var _ = Describe("component repository mapping", func() {
 		finalize.Close(art)
 
 		Expect(art.GetDescriptor().IsManifest()).To(BeTrue())
-		Expect(len(art.GetDescriptor().Manifest().Layers)).To(Equal(2))
+		m := Must(art.GetDescriptor().Manifest())
+		Expect(len(m.Layers)).To(Equal(2))
 	})
 
 	Context("legacy mode", func() {
@@ -340,7 +341,7 @@ var _ = Describe("component repository mapping", func() {
 			ocirepo := finalizer.ClosingWith(&finalize, Must(oci.DefaultContext().RepositoryForSpec(ocispec)))
 			ns := finalizer.ClosingWith(&finalize, Must(ocirepo.LookupNamespace(path.Join(componentmapping.ComponentDescriptorNamespace, COMPONENT))))
 			art := finalizer.ClosingWith(&finalize, Must(ns.GetArtifact("v1")))
-			m := art.GetDescriptor().Manifest()
+			m := Must(art.GetDescriptor().Manifest())
 			Expect(m.Config.MediaType).To(Equal(componentmapping.LegacyComponentDescriptorConfigMimeType))
 			Expect(len(m.Layers)).To(Equal(1))
 			Expect(m.Layers[0].MediaType).To(Equal(componentmapping.LegacyComponentDescriptorTarMimeType))
@@ -373,7 +374,7 @@ var _ = Describe("component repository mapping", func() {
 			ocirepo := finalizer.ClosingWith(&finalize, Must(oci.DefaultContext().RepositoryForSpec(ocispec)))
 			ns := finalizer.ClosingWith(&finalize, Must(ocirepo.LookupNamespace(path.Join(componentmapping.ComponentDescriptorNamespace, COMPONENT))))
 			art := finalizer.ClosingWith(&finalize, Must(ns.GetArtifact("v1")))
-			m := art.GetDescriptor().Manifest()
+			m := Must(art.GetDescriptor().Manifest())
 			Expect(m.Config.MediaType).To(Equal(componentmapping.LegacyComponentDescriptorConfigMimeType))
 			Expect(len(m.Layers)).To(Equal(1))
 			Expect(m.Layers[0].MediaType).To(Equal(componentmapping.LegacyComponentDescriptorTarMimeType))

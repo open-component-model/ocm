@@ -9,7 +9,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
@@ -38,7 +37,7 @@ type NamespaceContainer interface {
 	// GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor
 
 	GetArtifact(i NamespaceAccessImpl, vers string) (cpi.ArtifactAccess, error)
-	NewArtifact(i NamespaceAccessImpl, arts ...*artdesc.Artifact) (cpi.ArtifactAccess, error)
+	NewArtifact(i NamespaceAccessImpl, arts ...cpi.Artifact) (cpi.ArtifactAccess, error)
 
 	AddArtifact(artifact cpi.Artifact, tags ...string) (access blobaccess.BlobAccess, err error)
 
@@ -113,6 +112,6 @@ func (i *namespaceAccessImpl) AddArtifact(artifact cpi.Artifact, tags ...string)
 	return i.NamespaceContainer.AddArtifact(artifact, tags...)
 }
 
-func (i *namespaceAccessImpl) NewArtifact(arts ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (i *namespaceAccessImpl) NewArtifact(arts ...cpi.Artifact) (cpi.ArtifactAccess, error) {
 	return i.NamespaceContainer.NewArtifact(i, arts...)
 }

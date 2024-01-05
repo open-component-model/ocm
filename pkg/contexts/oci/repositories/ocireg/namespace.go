@@ -256,7 +256,7 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return nil
 }
 
-func (n *NamespaceContainer) NewArtifact(i support.NamespaceAccessImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (n *NamespaceContainer) NewArtifact(i support.NamespaceAccessImpl, art ...cpi.Artifact) (cpi.ArtifactAccess, error) {
 	if n.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

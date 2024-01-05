@@ -242,7 +242,7 @@ func (n *namespaceAccessView) ListTags() (list []string, err error) {
 	return list, err
 }
 
-func (n *namespaceAccessView) NewArtifact(artifact ...*artdesc.Artifact) (acc internal.ArtifactAccess, err error) {
+func (n *namespaceAccessView) NewArtifact(artifact ...Artifact) (acc internal.ArtifactAccess, err error) {
 	err = n.Execute(func() error {
 		acc, err = n.impl.NewArtifact(artifact...)
 		return err
@@ -299,6 +299,10 @@ func (a *artifactAccessView) IsManifest() bool {
 
 func (a *artifactAccessView) IsIndex() bool {
 	return a.impl.IsIndex()
+}
+
+func (a *artifactAccessView) IsValid() bool {
+	return a.impl.IsValid()
 }
 
 func (a *artifactAccessView) Digest() digest.Digest {
@@ -375,7 +379,7 @@ func (a *artifactAccessView) AddArtifact(artifact internal.Artifact, platform *a
 	return acc, err
 }
 
-func (a *artifactAccessView) NewArtifact(art ...*artdesc.Artifact) (acc ArtifactAccess, err error) {
+func (a *artifactAccessView) NewArtifact(art ...Artifact) (acc ArtifactAccess, err error) {
 	err = a.Execute(func() error {
 		acc, err = a.impl.NewArtifact(art...)
 		return err

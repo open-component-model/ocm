@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -70,6 +71,7 @@ type state struct {
 	oci_tags          *[]string
 	oci_artfunc       func(oci.ArtifactAccess) error
 	oci_annofunc      func(name, value string)
+	oci_platform      *artdesc.Platform
 }
 
 type Builder struct {

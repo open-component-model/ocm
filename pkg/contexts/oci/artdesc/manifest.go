@@ -12,6 +12,7 @@ import (
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Manifest ociv1.Manifest
@@ -25,6 +26,36 @@ func NewManifest() *Manifest {
 		Layers:      nil,
 		Annotations: nil,
 	}
+}
+
+var _ ArtifactDescriptor = (*Manifest)(nil)
+
+func (i *Manifest) IsManifest() bool {
+	return true
+}
+
+func (i *Manifest) IsIndex() bool {
+	return false
+}
+
+func (i *Manifest) Digest() digest.Digest {
+	blob, _ := i.Blob()
+	if blob != nil {
+		return blob.Digest()
+	}
+	return ""
+}
+
+func (i *Manifest) Artifact() *Artifact {
+	return &Artifact{manifest: i}
+}
+
+func (i *Manifest) Manifest() (*Manifest, error) {
+	return i, nil
+}
+
+func (i *Manifest) Index() (*Index, error) {
+	return nil, errors.ErrInvalid()
 }
 
 func (i *Manifest) IsValid() bool {
@@ -48,7 +79,7 @@ func (m *Manifest) MimeType() string {
 	return ArtifactMimeType(m.MediaType, MediaTypeImageManifest, legacy)
 }
 
-func (m *Manifest) ToBlobAccess() (blobaccess.BlobAccess, error) {
+func (m *Manifest) Blob() (blobaccess.BlobAccess, error) {
 	m.MediaType = m.MimeType()
 	data, err := json.Marshal(m)
 	if err != nil {

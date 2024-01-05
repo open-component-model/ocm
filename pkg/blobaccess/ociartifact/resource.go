@@ -44,7 +44,7 @@ func BlobAccessForOCIArtifact(refname string, opts ...Option) (blobaccess.BlobAc
 	if version == "" {
 		return nil, "", fmt.Errorf("no version specified")
 	}
-	blob, err := artifactset.SynthesizeArtifactBlob(ns, version)
+	blob, err := artifactset.SynthesizeArtifactBlobWithFilter(ns, version, eff.Filter)
 	if err != nil {
 		return nil, "", err
 	}

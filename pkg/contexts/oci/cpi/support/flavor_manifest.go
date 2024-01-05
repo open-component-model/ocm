@@ -29,11 +29,13 @@ type manifestMapper struct {
 var _ accessobj.State = (*manifestMapper)(nil)
 
 func (m *manifestMapper) GetState() interface{} {
-	return m.State.GetState().(*artdesc.Artifact).Manifest()
+	i, _ := m.State.GetState().(*artdesc.Artifact).Manifest()
+	return i
 }
 
 func (m *manifestMapper) GetOriginalState() interface{} {
-	return m.State.GetOriginalState().(*artdesc.Artifact).Manifest()
+	i, _ := m.State.GetOriginalState().(*artdesc.Artifact).Manifest()
+	return i
 }
 
 func NewManifestForArtifact(master cpi.ArtifactAccess, a *ArtifactAccessImpl) *ManifestAccess {

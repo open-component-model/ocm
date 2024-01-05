@@ -40,19 +40,19 @@ func OCIManifest1(env *builder.Builder) *artdesc.Descriptor {
 	return ldesc
 }
 
-func OCIManifest1For(env *builder.Builder, ns, tag string) (*artdesc.Descriptor, *artdesc.Descriptor) {
+func OCIManifest1For(env *builder.Builder, ns, tag string, nested ...func()) (*artdesc.Descriptor, *artdesc.Descriptor) {
 	var ldesc *artdesc.Descriptor
 	var mdesc *artdesc.Descriptor
 
 	env.Namespace(ns, func() {
-		mdesc = env.Manifest(tag, func() {
+		mdesc = env.Manifest(tag, append(nested, func() {
 			env.Config(func() {
 				env.BlobStringData(mime.MIME_JSON, "{}")
 			})
 			ldesc = env.Layer(func() {
 				env.BlobStringData(mime.MIME_TEXT, OCILAYER)
 			})
-		})
+		})...)
 	})
 	return mdesc, ldesc
 }
@@ -108,19 +108,19 @@ func OCIManifest2(env *builder.Builder) *artdesc.Descriptor {
 	return ldesc
 }
 
-func OCIManifest2For(env *builder.Builder, ns, tag string) (*artdesc.Descriptor, *artdesc.Descriptor) {
+func OCIManifest2For(env *builder.Builder, ns, tag string, nested ...func()) (*artdesc.Descriptor, *artdesc.Descriptor) {
 	var ldesc *artdesc.Descriptor
 	var mdesc *artdesc.Descriptor
 
 	env.Namespace(ns, func() {
-		mdesc = env.Manifest(tag, func() {
+		mdesc = env.Manifest(tag, append(nested, func() {
 			env.Config(func() {
 				env.BlobStringData(mime.MIME_JSON, "{}")
 			})
 			ldesc = env.Layer(func() {
 				env.BlobStringData(mime.MIME_TEXT, OCILAYER2)
 			})
-		})
+		})...)
 	})
 	return mdesc, ldesc
 }
@@ -152,13 +152,15 @@ const (
 func OCIIndex1(env *builder.Builder) *artdesc.Descriptor {
 	var idesc *artdesc.Descriptor
 
-	a1, _ := OCIManifest1For(env, OCINAMESPACE3, "")
-	a2, _ := OCIManifest2For(env, OCINAMESPACE3, "")
+	a1, _ := OCIManifest1For(env, OCINAMESPACE3, "", func() { env.Platform("linux", "amd64") })
+	a2, _ := OCIManifest2For(env, OCINAMESPACE3, "", func() { env.Platform("linux", "arm64") })
+	a3, _ := OCIManifest2For(env, OCINAMESPACE3, "", func() { env.Platform("darwin", "arm64") })
 
 	env.Namespace(OCINAMESPACE3, func() {
 		idesc = env.Index(OCIINDEXVERSION, func() {
 			env.Artifact(a1)
 			env.Artifact(a2)
+			env.Artifact(a3)
 		})
 	})
 	return idesc

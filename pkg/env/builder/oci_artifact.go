@@ -23,8 +23,9 @@ type ociArtifact struct {
 	artfunc func(a oci.ArtifactAccess) error
 	ns      cpi.NamespaceAccess
 	cpi.ArtifactAccess
-	tags  []string
-	annos *map[string]string
+	tags     []string
+	annos    *map[string]string
+	platform artdesc.Platform
 }
 
 func (r *ociArtifact) setAnno(name, value string) {
@@ -47,6 +48,10 @@ func (r *ociArtifact) Set() {
 	r.Builder.oci_tags = &r.tags
 	r.Builder.oci_annofunc = r.setAnno
 
+	if r.kind == T_OCIMANIFEST {
+		r.Builder.oci_platform = &r.platform
+	}
+
 	if r.ns != nil {
 		r.Builder.oci_artfunc = r.addArtifact
 	}
@@ -62,7 +67,11 @@ func (r *ociArtifact) Close() error {
 		err = r.artfunc(r.ArtifactAccess)
 	}
 	if err == nil {
-		r.result = artdesc.DefaultBlobDescriptor(blob)
+		d := artdesc.DefaultBlobDescriptor(blob)
+		if r.platform.OS != "" || r.platform.Architecture != "" {
+			d.Platform = &r.platform
+		}
+		r.result = d
 	}
 	return err
 }

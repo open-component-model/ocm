@@ -41,10 +41,10 @@ func NewArtifactForBlob(container NamespaceAccessImpl, blob blobaccess.BlobAcces
 	return newArtifact(container, state, closer...)
 }
 
-func NewArtifact(container NamespaceAccessImpl, defs ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
-	var def *artdesc.Artifact
-	if len(defs) != 0 && defs[0] != nil {
-		def = defs[0]
+func NewArtifact(container NamespaceAccessImpl, defs ...cpi.Artifact) (cpi.ArtifactAccess, error) {
+	var def cpi.Artifact
+	if len(defs) != 0 && defs[0] != nil && defs[0].IsValid() {
+		def = defs[0].Artifact()
 	}
 	mode := accessobj.ACC_WRITABLE
 	if container.IsReadOnly() {
@@ -73,7 +73,7 @@ func (a *ArtifactAccessImpl) AddBlob(access cpi.BlobAccess) error {
 	return a.container.AddBlob(access)
 }
 
-func (a *ArtifactAccessImpl) NewArtifact(art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (a *ArtifactAccessImpl) NewArtifact(art ...cpi.Artifact) (cpi.ArtifactAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
@@ -117,37 +117,34 @@ func (a *ArtifactAccessImpl) Index() (*artdesc.Index, error) {
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to *artdesc.Artifact", a.state.GetState())
 	}
-	idx := d.Index()
-	if idx == nil {
-		idx = artdesc.NewIndex()
+	if !d.IsValid() {
+		idx := artdesc.NewIndex()
 		if err := d.SetIndex(idx); err != nil {
 			return nil, errors.Newf("artifact is manifest")
 		}
 	}
-	return idx, nil
+	return d.Index()
 }
 
 func (a *ArtifactAccessImpl) Manifest() (*artdesc.Manifest, error) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d := a.state.GetState().(*artdesc.Artifact)
-	m := d.Manifest()
-	if m == nil {
-		m = artdesc.NewManifest()
+	if !d.IsValid() {
+		m := artdesc.NewManifest()
 		if err := d.SetManifest(m); err != nil {
 			return nil, errors.Newf("artifact is index")
 		}
 	}
-	return m, nil
+	return d.Manifest()
 }
 
 func (a *ArtifactAccessImpl) ManifestAccess(v cpi.ArtifactAccess) internal.ManifestAccess {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d := a.state.GetState().(*artdesc.Artifact)
-	m := d.Manifest()
-	if m == nil {
-		m = artdesc.NewManifest()
+	if !d.IsManifest() {
+		m := artdesc.NewManifest()
 		if err := d.SetManifest(m); err != nil {
 			return nil
 		}
@@ -159,9 +156,8 @@ func (a *ArtifactAccessImpl) IndexAccess(v cpi.ArtifactAccess) internal.IndexAcc
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d := a.state.GetState().(*artdesc.Artifact)
-	i := d.Index()
-	if i == nil {
-		i = artdesc.NewIndex()
+	if !d.IsIndex() {
+		i := artdesc.NewIndex()
 		if err := d.SetIndex(i); err != nil {
 			return nil
 		}
