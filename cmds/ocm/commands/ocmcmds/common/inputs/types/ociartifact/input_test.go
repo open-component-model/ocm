@@ -115,7 +115,29 @@ var _ = Describe("Test Environment", func() {
 			spec := Must(Apply(opts))
 			Expect(spec).To(Equal(me.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64")))
 		})
+	})
 
+	Context("inputs", func() {
+		BeforeEach(func() {
+			flags = &pflag.FlagSet{}
+			opts = inputs.DefaultInputTypeScheme.ConfigTypeSetConfigProvider().CreateOptions()
+			opts.AddFlags(flags)
+			cfg = flagsets.Config{}
+		})
+
+		It("input type", func() {
+			fmt.Printf("input option names: %+v\n", opts.Names())
+			MustBeSuccessful(flags.Parse([]string{
+				"--inputType", me.TYPE,
+				flagsets.OptionString(options.PathOption), "ghcr.io/open-component-model/image:v1.0",
+				flagsets.OptionString(options.PlatformsOption), "linux/amd64",
+			}))
+			cfg := Must(inputs.DefaultInputTypeScheme.GetConfigFor(opts))
+			fmt.Printf("selected input options: %+v\n", cfg)
+
+			spec := Must(inputs.DefaultInputTypeScheme.GetInputSpecFor(opts))
+			Expect(spec).To(Equal(me.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64")))
+		})
 	})
 
 	Context("scenario", func() {
