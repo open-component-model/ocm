@@ -11,6 +11,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+func OptionString(option ConfigOptionType) string {
+	return "--" + option.GetName()
+}
+
 func GetField(config Config, names ...string) (interface{}, error) {
 	var cur interface{} = config
 

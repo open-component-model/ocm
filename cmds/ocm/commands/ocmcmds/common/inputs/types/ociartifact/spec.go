@@ -31,9 +31,10 @@ type Spec struct {
 
 var _ inputs.InputSpec = (*Spec)(nil)
 
-func New(pathtag string) *Spec {
+func New(pathtag string, platforms ...string) *Spec {
 	return &Spec{
-		PathSpec: cpi.NewPathSpec(TYPE, pathtag),
+		PathSpec:  cpi.NewPathSpec(TYPE, pathtag),
+		Platforms: platforms,
 	}
 }
 

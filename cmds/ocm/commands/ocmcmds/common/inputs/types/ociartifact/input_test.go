@@ -1,0 +1,146 @@
+// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+package ociartifact_test
+
+import (
+	"encoding/json"
+	"fmt"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	me "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+)
+
+const OCIPATH = "/tmp/oci"
+const OCIHOST = "alias"
+const ARCH = "/tmp/ctf"
+const VERSION = "1.0.0"
+const COMPONENT = "ocm.software/demo/test"
+
+func CheckComponent(env *TestEnv) {
+	repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
+	defer Close(repo)
+	cv := Must(repo.LookupComponentVersion(COMPONENT, VERSION))
+	defer Close(cv)
+	cd := cv.GetDescriptor()
+
+	Expect(string(cd.Provider.Name)).To(Equal("ocm.software"))
+
+	r := Must(cv.GetResource(metav1.Identity{"name": "image"}))
+	a := Must(r.Access())
+
+	expDigest := "sha256:bde0f428596a33a6ba00b2df6047227e06130409fae69cf37edbe2eca13e8448"
+	Expect(a.Describe(env.OCMContext())).To(Equal("Local blob " + expDigest + "[ocm.software/demo/test/image:v2.0-index]"))
+
+	m := Must(r.AccessMethod())
+	defer Close(m, "method")
+
+	rd := Must(m.Reader())
+	defer Close(rd, "reader")
+
+	set := Must(artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(rd)))
+	defer Close(set, "set")
+
+	digest := set.GetMain()
+	Expect(digest.Encoded()).To(Equal(D_OCIMANIFEST1))
+
+	art := Must(set.GetArtifact(digest.String()))
+	defer Close(art, "art")
+
+	Expect(art.IsManifest()).To(BeTrue())
+}
+
+func Apply(opts flagsets.ConfigOptions) (inputs.InputSpec, error) {
+	cfg := flagsets.Config{"type": me.TYPE}
+	err := inputs.DefaultInputTypeScheme.GetInputType(me.TYPE).ConfigOptionTypeSetHandler().ApplyConfig(opts, cfg)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("config options: %+v\n", cfg)
+	data, err := json.Marshal(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return inputs.DefaultInputTypeScheme.Decode(data, nil)
+}
+
+var _ = Describe("Test Environment", func() {
+	var (
+		itype = inputs.DefaultInputTypeScheme.GetInputType(me.TYPE)
+		flags *pflag.FlagSet
+		opts  flagsets.ConfigOptions
+		cfg   flagsets.Config
+	)
+
+	Context("options", func() {
+		BeforeEach(func() {
+			flags = &pflag.FlagSet{}
+			opts = itype.ConfigOptionTypeSetHandler().CreateOptions()
+			opts.AddFlags(flags)
+			cfg = flagsets.Config{}
+		})
+
+		It("handles path option", func() {
+			fmt.Printf("option names: %+v\n", opts.Names())
+
+			MustBeSuccessful(flags.Parse([]string{"--" + options.PathOption.GetName(), "ghcr.io/open-component-model/image:v1.0"}))
+			MustBeSuccessful(itype.ConfigOptionTypeSetHandler().ApplyConfig(opts, cfg))
+
+			spec := Must(Apply(opts))
+			Expect(spec).To(Equal(me.New("ghcr.io/open-component-model/image:v1.0")))
+		})
+
+		It("handles platform option", func() {
+			MustBeSuccessful(flags.Parse([]string{
+				flagsets.OptionString(options.PathOption), "ghcr.io/open-component-model/image:v1.0",
+				flagsets.OptionString(options.PlatformsOption), "linux/amd64",
+			}))
+			spec := Must(Apply(opts))
+			Expect(spec).To(Equal(me.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64")))
+		})
+
+	})
+
+	Context("scenario", func() {
+		var env *TestEnv
+		var rname string
+
+		BeforeEach(func() {
+			env = NewTestEnv(TestData())
+
+			rname = FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
+
+			fmt.Printf("image url: %s\n", oci.StandardOCIRef(rname, OCINAMESPACE3, OCIINDEXVERSION))
+			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+				OCIIndex1(env.Builder)
+			})
+		})
+
+		AfterEach(func() {
+			env.Cleanup()
+		})
+
+		It("creates ctf and adds component", func() {
+			Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "testdata/component.yaml")).To(Succeed())
+			Expect(env.DirExists(ARCH)).To(BeTrue())
+			CheckComponent(env)
+		})
+	})
+})

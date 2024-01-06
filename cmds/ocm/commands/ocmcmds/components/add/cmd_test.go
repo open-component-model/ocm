@@ -125,11 +125,11 @@ var _ = Describe("Test Environment", func() {
 
 	Context("with completion", func() {
 		var ldesc *artdesc.Descriptor
-
+		var rname string // repo name
 		_ = ldesc
 
 		BeforeEach(func() {
-			FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
+			rname = FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
 
 			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 				ldesc = OCIManifest1(env.Builder)
@@ -145,7 +145,7 @@ var _ = Describe("Test Environment", func() {
 						})
 						env.Resource("image", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 							env.Access(
-								ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+								ociartifact.New(oci.StandardOCIRef(rname, OCINAMESPACE, OCIVERSION)),
 							)
 						})
 					})
