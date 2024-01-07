@@ -17,6 +17,22 @@ func OptionString(option ConfigOptionType) string {
 	return "--" + option.GetName()
 }
 
+func OptionStrings(types ...ConfigOptionType) []string {
+	var r []string
+	for _, o := range types {
+		r = append(r, OptionString(o))
+	}
+	return r
+}
+
+func AddPrefix(prefix string, values ...string) []string {
+	var r []string
+	for _, v := range values {
+		r = append(r, prefix+v)
+	}
+	return r
+}
+
 type _OptionSpec struct {
 	otype ConfigOptionType
 	args  []string
