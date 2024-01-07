@@ -100,7 +100,9 @@ var _ = Describe("Test Environment", func() {
 		It("handles path option", func() {
 			fmt.Printf("option names: %+v\n", opts.Names())
 
-			MustBeSuccessful(flags.Parse([]string{"--" + options.PathOption.GetName(), "ghcr.io/open-component-model/image:v1.0"}))
+			MustBeSuccessful(flagsets.ParseOptionsFor(flags,
+				flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
+			))
 			MustBeSuccessful(itype.ConfigOptionTypeSetHandler().ApplyConfig(opts, cfg))
 
 			spec := Must(Apply(opts))
@@ -108,10 +110,10 @@ var _ = Describe("Test Environment", func() {
 		})
 
 		It("handles platform option", func() {
-			MustBeSuccessful(flags.Parse([]string{
-				flagsets.OptionString(options.PathOption), "ghcr.io/open-component-model/image:v1.0",
-				flagsets.OptionString(options.PlatformsOption), "linux/amd64",
-			}))
+			MustBeSuccessful(flagsets.ParseOptionsFor(flags,
+				flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
+				flagsets.OptionSpec(options.PlatformsOption, "linux/amd64"),
+			))
 			spec := Must(Apply(opts))
 			Expect(spec).To(Equal(me.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64")))
 		})
@@ -120,23 +122,24 @@ var _ = Describe("Test Environment", func() {
 	Context("inputs", func() {
 		BeforeEach(func() {
 			flags = &pflag.FlagSet{}
-			opts = inputs.DefaultInputTypeScheme.ConfigTypeSetConfigProvider().CreateOptions()
+			opts = inputs.DefaultInputTypeScheme.CreateOptions()
 			opts.AddFlags(flags)
 			cfg = flagsets.Config{}
 		})
 
 		It("input type", func() {
 			fmt.Printf("input option names: %+v\n", opts.Names())
-			MustBeSuccessful(flags.Parse([]string{
-				"--inputType", me.TYPE,
-				flagsets.OptionString(options.PathOption), "ghcr.io/open-component-model/image:v1.0",
-				flagsets.OptionString(options.PlatformsOption), "linux/amd64",
-			}))
+			MustBeSuccessful(flagsets.ParseOptionsFor(flags,
+				flagsets.OptionSpec(inputs.DefaultInputTypeScheme.ConfigTypeSetConfigProvider().GetTypeOptionType(), me.TYPE),
+				flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
+				flagsets.OptionSpec(options.PlatformsOption, "linux/amd64"),
+				flagsets.OptionSpec(options.PlatformsOption, "/arm64"),
+			))
 			cfg := Must(inputs.DefaultInputTypeScheme.GetConfigFor(opts))
 			fmt.Printf("selected input options: %+v\n", cfg)
 
 			spec := Must(inputs.DefaultInputTypeScheme.GetInputSpecFor(opts))
-			Expect(spec).To(Equal(me.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64")))
+			Expect(spec).To(Equal(me.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64", "/arm64")))
 		})
 	})
 

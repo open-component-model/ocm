@@ -8,11 +8,32 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func OptionString(option ConfigOptionType) string {
 	return "--" + option.GetName()
+}
+
+type _OptionSpec struct {
+	otype ConfigOptionType
+	args  []string
+}
+
+func OptionSpec(otype ConfigOptionType, args ...string) _OptionSpec {
+	return _OptionSpec{otype, args}
+}
+
+func ParseOptionsFor(flags *pflag.FlagSet, specs ..._OptionSpec) error {
+	var args []string
+
+	for _, spec := range specs {
+		args = append(args, OptionString(spec.otype))
+		args = append(args, spec.args...)
+	}
+	return flags.Parse(args)
 }
 
 func GetField(config Config, names ...string) (interface{}, error) {
