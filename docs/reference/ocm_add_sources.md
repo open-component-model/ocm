@@ -62,12 +62,13 @@ sources, source, src, s
       --inputJson YAML               JSON formatted text
       --inputLibraries stringArray   library path for inputs
       --inputPath string             path field for input
+      --inputPlatforms stringArray   input filter for image platforms ([os]/[architecture])
       --inputPreserveDir             preserve directory in archive for inputs
       --inputText string             utf8 text
       --inputType string             type of blob input specification
       --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
-      --inputVersion stringArray     version info for inputs
+      --inputVersion string          version info for inputs
       --inputYaml YAML               YAML formatted text
       --mediaType string             media type for artifact blob representation
 ```
@@ -377,13 +378,19 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
 
-  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
+  - **<code>platforms</code>** *[]string*
+
+    This OPTIONAL property can be used to filter index artifacts to include
+    only images for dedicated operating systems/architectures.
+    Elements must meet the syntax [&lt;os>]/[&lt;architecture>].
+
+  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputPlatforms</code>, <code>--mediaType</code>
 
 - Input type <code>ociImage</code>
 
   DEPRECATED: This type is deprecated, please use ociArtifact instead.
 
-  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
+  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputPlatforms</code>, <code>--mediaType</code>
 
 - Input type <code>spiff</code>
 
