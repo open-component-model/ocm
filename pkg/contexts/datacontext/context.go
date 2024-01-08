@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	runtime2 "runtime"
 	"sync"
 
 	"github.com/mandelsoft/logging"
@@ -143,6 +144,9 @@ const CONTEXT_TYPE = "attributes" + OCM_CONTEXT_SUFFIX
 type AttributesContext interface {
 	Context
 
+	IsAttributesContext() bool
+	AttributesContext() AttributesContext
+
 	BindTo(ctx context.Context) context.Context
 }
 
@@ -212,6 +216,37 @@ func (w *gcWrapper) SetContext(c *_context) {
 	w._context = c
 }
 
+// var _ Context = gcWrapper{}
+
+// AttributesContext must be defined at wrapper as special
+// case for a root context.
+// Unfortunately GO generics do not accept this these for
+// FinalizedContext anymore because of this
+// pointer receiver, therefore we have to copy and specialize
+// the complete stuff.
+func (w *gcWrapper) AttributesContext() AttributesContext {
+	if w.updater != nil {
+		w.updater.Update()
+	}
+	return w
+}
+
+func finalizedContext(c *_context) AttributesContext {
+	var v gcWrapper
+	p := &v
+	p.SetContext(c)
+	p.setSelf(p, c.GetKey()) // prepare for generic bind operation
+	runtime2.SetFinalizer(&v, lfi)
+	Debug(p, "create context", "id", c.GetId())
+	return p
+}
+
+func lfi(c *gcWrapper) {
+	err := c.Cleanup()
+	c.GetRecorder().Record(c.GetId())
+	Debug(c, "cleanup context", "error", err)
+}
+
 // New provides a root attribute context.
 func New(parentAttrs ...Attributes) AttributesContext {
 	return NewWithActions(utils.Optional(parentAttrs...), handlers.NewRegistry(nil, handlers.DefaultRegistry()))
@@ -226,14 +261,12 @@ func newWithActions(mode BuilderMode, parentAttrs Attributes, actions handlers.R
 	c.contextBase = newContextBase(c, CONTEXT_TYPE, key, parentAttrs, &c.updater,
 		ComposeDelegates(logging.NewWithBase(ocmlog.Context()), handlers.NewRegistry(nil, actions)),
 	)
-	return SetupContext(mode, FinalizedContext[gcWrapper](c))
+	// return SetupContext(mode, FinalizedContext[gcWrapper](c)) // see above
+	return SetupContext(mode, finalizedContext(c))
 }
 
-func (c *_context) AttributesContext() AttributesContext {
-	if c.updater != nil {
-		c.updater.Update()
-	}
-	return c
+func (c *_context) IsAttributesContext() bool {
+	return true
 }
 
 func (c *_context) Actions() handlers.Registry {

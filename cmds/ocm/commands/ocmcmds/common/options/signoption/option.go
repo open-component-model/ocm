@@ -5,7 +5,6 @@
 package signoption
 
 import (
-	"crypto/x509"
 	"fmt"
 	"strings"
 
@@ -46,7 +45,6 @@ type Option struct {
 
 	SignMode      bool
 	signAlgorithm string
-	RootCerts     *x509.CertPool
 	// Verify the digests
 	Verify bool
 
@@ -100,9 +98,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 	} else {
 		o.SignatureNames = nil
 	}
-	if o.Keys == nil {
-		o.Keys = signing.NewKeyRegistry()
-	}
+
 	if o.SignMode {
 		err := o.Hash.Configure(ctx)
 		if err != nil {
@@ -124,9 +120,6 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		return err
 	}
 
-	if o.Keys.HasRootCertificates() {
-		o.RootCerts = o.Keys.GetRootCertPool(true)
-	}
 	return nil
 }
 

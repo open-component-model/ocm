@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package certattr
+package rootcertsattr
 
 import (
 	"crypto/x509"
@@ -21,7 +21,7 @@ const (
 )
 
 type (
-	Context         = datacontext.Context
+	Context         = datacontext.AttributesContext
 	ContextProvider = datacontext.ContextProvider
 )
 
@@ -119,7 +119,7 @@ func (a *Attribute) HasRootCertificates() bool {
 	return len(a.rootCertificates) > 0
 }
 
-func (a *Attribute) GetCertificatePool(system bool) *x509.CertPool {
+func (a *Attribute) GetRootCertPool(system bool) *x509.CertPool {
 	var pool *x509.CertPool
 
 	if system {
@@ -141,7 +141,7 @@ func (a *Attribute) GetCertificatePool(system bool) *x509.CertPool {
 ////////////////////////////////////////////////////////////////////////////////
 
 func Get(ctx ContextProvider) *Attribute {
-	return ctx.AttributesContext().GetAttributes().GetOrCreateAttribute(ATTR_KEY, func(ctx Context) interface{} {
+	return ctx.AttributesContext().GetAttributes().GetOrCreateAttribute(ATTR_KEY, func(ctx datacontext.Context) interface{} {
 		return &Attribute{}
 	}).(*Attribute)
 }

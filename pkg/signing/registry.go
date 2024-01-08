@@ -5,7 +5,6 @@
 package signing
 
 import (
-	"crypto/x509"
 	"crypto/x509/pkix"
 	"sort"
 	"sync"
@@ -99,11 +98,6 @@ type KeyRegistryFuncs interface {
 	RegisterIssuer(name string, is *pkix.Name)
 	GetIssuer(name string) *pkix.Name
 	HasIssuers() bool
-
-	RegisterRootCertificates(in signutils.GenericCertificateChain) error
-	GetRootCertificates() []*x509.Certificate
-	GetRootCertPool(system bool) *x509.CertPool
-	HasRootCertificates() bool
 }
 
 type HandlerRegistryProvider interface {
@@ -365,7 +359,6 @@ type keyRegistry struct {
 	publicKeys  map[string]interface{}
 	privateKeys map[string]interface{}
 	issuers     map[string]*pkix.Name
-	rootCerts   []*x509.Certificate
 }
 
 var _ KeyRegistry = (*keyRegistry)(nil)
@@ -494,69 +487,6 @@ func (r *keyRegistry) HasIssuers() bool {
 			continue
 		}
 		if p.HasIssuers() {
-			return true
-		}
-	}
-	return false
-}
-
-func (r *keyRegistry) RegisterRootCertificates(in signutils.GenericCertificateChain) error {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-
-	certs, err := signutils.GetCertificateChain(in, false)
-	if err != nil {
-		return err
-	}
-	r.rootCerts = append(r.rootCerts, certs...)
-	return nil
-}
-
-func (r *keyRegistry) GetRootCertificates() []*x509.Certificate {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-
-	certs := slices.Clone(r.rootCerts)
-	for _, p := range r.parents {
-		if p != nil {
-			certs = append(certs, p.GetRootCertificates()...)
-		}
-	}
-	return certs
-}
-
-func (r *keyRegistry) GetRootCertPool(system bool) *x509.CertPool {
-	var (
-		err  error
-		pool *x509.CertPool
-	)
-
-	if system {
-		pool, err = x509.SystemCertPool()
-		if err != nil {
-			pool = x509.NewCertPool()
-		}
-	} else {
-		pool = x509.NewCertPool()
-	}
-
-	for _, c := range r.GetRootCertificates() {
-		pool.AddCert(c)
-	}
-	return pool
-}
-
-func (r *keyRegistry) HasRootCertificates() bool {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	if len(r.rootCerts) > 0 {
-		return true
-	}
-	for _, p := range r.parents {
-		if p == nil {
-			continue
-		}
-		if p.HasRootCertificates() {
 			return true
 		}
 	}

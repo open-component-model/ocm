@@ -2,12 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package certattr
+package rootcertsattr
 
 import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -60,9 +61,10 @@ func (a *Config) AddRootCertifacte(chain signutils.GenericCertificateChain) erro
 }
 
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
-	switch t := target.(type) {
-	case Context:
-		errors.Wrapf(a.ApplyToAttribute(Get(t)), "applying config to certattr failed")
+	if t, ok := target.(Context); ok {
+		if t.AttributesContext() == t { // apply only to root context
+			return errors.Wrapf(a.ApplyToAttribute(Get(t)), "applying config to certattr failed")
+		}
 	}
 	return cfgcpi.ErrNoContext(ConfigType)
 }

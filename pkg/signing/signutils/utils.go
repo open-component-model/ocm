@@ -16,6 +16,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
+	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -282,6 +283,50 @@ func GetCertPool(in GenericCertificatePool, filter bool) (*x509.CertPool, error)
 		pool.AddCert(c)
 	}
 	return pool, nil
+}
+
+func AddCertificateToPool(in GenericCertificatePool, chain ...GenericCertificateChain) (GenericCertificatePool, error) {
+	var certs []*x509.Certificate
+	var pool *x509.CertPool
+	var err error
+
+	if !reflect2.IsNil(in) {
+		switch k := in.(type) {
+		case []byte:
+			certs, err = ParseCertificateChain(k, false)
+		case string:
+			certs, err = ParseCertificateChain([]byte(k), false)
+		case *x509.Certificate:
+			certs = []*x509.Certificate{k}
+		case []*x509.Certificate:
+			certs = slices.Clone(k)
+		case *x509.CertPool:
+			pool = k
+		default:
+			err = fmt.Errorf("unknown certificate pool specification %T", k)
+		}
+	}
+	if err != nil {
+		return in, err
+	}
+
+	for _, c := range chain {
+		sub, err := GetCertificateChain(c, false)
+		if err != nil {
+			return in, err
+		}
+		if pool != nil {
+			for _, cert := range sub {
+				pool.AddCert(cert)
+			}
+		} else {
+			certs = append(certs, sub...)
+		}
+	}
+	if pool != nil {
+		return pool, nil
+	}
+	return certs, nil
 }
 
 func GetCertificate(in GenericCertificate, filter bool) (*x509.Certificate, *x509.CertPool, error) {

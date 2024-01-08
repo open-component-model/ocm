@@ -9,10 +9,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/certattr"
-
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 )
@@ -46,7 +45,6 @@ var _ = Describe("attribute", func() {
 
 		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())
 		Expect(signingattr.Get(ocmctx).GetPublicKey(NAME)).To(Equal([]byte("keydata")))
-		Expect(signingattr.Get(ocmctx).HasRootCertificates()).To(BeFalse())
 	})
 
 	It("applies root certificate", func() {
@@ -75,9 +73,7 @@ EVQVGDF6KNU=
 		cfg.AddRootCertifacteData([]byte(certdata))
 
 		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())
-		Expect(signingattr.Get(ocmctx).HasRootCertificates()).To(BeTrue())
-
-		Expect(certattr.Get(ocmctx).HasRootCertificates()).To(BeTrue())
+		Expect(rootcertsattr.Get(ocmctx).HasRootCertificates()).To(BeTrue())
 	})
 
 })

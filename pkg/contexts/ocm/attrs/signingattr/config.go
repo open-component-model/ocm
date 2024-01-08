@@ -11,11 +11,11 @@ import (
 	"encoding/pem"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/certattr"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
 	"golang.org/x/exp/slices"
 
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -209,12 +209,12 @@ func (a *Config) AddRootCertifacte(chain signutils.GenericCertificateChain) erro
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	t, ok := target.(Context)
 	if !ok {
-		if t, ok := target.(datacontext.Context); ok {
+		if t, ok := target.(datacontext.AttributesContext); ok {
 			// datacontext.Context is implemented by all context types.
 			// Therefore, we have to check for the root context, this is the one
 			// identical to the attributes context of a context.
 			if t.AttributesContext() == t {
-				return errors.Wrapf(a.ApplyToCertAttr(certattr.Get(t)), "applying config to certattr failed")
+				return errors.Wrapf(a.ApplyToCertAttr(rootcertsattr.Get(t)), "applying config to certattr failed")
 			}
 		}
 		return cfgcpi.ErrNoContext(ConfigType)
@@ -222,7 +222,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	return errors.Wrapf(a.ApplyToRegistry(Get(t)), "applying config failed")
 }
 
-func (a *Config) ApplyToCertAttr(attr *certattr.Attribute) error {
+func (a *Config) ApplyToCertAttr(attr *rootcertsattr.Attribute) error {
 	for i, k := range a.RootCertificates {
 		key, err := k.Get()
 		if err != nil {
@@ -250,16 +250,6 @@ func (a *Config) ApplyToRegistry(registry signing.Registry) error {
 			return errors.Wrapf(err, "cannot get private key %s", n)
 		}
 		registry.RegisterPrivateKey(n, key)
-	}
-	for i, k := range a.RootCertificates {
-		key, err := k.Get()
-		if err != nil {
-			return errors.Wrapf(err, "cannot get root certificate %d", i)
-		}
-		err = registry.RegisterRootCertificates(key)
-		if err != nil {
-			return errors.Wrapf(err, "invalid certificate %d", i)
-		}
 	}
 	for n, k := range a.Issuers {
 		registry.RegisterIssuer(n, k.Get())

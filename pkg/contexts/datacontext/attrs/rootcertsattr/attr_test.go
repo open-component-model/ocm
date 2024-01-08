@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package certattr_test
+package rootcertsattr_test
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	me "github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/certattr"
+	me "github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
 )
 
 const NAME = "test"

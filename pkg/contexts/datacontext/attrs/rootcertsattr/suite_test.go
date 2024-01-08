@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package certattr_test
+package rootcertsattr_test
 
 import (
 	"testing"
