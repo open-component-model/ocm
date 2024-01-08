@@ -27,6 +27,9 @@ type (
 
 	ConfigSet         = internal.ConfigSet
 	ConfigurationList = internal.ConfigurationList
+
+	ConfigApplier         = internal.ConfigApplier
+	ConfigApplierFunction = internal.ConfigApplierFunction
 )
 
 var DefaultContext = internal.DefaultContext

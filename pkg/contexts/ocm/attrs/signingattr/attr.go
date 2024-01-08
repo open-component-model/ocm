@@ -5,7 +5,9 @@
 package signingattr
 
 import (
+	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/certattr"
 	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/context"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -102,4 +104,24 @@ func SetHandlerRegistry(ctx ContextProvider, registry signing.HandlerRegistry) e
 
 func Set(ctx ContextProvider, registry signing.Registry) error {
 	return ctx.OCMContext().GetAttributes().SetAttribute(ATTR_KEY, registry)
+}
+
+func ApplyToRegistry(ctx cfgcpi.Context, src, tgt interface{}) error {
+	if c, ok := tgt.(ocm.Context); ok {
+		if cfg, ok := src.(*certattr.Config); ok {
+			reg := Get(c)
+
+			for i, k := range cfg.RootCertificates {
+				key, err := k.Get()
+				if err != nil {
+					return errors.Wrapf(err, "cannot get root certificate %d", i)
+				}
+				err = reg.RegisterRootCertificates(key)
+				if err != nil {
+					return errors.Wrapf(err, "invalid certificate %d", i)
+				}
+			}
+		}
+	}
+	return nil
 }

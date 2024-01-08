@@ -13,10 +13,20 @@ import (
 
 const KIND_CONFIGSET = "config set"
 
+type ConfigApplier interface {
+	ApplyConfigTo(Context, cfg, tgt interface{}) error
+}
+
 type Config interface {
 	runtime.VersionedTypedObject
 
 	ApplyTo(Context, interface{}) error
+}
+
+type ConfigApplierFunction func(ctx Context, cfg, tgt interface{}) error
+
+func (f ConfigApplierFunction) ApplyConfigTo(ctx Context, cfg, tgt interface{}) error {
+	return f(ctx, cfg, tgt)
 }
 
 type ConfigSet struct {

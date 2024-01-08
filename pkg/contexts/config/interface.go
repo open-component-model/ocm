@@ -31,6 +31,8 @@ type (
 	GenericConfig          = internal.GenericConfig
 	ConfigSelector         = internal.ConfigSelector
 	ConfigSelectorFunction = internal.ConfigSelectorFunction
+	ConfigApplier          = internal.ConfigApplier
+	ConfigApplierFunction  = internal.ConfigApplierFunction
 )
 
 func DefaultContext() internal.Context {

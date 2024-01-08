@@ -182,7 +182,7 @@ func (c *_context) WithInfo(desc string) Context {
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
 	c.updater.Update()
-	return c.sharedAttributes
+	return c
 }
 
 func (c *_context) ConfigTypes() ConfigTypeScheme {

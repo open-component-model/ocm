@@ -10,8 +10,9 @@ import (
 	"encoding/json"
 	"encoding/pem"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/certattr"
 	"golang.org/x/exp/slices"
 
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
@@ -70,6 +71,8 @@ func (i *Issuer) Set(issuer *pkix.Name) {
 	i.PostalCode = slices.Clone(issuer.PostalCode)
 }
 
+type KeySpec = cfgcpi.ContentSpec
+
 // Config describes a memory based repository interface.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
@@ -96,38 +99,6 @@ func (r *RawData) UnmarshalJSON(data []byte) error {
 	}
 	*r, err = base64.StdEncoding.DecodeString(s)
 	return err
-}
-
-type KeySpec struct {
-	Data       RawData        `json:"data,omitempty"`
-	StringData string         `json:"stringdata,omitempty"`
-	Path       string         `json:"path,omitempty"`
-	Parsed     interface{}    `json:"-"`
-	FileSystem vfs.FileSystem `json:"-"`
-}
-
-func (k *KeySpec) Get() (interface{}, error) {
-	if k.Parsed != nil {
-		return k.Parsed, nil
-	}
-	if k.Data != nil {
-		if k.StringData != "" || k.Path != "" {
-			return nil, errors.Newf("only one of data, stringdata or path may be set")
-		}
-		return []byte(k.Data), nil
-	}
-	if k.StringData != "" {
-		if k.Path != "" {
-			return nil, errors.Newf("only one of data, stringdata or path may be set")
-		}
-		return []byte(k.StringData), nil
-	}
-	fs := k.FileSystem
-	if fs == nil {
-		fs = osfs.New()
-	}
-
-	return utils.ReadFile(k.Path, fs)
 }
 
 // New creates a new memory ConfigSpec.
@@ -238,9 +209,31 @@ func (a *Config) AddRootCertifacte(chain signutils.GenericCertificateChain) erro
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	t, ok := target.(Context)
 	if !ok {
+		if t, ok := target.(datacontext.Context); ok {
+			// datacontext.Context is implemented by all context types.
+			// Therefore, we have to check for the root context, this is the one
+			// identical to the attributes context of a context.
+			if t.AttributesContext() == t {
+				return errors.Wrapf(a.ApplyToCertAttr(certattr.Get(t)), "applying config to certattr failed")
+			}
+		}
 		return cfgcpi.ErrNoContext(ConfigType)
 	}
 	return errors.Wrapf(a.ApplyToRegistry(Get(t)), "applying config failed")
+}
+
+func (a *Config) ApplyToCertAttr(attr *certattr.Attribute) error {
+	for i, k := range a.RootCertificates {
+		key, err := k.Get()
+		if err != nil {
+			return errors.Wrapf(err, "cannot get root certificate %d", i)
+		}
+		err = attr.RegisterRootCertificates(key)
+		if err != nil {
+			return errors.Wrapf(err, "invalid certificate %d", i)
+		}
+	}
+	return nil
 }
 
 func (a *Config) ApplyToRegistry(registry signing.Registry) error {

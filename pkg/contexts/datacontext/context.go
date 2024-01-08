@@ -229,6 +229,13 @@ func newWithActions(mode BuilderMode, parentAttrs Attributes, actions handlers.R
 	return SetupContext(mode, FinalizedContext[gcWrapper](c))
 }
 
+func (c *_context) AttributesContext() AttributesContext {
+	if c.updater != nil {
+		c.updater.Update()
+	}
+	return c
+}
+
 func (c *_context) Actions() handlers.Registry {
 	if c.updater != nil {
 		c.updater.Update()

@@ -2,55 +2,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package signingattr_test
+package certattr_test
 
 import (
 	"encoding/json"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/certattr"
-
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	me "github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/certattr"
 )
 
 const NAME = "test"
 
-var _ = Describe("attribute", func() {
-	var cfgctx config.Context
-	var ocmctx ocm.Context
-
-	BeforeEach(func() {
-		ocmctx = ocm.New(datacontext.MODE_EXTENDED)
-		cfgctx = ocmctx.ConfigContext()
-	})
-
-	It("marshal/unmarshal", func() {
-		cfg := signingattr.New()
-		cfg.AddPublicKeyData(NAME, []byte("keydata"))
-
-		data, err := json.Marshal(cfg)
-		Expect(err).To(Succeed())
-
-		r := &signingattr.Config{}
-		Expect(json.Unmarshal(data, r)).To(Succeed())
-		Expect(r).To(Equal(cfg))
-	})
-
-	It("applies public key", func() {
-		cfg := signingattr.New()
-		cfg.AddPublicKeyData(NAME, []byte("keydata"))
-
-		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())
-		Expect(signingattr.Get(ocmctx).GetPublicKey(NAME)).To(Equal([]byte("keydata")))
-		Expect(signingattr.Get(ocmctx).HasRootCertificates()).To(BeFalse())
-	})
-
-	It("applies root certificate", func() {
-		certdata := `
+var certdata = []byte(`
 -----BEGIN CERTIFICATE-----
 MIIDBDCCAeygAwIBAgIQF+kRr0G+faDEAH5Y4P1J7DANBgkqhkiG9w0BAQsFADAc
 MQwwCgYDVQQKEwNPQ00xDDAKBgNVBAMTA29jbTAeFw0yMzEyMjkxMDIyMzdaFw0y
@@ -70,14 +36,35 @@ gHMKSEk3HuYA1raDJFv4ihwO5pXHvlDhcW0C1oMG9lOCh8TXpVzzBDZiH1kWPWSs
 gW9YBu7/p/22U4++X23RyaheGuysfRAMv9cTv+8T0J8NHaAmQz4/QHFXh+0/tQgU
 EVQVGDF6KNU=
 -----END CERTIFICATE-----
-`
-		cfg := signingattr.New()
-		cfg.AddRootCertifacteData([]byte(certdata))
+`)
+
+var _ = Describe("attribute", func() {
+	var cfgctx config.Context
+	var ctx me.Context
+
+	BeforeEach(func() {
+		cfgctx = config.New(datacontext.MODE_DEFAULTED)
+		ctx = cfgctx.AttributesContext()
+	})
+
+	It("marshal/unmarshal", func() {
+		cfg := me.New()
+		cfg.AddRootCertifacteData(certdata)
+
+		data, err := json.Marshal(cfg)
+		Expect(err).To(Succeed())
+
+		r := &me.Config{}
+		Expect(json.Unmarshal(data, r)).To(Succeed())
+		Expect(r).To(Equal(cfg))
+	})
+
+	It("applies root certificate", func() {
+		cfg := me.New()
+		cfg.AddRootCertifacteData(certdata)
 
 		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())
-		Expect(signingattr.Get(ocmctx).HasRootCertificates()).To(BeTrue())
-
-		Expect(certattr.Get(ocmctx).HasRootCertificates()).To(BeTrue())
+		Expect(me.Get(ctx).HasRootCertificates()).To(BeTrue())
 	})
 
 })
