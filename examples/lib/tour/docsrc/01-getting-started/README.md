@@ -75,6 +75,22 @@ successful object retrieval.
 {{include}{../../01-getting-started/example.go}{close}}
 ```
 
+All kinds of repositories, regardless of their type
+feature the same interface to work with OCM content.
+It can be used to access stored elements.
+First of all, a repository hosts component versions.
+They are stored for components. Components are not
+necessarily explicit objects stored in an OCM repository.
+But they have features like a name and versions. Therefore, the
+repository abstraction provided by the library offers
+a component object, which can be retrieved from a
+repository object. A component has a name and acts as
+namespace for versions.
+
+```go
+{{include}{../../01-getting-started/example.go}{lookup component}}
+```
+
 Now we look for the versions of the component
 available in this repository.
 
@@ -183,7 +199,7 @@ closing the reader, again
 ```
 
 Now, we just read the content and copy it to the intended 
-output file.
+output file (`/tmp/ocmcli`).
 
 ```go
 {{include}{../../01-getting-started/example.go}{copy}}
