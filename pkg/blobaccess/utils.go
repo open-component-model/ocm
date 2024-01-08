@@ -5,12 +5,15 @@
 package blobaccess
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -162,4 +165,38 @@ func MimeReaderFromProvider(s BlobAccessProvider) (io.ReadCloser, string, error)
 		return nil, "", err
 	}
 	return iotools.AddReaderCloser(r, blob), mime, nil
+}
+
+type GenericData interface{}
+
+const KIND_DATASOURCE = "data source"
+
+// GetData provides data as byte sequence from some generic
+// data sources like byte arrays, strings, DataReader and
+// DataGetters. This means we can pass all BlobAccess or DataAccess
+// objects.
+// If no an unknown data source is passes an ErrInvalid(KIND_DATASOURCE)
+// is returned.
+func GetData(src GenericData) ([]byte, error) {
+	switch t := src.(type) {
+	case []byte:
+		return t, nil
+	case string:
+		return []byte(t), nil
+	case DataGetter:
+		return t.Get()
+	case DataReader:
+		var buf bytes.Buffer
+		r, err := t.Reader()
+		if err != nil {
+			return nil, err
+		}
+		defer r.Close()
+		_, err = io.Copy(&buf, r)
+		if err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
+	}
+	return nil, errors.ErrUnknown(KIND_DATASOURCE, fmt.Sprintf("%T", src))
 }

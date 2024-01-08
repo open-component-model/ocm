@@ -12,6 +12,8 @@ package signutils
 //  - dedicated implementations
 //  - byte sequences
 //  - strings
+//  - blobaccess.BlobAccess
+//  - blobaccess.DataAccess
 //  - other elements or list of elements, which can be mapped appropriately.
 
 // GenericPublicKey can be everything somebody

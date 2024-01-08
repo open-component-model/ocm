@@ -18,6 +18,7 @@ import (
 	"github.com/modern-go/reflect2"
 	"golang.org/x/exp/slices"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -163,12 +164,26 @@ type PublicKeySource interface {
 	Public() crypto.PublicKey
 }
 
+func getStandardData(in blobaccess.GenericData) (blobaccess.GenericData, error) {
+	data, err := blobaccess.GetData(in)
+	if err != nil {
+		if !errors.IsErrUnknownKind(err, blobaccess.KIND_DATASOURCE) {
+			return nil, err
+		}
+		return in, nil
+	} else {
+		return data, nil
+	}
+}
+
 func GetPrivateKey(key GenericPrivateKey) (interface{}, error) {
+	key, err := getStandardData(key)
+	if err != nil {
+		return nil, err
+	}
 	switch k := key.(type) {
 	case []byte:
 		return ParsePrivateKey(k)
-	case string:
-		return ParsePrivateKey([]byte(k))
 	case *rsa.PrivateKey:
 		return k, nil
 	case *ecdsa.PrivateKey:
@@ -179,11 +194,13 @@ func GetPrivateKey(key GenericPrivateKey) (interface{}, error) {
 }
 
 func GetPublicKey(key GenericPublicKey) (interface{}, error) {
+	key, err := getStandardData(key)
+	if err != nil {
+		return nil, err
+	}
 	switch k := key.(type) {
 	case []byte:
 		return ParsePublicKey(k)
-	case string:
-		return ParsePublicKey([]byte(k))
 	case *rsa.PublicKey:
 		return k, nil
 	case *dsa.PublicKey:
@@ -202,11 +219,13 @@ func GetPublicKey(key GenericPublicKey) (interface{}, error) {
 func GetCertificateChain(in GenericCertificateChain, filter bool) ([]*x509.Certificate, error) {
 	// unfortunately it is not possible to get certificates from a x509.CertPool
 
+	in, err := getStandardData(in)
+	if err != nil {
+		return nil, err
+	}
 	switch k := in.(type) {
 	case []byte:
 		return ParseCertificateChain(k, filter)
-	case string:
-		return ParseCertificateChain([]byte(k), filter)
 	case *x509.Certificate:
 		return []*x509.Certificate{k}, nil
 	case []*x509.Certificate:
@@ -259,11 +278,13 @@ func GetCertPool(in GenericCertificatePool, filter bool) (*x509.CertPool, error)
 	if reflect2.IsNil(in) {
 		return nil, nil
 	}
+	in, err = getStandardData(in)
+	if err != nil {
+		return nil, err
+	}
 	switch k := in.(type) {
 	case []byte:
 		certs, err = ParseCertificateChain(k, filter)
-	case string:
-		certs, err = ParseCertificateChain([]byte(k), filter)
 	case *x509.Certificate:
 		certs = []*x509.Certificate{k}
 	case []*x509.Certificate:
