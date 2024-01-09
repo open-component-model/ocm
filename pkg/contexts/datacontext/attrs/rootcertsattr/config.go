@@ -71,11 +71,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 
 func (a *Config) ApplyToAttribute(attr *Attribute) error {
 	for i, k := range a.RootCertificates {
-		key, err := k.Get()
-		if err != nil {
-			return errors.Wrapf(err, "cannot get root certificate %d", i)
-		}
-		err = attr.RegisterRootCertificates(key)
+		err := attr.RegisterRootCertificates(k)
 		if err != nil {
 			return errors.Wrapf(err, "invalid certificate %d", i)
 		}

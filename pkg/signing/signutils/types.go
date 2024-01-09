@@ -44,6 +44,8 @@ const (
 	KIND_VERIFY_ALGORITHM = "signature verification algorithm"
 	KIND_PUBLIC_KEY       = "public key"
 	KIND_PRIVATE_KEY      = "private key"
+	KIND_CERTIFICATE      = "certificate"
+	KIND_CERTPOOL         = "certificate pool"
 	KIND_SIGNATURE        = "signature"
 	KIND_DIGEST           = "digest"
 )

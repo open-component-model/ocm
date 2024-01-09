@@ -164,10 +164,10 @@ type PublicKeySource interface {
 	Public() crypto.PublicKey
 }
 
-func getStandardData(in blobaccess.GenericData) (blobaccess.GenericData, error) {
-	data, err := blobaccess.GetData(in)
+func getGenericData(in blobaccess.GenericData) (blobaccess.GenericData, error) {
+	data, err := blobaccess.GetGenericData(in)
 	if err != nil {
-		if !errors.IsErrUnknownKind(err, blobaccess.KIND_DATASOURCE) {
+		if !errors.IsErrInvalidKind(err, blobaccess.KIND_DATASOURCE) {
 			return nil, err
 		}
 		return in, nil
@@ -177,9 +177,9 @@ func getStandardData(in blobaccess.GenericData) (blobaccess.GenericData, error) 
 }
 
 func GetPrivateKey(key GenericPrivateKey) (interface{}, error) {
-	key, err := getStandardData(key)
+	key, err := getGenericData(key)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "cannot evaluate private key")
 	}
 	switch k := key.(type) {
 	case []byte:
@@ -189,14 +189,14 @@ func GetPrivateKey(key GenericPrivateKey) (interface{}, error) {
 	case *ecdsa.PrivateKey:
 		return k, nil
 	default:
-		return nil, fmt.Errorf("unknown private key specification %T", k)
+		return nil, errors.ErrInvalidType(KIND_PRIVATE_KEY, k)
 	}
 }
 
 func GetPublicKey(key GenericPublicKey) (interface{}, error) {
-	key, err := getStandardData(key)
+	key, err := getGenericData(key)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "cannot evaluate public key")
 	}
 	switch k := key.(type) {
 	case []byte:
@@ -212,16 +212,16 @@ func GetPublicKey(key GenericPublicKey) (interface{}, error) {
 	case PublicKeySource:
 		return k.Public(), nil
 	default:
-		return nil, fmt.Errorf("unknown public key specification %T", k)
+		return nil, errors.ErrInvalidType(KIND_PUBLIC_KEY, k)
 	}
 }
 
 func GetCertificateChain(in GenericCertificateChain, filter bool) ([]*x509.Certificate, error) {
 	// unfortunately it is not possible to get certificates from a x509.CertPool
 
-	in, err := getStandardData(in)
+	in, err := getGenericData(in)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "cannot evaluate certificate chain")
 	}
 	switch k := in.(type) {
 	case []byte:
@@ -231,7 +231,7 @@ func GetCertificateChain(in GenericCertificateChain, filter bool) ([]*x509.Certi
 	case []*x509.Certificate:
 		return k, nil
 	default:
-		return nil, fmt.Errorf("unknown certificate chain specification %T", k)
+		return nil, errors.ErrInvalidType(KIND_CERTIFICATE, k)
 	}
 }
 
@@ -278,9 +278,9 @@ func GetCertPool(in GenericCertificatePool, filter bool) (*x509.CertPool, error)
 	if reflect2.IsNil(in) {
 		return nil, nil
 	}
-	in, err = getStandardData(in)
+	in, err = getGenericData(in)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "cannot evaluate certificate pool")
 	}
 	switch k := in.(type) {
 	case []byte:
@@ -292,7 +292,7 @@ func GetCertPool(in GenericCertificatePool, filter bool) (*x509.CertPool, error)
 	case *x509.CertPool:
 		return k, nil
 	default:
-		err = fmt.Errorf("unknown certificate pool specification %T", k)
+		err = errors.ErrInvalidType(KIND_CERTPOOL, k)
 	}
 
 	if err != nil {
@@ -324,7 +324,7 @@ func AddCertificateToPool(in GenericCertificatePool, chain ...GenericCertificate
 		case *x509.CertPool:
 			pool = k
 		default:
-			err = fmt.Errorf("unknown certificate pool specification %T", k)
+			err = errors.ErrInvalidType(KIND_CERTPOOL, k)
 		}
 	}
 	if err != nil {
@@ -354,17 +354,20 @@ func GetCertificate(in GenericCertificate, filter bool) (*x509.Certificate, *x50
 	var certs []*x509.Certificate
 	var err error
 
+	in, err = getGenericData(in)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "cannot evaluate certificate")
+	}
+
 	switch k := in.(type) {
 	case []byte:
 		certs, err = ParseCertificateChain(k, filter)
-	case string:
-		certs, err = ParseCertificateChain([]byte(k), filter)
 	case *x509.Certificate:
 		certs = []*x509.Certificate{k}
 	case []*x509.Certificate:
 		certs = k
 	default:
-		err = fmt.Errorf("unknown certificate chain specification %T", k)
+		err = errors.ErrInvalidType(KIND_CERTIFICATE, k)
 	}
 
 	if err != nil {
@@ -402,7 +405,7 @@ func GetTime(in interface{}) (time.Time, error) {
 		}
 		return notBefore, nil
 	default:
-		return time.Time{}, fmt.Errorf("invalid time specification type %T", in)
+		return time.Time{}, errors.ErrInvalidType("time specification", in)
 	}
 }
 

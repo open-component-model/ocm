@@ -6,7 +6,6 @@ package blobaccess
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"sync"
 
@@ -169,6 +168,10 @@ func MimeReaderFromProvider(s BlobAccessProvider) (io.ReadCloser, string, error)
 
 type GenericData interface{}
 
+type GenericDataGetter interface {
+	Get() (interface{}, error)
+}
+
 const KIND_DATASOURCE = "data source"
 
 // GetData provides data as byte sequence from some generic
@@ -198,5 +201,22 @@ func GetData(src GenericData) ([]byte, error) {
 		}
 		return buf.Bytes(), nil
 	}
-	return nil, errors.ErrUnknown(KIND_DATASOURCE, fmt.Sprintf("%T", src))
+	return nil, errors.ErrInvalidType(KIND_DATASOURCE, src)
+}
+
+// GetGenericData evaluates some input provided by well-known
+// types or interfaces and provides some data output
+// by mapping the input to either a byte sequence or
+// some specialized object.
+// If the input type is not known an ErrInvalid(KIND_DATASOURCE)
+// // is returned.
+// In extension to GetData, it additionally evaluates the interface
+// GenericDataGetter to map the input to some evaluated object.
+func GetGenericData(src GenericData) (interface{}, error) {
+	switch t := src.(type) {
+	case GenericDataGetter:
+		return t.Get()
+	default:
+		return GetData(src)
+	}
 }
