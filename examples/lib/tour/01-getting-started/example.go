@@ -76,11 +76,13 @@ func GettingStarted() error {
 	// Now, we look up the OCM CLI component.
 	// All kinds of repositories, regardless of their type
 	// feature the same interface to work with OCM content.
+	// --- begin lookup component ---
 	c, err := repo.LookupComponent("ocm.software/ocmcli")
 	if err != nil {
 		return errors.Wrapf(err, "cannot lookup component")
 	}
-	defer repo.Close()
+	defer c.Close()
+	// --- end lookup component ---
 
 	// Now we look for the versions of the component
 	// available in this repository.
