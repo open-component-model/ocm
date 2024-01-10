@@ -9,16 +9,15 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	runtime2 "runtime"
 	"sync"
 
 	"github.com/mandelsoft/logging"
-
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -46,6 +45,8 @@ const (
 	// and initial registrations.
 	MODE_INITIAL
 )
+
+const MULTI_REF = false
 
 func (m BuilderMode) String() string {
 	switch m {
@@ -123,6 +124,8 @@ type Context interface {
 	ContextProvider
 	Delegates
 
+	IsIdenticalTo(Context) bool
+
 	// GetType returns the context type
 	GetType() string
 	GetId() ContextIdentity
@@ -137,7 +140,7 @@ type InternalContext interface {
 	Context
 	finalizer.RecorderProvider
 	GetKey() interface{}
-	Cleanup() error
+	GetAllocatable() refmgmt.Allocatable
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +208,8 @@ var key = reflect.TypeOf(_context{})
 
 type _context struct {
 	*contextBase
-	updater Updater
+	allocatable refmgmt.Allocatable
+	updater     Updater
 }
 
 // gcWrapper is used as garbage collectable
@@ -216,40 +220,21 @@ type gcWrapper struct {
 	*_context
 }
 
+func newView(c *_context, ref ...bool) AttributesContext {
+	if utils.Optional(ref...) {
+		return FinalizedContext[gcWrapper](c)
+	}
+	return c
+}
+
 func (w *gcWrapper) SetContext(c *_context) {
 	w._context = c
 }
 
-// var _ Context = gcWrapper{}
-
-// AttributesContext must be defined at wrapper as special
-// case for a root context.
-// Unfortunately GO generics do not accept this these for
-// FinalizedContext anymore because of this
-// pointer receiver, therefore we have to copy and specialize
-// the complete stuff.
-func (w *gcWrapper) AttributesContext() AttributesContext {
-	if w.updater != nil {
-		w.updater.Update()
-	}
-	return w
-}
-
-func finalizedContext(c *_context) AttributesContext {
-	var v gcWrapper
-	p := &v
-	p.SetContext(c)
-	p.setSelf(p, c.GetKey()) // prepare for generic bind operation
-	runtime2.SetFinalizer(&v, lfi)
-	Debug(p, "create context", "id", c.GetId())
-	return p
-}
-
-func lfi(c *gcWrapper) {
-	err := c.Cleanup()
-	c.GetRecorder().Record(c.GetId())
-	Debug(c, "cleanup context", "error", err)
-}
+var (
+	_ Context                        = (*_context)(nil)
+	_ ViewCreator[AttributesContext] = (*_context)(nil)
+)
 
 // New provides a root attribute context.
 func New(parentAttrs ...Attributes) AttributesContext {
@@ -265,8 +250,18 @@ func newWithActions(mode BuilderMode, parentAttrs Attributes, actions handlers.R
 	c.contextBase = newContextBase(c, CONTEXT_TYPE, key, parentAttrs, &c.updater,
 		ComposeDelegates(logging.NewWithBase(ocmlog.Context()), handlers.NewRegistry(nil, actions)),
 	)
-	// return SetupContext(mode, FinalizedContext[gcWrapper](c)) // see above
-	return SetupContext(mode, finalizedContext(c))
+	return SetupContext(mode, c.CreateView()) // see above
+}
+
+func (c *_context) CreateView() AttributesContext {
+	return newView(c, true)
+}
+
+func (c *_context) AttributesContext() AttributesContext {
+	if c.updater != nil {
+		c.updater.Update()
+	}
+	return newView(c)
 }
 
 func (c *_context) IsAttributesContext() bool {

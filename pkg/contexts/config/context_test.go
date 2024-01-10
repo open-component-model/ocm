@@ -10,6 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -23,6 +24,7 @@ var _ = Describe("config handling", func() {
 	BeforeEach(func() {
 		scheme = config.NewConfigTypeScheme()
 		cfgctx = config.WithConfigTypeScheme(scheme).New()
+		Expect(cfgctx.AttributesContext().GetId()).NotTo(BeIdenticalTo(datacontext.DefaultContext.GetId()))
 	})
 
 	It("can deserialize unknown", func() {
