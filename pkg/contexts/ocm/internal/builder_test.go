@@ -29,11 +29,9 @@ var _ = Describe("builder test", func() {
 		Expect(ctx.BlobHandlers()).To(BeIdenticalTo(local.DefaultBlobHandlerRegistry))
 		Expect(ctx.BlobDigesters()).To(BeIdenticalTo(local.DefaultBlobDigesterRegistry))
 
-		Expect(ctx.ConfigContext()).To(BeIdenticalTo(config.DefaultContext()))
-
-		Expect(ctx.CredentialsContext()).To(BeIdenticalTo(credentials.DefaultContext()))
-
-		Expect(ctx.OCIContext()).To(BeIdenticalTo(oci.DefaultContext()))
+		Expect(ctx.ConfigContext().GetId()).To(BeIdenticalTo(config.DefaultContext().GetId()))
+		Expect(ctx.CredentialsContext().GetId()).To(BeIdenticalTo(credentials.DefaultContext().GetId()))
+		Expect(ctx.OCIContext().GetId()).To(BeIdenticalTo(oci.DefaultContext().GetId()))
 	})
 
 	It("creates defaulted", func() {

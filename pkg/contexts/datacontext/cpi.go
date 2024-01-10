@@ -7,13 +7,14 @@ package datacontext
 import (
 	"context"
 	"fmt"
-	runtime2 "runtime"
 
 	"github.com/mandelsoft/logging"
-
+	"github.com/modern-go/reflect2"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
+	"github.com/open-component-model/ocm/pkg/refmgmt/finalized"
 )
 
 // NewContextBase creates a context base implementation supporting
@@ -29,28 +30,114 @@ func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attrib
 // for a context wrapper handling garbage collection.
 // It also handles the BindTo interface for a context.
 type GCWrapper struct {
-	self Context
+	ref  *finalized.FinalizedRef
+	self Context // reference to wrapper
+	ctx  Context // reference to internal context
 	key  interface{}
 }
+
+var _ provider = (*GCWrapper)(nil) // wrapper provides access to internal context ref
 
 // setSelf is not public to enforce
 // the usage of this GCWrapper type in context
 // specific garbage collection wrappers.
 // It is enforced by the
 // finalizableContextWrapper interface.
-func (w *GCWrapper) setSelf(self Context, key interface{}) {
+func (w *GCWrapper) setSelf(a refmgmt.Allocatable, self Context, key interface{}) {
+	if a != nil {
+		w.ref, _ = finalized.NewPlainFinalizedView(a)
+	}
 	w.self = self
 	w.key = key
 }
 
+func (w *GCWrapper) setContext(c Context) {
+	w.ctx = c
+}
+
+func (w *GCWrapper) IsPersistent() bool {
+	return true
+}
+
+func (w *GCWrapper) GetInternalContext() Context {
+	return w.ctx
+}
+
 func init() { // linter complains about unused method.
-	(&GCWrapper{}).setSelf(nil, nil)
+	(&GCWrapper{}).setSelf(nil, nil, nil)
 }
 
 // BindTo makes the Context reachable via the resulting context.Context.
 // Go requires not to use a pointer receiver, here ??????
 func (b GCWrapper) BindTo(ctx context.Context) context.Context {
 	return context.WithValue(ctx, b.key, b.self)
+}
+
+func (w GCWrapper) getAllocatable() refmgmt.Allocatable {
+	return w.ref.GetAllocatable()
+}
+
+type view interface {
+	getAllocatable() refmgmt.Allocatable
+}
+
+type viewI interface {
+	GetAllocatable() refmgmt.Allocatable
+}
+
+func GetContextRefCount(ctx Context) int {
+	switch a := ctx.(type) {
+	case view:
+		if m, ok := a.getAllocatable().(refmgmt.RefMgmt); ok {
+			return m.RefCount()
+		}
+	case viewI:
+		if m, ok := a.GetAllocatable().(refmgmt.RefMgmt); ok {
+			return m.RefCount()
+		}
+	}
+	return -1
+}
+
+type persistent interface {
+	IsPersistent() bool
+}
+
+type provider interface {
+	GetInternalContext() Context
+}
+
+type ViewCreator[C Context] interface {
+	CreateView() C
+}
+
+func IsPersistentContextRef(ctx Context) bool {
+	if p, ok := ctx.(persistent); ok {
+		return p.IsPersistent()
+	}
+	return false
+}
+
+// PersistentContextRef ensure a persistent context ref to the given
+// context to avoid an automatic cleanup of the context, which is
+// executed if all persistent reds are gone.
+// If you want to keep context related objects longer than your used
+// context reference, you should keep a persistent ref. This
+// could be the one provided by context creation, or by retrieving
+// an explicit one using this function.
+func PersistentContextRef[C Context](ctx C) C {
+	if IsPersistentContextRef(ctx) {
+		return ctx
+	}
+	var c interface{} = ctx
+	for {
+		if p, ok := c.(provider); ok {
+			c = p.GetInternalContext()
+		} else {
+			break
+		}
+	}
+	return c.(ViewCreator[C]).CreateView()
 }
 
 // finalizableContextWrapper is the interface for
@@ -62,7 +149,8 @@ type finalizableContextWrapper[C InternalContext, P any] interface {
 	InternalContext
 
 	SetContext(C)
-	setSelf(Context, interface{})
+	provider
+	setSelf(refmgmt.Allocatable, Context, interface{})
 	*P
 }
 
@@ -81,24 +169,17 @@ func FinalizedContext[W Context, C InternalContext, P finalizableContextWrapper[
 	var v W
 	p := (P)(&v)
 	p.SetContext(c)
-	p.setSelf(p, c.GetKey()) // prepare for generic bind operation
-	runtime2.SetFinalizer(p, fi[W, C, P])
-	Debug(p, "create context", "id", c.GetId())
+	p.setSelf(c.GetAllocatable(), p, c.GetKey()) // prepare for generic bind operation
 	return p
 }
 
-func fi[W Context, C InternalContext, P finalizableContextWrapper[C, W]](c P) {
-	err := c.Cleanup()
-	c.GetRecorder().Record(c.GetId())
-	Debug(c, "cleanup context", "error", err)
-}
-
 type contextBase struct {
-	ctxtype    string
-	id         ContextIdentity
-	key        interface{}
-	effective  Context
-	attributes *_attributes
+	ctxtype     string
+	allocatable refmgmt.Allocatable
+	id          ContextIdentity
+	key         interface{}
+	effective   Context
+	attributes  *_attributes
 	delegates
 
 	finalizer *finalizer.Finalizer
@@ -120,7 +201,20 @@ func newContextBase(eff Context, typ string, key interface{}, parentAttrs Attrib
 		delegates:  delegates,
 		recorder:   recorder,
 	}
+	c.allocatable = refmgmt.NewAllocatable(c.cleanup, true)
+	Debug(c, "create context", "id", c.GetId())
 	return c
+}
+
+func (c *contextBase) IsIdenticalTo(ctx Context) bool {
+	if reflect2.IsNil(ctx) {
+		return false
+	}
+	return c.GetId() == ctx.GetId()
+}
+
+func (c *contextBase) GetAllocatable() refmgmt.Allocatable {
+	return c.allocatable
 }
 
 func (c *contextBase) BindTo(ctx context.Context) context.Context {
@@ -151,7 +245,10 @@ func (c *contextBase) GetRecorder() *finalizer.RuntimeFinalizationRecoder {
 	return c.recorder
 }
 
-func (c *contextBase) Cleanup() error {
+func (c *contextBase) cleanup() error {
+	if c.recorder != nil {
+		c.recorder.Record(c.id)
+	}
 	list := errors.ErrListf("cleanup %s", c.id)
 	list.Addf(nil, c.finalizer.Finalize(), "finalizers")
 	list.Add(c.attributes.Finalize())

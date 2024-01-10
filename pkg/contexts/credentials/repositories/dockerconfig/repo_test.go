@@ -13,6 +13,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -165,6 +166,7 @@ var _ = Describe("docker config", func() {
 			ctx.GetType()
 			Expect(r.Get()).To(BeNil())
 
+			Expect(datacontext.GetContextRefCount(ctx)).To(Equal(1))
 			ctx = nil
 			runtime.GC()
 			time.Sleep(time.Second)
