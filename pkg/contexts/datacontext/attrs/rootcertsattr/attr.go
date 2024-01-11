@@ -72,7 +72,7 @@ func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]by
 
 	for _, c := range attr.rootCertificates {
 		data := signutils.CertificateToPem(c)
-		cfg.AddRootCertifacteData(data)
+		cfg.AddRootCertificateData(data)
 	}
 
 	return json.Marshal(cfg)

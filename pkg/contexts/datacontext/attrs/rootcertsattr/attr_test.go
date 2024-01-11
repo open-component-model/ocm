@@ -49,7 +49,7 @@ var _ = Describe("attribute", func() {
 
 	It("marshal/unmarshal", func() {
 		cfg := me.New()
-		cfg.AddRootCertifacteData(certdata)
+		cfg.AddRootCertificateData(certdata)
 
 		data, err := json.Marshal(cfg)
 		Expect(err).To(Succeed())
@@ -61,7 +61,7 @@ var _ = Describe("attribute", func() {
 
 	It("applies root certificate", func() {
 		cfg := me.New()
-		cfg.AddRootCertifacteData(certdata)
+		cfg.AddRootCertificateData(certdata)
 
 		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())
 		Expect(me.Get(ctx).HasRootCertificates()).To(BeTrue())

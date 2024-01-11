@@ -174,7 +174,7 @@ func (a *Config) AddPrivateKeyFile(name, path string, fss ...vfs.FileSystem) {
 	a.addKeyFile(&a.PrivateKeys, name, path, fss...)
 }
 
-func (a *Config) AddRootCertifacteFile(name string, fss ...vfs.FileSystem) {
+func (a *Config) AddRootCertificateFile(name string, fss ...vfs.FileSystem) {
 	a.RootCertificates = append(a.RootCertificates, KeySpec{Path: name, FileSystem: utils.Optional(fss...)})
 }
 
@@ -193,11 +193,11 @@ func (a *Config) AddPrivateKeyData(name string, data []byte) {
 	a.addKeyData(&a.PrivateKeys, name, data)
 }
 
-func (a *Config) AddRootCertifacteData(data []byte) {
+func (a *Config) AddRootCertificateData(data []byte) {
 	a.RootCertificates = append(a.RootCertificates, KeySpec{Data: data})
 }
 
-func (a *Config) AddRootCertifacte(chain signutils.GenericCertificateChain) error {
+func (a *Config) AddRootCertificate(chain signutils.GenericCertificateChain) error {
 	certs, err := signutils.GetCertificateChain(chain, false)
 	if err != nil {
 		return err

@@ -70,7 +70,7 @@ EVQVGDF6KNU=
 -----END CERTIFICATE-----
 `
 		cfg := signingattr.New()
-		cfg.AddRootCertifacteData([]byte(certdata))
+		cfg.AddRootCertificateData([]byte(certdata))
 
 		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())
 		Expect(rootcertsattr.Get(ocmctx).HasRootCertificates()).To(BeTrue())
