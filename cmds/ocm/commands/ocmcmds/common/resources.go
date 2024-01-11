@@ -216,6 +216,8 @@ type ContentResourceSpecificationsProvider struct {
 	accprov flagsets.ConfigTypeOptionSetConfigProvider
 	shared  flagsets.ConfigOptionTypeSet
 	options flagsets.ConfigOptions
+
+	contentFlags []string
 }
 
 var (
@@ -271,6 +273,12 @@ func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 	a.options.AddTypeSetGroupsToOptions(a.accprov)
 	a.options.AddTypeSetGroupsToOptions(inptypes)
 	a.options.AddFlags(fs)
+	a.contentFlags = nil
+	for _, t := range []flagsets.ConfigOptionType{inptypes.GetPlainOptionType(), inptypes.GetTypeOptionType(), a.accprov.GetPlainOptionType(), a.accprov.GetTypeOptionType()} {
+		if t != nil {
+			a.contentFlags = append(a.contentFlags, t.GetName())
+		}
+	}
 }
 
 func (a *ContentResourceSpecificationsProvider) IsSpecified() bool {
@@ -289,11 +297,11 @@ func (a *ContentResourceSpecificationsProvider) Complete() error {
 	aopts := unique.FilterBy(a.accprov.HasOptionType)
 	iopts := unique.FilterBy(inputs.For(a.ctx).ConfigTypeSetConfigProvider().HasOptionType)
 
+	if !a.options.Changed(a.contentFlags...) {
+		return fmt.Errorf("one of %v is required", flagsets.AddPrefix("--", a.contentFlags...))
+	}
 	if aopts.Changed() && iopts.Changed() {
 		return fmt.Errorf("either input or access specification is possible")
-	}
-	if !a.options.Changed("input", "inputType", "access", "accessType") {
-		return fmt.Errorf("either --input, --inputType, --access or --accessType is required")
 	}
 	return nil
 }

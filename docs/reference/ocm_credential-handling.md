@@ -181,6 +181,23 @@ The following credential consumer types are used/supported:
       - <code>token</code>: AWS access token (alternatively)
 
 
+  - <code>Signingserver.gardener.cloud</code>: signing service credential matcher
+
+    This matcher matches credentials for a Signing Service instance.
+    It uses the following identity attributes:
+      - <code>hostname</code>: signing server host
+      - <code>scheme</code>: (optional) URL scheme
+      - <code>port</code>: (optional) server port
+      - <code>pathprefix</code>: path prefix for the server URL
+
+
+    Credential consumers of the consumer type Signingserver.gardener.cloud evaluate the following credential properties:
+
+      - <code>clientCert</code>: client certificate for authentication
+      - <code>privateKey</code>: private key for client certificate
+      - <code>caCerts</code>: root certificate for signing server
+
+
 \
 Those consumer types provide their own matchers, which are often based
 on some standard generic matches. Those generic matchers and their

@@ -62,7 +62,7 @@ func BlobAccessForMultiImageFromDockerDaemon(opts ...Option) (blobaccess.BlobAcc
 	eff := optionutils.EvalOptions(opts...)
 	ctx := eff.OCIContext()
 
-	index := artdesc.NewIndexArtifact()
+	index := artdesc.NewIndex()
 	i := 0
 
 	version := eff.Version
@@ -95,7 +95,7 @@ func BlobAccessForMultiImageFromDockerDaemon(opts ...Option) (blobaccess.BlobAcc
 				}
 			}
 		}
-		index.Index().AddManifest(desc)
+		index.AddManifest(desc)
 		return nil
 	}
 

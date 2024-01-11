@@ -5,7 +5,9 @@
 package main
 
 import (
+	"encoding/pem"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
@@ -24,6 +26,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/semverutils"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 // setupVersion configures a component version.
@@ -313,4 +316,21 @@ func ReadConfiguration(ctx ocm.Context, cfg *helper.Config) error {
 		}
 	}
 	return nil
+}
+
+func saveKey(key signutils.GenericPrivateKey) {
+	block := signutils.PemBlockForPrivateKey(key)
+	os.WriteFile("key.pem", pem.EncodeToMemory(block), 0o0600)
+}
+
+func lookupKey() signutils.GenericPrivateKey {
+	data, err := os.ReadFile("key.pem")
+	if err != nil {
+		return nil
+	}
+	key, _ := signutils.GetPrivateKey(data)
+	if err != nil {
+		return nil
+	}
+	return key
 }

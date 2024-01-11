@@ -450,7 +450,7 @@ func (a *namespaceContainer) AddPlatformArtifact(artifact cpi.Artifact, platform
 	return blob, nil
 }
 
-func (a *namespaceContainer) NewArtifact(i support.NamespaceAccessImpl, artifact ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (a *namespaceContainer) NewArtifact(i support.NamespaceAccessImpl, artifact ...cpi.Artifact) (cpi.ArtifactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}

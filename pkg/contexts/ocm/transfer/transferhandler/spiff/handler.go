@@ -58,6 +58,17 @@ func (h *Handler) UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.Componen
 	return h.EvalBool("update", binding, "process")
 }
 
+func (h *Handler) EnforceTransport(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
+	if ok, err := h.Handler.EnforceTransport(src, tgt); ok || err != nil {
+		return ok, nil
+	}
+	if h.opts.GetScript() == nil {
+		return false, nil
+	}
+	binding := h.getBinding(src, nil, nil, nil, nil)
+	return h.EvalBool("enforceTransport", binding, "process")
+}
+
 func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
 	if ok, err := h.Handler.OverwriteVersion(src, tgt); ok || err != nil {
 		return ok, nil

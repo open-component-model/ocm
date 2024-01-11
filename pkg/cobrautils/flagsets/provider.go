@@ -22,6 +22,9 @@ type ConfigTypeOptionSetConfigProvider interface {
 	ConfigProvider
 	ConfigOptionTypeSet
 
+	GetPlainOptionType() ConfigOptionType
+	GetTypeOptionType() ConfigOptionType
+
 	IsExplicitlySelected(opts ConfigOptions) bool
 }
 
@@ -46,6 +49,14 @@ func (p *plainConfigProvider) GetConfigOptionTypeSet() ConfigOptionTypeSet {
 	return p
 }
 
+func (p *plainConfigProvider) GetPlainOptionType() ConfigOptionType {
+	return nil
+}
+
+func (p *plainConfigProvider) GetTypeOptionType() ConfigOptionType {
+	return nil
+}
+
 func (p *plainConfigProvider) IsExplicitlySelected(opts ConfigOptions) bool {
 	return opts.FilterBy(p.HasOptionType).Changed()
 }
@@ -63,17 +74,22 @@ func (p *plainConfigProvider) GetConfigFor(opts ConfigOptions) (Config, error) {
 
 type typedConfigProvider struct {
 	_ConfigTypeOptionSetConfigProvider
-	typeOption string
+	typeOptionType ConfigOptionType
 }
 
 var _ ConfigTypeOptionSetConfigProvider = (*typedConfigProvider)(nil)
 
 func NewTypedConfigProvider(name string, desc, typeOption string, acceptUnknown ...bool) ConfigTypeOptionSetConfigProvider {
-	return &typedConfigProvider{NewTypedConfigProviderBase(name, desc, TypeNameProviderFromOptions(typeOption), utils.Optional(acceptUnknown...), NewStringOptionType(name+"Type", "type of "+desc)), typeOption}
+	typeOpt := NewStringOptionType(name+"Type", "type of "+desc)
+	return &typedConfigProvider{NewTypedConfigProviderBase(name, desc, TypeNameProviderFromOptions(typeOption), utils.Optional(acceptUnknown...), typeOpt), typeOpt}
+}
+
+func (p *typedConfigProvider) GetTypeOptionType() ConfigOptionType {
+	return p.typeOptionType
 }
 
 func (p *typedConfigProvider) IsExplicitlySelected(opts ConfigOptions) bool {
-	return opts.Changed(p.typeOption, p.GetName())
+	return opts.Changed(p.typeOptionType.GetName(), p.GetName())
 }
 
 func TypeNameProviderFromOptions(name string) TypeNameProvider {
@@ -121,25 +137,36 @@ type TypeNameProvider func(opts ConfigOptions) (string, error)
 
 type typedConfigProviderBase struct {
 	ConfigOptionTypeSet
-	typeProvider  TypeNameProvider
-	meta          ConfigOptionTypeSet
-	acceptUnknown bool
+	typeProvider    TypeNameProvider
+	meta            ConfigOptionTypeSet
+	acceptUnknown   bool
+	plainOptionType ConfigOptionType
 }
 
 var _ ConfigTypeOptionSetConfigProvider = (*typedConfigProviderBase)(nil)
 
 func NewTypedConfigProviderBase(name string, desc string, prov TypeNameProvider, acceptUnknown bool, types ...ConfigOptionType) ConfigTypeOptionSetConfigProvider {
-	set := NewConfigOptionTypeSet(name, append(types, NewValueMapYAMLOptionType(name, desc+" (YAML)"))...)
+	plainType := NewValueMapYAMLOptionType(name, desc+" (YAML)")
+	set := NewConfigOptionTypeSet(name, append(types, plainType)...)
 	return &typedConfigProviderBase{
 		ConfigOptionTypeSet: set,
 		typeProvider:        prov,
 		meta:                NewConfigOptionTypeSet(name, append(types, NewValueMapYAMLOptionType(name, desc+" (YAML)"))...),
 		acceptUnknown:       acceptUnknown,
+		plainOptionType:     plainType,
 	}
 }
 
 func (p *typedConfigProviderBase) GetConfigOptionTypeSet() ConfigOptionTypeSet {
 	return p
+}
+
+func (p *typedConfigProviderBase) GetPlainOptionType() ConfigOptionType {
+	return p.plainOptionType
+}
+
+func (p *typedConfigProviderBase) GetTypeOptionType() ConfigOptionType {
+	return nil
 }
 
 func (p *typedConfigProviderBase) IsExplicitlySelected(opts ConfigOptions) bool {

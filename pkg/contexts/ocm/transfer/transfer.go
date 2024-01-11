@@ -85,61 +85,72 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			finalize.Close(t, "new target version")
 		}
 	} else {
-		if eq := d.Equivalent(t.GetDescriptor()); eq.IsHashEqual() {
-			if eq.IsEquivalent() {
-				if !needsResourceTransport(src, d, t.GetDescriptor(), handler) {
-					printer.Printf("  version %q already present -> skip transport\n", nv)
-					doTransport = false
+		ok, err = handler.EnforceTransport(src, t)
+		if err != nil {
+			return err
+		}
+		if ok {
+			//  execute transport as if the component version were not present
+			// 	on the target side.
+		} else {
+			// determine transport mode for component version present
+			// on the target side.
+			if eq := d.Equivalent(t.GetDescriptor()); eq.IsHashEqual() {
+				if eq.IsEquivalent() {
+					if !needsResourceTransport(src, d, t.GetDescriptor(), handler) {
+						printer.Printf("  version %q already present -> skip transport\n", nv)
+						doTransport = false
+					} else {
+						printer.Printf("  version %q already present -> but requires resource transport\n", nv)
+					}
 				} else {
-					printer.Printf("  version %q already present -> but requires resource transport\n", nv)
+					ok, err = handler.UpdateVersion(src, t)
+					if err != nil {
+						return err
+					}
+					if !ok {
+						printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
+						return nil
+					}
+					ok, err = handler.OverwriteVersion(src, t)
+					if ok {
+						printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
+						doMerge = false
+						doCopy = true
+					} else {
+						printer.Printf("  updating volatile properties of %q\n", nv)
+						doMerge = true
+						doCopy = false
+					}
 				}
 			} else {
-				ok, err = handler.UpdateVersion(src, t)
-				if err != nil {
-					return err
-				}
-				if !ok {
-					printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
-					return nil
+				msg := "  version %q already present, but"
+				if eq.IsLocalHashEqual() {
+					if eq.IsArtifactDetectable() {
+						msg += " differs because some artifact digests are changed"
+					} else {
+						// TODO: option to precalculate missing digests (as pre equivalent step).
+						msg += " might differ, because not all artifact digests are known"
+					}
+				} else {
+					if eq.IsArtifactDetectable() {
+						if eq.IsArtifactEqual() {
+							msg += " differs because signature relevant properties have been changed"
+						} else {
+							msg += " differs because some artifacts and signature relevant properties have been changed"
+						}
+					} else {
+						msg += "differs because signature relevant properties have been changed (and not all artifact digests are known)"
+					}
 				}
 				ok, err = handler.OverwriteVersion(src, t)
 				if ok {
-					printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
 					doMerge = false
-					doCopy = true
+					printer.Printf("warning: "+msg+" (transport enforced by overwrite option)\n", nv)
 				} else {
-					printer.Printf("  updating volatile properties of %q\n", nv)
-					doMerge = true
-					doCopy = false
+					printer.Printf(msg+" -> transport aborted (use option overwrite option to enforce transport)\n", nv)
+					return errors.ErrAlreadyExists(ocm.KIND_COMPONENTVERSION, nv.String())
 				}
-			}
-		} else {
-			msg := "  version %q already present, but"
-			if eq.IsLocalHashEqual() {
-				if eq.IsArtifactDetectable() {
-					msg += " differs because some artifact digests are changed"
-				} else {
-					// TODO: option to precalculate missing digests (as pre equivalent step).
-					msg += " might differ, because not all artifact digests are known"
-				}
-			} else {
-				if eq.IsArtifactDetectable() {
-					if eq.IsArtifactEqual() {
-						msg += " differs because signature relevant properties have been changed"
-					} else {
-						msg += " differs because some artifacts and signature relevant properties have been changed"
-					}
-				} else {
-					msg += "differs because signature relevant properties have been changed (and not all artifact digests are known)"
-				}
-			}
-			ok, err = handler.OverwriteVersion(src, t)
-			if ok {
-				doMerge = false
-				printer.Printf("warning: "+msg+" (transport enforced by overwrite option)\n", nv)
-			} else {
-				printer.Printf(msg+" -> transport aborted (use option overwrite option to enforce transport)\n", nv)
-				return errors.ErrAlreadyExists(ocm.KIND_COMPONENTVERSION, nv.String())
 			}
 		}
 	}

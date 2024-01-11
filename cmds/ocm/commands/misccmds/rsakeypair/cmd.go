@@ -14,6 +14,7 @@ import (
 
 	parse "github.com/mandelsoft/spiff/dynaml/x509"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -151,7 +152,7 @@ func (o *Command) Complete(args []string) error {
 		}
 		o.RootCertPool = pool
 	} else {
-		o.RootCertPool = signingattr.Get(o.Context.OCMContext()).GetRootCertPool(true)
+		o.RootCertPool = rootcertsattr.Get(o.Context).GetRootCertPool(true)
 	}
 
 	if o.attrs != nil && len(o.attrs) > 0 {

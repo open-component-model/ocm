@@ -1,0 +1,14 @@
+name: ocm.software/demo/test
+version: 1.0.0
+provider:
+  name: ocm.software
+
+resources:
+  - name: image
+    type: ociImage
+    input:
+      type: ociArtifact
+      path: alias.alias/ocm/index:v2.0-index
+      platforms:
+        - linux/amd64
+

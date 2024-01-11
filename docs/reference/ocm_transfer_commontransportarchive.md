@@ -18,6 +18,7 @@ commontransportarchive, ctf
   -L, --copy-local-resources        transfer referenced local resources by-value
   -V, --copy-resources              transfer referenced resources by-value
       --copy-sources                transfer referenced sources by-value
+      --enforce                     enforce transport as if target version were not present
   -h, --help                        help for commontransportarchive
       --lookup stringArray          repository name or spec for closure lookup fallback
       --no-update                   don't touch existing versions in target
@@ -48,8 +49,12 @@ modification of non-volatile data is prohibited unless the overwrite
 option is given.
 
 
-It the option <code>--overwrite</code> is given, component version in the
-target repository will be overwritten, if they already exist.
+It the option <code>--overwrite</code> is given, component versions in the
+target repository will be overwritten, if they already exist, but with different digest.
+It the option <code>--enforce</code> is given, component versions in the
+target repository will be transported as if they were not present on the target side,
+regardless of their state (this is independent on their actual state, even identical
+versions are re-transported).
 
 \
 If a component lookup for building a reference closure is required

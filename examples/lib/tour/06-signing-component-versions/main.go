@@ -11,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
 // CFG is the path to the file containing the credentials
@@ -56,6 +57,12 @@ func main() {
 			err = SigningComponentVersionInRepo(cfg)
 		case "config":
 			privkey, pubkey, err := rsa.CreateKeyPair()
+			if priv := lookupKey(); priv != nil {
+				privkey = priv
+				pubkey, _ = signutils.GetPublicKey(priv)
+			} else {
+				saveKey(privkey)
+			}
 			if err == nil {
 				err = createOCMConfig(privkey, pubkey)
 			}

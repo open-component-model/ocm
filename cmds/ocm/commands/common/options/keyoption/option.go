@@ -5,6 +5,7 @@
 package keyoption
 
 import (
+	"crypto/x509"
 	"fmt"
 	"reflect"
 	"strings"
@@ -38,6 +39,7 @@ type Option struct {
 	privateKeys []string
 	issuers     []string
 	rootCAs     []string
+	RootCerts   signutils.GenericCertificatePool
 	Keys        signing.KeyRegistry
 }
 
@@ -80,15 +82,20 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		o.Keys.RegisterIssuer(name, dn)
 	}
 
-	for _, r := range o.rootCAs {
-		data, err := utils.ReadFile(r, ctx.FileSystem())
-		if err != nil {
-			return errors.Wrapf(err, "root CA")
+	if len(o.rootCAs) > 0 {
+		var list []*x509.Certificate
+		for _, r := range o.rootCAs {
+			data, err := utils.ReadFile(r, ctx.FileSystem())
+			if err != nil {
+				return errors.Wrapf(err, "root CA")
+			}
+			certs, err := signutils.GetCertificateChain(data, false)
+			if err != nil {
+				return errors.Wrapf(err, "root CA")
+			}
+			list = append(list, certs...)
 		}
-		err = o.Keys.RegisterRootCertificates(data)
-		if err != nil {
-			return errors.Wrapf(err, "root CA")
-		}
+		o.RootCerts = list
 	}
 	return nil
 }
@@ -103,7 +110,7 @@ func (o *Option) HandleKeys(ctx clictx.Context, desc string, keys []string, add 
 			file = k[sep+1:]
 		}
 		if len(file) == 0 {
-			return errors.Newf("empty file name")
+			return errors.Newf("%s: empty file name", desc)
 		}
 		var data []byte
 		var err error
@@ -117,7 +124,7 @@ func (o *Option) HandleKeys(ctx clictx.Context, desc string, keys []string, add 
 			return errors.Wrapf(err, "cannot read %s file %q", desc, file)
 		}
 		if name == "" {
-			return errors.Newf("key name required")
+			return errors.Newf("%s: key name required", desc)
 		}
 		add(name, data)
 	}
@@ -154,4 +161,5 @@ var _ ocmsign.Option = (*Option)(nil)
 
 func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	opts.Keys = o.Keys
+	opts.RootCerts = o.RootCerts
 }

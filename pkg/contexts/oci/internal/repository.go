@@ -73,7 +73,7 @@ type NamespaceAccessImpl interface {
 
 	HasArtifact(vers string) (bool, error)
 
-	NewArtifact(...*artdesc.Artifact) (ArtifactAccess, error)
+	NewArtifact(...Artifact) (ArtifactAccess, error)
 	io.Closer
 }
 
@@ -83,16 +83,7 @@ type NamespaceAccess interface {
 	NamespaceAccessImpl
 }
 
-type Artifact interface {
-	IsManifest() bool
-	IsIndex() bool
-
-	Digest() digest.Digest
-	Blob() (BlobAccess, error)
-	Artifact() *artdesc.Artifact
-	Manifest() (*artdesc.Manifest, error)
-	Index() (*artdesc.Index, error)
-}
+type Artifact artdesc.ArtifactDescriptor
 
 type ArtifactAccessImpl interface {
 	Artifact
@@ -108,7 +99,7 @@ type ArtifactAccessImpl interface {
 	AddArtifact(Artifact, *artdesc.Platform) (BlobAccess, error)
 	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
 
-	NewArtifact(...*artdesc.Artifact) (ArtifactAccess, error)
+	NewArtifact(...Artifact) (ArtifactAccess, error)
 
 	io.Closer
 }

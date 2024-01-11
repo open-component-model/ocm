@@ -27,7 +27,7 @@ func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attrib
 
 // GCWrapper is the embeddable base type
 // for a context wrapper handling garbage collection.
-// It aölso handles the BindTo interface for a context.
+// It also handles the BindTo interface for a context.
 type GCWrapper struct {
 	self Context
 	key  interface{}

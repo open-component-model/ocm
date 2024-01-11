@@ -25,27 +25,39 @@ func New() *Option {
 
 type Option struct {
 	standard.TransferOptionsCreator
-	flag      *pflag.Flag
+
+	overwrite *pflag.Flag
 	Overwrite bool
+
+	enforce          *pflag.Flag
+	EnforceTransport bool
 }
 
 var _ transferhandler.TransferOption = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	o.flag = flag.BoolVarPF(fs, &o.Overwrite, "overwrite", "f", false, "overwrite existing component versions")
+	o.overwrite = flag.BoolVarPF(fs, &o.Overwrite, "overwrite", "f", false, "overwrite existing component versions")
+	o.enforce = flag.BoolVarPF(fs, &o.EnforceTransport, "enforce", "", false, "enforce transport as if target version were not present")
 }
 
 func (o *Option) Usage() string {
 	s := `
-It the option <code>--overwrite</code> is given, component version in the
-target repository will be overwritten, if they already exist.
+It the option <code>--overwrite</code> is given, component versions in the
+target repository will be overwritten, if they already exist, but with different digest.
+It the option <code>--enforce</code> is given, component versions in the
+target repository will be transported as if they were not present on the target side,
+regardless of their state (this is independent on their actual state, even identical 
+versions are re-transported).
 `
 	return s
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
-	if (o.flag != nil && o.flag.Changed) || o.Overwrite {
+	if (o.overwrite != nil && o.overwrite.Changed) || o.Overwrite {
 		return standard.Overwrite(o.Overwrite).ApplyTransferOption(opts)
+	}
+	if (o.enforce != nil && o.enforce.Changed) || o.EnforceTransport {
+		return standard.EnforceTransport(o.EnforceTransport).ApplyTransferOption(opts)
 	}
 	return nil
 }

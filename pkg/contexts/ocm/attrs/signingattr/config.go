@@ -10,11 +10,12 @@ import (
 	"encoding/json"
 	"encoding/pem"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"golang.org/x/exp/slices"
 
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -70,12 +71,15 @@ func (i *Issuer) Set(issuer *pkix.Name) {
 	i.PostalCode = slices.Clone(issuer.PostalCode)
 }
 
+type KeySpec = cfgcpi.ContentSpec
+
 // Config describes a memory based repository interface.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	PublicKeys                  map[string]KeySpec `json:"publicKeys,omitempty"`
 	PrivateKeys                 map[string]KeySpec `json:"privateKeys,omitempty"`
 	Issuers                     map[string]Issuer  `json:"issuers,omitempty"`
+	RootCertificates            []KeySpec          `json:"rootCertificates,omitempty"`
 	TSAUrl                      string             `json:"tsaURL,omitempty"`
 }
 
@@ -95,38 +99,6 @@ func (r *RawData) UnmarshalJSON(data []byte) error {
 	}
 	*r, err = base64.StdEncoding.DecodeString(s)
 	return err
-}
-
-type KeySpec struct {
-	Data       RawData        `json:"data,omitempty"`
-	StringData string         `json:"stringdata,omitempty"`
-	Path       string         `json:"path,omitempty"`
-	Parsed     interface{}    `json:"-"`
-	FileSystem vfs.FileSystem `json:"-"`
-}
-
-func (k *KeySpec) Get() (interface{}, error) {
-	if k.Parsed != nil {
-		return k.Parsed, nil
-	}
-	if k.Data != nil {
-		if k.StringData != "" || k.Path != "" {
-			return nil, errors.Newf("only one of data, stringdata or path may be set")
-		}
-		return []byte(k.Data), nil
-	}
-	if k.StringData != "" {
-		if k.Path != "" {
-			return nil, errors.Newf("only one of data, stringdata or path may be set")
-		}
-		return []byte(k.StringData), nil
-	}
-	fs := k.FileSystem
-	if fs == nil {
-		fs = osfs.New()
-	}
-
-	return utils.ReadFile(k.Path, fs)
 }
 
 // New creates a new memory ConfigSpec.
@@ -202,6 +174,10 @@ func (a *Config) AddPrivateKeyFile(name, path string, fss ...vfs.FileSystem) {
 	a.addKeyFile(&a.PrivateKeys, name, path, fss...)
 }
 
+func (a *Config) AddRootCertificateFile(name string, fss ...vfs.FileSystem) {
+	a.RootCertificates = append(a.RootCertificates, KeySpec{Path: name, FileSystem: utils.Optional(fss...)})
+}
+
 func (a *Config) addKeyData(set *map[string]KeySpec, name string, data []byte) {
 	if *set == nil {
 		*set = map[string]KeySpec{}
@@ -217,12 +193,47 @@ func (a *Config) AddPrivateKeyData(name string, data []byte) {
 	a.addKeyData(&a.PrivateKeys, name, data)
 }
 
+func (a *Config) AddRootCertificateData(data []byte) {
+	a.RootCertificates = append(a.RootCertificates, KeySpec{Data: data})
+}
+
+func (a *Config) AddRootCertificate(chain signutils.GenericCertificateChain) error {
+	certs, err := signutils.GetCertificateChain(chain, false)
+	if err != nil {
+		return err
+	}
+	a.RootCertificates = append(a.RootCertificates, KeySpec{Data: signutils.CertificateChainToPem(certs), Parsed: certs})
+	return nil
+}
+
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	t, ok := target.(Context)
 	if !ok {
+		if t, ok := target.(datacontext.AttributesContext); ok {
+			// datacontext.Context is implemented by all context types.
+			// Therefore, we have to check for the root context, this is the one
+			// identical to the attributes context of a context.
+			if t.AttributesContext() == t {
+				return errors.Wrapf(a.ApplyToRootCertsAttr(rootcertsattr.Get(t)), "applying config to certattr failed")
+			}
+		}
 		return cfgcpi.ErrNoContext(ConfigType)
 	}
 	return errors.Wrapf(a.ApplyToRegistry(Get(t)), "applying config failed")
+}
+
+func (a *Config) ApplyToRootCertsAttr(attr *rootcertsattr.Attribute) error {
+	for i, k := range a.RootCertificates {
+		key, err := k.Get()
+		if err != nil {
+			return errors.Wrapf(err, "cannot get root certificate %d", i)
+		}
+		err = attr.RegisterRootCertificates(key)
+		if err != nil {
+			return errors.Wrapf(err, "invalid certificate %d", i)
+		}
+	}
+	return nil
 }
 
 func (a *Config) ApplyToRegistry(registry signing.Registry) error {
@@ -266,6 +277,9 @@ public and private keys. A key value might be given by one of the fields:
        &lt;name>:
          data: &lt;base64 encoded key representation>
        ...
+    rootCertificates:
+      - path: &lt;file path>
+
     issuers:
        &lt;name>:
          commonName: acme.org

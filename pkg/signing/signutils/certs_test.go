@@ -12,6 +12,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -20,11 +21,12 @@ import (
 )
 
 var _ = Describe("normalization", func() {
-
 	// root
 	ca, capriv := Must2(rsa.CreateRootCertificate(signutils.CommonName("ca-authority"), 10*time.Hour))
 
 	Context("direct", func() {
+		defer GinkgoRecover()
+
 		cert, _, _ := Must3(rsa.CreateSigningCertificate(signutils.CommonName("mandelsoft"), ca, ca, capriv, 1*time.Hour))
 
 		pool := x509.NewCertPool()
@@ -59,7 +61,8 @@ var _ = Describe("normalization", func() {
 			Province:      []string{"BW"},
 		}, interBytes, ca, interpriv, 1*time.Hour))
 
-		certs := Must(signutils.GetCertificateChain(pemBytes, false))
+		acc := blobaccess.DataAccessForBytes(pemBytes)
+		certs := Must(signutils.GetCertificateChain(acc, false))
 		Expect(len(certs)).To(Equal(3))
 
 		pool := x509.NewCertPool()

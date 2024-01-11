@@ -15,6 +15,7 @@ import (
 	ociartifact2 "github.com/open-component-model/ocm/pkg/blobaccess/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer/filters"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 )
 
@@ -23,13 +24,17 @@ type Spec struct {
 	cpi.PathSpec
 	// Repository is the repository hint for the index artifact
 	Repository string `json:"repository,omitempty"`
+	// Platforms provides filters for operating system/architecture.
+	// Syntax [OS]/[Architecture]
+	Platforms []string `json:"platforms,omitempty"`
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)
 
-func New(pathtag string) *Spec {
+func New(pathtag string, platforms ...string) *Spec {
 	return &Spec{
-		PathSpec: cpi.NewPathSpec(TYPE, pathtag),
+		PathSpec:  cpi.NewPathSpec(TYPE, pathtag),
+		Platforms: platforms,
 	}
 }
 
@@ -46,8 +51,25 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
+func (s *Spec) CreateFilter() ociartifact2.Option {
+	var filter []filters.Filter
+
+	for _, v := range s.Platforms {
+		p := strings.Split(v, "/")
+		if len(p) == 2 {
+			filter = append(filter, filters.Platform(p[0], p[1]))
+		}
+	}
+	if len(filter) > 0 {
+		return ociartifact2.WithFilter(filters.Or(filter...))
+	}
+	return nil
+}
+
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+	filter := s.CreateFilter()
 	blob, version, err := ociartifact2.BlobAccessForOCIArtifact(s.Path,
+		filter,
 		ociartifact2.WithContext(ctx),
 		ociartifact2.WithPrinter(ctx.Printer()),
 		ociartifact2.WithVersion(info.ComponentVersion.GetVersion()),

@@ -16,7 +16,9 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
+	"golang.org/x/exp/slices"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -149,31 +151,56 @@ func ParseCertificateChain(data []byte, filter bool) ([]*x509.Certificate, error
 	return chain, nil
 }
 
+func PemBlockForCertificate(cert interface{}) *pem.Block {
+	switch k := cert.(type) {
+	case *x509.Certificate:
+		return &pem.Block{Type: CertificatePEMBlockType, Bytes: k.Raw}
+	default:
+		return nil
+	}
+}
+
 type PublicKeySource interface {
 	Public() crypto.PublicKey
 }
 
+func getGenericData(in blobaccess.GenericData) (blobaccess.GenericData, error) {
+	data, err := blobaccess.GetGenericData(in)
+	if err != nil {
+		if !errors.IsErrInvalidKind(err, blobaccess.KIND_DATASOURCE) {
+			return nil, err
+		}
+		return in, nil
+	} else {
+		return data, nil
+	}
+}
+
 func GetPrivateKey(key GenericPrivateKey) (interface{}, error) {
+	key, err := getGenericData(key)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot evaluate private key")
+	}
 	switch k := key.(type) {
 	case []byte:
 		return ParsePrivateKey(k)
-	case string:
-		return ParsePrivateKey([]byte(k))
 	case *rsa.PrivateKey:
 		return k, nil
 	case *ecdsa.PrivateKey:
 		return k, nil
 	default:
-		return nil, fmt.Errorf("unknown private key specification %T", k)
+		return nil, errors.ErrInvalidType(KIND_PRIVATE_KEY, k)
 	}
 }
 
 func GetPublicKey(key GenericPublicKey) (interface{}, error) {
+	key, err := getGenericData(key)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot evaluate public key")
+	}
 	switch k := key.(type) {
 	case []byte:
 		return ParsePublicKey(k)
-	case string:
-		return ParsePublicKey([]byte(k))
 	case *rsa.PublicKey:
 		return k, nil
 	case *dsa.PublicKey:
@@ -185,24 +212,26 @@ func GetPublicKey(key GenericPublicKey) (interface{}, error) {
 	case PublicKeySource:
 		return k.Public(), nil
 	default:
-		return nil, fmt.Errorf("unknown public key specification %T", k)
+		return nil, errors.ErrInvalidType(KIND_PUBLIC_KEY, k)
 	}
 }
 
 func GetCertificateChain(in GenericCertificateChain, filter bool) ([]*x509.Certificate, error) {
 	// unfortunately it is not possible to get certificates from a x509.CertPool
 
+	in, err := getGenericData(in)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot evaluate certificate chain")
+	}
 	switch k := in.(type) {
 	case []byte:
 		return ParseCertificateChain(k, filter)
-	case string:
-		return ParseCertificateChain([]byte(k), filter)
 	case *x509.Certificate:
 		return []*x509.Certificate{k}, nil
 	case []*x509.Certificate:
 		return k, nil
 	default:
-		return nil, fmt.Errorf("unknown certificate chain specification %T", k)
+		return nil, errors.ErrInvalidType(KIND_CERTIFICATE, k)
 	}
 }
 
@@ -249,11 +278,13 @@ func GetCertPool(in GenericCertificatePool, filter bool) (*x509.CertPool, error)
 	if reflect2.IsNil(in) {
 		return nil, nil
 	}
+	in, err = getGenericData(in)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot evaluate certificate pool")
+	}
 	switch k := in.(type) {
 	case []byte:
 		certs, err = ParseCertificateChain(k, filter)
-	case string:
-		certs, err = ParseCertificateChain([]byte(k), filter)
 	case *x509.Certificate:
 		certs = []*x509.Certificate{k}
 	case []*x509.Certificate:
@@ -261,7 +292,7 @@ func GetCertPool(in GenericCertificatePool, filter bool) (*x509.CertPool, error)
 	case *x509.CertPool:
 		return k, nil
 	default:
-		err = fmt.Errorf("unknown certificate pool specification %T", k)
+		err = errors.ErrInvalidType(KIND_CERTPOOL, k)
 	}
 
 	if err != nil {
@@ -275,21 +306,68 @@ func GetCertPool(in GenericCertificatePool, filter bool) (*x509.CertPool, error)
 	return pool, nil
 }
 
+func AddCertificateToPool(in GenericCertificatePool, chain ...GenericCertificateChain) (GenericCertificatePool, error) {
+	var certs []*x509.Certificate
+	var pool *x509.CertPool
+	var err error
+
+	if !reflect2.IsNil(in) {
+		switch k := in.(type) {
+		case []byte:
+			certs, err = ParseCertificateChain(k, false)
+		case string:
+			certs, err = ParseCertificateChain([]byte(k), false)
+		case *x509.Certificate:
+			certs = []*x509.Certificate{k}
+		case []*x509.Certificate:
+			certs = slices.Clone(k)
+		case *x509.CertPool:
+			pool = k
+		default:
+			err = errors.ErrInvalidType(KIND_CERTPOOL, k)
+		}
+	}
+	if err != nil {
+		return in, err
+	}
+
+	for _, c := range chain {
+		sub, err := GetCertificateChain(c, false)
+		if err != nil {
+			return in, err
+		}
+		if pool != nil {
+			for _, cert := range sub {
+				pool.AddCert(cert)
+			}
+		} else {
+			certs = append(certs, sub...)
+		}
+	}
+	if pool != nil {
+		return pool, nil
+	}
+	return certs, nil
+}
+
 func GetCertificate(in GenericCertificate, filter bool) (*x509.Certificate, *x509.CertPool, error) {
 	var certs []*x509.Certificate
 	var err error
 
+	in, err = getGenericData(in)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "cannot evaluate certificate")
+	}
+
 	switch k := in.(type) {
 	case []byte:
 		certs, err = ParseCertificateChain(k, filter)
-	case string:
-		certs, err = ParseCertificateChain([]byte(k), filter)
 	case *x509.Certificate:
 		certs = []*x509.Certificate{k}
 	case []*x509.Certificate:
 		certs = k
 	default:
-		err = fmt.Errorf("unknown certificate chain specification %T", k)
+		err = errors.ErrInvalidType(KIND_CERTIFICATE, k)
 	}
 
 	if err != nil {
@@ -327,7 +405,7 @@ func GetTime(in interface{}) (time.Time, error) {
 		}
 		return notBefore, nil
 	default:
-		return time.Time{}, fmt.Errorf("invalid time specification type %T", in)
+		return time.Time{}, errors.ErrInvalidType("time specification", in)
 	}
 }
 

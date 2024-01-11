@@ -17,6 +17,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/docker"
@@ -151,12 +152,12 @@ func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {
 					if creds != nil {
 						c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
 						if c != "" {
-							rootCAs, _ = x509.SystemCertPool()
-							if rootCAs == nil {
-								rootCAs = x509.NewCertPool()
-							}
+							rootCAs = x509.NewCertPool()
 							rootCAs.AppendCertsFromPEM([]byte(c))
 						}
+					}
+					if rootCAs == nil {
+						rootCAs = rootcertsattr.Get(r.GetContext()).GetRootCertPool(true)
 					}
 					return rootCAs
 				}(),

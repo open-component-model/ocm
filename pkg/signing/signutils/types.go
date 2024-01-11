@@ -12,6 +12,8 @@ package signutils
 //  - dedicated implementations
 //  - byte sequences
 //  - strings
+//  - blobaccess.BlobAccess
+//  - blobaccess.DataAccess
 //  - other elements or list of elements, which can be mapped appropriately.
 
 // GenericPublicKey can be everything somebody
@@ -42,6 +44,8 @@ const (
 	KIND_VERIFY_ALGORITHM = "signature verification algorithm"
 	KIND_PUBLIC_KEY       = "public key"
 	KIND_PRIVATE_KEY      = "private key"
+	KIND_CERTIFICATE      = "certificate"
+	KIND_CERTPOOL         = "certificate pool"
 	KIND_SIGNATURE        = "signature"
 	KIND_DIGEST           = "digest"
 )

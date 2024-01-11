@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -542,11 +543,15 @@ func (o *Options) Complete(ctx interface{}) error {
 		ctx = ocm.DefaultContext()
 	}
 
+	var ocmctx ocm.Context
+
 	switch t := ctx.(type) {
 	case ocm.ContextProvider:
-		reg = signingattr.Get(t.OCMContext())
+		ocmctx = t.OCMContext()
+		reg = signingattr.Get(ocmctx)
 	case signing.Registry:
 		reg = t
+		ocmctx = ocm.DefaultContext()
 	default:
 		return fmt.Errorf("context argument (%T) is invalid", ctx)
 	}
@@ -558,12 +563,13 @@ func (o *Options) Complete(ctx interface{}) error {
 	}
 
 	o.effectiveRegistry = o.Registry
-	if o.Keys != nil && (o.Keys.HasKeys() || o.Keys.HasIssuers() || o.Keys.HasRootCertificates()) {
+	if o.Keys != nil && (o.Keys.HasKeys() || o.Keys.HasIssuers()) {
 		o.effectiveRegistry = signing.RegistryWithPreferredKeys(o.Registry, o.Keys)
 	}
 
-	if o.RootCerts == nil && o.effectiveRegistry.HasRootCertificates() {
-		o.RootCerts = o.effectiveRegistry.GetRootCertPool(true)
+	certs := rootcertsattr.Get(ocmctx)
+	if o.RootCerts == nil && certs.HasRootCertificates() {
+		o.RootCerts = certs.GetRootCertPool(true)
 	}
 
 	if o.RootCerts != nil {
