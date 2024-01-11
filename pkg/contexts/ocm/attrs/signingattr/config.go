@@ -214,7 +214,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 			// Therefore, we have to check for the root context, this is the one
 			// identical to the attributes context of a context.
 			if t.AttributesContext() == t {
-				return errors.Wrapf(a.ApplyToCertAttr(rootcertsattr.Get(t)), "applying config to certattr failed")
+				return errors.Wrapf(a.ApplyToRootCertsAttr(rootcertsattr.Get(t)), "applying config to certattr failed")
 			}
 		}
 		return cfgcpi.ErrNoContext(ConfigType)
@@ -222,7 +222,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	return errors.Wrapf(a.ApplyToRegistry(Get(t)), "applying config failed")
 }
 
-func (a *Config) ApplyToCertAttr(attr *rootcertsattr.Attribute) error {
+func (a *Config) ApplyToRootCertsAttr(attr *rootcertsattr.Attribute) error {
 	for i, k := range a.RootCertificates {
 		key, err := k.Get()
 		if err != nil {
