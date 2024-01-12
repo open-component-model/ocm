@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
   inputs = {
     # NixPkgs (nixos-23.11)
-    nixpkgs.url = "nixpkgs/nixos-23.11"; #"github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -64,15 +64,17 @@ SPDX-License-Identifier: Apache-2.0
             nativeBuildInputs = [ pkgs.installShellFiles ];
 
             postInstall = ''
-              installShellCompletion --cmd ${pname} --zsh  <($out/bin/${pname} completion zsh)
-              installShellCompletion --cmd ${pname} --bash <($out/bin/${pname} completion bash)
-              installShellCompletion --cmd ${pname} --fish <($out/bin/${pname} completion fish)
+              installShellCompletion --cmd ${pname} \
+                  --zsh  <($out/bin/${pname} completion zsh) \
+                  --bash <($out/bin/${pname} completion bash) \
+                  --fish <($out/bin/${pname} completion fish)
             '';
 
             meta = with lib; {
               description = "Open Component Model (OCM) is an open standard to describe software bills of delivery (SBOD)";
               longDescription = ''
-                The Open Component Model (OCM) is an open standard to describe software bills of delivery (SBOD). OCM is a technology-agnostic and machine-readable format focused on the software artifacts that must be delivered for software products.
+                OCM is a technology-agnostic and machine-readable format focused on the software artifacts that must be delivered for software products.
+                The specification is also used to express metadata needed for security, compliance, and certification purpose.
               '';
               homepage = "https://ocm.software";
               license = licenses.asl20;
@@ -89,11 +91,11 @@ SPDX-License-Identifier: Apache-2.0
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [ 
-              go_1_21 
-              gopls 
-              gotools 
-              go-tools
-              gnumake
+              go_1_21   # golang 1.21
+              gopls     # go language server
+              gotools   # go imports
+              go-tools  # static checks
+              gnumake   # standard make
             ];
           };
         });
