@@ -1,0 +1,20 @@
+package wget
+
+import (
+	"github.com/open-component-model/ocm/pkg/optionutils"
+)
+
+type Option = optionutils.Option[*Options]
+
+type Options struct {
+}
+
+func (o *Options) ApplyTo(opts *Options) {
+	if opts == nil {
+		return
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////

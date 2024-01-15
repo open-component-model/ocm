@@ -148,7 +148,7 @@ func (h Handler) Verify(digest string, signature *signing.Signature, sctx signin
 	return nil
 }
 
-func (_ Handler) CreateKeyPair() (priv signutils.GenericPublicKey, pub signutils.GenericPublicKey, err error) {
+func (_ Handler) CreateKeyPair() (priv signutils.GenericPrivateKey, pub signutils.GenericPublicKey, err error) {
 	return CreateKeyPair()
 }
 
