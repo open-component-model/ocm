@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"fmt"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -13,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -39,8 +41,14 @@ const (
 	HTTPS_HOST                  = "https://localhost" + HTTPS_PORT
 	HTTPS_HOST_WITH_CLIENT_AUTH = "https://localhost" + HTTPS_PORT_WITH_CLIENT_AUTH
 
-	TO_MEMORY = "/tomemory"
-	TO_FILE   = "/tofile"
+	TO_MEMORY    = "/tomemory"
+	TO_FILE      = "/tofile"
+	BASIC_LOGIN  = "/basic-login"
+	BEARER_LOGIN = "/bearer-login"
+
+	USERNAME = "user"
+	PASSWORD = "password"
+	TOKEN    = "token"
 
 	CONTENT = "hello world"
 )
@@ -103,6 +111,37 @@ var _ = BeforeSuite(func() {
 	mux.HandleFunc(TO_MEMORY, func(writer http.ResponseWriter, request *http.Request) {
 		n, err := writer.Write([]byte(CONTENT))
 		_, _ = n, err
+	})
+	mux.HandleFunc(BASIC_LOGIN, func(writer http.ResponseWriter, request *http.Request) {
+		username, password, ok := request.BasicAuth()
+		if !ok {
+			n, err := writer.Write([]byte(`failure`))
+			_, _ = n, err
+		}
+		if username != "" && password != "" {
+			res := fmt.Sprintf("%s:%s", username, password)
+			n, err := writer.Write([]byte(res))
+			_, _ = n, err
+		} else {
+			n, err := writer.Write([]byte(`failure`))
+			_, _ = n, err
+		}
+	})
+	mux.HandleFunc(BEARER_LOGIN, func(writer http.ResponseWriter, request *http.Request) {
+		auth := request.Header.Get("Authorization")
+		if auth == "" {
+			n, err := writer.Write([]byte(`failure`))
+			_, _ = n, err
+		} else {
+			bearer, ok := strings.CutPrefix(auth, "Bearer ")
+			if !ok {
+				n, err := writer.Write([]byte(`failure`))
+				_, _ = n, err
+			} else {
+				n, err := writer.Write([]byte(bearer))
+				_, _ = n, err
+			}
+		}
 	})
 
 	// setup an https and an http httpsServer
@@ -200,6 +239,37 @@ var _ = Describe("wget access method", func() {
 
 		b := Must(m.Get())
 		Expect(string(b)).To(Equal(CONTENT))
+	})
+
+	It("check that username and password are passed correctly", func() {
+		url := HTTP_HOST + BASIC_LOGIN
+		spec := New(url)
+
+		ctx := ocm.DefaultContext()
+		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
+			identity.ATTR_USERNAME: USERNAME,
+			identity.ATTR_PASSWORD: PASSWORD,
+		})
+		m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
+		defer Close(m, "method")
+
+		b := Must(m.Get())
+		Expect(string(b)).To(Equal(USERNAME + ":" + PASSWORD))
+	})
+
+	It("check that bearer token is passed correctly", func() {
+		url := HTTP_HOST + BEARER_LOGIN
+		spec := New(url)
+
+		ctx := ocm.DefaultContext()
+		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
+			identity.ATTR_IDENTITY_TOKEN: TOKEN,
+		})
+		m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
+		defer Close(m, "method")
+
+		b := Must(m.Get())
+		Expect(string(b)).To(Equal(TOKEN))
 	})
 
 })

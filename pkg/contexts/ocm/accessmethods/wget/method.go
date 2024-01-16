@@ -170,7 +170,7 @@ func (m *accessMethod) getBlob() (blobaccess.BlobAccess, error) {
 		request.Header.Set("Authorization", "Bearer "+token)
 	}
 
-	resp, err := client.Get(m.spec.URL)
+	resp, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
