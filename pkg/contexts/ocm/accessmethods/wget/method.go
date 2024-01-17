@@ -1,17 +1,15 @@
 package wget
 
 import (
-	"crypto/tls"
-	"errors"
 	"fmt"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/wget"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"io"
-	"net/http"
 	"sync"
 )
 
@@ -19,8 +17,6 @@ import (
 const (
 	Type   = "wget"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
-
-	CACHE_CONTENT_THRESHOLD = 4096
 )
 
 func init() {
@@ -125,82 +121,10 @@ func (m *accessMethod) getBlob() (blobaccess.BlobAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	log := Logger(m.comp, "URL", m.spec.URL)
-
-	if m.blob != nil {
-		return m.blob, nil
-	}
-
-	creds, err := credentials.CredentialsForConsumer(m.comp.GetContext(), identity.GetConsumerId(m.spec.URL), identity.IdentityMatcher)
-	if err != nil {
-		log.Debug("no credentials found for", "url", m.spec.URL)
-		return nil, err
-	}
-
-	rootCAs := credentials.GetRootCAs(m.comp.GetContext(), creds)
-	clientCerts, err := credentials.GetClientCerts(m.comp.GetContext(), creds)
-	if err != nil {
-		return nil, errors.New("client certificate and private key provided in credentials could not be loaded " +
-			"as tls certificate")
-	}
-
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			RootCAs:      rootCAs,
-			Certificates: clientCerts,
-		},
-	}
-
-	client := &http.Client{
-		Transport: transport,
-	}
-
-	request, err := http.NewRequest(http.MethodGet, m.spec.URL, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	user := creds.GetProperty(identity.ATTR_USERNAME)
-	password := creds.GetProperty(identity.ATTR_PASSWORD)
-	token := creds.GetProperty(identity.ATTR_IDENTITY_TOKEN)
-
-	if user != "" && password != "" {
-		request.SetBasicAuth(user, password)
-	} else if token != "" {
-		request.Header.Set("Authorization", "Bearer "+token)
-	}
-
-	resp, err := client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	log.Debug("http status code", "", resp.StatusCode)
-	if resp.ContentLength < 0 || resp.ContentLength > CACHE_CONTENT_THRESHOLD {
-		log.Debug("download to file because content length is", "unkown or greater than", CACHE_CONTENT_THRESHOLD)
-		f, err := blobaccess.NewTempFile("", "wget")
-		if err != nil {
-			return nil, err
-		}
-		defer f.Close()
-
-		n, err := io.Copy(f.Writer(), resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		log.Debug("downloaded", "size", n, "to", f.Name())
-		m.blob = f.AsBlob(m.spec.GetMimeType())
-	} else {
-		log.Debug("download to memory because content length is", "less than", CACHE_CONTENT_THRESHOLD)
-		buf, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		m.blob = blobaccess.ForData(m.spec.GetMimeType(), buf)
-	}
-
-	return m.blob, nil
+	return wget.BlobAccessForWget(m.spec.URL,
+		wget.WithMimeType(m.spec.GetMimeType()),
+		wget.WithCredentialContext(m.comp.GetContext()),
+		wget.WithLoggingContext(m.comp.GetContext()))
 }
 
 func (m *accessMethod) Close() error {

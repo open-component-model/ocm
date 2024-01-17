@@ -86,6 +86,17 @@ func Logger(messageContext ...logging.MessageContext) logging.Logger {
 	return logContext.Logger(messageContext...)
 }
 
+func LogContext(ctx logging.Context, provider logging.ContextProvider) logging.Context {
+	switch {
+	case ctx != nil:
+		return ctx
+	case provider != nil:
+		return provider.LoggingContext()
+	default:
+		return Context()
+	}
+}
+
 // Configure applies configuration for the default log context
 // provided by this package.
 func Configure(config *logcfg.Config, extra ...string) error {

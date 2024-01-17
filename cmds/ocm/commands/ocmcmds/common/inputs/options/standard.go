@@ -31,6 +31,8 @@ var (
 	VariantsOption       = flagsets.NewStringArrayOptionType("inputVariants", "(platform) variants for inputs")
 )
 
+var URLOption = flagsets.NewStringOptionType("URL", "url for http request")
+
 var LibrariesOption = flagsets.NewStringArrayOptionType("inputLibraries", "library path for inputs")
 
 var VersionOption = flagsets.NewStringOptionType("inputVersion", "version info for inputs")

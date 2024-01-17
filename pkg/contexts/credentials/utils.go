@@ -33,8 +33,10 @@ func CredentialsFor(ctx ContextProvider, obj interface{}, uctx ...UsageContext) 
 	return CredentialsForConsumer(ctx, id)
 }
 
-func GetRootCAs(ctx ContextProvider, creds Credentials) *x509.CertPool {
+func GetRootCAs(ctx ContextProvider, creds Credentials) (*x509.CertPool, error) {
 	var rootCAs *x509.CertPool
+	var err error
+
 	if creds != nil {
 		c := creds.GetProperty(internal.ATTR_CERTIFICATE_AUTHORITY)
 		if c != "" {
@@ -43,9 +45,16 @@ func GetRootCAs(ctx ContextProvider, creds Credentials) *x509.CertPool {
 		}
 	}
 	if rootCAs == nil {
-		rootCAs = rootcertsattr.Get(ctx.CredentialsContext()).GetRootCertPool(true)
+		if ctx != nil {
+			rootCAs = rootcertsattr.Get(ctx.CredentialsContext()).GetRootCertPool(true)
+		} else {
+			rootCAs, err = x509.SystemCertPool()
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
-	return rootCAs
+	return rootCAs, nil
 }
 
 func GetClientCerts(ctx ContextProvider, creds Credentials) ([]tls.Certificate, error) {
