@@ -29,7 +29,7 @@ func DataAccessForWget(url string, opts ...Option) (blobaccess.DataAccess, error
 
 func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rerr error) {
 	eff := optionutils.EvalOptions(opts...)
-	log := eff.Logger("URL", fmt.Sprintf("%s/%s", url))
+	log := eff.Logger("URL", fmt.Sprintf("%s", url))
 
 	creds, err := eff.GetCredentials(url)
 	if err != nil {
