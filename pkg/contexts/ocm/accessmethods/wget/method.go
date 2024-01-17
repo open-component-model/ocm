@@ -29,10 +29,11 @@ func Is(spec accspeccpi.AccessSpec) bool {
 }
 
 // New creates a new Helm Chart accessor for helm repositories.
-func New(url string) *AccessSpec {
+func New(url, mime string) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		URL:                 url,
+		MediaType:           mime,
 	}
 }
 
