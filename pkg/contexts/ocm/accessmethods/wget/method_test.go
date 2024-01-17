@@ -1,4 +1,4 @@
-package wget
+package wget_test
 
 import (
 	"crypto/tls"
@@ -10,6 +10,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/wget"
+	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	. "github.com/open-component-model/ocm/pkg/testutils"
@@ -178,7 +180,7 @@ var _ = BeforeSuite(func() {
 var _ = Describe("wget access method", func() {
 	It("access content on http server", func() {
 		url := HTTP_HOST + TO_MEMORY
-		spec := New(url)
+		spec := New(url, mime.MIME_OCTET)
 
 		ctx := ocm.DefaultContext()
 		m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
@@ -190,7 +192,7 @@ var _ = Describe("wget access method", func() {
 
 	It("access content on https server", func() {
 		url := HTTPS_HOST + TO_MEMORY
-		spec := New(url)
+		spec := New(url, mime.MIME_OCTET)
 
 		ctx := ocm.DefaultContext()
 		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
@@ -226,7 +228,7 @@ var _ = Describe("wget access method", func() {
 
 		// Request
 		url := HTTPS_HOST_WITH_CLIENT_AUTH + TO_MEMORY
-		spec := New(url)
+		spec := New(url, mime.MIME_OCTET)
 
 		ctx := ocm.DefaultContext()
 		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
@@ -243,7 +245,7 @@ var _ = Describe("wget access method", func() {
 
 	It("check that username and password are passed correctly", func() {
 		url := HTTP_HOST + BASIC_LOGIN
-		spec := New(url)
+		spec := New(url, mime.MIME_OCTET)
 
 		ctx := ocm.DefaultContext()
 		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
@@ -259,7 +261,7 @@ var _ = Describe("wget access method", func() {
 
 	It("check that bearer token is passed correctly", func() {
 		url := HTTP_HOST + BEARER_LOGIN
-		spec := New(url)
+		spec := New(url, mime.MIME_OCTET)
 
 		ctx := ocm.DefaultContext()
 		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
