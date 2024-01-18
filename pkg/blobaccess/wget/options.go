@@ -21,7 +21,7 @@ type Options struct {
 }
 
 func (o *Options) Logger(keyValuePairs ...interface{}) logging.Logger {
-	return ocmlog.LogContext(o.LoggingContext, o.CredentialContext).Logger(REALM).WithValues(keyValuePairs)
+	return ocmlog.LogContext(o.LoggingContext, o.CredentialContext).Logger(REALM).WithValues(keyValuePairs...)
 }
 
 func (o *Options) GetCredentials(url string) (credentials.Credentials, error) {

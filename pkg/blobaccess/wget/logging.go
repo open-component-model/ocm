@@ -11,6 +11,6 @@ func Logger(c logging.Context, keyValuePairs ...interface{}) logging.Logger {
 	if c != nil {
 		return c.Logger(REALM).WithValues(keyValuePairs...)
 	} else {
-		return ocmlog.Logger(REALM).WithValues(keyValuePairs)
+		return ocmlog.Logger(REALM).WithValues(keyValuePairs...)
 	}
 }

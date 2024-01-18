@@ -1,8 +1,8 @@
 package wget
 
 import (
+	gocontext "context"
 	"crypto/tls"
-	"fmt"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -28,8 +28,10 @@ func DataAccessForWget(url string, opts ...Option) (blobaccess.DataAccess, error
 }
 
 func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rerr error) {
+	goctx := gocontext.Background()
+
 	eff := optionutils.EvalOptions(opts...)
-	log := eff.Logger("URL", fmt.Sprintf("%s", url))
+	log := eff.Logger("URL", url)
 
 	creds, err := eff.GetCredentials(url)
 	if err != nil {
@@ -41,6 +43,9 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 
 	// configure http client
 	rootCAs, err := credentials.GetRootCAs(eff.CredentialContext, creds)
+	if rerr != nil {
+		return nil, err
+	}
 	clientCerts, err := credentials.GetClientCerts(eff.CredentialContext, creds)
 	if err != nil {
 		return nil, errors.New("client certificate and private key provided in credentials could not be loaded " +
@@ -49,6 +54,7 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
+			MinVersion:   tls.VersionTLS13,
 			RootCAs:      rootCAs,
 			Certificates: clientCerts,
 		},
@@ -63,6 +69,7 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 	if err != nil {
 		return nil, err
 	}
+	request.WithContext(goctx)
 
 	if creds != nil {
 		user := creds.GetProperty(identity.ATTR_USERNAME)
@@ -85,7 +92,7 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 
 	var blob cpi.BlobAccess
 	if resp.ContentLength < 0 || resp.ContentLength > CACHE_CONTENT_THRESHOLD {
-		log.Debug("download to file because content length is", "unkown or greater than", CACHE_CONTENT_THRESHOLD)
+		log.Debug("download to file because content length is", "unknown or greater than", CACHE_CONTENT_THRESHOLD)
 		f, err := blobaccess.NewTempFile("", "wget")
 		if err != nil {
 			return nil, err
