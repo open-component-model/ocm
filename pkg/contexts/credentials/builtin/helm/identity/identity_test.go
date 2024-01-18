@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package identity
+package identity_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	. "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/helm/identity"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
