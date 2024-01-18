@@ -5,12 +5,12 @@
 package directory
 
 import (
-	"github.com/open-component-model/ocm/pkg/blobaccess/wget"
-	"github.com/open-component-model/ocm/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/wget"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type Spec struct {

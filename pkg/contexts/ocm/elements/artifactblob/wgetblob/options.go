@@ -2,6 +2,7 @@ package wgetblob
 
 import (
 	"github.com/mandelsoft/logging"
+
 	base "github.com/open-component-model/ocm/pkg/blobaccess/wget"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"

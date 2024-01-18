@@ -6,6 +6,7 @@ package wget
 
 import (
 	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )

@@ -5,9 +5,8 @@
 package transfer
 
 import (
-	"slices"
-
 	"github.com/opencontainers/go-digest"
+	"slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer/filters"

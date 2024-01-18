@@ -3,6 +3,9 @@ package wget
 import (
 	gocontext "context"
 	"crypto/tls"
+	"io"
+	"net/http"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -11,8 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/optionutils"
-	"io"
-	"net/http"
 )
 
 const (

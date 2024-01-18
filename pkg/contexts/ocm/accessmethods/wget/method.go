@@ -2,6 +2,9 @@ package wget
 
 import (
 	"fmt"
+	"io"
+	"sync"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/wget"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -9,8 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"io"
-	"sync"
 )
 
 // Type is the access type for a blob on an http server .

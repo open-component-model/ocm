@@ -2,6 +2,7 @@ package wget
 
 import (
 	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"

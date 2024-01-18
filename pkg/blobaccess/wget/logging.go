@@ -2,6 +2,7 @@ package wget
 
 import (
 	"github.com/mandelsoft/logging"
+
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
 
