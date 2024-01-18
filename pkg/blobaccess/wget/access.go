@@ -28,8 +28,6 @@ func DataAccessForWget(url string, opts ...Option) (blobaccess.DataAccess, error
 }
 
 func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rerr error) {
-	goctx := gocontext.Background()
-
 	eff := optionutils.EvalOptions(opts...)
 	log := eff.Logger("URL", url)
 
@@ -65,11 +63,10 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 	}
 
 	// configure http request
-	request, err := http.NewRequest(http.MethodGet, url, nil)
+	request, err := http.NewRequestWithContext(gocontext.Background(), http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
-	request.WithContext(goctx)
 
 	if creds != nil {
 		user := creds.GetProperty(identity.ATTR_USERNAME)
