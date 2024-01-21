@@ -140,7 +140,7 @@ jobs:
         go-version-file: '${{ github.workspace }}/go.mod'
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@5ecf649a417b8ae17dc8383dc32d46c03f2312df # v0.15.1
+      uses: anchore/sbom-action/download-syft@41f7a6c033dbcdf78917f23b652c8b8146298c85 # v0.15.4
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.3.0
@@ -151,7 +151,7 @@ jobs:
         git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
 
     - name: Cache go-build and mod
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cache/go-build/
