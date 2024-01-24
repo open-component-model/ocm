@@ -1,0 +1,252 @@
+package main
+
+import (
+	"archive/tar"
+	"bytes"
+	"compress/gzip"
+	"crypto/sha1"
+	"crypto/sha512"
+	"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+)
+
+func login(registry, username, password string, email string) (string, error) {
+	data := map[string]interface{}{
+		"_id":      "org.couchdb.user:" + username,
+		"name":     username,
+		"email":    email,
+		"password": password,
+		"type":     "user",
+	}
+	marshal, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	req, err := http.NewRequest(http.MethodPut, registry+"/-/user/org.couchdb.user:"+url.PathEscape(username), bytes.NewReader(marshal))
+	if err != nil {
+		return "", err
+	}
+	req.SetBasicAuth(username, password)
+	req.Header.Set("content-type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= http.StatusBadRequest {
+		all, _ := ioutil.ReadAll(resp.Body)
+		return "", fmt.Errorf("%d, %s", resp.StatusCode, string(all))
+	}
+	var token struct {
+		Token string `json:"token"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&token)
+	if err != nil {
+		return "", err
+	}
+	return token.Token, nil
+}
+
+type Package struct {
+	pkg            map[string]interface{}
+	Name           string
+	Version        string
+	Readme         string
+	ReadmeFilename string
+	GitHead        string
+	Description    string
+	ID             string
+	NodeVersion    string
+	NpmVersion     string
+	Dist           struct {
+		Integrity string `json:"integrity"`
+		Shasum    string `json:"shasum"`
+		Tarball   string `json:"tarball"`
+	}
+}
+
+func (p *Package) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &p.pkg)
+}
+
+func (p *Package) MarshalJSON() ([]byte, error) {
+	p.pkg["readme"] = p.Readme
+	p.pkg["readmeFilename"] = p.ReadmeFilename
+	p.pkg["gitHead"] = p.GitHead
+	p.pkg["_id"] = p.ID
+	p.pkg["_nodeVersion"] = p.NodeVersion
+	p.pkg["_npmVersion"] = p.NpmVersion
+	p.pkg["dist"] = p.Dist
+	return json.Marshal(p.pkg)
+}
+
+type Attachment struct {
+	ContentType string `json:"content_type"`
+	Data        []byte `json:"data"`
+	Length      int    `json:"length"`
+}
+
+type Body struct {
+	ID          string `json:"_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	DistTags    struct {
+		Latest string `json:"latest"`
+	} `json:"dist-tags"`
+	Versions    map[string]*Package    `json:"versions"`
+	Readme      string                 `json:"readme"`
+	Attachments map[string]*Attachment `json:"_attachments"`
+}
+
+func NewAttachment(data []byte) *Attachment {
+	return &Attachment{
+		ContentType: "application/octet-stream",
+		Data:        data,
+		Length:      len(data),
+	}
+}
+
+func createIntegrity(data []byte) string {
+	hash := sha512.New()
+	hash.Write(data)
+	return "sha512-" + base64.StdEncoding.EncodeToString(hash.Sum(nil))
+}
+
+func createShasum(data []byte) string {
+	hash := sha1.New()
+	hash.Write(data)
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func prepare(data []byte) (*Package, error) {
+	gz, err := gzip.NewReader(bytes.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+	tr := tar.NewReader(gz)
+	var (
+		pkgData []byte
+		readme  []byte
+	)
+	for {
+		thr, err := tr.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err
+		}
+		if pkgData != nil && readme != nil {
+			break
+		}
+		switch thr.Name {
+		case "package/package.json":
+			pkgData, err = ioutil.ReadAll(tr)
+			if err != nil {
+				return nil, fmt.Errorf("read package.json failed, %w", err)
+			}
+		case "package/README.md":
+			readme, err = ioutil.ReadAll(tr)
+			if err != nil {
+				return nil, fmt.Errorf("read README.md failed, %w", err)
+			}
+		}
+	}
+	if len(pkgData) == 0 {
+		return nil, fmt.Errorf("package.json is empty")
+	}
+	var pkg Package
+	err = json.Unmarshal(pkgData, &pkg)
+	if err != nil {
+		return nil, fmt.Errorf("read package.json failed, %w", err)
+	}
+	var meta struct {
+		Name        string `json:"name"`
+		Version     string `json:"version"`
+		Description string `json:"description"`
+	}
+	if err := json.Unmarshal(pkgData, &meta); err != nil {
+		return nil, fmt.Errorf("read package.json version and name failed, %w", err)
+	}
+	if meta.Name == "" {
+		return nil, fmt.Errorf("package.json's name is empty")
+	}
+	if meta.Version == "" {
+		return nil, fmt.Errorf("package.json's version is empty")
+	}
+	pkg.Version = meta.Version
+	pkg.Description = meta.Description
+	pkg.Name = meta.Name
+	pkg.Readme = string(readme)
+	pkg.ReadmeFilename = "README.md"
+	pkg.ID = meta.Name + meta.Version
+	pkg.Dist.Shasum = createShasum(data)
+	pkg.Dist.Integrity = createIntegrity(data)
+	return &pkg, nil
+}
+
+func main() {
+	// FIXME: make registry configurable
+	registry := "https://...FIXME"
+
+	// FIXME: make login configurable
+	token, err := login(registry, "FIXME user", "FIXME token/password", "FIXME@FIXME.com")
+	if err != nil {
+		panic(err)
+	}
+
+	// FIXME: make URL/File configurable - tar -czf ocm-website.tgz package/
+	data, err := ioutil.ReadFile("FIXME.tgz")
+	if err != nil {
+		panic(err)
+	}
+	pkg, err := prepare(data)
+	if err != nil {
+		panic(err)
+	}
+	body := Body{
+		ID:          pkg.Name,
+		Name:        pkg.Name,
+		Description: pkg.Description,
+	}
+	body.DistTags.Latest = pkg.Version
+	body.Versions = map[string]*Package{
+		pkg.Version: pkg,
+	}
+	body.Readme = pkg.Readme
+	tbName := pkg.Name + "-" + pkg.Version + ".tgz"
+	body.Attachments = map[string]*Attachment{
+		tbName: NewAttachment(data),
+	}
+	pkg.Dist.Tarball = registry + pkg.Name + "/-/" + tbName
+
+	client := http.Client{}
+	marshal, err := json.Marshal(body)
+	if err != nil {
+		panic(err)
+	}
+	req, err := http.NewRequest(http.MethodPut, registry+"/"+url.PathEscape(pkg.Name), bytes.NewReader(marshal))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("authorization", "Bearer " + token)
+	req.Header.Set("content-type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusCreated {
+		all, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(all))
+	}
+}
