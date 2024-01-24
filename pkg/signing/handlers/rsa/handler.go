@@ -152,7 +152,7 @@ func (_ Handler) CreateKeyPair() (priv signutils.GenericPrivateKey, pub signutil
 	return CreateKeyPair()
 }
 
-func CreateKeyPair() (priv signutils.GenericPublicKey, pub signutils.GenericPublicKey, err error) {
+func CreateKeyPair() (priv signutils.GenericPrivateKey, pub signutils.GenericPublicKey, err error) {
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, nil, err

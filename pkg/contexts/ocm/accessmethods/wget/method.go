@@ -29,7 +29,7 @@ func Is(spec accspeccpi.AccessSpec) bool {
 	return spec != nil && spec.GetKind() == Type
 }
 
-// New creates a new Helm Chart accessor for helm repositories.
+// New creates a new WGET accessor for http resources.
 func New(url, mime string) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
