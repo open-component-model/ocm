@@ -9,7 +9,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/index"
@@ -97,7 +96,7 @@ func (n *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return n.repo.getIndex().AddTagsFor(n.impl.GetNamespace(), digest, tags...)
 }
 
-func (n *namespaceContainer) NewArtifact(i support.NamespaceAccessImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (n *namespaceContainer) NewArtifact(i support.NamespaceAccessImpl, art ...cpi.Artifact) (cpi.ArtifactAccess, error) {
 	if n.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

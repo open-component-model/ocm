@@ -29,11 +29,13 @@ type indexMapper struct {
 var _ accessobj.State = (*indexMapper)(nil)
 
 func (m *indexMapper) GetState() interface{} {
-	return m.State.GetState().(*artdesc.Artifact).Index()
+	i, _ := m.State.GetState().(*artdesc.Artifact).Index()
+	return i
 }
 
 func (m *indexMapper) GetOriginalState() interface{} {
-	return m.State.GetOriginalState().(*artdesc.Artifact).Index()
+	i, _ := m.State.GetOriginalState().(*artdesc.Artifact).Index()
+	return i
 }
 
 func NewIndexForArtifact(master cpi.ArtifactAccess, a *ArtifactAccessImpl) *IndexAccess {
@@ -47,7 +49,7 @@ func NewIndexForArtifact(master cpi.ArtifactAccess, a *ArtifactAccessImpl) *Inde
 	return m
 }
 
-func (i *IndexAccess) NewArtifact(art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (i *IndexAccess) NewArtifact(art ...cpi.Artifact) (cpi.ArtifactAccess, error) {
 	return i.master.NewArtifact(art...)
 }
 

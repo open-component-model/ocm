@@ -13,6 +13,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -182,7 +183,7 @@ func (dc *DigestContext) ValidFor(ctx *DigestContext) bool {
 	return true
 }
 
-func (dc *DigestContext) determineSignatureInfo(state WalkingState, opts *Options) (*Options, error) {
+func (dc *DigestContext) determineSignatureInfo(state WalkingState, cv ocm.ComponentVersionAccess, opts *Options) (*Options, error) {
 	if opts.SignatureName() != "" {
 		// determine digester type
 		var found bool
@@ -222,8 +223,24 @@ func (dc *DigestContext) determineSignatureInfo(state WalkingState, opts *Option
 				opts.Printer.Printf("Warning: digest type %s for signature %q in %s does not match (signature ignored)\n", dc.DigestType.String(), sig.Name, state.History)
 			}
 		} else {
-			if opts.SignatureConfigured(sig.Name) {
-				return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, sig.Name)
+			if opts.SignatureConfigured(sig.Name) || opts.SignatureName() == "" {
+				i := cv.GetDescriptor().GetSignatureIndex(sig.Name)
+				if i < 0 {
+					return nil, errors.ErrNotFound(compdesc.KIND_SIGNATURE, sig.Name)
+				}
+				s := cv.GetDescriptor().Signatures[i]
+				if s.Signature.MediaType == signutils.MediaTypePEM {
+					_, _, _, err := signutils.GetSignatureFromPem([]byte(s.Signature.Value))
+					if err != nil {
+						return nil, errors.Wrapf(err, "cannot decode signature PEM for %q", sig.Name)
+					}
+					signatures = append(signatures, sig.Name)
+					dc.DigestType = DigesterType(&sig.Digest)
+				} else {
+					if opts.SignatureName() != "" {
+						return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, sig.Name)
+					}
+				}
 			}
 		}
 	}

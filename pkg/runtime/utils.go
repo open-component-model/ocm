@@ -5,6 +5,7 @@
 package runtime
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -102,3 +103,22 @@ func Nil[T any]() T {
 	var _nil T
 	return _nil
 }
+
+// --- begin check ---
+
+// CheckSpecification checks a byte sequence to describe a
+// valid minimum specification object.
+func CheckSpecification(data []byte) error {
+	var obj ObjectTypedObject
+
+	err := DefaultYAMLEncoding.Unmarshal(data, &obj)
+	if err != nil {
+		return errors.ErrInvalidWrap(err, "repository specification", string(data))
+	}
+	if obj.GetType() == "" {
+		return errors.ErrInvalidWrap(fmt.Errorf("non-empty type field required"), "repository specification", string(data))
+	}
+	return nil
+}
+
+// --- end check ---

@@ -52,7 +52,6 @@ var _ = Describe("management", func() {
 			Timestamp: t,
 			Parent:    &parent,
 			Digest:    "xxx",
-			Signature: metav1.SignatureSpec{},
 		}
 
 		fmt.Printf("timestamp: %s\n", t)
@@ -61,7 +60,7 @@ var _ = Describe("management", func() {
 	})
 
 	It("adds entry", func() {
-		slip := routingslip.NewRoutingSlip(ORG, nil)
+		slip := Must(routingslip.NewRoutingSlip(ORG, nil))
 
 		e1 := comment.New("start of routing slip")
 		e2 := comment.New("next comment")
@@ -78,9 +77,9 @@ var _ = Describe("management", func() {
 	It("adds linked entry", func() {
 		label := routingslip.LabelValue{}
 
-		slip := routingslip.NewRoutingSlip(ORG, label)
+		slip := Must(routingslip.NewRoutingSlip(ORG, label))
 		label.Set(slip)
-		lslip := routingslip.NewRoutingSlip(OTHER, label)
+		lslip := Must(routingslip.NewRoutingSlip(OTHER, label))
 		label.Set(lslip)
 
 		e1 := comment.New("start of routing slip")

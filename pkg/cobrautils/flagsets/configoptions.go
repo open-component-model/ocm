@@ -54,6 +54,10 @@ func NewOptions(opts []Option) ConfigOptions {
 	return &configOptions{options: opts}
 }
 
+func NewOptionsByList(opts ...Option) ConfigOptions {
+	return &configOptions{options: opts}
+}
+
 func (o *configOptions) AddTypeSetGroupsToOptions(set ConfigOptionTypeSet) {
 	for _, opt := range o.options {
 		set.AddGroupsToOption(opt)

@@ -27,8 +27,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
+const COMPARCH = "/tmp/ca"
 const ARCH = "/tmp/ctf"
 const ARCH2 = "/tmp/ctf2"
 const PROVIDER = "mandelsoft"
@@ -238,7 +240,7 @@ Error: signing: github.com/mandelsoft/ref:v1: failed resolving component referen
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(HaveOccurred())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-Error: signing: github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: component "github.com/mandelsoft/test" not found in ComponentArchive
+Error: signing: github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: ocm reference "github.com/mandelsoft/test:v1" not found
 `))
 		})
 
@@ -246,9 +248,110 @@ Error: signing: github.com/mandelsoft/ref:v1: failed resolving component referen
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, ARCH)).To(HaveOccurred())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-Error: signing: github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: component "github.com/mandelsoft/test" not found in ComponentArchive
+Error: signing: github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: ocm reference "github.com/mandelsoft/test:v1" not found
 `))
 		})
+	})
+
+	Context("component archive", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMPONENTA, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "testdata")
+						})
+					})
+				})
+			})
+
+			env.ComponentArchive(COMPARCH, accessio.FormatDirectory, COMPONENTB, VERSION, func() {
+				env.Reference("ref", COMPONENTA, VERSION)
+			})
+		})
+
+		It("signs comp arch with lookup", func() {
+			buf := bytes.NewBuffer(nil)
+
+			MustBeSuccessful(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--lookup", ARCH, "--repo", COMPARCH))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
+  no digest found for "github.com/mandelsoft/test:v1"
+  applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref:v1]...
+    resource 0:  "name"="testdata": digest SHA-256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
+  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:5923de2b3b68e904eecb58eca91727926b36623623555025dc5a8700edfa9daa[jsonNormalisation/v1]
+successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:3d1bf98adce06320809393473bed3aaaccf8696418bd1ef5b4d35fa632082d05)
+`))
+		})
+	})
+
+	It("keyless verification", func() {
+		buf := bytes.NewBuffer(nil)
+
+		// create Root CA
+		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=cerificate-authority", "root.priv")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+created rsa key pair root.priv[root.cert]
+`))
+		Expect(env.FileExists("root.priv")).To(BeTrue())
+		Expect(env.FileExists("root.cert")).To(BeTrue())
+
+		// create CA used to create signing certificates
+		buf.Reset()
+		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "--ca", "CN=acme.org", "--ca-key", "root.priv", "--ca-cert", "root.cert", "ca.priv")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+created rsa key pair ca.priv[ca.cert]
+`))
+		Expect(env.FileExists("ca.priv")).To(BeTrue())
+		Expect(env.FileExists("ca.cert")).To(BeTrue())
+
+		// create signing vcertificate from CA
+		buf.Reset()
+		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "CN=mandelsoft", "C=DE", "--ca-key", "ca.priv", "--ca-cert", "ca.cert", "--root-certs", "root.cert", "key.priv")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+created rsa key pair key.priv[key.cert]
+`))
+		Expect(env.FileExists("key.priv")).To(BeTrue())
+		Expect(env.FileExists("key.cert")).To(BeTrue())
+
+		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+			env.ComponentVersion(COMPONENTA, VERSION, func() {
+				env.Provider("mandelsoft")
+			})
+		})
+
+		// sigh component with certificate
+		buf.Reset()
+		Expect(env.CatchOutput(buf).Execute("sign", "component", ARCH, "-K", "key.priv", "-k", "key.cert", "--ca-cert", "root.cert", "-s", "mandelsoft", "-I", "CN=mandelsoft")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
+successfully signed github.com/mandelsoft/test:v1 (digest SHA-256:5ed8bb27309c3c2fff43f3b0f3ebb56a5737ad6db4bc8ace73c5455cb86faf54)
+`))
+		// verify component without key
+		buf.Reset()
+		Expect(env.CatchOutput(buf).Execute("verify", "component", ARCH, "--ca-cert", "root.cert", "-I", "CN=mandelsoft")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
+no public key found for signature "mandelsoft" -> extract key from signature
+successfully verified github.com/mandelsoft/test:v1 (digest SHA-256:5ed8bb27309c3c2fff43f3b0f3ebb56a5737ad6db4bc8ace73c5455cb86faf54)
+`))
+
+		repo := Must(ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env))
+		defer Close(repo, "repo")
+		cv := Must(repo.LookupComponentVersion(COMPONENTA, VERSION))
+		defer Close(cv, "cv")
+
+		Expect(len(cv.GetDescriptor().Signatures)).To(Equal(1))
+
+		sig := cv.GetDescriptor().Signatures[0].Signature
+
+		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
+		Expect(sig.MediaType).To(Equal(signutils.MediaTypePEM))
+
+		_, algo, certs := Must3(signutils.GetSignatureFromPem([]byte(sig.Value)))
+		Expect(len(certs)).To(Equal(3))
+		Expect(algo).To(Equal(rsa.Algorithm))
 	})
 })
 

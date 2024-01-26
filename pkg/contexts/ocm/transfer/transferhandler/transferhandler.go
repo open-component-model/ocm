@@ -88,6 +88,10 @@ func (o SpecializedOptionsCreator[P, T]) NewOptions() TransferHandlerOptions {
 type TransferHandler interface {
 	// UpdateVersion decides whether an update of volatile (non-signature relevant) parts of a CV should be updated.
 	UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error)
+	// EnforceTransport decides whether a component version should be transport as it is.
+	// This controls whether transport is carried out
+	// as if the component version were not present at the destination.
+	EnforceTransport(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error)
 	// OverwriteVersion decides whether a modification of non-volatile (signature relevant) parts of a CV should be updated.
 	OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error)
 

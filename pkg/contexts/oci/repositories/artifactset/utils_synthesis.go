@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer/filters"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -63,9 +64,16 @@ func TransferArtifact(art cpi.ArtifactAccess, set cpi.ArtifactSink, tags ...stri
 type ArtifactModifier func(access cpi.ArtifactAccess) error
 
 // SynthesizeArtifactBlob synthesizes an artifact blob incorporating all side artifacts.
-// To support extensions like cosign, we need the namespace access her to find
-// additionally objects associated by tags.
+// To support extensions like cosign, we need the namespace access here to find
+// additionally objects associated by tags. (not yet implemented).
 func SynthesizeArtifactBlob(ns cpi.NamespaceAccess, ref string, mod ...ArtifactModifier) (ArtifactBlob, error) {
+	return SynthesizeArtifactBlobWithFilter(ns, ref, nil, mod...)
+}
+
+// SynthesizeArtifactBlobWithFilter synthesizes an artifact blob incorporating all side artifacts.
+// To support extensions like cosign, we need the namespace access here to find
+// additionally objects associated by tags (not yet implemented).
+func SynthesizeArtifactBlobWithFilter(ns cpi.NamespaceAccess, ref string, filter filters.Filter, mod ...ArtifactModifier) (ArtifactBlob, error) {
 	art, err := ns.GetArtifact(ref)
 	if err != nil {
 		return nil, GetArtifactError{Original: err, Ref: ref}
@@ -78,30 +86,29 @@ func SynthesizeArtifactBlob(ns cpi.NamespaceAccess, ref string, mod ...ArtifactM
 			return nil, err
 		}
 	}
-	return SynthesizeArtifactBlobForArtifact(art, ref)
+	return SynthesizeArtifactBlobForArtifact(art, ref, filter)
 }
 
-func SynthesizeArtifactBlobForArtifact(art cpi.ArtifactAccess, ref string) (ArtifactBlob, error) {
+func SynthesizeArtifactBlobForArtifact(art cpi.ArtifactAccess, ref string, filter ...filters.Filter) (ArtifactBlob, error) {
 	blob, err := art.Blob()
 	if err != nil {
 		return nil, err
 	}
-	digest := blob.Digest()
 
 	return SythesizeArtifactSet(func(set *ArtifactSet) (string, error) {
-		err = TransferArtifact(art, set)
+		dig, err := transfer.TransferArtifactWithFilter(art, set, filters.And(filter...))
 		if err != nil {
 			return "", fmt.Errorf("failed to transfer artifact: %w", err)
 		}
 
 		if ok, _ := artdesc.IsDigest(ref); !ok {
-			err = set.AddTags(digest, ref)
+			err = set.AddTags(*dig, ref)
 			if err != nil {
 				return "", fmt.Errorf("failed to add tag: %w", err)
 			}
 		}
 
-		set.Annotate(MAINARTIFACT_ANNOTATION, digest.String())
+		set.Annotate(MAINARTIFACT_ANNOTATION, dig.String())
 
 		return blob.MimeType(), nil
 	})

@@ -34,4 +34,10 @@ This blob type specification supports the following fields:
   This OPTIONAL property can be used to specify the repository hint for the
   generated local artifact access. It is prefixed by the component name if
   it does not start with slash "/".
+
+- **<code>platforms</code>** *[]string*
+
+  This OPTIONAL property can be used to filter index artifacts to include
+  only images for dedicated operating systems/architectures.
+  Elements must meet the syntax [&lt;os>]/[&lt;architecture>].
 `

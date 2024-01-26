@@ -59,7 +59,7 @@ The used credential management model is based on four elements:
 
   This is again achieved by a set of simple named attributes. There is only
   one defined property, which must always be present, the <code>type</code> attibute.
-  It denotes the type of the technical environment credentails are required for.
+  It denotes the type of the technical environment credentials are required for.
   For example, for accessing OCI or Git registries. Additionally, there may 
   be any number of arbitrary attributes used to describe the concrete
   instance of such an environment and access paths in this environment, which
@@ -82,7 +82,7 @@ The used credential management model is based on four elements:
 
 - *Identity Matchers*
 
-  The credential management must resolve crednetial requests against a set
+  The credential management must resolve credential requests against a set
   of credential assignments. This is not necessarily a complete attribute match
   for the involved consumer ids. There is typically some kind of matching 
   involved. For example, an assigment is done for an OCI registry with a dedicated

@@ -27,6 +27,7 @@ type Options struct {
 	sourcesByValue    *bool
 	keepGlobalAccess  *bool
 	stopOnExisting    *bool
+	enforceTransport  *bool
 	overwrite         *bool
 	skipUpdate        *bool
 	omitAccessTypes   utils.StringSet
@@ -40,6 +41,7 @@ var (
 	_ RetryOption                 = (*Options)(nil)
 	_ ResourcesByValueOption      = (*Options)(nil)
 	_ LocalResourcesByValueOption = (*Options)(nil)
+	_ EnforceTransportOption      = (*Options)(nil)
 	_ OverwriteOption             = (*Options)(nil)
 	_ SkipUpdateOption            = (*Options)(nil)
 	_ SourcesByValueOption        = (*Options)(nil)
@@ -101,6 +103,11 @@ func (o *Options) ApplyTransferOption(target transferhandler.TransferOptions) er
 			opts.SetStopOnExistingVersion(*o.stopOnExisting)
 		}
 	}
+	if o.enforceTransport != nil {
+		if opts, ok := target.(EnforceTransportOption); ok {
+			opts.SetEnforceTransport(*o.enforceTransport)
+		}
+	}
 	if o.overwrite != nil {
 		if opts, ok := target.(OverwriteOption); ok {
 			opts.SetOverwrite(*o.overwrite)
@@ -126,6 +133,14 @@ func (o *Options) ApplyTransferOption(target transferhandler.TransferOptions) er
 
 func (o *Options) Apply(opts ...transferhandler.TransferOption) error {
 	return transferhandler.ApplyOptions(o, opts...)
+}
+
+func (o *Options) SetEnforceTransport(enforce bool) {
+	o.enforceTransport = &enforce
+}
+
+func (o *Options) IsTransportEnforced() bool {
+	return utils.AsBool(o.enforceTransport)
 }
 
 func (o *Options) SetOverwrite(overwrite bool) {
@@ -276,6 +291,36 @@ func (o *Options) IsArtifactTypeOmitted(t string) bool {
 		return true
 	}
 	return o.omitArtifactTypes.Contains(t)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+type EnforceTransportOption interface {
+	SetEnforceTransport(bool)
+	IsTransportEnforced() bool
+}
+
+type enforceTransportOption struct {
+	TransferOptionsCreator
+	enforce bool
+}
+
+func (o *enforceTransportOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	if eff, ok := to.(EnforceTransportOption); ok {
+		eff.SetEnforceTransport(o.enforce)
+		return nil
+	} else {
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "enforceTransport")
+	}
+}
+
+// EnforceTransport enforces a transport of a component version as it is.
+// This controls whether transport is carried out
+// as if the component version were not present at the destination.
+func EnforceTransport(args ...bool) transferhandler.TransferOption {
+	return &enforceTransportOption{
+		enforce: utils.GetOptionFlag(args...),
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -5,9 +5,9 @@
 package sign
 
 import (
+	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/hash/sign"
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/hash"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -20,6 +20,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Short: "Sign components or hashes",
 	}, verbs.Sign)
 	cmd.AddCommand(components.NewCommand(ctx))
-	cmd.AddCommand(hash.NewCommand(ctx))
+	cmd.AddCommand(sign.NewCommand(ctx))
 	return cmd
 }

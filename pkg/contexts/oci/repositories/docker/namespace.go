@@ -265,21 +265,18 @@ func (n *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return nil
 }
 
-func (n *namespaceContainer) NewArtifact(i support.NamespaceAccessImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (n *namespaceContainer) NewArtifact(i support.NamespaceAccessImpl, art ...cpi.Artifact) (cpi.ArtifactAccess, error) {
 	if n.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	var m *artdesc.Artifact
-	if len(art) == 0 {
-		m = artdesc.NewManifestArtifact()
+	var m cpi.Artifact
+	if len(art) == 0 || art[0] == nil {
+		m = artdesc.NewManifest()
 	} else {
-		if !art[0].IsManifest() {
-			err := m.SetManifest(artdesc.NewManifest())
-			if err != nil {
-				return nil, err
-			}
-		}
 		m = art[0]
+		if !m.IsValid() {
+			m = artdesc.NewManifest()
+		}
 	}
 	return support.NewArtifact(i, m)
 }

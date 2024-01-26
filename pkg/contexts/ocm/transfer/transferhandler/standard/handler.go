@@ -41,6 +41,10 @@ func (h *Handler) UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.Componen
 	return !h.opts.IsSkipUpdate(), nil
 }
 
+func (h *Handler) EnforceTransport(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
+	return h.opts.IsTransportEnforced(), nil
+}
+
 func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
 	return h.opts.IsOverwrite(), nil
 }

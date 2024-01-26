@@ -44,6 +44,11 @@ func (a *artifactBase) IsManifest() bool {
 	return d.IsManifest()
 }
 
+func (a *artifactBase) IsValid() bool {
+	d := a.state.GetState().(*artdesc.Artifact)
+	return d.IsValid()
+}
+
 func (a *artifactBase) blob() (cpi.BlobAccess, error) {
 	return a.state.GetBlob()
 }

@@ -35,7 +35,7 @@ jobs:
           go-version-file: '${{ github.workspace }}/go.mod'
 
       - name: Cache go-build and mod
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/go-build/
@@ -60,7 +60,7 @@ jobs:
           make ctf
 
       - name: Upload OCM Archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ocm.ctf
           path: gen/ctf

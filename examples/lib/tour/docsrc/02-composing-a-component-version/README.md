@@ -1,0 +1,249 @@
+{{compose-compvers}}
+# Composing a Component Version
+
+This tour illustrates the basic usage of the API to
+create/compose component versions.
+
+It covers two basic scenarios:
+- [`basic`](01-basic-componentversion-creation.go) Create a component version stored in the file system
+- [`compose`](02-composition-version.go) Create a component version stored in memory using a non-persistent composition version.
+
+## Running the example
+
+You can call the main program with the scenario as argument. Configuration is not required.
+
+## Walkthrough
+
+### Basic Component Version Creation
+
+The first variant just creates a new component version
+in an OCM repository. To avoid the requirement for 
+credentials a file system based repository is created, using
+the *Common Transport Format* (CTF).
+
+As usual, we start with getting access to an OCM context
+object:
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{default context}}
+```
+
+To compose and store a new component version
+we need some OCM repository to
+store the component. The most simple
+external repository could be the file system.
+For this purpose OCM defines a distribution format, the
+*Common Transport Format* (CTF),
+which is an extension of the OCI distribution
+specification.
+There are three flavors, *Directory*, *Tar* or *TGZ*.
+The implementation provides a regular OCM repository
+interface, like the one used in the previous example.
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{create ctf}}
+```
+
+Once we have a repository we can compose a new version.
+First, we create a new version backed by this repository.
+The result is a memory based representation, which is not yet persisted.
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{new version}}
+```
+
+Now, we can configure the component version. It only exists in memory
+so far, but is already connected to the repository.
+
+The setup of the component version is put into a 
+separate method (`setupVersion`), so it can be reused for the second variant.
+
+First, we configure the component version provider.
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup provider}}
+```
+
+The provider is a structure with a name and some labels.
+We just set the name here by directly setting the `Name` attribute.
+
+Now, we fill the component version with content.
+First, we add some resource already located in
+an external registry. We use an OCI image here.
+A resources has some metadata, like an identity
+and a type.
+The identity is just a set of string properties,
+at least containing the `name` property.
+Additional identity properties can be added via
+options.
+The type represents the logical meaning of the
+resource, here an `ociImage`.
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup resource meta}}
+```
+
+In this example, we just use the `name` property
+without any extra identity.
+
+And most importantly, a resource requires content.
+Content can already be present in some external
+repository. As long, as there is an access type
+for this kind of repository, we can just refer to it.
+Here, we just use an image provided by the
+OCM ecosystem.
+Supported access types can be found under
+.../pkg/contexts/ocm/accessmethods.
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup image access}}
+```
+
+Once we have both, the metadata and the content specification,
+we can now add the resource to our component version. 
+The `SetResource` methods will replace an existing resource with the same
+identity, or add the resource, if no such resource exists in the component
+version.
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup resource}}
+```
+
+Now, we will add a second resource, some unspecific yaml data.
+Therefore, we use the generic YAML resource type.
+In practice, you should always use a resource type describing
+the real meaning of the content, for example something like
+`kubernetesManifest`. This enables tools working with specific content
+to understand the resource set of a component version.
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup second meta}}
+```
+
+Besides referring to external resources, another possibility
+to add content is to directly provide the content blob. The
+used abstraction here is `blobaccess.BlobAccess`.
+
+Any blob content, which can be provided by an implementation of this
+interface, can be added as resource to a component version.
+The library provides various access implementations for blobs
+taken from the local host or from other repositories.
+For example, this could be some file system content.
+To describe blobs taken from external repositories
+an access type specification can be mapped to a blob access.
+Hereby, blobs are stored along with the component descriptor
+instead of storing a reference to content in an external repository.
+
+The most simple form is to directly provide a byte sequence,
+for example some YAML data.
+A blob always must provide a mime type, describing the
+technical format of the blob's byte sequence. This is different
+from the resource type. A logical resource, like a *Helm chart* can be
+represented in different technical formats, for example a Helm chart
+archive or as OCI image archive. While the type described the
+logical content, the meaning of the resource, its mime type
+described the technical blob format used to represent
+the resource as byte sequence.
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{string blob access}}
+```
+
+When storing the blob, it is possible to provide some
+optional additional information:
+- a name of the resource described by the blob, which could
+  be used to do a later upload into an external repository
+  (for example the image repository of an OCI image stored
+  as local blob)
+- an additional access type, which provides an alternative
+  global technology specific access to the same content
+  (we don't use it, here).
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup by blob access}}
+```
+
+Resources added by blobs will be stored along with the component
+version metadata in the same repository, no external
+repository is required.
+
+The above blob example describes the basic operations,
+which can be used to compose any kind of resource 
+from any kind of source.
+For selected use cases there are convenience helpers available,
+which can be used to compose a resource access object.
+This is basically the same interface returned by `GetResource`
+functions on the component version from the last example.
+Such objects can directly be used to add/modify a resource in a
+component version.
+
+The above case could also be written as follows:
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup by access}}
+```
+
+The resource access is an abstraction of external access via access
+methods or direct blob access objects and additionally
+contain all the required resource metadata.
+
+There are even more complex blob sources, for example
+for Helm charts stored in the file system, or even for images
+generated by docker builds.
+Here, we just compose a multi-platform image built with `buildx`
+from these sources (components/ocmcli) featuring two flavors.
+(you have to execute `make image.multi` in components/ocmcli
+before executing this example.
+
+```go
+{{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup by docker}}
+```
+
+{{composition-environment}}
+### Composition Environment
+
+The second variant just creates a new component version
+in a memory based composition environment, no persistence is 
+required. Like all component versions, such component versions
+can be added to any repository later.
+
+As usual, we start with getting access to an OCM context
+object:
+
+```go
+{{include}{../../02-composing-a-component-version/02-composition-version.go}{default context}}
+```
+
+Now, we can create a new component version in the composition
+environment. This does not require a repository or component object.
+
+```go
+{{include}{../../02-composing-a-component-version/02-composition-version.go}{new version}}
+```
+
+To configure the component version, we can just reuse the coding
+from the example above, the component version interface is just the same.
+We just call the `setupVersion` function for the created component version access.
+
+```go
+{{include}{../../02-composing-a-component-version/02-composition-version.go}{setup version}}
+```
+
+The resulting component version can be added to any OCM repository,
+like the one from the previous example.
+Here, we use another feature of the composition environment. It also provides
+complete memory based OCM repositories.
+It has no storage backend and can be used to internally compose
+a set of component versions, which can then be transferred
+to any other repository (see [tour 05]({{transport}}))
+
+```go
+{{include}{../../02-composing-a-component-version/02-composition-version.go}{create composition repository}}
+```
+
+This repository object behaves like any other OCM repository object. We can just
+add the new component version.
+
+```go
+{{include}{../../02-composing-a-component-version/02-composition-version.go}{add version}}
+```

@@ -12,6 +12,7 @@ import (
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Index ociv1.Index
@@ -25,6 +26,36 @@ func NewIndex() *Index {
 		Manifests:   nil,
 		Annotations: nil,
 	}
+}
+
+var _ ArtifactDescriptor = (*Index)(nil)
+
+func (i *Index) IsManifest() bool {
+	return false
+}
+
+func (i *Index) IsIndex() bool {
+	return true
+}
+
+func (i *Index) Digest() digest.Digest {
+	blob, _ := i.Blob()
+	if blob != nil {
+		return blob.Digest()
+	}
+	return ""
+}
+
+func (i *Index) Artifact() *Artifact {
+	return &Artifact{index: i}
+}
+
+func (i *Index) Manifest() (*Manifest, error) {
+	return nil, errors.ErrInvalid()
+}
+
+func (i *Index) Index() (*Index, error) {
+	return i, nil
 }
 
 func (i *Index) IsValid() bool {
@@ -61,7 +92,7 @@ func (i *Index) DeleteAnnotation(name string) {
 	}
 }
 
-func (i *Index) ToBlobAccess() (blobaccess.BlobAccess, error) {
+func (i *Index) Blob() (blobaccess.BlobAccess, error) {
 	i.MediaType = i.MimeType()
 	data, err := json.Marshal(i)
 	if err != nil {

@@ -21,6 +21,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -V, --copy-resources              transfer referenced resources by-value
       --copy-sources                transfer referenced sources by-value
       --disable-uploads             disable standard upload handlers for transport
+      --enforce                     enforce transport as if target version were not present
   -h, --help                        help for componentversions
       --latest                      restrict component versions to latest
       --lookup stringArray          repository name or spec for closure lookup fallback
@@ -116,8 +117,12 @@ this option must always be specified to be able to follow component
 references.
 
 
-It the option <code>--overwrite</code> is given, component version in the
-target repository will be overwritten, if they already exist.
+It the option <code>--overwrite</code> is given, component versions in the
+target repository will be overwritten, if they already exist, but with different digest.
+It the option <code>--enforce</code> is given, component versions in the
+target repository will be transported as if they were not present on the target side,
+regardless of their state (this is independent on their actual state, even identical
+versions are re-transported).
 
 
 With the option <code>--no-update</code> existing versions in the target

@@ -9,6 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -90,6 +91,14 @@ func CredentialsFromList(props ...string) Credentials {
 		creds[props[i-1]] = props[i]
 	}
 	return creds
+}
+
+func CredentialsSpecFromList(props ...string) CredentialsSpec {
+	creds := DirectCredentials{}
+	for i := 1; i < len(props); i += 2 {
+		creds[props[i-1]] = props[i]
+	}
+	return directcreds.NewCredentials(creds.Properties())
 }
 
 func ToGenericCredentialsSpec(spec CredentialsSpec) (*GenericCredentialsSpec, error) {

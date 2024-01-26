@@ -3,14 +3,18 @@ package ociartifact
 import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer/filters"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 type Option = optionutils.Option[*Options]
 
+type Filter = filters.Filter
+
 type Options struct {
 	Context oci.Context
 	Version string
+	Filter  Filter
 	Printer common.Printer
 }
 
@@ -46,6 +50,9 @@ func (o *Options) ApplyTo(opts *Options) {
 	}
 	if o.Printer != nil {
 		opts.Printer = o.Printer
+	}
+	if o.Filter != nil {
+		opts.Filter = o.Filter
 	}
 }
 
@@ -87,4 +94,18 @@ func (o printer) ApplyTo(opts *Options) {
 
 func WithPrinter(p common.Printer) Option {
 	return printer{p}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type _filter struct {
+	filters.Filter
+}
+
+func (o _filter) ApplyTo(opts *Options) {
+	opts.Filter = o.Filter
+}
+
+func WithFilter(f filters.Filter) Option {
+	return _filter{f}
 }

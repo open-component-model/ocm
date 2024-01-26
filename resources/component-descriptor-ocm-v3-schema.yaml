@@ -173,6 +173,15 @@ $defs:
       value:
         type: string
 
+  timestampSpec:
+    type: object
+    properties:
+      value:
+        type: string
+      time:
+        type: string
+        format: date-time
+
   signatureSpec:
     type: 'object'
     required:
@@ -203,6 +212,8 @@ $defs:
         $ref: '#/$defs/digestSpec'
       signature:
         $ref: '#/$defs/signatureSpec'
+      timestamp:
+        $ref: '#/$defs/timestampSpec'
 
   nestedDigestSpec:
     type: 'object'

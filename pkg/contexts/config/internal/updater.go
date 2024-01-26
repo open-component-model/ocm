@@ -72,5 +72,9 @@ func (u *updater) Update() error {
 	defer u.Unlock()
 	u.inupdate = false
 	u.lastGeneration = gen
+
+	if err != nil {
+		Logger.LogError(err, "config update failed", "id", u.ctx.GetId())
+	}
 	return err
 }

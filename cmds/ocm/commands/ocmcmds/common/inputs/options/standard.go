@@ -33,7 +33,7 @@ var (
 
 var LibrariesOption = flagsets.NewStringArrayOptionType("inputLibraries", "library path for inputs")
 
-var VersionOption = flagsets.NewStringArrayOptionType("inputVersion", "version info for inputs")
+var VersionOption = flagsets.NewStringOptionType("inputVersion", "version info for inputs")
 
 var ValuesOption = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based generic values for inputs")
 
@@ -48,3 +48,7 @@ var JSONOption = flagsets.NewYAMLOptionType("inputJson", "JSON formatted text")
 var FormattedJSONOption = flagsets.NewYAMLOptionType("inputFormattedJson", "JSON formatted text")
 
 var HelmRepositoryOption = flagsets.NewStringOptionType("inputHelmRepository", "helm repository base URL")
+
+var (
+	PlatformsOption = flagsets.NewStringArrayOptionType("inputPlatforms", "input filter for image platforms ([os]/[architecture])")
+)

@@ -14,18 +14,23 @@ import (
 
 func ComposingAComponentVersionB() error {
 	// yes, we need an OCM context, again
+	// --- begin default context ---
 	ctx := ocm.DefaultContext()
+	// --- end default context ---
 
 	// now we compose a component version without a repository.
-	// later we add this to a new repository.
-
+	// later, we add this to a new repository.
+	// --- begin new version ---
 	cv := composition.NewComponentVersion(ctx, "acme.org/example2", "v0.1.0")
+	// --- end new version ---
 
 	// just use the same component version setup from variant A
+	// --- begin setup version ---
 	err := setupVersion(cv)
 	if err != nil {
 		return errors.Wrapf(err, "version composition")
 	}
+	// --- end setup version ---
 
 	// even on this internal component version, the API is the same
 	fmt.Printf("*** composition version ***\n")
@@ -36,13 +41,17 @@ func ComposingAComponentVersionB() error {
 	// Here, we are using an internal composition repository.
 	// It has no storage backend and can be used to internally compose
 	// a set of component versions, which can then be transferred
-	// to any other repository (see example 4)
+	// to any other repository (see tour 5)
 
+	// --- begin create composition repository ---
 	repo := composition.NewRepository(ctx)
+	// --- end create composition repository ---
+	// --- begin add version ---
 	err = repo.AddComponentVersion(cv)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add version")
 	}
+	// --- end add version ---
 
 	var list []string
 

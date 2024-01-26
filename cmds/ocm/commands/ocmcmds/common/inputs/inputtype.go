@@ -168,6 +168,7 @@ type InputTypeScheme interface {
 	GetInputType(name string) InputType
 	Register(atype InputType)
 
+	GetInputSpecFor(opts flagsets.ConfigOptions) (InputSpec, error)
 	DecodeInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (InputSpec, error)
 	CreateInputSpec(obj runtime.TypedObject) (InputSpec, error)
 }
@@ -190,6 +191,18 @@ func (t *inputTypeScheme) ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptio
 
 func (t *inputTypeScheme) CreateOptions() flagsets.ConfigOptions {
 	return t.optionTypes.CreateOptions()
+}
+
+func (t *inputTypeScheme) GetInputSpecFor(opts flagsets.ConfigOptions) (InputSpec, error) {
+	cfg, err := t.GetConfigFor(opts)
+	if err != nil {
+		return nil, err
+	}
+	data, err := json.Marshal(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return t.DecodeInputSpec(data, runtime.DefaultJSONEncoding)
 }
 
 func (t *inputTypeScheme) GetConfigFor(opts flagsets.ConfigOptions) (flagsets.Config, error) {

@@ -10,10 +10,12 @@ ocm [<options>] <sub command> ...
 
 ```
   -X, --attribute stringArray     attribute setting
+      --ca-cert stringArray       additional root certificate authorities
       --config string             configuration file
       --config-set strings        apply configuration set
   -C, --cred stringArray          credential setting
   -h, --help                      help for ocm
+  -I, --issuer stringArray        issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>
       --logconfig string          log config
   -L, --logfile string            set log file
       --logkeys stringArray       log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])
@@ -43,7 +45,7 @@ The command accepts some top level options, they can only be given before the su
 
 With the option <code>--cred</code> it is possible to specify arbitrary credentials
 for various environments on the command line. Nevertheless it is always preferrable
-to use the CLI [config file](./ocm_configfile.md).
+to use the cli config file.
 Every credential setting is related to a dedicated consumer and provides a set of
 credential attributes. All this can be specified by a sequence of <code>--cred</code>
 options.
@@ -196,7 +198,7 @@ The value can be a simple type or a JSON/YAML string for complex values
   Note that the host name part of the transfer target <code>ghcr.io/acme</code> is excluded from the
   prefix but the path <code>acme</code> is considered.
 
-  The same using a [config file](./ocm_configfile.md) <code>.ocmconfig</code>:
+  The same using a config file <code>.ocmconfig</code>:
   <pre>
   type: generic.config.ocm.software/v1
   configurations:
@@ -297,6 +299,17 @@ name of a component version)
 Alternatively a key can be specified as base64 encoded string if the argument
 start with the prefix <code>!</code> or as direct string with the prefix
 <code>=</code>.
+
+With <code>--issuer</code> it is possible to declare expected issuer
+constraints for public key certificates provided as part of a signature
+required to accept the provisioned public key (besides the successful
+validation of the certificate). By default, the issuer constraint is
+derived from the signature name. If it is not a formal distinguished name,
+it is assumed to be a plain common name.
+
+With <code>--ca-cert</code> it is possible to define additional root
+certificates for signature verification, if public keys are provided
+by a certificate delivered with the signature.
 
 
 ### SEE ALSO

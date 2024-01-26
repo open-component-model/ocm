@@ -5,21 +5,40 @@
 package transfer
 
 import (
+	"slices"
+
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer/filters"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 func TransferArtifact(art cpi.ArtifactAccess, set cpi.ArtifactSink, tags ...string) error {
+	_, err := TransferArtifactWithFilter(art, set, nil, tags...)
+	return err
+}
+
+func TransferArtifactWithFilter(art cpi.ArtifactAccess, set cpi.ArtifactSink, filter filters.Filter, tags ...string) (*digest.Digest, error) {
 	if art.GetDescriptor().IsIndex() {
-		return TransferIndex(art.IndexAccess(), set, tags...)
+		return TransferIndexWithFilter(art.IndexAccess(), set, filter, tags...)
 	} else {
-		return TransferManifest(art.ManifestAccess(), set, tags...)
+		if filter != nil && !filter.Accept(art, nil) {
+			return nil, errors.ErrNoMatch(cpi.KIND_OCIARTIFACT, art.Digest().String())
+		}
+		return generics.Pointer(art.Digest()), TransferManifest(art.ManifestAccess(), set, tags...)
 	}
 }
 
-func TransferIndex(art cpi.IndexAccess, set cpi.ArtifactSink, tags ...string) (err error) {
+func TransferIndex(art cpi.IndexAccess, set cpi.ArtifactSink, tags ...string) error {
+	_, err := TransferIndexWithFilter(art, set, nil, tags...)
+	return err
+}
+
+func TransferIndexWithFilter(art cpi.IndexAccess, set cpi.ArtifactSink, filter filters.Filter, tags ...string) (dig *digest.Digest, err error) {
 	logging.Logger().Debug("transfer OCI index", "digest", art.Digest())
 	defer func() {
 		logging.Logger().Debug("transfer OCI index done", "error", logging.ErrorMessage(err))
@@ -28,28 +47,54 @@ func TransferIndex(art cpi.IndexAccess, set cpi.ArtifactSink, tags ...string) (e
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 
-	for _, l := range art.GetDescriptor().Manifests {
+	index := *art.GetDescriptor()
+	index.Manifests = slices.Clone(index.Manifests)
+
+	ign := 0
+	for i, l := range art.GetDescriptor().Manifests {
 		loop := finalize.Nested()
 		logging.Logger().Debug("indexed manifest", "digest", "digest", l.Digest, "size", l.Size)
 		art, err := art.GetArtifact(l.Digest)
 		if err != nil {
-			return errors.Wrapf(err, "getting indexed artifact %s", l.Digest)
+			return nil, errors.Wrapf(err, "getting indexed artifact %s", l.Digest)
 		}
 		loop.Close(art)
-		err = TransferArtifact(art, set)
-		if err != nil {
-			return errors.Wrapf(err, "transferring indexed artifact %s", l.Digest)
+		if filter == nil || filter.Accept(art, l.Platform) {
+			err = TransferArtifact(art, set)
+			if err != nil {
+				return nil, errors.Wrapf(err, "transferring indexed artifact %s", l.Digest)
+			}
+			dig = generics.Pointer(l.Digest)
+		} else {
+			index.Manifests = append(index.Manifests[:i-ign], index.Manifests[i-ign+1:]...)
+			ign++
 		}
 		err = loop.Finalize()
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
-	_, err = set.AddArtifact(art, tags...)
-	if err != nil {
-		return errors.Wrapf(err, "transferring index artifact")
+
+	if filter != nil {
+		switch len(art.GetDescriptor().Manifests) - ign {
+		case 0:
+			return nil, errors.ErrNoMatch(cpi.KIND_OCIARTIFACT, art.Digest().String())
+		case 1:
+			if len(tags) > 0 {
+				err := set.AddTags(*dig, tags...)
+				if err != nil {
+					return nil, err
+				}
+			}
+			return dig, nil
+		}
 	}
-	return err
+
+	_, err = set.AddArtifact(&index, tags...)
+	if err != nil {
+		return nil, errors.Wrapf(err, "transferring index artifact")
+	}
+	return generics.Pointer(index.Digest()), err
 }
 
 func TransferManifest(art cpi.ManifestAccess, set cpi.ArtifactSink, tags ...string) (err error) {

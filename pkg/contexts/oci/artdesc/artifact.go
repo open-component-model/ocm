@@ -37,6 +37,18 @@ type (
 	Platform   = ociv1.Platform
 )
 
+type ArtifactDescriptor interface {
+	IsManifest() bool
+	IsIndex() bool
+	IsValid() bool
+
+	Digest() digest.Digest
+	Blob() (blobaccess.BlobAccess, error)
+	Artifact() *Artifact
+	Manifest() (*Manifest, error)
+	Index() (*Index, error)
+}
+
 type BlobDescriptorSource interface {
 	GetBlobDescriptor(digest.Digest) *Descriptor
 	MimeType() string
@@ -52,6 +64,7 @@ type Artifact struct {
 }
 
 var (
+	_ ArtifactDescriptor   = (*Artifact)(nil)
 	_ BlobDescriptorSource = (*Artifact)(nil)
 	_ json.Marshaler       = (*Artifact)(nil)
 	_ json.Unmarshaler     = (*Artifact)(nil)
@@ -71,6 +84,34 @@ func NewIndexArtifact() *Artifact {
 	a := New()
 	a.SetIndex(NewIndex())
 	return a
+}
+
+func (d *Artifact) Digest() digest.Digest {
+	var blob blobaccess.BlobAccess
+	if d.manifest != nil {
+		blob, _ = d.manifest.Blob()
+	}
+	if d.index != nil {
+		blob, _ = d.index.Blob()
+	}
+	if blob != nil {
+		return blob.Digest()
+	}
+	return ""
+}
+
+func (d *Artifact) Blob() (blobaccess.BlobAccess, error) {
+	if d.manifest != nil {
+		return d.manifest.Blob()
+	}
+	if d.index != nil {
+		return d.index.Blob()
+	}
+	return nil, errors.ErrInvalid("oci artifact")
+}
+
+func (d *Artifact) Artifact() *Artifact {
+	return d
 }
 
 func (d *Artifact) MimeType() string {
@@ -111,12 +152,18 @@ func (d *Artifact) IsIndex() bool {
 	return d.index != nil
 }
 
-func (d *Artifact) Index() *Index {
-	return d.index
+func (d *Artifact) Index() (*Index, error) {
+	if d.index != nil {
+		return d.index, nil
+	}
+	return nil, errors.ErrInvalid()
 }
 
-func (d *Artifact) Manifest() *Manifest {
-	return d.manifest
+func (d *Artifact) Manifest() (*Manifest, error) {
+	if d.manifest != nil {
+		return d.manifest, nil
+	}
+	return nil, errors.ErrInvalid()
 }
 
 func (d *Artifact) SetAnnotation(name, value string) error {
@@ -126,6 +173,22 @@ func (d *Artifact) SetAnnotation(name, value string) error {
 		}
 		(*annos)[name] = value
 	})
+}
+
+func (d *Artifact) GetAnnotation(name string) string {
+	var annos map[string]string
+	switch {
+	case d.manifest != nil:
+		annos = d.manifest.Annotations
+	case d.index != nil:
+		annos = d.index.Annotations
+	default:
+		return ""
+	}
+	if len(annos) == 0 {
+		return ""
+	}
+	return annos[name]
 }
 
 func (d *Artifact) DeleteAnnotation(name string) error {
@@ -162,20 +225,22 @@ func (d *Artifact) modifyAnnotation(mod func(annos *map[string]string)) error {
 
 func (d *Artifact) ToBlobAccess() (blobaccess.BlobAccess, error) {
 	if d.IsManifest() {
-		return d.manifest.ToBlobAccess()
+		return d.manifest.Blob()
 	}
 	if d.IsIndex() {
-		return d.index.ToBlobAccess()
+		return d.index.Blob()
 	}
 	return nil, errors.ErrInvalid("artifact descriptor")
 }
 
 func (d *Artifact) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	if d.IsManifest() {
-		return d.Manifest().GetBlobDescriptor(digest)
+		m, _ := d.Manifest()
+		return m.GetBlobDescriptor(digest)
 	}
 	if d.IsIndex() {
-		return d.Index().GetBlobDescriptor(digest)
+		i, _ := d.Index()
+		return i.GetBlobDescriptor(digest)
 	}
 	return nil
 }

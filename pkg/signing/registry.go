@@ -5,6 +5,7 @@
 package signing
 
 import (
+	"crypto/x509/pkix"
 	"sort"
 	"sync"
 
@@ -12,16 +13,26 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
+const DEFAULT_TSA_URL = "http://timestamp.digicert.com"
+
 type Registry interface {
+	RegistryFuncs
+
+	Copy() Registry
+}
+
+type RegistryFuncs interface {
 	HandlerRegistryFuncs
 	KeyRegistryFuncs
 
 	HandlerRegistryProvider
 	KeyRegistryProvider
 
-	Copy() Registry
+	TSAUrl() string
+	SetTSAUrl(url string)
 }
 
 type HasherProvider interface {
@@ -82,8 +93,11 @@ type KeyRegistryFuncs interface {
 	RegisterPrivateKey(name string, key interface{})
 	GetPublicKey(name string) interface{}
 	GetPrivateKey(name string) interface{}
-
 	HasKeys() bool
+
+	RegisterIssuer(name string, is *pkix.Name)
+	GetIssuer(name string) *pkix.Name
+	HasIssuers() bool
 }
 
 type HandlerRegistryProvider interface {
@@ -344,6 +358,7 @@ type keyRegistry struct {
 	parents     []KeyRegistry
 	publicKeys  map[string]interface{}
 	privateKeys map[string]interface{}
+	issuers     map[string]*pkix.Name
 }
 
 var _ KeyRegistry = (*keyRegistry)(nil)
@@ -353,6 +368,7 @@ func NewKeyRegistry(parents ...KeyRegistry) KeyRegistry {
 		parents:     slices.Clone(parents),
 		publicKeys:  map[string]interface{}{},
 		privateKeys: map[string]interface{}{},
+		issuers:     map[string]*pkix.Name{},
 	}
 }
 
@@ -432,6 +448,51 @@ func (r *keyRegistry) GetPrivateKey(name string) interface{} {
 	return nil
 }
 
+func (r *keyRegistry) RegisterIssuer(name string, is *pkix.Name) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	r.issuers[name] = is
+}
+
+func (r *keyRegistry) GetIssuer(name string) *pkix.Name {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	i := r.issuers[name]
+	if i != nil {
+		return i
+	}
+	for _, p := range r.parents {
+		i := p.GetIssuer(name)
+		if i != nil {
+			return i
+		}
+	}
+	// if not explicitly overwritten, the signature name
+	// is interpreted as expected distinguished name for the issuer.
+	dn, err := signutils.ParseDN(name)
+	if err == nil {
+		return dn
+	}
+	return nil
+}
+
+func (r *keyRegistry) HasIssuers() bool {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	if len(r.issuers) > 0 {
+		return true
+	}
+	for _, p := range r.parents {
+		if p == nil {
+			continue
+		}
+		if p.HasIssuers() {
+			return true
+		}
+	}
+	return false
+}
+
 var defaultKeyRegistry = NewKeyRegistry()
 
 func DefaultKeyRegistry() KeyRegistry {
@@ -448,6 +509,8 @@ type (
 type registry struct {
 	_HandlerRegistry
 	_KeyRegistry
+
+	tsaUrl string
 }
 
 var _ Registry = (*registry)(nil)
@@ -471,7 +534,19 @@ func (r *registry) Copy() Registry {
 	return &registry{
 		_HandlerRegistry: r.HandlerRegistry().Copy(),
 		_KeyRegistry:     r.KeyRegistry().Copy(),
+		tsaUrl:           r.tsaUrl,
 	}
+}
+
+func (r *registry) TSAUrl() string {
+	if r.tsaUrl == "" {
+		return DEFAULT_TSA_URL
+	}
+	return r.tsaUrl
+}
+
+func (r *registry) SetTSAUrl(url string) {
+	r.tsaUrl = url
 }
 
 func RegistryWithPreferredKeys(reg Registry, keys KeyRegistry) Registry {
