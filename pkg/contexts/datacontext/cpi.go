@@ -140,6 +140,21 @@ func PersistentContextRef[C Context](ctx C) C {
 	return c.(ViewCreator[C]).CreateView()
 }
 
+func InternalContextRef[C Context](ctx C) C {
+	if IsPersistentContextRef(ctx) {
+		var c interface{} = ctx
+		for {
+			if p, ok := c.(provider); ok {
+				c = p.GetInternalContext()
+			} else {
+				break
+			}
+		}
+		return c.(C)
+	}
+	return ctx
+}
+
 // finalizableContextWrapper is the interface for
 // a context wrapper used to establish a garbage collectable
 // runtime finalizer.
@@ -249,6 +264,10 @@ func (c *contextBase) cleanup() error {
 	if c.recorder != nil {
 		c.recorder.Record(c.id)
 	}
+	return c.Cleanup()
+}
+
+func (c *contextBase) Cleanup() error {
 	list := errors.ErrListf("cleanup %s", c.id)
 	list.Addf(nil, c.finalizer.Finalize(), "finalizers")
 	list.Add(c.attributes.Finalize())
