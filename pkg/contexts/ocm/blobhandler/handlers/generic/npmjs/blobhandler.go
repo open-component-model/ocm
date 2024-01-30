@@ -1,31 +1,24 @@
 package npmjs
 
 import (
+	"bytes"
 	"encoding/json"
-	"path"
-	"strings"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	artifact "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-func init() {
-	cpi.RegisterBlobHandler(NewArtifactHandler(), cpi.ForMimeType("npmjs"), cpi.WithPrio(10))
-}
-
 type artifactHandler struct {
-	spec *Attribute
+	spec *Config
 }
 
-func NewArtifactHandler(repospec ...*Attribute) cpi.BlobHandler {
-	return &artifactHandler{utils.Optional(repospec...)}
+func NewArtifactHandler(repospec *Config) cpi.BlobHandler {
+	return &artifactHandler{repospec}
 }
 
 func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
@@ -34,78 +27,82 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		return nil, nil
 	}
 
-	mediaType := blob.MimeType()
-	if !strings.HasSuffix(mediaType, "+tar") && !strings.HasSuffix(mediaType, "+tar+gzip") {
+	mimeType := blob.MimeType()
+	if mime.MIME_TGZ != mimeType && mime.MIME_TGZ_ALT != mimeType {
 		return nil, nil
 	}
 
-	repo, base, prefix, err := attr.GetInfo(ctx.GetContext())
+	blobReader, err := blob.Reader()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
+	defer blobReader.Close()
 
-	target, err := json.Marshal(repo.GetSpecification())
+	data, err := io.ReadAll(blobReader)
+
+	// read package.json from tarball to get package name and version
+	var pkg *Package
+	pkg, err = prepare(data)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot marshal target specification")
-	}
-	values := []interface{}{
-		"arttype", artType,
-		"mediatype", mediaType,
-		"hint", hint,
-		"target", string(target),
-	}
-	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[cpi.AccessMethod]); ok {
-		// prepare for optimized point to point implementation
-		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("npmjs generic artifact handler with ocm access source",
-			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
-		)
-	} else {
-		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("npmjs generic artifact handler", values...)
+		panic(err)
 	}
 
-	var namespace oci.NamespaceAccess
-	var version string
-	var name string
-	var tag string
+	// use user+pass+mail from credentials to login and retrieve bearer token
+	cred := GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
+	username := cred[ATTR_USERNAME]
+	password := cred[ATTR_PASSWORD]
+	email := cred[ATTR_EMAIL]
+	if username == "" || password == "" || email == "" {
+		return nil, fmt.Errorf("username, password or email missing")
+	}
+	token, err := login(b.spec.Url, username, password, email)
+	if err != nil {
+		panic(err)
+	}
 
-	if hint == "" {
-		name = path.Join(prefix, ctx.TargetComponentName())
-	} else {
-		i := strings.LastIndex(hint, ":")
-		if i > 0 {
-			version = hint[i:]
-			name = path.Join(prefix, hint[:i])
-			tag = version[1:] // remove colon
-		} else {
-			name = hint
+	// prepare body for upload
+	body := Body{
+		ID:          pkg.Name,
+		Name:        pkg.Name,
+		Description: pkg.Description,
+	}
+	body.DistTags.Latest = pkg.Version
+	body.Versions = map[string]*Package{
+		pkg.Version: pkg,
+	}
+	body.Readme = pkg.Readme
+	tbName := pkg.Name + "-" + pkg.Version + ".tgz"
+	body.Attachments = map[string]*Attachment{
+		tbName: NewAttachment(data),
+	}
+	pkg.Dist.Tarball = b.spec.Url + pkg.Name + "/-/" + tbName
+	marshal, err := json.Marshal(body)
+	if err != nil {
+		panic(err)
+	}
+
+	// prepare request
+	req, err := http.NewRequest(http.MethodPut, b.spec.Url+"/"+url.PathEscape(pkg.Name), bytes.NewReader(marshal))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("authorization", "Bearer "+token)
+	req.Header.Set("content-type", "application/json")
+
+	// send request
+	client := http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusCreated {
+		all, err := io.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
 		}
-	}
-	namespace, err = repo.LookupNamespace(name)
-	if err != nil {
-		return nil, errors.Wrapf(err, "lookup namespace %s in target repository %s", name, attr.Ref)
-	}
-	defer namespace.Close()
-
-	set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
-	if err != nil {
-		return nil, err
-	}
-	defer set.Close()
-	digest := set.GetMain()
-	if version == "" {
-		version = "@" + digest.String()
-	}
-	art, err := set.GetArtifact(digest.String())
-	if err != nil {
-		return nil, err
-	}
-	defer art.Close()
-
-	err = artifactset.TransferArtifact(art, namespace, oci.AsTags(tag)...)
-	if err != nil {
-		return nil, err
+		fmt.Println(string(all))
 	}
 
-	ref := base.ComposeRef(namespace.GetNamespace() + version)
-	return artifact.New(ref), nil
+	return npm.New(b.spec.Url, pkg.Name, pkg.Version), nil
 }

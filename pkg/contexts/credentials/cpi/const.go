@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package cpi
 
 import (
@@ -13,6 +9,7 @@ const (
 
 	ATTR_TYPE                  = internal.ATTR_TYPE
 	ATTR_USERNAME              = internal.ATTR_USERNAME
+	ATTR_EMAIL                 = internal.ATTR_EMAIL
 	ATTR_PASSWORD              = internal.ATTR_PASSWORD
 	ATTR_SERVER_ADDRESS        = internal.ATTR_SERVER_ADDRESS
 	ATTR_TOKEN                 = internal.ATTR_TOKEN

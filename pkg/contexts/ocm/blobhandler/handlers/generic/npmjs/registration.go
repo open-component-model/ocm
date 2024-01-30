@@ -4,15 +4,18 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/listformat"
+	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/registrations"
 )
 
-type Config = Attribute
+type Config struct {
+	Url string `json:"url"`
+}
 
 func init() {
-	cpi.RegisterBlobHandlerRegistrationHandler("npmjs/package", &RegistrationHandler{})
+	cpi.RegisterBlobHandlerRegistrationHandler("ocm/npmPackage", &RegistrationHandler{})
 }
 
 type RegistrationHandler struct{}
@@ -26,36 +29,30 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 	if config == nil {
 		return true, fmt.Errorf("npmjs target specification required")
 	}
-	attr, err := registrations.DecodeConfig[Config](config, AttributeType{}.Decode)
+	cfg, err := registrations.DecodeConfig[Config](config)
 	if err != nil {
 		return true, errors.Wrapf(err, "blob handler configuration")
 	}
 
-	var mimes []string
-	opts := cpi.NewBlobHandlerOptions(olist...)
-	if opts.MimeType == "npmjs" {
-		mimes = append(mimes, opts.MimeType)
-	}
-
-	h := NewArtifactHandler(attr)
-	for _, m := range mimes {
-		opts.MimeType = m
-		ctx.BlobHandlers().Register(h, opts)
-	}
+	ctx.BlobHandlers().Register(NewArtifactHandler(cfg),
+		cpi.ForArtifactType(resourcetypes.NPM_PACKAGE),
+		cpi.ForMimeType(mime.MIME_TGZ),
+		cpi.NewBlobHandlerOptions(olist...),
+	)
 
 	return true, nil
 }
 
 func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
-	return registrations.NewLeafHandlerInfo("downloading npmjs artifacts", `
-The <code>npmjsArtifacts</code> downloader is able to download npmjs artifacts
+	return registrations.NewLeafHandlerInfo("uploading npmjs artifacts", `
+The <code>npmjsArtifacts</code> uploader is able to upload npmjs artifacts
 as artifact archive according to the npmjs package spec.
-The following artifact media types are supported: npmjs
+The following artifact media types are supported: `+mime.MIME_TGZ+`
 By default, it is registered for these mimetypes.
 
 It accepts a config with the following fields:
-`+listformat.FormatMapElements("", AttributeDescription())+`
-Alternatively, a single string value can be given representing a npmjs repository
-reference.`,
+'url': the URL of the npmjs repository.
+If not given, the default npmjs.com repository.
+`,
 	)
 }
