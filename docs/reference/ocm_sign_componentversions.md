@@ -108,7 +108,9 @@ given signature name will be verified, instead of recreated.
 
 The following signing types are supported with option <code>--algorithm</code>:
   - <code>RSASSA-PKCS1-V1_5</code> (default)
+  - <code>RSASSA-PSS</code>
   - <code>rsa-signingservice</code>
+  - <code>rsapss-signingservice</code>
   - <code>sigstore</code>
 
 

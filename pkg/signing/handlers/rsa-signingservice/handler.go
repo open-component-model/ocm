@@ -28,20 +28,28 @@ type Key struct {
 const SignaturePEMBlockAlgorithmHeader = "Algorithm"
 
 func init() {
-	signing.DefaultHandlerRegistry().RegisterSigner(Name, Handler{})
+	signing.DefaultHandlerRegistry().RegisterSigner(Name, NewHandler())
 }
 
 // Handler is a signatures.Signer compatible struct to sign with RSASSA-PKCS1-V1_5.
 // using a signature service.
-type Handler struct{}
+type Handler struct {
+	algo string
+}
 
-var _ Handler = Handler{}
+func NewHandlerFor(algo string) signing.Signer {
+	return &Handler{algo}
+}
 
-func (h Handler) Algorithm() string {
+func NewHandler() signing.Signer {
+	return &Handler{Algorithm}
+}
+
+func (h *Handler) Algorithm() string {
 	return Algorithm
 }
 
-func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (signature *signing.Signature, err error) {
+func (h *Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (signature *signing.Signature, err error) {
 	privateKey, err := PrivateKey(sctx.GetPrivateKey())
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid signing server access configuration")
