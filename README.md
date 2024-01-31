@@ -47,6 +47,37 @@ The code for the CLI can be found in [package `cmds/ocm`](https://github.com/op
 The OCI and OCM support can be found in packages
 [`pkg/contexts/oci`](pkg/contexts/oci) and [`pkg/contexts/ocm`](pkg/contexts/ocm).
 
+## Installation
+
+Install the latest release via [Homebrew](https://brew.sh), [Nix](https://nixos.org), or directly from [GitHub Releases](https://github.com/open-component-model/ocm/releases).
+
+### Install using Homebrew
+
+```sh
+# Homebrew (macOS and Linux)
+brew install open-component-model/tap/ocm
+```
+
+### Install using Nix (with [Flakes](https://nixos.wiki/wiki/Flakes))
+
+```bash
+# Nix (macOS, Linux, and Windows)
+# ad hoc cmd execution
+nix run github:open-component-model/ocm -- --help
+nix run github:open-component-model/ocm#helminstaller -- --help
+
+# install development version
+nix profile install github:open-component-model/ocm
+# or release <version>
+nix profile install github:open-component-model/ocm/<version>
+
+#check installation
+nix profile list | grep ocm
+
+# optionally, open a new shell and verify that cmd completion works
+ocm --help
+```
+
 ## Examples
 An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](https://github.com/open-component-model/ocm/blob/main/examples/make/Makefile).
 
