@@ -1,6 +1,7 @@
 package npmjs
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -12,6 +13,23 @@ import (
 
 type Config struct {
 	Url string `json:"url"`
+}
+
+type rawConfig Config
+
+func (c *Config) UnmarshalJSON(data []byte) error {
+	err := json.Unmarshal(data, &c.Url)
+	if err == nil {
+		return nil
+	}
+	var raw rawConfig
+	err = json.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+	*c = Config(raw)
+
+	return nil
 }
 
 func init() {
