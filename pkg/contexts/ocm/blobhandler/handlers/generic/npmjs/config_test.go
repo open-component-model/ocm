@@ -11,9 +11,13 @@ import (
 
 var _ = Describe("Config deserialization Test Environment", func() {
 
-	It("deserialize string", func() {
+	It("deserializes string", func() {
 		cfg := Must(registrations.DecodeConfig[npmjs.Config]("test"))
+		Expect(cfg).To(Equal(&npmjs.Config{"test"}))
+	})
 
+	It("deserializes struct", func() {
+		cfg := Must(registrations.DecodeConfig[npmjs.Config](`{"Url":"test"}`))
 		Expect(cfg).To(Equal(&npmjs.Config{"test"}))
 	})
 

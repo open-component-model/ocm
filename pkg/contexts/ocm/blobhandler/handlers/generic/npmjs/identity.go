@@ -1,8 +1,9 @@
 package npmjs
 
 import (
-	"net/url"
 	"path"
+
+	. "net/url"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -20,17 +21,11 @@ func init() {
 		ATTR_EMAIL, "npmjs registries, require an email address",
 	})
 
-	cpi.RegisterStandardIdentity(CONSUMER_TYPE, IdentityMatcher, `Npmjs repository
+	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `Npmjs repository
 
 It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
 the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 		attrs)
-}
-
-var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
-
-func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
-	return identityMatcher(pattern, cur, id)
 }
 
 const (
@@ -39,32 +34,24 @@ const (
 	ATTR_EMAIL    = cpi.ATTR_EMAIL
 )
 
-func SimpleCredentials(user, passwd string, email string) cpi.Credentials {
-	return cpi.DirectCredentials{
-		ATTR_USERNAME: user,
-		ATTR_PASSWORD: passwd,
-		ATTR_EMAIL:    email,
-	}
-}
-
-func GetConsumerId(repourl string, pkgname string) cpi.ConsumerIdentity {
-	u, err := url.Parse(repourl)
+func GetConsumerId(rawURL string, pkgName string) cpi.ConsumerIdentity {
+	url, err := Parse(rawURL)
 	if err != nil {
 		return nil
 	}
 
-	u.Path = path.Join(u.Path, pkgname)
-	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, u.String())
+	url.Path = path.Join(url.Path, pkgName)
+	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url.String())
 }
 
-func GetCredentials(ctx cpi.ContextProvider, repourl string, pkgname string) common.Properties {
-	id := GetConsumerId(repourl, pkgname)
+func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) common.Properties {
+	id := GetConsumerId(repoUrl, pkgName)
 	if id == nil {
 		return nil
 	}
-	creds, err := cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
-	if creds == nil || err != nil {
+	credentials, err := cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
+	if credentials == nil || err != nil {
 		return nil
 	}
-	return creds.Properties()
+	return credentials.Properties()
 }
