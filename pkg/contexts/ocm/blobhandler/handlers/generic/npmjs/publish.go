@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"context"
 	"crypto/sha1"
 	"crypto/sha512"
 	"encoding/base64"
@@ -27,7 +28,7 @@ func login(registry, username, password string, email string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest(http.MethodPut, registry+"/-/user/org.couchdb.user:"+url.PathEscape(username), bytes.NewReader(marshal))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, registry+"/-/user/org.couchdb.user:"+url.PathEscape(username), bytes.NewReader(marshal))
 	if err != nil {
 		return "", err
 	}
@@ -134,25 +135,25 @@ func prepare(data []byte) (*Package, error) {
 		readme  []byte
 	)
 	for {
-		thr, err := tr.Next()
-		if err != nil {
-			if err == io.EOF {
+		thr, e := tr.Next()
+		if e != nil {
+			if e == io.EOF {
 				break
 			}
-			return nil, err
+			return nil, e
 		}
 		if pkgData != nil && readme != nil {
 			break
 		}
 		switch thr.Name {
 		case "package/package.json":
-			pkgData, err = io.ReadAll(tr)
+			pkgData, e = io.ReadAll(tr)
 			if err != nil {
 				return nil, fmt.Errorf("read package.json failed, %w", err)
 			}
 		case "package/README.md":
-			readme, err = io.ReadAll(tr)
-			if err != nil {
+			readme, e = io.ReadAll(tr)
+			if e != nil {
 				return nil, fmt.Errorf("read README.md failed, %w", err)
 			}
 		}

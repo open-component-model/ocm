@@ -2,6 +2,7 @@ package npmjs
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,8 +23,7 @@ func NewArtifactHandler(repospec *Config) cpi.BlobHandler {
 }
 
 func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
-	attr := b.spec
-	if attr == nil {
+	if b.spec == nil {
 		return nil, nil
 	}
 
@@ -34,17 +34,20 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	blobReader, err := blob.Reader()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer blobReader.Close()
 
 	data, err := io.ReadAll(blobReader)
+	if err != nil {
+		return nil, err
+	}
 
 	// read package.json from tarball to get package name and version
 	var pkg *Package
 	pkg, err = prepare(data)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// use user+pass+mail from credentials to login and retrieve bearer token
@@ -57,7 +60,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	}
 	token, err := login(b.spec.Url, username, password, email)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// prepare body for upload
@@ -78,13 +81,13 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	pkg.Dist.Tarball = b.spec.Url + pkg.Name + "/-/" + tbName
 	marshal, err := json.Marshal(body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// prepare request
-	req, err := http.NewRequest(http.MethodPut, b.spec.Url+"/"+url.PathEscape(pkg.Name), bytes.NewReader(marshal))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, b.spec.Url+"/"+url.PathEscape(pkg.Name), bytes.NewReader(marshal))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	req.Header.Set("authorization", "Bearer "+token)
 	req.Header.Set("content-type", "application/json")
@@ -93,13 +96,13 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusCreated {
 		all, err := io.ReadAll(resp.Body)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		fmt.Println(string(all))
 	}

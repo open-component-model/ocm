@@ -33,7 +33,7 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 }
 
 func init() {
-	cpi.RegisterBlobHandlerRegistrationHandler("ocm/npmPackage", &RegistrationHandler{})
+	cpi.RegisterBlobHandlerRegistrationHandler(BLOB_HANDLER_NAME, &RegistrationHandler{})
 }
 
 type RegistrationHandler struct{}

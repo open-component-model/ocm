@@ -11,9 +11,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/listformat"
 )
 
-// CONSUMER_TYPE is the npmjs repository type.
-const CONSUMER_TYPE = "Registry.npmjs.com"
-
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
 		ATTR_USERNAME, "the basic auth user name",
@@ -27,12 +24,6 @@ It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally act
 the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 		attrs)
 }
-
-const (
-	ATTR_USERNAME = cpi.ATTR_USERNAME
-	ATTR_PASSWORD = cpi.ATTR_PASSWORD
-	ATTR_EMAIL    = cpi.ATTR_EMAIL
-)
 
 func GetConsumerId(rawURL string, pkgName string) cpi.ConsumerIdentity {
 	url, err := Parse(rawURL)
