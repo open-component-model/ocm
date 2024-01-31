@@ -1,4 +1,4 @@
-package main
+package npmjs
 
 import (
 	"archive/tar"
@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -40,7 +39,7 @@ func login(registry, username, password string, email string) (string, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= http.StatusBadRequest {
-		all, _ := ioutil.ReadAll(resp.Body)
+		all, _ := io.ReadAll(resp.Body)
 		return "", fmt.Errorf("%d, %s", resp.StatusCode, string(all))
 	}
 	var token struct {
@@ -147,12 +146,12 @@ func prepare(data []byte) (*Package, error) {
 		}
 		switch thr.Name {
 		case "package/package.json":
-			pkgData, err = ioutil.ReadAll(tr)
+			pkgData, err = io.ReadAll(tr)
 			if err != nil {
 				return nil, fmt.Errorf("read package.json failed, %w", err)
 			}
 		case "package/README.md":
-			readme, err = ioutil.ReadAll(tr)
+			readme, err = io.ReadAll(tr)
 			if err != nil {
 				return nil, fmt.Errorf("read README.md failed, %w", err)
 			}
@@ -189,64 +188,4 @@ func prepare(data []byte) (*Package, error) {
 	pkg.Dist.Shasum = createShasum(data)
 	pkg.Dist.Integrity = createIntegrity(data)
 	return &pkg, nil
-}
-
-func main() {
-	// FIXME: make registry configurable
-	registry := "https://...FIXME"
-
-	// FIXME: make login configurable
-	token, err := login(registry, "FIXME user", "FIXME token/password", "FIXME@FIXME.com")
-	if err != nil {
-		panic(err)
-	}
-
-	// FIXME: make URL/File configurable - tar -czf ocm-website.tgz package/
-	data, err := ioutil.ReadFile("FIXME.tgz")
-	if err != nil {
-		panic(err)
-	}
-	pkg, err := prepare(data)
-	if err != nil {
-		panic(err)
-	}
-	body := Body{
-		ID:          pkg.Name,
-		Name:        pkg.Name,
-		Description: pkg.Description,
-	}
-	body.DistTags.Latest = pkg.Version
-	body.Versions = map[string]*Package{
-		pkg.Version: pkg,
-	}
-	body.Readme = pkg.Readme
-	tbName := pkg.Name + "-" + pkg.Version + ".tgz"
-	body.Attachments = map[string]*Attachment{
-		tbName: NewAttachment(data),
-	}
-	pkg.Dist.Tarball = registry + pkg.Name + "/-/" + tbName
-
-	client := http.Client{}
-	marshal, err := json.Marshal(body)
-	if err != nil {
-		panic(err)
-	}
-	req, err := http.NewRequest(http.MethodPut, registry+"/"+url.PathEscape(pkg.Name), bytes.NewReader(marshal))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("authorization", "Bearer " + token)
-	req.Header.Set("content-type", "application/json")
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusCreated {
-		all, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(string(all))
-	}
 }
