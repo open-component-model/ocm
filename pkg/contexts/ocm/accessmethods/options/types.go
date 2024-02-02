@@ -99,3 +99,10 @@ func NewStringMapOptionType(name, desc string) OptionType {
 		valueType: TYPE_STRING2STRING,
 	}
 }
+
+func NewStringSliceMapOptionType(name, desc string) OptionType {
+	return &option{
+		base:      flagsets.NewStringOptionType("", ""), //TODO
+		valueType: TYPE_STRING2STRINGSLICE,
+	}
+}

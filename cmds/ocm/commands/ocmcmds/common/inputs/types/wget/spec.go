@@ -6,6 +6,7 @@ package directory
 
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"net/http"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -19,6 +20,15 @@ type Spec struct {
 	URL string `json:"url"`
 	// MimeType defines the mime type of the artifact.
 	MimeType string `json:"mediaType"`
+	// Header to be passed in the http request
+	Header http.Header `json:"header"`
+	// Verb is the http verb to be used for the request
+	Verb string `json:"verb"`
+	// Body is the body to be included in the http request
+	Body []byte
+	// NoRedirect allows to disable redirects
+	NoRedirect bool `json:"noRedirect"`
+	// Credentials allows to pass credentials and certificates for the http communication
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)

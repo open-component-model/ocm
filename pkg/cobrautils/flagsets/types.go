@@ -407,3 +407,40 @@ func (o *BytesOption) AddFlags(fs *pflag.FlagSet) {
 func (o *BytesOption) Value() interface{} {
 	return o.value
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+type StringSliceMapOptionType struct {
+	TypeOptionBase
+}
+
+func NewStringSliceMapOptionType(name string, description string) ConfigOptionType {
+	return &StringSliceMapOptionType{
+		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *StringSliceMapOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *StringSliceMapOptionType) Create() Option {
+	return &StringSliceMapOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
+type StringSliceMapOption struct {
+	OptionBase
+	value map[string][]string
+}
+
+var _ Option = (*StringSliceMapOption)(nil)
+
+func (o *StringSliceMapOption) AddFlags(fs *pflag.FlagSet) {
+	o.TweakFlag(flag.StringToStringSliceVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+}
+
+func (o *StringSliceMapOption) Value() interface{} {
+	return o.value
+}

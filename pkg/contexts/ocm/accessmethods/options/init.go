@@ -5,14 +5,15 @@
 package options
 
 const (
-	TYPE_STRING        = "string"
-	TYPE_STRINGARRAY   = "[]string"
-	TYPE_STRING2STRING = "string=string"
-	TYPE_INT           = "int"
-	TYPE_BOOL          = "bool"
-	TYPE_YAML          = "YAML"
-	TYPE_STRINGMAPYAML = "map[string]YAML"
-	TYPE_STRING2YAML   = "string=YAML"
+	TYPE_STRING             = "string"
+	TYPE_STRINGARRAY        = "[]string"
+	TYPE_STRING2STRING      = "string=string"
+	TYPE_INT                = "int"
+	TYPE_BOOL               = "bool"
+	TYPE_YAML               = "YAML"
+	TYPE_STRINGMAPYAML      = "map[string]YAML"
+	TYPE_STRING2YAML        = "string=YAML"
+	TYPE_STRING2STRINGSLICE = "string=string,string"
 )
 
 func init() {

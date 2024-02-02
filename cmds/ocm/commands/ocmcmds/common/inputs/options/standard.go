@@ -12,6 +12,7 @@ import (
 var (
 	HintOption      = options.HintOption
 	MediaTypeOption = options.MediatypeOption
+	URLOption       = options.URLOption
 )
 
 var PathOption = flagsets.NewStringOptionType("inputPath", "path field for input")
@@ -30,8 +31,6 @@ var (
 	FollowSymlinksOption = flagsets.NewBoolOptionType("inputFollowSymlinks", "follow symbolic links during archive creation for inputs")
 	VariantsOption       = flagsets.NewStringArrayOptionType("inputVariants", "(platform) variants for inputs")
 )
-
-var URLOption = flagsets.NewStringOptionType("URL", "url for http request")
 
 var LibrariesOption = flagsets.NewStringArrayOptionType("inputLibraries", "library path for inputs")
 

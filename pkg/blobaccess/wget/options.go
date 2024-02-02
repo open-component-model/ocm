@@ -2,6 +2,8 @@ package wget
 
 import (
 	"github.com/mandelsoft/logging"
+	"io"
+	"net/http"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
@@ -13,11 +15,18 @@ type Option = optionutils.Option[*Options]
 
 type Options struct {
 	CredentialContext credentials.Context
-
-	LoggingContext logging.Context
+	LoggingContext    logging.Context
+	// Header to be passed in the http request
+	Header http.Header
+	// Verb is the http verb to be used for the request
+	Verb string
+	// Body is the body to be included in the http request
+	Body io.Reader
+	// NoRedirect allows to disable redirects
+	NoRedirect bool
 	// MimeType defines the media type of the downloaded content
 	MimeType string
-
+	// Credentials allows to pass credentials and certificates for the http communication
 	Credentials credentials.Credentials
 }
 
@@ -107,4 +116,16 @@ func (o creds) ApplyTo(opts *Options) {
 
 func WithCredentials(c credentials.Credentials) Option {
 	return creds{c}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type header http.Header
+
+func (o header) ApplyTo(opts *Options) {
+	opts.Header = http.Header(o)
+}
+
+func WithHeader(h http.Header) Option {
+	return header(h)
 }

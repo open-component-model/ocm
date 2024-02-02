@@ -46,6 +46,9 @@ var BucketOption = RegisterOption(NewStringOptionType("bucket", "bucket name"))
 // VersionOption.
 var VersionOption = RegisterOption(NewStringOptionType("accessVersion", "version for access specification"))
 
+// URLOption
+var URLOption = RegisterOption(NewStringOptionType("url", "artifact or server url"))
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // CommentOption.
