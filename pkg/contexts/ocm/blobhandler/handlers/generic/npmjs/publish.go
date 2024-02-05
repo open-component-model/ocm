@@ -105,7 +105,7 @@ func createSha1(data []byte) string {
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
-// read package.json and README.md from tarball to create Package object
+// Read package.json and README.md from tarball to create Package object.
 func prepare(data []byte) (*Package, error) {
 	gz, err := gzip.NewReader(bytes.NewReader(data))
 	if err != nil {
