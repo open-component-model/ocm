@@ -56,36 +56,15 @@ func login(registry, username, password string, email string) (string, error) {
 }
 
 type Package struct {
-	pkg            map[string]interface{}
-	Name           string
-	Version        string
-	Readme         string
-	ReadmeFilename string
-	GitHead        string
-	Description    string
-	ID             string
-	NodeVersion    string
-	NpmVersion     string
-	Dist           struct {
+	Name        string
+	Version     string
+	Readme      string
+	Description string
+	Dist        struct {
 		Integrity string `json:"integrity"`
 		Shasum    string `json:"shasum"`
 		Tarball   string `json:"tarball"`
 	}
-}
-
-func (p *Package) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, &p.pkg)
-}
-
-func (p *Package) MarshalJSON() ([]byte, error) {
-	p.pkg["readme"] = p.Readme
-	p.pkg["readmeFilename"] = p.ReadmeFilename
-	p.pkg["gitHead"] = p.GitHead
-	p.pkg["_id"] = p.ID
-	p.pkg["_nodeVersion"] = p.NodeVersion
-	p.pkg["_npmVersion"] = p.NpmVersion
-	p.pkg["dist"] = p.Dist
-	return json.Marshal(p.pkg)
 }
 
 type Attachment struct {
@@ -114,18 +93,19 @@ func NewAttachment(data []byte) *Attachment {
 	}
 }
 
-func createIntegrity(data []byte) string {
+func createSha512(data []byte) string {
 	hash := sha512.New()
 	hash.Write(data)
 	return "sha512-" + base64.StdEncoding.EncodeToString(hash.Sum(nil))
 }
 
-func createShasum(data []byte) string {
+func createSha1(data []byte) string {
 	hash := sha1.New() //nolint:gosec // older npm (prior to v5) uses sha1
 	hash.Write(data)
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
+// read package.json and README.md from tarball to create Package object
 func prepare(data []byte) (*Package, error) {
 	gz, err := gzip.NewReader(bytes.NewReader(data))
 	if err != nil {
@@ -160,35 +140,30 @@ func prepare(data []byte) (*Package, error) {
 			}
 		}
 	}
+
+	// fetch some information from package.json
 	if len(pkgData) == 0 {
 		return nil, fmt.Errorf("package.json is empty")
 	}
-	var pkg Package
-	err = json.Unmarshal(pkgData, &pkg)
+	var pkgJson map[string]string
+	err = json.Unmarshal(pkgData, &pkgJson)
 	if err != nil {
 		return nil, fmt.Errorf("read package.json failed, %w", err)
 	}
-	var meta struct {
-		Name        string `json:"name"`
-		Version     string `json:"version"`
-		Description string `json:"description"`
-	}
-	if err := json.Unmarshal(pkgData, &meta); err != nil {
-		return nil, fmt.Errorf("read package.json version and name failed, %w", err)
-	}
-	if meta.Name == "" {
+	if pkgJson["name"] == "" {
 		return nil, fmt.Errorf("package.json's name is empty")
 	}
-	if meta.Version == "" {
+	if pkgJson["version"] == "" {
 		return nil, fmt.Errorf("package.json's version is empty")
 	}
-	pkg.Version = meta.Version
-	pkg.Description = meta.Description
-	pkg.Name = meta.Name
+
+	// create package object
+	var pkg Package
+	pkg.Name = pkgJson["name"]
+	pkg.Version = pkgJson["version"]
+	pkg.Description = pkgJson["description"]
 	pkg.Readme = string(readme)
-	pkg.ReadmeFilename = "README.md"
-	pkg.ID = meta.Name + meta.Version
-	pkg.Dist.Shasum = createShasum(data)
-	pkg.Dist.Integrity = createIntegrity(data)
+	pkg.Dist.Shasum = createSha1(data)
+	pkg.Dist.Integrity = createSha512(data)
 	return &pkg, nil
 }

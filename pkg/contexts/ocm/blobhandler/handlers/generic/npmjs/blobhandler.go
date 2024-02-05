@@ -11,7 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	log "github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -44,12 +44,14 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		return nil, err
 	}
 
-	// read package.json from tarball to get package name and version
+	// read package.json from tarball to get name, version, etc.
 	var pkg *Package
 	pkg, err = prepare(data)
 	if err != nil {
 		return nil, err
 	}
+	tbName := pkg.Name + "-" + pkg.Version + ".tgz"
+	pkg.Dist.Tarball = b.spec.Url + pkg.Name + "/-/" + tbName
 
 	// use user+pass+mail from credentials to login and retrieve bearer token
 	cred := GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
@@ -70,16 +72,14 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		Name:        pkg.Name,
 		Description: pkg.Description,
 	}
-	body.DistTags.Latest = pkg.Version
 	body.Versions = map[string]*Package{
 		pkg.Version: pkg,
 	}
+	body.DistTags.Latest = pkg.Version
 	body.Readme = pkg.Readme
-	tbName := pkg.Name + "-" + pkg.Version + ".tgz"
 	body.Attachments = map[string]*Attachment{
 		tbName: NewAttachment(data),
 	}
-	pkg.Dist.Tarball = b.spec.Url + pkg.Name + "/-/" + tbName
 	marshal, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		if err != nil {
 			return nil, err
 		}
-		log.Context().Logger().Error("http (%d) - failed to upload package: %s", resp.StatusCode, string(all))
+		logging.Context().Logger().Error("http (%d) - failed to upload package: %s", resp.StatusCode, string(all))
 	}
 
 	return npm.New(b.spec.Url, pkg.Name, pkg.Version), nil
