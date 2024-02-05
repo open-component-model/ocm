@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -137,7 +138,7 @@ func prepare(data []byte) (*Package, error) {
 	for {
 		thr, e := tr.Next()
 		if e != nil {
-			if e == io.EOF {
+			if errors.Is(e, io.EOF) {
 				break
 			}
 			return nil, e
@@ -147,13 +148,13 @@ func prepare(data []byte) (*Package, error) {
 		}
 		switch thr.Name {
 		case "package/package.json":
-			pkgData, e = io.ReadAll(tr)
+			pkgData, err = io.ReadAll(tr)
 			if err != nil {
 				return nil, fmt.Errorf("read package.json failed, %w", err)
 			}
 		case "package/README.md":
-			readme, e = io.ReadAll(tr)
-			if e != nil {
+			readme, err = io.ReadAll(tr)
+			if err != nil {
 				return nil, fmt.Errorf("read README.md failed, %w", err)
 			}
 		}
