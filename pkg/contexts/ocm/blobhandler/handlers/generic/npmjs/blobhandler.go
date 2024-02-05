@@ -11,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	log "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -104,7 +105,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(string(all))
+		log.Context().Logger().Error("http (%d) - failed to upload package: %s", resp.StatusCode, string(all))
 	}
 
 	return npm.New(b.spec.Url, pkg.Name, pkg.Version), nil
