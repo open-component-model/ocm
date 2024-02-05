@@ -113,13 +113,13 @@ func NewAttachment(data []byte) *Attachment {
 }
 
 func createIntegrity(data []byte) string {
-	hash := sha512.New()
+	hash := sha512.New() //nolint:gosec
 	hash.Write(data)
 	return "sha512-" + base64.StdEncoding.EncodeToString(hash.Sum(nil))
 }
 
 func createShasum(data []byte) string {
-	hash := sha1.New()
+	hash := sha1.New() //nolint:gosec
 	hash.Write(data)
 	return hex.EncodeToString(hash.Sum(nil))
 }
