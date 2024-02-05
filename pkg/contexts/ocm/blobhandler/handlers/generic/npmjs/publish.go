@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	//nolint:gosec // older npm (prior to v5) uses sha1
 	"crypto/sha1"
 	"crypto/sha512"
 	"encoding/base64"
@@ -114,13 +115,13 @@ func NewAttachment(data []byte) *Attachment {
 }
 
 func createIntegrity(data []byte) string {
-	hash := sha512.New() //nolint:gosec
+	hash := sha512.New()
 	hash.Write(data)
 	return "sha512-" + base64.StdEncoding.EncodeToString(hash.Sum(nil))
 }
 
 func createShasum(data []byte) string {
-	hash := sha1.New() //nolint:gosec
+	hash := sha1.New() //nolint:gosec // older npm (prior to v5) uses sha1
 	hash.Write(data)
 	return hex.EncodeToString(hash.Sum(nil))
 }
