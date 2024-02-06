@@ -1,14 +1,16 @@
 package wget
 
 import (
-	"github.com/mandelsoft/logging"
 	"io"
 	"net/http"
+
+	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/optionutils"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Option = optionutils.Option[*Options]
@@ -23,7 +25,7 @@ type Options struct {
 	// Body is the body to be included in the http request
 	Body io.Reader
 	// NoRedirect allows to disable redirects
-	NoRedirect bool
+	NoRedirect *bool
 	// MimeType defines the media type of the downloaded content
 	MimeType string
 	// Credentials allows to pass credentials and certificates for the http communication
@@ -61,6 +63,18 @@ func (o *Options) ApplyTo(opts *Options) {
 	}
 	if o.LoggingContext != nil {
 		opts.LoggingContext = o.LoggingContext
+	}
+	if o.Header != nil {
+		opts.Header = o.Header
+	}
+	if o.Verb != "" {
+		opts.Verb = o.Verb
+	}
+	if o.Body != nil {
+		opts.Body = o.Body
+	}
+	if o.NoRedirect != nil {
+		opts.NoRedirect = o.NoRedirect
 	}
 }
 
@@ -128,4 +142,44 @@ func (o header) ApplyTo(opts *Options) {
 
 func WithHeader(h http.Header) Option {
 	return header(h)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type verb string
+
+func (o verb) ApplyTo(opts *Options) {
+	opts.Verb = string(o)
+}
+
+func WithVerb(v string) Option {
+	return verb(v)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type body struct {
+	io.Reader
+}
+
+func (o *body) ApplyTo(opts *Options) {
+	if o.Reader != nil {
+		opts.Body = io.Reader(o)
+	}
+}
+
+func WithBody(v io.Reader) Option {
+	return &body{v}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type noredirect bool
+
+func (o noredirect) ApplyTo(opts *Options) {
+	opts.NoRedirect = utils.BoolP(o)
+}
+
+func WithNoRedirect(r ...bool) Option {
+	return noredirect(utils.OptionalDefaultedBool(true, r...))
 }

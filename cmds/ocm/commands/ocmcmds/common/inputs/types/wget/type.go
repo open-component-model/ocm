@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package directory
+package wget
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -29,5 +29,26 @@ This blob type specification supports the following fields:
 - **<code>mediaType</code> *string*
 
   This OPTIONAL property describes the media type of the resource to be 
-  downloaded. The default media type is ` + mime.MIME_OCTET + `.
+  downloaded. If omitted, ocm tries to read the mediaType from the Content-Type header
+  of the http response. If the mediaType cannot be set from the Content-Type header as well,
+  ocm tries to deduct the mediaType from the URL. If that is not possible either, the default
+  media type is defaulted to ` + mime.MIME_OCTET + `.
+
+- **<code>header</code>** *map[string][]string*
+	
+  This OPTIONAL property describes the http headers to be set in the http request to the server.
+
+- **<code>verb</code>** *string*
+
+  This OPTIONAL property describes the http verb (also known as http request method) for the http
+  request. If omitted, the http verb is defaulted to GET.
+
+- **<code>body</code>** *[]byte*
+  
+  This OPTIONAL property describes the http body to be included in the request.
+
+- **<code>noredirect<code>** *bool*
+
+  This OPTIONAL property describes whether http redirects should be disabled. If omitted,
+  it is defaulted to false (so, per default, redirects are enabled).
 `

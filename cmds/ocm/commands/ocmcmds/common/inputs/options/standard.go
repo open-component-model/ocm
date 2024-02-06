@@ -10,9 +10,13 @@ import (
 )
 
 var (
-	HintOption      = options.HintOption
-	MediaTypeOption = options.MediatypeOption
-	URLOption       = options.URLOption
+	HintOption         = options.HintOption
+	MediaTypeOption    = options.MediatypeOption
+	URLOption          = options.URLOption
+	HTTPHeaderOption   = options.HTTPHeaderOption
+	HTTPVerbOption     = options.HTTPVerbOption
+	HTTPBodyOption     = options.HTTPBodyOption
+	HTTPRedirectOption = options.HTTPRedirectOption
 )
 
 var PathOption = flagsets.NewStringOptionType("inputPath", "path field for input")

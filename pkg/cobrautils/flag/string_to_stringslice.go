@@ -7,9 +7,10 @@ package flag
 import (
 	"bytes"
 	"encoding/csv"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/spf13/pflag"
+	"errors"
 	"strings"
+
+	"github.com/spf13/pflag"
 )
 
 type stringToStringSliceValue[T ~map[string][]string] struct {
@@ -24,47 +25,38 @@ func newStringToStringSliceValue[T ~map[string][]string](val map[string][]string
 	return ssv
 }
 
-// Set Format: a=1,2,3,b=2,3,4
-// assumes that keys and values cannot contain = signs or comma
+// Set Format: a=1,2,3
+// assumes that keys and values cannot contain = signs or comma.
 func (s *stringToStringSliceValue[T]) Set(val string) error {
-	ss := strings.Split(val, ",")
-
-	out := make(map[string][]string)
-	for index, substr := range ss {
-		key := ""
-		if strings.Contains(substr, "=") {
-			kv := strings.Split(substr, "=")
-			key = kv[0]
-			out[key] = append(out[key], kv[0])
-		} else if index == 0 {
-			return errors.New("invalid format, has to contain at least one = sign and cannot contain , sign " +
-				"before first = sign")
-		} else {
-			out[key] = append(out[key], substr)
-		}
+	pos := strings.Index(val, "=")
+	if pos == -1 {
+		return errors.New("option has to contain at least one equal sign (=)")
 	}
+	key := val[:pos]
+	str := val[pos+1:]
+
+	ss := strings.Split(str, ",")
+
 	if !s.changed {
-		*s.value = out
+		*s.value = map[string][]string{key: ss}
 	} else {
 		if *s.value == nil {
 			*s.value = map[string][]string{}
 		}
-		for k, v := range out {
-			(*s.value)[k] = v
-		}
+		(*s.value)[key] = ss
 	}
 	s.changed = true
 	return nil
 }
 
 func (s *stringToStringSliceValue[T]) Type() string {
-	return "<name>=<value>,<value>,...,<name>=<value>,..."
+	return "<name>=<value>,<value>,..."
 }
 
 func (s *stringToStringSliceValue[T]) String() string {
 	records := make([]string, 0, len(*s.value))
 	for k, v := range *s.value {
-		records = append(records, k+"="+strings.Join(v, ","))
+		records = append(records, k+"=["+strings.Join(v, ",")+"]")
 	}
 
 	var buf bytes.Buffer
@@ -73,12 +65,11 @@ func (s *stringToStringSliceValue[T]) String() string {
 		panic(err)
 	}
 	w.Flush()
-	return "[" + strings.TrimSpace(buf.String()) + "]"
+	return "{" + strings.TrimSpace(buf.String()) + "}"
 }
 
 // StringToStringSliceVar defines a string flag with specified name, default value, and usage string.
-// The argument p points to a map[string]string variable in which to store the values of the multiple flags.
-// The value of each argument will not try to be separated by comma.
+// The argument p points to a map[string][]string variable in which to store the values of the multiple flags.
 func StringToStringSliceVar[T ~map[string][]string](f *pflag.FlagSet, p *T, name string, value map[string][]string, usage string) {
 	f.VarP(newStringToStringSliceValue(value, p), name, "", usage)
 }

@@ -2,11 +2,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package directory
+package wget
 
 import (
+	"bytes"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"net/http"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -21,27 +22,30 @@ type Spec struct {
 	// MimeType defines the mime type of the artifact.
 	MimeType string `json:"mediaType"`
 	// Header to be passed in the http request
-	Header http.Header `json:"header"`
+	Header map[string][]string `json:"header"`
 	// Verb is the http verb to be used for the request
 	Verb string `json:"verb"`
 	// Body is the body to be included in the http request
-	Body []byte
+	Body string `json:"body"`
 	// NoRedirect allows to disable redirects
 	NoRedirect bool `json:"noRedirect"`
-	// Credentials allows to pass credentials and certificates for the http communication
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)
 
-func New(url, mimeType string) *Spec {
+func New(url, mimeType string, header map[string][]string, verb string, body string, noRedirect bool) *Spec {
 	return &Spec{
 		InputSpecBase: inputs.InputSpecBase{
 			ObjectVersionedType: runtime.ObjectVersionedType{
 				Type: TYPE,
 			},
 		},
-		URL:      url,
-		MimeType: mimeType,
+		URL:        url,
+		MimeType:   mimeType,
+		Header:     header,
+		Verb:       verb,
+		Body:       body,
+		NoRedirect: noRedirect,
 	}
 }
 
@@ -59,6 +63,10 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		wget.WithCredentialContext(ctx),
 		wget.WithLoggingContext(ctx),
 		wget.WithMimeType(s.MimeType),
+		wget.WithHeader(s.Header),
+		wget.WithVerb(s.Verb),
+		wget.WithBody(bytes.NewReader([]byte(s.Body))),
+		wget.WithNoRedirect(s.NoRedirect),
 	)
 	return access, "", err
 }

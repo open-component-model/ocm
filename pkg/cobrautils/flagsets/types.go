@@ -444,3 +444,40 @@ func (o *StringSliceMapOption) AddFlags(fs *pflag.FlagSet) {
 func (o *StringSliceMapOption) Value() interface{} {
 	return o.value
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+type StringSliceMapColonOptionType struct {
+	TypeOptionBase
+}
+
+func NewStringSliceMapColonOptionType(name string, description string) ConfigOptionType {
+	return &StringSliceMapColonOptionType{
+		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *StringSliceMapColonOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *StringSliceMapColonOptionType) Create() Option {
+	return &StringSliceMapColonOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
+type StringSliceMapColonOption struct {
+	OptionBase
+	value map[string][]string
+}
+
+var _ Option = (*StringSliceMapColonOption)(nil)
+
+func (o *StringSliceMapColonOption) AddFlags(fs *pflag.FlagSet) {
+	o.TweakFlag(flag.StringColonStringSliceVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+}
+
+func (o *StringSliceMapColonOption) Value() interface{} {
+	return o.value
+}

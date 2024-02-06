@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	ocmmime "github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/optionutils"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -62,7 +63,7 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 	}
 
 	var redirectFunc func(req *http.Request, via []*http.Request) error = nil
-	if eff.NoRedirect {
+	if eff.NoRedirect != nil && *eff.NoRedirect {
 		redirectFunc = func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		}
@@ -128,8 +129,12 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 	if eff.MimeType == "" {
 		log.Debug("no mime type was provided as content type header of the http response, trying to" +
 			"extract mime type from url")
-
-		eff.MimeType = mime.TypeByExtension(url)
+		ext, err := utils.GetFileExtensionFromUrl(url)
+		if err == nil && ext != "" {
+			eff.MimeType = mime.TypeByExtension(ext)
+		} else if err != nil {
+			log.Debug(err.Error())
+		}
 	}
 	if eff.MimeType == "" {
 		eff.MimeType = ocmmime.MIME_OCTET

@@ -1,10 +1,14 @@
 package wgetblob
 
 import (
+	"io"
+	"net/http"
+
 	"github.com/mandelsoft/logging"
 
 	base "github.com/open-component-model/ocm/pkg/blobaccess/wget"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/wget"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/api"
 	"github.com/open-component-model/ocm/pkg/optionutils"
@@ -67,4 +71,20 @@ func WithMimeType(mime string) Option {
 
 func WithCredentials(creds credentials.Credentials) Option {
 	return wrapBase(base.WithCredentials(creds))
+}
+
+func WithHeader(h http.Header) Option {
+	return wrapBase(base.WithHeader(h))
+}
+
+func WithVerb(v string) Option {
+	return wrapBase(base.WithVerb(v))
+}
+
+func WithBody(v io.Reader) Option {
+	return wrapBase(base.WithBody(v))
+}
+
+func WithNoRedirect(r ...bool) Option {
+	return wrapBase(wget.WithNoRedirect(r...))
 }

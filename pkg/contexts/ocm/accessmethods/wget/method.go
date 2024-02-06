@@ -11,6 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -30,11 +31,17 @@ func Is(spec accspeccpi.AccessSpec) bool {
 }
 
 // New creates a new WGET accessor for http resources.
-func New(url, mime string) *AccessSpec {
+func New(url string, opts ...Option) *AccessSpec {
+	eff := optionutils.EvalOptions(opts...)
+
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		URL:                 url,
-		MediaType:           mime,
+		MediaType:           eff.MimeType,
+		Header:              eff.Header,
+		Verb:                eff.Verb,
+		Body:                eff.Body,
+		NoRedirect:          optionutils.AsValue(eff.NoRedirect),
 	}
 }
 
@@ -44,9 +51,16 @@ type AccessSpec struct {
 
 	// URLs to the files on a server
 	URL string `json:"URL"`
-
 	// MediaType is the media type of the object represented by the blob
 	MediaType string `json:"mediaType"`
+	// Header to be passed in the http request
+	Header map[string][]string `json:"header"`
+	// Verb is the http verb to be used for the request
+	Verb string `json:"verb"`
+	// Body is the body to be included in the http request
+	Body io.Reader `json:"body"`
+	// NoRedirect allows to disable redirects
+	NoRedirect bool `json:"noRedirect"`
 }
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
@@ -61,13 +75,6 @@ func (a *AccessSpec) IsLocal(ctx accspeccpi.Context) bool {
 
 func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessSpec {
 	return a
-}
-
-func (a *AccessSpec) GetMimeType() string {
-	if a.MediaType == "" {
-		return mime.MIME_OCTET
-	}
-	return a.MediaType
 }
 
 func (a *AccessSpec) AccessMethod(access accspeccpi.ComponentVersionAccess) (accspeccpi.AccessMethod, error) {
@@ -120,17 +127,38 @@ func (m *accessMethod) Reader() (io.ReadCloser, error) {
 }
 
 func (m *accessMethod) MimeType() string {
-	return m.spec.MediaType
+	if m.spec.MediaType != "" {
+		return m.spec.MediaType
+	}
+	blob, err := m.getBlob()
+	if err != nil {
+		return mime.MIME_OCTET
+	}
+	return blob.MimeType()
 }
 
 func (m *accessMethod) getBlob() (blobaccess.BlobAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	return wget.BlobAccessForWget(m.spec.URL,
-		wget.WithMimeType(m.spec.GetMimeType()),
+	if m.blob != nil {
+		return m.blob, nil
+	}
+
+	blob, err := wget.BlobAccessForWget(m.spec.URL,
+		wget.WithMimeType(m.spec.MediaType),
 		wget.WithCredentialContext(m.comp.GetContext()),
-		wget.WithLoggingContext(m.comp.GetContext()))
+		wget.WithLoggingContext(m.comp.GetContext()),
+		wget.WithHeader(m.spec.Header),
+		wget.WithVerb(m.spec.Verb),
+		wget.WithBody(m.spec.Body),
+		wget.WithNoRedirect(m.spec.NoRedirect))
+	if err != nil {
+		return nil, err
+	}
+
+	m.blob = blob
+	return m.blob, nil
 }
 
 func (m *accessMethod) Close() error {

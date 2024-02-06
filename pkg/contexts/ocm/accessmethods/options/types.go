@@ -102,7 +102,21 @@ func NewStringMapOptionType(name, desc string) OptionType {
 
 func NewStringSliceMapOptionType(name, desc string) OptionType {
 	return &option{
-		base:      flagsets.NewStringOptionType("", ""), //TODO
+		base:      flagsets.NewStringSliceMapOptionType(name, desc),
 		valueType: TYPE_STRING2STRINGSLICE,
+	}
+}
+
+func NewStringSliceMapColonOptionType(name, desc string) OptionType {
+	return &option{
+		base:      flagsets.NewStringSliceMapColonOptionType(name, desc),
+		valueType: TYPE_STRINGCOLONSTRINGSLICE,
+	}
+}
+
+func NewBytesOptionType(name, desc string) OptionType {
+	return &option{
+		base:      flagsets.NewBytesOptionType(name, desc),
+		valueType: TYPE_BYTES,
 	}
 }

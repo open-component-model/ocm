@@ -7,7 +7,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
@@ -19,9 +18,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, u
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)
 	}
-	if eff.Blob.MimeType == "" {
-		eff.Blob.MimeType = mime.MIME_OCTET
-	}
+
 	blobprov := wget.BlobAccessProviderForWget(url, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, eff.Hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.

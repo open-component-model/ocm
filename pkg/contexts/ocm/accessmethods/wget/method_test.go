@@ -1,10 +1,12 @@
 package wget_test
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -33,6 +35,10 @@ var (
 	serverPriv *rsa.PrivateKey
 	serverPub  *rsa.PublicKey
 	serverPEM  []byte
+
+	httpsServerClientAuth http.Server
+	httpsServer           http.Server
+	httpServer            http.Server
 )
 
 const (
@@ -48,12 +54,19 @@ const (
 	TO_FILE      = "/tofile"
 	BASIC_LOGIN  = "/basic-login"
 	BEARER_LOGIN = "/bearer-login"
+	ECHO_HEADERS = "/headers"
+	ECHO_BODY    = "/body"
+	ECHO_METHOD  = "/method"
+	CONTENT_TYPE = " /content-type"
+	DOT_EXT      = "/somefile.tar"
+	REDIRECT     = "/redirect"
 
 	USERNAME = "user"
 	PASSWORD = "password"
 	TOKEN    = "token"
 
-	CONTENT = "hello world"
+	CONTENT            = "hello world"
+	NOREDIRECT_CONTENT = "noredirect"
 )
 
 var _ = BeforeSuite(func() {
@@ -146,6 +159,28 @@ var _ = BeforeSuite(func() {
 			}
 		}
 	})
+	mux.HandleFunc(ECHO_HEADERS, func(writer http.ResponseWriter, request *http.Request) {
+		err := request.Header.Write(writer)
+		_ = err
+	})
+	mux.HandleFunc(ECHO_BODY, func(writer http.ResponseWriter, request *http.Request) {
+		b, err := io.ReadAll(request.Body)
+		_, err = writer.Write(b)
+		_ = err
+	})
+	mux.HandleFunc(ECHO_METHOD, func(writer http.ResponseWriter, request *http.Request) {
+		_, err := writer.Write([]byte(request.Method))
+		_ = err
+	})
+	mux.HandleFunc(CONTENT_TYPE, func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", mime.MIME_TEXT)
+	})
+	mux.HandleFunc(DOT_EXT, func(writer http.ResponseWriter, request *http.Request) {})
+	mux.HandleFunc(REDIRECT, func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Location", TO_MEMORY)
+		writer.WriteHeader(307)
+		writer.Write([]byte(NOREDIRECT_CONTENT))
+	})
 
 	// setup an https and an http httpsServer
 	httpsServerClientAuth := &http.Server{
@@ -178,10 +213,16 @@ var _ = BeforeSuite(func() {
 	}()
 })
 
+var _ = AfterSuite(func() {
+	MustBeSuccessful(httpsServerClientAuth.Close())
+	MustBeSuccessful(httpsServer.Close())
+	MustBeSuccessful(httpServer.Close())
+})
+
 var _ = Describe("wget access method", func() {
 	It("access content on http server", func() {
 		url := HTTP_HOST + TO_MEMORY
-		spec := New(url, mime.MIME_OCTET)
+		spec := New(url)
 
 		ctx := ocm.DefaultContext()
 		m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
@@ -193,7 +234,7 @@ var _ = Describe("wget access method", func() {
 
 	It("access content on https server", func() {
 		url := HTTPS_HOST + TO_MEMORY
-		spec := New(url, mime.MIME_OCTET)
+		spec := New(url)
 
 		ctx := ocm.DefaultContext()
 		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
@@ -229,7 +270,7 @@ var _ = Describe("wget access method", func() {
 
 		// Request
 		url := HTTPS_HOST_WITH_CLIENT_AUTH + TO_MEMORY
-		spec := New(url, mime.MIME_OCTET)
+		spec := New(url)
 
 		ctx := ocm.DefaultContext()
 		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
@@ -246,7 +287,7 @@ var _ = Describe("wget access method", func() {
 
 	It("check that username and password are passed correctly", func() {
 		url := HTTP_HOST + BASIC_LOGIN
-		spec := New(url, mime.MIME_OCTET)
+		spec := New(url)
 
 		ctx := ocm.DefaultContext()
 		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
@@ -262,7 +303,7 @@ var _ = Describe("wget access method", func() {
 
 	It("check that bearer token is passed correctly", func() {
 		url := HTTP_HOST + BEARER_LOGIN
-		spec := New(url, mime.MIME_OCTET)
+		spec := New(url)
 
 		ctx := ocm.DefaultContext()
 		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
@@ -273,6 +314,97 @@ var _ = Describe("wget access method", func() {
 
 		b := Must(m.Get())
 		Expect(string(b)).To(Equal(TOKEN))
+	})
+
+	It("check that basic auth is merged correctly with other provided headers", func() {
+		url := HTTP_HOST + ECHO_HEADERS
+		headers := map[string][]string{"Content-Type": {"text/plain"}}
+		spec := New(url, WithHeader(headers))
+
+		ctx := ocm.DefaultContext()
+		ctx.CredentialsContext().SetCredentialsForConsumer(identity.GetConsumerId(url), credentials.DirectCredentials{
+			identity.ATTR_USERNAME: USERNAME,
+			identity.ATTR_PASSWORD: PASSWORD,
+		})
+		m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
+		defer Close(m, "method")
+
+		b := Must(m.Get())
+
+		Expect(strings.Contains(string(b), "Content-Type: text/plain")).To(BeTrue())
+		Expect(strings.Contains(string(b), "Authorization: Basic")).To(BeTrue())
+	})
+
+	It("check detect mime type based on content-type response header", func() {
+		url := HTTP_HOST + ECHO_HEADERS
+		spec := New(url)
+
+		ctx := ocm.DefaultContext()
+		m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
+		defer Close(m, "method")
+
+		Expect(m.MimeType()).To(Equal(mime.MIME_TEXT))
+	})
+
+	It("check deduction of mime type based on url", func() {
+		url := HTTP_HOST + DOT_EXT
+		spec := New(url)
+
+		ctx := ocm.DefaultContext()
+		m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
+		defer Close(m, "method")
+
+		Expect(m.MimeType()).To(Equal("application/x-tar"))
+	})
+
+	It("check passing an http body", func() {
+		url := HTTP_HOST + ECHO_BODY
+
+		content := `hello world`
+		spec := New(url, WithBody(bytes.NewReader([]byte(content))))
+
+		ctx := ocm.DefaultContext()
+		m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
+		defer Close(m, "method")
+
+		b := Must(m.Get())
+
+		Expect(string(b)).To(Equal(content))
+	})
+
+	It("check passing an http verb", func() {
+		url := HTTP_HOST + ECHO_METHOD
+
+		method := http.MethodPost
+		spec := New(url, WithVerb(method))
+
+		ctx := ocm.DefaultContext()
+		m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
+		defer Close(m, "method")
+
+		b := Must(m.Get())
+
+		Expect(string(b)).To(Equal(method))
+	})
+
+	It("check noredirect behavior", func() {
+		url := HTTP_HOST + REDIRECT
+
+		redirectSpec := New(url, WithNoRedirect(false))
+		noredirectSpec := New(url, WithNoRedirect(true))
+
+		ctx := ocm.DefaultContext()
+		redirectMethod := Must(redirectSpec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
+		defer Close(redirectMethod, "redirectmethod")
+
+		noredirectMethod := Must(noredirectSpec.AccessMethod(&cpi.DummyComponentVersionAccess{ctx}))
+		defer Close(noredirectMethod, "noredirectmethod")
+
+		redirectContent := Must(redirectMethod.Get())
+		Expect(string(redirectContent)).To(Equal(CONTENT))
+
+		noredirectContent := Must(noredirectMethod.Get())
+		Expect(string(noredirectContent)).To(Equal(NOREDIRECT_CONTENT))
 	})
 
 })
