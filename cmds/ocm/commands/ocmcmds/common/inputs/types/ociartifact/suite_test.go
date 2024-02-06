@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Input Type ociArtifact")
+	RunSpecs(t, "Input Type wget")
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	ocmmime "github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/mimeutils"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -131,7 +132,7 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 			"extract mime type from url")
 		ext, err := utils.GetFileExtensionFromUrl(url)
 		if err == nil && ext != "" {
-			eff.MimeType = mime.TypeByExtension(ext)
+			eff.MimeType = mimeutils.TypeByExtension(ext)
 		} else if err != nil {
 			log.Debug(err.Error())
 		}

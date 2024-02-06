@@ -5,15 +5,8 @@
 package mime
 
 import (
-	"mime"
 	"strings"
 )
-
-func init() {
-	for k, v := range ext2mime {
-		mime.AddExtensionType(k, v)
-	}
-}
 
 func IsJSON(mime string) bool {
 	if mime == MIME_JSON || mime == MIME_JSON_ALT {

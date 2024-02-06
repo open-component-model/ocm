@@ -20,12 +20,3 @@ const (
 	MIME_TGZ     = "application/x-tgz"
 	MIME_TGZ_ALT = MIME_TAR + "+gzip"
 )
-
-var ext2mime map[string]string = map[string]string{
-	".txt":  MIME_TEXT,
-	".json": MIME_JSON_OFFICIAL,
-	".yaml": MIME_YAML_OFFICIAL,
-	".gzip": MIME_GZIP,
-	".tar":  MIME_TAR,
-	".tgz":  MIME_TGZ,
-}
