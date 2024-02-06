@@ -18,43 +18,6 @@ import (
 	"net/url"
 )
 
-func login(registry, username, password string, email string) (string, error) {
-	data := map[string]interface{}{
-		"_id":      "org.couchdb.user:" + username,
-		"name":     username,
-		"email":    email,
-		"password": password,
-		"type":     "user",
-	}
-	marshal, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, registry+"/-/user/org.couchdb.user:"+url.PathEscape(username), bytes.NewReader(marshal))
-	if err != nil {
-		return "", err
-	}
-	req.SetBasicAuth(username, password)
-	req.Header.Set("content-type", "application/json")
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= http.StatusBadRequest {
-		all, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("%d, %s", resp.StatusCode, string(all))
-	}
-	var token struct {
-		Token string `json:"token"`
-	}
-	err = json.NewDecoder(resp.Body).Decode(&token)
-	if err != nil {
-		return "", err
-	}
-	return token.Token, nil
-}
-
 type Package struct {
 	Name        string
 	Version     string
@@ -91,6 +54,44 @@ func NewAttachment(data []byte) *Attachment {
 		Data:        data,
 		Length:      len(data),
 	}
+}
+
+// Login to npmjs registry (URL) and retrieve bearer token.
+func login(registry string, username string, password string, email string) (string, error) {
+	data := map[string]interface{}{
+		"_id":      "org.couchdb.user:" + username,
+		"name":     username,
+		"email":    email,
+		"password": password,
+		"type":     "user",
+	}
+	marshal, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, registry+"/-/user/org.couchdb.user:"+url.PathEscape(username), bytes.NewReader(marshal))
+	if err != nil {
+		return "", err
+	}
+	req.SetBasicAuth(username, password)
+	req.Header.Set("content-type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= http.StatusBadRequest {
+		all, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("%d, %s", resp.StatusCode, string(all))
+	}
+	var token struct {
+		Token string `json:"token"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&token)
+	if err != nil {
+		return "", err
+	}
+	return token.Token, nil
 }
 
 func createSha512(data []byte) string {
@@ -145,7 +146,7 @@ func prepare(data []byte) (*Package, error) {
 	if len(pkgData) == 0 {
 		return nil, fmt.Errorf("package.json is empty")
 	}
-	var pkgJson map[string]string
+	var pkgJson map[string]interface{}
 	err = json.Unmarshal(pkgData, &pkgJson)
 	if err != nil {
 		return nil, fmt.Errorf("read package.json failed, %w", err)
@@ -159,11 +160,55 @@ func prepare(data []byte) (*Package, error) {
 
 	// create package object
 	var pkg Package
-	pkg.Name = pkgJson["name"]
-	pkg.Version = pkgJson["version"]
-	pkg.Description = pkgJson["description"]
+	pkg.Name = pkgJson["name"].(string)
+	pkg.Version = pkgJson["version"].(string)
+	pkg.Description = pkgJson["description"].(string)
 	pkg.Readme = string(readme)
 	pkg.Dist.Shasum = createSha1(data)
 	pkg.Dist.Integrity = createSha512(data)
 	return &pkg, nil
+}
+
+// Check if package already exists in npmjs registry. If it does, checks if it's the same.
+func packageExists(repoUrl string, pkg Package, token string) (bool, error) {
+	client := http.Client{}
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, repoUrl+"/"+url.PathEscape(pkg.Name)+"/"+url.PathEscape(pkg.Version), nil)
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("authorization", "Bearer "+token)
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		// artifact doesn't exist, it's safe to upload
+		return false, nil
+	}
+
+	// artifact exists, let's check if it's the same
+	all, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return false, fmt.Errorf("http (%d) - %s", resp.StatusCode, string(all))
+	}
+	var data map[string]interface{}
+	err = json.Unmarshal(all, &data)
+	if err != nil {
+		return false, err
+	}
+	dist := data["dist"].(map[string]interface{})
+	if pkg.Dist.Integrity == dist["integrity"] {
+		// sha-512 sum is the same, we can skip the upload
+		return true, nil
+	}
+	if pkg.Dist.Shasum == dist["shasum"] {
+		// sha-1 sum is the same, we can skip the upload
+		return true, nil
+	}
+
+	return false, fmt.Errorf("artifact already exists but has different shasum or integrity")
 }
