@@ -120,7 +120,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		if err != nil {
 			return nil, err
 		}
-		log.Error("http (%d) - failed to upload package: %s", resp.StatusCode, string(all))
+		return nil, fmt.Errorf("http (%d) - failed to upload package: %s", resp.StatusCode, string(all))
 	}
 	log.Debug("package %s@%s uploaded to %s", pkg.Name, pkg.Version, b.spec.Url)
 	return npm.New(b.spec.Url, pkg.Name, pkg.Version), nil
