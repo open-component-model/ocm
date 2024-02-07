@@ -33,6 +33,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 		return nil, nil
 	}
 
+	if b.spec.Url == "" {
+		return nil, fmt.Errorf("NPM registry url not provided")
+	}
+
 	blobReader, err := blob.Reader()
 	if err != nil {
 		return nil, err
