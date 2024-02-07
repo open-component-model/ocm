@@ -18,5 +18,5 @@ const (
 	ATTR_EMAIL = cpi.ATTR_EMAIL
 )
 
-// logging Realm
+// Logging Realm.
 var NPM_REALM = logging.DefineSubRealm("NPM registry", "NPM")
