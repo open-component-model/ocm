@@ -117,6 +117,15 @@ func (h History) Compare2(o History) (int, bool) {
 	return len(h) - len(o), false
 }
 
+func (h History) Cycle(nv NameVersion) (History, History) {
+	for i, e := range h {
+		if e == nv {
+			return h[:i], h[i:].Append(nv)
+		}
+	}
+	return nil, nil
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type HistoryElement interface {
