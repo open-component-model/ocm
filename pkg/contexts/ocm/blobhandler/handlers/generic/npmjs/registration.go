@@ -63,12 +63,11 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 
 func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
 	return registrations.NewLeafHandlerInfo("uploading npmjs artifacts", `
-The <code>npmjsArtifacts</code> uploader is able to upload npmjs artifacts
+The <code>`+BLOB_HANDLER_NAME+`</code> uploader is able to upload npmjs artifacts
 as artifact archive according to the npmjs package spec.
-The following artifact media types are supported: `+mime.MIME_TGZ+`
-By default, it is registered for these mimetypes.
+If registered the default mime type is: `+mime.MIME_TGZ+`
 
-It accepts a config with the following fields:
+It accepts a plain string for the URL or a config with the following field:
 'url': the URL of the npmjs repository.
 If not given, the default npmjs.com repository.
 `,
