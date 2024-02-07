@@ -15,6 +15,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Options
 
 ```
+      --fail-on-error      fail on validation error
   -h, --help               help for componentversions
   -o, --output string      output mode (JSON, json, wide, yaml)
       --repo string        repository name or spec

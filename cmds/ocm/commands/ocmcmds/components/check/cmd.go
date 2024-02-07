@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/failonerroroption"
 	"github.com/spf13/cobra"
 
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -42,7 +43,9 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		&Command{
 			BaseCommand: utils.NewBaseCommand(ctx,
 				repooption.New(),
-				output.OutputOptions(outputs),
+				output.OutputOptions(outputs,
+					failonerroroption.New(),
+				),
 			),
 		},
 		utils.Names(Names, names...)...,
@@ -81,21 +84,25 @@ func (o *Command) Run() error {
 		return err
 	}
 	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository, comphdlr.OptionsFor(o))
-	return utils.HandleArgs(output.From(o), handler, o.Refs...)
+	err = utils.HandleArgs(output.From(o), handler, o.Refs...)
+	if err != nil {
+		return err
+	}
+	return failonerroroption.From(o).ActivatedError()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 var outputs = output.NewOutputs(OutputFactory(mapRegularOutput), output.Outputs{
 	"wide": OutputFactory(mapWideOutput, "MISSING"),
-}).AddChainedManifestOutputs(CreateChain)
+}).AddChainedManifestOutputs(NewAction)
 
 func OutputFactory(fmt processing.MappingFunction, wide ...string) output.OutputFactory {
 	return func(opts *output.Options) output.Output {
 		return (&output.TableOutput{
 			Headers: output.Fields("COMPONENT", "VERSION", "STATUS", "ERROR", wide),
 			Options: opts,
-			Chain:   NewAction(),
+			Chain:   NewAction(opts),
 			Mapping: fmt,
 		}).New()
 	}
@@ -161,39 +168,40 @@ func (n Missing) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
-func CreateChain(options *output.Options) processing.ProcessChain {
-	// opts are not required by action so far.
-	return NewAction()
-}
-
 type action struct {
-	cache map[common.NameVersion]map[common.NameVersion]common.History
+	erropt *failonerroroption.Option
 }
 
-func NewAction() processing.ProcessChain {
-	return comphdlr.Sort.Map((&action{}).Map)
+func NewAction(opts *output.Options) processing.ProcessChain {
+	return comphdlr.Sort.Map((&action{
+		erropt: failonerroroption.From(opts),
+	}).Map)
 }
+
+type Cache = map[common.NameVersion]Missing
 
 func (a *action) Map(in interface{}) interface{} {
-	a.cache = map[common.NameVersion]map[common.NameVersion]common.History{}
+	cache := Cache{}
 
 	i := in.(*comphdlr.Object)
 	o := &Entry{
 		Status:           "OK",
 		ComponentVersion: common.VersionedElementKey(i.ComponentVersion),
 	}
-	o.Missing, o.Error = a.handle(i.ComponentVersion, common.History{common.VersionedElementKey(i.ComponentVersion)})
+	o.Missing, o.Error = a.handle(cache, i.ComponentVersion, common.History{common.VersionedElementKey(i.ComponentVersion)})
 	if o.Error != nil {
 		o.Status = "Error"
+		a.erropt.AddError(o.Error)
 	}
 	if len(o.Missing) > 0 {
+		a.erropt.AddError(fmt.Errorf("incomplete component version %s", common.VersionedElementKey(i.ComponentVersion)))
 		o.Status = "Incomplete"
 	}
 	return o
 }
 
-func (a *action) getMissing(repo ocm.Repository, id common.NameVersion, h common.History) (Missing, error) {
-	if r, ok := a.cache[id]; ok {
+func (a *action) getMissing(cache Cache, repo ocm.Repository, id common.NameVersion, h common.History) (Missing, error) {
+	if r, ok := cache[id]; ok {
 		return r, nil
 	}
 
@@ -206,19 +214,23 @@ func (a *action) getMissing(repo ocm.Repository, id common.NameVersion, h common
 		if !errors.IsErrNotFound(err) {
 			return nil, err
 		}
+		err = nil
 	}
+	var r Missing
 	if cv == nil {
-		return map[common.NameVersion]common.History{id: h}, nil
+		r = map[common.NameVersion]common.History{id: h}
 	} else {
-		return a.handle(cv, h)
+		r, err = a.handle(cache, cv, h)
 	}
+	cache[id] = r
+	return r, err
 }
 
-func (a *action) handle(cv ocm.ComponentVersionAccess, h common.History) (Missing, error) {
+func (a *action) handle(cache Cache, cv ocm.ComponentVersionAccess, h common.History) (Missing, error) {
 	var missing Missing
 	for _, r := range cv.GetDescriptor().References {
 		id := common.NewNameVersion(r.ComponentName, r.Version)
-		n, err := a.getMissing(cv.Repository(), id, h)
+		n, err := a.getMissing(cache, cv.Repository(), id, h)
 		if err != nil {
 			return missing, err
 		}

@@ -74,6 +74,7 @@ COMPONENT VERSION STATUS     ERROR
 test.de/x v1      Incomplete
 `))
 		})
+
 		It("outputs json", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("check", "components", ARCH+"//"+COMP, "-o", "json")).To(Succeed())
@@ -93,6 +94,17 @@ test.de/x v1      Incomplete
     }
   ]
 }
+`))
+		})
+
+		It("provides error table", func() {
+			buf := bytes.NewBuffer(nil)
+			ExpectError(env.CatchOutput(buf).Execute("check", "components", ARCH+"//"+COMP, "--fail-on-error")).
+				To(MatchError("incomplete component version test.de/x:v1"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+COMPONENT VERSION STATUS     ERROR
+test.de/x v1      Incomplete
 `))
 		})
 	})
