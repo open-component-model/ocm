@@ -69,7 +69,6 @@ If registered the default mime type is: `+mime.MIME_TGZ+`
 
 It accepts a plain string for the URL or a config with the following field:
 'url': the URL of the npmjs repository.
-If not given, the default npmjs.com repository.
 `,
 	)
 }
