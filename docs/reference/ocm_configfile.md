@@ -264,6 +264,17 @@ The following configuration types are supported:
       config: &lt;arbitrary configuration structure>
       disableAutoRegistration: &lt;boolean flag to disable auto registration for up- and download handlers>
   </pre>
+- <code>rootcerts.config.ocm.software</code>
+  The config type <code>rootcerts.config.ocm.software</code> can be used to define
+  general root certificates. A certificate value might be given by one of the fields:
+  - <code>path</code>: path of file with key data
+  - <code>data</code>: base64 encoded binary data
+  - <code>stringdata</code>: data a string parsed by key handler
+
+  <pre>
+      rootCertificates:
+        - path: &lt;file path>
+  </pre>
 - <code>scripts.ocm.config.ocm.software</code>
   The config type <code>scripts.ocm.config.ocm.software</code> can be used to define transfer scripts:
 

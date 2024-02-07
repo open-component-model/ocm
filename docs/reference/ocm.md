@@ -11,7 +11,7 @@ ocm [<options>] <sub command> ...
 ```
   -X, --attribute stringArray     attribute setting
       --ca-cert stringArray       additional root certificate authorities
-      --config string             configuration file
+      --config stringArray        configuration file
       --config-set strings        apply configuration set
   -C, --cred stringArray          credential setting
   -h, --help                      help for ocm
@@ -225,6 +225,28 @@ The value can be a simple type or a JSON/YAML string for complex values
 
   Directory to look for OCM plugin executables.
 
+- <code>github.com/mandelsoft/ocm/rootcerts</code>: *JSON*
+
+  General root certificate settings given as JSON document with the following
+  format:
+
+  <pre>
+  {
+    "rootCertificates"": [
+       {
+         "data": ""&lt;base64>"
+       },
+       {
+         "path": ""&lt;file path>"
+       }
+    ],
+  </pre>
+
+  One of following data fields are possible:
+  - <code>data</code>:       base64 encoded binary data
+  - <code>stringdata</code>: plain text data
+  - <code>path</code>:       a file path to read the data from
+
 - <code>github.com/mandelsoft/ocm/signing</code>: *JSON*
 
   Public and private Key settings given as JSON document with the following
@@ -318,8 +340,9 @@ by a certificate delivered with the signature.
 
 ##### Sub Commands
 
-* [ocm <b>add</b>](ocm_add.md)	 &mdash; Add resources or sources to a component archive
+* [ocm <b>add</b>](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 &mdash; bootstrap components
+* [ocm <b>check</b>](ocm_check.md)	 &mdash; check components in OCM repository
 * [ocm <b>clean</b>](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
 * [ocm <b>controller</b>](ocm_controller.md)	 &mdash; Commands acting on the ocm-controller
 * [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive
