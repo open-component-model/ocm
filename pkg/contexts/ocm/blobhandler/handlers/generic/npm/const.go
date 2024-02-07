@@ -7,7 +7,7 @@ import (
 
 const (
 	// CONSUMER_TYPE is the npm repository type.
-	CONSUMER_TYPE     = "Registry.npm.com"
+	CONSUMER_TYPE     = "Registry.npmjs.com"
 	BLOB_HANDLER_NAME = "ocm/npmPackage"
 
 	// ATTR_USERNAME is the username attribute. Required for login at any npm registry.
