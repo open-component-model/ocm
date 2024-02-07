@@ -19,4 +19,4 @@ const (
 )
 
 // Logging Realm.
-var NPM_REALM = logging.DefineSubRealm("NPM registry", "NPM")
+var REALM = logging.DefineSubRealm("NPM registry", "NPM")

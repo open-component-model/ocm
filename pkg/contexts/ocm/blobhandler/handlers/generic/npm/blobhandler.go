@@ -49,7 +49,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	}
 
 	// read package.json from tarball to get name, version, etc.
-	log := logging.Context().WithContext(NPM_REALM).Logger()
+	log := logging.Context().Logger(REALM)
 	log.Debug("reading package.json from tarball")
 	var pkg *Package
 	pkg, err = prepare(data)
