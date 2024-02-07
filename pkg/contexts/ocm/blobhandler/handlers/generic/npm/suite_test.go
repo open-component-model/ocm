@@ -1,4 +1,4 @@
-package npmjs_test
+package npm_test
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "npmjs Upload Repository Attribute")
+	RunSpecs(t, "npm Upload Repository Attribute")
 }

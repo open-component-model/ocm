@@ -1,4 +1,4 @@
-package npmjs
+package npm
 
 import (
 	"encoding/json"
@@ -45,7 +45,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 		return true, fmt.Errorf("invalid npmjsArtifact handler %q", handler)
 	}
 	if config == nil {
-		return true, fmt.Errorf("npmjs target specification required")
+		return true, fmt.Errorf("npm target specification required")
 	}
 	cfg, err := registrations.DecodeConfig[Config](config)
 	if err != nil {
@@ -62,13 +62,13 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 }
 
 func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
-	return registrations.NewLeafHandlerInfo("uploading npmjs artifacts", `
-The <code>`+BLOB_HANDLER_NAME+`</code> uploader is able to upload npmjs artifacts
-as artifact archive according to the npmjs package spec.
+	return registrations.NewLeafHandlerInfo("uploading npm artifacts", `
+The <code>`+BLOB_HANDLER_NAME+`</code> uploader is able to upload npm artifacts
+as artifact archive according to the npm package spec.
 If registered the default mime type is: `+mime.MIME_TGZ+`
 
 It accepts a plain string for the URL or a config with the following field:
-'url': the URL of the npmjs repository.
+'url': the URL of the npm repository.
 `,
 	)
 }

@@ -1,4 +1,4 @@
-package npmjs
+package npm
 
 import (
 	"archive/tar"
@@ -56,7 +56,7 @@ func NewAttachment(data []byte) *Attachment {
 	}
 }
 
-// Login to npmjs registry (URL) and retrieve bearer token.
+// Login to npm registry (URL) and retrieve bearer token.
 func login(registry string, username string, password string, email string) (string, error) {
 	data := map[string]interface{}{
 		"_id":      "org.couchdb.user:" + username,
@@ -169,7 +169,7 @@ func prepare(data []byte) (*Package, error) {
 	return &pkg, nil
 }
 
-// Check if package already exists in npmjs registry. If it does, checks if it's the same.
+// Check if package already exists in npm registry. If it does, checks if it's the same.
 func packageExists(repoUrl string, pkg Package, token string) (bool, error) {
 	client := http.Client{}
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, repoUrl+"/"+url.PathEscape(pkg.Name)+"/"+url.PathEscape(pkg.Version), nil)

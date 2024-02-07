@@ -1,4 +1,4 @@
-package npmjs
+package npm
 
 import (
 	"bytes"
