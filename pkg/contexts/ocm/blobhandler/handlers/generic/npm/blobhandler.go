@@ -23,7 +23,7 @@ func NewArtifactHandler(repospec *Config) cpi.BlobHandler {
 	return &artifactHandler{repospec}
 }
 
-func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	if b.spec == nil {
 		return nil, nil
 	}

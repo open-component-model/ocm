@@ -63,7 +63,7 @@ func New(registry, pkg, version string) *AccessSpec {
 	}
 }
 
-func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
+func (a *AccessSpec) Describe(_ accspeccpi.Context) string {
 	return fmt.Sprintf("NPM package %s:%s in registry %s", a.Package, a.Version, a.Registry)
 }
 
@@ -71,11 +71,11 @@ func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return false
 }
 
-func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessSpec {
+func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpec {
 	return a
 }
 
-func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) string {
 	return a.Package + ":" + a.Version
 }
 

@@ -61,7 +61,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 	return true, nil
 }
 
-func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
+func (r *RegistrationHandler) GetHandlers(_ cpi.Context) registrations.HandlerInfos {
 	return registrations.NewLeafHandlerInfo("uploading npm artifacts", `
 The <code>`+BLOB_HANDLER_NAME+`</code> uploader is able to upload npm artifacts
 as artifact archive according to the npm package spec.
