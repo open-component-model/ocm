@@ -15,10 +15,10 @@ func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
 		ATTR_USERNAME, "the basic auth user name",
 		ATTR_PASSWORD, "the basic auth password",
-		ATTR_EMAIL, "npmjs registries, require an email address",
+		ATTR_EMAIL, "NPM registry, require an email address",
 	})
 
-	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `Npmjs repository
+	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `NPM repository
 
 It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
 the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,

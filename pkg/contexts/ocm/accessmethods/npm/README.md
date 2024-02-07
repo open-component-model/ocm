@@ -21,7 +21,7 @@ The type specific specification fields are:
 
 - **`registry`** *string*
 
-  Base URL of the npmjs registry.
+  Base URL of the NPM registry.
 
 - **`package`** *string*
 

@@ -28,7 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-// Type is the access type of npmjs registry.
+// Type is the access type of NPM registry.
 const (
 	Type   = "npm"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
@@ -39,7 +39,7 @@ func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 }
 
-// AccessSpec describes the access for a npmjs registry.
+// AccessSpec describes the access for a NPM registry.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
@@ -53,7 +53,7 @@ type AccessSpec struct {
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
-// New creates a new npmjs registry access spec version v1.
+// New creates a new NPM registry access spec version v1.
 func New(registry, pkg, version string) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
@@ -115,6 +115,8 @@ func (a *AccessSpec) getPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	}
 	return &metadata, nil
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.AccessMethodImpl, error) {
 	factory := func() (blobaccess.BlobAccess, error) {
