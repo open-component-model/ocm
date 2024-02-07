@@ -1,6 +1,9 @@
 package npmjs
 
-import "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+import (
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/logging"
+)
 
 const (
 	// CONSUMER_TYPE is the npmjs repository type.
@@ -14,3 +17,6 @@ const (
 	// ATTR_EMAIL is the email attribute. Required for login at any npmjs registry.
 	ATTR_EMAIL = cpi.ATTR_EMAIL
 )
+
+// logging Realm
+var NPM_REALM = logging.DefineSubRealm("NPM registry", "NPM")

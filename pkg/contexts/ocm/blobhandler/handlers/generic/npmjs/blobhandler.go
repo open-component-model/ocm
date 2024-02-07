@@ -45,7 +45,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	}
 
 	// read package.json from tarball to get name, version, etc.
-	log := logging.Context().Logger()
+	log := logging.Context().WithContext(NPM_REALM).Logger()
 	log.Debug("reading package.json from tarball")
 	var pkg *Package
 	pkg, err = prepare(data)
@@ -54,7 +54,8 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	}
 	tbName := pkg.Name + "-" + pkg.Version + ".tgz"
 	pkg.Dist.Tarball = b.spec.Url + pkg.Name + "/-/" + tbName
-	log.Debug("identified package: %s@%s", pkg.Name, pkg.Version)
+	log = log.WithValues("package", pkg.Name, "version", pkg.Version)
+	log.Debug("identified")
 
 	// use user+pass+mail from credentials to login and retrieve bearer token
 	cred := GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
@@ -64,7 +65,8 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if username == "" || password == "" || email == "" {
 		return nil, fmt.Errorf("username, password or email missing")
 	}
-	log.Debug("logging in as %s on %s", username, b.spec.Url)
+	log = log.WithValues("user", username, "repo", b.spec.Url)
+	log.Debug("login")
 	token, err := login(b.spec.Url, username, password, email)
 	if err != nil {
 		return nil, err
@@ -76,7 +78,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		return nil, err
 	}
 	if exists {
-		log.Debug("package %s@%s already exists, skipping upload", pkg.Name, pkg.Version)
+		log.Debug("package+version already exists, skipping upload")
 		return npm.New(b.spec.Url, pkg.Name, pkg.Version), nil
 	}
 
@@ -109,7 +111,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	// send PUT request - upload tgz
 	client := http.Client{}
-	log.Debug("uploading package %s@%s to %s", pkg.Name, pkg.Version, b.spec.Url)
+	log.Debug("uploading")
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -122,6 +124,6 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		}
 		return nil, fmt.Errorf("http (%d) - failed to upload package: %s", resp.StatusCode, string(all))
 	}
-	log.Debug("package %s@%s uploaded to %s", pkg.Name, pkg.Version, b.spec.Url)
+	log.Debug("successfully uploaded")
 	return npm.New(b.spec.Url, pkg.Name, pkg.Version), nil
 }
