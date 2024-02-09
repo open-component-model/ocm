@@ -1,5 +1,4 @@
-# `npm` - NPM packages in an NPM registry
-
+# `npm` - NPM packages in a NPM registry (e.g. npmjs.com)
 
 ### Synopsis
 ```
@@ -11,7 +10,6 @@ Provided blobs use the following media type: `application/x-tgz`
 ### Description
 
 This method implements the access of an NPM package from an NPM registry.
-
 
 ### Specification Versions
 
@@ -31,6 +29,4 @@ The type specific specification fields are:
 
 - **`version`** *string*
 
-  The version name of the NPM package.
-
-
+  The version of the NPM package.
