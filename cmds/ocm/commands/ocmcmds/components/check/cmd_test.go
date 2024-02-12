@@ -75,6 +75,16 @@ test.de/x v1      Incomplete
 `))
 		})
 
+		It("outputs wide table", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("check", "components", ARCH+"//"+COMP, "-o", "wide")).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+COMPONENT VERSION STATUS     ERROR MISSING
+test.de/x v1      Incomplete       test.de/z:v1[test.de/x:v1]
+`))
+		})
+
 		It("outputs json", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("check", "components", ARCH+"//"+COMP, "-o", "json")).To(Succeed())

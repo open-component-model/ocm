@@ -57,7 +57,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Use:   "[<options>] {<component-reference>}",
 		Short: "check completeness of a component version in an OCM repository",
 		Long: `
-THis command checks, whether component versiuons are completely contained
+This command checks, whether component versiuons are completely contained
 in an OCM repository with all its dependent component references.
 `,
 		Example: `
@@ -124,12 +124,9 @@ func mapRegularOutput(e interface{}) interface{} {
 func mapWideOutput(e interface{}) interface{} {
 	p := e.(*Entry)
 
-	err := ""
-	if p.Error != nil {
-		err = p.Error.Error()
-	}
+	line := mapRegularOutput(e).([]string)
 	if len(p.Missing) == 0 {
-		return []string{p.ComponentVersion.GetName(), p.ComponentVersion.GetVersion(), p.Status, err, ""}
+		return append(line, "")
 	}
 	missing := map[string]string{}
 	for id, m := range p.Missing {
@@ -147,7 +144,7 @@ func mapWideOutput(e interface{}) interface{} {
 		msg += sep + k + missing[k]
 		sep = ", "
 	}
-	return []string{p.ComponentVersion.GetName(), p.ComponentVersion.GetVersion(), p.Status, err, msg}
+	return append(line, msg)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
