@@ -293,8 +293,10 @@ type Resource struct {
 	// Can be a local or external resource
 	Relation metav1.ResourceRelation `json:"relation,omitempty"`
 
-	// SourceRef defines a list of source names.
+	// SourceRefs defines a list of source names.
 	// These names reference the sources defines in `component.sources`.
+	SourceRefs []SourceRef `json:"srcRefs,omitempty"`
+	// SourceRef is for compatibility reasons.
 	SourceRef []SourceRef `json:"srcRef,omitempty"`
 
 	// Access describes the type specific method to
