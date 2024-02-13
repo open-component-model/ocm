@@ -62,7 +62,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	log.Debug("identified")
 
 	// use user+pass+mail from credentials to login and retrieve bearer token
-	cred := GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
+	cred := npmCredentials.GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
 	username := cred[ATTR_USERNAME]
 	password := cred[ATTR_PASSWORD]
 	email := cred[ATTR_EMAIL]
