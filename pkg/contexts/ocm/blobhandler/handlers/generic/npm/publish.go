@@ -19,15 +19,15 @@ import (
 )
 
 type Package struct {
-	Name        string
-	Version     string
-	Readme      string
-	Description string
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+	Readme      string `json:"readme"`
+	Description string `json:"description"`
 	Dist        struct {
 		Integrity string `json:"integrity"`
 		Shasum    string `json:"shasum"`
 		Tarball   string `json:"tarball"`
-	}
+	} `json:"dist"`
 }
 
 type Attachment struct {
