@@ -1,22 +1,19 @@
 package npm
 
 import (
-	dockercred "github.com/docker/cli/cli/config/credentials"
+	"net/url"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-const PROVIDER = "ocm.software/credentialprovider/" + REPOSITORY_TYPE
-
 type ConsumerProvider struct {
-	cfg string
+	npmrcPath string
 }
 
 var _ cpi.ConsumerProvider = (*ConsumerProvider)(nil)
 
-func (p *ConsumerProvider) Unregister(id cpi.ProviderIdentity) {
+func (p *ConsumerProvider) Unregister(_ cpi.ProviderIdentity) {
 }
 
 func (p *ConsumerProvider) Match(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
@@ -28,9 +25,8 @@ func (p *ConsumerProvider) Get(req cpi.ConsumerIdentity) (cpi.CredentialsSource,
 	return creds, creds != nil
 }
 
-func (p *ConsumerProvider) get(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
-	cfg := p.cfg
-	all, err := ReadNpmConfigFile(cfg)
+func (p *ConsumerProvider) get(requested cpi.ConsumerIdentity, currentFound cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
+	all, err := readNpmConfigFile(p.npmrcPath)
 	if err != nil {
 		panic(err)
 		return nil, nil
@@ -39,33 +35,21 @@ func (p *ConsumerProvider) get(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentit
 	var creds cpi.CredentialsSource
 
 	for key, value := range all {
-		hostname, port, _ := utils.SplitLocator(key)
-		attrs := []string{identity.ID_HOSTNAME, hostname}
-		if port != "" {
-			attrs = append(attrs, identity.ID_PORT, port)
+		u, e := url.Parse(key)
+		if e != nil {
+			return nil, nil
+		}
+
+		attrs := []string{identity.ID_HOSTNAME, u.Hostname()}
+		if u.Port() != "" {
+			attrs = append(attrs, identity.ID_PORT, u.Port())
 		}
 		id := cpi.NewConsumerIdentity(identity.CONSUMER_TYPE, attrs...)
-		if m(req, cur, id) {
-			if IsEmptyAuthConfig(value) {
-			} else {
-				creds = newCredentials(value)
-			}
-			cur = id
+		if m(requested, currentFound, id) {
+			creds = newCredentials(value)
+			currentFound = id
 		}
 	}
-	for h, helper := range cfg.CredentialHelpers {
-		hostname := dockercred.ConvertToHostname(h)
-		if hostname == "index.docker.io" {
-			hostname = "docker.io"
-		}
-		id := cpi.ConsumerIdentity{
-			cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
-			identity.ID_HOSTNAME: hostname,
-		}
-		if m(req, cur, id) {
-			creds = NewCredentials(cfg, h, dockercred.NewNativeStore(cfg, helper))
-			cur = id
-		}
-	}
-	return creds, cur
+
+	return creds, currentFound
 }

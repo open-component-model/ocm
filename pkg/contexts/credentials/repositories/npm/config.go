@@ -24,18 +24,20 @@ func init() {
 
 var usage = `
 This repository type can be used to access credentials stored in a file
-following the NPM config format (~/.npmrc). It take into account the
+following the NPM npmrc format (~/.npmrc). It take into account the
 credentials helper section, also. If enabled, the described
 credentials will be automatically assigned to appropriate consumer ids.
 `
 
 var format = `The repository specification supports the following fields:
 ` + listformat.FormatListElements("", listformat.StringElementDescriptionList{
-	"npmrcFile", "*string*: the file path to a NPM config file",
+	"npmrcFile", "*string*: the file path to a NPM npmrc file",
 	"propagateConsumerIdentity", "*bool*(optional): enable consumer id propagation",
 })
 
-// RepositorySpec describes a docker config based credential repository interface.
+type npmConfig map[string]string
+
+// RepositorySpec describes a docker npmrc based credential repository interface.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	NpmrcFile                   string `json:"npmrcFile,omitempty"`
@@ -60,18 +62,17 @@ func (rs *RepositorySpec) GetType() string {
 	return REPOSITORY_TYPE
 }
 
-func (rs *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
-	//	r := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories)
-	//	repos, ok := r.(*Repositories)
-	//	if !ok {
-	//		return nil, fmt.Errorf("failed to assert type %T to Repositories", r)
-	//	}
-	//	return repos.GetRepository(ctx, a.DockerConfigFile, a.DockerConfig, true)
-	return nil, fmt.Errorf("not implemented")
+func (rs *RepositorySpec) Repository(ctx cpi.Context, _ cpi.Credentials) (cpi.Repository, error) {
+	r := ctx.GetAttributes().GetOrCreateAttribute(".npmrc", createCache)
+	cache, ok := r.(*Cache)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to Cache", r)
+	}
+	return cache.GetRepository(ctx, rs.NpmrcFile)
 }
 
-// ReadNpmConfigFile reads "~/.npmrc" file line by line, parse it and return the result as a map.
-func ReadNpmConfigFile(path string) (map[string]string, error) {
+// readNpmConfigFile reads "~/.npmrc" file line by line, parse it and return the result as a npmConfig.
+func readNpmConfigFile(path string) (npmConfig, error) {
 	// Open the file
 	file, err := os.Open(path)
 	if err != nil {
@@ -81,7 +82,7 @@ func ReadNpmConfigFile(path string) (map[string]string, error) {
 
 	// Create a new scanner and read the file line by line
 	scanner := bufio.NewScanner(file)
-	config := make(map[string]string)
+	cfg := make(map[string]string)
 	for scanner.Scan() {
 		line := scanner.Text()
 		line, authFound := strings.CutPrefix(line, "//")
@@ -90,10 +91,9 @@ func ReadNpmConfigFile(path string) (map[string]string, error) {
 			continue
 		}
 		// Split the line into key and value
-		parts := strings.SplitN(line, "/:_authToken=", 2)
+		parts := strings.SplitN(line, ":_authToken=", 2)
 		if len(parts) == 2 {
-			// TODO: should we directly add here the prefix 'https://'?
-			config[parts[0]] = parts[1]
+			cfg["https://"+parts[0]] = parts[1]
 		}
 	}
 
@@ -102,5 +102,5 @@ func ReadNpmConfigFile(path string) (map[string]string, error) {
 		return nil, err
 	}
 
-	return config, nil
+	return cfg, nil
 }

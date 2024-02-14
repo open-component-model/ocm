@@ -9,11 +9,17 @@ import (
 	"net/http"
 	"net/url"
 
+	npmCredentials "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
+
+const BLOB_HANDLER_NAME = "ocm/npmPackage"
+
+// Logging Realm.
+var REALM = logging.DefineSubRealm("NPM registry", "NPM")
 
 type artifactHandler struct {
 	spec *Config
@@ -63,9 +69,9 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 
 	// use user+pass+mail from credentials to login and retrieve bearer token
 	cred := npmCredentials.GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
-	username := cred[ATTR_USERNAME]
-	password := cred[ATTR_PASSWORD]
-	email := cred[ATTR_EMAIL]
+	username := cred[npmCredentials.ATTR_USERNAME]
+	password := cred[npmCredentials.ATTR_PASSWORD]
+	email := cred[npmCredentials.ATTR_EMAIL]
 	if username == "" || password == "" || email == "" {
 		return nil, fmt.Errorf("username, password or email missing")
 	}
