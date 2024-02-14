@@ -146,7 +146,7 @@ jobs:
           echo "${requires_review}" | jq -r .retVal[]
         fi
         
-        print "LICENSE RISK HIGH: ${high_license_risk_no}"
+        print "HIGH RISK LICENSES: ${high_license_risk_no}"
         if [[ high_license_risk_no -gt 0 ]]
         then
           echo "Visit the Mend UI and check High Risk Licenses. Understand Risk Score: https://docs.mend.io/bundle/sca_user_guide/page/understanding_risk_score_attribution_and_license_analysis.html"
@@ -174,7 +174,7 @@ jobs:
         fi
         
     - name: Check if PR exists
-      uses: 8BitJonny/gh-get-current-pr@3.0.0
+      uses: 8BitJonny/gh-get-current-pr@2.2.0
       id: pr_exists
       with:
         filterOutClosed: true
@@ -192,7 +192,7 @@ jobs:
           | HIGH/CRITICAL SECURITY VULNERABILITIES       | ${{ steps.report.outputs.security_vulnerability_no }} |
           | MAJOR UPDATES AVAILABLE                      | ${{ steps.report.outputs.major_updates_pending_no }}  |
           | LICENSE REQUIRES REVIEW                      | ${{ steps.report.outputs.requires_review_no }}        |
-          | LICENSE RISK HIGH                            | ${{ steps.report.outputs.high_license_risk_no }}      |
+          | HIGH RISK LICENSES                           | ${{ steps.report.outputs.high_license_risk_no }}      |
           | RESTRICTIED LICENSE FOR ON-PREMISE DELIVERY  | ${{ steps.report.outputs.VIOLATIONS }}                |
           
           [Detailed Logs: mend-scan-> Generate Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
