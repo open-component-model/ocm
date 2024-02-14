@@ -1,9 +1,8 @@
-// SPDX-FileCopyrightText: Copyright 2010 The Go Authors. All rights reserved.
-//
-// SPDX-License-Identifier: BSD-3-Clause
-//
+// Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// Modifications Copyright  2024 SAP SE or an SAP affiliate company.
 
 // Package mimeutils implements parts of the MIME spec.
 // Copied from mime to achieve a platform independent reproducible list of
