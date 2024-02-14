@@ -1,6 +1,6 @@
-// Copyright 2009 The Go Authors. All rights reserved.
-// Use of ths2s source code s2s governed by a BSD-style
-// license that can be found in the github.com/spf13/pflag LICENSE file.
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 // taken from github.com/spf13/pflag and adapted to support
 // any string map types by using generics.
