@@ -5,6 +5,8 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/generic/npm"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 type ConsumerProvider struct {
@@ -28,7 +30,8 @@ func (p *ConsumerProvider) Get(req cpi.ConsumerIdentity) (cpi.CredentialsSource,
 func (p *ConsumerProvider) get(requested cpi.ConsumerIdentity, currentFound cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
 	all, err := readNpmConfigFile(p.npmrcPath)
 	if err != nil {
-		panic(err)
+		log := logging.Context().Logger(npm.REALM)
+		log.LogError(err, "Failed to read npmrc file", "path", p.npmrcPath)
 		return nil, nil
 	}
 

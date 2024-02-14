@@ -7,7 +7,6 @@ import (
 	npmCredentials "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -69,8 +68,7 @@ func (r *Repository) Read(force bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to load npmrc: %w", err)
 	}
-	var id finalizer.ObjectIdentity
-	id = cpi.ProviderIdentity(PROVIDER + "/" + path)
+	id := cpi.ProviderIdentity(PROVIDER + "/" + path)
 
 	r.ctx.RegisterConsumerProvider(id, &ConsumerProvider{path})
 	r.npmrc = cfg
