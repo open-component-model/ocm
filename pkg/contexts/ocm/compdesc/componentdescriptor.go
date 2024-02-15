@@ -665,7 +665,8 @@ type ResourceMeta struct {
 	Relation metav1.ResourceRelation `json:"relation,omitempty"`
 
 	// SourceRefs defines a list of source names.
-	// These names reference the sources defines in `component.sources`.
+	// These entries reference the sources defined in the
+	// component.sources.
 	SourceRefs SourceRefs `json:"srcRefs,omitempty"`
 
 	// Digest is the optional digest of the referenced resource.

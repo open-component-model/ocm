@@ -237,9 +237,12 @@ type Resource struct {
 	Relation metav1.ResourceRelation `json:"relation,omitempty"`
 
 	// SourceRefs defines a list of source names.
-	// These names reference the sources defines in `component.sources`.
+	// These entries reference the sources defined in the
+	// component.sources.
 	SourceRefs []SourceRef `json:"srcRefs,omitempty"`
-	SourceRef  []SourceRef `json:"srcRef,omitempty"`
+	// SourceRef is for deserialization compatibility, only.
+	// The usage of this field in external formats is deprecated.
+	SourceRef []SourceRef `json:"srcRef,omitempty"`
 
 	// Access describes the type specific method to
 	// access the defined resource.

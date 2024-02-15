@@ -348,7 +348,7 @@ A resource uses the following additional formal fields:
 
 - **`srcRefs`** (optional) *[]struct*
 
-  This field is used to describes a list of sources used to generate the resource.
+  This field describes a list of sources used to generate the resource.
   The selection is done by the following two fields:
 
   - **`identitySelector`** *map[string]string*
