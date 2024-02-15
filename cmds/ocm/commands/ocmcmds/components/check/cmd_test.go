@@ -10,6 +10,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -80,7 +84,7 @@ test.de/x v1      Incomplete
 			Expect(env.CatchOutput(buf).Execute("check", "components", ARCH+"//"+COMP, "-o", "wide")).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-COMPONENT VERSION STATUS     ERROR MISSING
+COMPONENT VERSION STATUS     ERROR MISSING                    NON-LOCAL
 test.de/x v1      Incomplete       test.de/z:v1[test.de/x:v1]
 `))
 		})
@@ -220,5 +224,38 @@ test.de/x v1      Error  component version recursion: use of test.de/x:v1 for te
 test.de/y v1      Error  component version recursion: use of test.de/a:v1 for test.de/y:v1->test.de/a:v1->test.de/x:v1->test.de/z:v1
 test.de/z v1      Error  component version recursion: use of test.de/z:v1 for test.de/z:v1->test.de/a:v1->test.de/x:v1
 `))
+	})
+
+	Context("finds non-local resources", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.ComponentVersion(COMP, VERSION, func() {
+					env.Resource("rsc1", VERSION, resourcetypes.BLUEPRINT, v1.LocalRelation, func() {
+						env.ModificationOptions(ocm.SkipDigest())
+						env.Access(ociartifact.New("bla"))
+					})
+				})
+			})
+		})
+
+		It("outputs table", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("check", "components", ARCH+"//"+COMP, "--local-resources")).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+COMPONENT VERSION STATUS    ERROR
+test.de/x v1      Resources
+`))
+		})
+
+		It("outputs wide table", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("check", "components", ARCH+"//"+COMP, "--local-resources", "-o=wide")).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+COMPONENT VERSION STATUS    ERROR MISSING NON-LOCAL
+test.de/x v1      Resources               RSC("name"="rsc1")
+`))
+		})
 	})
 })

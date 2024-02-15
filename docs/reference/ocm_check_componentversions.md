@@ -17,6 +17,8 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
       --fail-on-error      fail on validation error
   -h, --help               help for componentversions
+  -R, --local-resources    check also for describing resources with local access method, only
+  -S, --local-sources      check also for describing sources with local access method, only
   -o, --output string      output mode (JSON, json, wide, yaml)
       --repo string        repository name or spec
   -s, --sort stringArray   sort fields
@@ -25,7 +27,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Description
 
 
-THis command checks, whether component versiuons are completely contained
+This command checks, whether component versions are completely contained
 in an OCM repository with all its dependent component references.
 
 
@@ -71,6 +73,11 @@ OCI Repository types (using standard component repository to OCI mapping):
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 
+
+
+If the options <code>--local-resources</code> and/or <code>--local-sources</code> are given the
+the check additionally assures that all resources or sources are included into the component version.
+This means that they are using local access methods, only.
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:

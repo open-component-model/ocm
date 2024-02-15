@@ -9,6 +9,8 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/failonerroroption"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/spf13/cobra"
 
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -45,6 +47,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 				repooption.New(),
 				output.OutputOptions(outputs,
 					failonerroroption.New(),
+					NewOption(),
 				),
 			),
 		},
@@ -57,7 +60,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Use:   "[<options>] {<component-reference>}",
 		Short: "check completeness of a component version in an OCM repository",
 		Long: `
-This command checks, whether component versiuons are completely contained
+This command checks, whether component versions are completely contained
 in an OCM repository with all its dependent component references.
 `,
 		Example: `
@@ -94,7 +97,7 @@ func (o *Command) Run() error {
 ////////////////////////////////////////////////////////////////////////////////
 
 var outputs = output.NewOutputs(OutputFactory(mapRegularOutput), output.Outputs{
-	"wide": OutputFactory(mapWideOutput, "MISSING"),
+	"wide": OutputFactory(mapWideOutput, "MISSING", "NON-LOCAL"),
 }).AddChainedManifestOutputs(NewAction)
 
 func OutputFactory(fmt processing.MappingFunction, wide ...string) output.OutputFactory {
@@ -115,9 +118,6 @@ func mapRegularOutput(e interface{}) interface{} {
 	if p.Error != nil {
 		err = p.Error.Error()
 	}
-	if len(p.Missing) == 0 {
-		return []string{p.ComponentVersion.GetName(), p.ComponentVersion.GetVersion(), p.Status, err}
-	}
 	return []string{p.ComponentVersion.GetName(), p.ComponentVersion.GetVersion(), p.Status, err}
 }
 
@@ -125,37 +125,70 @@ func mapWideOutput(e interface{}) interface{} {
 	p := e.(*Entry)
 
 	line := mapRegularOutput(e).([]string)
-	if len(p.Missing) == 0 {
+	if p.Results.IsEmpty() {
 		return append(line, "")
 	}
-	missing := map[string]string{}
-	for id, m := range p.Missing {
-		sep := "["
-		d := ""
-		for _, id := range m[:len(m)-1] {
-			d = d + sep + id.String()
-			sep = "->"
+
+	mmsg := ""
+	amsg := ""
+	if len(p.Results.Missing) > 0 {
+		missing := map[string]string{}
+		for id, m := range p.Results.Missing {
+			sep := "["
+			d := ""
+			for _, id := range m[:len(m)-1] {
+				d = d + sep + id.String()
+				sep = "->"
+			}
+			missing[id.String()] = d + "]"
 		}
-		missing[id.String()] = d + "]"
+		sep := ""
+		for _, k := range utils2.StringMapKeys(missing) {
+			mmsg += sep + k + missing[k]
+			sep = ", "
+		}
 	}
-	msg := ""
-	sep := ""
-	for _, k := range utils2.StringMapKeys(missing) {
-		msg += sep + k + missing[k]
-		sep = ", "
+
+	if len(p.Results.Resources) > 0 {
+		sep := "RSC("
+		for _, r := range p.Results.Resources {
+			amsg = fmt.Sprintf("%s%s%s", amsg, sep, r.String())
+			sep = ","
+		}
+		amsg += ")"
 	}
-	return append(line, msg)
+	if len(p.Results.Sources) > 0 {
+		sep := "SRC("
+		for _, r := range p.Results.Sources {
+			amsg = fmt.Sprintf("%s%s%s", amsg, sep, r.String())
+			sep = ","
+		}
+		amsg += ")"
+	}
+
+	return append(line, mmsg, amsg)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type Missing map[common.NameVersion]common.History
-type Entry struct {
-	Status           string             `json:"status"`
-	ComponentVersion common.NameVersion `json:"componentVersion"`
-	Missing          Missing            `json:"missing,omitempty"`
-	Error            error              `json:"error,omitempty"`
+type CheckResult struct {
+	Missing   Missing           `json:"missing,omitempty"`
+	Resources []metav1.Identity `json:"resources,omitempty"`
+	Sources   []metav1.Identity `json:"sources,omitempty"`
 }
+
+func newCheckResult() *CheckResult {
+	return &CheckResult{Missing: Missing{}}
+}
+
+func (r *CheckResult) IsEmpty() bool {
+	if r == nil {
+		return true
+	}
+	return len(r.Missing) == 0 && len(r.Resources) == 0 && len(r.Sources) == 0
+}
+
+type Missing map[common.NameVersion]common.History
 
 func (n Missing) MarshalJSON() ([]byte, error) {
 	m := map[string]common.History{}
@@ -165,39 +198,73 @@ func (n Missing) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
+type Entry struct {
+	Status           string             `json:"status"`
+	ComponentVersion common.NameVersion `json:"componentVersion"`
+	Results          *CheckResult       `json:"missing,omitempty"`
+	Error            error              `json:"error,omitempty"`
+}
+
+func (n CheckResult) MarshalJSON() ([]byte, error) {
+	m := map[string]common.History{}
+	for k, v := range n.Missing {
+		m[k.String()] = v
+	}
+	return json.Marshal(m)
+}
+
 type action struct {
-	erropt *failonerroroption.Option
+	erropt  *failonerroroption.Option
+	options *Option
 }
 
 func NewAction(opts *output.Options) processing.ProcessChain {
 	return comphdlr.Sort.Map((&action{
-		erropt: failonerroroption.From(opts),
+		erropt:  failonerroroption.From(opts),
+		options: From(opts),
 	}).Map)
 }
 
-type Cache = map[common.NameVersion]Missing
+type Cache = map[common.NameVersion]*CheckResult
 
 func (a *action) Map(in interface{}) interface{} {
 	cache := Cache{}
 
 	i := in.(*comphdlr.Object)
 	o := &Entry{
-		Status:           "OK",
 		ComponentVersion: common.VersionedElementKey(i.ComponentVersion),
 	}
-	o.Missing, o.Error = a.handle(cache, i.ComponentVersion, common.History{common.VersionedElementKey(i.ComponentVersion)})
+	status := ""
+	o.Results, o.Error = a.handle(cache, i.ComponentVersion, common.History{common.VersionedElementKey(i.ComponentVersion)})
 	if o.Error != nil {
-		o.Status = "Error"
+		status = ",Error"
 		a.erropt.AddError(o.Error)
 	}
-	if len(o.Missing) > 0 {
-		a.erropt.AddError(fmt.Errorf("incomplete component version %s", common.VersionedElementKey(i.ComponentVersion)))
-		o.Status = "Incomplete"
+	if !o.Results.IsEmpty() {
+		if len(o.Results.Missing) > 0 {
+			a.erropt.AddError(fmt.Errorf("incomplete component version %s", common.VersionedElementKey(i.ComponentVersion)))
+			status += ",Incomplete"
+		}
+		if len(o.Results.Sources) > 0 || len(o.Results.Resources) > 0 {
+			if len(o.Results.Resources) > 0 {
+				status += ",Resources"
+				a.erropt.AddError(fmt.Errorf("version %s with non-local resources", common.VersionedElementKey(i.ComponentVersion)))
+			}
+			if len(o.Results.Sources) > 0 {
+				status += ",Sources"
+				a.erropt.AddError(fmt.Errorf("version %s with non-local sources", common.VersionedElementKey(i.ComponentVersion)))
+			}
+		}
+	}
+	if status != "" {
+		o.Status = status[1:]
+	} else {
+		o.Status = "OK"
 	}
 	return o
 }
 
-func (a *action) getMissing(cache Cache, repo ocm.Repository, id common.NameVersion, h common.History) (Missing, error) {
+func (a *action) check(cache Cache, repo ocm.Repository, id common.NameVersion, h common.History) (*CheckResult, error) {
 	if r, ok := cache[id]; ok {
 		return r, nil
 	}
@@ -213,9 +280,9 @@ func (a *action) getMissing(cache Cache, repo ocm.Repository, id common.NameVers
 		}
 		err = nil
 	}
-	var r Missing
+	var r *CheckResult
 	if cv == nil {
-		r = map[common.NameVersion]common.History{id: h}
+		r = &CheckResult{Missing: Missing{id: h}}
 	} else {
 		r, err = a.handle(cache, cv, h)
 	}
@@ -223,22 +290,54 @@ func (a *action) getMissing(cache Cache, repo ocm.Repository, id common.NameVers
 	return r, err
 }
 
-func (a *action) handle(cache Cache, cv ocm.ComponentVersionAccess, h common.History) (Missing, error) {
-	var missing Missing
+func (a *action) handle(cache Cache, cv ocm.ComponentVersionAccess, h common.History) (*CheckResult, error) {
+	result := newCheckResult()
+
 	for _, r := range cv.GetDescriptor().References {
 		id := common.NewNameVersion(r.ComponentName, r.Version)
-		n, err := a.getMissing(cache, cv.Repository(), id, h)
+		n, err := a.check(cache, cv.Repository(), id, h)
 		if err != nil {
-			return missing, err
+			return result, err
 		}
-		if len(n) > 0 {
-			if missing == nil {
-				missing = Missing{}
-			}
-			for k, v := range n {
-				missing[k] = v
+		if n != nil && len(n.Missing) > 0 {
+			for k, v := range n.Missing {
+				result.Missing[k] = v
 			}
 		}
 	}
-	return missing, nil
+
+	var err error
+
+	list := errors.ErrorList{}
+	if a.options.CheckLocalResources {
+		result.Resources, err = a.checkArtifacts(cv.GetContext(), cv.GetDescriptor().Resources)
+		list.Add(err)
+	}
+	if a.options.CheckLocalSources {
+		result.Sources, err = a.checkArtifacts(cv.GetContext(), cv.GetDescriptor().Sources)
+		list.Add(err)
+	}
+	if result.IsEmpty() {
+		result = nil
+	}
+	return result, list.Result()
+}
+
+func (a *action) checkArtifacts(ctx ocm.Context, accessor compdesc.ElementAccessor) ([]metav1.Identity, error) {
+	var result []metav1.Identity
+
+	list := errors.ErrorList{}
+	for i := 0; i < accessor.Len(); i++ {
+		e := accessor.Get(i).(compdesc.ElementArtifactAccessor)
+
+		m, err := ctx.AccessSpecForSpec(e.GetAccess())
+		if err != nil {
+			list.Add(err)
+		} else {
+			if !m.IsLocal(ctx) {
+				result = append(result, e.GetMeta().GetIdentity(accessor))
+			}
+		}
+	}
+	return result, list.Result()
 }
