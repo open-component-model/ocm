@@ -58,7 +58,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] {<component-reference>}",
-		Short: "check completeness of a component version in an OCM repository",
+		Short: "Check completeness of a component version in an OCM repository",
 		Long: `
 This command checks, whether component versions are completely contained
 in an OCM repository with all its dependent component references.
