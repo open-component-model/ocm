@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Input Type Directory")
+	RunSpecs(t, "Input Type wget")
 }
