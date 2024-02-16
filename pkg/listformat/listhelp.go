@@ -6,6 +6,8 @@ package listformat
 
 import (
 	"fmt"
+	"slices"
+	"sort"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -93,4 +95,21 @@ func FormatListElements(def string, elems ListElements) string {
 		names += "\n"
 	}
 	return names
+}
+
+func FormatDescriptionList(def string, elems ...string) string {
+	list := slices.Clone(elems)
+	sort.Strings(list)
+
+	out := ""
+	for _, l := range list {
+		if l != "" {
+			out += "  - " + utils.IndentLines(l, "    ", true)
+			if strings.Contains(l, "\n") {
+				out += "\n"
+			}
+		}
+		out += "\n"
+	}
+	return out
 }

@@ -43,6 +43,18 @@ It can be used in two ways:
 
 The command accepts some top level options, they can only be given before the sub commands.
 
+A configuration according to [ocm configfile](ocm_configfile.md) is read from a <code>.ocmconfig</code> file
+located in the <code>HOME</code> directory. With the option <code>--config</code> other
+file locations can be specified. If nothing is specified and no file is found at the default
+location a default configuration is composed according to known type specific
+configuration files.
+
+The following configuration sources are used:
+  - The docker configuration file at <code>~/.docker/config.jaon</code> is
+    read to feed in the configured credentials for OCI registries.
+
+
+
 With the option <code>--cred</code> it is possible to specify arbitrary credentials
 for various environments on the command line. Nevertheless it is always preferrable
 to use the cli config file.
@@ -224,6 +236,28 @@ The value can be a simple type or a JSON/YAML string for complex values
 - <code>github.com/mandelsoft/ocm/plugindir</code> [<code>plugindir</code>]: *plugin directory*
 
   Directory to look for OCM plugin executables.
+
+- <code>github.com/mandelsoft/ocm/rootcerts</code>: *JSON*
+
+  General root certificate settings given as JSON document with the following
+  format:
+
+  <pre>
+  {
+    "rootCertificates"": [
+       {
+         "data": ""&lt;base64>"
+       },
+       {
+         "path": ""&lt;file path>"
+       }
+    ],
+  </pre>
+
+  One of following data fields are possible:
+  - <code>data</code>:       base64 encoded binary data
+  - <code>stringdata</code>: plain text data
+  - <code>path</code>:       a file path to read the data from
 
 - <code>github.com/mandelsoft/ocm/signing</code>: *JSON*
 
