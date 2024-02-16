@@ -13,6 +13,7 @@ import (
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/defaultconfigregistry"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -105,6 +106,15 @@ It can be used in two ways:
   *[&lt;area>] &lt;object kind> &lt;verb/operation> &lt;arguments>*
 
 The command accepts some top level options, they can only be given before the sub commands.
+
+A configuration according to <CMD>ocm configfile</CMD> is read from a <code>.ocmconfig</code> file
+located in the <code>HOME</code> directory. With the option <code>--config</code> other
+file locations can be specified. If nothing is specified and no file is found at the default
+location a default configuration is composed according to known type specific
+configuration files.
+
+The following configuration sources are used:
+` + defaultconfigregistry.Description() + `
 
 With the option <code>--cred</code> it is possible to specify arbitrary credentials
 for various environments on the command line. Nevertheless it is always preferrable
