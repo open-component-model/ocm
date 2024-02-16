@@ -44,7 +44,7 @@ type RepositorySpec struct {
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec.
-func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
+func NewRepositorySpec(path string) *RepositorySpec {
 	if path == "" {
 		path = "~/.npmrc"
 	}
