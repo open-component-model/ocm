@@ -9,11 +9,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/listformat"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 const (
 	// CONSUMER_TYPE is the npm repository type.
-	CONSUMER_TYPE = "Registry.npm.com"
+	CONSUMER_TYPE = "Registry.npmjs.com"
 
 	// ATTR_USERNAME is the username attribute. Required for login at any npm registry.
 	ATTR_USERNAME = cpi.ATTR_USERNAME
@@ -24,6 +25,9 @@ const (
 	// ATTR_TOKEN is the token attribute. May exist after login at any npm registry.
 	ATTR_TOKEN = cpi.ATTR_TOKEN
 )
+
+// Logging Realm.
+var REALM = logging.DefineSubRealm("NPM registry", "NPM")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{

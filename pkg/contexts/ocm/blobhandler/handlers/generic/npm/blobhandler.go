@@ -18,9 +18,6 @@ import (
 
 const BLOB_HANDLER_NAME = "ocm/npmPackage"
 
-// Logging Realm.
-var REALM = logging.DefineSubRealm("NPM registry", "NPM")
-
 type artifactHandler struct {
 	spec *Config
 }
@@ -55,7 +52,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	}
 
 	// read package.json from tarball to get name, version, etc.
-	log := logging.Context().Logger(REALM)
+	log := logging.Context().Logger(npmCredentials.REALM)
 	log.Debug("reading package.json from tarball")
 	var pkg *Package
 	pkg, err = prepare(data)
@@ -67,7 +64,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	log = log.WithValues("package", pkg.Name, "version", pkg.Version)
 	log.Debug("identified")
 
-	// get credentials
+	// get credentials and TODO cache it
 	cred := npmCredentials.GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
 	if cred == nil {
 		return nil, fmt.Errorf("No credentials found for %s. Couldn't upload '%s'.", b.spec.Url, pkg.Name)
@@ -92,7 +89,6 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 		if err != nil {
 			return nil, err
 		}
-		cred[npmCredentials.ATTR_TOKEN] = token // Frage: @mandelsoft funktioniert das?
 	} else {
 		log.Debug("token found, skipping login")
 	}
