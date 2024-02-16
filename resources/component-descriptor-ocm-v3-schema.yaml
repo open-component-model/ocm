@@ -253,6 +253,7 @@ $defs:
   srcRef:
     type: 'object'
     description: 'a reference to a (component-local) source'
+    additionalProperties: false
     properties:
       identitySelector:
         $ref: '#/$defs/identityAttribute'

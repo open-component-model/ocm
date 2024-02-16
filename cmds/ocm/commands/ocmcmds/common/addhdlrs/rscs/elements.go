@@ -101,9 +101,9 @@ func (h ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Elemen
 			ExtraIdentity: spec.ExtraIdentity,
 			Labels:        spec.Labels,
 		},
-		Type:      spec.Type,
-		Relation:  spec.Relation,
-		SourceRef: compdescv2.ConvertSourcerefsTo(spec.SourceRef),
+		Type:       spec.Type,
+		Relation:   spec.Relation,
+		SourceRefs: compdescv2.ConvertSourcerefsTo(spec.SourceRefs),
 	}
 	opts := h.getModOpts()
 	if ocm.IsIntermediate(v.Repository().GetSpecification()) {
@@ -124,9 +124,10 @@ type ResourceSpec struct {
 	// Can be a local or external resource
 	Relation metav1.ResourceRelation `json:"relation,omitempty"`
 
-	// SourceRef defines a list of source names.
-	// These names reference the sources defines in `component.sources`.
-	SourceRef []compdescv2.SourceRef `json:"srcRef"`
+	// SourceRefs defines a list of source names.
+	// These entries reference the sources defined in the
+	// component.sources.
+	SourceRefs []compdescv2.SourceRef `json:"srcRefs"`
 
 	addhdlrs.ResourceInput `json:",inline"`
 }
@@ -160,7 +161,7 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *addhdlrs.ResourceInpu
 		ElementMeta: r.ElementMeta,
 		Type:        r.Type,
 		Relation:    r.Relation,
-		SourceRef:   r.SourceRef,
+		SourceRefs:  r.SourceRefs,
 	}
 	if err := compdescv2.ValidateResource(fldPath, rsc, false); err != nil {
 		allErrs = append(allErrs, err...)

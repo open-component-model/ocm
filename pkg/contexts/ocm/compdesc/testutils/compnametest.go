@@ -23,7 +23,7 @@ func TestCompName(dataBytes []byte, err error) {
 		var scheme map[string]interface{}
 		Expect(runtime.DefaultYAMLEncoding.Unmarshal(dataBytes, &scheme)).To(Succeed())
 
-		pattern := scheme["definitions"].(map[string]interface{})["componentName"].(map[string]interface{})["pattern"].(string)
+		pattern := scheme["$defs"].(map[string]interface{})["componentName"].(map[string]interface{})["pattern"].(string)
 
 		logrus.Infof("pattern=%s", pattern)
 
