@@ -3,9 +3,9 @@ package npm
 import (
 	"net/url"
 
+	npm "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/generic/npm"
 	"github.com/open-component-model/ocm/pkg/logging"
 )
 
@@ -47,7 +47,10 @@ func (p *ConsumerProvider) get(requested cpi.ConsumerIdentity, currentFound cpi.
 		if u.Port() != "" {
 			attrs = append(attrs, identity.ID_PORT, u.Port())
 		}
-		id := cpi.NewConsumerIdentity(identity.CONSUMER_TYPE, attrs...)
+		if u.Path != "" {
+			attrs = append(attrs, identity.ID_PATHPREFIX, u.Path)
+		}
+		id := cpi.NewConsumerIdentity(npm.CONSUMER_TYPE, attrs...)
 		if m(requested, currentFound, id) {
 			creds = newCredentials(value)
 			currentFound = id
