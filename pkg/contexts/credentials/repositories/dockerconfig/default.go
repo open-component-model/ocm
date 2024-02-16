@@ -35,6 +35,6 @@ func DefaultConfigHandler(cfg config.Context) error {
 }
 
 var desc = `
-The docker configuration file at <code>~/.docker/config.jaon</code> is
+The docker configuration file at <code>~/.docker/config.json</code> is
 read to feed in the configured credentials for OCI registries.
 `
