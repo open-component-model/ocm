@@ -177,6 +177,13 @@ func (in *Resource) DeepCopyInto(out *Resource) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.SourceRef != nil {
+		in, out := &in.SourceRef, &out.SourceRef
+		*out = make([]SourceRef, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	if in.Access != nil {
 		in, out := &in.Access, &out.Access
 		*out = (*in).DeepCopy()
