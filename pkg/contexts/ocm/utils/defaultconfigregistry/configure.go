@@ -5,10 +5,11 @@
 package defaultconfigregistry
 
 import (
-	"slices"
+	"strings"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/listformat"
 )
 
 type DefaultConfigHandler func(cfg config.Context) error
@@ -16,29 +17,49 @@ type DefaultConfigHandler func(cfg config.Context) error
 type defaultConfigurationRegistry struct {
 	lock sync.Mutex
 
-	list []DefaultConfigHandler
+	list []entry
 }
 
-func (r *defaultConfigurationRegistry) Register(h DefaultConfigHandler) {
+type entry struct {
+	desc    string
+	handler DefaultConfigHandler
+}
+
+func (r *defaultConfigurationRegistry) Register(h DefaultConfigHandler, desc string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.list = append(r.list, h)
+	r.list = append(r.list, entry{desc, h})
 }
 
 func (r *defaultConfigurationRegistry) Get() []DefaultConfigHandler {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	return slices.Clone(r.list)
+	var result []DefaultConfigHandler
+	for _, h := range r.list {
+		result = append(result, h.handler)
+	}
+	return result
 }
 
 var defaultConfigRegistry = &defaultConfigurationRegistry{}
 
-func RegisterDefaultConfigHandler(h DefaultConfigHandler) {
-	defaultConfigRegistry.Register(h)
+func RegisterDefaultConfigHandler(h DefaultConfigHandler, desc string) {
+	defaultConfigRegistry.Register(h, desc)
 }
 
 func Get() []DefaultConfigHandler {
 	return defaultConfigRegistry.Get()
+}
+
+func Description() string {
+	var result []string
+
+	for _, h := range defaultConfigRegistry.list {
+		if h.desc != "" {
+			result = append(result, strings.TrimSpace(h.desc))
+		}
+	}
+	return listformat.FormatDescriptionList("", result...)
 }

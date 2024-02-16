@@ -17,7 +17,7 @@ import (
 )
 
 func init() {
-	defaultconfigregistry.RegisterDefaultConfigHandler(DefaultConfigHandler)
+	defaultconfigregistry.RegisterDefaultConfigHandler(DefaultConfigHandler, desc)
 }
 
 func DefaultConfigHandler(cfg config.Context) error {
@@ -33,3 +33,8 @@ func DefaultConfigHandler(cfg config.Context) error {
 	}
 	return nil
 }
+
+var desc = `
+The docker configuration file at <code>~/.docker/config.jaon</code> is
+read to feed in the configured credentials for OCI registries.
+`
