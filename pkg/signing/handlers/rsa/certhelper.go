@@ -14,7 +14,7 @@ import (
 )
 
 func CreateRootCertificate(sub *pkix.Name, validity time.Duration) (*x509.Certificate, *PrivateKey, error) {
-	capriv, _, err := Handler{}.CreateKeyPair()
+	capriv, _, err := CreateKeyPair()
 	if err != nil {
 		return nil, nil, err
 	}

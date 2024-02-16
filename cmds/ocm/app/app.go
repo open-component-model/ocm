@@ -36,6 +36,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/bootstrap"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/check"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/clean"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/controller"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/create"
@@ -82,7 +83,7 @@ type CLIOptions struct {
 	keyoption.Option
 
 	Completed   bool
-	Config      string
+	Config      []string
 	ConfigSets  []string
 	Credentials []string
 	Context     clictx.Context
@@ -141,7 +142,7 @@ default credential, always used if no dedicated match is found.
 For example:
 
 <center>
-    <pre>--cred :type=ociRegistry --cred :hostname=ghcr.io --cred username=mandelsoft --cred password=xyz</pre>
+    <pre>--cred :type=OCIRegistry --cred :hostname=ghcr.io --cred username=mandelsoft --cred password=xyz</pre>
 </center>
 
 With the option <code>-X</code> it is possible to pass global settings of the
@@ -231,6 +232,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 
 	cmd.AddCommand(NewVersionCommand(opts.Context))
 
+	cmd.AddCommand(check.NewCommand(opts.Context))
 	cmd.AddCommand(get.NewCommand(opts.Context))
 	cmd.AddCommand(create.NewCommand(opts.Context))
 	cmd.AddCommand(add.NewCommand(opts.Context))
@@ -306,7 +308,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 }
 
 func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.Config, "config", "", "", "configuration file")
+	fs.StringArrayVarP(&o.Config, "config", "", nil, "configuration file")
 	fs.StringSliceVarP(&o.ConfigSets, "config-set", "", nil, "apply configuration set")
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
@@ -335,9 +337,18 @@ func (o *CLIOptions) Complete() error {
 	if err != nil {
 		return err
 	}
-	_, err = utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
-	if err != nil {
-		return err
+
+	if len(o.Config) == 0 {
+		_, err = utils.Configure(o.Context.OCMContext(), "", vfsattr.Get(o.Context))
+		if err != nil {
+			return err
+		}
+	}
+	for _, config := range o.Config {
+		_, err = utils.Configure(o.Context.OCMContext(), config, vfsattr.Get(o.Context))
+		if err != nil {
+			return err
+		}
 	}
 
 	err = o.Option.Configure(o.Context)
