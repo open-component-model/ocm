@@ -25,7 +25,10 @@ type NameVersion struct {
 	version string
 }
 
-var _ VersionedElement = (*NameVersion)(nil)
+var (
+	_ json.Marshaler   = (*NameVersion)(nil)
+	_ VersionedElement = (*NameVersion)(nil)
+)
 
 func NewNameVersion(name, version string) NameVersion {
 	return NameVersion{name, version}

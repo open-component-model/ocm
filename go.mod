@@ -84,6 +84,7 @@ require (
 	github.com/distribution/reference v0.5.0
 	github.com/imdario/mergo v0.3.16
 	github.com/mandelsoft/vfs v0.4.0
+	github.com/texttheater/golang-levenshtein/levenshtein v0.0.0-20200805054039-cae8b0eaed6c
 	k8s.io/client-go v0.28.4
 )
 

@@ -11,7 +11,7 @@ ocm [<options>] <sub command> ...
 ```
   -X, --attribute stringArray     attribute setting
       --ca-cert stringArray       additional root certificate authorities
-      --config string             configuration file
+      --config stringArray        configuration file
       --config-set strings        apply configuration set
   -C, --cred stringArray          credential setting
   -h, --help                      help for ocm
@@ -352,8 +352,9 @@ by a certificate delivered with the signature.
 
 ##### Sub Commands
 
-* [ocm <b>add</b>](ocm_add.md)	 &mdash; Add resources or sources to a component archive
+* [ocm <b>add</b>](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 &mdash; bootstrap components
+* [ocm <b>check</b>](ocm_check.md)	 &mdash; check components in OCM repository
 * [ocm <b>clean</b>](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
 * [ocm <b>controller</b>](ocm_controller.md)	 &mdash; Commands acting on the ocm-controller
 * [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive

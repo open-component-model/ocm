@@ -1,43 +1,34 @@
-## ocm get routingslips &mdash; Get Routings Slips For A Component Version
+## ocm check componentversions &mdash; Check Completeness Of A Component Version In An OCM Repository
 
 ### Synopsis
 
 ```
-ocm get routingslips [<options>]  <component> {<name>}
+ocm check componentversions [<options>] {<component-reference>}
 ```
 
 ##### Aliases
 
 ```
-routingslips, routingslip, rs
+componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Options
 
 ```
-      --all-columns               show all table columns
-  -c, --constraints constraints   version constraint
-      --fail-on-error             fail on validation error
-  -h, --help                      help for routingslips
-      --latest                    restrict component versions to latest
-      --lookup stringArray        repository name or spec for closure lookup fallback
-  -o, --output string             output mode (JSON, json, wide, yaml)
-      --repo string               repository name or spec
-  -s, --sort stringArray          sort fields
-  -v, --verify                    verify signature
+      --fail-on-error      fail on validation error
+  -h, --help               help for componentversions
+  -R, --local-resources    check also for describing resources with local access method, only
+  -S, --local-sources      check also for describing sources with local access method, only
+  -o, --output string      output mode (JSON, json, wide, yaml)
+      --repo string        repository name or spec
+  -s, --sort stringArray   sort fields
 ```
 
 ### Description
 
 
-Get all or the selected routing slips for a component version specification.
-
-
-If the option <code>--constraints</code> is given, and no version is specified
-for a component, only versions matching the given version constraints
-(semver https://github.com/Masterminds/semver) are selected.
-With <code>--latest</code> only
-the latest matching versions will be selected.
+This command checks, whether component versions are completely contained
+in an OCM repository with all its dependent component references.
 
 
 If the <code>--repo</code> option is specified, the given names are interpreted
@@ -83,15 +74,10 @@ OCI Repository types (using standard component repository to OCI mapping):
   - <code>ociRegistry</code>
 
 
-\
-If a component lookup for building a reference closure is required
-the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. By default, the component versions are searched in
-the repository holding the component version for which the closure is
-determined. For *Component Archives* this is never possible, because
-it only contains a single component version. Therefore, in this scenario
-this option must always be specified to be able to follow component
-references.
+
+If the options <code>--local-resources</code> and/or <code>--local-sources</code> are given the
+the check additionally assures that all resources or sources are included into the component version.
+This means that they are using local access methods, only.
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
@@ -102,10 +88,17 @@ The following modes are supported:
   - <code>yaml</code>
 
 
+### Examples
+
+```
+$ ocm check componentversion ghcr.io/mandelsoft/kubelink
+$ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
+```
+
 ### SEE ALSO
 
 ##### Parents
 
-* [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
+* [ocm check](ocm_check.md)	 &mdash; check components in OCM repository
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

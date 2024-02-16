@@ -8,9 +8,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
@@ -19,6 +16,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/listformat"
+	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var (
@@ -32,7 +32,8 @@ type Command struct {
 	Consumer credentials.ConsumerIdentity
 	Matcher  credentials.IdentityMatcher
 
-	Type string
+	Type   string
+	Sloppy bool
 }
 
 var _ utils.OCMCommand = (*Command)(nil)
@@ -75,6 +76,7 @@ The usage of a dedicated matcher can be enforced by the option <code>--matcher</
 
 func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.Type, "matcher", "m", "", "matcher type override")
+	set.BoolVarP(&o.Sloppy, "sloppy", "s", false, "sloppy matching of consumer type")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -111,6 +113,14 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
+	if o.Sloppy {
+		fix := credentials.GuessConsumerType(o, o.Consumer.Type())
+		if fix != o.Consumer.Type() {
+			out.Outf(o, "Correcting consumer type to %q\n", fix)
+			o.Consumer[credentials.ID_TYPE] = fix
+		}
+	}
+
 	creds, err := credentials.RequiredCredentialsForConsumer(o.CredentialsContext(), o.Consumer, o.Matcher)
 	if err != nil {
 		return err
