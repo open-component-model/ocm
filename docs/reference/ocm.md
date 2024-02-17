@@ -53,6 +53,9 @@ The following configuration sources are used:
   - The docker configuration file at <code>~/.docker/config.json</code> is
     read to feed in the configured credentials for OCI registries.
 
+  - The npm configuration file at <code>~/.npmrc</code> is
+    read to feed in the configured credentials for NPM registries.
+
 
 
 With the option <code>--cred</code> it is possible to specify arbitrary credentials
