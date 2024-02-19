@@ -96,6 +96,18 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>certificateAuthority</code>: the certificate authority certificate used to verify certificates
 
 
+  - <code>Registry.npmjs.com</code>: NPM repository
+
+    It matches the <code>Registry.npmjs.com</code> consumer type and additionally acts like
+    the <code>hostpath</code> type.
+
+    Credential consumers of the consumer type Registry.npmjs.com evaluate the following credential properties:
+
+      - <code>username</code>: the basic auth user name
+      - <code>password</code>: the basic auth password
+      - <code>email</code>: NPM registry, require an email address
+
+
   - <code>S3</code>: S3 credential matcher
 
     This matcher is a hostpath matcher.

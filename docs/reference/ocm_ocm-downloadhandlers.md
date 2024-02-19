@@ -49,27 +49,29 @@ The following handler names are possible:
       - <code>ociConfigTypes</code>: a list of accepted OCI config archive mime types
         defaulted by <code>application/vnd.oci.image.config.v1+json</code>.
 
-  - <code>oci/artifact</code>: uploading an OCI artifact to an OCI registry
+  - <code>oci/artifact</code>: download OCI artifacts
 
-    The <code>artifact</code> downloader is able to transfer OCI artifact-like resources
-    into an OCI registry given by the combination of the download target and the
-    registration config.
-
-    If no config is given, the target must be an OCI reference with a potentially
-    omitted repository. The repo part is derived from the reference hint provided
-    by the resource's access specification.
-
-    If the config is given, the target is used as repository name prefixed with an
-    optional repository prefix given by the configuration.
-
+    The <code>oci/artifact</code> downloader is able to download OCI artifacts
+    as artifact archive according to the OCI distribution spec.
     The following artifact media types are supported:
+      - <code>application/vnd.oci.image.manifest.v1+tar</code>
       - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
+      - <code>application/vnd.oci.image.index.v1+tar</code>
       - <code>application/vnd.oci.image.index.v1+tar+gzip</code>
+      - <code>application/vnd.docker.distribution.manifest.v2+tar</code>
+      - <code>application/vnd.docker.distribution.manifest.v2+tar+gzip</code>
+      - <code>application/vnd.docker.distribution.manifest.list.v2+tar</code>
+      - <code>application/vnd.docker.distribution.manifest.list.v2+tar+gzip</code>
+
+    By default, it is registered for these mimetypes.
 
     It accepts a config with the following fields:
       - <code>namespacePrefix</code>: a namespace prefix used for the uploaded artifacts
       - <code>ociRef</code>: an OCI repository reference
       - <code>repository</code>: an OCI repository specification for the target OCI registry
+
+    Alternatively, a single string value can be given representing an OCI repository
+    reference.
 
   - <code>plugin</code>: [downloaders provided by plugins]
 

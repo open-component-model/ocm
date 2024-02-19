@@ -110,33 +110,39 @@ are configured for the operation. It has the following format
 </center>
 
 The uploader name may be a path expression with the following possibilities:
-  - <code>plugin</code>: [downloaders provided by plugins]
+  - <code>ocm/ociArtifacts</code>: upload an OCI artifact to an OCI registry
 
-    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
+    The <code>ocm/ociArtifacts</code> uploader is able to transfer OCI artifact-like resources
+    into an OCI registry given by the combination of the upload target and the registration config.
 
-  - <code>ocm/ociArtifacts</code>: downloading OCI artifacts
+    If no config is given, the target must be an OCI reference with a potentially
+    omitted repository. The repo part is derived from the reference hint provided
+    by the resource's access specification.
 
-    The <code>ociArtifacts</code> downloader is able to download OCI artifacts
-    as artifact archive according to the OCI distribution spec.
+    If the config is given, the target is used as repository name prefixed with an
+    optional repository prefix given by the configuration.
+
     The following artifact media types are supported:
-      - <code>application/vnd.oci.image.manifest.v1+tar</code>
       - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
-      - <code>application/vnd.oci.image.index.v1+tar</code>
       - <code>application/vnd.oci.image.index.v1+tar+gzip</code>
-      - <code>application/vnd.docker.distribution.manifest.v2+tar</code>
-      - <code>application/vnd.docker.distribution.manifest.v2+tar+gzip</code>
-      - <code>application/vnd.docker.distribution.manifest.list.v2+tar</code>
-      - <code>application/vnd.docker.distribution.manifest.list.v2+tar+gzip</code>
-
-    By default, it is registered for these mimetypes.
 
     It accepts a config with the following fields:
       - <code>namespacePrefix</code>: a namespace prefix used for the uploaded artifacts
       - <code>ociRef</code>: an OCI repository reference
       - <code>repository</code>: an OCI repository specification for the target OCI registry
 
-    Alternatively, a single string value can be given representing an OCI repository
-    reference.
+  - <code>plugin</code>: [downloaders provided by plugins]
+
+    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
+
+  - <code>ocm/npmPackage</code>: uploading npm artifacts
+
+    The <code>ocm/npmPackage</code> uploader is able to upload npm artifacts
+    as artifact archive according to the npm package spec.
+    If registered the default mime type is: application/x-tgz
+
+    It accepts a plain string for the URL or a config with the following field:
+    'url': the URL of the npm repository.
 
 
 

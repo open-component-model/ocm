@@ -50,7 +50,7 @@ location a default configuration is composed according to known type specific
 configuration files.
 
 The following configuration sources are used:
-  - The docker configuration file at <code>~/.docker/config.jaon</code> is
+  - The docker configuration file at <code>~/.docker/config.json</code> is
     read to feed in the configured credentials for OCI registries.
 
 
