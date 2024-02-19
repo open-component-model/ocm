@@ -20,16 +20,7 @@ func init() {
 	download.RegisterHandlerRegistrationHandler(PATH, &RegistrationHandler{})
 }
 
-var supportedMimeTypes = []string{
-	artifactset.MediaType(artdesc.MediaTypeImageManifest),
-	artifactset.MediaType(artdesc.MediaTypeImageIndex),
-}
-
 type Config = ociuploadattr.Attribute
-
-func AttributeDescription() map[string]string {
-	return ociuploadattr.AttributeDescription()
-}
 
 type RegistrationHandler struct{}
 
@@ -48,13 +39,13 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 	}
 
 	opts := download.NewHandlerOptions(olist...)
-	if opts.MimeType != "" && !slices.Contains(supportedMimeTypes, opts.MimeType) {
+	if opts.MimeType != "" && !slices.Contains(artdesc.SupportedMimeTypes, opts.MimeType) {
 		return true, errors.Wrapf(err, "mime type %s not supported", opts.MimeType)
 	}
 
 	h := New(attr)
 	if opts.MimeType == "" {
-		for _, m := range supportedMimeTypes {
+		for _, m := range artdesc.SupportedMimeTypes {
 			opts.MimeType = m
 			download.For(ctx).Register(h, opts)
 		}
@@ -65,22 +56,17 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 	return true, nil
 }
 
-func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
-	return registrations.NewLeafHandlerInfo("uploading an OCI artifact to an OCI registry", `
-The <code>artifact</code> downloader is able to transfer OCI artifact-like resources
-into an OCI registry given by the combination of the download target and the
-registration config.
-
-If no config is given, the target must be an OCI reference with a potentially
-omitted repository. The repo part is derived from the reference hint provided
-by the resource's access specification.
-
-If the config is given, the target is used as repository name prefixed with an
-optional repository prefix given by the configuration.
-
+func (r *RegistrationHandler) GetHandlers(_ cpi.Context) registrations.HandlerInfos {
+	return registrations.NewLeafHandlerInfo("download OCI artifacts", `
+The <code>`+PATH+`</code> downloader is able to download OCI artifacts
+as artifact archive according to the OCI distribution spec.
 The following artifact media types are supported:
-`+listformat.FormatList("", supportedMimeTypes...)+`
+`+listformat.FormatList("", artdesc.ArchiveBlobTypes()...)+`
+By default, it is registered for these mimetypes.
+
 It accepts a config with the following fields:
-`+listformat.FormatMapElements("", AttributeDescription()),
+`+listformat.FormatMapElements("", ociuploadattr.AttributeDescription())+`
+Alternatively, a single string value can be given representing an OCI repository
+reference.`,
 	)
 }
