@@ -133,6 +133,28 @@ OCM library:
 
   Directory to look for OCM plugin executables.
 
+- <code>github.com/mandelsoft/ocm/rootcerts</code>: *JSON*
+
+  General root certificate settings given as JSON document with the following
+  format:
+
+  <pre>
+  {
+    "rootCertificates"": [
+       {
+         "data": ""&lt;base64>"
+       },
+       {
+         "path": ""&lt;file path>"
+       }
+    ],
+  </pre>
+
+  One of following data fields are possible:
+  - <code>data</code>:       base64 encoded binary data
+  - <code>stringdata</code>: plain text data
+  - <code>path</code>:       a file path to read the data from
+
 - <code>github.com/mandelsoft/ocm/signing</code>: *JSON*
 
   Public and private Key settings given as JSON document with the following

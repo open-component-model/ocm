@@ -15,7 +15,7 @@ func createCache(_ datacontext.Context) interface{} {
 	}
 }
 
-func (r *Cache) GetRepository(ctx cpi.Context, name string) (*Repository, error) {
+func (r *Cache) GetRepository(ctx cpi.Context, name string, prop bool) (*Repository, error) {
 	var (
 		err  error = nil
 		repo *Repository
@@ -24,7 +24,7 @@ func (r *Cache) GetRepository(ctx cpi.Context, name string) (*Repository, error)
 		repo = r.repos[name]
 	}
 	if repo == nil {
-		repo, err = NewRepository(ctx, name)
+		repo, err = NewRepository(ctx, name, prop)
 		if err == nil {
 			r.repos[name] = repo
 		}

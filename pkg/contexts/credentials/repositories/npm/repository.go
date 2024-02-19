@@ -10,18 +10,24 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-const PROVIDER = "ocm.software/credentialprovider/" + REPOSITORY_TYPE
+const PROVIDER = "ocm.software/credentialprovider/" + Type
 
 type Repository struct {
-	ctx   cpi.Context
-	path  string
-	npmrc npmConfig
+	ctx       cpi.Context
+	path      string
+	propagate bool
+	npmrc     npmConfig
 }
 
-func NewRepository(ctx cpi.Context, path string) (*Repository, error) {
+func NewRepository(ctx cpi.Context, path string, prop ...bool) (*Repository, error) {
+	return newRepository(ctx, path, utils.OptionalDefaultedBool(true, prop...))
+}
+
+func newRepository(ctx cpi.Context, path string, prop bool) (*Repository, error) {
 	r := &Repository{
-		ctx:  ctx,
-		path: path,
+		ctx:       ctx,
+		path:      path,
+		propagate: prop,
 	}
 	err := r.Read(true)
 	return r, err
@@ -43,13 +49,13 @@ func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 		return nil, err
 	}
 	if !exists {
-		return nil, errors.ErrNotFound("credentials", name, REPOSITORY_TYPE)
+		return nil, errors.ErrNotFound("credentials", name, Type)
 	}
 	return newCredentials(r.npmrc[name]), nil
 }
 
 func (r *Repository) WriteCredentials(_ string, _ cpi.Credentials) (cpi.Credentials, error) {
-	return nil, errors.ErrNotSupported("write", "credentials", REPOSITORY_TYPE)
+	return nil, errors.ErrNotSupported("write", "credentials", Type)
 }
 
 func (r *Repository) Read(force bool) error {
@@ -70,7 +76,9 @@ func (r *Repository) Read(force bool) error {
 	}
 	id := cpi.ProviderIdentity(PROVIDER + "/" + path)
 
-	r.ctx.RegisterConsumerProvider(id, &ConsumerProvider{path})
+	if r.propagate {
+		r.ctx.RegisterConsumerProvider(id, &ConsumerProvider{r.path})
+	}
 	r.npmrc = cfg
 	return nil
 }

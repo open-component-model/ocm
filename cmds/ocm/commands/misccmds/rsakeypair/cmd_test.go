@@ -61,12 +61,12 @@ created rsa key pair key.priv[key.pub]
 			Issuer:     ISSUER,
 		}
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), sctx)
+		sig, err := rsa.NewHandler().Sign(defaultContext, d.Hex(), sctx)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 
-		err = rsa.Handler{}.Verify(d.Hex(), sig, &signing.DefaultSigningContext{PublicKey: pub})
+		err = rsa.NewHandler().Verify(d.Hex(), sig, &signing.DefaultSigningContext{PublicKey: pub})
 		Expect(err).To(Succeed())
 	})
 
@@ -90,12 +90,12 @@ created rsa key pair key.priv[key.cert]
 			Issuer:     ISSUER,
 		}
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(defaultContext, d.Hex(), sctx)
+		sig, err := rsa.NewHandler().Sign(defaultContext, d.Hex(), sctx)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 
-		err = rsa.Handler{}.Verify(d.Hex(), sig, &signing.DefaultSigningContext{PublicKey: pub})
+		err = rsa.NewHandler().Verify(d.Hex(), sig, &signing.DefaultSigningContext{PublicKey: pub})
 		Expect(err).To(Succeed())
 	})
 
@@ -137,7 +137,7 @@ created encrypted rsa key pair key.priv[key.pub][key.priv.ekey]
 				Issuer:     ISSUER,
 			}
 			d := digest.FromBytes([]byte("digest"))
-			Must(rsa.Handler{}.Sign(defaultContext, d.Hex(), sctx))
+			Must(rsa.NewHandler().Sign(defaultContext, d.Hex(), sctx))
 
 			buf.Reset()
 			Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "-e", KEYNAME, "other.priv")).To(Succeed())

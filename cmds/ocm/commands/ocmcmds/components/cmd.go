@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/add"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/check"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/hash"
@@ -38,4 +39,5 @@ func AddCommands(ctx clictx.Context, cmd *cobra.Command) {
 	cmd.AddCommand(transfer.NewCommand(ctx, transfer.Verb))
 	cmd.AddCommand(verify.NewCommand(ctx, verify.Verb))
 	cmd.AddCommand(download.NewCommand(ctx, download.Verb))
+	cmd.AddCommand(check.NewCommand(ctx, check.Verb))
 }

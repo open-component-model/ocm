@@ -1,4 +1,4 @@
-## ocm add &mdash; Add Resources Or Sources To A Component Archive
+## ocm add &mdash; Add Elements To A Component Repository Or Component Version
 
 ### Synopsis
 
