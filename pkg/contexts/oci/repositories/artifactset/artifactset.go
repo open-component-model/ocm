@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package artifactset
 
 import (
@@ -60,6 +56,11 @@ func RetrieveDigest(idx *artdesc.Index, ref string) digest.Digest {
 		}
 	}
 	return digest.Digest("")
+}
+
+var SupportedMimeTypes = []string{
+	MediaType(artdesc.MediaTypeImageManifest),
+	MediaType(artdesc.MediaTypeImageIndex),
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -66,7 +67,7 @@ func AttributeDescription() map[string]string {
 	return ociuploadattr.AttributeDescription()
 }
 
-func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
+func (r *RegistrationHandler) GetHandlers(_ cpi.Context) registrations.HandlerInfos {
 	return registrations.NewLeafHandlerInfo("upload an OCI artifact to an OCI registry", `
 The <code>`+UPLOADER_NAME+`</code> uploader is able to transfer OCI artifact-like resources
 into an OCI registry given by the combination of the upload target and the registration config.
@@ -79,7 +80,7 @@ If the config is given, the target is used as repository name prefixed with an
 optional repository prefix given by the configuration.
 
 The following artifact media types are supported:
-`+listformat.FormatList("", artdesc.SupportedMimeTypes...)+`
+`+listformat.FormatList("", artifactset.SupportedMimeTypes...)+`
 It accepts a config with the following fields:
 `+listformat.FormatMapElements("", AttributeDescription()),
 	)

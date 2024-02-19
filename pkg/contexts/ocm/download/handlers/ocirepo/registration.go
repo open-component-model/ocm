@@ -6,6 +6,7 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
@@ -39,13 +40,13 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 	}
 
 	opts := download.NewHandlerOptions(olist...)
-	if opts.MimeType != "" && !slices.Contains(artdesc.SupportedMimeTypes, opts.MimeType) {
+	if opts.MimeType != "" && !slices.Contains(artifactset.SupportedMimeTypes, opts.MimeType) {
 		return true, errors.Wrapf(err, "mime type %s not supported", opts.MimeType)
 	}
 
 	h := New(attr)
 	if opts.MimeType == "" {
-		for _, m := range artdesc.SupportedMimeTypes {
+		for _, m := range artifactset.SupportedMimeTypes {
 			opts.MimeType = m
 			download.For(ctx).Register(h, opts)
 		}
