@@ -5,12 +5,17 @@
 package v2_test
 
 import (
+	"encoding/json"
+	"fmt"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -252,6 +257,41 @@ var _ = Describe("Validation", func() {
 		})
 
 		Context("#Resources", func() {
+			It("should handle srcRefs", func() {
+				comp.Name = "acme.org/test"
+				comp.RepositoryContexts = []*runtime.UnstructuredTypedObject{}
+				comp.ComponentReferences = ComponentReferences{}
+				comp.Sources = Sources{}
+				comp.Resources = []Resource{
+					{
+						ElementMeta: ElementMeta{
+							Name:    "test",
+							Version: "v1",
+						},
+						Type:     "test",
+						Relation: meta.LocalRelation,
+						Access:   runtime.NewEmptyUnstructured("access"),
+						SourceRefs: []SourceRef{
+							{
+								IdentitySelector: map[string]string{
+									"name": "test",
+								},
+								Labels: nil,
+							},
+						},
+					},
+				}
+				v := &DescriptorVersion{}
+				data := Must(json.Marshal(comp))
+				fmt.Printf("%s\n", string(data))
+				r := Must(v.Decode(data, &compdesc.DecodeOptions{Codec: compdesc.DefaultYAMLCodec}))
+				Expect(r).To(DeepEqual(comp))
+
+				old := strings.Replace(string(data), "srcRefs", "srcRef", -1)
+				r = Must(v.Decode([]byte(old), &compdesc.DecodeOptions{Codec: compdesc.DefaultYAMLCodec}))
+				Expect(v.ConvertTo(r)).To(DeepEqual(Must(v.ConvertTo(comp))))
+			})
+
 			It("should forbid if a resource name contains invalid characters", func() {
 				comp.Resources = []Resource{
 					{

@@ -31,8 +31,8 @@ var CDExcludes = signing.MapExcludes{
 			Next: signing.DynamicArrayExcludes{
 				ValueChecker: rules.IgnoreResourcesWithAccessType("localBlob"),
 				Continue: signing.MapExcludes{
-					"access": nil,
-					"srcRef": nil,
+					"access":  nil,
+					"srcRefs": nil,
 					"labels": signing.DynamicArrayExcludes{
 						ValueChecker: rules.IgnoreLabelsWithoutSignature,
 						Continue:     signing.NoExcludes{},
@@ -106,9 +106,16 @@ var _ = Describe("normalization", func() {
 							},
 							Labels: labels,
 						},
-						Type:      "elemtype",
-						Relation:  "local",
-						SourceRef: nil,
+						Type:     "elemtype",
+						Relation: "local",
+						SourceRefs: []compdesc.SourceRef{
+							compdesc.SourceRef{
+								IdentitySelector: map[string]string{
+									"name": "non-existent",
+								},
+								Labels: nil,
+							},
+						},
 					},
 					Access: localblob.New("blob", "ref", mime.MIME_TEXT, nil),
 				},
@@ -130,10 +137,16 @@ var _ = Describe("normalization", func() {
 								},
 							},
 						},
-						Type:      "elemtype",
-						Relation:  "local",
-						SourceRef: nil,
-					},
+						Type:     "elemtype",
+						Relation: "local",
+						SourceRefs: []compdesc.SourceRef{
+							compdesc.SourceRef{
+								IdentitySelector: map[string]string{
+									"name": "non-existent",
+								},
+								Labels: nil,
+							},
+						}},
 					Access: ociartifact.New("blob"),
 				},
 			},
@@ -209,6 +222,13 @@ var _ = Describe("normalization", func() {
         ]
         name: elem1
         relation: local
+        srcRefs: [
+          {
+            identitySelector: {
+              name: non-existent
+            }
+          }
+        ]
         type: elemtype
         version: 1
       }
@@ -233,6 +253,13 @@ var _ = Describe("normalization", func() {
         ]
         name: elem2
         relation: local
+        srcRefs: [
+          {
+            identitySelector: {
+              name: non-existent
+            }
+          }
+        ]
         type: elemtype
         version: 1
       }
@@ -308,6 +335,13 @@ var _ = Describe("normalization", func() {
         ]
         name: elem1
         relation: local
+        srcRefs: [
+          {
+            identitySelector: {
+              name: non-existent
+            }
+          }
+        ]
         type: elemtype
         version: 1
       }
@@ -332,6 +366,13 @@ var _ = Describe("normalization", func() {
         ]
         name: elem2
         relation: local
+        srcRefs: [
+          {
+            identitySelector: {
+              name: non-existent
+            }
+          }
+        ]
         type: elemtype
         version: 1
       }
@@ -411,6 +452,13 @@ var _ = Describe("normalization", func() {
         ]
         name: elem1
         relation: local
+        srcRefs: [
+          {
+            identitySelector: {
+              name: non-existent
+            }
+          }
+        ]
         type: elemtype
         version: 1
       }
@@ -431,6 +479,13 @@ var _ = Describe("normalization", func() {
         ]
         name: elem2
         relation: local
+        srcRefs: [
+          {
+            identitySelector: {
+              name: non-existent
+            }
+          }
+        ]
         type: elemtype
         version: 1
       }
@@ -505,6 +560,13 @@ var _ = Describe("normalization", func() {
         ]
         name: elem2
         relation: local
+        srcRefs: [
+          {
+            identitySelector: {
+              name: non-existent
+            }
+          }
+        ]
         type: elemtype
         version: 1
       }
@@ -747,6 +809,13 @@ resources:
         }
         name: elem1
         relation: local
+        srcRefs: [
+          {
+            identitySelector: {
+              name: non-existent
+            }
+          }
+        ]
         type: elemtype
         version: 1
       }
@@ -764,6 +833,13 @@ resources:
         ]
         name: elem2
         relation: local
+        srcRefs: [
+          {
+            identitySelector: {
+              name: non-existent
+            }
+          }
+        ]
         type: elemtype
         version: 1
       }

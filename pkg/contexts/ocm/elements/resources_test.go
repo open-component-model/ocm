@@ -41,7 +41,7 @@ labels:
     value:
       field: value
     signing: true
-srcRef:
+srcRefs:
   - identitySelector:
       name: image
     labels:
