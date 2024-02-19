@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ocirepo
 
 import (
@@ -17,8 +13,10 @@ import (
 
 type Config = ociuploadattr.Attribute
 
+const UPLOADER_NAME = "ocm/ociArtifacts"
+
 func init() {
-	cpi.RegisterBlobHandlerRegistrationHandler("ocm/ociArtifacts", &RegistrationHandler{})
+	cpi.RegisterBlobHandlerRegistrationHandler(UPLOADER_NAME, &RegistrationHandler{})
 }
 
 type RegistrationHandler struct{}
@@ -64,17 +62,25 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 	return true, nil
 }
 
-func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
-	return registrations.NewLeafHandlerInfo("downloading OCI artifacts", `
-The <code>ociArtifacts</code> downloader is able to download OCI artifacts
-as artifact archive according to the OCI distribution spec.
-The following artifact media types are supported:
-`+listformat.FormatList("", artdesc.ArchiveBlobTypes()...)+`
-By default, it is registered for these mimetypes.
+func AttributeDescription() map[string]string {
+	return ociuploadattr.AttributeDescription()
+}
 
+func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
+	return registrations.NewLeafHandlerInfo("upload an OCI artifact to an OCI registry", `
+The <code>`+UPLOADER_NAME+`</code> uploader is able to transfer OCI artifact-like resources
+into an OCI registry given by the combination of the upload target and the registration config.
+
+If no config is given, the target must be an OCI reference with a potentially
+omitted repository. The repo part is derived from the reference hint provided
+by the resource's access specification.
+
+If the config is given, the target is used as repository name prefixed with an
+optional repository prefix given by the configuration.
+
+The following artifact media types are supported:
+`+listformat.FormatList("", artdesc.SupportedMimeTypes...)+`
 It accepts a config with the following fields:
-`+listformat.FormatMapElements("", ociuploadattr.AttributeDescription())+`
-Alternatively, a single string value can be given representing an OCI repository
-reference.`,
+`+listformat.FormatMapElements("", AttributeDescription()),
 	)
 }
