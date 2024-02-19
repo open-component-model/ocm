@@ -181,7 +181,7 @@ func ValidateResources(fldPath *field.Path, resources Resources, componentVersio
 		localPath := fldPath.Index(i)
 		allErrs = append(allErrs, ValidateResource(localPath, res, true)...)
 
-		if err := ValidateSourceRefs(localPath.Child("sourceRef"), res.SourceRef); err != nil {
+		if err := ValidateSourceRefs(localPath.Child("sourceRef"), res.SourceRefs); err != nil {
 			allErrs = append(allErrs, err...)
 		}
 

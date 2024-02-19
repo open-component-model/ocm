@@ -28,9 +28,9 @@ var CDExcludes = signing.MapExcludes{
 		"resources": signing.DynamicArrayExcludes{
 			ValueMapper: rules.MapResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
-				"access": nil,
-				"srcRef": nil,
-				"labels": rules.LabelExcludes,
+				"access":  nil,
+				"srcRefs": nil,
+				"labels":  rules.LabelExcludes,
 			},
 		},
 		"sources": signing.ArrayExcludes{

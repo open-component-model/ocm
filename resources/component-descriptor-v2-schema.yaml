@@ -233,6 +233,7 @@ $defs:
   srcRef:
     type: 'object'
     description: 'a reference to a (component-local) source'
+    additionalProperties: false
     properties:
       identitySelector:
         $ref: '#/$defs/identityAttribute'
@@ -248,6 +249,7 @@ $defs:
       - 'name'
       - 'componentName'
       - 'version'
+    additionalProperties: false
     properties:
       componentName:
         $ref: '#/$defs/componentName'

@@ -177,6 +177,6 @@ The following label assignments are configured:
 ##### Parents
 
 * [ocm add componentversions](ocm_add_componentversions.md)	 &mdash; add component version(s) to a (new) transport archive
-* [ocm add](ocm_add.md)	 &mdash; Add resources or sources to a component archive
+* [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

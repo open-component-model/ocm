@@ -346,9 +346,9 @@ A resource uses the following additional formal fields:
   the resource description. This is required because there might be different
   digest and resource normalization algorithms.
 
-- **`srcRef`** (optional) *struct*
+- **`srcRefs`** (optional) *[]struct*
 
-  This field is used to describe the sources used to generate the resource.
+  This field describes a list of sources used to generate the resource.
   The selection is done by the following two fields:
 
   - **`identitySelector`** *map[string]string*

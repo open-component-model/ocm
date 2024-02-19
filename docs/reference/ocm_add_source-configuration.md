@@ -809,7 +809,7 @@ $ ocm add source-config sources.yaml --name sources --type filesystem --access '
 
 ##### Parents
 
-* [ocm add](ocm_add.md)	 &mdash; Add resources or sources to a component archive
+* [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 

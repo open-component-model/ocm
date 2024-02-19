@@ -183,6 +183,6 @@ $ ocm add references  path/to/ca  references.yaml VERSION=1.0.0
 
 ##### Parents
 
-* [ocm add](ocm_add.md)	 &mdash; Add resources or sources to a component archive
+* [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

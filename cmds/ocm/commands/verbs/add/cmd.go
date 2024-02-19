@@ -22,7 +22,7 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Add resources or sources to a component archive",
+		Short: "Add elements to a component repository or component version",
 	}, verbs.Add)
 	cmd.AddCommand(resourceconfig.NewCommand(ctx))
 	cmd.AddCommand(sourceconfig.NewCommand(ctx))

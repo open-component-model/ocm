@@ -150,12 +150,16 @@ func convertElementMetaTo(in ElementMeta) compdesc.ElementMeta {
 }
 
 func convertResourceTo(in Resource) compdesc.Resource {
+	srcRefs := ConvertSourcerefsTo(in.SourceRefs)
+	if srcRefs == nil {
+		srcRefs = ConvertSourcerefsTo(in.SourceRef)
+	}
 	return compdesc.Resource{
 		ResourceMeta: compdesc.ResourceMeta{
 			ElementMeta: convertElementMetaTo(in.ElementMeta),
 			Type:        in.Type,
 			Relation:    in.Relation,
-			SourceRef:   ConvertSourcerefsTo(in.SourceRef),
+			SourceRefs:  srcRefs,
 			Digest:      in.Digest.Copy(),
 		},
 		Access: compdesc.GenericAccessSpec(in.Access),
@@ -295,7 +299,7 @@ func convertResourceFrom(in compdesc.Resource) Resource {
 		ElementMeta: convertElementMetaFrom(in.ElementMeta),
 		Type:        in.Type,
 		Relation:    in.Relation,
-		SourceRef:   convertSourceRefsFrom(in.SourceRef),
+		SourceRefs:  convertSourceRefsFrom(in.SourceRefs),
 		Access:      acc,
 		Digest:      in.Digest.Copy(),
 	}
