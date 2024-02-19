@@ -170,6 +170,13 @@ func (in *ObjectMeta) DeepCopy() *ObjectMeta {
 func (in *Resource) DeepCopyInto(out *Resource) {
 	*out = *in
 	in.ElementMeta.DeepCopyInto(&out.ElementMeta)
+	if in.SourceRefs != nil {
+		in, out := &in.SourceRefs, &out.SourceRefs
+		*out = make([]SourceRef, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	if in.SourceRef != nil {
 		in, out := &in.SourceRef, &out.SourceRef
 		*out = make([]SourceRef, len(*in))

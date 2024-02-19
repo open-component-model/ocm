@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -31,13 +32,22 @@ type RepositorySpec struct {
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec.
-func NewRepositorySpec(path string) *RepositorySpec {
+func NewRepositorySpec(path string, propagate ...bool) *RepositorySpec {
+	var p *bool
 	if path == "" {
-		path = "~/.npmrc"
+		d, err := DefaultConfig()
+		if err == nil {
+			path = d
+		}
 	}
+	if len(propagate) > 0 {
+		p = generics.Pointer(utils.OptionalDefaultedBool(true, propagate...))
+	}
+
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
-		NpmrcFile:           path,
+		ObjectVersionedType:      runtime.NewVersionedTypedObject(Type),
+		NpmrcFile:                path,
+		PropgateConsumerIdentity: p,
 	}
 }
 

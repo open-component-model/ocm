@@ -17,6 +17,7 @@ The following *tags* are used by the command line tool:
 
 The following *realms* are used by the command line tool:
   - <code>ocm</code>: general realm used for the ocm go library.
+  - <code>ocm/NPM</code>: NPM registry
   - <code>ocm/accessmethod/ociartifact</code>: access method ociArtifact
   - <code>ocm/compdesc</code>: component descriptor handling
   - <code>ocm/config</code>: configuration management

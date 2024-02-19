@@ -63,7 +63,7 @@ func (o *srcref) ApplyToResourceMeta(m *compdesc.ResourceMeta) error {
 	if err := o.errlist.Result(); err != nil {
 		return err
 	}
-	m.SourceRef = append(m.SourceRef, compdesc.SourceRef{IdentitySelector: o.ref.Copy(), Labels: o.labels.Copy()})
+	m.SourceRefs = append(m.SourceRefs, compdesc.SourceRef{IdentitySelector: o.ref.Copy(), Labels: o.labels.Copy()})
 	return nil
 }
 
