@@ -31,9 +31,9 @@ func readNpmConfigFile(path string) (npmConfig, error) {
 		parts := strings.SplitN(line, ":_authToken=", 2)
 		if len(parts) == 2 {
 			if strings.HasSuffix(parts[0], "/") {
-				cfg["https://"+parts[0][:len(parts[0])-1]] = parts[1]
+				cfg[parts[0][:len(parts[0])-1]] = parts[1]
 			} else {
-				cfg["https://"+parts[0]] = parts[1]
+				cfg[parts[0]] = parts[1]
 			}
 		}
 	}

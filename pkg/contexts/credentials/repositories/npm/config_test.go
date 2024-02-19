@@ -3,6 +3,7 @@ package npm_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
@@ -15,8 +16,8 @@ var _ = Describe("Config deserialization Test Environment", func() {
 		ctx := credentials.New()
 
 		repo := Must(npm.NewRepository(ctx, "testdata/.npmrc"))
-		Expect(Must(repo.LookupCredentials("https://registry.npmjs.org")).Properties()).To(Equal(common.Properties{identity.ATTR_TOKEN: "npm_TOKEN"}))
-		Expect(Must(repo.LookupCredentials("https://npm.registry.acme.com/api/npm")).Properties()).To(Equal(common.Properties{identity.ATTR_TOKEN: "bearer_TOKEN"}))
+		Expect(Must(repo.LookupCredentials("registry.npmjs.org")).Properties()).To(Equal(common.Properties{identity.ATTR_TOKEN: "npm_TOKEN"}))
+		Expect(Must(repo.LookupCredentials("npm.registry.acme.com/api/npm")).Properties()).To(Equal(common.Properties{identity.ATTR_TOKEN: "bearer_TOKEN"}))
 	})
 
 	It("propagates credentials", func() {
@@ -25,7 +26,7 @@ var _ = Describe("Config deserialization Test Environment", func() {
 		spec := npm.NewRepositorySpec("testdata/.npmrc")
 
 		_ = Must(ctx.RepositoryForSpec(spec))
-		id := identity.GetConsumerId("https://registry.npmjs.org", "pkg")
+		id := identity.GetConsumerId("registry.npmjs.org", "pkg")
 
 		creds := Must(credentials.CredentialsForConsumer(ctx, id))
 		Expect(creds).NotTo(BeNil())

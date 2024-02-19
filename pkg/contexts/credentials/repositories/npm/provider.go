@@ -1,10 +1,7 @@
 package npm
 
 import (
-	"net/url"
-
 	npm "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/logging"
 )
@@ -38,19 +35,8 @@ func (p *ConsumerProvider) get(requested cpi.ConsumerIdentity, currentFound cpi.
 	var creds cpi.CredentialsSource
 
 	for key, value := range all {
-		u, e := url.Parse(key)
-		if e != nil {
-			return nil, nil
-		}
+		id := npm.GetConsumerId("https://"+key, "")
 
-		attrs := []string{identity.ID_HOSTNAME, u.Hostname()}
-		if u.Port() != "" {
-			attrs = append(attrs, identity.ID_PORT, u.Port())
-		}
-		if u.Path != "" {
-			attrs = append(attrs, identity.ID_PATHPREFIX, u.Path)
-		}
-		id := cpi.NewConsumerIdentity(npm.CONSUMER_TYPE, attrs...)
 		if m(requested, currentFound, id) {
 			creds = newCredentials(value)
 			currentFound = id
