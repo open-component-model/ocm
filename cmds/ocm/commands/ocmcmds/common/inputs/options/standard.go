@@ -18,7 +18,6 @@ var (
 )
 var (
 	VariantsOption  = flagsets.NewStringArrayOptionType("inputVariants", "(platform) variants for inputs")
-	ExcludeOption   = flagsets.NewStringArrayOptionType("inputExcludes", "excludes (path) for inputs")
 	PlatformsOption = flagsets.NewStringArrayOptionType("inputPlatforms", "input filter for image platforms ([os]/[architecture])")
 )
 
@@ -28,6 +27,7 @@ var (
 )
 var (
 	IncludeOption   = flagsets.NewPathArrayOptionType("inputIncludes", "includes (path) for inputs")
+	ExcludeOption   = flagsets.NewPathArrayOptionType("inputExcludes", "excludes (path) for inputs")
 	LibrariesOption = flagsets.NewPathArrayOptionType("inputLibraries", "library path for inputs")
 )
 
