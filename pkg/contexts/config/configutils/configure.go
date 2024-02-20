@@ -5,13 +5,14 @@ import (
 	"os"
 	"strings"
 
+	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
