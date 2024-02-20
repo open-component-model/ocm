@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package configutils
 
 import (
@@ -9,14 +5,13 @@ import (
 	"os"
 	"strings"
 
-	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
-
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
+	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -27,7 +22,10 @@ func Configure(path string) error {
 func ConfigureContext(ctxp config.ContextProvider, path string) error {
 	ctx := config.FromProvider(ctxp)
 
-	h := os.Getenv("HOME")
+	h, err := os.UserHomeDir()
+	if err != nil {
+		return errors.Wrapf(err, "cannot determine home directory")
+	}
 	if path == "" {
 		if h != "" {
 			cfg := h + "/.ocmconfig"
