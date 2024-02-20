@@ -4,16 +4,24 @@ import (
 	"bufio"
 	"os"
 	"strings"
+
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type npmConfig map[string]string
 
 // readNpmConfigFile reads "~/.npmrc" file line by line, parse it and return the result as a npmConfig.
-func readNpmConfigFile(path string) (npmConfig, error) {
+func readNpmConfigFile(path string) (npmConfig, string, error) {
+	path, err := utils.ResolvePath(path)
+	if err != nil {
+		return nil, path, errors.Wrapf(err, "cannot resolve path %q", path)
+	}
+
 	// Open the file
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, path, err
 	}
 	defer file.Close()
 
@@ -40,8 +48,8 @@ func readNpmConfigFile(path string) (npmConfig, error) {
 
 	// Check for errors
 	if err = scanner.Err(); err != nil {
-		return nil, err
+		return nil, path, err
 	}
 
-	return cfg, nil
+	return cfg, path, nil
 }

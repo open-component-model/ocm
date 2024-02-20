@@ -66,11 +66,7 @@ func (r *Repository) Read(force bool) error {
 	if r.path == "" {
 		return fmt.Errorf("npmrc path not provided")
 	}
-	path, err := utils.ResolvePath(r.path)
-	if err != nil {
-		return errors.Wrapf(err, "cannot resolve path %q", r.path)
-	}
-	cfg, err := readNpmConfigFile(path)
+	cfg, path, err := readNpmConfigFile(r.path)
 	if err != nil {
 		return fmt.Errorf("failed to load npmrc: %w", err)
 	}
