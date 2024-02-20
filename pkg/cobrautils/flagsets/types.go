@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package flagsets
 
 import (
@@ -146,6 +142,82 @@ func (o *StringArrayOption) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *StringArrayOption) Value() interface{} {
+	return o.value
+}
+
+// PathOptionType //////////////////////////////////////////////////////////////////////////////
+
+type Path string
+
+type PathOptionType struct {
+	TypeOptionBase
+}
+
+func NewPathOptionType(name string, description string) ConfigOptionType {
+	return &PathOptionType{
+		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *PathOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *PathOptionType) Create() Option {
+	return &PathOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
+type PathOption struct {
+	OptionBase
+	value string // TODO replace with Path?
+}
+
+var _ Option = (*PathOption)(nil)
+
+func (o *PathOption) AddFlags(fs *pflag.FlagSet) {
+	o.TweakFlag(flag.StringVarPF(fs, &o.value, o.otyp.GetName(), "", "", o.otyp.GetDescription()))
+}
+
+func (o *PathOption) Value() interface{} {
+	return o.value
+}
+
+// PathArrayOptionType //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+type PathArrayOptionType struct {
+	TypeOptionBase
+}
+
+func NewPathArrayOptionType(name string, description string) ConfigOptionType {
+	return &PathArrayOptionType{
+		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *PathArrayOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *PathArrayOptionType) Create() Option {
+	return &PathArrayOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
+type PathArrayOption struct {
+	OptionBase
+	value []string // TODO replace with Path?
+}
+
+var _ Option = (*PathArrayOption)(nil)
+
+func (o *PathArrayOption) AddFlags(fs *pflag.FlagSet) {
+	o.TweakFlag(flag.StringArrayVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+}
+
+func (o *PathArrayOption) Value() interface{} {
 	return o.value
 }
 
