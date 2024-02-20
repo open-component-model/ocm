@@ -25,6 +25,7 @@ on:
         - debug
 jobs:
   mend-scan:
+    if: github.repository == 'open-component-model/ocm'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
