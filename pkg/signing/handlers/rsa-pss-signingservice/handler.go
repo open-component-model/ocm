@@ -6,13 +6,13 @@ package rsa_pss_signingservice
 
 import (
 	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa-pss"
 	rsa_signingservice "github.com/open-component-model/ocm/pkg/signing/handlers/rsa-signingservice"
 )
 
 // Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
 const (
-	Algorithm = rsa.Algorithm
+	Algorithm = rsa_pss.Algorithm
 	Name      = "rsapss-signingservice"
 )
 
