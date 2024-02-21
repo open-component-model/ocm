@@ -174,7 +174,7 @@ jobs:
         fi
         
     - name: Check if PR exists
-      uses: 8BitJonny/gh-get-current-pr@2.2.0
+      uses: 8BitJonny/gh-get-current-pr@3.0.0
       id: pr_exists
       with:
         filterOutClosed: true
@@ -182,7 +182,7 @@ jobs:
         
     - name: Comment Mend Status on PR
       if: ${{ github.event_name != 'schedule' && steps.pr_exists.outputs.pr_found == 'true' }}
-      uses: thollander/actions-comment-pull-request@v2.4.3
+      uses: thollander/actions-comment-pull-request@v2.5.0
       with:
         message: |
           ## Mend Scan Summary: :${{ steps.report.outputs.status }}:
