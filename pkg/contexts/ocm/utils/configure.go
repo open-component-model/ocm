@@ -24,10 +24,7 @@ func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context
 	if ctx == nil {
 		ctx = ocm.DefaultContext()
 	}
-	h, err := os.UserHomeDir()
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot determine home directory")
-	}
+	h, _ := os.UserHomeDir()
 	if path == "" {
 		if h != "" {
 			cfg := h + "/" + DEFAULT_OCM_CONFIG
