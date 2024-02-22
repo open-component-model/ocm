@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package flag
 
 import (
@@ -29,5 +25,17 @@ func BoolVarPF(f *pflag.FlagSet, p *bool, name, shorthand string, value bool, us
 // IntVarPF is like IntVarP, but returns the created flag.
 func IntVarPF(f *pflag.FlagSet, p *int, name, shorthand string, value int, usage string) *pflag.Flag {
 	f.IntVarP(p, name, shorthand, value, usage)
+	return f.Lookup(name)
+}
+
+// PathVarPF is like PathVarP, but returns the created flag.
+func PathVarPF(f *pflag.FlagSet, p *string, name, shorthand string, value string, usage string) *pflag.Flag {
+	PathVarP(f, p, name, shorthand, value, usage)
+	return f.Lookup(name)
+}
+
+// PathArrayVarPF is like PathArrayVarP, but returns the created flag.
+func PathArrayVarPF(f *pflag.FlagSet, p *[]string, name, shorthand string, value []string, usage string) *pflag.Flag {
+	PathArrayVarP(f, p, name, shorthand, value, usage)
 	return f.Lookup(name)
 }

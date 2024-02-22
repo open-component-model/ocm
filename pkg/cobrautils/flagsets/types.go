@@ -147,8 +147,6 @@ func (o *StringArrayOption) Value() interface{} {
 
 // PathOptionType //////////////////////////////////////////////////////////////////////////////
 
-type Path string
-
 type PathOptionType struct {
 	TypeOptionBase
 }
@@ -171,13 +169,13 @@ func (s *PathOptionType) Create() Option {
 
 type PathOption struct {
 	OptionBase
-	value string // TODO replace with Path?
+	value string
 }
 
 var _ Option = (*PathOption)(nil)
 
 func (o *PathOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.StringVarPF(fs, &o.value, o.otyp.GetName(), "", "", o.otyp.GetDescription()))
+	o.TweakFlag(flag.PathVarPF(fs, &o.value, o.otyp.GetName(), "", "", o.otyp.GetDescription()))
 }
 
 func (o *PathOption) Value() interface{} {
@@ -208,13 +206,13 @@ func (s *PathArrayOptionType) Create() Option {
 
 type PathArrayOption struct {
 	OptionBase
-	value []string // TODO replace with Path?
+	value []string
 }
 
 var _ Option = (*PathArrayOption)(nil)
 
 func (o *PathArrayOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.StringArrayVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.PathArrayVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
 }
 
 func (o *PathArrayOption) Value() interface{} {
