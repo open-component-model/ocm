@@ -9,11 +9,14 @@ import (
 	"net/http"
 	"net/url"
 
+	npmCredentials "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
+
+const BLOB_HANDLER_NAME = "ocm/npmPackage"
 
 type artifactHandler struct {
 	spec *Config
@@ -49,7 +52,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	}
 
 	// read package.json from tarball to get name, version, etc.
-	log := logging.Context().Logger(REALM)
+	log := logging.Context().Logger(npmCredentials.REALM)
 	log.Debug("reading package.json from tarball")
 	var pkg *Package
 	pkg, err = prepare(data)
@@ -61,19 +64,33 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	log = log.WithValues("package", pkg.Name, "version", pkg.Version)
 	log.Debug("identified")
 
-	// use user+pass+mail from credentials to login and retrieve bearer token
-	cred := GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
-	username := cred[ATTR_USERNAME]
-	password := cred[ATTR_PASSWORD]
-	email := cred[ATTR_EMAIL]
-	if username == "" || password == "" || email == "" {
-		return nil, fmt.Errorf("username, password or email missing")
+	// get credentials and TODO cache it
+	cred := npmCredentials.GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
+	if cred == nil {
+		return nil, fmt.Errorf("No credentials found for %s. Couldn't upload '%s'.", b.spec.Url, pkg.Name)
 	}
-	log = log.WithValues("user", username, "repo", b.spec.Url)
-	log.Debug("login")
-	token, err := login(b.spec.Url, username, password, email)
-	if err != nil {
-		return nil, err
+	log.Debug("found credentials")
+
+	// check if token exists, if not login and retrieve token
+	token := cred[npmCredentials.ATTR_TOKEN]
+	if token == "" {
+		// use user+pass+mail from credentials to login and retrieve bearer token
+		username := cred[npmCredentials.ATTR_USERNAME]
+		password := cred[npmCredentials.ATTR_PASSWORD]
+		email := cred[npmCredentials.ATTR_EMAIL]
+		if username == "" || password == "" || email == "" {
+			return nil, fmt.Errorf("No credentials for %s are invalid. Username, password or email missing! Couldn't upload '%s'.", b.spec.Url, pkg.Name)
+		}
+		log = log.WithValues("user", username, "repo", b.spec.Url)
+		log.Debug("login")
+
+		// TODO: check different kinds of .npmrc content
+		token, err = login(b.spec.Url, username, password, email)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		log.Debug("token found, skipping login")
 	}
 
 	// check if package exists

@@ -170,6 +170,19 @@ The following credential consumer types are used/supported:
       - <code>certificateAuthority</code>: the certificate authority certificate used to verify certificates
 
 
+  - <code>Registry.npmjs.com</code>: NPM repository
+
+    It matches the <code>Registry.npmjs.com</code> consumer type and additionally acts like
+    the <code>hostpath</code> type.
+
+    Credential consumers of the consumer type Registry.npmjs.com evaluate the following credential properties:
+
+      - <code>username</code>: the basic auth user name
+      - <code>password</code>: the basic auth password
+      - <code>email</code>: NPM registry, require an email address
+      - <code>token</code>: the token attribute. May exist after login at any npm registry. Check your .npmrc file!
+
+
   - <code>S3</code>: S3 credential matcher
 
     This matcher is a hostpath matcher.
@@ -304,6 +317,21 @@ behaviours are described in the following list:
 
     If the secrets list is empty, all secret entries found in the given path
     is read.
+
+
+- Credential provider <code>NPMConfig</code>
+
+  This repository type can be used to access credentials stored in a file
+  following the NPM npmrc format (~/.npmrc). It take into account the
+  credentials helper section, also. If enabled, the described
+  credentials will be automatically assigned to appropriate consumer ids.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The repository specification supports the following fields:
+      - <code>npmrcFile</code>: *string*: the file path to a NPM npmrc file
+      - <code>propagateConsumerIdentity</code>: *bool*(optional): enable consumer id propagation
 
 
 

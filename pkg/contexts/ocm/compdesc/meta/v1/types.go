@@ -149,10 +149,11 @@ func (o *ObjectMeta) SetLabels(labels []Label) {
 // GetName returns the name of the object.
 func (o *ObjectMeta) Copy() *ObjectMeta {
 	return &ObjectMeta{
-		Name:     o.Name,
-		Version:  o.Version,
-		Labels:   o.Labels.Copy(),
-		Provider: *o.Provider.Copy(),
+		Name:         o.Name,
+		Version:      o.Version,
+		Labels:       o.Labels.Copy(),
+		Provider:     *o.Provider.Copy(),
+		CreationTime: o.CreationTime.DeepCopy(),
 	}
 }
 
