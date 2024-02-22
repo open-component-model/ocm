@@ -23,10 +23,7 @@ func Configure(path string) error {
 func ConfigureContext(ctxp config.ContextProvider, path string) error {
 	ctx := config.FromProvider(ctxp)
 
-	h, err := os.UserHomeDir()
-	if err != nil {
-		return errors.Wrapf(err, "cannot determine home directory")
-	}
+	h, _ := os.UserHomeDir()
 	if path == "" {
 		if h != "" {
 			cfg := h + "/.ocmconfig"
