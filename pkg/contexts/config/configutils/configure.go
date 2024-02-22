@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package configutils
 
 import (
@@ -27,7 +23,7 @@ func Configure(path string) error {
 func ConfigureContext(ctxp config.ContextProvider, path string) error {
 	ctx := config.FromProvider(ctxp)
 
-	h := os.Getenv("HOME")
+	h, _ := os.UserHomeDir()
 	if path == "" {
 		if h != "" {
 			cfg := h + "/.ocmconfig"

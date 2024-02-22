@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package utils
 
 import (
@@ -19,8 +15,8 @@ import (
 // ResolvePath handles the ~ notation for the home directory.
 func ResolvePath(path string) (string, error) {
 	if strings.HasPrefix(path, "~"+string(os.PathSeparator)) {
-		home := os.Getenv("HOME")
-		if home == "" {
+		home, err := os.UserHomeDir()
+		if home == "" || err != nil {
 			return path, fmt.Errorf("HOME not set")
 		}
 		path = home + path[1:]

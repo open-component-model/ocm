@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package utils
 
 import (
@@ -28,7 +24,7 @@ func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context
 	if ctx == nil {
 		ctx = ocm.DefaultContext()
 	}
-	h := os.Getenv("HOME")
+	h, _ := os.UserHomeDir()
 	if path == "" {
 		if h != "" {
 			cfg := h + "/" + DEFAULT_OCM_CONFIG
