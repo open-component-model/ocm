@@ -9,7 +9,9 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -27,19 +29,19 @@ type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	DockerConfigFile            string          `json:"dockerConfigFile,omitempty"`
 	DockerConfig                json.RawMessage `json:"dockerConfig,omitempty"`
-	PropgateConsumerIdentity    bool            `json:"propagateConsumerIdentity,omitempty"`
+	PropgateConsumerIdentity    *bool           `json:"propagateConsumerIdentity,omitempty"`
 }
 
 func (s RepositorySpec) WithConsumerPropagation(propagate bool) *RepositorySpec {
-	s.PropgateConsumerIdentity = propagate
+	s.PropgateConsumerIdentity = &propagate
 	return &s
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec.
 func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
-	p := false
-	for _, e := range prop {
-		p = p || e
+	var p *bool
+	if len(prop) > 0 {
+		p = generics.Pointer(utils.Optional(prop...))
 	}
 	if path == "" {
 		path = "~/.docker/config.json"
@@ -52,9 +54,9 @@ func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 }
 
 func NewRepositorySpecForConfig(data []byte, prop ...bool) *RepositorySpec {
-	p := false
-	for _, e := range prop {
-		p = p || e
+	var p *bool
+	if len(prop) > 0 {
+		p = generics.Pointer(utils.Optional(prop...))
 	}
 	return &RepositorySpec{
 		ObjectVersionedType:      runtime.NewVersionedTypedObject(Type),
@@ -73,5 +75,5 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to Repositories", r)
 	}
-	return repos.GetRepository(ctx, a.DockerConfigFile, a.DockerConfig, a.PropgateConsumerIdentity)
+	return repos.GetRepository(ctx, a.DockerConfigFile, a.DockerConfig, utils.AsBool(a.PropgateConsumerIdentity, true))
 }

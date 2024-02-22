@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package plugindirattr
 
 import (
@@ -30,7 +26,7 @@ func init() {
 }
 
 func DefaultDir(fs vfs.FileSystem) string {
-	home := os.Getenv("HOME")
+	home, _ := os.UserHomeDir()
 	if home != "" {
 		dir := filepath.Join(home, DEFAULT_PLUGIN_DIR)
 		if ok, err := vfs.DirExists(fs, dir); ok && err == nil {
