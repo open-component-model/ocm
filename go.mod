@@ -40,7 +40,7 @@ require (
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
 	github.com/mandelsoft/logging v0.0.0-20230905123808-7042ee3aae45
 	github.com/mandelsoft/spiff v1.7.0-beta-5
-	github.com/mandelsoft/vfs v0.4.3-0.20240223095430-def3828dd181
+	github.com/mandelsoft/vfs v0.4.3
 	github.com/marstr/guid v1.1.0
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mittwald/go-helm-client v0.12.3
