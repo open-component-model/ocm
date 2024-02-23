@@ -106,3 +106,9 @@ func PathArrayP(f *pflag.FlagSet, name, shorthand string, value []string, usage 
 	PathArrayVarP(f, &p, name, shorthand, value, usage)
 	return &p
 }
+
+// PathArrayVarPF is like PathArrayVarP, but returns the created flag.
+func PathArrayVarPF(f *pflag.FlagSet, p *[]string, name, shorthand string, value []string, usage string) *pflag.Flag {
+	PathArrayVarP(f, p, name, shorthand, value, usage)
+	return f.Lookup(name)
+}

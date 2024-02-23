@@ -27,15 +27,3 @@ func IntVarPF(f *pflag.FlagSet, p *int, name, shorthand string, value int, usage
 	f.IntVarP(p, name, shorthand, value, usage)
 	return f.Lookup(name)
 }
-
-// PathVarPF is like PathVarP, but returns the created flag.
-func PathVarPF(f *pflag.FlagSet, p *string, name, shorthand string, value string, usage string) *pflag.Flag {
-	PathVarP(f, p, name, shorthand, value, usage)
-	return f.Lookup(name)
-}
-
-// PathArrayVarPF is like PathArrayVarP, but returns the created flag.
-func PathArrayVarPF(f *pflag.FlagSet, p *[]string, name, shorthand string, value []string, usage string) *pflag.Flag {
-	PathArrayVarP(f, p, name, shorthand, value, usage)
-	return f.Lookup(name)
-}

@@ -56,3 +56,9 @@ func PathP(f *pflag.FlagSet, name, shorthand string, value string, usage string)
 	PathVarP(f, p, name, shorthand, value, usage)
 	return p
 }
+
+// PathVarPF is like PathVarP, but returns the created flag.
+func PathVarPF(f *pflag.FlagSet, p *string, name, shorthand string, value string, usage string) *pflag.Flag {
+	PathVarP(f, p, name, shorthand, value, usage)
+	return f.Lookup(name)
+}
