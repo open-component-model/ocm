@@ -49,9 +49,7 @@ func (s *pathArrayValue) Replace(val []string) error {
 
 func (s *pathArrayValue) GetSlice() []string {
 	out := make([]string, len(*s.value))
-	for i, d := range *s.value {
-		out[i] = d
-	}
+	copy(out, *s.value)
 	return out
 }
 
@@ -73,7 +71,7 @@ func pathArrayConv(sval []string) []string {
 	return sval
 }
 
-// pathStringListConv converts a string containing multiple filepaths seperated by filepath.ListSeparator into a list
+// pathStringListConv converts a string containing multiple filepaths separated by filepath.ListSeparator into a list
 // of filepaths.
 func pathStringListConv(sval string) []string {
 	values := filepath.SplitList(sval)
