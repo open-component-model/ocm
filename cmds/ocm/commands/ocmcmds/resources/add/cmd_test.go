@@ -264,6 +264,22 @@ var _ = Describe("Add resources", func() {
 		Expect(acc.(*ociartifact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
 	})
 
+	It("re-adds external image", func() {
+		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(Succeed())
+		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(Succeed())
+
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(len(cd.Resources)).To(Equal(1))
+	})
+
+	It("rejects duplicate hinte", func() {
+		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm.yaml")).To(Succeed())
+		ExpectError(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(MatchError("cannot add resource \"chart2\"(/testdata/helm2.yaml[1][1]): reference name (hint) \"test.de/x/mandelsoft/testchart:0.1.0\" with base media type application/vnd.oci.image.manifest.v1 already used for resource chart:v1"))
+	})
+
 	Context("resource by options", func() {
 		It("adds simple text blob", func() {
 			meta := `
