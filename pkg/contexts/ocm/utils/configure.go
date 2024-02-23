@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/defaultconfigregistry"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -19,10 +20,17 @@ const DEFAULT_OCM_CONFIG = ".ocmconfig"
 
 const DEFAULT_OCM_CONFIG_DIR = ".ocm"
 
-func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context, error) {
+func Configure(ctx config.ContextProvider, path string, fss ...vfs.FileSystem) (ocm.Context, error) {
+	var ocmctx ocm.Context
+
 	fs := utils.FileSystem(fss...)
 	if ctx == nil {
-		ctx = ocm.DefaultContext()
+		ocmctx = ocm.DefaultContext()
+		ctx = ocmctx
+	} else {
+		if c, ok := ctx.(ocm.Context); ok {
+			ocmctx = c
+		}
 	}
 	h, _ := os.UserHomeDir()
 	if path == "" {
@@ -66,10 +74,10 @@ func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context
 			}
 		}
 	}
-	return ctx, nil
+	return ocmctx, nil
 }
 
-func ConfigureByData(ctx ocm.Context, data []byte, info string) error {
+func ConfigureByData(ctx config.ContextProvider, data []byte, info string) error {
 	var err error
 
 	sctx := spiffing.New().WithFeatures(features.INTERPOLATION, features.CONTROL)

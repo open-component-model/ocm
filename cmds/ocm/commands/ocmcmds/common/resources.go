@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
@@ -44,15 +45,15 @@ type ResourceSpecHandler interface {
 	Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error
 }
 
-func CheckHint(v ocm.ComponentVersionAccess, acc compdesc.AccessSpec) error {
-	err := checkHint(v, "source", compdesc.SourceArtifacts, acc)
+func CheckHint(v ocm.ComponentVersionAccess, elem addhdlrs.Element, acc compdesc.AccessSpec) error {
+	err := checkHint(v, "source", elem, compdesc.SourceArtifacts, acc)
 	if err != nil {
 		return err
 	}
-	return checkHint(v, "resource", compdesc.ResourceArtifacts, acc)
+	return checkHint(v, "resource", elem, compdesc.ResourceArtifacts, acc)
 }
 
-func checkHint(v ocm.ComponentVersionAccess, typ string, artacc compdesc.ArtifactAccess, acc compdesc.AccessSpec) error {
+func checkHint(v ocm.ComponentVersionAccess, typ string, elem addhdlrs.Element, artacc compdesc.ArtifactAccess, acc compdesc.AccessSpec) error {
 	spec, err := v.GetContext().AccessSpecForSpec(acc)
 	if err != nil {
 		return err
@@ -64,11 +65,18 @@ func checkHint(v ocm.ComponentVersionAccess, typ string, artacc compdesc.Artifac
 	if local.ReferenceName == "" {
 		return nil
 	}
+	elemid := elem.Spec().GetRawIdentity()
+	if elemid[v1.SystemIdentityVersion] == ComponentVersionTag {
+		elemid[v1.SystemIdentityVersion] = v.GetVersion()
+	}
 	accessor := artacc(v.GetDescriptor())
 	for i := 0; i < accessor.Len(); i++ {
 		a := accessor.GetArtifact(i)
 		other, err := v.GetContext().AccessSpecForSpec(a.GetAccess())
 		if err != nil {
+			continue
+		}
+		if elemid.Equals(a.GetMeta().GetRawIdentity()) {
 			continue
 		}
 		olocal, ok := other.(*localblob.AccessSpec)
@@ -486,14 +494,14 @@ func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems [
 				acc, err = cv.AddBlob(blob, elem.Type(), hint, nil)
 				blob.Close()
 				if err == nil {
-					err = CheckHint(cv, acc)
+					err = CheckHint(cv, elem, acc)
 					if err == nil {
 						err = h.Set(cv, elem, acc)
 					}
 				}
 			} else {
 				acc := elem.Input().Access
-				err = CheckHint(cv, acc)
+				err = CheckHint(cv, elem, acc)
 				if err == nil {
 					err = h.Set(cv, elem, acc)
 				}
