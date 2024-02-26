@@ -13,7 +13,6 @@ import (
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/defaultconfigregistry"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -73,6 +72,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/defaultconfigregistry"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/signing"

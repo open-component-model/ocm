@@ -18,3 +18,4 @@ bin/
 *.go.grc.bk
 go.mod.bak
 dist/
+.cache_ggshield

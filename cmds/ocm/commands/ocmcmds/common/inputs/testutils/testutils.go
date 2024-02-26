@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type NameProvider interface {
@@ -52,5 +53,5 @@ func (t *InputTest) Check(expected interface{}) {
 	ExpectWithOffset(1, err).To(Succeed())
 	spec, err := t.Type.Decode(data, runtime.DefaultJSONEncoding)
 	ExpectWithOffset(1, err).To(Succeed())
-	ExpectWithOffset(1, spec).To(Equal(expected))
+	ExpectWithOffset(1, spec).To(testutils.DeepEqual(expected))
 }

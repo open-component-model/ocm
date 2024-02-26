@@ -5,9 +5,9 @@
 package sign
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/hash/sign"
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/hash/sign"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"

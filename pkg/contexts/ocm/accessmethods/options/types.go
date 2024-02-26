@@ -99,3 +99,24 @@ func NewStringMapOptionType(name, desc string) OptionType {
 		valueType: TYPE_STRING2STRING,
 	}
 }
+
+func NewStringSliceMapOptionType(name, desc string) OptionType {
+	return &option{
+		base:      flagsets.NewStringSliceMapOptionType(name, desc),
+		valueType: TYPE_STRING2STRINGSLICE,
+	}
+}
+
+func NewStringSliceMapColonOptionType(name, desc string) OptionType {
+	return &option{
+		base:      flagsets.NewStringSliceMapColonOptionType(name, desc),
+		valueType: TYPE_STRINGCOLONSTRINGSLICE,
+	}
+}
+
+func NewBytesOptionType(name, desc string) OptionType {
+	return &option{
+		base:      flagsets.NewBytesOptionType(name, desc),
+		valueType: TYPE_BYTES,
+	}
+}

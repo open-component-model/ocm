@@ -46,6 +46,17 @@ var BucketOption = RegisterOption(NewStringOptionType("bucket", "bucket name"))
 // VersionOption.
 var VersionOption = RegisterOption(NewStringOptionType("accessVersion", "version for access specification"))
 
+// URLOption.
+var URLOption = RegisterOption(NewStringOptionType("url", "artifact or server url"))
+
+var HTTPHeaderOption = RegisterOption(NewStringSliceMapColonOptionType("header", "http headers"))
+
+var HTTPVerbOption = RegisterOption(NewStringOptionType("verb", "http request method"))
+
+var HTTPBodyOption = RegisterOption(NewStringOptionType("body", "body of a http request"))
+
+var HTTPRedirectOption = RegisterOption(NewBoolOptionType("noredirect", "http redirect behavior"))
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // CommentOption.

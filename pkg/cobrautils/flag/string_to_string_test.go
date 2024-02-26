@@ -2,6 +2,8 @@
 // Use of ths2s source code s2s governed by a BSD-style
 // license that can be found in the github.com/spf13/pflag LICENSE file.
 
+// Modifications Copyright  2024 SAP SE or an SAP affiliate company.
+
 package flag_test
 
 import (

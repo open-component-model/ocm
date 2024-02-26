@@ -17,7 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
-// CreateCertificate cretes a pem encoded certificate.
+// CreateCertificate creates a pem encoded certificate.
 func CreateCertificate(subject pkix.Name, validFrom *time.Time, validity time.Duration,
 	pub interface{}, ca *x509.Certificate, priv interface{}, isCA bool, names ...string,
 ) ([]byte, error) {

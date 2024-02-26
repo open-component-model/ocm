@@ -109,7 +109,7 @@ var _ = Describe("normalization", func() {
 						Type:     "elemtype",
 						Relation: "local",
 						SourceRefs: []compdesc.SourceRef{
-							compdesc.SourceRef{
+							{
 								IdentitySelector: map[string]string{
 									"name": "non-existent",
 								},
@@ -140,7 +140,7 @@ var _ = Describe("normalization", func() {
 						Type:     "elemtype",
 						Relation: "local",
 						SourceRefs: []compdesc.SourceRef{
-							compdesc.SourceRef{
+							{
 								IdentitySelector: map[string]string{
 									"name": "non-existent",
 								},
