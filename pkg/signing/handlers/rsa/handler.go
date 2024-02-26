@@ -5,10 +5,12 @@
 package rsa
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/hex"
 	"fmt"
+	"io"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -26,7 +28,7 @@ const MediaType = "application/vnd.ocm.signature.rsa"
 const MediaTypePEM = signutils.MediaTypePEM
 
 func init() {
-	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{})
+	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, NewHandler())
 }
 
 type (
@@ -34,17 +36,39 @@ type (
 	PublicKey  = rsa.PublicKey
 )
 
-// Handler is a signatures.Signer compatible struct to sign with RSASSA-PKCS1-V1_5.
-// and a signatures.Verifier compatible struct to verify RSASSA-PKCS1-V1_5 signatures.
-type Handler struct{}
-
-var _ Handler = Handler{}
-
-func (h Handler) Algorithm() string {
-	return Algorithm
+type Method struct {
+	Algorithm string
+	MediaType string
+	Sign      func(random io.Reader, priv *PrivateKey, hash crypto.Hash, hashed []byte) ([]byte, error)
+	Verify    func(pub *PublicKey, hash crypto.Hash, hashed []byte, sig []byte) error
 }
 
-func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (signature *signing.Signature, err error) {
+// Handler is a signatures.Signer compatible struct to sign with RSASSA-PKCS1-V1_5.
+// and a signatures.Verifier compatible struct to verify RSASSA-PKCS1-V1_5 signatures.
+type Handler struct {
+	method *Method
+}
+
+func NewHandler() signing.SignatureHandler {
+	return NewHandlerFor(PKCS1v15)
+}
+
+func NewHandlerFor(m *Method) signing.SignatureHandler {
+	return &Handler{method: m}
+}
+
+var PKCS1v15 = &Method{
+	Algorithm: Algorithm,
+	MediaType: MediaType,
+	Sign:      rsa.SignPKCS1v15,
+	Verify:    rsa.VerifyPKCS1v15,
+}
+
+func (h *Handler) Algorithm() string {
+	return h.method.Algorithm
+}
+
+func (h *Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (signature *signing.Signature, err error) {
 	privateKey, err := GetPrivateKey(sctx.GetPrivateKey())
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid rsa private key")
@@ -53,12 +77,12 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	if err != nil {
 		return nil, fmt.Errorf("failed decoding hash to bytes")
 	}
-	sig, err := rsa.SignPKCS1v15(rand.Reader, privateKey, sctx.GetHash(), decodedHash)
+	sig, err := h.method.Sign(rand.Reader, privateKey, sctx.GetHash(), decodedHash)
 	if err != nil {
 		return nil, fmt.Errorf("failed signing hash, %w", err)
 	}
 
-	media := MediaType
+	media := h.method.MediaType
 	value := hex.EncodeToString(sig)
 
 	var iss string
@@ -98,7 +122,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 }
 
 // Verify checks the signature, returns an error on verification failure.
-func (h Handler) Verify(digest string, signature *signing.Signature, sctx signing.SigningContext) (err error) {
+func (h *Handler) Verify(digest string, signature *signing.Signature, sctx signing.SigningContext) (err error) {
 	var signatureBytes []byte
 
 	publicKey, name, err := GetPublicKey(sctx.GetPublicKey())
@@ -141,7 +165,7 @@ func (h Handler) Verify(digest string, signature *signing.Signature, sctx signin
 			}
 		}
 	}
-	if err := rsa.VerifyPKCS1v15(publicKey, sctx.GetHash(), decodedHash, signatureBytes); err != nil {
+	if err := h.method.Verify(publicKey, sctx.GetHash(), decodedHash, signatureBytes); err != nil {
 		return fmt.Errorf("signature verification failed, %w", err)
 	}
 

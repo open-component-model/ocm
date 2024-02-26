@@ -17,7 +17,7 @@ routingslips, routingslip, rs
 ```
       --all-columns               show all table columns
   -c, --constraints constraints   version constraint
-      --fail-on-error             fail on label validation error
+      --fail-on-error             fail on validation error
   -h, --help                      help for routingslips
       --latest                    restrict component versions to latest
       --lookup stringArray        repository name or spec for closure lookup fallback

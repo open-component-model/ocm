@@ -11,7 +11,7 @@ ocm [<options>] <sub command> ...
 ```
   -X, --attribute stringArray     attribute setting
       --ca-cert stringArray       additional root certificate authorities
-      --config string             configuration file
+      --config stringArray        configuration file
       --config-set strings        apply configuration set
   -C, --cred stringArray          credential setting
   -h, --help                      help for ocm
@@ -43,6 +43,21 @@ It can be used in two ways:
 
 The command accepts some top level options, they can only be given before the sub commands.
 
+A configuration according to [ocm configfile](ocm_configfile.md) is read from a <code>.ocmconfig</code> file
+located in the <code>HOME</code> directory. With the option <code>--config</code> other
+file locations can be specified. If nothing is specified and no file is found at the default
+location a default configuration is composed according to known type specific
+configuration files.
+
+The following configuration sources are used:
+  - The docker configuration file at <code>~/.docker/config.json</code> is
+    read to feed in the configured credentials for OCI registries.
+
+  - The npm configuration file at <code>~/.npmrc</code> is
+    read to feed in the configured credentials for NPM registries.
+
+
+
 With the option <code>--cred</code> it is possible to specify arbitrary credentials
 for various environments on the command line. Nevertheless it is always preferrable
 to use the cli config file.
@@ -68,7 +83,7 @@ default credential, always used if no dedicated match is found.
 For example:
 
 <center>
-    <pre>--cred :type=ociRegistry --cred :hostname=ghcr.io --cred username=mandelsoft --cred password=xyz</pre>
+    <pre>--cred :type=OCIRegistry --cred :hostname=ghcr.io --cred username=mandelsoft --cred password=xyz</pre>
 </center>
 
 With the option <code>-X</code> it is possible to pass global settings of the
@@ -225,6 +240,28 @@ The value can be a simple type or a JSON/YAML string for complex values
 
   Directory to look for OCM plugin executables.
 
+- <code>github.com/mandelsoft/ocm/rootcerts</code>: *JSON*
+
+  General root certificate settings given as JSON document with the following
+  format:
+
+  <pre>
+  {
+    "rootCertificates"": [
+       {
+         "data": ""&lt;base64>"
+       },
+       {
+         "path": ""&lt;file path>"
+       }
+    ],
+  </pre>
+
+  One of following data fields are possible:
+  - <code>data</code>:       base64 encoded binary data
+  - <code>stringdata</code>: plain text data
+  - <code>path</code>:       a file path to read the data from
+
 - <code>github.com/mandelsoft/ocm/signing</code>: *JSON*
 
   Public and private Key settings given as JSON document with the following
@@ -318,8 +355,9 @@ by a certificate delivered with the signature.
 
 ##### Sub Commands
 
-* [ocm <b>add</b>](ocm_add.md)	 &mdash; Add resources or sources to a component archive
+* [ocm <b>add</b>](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 &mdash; bootstrap components
+* [ocm <b>check</b>](ocm_check.md)	 &mdash; check components in OCM repository
 * [ocm <b>clean</b>](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
 * [ocm <b>controller</b>](ocm_controller.md)	 &mdash; Commands acting on the ocm-controller
 * [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive

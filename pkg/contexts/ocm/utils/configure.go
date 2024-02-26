@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package utils
 
 import (
@@ -9,17 +5,13 @@ import (
 	"os"
 	"strings"
 
-	dockercli "github.com/docker/cli/cli/config"
-	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
-	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/defaultconfigregistry"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -28,12 +20,19 @@ const DEFAULT_OCM_CONFIG = ".ocmconfig"
 
 const DEFAULT_OCM_CONFIG_DIR = ".ocm"
 
-func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context, error) {
+func Configure(ctx config.ContextProvider, path string, fss ...vfs.FileSystem) (ocm.Context, error) {
+	var ocmctx ocm.Context
+
 	fs := utils.FileSystem(fss...)
 	if ctx == nil {
-		ctx = ocm.DefaultContext()
+		ocmctx = ocm.DefaultContext()
+		ctx = ocmctx
+	} else {
+		if c, ok := ctx.(ocm.Context); ok {
+			ocmctx = c
+		}
 	}
-	h := os.Getenv("HOME")
+	h, _ := os.UserHomeDir()
 	if path == "" {
 		if h != "" {
 			cfg := h + "/" + DEFAULT_OCM_CONFIG
@@ -68,21 +67,17 @@ func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context
 			return nil, err
 		}
 	} else {
-		// use docker config as default config for ocm cli
-		d := filepath.Join(dockercli.Dir(), dockercli.ConfigFileName)
-		if ok, err := vfs.FileExists(osfs.New(), d); ok && err == nil {
-			cfg := credcfg.New()
-			cfg.AddRepository(dockerconfig.NewRepositorySpec(d, true))
-			err = config.DefaultContext().ApplyConfig(cfg, d)
+		for _, h := range defaultconfigregistry.Get() {
+			err := h(ctx.ConfigContext())
 			if err != nil {
-				return nil, errors.Wrapf(err, "cannot apply docker config %q", d)
+				return nil, err
 			}
 		}
 	}
-	return ctx, nil
+	return ocmctx, nil
 }
 
-func ConfigureByData(ctx ocm.Context, data []byte, info string) error {
+func ConfigureByData(ctx config.ContextProvider, data []byte, info string) error {
 	var err error
 
 	sctx := spiffing.New().WithFeatures(features.INTERPOLATION, features.CONTROL)

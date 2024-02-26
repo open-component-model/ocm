@@ -11,7 +11,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/identity"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -30,19 +32,19 @@ type RepositorySpec struct {
 	URL                         string                    `json:"url"`
 	ConfigType                  gardenercfgcpi.ConfigType `json:"configType"`
 	Cipher                      Cipher                    `json:"cipher"`
-	PropagateConsumerIdentity   bool                      `json:"propagateConsumerIdentity"`
+	PropagateConsumerIdentity   *bool                     `json:"propagateConsumerIdentity,omitempty"`
 }
 
 var _ cpi.ConsumerIdentityProvider = (*RepositorySpec)(nil)
 
 // NewRepositorySpec creates a new memory RepositorySpec.
-func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher Cipher, propagateConsumerIdentity bool) *RepositorySpec {
+func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher Cipher, propagateConsumerIdentity ...bool) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType:       runtime.NewVersionedTypedObject(Type),
 		URL:                       url,
 		ConfigType:                configType,
 		Cipher:                    cipher,
-		PropagateConsumerIdentity: propagateConsumerIdentity,
+		PropagateConsumerIdentity: generics.Pointer(utils.OptionalDefaultedBool(true, propagateConsumerIdentity...)),
 	}
 }
 
@@ -62,7 +64,7 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi
 		return nil, fmt.Errorf("unable to get key from context: %w", err)
 	}
 
-	return repos.GetRepository(ctx, a.URL, a.ConfigType, a.Cipher, key, a.PropagateConsumerIdentity)
+	return repos.GetRepository(ctx, a.URL, a.ConfigType, a.Cipher, key, utils.AsBool(a.PropagateConsumerIdentity, true))
 }
 
 func (a *RepositorySpec) GetConsumerId(uctx ...internal.UsageContext) internal.ConsumerIdentity {

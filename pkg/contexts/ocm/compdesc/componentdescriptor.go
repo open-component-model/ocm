@@ -635,7 +635,7 @@ func (r *Resource) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 		return state
 	} else {
 		// not delegated to ResourceMeta, because the significance of digests can only be determined at the Resource level.
-		state := equivalent.StateLocalHashEqual(r.Type == o.Type && r.Relation == o.Relation && reflect.DeepEqual(r.SourceRef, o.SourceRef))
+		state := equivalent.StateLocalHashEqual(r.Type == o.Type && r.Relation == o.Relation && reflect.DeepEqual(r.SourceRefs, o.SourceRefs))
 
 		if !IsNoneAccess(r.Access) || !IsNoneAccess(o.Access) {
 			state = state.Apply(r.Digest.Equivalent(o.Digest))
@@ -664,9 +664,10 @@ type ResourceMeta struct {
 	// Can be a local or external resource
 	Relation metav1.ResourceRelation `json:"relation,omitempty"`
 
-	// SourceRef defines a list of source names.
-	// These names reference the sources defines in `component.sources`.
-	SourceRef SourceRefs `json:"srcRef,omitempty"`
+	// SourceRefs defines a list of source names.
+	// These entries reference the sources defined in the
+	// component.sources.
+	SourceRefs SourceRefs `json:"srcRefs,omitempty"`
 
 	// Digest is the optional digest of the referenced resource.
 	// +optional
@@ -704,7 +705,7 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 		ElementMeta: *o.ElementMeta.Copy(),
 		Type:        o.Type,
 		Relation:    o.Relation,
-		SourceRef:   o.SourceRef.Copy(),
+		SourceRefs:  o.SourceRefs.Copy(),
 		Digest:      o.Digest.Copy(),
 	}
 	return r

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package options
 
 import (
@@ -19,41 +15,45 @@ var (
 	HTTPRedirectOption = options.HTTPRedirectOption
 )
 
-var PathOption = flagsets.NewStringOptionType("inputPath", "path field for input")
-
+// string options
 var (
-	CompressOption = flagsets.NewBoolOptionType("inputCompress", "compress option for input")
-	ExcludeOption  = flagsets.NewStringArrayOptionType("inputExcludes", "excludes (path) for inputs")
+	VersionOption        = flagsets.NewStringOptionType("inputVersion", "version info for inputs")
+	TextOption           = flagsets.NewStringOptionType("inputText", "utf8 text")
+	HelmRepositoryOption = flagsets.NewStringOptionType("inputHelmRepository", "helm repository base URL")
 )
-
 var (
-	IncludeOption     = flagsets.NewStringArrayOptionType("inputIncludes", "includes (path) for inputs")
-	PreserveDirOption = flagsets.NewBoolOptionType("inputPreserveDir", "preserve directory in archive for inputs")
-)
-
-var (
-	FollowSymlinksOption = flagsets.NewBoolOptionType("inputFollowSymlinks", "follow symbolic links during archive creation for inputs")
-	VariantsOption       = flagsets.NewStringArrayOptionType("inputVariants", "(platform) variants for inputs")
-)
-
-var LibrariesOption = flagsets.NewStringArrayOptionType("inputLibraries", "library path for inputs")
-
-var VersionOption = flagsets.NewStringOptionType("inputVersion", "version info for inputs")
-
-var ValuesOption = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based generic values for inputs")
-
-var DataOption = flagsets.NewBytesOptionType("inputData", "data (string, !!string or !<base64>")
-
-var TextOption = flagsets.NewStringOptionType("inputText", "utf8 text")
-
-var YAMLOption = flagsets.NewYAMLOptionType("inputYaml", "YAML formatted text")
-
-var JSONOption = flagsets.NewYAMLOptionType("inputJson", "JSON formatted text")
-
-var FormattedJSONOption = flagsets.NewYAMLOptionType("inputFormattedJson", "JSON formatted text")
-
-var HelmRepositoryOption = flagsets.NewStringOptionType("inputHelmRepository", "helm repository base URL")
-
-var (
+	VariantsOption  = flagsets.NewStringArrayOptionType("inputVariants", "(platform) variants for inputs")
 	PlatformsOption = flagsets.NewStringArrayOptionType("inputPlatforms", "input filter for image platforms ([os]/[architecture])")
+)
+
+// path options
+var (
+	PathOption = flagsets.NewPathOptionType("inputPath", "path field for input")
+)
+var (
+	IncludeOption   = flagsets.NewPathArrayOptionType("inputIncludes", "includes (path) for inputs")
+	ExcludeOption   = flagsets.NewPathArrayOptionType("inputExcludes", "excludes (path) for inputs")
+	LibrariesOption = flagsets.NewPathArrayOptionType("inputLibraries", "library path for inputs")
+)
+
+// boolean options
+var (
+	CompressOption       = flagsets.NewBoolOptionType("inputCompress", "compress option for input")
+	PreserveDirOption    = flagsets.NewBoolOptionType("inputPreserveDir", "preserve directory in archive for inputs")
+	FollowSymlinksOption = flagsets.NewBoolOptionType("inputFollowSymlinks", "follow symbolic links during archive creation for inputs")
+)
+
+// data options
+var (
+	DataOption = flagsets.NewBytesOptionType("inputData", "data (string, !!string or !<base64>")
+)
+
+// yaml/json options
+var (
+	YAMLOption          = flagsets.NewYAMLOptionType("inputYaml", "YAML formatted text")
+	JSONOption          = flagsets.NewYAMLOptionType("inputJson", "JSON formatted text")
+	FormattedJSONOption = flagsets.NewYAMLOptionType("inputFormattedJson", "JSON formatted text")
+)
+var (
+	ValuesOption = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based generic values for inputs")
 )

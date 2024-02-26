@@ -5,27 +5,8 @@ go 1.21
 replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 
 require (
-	github.com/docker/docker-credential-helpers v0.8.0 // indirect
-	github.com/ghodss/yaml v1.0.0
-	github.com/go-logr/logr v1.3.0
-	github.com/hashicorp/vault-client-go v0.4.2
-	github.com/mandelsoft/filepath v0.0.0-20230412200429-36b1eb66bd27
-	github.com/mandelsoft/spiff v1.7.0-beta-5
-	github.com/modern-go/reflect2 v1.0.2
-	github.com/onsi/gomega v1.27.6
-	github.com/opencontainers/go-digest v1.0.0
-	github.com/opencontainers/image-spec v1.1.0-rc5
-	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.8.0
-	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/net v0.17.0
-	golang.org/x/sys v0.15.0 // indirect
-	k8s.io/apimachinery v0.28.4
-	sigs.k8s.io/yaml v1.4.0
-)
-
-require (
 	github.com/DataDog/gostackparse v0.7.0
+	github.com/InfiniteLoopSpace/go_S-MIME v0.0.0-20181221134359-3f58f9a4b2b6
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/aws/aws-sdk-go-v2 v1.21.2
 	github.com/aws/aws-sdk-go-v2/config v1.19.1
@@ -34,59 +15,70 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.20.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.40.0
 	github.com/containerd/containerd v1.7.11
+	github.com/containerd/log v0.1.0
 	github.com/containers/image/v5 v5.21.1
 	github.com/cyberphone/json-canonicalization v0.0.0-20231011164504-785e29786b46
+	github.com/distribution/reference v0.5.0
 	github.com/docker/cli v24.0.7+incompatible
-	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/pkg/ssa v0.24.1
 	github.com/gertd/go-pluralize v0.2.1
+	github.com/ghodss/yaml v1.0.0
+	github.com/go-logr/logr v1.3.0
 	github.com/go-openapi/strfmt v0.21.7
 	github.com/go-openapi/swag v0.22.4
 	github.com/go-test/deep v1.1.0
 	github.com/goccy/go-yaml v1.9.5
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v45 v45.2.0
+	github.com/hashicorp/vault-client-go v0.4.2
+	github.com/imdario/mergo v0.3.16
 	github.com/klauspost/compress v1.17.2
 	github.com/klauspost/pgzip v1.2.6
+	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
 	github.com/mandelsoft/logging v0.0.0-20230905123808-7042ee3aae45
+	github.com/mandelsoft/spiff v1.7.0-beta-5
+	github.com/mandelsoft/vfs v0.4.3
 	github.com/marstr/guid v1.1.0
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mittwald/go-helm-client v0.12.3
+	github.com/modern-go/reflect2 v1.0.2
 	github.com/onsi/ginkgo/v2 v2.9.4
+	github.com/onsi/gomega v1.27.6
+	github.com/opencontainers/go-digest v1.0.0
+	github.com/opencontainers/image-spec v1.1.0-rc5
 	github.com/pkg/errors v0.9.1
 	github.com/sigstore/cosign/v2 v2.2.1
 	github.com/sigstore/rekor v1.3.3
 	github.com/sigstore/sigstore v1.7.5
+	github.com/sirupsen/logrus v1.9.3
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
+	github.com/texttheater/golang-levenshtein/levenshtein v0.0.0-20200805054039-cae8b0eaed6c
 	github.com/tonglil/buflogr v1.0.1
 	github.com/ulikunitz/xz v0.5.11
+	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
+	golang.org/x/net v0.17.0
 	golang.org/x/oauth2 v0.13.0
 	golang.org/x/text v0.14.0
-	google.golang.org/api v0.149.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.12.2
 	k8s.io/api v0.28.4
 	k8s.io/apiextensions-apiserver v0.27.2
+	k8s.io/apimachinery v0.28.4
 	k8s.io/cli-runtime v0.27.2
+	k8s.io/client-go v0.28.4
 	sigs.k8s.io/cli-utils v0.34.0
 	sigs.k8s.io/controller-runtime v0.14.4
+	sigs.k8s.io/yaml v1.4.0
 )
 
-require (
-	github.com/InfiniteLoopSpace/go_S-MIME v0.0.0-20181221134359-3f58f9a4b2b6
-	github.com/containerd/log v0.1.0
-	github.com/distribution/reference v0.5.0
-	github.com/imdario/mergo v0.3.16
-	github.com/mandelsoft/vfs v0.4.0
-	k8s.io/client-go v0.28.4
-)
-
+// indirect dependencies
 require (
 	cloud.google.com/go/compute v1.23.2 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
@@ -168,6 +160,8 @@ require (
 	github.com/digitorus/pkcs7 v0.0.0-20230818184609-3a137a874352 // indirect
 	github.com/digitorus/timestamp v0.0.0-20230902153158-687734543647 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
+	github.com/docker/distribution v2.8.3+incompatible // indirect
+	github.com/docker/docker-credential-helpers v0.8.0 // indirect
 	github.com/docker/go v1.5.1-1.0.20160303222718-d30aec9fd63c // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -246,7 +240,7 @@ require (
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.4 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
-	github.com/lestrrat-go/jwx/v2 v2.0.16 // indirect
+	github.com/lestrrat-go/jwx/v2 v2.0.19 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/letsencrypt/boulder v0.0.0-20231026200631-000cd05d5491 // indirect
 	github.com/lib/pq v1.10.9 // indirect
@@ -340,10 +334,12 @@ require (
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
+	google.golang.org/api v0.149.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231016165738-49dd2c1f3d0b // indirect
 	google.golang.org/grpc v1.59.0 // indirect

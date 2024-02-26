@@ -1,14 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package inputs
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -41,7 +36,7 @@ func GetBaseDir(fs vfs.FileSystem, filePath string) (string, error) {
 			return "", fmt.Errorf("unable to read current working directory: %w", err)
 		}
 	} else {
-		wd = filepath.Dir(filePath)
+		wd = vfs.Dir(fs, filePath)
 	}
 	return wd, nil
 }
@@ -51,7 +46,7 @@ func GetPath(ctx clictx.Context, path string, inputFilePath string) (string, err
 	if path == "" {
 		return "", fmt.Errorf("path attribute required")
 	}
-	if filepath.IsAbs(path) {
+	if vfs.IsAbs(fs, path) {
 		return path, nil
 	} else {
 		wd, err := GetBaseDir(fs, inputFilePath)
@@ -59,6 +54,6 @@ func GetPath(ctx clictx.Context, path string, inputFilePath string) (string, err
 			return "", err
 		}
 
-		return filepath.Join(wd, path), nil
+		return vfs.Join(fs, wd, path), nil
 	}
 }

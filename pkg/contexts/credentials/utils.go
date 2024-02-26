@@ -10,6 +10,11 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
+
+	"strings"
+
+	"github.com/texttheater/golang-levenshtein/levenshtein"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -77,4 +82,64 @@ func GetClientCerts(ctx ContextProvider, creds Credentials) ([]tls.Certificate, 
 		}
 	}
 	return nil, nil
+}
+
+func GuessConsumerType(ctxp ContextProvider, spec string) string {
+	matchers := ctxp.CredentialsContext().ConsumerIdentityMatchers()
+	lspec := strings.ToLower(spec)
+
+	if matchers.Get(spec) == nil {
+		fix := ""
+		for _, i := range matchers.List() {
+			idx := strings.Index(i.Type, ".")
+			if idx > 0 && i.Type[:idx] == spec {
+				fix = i.Type
+				break
+			}
+		}
+		if fix == "" {
+			for _, i := range matchers.List() {
+				if strings.ToLower(i.Type) == lspec {
+					fix = i.Type
+					break
+				}
+			}
+		}
+		if fix == "" {
+			for _, i := range matchers.List() {
+				idx := strings.Index(i.Type, ".")
+				if idx > 0 && strings.ToLower(i.Type[:idx]) == lspec {
+					fix = i.Type
+					break
+				}
+			}
+		}
+		if fix == "" {
+			min := -1
+			for _, i := range matchers.List() {
+				idx := strings.Index(i.Type, ".")
+				if idx > 0 {
+					d := levenshtein.DistanceForStrings([]rune(lspec), []rune(strings.ToLower(i.Type[:idx])), levenshtein.DefaultOptions)
+					if d < 5 && fix == "" || min > d {
+						fix = i.Type
+						min = d
+					}
+				}
+			}
+		}
+		if fix == "" {
+			min := -1
+			for _, i := range matchers.List() {
+				d := levenshtein.DistanceForStrings([]rune(lspec), []rune(strings.ToLower(i.Type)), levenshtein.DefaultOptions)
+				if d < 5 && fix == "" || min > d {
+					fix = i.Type
+					min = d
+				}
+			}
+		}
+		if fix != "" {
+			return fix
+		}
+	}
+	return spec
 }

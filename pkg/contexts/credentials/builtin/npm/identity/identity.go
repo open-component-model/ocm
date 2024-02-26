@@ -1,8 +1,4 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
-package npm
+package identity
 
 import (
 	"path"
@@ -13,13 +9,32 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/listformat"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
+
+const (
+	// CONSUMER_TYPE is the npm repository type.
+	CONSUMER_TYPE = "Registry.npmjs.com"
+
+	// ATTR_USERNAME is the username attribute. Required for login at any npm registry.
+	ATTR_USERNAME = cpi.ATTR_USERNAME
+	// ATTR_PASSWORD is the password attribute. Required for login at any npm registry.
+	ATTR_PASSWORD = cpi.ATTR_PASSWORD
+	// ATTR_EMAIL is the email attribute. Required for login at any npm registry.
+	ATTR_EMAIL = cpi.ATTR_EMAIL
+	// ATTR_TOKEN is the token attribute. May exist after login at any npm registry.
+	ATTR_TOKEN = cpi.ATTR_TOKEN
+)
+
+// Logging Realm.
+var REALM = logging.DefineSubRealm("NPM registry", "NPM")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
 		ATTR_USERNAME, "the basic auth user name",
 		ATTR_PASSWORD, "the basic auth password",
 		ATTR_EMAIL, "NPM registry, require an email address",
+		ATTR_TOKEN, "the token attribute. May exist after login at any npm registry. Check your .npmrc file!",
 	})
 
 	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `NPM repository

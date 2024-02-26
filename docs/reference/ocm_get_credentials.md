@@ -17,6 +17,7 @@ credentials, creds, cred
 ```
   -h, --help             help for credentials
   -m, --matcher string   matcher type override
+  -s, --sloppy           sloppy matching of consumer type
 ```
 
 ### Description
@@ -93,6 +94,19 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>password</code>: the basic auth password
       - <code>identityToken</code>: the bearer token used for non-basic auth authorization
       - <code>certificateAuthority</code>: the certificate authority certificate used to verify certificates
+
+
+  - <code>Registry.npmjs.com</code>: NPM repository
+
+    It matches the <code>Registry.npmjs.com</code> consumer type and additionally acts like
+    the <code>hostpath</code> type.
+
+    Credential consumers of the consumer type Registry.npmjs.com evaluate the following credential properties:
+
+      - <code>username</code>: the basic auth user name
+      - <code>password</code>: the basic auth password
+      - <code>email</code>: NPM registry, require an email address
+      - <code>token</code>: the token attribute. May exist after login at any npm registry. Check your .npmrc file!
 
 
   - <code>S3</code>: S3 credential matcher
