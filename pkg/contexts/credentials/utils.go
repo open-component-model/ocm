@@ -7,14 +7,12 @@ package credentials
 import (
 	"crypto/tls"
 	"crypto/x509"
-
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
-
 	"strings"
 
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
