@@ -15,17 +15,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
-type CheckResult struct {
+type Result struct {
 	Missing   Missing           `json:"missing,omitempty"`
 	Resources []metav1.Identity `json:"resources,omitempty"`
 	Sources   []metav1.Identity `json:"sources,omitempty"`
 }
 
-func newCheckResult() *CheckResult {
-	return &CheckResult{Missing: Missing{}}
+func newResult() *Result {
+	return &Result{Missing: Missing{}}
 }
 
-func (r *CheckResult) IsEmpty() bool {
+func (r *Result) IsEmpty() bool {
 	if r == nil {
 		return true
 	}
@@ -42,20 +42,26 @@ func (n Missing) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
-type Cache = map[common.NameVersion]*CheckResult
+type Cache = map[common.NameVersion]*Result
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Check provides a check object for checking component versions
+// to completely available in an ocm repository.
+// By default, it only checks the component reference closure
+// to be in the same repository.
+// Optionally, it is possible to check for inlined
+// resources and sources, also.
 func Check(opts ...Option) *Options {
 	return optionutils.EvalOptions(opts...)
 }
 
-func (a *Options) For(cv ocm.ComponentVersionAccess) (*CheckResult, error) {
+func (a *Options) For(cv ocm.ComponentVersionAccess) (*Result, error) {
 	cache := Cache{}
 	return a.handle(cache, cv, common.History{common.VersionedElementKey(cv)})
 }
 
-func (a *Options) ForId(repo ocm.Repository, id common.NameVersion) (*CheckResult, error) {
+func (a *Options) ForId(repo ocm.Repository, id common.NameVersion) (*Result, error) {
 	cv, err := repo.LookupComponentVersion(id.GetName(), id.GetVersion())
 	if err != nil {
 		return nil, err
@@ -64,7 +70,7 @@ func (a *Options) ForId(repo ocm.Repository, id common.NameVersion) (*CheckResul
 	return a.For(cv)
 }
 
-func (a *Options) check(cache Cache, repo ocm.Repository, id common.NameVersion, h common.History) (*CheckResult, error) {
+func (a *Options) check(cache Cache, repo ocm.Repository, id common.NameVersion, h common.History) (*Result, error) {
 	if r, ok := cache[id]; ok {
 		return r, nil
 	}
@@ -81,9 +87,9 @@ func (a *Options) check(cache Cache, repo ocm.Repository, id common.NameVersion,
 		err = nil
 	}
 
-	var r *CheckResult
+	var r *Result
 	if cv == nil {
-		r = &CheckResult{Missing: Missing{id: h}}
+		r = &Result{Missing: Missing{id: h}}
 	} else {
 		defer cv.Close()
 		r, err = a.handle(cache, cv, h)
@@ -92,8 +98,8 @@ func (a *Options) check(cache Cache, repo ocm.Repository, id common.NameVersion,
 	return r, err
 }
 
-func (a *Options) handle(cache Cache, cv ocm.ComponentVersionAccess, h common.History) (*CheckResult, error) {
-	result := newCheckResult()
+func (a *Options) handle(cache Cache, cv ocm.ComponentVersionAccess, h common.History) (*Result, error) {
+	result := newResult()
 
 	for _, r := range cv.GetDescriptor().References {
 		id := common.NewNameVersion(r.ComponentName, r.Version)

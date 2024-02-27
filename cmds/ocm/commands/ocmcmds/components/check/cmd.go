@@ -170,7 +170,7 @@ func mapWideOutput(e interface{}) interface{} {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type CheckResult = check.CheckResult
+type CheckResult = check.Result
 
 type Entry struct {
 	Status           string             `json:"status"`
