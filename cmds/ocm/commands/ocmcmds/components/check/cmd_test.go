@@ -97,14 +97,14 @@ test.de/x v1      Incomplete       test.de/z:v1[test.de/x:v1]
 {
   "items": [
     {
-      "status": "Incomplete",
       "componentVersion": "test.de/x:v1",
       "missing": {
         "test.de/z:v1": [
           "test.de/x:v1",
           "test.de/z:v1"
         ]
-      }
+      },
+      "status": "Incomplete"
     }
   ]
 }
