@@ -35,8 +35,8 @@ The type specific specification fields are:
 - **`imageReference`** *string*
 
   OCI image/artifact reference following the possible docker schemes:
-  - `<repo>/<artifact>:<digest>@<tag>`
-  - `<host>[<port>]/<repo path>/<artifact>:<version>@<tag>`
+  - `<repo>/<artifact>:<tag>@<digest>`
+  - `<host>[<port>]/<repo path>/<artifact>:<tag>@<digest>`
 
 ### Go Bindings
 
