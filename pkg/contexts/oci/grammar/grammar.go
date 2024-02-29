@@ -123,6 +123,13 @@ var (
 		Optional(SchemeRegexp),
 		Capture(HostPortRegexp))
 
+	// SchemedHostPortArtifactRegexp describes a non-DNS simple hostname with scheme like https://localhost/repository:1.0.0 with the scheme being required.
+	AnchoredSchemedHostPortArtifactRegexp = Anchored(Sequence(
+		SchemeRegexp,
+		Capture(Or(HostPortRegexp, DomainPortRegexp)),
+		Literal("/"),
+		CapturedArtifactVersionRegexp))
+
 	PathRegexp = Sequence(
 		Optional(Literal("/")),
 		Match(`[a-zA-Z0-9-_.]+(?:/[a-zA-Z0-9-_.]+)+`))

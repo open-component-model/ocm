@@ -7,6 +7,8 @@ package oci_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -212,16 +214,21 @@ var _ = Describe("ref parsing", func() {
 		})
 	})
 	It("localhost", func() {
-		tag := "1.0.0"
-		CheckRef("http://localhost:8080//test:1.0.0", &oci.RefSpec{
-			UniformRepositorySpec: oci.UniformRepositorySpec{
-				Scheme: "http",
-				Host:   "localhost:8080",
-			},
-			ArtSpec: oci.ArtSpec{
-				Repository: "test",
-				Tag:        &tag,
-			},
-		})
+		ctx := oci.New()
+		ref := Must(oci.ParseRef("localhost:80//test:1.0.0"))
+		spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+		Expect(spec).To(Equal(ocireg.NewRepositorySpec("localhost:80")))
+	})
+	It("scheme://localhost:port//repository:version", func() {
+		ctx := oci.New()
+		ref := Must(oci.ParseRef("http://localhost:80//test:1.0.0"))
+		spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+		Expect(spec).To(Equal(ocireg.NewRepositorySpec("http://localhost:80")))
+	})
+	It("scheme://localhost:port/repository:version", func() {
+		ctx := oci.New()
+		ref := Must(oci.ParseRef("http://localhost:80/test:1.0.0"))
+		spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+		Expect(spec).To(Equal(ocireg.NewRepositorySpec("http://localhost:80")))
 	})
 })
