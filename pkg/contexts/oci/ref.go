@@ -23,7 +23,7 @@ const (
 	KIND_ARETEFACT_REFERENCE = "artifact reference"
 )
 
-// ParseRepo parses a standard oci repository reference into a internal representation.
+// ParseRepo parses a standard oci repository reference into an internal representation.
 func ParseRepo(ref string) (UniformRepositorySpec, error) {
 	create := false
 	if strings.HasPrefix(ref, "+") {

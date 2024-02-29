@@ -112,12 +112,14 @@ func ParseRef(ref string) (RefSpec, error) {
 		}
 	} else {
 		v = string(match[5])
-		h := string(match[1])
+		s := string(match[1])
+		h := string(match[2])
 		t, _ := grammar.SplitTypeSpec(h)
 		spec = RefSpec{
 			UniformRepositorySpec{
 				Type:            t,
 				TypeHint:        h,
+				Scheme:          s,
 				Host:            string(match[2]),
 				SubPath:         string(match[3]),
 				CreateIfMissing: create,

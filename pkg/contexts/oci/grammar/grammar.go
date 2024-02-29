@@ -85,6 +85,10 @@ var (
 
 	IPRegexp = Sequence(Match("[0-9]+"), Literal(`.`), Match("[0-9]+"), Literal(`.`), Match("[0-9]+"), Literal(`.`), Match("[0-9]+"))
 
+	SchemeRegexp = Sequence(Capture(Match("[a-z]+")), Literal(`://`))
+
+	AnchoredSchemedRegexp = Anchored(Optional(SchemeRegexp), Capture(Match(".*")))
+
 	// DomainRegexp defines the structure of potential domain components
 	// that may be part of image names. This is purposely a subset of what is
 	// allowed by DNS to ensure backwards compatibility with Docker image
@@ -101,10 +105,23 @@ var (
 		DomainRegexp,
 		Optional(Literal(`:`), Match(`[0-9]+`)))
 
+	// SchemeDomainPortRegexp defines the structure of potential domain components
+	// that may be part of image names. This is purposely a subset of what is
+	// allowed by DNS to ensure backwards compatibility with Docker image
+	// names followed by an optional port part.
+	SchemeDomainPortRegexp = Sequence(
+		Optional(SchemeRegexp),
+		Capture(DomainPortRegexp))
+
 	// HostPortRegexp describes a non-DNS simple hostname like localhost.
 	HostPortRegexp = Sequence(
 		Or(DomainComponentRegexp, IPRegexp),
 		Optional(Literal(`:`), Match(`[0-9]+`)))
+
+	// SchemeHostPortRegexp describes a non-DNS simple hostname with scheme like https://localhost.
+	SchemeHostPortRegexp = Sequence(
+		Optional(SchemeRegexp),
+		Capture(HostPortRegexp))
 
 	PathRegexp = Sequence(
 		Optional(Literal("/")),

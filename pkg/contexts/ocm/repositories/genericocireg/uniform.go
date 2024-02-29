@@ -44,6 +44,9 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 		}
 		host = u.Host
 	}
+	if u.Scheme != "" {
+		host = u.Scheme + "://" + host
+	}
 	if subp != "" {
 		meta = NewComponentRepositoryMeta(subp, "")
 	}
@@ -55,16 +58,24 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 
 func HandleRef(u *cpi.UniformRepositorySpec) error {
 	if u.Host == "" && u.Info != "" && u.SubPath == "" {
+		info := u.Info
+		scheme := ""
+		match := grammar.AnchoredSchemedRegexp.FindStringSubmatch(info)
+		if match != nil {
+			scheme = match[1]
+			info = match[2]
+		}
 		host := ""
 		subp := ""
-		idx := strings.Index(u.Info, grammar.RepositorySeparator)
+		idx := strings.Index(info, grammar.RepositorySeparator)
 		if idx > 0 {
-			host = u.Info[:idx]
-			subp = u.Info[idx+1:]
+			host = info[:idx]
+			subp = info[idx+1:]
 		} else {
-			host = u.Info
+			host = info
 		}
 		if grammar.HostPortRegexp.MatchString(host) || grammar.DomainPortRegexp.MatchString(host) {
+			u.Scheme = scheme
 			u.Host = host
 			u.SubPath = subp
 			u.Info = ""

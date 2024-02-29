@@ -145,23 +145,28 @@ func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {
 			},
 			DefaultScheme: r.info.Scheme,
 			//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
-			DefaultTLS: &tls.Config{
-				// MinVersion: tls.VersionTLS13,
-				RootCAs: func() *x509.CertPool {
-					var rootCAs *x509.CertPool
-					if creds != nil {
-						c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
-						if c != "" {
-							rootCAs = x509.NewCertPool()
-							rootCAs.AppendCertsFromPEM([]byte(c))
+			DefaultTLS: func() *tls.Config {
+				if r.info.Scheme == "http" {
+					return nil
+				}
+				return &tls.Config{
+					// MinVersion: tls.VersionTLS13,
+					RootCAs: func() *x509.CertPool {
+						var rootCAs *x509.CertPool
+						if creds != nil {
+							c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
+							if c != "" {
+								rootCAs = x509.NewCertPool()
+								rootCAs.AppendCertsFromPEM([]byte(c))
+							}
 						}
-					}
-					if rootCAs == nil {
-						rootCAs = rootcertsattr.Get(r.GetContext()).GetRootCertPool(true)
-					}
-					return rootCAs
-				}(),
-			},
+						if rootCAs == nil {
+							rootCAs = rootcertsattr.Get(r.GetContext()).GetRootCertPool(true)
+						}
+						return rootCAs
+					}(),
+				}
+			}(),
 		})),
 	}
 
