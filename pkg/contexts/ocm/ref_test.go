@@ -140,7 +140,7 @@ var _ = Describe("ref parsing", func() {
 	})
 
 	Context("map to spec", func() {
-		FIt("handles localhost", func() {
+		It("handles localhost", func() {
 			ctx := ocm.New()
 
 			ref := Must(ocm.ParseRef("OCIRegistry::http://localhost:80/test//github.vom/mandelsoft/test"))
