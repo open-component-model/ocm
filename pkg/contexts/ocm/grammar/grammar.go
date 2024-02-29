@@ -30,7 +30,7 @@ var (
 	// AnchoredRepositoryRegexp parses a uniform repository spec.
 	AnchoredRepositoryRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
-		Capture(grammar.DomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+		Capture(grammar.SchemeDomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
 	)
 
 	// AnchoredGenericRepositoryRegexp describes a CTF reference.
@@ -54,7 +54,7 @@ var (
 	// It provides 5 captures: type, repository host port, sub path, component and version.
 	AnchoredReferenceRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
-		Capture(grammar.DomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+		grammar.SchemeDomainPortRegexp, Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
 		Literal("//"), Capture(ComponentRegexp),
 		Optional(Literal(VersionSeparator), Capture(VersionRegexp)),
 	)

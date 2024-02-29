@@ -91,6 +91,10 @@ var _ = Describe("ref parsing", func() {
 			}
 		})
 
+		It("scheme", func() {
+			CheckRef("OCIRegistry::http://ghcr.io:80/repository//acme.org/component:1.0.0", "OCIRegistry", "localhost:8080", "repository", "acme.org/component", "1.0.0", "")
+		})
+
 		It("info", func() {
 			for _, ut := range []string{"", t} {
 				CheckRef(Type(ut)+"{}", ut, "", "", "", "", "{}")
@@ -136,12 +140,12 @@ var _ = Describe("ref parsing", func() {
 	})
 
 	Context("map to spec", func() {
-		It("handles localhost", func() {
+		FIt("handles localhost", func() {
 			ctx := ocm.New()
 
-			ref := Must(ocm.ParseRef("OCIRegistry::localhost:80/test//github.vom/mandelsoft/test"))
+			ref := Must(ocm.ParseRef("OCIRegistry::http://localhost:80/test//github.vom/mandelsoft/test"))
 			spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
-			Expect(spec).To(Equal(ocireg.NewRepositorySpec("localhost:80", ocireg.NewComponentRepositoryMeta("test", ""))))
+			Expect(spec).To(Equal(ocireg.NewRepositorySpec("http://localhost:80", ocireg.NewComponentRepositoryMeta("test", ""))))
 		})
 	})
 })

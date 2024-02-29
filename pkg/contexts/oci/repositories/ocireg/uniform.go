@@ -18,6 +18,9 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	if u.Info != "" || u.Host == "" {
 		return nil, nil
 	}
-
-	return NewRepositorySpec(u.Host), nil
+	host := u.Host
+	if u.Scheme != "" {
+		host = u.Scheme + "://" + host
+	}
+	return NewRepositorySpec(host), nil
 }

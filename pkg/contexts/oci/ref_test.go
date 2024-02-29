@@ -7,7 +7,6 @@ package oci_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -212,5 +211,17 @@ var _ = Describe("ref parsing", func() {
 			Info: "a/b.tar",
 		})
 	})
-
+	It("localhost", func() {
+		tag := "1.0.0"
+		CheckRef("http://localhost:8080//test:1.0.0", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Scheme: "http",
+				Host:   "localhost:8080",
+			},
+			ArtSpec: oci.ArtSpec{
+				Repository: "test",
+				Tag:        &tag,
+			},
+		})
+	})
 })
