@@ -5,10 +5,12 @@
 package check
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/check"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/util/json"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/failonerroroption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -22,9 +24,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -171,71 +170,54 @@ func mapWideOutput(e interface{}) interface{} {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type CheckResult struct {
-	Missing   Missing           `json:"missing,omitempty"`
-	Resources []metav1.Identity `json:"resources,omitempty"`
-	Sources   []metav1.Identity `json:"sources,omitempty"`
-}
-
-func newCheckResult() *CheckResult {
-	return &CheckResult{Missing: Missing{}}
-}
-
-func (r *CheckResult) IsEmpty() bool {
-	if r == nil {
-		return true
-	}
-	return len(r.Missing) == 0 && len(r.Resources) == 0 && len(r.Sources) == 0
-}
-
-type Missing map[common.NameVersion]common.History
-
-func (n Missing) MarshalJSON() ([]byte, error) {
-	m := map[string]common.History{}
-	for k, v := range n {
-		m[k.String()] = v
-	}
-	return json.Marshal(m)
-}
+type CheckResult = check.Result
 
 type Entry struct {
 	Status           string             `json:"status"`
 	ComponentVersion common.NameVersion `json:"componentVersion"`
-	Results          *CheckResult       `json:"missing,omitempty"`
+	Results          *CheckResult       `json:",inline"` // does not work
 	Error            error              `json:"error,omitempty"`
 }
 
-func (n CheckResult) MarshalJSON() ([]byte, error) {
-	m := map[string]common.History{}
-	for k, v := range n.Missing {
-		m[k.String()] = v
+func (n Entry) MarshalJSON() ([]byte, error) {
+	m := map[string]interface{}{}
+	if n.Results != nil {
+		data, err := json.Marshal(n.Results)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(data, &m)
+		if err != nil {
+			return nil, err
+		}
+	}
+	m["status"] = n.Status
+	m["componentVersion"] = n.ComponentVersion
+	if n.Error != nil {
+		m["error"] = n.Error
 	}
 	return json.Marshal(m)
 }
 
 type action struct {
 	erropt  *failonerroroption.Option
-	options *Option
+	options *check.Options
 }
 
 func NewAction(opts *output.Options) processing.ProcessChain {
 	return comphdlr.Sort.Map((&action{
 		erropt:  failonerroroption.From(opts),
-		options: From(opts),
+		options: optionutils.EvalOptions(check.Option(From(opts))),
 	}).Map)
 }
 
-type Cache = map[common.NameVersion]*CheckResult
-
 func (a *action) Map(in interface{}) interface{} {
-	cache := Cache{}
-
 	i := in.(*comphdlr.Object)
 	o := &Entry{
 		ComponentVersion: common.VersionedElementKey(i.ComponentVersion),
 	}
 	status := ""
-	o.Results, o.Error = a.handle(cache, i.ComponentVersion, common.History{common.VersionedElementKey(i.ComponentVersion)})
+	o.Results, o.Error = a.options.For(i.ComponentVersion)
 	if o.Error != nil {
 		status = ",Error"
 		a.erropt.AddError(o.Error)
@@ -262,82 +244,4 @@ func (a *action) Map(in interface{}) interface{} {
 		o.Status = "OK"
 	}
 	return o
-}
-
-func (a *action) check(cache Cache, repo ocm.Repository, id common.NameVersion, h common.History) (*CheckResult, error) {
-	if r, ok := cache[id]; ok {
-		return r, nil
-	}
-
-	err := h.Add(ocm.KIND_COMPONENTVERSION, id)
-	if err != nil {
-		return nil, err
-	}
-	cv, err := repo.LookupComponentVersion(id.GetName(), id.GetVersion())
-	if err != nil {
-		if !errors.IsErrNotFound(err) {
-			return nil, err
-		}
-		err = nil
-	}
-	var r *CheckResult
-	if cv == nil {
-		r = &CheckResult{Missing: Missing{id: h}}
-	} else {
-		r, err = a.handle(cache, cv, h)
-	}
-	cache[id] = r
-	return r, err
-}
-
-func (a *action) handle(cache Cache, cv ocm.ComponentVersionAccess, h common.History) (*CheckResult, error) {
-	result := newCheckResult()
-
-	for _, r := range cv.GetDescriptor().References {
-		id := common.NewNameVersion(r.ComponentName, r.Version)
-		n, err := a.check(cache, cv.Repository(), id, h)
-		if err != nil {
-			return result, err
-		}
-		if n != nil && len(n.Missing) > 0 {
-			for k, v := range n.Missing {
-				result.Missing[k] = v
-			}
-		}
-	}
-
-	var err error
-
-	list := errors.ErrorList{}
-	if a.options.CheckLocalResources {
-		result.Resources, err = a.checkArtifacts(cv.GetContext(), cv.GetDescriptor().Resources)
-		list.Add(err)
-	}
-	if a.options.CheckLocalSources {
-		result.Sources, err = a.checkArtifacts(cv.GetContext(), cv.GetDescriptor().Sources)
-		list.Add(err)
-	}
-	if result.IsEmpty() {
-		result = nil
-	}
-	return result, list.Result()
-}
-
-func (a *action) checkArtifacts(ctx ocm.Context, accessor compdesc.ElementAccessor) ([]metav1.Identity, error) {
-	var result []metav1.Identity
-
-	list := errors.ErrorList{}
-	for i := 0; i < accessor.Len(); i++ {
-		e := accessor.Get(i).(compdesc.ElementArtifactAccessor)
-
-		m, err := ctx.AccessSpecForSpec(e.GetAccess())
-		if err != nil {
-			list.Add(err)
-		} else {
-			if !m.IsLocal(ctx) {
-				result = append(result, e.GetMeta().GetIdentity(accessor))
-			}
-		}
-	}
-	return result, list.Result()
 }

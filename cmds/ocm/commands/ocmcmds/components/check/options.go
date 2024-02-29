@@ -5,6 +5,8 @@
 package check
 
 import (
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/check"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -25,6 +27,11 @@ type Option struct {
 
 func NewOption() *Option {
 	return &Option{}
+}
+
+func (o *Option) ApplyTo(opts *check.Options) {
+	optionutils.ApplyOption(&o.CheckLocalSources, &opts.CheckLocalSources)
+	optionutils.ApplyOption(&o.CheckLocalResources, &opts.CheckLocalResources)
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
