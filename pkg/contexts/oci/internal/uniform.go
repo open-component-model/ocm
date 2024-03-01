@@ -7,6 +7,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/containerd/containerd/reference"
 	"net/url"
 	"strings"
 	"sync"
@@ -89,16 +90,23 @@ func (u *UniformRepositorySpec) String() string {
 }
 
 func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepositorySpec {
-	scheme := ""
-	parsed, err := url.Parse(host)
+	var url *url.URL
+	ref, err := reference.Parse(host)
 	if err == nil {
-		host = parsed.Host
-		scheme = parsed.Scheme
+		url, err = url.Parse("https://" + ref.Locator)
+		if err != nil {
+			return nil
+		}
+	} else {
+		url, err = url.Parse(host)
+		if err != nil {
+			return nil
+		}
 	}
 	u := &UniformRepositorySpec{
 		Type:   typ,
-		Scheme: scheme,
-		Host:   host,
+		Scheme: url.Scheme,
+		Host:   url.Host,
 	}
 	return u
 }
