@@ -111,21 +111,21 @@ func ParseRef(ref string) (RefSpec, error) {
 			},
 		}
 	} else {
-		v = string(match[5])
-		s := string(match[1])
-		h := string(match[2])
+		v = string(match[6])
+		s := string(match[2])
+		h := string(match[1])
 		t, _ := grammar.SplitTypeSpec(h)
 		spec = RefSpec{
 			UniformRepositorySpec{
 				Type:            t,
 				TypeHint:        h,
 				Scheme:          s,
-				Host:            string(match[2]),
-				SubPath:         string(match[3]),
+				Host:            string(match[3]),
+				SubPath:         string(match[4]),
 				CreateIfMissing: create,
 			},
 			CompSpec{
-				Component: string(match[4]),
+				Component: string(match[5]),
 				Version:   nil,
 			},
 		}

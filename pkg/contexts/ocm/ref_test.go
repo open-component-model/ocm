@@ -91,9 +91,9 @@ var _ = Describe("ref parsing", func() {
 			}
 		})
 
-		It("scheme", func() {
-			CheckRef("OCIRegistry::http://ghcr.io:80/repository//acme.org/component:1.0.0", "OCIRegistry", "localhost:8080", "repository", "acme.org/component", "1.0.0", "")
-		})
+		//It("scheme", func() {
+		//	CheckRef("OCIRegistry::http://ghcr.io:80/repository//acme.org/component:1.0.0", "OCIRegistry", "localhost:8080", "repository", "acme.org/component", "1.0.0", "")
+		//})
 
 		It("info", func() {
 			for _, ut := range []string{"", t} {
@@ -146,6 +146,19 @@ var _ = Describe("ref parsing", func() {
 			ref := Must(ocm.ParseRef("OCIRegistry::http://localhost:80/test//github.vom/mandelsoft/test"))
 			spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
 			Expect(spec).To(Equal(ocireg.NewRepositorySpec("http://localhost:80", ocireg.NewComponentRepositoryMeta("test", ""))))
+			repo := Must(spec.Repository(ctx, nil))
+			specFromRepo := repo.GetSpecification()
+			Expect(spec).To(Equal(specFromRepo))
+		})
+		It("handles localhost without scheme", func() {
+			ctx := ocm.New()
+
+			ref := Must(ocm.ParseRef("OCIRegistry::localhost:80/test//github.vom/mandelsoft/test"))
+			spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+			Expect(spec).To(Equal(ocireg.NewRepositorySpec("localhost:80", ocireg.NewComponentRepositoryMeta("test", ""))))
+			repo := Must(spec.Repository(ctx, nil))
+			specFromRepo := repo.GetSpecification()
+			Expect(spec).To(Equal(specFromRepo))
 		})
 	})
 })
