@@ -62,6 +62,9 @@ var (
 
 func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) (cpi.Repository, error) {
 	urs := spec.UniformRepositorySpec()
+	if urs.Scheme == "http" {
+		ocmlog.Logger(REALM).Warn("using insecure http for oci registry {{host}}", "host", urs.Host)
+	}
 	i := &RepositoryImpl{
 		RepositoryImplBase: cpi.NewRepositoryImplBase(ctx),
 		logger:             logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host)),
