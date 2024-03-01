@@ -29,11 +29,10 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 		if !(regex.Anchored(grammar.HostPortRegexp).MatchString(host) || regex.Anchored(grammar.DomainPortRegexp).MatchString(host)) {
 			return nil, nil
 		}
-	} else {
-		if u.Info != "" || u.Host == "" {
-			return nil, nil
-		}
+	} else if u.Info != "" || u.Host == "" {
+		return nil, nil
 	}
+
 	if scheme != "" {
 		host = scheme + "://" + host
 	}

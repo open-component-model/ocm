@@ -7,11 +7,12 @@ package oci_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 )
 
 func CheckRef(ref string, exp *oci.RefSpec) {
