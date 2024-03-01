@@ -35,7 +35,7 @@ func Vers(t string) string {
 	return ":" + t
 }
 
-func CheckRef(ref, ut, h, us, c, uv, i string, th ...string) {
+func CheckRef(ref, ut, scheme, h, us, c, uv, i string, th ...string) {
 	var v *string
 	if uv != "" {
 		v = &uv
@@ -48,6 +48,7 @@ func CheckRef(ref, ut, h, us, c, uv, i string, th ...string) {
 	Expect(spec).WithOffset(1).To(Equal(ocm.RefSpec{
 		UniformRepositorySpec: ocm.UniformRepositorySpec{
 			Type:            ut,
+			Scheme:          scheme,
 			Host:            h,
 			SubPath:         us,
 			Info:            i,
@@ -80,9 +81,9 @@ var _ = Describe("ref parsing", func() {
 
 							It("parses ref "+ref, func() {
 								if ut == "" && strings.HasPrefix(uh, "localhost") {
-									CheckRef(ref, ut, "", "", c, uv, uh+Sub(us))
+									CheckRef(ref, ut, "", "", "", c, uv, uh+Sub(us))
 								} else {
-									CheckRef(ref, ut, uh, us, c, uv, "")
+									CheckRef(ref, ut, "", uh, us, c, uv, "")
 								}
 							})
 						}
@@ -91,31 +92,31 @@ var _ = Describe("ref parsing", func() {
 			}
 		})
 
-		//It("scheme", func() {
-		//	CheckRef("OCIRegistry::http://ghcr.io:80/repository//acme.org/component:1.0.0", "OCIRegistry", "localhost:8080", "repository", "acme.org/component", "1.0.0", "")
-		//})
+		It("scheme", func() {
+			CheckRef("OCIRegistry::http://ghcr.io:80/repository//acme.org/component:1.0.0", "OCIRegistry", "http", "ghcr.io:80", "repository", "acme.org/component", "1.0.0", "")
+		})
 
 		It("info", func() {
 			for _, ut := range []string{"", t} {
-				CheckRef(Type(ut)+"{}", ut, "", "", "", "", "{}")
+				CheckRef(Type(ut)+"{}", ut, "", "", "", "", "", "{}")
 			}
 		})
 
 		It("info+comp", func() {
 			for _, ut := range []string{"", t} {
 				for _, uv := range []string{"", v} {
-					CheckRef(Type(ut)+"{}"+"//"+c+Vers(uv), ut, "", "", c, uv, "{}")
+					CheckRef(Type(ut)+"{}"+"//"+c+Vers(uv), ut, "", "", "", c, uv, "{}")
 				}
 			}
 		})
 
 		It("dir ref", func() {
-			CheckRef("+ctf+directory::./file//bla.blob/comp", "ctf", "", "", "bla.blob/comp", "", "./file", "ctf+directory")
-			CheckRef("ctf+directory::./file//bla.blob/comp", "ctf", "", "", "bla.blob/comp", "", "./file", "ctf+directory")
-			CheckRef("directory::./file//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "./file")
-			CheckRef("directory::file//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "file")
-			CheckRef("directory::./file.io//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "./file.io")
-			CheckRef("any::file.io//bla.blob/comp", "any", "file.io", "", "bla.blob/comp", "", "")
+			CheckRef("+ctf+directory::./file//bla.blob/comp", "ctf", "", "", "", "bla.blob/comp", "", "./file", "ctf+directory")
+			CheckRef("ctf+directory::./file//bla.blob/comp", "ctf", "", "", "", "bla.blob/comp", "", "./file", "ctf+directory")
+			CheckRef("directory::./file//bla.blob/comp", "directory", "", "", "", "bla.blob/comp", "", "./file")
+			CheckRef("directory::file//bla.blob/comp", "directory", "", "", "", "bla.blob/comp", "", "file")
+			CheckRef("directory::./file.io//bla.blob/comp", "directory", "", "", "", "bla.blob/comp", "", "./file.io")
+			CheckRef("any::file.io//bla.blob/comp", "any", "", "file.io", "", "bla.blob/comp", "", "")
 		})
 
 		It("dedicated test case", func() {
