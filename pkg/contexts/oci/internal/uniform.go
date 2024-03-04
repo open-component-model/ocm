@@ -176,6 +176,14 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 	defer s.lock.RUnlock()
 	deferr := errors.ErrNotSupported("uniform repository ref", u.String())
 
+	if u.Info != "" && string(u.Info[0]) == "{" && u.Host == "" && u.Scheme == "" {
+		data, err := runtime.CompleteSpecWithType(u.Type, []byte(u.Info))
+		if err != nil {
+			return nil, err
+		}
+		return ctx.RepositorySpecForConfig(data, runtime.DefaultJSONEncoding)
+	}
+
 	if u.Type == "" {
 		if u.Info != "" {
 			spec := ctx.GetAlias(u.Info)
