@@ -7,11 +7,11 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/containerd/containerd/reference"
 	"net/url"
 	"strings"
 	"sync"
 
+	"github.com/containerd/containerd/reference"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 
@@ -90,23 +90,23 @@ func (u *UniformRepositorySpec) String() string {
 }
 
 func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepositorySpec {
-	var url *url.URL
+	s := ""
+	h := host
+	var parsed *url.URL
 	ref, err := reference.Parse(host)
 	if err == nil {
-		url, err = url.Parse("https://" + ref.Locator)
-		if err != nil {
-			return nil
-		}
+		parsed, err = url.Parse("https://" + ref.Locator)
 	} else {
-		url, err = url.Parse(host)
-		if err != nil {
-			return nil
-		}
+		parsed, err = url.Parse(host)
+	}
+	if err == nil {
+		s = parsed.Scheme
+		h = parsed.Host
 	}
 	u := &UniformRepositorySpec{
 		Type:   typ,
-		Scheme: url.Scheme,
-		Host:   url.Host,
+		Scheme: s,
+		Host:   h,
 	}
 	return u
 }
