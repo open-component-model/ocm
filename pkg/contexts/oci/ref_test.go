@@ -186,6 +186,28 @@ var _ = Describe("ref parsing", func() {
 
 	})
 
+	It("json spec", func() {
+		ctx := oci.New()
+
+		tag := "1.0.0"
+		CheckRef("OCIRegistry::{\"baseUrl\": \"test.com\"}//repo:1.0.0", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:   "OCIRegistry",
+				Scheme: "",
+				Host:   "",
+				Info:   "{\"baseUrl\": \"test.com\"}",
+			},
+			ArtSpec: oci.ArtSpec{
+				Repository: "repo",
+				Tag:        &tag,
+			},
+		})
+		ref := Must(oci.ParseRef("OCIRegistry::{\"baseUrl\": \"test.com\"}//repo:1.0.0"))
+		spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+		repo := Must(spec.Repository(ctx, nil))
+		_ = repo
+	})
+
 	It("fails", func() {
 		CheckRef("https://ubuntu", nil)
 		CheckRef("ubuntu@4711", nil)
@@ -215,6 +237,20 @@ var _ = Describe("ref parsing", func() {
 		})
 	})
 	It("localhost", func() {
+		ctx := oci.New()
+		// port is necessary here, otherwise it is ambiguous with dockerhub reference (localhost/test:1.0.0 could be
+		// an artifact stored on duckerhub)
+		ref := Must(oci.ParseRef("localhost:80/test:1.0.0"))
+		spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+		Expect(spec).To(Equal(ocireg.NewRepositorySpec("localhost:80")))
+	})
+	It("localhost with unambiguous separator and without port", func() {
+		ctx := oci.New()
+		ref := Must(oci.ParseRef("localhost//test:1.0.0"))
+		spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+		Expect(spec).To(Equal(ocireg.NewRepositorySpec("localhost")))
+	})
+	It("localhost with unambiguous separator", func() {
 		ctx := oci.New()
 		ref := Must(oci.ParseRef("localhost:80//test:1.0.0"))
 		spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
