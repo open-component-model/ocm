@@ -134,7 +134,9 @@ func ParseRef(ref string) (RefSpec, error) {
 		spec.Version = &v
 	}
 	var err error
-	spec.UniformRepositorySpec, err = cpi.HandleRef(spec.UniformRepositorySpec)
+	if spec.Info == "" || !(string(spec.Info[0]) == "{") {
+		spec.UniformRepositorySpec, err = cpi.HandleRef(spec.UniformRepositorySpec)
+	}
 	return spec, err
 }
 
