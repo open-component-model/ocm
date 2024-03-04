@@ -30,7 +30,7 @@ var (
 	// AnchoredRepositoryRegexp parses a uniform repository spec.
 	AnchoredRepositoryRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
-		Capture(grammar.SchemeDomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+		grammar.SchemeDomainPortRegexp, Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
 	)
 
 	// AnchoredGenericRepositoryRegexp describes a CTF reference.
