@@ -22,6 +22,28 @@ func Type(t string) string {
 	}
 	return t + "::"
 }
+func FileFormat(t, f string) string {
+	if t == "" {
+		return f
+	}
+	if f == "" {
+		return t
+	}
+	return t + "+" + f
+}
+func FileType(t, f string) string {
+	if t != "" {
+		return t
+	} else {
+		return f
+	}
+}
+func Scheme(s string) string {
+	if s == "" {
+		return s
+	}
+	return s + "://"
+}
 func Sub(t string) string {
 	if t == "" {
 		return t
@@ -63,7 +85,39 @@ func CheckRef(ref, ut, scheme, h, us, c, uv, i string, th ...string) {
 }
 
 var _ = Describe("ref parsing", func() {
-	Context("complete refs", func() {
+	Context("file path refs", func() {
+		t := "ctf"
+		p := "file/path"
+		c := "github.com/mandelsoft/ocm"
+		v := "v1"
+
+		Context("[+][<type>::][./][<file path>//<component id>[:<version>]", func() {
+			for _, cm := range []string{"", "+"} {
+				for _, ut := range []string{"", t} {
+					for _, uf := range []string{"", "directory", "tar", "tgz"} {
+						for _, up := range []string{p, "./" + p} {
+							for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + "+65", v + ".1.2-rc.1", v + ".1.2+65"} {
+								ref := cm + Type(FileFormat(ut, uf)) + up + "//" + c + Vers(uv)
+								ut, uf, uv, up := ut, uf, uv, up
+
+								// tests parsing of all permutations of
+								// [+][<type>::][./]<file path>//<component id>[:<version>]
+								It("parses ref "+ref, func() {
+									if ut != "" || uf != "" {
+										CheckRef(ref, FileType(ut, uf), "", "", "", c, uv, up, FileFormat(ut, uf))
+									} else {
+										CheckRef(ref, FileType(ut, uf), "", "", "", c, uv, up)
+									}
+								})
+							}
+						}
+					}
+				}
+			}
+		})
+	})
+
+	Context("json repo spec refs", func() {
 		t := ocireg.Type
 		s := "mandelsoft/cnudie"
 		v := "v1"
@@ -71,21 +125,68 @@ var _ = Describe("ref parsing", func() {
 		h := "ghcr.io"
 		c := "github.com/mandelsoft/ocm"
 
-		Context("without info", func() {
-			for _, ut := range []string{t, ""} {
-				for _, uh := range []string{h, h + ":3030", "localhost", "localhost:3030"} {
-					for _, us := range []string{"", s} {
-						for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + "+65", v + ".1.2-rc.1", v + ".1.2+65"} {
-							ref := Type(ut) + uh + Sub(us) + "//" + c + Vers(uv)
-							ut, uh, us, uv := ut, uh, us, uv
+		repospec := ocireg.NewRepositorySpec(h, &ocireg.ComponentRepositoryMeta{
+			ComponentNameMapping: "",
+			SubPath:              s,
+		})
+		jsonrepospec := string(Must(repospec.MarshalJSON()))
 
-							It("parses ref "+ref, func() {
-								if ut == "" && strings.HasPrefix(uh, "localhost") {
-									CheckRef(ref, ut, "", "", "", c, uv, uh+Sub(us))
-								} else {
-									CheckRef(ref, ut, "", uh, us, c, uv, "")
+		Context("[<type>::][<json repo spec>//]<component id>[:<version>]", func() {
+			for _, cm := range []string{"", "+"} {
+				for _, ut := range []string{t, ""} {
+					for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + "+65", v + ".1.2-rc.1", v + ".1.2+65"} {
+						ref := cm + Type(ut) + jsonrepospec + "//" + c + Vers(uv)
+						ut, uv := ut, uv
+
+						// tests parsing of all permutations of
+						// [<type>::][<json repo spec>//]<component id>[:<version>]
+						It("parses ref "+ref, func() {
+							CheckRef(ref, ut, "", "", "", c, uv, jsonrepospec)
+						})
+					}
+				}
+			}
+		})
+
+		It("fail if mismatch between type in ref (here, ctf) and type in json repo spec (here, OCIRegistry)", func() {
+			ctx := ocm.New()
+
+			ref := Must(ocm.ParseRef("ctf::{\"baseUrl\":\"ghcr.io\",\"subPath\":\"mandelsoft/cnudie\",\"type\":\"OCIRegistry\"}//github.com/mandelsoft/ocm:v1"))
+			spec, err := ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec)
+			Expect(spec).To(BeNil())
+			Expect(err).ToNot(BeNil())
+		})
+	})
+
+	Context("domain refs", func() {
+		t := ocireg.Type
+		s := "mandelsoft/cnudie"
+		v := "v1"
+
+		h := "ghcr.io"
+		c := "github.com/mandelsoft/ocm"
+
+		Context("[+][<type>::]<domain>[:<port>][/<repository prefix>]//<component id>[:<version] - without info", func() {
+			for _, cm := range []string{"", "+"} {
+				for _, ut := range []string{t, ""} {
+					for _, ush := range []string{"", "http", "https"} {
+						for _, uh := range []string{h, h + ":3030", "localhost", "localhost:3030"} {
+							for _, us := range []string{"", s} {
+								for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + "+65", v + ".1.2-rc.1", v + ".1.2+65"} {
+									ref := cm + Type(ut) + Scheme(ush) + uh + Sub(us) + "//" + c + Vers(uv)
+									ut, ush, uh, us, uv := ut, ush, uh, us, uv
+
+									// tests parsing of all permutations of
+									// [+][<type>::]<domain>[:<port>][/<repository prefix>]//<component id>[:<version]
+									It("parses ref "+ref, func() {
+										if ut == "" && strings.HasPrefix(uh, "localhost") {
+											CheckRef(ref, ut, "", "", "", c, uv, Scheme(ush)+uh+Sub(us))
+										} else {
+											CheckRef(ref, ut, ush, uh, us, c, uv, "")
+										}
+									})
 								}
-							})
+							}
 						}
 					}
 				}
@@ -137,6 +238,33 @@ var _ = Describe("ref parsing", func() {
 					Version:   &v,
 				},
 			}))
+		})
+	})
+
+	Context("json repository spec ref", func() {
+		It("type in ref", func() {
+			ctx := ocm.New()
+
+			ref := Must(ocm.ParseRef("+OCIRegistry::{\"baseUrl\": \"example.com\"}//github.com/mandelsoft/ocm:v1"))
+			spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+			repo := Must(spec.Repository(ctx, nil))
+			_ = repo
+		})
+		It("type in json repo spec", func() {
+			ctx := ocm.New()
+
+			ref := Must(ocm.ParseRef("{\"type\":\"OCIRegistry\", \"baseUrl\": \"example.com\"}//github.com/mandelsoft/ocm:v1"))
+			spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+			repo := Must(spec.Repository(ctx, nil))
+			_ = repo
+		})
+		It("type in ref and json repo spec", func() {
+			ctx := ocm.New()
+
+			ref := Must(ocm.ParseRef("OCIRegistry::{\"type\":\"OCIRegistry\", \"baseUrl\": \"example.com//test\"}//github.com/mandelsoft/ocm:v1"))
+			spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+			repo := Must(spec.Repository(ctx, nil))
+			_ = repo
 		})
 	})
 
