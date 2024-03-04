@@ -37,6 +37,7 @@ type Context interface {
 
 	RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error)
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
+	RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error)
 
 	GetAlias(name string) RepositorySpec
 	SetAlias(name string, spec RepositorySpec)
