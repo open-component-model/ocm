@@ -137,6 +137,21 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>caCerts</code>: root certificate for signing server
 
 
+  - <code>wget</code>: wget credential matcher
+
+    It matches the <code>wget</code> consumer type and additionally acts like
+    the <code>hostpath</code> type.
+
+    Credential consumers of the consumer type wget evaluate the following credential properties:
+
+      - <code>username</code>: the basic auth user name
+      - <code>password</code>: the basic auth password
+      - <code>identityToken</code>: the bearer token used for non-basic auth authorization
+      - <code>certificateAuthority</code>: the certificate authority certificate used to verify certificates presented by the server
+      - <code>certificate</code>: the certificate used to present to the server
+      - <code>privateKey</code>: the private key corresponding to the certificate
+
+
 
 The following standard identity matchers are supported:
   - <code>exact</code>: exact match of given pattern set

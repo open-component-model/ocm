@@ -35,22 +35,24 @@ type SignatureCommand struct {
 type spec struct {
 	op      string
 	sign    bool
+	desc    string
 	example string
 	terms   []string
 }
 
-func newOperation(op string, sign bool, terms []string, example string) *spec {
+func newOperation(op string, sign bool, terms []string, desc string, example string) *spec {
 	return &spec{
 		op:      op,
 		sign:    sign,
+		desc:    desc,
 		example: example,
 		terms:   terms,
 	}
 }
 
 // NewCommand creates a new ctf command.
-func NewCommand(ctx clictx.Context, op string, sign bool, terms []string, example string, names ...string) *cobra.Command {
-	spec := newOperation(op, sign, terms, example)
+func NewCommand(ctx clictx.Context, op string, sign bool, terms []string, desc string, example string, names ...string) *cobra.Command {
+	spec := newOperation(op, sign, terms, desc, example)
 	return utils.SetupCommand(&SignatureCommand{spec: spec, BaseCommand: utils.NewBaseCommand(ctx, versionconstraintsoption.New(), repooption.New(), signoption.New(sign), lookupoption.New())}, names...)
 }
 
@@ -60,7 +62,7 @@ func (o *SignatureCommand) ForName(name string) *cobra.Command {
 		Short: o.spec.op + " component version",
 		Long: `
 ` + o.spec.op + ` specified component versions.
-`,
+` + o.spec.desc,
 		Example: o.spec.example,
 	}
 }
