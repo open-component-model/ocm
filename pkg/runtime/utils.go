@@ -122,3 +122,23 @@ func CheckSpecification(data []byte) error {
 }
 
 // --- end check ---
+
+func CompleteSpecWithType(typ string, data []byte) ([]byte, error) {
+	var m map[string]interface{}
+	err := DefaultJSONEncoding.Unmarshal(data, &m)
+	if err != nil {
+		return nil, err
+	}
+	if typ != "" {
+		if m["type"] != nil && m["type"] != typ {
+			return nil, fmt.Errorf("type mismatch: %s", m["type"])
+		}
+		m["type"] = typ
+		return DefaultJSONEncoding.Marshal(m)
+	} else {
+		if m["type"] == nil {
+			return nil, fmt.Errorf("type missing")
+		}
+	}
+	return data, nil
+}

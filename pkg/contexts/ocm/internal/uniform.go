@@ -153,6 +153,14 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
+	if u.Info != "" && string(u.Info[0]) == "{" && u.Host == "" && u.Scheme == "" && u.SubPath == "" {
+		data, err := runtime.CompleteSpecWithType(u.Type, []byte(u.Info))
+		if err != nil {
+			return nil, err
+		}
+		return ctx.RepositorySpecForConfig(data, runtime.DefaultJSONEncoding)
+	}
+
 	deferr := errors.ErrNotSupported("uniform repository ref", u.String())
 	if u.Type == "" {
 		if u.Info != "" {
