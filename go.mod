@@ -23,6 +23,7 @@ require (
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/drone/envsubst v1.0.3
+	github.com/fluxcd/cli-utils v0.36.0-flux.3
 	github.com/fluxcd/pkg/ssa v0.36.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/ghodss/yaml v1.0.0
@@ -73,14 +74,12 @@ require (
 	k8s.io/apimachinery v0.29.0
 	k8s.io/cli-runtime v0.29.0
 	k8s.io/client-go v0.29.0
-	sigs.k8s.io/cli-utils v0.35.0
 	sigs.k8s.io/controller-runtime v0.16.3
 	sigs.k8s.io/yaml v1.4.0
 )
 
 require (
 	github.com/buildkite/go-pipeline v0.3.2 // indirect
-	github.com/fluxcd/cli-utils v0.36.0-flux.3 // indirect
 	github.com/gomodule/redigo v1.8.9 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/jinzhu/gorm v1.9.16 // indirect
