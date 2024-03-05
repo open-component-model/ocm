@@ -45,11 +45,20 @@ func TransferIndexWithFilter(art cpi.IndexAccess, set cpi.ArtifactSink, filter f
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 
+	// provide a local copy of the inbound artifact (index)
+	// which keeps track of the original serialized form,
+	// which is used if the manifest is left unchanged after
+	// filtering.
 	modified, err := cpi.NewArtifact(art)
 	if err != nil {
 		return nil, err
 	}
 
+	// don't add this (index) object later.
+	// it implements the same interface, but would
+	// provide a new serialization, which might differ
+	// from the original one even if it is unchanged,
+	// which would change the digest.
 	index, err := modified.Index()
 	if err != nil {
 		return nil, err

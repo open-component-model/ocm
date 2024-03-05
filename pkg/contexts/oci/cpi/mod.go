@@ -20,6 +20,11 @@ type modifiedArtifact struct {
 
 var _ Artifact = (*modifiedArtifact)(nil)
 
+// NewArtifact provides a copy of the given artifact,
+// which will keep track of the original serialization.
+// This one is used as long as the artifact is unchanged.
+// (the returned underlying implementation of the Artifact interface
+// might differ from the original one).
 func NewArtifact(art Artifact) (Artifact, error) {
 	blob, err := art.Blob()
 	if err != nil {
@@ -31,7 +36,7 @@ func NewArtifact(art Artifact) (Artifact, error) {
 	}
 
 	return &modifiedArtifact{
-		_Artifact: state.GetOriginalState().(*_Artifact),
+		_Artifact: state.GetState().(*_Artifact),
 		state:     state,
 	}, nil
 }
