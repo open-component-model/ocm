@@ -5,8 +5,6 @@
 package transfer
 
 import (
-	"slices"
-
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -47,13 +45,29 @@ func TransferIndexWithFilter(art cpi.IndexAccess, set cpi.ArtifactSink, filter f
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 
-	index := *art.GetDescriptor()
-	index.Manifests = slices.Clone(index.Manifests)
+	// provide a local copy of the inbound artifact (index)
+	// which keeps track of the original serialized form,
+	// which is used if the manifest is left unchanged after
+	// filtering.
+	modified, err := cpi.NewArtifact(art)
+	if err != nil {
+		return nil, err
+	}
+
+	// don't add this (index) object later.
+	// it implements the same interface, but would
+	// provide a new serialization, which might differ
+	// from the original one even if it is unchanged,
+	// which would change the digest.
+	index, err := modified.Index()
+	if err != nil {
+		return nil, err
+	}
 
 	ign := 0
 	for i, l := range art.GetDescriptor().Manifests {
 		loop := finalize.Nested()
-		logging.Logger().Debug("indexed manifest", "digest", "digest", l.Digest, "size", l.Size)
+		logging.Logger().Debug("indexed manifest", "digest", l.Digest, "size", l.Size)
 		art, err := art.GetArtifact(l.Digest)
 		if err != nil {
 			return nil, errors.Wrapf(err, "getting indexed artifact %s", l.Digest)
@@ -90,11 +104,11 @@ func TransferIndexWithFilter(art cpi.IndexAccess, set cpi.ArtifactSink, filter f
 		}
 	}
 
-	_, err = set.AddArtifact(&index, tags...)
+	_, err = set.AddArtifact(modified, tags...)
 	if err != nil {
 		return nil, errors.Wrapf(err, "transferring index artifact")
 	}
-	return generics.Pointer(index.Digest()), err
+	return generics.Pointer(modified.Digest()), err
 }
 
 func TransferManifest(art cpi.ManifestAccess, set cpi.ArtifactSink, tags ...string) (err error) {

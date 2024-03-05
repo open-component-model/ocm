@@ -9,13 +9,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fluxcd/cli-utils/pkg/kstatus/polling"
 	"github.com/fluxcd/pkg/ssa"
+	"github.com/fluxcd/pkg/ssa/utils"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	apiruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"sigs.k8s.io/cli-utils/pkg/kstatus/polling"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -34,7 +35,7 @@ func readObjects(manifestPath string) ([]*unstructured.Unstructured, error) {
 	}
 	defer ms.Close()
 
-	return ssa.ReadObjects(bufio.NewReader(ms))
+	return utils.ReadObjects(bufio.NewReader(ms))
 }
 
 // ownerRef contains the server-side apply field manager and ownership labels group.
@@ -49,7 +50,6 @@ func NewResourceManager(rcg genericclioptions.RESTClientGetter) (*ssa.ResourceMa
 	if err != nil {
 		return nil, fmt.Errorf("loading kubeconfig failed: %w", err)
 	}
-
 	// bump limits
 	cfg.QPS = 100.0
 	cfg.Burst = 300
