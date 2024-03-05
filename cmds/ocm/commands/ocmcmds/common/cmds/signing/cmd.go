@@ -91,7 +91,7 @@ func (o *SignatureCommand) Run() (rerr error) {
 	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repo, comphdlr.OptionsFor(o))
 	sopts := signing.NewOptions(sign, signing.Resolver(repo, lookup.Resolver))
 	if !o.spec.sign {
-		if len(sopts.SignatureNames) > 0 {
+		if len(sopts.SignatureNames) > 0 || sopts.Issuer != nil || sopts.Keyless {
 			sopts.VerifySignature = true
 		}
 	}
