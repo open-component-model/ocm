@@ -6,6 +6,7 @@ package ociutils
 
 import (
 	"archive/tar"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
@@ -16,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -39,6 +41,7 @@ func PrintManifest(pr common.Printer, m cpi.ManifestAccess, listFiles bool) {
 		pr.Printf("descriptor: invalid: %s\n", err)
 	} else {
 		pr.Printf("descriptor: %s\n", string(data))
+		pr.Printf("digest    : %s\n", HashData(data))
 	}
 	man := m.GetDescriptor()
 	pr.Printf("config:\n")
@@ -116,6 +119,13 @@ func PrintLayer(pr common.Printer, blob blobaccess.BlobAccess, listFiles bool) {
 }
 
 func PrintIndex(pr common.Printer, i cpi.IndexAccess, listFiles bool) {
+	data, err := blobaccess.BlobData(i.Blob())
+	if err != nil {
+		pr.Printf("descriptor: invalid: %s\n", err)
+	} else {
+		pr.Printf("descriptor: %s\n", string(data))
+		pr.Printf("digest    : %s\n", HashData(data))
+	}
 	printAnnotations(pr, i.GetDescriptor().Annotations)
 	pr.Printf("manifests:\n")
 	for _, l := range i.GetDescriptor().Manifests {
@@ -163,4 +173,9 @@ func printAnnotations(pr common.Printer, annos map[string]string) {
 			pr.Printf(fmt.Sprintf("  %%s:%%%ds %%s\n", l-len(k)), k, "", annos[k])
 		}
 	}
+}
+
+func HashData(data []byte) string {
+	s, _ := signing.Hash(sha256.New(), data)
+	return s
 }

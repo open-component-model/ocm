@@ -285,7 +285,7 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 
 			if resp.StatusCode > 299 {
 				if resp.StatusCode == http.StatusNotFound {
-					log.G(ctxWithLogger).Info("trying next host - response was http.StatusNotFound")
+					// log.G(ctxWithLogger).Info("trying next host - response was http.StatusNotFound")
 					continue
 				}
 				if resp.StatusCode > 399 {
