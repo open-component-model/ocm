@@ -87,19 +87,39 @@ func ParseRef(ref string) (RefSpec, error) {
 	}
 
 	spec := RefSpec{UniformRepositorySpec: UniformRepositorySpec{CreateIfMissing: create}}
-	match := grammar.AnchoredSchemedHostPortArtifactRegexp.FindSubmatch([]byte(ref))
+	match := grammar.AnchoredTypedSchemedHostPortArtifactRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Scheme = string(match[1])
-		spec.Host = string(match[2])
-		spec.Repository = string(match[3])
-		spec.Tag = pointer(match[4])
-		spec.Digest = dig(match[5])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
+		spec.Scheme = string(match[2])
+		spec.Host = string(match[3])
+		spec.Repository = string(match[4])
+		spec.Tag = pointer(match[5])
+		spec.Digest = dig(match[6])
 		return spec, nil
 	}
 
+	match = grammar.AnchoredTypedOptSchemedReqHostReqPortArtifactRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
+		spec.Scheme = string(match[2])
+		spec.Host = string(match[3])
+		spec.Repository = string(match[4])
+		spec.Tag = pointer(match[5])
+		spec.Digest = dig(match[6])
+		return spec, nil
+	}
 	match = grammar.FileReferenceRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Info = string(match[2])
 		spec.Repository = string(match[3])
 		spec.Tag = pointer(match[4])
@@ -133,7 +153,10 @@ func ParseRef(ref string) (RefSpec, error) {
 	}
 	match = grammar.TypedReferenceRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Scheme = string(match[2])
 		spec.Host = string(match[3])
 		spec.Repository = string(match[4])
@@ -143,7 +166,10 @@ func ParseRef(ref string) (RefSpec, error) {
 	}
 	match = grammar.TypedURIRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Scheme = string(match[2])
 		spec.Host = string(match[3])
 		spec.Repository = string(match[4])
@@ -153,25 +179,34 @@ func ParseRef(ref string) (RefSpec, error) {
 	}
 	match = grammar.TypedGenericReferenceRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Info = string(match[2])
 		spec.Repository = string(match[3])
 		spec.Tag = pointer(match[4])
 		spec.Digest = dig(match[5])
 		return spec, nil
 	}
-	match = grammar.TypedGenericReferenceRegexpWithPort.FindSubmatch([]byte(ref))
-	if match != nil {
-		spec.Type = string(match[1])
-		spec.Info = string(match[2])
-		spec.Repository = string(match[3])
-		spec.Tag = pointer(match[4])
-		spec.Digest = dig(match[5])
-		return spec, nil
-	}
+	//match = grammar.TypedGenericReferenceRegexpWithPort.FindSubmatch([]byte(ref))
+	//if match != nil {
+	//	h := string(match[1])
+	//	t, _ := grammar.SplitTypeSpec(h)
+	//	spec.Type = t
+	//	spec.TypeHint = h
+	//	spec.Info = string(match[2])
+	//	spec.Repository = string(match[3])
+	//	spec.Tag = pointer(match[4])
+	//	spec.Digest = dig(match[5])
+	//	return spec, nil
+	//}
 	match = grammar.AnchoredRegistryRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Info = string(match[2])
 		spec.Repository = string(match[3])
 		spec.Tag = pointer(match[4])
@@ -181,7 +216,10 @@ func ParseRef(ref string) (RefSpec, error) {
 
 	match = grammar.AnchoredGenericRegistryRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Info = string(match[2])
 
 		match = grammar.ErrorCheckRegexp.FindSubmatch([]byte(ref))

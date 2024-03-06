@@ -7,13 +7,80 @@ package oci_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
-	"github.com/opencontainers/go-digest"
+	godigest "github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 )
+
+func Type(t string) string {
+	if t == "" {
+		return t
+	}
+	return t + "::"
+}
+func FileFormat(t, f string) string {
+	if t == "" {
+		return f
+	}
+	if f == "" {
+		return t
+	}
+	return t + "+" + f
+}
+func FileType(t, f string) string {
+	if t != "" {
+		return t
+	} else {
+		return f
+	}
+}
+func Scheme(s string) string {
+	if s == "" {
+		return s
+	}
+	return s + "://"
+}
+func Sub(t string) string {
+	if t == "" {
+		return t
+	}
+	return "/" + t
+}
+func Vers(t, d string) string {
+	if t == "" && d == "" {
+		return ""
+	}
+	if t == "" {
+		return "@" + d
+	}
+	if d == "" {
+		return ":" + t
+	}
+	return ":" + t + "@" + d
+}
+
+func Dig(b []byte) *godigest.Digest {
+	if len(b) == 0 {
+		return nil
+	}
+	s := godigest.Digest(b)
+	return &s
+}
+
+func Pointer(b []byte) *string {
+	if len(b) == 0 {
+		return nil
+	}
+	s := string(b)
+	return &s
+}
 
 func CheckRef(ref string, exp *oci.RefSpec) {
 	spec, err := oci.ParseRef(ref)
@@ -36,11 +103,240 @@ func CheckRepo(ref string, exp *oci.UniformRepositorySpec) {
 }
 
 var _ = Describe("ref parsing", func() {
-	digest := digest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
+	digest := godigest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
 	tag := "v1"
 
 	ghcr := oci.UniformRepositorySpec{Host: "ghcr.io"}
 	docker := oci.UniformRepositorySpec{Host: "docker.io"}
+
+	Context("file path refs", func() {
+		t := "ctf"
+		p := "file/path"
+		r := "github.com/mandelsoft/ocm"
+		v := "v1"
+		d := "sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
+
+		Context("[+][<type>::][./][<file path>//<component id>[:<version>]", func() {
+			for _, cm := range []string{"", "+"} {
+				for _, ut := range []string{"", t} {
+					for _, uf := range []string{"", "directory", "tar", "tgz"} {
+						for _, up := range []string{p, "./" + p} {
+							for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + ".1.2-rc.1"} {
+								for _, ud := range []string{"", d} {
+									ref := cm + Type(FileFormat(ut, uf)) + up + "//" + r + Vers(uv, ud)
+									ut, uf, uv, up, ud := ut, uf, uv, up, ud
+
+									// tests parsing of all permutations of
+									// [+][<type>::][./][<file path>//<repository>[:<tag>][@<digest>]
+									It("parses ref "+ref, func() {
+										CheckRef(ref, &oci.RefSpec{
+											UniformRepositorySpec: oci.UniformRepositorySpec{
+												Type:            FileType(ut, uf),
+												Scheme:          "",
+												Host:            "",
+												Info:            up,
+												CreateIfMissing: ref[0] == '+',
+												TypeHint:        FileFormat(ut, uf),
+											},
+											ArtSpec: oci.ArtSpec{
+												Repository: r,
+												Tag:        Pointer([]byte(uv)),
+												Digest:     Dig([]byte(ud)),
+											},
+										})
+									})
+								}
+							}
+						}
+					}
+				}
+			}
+		})
+	})
+
+	Context("domain refs", func() {
+		t := "oci"
+		h := "ghcr.io"
+		r := "github.com/mandelsoft/ocm"
+		v := "v1"
+		d := "sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
+
+		// Notice that the file formats (directory, tar, tgz) CAN BE PARSED in this notation, BUT for non file based
+		// implementations like oci, this information is not used.
+		Context("[<type>::][<scheme>:://]<domain>[:<port>/]<repository>[:<tag>][@<digest>]", func() {
+			for _, cm := range []string{"", "+"} {
+				for _, ut := range []string{"", t} {
+					for _, uf := range []string{"", "directory", "tar", "tgz"} {
+						for _, ush := range []string{"", "http", "https"} {
+							for _, uh := range []string{h, h + ":3030"} {
+								for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + ".1.2-rc.1"} {
+									for _, ud := range []string{"", d} {
+										ref := cm + Type(FileFormat(ut, uf)) + Scheme(ush) + uh + "/" + r + Vers(uv, ud)
+										ut, uf, ush, uh, uv, ud := ut, uf, ush, uh, uv, ud
+
+										// tests parsing of all permutations of
+										// [<type>::][<scheme>:://]<domain>[:<port>/]<repository>[:<tag>][@<digest>]
+										It("parses ref "+ref, func() {
+											CheckRef(ref, &oci.RefSpec{
+												UniformRepositorySpec: oci.UniformRepositorySpec{
+													Type:            FileType(ut, uf),
+													Scheme:          ush,
+													Host:            uh,
+													Info:            "",
+													CreateIfMissing: ref[0] == '+',
+													TypeHint:        FileFormat(ut, uf),
+												},
+												ArtSpec: oci.ArtSpec{
+													Repository: r,
+													Tag:        Pointer([]byte(uv)),
+													Digest:     Dig([]byte(ud)),
+												},
+											})
+										})
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		})
+	})
+
+	Context("host port refs", func() {
+		t := "oci"
+		h := "localhost"
+		r := "github.com/mandelsoft/ocm"
+		v := "v1"
+		d := "sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
+
+		// localhost (with and without port) (and other host names) are a special case since these are not formally
+		// valid domains
+		// the combination of this test and the test below test parsing of all permutations of
+		// [<type>::][<scheme>://]<host>:<port>/<repository>[:<tag>][@<digest>]
+		Context("[<type>::]<scheme>://<host>:<port>/<repository>[:<tag>][@<digest>]", func() {
+			for _, cm := range []string{"", "+"} {
+				for _, ut := range []string{"", t} {
+					for _, uf := range []string{"", "directory", "tar", "tgz"} {
+						for _, ush := range []string{"", "http", "https"} {
+							for _, uh := range []string{h + ":3030"} {
+								for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + ".1.2-rc.1"} {
+									for _, ud := range []string{"", d} {
+										ref := cm + Type(FileFormat(ut, uf)) + Scheme(ush) + uh + "/" + r + Vers(uv, ud)
+										ut, uf, ush, uh, uv, ud := ut, uf, ush, uh, uv, ud
+
+										// tests parsing of all permutations of
+										// [<type>::]<scheme>://<domain>:<port>/<repository>[:<tag>][@<digest>]
+										It("parses ref "+ref, func() {
+											CheckRef(ref, &oci.RefSpec{
+												UniformRepositorySpec: oci.UniformRepositorySpec{
+													Type:            FileType(ut, uf),
+													Scheme:          ush,
+													Host:            uh,
+													Info:            "",
+													CreateIfMissing: ref[0] == '+',
+													TypeHint:        FileFormat(ut, uf),
+												},
+												ArtSpec: oci.ArtSpec{
+													Repository: r,
+													Tag:        Pointer([]byte(uv)),
+													Digest:     Dig([]byte(ud)),
+												},
+											})
+										})
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		})
+		//Context("[<type>::]<host>:<port>/<repository>[:<tag>][@<digest>]", func() {
+		//	for _, cm := range []string{"", "+"} {
+		//		for _, ut := range []string{"", t} {
+		//			for _, uf := range []string{"", "directory", "tar", "tgz"} {
+		//				for _, uh := range []string{h + ":3030"} {
+		//					for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + ".1.2-rc.1"} {
+		//						for _, ud := range []string{"", d} {
+		//							ref := cm + Type(FileFormat(ut, uf)) + uh + "/" + r + Vers(uv, ud)
+		//							ut, uf, uh, uv, ud := ut, uf, uh, uv, ud
+		//
+		//							// tests parsing of all permutations of
+		//							// [<type>::]<host>:<port>/<repository>[:<tag>][@<digest>]
+		//							It("parses ref "+ref, func() {
+		//								CheckRef(ref, &oci.RefSpec{
+		//									UniformRepositorySpec: oci.UniformRepositorySpec{
+		//										Type:            FileType(ut, uf),
+		//										Scheme:          "",
+		//										Host:            "",
+		//										Info:            uh,
+		//										CreateIfMissing: ref[0] == '+',
+		//										TypeHint:        FileFormat(ut, uf),
+		//									},
+		//									ArtSpec: oci.ArtSpec{
+		//										Repository: r,
+		//										Tag:        Pointer([]byte(uv)),
+		//										Digest:     Dig([]byte(ud)),
+		//									},
+		//								})
+		//							})
+		//						}
+		//					}
+		//				}
+		//			}
+		//		}
+		//	}
+		//})
+	})
+
+	Context("json repo spec refs", func() {
+		t := "oci"
+		h := "ghcr.io"
+		r := "github.com/mandelsoft/ocm"
+		v := "v1"
+		d := "sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
+
+		repospec := ocireg.NewRepositorySpec(h)
+		jsonrepospec := string(Must(runtime.DefaultJSONEncoding.Marshal(repospec)))
+
+		// Notice that the file formats (directory, tar, tgz) CAN BE PARSED in this notation, BUT for non file based
+		// implementations like oci, this information is not used.
+		Context("[<type>::][<json repo spec>//]<repository>[:<tag>][@<digest>]", func() {
+			for _, cm := range []string{"", "+"} {
+				for _, ut := range []string{"", t} {
+					for _, uf := range []string{"", "directory", "tar", "tgz"} {
+						for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + ".1.2-rc.1"} {
+							for _, ud := range []string{"", d} {
+								ref := cm + Type(ut) + jsonrepospec + "//" + r + Vers(uv, ud)
+								ut, uv, ud := ut, uv, ud
+
+								// tests parsing of all permutations of
+								// [<type>::][<json repo spec>//]<repository>[:<tag>][@<digest>]
+								It("parses ref "+ref, func() {
+									CheckRef(ref, &oci.RefSpec{
+										UniformRepositorySpec: oci.UniformRepositorySpec{
+											Type:            FileType(ut, uf),
+											Scheme:          "",
+											Host:            "",
+											Info:            jsonrepospec,
+											CreateIfMissing: ref[0] == '+',
+											TypeHint:        FileFormat(ut, uf),
+										},
+										ArtSpec: oci.ArtSpec{
+											Repository: r,
+											Tag:        Pointer([]byte(uv)),
+											Digest:     Dig([]byte(ud)),
+										},
+									})
+								})
+							}
+						}
+					}
+				}
+			}
+		})
+	})
 
 	It("succeeds for repository", func() {
 		CheckRef("::ghcr.io/", &oci.RefSpec{UniformRepositorySpec: ghcr})
@@ -69,10 +365,11 @@ var _ = Describe("ref parsing", func() {
 		})
 		CheckRef("type::https://ghcr.io/repo/repo:v1@"+digest.String(), &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
-				Type:   "type",
-				Scheme: "https",
-				Host:   "ghcr.io",
-				Info:   "",
+				Type:     "type",
+				Scheme:   "https",
+				Host:     "ghcr.io",
+				Info:     "",
+				TypeHint: "type",
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "repo/repo",
@@ -95,10 +392,11 @@ var _ = Describe("ref parsing", func() {
 		})
 		CheckRef("directory::a/b", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
-				Type:   "directory",
-				Scheme: "",
-				Host:   "",
-				Info:   "a/b",
+				Type:     "directory",
+				Scheme:   "",
+				Host:     "",
+				Info:     "a/b",
+				TypeHint: "directory",
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "",
@@ -106,10 +404,11 @@ var _ = Describe("ref parsing", func() {
 		})
 		CheckRef("ctf+directory::a/b", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
-				Type:   "ctf+directory",
-				Scheme: "",
-				Host:   "",
-				Info:   "a/b",
+				Type:     "ctf",
+				Scheme:   "",
+				Host:     "",
+				Info:     "a/b",
+				TypeHint: "ctf+directory",
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "",
@@ -117,11 +416,12 @@ var _ = Describe("ref parsing", func() {
 		})
 		CheckRef("+ctf+directory::a/b", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
-				Type:            "ctf+directory",
+				Type:            "ctf",
 				Scheme:          "",
 				Host:            "",
 				Info:            "a/b",
 				CreateIfMissing: true,
+				TypeHint:        "ctf+directory",
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "",
@@ -142,10 +442,11 @@ var _ = Describe("ref parsing", func() {
 
 		CheckRef("directory::a/b//c/d", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
-				Type:   "directory",
-				Scheme: "",
-				Host:   "",
-				Info:   "a/b",
+				Type:     "directory",
+				Scheme:   "",
+				Host:     "",
+				Info:     "a/b",
+				TypeHint: "directory",
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "c/d",
@@ -154,10 +455,11 @@ var _ = Describe("ref parsing", func() {
 
 		CheckRef("oci::ghcr.io", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
-				Type:   "oci",
-				Scheme: "",
-				Host:   "ghcr.io",
-				Info:   "",
+				Type:     "oci",
+				Scheme:   "",
+				Host:     "ghcr.io",
+				Info:     "",
+				TypeHint: "oci",
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "",
@@ -192,10 +494,11 @@ var _ = Describe("ref parsing", func() {
 		tag := "1.0.0"
 		CheckRef("OCIRegistry::{\"baseUrl\": \"test.com\"}//repo:1.0.0", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
-				Type:   "OCIRegistry",
-				Scheme: "",
-				Host:   "",
-				Info:   "{\"baseUrl\": \"test.com\"}",
+				Type:     "OCIRegistry",
+				Scheme:   "",
+				Host:     "",
+				Info:     "{\"baseUrl\": \"test.com\"}",
+				TypeHint: "OCIRegistry",
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "repo",
@@ -267,5 +570,18 @@ var _ = Describe("ref parsing", func() {
 		ref := Must(oci.ParseRef("http://localhost:80/test:1.0.0"))
 		spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
 		Expect(spec).To(Equal(ocireg.NewRepositorySpec("http://localhost:80")))
+	})
+	It("ctf with create", func() {
+		ctx := oci.New()
+		ref := Must(oci.ParseRef("+ctf+directory::./file/path//github.com/mandelsoft/ocm"))
+		spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+		Expect(spec).To(Equal(Must(ctf.NewRepositorySpec(accessobj.ACC_CREATE, "./file/path", accessio.FormatDirectory))))
+	})
+	It("ctf without create", func() {
+		ctx := oci.New()
+
+		ref := Must(oci.ParseRepo("ctf+directory::./file/path"))
+		spec := Must(ctx.MapUniformRepositorySpec(&ref))
+		Expect(spec).To(Equal(Must(ctf.NewRepositorySpec(accessobj.ACC_WRITABLE, "./file/path"))))
 	})
 })
