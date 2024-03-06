@@ -123,5 +123,10 @@ SPDX-License-Identifier: Apache-2.0
           program = self.packages.${system}.${pname} + "/bin/ecrplugin";
         };
       });
+      
+      legacyPackages = forAllSystems (system: rec {
+        nixpkgs = nixpkgsFor.${system};
+      });
+
     };
 }
