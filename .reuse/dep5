@@ -34,4 +34,4 @@ License: BSD-3-Clause
 
 Files: pkg/contexts/ocm/blobhandler/handlers/generic/npm/publish.go
 Copyright: Copyright 2021 - cloverstd
-License: MIT License
+License: MIT
