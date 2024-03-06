@@ -124,11 +124,24 @@ var (
 		Capture(HostPortRegexp))
 
 	// SchemedHostPortArtifactRegexp describes a non-DNS simple hostname with scheme like https://localhost/repository:1.0.0 with the scheme being required.
-	AnchoredSchemedHostPortArtifactRegexp = Anchored(Sequence(
+	AnchoredTypedSchemedHostPortArtifactRegexp = Anchored(Sequence(
+		Optional(Capture(TypeRegexp), Literal("::")),
 		SchemeRegexp,
 		Capture(Or(HostPortRegexp, DomainPortRegexp)),
 		Literal("/"),
+		Literal("/"),
 		CapturedArtifactVersionRegexp))
+
+	ReqHostPortRegexp = Sequence(
+		Or(DomainComponentRegexp, IPRegexp),
+		Literal(`:`), Match(`[0-9]+`))
+
+	AnchoredTypedOptSchemedReqHostReqPortArtifactRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Optional(SchemeRegexp),
+		Capture(ReqHostPortRegexp),
+		Match(RepositorySeparator),
+		Optional(CapturedArtifactVersionRegexp))
 
 	PathRegexp = Sequence(
 		Optional(Literal("/")),
@@ -222,11 +235,11 @@ var (
 		Capture(Match(".*?"), Match("[^:]")), Match(RepositorySeparator+RepositorySeparator),
 		Optional(CapturedArtifactVersionRegexp))
 
-	TypedGenericReferenceRegexpWithPort = Anchored(
-		Optional(Capture(TypeRegexp), Literal("::")),
-		Capture(Match(".*?"), Literal(`:`), Match(`[0-9]+`)),
-		Match(RepositorySeparator),
-		Optional(CapturedArtifactVersionRegexp))
+	//TypedGenericReferenceRegexpWithPort = Anchored(
+	//	Optional(Capture(TypeRegexp), Literal("::")),
+	//	Capture(Match(".*?"), Literal(`:`), Match(`[0-9]+`)),
+	//	Match(RepositorySeparator),
+	//	Optional(CapturedArtifactVersionRegexp))
 
 	FileReferenceRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
