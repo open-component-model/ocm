@@ -25,9 +25,13 @@ Disclaimer: The code in this project may include calls to APIs ("API Calls") of
  parties the right to use of access any SAP External Product, through API Calls.
 
 Files: **
-Copyright: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors
+Copyright: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors
 License: Apache-2.0
 
 Files: pkg/mimeutils/*
 Copyright: Copyright 2010 The Go Authors. All rights reserved.
 License: BSD-3-Clause
+
+Files: pkg/contexts/ocm/blobhandler/handlers/generic/npm/publish.go
+Copyright: Copyright 2021 - cloverstd
+License: MIT

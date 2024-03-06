@@ -1,6 +1,4 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
+// inspired by @cloverstd - https://gist.github.com/cloverstd/7355e95424d59256123a1093f76f78a6
 
 package npm
 
@@ -171,48 +169,4 @@ func prepare(data []byte) (*Package, error) {
 	pkg.Dist.Shasum = createSha1(data)
 	pkg.Dist.Integrity = createSha512(data)
 	return &pkg, nil
-}
-
-// Check if package already exists in npm registry. If it does, checks if it's the same.
-func packageExists(repoUrl string, pkg Package, token string) (bool, error) {
-	client := http.Client{}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, repoUrl+"/"+url.PathEscape(pkg.Name)+"/"+url.PathEscape(pkg.Version), nil)
-	if err != nil {
-		return false, err
-	}
-	req.Header.Set("authorization", "Bearer "+token)
-	resp, err := client.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusNotFound {
-		// artifact doesn't exist, it's safe to upload
-		return false, nil
-	}
-
-	// artifact exists, let's check if it's the same
-	all, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return false, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return false, fmt.Errorf("http (%d) - %s", resp.StatusCode, string(all))
-	}
-	var data map[string]interface{}
-	err = json.Unmarshal(all, &data)
-	if err != nil {
-		return false, err
-	}
-	dist := data["dist"].(map[string]interface{})
-	if pkg.Dist.Integrity == dist["integrity"] {
-		// sha-512 sum is the same, we can skip the upload
-		return true, nil
-	}
-	if pkg.Dist.Shasum == dist["shasum"] {
-		// sha-1 sum is the same, we can skip the upload
-		return true, nil
-	}
-
-	return false, fmt.Errorf("artifact already exists but has different shasum or integrity")
 }
