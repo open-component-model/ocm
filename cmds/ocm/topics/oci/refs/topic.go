@@ -30,14 +30,14 @@ images are possible:
 <center>
     <pre>[+][&lt;type>::][./][&lt;file path>//&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
         or
+    <pre>[+][&lt;type>::][&lt;json repo spec>//]&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
+		or
 	<pre>[+][&lt;type>::][&lt;scheme>:://]&lt;domain>[:&lt;port>]/&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
         or
-    <pre>[+][&lt;type>::][&lt;json repo spec>//]&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
-        or
-	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;host>:<port>[:&lt;tag>][@&lt;digest>]</pre>
-		Notice that <port> is required in this notation. Without <port>, this
-		notation would be ambiguous with the docker library notation mentioned
-		below.  
+	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;host>:&lt;port>/&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
+		Notice that &lt;port> is required in this notation. Without &lt;port>,
+		this notation would be ambiguous with the docker library notation 
+		mentioned below.  
 		or
     <pre>&lt;docker library>[:&lt;tag>][@&lt;digest>]</pre>
         or
@@ -50,6 +50,11 @@ as a whole:
 <center>
     <pre>[+][&lt;type>::][&lt;scheme>:://]&lt;domain>[:&lt;port>]</pre>
         or
+	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;host>[:&lt;port>]</pre>
+		Notice that &lt;port> is optional in this notation since this cannot be
+		an image reference and therefore cannot be ambiguous with the docker
+		library notaton.
+		or
     <pre>[+][&lt;type>::]&lt;json repo spec></pre>
         or
     <pre>[+][&lt;type>::][./]&lt;file path></pre>

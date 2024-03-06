@@ -189,18 +189,6 @@ func ParseRef(ref string) (RefSpec, error) {
 		spec.Digest = dig(match[5])
 		return spec, nil
 	}
-	//match = grammar.TypedGenericReferenceRegexpWithPort.FindSubmatch([]byte(ref))
-	//if match != nil {
-	//	h := string(match[1])
-	//	t, _ := grammar.SplitTypeSpec(h)
-	//	spec.Type = t
-	//	spec.TypeHint = h
-	//	spec.Info = string(match[2])
-	//	spec.Repository = string(match[3])
-	//	spec.Tag = pointer(match[4])
-	//	spec.Digest = dig(match[5])
-	//	return spec, nil
-	//}
 	match = grammar.AnchoredRegistryRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
 		h := string(match[1])

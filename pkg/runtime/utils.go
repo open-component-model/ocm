@@ -131,7 +131,7 @@ func CompleteSpecWithType(typ string, data []byte) ([]byte, error) {
 	}
 	if typ != "" {
 		if m["type"] != nil && m["type"] != typ {
-			return nil, fmt.Errorf("type mismatch: %s", m["type"])
+			return nil, fmt.Errorf("type mismatch between type in reference \"%s\" and type in json spec \"%s\"", typ, m["type"])
 		}
 		m["type"] = typ
 		return DefaultJSONEncoding.Marshal(m)
