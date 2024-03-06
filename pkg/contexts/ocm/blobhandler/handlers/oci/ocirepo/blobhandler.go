@@ -130,6 +130,84 @@ func NewArtifactHandler(base BaseFunction) cpi.BlobHandler {
 	return &artifactHandler{blobHandler{base}}
 }
 
+func (b *artifactHandler) CheckBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (bool, bool, error) {
+	mediaType := blob.MimeType()
+
+	if !artdesc.IsOCIMediaType(mediaType) || (!strings.HasSuffix(mediaType, "+tar") && !strings.HasSuffix(mediaType, "+tar+gzip")) {
+		return false, false, nil
+	}
+
+	log := cpi.BlobHandlerLogger(ctx.GetContext())
+
+	values := []interface{}{
+		"arttype", artType,
+		"mediatype", mediaType,
+		"hint", hint,
+	}
+
+	var art oci.ArtifactAccess
+	var err error
+	var finalizer Finalizer
+	defer finalizer.Finalize()
+
+	var namespace oci.NamespaceAccess
+	var version string
+	var name string
+	var tag string
+
+	ocictx, ok := ctx.(*storagecontext.StorageContext)
+	if !ok {
+		return false, false, fmt.Errorf("failed to assert type %T to storagecontext.StorageContext", ctx)
+	}
+	if hint == "" {
+		namespace = ocictx.Namespace
+	} else {
+		prefix := cpi.RepositoryPrefix(ctx.TargetComponentRepository().GetSpecification())
+		i := strings.LastIndex(hint, "@")
+		if i >= 0 {
+			hint = hint[:i] // remove digest
+		}
+		i = strings.LastIndex(hint, ":")
+		if i > 0 {
+			version = hint[i:]
+			tag = version[1:] // remove colon
+			name = hint[:i]
+		} else {
+			name = hint
+		}
+
+		hash := mapocirepoattr.Get(ctx.GetContext())
+		if hash.Prefix != nil {
+			prefix = *hash.Prefix
+		}
+		orig := name
+		mapped := hash.Map(name)
+		name = path.Join(prefix, mapped)
+		if mapped == orig {
+			log.Debug("namespace derived from hint",
+				generics.AppendedSlice[any](values, "namespace", name),
+			)
+		} else {
+			log.Debug("mapped namespace derived from hint",
+				generics.AppendedSlice[any](values, "namespace", name),
+			)
+		}
+
+		namespace, err = ocictx.Repository.LookupNamespace(name)
+		if err != nil {
+			return false, false, err
+		}
+		defer namespace.Close()
+	}
+
+	ok, err = namespace.HasArtifact(string(art.Digest()))
+	if ok {
+		return true, true, err
+	}
+	ok, err = namespace.HasArtifact(tag)
+	return ok, true, err
+}
+
 func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	mediaType := blob.MimeType()
 

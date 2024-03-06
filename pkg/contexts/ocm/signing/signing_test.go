@@ -283,7 +283,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			cv.GetDescriptor().Resources[0].Digest.Value = "010ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50" // some wrong value
 			_, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(StringEqualWithContext("github.com/mandelsoft/test:v1: calculated resource digest ([{HashAlgorithm:SHA-256 NormalisationAlgorithm:genericBlobDigest/v1 Value:" + D_TESTDATA + "}]) mismatches existing digest (SHA-256:010ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]) for testdata:v1 (Local blob sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[])"))
+			Expect(err.Error()).To(StringEqualWithContext("github.com/mandelsoft/test:v1: calculated resource digest (SHA-256:" + D_TESTDATA + "[genericBlobDigest/v1]) mismatches existing digest (SHA-256:010ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]) for testdata:v1 (Local blob sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[])"))
 			// Reset to original to avoid write back in readonly mode
 			cv.GetDescriptor().Resources[0].Digest.Value = D_TESTDATA
 
@@ -653,7 +653,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 			Expect(opts.Complete(env)).To(Succeed())
 			_, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("github.com/mandelsoft/top:v1: failed applying to component reference refb[github.com/mandelsoft/ref:v1]: github.com/mandelsoft/top:v1->github.com/mandelsoft/ref:v1: failed applying to component reference ref[github.com/mandelsoft/test:v1]: github.com/mandelsoft/top:v1->github.com/mandelsoft/ref:v1->github.com/mandelsoft/test:v1: calculated resource digest ([{HashAlgorithm:SHA-256 NormalisationAlgorithm:genericBlobDigest/v1 Value:" + D_DATAA + "}]) mismatches existing digest (SHA-256:" + wrongDigest + "[genericBlobDigest/v1]) for data_a:v1 (Local blob sha256:" + D_DATAA + "[])"))
+			Expect(err.Error()).To(Equal("github.com/mandelsoft/top:v1: failed applying to component reference refb[github.com/mandelsoft/ref:v1]: github.com/mandelsoft/top:v1->github.com/mandelsoft/ref:v1: failed applying to component reference ref[github.com/mandelsoft/test:v1]: github.com/mandelsoft/top:v1->github.com/mandelsoft/ref:v1->github.com/mandelsoft/test:v1: calculated resource digest (SHA-256:" + D_DATAA + "[genericBlobDigest/v1]) mismatches existing digest (SHA-256:" + wrongDigest + "[genericBlobDigest/v1]) for data_a:v1 (Local blob sha256:" + D_DATAA + "[])"))
 		},
 			Entry(DIGESTMODE_TOP, false, &EntryTop{}),
 			Entry(DIGESTMODE_LOCAL, false, &EntryLocal{}),
