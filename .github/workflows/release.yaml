@@ -211,7 +211,7 @@ jobs:
 
     - name: Create and Push Release
       run: |
-        git checkout --detach HEAD
+        # git checkout --detach HEAD
         echo -n "${RELEASE_VERSION#v}" > VERSION
         git add VERSION
         git commit -m "Release $RELEASE_VERSION"
