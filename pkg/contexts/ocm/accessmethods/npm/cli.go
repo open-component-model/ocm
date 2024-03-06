@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package npm
 
 import (
@@ -13,6 +9,7 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 	return flagsets.NewConfigOptionTypeSetHandler(
 		Type, AddConfig,
 		options.RegistryOption,
+		options.ScopeOption,
 		options.PackageOption,
 		options.VersionOption,
 	)
@@ -20,6 +17,7 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.RegistryOption, config, "registry")
+	flagsets.AddFieldByOptionP(opts, options.ScopeOption, config, "scope")
 	flagsets.AddFieldByOptionP(opts, options.PackageOption, config, "package")
 	flagsets.AddFieldByOptionP(opts, options.VersionOption, config, "version")
 	return nil
@@ -35,6 +33,10 @@ The type specific specification fields are:
 - **<code>registry</code>** *string*
 
   Base URL of the NPM registry.
+
+- **<code>scope</code>** *string*
+
+  The scope of the NPM package.
 
 - **<code>package</code>** *string*
 

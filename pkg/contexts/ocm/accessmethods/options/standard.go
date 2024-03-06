@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package options
 
 // HintOption.
@@ -27,6 +23,9 @@ var RepositoryOption = RegisterOption(NewStringOptionType("accessRepository", "r
 
 // RegistryOption.
 var RegistryOption = RegisterOption(NewStringOptionType("accessRegistry", "registry base URL"))
+
+// ScopeOption or NamespaceOption.
+var ScopeOption = RegisterOption(NewStringOptionType("accessScope", "scope or namespace name"))
 
 // HostnameOption.
 var HostnameOption = RegisterOption(NewStringOptionType("accessHostname", "hostname used for access"))
@@ -56,8 +55,6 @@ var HTTPVerbOption = RegisterOption(NewStringOptionType("verb", "http request me
 var HTTPBodyOption = RegisterOption(NewStringOptionType("body", "body of a http request"))
 
 var HTTPRedirectOption = RegisterOption(NewBoolOptionType("noredirect", "http redirect behavior"))
-
-////////////////////////////////////////////////////////////////////////////////
 
 // CommentOption.
 var CommentOption = RegisterOption(NewStringOptionType("comment", "comment field value"))

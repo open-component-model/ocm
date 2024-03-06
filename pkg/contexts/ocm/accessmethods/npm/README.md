@@ -23,6 +23,10 @@ The type specific specification fields are:
 
   Base URL of the NPM registry.
 
+- **`scope`** *string*
+
+  The scope of the NPM package.
+
 - **`package`** *string*
 
   The name of the NPM package.
