@@ -114,17 +114,6 @@ var _ = Describe("ref parsing", func() {
 					}
 				}
 			}
-
-			//FIt("map to repository spec", func() {
-			//	ctx := ocm.New()
-			//
-			//	ref := Must(ocm.ParseRef("+ctf+directory::./file/path//github.vom/mandelsoft/test"))
-			//	spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
-			//	//Expect(spec).To(Equal(ocireg.NewRepositorySpec("localhost:80", ocireg.NewComponentRepositoryMeta("test", ""))))
-			//	repo := Must(spec.Repository(ctx, nil))
-			//	specFromRepo := repo.GetSpecification()
-			//	Expect(spec).To(Equal(specFromRepo))
-			//})
 		})
 	})
 
@@ -177,7 +166,7 @@ var _ = Describe("ref parsing", func() {
 		h := "ghcr.io"
 		c := "github.com/mandelsoft/ocm"
 
-		Context("[+][<type>::]<domain>[:<port>][/<repository prefix>]//<component id>[:<version] - without info", func() {
+		FContext("[+][<type>::]<domain>[:<port>][/<repository prefix>]//<component id>[:<version] - without info", func() {
 			for _, cm := range []string{"", "+"} {
 				for _, ut := range []string{t, ""} {
 					for _, ush := range []string{"", "http", "https"} {

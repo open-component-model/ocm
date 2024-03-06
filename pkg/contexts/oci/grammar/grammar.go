@@ -235,12 +235,6 @@ var (
 		Capture(Match(".*?"), Match("[^:]")), Match(RepositorySeparator+RepositorySeparator),
 		Optional(CapturedArtifactVersionRegexp))
 
-	//TypedGenericReferenceRegexpWithPort = Anchored(
-	//	Optional(Capture(TypeRegexp), Literal("::")),
-	//	Capture(Match(".*?"), Literal(`:`), Match(`[0-9]+`)),
-	//	Match(RepositorySeparator),
-	//	Optional(CapturedArtifactVersionRegexp))
-
 	FileReferenceRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
 		Capture(Match("[./].*?"), Match("[^:]")), Match(RepositorySeparator+RepositorySeparator),
