@@ -35,6 +35,9 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 Verify signature of specified component versions.
 
+If no signature name is given, only the digests are validated against the
+registered ones at the component version.
+
 
 If the option <code>--constraints</code> is given, and no version is specified
 for a component, only versions matching the given version constraints

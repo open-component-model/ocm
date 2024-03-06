@@ -655,11 +655,11 @@ func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 			return errors.Newf(resMsg(raw, acc.Describe(octx), "no digester accepts resource"))
 		}
 		if !checkDigest(rdigest, &digest[0]) {
-			return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, rdigest))
+			return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", &digest[0], rdigest))
 		}
 		if NormalizedDigesterType(raw.Digest) == NormalizedDigesterType(&digest[0]) {
 			if !checkDigest(raw.Digest, &digest[0]) {
-				return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
+				return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", &digest[0], raw.Digest))
 			}
 		}
 		cd.Resources[i].Digest = &digest[0]

@@ -23,6 +23,11 @@ var (
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return signing.NewCommand(ctx, "Verify signature of", false,
 		[]string{"verified", "verifying signature of"},
-		"$ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink",
+		desc, "$ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink",
 		utils.Names(Names, names...)...)
 }
+
+var desc = `
+If no signature name is given, only the digests are validated against the
+registered ones at the component version.
+`
