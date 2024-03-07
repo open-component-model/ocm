@@ -203,6 +203,20 @@ var _ = Describe("ref parsing", func() {
 				}
 			}
 		})
+		// localhost/repo:v1 (will be resolved to docker.io/localhost/repo:v1)
+		// localhost:8080/repo:v1 (works as expected)
+		// http:localhost/repo:v1 (works as expected)
+		// localhost//repo:v1 (special notation with //, works as expected)
+		// alias/repo:v1 (will be resolved to docker.io/alias/repo:v1, as with localhost) -> better, implement a precedence for alias
+		// alias//repo:v1 (works as expected)
+		It("repository creation from parsed repo", func() {
+			ctx := oci.New()
+			aliasreg := ocireg.NewRepositorySpec("http://ghcr.io")
+			ctx.SetAlias("myalias", aliasreg)
+			repo := Must(oci.ParseRef("myalias//repository:1.0.0"))
+			spec := Must(ctx.MapUniformRepositorySpec(&repo.UniformRepositorySpec))
+			Expect(spec).To(Equal(aliasreg))
+		})
 	})
 
 	Context("parse host port refs", func() {
@@ -459,44 +473,56 @@ var _ = Describe("ref parsing", func() {
 				}
 			}
 		})
+		It("repository creation from parsed repo with localhost", func() {
+			ctx := oci.New()
+			repo := Must(oci.ParseRepo("http://localhost"))
+			spec := Must(ctx.MapUniformRepositorySpec(&repo))
+			Expect(spec).To(Equal(ocireg.NewRepositorySpec("http://localhost")))
+		})
+		It("repository creation from parsed repo with localhost", func() {
+			ctx := oci.New()
+
+			aliasreg := ocireg.NewRepositorySpec("http://ghcr.io")
+			ctx.SetAlias("myalias", aliasreg)
+			repo := Must(oci.ParseRepo("myalias"))
+			spec := Must(ctx.MapUniformRepositorySpec(&repo))
+			Expect(spec).To(Equal(aliasreg))
+		})
 	})
 
-	// Context("parse host port repos", func() {
-	// 	t := "oci"
-	// 	h := "localhost"
+	Context("parse json repo spec refs", func() {
+		t := "oci"
+		h := "ghcr.io"
 
-	// 	// localhost (with and without port) (and other host names) are a special case since these are not formally
-	// 	// valid domains
-	// 	// the combination of this test and the test below test parsing of all permutations of
-	// 	// [<type>::][<scheme>://]<host>[:<port>]
-	// 	Context("[<type>::][<scheme>://]<host>[:<port>]", func() {
-	// 		for _, cm := range []string{"", "+"} {
-	// 			for _, ut := range []string{"", t} {
-	// 				for _, uf := range []string{"", "directory", "tar", "tgz"} {
-	// 					for _, ush := range []string{"", "http", "https"} {
-	// 						for _, uh := range []string{h, h + ":3030"} {
-	// 							ref := cm + Type(FileFormat(ut, uf)) + Scheme(ush) + uh
-	// 							ut, uf, ush, uh := ut, uf, ush, uh
+		repospec := ocireg.NewRepositorySpec(h)
+		jsonrepospec := string(Must(runtime.DefaultJSONEncoding.Marshal(repospec)))
 
-	// 							// tests parsing of all permutations of
-	// 							// [<type>::][<scheme>://]<host>[:<port>]
-	// 							It("parses ref "+ref, func() {
-	// 								CheckRepo(ref, &oci.UniformRepositorySpec{
-	// 									Type:            FileType(ut, uf),
-	// 									Scheme:          ush,
-	// 									Host:            uh,
-	// 									Info:            "",
-	// 									CreateIfMissing: ref[0] == '+',
-	// 									TypeHint:        FileFormat(ut, uf),
-	// 								})
-	// 							})
-	// 						}
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	})
-	// })
+		// Notice that the file formats (directory, tar, tgz) CAN BE PARSED in this notation, BUT for non file based
+		// implementations like oci, this information is not used.
+		Context("[+][<type>::]<json repo spec>", func() {
+			for _, cm := range []string{"", "+"} {
+				for _, ut := range []string{"", t} {
+					for _, uf := range []string{"", "directory", "tar", "tgz"} {
+						ref := cm + Type(FileFormat(ut, uf)) + jsonrepospec
+						ut, uf := ut, uf
+
+						// tests parsing of all permutations of
+						// [<type>::]<json repo spec>
+						It("parses ref "+ref, func() {
+							CheckRepo(ref, &oci.UniformRepositorySpec{
+								Type:            FileType(ut, uf),
+								Scheme:          "",
+								Host:            "",
+								Info:            jsonrepospec,
+								CreateIfMissing: ref[0] == '+',
+								TypeHint:        FileFormat(ut, uf),
+							})
+						})
+					}
+				}
+			}
+		})
+	})
 
 	It("succeeds for repository", func() {
 		CheckRef("::ghcr.io/", &oci.RefSpec{UniformRepositorySpec: ghcr})

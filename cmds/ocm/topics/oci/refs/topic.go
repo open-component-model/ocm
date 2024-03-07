@@ -31,8 +31,11 @@ images are possible:
     <pre>[+][&lt;type>::][./][&lt;file path>//&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
         or
     <pre>[+][&lt;type>::][&lt;json repo spec>//]&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
+		Notice that if you specify the &lt;type> in the beginning of this
+		notation AND in the &lt;json repo spec>, the types have to match
+		(but there is no reason to specify the type in both places). 
 		or
-	<pre>[+][&lt;type>::][&lt;scheme>:://]&lt;domain>[:&lt;port>]/&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
+	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;domain>[:&lt;port>]/&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
         or
 	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;host>:&lt;port>/&lt;repository>[:&lt;tag>][@&lt;digest>]</pre>
 		Notice that &lt;port> is required in this notation. Without &lt;port>,
@@ -48,16 +51,19 @@ Besides dedicated artifacts it is also possible to denote registries
 as a whole:
 
 <center>
-    <pre>[+][&lt;type>::][&lt;scheme>:://]&lt;domain>[:&lt;port>]</pre>
+	<pre>[+][&lt;type>::][./]&lt;file path></pre>
+		or
+	<pre>[+][&lt;type>::]&lt;json repo spec></pre>
+		Notice that if you specify the &lt;type> in the beginning of this
+		notation AND in the &lt;json repo spec>, the types have to match
+		(but there is no reason to specify the type in both places).
+        or
+    <pre>[+][&lt;type>::][&lt;scheme>://]&lt;domain>[:&lt;port>]</pre>
         or
 	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;host>[:&lt;port>]</pre>
 		Notice that &lt;port> is optional in this notation since this cannot be
 		an image reference and therefore cannot be ambiguous with the docker
 		library notaton.
-		or
-    <pre>[+][&lt;type>::]&lt;json repo spec></pre>
-        or
-    <pre>[+][&lt;type>::][./]&lt;file path></pre>
 </center>
 ` + FileBasedUsage(),
 	}
