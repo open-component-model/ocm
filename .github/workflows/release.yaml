@@ -191,6 +191,7 @@ jobs:
     - name: Update Release Notes File
       env:
         RELEASE_NOTES: ${{ steps.release-notes.outputs.body }}
+        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }}; then
           >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
@@ -210,6 +211,8 @@ jobs:
         fi
 
     - name: Create and Push Release
+      env:
+        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         # git checkout --detach HEAD
         echo -n "${RELEASE_VERSION#v}" > VERSION
