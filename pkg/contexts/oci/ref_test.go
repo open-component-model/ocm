@@ -165,7 +165,7 @@ var _ = Describe("ref parsing", func() {
 
 		// Notice that the file formats (directory, tar, tgz) CAN BE PARSED in this notation, BUT for non file based
 		// implementations like oci, this information is not used.
-		Context("[+][<type>::][<scheme>:://]<domain>[:<port>/]<repository>[:<tag>][@<digest>]", func() {
+		Context("[+][<type>::][<scheme>://]<domain>[:<port>][/]/<repository>[:<tag>][@<digest>]", func() {
 			for _, cm := range []string{"", "+"} {
 				for _, ut := range []string{"", t} {
 					for _, uf := range []string{"", "directory", "tar", "tgz"} {
@@ -173,28 +173,30 @@ var _ = Describe("ref parsing", func() {
 							for _, uh := range []string{h, h + ":3030"} {
 								for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + ".1.2-rc.1"} {
 									for _, ud := range []string{"", d} {
-										ref := cm + Type(FileFormat(ut, uf)) + Scheme(ush) + uh + "/" + r + Vers(uv, ud)
-										ut, uf, ush, uh, uv, ud := ut, uf, ush, uh, uv, ud
+										for _, sep := range []string{"/", "//"} {
+											ref := cm + Type(FileFormat(ut, uf)) + Scheme(ush) + uh + sep + r + Vers(uv, ud)
+											ut, uf, ush, uh, uv, ud := ut, uf, ush, uh, uv, ud
 
-										// tests parsing of all permutations of
-										// [<type>::][<scheme>:://]<domain>[:<port>/]<repository>[:<tag>][@<digest>]
-										It("parses ref "+ref, func() {
-											CheckRef(ref, &oci.RefSpec{
-												UniformRepositorySpec: oci.UniformRepositorySpec{
-													Type:            FileType(ut, uf),
-													Scheme:          ush,
-													Host:            uh,
-													Info:            "",
-													CreateIfMissing: ref[0] == '+',
-													TypeHint:        FileFormat(ut, uf),
-												},
-												ArtSpec: oci.ArtSpec{
-													Repository: r,
-													Tag:        Pointer([]byte(uv)),
-													Digest:     Dig([]byte(ud)),
-												},
+											// tests parsing of all permutations of
+											// [<type>::][<scheme>://]<domain>[:<port>][/]/<repository>[:<tag>][@<digest>]
+											It("parses ref "+ref, func() {
+												CheckRef(ref, &oci.RefSpec{
+													UniformRepositorySpec: oci.UniformRepositorySpec{
+														Type:            FileType(ut, uf),
+														Scheme:          ush,
+														Host:            uh,
+														Info:            "",
+														CreateIfMissing: ref[0] == '+',
+														TypeHint:        FileFormat(ut, uf),
+													},
+													ArtSpec: oci.ArtSpec{
+														Repository: r,
+														Tag:        Pointer([]byte(uv)),
+														Digest:     Dig([]byte(ud)),
+													},
+												})
 											})
-										})
+										}
 									}
 								}
 							}
@@ -203,12 +205,7 @@ var _ = Describe("ref parsing", func() {
 				}
 			}
 		})
-		// localhost/repo:v1 (will be resolved to docker.io/localhost/repo:v1)
-		// localhost:8080/repo:v1 (works as expected)
-		// http:localhost/repo:v1 (works as expected)
-		// localhost//repo:v1 (special notation with //, works as expected)
-		// alias/repo:v1 (will be resolved to docker.io/alias/repo:v1, as with localhost) -> better, implement a precedence for alias
-		// alias//repo:v1 (works as expected)
+
 		It("repository creation from parsed repo", func() {
 			ctx := oci.New()
 			aliasreg := ocireg.NewRepositorySpec("http://ghcr.io")
@@ -243,6 +240,44 @@ var _ = Describe("ref parsing", func() {
 
 										// tests parsing of all permutations of
 										// [<type>::][<scheme>://]<host>:<port>/<repository>[:<tag>][@<digest>]
+										It("parses ref "+ref, func() {
+											CheckRef(ref, &oci.RefSpec{
+												UniformRepositorySpec: oci.UniformRepositorySpec{
+													Type:            FileType(ut, uf),
+													Scheme:          ush,
+													Host:            uh,
+													Info:            "",
+													CreateIfMissing: ref[0] == '+',
+													TypeHint:        FileFormat(ut, uf),
+												},
+												ArtSpec: oci.ArtSpec{
+													Repository: r,
+													Tag:        Pointer([]byte(uv)),
+													Digest:     Dig([]byte(ud)),
+												},
+											})
+										})
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		})
+		Context("[+][<type>::][<scheme>://]<host>[:<port>]//<repository>[:<tag>][@<digest>]", func() {
+			for _, cm := range []string{"", "+"} {
+				for _, ut := range []string{"", t} {
+					for _, uf := range []string{"", "directory", "tar", "tgz"} {
+						for _, ush := range []string{"", "http", "https"} {
+							for _, uh := range []string{h, h + ":3030"} {
+								for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + ".1.2-rc.1"} {
+									for _, ud := range []string{"", d} {
+										ref := cm + Type(FileFormat(ut, uf)) + Scheme(ush) + uh + "//" + r + Vers(uv, ud)
+										ut, uf, ush, uh, uv, ud := ut, uf, ush, uh, uv, ud
+
+										// tests parsing of all permutations of
+										// [<type>::][<scheme>://]<host>[:<port>]//<repository>[:<tag>][@<digest>]
 										It("parses ref "+ref, func() {
 											CheckRef(ref, &oci.RefSpec{
 												UniformRepositorySpec: oci.UniformRepositorySpec{
@@ -523,6 +558,21 @@ var _ = Describe("ref parsing", func() {
 			}
 		})
 	})
+
+	//Context("repository types", func() {
+	//	oci := []string{"OCIRegistry", "OCIRegistry/v1", "oci", "oci/v1"}
+	//	ctf := []string{"CommonTransportFormat", "CommonTransportFormat/v1", "ctf", "ctf/v1"}
+	//	docker := []string{"DockerDaemon", "DockerDaemon/v1", "docker", "docker/v1"}
+	//	arts := []string{"ArtifactSet", "ArtifactSet/v1"}
+	//
+	//	// Notice that the file formats (directory, tar, tgz) CAN BE PARSED in this notation, BUT for non file based
+	//	// implementations like oci, this information is not used.
+	//	Context("OCIRegistry", func() {
+	//		for _, typ := range oci {
+	//			spec := ocireg.
+	//		}
+	//	})
+	//})
 
 	It("succeeds for repository", func() {
 		CheckRef("::ghcr.io/", &oci.RefSpec{UniformRepositorySpec: ghcr})

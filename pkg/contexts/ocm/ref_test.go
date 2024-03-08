@@ -166,7 +166,7 @@ var _ = Describe("ref parsing", func() {
 		h := "ghcr.io"
 		c := "github.com/mandelsoft/ocm"
 
-		FContext("[+][<type>::]<domain>[:<port>][/<repository prefix>]//<component id>[:<version] - without info", func() {
+		Context("[+][<type>::]<domain>[:<port>][/<repository prefix>]//<component id>[:<version] - without info", func() {
 			for _, cm := range []string{"", "+"} {
 				for _, ut := range []string{t, ""} {
 					for _, ush := range []string{"", "http", "https"} {
