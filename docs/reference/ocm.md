@@ -29,9 +29,9 @@ ocm [<options>] <sub command> ...
 ### Description
 
 
-The Open Component Model command line client support the work with OCM
+The Open Component Model command line client supports the work with OCM
 artifacts, like Component Archives, Common Transport Archive,
-Component Repositories, and component versions.
+Component Repositories, and Component Versions.
 
 Additionally it provides some limited support for the docker daemon, OCI artifacts and
 registries.

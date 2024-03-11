@@ -125,28 +125,36 @@ The following predefined option types can be used:
   - <code>accessRegistry</code>: [*string*] registry base URL
   - <code>accessRepository</code>: [*string*] repository URL
   - <code>accessVersion</code>: [*string*] version for access specification
+  - <code>body</code>: [*string*] body of a http request
   - <code>bucket</code>: [*string*] bucket name
   - <code>comment</code>: [*string*] comment field value
   - <code>commit</code>: [*string*] git commit id
   - <code>digest</code>: [*string*] blob digest
   - <code>globalAccess</code>: [*map[string]YAML*] access specification for global access
+  - <code>header</code>: [*string:string,string*] http headers
   - <code>hint</code>: [*string*] (repository) hint for local artifacts
   - <code>mediaType</code>: [*string*] media type for artifact blob representation
+  - <code>noredirect</code>: [*bool*] http redirect behavior
   - <code>reference</code>: [*string*] reference name
   - <code>region</code>: [*string*] region name
   - <code>size</code>: [*int*] blob size
+  - <code>url</code>: [*string*] artifact or server url
+  - <code>verb</code>: [*string*] http request method
 
 The following predefined value types are supported:
 
 
   - <code>YAML</code>: JSON or YAML document string
+  - <code>[]byte</code>: byte value
   - <code>[]string</code>: list of string values
   - <code>bool</code>: boolean flag
   - <code>int</code>: integer value
   - <code>map[string]YAML</code>: JSON or YAML map
   - <code>string</code>: string value
+  - <code>string:string,string</code>: string map defined by dedicated assignment of comma separated strings
   - <code>string=YAML</code>: string map with arbitrary values defined by dedicated assignments
   - <code>string=string</code>: string map defined by dedicated assignments
+  - <code>string=string,string</code>: string map defined by dedicated assignment of comma separated strings
 
 #### Uploader Descriptor
 

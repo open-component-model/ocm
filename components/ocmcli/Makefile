@@ -20,7 +20,7 @@ PLATFORM_ARCH                                  := $(shell go env GOARCH)
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
-ATTRIBUTES = VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(IMAGE_PLATFORMS)" GEN="$(GEN)" MULTI=$(MULTI)
+ATTRIBUTES = VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" IMAGE_PLATFORMS="$(IMAGE_PLATFORMS)" GEN="$(GEN)" MULTI=$(MULTI)
 
 ifeq ($(MULTI),true)
 FLAGSUF     = .multi
