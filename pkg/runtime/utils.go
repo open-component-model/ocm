@@ -135,10 +135,8 @@ func CompleteSpecWithType(typ string, data []byte) ([]byte, error) {
 		}
 		m["type"] = typ
 		return DefaultJSONEncoding.Marshal(m)
-	} else {
-		if m["type"] == nil {
-			return nil, fmt.Errorf("type missing")
-		}
+	} else if m["type"] == nil {
+		return nil, fmt.Errorf("type missing")
 	}
 	return data, nil
 }
