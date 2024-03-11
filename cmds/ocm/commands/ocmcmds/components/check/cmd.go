@@ -7,8 +7,6 @@ package check
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/check"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/util/json"
 
@@ -24,6 +22,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/check"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
