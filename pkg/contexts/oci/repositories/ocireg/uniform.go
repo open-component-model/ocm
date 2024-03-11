@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	cpi.RegisterRepositorySpecHandler(&repospechandler{}, Type, "")
+	cpi.RegisterRepositorySpecHandler(&repospechandler{}, Type, ShortType, "")
 }
 
 type repospechandler struct{}

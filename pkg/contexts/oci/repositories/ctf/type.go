@@ -15,13 +15,17 @@ import (
 )
 
 const (
-	Type   = cpi.CommonTransportFormat
-	TypeV1 = Type + runtime.VersionSeparator + "v1"
+	Type        = cpi.CommonTransportFormat
+	TypeV1      = Type + runtime.VersionSeparator + "v1"
+	ShortType   = "ctf"
+	ShortTypeV1 = ShortType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
 	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type))
 	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](ShortType))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](ShortTypeV1))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
