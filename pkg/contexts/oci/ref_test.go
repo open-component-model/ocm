@@ -9,16 +9,16 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/runtime"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	godigest "github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func Type(t string) string {
@@ -558,21 +558,6 @@ var _ = Describe("ref parsing", func() {
 			}
 		})
 	})
-
-	//Context("repository types", func() {
-	//	oci := []string{"OCIRegistry", "OCIRegistry/v1", "oci", "oci/v1"}
-	//	ctf := []string{"CommonTransportFormat", "CommonTransportFormat/v1", "ctf", "ctf/v1"}
-	//	docker := []string{"DockerDaemon", "DockerDaemon/v1", "docker", "docker/v1"}
-	//	arts := []string{"ArtifactSet", "ArtifactSet/v1"}
-	//
-	//	// Notice that the file formats (directory, tar, tgz) CAN BE PARSED in this notation, BUT for non file based
-	//	// implementations like oci, this information is not used.
-	//	Context("OCIRegistry", func() {
-	//		for _, typ := range oci {
-	//			spec := ocireg.
-	//		}
-	//	})
-	//})
 
 	It("succeeds for repository", func() {
 		CheckRef("::ghcr.io/", &oci.RefSpec{UniformRepositorySpec: ghcr})
