@@ -9,23 +9,26 @@ references to any registry supported by the OCM toolset that can host OCM
 components:
 
 <center>
-    <pre>[+][&lt;type>::][./][&lt;file path>//&lt;component id>[:&lt;version>]</pre>
+    <pre>[+][&lt;type>::][./]&lt;file path>//&lt;component id>[:&lt;version>]</pre>
         or
-    <pre>[+][&lt;type>::]&lt;domain>[:&lt;port>][/&lt;repository prefix>]//&lt;component id>[:&lt;version]</pre>
-        or
-    <pre>[&lt;type>::][&lt;json repo spec>//]&lt;component id>[:&lt;version>]</pre>
-
+	<pre>[+][&lt;type>::][&lt;json repo spec>//]&lt;component id>[:&lt;version>]</pre>
+		or
+    <pre>[+][&lt;type>::][&lt;scheme>://]&lt;domain>[:&lt;port>][/&lt;repository prefix>]//&lt;component id>[:&lt;version]</pre>
+		or
+	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;host>[:&lt;port>][/&lt;repository prefix>]//&lt;component id>[:&lt;version]</pre>
 </center>
 
 Besides dedicated components it is also possible to denote repositories
 as a whole:
 
 <center>
-    <pre>[+][&lt;type>::][&lt;scheme>:://]&lt;domain>[:&lt;port>][/&lt;repository prefix>]</pre>
-        or
-    <pre>[+][&lt;type>::]&lt;json repo spec></pre>
-        or
     <pre>[+][&lt;type>::][./]&lt;file path></pre>
+		or
+    <pre>[+][&lt;type>::]&lt;json repo spec></pre>
+		or
+    <pre>[+][&lt;type>::][&lt;scheme>://]&lt;domain>[:&lt;port>][/&lt;repository prefix>]</pre>
+		or
+	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;host>[:&lt;port>][/&lt;repository prefix>]</pre>
 </center>
 
 The optional <code>+</code> is used for file based implementations
@@ -38,9 +41,13 @@ character. The following formats are supported: <code>directory</code>, <code>ta
 ### Examples
 
 ```
-ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/pause:1.0.0
++ctf+directory::./ocm/ctf//ocm.software/ocmcli:0.7.0
 
-ctf+tgz::./ctf
+oci::{"baseUrl":"ghcr.io","componentNameMapping":"urlPath","subPath":"open-component-model"}//ocm.software/ocmcli.0.7.0
+
+oci::https://ghcr.io:443/open-component-model//ocm.software/ocmcli:0.7.0
+
+oci::http://localhost:8080/local-component-repository//ocm.software/ocmcli:0.7.0
 ```
 
 ### SEE ALSO
