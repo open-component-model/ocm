@@ -10,24 +10,50 @@ components:
 
 <center>
     <pre>[+][&lt;type>::][./]&lt;file path>//&lt;component id>[:&lt;version>]</pre>
-        or
+</center>
+
+or
+
+<center>
 	<pre>[+][&lt;type>::][&lt;json repo spec>//]&lt;component id>[:&lt;version>]</pre>
-		or
+</center>
+
+or
+
+<center>
     <pre>[+][&lt;type>::][&lt;scheme>://]&lt;domain>[:&lt;port>][/&lt;repository prefix>]//&lt;component id>[:&lt;version]</pre>
-		or
+</center>
+
+or
+
+<center>
 	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;host>[:&lt;port>][/&lt;repository prefix>]//&lt;component id>[:&lt;version]</pre>
 </center>
+
+---
 
 Besides dedicated components it is also possible to denote repositories
 as a whole:
 
 <center>
     <pre>[+][&lt;type>::][./]&lt;file path></pre>
-		or
+</center>
+
+or
+
+<center>
     <pre>[+][&lt;type>::]&lt;json repo spec></pre>
-		or
+</center>
+
+or
+
+<center>
     <pre>[+][&lt;type>::][&lt;scheme>://]&lt;domain>[:&lt;port>][/&lt;repository prefix>]</pre>
-		or
+</center>
+
+or
+
+<center>
 	<pre>[+][&lt;type>::][&lt;scheme>://]&lt;host>[:&lt;port>][/&lt;repository prefix>]</pre>
 </center>
 
