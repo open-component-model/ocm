@@ -35,7 +35,10 @@ jobs:
           username: ocmbot
           password: ${{ steps.generate_token.outputs.token }}
 
-      - name: 'Build Inventory Image'
-        run: |
-          docker build . --tag ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest --tag ghcr.io/open-component-model/ocm:latest
-          docker push ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest
