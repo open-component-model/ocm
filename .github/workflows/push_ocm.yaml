@@ -10,11 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.OCMBOT_APP_ID }}
+          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.generate_token.outputs.token }}
 
       # https://github.com/marketplace/actions/push-to-ghcr
-      - name: Build and publish a Docker image for ${{ github.repository }}
+      - name: Build and publish latest ocm image
         uses: macbre/push-to-ghcr@master
         with:
-          image_name: ${{ github.repository }}  # it will be lowercased internally
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          image_name: ${{ github.repository }} # it will be lowercased internally
+          github_token: ${{ steps.generate_token.outputs.token }}
