@@ -38,5 +38,4 @@ jobs:
       - name: 'Build Inventory Image'
         run: |
           docker build . --tag ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest --tag ghcr.io/open-component-model/ocm:latest
-          docker push ghcr.io/open-component-model/ocm:latest
-
+          docker push ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest
