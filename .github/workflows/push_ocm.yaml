@@ -32,5 +32,11 @@ jobs:
         uses: docker/login-action@v3.1.0
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ocmbot
           password: ${{ steps.generate_token.outputs.token }}
+
+      - name: 'Build Inventory Image'
+        run: |
+          docker build . --tag ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest --tag ghcr.io/open-component-model/ocm:latest
+          docker push ghcr.io/open-component-model/ocm:latest
+
