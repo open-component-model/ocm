@@ -28,8 +28,9 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
 
       # https://github.com/marketplace/actions/push-to-ghcr
-      - name: Build and publish latest ocm image
-        uses: macbre/push-to-ghcr@master
+      - name: Docker Login
+        uses: docker/login-action@v3.1.0
         with:
-          image_name: ${{ github.repository }} # it will be lowercased internally
-          github_token: ${{ steps.generate_token.outputs.token }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ steps.generate_token.outputs.token }}
