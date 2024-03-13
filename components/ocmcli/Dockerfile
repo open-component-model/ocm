@@ -2,9 +2,6 @@ ARG SUFFIX
 ARG OCM_VERSION
 ARG ALPINE_VERSION
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION}
-ARG SUFFIX
-ARG OCM_VERSION
-ARG ALPINE_VERSION
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 LABEL org.opencontainers.image.description="Open Component Model command line interface based on Alpine ${ALPINE_VERSION}"
