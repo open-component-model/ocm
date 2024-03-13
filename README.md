@@ -49,7 +49,7 @@ The OCI and OCM support can be found in packages
 
 ## Installation
 
-Install the latest release via [Homebrew](https://brew.sh), [Nix](https://nixos.org), or directly from [GitHub Releases](https://github.com/open-component-model/ocm/releases).
+Install the latest release via [Homebrew](https://brew.sh), [Nix](https://nixos.org), [Docker](https://www.docker.com/)/[Podman](https://podman.io/) or directly from [GitHub Releases](https://github.com/open-component-model/ocm/releases).
 
 ### Install using Homebrew
 
@@ -78,6 +78,37 @@ nix profile list | grep ocm
 ocm --help
 ```
 
+### Usage via Docker / Podman
+
+```sh
+podman run -t ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.8.0 --help
+```
+
+#### Build and run it yourself
+
+```sh
+podman build -t ocm .
+podman run --rm -t ocm --loglevel debug --help
+```
+
+or interactively:
+
+```sh
+podman run --rm -it ocm /bin/sh
+```
+
+You can pass in the following arguments to override the predefined defaults:
+
+- `GO_VERSION`: The **golang** version to be used for compiling.
+- `ALPINE_VERSION`: The **alpine** version to be used as the base image.
+- `GO_PROXY`: Your **go** proxy to be used for fetching dependencies.
+
+Please check [hub.docker.com](https://hub.docker.com/_/golang/tags?page=1&name=alpine) for possible version combinations.
+
+```sh
+podman build -t ocm --build-arg GO_VERSION=1.22 --build-arg ALPINE_VERSION=3.19 --build-arg GO_PROXY=https://proxy.golang.org .
+```
+
 ## Examples
 An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](https://github.com/open-component-model/ocm/blob/main/examples/make/Makefile).
 
@@ -92,6 +123,6 @@ OCM follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/m
 
 ## Licensing
 
-Copyright 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+Copyright 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
 Please see our [LICENSE](LICENSE) for copyright and license information.
 Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/open-component-model/ocm).
