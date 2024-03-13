@@ -58,7 +58,7 @@ func GetConsumerId(serverurl string, repo ...string) cpi.ConsumerIdentity {
 	port := ""
 	if serverurl != "" {
 		u, err := url.Parse(serverurl)
-		if err != nil {
+		if err == nil {
 			host = u.Host
 		}
 	}

@@ -10,7 +10,7 @@ updates:
           - "*"
     schedule:
       interval: "weekly"
-      day: "sunday"
+      day: "friday"
   - package-ecosystem: "gomod"
     directory: "/"
     groups:

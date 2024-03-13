@@ -140,7 +140,7 @@ jobs:
         go-version-file: '${{ github.workspace }}/go.mod'
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@b6a39da80722a2cb0ef5d197531764a89b5d48c3 # v0.15.8
+      uses: anchore/sbom-action/download-syft@9fece9e20048ca9590af301449208b2b8861333b # v0.15.9
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.4.0
@@ -191,6 +191,7 @@ jobs:
     - name: Update Release Notes File
       env:
         RELEASE_NOTES: ${{ steps.release-notes.outputs.body }}
+        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }}; then
           >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
@@ -210,8 +211,10 @@ jobs:
         fi
 
     - name: Create and Push Release
+      env:
+        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
-        git checkout --detach HEAD
+        # git checkout --detach HEAD
         echo -n "${RELEASE_VERSION#v}" > VERSION
         git add VERSION
         git commit -m "Release $RELEASE_VERSION"
