@@ -4,17 +4,18 @@ ARG ALPINE_VERSION="3.19"
 FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS build
 
 WORKDIR /src
+RUN go env -w GOMODCACHE=/root/.cache/go-build
 
 COPY go.mod go.sum ./
 
 ARG GO_PROXY="https://proxy.golang.org"
 ENV GOPROXY=${GO_PROXY}
-RUN go mod download
+RUN --mount=type=cache,target=/root/.cache/go-build go mod download
 
 COPY . .
 RUN export VERSION=$(go run pkg/version/generate/release_generate.go print-rc-version) && \
     export NOW=$(date -u +%FT%T%z) && \
-    go build -trimpath -ldflags \
+    --mount=type=cache,target=/root/.cache/go-build go build -trimpath -ldflags \
     "-s -w -X github.com/open-component-model/ocm/pkg/version.gitVersion=$VERSION -X github.com/open-component-model/ocm/pkg/version.buildDate=$NOW" \
     -o /bin/ocm ./cmds/ocm/main.go
 
