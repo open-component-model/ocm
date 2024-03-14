@@ -1,4 +1,4 @@
-name: Build and publish a Docker image to ghcr.io
+name: publish as latest
 on:
   # publish on pushes to the main branch (image tagged as "latest")
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   docker_publish:
-    runs-on: large_runner
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write
@@ -53,7 +53,7 @@ jobs:
         with:
           context: .
           # supported platforms of https://hub.docker.com/_/golang/tags?page=1&name=1.22-alpine3.19
-          platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x
+          # platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x
           push: true
           tags: |
             ghcr.io/open-component-model/ocm:latest
