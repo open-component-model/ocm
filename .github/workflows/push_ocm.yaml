@@ -46,8 +46,11 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          # supported platforms of https://hub.docker.com/_/golang/tags?page=1&name=1.22-alpine3.19
+          platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x
           push: true
           tags: |
+            ghcr.io/open-component-model/ocm:latest
             ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest
             ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
