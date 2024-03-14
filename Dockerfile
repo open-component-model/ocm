@@ -27,6 +27,7 @@ LABEL org.opencontainers.image.description="Open Component Model command line in
 LABEL org.opencontainers.image.vendor="SAP SE"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
 LABEL org.opencontainers.image.url="https://ocm.software/"
+LABEL org.opencontainers.image.source="https://github.com/open-component-model/ocm"
 LABEL org.opencontainers.image.title="ocm"
 LABEL org.opencontainers.image.documentation="https://github.com/open-component-model/ocm/blob/main/docs/reference/ocm.md"
 LABEL org.opencontainers.image.base.name="alpine:${ALPINE_VERSION}"

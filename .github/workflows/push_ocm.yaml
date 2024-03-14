@@ -9,9 +9,18 @@ jobs:
   docker_publish:
     runs-on: ubuntu-latest
     permissions:
+      contents: write
+      id-token: write
       packages: write
 
     steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.OCMBOT_APP_ID }}
+          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
