@@ -51,6 +51,14 @@ The OCI and OCM support can be found in packages
 
 Install the latest release via [Homebrew](https://brew.sh), [Nix](https://nixos.org), [Docker](https://www.docker.com/)/[Podman](https://podman.io/) or directly from [GitHub Releases](https://github.com/open-component-model/ocm/releases).
 
+### Bash
+
+To install with `bash` for macOS or Linux execute the following command:
+
+```sh
+curl -s https://ocm.software/install.sh | sudo bash
+```
+
 ### Install using Homebrew
 
 ```sh
@@ -81,7 +89,7 @@ ocm --help
 ### Usage via Docker / Podman
 
 ```sh
-podman run -t ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.8.0 --help
+podman run -t ghcr.io/open-component-model/ocm:latest --help
 ```
 
 #### Build and run it yourself
