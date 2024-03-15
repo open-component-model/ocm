@@ -6,12 +6,12 @@ package ocm
 
 import (
 	"fmt"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type ComponentContainer interface {
@@ -46,7 +46,7 @@ type Session interface {
 type session struct {
 	datacontext.Session
 	base         datacontext.SessionBase
-	repositories map[datacontext.ObjectKey]Repository
+	repositories *internal.RepositoryCache
 	components   map[datacontext.ObjectKey]ComponentAccess
 	versions     map[datacontext.ObjectKey]ComponentVersionAccess
 }
@@ -63,7 +63,7 @@ func newSession(s datacontext.SessionBase) datacontext.Session {
 	return &session{
 		Session:      s.Session(),
 		base:         s,
-		repositories: map[datacontext.ObjectKey]Repository{},
+		repositories: internal.NewRepositoryCache(),
 		components:   map[datacontext.ObjectKey]ComponentAccess{},
 		versions:     map[datacontext.ObjectKey]ComponentVersionAccess{},
 	}
@@ -91,36 +91,27 @@ func (s *session) Close() error {
 }
 
 func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
-	spec, err := ctx.RepositoryTypes().Convert(spec)
+	repo, cached, err := s.repositories.LookupRepository(ctx, spec)
 	if err != nil {
 		return nil, err
 	}
 
-	keyName, err := utils.Key(spec)
-	if err != nil {
-		return nil, err
-	}
-	key := datacontext.ObjectKey{
-		Object: ctx,
-		Name:   keyName,
+	// The repo's closer function should only be added once with add closer. Otherwise, it would be attempted to close
+	// an already closed object. Thus, we only want to add the repo's closer function, if it was not already cached
+	// (and thus, consequently already added to the sessions close).
+	if !cached {
+		s.base.Lock()
+		defer s.base.Unlock()
+		if s.base.IsClosed() {
+			return nil, errors.ErrClosed("session")
+		}
+		// Session has to take over responsibility for open repositories for the Repository Cache because the objects
+		// opened during a session have to be closed in the reverse order they were opened (e.g. components opened based
+		// on a previously opened repository have to be closed first).
+		s.base.AddCloser(repo)
 	}
 
-	s.base.Lock()
-	defer s.base.Unlock()
-	if s.base.IsClosed() {
-		return nil, errors.ErrClosed("session")
-	}
-
-	if r := s.repositories[key]; r != nil {
-		return r, nil
-	}
-	repo, err := ctx.RepositoryForSpec(spec)
-	if err != nil {
-		return nil, err
-	}
-	s.repositories[key] = repo
-	s.base.AddCloser(repo)
-	return repo, err
+	return repo, nil
 }
 
 func (s *session) LookupComponent(c ComponentContainer, name string) (ComponentAccess, error) {
