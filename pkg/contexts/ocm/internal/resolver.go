@@ -15,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/registrations"
-	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -57,13 +56,13 @@ func (c *RepositoryCache) LookupRepository(ctx Context, spec RepositorySpec) (Re
 	if err != nil {
 		return nil, err
 	}
-	data, err := runtime.DefaultJSONEncoding.Marshal(spec)
+	keyName, err := utils.Key(spec)
 	if err != nil {
 		return nil, err
 	}
 	key := datacontext.ObjectKey{
 		Object: ctx,
-		Name:   string(data),
+		Name:   keyName,
 	}
 
 	c.lock.Lock()
