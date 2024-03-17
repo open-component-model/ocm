@@ -1,0 +1,73 @@
+name: publish as latest
+on:
+  # publish on pushes to the main branch (image tagged as "latest")
+  # https://github.com/open-component-model/ocm/pkgs/container/ocm
+  push:
+    branches:
+      - main
+
+jobs:
+  docker_publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.OCMBOT_APP_ID }}
+          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |            
+            ghcr.io/${{ github.repository }}
+
+      - name: Go Build Cache for Docker
+        uses: actions/cache@v4
+        with:
+          path: go-build-cache
+          key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
+
+      - name: inject go-build-cache into docker
+        uses: reproducible-containers/buildkit-cache-dance@v2
+        with:
+          cache-source: go-build-cache
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          # supported platforms of https://hub.docker.com/_/golang/tags?page=1&name=1.22-alpine3.19
+          # platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x
+          push: true
+          tags: |
+            ghcr.io/open-component-model/ocm:latest
+            ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest
+            ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
