@@ -21,6 +21,12 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     -o /bin/ocm ./cmds/ocm/main.go
 
 FROM alpine:${ALPINE_VERSION}
+
+# Create group and user
+ARG UID=1000
+ARG GID=1000
+RUN addgroup -g "${GID}" ocmGroup && adduser -u "${UID}" ocmUser -G ocmGroup -D
+
 COPY --from=build /bin/ocm /bin/ocm
 COPY --chmod=0755 components/ocmcli/ocm.sh /bin/ocm.sh
 
@@ -34,5 +40,6 @@ LABEL org.opencontainers.image.title="ocm"
 LABEL org.opencontainers.image.documentation="https://github.com/open-component-model/ocm/blob/main/docs/reference/ocm.md"
 LABEL org.opencontainers.image.base.name="alpine:${ALPINE_VERSION}"
 
+USER ocmUser
 ENTRYPOINT ["/bin/ocm.sh"]
 CMD ["/bin/ocm"]

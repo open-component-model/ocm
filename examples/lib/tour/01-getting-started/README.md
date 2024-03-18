@@ -164,7 +164,7 @@ differ, because the code always describes the latest version):
 
 ```
 resources of the latest version:
-  version:  0.6.0
+  version:  0.8.0
   provider: ocm.software
    1: name:           ocmcli
       extra identity: "architecture"="amd64","os"="linux"
@@ -177,7 +177,7 @@ resources of the latest version:
    3: name:           ocmcli-image
       extra identity: 
       resource type:  ociImage
-      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.6.0
+      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.8.0
 ```
 
 Resources have some metadata, like their identity and a resource type.
