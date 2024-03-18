@@ -5,8 +5,6 @@
 package internal
 
 import (
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"strings"
 	"sync"
 
@@ -15,6 +13,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/utils"
 )

@@ -6,11 +6,11 @@ package ocm
 
 import (
 	"fmt"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
