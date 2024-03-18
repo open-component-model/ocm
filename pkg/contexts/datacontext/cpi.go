@@ -10,6 +10,7 @@ import (
 
 	"github.com/mandelsoft/logging"
 	"github.com/modern-go/reflect2"
+
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
@@ -43,16 +44,13 @@ var _ provider = (*GCWrapper)(nil) // wrapper provides access to internal contex
 // specific garbage collection wrappers.
 // It is enforced by the
 // finalizableContextWrapper interface.
-func (w *GCWrapper) setSelf(a refmgmt.Allocatable, self Context, key interface{}) {
+func (w *GCWrapper) setSelf(a refmgmt.Allocatable, self Context, ictx Context, key interface{}) {
 	if a != nil {
 		w.ref, _ = finalized.NewPlainFinalizedView(a)
 	}
 	w.self = self
+	w.ctx = ictx
 	w.key = key
-}
-
-func (w *GCWrapper) setContext(c Context) {
-	w.ctx = c
 }
 
 func (w *GCWrapper) IsPersistent() bool {
@@ -64,7 +62,7 @@ func (w *GCWrapper) GetInternalContext() Context {
 }
 
 func init() { // linter complains about unused method.
-	(&GCWrapper{}).setSelf(nil, nil, nil)
+	(&GCWrapper{}).setSelf(nil, nil, nil, nil)
 }
 
 // BindTo makes the Context reachable via the resulting context.Context.
@@ -118,9 +116,9 @@ func IsPersistentContextRef(ctx Context) bool {
 	return false
 }
 
-// PersistentContextRef ensure a persistent context ref to the given
+// PersistentContextRef ensures a persistent context ref to the given
 // context to avoid an automatic cleanup of the context, which is
-// executed if all persistent reds are gone.
+// executed if all persistent refs are gone.
 // If you want to keep context related objects longer than your used
 // context reference, you should keep a persistent ref. This
 // could be the one provided by context creation, or by retrieving
@@ -165,7 +163,7 @@ type finalizableContextWrapper[C InternalContext, P any] interface {
 
 	SetContext(C)
 	provider
-	setSelf(refmgmt.Allocatable, Context, interface{})
+	setSelf(refmgmt.Allocatable, Context, Context, interface{})
 	*P
 }
 
@@ -184,7 +182,7 @@ func FinalizedContext[W Context, C InternalContext, P finalizableContextWrapper[
 	var v W
 	p := (P)(&v)
 	p.SetContext(c)
-	p.setSelf(c.GetAllocatable(), p, c.GetKey()) // prepare for generic bind operation
+	p.setSelf(c.GetAllocatable(), p, c, c.GetKey()) // prepare for generic bind operation
 	return p
 }
 
