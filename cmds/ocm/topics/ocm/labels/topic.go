@@ -30,7 +30,7 @@ which is a list of label definitions. Every label definition has several fields:
 
 - *<code>name</code>* *string* 
 
-  The name of the label also determines the interpretaion of its value. All labels
+  The name of the label also determines the interpretation of its value. All labels
   with a dedicated name must have the same globally unique meaning, enabling a
   common understanding of label content for tools working of such properties of an
   element.
@@ -54,7 +54,7 @@ which is a list of label definitions. Every label definition has several fields:
 
 - *<code>value</code>* *any*
 
-  The value of the label accoding to the specified format version of the
+  The value of the label according to the specified format version of the
   label in the context of its name.
 
 - *<code>signing</code>* *bool* (optional)
@@ -63,7 +63,7 @@ which is a list of label definitions. Every label definition has several fields:
   digest of the component version. This allows adding, deleting or modifying
   labels as part of a process chain during the lifecycle of a component version.
 
-  Labels which should describe relevant and unmodifyable content can be marked
+  Labels which should describe relevant and unmodifiable content can be marked
   to be signing relevant by setting this label field to <code>true</code>.
 
 - *<code>merge</code>* *merge spec* (optional)
