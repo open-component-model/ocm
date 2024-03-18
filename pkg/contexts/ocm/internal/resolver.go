@@ -105,10 +105,11 @@ func (r *ResolverRule) Match(name string) bool {
 }
 
 type MatchingResolver struct {
-	lock  sync.Mutex
-	ctx   Context
-	cache *RepositoryCache
-	rules []*ResolverRule
+	lock     sync.Mutex
+	ctx      Context
+	finalize finalizer.Finalizer
+	cache    *RepositoryCache
+	rules    []*ResolverRule
 }
 
 func NewMatchingResolver(ctx ContextProvider, rules ...*ResolverRule) *MatchingResolver {
@@ -125,7 +126,7 @@ func (r *MatchingResolver) OCMContext() Context {
 }
 
 func (r *MatchingResolver) Finalize() error {
-	return r.cache.Finalize()
+	return r.finalize.Finalize()
 }
 
 func (r *MatchingResolver) GetRules() []*ResolverRule {
@@ -155,9 +156,15 @@ func (r *MatchingResolver) LookupComponentVersion(name string, version string) (
 
 	for _, rule := range r.rules {
 		if rule.Match(name) {
-			repo, err := r.cache.LookupRepository(r.ctx, rule.spec)
+			repo, cached, err := r.cache.LookupRepository(r.ctx, rule.spec)
 			if err != nil {
 				return nil, err
+			}
+			if !cached {
+				// Even though the matching resolver is closed, there might be components or component versions, which
+				// contain a reference to the repository. Still, it shall be possible to close the matching resolver.
+				refmgmt.Lazy(repo)
+				r.finalize.Close(repo)
 			}
 			cv, err := repo.LookupComponentVersion(name, version)
 			if err == nil && cv != nil {
