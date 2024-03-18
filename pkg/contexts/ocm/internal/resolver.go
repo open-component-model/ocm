@@ -5,6 +5,8 @@
 package internal
 
 import (
+	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"strings"
 	"sync"
 
@@ -13,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -39,9 +40,12 @@ func (r *ResolverRule) GetPriority() int {
 	return r.prio
 }
 
+// RepositoryCache is a utility object intended to be used by higher level objects such as session or resolver. Since
+// the closing of the repository objects depends on the usage context (e.g. if components have been looked up in this
+// repository, these components have to be closed before the repository can be closed), it is the responsibility of the
+// higher level objects to close the repositories correctly.
 type RepositoryCache struct {
 	lock         sync.Mutex
-	finalize     finalizer.Finalizer
 	repositories map[datacontext.ObjectKey]Repository
 }
 
@@ -51,14 +55,14 @@ func NewRepositoryCache() *RepositoryCache {
 	}
 }
 
-func (c *RepositoryCache) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
+func (c *RepositoryCache) LookupRepository(ctx Context, spec RepositorySpec) (Repository, bool, error) {
 	spec, err := ctx.RepositoryTypes().Convert(spec)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	keyName, err := utils.Key(spec)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	key := datacontext.ObjectKey{
 		Object: ctx,
@@ -69,24 +73,14 @@ func (c *RepositoryCache) LookupRepository(ctx Context, spec RepositorySpec) (Re
 	defer c.lock.Unlock()
 
 	if r := c.repositories[key]; r != nil {
-		return r, nil
+		return r, true, nil
 	}
 	repo, err := ctx.RepositoryForSpec(spec)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	c.repositories[key] = repo
-	c.finalize.Close(repo)
-	return repo, err
-}
-
-func (c *RepositoryCache) Finalize() error {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	err := c.finalize.Finalize()
-	c.repositories = map[datacontext.ObjectKey]Repository{}
-	return err
+	return repo, false, err
 }
 
 func NewResolverRule(prefix string, spec RepositorySpec, prio ...int) *ResolverRule {
