@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	. "github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/modern-go/reflect2"
 
@@ -22,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const CONTEXT_TYPE = "ocm" + datacontext.OCM_CONTEXT_SUFFIX

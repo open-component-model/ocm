@@ -10,7 +10,6 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -25,6 +24,7 @@ import (
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const CONTEXT_TYPE = "ocm.cmd" + datacontext.OCM_CONTEXT_SUFFIX
