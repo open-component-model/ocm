@@ -210,10 +210,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	t, ok := target.(Context)
 	if !ok {
 		if t, ok := target.(datacontext.AttributesContext); ok {
-			// datacontext.Context is implemented by all context types.
-			// Therefore, we have to check for the root context, this is the one
-			// identical to the attributes context of a context.
-			if t.AttributesContext() == t {
+			if t.AttributesContext().IsAttributesContext() {
 				return errors.Wrapf(a.ApplyToRootCertsAttr(rootcertsattr.Get(t)), "applying config to certattr failed")
 			}
 		}

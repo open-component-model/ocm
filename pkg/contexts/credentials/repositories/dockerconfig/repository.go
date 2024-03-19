@@ -17,6 +17,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -33,7 +34,7 @@ type Repository struct {
 
 func NewRepository(ctx cpi.Context, path string, data []byte, propagate bool) (*Repository, error) {
 	r := &Repository{
-		ctx:       ctx,
+		ctx:       datacontext.InternalContextRef(ctx),
 		propagate: propagate,
 		path:      path,
 		data:      data,

@@ -24,6 +24,7 @@ import (
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const CONTEXT_TYPE = "ocm.cmd" + datacontext.OCM_CONTEXT_SUFFIX
@@ -47,15 +48,18 @@ func (f *FileSystem) ApplyOption(options accessio.Options) error {
 	return nil
 }
 
+type ContextProvider interface {
+	CLIContext() Context
+}
+
 type Context interface {
 	datacontext.Context
-
-	AttributesContext() datacontext.AttributesContext
-
-	ConfigContext() config.Context
-	CredentialsContext() credentials.Context
-	OCIContext() oci.Context
-	OCMContext() ocm.Context
+	ContextProvider
+	datacontext.ContextProvider
+	config.ContextProvider
+	credentials.ContextProvider
+	oci.ContextProvider
+	ocm.ContextProvider
 
 	FileSystem() *FileSystem
 
@@ -91,13 +95,14 @@ func DefinedForContext(ctx context.Context) (Context, bool) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type _InternalContext = datacontext.InternalContext
+
 type _context struct {
-	datacontext.Context
+	_InternalContext
 	updater cfgcpi.Updater
 
 	sharedAttributes datacontext.AttributesContext
 
-	config      config.Context
 	credentials credentials.Context
 	oci         *_oci
 	ocm         *_ocm
@@ -105,7 +110,29 @@ type _context struct {
 	out out.Context
 }
 
-var _ Context = &_context{}
+var (
+	_ Context                          = (*_context)(nil)
+	_ datacontext.ViewCreator[Context] = (*_context)(nil)
+)
+
+// gcWrapper is used as garbage collectable
+// wrapper for a context implementation
+// to establish a runtime finalizer.
+type gcWrapper struct {
+	datacontext.GCWrapper
+	*_context
+}
+
+func newView(c *_context, ref ...bool) Context {
+	if utils.Optional(ref...) {
+		return datacontext.FinalizedContext[gcWrapper](c)
+	}
+	return c
+}
+
+func (w *gcWrapper) SetContext(c *_context) {
+	w._context = c
+}
 
 func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx out.Context, fs vfs.FileSystem, delegates datacontext.Delegates) Context {
 	if outctx == nil {
@@ -115,19 +142,27 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx
 		shared = ocmctx.AttributesContext()
 	}
 	c := &_context{
-		sharedAttributes: shared,
-		credentials:      ocmctx.CredentialsContext(),
-		config:           ocmctx.CredentialsContext().ConfigContext(),
+		sharedAttributes: datacontext.PersistentContextRef(shared),
+		credentials:      datacontext.PersistentContextRef(ocmctx.CredentialsContext()),
 		out:              outctx,
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, ocmctx.GetAttributes(), delegates)
-	c.updater = cfgcpi.NewUpdater(ocmctx.CredentialsContext().ConfigContext(), c)
+	c._InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, ocmctx.GetAttributes(), delegates)
+	c.updater = cfgcpi.NewUpdater(datacontext.PersistentContextRef(ocmctx.CredentialsContext().ConfigContext()), c)
+	ocmctx = datacontext.PersistentContextRef(ocmctx)
 	c.oci = newOCI(c, ocmctx)
 	c.ocm = newOCM(c, ocmctx)
 	if fs != nil {
 		vfsattr.Set(c.AttributesContext(), fs)
 	}
-	return c
+	return newView(c, true)
+}
+
+func (c *_context) CreateView() Context {
+	return newView(c, true)
+}
+
+func (c *_context) CLIContext() Context {
+	return newView(c)
 }
 
 func (c *_context) Update() error {
@@ -139,7 +174,7 @@ func (c *_context) AttributesContext() datacontext.AttributesContext {
 }
 
 func (c *_context) ConfigContext() config.Context {
-	return c.config
+	return c.updater.GetContext()
 }
 
 func (c *_context) CredentialsContext() credentials.Context {
@@ -155,7 +190,7 @@ func (c *_context) OCMContext() ocm.Context {
 }
 
 func (c *_context) FileSystem() *FileSystem {
-	return &FileSystem{vfsattr.Get(c)}
+	return &FileSystem{vfsattr.Get(c.CLIContext())}
 }
 
 func (c *_context) OCI() OCI {
@@ -185,7 +220,7 @@ func (c *_context) StdIn() io.Reader {
 
 func (c *_context) WithStdIO(r io.Reader, o io.Writer, e io.Writer) Context {
 	return &_view{
-		Context: c,
+		Context: c.CLIContext(),
 		out:     out.NewFor(out.WithStdIO(c.out, r, o, e)),
 	}
 }
@@ -211,7 +246,7 @@ func (c *_view) StdIn() io.Reader {
 
 func (c *_view) WithStdIO(r io.Reader, o io.Writer, e io.Writer) Context {
 	return &_view{
-		Context: c.Context,
+		Context: c.CLIContext(),
 		out:     out.NewFor(out.WithStdIO(c.out, r, o, e)),
 	}
 }
@@ -222,16 +257,16 @@ func (c *_view) WithStdIO(r io.Reader, o io.Writer, e io.Writer) Context {
 // _ocm uses ocm and ctfocm
 
 type _oci struct {
-	*_context
+	cli   *_context
 	ctx   oci.Context
 	repos map[string]oci.RepositorySpec
 }
 
 func newOCI(ctx *_context, ocmctx ocm.Context) *_oci {
 	return &_oci{
-		_context: ctx,
-		ctx:      ocmctx.OCIContext(),
-		repos:    map[string]oci.RepositorySpec{},
+		cli:   ctx,
+		ctx:   ocmctx.OCIContext(),
+		repos: map[string]oci.RepositorySpec{},
 	}
 }
 
@@ -240,29 +275,29 @@ func (c *_oci) Context() oci.Context {
 }
 
 func (c *_oci) OpenCTF(path string) (oci.Repository, error) {
-	ok, err := vfs.Exists(c.FileSystem(), path)
+	ok, err := vfs.Exists(c.cli.FileSystem(), path)
 	if err != nil {
 		return nil, err
 	}
 	if !ok {
 		return nil, errors.ErrNotFound("file", path)
 	}
-	return ctfoci.Open(c.ctx, accessobj.ACC_WRITABLE, path, 0, accessio.PathFileSystem(c.FileSystem()))
+	return ctfoci.Open(c.ctx, accessobj.ACC_WRITABLE, path, 0, accessio.PathFileSystem(c.cli.FileSystem()))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type _ocm struct {
-	*_context
+	cli   *_context
 	ctx   ocm.Context
 	repos map[string]ocm.RepositorySpec
 }
 
 func newOCM(ctx *_context, ocmctx ocm.Context) *_ocm {
 	return &_ocm{
-		_context: ctx,
-		ctx:      ocmctx,
-		repos:    map[string]ocm.RepositorySpec{},
+		cli:   ctx,
+		ctx:   ocmctx,
+		repos: map[string]ocm.RepositorySpec{},
 	}
 }
 
@@ -271,12 +306,12 @@ func (c *_ocm) Context() ocm.Context {
 }
 
 func (c *_ocm) OpenCTF(path string) (ocm.Repository, error) {
-	ok, err := vfs.Exists(c.FileSystem(), path)
+	ok, err := vfs.Exists(c.cli.FileSystem(), path)
 	if err != nil {
 		return nil, err
 	}
 	if !ok {
 		return nil, errors.ErrNotFound("file", path)
 	}
-	return ctfocm.Open(c.ctx, accessobj.ACC_WRITABLE, path, 0, c)
+	return ctfocm.Open(c.ctx, accessobj.ACC_WRITABLE, path, 0, c.cli.FileSystem())
 }

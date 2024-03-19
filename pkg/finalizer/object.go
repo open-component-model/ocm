@@ -94,7 +94,7 @@ func fi(o *RuntimeFinalizer) {
 	o.finalize()
 }
 
-func NewRuntimeFinalizer(id ObjectIdentity, r *RuntimeFinalizationRecoder) *RuntimeFinalizer {
+func NewRuntimeFinalizer(id ObjectIdentity, r *RuntimeFinalizationRecoder, cleanup ...func() error) *RuntimeFinalizer {
 	f := &RuntimeFinalizer{
 		id:       id,
 		recorder: r,

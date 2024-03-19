@@ -62,7 +62,7 @@ func (a *Config) AddRootCertificate(chain signutils.GenericCertificateChain) err
 
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	if t, ok := target.(Context); ok {
-		if t.AttributesContext() == t { // apply only to root context
+		if t.AttributesContext().IsAttributesContext() { // apply only to root context
 			return errors.Wrapf(a.ApplyToAttribute(Get(t)), "applying config to certattr failed")
 		}
 	}

@@ -61,6 +61,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		return nil, err
 	}
 
+	// this section is for logging, only
 	target, err := json.Marshal(repo.GetSpecification())
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot marshal target specification")
