@@ -5,7 +5,7 @@
 // Package finalized provided a view management for a backend object,
 // which is based on Go Garbage Collection and runtime finalizers.
 // Finalization is not possible in Go, if an object is involved in
-// a reference cycle. In such a case the complete cycle not not
+// a reference cycle. In such a case the complete cycle is not
 // garbage collected at all.
 //
 // If some kind of finalization is required together with cyclic

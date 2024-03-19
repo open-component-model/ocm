@@ -205,8 +205,7 @@ var key = reflect.TypeOf(_context{})
 
 type _context struct {
 	*contextBase
-	allocatable refmgmt.Allocatable
-	updater     Updater
+	updater Updater
 }
 
 // gcWrapper is used as garbage collectable
