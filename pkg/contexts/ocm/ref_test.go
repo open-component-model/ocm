@@ -5,8 +5,6 @@
 package ocm_test
 
 import (
-	"strings"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
@@ -170,7 +168,7 @@ var _ = Describe("ref parsing", func() {
 			for _, cm := range []string{"", "+"} {
 				for _, ut := range []string{t, ""} {
 					for _, ush := range []string{"", "http", "https"} {
-						for _, uh := range []string{h, h + ":3030", "localhost", "localhost:3030"} {
+						for _, uh := range []string{h, h + ":3030"} {
 							for _, us := range []string{"", s} {
 								for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + "+65", v + ".1.2-rc.1", v + ".1.2+65"} {
 									ref := cm + Type(ut) + Scheme(ush) + uh + Sub(us) + "//" + c + Vers(uv)
@@ -179,11 +177,7 @@ var _ = Describe("ref parsing", func() {
 									// tests parsing of all permutations of
 									// [+][<type>::][scheme://]<domain>[:<port>][/<repository prefix>]//<component id>[:<version]
 									It("parses ref "+ref, func() {
-										if ut == "" && strings.HasPrefix(uh, "localhost") {
-											CheckRef(ref, ut, "", "", "", c, uv, Scheme(ush)+uh+Sub(us))
-										} else {
-											CheckRef(ref, ut, ush, uh, us, c, uv, "")
-										}
+										CheckRef(ref, ut, ush, uh, us, c, uv, "")
 									})
 								}
 							}
@@ -191,6 +185,62 @@ var _ = Describe("ref parsing", func() {
 					}
 				}
 			}
+		})
+
+		Context("host port refs", func() {
+			t := ocireg.Type
+			s := "mandelsoft/cnudie"
+			v := "v1"
+
+			h := "localhost"
+			ip := "127.0.0.1"
+			c := "github.com/mandelsoft/ocm"
+
+			Context("[+][<type>::]<scheme>://<host>[:<port>][/<repository prefix>]//<component id>[:<version] - without info", func() {
+				for _, cm := range []string{"", "+"} {
+					for _, ut := range []string{t, ""} {
+						for _, ush := range []string{"http", "https"} {
+							for _, uh := range []string{h, h + ":3030", ip, ip + ":3030"} {
+								for _, us := range []string{"", s} {
+									for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + "+65", v + ".1.2-rc.1", v + ".1.2+65"} {
+										ref := cm + Type(ut) + Scheme(ush) + uh + Sub(us) + "//" + c + Vers(uv)
+										ut, ush, uh, us, uv := ut, ush, uh, us, uv
+
+										// tests parsing of all permutations of
+										// [+][<type>::]scheme://<host>[:<port>][/<repository prefix>]//<component id>[:<version]
+										It("parses ref "+ref, func() {
+											CheckRef(ref, ut, ush, uh, us, c, uv, "")
+										})
+									}
+								}
+							}
+						}
+					}
+				}
+			})
+
+			Context("[+][<type>::][<scheme>://]<host>:<port>[/<repository prefix>]//<component id>[:<version] - without info", func() {
+				for _, cm := range []string{"", "+"} {
+					for _, ut := range []string{t, ""} {
+						for _, ush := range []string{"", "http", "https"} {
+							for _, uh := range []string{h + ":3030", ip + ":3030"} {
+								for _, us := range []string{"", s} {
+									for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + "+65", v + ".1.2-rc.1", v + ".1.2+65"} {
+										ref := cm + Type(ut) + Scheme(ush) + uh + Sub(us) + "//" + c + Vers(uv)
+										ut, ush, uh, us, uv := ut, ush, uh, us, uv
+
+										// tests parsing of all permutations of
+										// [+][<type>::][scheme://]<host>:<port>[/<repository prefix>]//<component id>[:<version]
+										It("parses ref "+ref, func() {
+											CheckRef(ref, ut, ush, uh, us, c, uv, "")
+										})
+									}
+								}
+							}
+						}
+					}
+				}
+			})
 		})
 
 		It("scheme", func() {
