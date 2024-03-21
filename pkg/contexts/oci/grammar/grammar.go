@@ -118,10 +118,14 @@ var (
 		Or(DomainComponentRegexp, IPRegexp),
 		Optional(Literal(`:`), Match(`[0-9]+`)))
 
-	// SchemeHostPortRegexp describes a non-DNS simple hostname with scheme like https://localhost.
+	// SchemedHostPortRegexp describes a non-DNS simple hostname with scheme like https://localhost.
+	SchemedHostPortRegexp = Sequence(
+		SchemeRegexp,
+		Capture(HostPortRegexp))
+
 	SchemeHostPortRegexp = Sequence(
 		Optional(SchemeRegexp),
-		Capture(HostPortRegexp))
+		Capture(ReqHostPortRegexp))
 
 	// SchemedHostPortArtifactRegexp describes a non-DNS simple hostname with scheme like https://localhost/repository:1.0.0 with the scheme being required.
 	AnchoredTypedSchemedHostPortArtifactRegexp = Anchored(Sequence(
