@@ -26,6 +26,10 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	host := u.Host
 	subp := u.SubPath
 
+	// This is checked because it can lead to confusion with the ocm notation.
+	if strings.Contains(subp, "//") {
+		return nil, fmt.Errorf("subpath %q cannot contain double slash (//)", subp)
+	}
 	if u.Type == Type {
 		if u.Info != "" && u.SubPath == "" {
 			idx := strings.Index(u.Info, grammar.RepositorySeparator)
