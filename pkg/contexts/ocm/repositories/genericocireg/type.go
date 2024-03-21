@@ -25,7 +25,8 @@ import (
 type ComponentNameMapping string
 
 const (
-	Type = ocireg.Type
+	Type      = ocireg.Type
+	ShortType = ocireg.ShortType
 
 	OCIRegistryURLPathMapping ComponentNameMapping = "urlPath"
 	OCIRegistryDigestMapping  ComponentNameMapping = "sha256-digest"

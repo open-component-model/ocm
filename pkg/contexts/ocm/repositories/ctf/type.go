@@ -11,7 +11,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 )
 
-const Type = ctf.Type
+const (
+	Type        = ctf.Type
+	TypeV1      = ctf.TypeV1
+	ShortType   = ctf.ShortType
+	ShortTypeV1 = ctf.ShortTypeV1
+)
 
 func NewRepositorySpec(acc accessobj.AccessMode, path string, opts ...accessio.Option) (*genericocireg.RepositorySpec, error) {
 	spec, err := ctf.NewRepositorySpec(acc, path, opts...)

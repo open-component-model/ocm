@@ -17,11 +17,16 @@ import (
 const (
 	Type   = "ComponentArchive"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
+
+	ShortType   = "ca"
+	ShortTypeV1 = ShortType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
 	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type, nil))
 	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1, nil))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](ShortType, nil))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](ShortTypeV1, nil))
 }
 
 type RepositorySpec struct {

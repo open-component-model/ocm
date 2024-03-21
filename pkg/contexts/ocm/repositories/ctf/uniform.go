@@ -18,9 +18,7 @@ func SupportedFormats() []accessio.FileFormat {
 
 func init() {
 	h := &repospechandler{}
-	cpi.RegisterRepositorySpecHandler(h, "")
-	cpi.RegisterRepositorySpecHandler(h, ctf.Type)
-	cpi.RegisterRepositorySpecHandler(h, "ctf")
+	cpi.RegisterRepositorySpecHandler(h, Type, ShortType, "")
 	for _, f := range SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 	}

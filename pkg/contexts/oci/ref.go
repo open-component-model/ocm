@@ -23,7 +23,7 @@ const (
 	KIND_ARETEFACT_REFERENCE = "artifact reference"
 )
 
-// ParseRepo parses a standard oci repository reference into a internal representation.
+// ParseRepo parses a standard oci repository reference into an internal representation.
 func ParseRepo(ref string) (UniformRepositorySpec, error) {
 	create := false
 	if strings.HasPrefix(ref, "+") {
@@ -87,10 +87,39 @@ func ParseRef(ref string) (RefSpec, error) {
 	}
 
 	spec := RefSpec{UniformRepositorySpec: UniformRepositorySpec{CreateIfMissing: create}}
-
-	match := grammar.FileReferenceRegexp.FindSubmatch([]byte(ref))
+	match := grammar.AnchoredTypedSchemedHostPortArtifactRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
+		spec.Scheme = string(match[2])
+		spec.Host = string(match[3])
+		spec.Repository = string(match[4])
+		spec.Tag = pointer(match[5])
+		spec.Digest = dig(match[6])
+		return spec, nil
+	}
+
+	match = grammar.AnchoredTypedOptSchemedReqHostReqPortArtifactRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
+		spec.Scheme = string(match[2])
+		spec.Host = string(match[3])
+		spec.Repository = string(match[4])
+		spec.Tag = pointer(match[5])
+		spec.Digest = dig(match[6])
+		return spec, nil
+	}
+	match = grammar.FileReferenceRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Info = string(match[2])
 		spec.Repository = string(match[3])
 		spec.Tag = pointer(match[4])
@@ -124,7 +153,10 @@ func ParseRef(ref string) (RefSpec, error) {
 	}
 	match = grammar.TypedReferenceRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Scheme = string(match[2])
 		spec.Host = string(match[3])
 		spec.Repository = string(match[4])
@@ -134,7 +166,10 @@ func ParseRef(ref string) (RefSpec, error) {
 	}
 	match = grammar.TypedURIRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Scheme = string(match[2])
 		spec.Host = string(match[3])
 		spec.Repository = string(match[4])
@@ -144,7 +179,10 @@ func ParseRef(ref string) (RefSpec, error) {
 	}
 	match = grammar.TypedGenericReferenceRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Info = string(match[2])
 		spec.Repository = string(match[3])
 		spec.Tag = pointer(match[4])
@@ -153,7 +191,10 @@ func ParseRef(ref string) (RefSpec, error) {
 	}
 	match = grammar.AnchoredRegistryRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Info = string(match[2])
 		spec.Repository = string(match[3])
 		spec.Tag = pointer(match[4])
@@ -163,7 +204,10 @@ func ParseRef(ref string) (RefSpec, error) {
 
 	match = grammar.AnchoredGenericRegistryRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
-		spec.Type = string(match[1])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec.Type = t
+		spec.TypeHint = h
 		spec.Info = string(match[2])
 
 		match = grammar.ErrorCheckRegexp.FindSubmatch([]byte(ref))

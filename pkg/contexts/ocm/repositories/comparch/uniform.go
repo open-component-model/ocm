@@ -11,13 +11,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
-const AltType = "ca"
-
 func init() {
 	h := &repospechandler{}
-	cpi.RegisterRepositorySpecHandler(h, "")
-	cpi.RegisterRepositorySpecHandler(h, Type)
-	cpi.RegisterRepositorySpecHandler(h, AltType)
+	cpi.RegisterRepositorySpecHandler(h, Type, ShortType, "")
 	for _, f := range GetFormats() {
 		cpi.RegisterRepositorySpecHandler(h, f)
 	}
@@ -26,7 +22,7 @@ func init() {
 type repospechandler struct{}
 
 func explicit(t string) bool {
-	return t == Type || t == AltType
+	return t == Type || t == ShortType
 }
 
 func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.RepositorySpec, error) {

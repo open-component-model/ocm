@@ -60,6 +60,7 @@ linked library can be used:
   - <code>DockerDaemon</code>: v1
   - <code>Empty</code>: v1
   - <code>OCIRegistry</code>: v1
+  - <code>ctf</code>: v1
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 

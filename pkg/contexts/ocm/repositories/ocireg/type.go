@@ -18,8 +18,10 @@ import (
 type ComponentNameMapping = genericocireg.ComponentNameMapping
 
 const (
-	Type   = ocireg.Type
-	TypeV1 = ocireg.TypeV1
+	Type        = ocireg.Type
+	TypeV1      = ocireg.TypeV1
+	ShortType   = ocireg.ShortType
+	ShortTypeV1 = ocireg.ShortTypeV1
 
 	OCIRegistryURLPathMapping ComponentNameMapping = "urlPath"
 	OCIRegistryDigestMapping  ComponentNameMapping = "sha256-digest"

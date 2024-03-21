@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/containerd/containerd/reference"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 
@@ -89,16 +90,23 @@ func (u *UniformRepositorySpec) String() string {
 }
 
 func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepositorySpec {
-	scheme := ""
-	parsed, err := url.Parse(host)
+	s := ""
+	h := host
+	var parsed *url.URL
+	ref, err := reference.Parse(host)
 	if err == nil {
-		host = parsed.Host
-		scheme = parsed.Scheme
+		parsed, err = url.Parse("https://" + ref.Locator)
+	} else {
+		parsed, err = url.Parse(host)
+	}
+	if err == nil {
+		s = parsed.Scheme
+		h = parsed.Host
 	}
 	u := &UniformRepositorySpec{
 		Type:   typ,
-		Scheme: scheme,
-		Host:   host,
+		Scheme: s,
+		Host:   h,
 	}
 	return u
 }
@@ -167,6 +175,14 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	deferr := errors.ErrNotSupported("uniform repository ref", u.String())
+
+	if u.Info != "" && string(u.Info[0]) == "{" && u.Host == "" && u.Scheme == "" {
+		data, err := runtime.CompleteSpecWithType(u.Type, []byte(u.Info))
+		if err != nil {
+			return nil, err
+		}
+		return ctx.RepositorySpecForConfig(data, runtime.DefaultJSONEncoding)
+	}
 
 	if u.Type == "" {
 		if u.Info != "" {

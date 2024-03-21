@@ -6,6 +6,7 @@ package ocirepo
 
 import (
 	"fmt"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"path"
 	"strings"
 
@@ -329,8 +330,16 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if err != nil {
 		return nil, wrap(err, errhint, "transfer artifact")
 	}
-
-	ref := path.Join(base, namespace.GetNamespace()) + version
+	match := grammar.AnchoredSchemedRegexp.FindStringSubmatch(base)
+	scheme := ""
+	if match != nil {
+		scheme = match[1]
+		base = match[2]
+	}
+	if scheme != "" {
+		scheme = scheme + "://"
+	}
+	ref := scheme + path.Join(base, namespace.GetNamespace()) + version
 	return ociartifact.New(ref), nil
 }
 

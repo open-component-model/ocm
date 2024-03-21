@@ -11,12 +11,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
-const AltType = "ctf"
-
 func init() {
 	h := &repospechandler{}
-	cpi.RegisterRepositorySpecHandler(h, "")
-	cpi.RegisterRepositorySpecHandler(h, Type)
+	cpi.RegisterRepositorySpecHandler(h, Type, ShortType, "")
 	for _, f := range SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 	}
@@ -34,7 +31,7 @@ func explicit(t string) bool {
 			return true
 		}
 	}
-	return t == Type || t == AltType
+	return t == Type || t == ShortType
 }
 
 func MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.RepositorySpec, error) {
@@ -47,8 +44,8 @@ func MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.Repository
 	}
 	fs := vfsattr.Get(ctx)
 
-	typ, _ := accessobj.MapType(u.Type, Type, accessio.FormatNone, true, AltType)
-	hint, f := accessobj.MapType(u.TypeHint, Type, accessio.FormatDirectory, true, AltType)
+	typ, _ := accessobj.MapType(u.Type, Type, accessio.FormatNone, true, ShortType)
+	hint, f := accessobj.MapType(u.TypeHint, Type, accessio.FormatDirectory, true, ShortType)
 	if !u.CreateIfMissing {
 		hint = ""
 	}

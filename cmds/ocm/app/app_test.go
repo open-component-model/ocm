@@ -72,7 +72,9 @@ var _ = Describe("Test Environment", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
+V[2] warn realm ocm realm test
 ERROR <nil> error realm ocm realm test
+V[2] ctxwarn realm ocm realm test
 ERROR <nil> ctxerror realm ocm realm test
 `))
 	})
@@ -137,7 +139,7 @@ ERROR <nil> ctxerror realm ocm realm test
 		Expect(err).To(Succeed())
 
 		fmt.Printf("%s\n", string(data))
-		Expect(len(string(data))).To(Equal(181))
+		Expect(len(string(data))).To(Equal(338))
 	})
 
 	It("sets attr from file", func() {
