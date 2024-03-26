@@ -1,6 +1,6 @@
 module github.com/open-component-model/ocm
 
-go 1.21
+go 1.22
 
 replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 
@@ -39,7 +39,7 @@ require (
 	github.com/klauspost/compress v1.17.4
 	github.com/klauspost/pgzip v1.2.6
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
-	github.com/mandelsoft/logging v0.0.0-20230905123808-7042ee3aae45
+	github.com/mandelsoft/logging v0.0.0-20240201091719-67180059d6bf
 	github.com/mandelsoft/spiff v1.7.0-beta-5
 	github.com/mandelsoft/vfs v0.4.3
 	github.com/marstr/guid v1.1.0

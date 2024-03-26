@@ -113,3 +113,22 @@ func ConfigureGlobal(config *logcfg.Config, extra ...string) error {
 func DynamicLogger(messageContext ...logging.MessageContext) logging.UnboundLogger {
 	return logging.DynamicLogger(Context(), messageContext...)
 }
+
+var (
+	contexts []*StaticContext
+	lock     sync.Mutex
+)
+
+func PushContext(ctx logging.Context) {
+	lock.Lock()
+	defer lock.Unlock()
+	contexts = append(contexts, logContext)
+	SetContext(ctx)
+}
+
+func PopContext() {
+	lock.Lock()
+	defer lock.Unlock()
+	logContext = contexts[len(contexts)-1]
+	contexts = contexts[:len(contexts)-1]
+}

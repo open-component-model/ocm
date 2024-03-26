@@ -35,6 +35,10 @@ func (a *FileSystemBlobAccess) Access() *AccessObject {
 	return a.base
 }
 
+func (a *FileSystemBlobAccess) SetReadOnly() {
+	a.base.SetReadOnly()
+}
+
 func (a *FileSystemBlobAccess) IsReadOnly() bool {
 	return a.base.IsReadOnly()
 }

@@ -256,6 +256,10 @@ func (c *ComponentVersionContainer) IsReadOnly() bool {
 	return c.comp.repo.arch.IsReadOnly()
 }
 
+func (c *ComponentVersionContainer) SetReadOnly() {
+	c.comp.repo.arch.SetReadOnly()
+}
+
 func (c *ComponentVersionContainer) Update() error {
 	desc := c.comp.repo.arch.GetDescriptor()
 	*desc = *c.descriptor.Copy()

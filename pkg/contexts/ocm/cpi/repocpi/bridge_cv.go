@@ -41,6 +41,7 @@ type ComponentVersionAccessImpl interface {
 	Repository() cpi.Repository
 
 	IsReadOnly() bool
+	SetReadOnly()
 
 	GetDescriptor() *compdesc.ComponentDescriptor
 	SetDescriptor(*compdesc.ComponentDescriptor) error
@@ -180,6 +181,10 @@ func (b *componentVersionAccessBridge) Repository() cpi.Repository {
 
 func (b *componentVersionAccessBridge) IsReadOnly() bool {
 	return b.impl.IsReadOnly()
+}
+
+func (b *componentVersionAccessBridge) SetReadOnly() {
+	b.impl.SetReadOnly()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

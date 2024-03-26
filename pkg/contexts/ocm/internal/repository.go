@@ -116,6 +116,8 @@ type ComponentVersionAccess interface {
 
 	DiscardChanges()
 	IsPersistent() bool
+	IsReadOnly() bool
+	SetReadOnly()
 
 	GetProvider() *compdesc.Provider
 	SetProvider(provider *compdesc.Provider) error

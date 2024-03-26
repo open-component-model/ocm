@@ -17,6 +17,7 @@ type VersionAccess interface {
 	Close() error
 
 	IsReadOnly() bool
+	SetReadOnly()
 	GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string
 }
 

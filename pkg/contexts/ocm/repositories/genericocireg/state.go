@@ -13,6 +13,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/go-test/deep"
+	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
@@ -25,6 +27,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
 	"github.com/open-component-model/ocm/pkg/errors"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -265,6 +268,15 @@ func (i StateHandler) Decode(data []byte) (interface{}, error) {
 }
 
 func (i StateHandler) Equivalent(a, b interface{}) bool {
+	if l := Logger(ocmlog.Context(), TAG_CDDIFF); l.Enabled(logging.DebugLevel) {
+		diff := deep.Equal(a, b)
+		if len(diff) > 0 {
+			l.Debug("component descriptor has been changed", "diff", diff)
+			return false
+		}
+		return true
+	}
+
 	ea, err := i.Encode(a)
 	if err == nil {
 		eb, err := i.Encode(b)

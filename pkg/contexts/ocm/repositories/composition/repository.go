@@ -11,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -99,7 +100,7 @@ func (a *Access) GetComponentVersion(comp, version string) (virtual.VersionAcces
 	} else {
 		cd = i.CD()
 	}
-	return &VersionAccess{a, cd.GetName(), cd.GetVersion(), cd.Copy()}, nil
+	return &VersionAccess{a, cd.GetName(), cd.GetVersion(), a.IsReadOnly(), cd.Copy()}, nil
 }
 
 func (a *Access) GetBlob(name string) (blobaccess.BlobAccess, error) {
@@ -141,10 +142,11 @@ func (a *Access) Close() error {
 var _ virtual.Access = (*Access)(nil)
 
 type VersionAccess struct {
-	access *Access
-	comp   string
-	vers   string
-	desc   *compdesc.ComponentDescriptor
+	access   *Access
+	comp     string
+	vers     string
+	readonly bool
+	desc     *compdesc.ComponentDescriptor
 }
 
 func (v *VersionAccess) GetDescriptor() *compdesc.ComponentDescriptor {
@@ -156,6 +158,9 @@ func (v *VersionAccess) GetBlob(name string) (cpi.DataAccess, error) {
 }
 
 func (v *VersionAccess) AddBlob(blob cpi.BlobAccess) (string, error) {
+	if v.readonly {
+		return "", accessio.ErrReadOnly
+	}
 	return v.access.AddBlob(blob)
 }
 
@@ -163,6 +168,9 @@ func (v *VersionAccess) Update() error {
 	v.access.lock.Lock()
 	defer v.access.lock.Unlock()
 
+	if v.readonly {
+		return accessio.ErrReadOnly
+	}
 	if v.desc.GetName() != v.comp || v.desc.GetVersion() != v.vers {
 		return errors.ErrInvalid(cpi.KIND_COMPONENTVERSION, common.VersionedElementKey(v.desc).String())
 	}
@@ -178,7 +186,11 @@ func (v *VersionAccess) Close() error {
 }
 
 func (v *VersionAccess) IsReadOnly() bool {
-	return false
+	return v.readonly
+}
+
+func (v *VersionAccess) SetReadOnly() {
+	v.readonly = true
 }
 
 func (v *VersionAccess) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {
