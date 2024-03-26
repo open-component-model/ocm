@@ -91,6 +91,10 @@ func (c *ComponentVersionContainer) Close() error {
 	return c.access.Close()
 }
 
+func (c *ComponentVersionContainer) SetReadOnly() {
+	c.state.SetReadOnly()
+}
+
 func (c *ComponentVersionContainer) Check() error {
 	if c.version != c.GetDescriptor().Version {
 		return errors.ErrInvalid("component version", c.GetDescriptor().Version)

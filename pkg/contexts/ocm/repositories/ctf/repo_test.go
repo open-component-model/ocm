@@ -5,11 +5,17 @@
 package ctf_test
 
 import (
+	"bytes"
+
+	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/finalizer"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	. "github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/tonglil/buflogr"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -170,5 +176,52 @@ var _ = Describe("access method", func() {
 		Expect(ErrorFrom((cv.SetResourceBlob(compdesc.NewResourceMeta("text1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blobaccess.ForFile(mime.MIME_TEXT, "non-existing-file"), "", nil)))).To(MatchError(`file "non-existing-file" not found`))
 
 		MustBeSuccessful(final.Finalize())
+	})
+
+	It("logs diff", func() {
+		r := Must(ctf.Open(ctx, ctf.ACC_CREATE, "test.ctf", 0o700, accessio.FormatDirectory, accessio.PathFileSystem(fs)))
+		defer Close(r, "repo")
+
+		c := Must(r.LookupComponent("acme.org/test"))
+		defer Close(c, "comp")
+
+		cv := Must(c.NewVersion("v1"))
+
+		ocmlog.PushContext(nil)
+		ocmlog.Context().AddRule(logging.NewConditionRule(logging.DebugLevel, genericocireg.TAG_CDDIFF))
+		var buf bytes.Buffer
+		def := buflogr.NewWithBuffer(&buf)
+		ocmlog.Context().SetBaseLogger(def)
+		defer ocmlog.Context().ResetRules()
+		defer ocmlog.PopContext()
+
+		MustBeSuccessful(c.AddVersion(cv))
+		MustBeSuccessful(cv.Close())
+
+		cv = Must(c.LookupVersion("v1"))
+		cv.GetDescriptor().Provider.Name = "acme.org"
+		MustBeSuccessful(cv.Close())
+		Expect("\n" + buf.String()).To(Equal(`
+V[4] component descriptor has been changed realm ocm realm ocm/oci/mapping diff [ComponentSpec.ObjectMeta.Provider.Name: acme != acme.org]
+V[4] component descriptor has been changed realm ocm realm ocm/oci/mapping diff [ComponentSpec.ObjectMeta.Provider.Name: acme != acme.org]
+`))
+	})
+
+	It("handles readonly mode", func() {
+		r := Must(ctf.Open(ctx, ctf.ACC_CREATE, "test.ctf", 0o700, accessio.FormatDirectory, accessio.PathFileSystem(fs)))
+		defer Close(r, "repo")
+
+		c := Must(r.LookupComponent("acme.org/test"))
+		defer Close(c, "comp")
+
+		cv := Must(c.NewVersion("v1"))
+
+		MustBeSuccessful(c.AddVersion(cv))
+		MustBeSuccessful(cv.Close())
+
+		cv = Must(c.LookupVersion("v1"))
+		cv.SetReadOnly()
+		cv.GetDescriptor().Provider.Name = "acme.org"
+		ExpectError(cv.Close()).To(MatchError(accessio.ErrReadOnly))
 	})
 })

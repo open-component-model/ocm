@@ -74,6 +74,7 @@ type ComponentVersionAccessBridge interface {
 	AddBlob(blob cpi.BlobAccess, arttype, refName string, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error)
 
 	IsReadOnly() bool
+	SetReadOnly()
 
 	// ShouldUpdate checks, whether an update is indicated
 	// by the state of object, considering persistence, lazy, discard
@@ -140,6 +141,14 @@ func NewComponentVersionAccess(name, version string, impl ComponentVersionAccess
 
 func (c *componentVersionAccessView) Unwrap() interface{} {
 	return c.bridge
+}
+
+func (c *componentVersionAccessView) IsReadOnly() bool {
+	return c.bridge.IsReadOnly()
+}
+
+func (c *componentVersionAccessView) SetReadOnly() {
+	c.bridge.SetReadOnly()
 }
 
 func (c *componentVersionAccessView) Close() error {

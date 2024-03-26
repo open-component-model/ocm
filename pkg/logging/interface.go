@@ -13,6 +13,7 @@ import (
 
 type LogProvider interface {
 	logging.ContextProvider
+	logging.AttributionContextProvider
 	Logger(messageContext ...logging.MessageContext) logging.Logger
 }
 
