@@ -33,8 +33,15 @@ func (n *Normalizers) Normalize(s *RepositorySpec) *RepositorySpec {
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
+	found := false
 	for _, f := range n.handlers[s.GetType()] {
+		found = true
 		f(s)
+	}
+	if !found && s.GetType() != s.GetKind() {
+		for _, f := range n.handlers[s.GetKind()] {
+			f(s)
+		}
 	}
 	return s
 }
