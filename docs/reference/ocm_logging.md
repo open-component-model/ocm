@@ -12,6 +12,7 @@ for dedicated tags and realms or realm prefixes (logging keys).
 
 The following *tags* are used by the command line tool:
   - <code>blobhandler</code>: execution of blob handler used to upload resource blobs to an ocm repository.
+  - <code>cd-diff</code>: component descriptor modification
 
 
 
