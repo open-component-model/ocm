@@ -137,7 +137,9 @@ ERROR <nil> ctxerror realm ocm realm test
 		Expect(err).To(Succeed())
 
 		fmt.Printf("%s\n", string(data))
-		Expect(len(string(data))).To(Equal(181))
+		// {"level":"error","msg":"error","realm":"test","time":"2024-03-27 09:54:19"}
+		// {"level":"error","msg":"ctxerror","realm":"test","time":"2024-03-27 09:54:19"}
+		Expect(len(string(data))).To(Equal(155))
 	})
 
 	It("sets attr from file", func() {
