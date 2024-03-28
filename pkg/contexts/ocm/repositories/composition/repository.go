@@ -44,9 +44,10 @@ func NewRepository(ctx cpi.ContextProvider, names ...string) cpi.Repository {
 type Index = virtual.Index[common.NameVersion]
 
 type Access struct {
-	lock  sync.Mutex
-	index *Index
-	blobs map[string]blobaccess.BlobAccess
+	lock     sync.Mutex
+	index    *Index
+	blobs    map[string]blobaccess.BlobAccess
+	readonly bool
 }
 
 var _ virtual.Access = (*Access)(nil)
@@ -59,7 +60,11 @@ func NewAccess() *Access {
 }
 
 func (a *Access) IsReadOnly() bool {
-	return false
+	return a.readonly
+}
+
+func (a *Access) SetReadOnly() {
+	a.readonly = true
 }
 
 func (a *Access) ComponentLister() cpi.ComponentLister {

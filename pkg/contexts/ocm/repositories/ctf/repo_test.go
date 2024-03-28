@@ -221,7 +221,29 @@ V[4] component descriptor has been changed realm ocm realm ocm/oci/mapping diff 
 
 		cv = Must(c.LookupVersion("v1"))
 		cv.SetReadOnly()
+		Expect(cv.IsReadOnly()).To(BeTrue())
 		cv.GetDescriptor().Provider.Name = "acme.org"
 		ExpectError(cv.Close()).To(MatchError(accessio.ErrReadOnly))
+	})
+
+	It("handles readonly mode on repo", func() {
+		r := Must(ctf.Open(ctx, ctf.ACC_CREATE, "test.ctf", 0o700, accessio.FormatDirectory, accessio.PathFileSystem(fs)))
+		defer Close(r, "repo")
+
+		c := Must(r.LookupComponent("acme.org/test"))
+		defer Close(c, "comp")
+
+		cv := Must(c.NewVersion("v1"))
+
+		MustBeSuccessful(c.AddVersion(cv))
+		MustBeSuccessful(cv.Close())
+
+		r.SetReadOnly()
+		cv = Must(c.LookupVersion("v1"))
+		Expect(cv.IsReadOnly()).To(BeTrue())
+		cv.GetDescriptor().Provider.Name = "acme.org"
+		ExpectError(cv.Close()).To(MatchError(accessio.ErrReadOnly))
+
+		ExpectError(c.NewVersion("v2")).To(MatchError(accessio.ErrReadOnly))
 	})
 })

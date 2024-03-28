@@ -35,6 +35,9 @@ type RepositoryBridge interface {
 
 	GetContext() cpi.Context
 
+	IsReadOnly() bool
+	SetReadOnly()
+
 	GetSpecification() cpi.RepositorySpec
 	ComponentLister() cpi.ComponentLister
 
@@ -115,6 +118,14 @@ func (r *repositoryView) GetSpecification() cpi.RepositorySpec {
 
 func (r *repositoryView) GetContext() cpi.Context {
 	return r.bridge.GetContext()
+}
+
+func (r *repositoryView) IsReadOnly() bool {
+	return r.bridge.IsReadOnly()
+}
+
+func (r *repositoryView) SetReadOnly() {
+	r.bridge.SetReadOnly()
 }
 
 func (r *repositoryView) ComponentLister() cpi.ComponentLister {
