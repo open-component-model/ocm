@@ -100,7 +100,7 @@ var _ = Describe("repository", func() {
 		Expect(refmgmt.ReferenceCount(repo)).To(Equal(1))
 	})
 
-	FIt("readonly mode on repo", func() {
+	It("readonly mode on repo", func() {
 		env := builder.NewBuilder(env.FileSystem(memoryfs.New(), ""))
 
 		env.OCMCompositionRepository("test", func() {

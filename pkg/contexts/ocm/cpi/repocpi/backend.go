@@ -31,11 +31,11 @@ type StorageBackendImpl interface {
 	GetSpecification() cpi.RepositorySpec
 
 	// IsReadOnly returns readonly mode for repo,
-	// if key is given for the dedicated cv.
+	// if key is given for the dedicated component version access.
 	IsReadOnly(key ...common.NameVersion) bool
 
 	// SetReadOnly sets readonly mode for repo,
-	// if key is given for the dedicated cv.
+	// if key is given for the dedicated component version access.
 	SetReadOnly(key ...common.NameVersion)
 
 	ComponentLister() cpi.ComponentLister

@@ -253,7 +253,7 @@ which might be directly mapped to consumer identities (if supported
 by the provider type).
 
 The type <code>Credentials</code> can be used to inline
-credentials for in credential configuration objects
+credentials in credential configuration objects
 to configure mappings of consumer identities to a credential
 set (see [ocm configfile](ocm_configfile.md)).
 
