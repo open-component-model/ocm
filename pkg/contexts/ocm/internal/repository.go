@@ -15,6 +15,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 )
 
+type ReadOnlyFeature interface {
+	IsReadOnly() bool
+	SetReadOnly()
+}
+
 type ComponentVersionResolver interface {
 	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
 }
@@ -29,7 +34,8 @@ type RepositoryImpl interface {
 	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
 	LookupComponent(name string) (ComponentAccess, error)
 
-	Close() error
+	io.Closer
+	ReadOnlyFeature
 }
 
 type Repository interface {
@@ -109,6 +115,7 @@ type ComponentVersionAccess interface {
 	resource.ResourceView[ComponentVersionAccess]
 	common.VersionedElement
 	io.Closer
+	ReadOnlyFeature
 
 	GetContext() Context
 	Repository() Repository
@@ -116,8 +123,6 @@ type ComponentVersionAccess interface {
 
 	DiscardChanges()
 	IsPersistent() bool
-	IsReadOnly() bool
-	SetReadOnly()
 
 	GetProvider() *compdesc.Provider
 	SetProvider(provider *compdesc.Provider) error

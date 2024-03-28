@@ -57,6 +57,14 @@ func (r *RepositoryImpl) Close() error {
 	return r.arch.container.Close()
 }
 
+func (r *RepositoryImpl) IsReadOnly() bool {
+	return r.arch.IsReadOnly()
+}
+
+func (r *RepositoryImpl) SetReadOnly() {
+	r.arch.SetReadOnly()
+}
+
 func (r *RepositoryImpl) SetBridge(base repocpi.RepositoryBridge) {
 	r.bridge = base
 	r.nonref = repocpi.NewNoneRefRepositoryView(base)

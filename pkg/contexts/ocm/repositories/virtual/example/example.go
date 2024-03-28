@@ -70,6 +70,10 @@ func (a *Access) IsReadOnly() bool {
 	return a.readonly
 }
 
+func (a *Access) SetReadOnly() {
+	a.readonly = true
+}
+
 func (a *Access) Reset() error {
 	a.lock.Lock()
 	defer a.lock.Unlock()

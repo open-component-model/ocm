@@ -29,10 +29,14 @@ type StorageBackendImpl interface {
 	io.Closer
 	GetContext() cpi.Context
 	GetSpecification() cpi.RepositorySpec
-	// IsReadOnly returns readonly mode for repo and component,
+
+	// IsReadOnly returns readonly mode for repo,
 	// if key is given for the dedicated cv.
 	IsReadOnly(key ...common.NameVersion) bool
-	SetReadOnly(key common.NameVersion)
+
+	// SetReadOnly sets readonly mode for repo,
+	// if key is given for the dedicated cv.
+	SetReadOnly(key ...common.NameVersion)
 
 	ComponentLister() cpi.ComponentLister
 	HasComponent(name string) (bool, error)
@@ -91,6 +95,14 @@ func (s *storageBackendRepository) Close() error {
 		return ErrClosed
 	}
 	return s.impl.Close()
+}
+
+func (s *storageBackendRepository) IsReadOnly() bool {
+	return s.impl.IsReadOnly()
+}
+
+func (s *storageBackendRepository) SetReadOnly() {
+	s.impl.SetReadOnly()
 }
 
 func (s *storageBackendRepository) GetContext() cpi.Context {
