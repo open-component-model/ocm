@@ -3,7 +3,7 @@
 ### Synopsis
 
 ```
-ocm add componentversions [<options>] [--version <version>] [<ctf archive>] {<components.yaml>}
+ocm add componentversions [<options>] [--version <version>] [<ctf archive>] {<component-constructor.yaml>}
 ```
 
 ##### Aliases
@@ -149,11 +149,11 @@ script with the <code>script</code> option family.
 
 
 <pre>
-$ ocm add componentversions &dash;&dash;file ctf &dash;&dash;version 1.0 components.yaml
+$ ocm add componentversions &dash;&dash;file ctf &dash;&dash;version 1.0 component-constructor.yaml
 </pre>
 
 
-and a file <code>components.yaml</code>:
+and a file <code>component-constructor.yaml</code>:
 
 
 <pre>
