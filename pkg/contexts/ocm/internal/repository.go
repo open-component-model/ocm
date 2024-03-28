@@ -17,6 +17,11 @@ import (
 
 type ReadOnlyFeature interface {
 	IsReadOnly() bool
+	// SetReadOnly is used to set the element into readonly mode.
+	// Once enabled it cannot be reverted. An underlying object, for
+	// example a CTF might be in readonly mode, forced by filesystem
+	// permissions. Such elements cannot be set into write mode again.
+	// Therefore, generally only one direction is possible.
 	SetReadOnly()
 }
 
