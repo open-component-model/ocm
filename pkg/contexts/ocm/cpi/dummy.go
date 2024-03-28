@@ -31,6 +31,13 @@ func (d *DummyComponentVersionAccess) IsClosed() bool {
 	return false
 }
 
+func (d *DummyComponentVersionAccess) IsReadOnly() bool {
+	return true
+}
+
+func (d *DummyComponentVersionAccess) SetReadOnly() {
+}
+
 func (d *DummyComponentVersionAccess) Dup() (ComponentVersionAccess, error) {
 	return d, nil
 }

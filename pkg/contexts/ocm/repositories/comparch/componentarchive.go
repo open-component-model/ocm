@@ -80,6 +80,10 @@ func (c *ComponentArchive) IsReadOnly() bool {
 	return c.container.IsReadOnly()
 }
 
+func (c *ComponentArchive) SetReadOnly() {
+	c.container.SetReadOnly()
+}
+
 // Repository returns a non referencing repository which does not
 // close the archive.
 func (c *ComponentArchive) Repository() cpi.Repository {
@@ -134,6 +138,10 @@ func (c *componentArchiveContainer) Repository() cpi.Repository {
 
 func (c *componentArchiveContainer) IsReadOnly() bool {
 	return c.fsacc.IsReadOnly()
+}
+
+func (c *componentArchiveContainer) SetReadOnly() {
+	c.fsacc.SetReadOnly()
 }
 
 func (c *componentArchiveContainer) Update() error {

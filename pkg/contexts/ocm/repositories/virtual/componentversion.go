@@ -89,6 +89,10 @@ func (c *ComponentVersionContainer) IsReadOnly() bool {
 	return c.access.IsReadOnly()
 }
 
+func (c *ComponentVersionContainer) SetReadOnly() {
+	c.access.SetReadOnly()
+}
+
 func (c *ComponentVersionContainer) IsClosed() bool {
 	return c.access == nil
 }

@@ -70,6 +70,10 @@ func (a *Access) IsReadOnly() bool {
 	return a.readonly
 }
 
+func (a *Access) SetReadOnly() {
+	a.readonly = true
+}
+
 func (a *Access) Reset() error {
 	a.lock.Lock()
 	defer a.lock.Unlock()
@@ -140,7 +144,7 @@ func (a *Access) GetComponentVersion(comp, version string) (virtual.VersionAcces
 	} else {
 		cd = i.CD()
 	}
-	return &VersionAccess{a, cd.GetName(), cd.GetVersion(), cd.Copy()}, nil
+	return &VersionAccess{a, cd.GetName(), cd.GetVersion(), a.readonly, cd.Copy()}, nil
 }
 
 func (a *Access) Close() error {
@@ -150,10 +154,11 @@ func (a *Access) Close() error {
 var _ virtual.Access = (*Access)(nil)
 
 type VersionAccess struct {
-	access *Access
-	comp   string
-	vers   string
-	desc   *compdesc.ComponentDescriptor
+	access   *Access
+	comp     string
+	vers     string
+	readonly bool
+	desc     *compdesc.ComponentDescriptor
 }
 
 func (v *VersionAccess) GetDescriptor() *compdesc.ComponentDescriptor {
@@ -219,7 +224,11 @@ func (v *VersionAccess) Close() error {
 }
 
 func (v *VersionAccess) IsReadOnly() bool {
-	return v.access.readonly
+	return v.readonly || v.access.readonly
+}
+
+func (v *VersionAccess) SetReadOnly() {
+	v.readonly = true
 }
 
 func (v *VersionAccess) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {

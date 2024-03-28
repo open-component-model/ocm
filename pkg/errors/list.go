@@ -22,6 +22,10 @@ type ErrorList struct { //nolint: errname // Intentional naming.
 	errors []error
 }
 
+func (l *ErrorList) Unwrap() []error {
+	return l.errors
+}
+
 func (l *ErrorList) Error() string {
 	msg := ""
 	if l.msg != "" {
