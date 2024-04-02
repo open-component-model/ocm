@@ -215,7 +215,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 }
 
 func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	return copyVersion(printer, log, hist, src, t, src.GetDescriptor().Copy(), handler)
+	return copyVersion(common.AssurePrinter(printer), log, hist, src, t, src.GetDescriptor().Copy(), handler)
 }
 
 // copyVersion (purely internal) expects an already prepared target comp desc for t given as prep.
