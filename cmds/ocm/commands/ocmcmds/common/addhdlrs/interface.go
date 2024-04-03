@@ -101,7 +101,7 @@ type ElementSpec interface {
 // component versions.
 type Element interface {
 	// Source provides info about the source the element has been
-	// derived from. (for example a component.yaml or resources.yaml).
+	// derived from. (for example a component-constructor.yaml or resources.yaml).
 	Source() SourceInfo
 	// Spec provides access to the element specification.
 	Spec() ElementSpec

@@ -74,15 +74,15 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "[<options>] [--version <version>] [<ctf archive>] {<components.yaml>}",
+		Use:   "[<options>] [--version <version>] [<ctf archive>] {<component-constructor.yaml>}",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add component version(s) to a (new) transport archive",
 		Example: `
 <pre>
-$ ocm add componentversions --file ctf --version 1.0 components.yaml
+$ ocm add componentversions --file ctf --version 1.0 component-constructor.yaml
 </pre>
 
-and a file <code>components.yaml</code>:
+and a file <code>component-constructor.yaml</code>:
 
 <pre>
 name: ocm.software/demo/test

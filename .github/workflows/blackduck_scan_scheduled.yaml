@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
           
       - name: Blackduck Full Scan
-        uses: mercedesbenzio/detect-action@v1
+        uses: mercedesbenzio/detect-action@v2
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
