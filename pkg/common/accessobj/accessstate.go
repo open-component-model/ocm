@@ -114,6 +114,8 @@ type State interface {
 
 	// Update updates the technical representation in its persistence
 	Update() (bool, error)
+
+	SetReadOnly()
 }
 
 type state struct {
@@ -201,6 +203,10 @@ func NewBlobStateForObject(mode AccessMode, obj interface{}, p StateHandler) (St
 		return nil, err
 	}
 	return NewBlobStateForBlob(mode, blobaccess.ForData("", data), p)
+}
+
+func (s *state) SetReadOnly() {
+	s.mode |= ACC_READONLY
 }
 
 func (s *state) IsReadOnly() bool {

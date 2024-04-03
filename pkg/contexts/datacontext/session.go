@@ -18,6 +18,10 @@ import (
 // Added closers may be closed prio to the session without causing
 // errors.
 type Session interface {
+	// Closer adds a closer returned by a function call providing a closer and an error
+	// to the session if not error is returned. The results of the call are forwarded to
+	// the own result. Unfortunately, Go does not support type parameters for methods,
+	// therefore only an io.Closer can be returned a function result.
 	Closer(closer io.Closer, extra ...interface{}) (io.Closer, error)
 	GetOrCreate(key interface{}, creator func(SessionBase) Session) Session
 	AddCloser(closer io.Closer, callbacks ...accessio.CloserCallback) io.Closer

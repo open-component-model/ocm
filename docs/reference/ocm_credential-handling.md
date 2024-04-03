@@ -248,6 +248,16 @@ behaviours are described in the following list:
 
 ### Credential Providers
 
+Credential providers offer sets of named credentials from variuos sources,
+which might be directly mapped to consumer identities (if supported
+by the provider type).
+
+The type <code>Credentials</code> can be used to inline
+credentials in credential configuration objects
+to configure mappings of consumer identities to a credential
+set (see [ocm configfile](ocm_configfile.md)).
+
+The following types are currently available:
 
 - Credential provider <code>Credentials</code>
 
@@ -355,4 +365,10 @@ behaviours are described in the following list:
 ##### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+
+
+
+##### Additional Links
+
+* [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -96,8 +97,7 @@ func toVersion(t string) string {
 }
 
 func (c *componentAccessImpl) IsReadOnly() bool {
-	// TODO: extend OCI to query ReadOnly mode
-	return false
+	return c.repo.IsReadOnly()
 }
 
 func (c *componentAccessImpl) ListVersions() ([]string, error) {
@@ -139,10 +139,17 @@ func (c *componentAccessImpl) LookupVersion(version string) (*repocpi.ComponentV
 		}
 		return nil, err
 	}
-	return newComponentVersionAccess(accessobj.ACC_WRITABLE, c, version, acc, true)
+	m := accessobj.ACC_WRITABLE
+	if c.IsReadOnly() {
+		m = accessobj.ACC_READONLY
+	}
+	return newComponentVersionAccess(m, c, version, acc, true)
 }
 
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (*repocpi.ComponentVersionAccessInfo, error) {
+	if c.IsReadOnly() {
+		return nil, accessio.ErrReadOnly
+	}
 	override := utils.Optional(overrides...)
 	acc, err := c.namespace.GetArtifact(toTag(version))
 	if err == nil {

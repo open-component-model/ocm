@@ -15,6 +15,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 )
 
+type ReadOnlyFeature interface {
+	IsReadOnly() bool
+	// SetReadOnly is used to set the element into readonly mode.
+	// Once enabled it cannot be reverted. An underlying object, for
+	// example a CTF might be in readonly mode, forced by filesystem
+	// permissions. Such elements cannot be set into write mode again.
+	// Therefore, generally only one direction is possible.
+	SetReadOnly()
+}
+
 type ComponentVersionResolver interface {
 	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
 }
@@ -29,7 +39,8 @@ type RepositoryImpl interface {
 	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
 	LookupComponent(name string) (ComponentAccess, error)
 
-	Close() error
+	io.Closer
+	ReadOnlyFeature
 }
 
 type Repository interface {
@@ -109,6 +120,7 @@ type ComponentVersionAccess interface {
 	resource.ResourceView[ComponentVersionAccess]
 	common.VersionedElement
 	io.Closer
+	ReadOnlyFeature
 
 	GetContext() Context
 	Repository() Repository

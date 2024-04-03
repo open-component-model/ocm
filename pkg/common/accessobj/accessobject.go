@@ -150,6 +150,10 @@ func (a *AccessObject) IsReadOnly() bool {
 	return a.state.IsReadOnly()
 }
 
+func (a *AccessObject) SetReadOnly() {
+	a.state.SetReadOnly()
+}
+
 func (a *AccessObject) updateDescriptor() (bool, error) {
 	if a.IsClosed() {
 		return false, accessio.ErrClosed

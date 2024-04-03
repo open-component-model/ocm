@@ -40,11 +40,12 @@ func GetOCIRepository(r cpi.Repository) ocicpi.Repository {
 }
 
 type RepositoryImpl struct {
-	bridge  repocpi.RepositoryBridge
-	ctx     cpi.Context
-	meta    ComponentRepositoryMeta
-	nonref  cpi.Repository
-	ocirepo oci.Repository
+	bridge   repocpi.RepositoryBridge
+	ctx      cpi.Context
+	meta     ComponentRepositoryMeta
+	nonref   cpi.Repository
+	ocirepo  oci.Repository
+	readonly bool
 }
 
 var (
@@ -63,6 +64,15 @@ func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.R
 
 func (r *RepositoryImpl) Close() error {
 	return r.ocirepo.Close()
+}
+
+func (r *RepositoryImpl) IsReadOnly() bool {
+	// TODO: extend OCI to query ReadOnly mode
+	return r.readonly
+}
+
+func (r *RepositoryImpl) SetReadOnly() {
+	r.readonly = true
 }
 
 func (r *RepositoryImpl) SetBridge(base repocpi.RepositoryBridge) {

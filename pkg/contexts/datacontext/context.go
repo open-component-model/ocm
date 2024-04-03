@@ -92,6 +92,10 @@ func (d _delegates) LoggingContext() logging.Context {
 	return d.logging
 }
 
+func (d _delegates) AttributionContext() logging.AttributionContext {
+	return d.logging.AttributionContext()
+}
+
 func (d _delegates) Logger(messageContext ...logging.MessageContext) logging.Logger {
 	return d.logging.Logger(messageContext)
 }

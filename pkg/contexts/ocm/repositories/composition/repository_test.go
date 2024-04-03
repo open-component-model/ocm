@@ -7,6 +7,8 @@ package composition_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
@@ -96,5 +98,40 @@ var _ = Describe("repository", func() {
 
 		MustBeSuccessful(finalize.Finalize())
 		Expect(refmgmt.ReferenceCount(repo)).To(Equal(1))
+	})
+
+	It("readonly mode on repo", func() {
+		env := builder.NewBuilder(env.FileSystem(memoryfs.New(), ""))
+
+		env.OCMCompositionRepository("test", func() {
+			env.Component(COMPONENT, func() {
+				env.Version(VERSION, func() {
+					env.Provider("acme.org")
+					env.Resource("text", VERSION, "special", metav1.LocalRelation, func() {
+						env.BlobStringData(mime.MIME_TEXT, "testdata")
+					})
+				})
+			})
+		})
+
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize, "final")
+
+		sess := ocm.NewSession(nil)
+		repo := me.NewRepository(env, "test")
+		sess.AddCloser(repo)
+		finalize.Close(sess, "repo")
+
+		repo.SetReadOnly()
+		Expect(repo.IsReadOnly()).To(BeTrue())
+
+		cv := Must(repo.LookupComponentVersion(COMPONENT, VERSION))
+		cl := accessio.OnceCloser(cv)
+		sess.AddCloser(cl)
+
+		Expect(cv.IsReadOnly()).To(BeTrue())
+
+		cv.GetDescriptor().Provider.Name = "acme.org"
+		ExpectError(cl.Close()).To(MatchError(accessobj.ErrReadOnly))
 	})
 })

@@ -57,6 +57,14 @@ func (r *RepositoryImpl) Close() error {
 	return r.arch.container.Close()
 }
 
+func (r *RepositoryImpl) IsReadOnly() bool {
+	return r.arch.IsReadOnly()
+}
+
+func (r *RepositoryImpl) SetReadOnly() {
+	r.arch.SetReadOnly()
+}
+
 func (r *RepositoryImpl) SetBridge(base repocpi.RepositoryBridge) {
 	r.bridge = base
 	r.nonref = repocpi.NewNoneRefRepositoryView(base)
@@ -254,6 +262,10 @@ func (c *ComponentVersionContainer) Repository() cpi.Repository {
 
 func (c *ComponentVersionContainer) IsReadOnly() bool {
 	return c.comp.repo.arch.IsReadOnly()
+}
+
+func (c *ComponentVersionContainer) SetReadOnly() {
+	c.comp.repo.arch.SetReadOnly()
 }
 
 func (c *ComponentVersionContainer) Update() error {
