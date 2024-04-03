@@ -66,7 +66,7 @@ func (d *delegation) Decode(ctx cpi.Context, data []byte, unmarshal runtime.Unma
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot unmarshal component repository meta information")
 	}
-	return NewRepositorySpec(ospec, meta), nil
+	return normalizers.Normalize(NewRepositorySpec(ospec, meta)), nil
 }
 
 func (d *delegation) Priority() int {
@@ -106,10 +106,11 @@ var (
 )
 
 func NewRepositorySpec(spec oci.RepositorySpec, meta *ComponentRepositoryMeta) *RepositorySpec {
-	return &RepositorySpec{
+	s := &RepositorySpec{
 		RepositorySpec:          spec,
 		ComponentRepositoryMeta: *DefaultComponentRepositoryMeta(meta),
 	}
+	return normalizers.Normalize(s)
 }
 
 func (a *RepositorySpec) PathPrefix() string {
@@ -142,6 +143,8 @@ func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
 
 	u.RepositorySpec = ocispec
 	u.ComponentRepositoryMeta = *compmeta
+
+	normalizers.Normalize(u)
 	return nil
 }
 

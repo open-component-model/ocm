@@ -50,6 +50,12 @@ var _ = Describe("Printer", func() {
 		Expect(buf.String()).To(Equal("line\n  test\n  next\nback\n"))
 	})
 
+	It("defaults printer", func() {
+		Expect(AssurePrinter(nil)).To(BeIdenticalTo(NonePrinter))
+		p := NewPrinter(nil)
+		Expect(AssurePrinter(p)).To(BeIdenticalTo(p))
+	})
+
 	Context("loggging", func() {
 		var buf *bytes.Buffer
 		var logctx logging.Context
