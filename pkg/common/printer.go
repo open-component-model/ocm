@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/logging"
-	
+
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
