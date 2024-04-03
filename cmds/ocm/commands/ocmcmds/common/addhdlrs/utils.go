@@ -303,7 +303,7 @@ func ValidateElementIdentities(kind string, elems []Element) error {
 }
 
 // ValidateElementSpecIdentities validate the element specifications
-// taken from some source (for example a resources.yaml or components.yaml).
+// taken from some source (for example a resources.yaml or component-constructor.yaml).
 // The parameter src somehow identifies the element source, for example
 // the path of the parsed file.
 func ValidateElementSpecIdentities(kind string, src string, elems []ElementSpec) error {
