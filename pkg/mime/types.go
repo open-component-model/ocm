@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package mime
 
 const (
@@ -19,4 +15,6 @@ const (
 	MIME_TAR     = "application/x-tar"
 	MIME_TGZ     = "application/x-tgz"
 	MIME_TGZ_ALT = MIME_TAR + "+gzip"
+
+	MIME_JAR = "application/x-jar"
 )
