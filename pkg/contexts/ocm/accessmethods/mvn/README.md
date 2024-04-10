@@ -21,12 +21,16 @@ The type specific specification fields are:
 
 - **`repository`** *string*
 
-  Base URL of the Maven (mvn) repository.
+  Base URL of the Maven (mvn) repository
 
-- **`package`** *string*
+- **`groupId`** *string*
 
-  The name of the Maven (mvn) package.
+  The groupId of the Maven (mvn) artifact
+- 
+- **`artifactId`** *string*
+
+  The artifactId of the Maven (mvn) artifact
 
 - **`version`** *string*
 
-  The version of the Maven (mvn) package.
+  The version name of the Maven (mvn) artifact

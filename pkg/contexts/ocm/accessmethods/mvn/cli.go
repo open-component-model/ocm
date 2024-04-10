@@ -32,7 +32,7 @@ The type specific specification fields are:
 
 - **<code>repository</code>** *string*
 
-  Base URL of the Maven (mvn) repository.
+  Base URL of the Maven (mvn) repository
 
 - **<code>groupId</code>** *string*
 
