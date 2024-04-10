@@ -26,7 +26,7 @@ The type specific specification fields are:
 - **`groupId`** *string*
 
   The groupId of the Maven (mvn) artifact
-- 
+
 - **`artifactId`** *string*
 
   The artifactId of the Maven (mvn) artifact
