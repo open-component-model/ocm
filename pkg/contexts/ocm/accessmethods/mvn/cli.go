@@ -8,7 +8,8 @@ import (
 func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 	return flagsets.NewConfigOptionTypeSetHandler(
 		Type, AddConfig,
-		options.RegistryOption,
+		options.RepositoryOption,
+		options.GroupOption,
 		options.PackageOption,
 		options.VersionOption,
 	)
@@ -16,13 +17,14 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "repository")
-	flagsets.AddFieldByOptionP(opts, options.PackageOption, config, "package")
+	flagsets.AddFieldByOptionP(opts, options.GroupOption, config, "groupId")
+	flagsets.AddFieldByOptionP(opts, options.PackageOption, config, "artifactId")
 	flagsets.AddFieldByOptionP(opts, options.VersionOption, config, "version")
 	return nil
 }
 
 var usage = `
-This method implements the access of a Maven (mvn) package in a Maven repository.
+This method implements the access of a Maven (mvn) artifact in a Maven repository.
 `
 
 var formatV1 = `
@@ -32,11 +34,15 @@ The type specific specification fields are:
 
   Base URL of the Maven (mvn) repository.
 
-- **<code>package</code>** *string*
+- **<code>groupId</code>** *string*
 
-  The name of the Maven (mvn) package
+  The groupId of the Maven (mvn) artifact
+
+- **<code>artifactId</code>** *string*
+
+  The artifactId of the Maven (mvn) artifact
 
 - **<code>version</code>** *string*
 
-  The version name of the Maven (mvn) package
+  The version name of the Maven (mvn) artifact
 `
