@@ -108,7 +108,7 @@ type meta struct {
 
 func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	// this is how the usual maven repository structure looks like
-	urlPrefix := a.Repository + path.Join("/", strings.Replace(a.GroupId, ".", "/", -1), a.ArtifactId, a.Version, a.ArtifactId+"-"+a.Version+".")
+	urlPrefix := a.Repository + path.Join("/", strings.ReplaceAll(a.GroupId, ".", "/"), a.ArtifactId, a.Version, a.ArtifactId+"-"+a.Version+".")
 	fs := vfsattr.Get(ctx)
 
 	// first let's read the pom file and check which binary artifact we need to read
