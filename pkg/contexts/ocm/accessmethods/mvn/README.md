@@ -5,7 +5,7 @@
 type: mvn/v1
 ```
 
-Provided blobs use the following media type: `application/x-tgz` // FIXME: Do we need to define a new media type for this?
+Provided blobs use the following media type: `application/x-jar`
 
 ### Description
 
