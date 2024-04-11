@@ -16,8 +16,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const mvnPATH = "/testdata/.m2/repository"
-const FAILPATH = "/testdata"
+const (
+	mvnPATH  = "/testdata/.m2/repository"
+	FAILPATH = "/testdata"
+)
 
 var _ = Describe("Method", func() {
 	var env *Builder
@@ -87,5 +89,4 @@ var _ = Describe("Method", func() {
 	                       Path: "C:/SAPDEV~1/TEMP/user/VFS-1551776656/C:",
 	                       Err: <syscall.Errno>0x7b,
 	*/
-
 })

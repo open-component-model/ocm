@@ -6,8 +6,6 @@ import (
 	"crypto"
 	"encoding/xml"
 	"fmt"
-	npmCredentials "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
-	"github.com/open-component-model/ocm/pkg/logging"
 	"io"
 	"net/http"
 	"path"
@@ -18,10 +16,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/mvn/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/iotools"
+	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -112,8 +112,8 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	fs := vfsattr.Get(ctx)
 
 	// first let's read the pom file and check which binary artifact we need to read
-	log := logging.Context().Logger(npmCredentials.REALM)
-	log.Debug("Reading %s", urlPrefix+"pom")
+	log := logging.Context().Logger(identity.REALM)
+	log.Debug("Reading ", "pom", urlPrefix+"pom")
 	pom, err := readPom(urlPrefix+"pom", fs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot read pom file for %s", urlPrefix)
@@ -121,11 +121,11 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 
 	hashType, hash, err := getBestHashValue(urlPrefix+pom.Packaging, fs)
 	if err != nil {
-		log.Debug("Could not find any hash value for %s", urlPrefix+pom.Packaging)
+		log.Debug("Could not find any hash value for ", "file", urlPrefix+pom.Packaging)
 	}
 	asc, err := getStringData(urlPrefix+pom.Packaging+".asc", fs)
 	if err != nil {
-		log.Debug("No signing info found for %s", urlPrefix+pom.Packaging)
+		log.Debug("No signing info found for ", "file", urlPrefix+pom.Packaging)
 	}
 
 	var metadata meta = meta{
@@ -185,14 +185,14 @@ func getStringData(url string, fs vfs.FileSystem) (string, error) {
 // getBestHashValue returns the best hash value (SHA-512, SHA-256, SHA-1, MD5) for the given artifact (POM, JAR, ...).
 func getBestHashValue(url string, fs vfs.FileSystem) (crypto.Hash, string, error) {
 	arr := [5]crypto.Hash{crypto.SHA512, crypto.SHA256, crypto.SHA1, crypto.MD5}
-	log := logging.Context().Logger(npmCredentials.REALM)
+	log := logging.Context().Logger(identity.REALM)
 	for i := 0; i < len(arr); i++ {
 		v, err := getStringData(url+hashUrlExt(arr[i]), fs)
 		if v != "" {
 			return arr[i], v, err
 		}
 		if err != nil {
-			log.Debug("hash value not found: %s - %s", url+hashUrlExt(arr[i]), err)
+			log.Debug("hash file not found", "url", url+hashUrlExt(arr[i]))
 		}
 	}
 	return 0, "", errors.New("no hash value found")
