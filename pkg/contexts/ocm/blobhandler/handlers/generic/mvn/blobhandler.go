@@ -1,6 +1,7 @@
 package mvn
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -65,7 +66,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, hint string, 
 		return nil, err
 	}
 	defer blobReader.Close()
-	req, err := http.NewRequest("PUT", b.spec.Url+"/"+artifact.Path(), blobReader)
+	req, err := http.NewRequestWithContext(context.Background(), "PUT", b.spec.Url+"/"+artifact.Path(), blobReader)
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +91,9 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, hint string, 
 
 	// Validate the response - especially the hash values with the ones we've tried to send
 	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	var artifactBody Body
 	err = json.Unmarshal(respBody, &artifactBody)
 	if err != nil {
