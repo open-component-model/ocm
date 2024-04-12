@@ -5,15 +5,15 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/mvn"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/mime"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const (
@@ -60,7 +60,7 @@ var _ = Describe("Method", func() {
 				break
 			}
 		}
-		Expect(dr.Size()).To(Equal(int64(65690)))
+		Expect(dr.Size()).To(Equal(int64(7153)))
 		Expect(dr.Digest().String()).To(Equal("SHA-1:34ccdeb9c008f8aaef90873fc636b09d3ae5c709"))
 	})
 

@@ -95,7 +95,6 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, hint string, 
 	if err != nil {
 		return nil, err
 	}
-
 	blobDigest := blob.Digest()
 	remoteDigest := artifactBody.Checksums[string(blobDigest.Algorithm())]
 	if remoteDigest == "" {
