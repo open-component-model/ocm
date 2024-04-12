@@ -28,8 +28,9 @@ const (
 	BLUEPRINT_LEGACY = "blueprint"
 	// BLOB describes any anonymous untyped blob data.
 	BLOB = "blob"
+	// DIRECTORY_TREE describes a directory structure.
+	DIRECTORY_TREE = "directoryTree"
 	// FILESYSTEM describes a directory structure stored as archive (tar, tgz).
-	DIRECTORY_TREE    = "directoryTree"
 	FILESYSTEM        = DIRECTORY_TREE
 	FILESYSTEM_LEGACY = "filesystem"
 	// EXECUTABLE describes an OS executable.
