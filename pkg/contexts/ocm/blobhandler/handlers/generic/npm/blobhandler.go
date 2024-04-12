@@ -12,11 +12,12 @@ import (
 	npmCredentials "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const BLOB_HANDLER_NAME = "ocm/npmPackage"
+const BLOB_HANDLER_NAME = "ocm/" + resourcetypes.NPM_PACKAGE
 
 type artifactHandler struct {
 	spec *Config
