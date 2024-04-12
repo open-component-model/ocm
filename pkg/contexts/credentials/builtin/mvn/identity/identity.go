@@ -16,8 +16,6 @@ const (
 	// CONSUMER_TYPE is the mvn repository type.
 	CONSUMER_TYPE = "Repository.maven.apache.org"
 
-	// FIXME use correct settings for maven repo authentication
-
 	// ATTR_USERNAME is the username attribute. Required for login at any mvn registry.
 	ATTR_USERNAME = cpi.ATTR_USERNAME
 	// ATTR_PASSWORD is the password attribute. Required for login at any mvn registry.
@@ -25,7 +23,7 @@ const (
 )
 
 // Logging Realm.
-var REALM = logging.DefineSubRealm("MVN repository", "MVN")
+var REALM = logging.DefineSubRealm("Maven repository", "mvn")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
