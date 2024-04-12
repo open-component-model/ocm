@@ -16,16 +16,12 @@ const (
 	// CONSUMER_TYPE is the mvn repository type.
 	CONSUMER_TYPE = "Repository.maven.apache.org"
 
-	// FIXME use correct settings for maven repo authentication	
-	
+	// FIXME use correct settings for maven repo authentication
+
 	// ATTR_USERNAME is the username attribute. Required for login at any mvn registry.
 	ATTR_USERNAME = cpi.ATTR_USERNAME
 	// ATTR_PASSWORD is the password attribute. Required for login at any mvn registry.
 	ATTR_PASSWORD = cpi.ATTR_PASSWORD
-	// ATTR_EMAIL is the email attribute. Required for login at any mvn registry.
-	ATTR_EMAIL = cpi.ATTR_EMAIL
-	// ATTR_TOKEN is the token attribute. May exist after login at any mvn registry.
-	ATTR_TOKEN = cpi.ATTR_TOKEN
 )
 
 // Logging Realm.
@@ -35,8 +31,6 @@ func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
 		ATTR_USERNAME, "the basic auth user name",
 		ATTR_PASSWORD, "the basic auth password",
-		ATTR_EMAIL, "MVN registry, require an email address",
-		ATTR_TOKEN, "the token attribute. May exist after login at any mvn registry. Check your .m2/settings.xml file!",
 	})
 
 	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `MVN repository
@@ -46,18 +40,18 @@ the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 		attrs)
 }
 
-func GetConsumerId(rawURL string, pkgName string) cpi.ConsumerIdentity {
+func GetConsumerId(rawURL, groupId string) cpi.ConsumerIdentity {
 	url, err := Parse(rawURL)
 	if err != nil {
 		return nil
 	}
 
-	url.Path = path.Join(url.Path, pkgName)
+	url.Path = path.Join(url.Path, groupId)
 	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url.String())
 }
 
-func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) common.Properties {
-	id := GetConsumerId(repoUrl, pkgName)
+func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) common.Properties {
+	id := GetConsumerId(repoUrl, groupId)
 	if id == nil {
 		return nil
 	}
