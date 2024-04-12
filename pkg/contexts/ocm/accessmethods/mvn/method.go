@@ -189,6 +189,7 @@ func getBestHashValue(url string, fs vfs.FileSystem) (crypto.Hash, string, error
 	for i := 0; i < len(arr); i++ {
 		v, err := getStringData(url+hashUrlExt(arr[i]), fs)
 		if v != "" {
+			log.Debug("found hash ", "url", url+hashUrlExt(arr[i]))
 			return arr[i], v, err
 		}
 		if err != nil {
