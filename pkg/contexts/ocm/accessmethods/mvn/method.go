@@ -37,8 +37,6 @@ func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 }
 
-var REALM = logging.DefineSubRealm("Maven repository", "mvn")
-
 // AccessSpec describes the access for a Maven (mvn) repository.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
