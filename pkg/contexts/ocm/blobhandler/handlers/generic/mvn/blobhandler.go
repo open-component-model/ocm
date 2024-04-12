@@ -3,14 +3,15 @@ package mvn
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/mvn/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/mvn"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"io"
-	"net/http"
 )
 
 const BLOB_HANDLER_NAME = "ocm/" + resourcetypes.MVN_ARTIFACT
@@ -23,7 +24,7 @@ func NewArtifactHandler(repospec *Config) cpi.BlobHandler {
 	return &artifactHandler{repospec}
 }
 
-func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, hint string, _ cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	// check conditions
 	if b.spec == nil {
 		return nil, nil
@@ -37,29 +38,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	}
 
 	// setup logger
-	log := logging.Context().Logger(mvn.REALM)
+	log := logging.Context().Logger(identity.REALM)
 	log = log.WithValues("repository", b.spec.Url)
 
-	blobReader, err := blob.Reader()
-	if err != nil {
-		return nil, err
-	}
-	defer blobReader.Close()
-
-	/*/ FIXME: do we need to read the whole file into memory? Maybe to guess the groupId, artifactId and version?
-	data, err := io.ReadAll(blobReader)
-	if err != nil {
-		return nil, err
-	} */
-	var artifact *Artifact
-	// FIXME: how do I get the groupId, artifactId and version from accessSpec.AccessMethod().???
-	log.Debug("reading jar file - but, where is the groupId, artifactId and version?")
-	artifact = &Artifact{
-		GroupId:    "ocm.software", // FIXME: hardcoded
-		ArtifactId: "hello-ocm",    // FIXME: hardcoded
-		Version:    "0.0.1",        // FIXME: hardcoded
-		Packaging:  "jar",          // FIXME: hardcoded
-	}
+	// identify artifact
+	artifact := FromGAV(hint)
 	log = log.WithValues("groupId", artifact.GroupId, "artifactId", artifact.ArtifactId, "version", artifact.Version)
 	log.Debug("identified")
 
@@ -68,29 +51,31 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	if cred == nil {
 		return nil, fmt.Errorf("no credentials found for %s. Couldn't upload '%s'", b.spec.Url, artifact.GAV())
 	}
-	log.Debug("found credentials")
-
 	username := cred[identity.ATTR_USERNAME]
 	password := cred[identity.ATTR_PASSWORD]
 	if username == "" || password == "" {
 		return nil, fmt.Errorf("credentials for %s are invalid. Username or password missing! Couldn't upload '%s'", b.spec.Url, artifact.GAV())
 	}
 	log = log.WithValues("user", username)
+	log.Debug("found credentials")
 
 	// Create a new request
+	blobReader, err := blob.Reader()
+	if err != nil {
+		return nil, err
+	}
+	defer blobReader.Close()
 	req, err := http.NewRequest("PUT", b.spec.Url+"/"+artifact.Path(), blobReader)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-
-	// Add authentication
 	req.SetBasicAuth(username, password)
 
 	// Execute the request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -103,10 +88,20 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 		return nil, fmt.Errorf("http (%d) - failed to upload artifact: %s", resp.StatusCode, string(all))
 	}
 
+	// Validate the response - especially the hash values with the ones we've tried to send
 	respBody, err := io.ReadAll(resp.Body)
-	err = json.Unmarshal(respBody, &artifact)
+	var artifactBody Body
+	err = json.Unmarshal(respBody, &artifactBody)
 	if err != nil {
 		return nil, err
+	}
+
+	blobDigest := blob.Digest()
+	remoteDigest := artifactBody.Checksums[string(blobDigest.Algorithm())]
+	if remoteDigest == "" {
+		log.Warn("no checksum found for algorithm, we can't guarantee that the artifact has been uploaded correctly", "algorithm", blobDigest.Algorithm())
+	} else if remoteDigest != blobDigest.Encoded() {
+		return nil, fmt.Errorf("failed to upload artifact: checksums do not match")
 	}
 
 	log.Debug("successfully uploaded")

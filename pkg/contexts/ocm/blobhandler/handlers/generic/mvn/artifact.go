@@ -30,18 +30,27 @@ func (a *Artifact) Purl() string {
 	return "pkg:maven/" + a.GroupId + "/" + a.ArtifactId + "@" + a.Version
 }
 
+// FromGAV creates new Artifact from GAV coordinates.
+func FromGAV(gav string) *Artifact {
+	parts := strings.Split(gav, ":")
+	if len(parts) != 3 {
+		return nil
+	}
+	return &Artifact{
+		GroupId:    parts[0],
+		ArtifactId: parts[1],
+		Version:    parts[2],
+		Packaging:  "jar",
+	}
+}
+
 // Body is the response struct of a deployment from the MVN repository (JFrog Artifactory).
 type Body struct {
-	Repo        string `json:"repo"`
-	Path        string `json:"path"`
-	DownloadUri string `json:"downloadUri"`
-	Uri         string `json:"uri"`
-	MimeType    string `json:"mimeType"`
-	Size        string `json:"size"`
-	Checksums   struct {
-		Md5    string `json:"md5"`
-		Sha1   string `json:"sha1"`
-		Sha256 string `json:"sha256"`
-		Sha512 string `json:"sha512"`
-	} `json:"checksums"`
+	Repo        string            `json:"repo"`
+	Path        string            `json:"path"`
+	DownloadUri string            `json:"downloadUri"`
+	Uri         string            `json:"uri"`
+	MimeType    string            `json:"mimeType"`
+	Size        string            `json:"size"`
+	Checksums   map[string]string `json:"checksums"`
 }
