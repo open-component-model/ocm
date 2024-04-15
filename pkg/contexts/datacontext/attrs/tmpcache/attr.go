@@ -74,11 +74,14 @@ func (a *Attribute) CreateTempFile(pat string) (vfs.File, error) {
 
 func Get(ctx datacontext.Context) *Attribute {
 	v := ctx.GetAttributes().GetAttribute(ATTR_KEY)
-	if v != nil {
-		return v.(*Attribute)
-	}
 	fs := utils.FileSystem(vfsattr.Get(ctx))
-
+	if v != nil {
+		a := v.(*Attribute)
+		if a.Filesystem == nil {
+			a.Filesystem = fs
+		}
+		return a
+	}
 	return &Attribute{fs.FSTempDir(), fs}
 }
 

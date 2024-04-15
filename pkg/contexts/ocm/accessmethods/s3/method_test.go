@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package s3_test
 
 import (
@@ -11,14 +7,11 @@ import (
 	"os"
 	"reflect"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -29,7 +22,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/generics"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type mockDownloader struct {
@@ -141,7 +136,7 @@ var _ = Describe("Method", func() {
 			Expect(err).To(Succeed())
 			ctx = datacontext.New(nil)
 			vfsattr.Set(ctx, fs)
-			tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
+			tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp", Filesystem: fs})
 			mcc = ocm.New(datacontext.MODE_INITIAL)
 			mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: identity.CONSUMER_TYPE}, credentials.DirectCredentials{
 				"accessKeyID":  "accessKeyID",
