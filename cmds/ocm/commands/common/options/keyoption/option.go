@@ -47,7 +47,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
 	fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
 	fs.StringArrayVarP(&o.issuers, "issuer", "I", nil, "issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>")
-	fs.StringArrayVarP(&o.rootCAs, "ca-cert", "", nil, "additional root certificate authorities")
+	fs.StringArrayVarP(&o.rootCAs, "ca-cert", "", nil, "additional root certificate authorities (for signing certificates)")
 }
 
 func (o *Option) Configure(ctx clictx.Context) error {
