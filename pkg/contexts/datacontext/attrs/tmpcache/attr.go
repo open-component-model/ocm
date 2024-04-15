@@ -1,12 +1,7 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package tmpcache
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -76,18 +71,12 @@ func (a *Attribute) CreateTempFile(pat string) (vfs.File, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var def = &Attribute{
-	Path: os.TempDir(),
-}
-
 func Get(ctx datacontext.Context) *Attribute {
 	v := ctx.GetAttributes().GetAttribute(ATTR_KEY)
-	a := def
-
 	if v != nil {
-		a, _ = v.(*Attribute)
+		return v.(*Attribute)
 	}
-	return &Attribute{a.Path, vfsattr.Get(ctx)}
+	return &Attribute{vfsattr.Get(ctx).FSTempDir(), vfsattr.Get(ctx)}
 }
 
 func Set(ctx datacontext.Context, a *Attribute) {
