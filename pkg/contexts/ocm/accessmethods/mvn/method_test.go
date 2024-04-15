@@ -70,23 +70,6 @@ var _ = Describe("Method", func() {
 		m := Must(acc.AccessMethod(cv))
 		defer m.Close()
 		_, err := m.Reader()
-		Expect(err).To(MatchError(ContainSubstring("SHA-1 digest mismatch: expected 44a77645201d1a8fc5213ace787c220eabbd0967, found 34a77645201d1a8fc5213ace787c220eabbd0967")))
+		Expect(err).To(MatchError(ContainSubstring("SHA-1 digest mismatch: expected 44a77645201d1a8fc5213ace787c220eabbd0967, found b3242b8c31f8ce14f729b8fd132ac77bc4bc5bf7")))
 	})
-
-	/* tests are failing with:
-
-	   <*fmt.wrapError | 0xc0008f2240>:
-	   unable to read access: unable to create temporary file: mkdir C:\SAPDEV~1\TEMP\user: lstat /C:: CreateFile C:/SAPDEV~1/TEMP/user/VFS-1551776656/C:: The filename, directory name, or volume label syntax is incorrect.
-	   		msg: "unable to create temporary file: mkdir C:\\SAPDEV~1\\TEMP\\user: lstat /C:: CreateFile C:/SAPDEV~1/TEMP/user/VFS-1551776656/C:: The filename, directory name, or volume label syntax is incorrect."
-	           err: <*fs.PathError | 0xc0008f47e0>{
-	               Op: "mkdir",
-	               Path: "C:\\SAPDEV~1\\TEMP\\user",
-	               Err: <*fs.PathError | 0xc0008f47b0>{
-	                   Op: "lstat",
-	                   Path: "/C:",
-	                   Err: <*fs.PathError | 0xc0008f4780>{
-	                       Op: "CreateFile",
-	                       Path: "C:/SAPDEV~1/TEMP/user/VFS-1551776656/C:",
-	                       Err: <syscall.Errno>0x7b,
-	*/
 })
