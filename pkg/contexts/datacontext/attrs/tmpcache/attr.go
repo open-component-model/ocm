@@ -9,6 +9,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -76,7 +77,9 @@ func Get(ctx datacontext.Context) *Attribute {
 	if v != nil {
 		return v.(*Attribute)
 	}
-	return &Attribute{vfsattr.Get(ctx).FSTempDir(), vfsattr.Get(ctx)}
+	fs := utils.FileSystem(vfsattr.Get(ctx))
+
+	return &Attribute{fs.FSTempDir(), fs}
 }
 
 func Set(ctx datacontext.Context, a *Attribute) {
