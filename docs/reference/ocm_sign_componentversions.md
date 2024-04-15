@@ -16,7 +16,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ```
   -S, --algorithm string          signature handler (default "RSASSA-PKCS1-V1_5")
-      --ca-cert stringArray       additional root certificate authorities
+      --ca-cert stringArray       additional root certificate authorities (for signing certificates)
   -c, --constraints constraints   version constraint
   -H, --hash string               hash algorithm (default "SHA-256")
   -h, --help                      help for componentversions
