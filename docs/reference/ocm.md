@@ -10,7 +10,7 @@ ocm [<options>] <sub command> ...
 
 ```
   -X, --attribute stringArray     attribute setting
-      --ca-cert stringArray       additional root certificate authorities
+      --ca-cert stringArray       additional root certificate authorities (for signing certificates)
       --config stringArray        configuration file
       --config-set strings        apply configuration set
   -C, --cred stringArray          credential setting
