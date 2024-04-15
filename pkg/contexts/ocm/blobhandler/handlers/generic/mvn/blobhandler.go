@@ -66,7 +66,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, hint string, 
 		return nil, err
 	}
 	defer blobReader.Close()
-	req, err := http.NewRequestWithContext(context.Background(), "PUT", b.spec.Url+"/"+artifact.Path(), blobReader)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, b.spec.Url+"/"+artifact.Path(), blobReader)
 	if err != nil {
 		return nil, err
 	}
