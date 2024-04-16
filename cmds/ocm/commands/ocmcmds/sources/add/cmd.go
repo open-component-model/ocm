@@ -50,7 +50,8 @@ $ ocm add sources --file path/to/cafile sources.yaml
 
 func (o *Command) Long() string {
 	return `
-Add source information specified in a resource file to a component version.
+Add information about the sources, e.g. commits in a Github repository,
+that have been used to create the resources specified in a resource file to a component version.
 So far only component archives are supported as target.
 
 This command accepts source specification files describing the sources
