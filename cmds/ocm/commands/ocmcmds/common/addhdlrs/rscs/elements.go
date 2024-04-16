@@ -166,16 +166,5 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *addhdlrs.ResourceInpu
 	if err := compdescv2.ValidateResource(fldPath, rsc, false); err != nil {
 		allErrs = append(allErrs, err...)
 	}
-
-	if input.Access != nil {
-		if r.Relation == metav1.LocalRelation {
-			allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "access requires external relation"))
-		}
-	}
-	if input.Input != nil {
-		if r.Relation != metav1.LocalRelation {
-			allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "input requires local relation"))
-		}
-	}
 	return allErrs.ToAggregate()
 }
