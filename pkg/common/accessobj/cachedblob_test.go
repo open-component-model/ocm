@@ -1,17 +1,12 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package accessobj_test
 
 import (
 	"io"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -72,7 +67,7 @@ var _ = Describe("cached blob", func() {
 		Expect(err).To(Succeed())
 		ctx = datacontext.New(nil)
 		vfsattr.Set(ctx, fs)
-		tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
+		tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp", Filesystem: fs})
 	})
 
 	AfterEach(func() {
