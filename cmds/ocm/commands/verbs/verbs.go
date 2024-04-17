@@ -6,6 +6,7 @@ package verbs
 
 const (
 	Get       = "get"
+	List      = "list"
 	Check     = "check"
 	Describe  = "describe"
 	Hash      = "hash"
