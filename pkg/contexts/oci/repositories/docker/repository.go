@@ -1,15 +1,11 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package docker
 
 import (
 	"strings"
 
 	"github.com/containers/image/v5/types"
-	dockertypes "github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
+	"github.com/moby/moby/api/types/image"
+	"github.com/moby/moby/client"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
@@ -75,7 +71,7 @@ func (r *RepositoryImpl) GetNamespaces(prefix string, closure bool) ([]string, e
 }
 
 func (r *RepositoryImpl) GetRepositories() ([]string, error) {
-	opts := dockertypes.ImageListOptions{}
+	opts := image.ListOptions{}
 	list, err := r.client.ImageList(dummyContext, opts)
 	if err != nil {
 		return nil, err
@@ -103,7 +99,7 @@ func (r *RepositoryImpl) ExistsArtifact(name string, version string) (bool, erro
 	if err != nil {
 		return false, err
 	}
-	opts := dockertypes.ImageListOptions{}
+	opts := image.ListOptions{}
 	opts.Filters.Add("reference", ref.StringWithinTransport())
 	list, err := r.client.ImageList(dummyContext, opts)
 	if err != nil {

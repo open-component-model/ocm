@@ -17,8 +17,7 @@ require (
 	github.com/cyberphone/json-canonicalization v0.0.0-20231217050601-ba74d44ecf5f
 	github.com/DataDog/gostackparse v0.7.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v25.0.5+incompatible
-	github.com/docker/docker v25.0.5+incompatible
+	github.com/docker/cli v26.0.1+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/cli-utils v0.36.0-flux.5
@@ -45,6 +44,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mittwald/go-helm-client v0.12.9
+	github.com/moby/moby v26.0.1+incompatible
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/onsi/ginkgo/v2 v2.17.1
 	github.com/onsi/gomega v1.32.0
@@ -146,6 +146,7 @@ require (
 	github.com/digitorus/timestamp v0.0.0-20231217203849-220c5c2851b7 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
+	github.com/docker/docker v25.0.3+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.8.1 // indirect
 	github.com/docker/go v1.5.1-1.0.20160303222718-d30aec9fd63c // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
@@ -235,6 +236,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
+	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/spdystream v0.2.0 // indirect
 	github.com/moby/sys/sequential v0.5.0 // indirect
