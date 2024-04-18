@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/semverutils"
 )
 
 // VersionedElement describes an element that has a name and a version.
@@ -56,7 +57,7 @@ func (n NameVersion) MarshalJSON() ([]byte, error) {
 func (n NameVersion) Compare(o NameVersion) int {
 	c := strings.Compare(n.name, o.name)
 	if c == 0 {
-		return strings.Compare(n.version, o.version)
+		return semverutils.Compare(n.version, o.version)
 	}
 	return c
 }

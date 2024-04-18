@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/pkg/semverutils"
 )
 
 func Compare(a, b interface{}) int {
@@ -18,7 +19,7 @@ func Compare(a, b interface{}) int {
 	if c != 0 {
 		return c
 	}
-	return strings.Compare(aa.Version, ab.Version)
+	return semverutils.Compare(aa.Version, ab.Version)
 }
 
 // Sort is a processing chain sorting original objects provided by type handler.
