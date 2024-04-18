@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package comphdlr
+package vershdlr
 
 import (
 	"strings"
@@ -15,11 +15,11 @@ func Compare(a, b interface{}) int {
 	aa := a.(*Object)
 	ab := b.(*Object)
 
-	c := strings.Compare(aa.ComponentVersion.GetName(), ab.ComponentVersion.GetName())
+	c := strings.Compare(aa.Component, ab.Component)
 	if c != 0 {
 		return c
 	}
-	return semverutils.Compare(aa.ComponentVersion.GetVersion(), ab.ComponentVersion.GetVersion())
+	return semverutils.Compare(aa.Version, ab.Version)
 }
 
 // Sort is a processing chain sorting original objects provided by type handler.
