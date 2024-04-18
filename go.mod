@@ -17,8 +17,8 @@ require (
 	github.com/cyberphone/json-canonicalization v0.0.0-20231217050601-ba74d44ecf5f
 	github.com/DataDog/gostackparse v0.7.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v26.0.1+incompatible
-	github.com/docker/docker v26.0.1+incompatible
+	github.com/docker/cli v25.0.5+incompatible
+	github.com/docker/docker v25.0.5+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/cli-utils v0.36.0-flux.5
@@ -334,5 +334,4 @@ require (
 	sigs.k8s.io/kustomize/kyaml v0.17.0 // indirect
 	sigs.k8s.io/release-utils v0.7.7 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
-    github.com/moby/docker-image-spec v1.3.1 // indirect
 )
