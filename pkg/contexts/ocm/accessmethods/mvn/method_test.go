@@ -2,6 +2,7 @@ package mvn_test
 
 import (
 	"crypto"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -36,6 +37,41 @@ var _ = Describe("Method", func() {
 
 	It("get packaging", func() {
 		acc := mvn.New("https://repo1.maven.org/maven2", "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
+		files, err := acc.GetGAVFiles()
+		Expect(err).ToNot(HaveOccurred())
+		Expect(files).To(HaveLen(1))
+		Expect(files["sdk-modules-bom-5.7.0.pom"]).To(Equal(crypto.SHA1))
+	})
+
+	It("get packaging", func() {
+		acc := mvn.New("https://repo1.maven.org/maven2", "org.apache.maven", "apache-maven", "3.9.6")
+		Expect(acc).ToNot(BeNil())
+		Expect(acc.BaseUrl()).To(Equal("https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.9.6"))
+		files, err := acc.GetGAVFiles()
+		Expect(err).ToNot(HaveOccurred())
+		Expect(files).To(HaveLen(8))
+
+		for _, f := range files {
+			fmt.Println(f)
+		}
+
+		//Expect(files[0]).To(Equal("sdk-modules-bom-5.7.0.pom"))
+		Expect(files["apache-maven-3.9.6-src.zip"]).To(Equal(crypto.SHA512))
+		Expect(files["apache-maven-3.9.6.pom"]).To(Equal(crypto.SHA1))
+	})
+
+	It("get packaging", func() {
+		acc := mvn.New("https://repo1.maven.org/maven2", "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
+
+		/*
+			repos to test with:
+				- https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.9.6/  // bin + tar.gz etc.
+			    - https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.26.1/  // cyclonedx
+				- https://repo1.maven.org/maven2/cn/afternode/commons/commons/1.6/ // gradle module!
+			    - https://repo1.maven.org/maven2/com/sap/cloud/sdk/sdk-modules-bom/5.7.0/ // one single pom only!
+			    - https://int.repositories.cloud.sap/artifactory/ocm-mvn-test/open-component-model/hello-ocm/0.0.1/ // jar only!
+		*/
+
 		meta, err := acc.GetPackageMeta(ocm.DefaultContext())
 		Expect(err).ToNot(HaveOccurred())
 		Expect(meta.Packaging).To(Equal("pom"))

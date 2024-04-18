@@ -1,15 +1,14 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package tarutils
 
 import (
 	"archive/tar"
 	"fmt"
 	"io"
+	"io/fs"
 	pathutil "path"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -188,4 +187,76 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 	default:
 		return fmt.Errorf("unsupported file type %s in %s", info.Mode().String(), path)
 	}
+}
+
+func Epoch() time.Time {
+	return time.Unix(0, 0)
+}
+
+func SimpleTarHeader(fs vfs.FileSystem, filepath string) (*tar.Header, error) {
+	info, err := fs.Lstat(filepath)
+	if err != nil {
+		return nil, err
+	}
+	return RegularFileInfoHeader(info), nil
+}
+
+func RegularFileInfoHeader(fi fs.FileInfo) *tar.Header {
+	h := &tar.Header{
+		Typeflag:   tar.TypeReg,
+		Name:       fi.Name(),
+		Size:       fi.Size(),
+		Mode:       int64(fs.ModePerm),
+		Uid:        0,
+		Gid:        0,
+		Uname:      "",
+		Gname:      "",
+		ModTime:    Epoch(),
+		AccessTime: Epoch(),
+		ChangeTime: Epoch(),
+	}
+	return h
+}
+
+func ListSortedFilesInDir(fs vfs.FileSystem, root string) ([]string, error) {
+	var files []string
+	err := vfs.Walk(fs, root, func(path string, info vfs.FileInfo, err error) error {
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	})
+	sort.Strings(files)
+	return files, err
+}
+
+func TarFs(fs vfs.FileSystem, writer io.Writer) error {
+	tw := tar.NewWriter(writer)
+	files, err := ListSortedFilesInDir(fs, "")
+	if err != nil {
+		return err
+	}
+
+	for _, fileName := range files {
+		header, err := SimpleTarHeader(fs, fileName)
+		if err != nil {
+			return err
+		}
+		if err := tw.WriteHeader(header); err != nil {
+			return fmt.Errorf("unable to write header for %q: %w", fileName, err)
+		}
+		file, err := fs.OpenFile(fileName, vfs.O_RDONLY, vfs.ModePerm)
+		if err != nil {
+			return fmt.Errorf("unable to open file %q: %w", fileName, err)
+		}
+		if _, err := io.Copy(tw, file); err != nil {
+			_ = file.Close()
+			return fmt.Errorf("unable to add file to tar %q: %w", fileName, err)
+		}
+		if err := file.Close(); err != nil {
+			return fmt.Errorf("unable to close file %q: %w", fileName, err)
+		}
+	}
+	
+	return tw.Close()
 }

@@ -4,14 +4,16 @@ import (
 	"bytes"
 	"context"
 	"crypto"
-	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"golang.org/x/exp/slices"
+	"golang.org/x/net/html"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -37,30 +39,54 @@ func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 }
 
-// AccessSpec describes the access for a Maven (mvn) repository.
+// AccessSpec describes the access for a Maven (mvn) artifact.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
-	// Repository is the base URL of the Maven (mvn) repository
+	// Repository is the base URL of the Maven (mvn) repository.
 	Repository string `json:"repository"`
-	// ArtifactId is the name of Maven (mvn) package
+	// ArtifactId is the name of Maven (mvn) artifact.
 	GroupId string `json:"groupId"`
-	// ArtifactId is the name of Maven (mvn) package
+	// ArtifactId is the name of Maven (mvn) artifact.
 	ArtifactId string `json:"artifactId"`
-	// Version of the Maven (mvn) package.
+	// Version of the Maven (mvn) artifact.
 	Version string `json:"version"`
+	// Classifier of the Maven (mvn) artifact.
+	Classifier string `json:"classifier"`
+	// Extension of the Maven (mvn) artifact.
+	Extension string `json:"extension"`
 }
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
 // New creates a new Maven (mvn) repository access spec version v1.
-func New(repository, groupId, artifactId, version string) *AccessSpec {
-	return &AccessSpec{
+func New(repository, groupId, artifactId, version string, options ...func(*AccessSpec)) *AccessSpec {
+	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Repository:          repository,
 		GroupId:             groupId,
 		ArtifactId:          artifactId,
 		Version:             version,
+		Classifier:          "",
+		Extension:           "jar",
+	}
+	for _, option := range options {
+		option(accessSpec)
+	}
+	return accessSpec
+}
+
+// WithClassifier sets the classifier of the Maven (mvn) artifact.
+func WithClassifier(classifier string) func(*AccessSpec) {
+	return func(a *AccessSpec) {
+		a.Classifier = classifier
+	}
+}
+
+// WithExtension sets the extension of the Maven (mvn) artifact.
+func WithExtension(extension string) func(*AccessSpec) {
+	return func(a *AccessSpec) {
+		a.Extension = extension
 	}
 }
 
@@ -76,8 +102,10 @@ func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpe
 	return a
 }
 
+// GetReferenceHint returns the reference hint for the Maven (mvn) artifact. In the following form:
+// groupId:artifactId:version:classifier:extension
 func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) string {
-	return a.GroupId + ":" + a.ArtifactId + ":" + a.Version
+	return a.GroupId + ":" + a.ArtifactId + ":" + a.Version + ":" + a.Classifier + ":" + a.Extension
 }
 
 func (_ *AccessSpec) GetType() string {
@@ -96,6 +124,24 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.Comp
 	return ""
 }
 
+func (a *AccessSpec) BaseUrl() string {
+	return a.Repository + "/" + a.AsArtifact().GavPath()
+}
+
+func (a *AccessSpec) ArtifactUrl() string {
+	return a.Repository + a.AsArtifact().Path()
+}
+
+func (a *AccessSpec) AsArtifact() *Artifact {
+	return &Artifact{
+		GroupId:    a.GroupId,
+		ArtifactId: a.ArtifactId,
+		Version:    a.Version,
+		Classifier: a.Classifier,
+		Extension:  a.Extension,
+	}
+}
+
 type meta struct {
 	Packaging string      `json:"packaging"`
 	HashType  crypto.Hash `json:"hashType"`
@@ -106,44 +152,116 @@ type meta struct {
 
 func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	// this is how the usual maven repository structure looks like
-	urlPrefix := a.Repository + path.Join("/", strings.ReplaceAll(a.GroupId, ".", "/"), a.ArtifactId, a.Version, a.ArtifactId+"-"+a.Version+".")
-	fs := vfsattr.Get(ctx)
+	baseUrl := a.Repository + path.Join("/", strings.ReplaceAll(a.GroupId, ".", "/"), a.ArtifactId, a.Version, a.ArtifactId+"-"+a.Version)
+	//fs := vfsattr.Get(ctx)
 
 	// first let's read the pom file and check which binary artifact we need to read
 	log := logging.Context().Logger(identity.REALM)
-	log.Debug("Reading ", "pom", urlPrefix+"pom")
-	pom, err := readPom(urlPrefix+"pom", fs)
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot read pom file for %s", urlPrefix)
-	}
+	log.Debug("Reading ", "repository", baseUrl)
 
-	hashType, hash, err := getBestHashValue(urlPrefix+pom.Packaging, fs)
-	if err != nil {
-		log.Debug("Could not find any hash value for ", "file", urlPrefix+pom.Packaging)
-	}
-	asc, err := getStringData(urlPrefix+pom.Packaging+".asc", fs)
-	if err != nil {
-		log.Debug("No signing info found for ", "file", urlPrefix+pom.Packaging)
-	}
+	/*
+		pom, err := readPom(urlPrefix+"pom", fs)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot read GAV: %s", baseUrl)
+		}
 
+		hashType, hash, err := getBestHashValue(urlPrefix+pom.Packaging, fs)
+		if err != nil {
+			log.Debug("Could not find any hash value for ", "file", urlPrefix+pom.Packaging)
+		}
+		asc, err := getStringData(urlPrefix+pom.Packaging+".asc", fs)
+		if err != nil {
+			log.Debug("No signing info found for ", "file", urlPrefix+pom.Packaging)
+		}
+
+
+	*/
 	var metadata meta = meta{
-		Packaging: pom.Packaging,
-		HashType:  hashType,
-		Hash:      hash,
-		Bin:       urlPrefix + pom.Packaging,
-		Asc:       asc,
+		Packaging: "",
+		HashType:  crypto.MD5,
+		Hash:      "hash",
+		Bin:       "urlPrefix + pom.Packaging",
+		Asc:       "asc",
 	}
 
 	return &metadata, nil
 }
 
+func (a *AccessSpec) GetGAVFiles() (map[string]crypto.Hash, error) {
+	// Create a new request
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, a.BaseUrl(), nil)
+	if err != nil {
+		return nil, err
+	}
+	// Execute the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	// Check the response
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("%s - %s", a.BaseUrl(), resp.Status)
+	}
+	htmlDoc, err := html.Parse(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Which files are listed in the repository?
+	var fileList []string
+	var process func(*html.Node)
+	prefix := a.AsArtifact().FilePrefix()
+	process = func(node *html.Node) {
+		// check if the node is an element node and the tag is "<a href="..." />"
+		if node.Type == html.ElementNode && node.Data == "a" {
+			// iterate over the attr and read the href attribute
+			for _, attribute := range node.Attr {
+				if attribute.Key == "href" {
+					// check if the href starts with artifactId-version
+					if strings.HasPrefix(attribute.Val, prefix) {
+						fileList = append(fileList, attribute.Val)
+					}
+				}
+			}
+		}
+		for nextChild := node.FirstChild; nextChild != nil; nextChild = nextChild.NextSibling {
+			process(nextChild) // recursive call!
+		}
+	}
+	process(htmlDoc)
+
+	var filesAndHashes map[string]crypto.Hash
+	filesAndHashes = make(map[string]crypto.Hash)
+	for _, file := range fileList {
+		if IsArtifact(file) {
+			filesAndHashes[file] = bestAvailableHash(fileList, file)
+		}
+	}
+
+	sort.Strings(fileList)
+	return filesAndHashes, nil
+}
+
+func bestAvailableHash(list []string, filename string) crypto.Hash {
+	hashes := [5]crypto.Hash{crypto.SHA512, crypto.SHA256, crypto.SHA1, crypto.MD5}
+	for _, hash := range hashes {
+		if slices.Contains(list, filename+hashUrlExt(hash)) {
+			return hash
+		}
+	}
+	return 0
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
 type project struct {
 	GroupId    string `xml:"groupId"`
 	ArtifactId string `xml:"artifactId"`
 	Version    string `xml:"version"`
-	Packaging  string `xml:"packaging"`
+	Classifier  string `xml:"packaging"`
 }
 
 func readPom(url string, fs vfs.FileSystem) (*project, error) {
@@ -161,11 +279,12 @@ func readPom(url string, fs vfs.FileSystem) (*project, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", url)
 	}
-	if pom.Packaging == "" {
-		pom.Packaging = "jar"
+	if pom.Classifier == "" {
+		pom.Classifier = "jar"
 	}
 	return &pom, nil
 }
+*/
 
 // getStringData reads all data from the given URL and returns it as a string.
 func getStringData(url string, fs vfs.FileSystem) (string, error) {
