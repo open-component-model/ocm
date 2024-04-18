@@ -149,7 +149,7 @@ script with the <code>script</code> option family.
 
 
 <pre>
-$ ocm add componentversions &dash;&dash;file ctf &dash;&dash;version 1.0 component-constructor.yaml
+$ ocm add componentversions &dash;&dash;file ctf &dash;&dash;version 1.0 component&dash;constructor.yaml
 </pre>
 
 

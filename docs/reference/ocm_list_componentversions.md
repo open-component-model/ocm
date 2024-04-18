@@ -1,9 +1,9 @@
-## ocm verify componentversions &mdash; Verify Signature Of Component Version
+## ocm list componentversions &mdash; List Component Version Names
 
 ### Synopsis
 
 ```
-ocm verify componentversions [<options>] {<component-reference>}
+ocm list componentversions [<options>] {<component-reference>}
 ```
 
 ##### Aliases
@@ -15,28 +15,21 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Options
 
 ```
-      --ca-cert stringArray       additional root certificate authorities (for signing certificates)
   -c, --constraints constraints   version constraint
   -h, --help                      help for componentversions
-  -I, --issuer stringArray        issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>
-      --keyless                   use keyless signing
       --latest                    restrict component versions to latest
-  -L, --local                     verification based on information found in component versions, only
       --lookup stringArray        repository name or spec for closure lookup fallback
-  -K, --private-key stringArray   private key setting
-  -k, --public-key stringArray    public key setting
+  -o, --output string             output mode (JSON, json, yaml)
       --repo string               repository name or spec
-  -s, --signature stringArray     signature name
-  -V, --verify                    verify existing digests
+  -S, --scheme string             schema version
+  -s, --sort stringArray          sort fields
 ```
 
 ### Description
 
 
-Verify signature of specified component versions.
-
-If no signature name is given, only the digests are validated against the
-registered ones at the component version.
+List lists the version names of the specified objects, if only a component is specified
+all versions according to the given versuin constraints are listed.
 
 
 If the option <code>--constraints</code> is given, and no version is specified
@@ -89,16 +82,6 @@ OCI Repository types (using standard component repository to OCI mapping):
   - <code>ociRegistry</code>
 
 
-The <code>--public-key</code> and <code>--private-key</code> options can be
-used to define public and private keys on the command line. The options have an
-argument of the form <code>[&lt;name>=]&lt;filepath></code>. The optional name
-specifies the signature name the key should be used for. By default, this is the
-signature name specified with the option <code>--signature</code>.
-
-Alternatively a key can be specified as base64 encoded string if the argument
-start with the prefix <code>!</code> or as direct string with the prefix
-<code>=</code>.
-
 \
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback
@@ -110,16 +93,34 @@ this option must always be specified to be able to follow component
 references.
 
 
+If the option <code>--scheme</code> is given, the component descriptor
+is converted to the specified format for output. If no format is given
+the storage format of the actual descriptor is used or, for new ones v2
+is used.
+With <code>internal</code> the internal representation is shown.
+The following schema versions are supported for explicit conversions:
+  - <code>ocm.software/v3alpha1</code>
+  - <code>v2</code>
+
+With the option <code>--output</code> the output mode can be selected.
+The following modes are supported:
+  - <code></code> (default)
+  - <code>JSON</code>
+  - <code>json</code>
+  - <code>yaml</code>
+
+
 ### Examples
 
 ```
-$ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink
+$ ocm list componentversion ghcr.io/mandelsoft/kubelink
+$ ocm list componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```
 
 ### SEE ALSO
 
 ##### Parents
 
-* [ocm verify](ocm_verify.md)	 &mdash; Verify component version signatures
+* [ocm list](ocm_list.md)	 &mdash; List information about components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

@@ -143,7 +143,7 @@ jobs:
       uses: anchore/sbom-action/download-syft@ab5d7b5f48981941c4c5d6bf33aeb98fe3bae38c # v0.15.10
 
     - name: Setup Cosign
-      uses: sigstore/cosign-installer@v3.4.0
+      uses: sigstore/cosign-installer@v3.5.0
 
     - name: Setup git config
       run: |

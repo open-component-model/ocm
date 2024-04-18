@@ -45,6 +45,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/hash"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/install"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/list"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/show"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
@@ -234,6 +235,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 
 	cmd.AddCommand(check.NewCommand(opts.Context))
 	cmd.AddCommand(get.NewCommand(opts.Context))
+	cmd.AddCommand(list.NewCommand(opts.Context))
 	cmd.AddCommand(create.NewCommand(opts.Context))
 	cmd.AddCommand(add.NewCommand(opts.Context))
 	cmd.AddCommand(sign.NewCommand(opts.Context))

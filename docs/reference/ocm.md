@@ -10,7 +10,7 @@ ocm [<options>] <sub command> ...
 
 ```
   -X, --attribute stringArray     attribute setting
-      --ca-cert stringArray       additional root certificate authorities
+      --ca-cert stringArray       additional root certificate authorities (for signing certificates)
       --config stringArray        configuration file
       --config-set strings        apply configuration set
   -C, --cred stringArray          credential setting
@@ -367,6 +367,7 @@ by a certificate delivered with the signature.
 * [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm <b>hash</b>](ocm_hash.md)	 &mdash; Hash and normalization operations
 * [ocm <b>install</b>](ocm_install.md)	 &mdash; Install elements.
+* [ocm <b>list</b>](ocm_list.md)	 &mdash; List information about components
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components or hashes
 * [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artifacts or components
