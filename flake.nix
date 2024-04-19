@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
             gitCommit = if (self ? rev) then self.rev else self.dirtyRev;
             state = if (self ? rev) then "clean" else "dirty";
 
-            # This vendorHash represents a dervative of all go.mod dependancies and needs to be adjusted with every change
+            # This vendorHash represents a dervative of all go.mod dependencies and needs to be adjusted with every change
             vendorHash = "sha256-CA3p9QNHo7mHCoXkuOojFAJen3TdieSsoQVivxPk3yw=";
 
             src = ./.;
