@@ -7,7 +7,7 @@ import (
 
 var _ = Describe("Maven Test Environment", func() {
 
-	It("GAV, GroupPath, Path", func() {
+	It("GAV, GroupPath, FileName", func() {
 		artifact := &Artifact{
 			GroupId:    "ocm.software",
 			ArtifactId: "hello-ocm",
@@ -16,7 +16,7 @@ var _ = Describe("Maven Test Environment", func() {
 		}
 		Expect(artifact.GAV()).To(Equal("ocm.software:hello-ocm:0.0.1"))
 		Expect(artifact.GroupPath()).To(Equal("ocm/software"))
-		Expect(artifact.Path()).To(Equal("ocm/software/hello-ocm/0.0.1/hello-ocm-0.0.1.jar"))
+		Expect(artifact.FileName()).To(Equal("ocm/software/hello-ocm/0.0.1/hello-ocm-0.0.1.jar"))
 	})
 
 	It("ClassifierExtensionFrom", func() {
@@ -48,7 +48,7 @@ var _ = Describe("Maven Test Environment", func() {
 		Expect(artifact.Version).To(Equal("1.26.1"))
 		Expect(artifact.Classifier).To(Equal("cyclonedx"))
 		Expect(artifact.Extension).To(Equal("xml"))
-		Expect(artifact.Path()).To(Equal("org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1-cyclonedx.xml"))
+		Expect(artifact.FileName()).To(Equal("org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1-cyclonedx.xml"))
 	})
 
 	/*
@@ -71,7 +71,7 @@ var _ = Describe("Maven Test Environment", func() {
 				err := json.Unmarshal([]byte(resp), &body)
 				Expect(err).To(BeNil())
 				Expect(body.Repo).To(Equal("ocm-mvn-test"))
-				Expect(body.Path).To(Equal("/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
+				Expect(body.FileName).To(Equal("/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
 				Expect(body.DownloadUri).To(Equal("https://ocm.sofware/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
 				Expect(body.Uri).To(Equal("https://ocm.sofware/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
 				Expect(body.MimeType).To(Equal("application/java-archive"))

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"path"
 	"sort"
 	"strings"
 
@@ -58,6 +57,8 @@ type AccessSpec struct {
 }
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
+
+var log = logging.Context().Logger(identity.REALM)
 
 // New creates a new Maven (mvn) repository access spec version v1.
 func New(repository, groupId, artifactId, version string, options ...func(*AccessSpec)) *AccessSpec {
@@ -129,7 +130,7 @@ func (a *AccessSpec) BaseUrl() string {
 }
 
 func (a *AccessSpec) ArtifactUrl() string {
-	return a.Repository + a.AsArtifact().Path()
+	return a.AsArtifact().DownloadUrl(a.BaseUrl())
 }
 
 func (a *AccessSpec) AsArtifact() *Artifact {
@@ -143,80 +144,84 @@ func (a *AccessSpec) AsArtifact() *Artifact {
 }
 
 type meta struct {
-	Packaging string      `json:"packaging"`
-	HashType  crypto.Hash `json:"hashType"`
-	Hash      string      `json:"hash"`
-	Asc       string      `json:"asc"`
-	Bin       string      `json:"bin"`
+	MimeType string      `json:"packaging"`
+	HashType crypto.Hash `json:"hashType"`
+	Hash     string      `json:"hash"`
+	Bin      string      `json:"bin"`
 }
 
 func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
-	// this is how the usual maven repository structure looks like
-	baseUrl := a.Repository + path.Join("/", strings.ReplaceAll(a.GroupId, ".", "/"), a.ArtifactId, a.Version, a.ArtifactId+"-"+a.Version)
-	//fs := vfsattr.Get(ctx)
 
-	// first let's read the pom file and check which binary artifact we need to read
-	log := logging.Context().Logger(identity.REALM)
-	log.Debug("Reading ", "repository", baseUrl)
+	fs := vfsattr.Get(ctx)
 
-	/*
-		pom, err := readPom(urlPrefix+"pom", fs)
-		if err != nil {
-			return nil, errors.Wrapf(err, "cannot read GAV: %s", baseUrl)
-		}
-
-		hashType, hash, err := getBestHashValue(urlPrefix+pom.Packaging, fs)
-		if err != nil {
-			log.Debug("Could not find any hash value for ", "file", urlPrefix+pom.Packaging)
-		}
-		asc, err := getStringData(urlPrefix+pom.Packaging+".asc", fs)
-		if err != nil {
-			log.Debug("No signing info found for ", "file", urlPrefix+pom.Packaging)
-		}
-
-
-	*/
-	var metadata meta = meta{
-		Packaging: "",
-		HashType:  crypto.MD5,
-		Hash:      "hash",
-		Bin:       "urlPrefix + pom.Packaging",
-		Asc:       "asc",
+	fileMap, err := a.GetGAVFiles()
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot read GAV: %s", a.BaseUrl())
 	}
 
+	singleArtifact := len(fileMap) == 1
+	var metadata = meta{}
+
+	for file, hash := range fileMap {
+		artifact := a.AsArtifact()
+		artifact.ClassifierExtensionFrom(file)
+		metadata.Bin = artifact.DownloadUrl(a.BaseUrl())
+		log.WithValues("file", metadata.Bin)
+		log.Debug("processing")
+		metadata.MimeType = artifact.MimeType()
+		if hash > 0 {
+			metadata.HashType = hash
+			metadata.Hash, err = getStringData(metadata.Bin+hashUrlExt(hash), fs)
+			if err != nil {
+				return nil, errors.Wrapf(err, "cannot read %s digest of: %s", hash, metadata.Bin)
+			}
+		} else {
+			log.Warn("no digest available")
+		}
+
+		if singleArtifact {
+			return &metadata, nil
+		}
+	}
+
+	// if we have multiple artifacts, we pack them into a tar.gz file
+	metadata.MimeType = mime.MIME_TGZ
+
+	// create a tar.gz file
+	
 	return &metadata, nil
 }
 
+// GetGAVFiles returns the files of the Maven (mvn) artifact in the repository and their available digests.
 func (a *AccessSpec) GetGAVFiles() (map[string]crypto.Hash, error) {
-	// Create a new request
+	log.WithValues("repository", a.BaseUrl())
+	log.Debug("reading")
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, a.BaseUrl(), nil)
 	if err != nil {
 		return nil, err
 	}
-	// Execute the request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	// Check the response
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("%s - %s", a.BaseUrl(), resp.Status)
 	}
+
+	// Which files are listed in the repository?
+	log.Debug("parsing html")
 	htmlDoc, err := html.Parse(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-
-	// Which files are listed in the repository?
 	var fileList []string
 	var process func(*html.Node)
 	prefix := a.AsArtifact().FilePrefix()
 	process = func(node *html.Node) {
 		// check if the node is an element node and the tag is "<a href="..." />"
 		if node.Type == html.ElementNode && node.Data == "a" {
-			// iterate over the attr and read the href attribute
 			for _, attribute := range node.Attr {
 				if attribute.Key == "href" {
 					// check if the href starts with artifactId-version
@@ -232,18 +237,23 @@ func (a *AccessSpec) GetGAVFiles() (map[string]crypto.Hash, error) {
 	}
 	process(htmlDoc)
 
+	// Which hash files are available?
 	var filesAndHashes map[string]crypto.Hash
 	filesAndHashes = make(map[string]crypto.Hash)
 	for _, file := range fileList {
 		if IsArtifact(file) {
 			filesAndHashes[file] = bestAvailableHash(fileList, file)
+			log.Debug("found", "file", file)
 		}
 	}
 
+	// Sort the list of files, to ensure always the same results for e.g. identical tar.gz files.
 	sort.Strings(fileList)
 	return filesAndHashes, nil
 }
 
+// bestAvailableHash returns the best available hash for the given file.
+// It first checks for SHA-512, then SHA-256, SHA-1, and finally MD5. If nothing is found, it returns 0.
 func bestAvailableHash(list []string, filename string) crypto.Hash {
 	hashes := [5]crypto.Hash{crypto.SHA512, crypto.SHA256, crypto.SHA1, crypto.MD5}
 	for _, hash := range hashes {

@@ -7,6 +7,7 @@ const (
 	MIME_JSON          = "application/x-json"
 	MIME_JSON_ALT      = "text/json" // no utf8
 	MIME_JSON_OFFICIAL = "application/json"
+	MIME_XML           = "application/xml"
 	MIME_YAML          = "application/x-yaml"
 	MIME_YAML_ALT      = "text/yaml" // no utf8
 	MIME_YAML_OFFICIAL = "application/yaml"

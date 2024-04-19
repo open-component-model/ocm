@@ -257,6 +257,6 @@ func TarFs(fs vfs.FileSystem, writer io.Writer) error {
 			return fmt.Errorf("unable to close file %q: %w", fileName, err)
 		}
 	}
-	
+
 	return tw.Close()
 }

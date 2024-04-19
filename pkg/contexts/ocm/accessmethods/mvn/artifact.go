@@ -2,6 +2,8 @@ package mvn
 
 import (
 	"strings"
+
+	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 // Artifact holds the typical Maven coordinates groupId, artifactId, version and packaging.
@@ -31,8 +33,9 @@ func (a *Artifact) GavPath() string {
 	return a.GroupPath() + "/" + a.ArtifactId + "/" + a.Version
 }
 
-// Path returns the Maven Artifact's path with classifier and extension.
-func (a *Artifact) Path() string {
+// FileName returns the Maven Artifact's name with classifier and extension.
+// Default extension is jar.
+func (a *Artifact) FileName() string {
 	path := a.GavPath() + "/" + a.FilePrefix()
 	if a.Classifier != "" {
 		path += "-" + a.Classifier
@@ -43,6 +46,10 @@ func (a *Artifact) Path() string {
 		path += ".jar"
 	}
 	return path
+}
+
+func (a *Artifact) DownloadUrl(baseUrl string) string {
+	return baseUrl + "/" + a.FileName()
 }
 
 // GroupPath returns GroupId with `/` instead of `.`.
@@ -68,6 +75,24 @@ func (a *Artifact) ClassifierExtensionFrom(filename string) *Artifact {
 	}
 	a.Extension = strings.TrimPrefix(s, ".")
 	return a
+}
+
+// MimeType returns the MIME type of the Maven Artifact based on the file extension.
+// Default is application/x-tgz.
+func (a *Artifact) MimeType() string {
+	switch a.Extension {
+	case "jar":
+		return mime.MIME_JAR
+	case "json", "module":
+		return mime.MIME_JSON
+	case "pom", "xml":
+		return mime.MIME_XML
+	case "tar.gz":
+		return mime.MIME_TGZ
+	case "zip":
+		return mime.MIME_GZIP
+	}
+	return mime.MIME_TGZ
 }
 
 // ArtifactFromHint creates new Artifact from accessspec-hint. See 'GetReferenceHint'.
