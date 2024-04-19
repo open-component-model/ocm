@@ -48,7 +48,7 @@ func (a *Artifact) FileName() string {
 	return path
 }
 
-func (a *Artifact) DownloadUrl(baseUrl string) string {
+func (a *Artifact) Url(baseUrl string) string {
 	return baseUrl + "/" + a.FileName()
 }
 
@@ -93,6 +93,14 @@ func (a *Artifact) MimeType() string {
 		return mime.MIME_GZIP
 	}
 	return mime.MIME_TGZ
+}
+
+func IsMimeTypeSupported(mimeType string) bool {
+	switch mimeType {
+	case mime.MIME_JAR, mime.MIME_JSON, mime.MIME_XML, mime.MIME_TGZ, mime.MIME_GZIP:
+		return true
+	}
+	return false
 }
 
 // ArtifactFromHint creates new Artifact from accessspec-hint. See 'GetReferenceHint'.

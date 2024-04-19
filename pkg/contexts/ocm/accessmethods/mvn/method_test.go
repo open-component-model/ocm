@@ -2,7 +2,6 @@ package mvn_test
 
 import (
 	"crypto"
-	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -51,16 +50,12 @@ var _ = Describe("Method", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(files).To(HaveLen(8))
 
-		for _, f := range files {
-			fmt.Println(f)
-		}
-
 		//Expect(files[0]).To(Equal("sdk-modules-bom-5.7.0.pom"))
 		Expect(files["apache-maven-3.9.6-src.zip"]).To(Equal(crypto.SHA512))
 		Expect(files["apache-maven-3.9.6.pom"]).To(Equal(crypto.SHA1))
 	})
 
-	It("get packaging", func() {
+	It("GetPackageMeta - com.sap.cloud.sdk", func() {
 		acc := mvn.New("https://repo1.maven.org/maven2", "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
 
 		/*
@@ -74,17 +69,25 @@ var _ = Describe("Method", func() {
 
 		meta, err := acc.GetPackageMeta(ocm.DefaultContext())
 		Expect(err).ToNot(HaveOccurred())
-		Expect(meta.Packaging).To(Equal("pom"))
+		Expect(meta.Bin).To(Equal("https://repo1.maven.org/maven2/com/sap/cloud/sdk/sdk-modules-bom/5.7.0/sdk-modules-bom-5.7.0.pom"))
 		Expect(meta.Hash).To(Equal("34ccdeb9c008f8aaef90873fc636b09d3ae5c709"))
 		Expect(meta.HashType).To(Equal(crypto.SHA1))
-		Expect(meta.Asc).To(ContainSubstring("-----BEGIN PGP SIGNATURE-----"))
+	})
+
+	It("GetPackageMeta - int.repositories.cloud.sap: hello-ocm", func() {
+		acc := mvn.New("https://int.repositories.cloud.sap/artifactory/ocm-mvn-test", "open-component-model", "hello-ocm", "0.0.1")
+		meta, err := acc.GetPackageMeta(ocm.DefaultContext())
+		Expect(err).ToNot(HaveOccurred())
+		Expect(meta.Bin).To(Equal("https://int.repositories.cloud.sap/artifactory/ocm-mvn-test/open-component-model/hello-ocm/0.0.1/hello-ocm-0.0.1.jar"))
+		Expect(meta.Hash).To(Equal(""))
+		Expect(meta.HashType).To(Equal(crypto.Hash(0)))
 	})
 
 	It("accesses artifact", func() {
-		acc := mvn.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
+		acc := mvn.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", mvn.WithExtension("pom"))
 		m := Must(acc.AccessMethod(cv))
 		defer m.Close()
-		Expect(m.MimeType()).To(Equal(mime.MIME_JAR)) // FIXME what about POM?
+		Expect(m.MimeType()).To(Equal(mime.MIME_XML))
 
 		r := Must(m.Reader())
 		defer r.Close()
@@ -101,7 +104,7 @@ var _ = Describe("Method", func() {
 	})
 
 	It("detects digests mismatch", func() {
-		acc := mvn.New("file://"+FAILPATH, "fail", "repository", "42")
+		acc := mvn.New("file://"+FAILPATH, "fail", "repository", "42", mvn.WithExtension("pom"))
 
 		m := Must(acc.AccessMethod(cv))
 		defer m.Close()

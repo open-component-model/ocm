@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+
+	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/mvn/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/mvn"
@@ -25,6 +28,8 @@ func NewArtifactHandler(repospec *Config) cpi.BlobHandler {
 	return &artifactHandler{repospec}
 }
 
+var log = logging.Context().Logger(identity.REALM)
+
 func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hint string, _ cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	// check conditions
 	if b.spec == nil {
@@ -34,7 +39,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	if resourcetypes.MVN_ARTIFACT != resourceType {
 		return nil, nil
 	}
-	if mime.MIME_JAR != mimeType && mime.MIME_TGZ != mimeType {
+	if !mvn.IsMimeTypeSupported(mimeType) {
 		return nil, nil
 	}
 	if b.spec.Url == "" {
@@ -42,7 +47,6 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	}
 
 	// setup logger
-	log := logging.Context().Logger(identity.REALM)
 	log = log.WithValues("repository", b.spec.Url)
 
 	// identify artifact
@@ -71,9 +75,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	defer blobReader.Close()
 
 	switch mimeType {
-	case mime.MIME_JAR:
 	case mime.MIME_TGZ:
-
+		// TODO extract the archive and upload the content
+	default:
+		err = deploy(artifact, b.spec.Url, blobReader, username, password, blob.Digest())
 	}
 
 	// https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact-apis
@@ -83,19 +88,31 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	// -H "X-Checksum-Md5: $md5Value" \
 	// -H "X-Checksum-Sha1: $sha1Value" \
 	// -H "X-Checksum-Sha256: $sha256Value" \
+
+	log.Debug("successfully uploaded")
+	return mvn.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, mvn.WithClassifier(artifact.Classifier), mvn.WithExtension(artifact.Extension)), nil
+}
+
+func ChecksumHeader(digest digest.Digest) string {
+	a := digest.Algorithm().String()
+	return "X-Checksum-" + strings.ToUpper(a[:1]) + a[1:]
+}
+
+func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, username string, password string, digest digest.Digest) error {
 	// Headers: X-Checksum-Deploy: true, X-Checksum-Sha1: sha1Value, X-Checksum-Sha256: sha256Value, X-Checksum: checksum value (type is resolved by length)
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, b.spec.Url+"/"+artifact.Path(), blobReader)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, artifact.Url(url), reader)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	req.SetBasicAuth(username, password)
-	//req.Header.Set("X-Checksum", )
+	req.Header.Set("X-Checksum", digest.Encoded())
+	req.Header.Set(ChecksumHeader(digest), digest.Encoded())
 
 	// Execute the request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer resp.Body.Close()
 
@@ -103,31 +120,29 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	if resp.StatusCode != http.StatusCreated {
 		all, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		return nil, fmt.Errorf("http (%d) - failed to upload artifact: %s", resp.StatusCode, string(all))
+		return fmt.Errorf("http (%d) - failed to upload artifact: %s", resp.StatusCode, string(all))
 	}
 
 	// Validate the response - especially the hash values with the ones we've tried to send
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	var artifactBody Body
 	err = json.Unmarshal(respBody, &artifactBody)
 	if err != nil {
-		return nil, err
-	}
-	blobDigest := blob.Digest()
-	remoteDigest := artifactBody.Checksums[string(blobDigest.Algorithm())]
-	if remoteDigest == "" {
-		log.Warn("no checksum found for algorithm, we can't guarantee that the artifact has been uploaded correctly", "algorithm", blobDigest.Algorithm())
-	} else if remoteDigest != blobDigest.Encoded() {
-		return nil, fmt.Errorf("failed to upload artifact: checksums do not match")
+		return err
 	}
 
-	log.Debug("successfully uploaded")
-	return mvn.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, mvn.WithClassifier(artifact.Classifier), mvn.WithExtension(artifact.Extension)), nil
+	remoteDigest := artifactBody.Checksums[string(digest.Algorithm())]
+	if remoteDigest == "" {
+		log.Warn("no checksum found for algorithm, we can't guarantee that the artifact has been uploaded correctly", "algorithm", digest.Algorithm())
+	} else if remoteDigest != digest.Encoded() {
+		return fmt.Errorf("failed to upload artifact: checksums do not match")
+	}
+	return nil
 }
 
 // Body is the response struct of a deployment from the MVN repository (JFrog Artifactory).

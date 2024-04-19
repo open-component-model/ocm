@@ -2,14 +2,17 @@ package mvn
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"net/http"
 	"sort"
 	"strings"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"golang.org/x/exp/slices"
 	"golang.org/x/net/html"
@@ -25,6 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 // Type is the access type of Maven (mvn) repository.
@@ -69,7 +73,7 @@ func New(repository, groupId, artifactId, version string, options ...func(*Acces
 		ArtifactId:          artifactId,
 		Version:             version,
 		Classifier:          "",
-		Extension:           "jar",
+		Extension:           "",
 	}
 	for _, option := range options {
 		option(accessSpec)
@@ -130,7 +134,7 @@ func (a *AccessSpec) BaseUrl() string {
 }
 
 func (a *AccessSpec) ArtifactUrl() string {
-	return a.AsArtifact().DownloadUrl(a.BaseUrl())
+	return a.AsArtifact().Url(a.Repository)
 }
 
 func (a *AccessSpec) AsArtifact() *Artifact {
@@ -151,6 +155,14 @@ type meta struct {
 }
 
 func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
+	artifact := a.AsArtifact()
+	var metadata = meta{}
+
+	if artifact.Extension != "" {
+		metadata.Bin = artifact.Url(a.Repository)
+		metadata.MimeType = artifact.MimeType()
+		return &metadata, nil
+	}
 
 	fs := vfsattr.Get(ctx)
 
@@ -160,12 +172,16 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	}
 
 	singleArtifact := len(fileMap) == 1
-	var metadata = meta{}
+
+	tempFs, err := osfs.NewTempFileSystem()
+	if err != nil {
+		return nil, err
+	}
+	defer vfs.Cleanup(tempFs)
 
 	for file, hash := range fileMap {
-		artifact := a.AsArtifact()
 		artifact.ClassifierExtensionFrom(file)
-		metadata.Bin = artifact.DownloadUrl(a.BaseUrl())
+		metadata.Bin = artifact.Url(a.Repository)
 		log.WithValues("file", metadata.Bin)
 		log.Debug("processing")
 		metadata.MimeType = artifact.MimeType()
@@ -182,13 +198,51 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 		if singleArtifact {
 			return &metadata, nil
 		}
+
+		// download the artifact into the temporary file system
+		out, err := tempFs.Create(file)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := http.Get(metadata.Bin)
+		defer resp.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+		_, err = io.Copy(out, resp.Body)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	// if we have multiple artifacts, we pack them into a tar.gz file
+	// pack all downloaded files into a tar.gz file
+	tgz, err := blobaccess.NewTempFile("", Type+"-"+artifact.FilePrefix()+"-*.tar.gz", fs)
+	defer tgz.Close()
+	if err != nil {
+		return nil, err
+	}
+	err = tarutils.TarFs(tempFs, gzip.NewWriter(tgz.Writer()))
+	if err != nil {
+		return nil, err
+	}
+	metadata.Bin = "file://" + tgz.Name()
+	log.Debug("created", "file", metadata.Bin)
+
+	// calculate digest for the tar.gz file
+	file, err := fs.OpenFile(tgz.Name(), vfs.O_RDONLY, vfs.ModePerm)
+	defer file.Close()
+	if err != nil {
+		return nil, err
+	}
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return nil, err
+	}
+	metadata.Hash = fmt.Sprintf("%x", hash.Sum(nil))
+	log.Debug("hash", "sum", metadata.Hash)
+	metadata.HashType = crypto.SHA256
 	metadata.MimeType = mime.MIME_TGZ
 
-	// create a tar.gz file
-	
 	return &metadata, nil
 }
 
@@ -353,9 +407,10 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 			}
 		}
 		acc := blobaccess.DataAccessForReaderFunction(reader, meta.Bin)
-		return accessobj.CachedBlobAccessForWriter(c.GetContext(), mime.MIME_JAR, accessio.NewDataAccessWriter(acc)), nil
+		return accessobj.CachedBlobAccessForWriter(c.GetContext(), a.AsArtifact().MimeType(), accessio.NewDataAccessWriter(acc)), nil
 	}
-	return accspeccpi.NewDefaultMethodImpl(c, a, "", mime.MIME_JAR, factory), nil
+	// FIXME add Digest!
+	return accspeccpi.NewDefaultMethodImpl(c, a, "", a.AsArtifact().MimeType(), factory), nil
 }
 
 func getReader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
