@@ -146,7 +146,7 @@ func (this *TableProcessingOutput) Out() error {
 // a regular string comparison.
 func compareColumn(c int, vers ...bool) CompareFunction {
 	if utils.Optional(vers...) {
-		return _compareColumn(c, semverutils.Compare)
+		return _compareColumn(c, semverutils.VersionCache{}.Compare)
 	} else {
 		return _compareColumn(c, strings.Compare)
 	}
