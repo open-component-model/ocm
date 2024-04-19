@@ -337,7 +337,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		base = match[2]
 	}
 	if scheme != "" {
-		scheme = scheme + "://"
+		scheme += "://"
 	}
 	ref := scheme + path.Join(base, namespace.GetNamespace()) + version
 	return ociartifact.New(ref), nil

@@ -51,7 +51,7 @@ or
 </center>
 
 Notice the double slash (//) before the &lt;repository>. This serves as
-an clear separator between &lt;host>[:&lt;port>] and &lt;repository>.
+a clear separator between &lt;host>[:&lt;port>] and &lt;repository>.
 Thus, with this notation, the port is optional and can therefore be
 omitted without creating ambiguity with the docker library notation
 mentioned below.
@@ -120,8 +120,8 @@ oci::{"baseUrl": "ghcr.io"}//open-component-model/ocm/ocm.software/ocmcli/ocmcli
 oci::https://ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.7.0@sha256:29c842be1ef1da67f6a1c07a3a3a8eb101bbcc4c80f174b87d147b341bca9625
 oci::https://ghcr.io//open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.7.0@sha256:29c842be1ef1da67f6a1c07a3a3a8eb101bbcc4c80f174b87d147b341bca9625
 
-oci:http://localhost:8080/ocm.software/ocmcli/ocmcli-image:0.7.0@sha256:29c842be1ef1da67f6a1c07a3a3a8eb101bbcc4c80f174b87d147b341bca9625
-oci:http://localhost:8080//ocm.software/ocmcli/ocmcli-image:0.7.0@sha256:29c842be1ef1da67f6a1c07a3a3a8eb101bbcc4c80f174b87d147b341bca9625
+oci::http://localhost:8080/ocm.software/ocmcli/ocmcli-image:0.7.0@sha256:29c842be1ef1da67f6a1c07a3a3a8eb101bbcc4c80f174b87d147b341bca9625
+oci::http://localhost:8080//ocm.software/ocmcli/ocmcli-image:0.7.0@sha256:29c842be1ef1da67f6a1c07a3a3a8eb101bbcc4c80f174b87d147b341bca9625
 
 ubuntu:24.04
 ubuntu

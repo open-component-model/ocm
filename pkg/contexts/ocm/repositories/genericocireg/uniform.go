@@ -17,6 +17,7 @@ import (
 func init() {
 	cpi.RegisterRepositorySpecHandler(&repospechandler{}, "*")
 	cpi.RegisterRefParseHandler(Type, HandleRef)
+	cpi.RegisterRefParseHandler(ocireg.ShortType, HandleRef)
 }
 
 type repospechandler struct{}

@@ -83,7 +83,7 @@ or
 </center>
 
 Notice the double slash (//) before the &lt;repository>. This serves as
-an clear separator between &lt;host>[:&lt;port>] and &lt;repository>.
+a clear separator between &lt;host>[:&lt;port>] and &lt;repository>.
 Thus, with this notation, the port is optional and can therefore be
 omitted without creating ambiguity with the docker library notation
 mentioned below.

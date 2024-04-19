@@ -15,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 
+	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -83,6 +84,12 @@ func (u *UniformRepositorySpec) RepositoryRef() string {
 		return fmt.Sprintf("%s%s", t, u.Host)
 	}
 	return fmt.Sprintf("%s%s://%s", t, u.Scheme, u.Host)
+}
+
+func (u *UniformRepositorySpec) SetType(typ string) {
+	t, _ := grammar.SplitTypeSpec(typ)
+	u.Type = t
+	u.TypeHint = typ
 }
 
 func (u *UniformRepositorySpec) String() string {
