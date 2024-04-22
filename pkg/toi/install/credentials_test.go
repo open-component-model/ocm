@@ -21,14 +21,14 @@ import (
 )
 
 var _ = Describe("credential mapping", func() {
-	consumerid := credentials.NewConsumerIdentity("CT", identity.ID_HOSTNAME, "github.com", identity.ID_PATHPREFIX, "mandelsoft")
+	consumerid := credentials.NewConsumerIdentity("CT", identity.ID_HOSTNAME, "github.com", identity.ID_PATHPREFIX, "open-component-model")
 	ccreds := common.Properties{
-		"user": "mandelsoft",
+		"user": "open-component-model",
 		"pass": "mypass",
 	}
 	memspec := memory.NewRepositorySpec("default")
 	memcred := credentials.DirectCredentials{
-		"username": "mandelsoft",
+		"username": "open-component-model",
 		"password": "secret",
 	}
 	cfgdata := `
@@ -36,7 +36,7 @@ configurations:
 - credentials:
   - credentials:
       password: secret
-      username: mandelsoft
+      username: open-component-model
     credentialsName: other
   - credentials:
       token: XXX
@@ -55,11 +55,11 @@ configurations:
     - credentialsName: Credentials
       properties:
         pass: mypass
-        user: mandelsoft
+        user: open-component-model
       type: Credentials
     identity:
       hostname: github.com
-      pathprefix: mandelsoft/testrepo
+      pathprefix: open-component-model/testrepo
       type: CT
   type: credentials.config.ocm.software
 type: generic.config.ocm.software
@@ -99,7 +99,7 @@ forwardedConsumers:
 - consumerId:
     type: CT
     hostname: github.com
-    pathprefix: mandelsoft/testrepo
+    pathprefix: open-component-model/testrepo
   consumerType: hostpath
 `
 		spec, err := install.ParseCredentialSpecification([]byte(input), "settings")
@@ -126,7 +126,7 @@ forwardedConsumers:
 		Expect(mem.LookupCredentials("other")).To(Equal(memcred))
 
 		creq := consumerid.Copy()
-		creq[identity.ID_PATHPREFIX] = "mandelsoft/testrepo/bla"
+		creq[identity.ID_PATHPREFIX] = "open-component-model/testrepo/bla"
 		props := Must(credentials.CredentialsForConsumer(ctx, creq, hostpath.Matcher))
 		Expect(props.Properties()).To(Equal(ccreds))
 	})

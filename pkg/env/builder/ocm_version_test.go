@@ -21,9 +21,9 @@ import (
 
 const ARCH = "/tmp/ctf"
 const ARCH2 = "/tmp/ctf2"
-const PROVIDER = "mandelsoft"
+const PROVIDER = "open-component-model"
 const VERSION = "v1"
-const COMPONENT = "github.com/mandelsoft/test"
+const COMPONENT = "github.com/open-component-model/test"
 const OUT = "/tmp/res"
 
 var _ = Describe("Transfer handler", func() {
