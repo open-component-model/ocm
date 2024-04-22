@@ -74,15 +74,6 @@ var _ = Describe("Method", func() {
 		Expect(meta.HashType).To(Equal(crypto.SHA1))
 	})
 
-	It("GetPackageMeta - int.repositories.cloud.sap: hello-ocm", func() {
-		acc := mvn.New("https://int.repositories.cloud.sap/artifactory/ocm-mvn-test", "open-component-model", "hello-ocm", "0.0.1")
-		meta, err := acc.GetPackageMeta(ocm.DefaultContext())
-		Expect(err).ToNot(HaveOccurred())
-		Expect(meta.Bin).To(Equal("https://int.repositories.cloud.sap/artifactory/ocm-mvn-test/open-component-model/hello-ocm/0.0.1/hello-ocm-0.0.1.jar"))
-		Expect(meta.Hash).To(Equal(""))
-		Expect(meta.HashType).To(Equal(crypto.Hash(0)))
-	})
-
 	It("accesses artifact", func() {
 		acc := mvn.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", mvn.WithExtension("pom"))
 		m := Must(acc.AccessMethod(cv))

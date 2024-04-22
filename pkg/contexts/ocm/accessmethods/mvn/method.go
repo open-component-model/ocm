@@ -108,7 +108,7 @@ func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpe
 }
 
 // GetReferenceHint returns the reference hint for the Maven (mvn) artifact. In the following form:
-// groupId:artifactId:version:classifier:extension
+// groupId:artifactId:version:classifier:extension.
 func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) string {
 	return a.GroupId + ":" + a.ArtifactId + ":" + a.Version + ":" + a.Classifier + ":" + a.Extension
 }
@@ -204,11 +204,12 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 		if err != nil {
 			return nil, err
 		}
+		defer out.Close()
 		resp, err := http.Get(metadata.Bin)
-		defer resp.Body.Close()
 		if err != nil {
 			return nil, err
 		}
+		defer resp.Body.Close()
 		_, err = io.Copy(out, resp.Body)
 		if err != nil {
 			return nil, err
@@ -292,8 +293,7 @@ func (a *AccessSpec) GetGAVFiles() (map[string]crypto.Hash, error) {
 	process(htmlDoc)
 
 	// Which hash files are available?
-	var filesAndHashes map[string]crypto.Hash
-	filesAndHashes = make(map[string]crypto.Hash)
+	var filesAndHashes = make(map[string]crypto.Hash)
 	for _, file := range fileList {
 		if IsArtifact(file) {
 			filesAndHashes[file] = bestAvailableHash(fileList, file)

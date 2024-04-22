@@ -54,7 +54,12 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 
 	ctx.BlobHandlers().Register(NewArtifactHandler(cfg),
 		cpi.ForArtifactType(resourcetypes.MVN_ARTIFACT),
+		// see artifact.go#IsMimeTypeSupported()
 		cpi.ForMimeType(mime.MIME_JAR),
+		cpi.ForMimeType(mime.MIME_JSON),
+		cpi.ForMimeType(mime.MIME_XML),
+		cpi.ForMimeType(mime.MIME_GZIP),
+		cpi.ForMimeType(mime.MIME_TGZ),
 		cpi.NewBlobHandlerOptions(olist...),
 	)
 
