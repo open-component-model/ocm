@@ -9,7 +9,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -30,10 +30,10 @@ const COMP3 = "test.de/z"
 const COMP4 = "test.de/a"
 
 var _ = Describe("Test Environment", func() {
-	var env *TestEnv
+	var env *Builder
 
 	BeforeEach(func() {
-		env = NewTestEnv()
+		env = NewBuilder()
 	})
 
 	AfterEach(func() {

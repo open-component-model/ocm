@@ -7,8 +7,8 @@ package genericaccess_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -25,15 +25,15 @@ const OCIPATH = "/tmp/oci"
 const OCIHOST = "alias"
 
 var _ = Describe("dir tree resource access", func() {
-	var env *TestEnv
+	var env *Builder
 
 	BeforeEach(func() {
-		env = NewTestEnv()
+		env = NewBuilder()
 
-		FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
+		FakeOCIRepo(env, OCIPATH, OCIHOST)
 
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-			OCIManifest1(env.Builder)
+			OCIManifest1(env)
 		})
 	})
 

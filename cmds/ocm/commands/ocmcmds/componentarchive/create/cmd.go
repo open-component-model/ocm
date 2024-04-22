@@ -9,11 +9,11 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -91,7 +91,7 @@ func (o *Command) Complete(args []string) error {
 	o.Version = args[1]
 
 	for _, a := range args[2:] {
-		o.Labels, err = common.AddParsedLabel(o.FileSystem(), o.Labels, a)
+		o.Labels, err = clisupport.AddParsedLabel(o.FileSystem(), o.Labels, a)
 		if err != nil {
 			return err
 		}
@@ -104,7 +104,7 @@ func (o *Command) Complete(args []string) error {
 			o.Provider = a
 			continue
 		}
-		o.ProviderLabels, err = common.AddParsedLabel(o.FileSystem(), o.ProviderLabels, a)
+		o.ProviderLabels, err = clisupport.AddParsedLabel(o.FileSystem(), o.ProviderLabels, a)
 		if err != nil {
 			return err
 		}

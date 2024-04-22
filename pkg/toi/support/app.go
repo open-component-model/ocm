@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -135,7 +135,7 @@ func (o *BootstrapperCLIOptions) Complete() error {
 		return errors.Newf("empty credential attribute set for %s", id.String())
 	}
 
-	set, err := common2.ParseLabels(vfsattr.Get(o.Context), o.Settings, "attribute setting")
+	set, err := clisupport.ParseLabels(vfsattr.Get(o.Context), o.Settings, "attribute setting")
 	if err == nil && len(set) > 0 {
 		ctx := o.Context.ConfigContext()
 		spec := datactg.New()
