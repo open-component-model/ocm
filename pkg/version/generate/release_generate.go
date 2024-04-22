@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package main
 
 import (
@@ -86,6 +82,8 @@ func main() {
 
 	//nolint:forbidigo // Logger not needed for this command.
 	switch cmd {
+	case "print-semver":
+		fmt.Print(nonpre)
 	case "print-version":
 		fmt.Print(v)
 	case "print-rc-version":

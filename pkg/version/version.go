@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package version
 
 import (
@@ -38,6 +34,16 @@ type Info struct {
 // String returns info as a human-friendly version string.
 func (info Info) String() string {
 	return info.GitVersion
+}
+
+// String returns info as a short semantic version string (0.8.15).
+func (info Info) SemVer() string {
+	return info.Major + "." + info.Minor + "." + info.Patch
+}
+
+// String returns current Release version.
+func Current() string {
+	return Get().SemVer()
 }
 
 // GetInterface returns the overall codebase version. It's for detecting
