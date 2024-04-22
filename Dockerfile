@@ -6,7 +6,7 @@ FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS build
 WORKDIR /src
 RUN go env -w GOMODCACHE=/root/.cache/go-build
 
-COPY go.mod go.sum ./
+COPY go.mod go.sum *.go VERSION ./
 
 ARG GO_PROXY="https://proxy.golang.org"
 ENV GOPROXY=${GO_PROXY}
