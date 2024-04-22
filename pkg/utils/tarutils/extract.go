@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package tarutils
 
 import (
@@ -33,7 +29,7 @@ func ExtractArchiveToFs(fs vfs.FileSystem, path string, fss ...vfs.FileSystem) e
 	return ExtractTarToFs(fs, r)
 }
 
-// ExtractArchiveToFsWithInfo wunpacks an archive to a filesystem.
+// ExtractArchiveToFsWithInfo unpacks an archive to a filesystem.
 func ExtractArchiveToFsWithInfo(fs vfs.FileSystem, path string, fss ...vfs.FileSystem) (int64, int64, error) {
 	sfs := utils.OptionalDefaulted(osfs.New(), fss...)
 
