@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+
+	"github.com/open-component-model/ocm"
 )
 
 var (
@@ -15,6 +17,13 @@ var (
 	gitTreeState string
 	buildDate    = "1970-01-01T00:00:00Z"
 )
+
+func init() {
+	if gitVersion == "0.0.0-dev" {
+		// gitVersion = strings.TrimSpace(string(MustAsset("../../VERSION")))
+		gitVersion = strings.TrimSpace(ocm.Version)
+	}
+}
 
 type Info struct {
 	Major        string `json:"major"`
