@@ -20,7 +20,7 @@ func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
 	cpi.RegisterRepositorySpecHandler(h, ctf.Type)
-	cpi.RegisterRepositorySpecHandler(h, "ctf")
+	cpi.RegisterRepositorySpecHandler(h, ctf.AltType)
 	for _, f := range SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 	}

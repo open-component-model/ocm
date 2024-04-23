@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -22,18 +23,19 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func NewRepository(ctx cpi.ContextProvider, names ...string) cpi.Repository {
+func NewRepository(ctxp cpi.ContextProvider, names ...string) cpi.Repository {
 	var repositories *Repositories
 
+	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
 	name := utils.Optional(names...)
 	if name != "" {
-		repositories = ctx.OCMContext().GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
+		repositories = ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
 		if repo := repositories.GetRepository(name); repo != nil {
 			repo, _ = repo.Dup()
 			return repo
 		}
 	}
-	repo := virtual.NewRepository(ctx.OCMContext(), NewAccess())
+	repo := virtual.NewRepository(ctx, NewAccess())
 	if repositories != nil {
 		repositories.SetRepository(name, repo)
 		repo, _ = repo.Dup()

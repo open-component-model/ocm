@@ -55,6 +55,13 @@ func NewRepositoryCache() *RepositoryCache {
 	}
 }
 
+func (c *RepositoryCache) Reset() {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	c.repositories = map[datacontext.ObjectKey]Repository{}
+}
+
 func (c *RepositoryCache) LookupRepository(ctx Context, spec RepositorySpec) (Repository, bool, error) {
 	spec, err := ctx.RepositoryTypes().Convert(spec)
 	if err != nil {
@@ -104,9 +111,17 @@ func (r *ResolverRule) Match(name string) bool {
 	return r.prefix == "" || r.prefix == name || strings.HasPrefix(name, r.prefix+"/")
 }
 
+// MatchingResolver hosts rule to match component version names.
+// Matched names will be mapped to a specification for repository
+// which should be used to look up the component version.
+// Therefore, it keeps a reference to the context to use.
+//
+// ATTENTION: Because such an object is used by the context
+// implementation, the context must be kept as ContextProvider
+// to provide context views to outbound calls.
 type MatchingResolver struct {
 	lock     sync.Mutex
-	ctx      Context
+	ctx      ContextProvider
 	finalize finalizer.Finalizer
 	cache    *RepositoryCache
 	rules    []*ResolverRule
@@ -115,17 +130,20 @@ type MatchingResolver struct {
 func NewMatchingResolver(ctx ContextProvider, rules ...*ResolverRule) *MatchingResolver {
 	return &MatchingResolver{
 		lock:  sync.Mutex{},
-		ctx:   ctx.OCMContext(),
+		ctx:   ctx,
 		cache: NewRepositoryCache(),
 		rules: nil,
 	}
 }
 
 func (r *MatchingResolver) OCMContext() Context {
-	return r.ctx
+	return r.ctx.OCMContext()
 }
 
 func (r *MatchingResolver) Finalize() error {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	defer r.cache.Reset()
 	return r.finalize.Finalize()
 }
 
@@ -154,9 +172,10 @@ func (r *MatchingResolver) LookupComponentVersion(name string, version string) (
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
+	ctx := r.ctx.OCMContext()
 	for _, rule := range r.rules {
 		if rule.Match(name) {
-			repo, cached, err := r.cache.LookupRepository(r.ctx, rule.spec)
+			repo, cached, err := r.cache.LookupRepository(ctx, rule.spec)
 			if err != nil {
 				return nil, err
 			}

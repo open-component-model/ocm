@@ -101,10 +101,12 @@ linked library can be used:
 
 Dedicated OCM repository types:
   - <code>ComponentArchive</code>: v1
+  - <code>ca</code>: v1
 
 OCI Repository types (using standard component repository to OCI mapping):
   - <code>CommonTransportFormat</code>: v1
   - <code>OCIRegistry</code>: v1
+  - <code>ctf</code>: v1
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 
