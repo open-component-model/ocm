@@ -51,6 +51,31 @@ func ExtractTarToFs(fs vfs.FileSystem, in io.Reader) error {
 	return err
 }
 
+// UnzipTarToFs tries to decompress the input stream and then writes the tar stream to a filesystem.
+func UnzipTarToFs(fs vfs.FileSystem, in io.Reader) error {
+	r, _, err := compression.AutoDecompress(in)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+	err = ExtractTarToFs(fs, r)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+// ExtractTgzToTempFs extracts a tar.gz archive to a temporary filesystem.
+// You should call vfs.Cleanup on the returned filesystem to clean up the temporary files.
+func ExtractTgzToTempFs(in io.Reader) (vfs.FileSystem, error) {
+	fs, err := osfs.NewTempFileSystem()
+	if err != nil {
+		return nil, err
+	}
+
+	return fs, UnzipTarToFs(fs, in)
+}
+
 func ExtractTarToFsWithInfo(fs vfs.FileSystem, in io.Reader) (fcnt int64, bcnt int64, err error) {
 	tr := tar.NewReader(in)
 	for {

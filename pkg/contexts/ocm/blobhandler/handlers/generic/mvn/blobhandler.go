@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
@@ -80,16 +79,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	}
 	defer blobReader.Close()
 
-	tempFs, err := osfs.NewTempFileSystem()
+	tempFs, err := tarutils.ExtractTgzToTempFs(blobReader)
 	if err != nil {
 		return nil, err
 	}
 	defer vfs.Cleanup(tempFs)
-	err = tarutils.ExtractTarToFs(tempFs, blobReader)
-	// err = tarutils.ExtractTarToFs(tempFs, compression.AutoDecompress(blobReader)) // ???
-	if err != nil {
-		return nil, err
-	}
 	files, err := tarutils.ListSortedFilesInDir(tempFs, "", false)
 	if err != nil {
 		return nil, err

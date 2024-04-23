@@ -21,7 +21,7 @@ const (
 	FAILPATH = "/testdata"
 )
 
-var _ = Describe("Method", func() {
+var _ = Describe("accessmethods.mvn.AccessSpec tests", func() {
 	var env *Builder
 	var cv ocm.ComponentVersionAccess
 
