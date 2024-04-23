@@ -17,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
@@ -329,8 +330,16 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if err != nil {
 		return nil, wrap(err, errhint, "transfer artifact")
 	}
-
-	ref := path.Join(base, namespace.GetNamespace()) + version
+	match := grammar.AnchoredSchemedRegexp.FindStringSubmatch(base)
+	scheme := ""
+	if match != nil {
+		scheme = match[1]
+		base = match[2]
+	}
+	if scheme != "" {
+		scheme += "://"
+	}
+	ref := scheme + path.Join(base, namespace.GetNamespace()) + version
 	return ociartifact.New(ref), nil
 }
 
