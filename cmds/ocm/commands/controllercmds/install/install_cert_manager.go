@@ -2,15 +2,12 @@ package install
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"os"
 
-	_ "embed"
-
 	"github.com/fluxcd/pkg/ssa"
 	"github.com/mandelsoft/filepath/pkg/filepath"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -54,18 +51,12 @@ func (o *Command) createRegistryCertificate() error {
 		return fmt.Errorf("failed to write issuer.yaml file at location: %w", err)
 	}
 
-	kubeconfigArgs := genericclioptions.NewConfigFlags(false)
-	sm, err := NewResourceManager(kubeconfigArgs)
-	if err != nil {
-		return fmt.Errorf("failed to create resource manager: %w", err)
-	}
-
 	objects, err := readObjects(path)
 	if err != nil {
 		return fmt.Errorf("failed to construct objects to apply: %w", err)
 	}
 
-	if _, err := sm.ApplyAllStaged(context.Background(), objects, ssa.DefaultApplyOptions()); err != nil {
+	if _, err := o.SM.ApplyAllStaged(context.Background(), objects, ssa.DefaultApplyOptions()); err != nil {
 		return fmt.Errorf("failed to apply manifests: %w", err)
 	}
 
