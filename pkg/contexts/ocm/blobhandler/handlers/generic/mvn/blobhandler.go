@@ -90,7 +90,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	if err != nil {
 		return nil, err
 	}
-	files, err := tarutils.FlatListSortedFilesInDir(tempFs, "")
+	files, err := tarutils.ListSortedFilesInDir(tempFs, "", false)
 	if err != nil {
 		return nil, err
 	}
@@ -111,14 +111,6 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 			return nil, err
 		}
 	}
-	/*
-		default:
-			err = deploy(artifact, b.spec.Url, blobReader, username, password, blob.Digest())
-			if err != nil {
-				return nil, err
-			}
-		}
-	*/
 
 	log.Debug("done", "artifact", artifact)
 	return mvn.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, mvn.WithClassifier(artifact.Classifier), mvn.WithExtension(artifact.Extension)), nil

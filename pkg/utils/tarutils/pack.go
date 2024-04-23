@@ -219,13 +219,17 @@ func RegularFileInfoHeader(fi fs.FileInfo) *tar.Header {
 	return h
 }
 
-// FlatListSortedFilesInDir returns a flat list of files in a directory sorted by name.
-// Attention: Files with same name but in different sub-paths, will be listed only once!!!
-func FlatListSortedFilesInDir(fs vfs.FileSystem, root string) ([]string, error) {
+// ListSortedFilesInDir returns a list of files in a directory sorted by name.
+// Attention: If 'flat == true', files with same name but in different sub-paths, will be listed only once!!!
+func ListSortedFilesInDir(fs vfs.FileSystem, root string, flat bool) ([]string, error) {
 	var files []string
 	err := vfs.Walk(fs, root, func(path string, info vfs.FileInfo, err error) error {
 		if !info.IsDir() {
-			files = append(files, info.Name())
+			pathOrName := path
+			if flat {
+				pathOrName = info.Name()
+			}
+			files = append(files, pathOrName)
 		}
 		return nil
 	})
@@ -244,7 +248,7 @@ func TgzFs(fs vfs.FileSystem, writer io.Writer) error {
 
 func TarFlatFs(fs vfs.FileSystem, writer io.Writer) error {
 	tw := tar.NewWriter(writer)
-	files, err := FlatListSortedFilesInDir(fs, "")
+	files, err := ListSortedFilesInDir(fs, "", true)
 	if err != nil {
 		return err
 	}

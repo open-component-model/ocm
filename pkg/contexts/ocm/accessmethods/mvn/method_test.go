@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	mvnPATH  = "/testdata/success"
+	mvnPATH  = "/testdata/.m2/repository"
 	FAILPATH = "/testdata"
 )
 
@@ -62,7 +62,7 @@ var _ = Describe("Method", func() {
 		Expect(meta.Bin).To(HavePrefix("file://"))
 		Expect(meta.Bin).To(ContainSubstring("mvn-sdk-modules-bom-5.7.0-"))
 		Expect(meta.Bin).To(HaveSuffix(".tar.gz"))
-		Expect(meta.Hash).To(Equal("217feb1e7490015dd0a2b231b9cea45804df3d2a9b37287ac861bb45b8c0de55"))
+		Expect(meta.Hash).To(Equal("345fe2e640663c3cd6ac87b7afb92e1c934f665f75ddcb9555bc33e1813ef00b"))
 		Expect(meta.HashType).To(Equal(crypto.SHA256))
 	})
 
@@ -82,8 +82,8 @@ var _ = Describe("Method", func() {
 				break
 			}
 		}
-		Expect(dr.Size()).To(Equal(int64(10)))
-		Expect(dr.Digest().String()).To(Equal("SHA-1:e727ef4792a349c485d893e60874475a54f24b97"))
+		Expect(dr.Size()).To(Equal(int64(1109)))
+		Expect(dr.Digest().String()).To(Equal("SHA-1:4ee125ffe4f7690588833f1217a13cc741e4df5f"))
 	})
 
 	It("accesses local artifact with extension", func() {
@@ -113,10 +113,5 @@ var _ = Describe("Method", func() {
 		defer m.Close()
 		_, err := m.Reader()
 		Expect(err).To(MatchError(ContainSubstring("SHA-1 digest mismatch: expected 44a77645201d1a8fc5213ace787c220eabbd0967, found b3242b8c31f8ce14f729b8fd132ac77bc4bc5bf7")))
-	})
-
-	FIt("NewDigestWriterWithHash", func() {
-		w := iotools.NewDigestWriterWithHash(crypto.SHA1, nil)
-		Expect(w).ToNot(BeNil())
 	})
 })

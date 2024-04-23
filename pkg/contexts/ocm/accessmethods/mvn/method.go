@@ -269,7 +269,7 @@ func (a *AccessSpec) GavFiles(fs ...vfs.FileSystem) (map[string]crypto.Hash, err
 }
 
 func gavFilesFromDisk(fs vfs.FileSystem, dir string) (map[string]crypto.Hash, error) {
-	files, err := tarutils.FlatListSortedFilesInDir(fs, dir)
+	files, err := tarutils.ListSortedFilesInDir(fs, dir, true)
 	if err != nil {
 		return nil, err
 	}
