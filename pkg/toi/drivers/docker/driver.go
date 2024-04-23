@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package docker
 
 import (
@@ -168,7 +164,7 @@ func pullImage(ctx context.Context, cli command.Cli, image string) error {
 		return fmt.Errorf("unable to parse repository info: %w", err)
 	}
 
-	authConfig := command.ResolveAuthConfig(ctx, cli, repoInfo.Index)
+	authConfig := command.ResolveAuthConfig(cli.ConfigFile(), repoInfo.Index)
 
 	encodedAuth, err := registrytypes.EncodeAuthConfig(authConfig)
 	if err != nil {
@@ -254,7 +250,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}
 
 	if d.config[OptionCleanup] == trueAsString {
-		defer cli.Client().ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{})
+		defer cli.Client().ContainerRemove(ctx, resp.ID, container.RemoveOptions{})
 	}
 
 	containerUID := getContainerUserID(ii.Config.User)
@@ -277,7 +273,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}
 	tarContent.Close()
 
-	attach, err := cli.Client().ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
+	attach, err := cli.Client().ContainerAttach(ctx, resp.ID, container.AttachOptions{
 		Stream: true,
 		Stdout: true,
 		Stderr: true,
@@ -310,7 +306,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 		}
 	}()
 
-	if err = cli.Client().ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+	if err = cli.Client().ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		return nil, fmt.Errorf("cannot start container: %w", err)
 	}
 	statusc, errc := cli.Client().ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)

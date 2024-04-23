@@ -217,7 +217,7 @@ func (s *session) EvaluateVersionRef(ctx Context, ref string) (*EvaluationResult
 func (s *session) EvaluateComponentRef(ctx Context, ref string) (*EvaluationResult, error) {
 	evaluated, err := s.EvaluateRef(ctx, ref)
 	if err != nil {
-		return nil, err
+		return evaluated, err
 	}
 	if evaluated.Component == nil {
 		lister := evaluated.Repository.ComponentLister()
