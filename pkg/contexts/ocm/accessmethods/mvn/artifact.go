@@ -76,6 +76,8 @@ func (a *Artifact) ClassifierExtensionFrom(filename string) *Artifact {
 		}
 		a.Classifier = s[:i]
 		s = strings.TrimPrefix(s, a.Classifier)
+	} else {
+		a.Classifier = ""
 	}
 	a.Extension = strings.TrimPrefix(s, ".")
 	return a
