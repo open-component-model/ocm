@@ -54,11 +54,6 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 
 	ctx.BlobHandlers().Register(NewArtifactHandler(cfg),
 		cpi.ForArtifactType(resourcetypes.MVN_ARTIFACT),
-		// see artifact.go#IsMimeTypeSupported()
-		cpi.ForMimeType(mime.MIME_JAR),
-		cpi.ForMimeType(mime.MIME_JSON),
-		cpi.ForMimeType(mime.MIME_XML),
-		cpi.ForMimeType(mime.MIME_GZIP),
 		cpi.ForMimeType(mime.MIME_TGZ),
 		cpi.NewBlobHandlerOptions(olist...),
 	)
@@ -68,9 +63,9 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 
 func (r *RegistrationHandler) GetHandlers(_ cpi.Context) registrations.HandlerInfos {
 	return registrations.NewLeafHandlerInfo("uploading mvn artifacts", `
-The <code>`+BLOB_HANDLER_NAME+`</code> uploader is able to upload mvn artifacts
+The <code>`+BLOB_HANDLER_NAME+`</code> uploader is able to upload mvn artifacts (whole GAV only!)
 as artifact archive according to the mvn artifact spec.
-If registered the default mime type is: `+mime.MIME_JAR+`
+If registered the default mime type is: `+mime.MIME_TGZ+`
 
 It accepts a plain string for the URL or a config with the following field:
 'url': the URL of the mvn repository.

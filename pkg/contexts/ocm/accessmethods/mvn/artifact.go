@@ -95,6 +95,7 @@ func (a *Artifact) MimeType() string {
 	return mime.MIME_TGZ
 }
 
+/*
 func IsMimeTypeSupported(mimeType string) bool {
 	switch mimeType {
 	case mime.MIME_JAR, mime.MIME_JSON, mime.MIME_XML, mime.MIME_TGZ, mime.MIME_GZIP:
@@ -102,6 +103,7 @@ func IsMimeTypeSupported(mimeType string) bool {
 	}
 	return false
 }
+*/
 
 // ArtifactFromHint creates new Artifact from accessspec-hint. See 'GetReferenceHint'.
 func ArtifactFromHint(gav string) *Artifact {

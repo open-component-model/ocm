@@ -41,9 +41,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	}
 	mimeType := blob.MimeType()
 	if resourcetypes.MVN_ARTIFACT != resourceType {
+		log.Debug("not a MVN artifact", "resourceType", resourceType)
 		return nil, nil
 	}
-	if !mvn.IsMimeTypeSupported(mimeType) {
+	if mime.MIME_TGZ != mimeType {
+		log.Debug("not a tarball, can't be a complete mvn GAV", "mimeType", mimeType)
 		return nil, nil
 	}
 	if b.spec.Url == "" {
@@ -78,45 +80,47 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	}
 	defer blobReader.Close()
 
-	switch mimeType {
-	case mime.MIME_TGZ:
-		tempFs, err := osfs.NewTempFileSystem()
+	//switch mimeType {
+	//case mime.MIME_TGZ:
+	tempFs, err := osfs.NewTempFileSystem()
+	if err != nil {
+		return nil, err
+	}
+	defer vfs.Cleanup(tempFs)
+	err = tarutils.ExtractTarToFs(tempFs, blobReader)
+	// err = tarutils.ExtractTarToFs(tempFs, compression.AutoDecompress(blobReader)) // ???
+	if err != nil {
+		return nil, err
+	}
+	files, err := tarutils.FlatListSortedFilesInDir(tempFs, "")
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range files {
+		log.Debug("uploading", "file", file)
+		artifact = artifact.ClassifierExtensionFrom(file)
+		reader, err := tempFs.Open(file)
 		if err != nil {
 			return nil, err
 		}
-		defer vfs.Cleanup(tempFs)
-		err = tarutils.ExtractTarToFs(tempFs, blobReader)
-		// err = tarutils.ExtractTarToFs(tempFs, compression.AutoDecompress(blobReader)) // ???
-		if err != nil {
+		defer reader.Close()
+		hash := sha256.New()
+		if _, err := io.Copy(hash, reader); err != nil {
 			return nil, err
 		}
-		files, err := tarutils.ListSortedFilesInDir(tempFs, "")
-		if err != nil {
-			return nil, err
-		}
-		for _, file := range files {
-			log.Debug("uploading", "file", file)
-			artifact = artifact.ClassifierExtensionFrom(file)
-			reader, err := tempFs.Open(file)
-			if err != nil {
-				return nil, err
-			}
-			defer reader.Close()
-			hash := sha256.New()
-			if _, err := io.Copy(hash, reader); err != nil {
-				return nil, err
-			}
-			err = deploy(artifact, b.spec.Url, reader, username, password, digest.NewDigest(digest.SHA256, hash))
-			if err != nil {
-				return nil, err
-			}
-		}
-	default:
-		err = deploy(artifact, b.spec.Url, blobReader, username, password, blob.Digest())
+		err = deploy(artifact, b.spec.Url, reader, username, password, digest.NewDigest(digest.SHA256, hash))
 		if err != nil {
 			return nil, err
 		}
 	}
+	/*
+		default:
+			err = deploy(artifact, b.spec.Url, blobReader, username, password, blob.Digest())
+			if err != nil {
+				return nil, err
+			}
+		}
+	*/
 
 	log.Debug("done", "artifact", artifact)
 	return mvn.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, mvn.WithClassifier(artifact.Classifier), mvn.WithExtension(artifact.Extension)), nil

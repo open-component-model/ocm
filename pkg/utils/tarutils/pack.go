@@ -2,6 +2,7 @@ package tarutils
 
 import (
 	"archive/tar"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"io/fs"
@@ -218,11 +219,13 @@ func RegularFileInfoHeader(fi fs.FileInfo) *tar.Header {
 	return h
 }
 
-func ListSortedFilesInDir(fs vfs.FileSystem, root string) ([]string, error) {
+// FlatListSortedFilesInDir returns a flat list of files in a directory sorted by name.
+// Attention: Files with same name but in different sub-paths, will be listed only once!!!
+func FlatListSortedFilesInDir(fs vfs.FileSystem, root string) ([]string, error) {
 	var files []string
 	err := vfs.Walk(fs, root, func(path string, info vfs.FileInfo, err error) error {
 		if !info.IsDir() {
-			files = append(files, path)
+			files = append(files, info.Name())
 		}
 		return nil
 	})
@@ -230,9 +233,18 @@ func ListSortedFilesInDir(fs vfs.FileSystem, root string) ([]string, error) {
 	return files, err
 }
 
-func TarFs(fs vfs.FileSystem, writer io.Writer) error {
+func TgzFs(fs vfs.FileSystem, writer io.Writer) error {
+	zip := gzip.NewWriter(writer)
+	err := TarFlatFs(fs, zip)
+	if err != nil {
+		return err
+	}
+	return zip.Close()
+}
+
+func TarFlatFs(fs vfs.FileSystem, writer io.Writer) error {
 	tw := tar.NewWriter(writer)
-	files, err := ListSortedFilesInDir(fs, "")
+	files, err := FlatListSortedFilesInDir(fs, "")
 	if err != nil {
 		return err
 	}

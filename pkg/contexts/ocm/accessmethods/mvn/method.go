@@ -2,10 +2,8 @@ package mvn
 
 import (
 	"bytes"
-	"compress/gzip"
 	"context"
 	"crypto"
-	"crypto/sha256"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +12,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/opencontainers/go-digest"
 	"golang.org/x/exp/slices"
 	"golang.org/x/net/html"
 
@@ -62,7 +61,7 @@ type AccessSpec struct {
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
-var log = logging.Context().Logger(identity.REALM)
+var logger = logging.Context().Logger(identity.REALM)
 
 // New creates a new Maven (mvn) repository access spec version v1.
 func New(repository, groupId, artifactId, version string, options ...func(*AccessSpec)) *AccessSpec {
@@ -155,23 +154,18 @@ type meta struct {
 }
 
 func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
-	artifact := a.AsArtifact()
-	var metadata = meta{}
-
-	if artifact.Extension != "" {
-		metadata.Bin = artifact.Url(a.Repository)
-		metadata.MimeType = artifact.MimeType()
-		return &metadata, nil
-	}
-
 	fs := vfsattr.Get(ctx)
 
-	fileMap, err := a.GetGAVFiles()
+	log := logger.WithValues("BaseUrl", a.BaseUrl())
+	fileMap, err := a.GavFiles(fs)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot read GAV: %s", a.BaseUrl())
+		return nil, err
 	}
 
-	singleArtifact := len(fileMap) == 1
+	if a.Classifier != "" {
+		fileMap = filterByClassifier(fileMap, a.Classifier)
+	}
+	singleBinary := len(fileMap) == 1
 
 	tempFs, err := osfs.NewTempFileSystem()
 	if err != nil {
@@ -179,10 +173,12 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	}
 	defer vfs.Cleanup(tempFs)
 
+	artifact := a.AsArtifact()
+	var metadata = meta{}
 	for file, hash := range fileMap {
 		artifact.ClassifierExtensionFrom(file)
 		metadata.Bin = artifact.Url(a.Repository)
-		log.WithValues("file", metadata.Bin)
+		log = logger.WithValues("file", metadata.Bin)
 		log.Debug("processing")
 		metadata.MimeType = artifact.MimeType()
 		if hash > 0 {
@@ -195,7 +191,9 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 			log.Warn("no digest available")
 		}
 
-		if singleArtifact {
+		// single binary dependency, this will never be a complete GAV - no maven uploader support!
+		if a.Extension != "" || singleBinary && a.Classifier != "" {
+			// in case you want to transport <packaging>pom</packaging>, then you should NOT set the extension
 			return &metadata, nil
 		}
 
@@ -205,36 +203,56 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 			return nil, err
 		}
 		defer out.Close()
-		resp, err := http.Get(metadata.Bin)
+		reader, err := getReader(metadata.Bin, fs)
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
-		_, err = io.Copy(out, resp.Body)
-		if err != nil {
-			return nil, err
+		defer reader.Close()
+
+		if hash > 0 {
+			dreader := iotools.NewDigestReaderWithHash(hash, reader)
+			_, err = io.Copy(out, dreader)
+			if err != nil {
+				return nil, err
+			}
+			sum := dreader.Digest().Encoded()
+			if metadata.Hash != sum {
+				return nil, errors.Newf("checksum mismatch for %s", metadata.Bin)
+			}
+		} else {
+			_, err = io.Copy(out, reader)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	// pack all downloaded files into a tar.gz file
-	tgz, err := blobaccess.NewTempFile("", Type+"-"+artifact.FilePrefix()+"-*.tar.gz", fs)
+	// tgz, err := blobaccess.NewTempFile("", Type+"-"+artifact.FilePrefix()+"-*.tar.gz", fs)
+	tgz, err := vfs.TempFile(fs, "", Type+"-"+artifact.FilePrefix()+"-*.tar.gz")
+	if err != nil {
+		return nil, err
+	}
 	defer tgz.Close()
+
+	dw := iotools.NewDigestWriterWith(digest.SHA256, tgz)
+	defer dw.Close()
+	err = tarutils.TgzFs(tempFs, dw)
 	if err != nil {
 		return nil, err
 	}
-	err = tarutils.TarFs(tempFs, gzip.NewWriter(tgz.Writer()))
-	if err != nil {
-		return nil, err
-	}
+
 	metadata.Bin = "file://" + tgz.Name()
+	metadata.Hash = dw.Digest().Encoded()
+	metadata.HashType = crypto.SHA256
 	log.Debug("created", "file", metadata.Bin)
 
-	// calculate digest for the tar.gz file
+	/*/ calculate digest for the tar.gz file
 	file, err := fs.OpenFile(tgz.Name(), vfs.O_RDONLY, vfs.ModePerm)
-	defer file.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 	hash := sha256.New()
 	if _, err := io.Copy(hash, file); err != nil {
 		return nil, err
@@ -242,32 +260,64 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	metadata.Hash = fmt.Sprintf("%x", hash.Sum(nil))
 	log.Debug("hash", "sum", metadata.Hash)
 	metadata.HashType = crypto.SHA256
+	*/
 	metadata.MimeType = mime.MIME_TGZ
 
 	return &metadata, nil
 }
 
-// GetGAVFiles returns the files of the Maven (mvn) artifact in the repository and their available digests.
-func (a *AccessSpec) GetGAVFiles() (map[string]crypto.Hash, error) {
-	log.WithValues("repository", a.BaseUrl())
-	log.Debug("reading")
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, a.BaseUrl(), nil)
+func filterByClassifier(fileMap map[string]crypto.Hash, classifier string) map[string]crypto.Hash {
+	var filtered = make(map[string]crypto.Hash)
+	for file, hash := range fileMap {
+		if strings.Contains(file, "-"+classifier+".") {
+			filtered[file] = hash
+		}
+	}
+	return filtered
+}
+
+/*
+func (a *AccessSpec) fileListFactory(fs vfs.FileSystem) func() (map[string]crypto.Hash, error) {
+	return func() (map[string]crypto.Hash, error) {
+		if strings.HasPrefix(a.BaseUrl(), "file://") {
+			dir := a.BaseUrl()[7:]
+			return gavFilesFromDisk(fs, dir)
+		}
+		return a.gavOnlineFiles()
+	}
+}
+*/
+
+func (a *AccessSpec) GavFiles(fs ...vfs.FileSystem) (map[string]crypto.Hash, error) {
+	if strings.HasPrefix(a.Repository, "file://") && len(fs) > 0 {
+		dir := a.Repository[7:]
+		return gavFilesFromDisk(fs[0], dir)
+	}
+	return a.gavOnlineFiles()
+}
+
+func gavFilesFromDisk(fs vfs.FileSystem, dir string) (map[string]crypto.Hash, error) {
+	files, err := tarutils.FlatListSortedFilesInDir(fs, dir)
 	if err != nil {
 		return nil, err
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	return filesAndHashes(files), nil
+}
+
+// gavOnlineFiles returns the files of the Maven (mvn) artifact in the repository and their available digests.
+func (a *AccessSpec) gavOnlineFiles() (map[string]crypto.Hash, error) {
+	log := logger.WithValues("BaseUrl", a.BaseUrl())
+	log.Debug("gavOnlineFiles")
+
+	reader, err := getReader(a.BaseUrl(), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%s - %s", a.BaseUrl(), resp.Status)
-	}
+	defer reader.Close()
 
 	// Which files are listed in the repository?
-	log.Debug("parsing html")
-	htmlDoc, err := html.Parse(resp.Body)
+	log.Debug("parse-html")
+	htmlDoc, err := html.Parse(reader)
 	if err != nil {
 		return nil, err
 	}
@@ -292,18 +342,22 @@ func (a *AccessSpec) GetGAVFiles() (map[string]crypto.Hash, error) {
 	}
 	process(htmlDoc)
 
-	// Which hash files are available?
-	var filesAndHashes = make(map[string]crypto.Hash)
-	for _, file := range fileList {
-		if IsArtifact(file) {
-			filesAndHashes[file] = bestAvailableHash(fileList, file)
-			log.Debug("found", "file", file)
-		}
-	}
+	return filesAndHashes(fileList), nil
+}
 
+func filesAndHashes(fileList []string) map[string]crypto.Hash {
 	// Sort the list of files, to ensure always the same results for e.g. identical tar.gz files.
 	sort.Strings(fileList)
-	return filesAndHashes, nil
+
+	// Which hash files are available?
+	var result = make(map[string]crypto.Hash)
+	for _, file := range fileList {
+		if IsArtifact(file) {
+			result[file] = bestAvailableHash(fileList, file)
+			logger.Debug("found", "file", file)
+		}
+	}
+	return result
 }
 
 // bestAvailableHash returns the best available hash for the given file.
@@ -363,7 +417,7 @@ func getStringData(url string, fs vfs.FileSystem) (string, error) {
 	return string(b), nil
 }
 
-// getBestHashValue returns the best hash value (SHA-512, SHA-256, SHA-1, MD5) for the given artifact (POM, JAR, ...).
+/*/ getBestHashValue returns the best hash value (SHA-512, SHA-256, SHA-1, MD5) for the given artifact (POM, JAR, ...).
 func getBestHashValue(url string, fs vfs.FileSystem) (crypto.Hash, string, error) {
 	arr := [5]crypto.Hash{crypto.SHA512, crypto.SHA256, crypto.SHA1, crypto.MD5}
 	log := logging.Context().Logger(identity.REALM)
@@ -379,6 +433,7 @@ func getBestHashValue(url string, fs vfs.FileSystem) (crypto.Hash, string, error
 	}
 	return 0, "", errors.New("no hash value found")
 }
+*/
 
 // hashUrlExt returns the 'maven' hash extension for the given hash.
 // Maven usually uses sha1, sha256, sha512, md5 instead of SHA-1, SHA-256, SHA-512, MD5.
@@ -414,8 +469,6 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 }
 
 func getReader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
-	c := &http.Client{}
-
 	if strings.HasPrefix(url, "file://") {
 		path := url[7:]
 		return fs.OpenFile(path, vfs.O_RDONLY, 0o600)
@@ -425,7 +478,8 @@ func getReader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.Do(req)
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -434,9 +488,9 @@ func getReader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
 		buf := &bytes.Buffer{}
 		_, err = io.Copy(buf, io.LimitReader(resp.Body, 2000))
 		if err != nil {
-			return nil, errors.Newf("version meta data request %s provides %s", url, resp.Status)
+			return nil, errors.Newf("http %s error - %s", resp.Status, url)
 		}
-		return nil, errors.Newf("version meta data request %s provides %s: %s", url, resp.Status, buf.String())
+		return nil, errors.Newf("http %s error - %s returned: %s", resp.Status, url, buf.String())
 	}
 	return resp.Body, nil
 }
