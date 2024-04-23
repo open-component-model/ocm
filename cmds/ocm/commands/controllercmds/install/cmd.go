@@ -50,6 +50,7 @@ type Command struct {
 	DryRun                   bool
 	SkipPreFlightCheck       bool
 	InstallPrerequisites     bool
+	SM                       *ssa.ResourceManager
 }
 
 var _ utils.OCMCommand = (*Command)(nil)
@@ -86,6 +87,14 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
+	kubeconfigArgs := genericclioptions.NewConfigFlags(false)
+	sm, err := NewResourceManager(kubeconfigArgs)
+	if err != nil {
+		return fmt.Errorf("✗ failed to create resource manager: %w", err)
+	}
+
+	o.SM = sm
+
 	ctx := context.Background()
 	if !o.SkipPreFlightCheck {
 		out.Outf(o.Context, "► running pre-install check\n")
@@ -163,23 +172,17 @@ func (o *Command) installManifest(ctx context.Context, releaseURL, baseURL, mani
 	}
 	out.Outf(o.Context, "► applying to cluster...\n")
 
-	kubeconfigArgs := genericclioptions.NewConfigFlags(false)
-	sm, err := NewResourceManager(kubeconfigArgs)
-	if err != nil {
-		return fmt.Errorf("✗ failed to create resource manager: %w", err)
-	}
-
 	objects, err := readObjects(path)
 	if err != nil {
 		return fmt.Errorf("✗ failed to construct objects to apply: %w", err)
 	}
 
-	if _, err := sm.ApplyAllStaged(context.Background(), objects, ssa.DefaultApplyOptions()); err != nil {
+	if _, err := o.SM.ApplyAllStaged(context.Background(), objects, ssa.DefaultApplyOptions()); err != nil {
 		return fmt.Errorf("✗ failed to apply manifests: %w", err)
 	}
 
 	out.Outf(o.Context, "► waiting for ocm deployment to be ready\n")
-	if err = sm.Wait(objects, ssa.DefaultWaitOptions()); err != nil {
+	if err = o.SM.Wait(objects, ssa.DefaultWaitOptions()); err != nil {
 		return fmt.Errorf("✗ failed to wait for objects to be ready: %w", err)
 	}
 

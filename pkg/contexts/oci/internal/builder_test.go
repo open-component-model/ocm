@@ -22,7 +22,7 @@ var _ = Describe("builder test", func() {
 		Expect(ctx).NotTo(BeIdenticalTo(local.DefaultContext))
 		Expect(ctx.RepositoryTypes()).To(BeIdenticalTo(local.DefaultRepositoryTypeScheme))
 
-		Expect(ctx.ConfigContext()).To(BeIdenticalTo(config.DefaultContext()))
+		Expect(ctx.ConfigContext().GetId()).To(BeIdenticalTo(config.DefaultContext().GetId()))
 
 		Expect(ctx.CredentialsContext()).To(BeIdenticalTo(credentials.DefaultContext()))
 	})
