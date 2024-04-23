@@ -2,7 +2,7 @@ package mvn
 
 import (
 	"context"
-	"crypto/sha256"
+	"crypto"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/mvn/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/mvn"
@@ -96,11 +95,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 			return nil, err
 		}
 		defer reader.Close()
-		hash := sha256.New()
-		if _, err := io.Copy(hash, reader); err != nil {
+		hash, err := GetHash(crypto.SHA256, tempFs, file)
+		if err != nil {
 			return nil, err
 		}
-		err = deploy(artifact, b.spec.Url, reader, username, password, digest.NewDigest(digest.SHA256, hash))
+		err = deploy(artifact, b.spec.Url, reader, username, password, crypto.SHA256, hash)
 		if err != nil {
 			return nil, err
 		}
@@ -110,12 +109,25 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	return mvn.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, mvn.WithClassifier(artifact.Classifier), mvn.WithExtension(artifact.Extension)), nil
 }
 
-func ChecksumHeader(digest digest.Digest) string {
-	a := digest.Algorithm().String()
-	return "X-Checksum-" + strings.ToUpper(a[:1]) + a[1:]
+func GetHash(hash crypto.Hash, fs vfs.FileSystem, path string) (string, error) {
+	reader, err := fs.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer reader.Close()
+	digest := hash.New()
+	if _, err := io.Copy(digest, reader); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", digest.Sum(nil)), nil
 }
 
-func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, username string, password string, digest digest.Digest) error {
+func ChecksumHeader(hash crypto.Hash) string {
+	a := strings.ReplaceAll(hash.String(), "-", "")
+	return "X-Checksum-" + a[:1] + strings.ToLower(a[1:])
+}
+
+func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, username string, password string, hash crypto.Hash, digest string) error {
 	// https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact-apis
 	// vs. https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifacts-from-archive
 	// Headers: X-Checksum-Deploy: true, X-Checksum-Sha1: sha1Value, X-Checksum-Sha256: sha256Value, X-Checksum: checksum value (type is resolved by length)
@@ -124,8 +136,8 @@ func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, username s
 		return err
 	}
 	req.SetBasicAuth(username, password)
-	req.Header.Set("X-Checksum", digest.Encoded())
-	req.Header.Set(ChecksumHeader(digest), digest.Encoded())
+	req.Header.Set("X-Checksum", digest)
+	req.Header.Set(ChecksumHeader(hash), digest)
 
 	// Execute the request
 	client := &http.Client{}
@@ -156,13 +168,13 @@ func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, username s
 		return err
 	}
 
-	remoteDigest := artifactBody.Checksums[string(digest.Algorithm())]
+	remoteDigest := artifactBody.Checksums[strings.ReplaceAll(strings.ToLower(hash.String()), "-", "")]
 	if remoteDigest == "" {
-		log.Warn("no checksum found for algorithm, we can't guarantee that the artifact has been uploaded correctly", "algorithm", digest.Algorithm())
-	} else if remoteDigest != digest.Encoded() {
+		log.Warn("no checksum found for algorithm, we can't guarantee that the artifact has been uploaded correctly", "algorithm", hash)
+	} else if remoteDigest != digest {
 		return fmt.Errorf("failed to upload artifact: checksums do not match")
 	}
-	log.Debug("digests are ok", "remoteDigest", remoteDigest, "digest", digest.Encoded())
+	log.Debug("digests are ok", "remoteDigest", remoteDigest, "digest", digest)
 	return nil
 }
 
