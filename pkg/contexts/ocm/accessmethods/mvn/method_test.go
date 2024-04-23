@@ -57,16 +57,6 @@ var _ = Describe("Method", func() {
 
 	It("GetPackageMeta - com.sap.cloud.sdk", func() {
 		acc := mvn.New("https://repo1.maven.org/maven2", "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
-
-		/*
-			repos to test with:
-				- https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.9.6/  // bin + tar.gz etc.
-			    - https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.26.1/  // cyclonedx
-				- https://repo1.maven.org/maven2/cn/afternode/commons/commons/1.6/ // gradle module!
-			    - https://repo1.maven.org/maven2/com/sap/cloud/sdk/sdk-modules-bom/5.7.0/ // one single pom only!
-			    - https://int.repositories.cloud.sap/artifactory/ocm-mvn-test/open-component-model/hello-ocm/0.0.1/ // jar only!
-		*/
-
 		meta, err := acc.GetPackageMeta(ocm.DefaultContext())
 		Expect(err).ToNot(HaveOccurred())
 		Expect(meta.Bin).To(HavePrefix("file://"))
@@ -75,18 +65,6 @@ var _ = Describe("Method", func() {
 		Expect(meta.Hash).To(Equal("217feb1e7490015dd0a2b231b9cea45804df3d2a9b37287ac861bb45b8c0de55"))
 		Expect(meta.HashType).To(Equal(crypto.SHA256))
 	})
-
-	/*/ works only internal
-	It("GetPackageMeta - int.repositories.cloud.sap: hello-ocm", func() {
-		acc := mvn.New("https://int.repositories.cloud.sap/artifactory/ocm-mvn-test", "open-component-model", "hello-ocm", "0.0.1")
-		meta, err := acc.GetPackageMeta(ocm.DefaultContext())
-		Expect(err).ToNot(HaveOccurred())
-		Expect(meta.Bin).To(Equal("https://int.repositories.cloud.sap/artifactory/ocm-mvn-test/open-component-model/hello-ocm/0.0.1/hello-ocm-0.0.1.jar"))
-		Expect(meta.Hash).To(Equal(""))
-		Expect(meta.HashType).To(Equal(crypto.Hash(0)))
-	})
-
-	*/
 
 	It("accesses local artifact", func() {
 		acc := mvn.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")

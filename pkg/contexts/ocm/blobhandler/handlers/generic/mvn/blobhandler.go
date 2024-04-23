@@ -80,8 +80,6 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	}
 	defer blobReader.Close()
 
-	//switch mimeType {
-	//case mime.MIME_TGZ:
 	tempFs, err := osfs.NewTempFileSystem()
 	if err != nil {
 		return nil, err

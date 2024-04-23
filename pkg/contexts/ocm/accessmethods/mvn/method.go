@@ -174,7 +174,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	defer vfs.Cleanup(tempFs)
 
 	artifact := a.AsArtifact()
-	var metadata = meta{}
+	metadata := meta{}
 	for file, hash := range fileMap {
 		artifact.ClassifierExtensionFrom(file)
 		metadata.Bin = artifact.Url(a.Repository)
@@ -228,7 +228,6 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	}
 
 	// pack all downloaded files into a tar.gz file
-	// tgz, err := blobaccess.NewTempFile("", Type+"-"+artifact.FilePrefix()+"-*.tar.gz", fs)
 	tgz, err := vfs.TempFile(fs, "", Type+"-"+artifact.FilePrefix()+"-*.tar.gz")
 	if err != nil {
 		return nil, err
@@ -243,31 +242,16 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	}
 
 	metadata.Bin = "file://" + tgz.Name()
+	metadata.MimeType = mime.MIME_TGZ
 	metadata.Hash = dw.Digest().Encoded()
 	metadata.HashType = crypto.SHA256
 	log.Debug("created", "file", metadata.Bin)
-
-	/*/ calculate digest for the tar.gz file
-	file, err := fs.OpenFile(tgz.Name(), vfs.O_RDONLY, vfs.ModePerm)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	hash := sha256.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return nil, err
-	}
-	metadata.Hash = fmt.Sprintf("%x", hash.Sum(nil))
-	log.Debug("hash", "sum", metadata.Hash)
-	metadata.HashType = crypto.SHA256
-	*/
-	metadata.MimeType = mime.MIME_TGZ
 
 	return &metadata, nil
 }
 
 func filterByClassifier(fileMap map[string]crypto.Hash, classifier string) map[string]crypto.Hash {
-	var filtered = make(map[string]crypto.Hash)
+	filtered := make(map[string]crypto.Hash)
 	for file, hash := range fileMap {
 		if strings.Contains(file, "-"+classifier+".") {
 			filtered[file] = hash
@@ -275,18 +259,6 @@ func filterByClassifier(fileMap map[string]crypto.Hash, classifier string) map[s
 	}
 	return filtered
 }
-
-/*
-func (a *AccessSpec) fileListFactory(fs vfs.FileSystem) func() (map[string]crypto.Hash, error) {
-	return func() (map[string]crypto.Hash, error) {
-		if strings.HasPrefix(a.BaseUrl(), "file://") {
-			dir := a.BaseUrl()[7:]
-			return gavFilesFromDisk(fs, dir)
-		}
-		return a.gavOnlineFiles()
-	}
-}
-*/
 
 func (a *AccessSpec) GavFiles(fs ...vfs.FileSystem) (map[string]crypto.Hash, error) {
 	if strings.HasPrefix(a.Repository, "file://") && len(fs) > 0 {
@@ -350,7 +322,7 @@ func filesAndHashes(fileList []string) map[string]crypto.Hash {
 	sort.Strings(fileList)
 
 	// Which hash files are available?
-	var result = make(map[string]crypto.Hash)
+	result := make(map[string]crypto.Hash)
 	for _, file := range fileList {
 		if IsArtifact(file) {
 			result[file] = bestAvailableHash(fileList, file)
@@ -374,36 +346,6 @@ func bestAvailableHash(list []string, filename string) crypto.Hash {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-/*
-type project struct {
-	GroupId    string `xml:"groupId"`
-	ArtifactId string `xml:"artifactId"`
-	Version    string `xml:"version"`
-	Classifier  string `xml:"packaging"`
-}
-
-func readPom(url string, fs vfs.FileSystem) (*project, error) {
-	reader, err := getReader(url, fs)
-	if err != nil {
-		return nil, err
-	}
-	buf := &bytes.Buffer{}
-	_, err = io.Copy(buf, io.LimitReader(reader, 200000))
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot get version metadata for %s", url)
-	}
-	var pom project
-	err = xml.Unmarshal(buf.Bytes(), &pom)
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", url)
-	}
-	if pom.Classifier == "" {
-		pom.Classifier = "jar"
-	}
-	return &pom, nil
-}
-*/
-
 // getStringData reads all data from the given URL and returns it as a string.
 func getStringData(url string, fs vfs.FileSystem) (string, error) {
 	r, err := getReader(url, fs)
@@ -416,24 +358,6 @@ func getStringData(url string, fs vfs.FileSystem) (string, error) {
 	}
 	return string(b), nil
 }
-
-/*/ getBestHashValue returns the best hash value (SHA-512, SHA-256, SHA-1, MD5) for the given artifact (POM, JAR, ...).
-func getBestHashValue(url string, fs vfs.FileSystem) (crypto.Hash, string, error) {
-	arr := [5]crypto.Hash{crypto.SHA512, crypto.SHA256, crypto.SHA1, crypto.MD5}
-	log := logging.Context().Logger(identity.REALM)
-	for i := 0; i < len(arr); i++ {
-		v, err := getStringData(url+hashUrlExt(arr[i]), fs)
-		if v != "" {
-			log.Debug("found hash ", "url", url+hashUrlExt(arr[i]))
-			return arr[i], v, err
-		}
-		if err != nil {
-			log.Debug("hash file not found", "url", url+hashUrlExt(arr[i]))
-		}
-	}
-	return 0, "", errors.New("no hash value found")
-}
-*/
 
 // hashUrlExt returns the 'maven' hash extension for the given hash.
 // Maven usually uses sha1, sha256, sha512, md5 instead of SHA-1, SHA-256, SHA-512, MD5.

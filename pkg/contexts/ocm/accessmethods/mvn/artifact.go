@@ -70,7 +70,11 @@ func (a *Artifact) ClassifierExtensionFrom(filename string) *Artifact {
 	s := strings.TrimPrefix(filename, a.FilePrefix())
 	if strings.HasPrefix(s, "-") {
 		s = strings.TrimPrefix(s, "-")
-		a.Classifier = s[:strings.Index(s, ".")]
+		i := strings.Index(s, ".")
+		if i < 0 {
+			panic("no extension after classifier found in filename: " + filename)
+		}
+		a.Classifier = s[:i]
 		s = strings.TrimPrefix(s, a.Classifier)
 	}
 	a.Extension = strings.TrimPrefix(s, ".")
@@ -94,16 +98,6 @@ func (a *Artifact) MimeType() string {
 	}
 	return mime.MIME_TGZ
 }
-
-/*
-func IsMimeTypeSupported(mimeType string) bool {
-	switch mimeType {
-	case mime.MIME_JAR, mime.MIME_JSON, mime.MIME_XML, mime.MIME_TGZ, mime.MIME_GZIP:
-		return true
-	}
-	return false
-}
-*/
 
 // ArtifactFromHint creates new Artifact from accessspec-hint. See 'GetReferenceHint'.
 func ArtifactFromHint(gav string) *Artifact {
