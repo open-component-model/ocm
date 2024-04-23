@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
@@ -33,7 +34,8 @@ type RepositoryImpl struct {
 
 var _ repocpi.RepositoryImpl = (*RepositoryImpl)(nil)
 
-func NewRepository(ctx cpi.Context, s *RepositorySpec) (cpi.Repository, error) {
+func NewRepository(ctxp cpi.ContextProvider, s *RepositorySpec) (cpi.Repository, error) {
+	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
 	if s.GetPathFileSystem() == nil {
 		s.SetPathFileSystem(vfsattr.Get(ctx))
 	}

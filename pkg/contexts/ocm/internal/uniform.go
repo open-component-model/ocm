@@ -27,6 +27,8 @@ const (
 type UniformRepositorySpec struct {
 	// Type
 	Type string `json:"type,omitempty"`
+	// Scheme
+	Scheme string `json:"scheme,omitempty"`
 	// Host is the hostname of an ocm ref.
 	Host string `json:"host,omitempty"`
 	// SubPath is the sub path spec used to host component versions
@@ -36,7 +38,7 @@ type UniformRepositorySpec struct {
 
 	// CreateIfMissing indicates whether a file based or dynamic repo should be created if it does not exist
 	CreateIfMissing bool `json:"createIfMissing,omitempty"`
-	// TypeHintshould be set if CreateIfMissing is true to help to decide what kind of repo to create
+	// TypeHint should be set if CreateIfMissing is true to help to decide what kind of repo to create
 	TypeHint string `json:"typeHint,omitempty"`
 }
 
@@ -150,6 +152,14 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 	var err error
 	s.lock.RLock()
 	defer s.lock.RUnlock()
+
+	if u.Info != "" && string(u.Info[0]) == "{" && u.Host == "" && u.Scheme == "" && u.SubPath == "" {
+		data, err := runtime.CompleteSpecWithType(u.Type, []byte(u.Info))
+		if err != nil {
+			return nil, err
+		}
+		return ctx.RepositorySpecForConfig(data, runtime.DefaultJSONEncoding)
+	}
 
 	deferr := errors.ErrNotSupported("uniform repository ref", u.String())
 	if u.Type == "" {

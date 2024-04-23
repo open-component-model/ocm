@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -53,7 +54,8 @@ var (
 	_ credentials.ConsumerIdentityProvider = (*RepositoryImpl)(nil)
 )
 
-func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) cpi.Repository {
+func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository) cpi.Repository {
+	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
 	impl := &RepositoryImpl{
 		ctx:     ctx,
 		meta:    *DefaultComponentRepositoryMeta(meta),

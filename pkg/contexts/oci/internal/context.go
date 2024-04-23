@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const CONTEXT_TYPE = "oci" + datacontext.OCM_CONTEXT_SUFFIX
@@ -37,6 +38,7 @@ type Context interface {
 
 	RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error)
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
+	RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error)
 
 	GetAlias(name string) RepositorySpec
 	SetAlias(name string, spec RepositorySpec)
@@ -77,15 +79,17 @@ type _context struct {
 	_InternalContext
 	updater cfgcpi.Updater
 
-	sharedattributes datacontext.AttributesContext
-	credentials      credentials.Context
+	credentials credentials.Context
 
 	knownRepositoryTypes RepositoryTypeScheme
 	specHandlers         RepositorySpecHandlers
 	aliases              map[string]RepositorySpec
 }
 
-var _ Context = &_context{}
+var (
+	_ Context                          = (*_context)(nil)
+	_ datacontext.ViewCreator[Context] = (*_context)(nil)
+)
 
 // gcWrapper is used as garbage collectable
 // wrapper for a context implementation
@@ -95,25 +99,35 @@ type gcWrapper struct {
 	*_context
 }
 
+func newView(c *_context, ref ...bool) Context {
+	if utils.Optional(ref...) {
+		return datacontext.FinalizedContext[gcWrapper](c)
+	}
+	return c
+}
+
 func (w *gcWrapper) SetContext(c *_context) {
 	w._context = c
 }
 
 func newContext(credctx credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers, delegates datacontext.Delegates) Context {
 	c := &_context{
-		sharedattributes:     credctx.AttributesContext(),
-		credentials:          credctx,
+		credentials:          datacontext.PersistentContextRef(credctx),
 		knownRepositoryTypes: reposcheme,
 		specHandlers:         specHandlers,
 		aliases:              map[string]RepositorySpec{},
 	}
 	c._InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.ConfigContext().GetAttributes(), delegates)
-	c.updater = cfgcpi.NewUpdater(credctx.ConfigContext(), c)
-	return datacontext.FinalizedContext[gcWrapper](c)
+	c.updater = cfgcpi.NewUpdaterForFactory(credctx.ConfigContext(), c.OCIContext)
+	return newView(c, true)
+}
+
+func (c *_context) CreateView() Context {
+	return newView(c, true)
 }
 
 func (c *_context) OCIContext() Context {
-	return c
+	return newView(c)
 }
 
 func (c *_context) Update() error {
@@ -121,7 +135,7 @@ func (c *_context) Update() error {
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
-	return c.sharedattributes
+	return c.credentials.AttributesContext()
 }
 
 func (c *_context) ConfigContext() config.Context {
@@ -141,7 +155,7 @@ func (c *_context) RepositorySpecHandlers() RepositorySpecHandlers {
 }
 
 func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error) {
-	return c.specHandlers.MapUniformRepositorySpec(c, u)
+	return c.specHandlers.MapUniformRepositorySpec(c.OCIContext(), u)
 }
 
 func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
@@ -153,7 +167,7 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.C
 	if err != nil {
 		return nil, err
 	}
-	return spec.Repository(c, cred)
+	return spec.Repository(c.OCIContext(), cred)
 }
 
 func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error) {

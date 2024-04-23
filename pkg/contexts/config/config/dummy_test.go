@@ -50,7 +50,18 @@ func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 		d.applied = append(d.applied, a)
 		return nil
 	}
+	c, ok := target.(*dummyTarget)
+	if ok {
+		c.used = ctx
+		return nil
+	}
 	return cpi.ErrNoContext(DummyType)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type dummyTarget struct {
+	used config.Context
 }
 
 ////////////////////////////////////////////////////////////////////////////////
