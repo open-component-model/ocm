@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // CONTEXT_TYPE is the global type for a credential context.
@@ -102,7 +103,10 @@ type _context struct {
 	consumerProviders        *consumerProviderRegistry
 }
 
-var _ Context = &_context{}
+var (
+	_ Context                          = (*_context)(nil)
+	_ datacontext.ViewCreator[Context] = (*_context)(nil)
+)
 
 // gcWrapper is used as garbage collectable
 // wrapper for a context implementation
@@ -112,24 +116,35 @@ type gcWrapper struct {
 	*_context
 }
 
+func newView(c *_context, ref ...bool) Context {
+	if utils.Optional(ref...) {
+		return datacontext.FinalizedContext[gcWrapper](c)
+	}
+	return c
+}
+
 func (w *gcWrapper) SetContext(c *_context) {
 	w._context = c
 }
 
 func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consumerMatchers IdentityMatcherRegistry, delegates datacontext.Delegates) Context {
 	c := &_context{
-		sharedattributes:         configctx.AttributesContext(),
+		sharedattributes:         datacontext.PersistentContextRef(configctx.AttributesContext()),
 		knownRepositoryTypes:     reposcheme,
 		consumerIdentityMatchers: consumerMatchers,
 		consumerProviders:        newConsumerProviderRegistry(),
 	}
 	c._InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes(), delegates)
-	c.updater = cfgcpi.NewUpdater(configctx, c)
-	return datacontext.FinalizedContext[gcWrapper](c)
+	c.updater = cfgcpi.NewUpdaterForFactory(datacontext.PersistentContextRef(configctx), c.CredentialsContext)
+	return newView(c, true)
+}
+
+func (c *_context) CreateView() Context {
+	return newView(c, true)
 }
 
 func (c *_context) CredentialsContext() Context {
-	return c
+	return newView(c)
 }
 
 func (c *_context) Update() error {
@@ -157,12 +172,13 @@ func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unma
 }
 
 func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...CredentialsSource) (Repository, error) {
-	cred, err := CredentialsChain(creds).Credentials(c)
+	out := newView(c)
+	cred, err := CredentialsChain(creds).Credentials(out)
 	if err != nil {
 		return nil, err
 	}
 	c.Update()
-	return spec.Repository(c, cred)
+	return spec.Repository(out, cred)
 }
 
 func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...CredentialsSource) (Repository, error) {
@@ -174,7 +190,8 @@ func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarsha
 }
 
 func (c *_context) CredentialsForSpec(spec CredentialsSpec, creds ...CredentialsSource) (Credentials, error) {
-	repospec := spec.GetRepositorySpec(c)
+	out := newView(c)
+	repospec := spec.GetRepositorySpec(out)
 	repo, err := c.RepositoryForSpec(repospec, creds...)
 	if err != nil {
 		return nil, err
