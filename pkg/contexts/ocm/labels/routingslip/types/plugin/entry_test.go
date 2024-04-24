@@ -20,16 +20,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/spi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
-	env2 "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env"
 )
 
 var _ = Describe("setup plugin cache", func() {
 	var ctx ocm.Context
 	var registry plugins.Set
-	var env *env2.Environment
+	var env *Environment
 
 	BeforeEach(func() {
-		env = env2.NewEnvironment()
+		env = NewEnvironment()
 		ctx = env.OCMContext()
 		plugindirattr.Set(ctx, "testdata")
 		registry = plugincacheattr.Get(ctx)

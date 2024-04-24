@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode"
 
+	common2 "github.com/open-component-model/ocm/pkg/clisupport"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
@@ -24,7 +25,6 @@ import (
 	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
-	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins"
