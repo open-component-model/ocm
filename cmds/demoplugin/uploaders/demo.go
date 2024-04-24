@@ -80,7 +80,11 @@ func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype, hint string, repo pp
 	var file *os.File
 	var err error
 
-	cfg, _ := p.GetConfig()
+	cfg, err := p.GetConfig()
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "can't get config for access method %s", mediatype)
+	}
+
 	root := os.TempDir()
 	if cfg != nil && cfg.(*config.Config).Uploaders.Path != "" {
 		root = cfg.(*config.Config).Uploaders.Path

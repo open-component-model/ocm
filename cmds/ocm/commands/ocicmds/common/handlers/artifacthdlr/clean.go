@@ -31,7 +31,10 @@ func clean(iterable data.Iterable) data.Iterable {
 		e := it.Next().(*Object)
 		data.Add(e)
 		l := len(e.History)
-		blob, _ := e.Artifact.Blob()
+		blob, err := e.Artifact.Blob()
+		if err != nil {
+			return nil
+		}
 
 		if l > depth[blob.Digest()] {
 			depth[blob.Digest()] = l
@@ -43,7 +46,10 @@ func clean(iterable data.Iterable) data.Iterable {
 
 	output.Print(data, "clean in")
 	for i := 0; i < len(data); i++ {
-		e := data[i].(*Object)
+		e, ok := data[i].(*Object)
+		if !ok {
+			return nil
+		}
 		l := len(e.History)
 		blob, _ := e.Artifact.Blob()
 		dig := blob.Digest()

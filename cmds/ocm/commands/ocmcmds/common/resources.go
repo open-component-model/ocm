@@ -358,7 +358,7 @@ func (a *ContentResourceSpecificationsProvider) Get() (string, error) {
 	}
 
 	//nolint:errchkjson // We don't care about this error.
-	r, _ := json.Marshal(data)
+	r, err := json.Marshal(data)
 	return string(r), nil
 }
 

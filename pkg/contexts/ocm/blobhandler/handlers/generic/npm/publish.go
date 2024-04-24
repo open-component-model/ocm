@@ -89,8 +89,7 @@ func login(registry string, username string, password string, email string) (str
 	var token struct {
 		Token string `json:"token"`
 	}
-	err = json.NewDecoder(resp.Body).Decode(&token)
-	if err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&token); err != nil {
 		return "", err
 	}
 	return token.Token, nil

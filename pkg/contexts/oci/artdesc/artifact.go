@@ -235,7 +235,10 @@ func (d *Artifact) ToBlobAccess() (blobaccess.BlobAccess, error) {
 
 func (d *Artifact) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	if d.IsManifest() {
-		m, _ := d.Manifest()
+		m, err := d.Manifest()
+		if err != nil {
+			return nil
+		}
 		return m.GetBlobDescriptor(digest)
 	}
 	if d.IsIndex() {

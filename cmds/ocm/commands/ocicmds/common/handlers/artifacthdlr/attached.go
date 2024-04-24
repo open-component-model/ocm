@@ -22,9 +22,15 @@ func Attachment(d digest.Digest, suffix string) string {
 var ExplodeAttached = processing.Explode(explodeAttached)
 
 func explodeAttached(o interface{}) []interface{} {
-	obj := o.(*Object)
+	obj, ok := o.(*Object)
+	if !ok {
+		return nil
+	}
 	result := []interface{}{o}
-	blob, _ := obj.Artifact.Blob()
+	blob, err := obj.Artifact.Blob()
+	if err != nil {
+		return result
+	}
 	dig := blob.Digest()
 	prefix := Attachment(dig, "")
 	list, err := obj.Namespace.ListTags()
@@ -38,9 +44,14 @@ func explodeAttached(o interface{}) []interface{} {
 					s := obj.Spec
 					s.Tag = &t
 					s.Digest = nil
+					key, err := Key(a)
+					if err != nil {
+						// this is questionable behaviour. :think:
+						return nil
+					}
 					att := &Object{
 						History:    hist,
-						Key:        Key(a),
+						Key:        key,
 						Spec:       s,
 						AttachKind: l[len(prefix):],
 						Namespace:  obj.Namespace,
