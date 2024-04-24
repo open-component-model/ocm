@@ -62,6 +62,10 @@ func NewUpdater(ctx Context, target interface{}) Updater {
 	return internal.NewUpdater(ctx, target)
 }
 
+func NewUpdaterForFactory[T any](ctx Context, f func() T) Updater {
+	return internal.NewUpdaterForFactory(ctx, f)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func ErrNoContext(name string) error {

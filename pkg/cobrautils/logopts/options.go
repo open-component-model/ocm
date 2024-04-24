@@ -87,7 +87,7 @@ func (o *Options) Configure(ctx ocm.Context, logctx logging.Context) error {
 		}
 		logctx.SetDefaultLevel(l)
 	} else {
-		logctx.SetDefaultLevel(logging.ErrorLevel)
+		logctx.SetDefaultLevel(logging.WarnLevel)
 	}
 	logcfg := &config.Config{DefaultLevel: logging.LevelName(logctx.GetDefaultLevel())}
 
