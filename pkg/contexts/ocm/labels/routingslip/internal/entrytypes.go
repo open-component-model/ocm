@@ -10,8 +10,10 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/modern-go/reflect2"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets/flagsetscheme"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -42,14 +44,18 @@ type (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type EntryTypeScheme = flagsetscheme.TypeScheme[Entry, EntryType]
+type EntryTypeScheme = flagsetscheme.ExtendedTypeScheme[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider]
+
+func unwrapTypeScheme(s EntryTypeScheme) flagsetscheme.TypeScheme[Entry, EntryType] {
+	return s.Unwrap()
+}
 
 func NewEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
-	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", &UnknownEntry{}, true, base...)
+	return flagsetscheme.NewTypeSchemeWrapper[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider](flagsetscheme.NewTypeScheme[Entry, EntryType, flagsetscheme.TypeScheme[Entry, EntryType]]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", &UnknownEntry{}, true, sliceutils.Transform(base, unwrapTypeScheme)...))
 }
 
 func NewStrictEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
-	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", nil, false, base...)
+	return flagsetscheme.NewTypeSchemeWrapper[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider](flagsetscheme.NewTypeScheme[Entry, EntryType, flagsetscheme.TypeScheme[Entry, EntryType]]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", nil, false, sliceutils.Transform(base, unwrapTypeScheme)...))
 }
 
 func CreateEntry(t runtime.TypedObject) (Entry, error) {

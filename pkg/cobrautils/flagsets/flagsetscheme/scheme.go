@@ -22,12 +22,43 @@ type VersionTypedObjectType[T runtime.VersionedTypedObject] interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// ExtendedTypeScheme is the appropriately extended scheme interface based on
+// runtime.TypeScheme supporting an extended config provider interface.
+type ExtendedTypeScheme[T runtime.VersionedTypedObject, R VersionTypedObjectType[T], P flagsets.ConfigTypeOptionSetConfigProvider] interface {
+	descriptivetype.TypeScheme[T, R]
+
+	CreateConfigTypeSetConfigProvider() P
+
+	Unwrap() TypeScheme[T, R]
+}
+
+type _TypeScheme[T runtime.VersionedTypedObject, R VersionTypedObjectType[T]] interface {
+	TypeScheme[T, R]
+}
+
+type typeSchemeWrapper[T runtime.VersionedTypedObject, R VersionTypedObjectType[T], P flagsets.ConfigTypeOptionSetConfigProvider] struct {
+	_TypeScheme[T, R]
+}
+
+func (s *typeSchemeWrapper[T, R, P]) CreateConfigTypeSetConfigProvider() P {
+	return s._TypeScheme.CreateConfigTypeSetConfigProvider().(P)
+}
+
+func (s *typeSchemeWrapper[T, R, P]) Unwrap() TypeScheme[T, R] {
+	return s._TypeScheme
+}
+
+// NewTypeSchemeWrapper wraps a [TypeScheme] into a scheme returning a specialized config provider
+// by casting the result. The type scheme constructor provides different implementations based on its
+// arguments. This method here can be used to provide a type scheme returning the correct type.
+func NewTypeSchemeWrapper[T runtime.VersionedTypedObject, R VersionTypedObjectType[T], P flagsets.ConfigTypeOptionSetConfigProvider](s TypeScheme[T, R]) ExtendedTypeScheme[T, R, P] {
+	return &typeSchemeWrapper[T, R, P]{s}
+}
+
 // TypeScheme is the appropriately extended scheme interface based on
 // runtime.TypeScheme.
 type TypeScheme[T runtime.VersionedTypedObject, R VersionTypedObjectType[T]] interface {
-	descriptivetype.TypeScheme[T, R]
-
-	CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
+	ExtendedTypeScheme[T, R, flagsets.ConfigTypeOptionSetConfigProvider]
 }
 
 type _typeScheme[T runtime.VersionedTypedObject, R VersionTypedObjectType[T]] interface {
@@ -60,6 +91,10 @@ func NewTypeScheme[T runtime.VersionedTypedObject, R VersionTypedObjectType[T], 
 		typeOption:  typeOption,
 		_typeScheme: scheme,
 	}
+}
+
+func (s *typeScheme[T, R, S]) Unwrap() TypeScheme[T, R] {
+	return s
 }
 
 func (t *typeScheme[T, R, S]) CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
