@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package docker
 
 import (
@@ -11,7 +7,7 @@ import (
 
 	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/types"
-	dockertypes "github.com/docker/docker/api/types"
+	dockertypes "github.com/docker/docker/api/types/image"
 	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 
@@ -131,7 +127,7 @@ func (n *namespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 }
 
 func (n *namespaceHandler) ListTags() ([]string, error) {
-	opts := dockertypes.ImageListOptions{}
+	opts := dockertypes.ListOptions{}
 	list, err := n.repo.client.ImageList(dummyContext, opts)
 	if err != nil {
 		return nil, err
