@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+NAME="$(basename "$0")"
+
+set -e
+
+Error() {
+  echo '{ "error": "'$1'" }' >&2
+  exit 1
+}
+
+extract() {
+   v="$(echo "$2" | sed 's/.*"'"$1"'": *"\([^"]*\)".*/\1/')"
+  if [ "$v" != "$2" ]; then
+     echo "$v"
+  fi
+}
+
+setfield() {
+  local v
+  v="$(echo "$BASE" | sed 's/"'"$1"'": *"[^"]*"/"'""$1""'":"'"${2//\//\\\/}"'"/')"
+  if [ "$v" == "$BASE" ]; then
+    v="$(echo "$BASE" | sed 's/^{"/{"'"$1"'":"'"${2//\//\\\/}"'","/')"
+  fi
+  if [ "$v" == "$BASE" ]; then
+    v="$(echo "$BASE" | sed 's/^{/{"'"$1"'":"'"${2//\//\\\/}"'"/')"
+  fi
+  BASE="$v"
+}
+
+setopt() {
+  local v
+  v="$(extract "$1" "$OPTS")"
+  if [ -n "$v" ]; then
+    setfield "$2" "$v"
+  fi
+}
+
+Info() {
+  PATHOPT='{"name":"accessPath","type":"string","description":"file path"}'
+  MEDIAOPT='{"name":"mediaType"}'
+  OPTS='['$PATHOPT','$MEDIAOPT']'
+  echo '{"version":"v1","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","description":"a test plugin with valueset test","valuesets":[{"name":"test","purposes":["routingslip"],"shortDescription":"test set","description":"","options":'$OPTS'},{"name":"test","purposes":["routingslip"],"version":"v1","shortDescription":"test set","description":""}]}
+'
+}
+
+Compose() {
+  BASE="$4"
+  OPTS="$3"
+
+  setopt accessPath path
+  setopt mediaType mediaType
+  echo "$BASE"
+}
+
+Validate() {
+  echo '{"description":"a test"}'
+}
+
+
+ValueSet() {
+  case "$1" in
+    get) Get "${@:2}";;
+    compose) Compose "${@:2}";;
+    validate) Validate "${@:2}";;
+    *) Error "invalid valueset command $1";;
+  esac
+}
+
+case "$1" in
+  info) Info;;
+  valueset) ValueSet "${@:2}";;
+  *) Error "invalid command $1";;
+esac

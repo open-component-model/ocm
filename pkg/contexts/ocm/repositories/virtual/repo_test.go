@@ -7,7 +7,8 @@ package virtual_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/layerfs"
@@ -30,7 +31,7 @@ import (
 )
 
 var _ = Describe("virtual repo", func() {
-	var env *TestEnv
+	var env *Builder
 	var repo ocm.Repository
 	var access *example.Access
 
@@ -43,7 +44,7 @@ var _ = Describe("virtual repo", func() {
 
 	Context("readonly", func() {
 		BeforeEach(func() {
-			env = NewTestEnv(TestData())
+			env = NewBuilder(TestData())
 			access = Must(example.NewAccess(Must(projectionfs.New(env, "testdata")), true))
 			repo = virtual.NewRepository(env.OCMContext(), access)
 		})
@@ -74,7 +75,7 @@ var _ = Describe("virtual repo", func() {
 
 	Context("modifiable", func() {
 		BeforeEach(func() {
-			env = NewTestEnv(TestData())
+			env = NewBuilder(TestData())
 
 			fs := Must(projectionfs.New(env, "testdata"))
 			fs = layerfs.New(memoryfs.New(), fs)
