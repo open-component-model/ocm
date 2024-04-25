@@ -114,8 +114,8 @@ The resource <code>text</code> is taken from a file <code>testdata</code> locate
 next to the description file.
 `,
 		Long: `
-Add component versions specified by a description file to a Common Transport
-Archive. This might be either a directory prepared to host component version
+Add component versions specified by a constructor file to a Common Transport
+Archive. The archive might be either a directory prepared to host component version
 content or a tar/tgz file (see option --type).
 
 If option <code>--create</code> is given, the archive is created first. An
