@@ -83,11 +83,16 @@ var builtinTypesLower = map[string]string{
 	".webp": "image/webp",
 	".xml":  "text/xml; charset=utf-8",
 	// added entries
-	".txt":  ocmmime.MIME_TEXT,
-	".yaml": ocmmime.MIME_YAML_OFFICIAL,
-	".gzip": ocmmime.MIME_GZIP,
-	".tar":  ocmmime.MIME_TAR,
-	".tgz":  ocmmime.MIME_TGZ,
+	".txt":    ocmmime.MIME_TEXT,
+	".yaml":   ocmmime.MIME_YAML_OFFICIAL,
+	".gzip":   ocmmime.MIME_GZIP,
+	".tar":    ocmmime.MIME_TAR,
+	".tgz":    ocmmime.MIME_TGZ,
+	".tar.gz": ocmmime.MIME_TGZ,
+	".pom":    ocmmime.MIME_XML,
+	".zip":    ocmmime.MIME_GZIP,
+	".jar":    ocmmime.MIME_JAR,
+	".module": ocmmime.MIME_JSON, // gradle module metadata
 }
 
 var once sync.Once // guards initMime

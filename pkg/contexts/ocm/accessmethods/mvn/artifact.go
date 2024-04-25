@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/mimeutils"
 )
 
 // Artifact holds the typical Maven coordinates groupId, artifactId, version and packaging.
@@ -86,17 +87,9 @@ func (a *Artifact) ClassifierExtensionFrom(filename string) *Artifact {
 // MimeType returns the MIME type of the Maven Artifact based on the file extension.
 // Default is application/x-tgz.
 func (a *Artifact) MimeType() string {
-	switch a.Extension {
-	case "jar":
-		return mime.MIME_JAR
-	case "json", "module":
-		return mime.MIME_JSON
-	case "pom", "xml":
-		return mime.MIME_XML
-	case "tar.gz":
-		return mime.MIME_TGZ
-	case "zip":
-		return mime.MIME_GZIP
+	m := mimeutils.TypeByExtension("." + a.Extension)
+	if m != "" {
+		return m
 	}
 	return mime.MIME_TGZ
 }
