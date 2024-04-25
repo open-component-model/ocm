@@ -5,6 +5,8 @@
 package subst
 
 import (
+	"reflect"
+
 	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/parser"
@@ -121,25 +123,23 @@ func (f *fileinfo) SubstituteByValue(path string, value interface{}) error {
 		err  error
 		data []byte
 	)
-	if f.json {
-		data, err = runtime.DefaultJSONEncoding.Marshal(value)
-	} else {
-		data, err = runtime.DefaultYAMLEncoding.Marshal(value)
-	}
-	if err != nil {
-		return err
-	}
-	return f.substituteByData(path, data)
-	/*
-		node, err := yaml.ValueToNode(value)
-		if err != nil {
-			return errors.Wrapf(err, "cannot unmarshal value")
-		}
 
-		p, err := yaml.PathString("$." + path)
-		if err != nil {
-			return errors.Wrapf(err, "invalid substitution path")
+	// Do not marshal the value if it's a primitive type.
+	switch reflect.ValueOf(value).Kind() {
+	case reflect.String:
+		data = []byte(value.(string))
+	case reflect.Slice:
+		data = value.([]byte)
+	default:
+		if f.json {
+			data, err = runtime.DefaultJSONEncoding.Marshal(value)
+		} else {
+			data, err = runtime.DefaultYAMLEncoding.Marshal(value)
 		}
-		return p.ReplaceWithNode(f.content, node)
-	*/
+		if err != nil {
+			return err
+		}
+	}
+
+	return f.substituteByData(path, data)
 }
