@@ -15,6 +15,7 @@ import (
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	registrytypes "github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
@@ -152,8 +153,8 @@ func (d *Driver) SetContainerErr(w io.Writer) {
 	d.containerErr = w
 }
 
-func pullImage(ctx context.Context, cli command.Cli, image string) error {
-	ref, err := reference.ParseNormalizedNamed(image)
+func pullImage(ctx context.Context, cli command.Cli, imageName string) error {
+	ref, err := reference.ParseNormalizedNamed(imageName)
 	if err != nil {
 		return fmt.Errorf("unable to parse normalized name: %w", err)
 	}
@@ -171,11 +172,11 @@ func pullImage(ctx context.Context, cli command.Cli, image string) error {
 		return fmt.Errorf("unable encode auth: %w", err)
 	}
 
-	options := types.ImagePullOptions{
+	options := image.PullOptions{
 		RegistryAuth: encodedAuth,
 	}
 
-	responseBody, err := cli.Client().ImagePull(ctx, image, options)
+	responseBody, err := cli.Client().ImagePull(ctx, imageName, options)
 	if err != nil {
 		return fmt.Errorf("unable to pull image: %w", err)
 	}
