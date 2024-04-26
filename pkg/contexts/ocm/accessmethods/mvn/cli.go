@@ -12,6 +12,9 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 		options.GroupOption,
 		options.PackageOption,
 		options.VersionOption,
+		// optional
+		options.ClassifierOption,
+		options.ExtensionOption,
 	)
 }
 
@@ -20,6 +23,9 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.GroupOption, config, "groupId")
 	flagsets.AddFieldByOptionP(opts, options.PackageOption, config, "artifactId")
 	flagsets.AddFieldByOptionP(opts, options.VersionOption, config, "version")
+	// optional
+	flagsets.AddFieldByOptionP(opts, options.ClassifierOption, config, "classifier")
+	flagsets.AddFieldByOptionP(opts, options.ExtensionOption, config, "extension")
 	return nil
 }
 
@@ -45,4 +51,12 @@ The type specific specification fields are:
 - **<code>version</code>** *string*
 
   The version name of the Maven (mvn) artifact
+
+- **<code>classifier</code>** *string*
+
+  The optional classifier of the Maven (mvn) artifact
+
+- **<code>extension</code>** *string*
+
+  The optional extension of the Maven (mvn) artifact
 `
