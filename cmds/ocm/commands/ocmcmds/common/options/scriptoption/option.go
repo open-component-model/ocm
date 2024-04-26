@@ -1,6 +1,7 @@
 package scriptoption
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
@@ -9,7 +10,6 @@ import (
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

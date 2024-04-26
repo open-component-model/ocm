@@ -2,9 +2,10 @@ package utils
 
 import (
 	"net/url"
+	"path"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 func ParseURL(urlToParse string) (*url.URL, error) {
@@ -27,9 +28,10 @@ func GetFileExtensionFromUrl(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	pos := strings.LastIndex(u.Path, ".")
+	s := path.Base(u.Path)
+	pos := strings.LastIndex(s, ".")
 	if pos == -1 {
 		return "", errors.New("failed to deduct file extension from url")
 	}
-	return u.Path[pos:len(u.Path)], nil
+	return s[pos:], nil
 }

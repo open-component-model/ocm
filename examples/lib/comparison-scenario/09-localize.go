@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/chart"
@@ -16,7 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/localize"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/helm/loader"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"

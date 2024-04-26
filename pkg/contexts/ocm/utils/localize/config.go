@@ -3,12 +3,12 @@ package localize
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/spiff/spiffing"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/spiff"

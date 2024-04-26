@@ -3,7 +3,7 @@ package dockermulti
 import (
 	"fmt"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/mandelsoft/goutils/finalizer"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 

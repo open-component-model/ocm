@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/modern-go/reflect2"
 	"github.com/sirupsen/logrus"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 )
 
 const ATTR_TYPE = "type"
@@ -18,9 +19,9 @@ const ATTR_TYPE = "type"
 // field together with the default struct marshalling with the
 // great json marshallers.
 // Anonymous inline struct fields are always marshaled by the default struct
-// marshales in a depth first manner without observing the Marshal interface!!!!
+// marshals in a depth first manner without observing the Marshal interface!!!!
 //
-// Therefore all structs in this module deriving from UnstructuedTypedObject
+// Therefore, all structs in this module deriving from UnstructuedTypedObject
 // are explicitly implementing the marshal/unmarshal interface.
 //
 // Side Fact: Marshaling a map[interface{}] filled by unmarshaling a marshaled
@@ -251,7 +252,7 @@ func EvaluateUnstructured[T TypedObject, R TypedObjectDecoder[T]](u *Unstructure
 		decoder = types.GetDecoder(u.GetType())
 	}
 	if decoder == nil {
-		return zero, errors.ErrUnknown(errors.KIND_OBJECTTYPE, u.GetType())
+		return zero, errors.ErrUnknown(errkind.KIND_OBJECTTYPE, u.GetType())
 	}
 
 	if obj, err := decoder.Decode(data, DefaultJSONEncoding); err != nil {

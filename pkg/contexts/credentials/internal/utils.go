@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 func CredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, unknownAsError bool, matchers ...IdentityMatcher) (Credentials, error) {

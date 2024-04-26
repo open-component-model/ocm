@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/mandelsoft/goutils/finalizer"
 
 	"github.com/modern-go/reflect2"
 

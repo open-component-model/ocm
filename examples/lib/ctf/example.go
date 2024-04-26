@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -13,8 +15,6 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 

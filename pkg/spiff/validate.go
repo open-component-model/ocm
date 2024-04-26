@@ -3,11 +3,10 @@ package spiff
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/xeipuuv/gojsonschema"
 	"sigs.k8s.io/yaml"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func ValidateSourceByScheme(src spiffing.Source, schemedata []byte) error {

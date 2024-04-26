@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

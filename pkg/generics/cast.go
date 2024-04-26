@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 // TypeOf returns the reflect.Type object for a formal Go type

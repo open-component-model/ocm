@@ -7,10 +7,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // OCMCommand is a command pattern, that can be instantiated for a dediated

@@ -5,6 +5,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/vfs/pkg/layerfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -21,12 +25,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
@@ -45,16 +45,16 @@ func SupportedMimeTypes() []string {
 }
 
 type Handler struct {
-	ociConfigtypes generics.Set[string]
+	ociConfigtypes set.Set[string]
 	archive        bool
 }
 
 func New(mimetypes ...string) *Handler {
-	if len(mimetypes) == 0 || utils.Optional(mimetypes...) == "" {
+	if len(mimetypes) == 0 || general.Optional(mimetypes...) == "" {
 		mimetypes = []string{artdesc.MediaTypeImageConfig}
 	}
 	return &Handler{
-		ociConfigtypes: generics.NewSet[string](mimetypes...),
+		ociConfigtypes: set.New[string](mimetypes...),
 	}
 }
 
@@ -169,7 +169,7 @@ func (h *Handler) GetForResource(racc cpi.ResourceAccess) (fs vfs.FileSystem, re
 	case mime.MIME_TGZ, mime.MIME_TAR:
 	case MimeOCIImageArtifact:
 	default:
-		if !h.ociConfigtypes.Contains(media) && !h.ociConfigtypes.Contains(meth.MimeType()) {
+		if !h.ociConfigtypes.Has(media) && !h.ociConfigtypes.Has(meth.MimeType()) {
 			return nil, nil, nil
 		}
 	}
@@ -228,7 +228,7 @@ func (h *Handler) getForArtifact(finalize *finalizer.Finalizer, m oci.ArtifactAc
 		return nil, nil, fmt.Errorf("oci artifact is no image manifest")
 	}
 	macc := m.ManifestAccess()
-	if !h.ociConfigtypes.Contains(macc.GetDescriptor().Config.MediaType) {
+	if !h.ociConfigtypes.Has(macc.GetDescriptor().Config.MediaType) {
 		return nil, nil, nil
 	}
 

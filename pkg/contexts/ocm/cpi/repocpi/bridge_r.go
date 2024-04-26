@@ -3,8 +3,9 @@ package repocpi
 import (
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/utils"

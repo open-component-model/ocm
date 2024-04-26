@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type YAMLValue[T any] struct {

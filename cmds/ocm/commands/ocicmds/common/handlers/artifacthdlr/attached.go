@@ -19,10 +19,8 @@ func Attachment(d digest.Digest, suffix string) string {
 var ExplodeAttached = processing.Explode(explodeAttached)
 
 func explodeAttached(o interface{}) []interface{} {
-	obj, ok := o.(*Object)
-	if !ok {
-		return nil
-	}
+	// internal function must be called correctly, otherwise early panic
+	obj := o.(*Object)
 	result := []interface{}{o}
 	blob, err := obj.Artifact.Blob()
 	if err != nil {

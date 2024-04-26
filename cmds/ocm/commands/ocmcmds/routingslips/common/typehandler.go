@@ -3,13 +3,14 @@ package common
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
-	"github.com/open-component-model/ocm/pkg/errors"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 

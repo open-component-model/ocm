@@ -13,6 +13,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
+	"github.com/mandelsoft/goutils/finalizer"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -43,7 +45,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	ocmtesthelper "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )

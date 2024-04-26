@@ -3,6 +3,7 @@ package comparch
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -12,7 +13,6 @@ import (
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func init() {

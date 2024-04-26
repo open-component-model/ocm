@@ -12,9 +12,9 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/modern-go/reflect2"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

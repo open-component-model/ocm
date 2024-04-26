@@ -3,6 +3,8 @@ package standard
 import (
 	"time"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -10,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Handler struct {

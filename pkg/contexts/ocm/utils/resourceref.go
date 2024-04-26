@@ -3,12 +3,13 @@ package utils
 import (
 	"fmt"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/mandelsoft/goutils/finalizer"
+
+	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity, resolver ocm.ComponentVersionResolver) (ocm.ComponentVersionAccess, error) {

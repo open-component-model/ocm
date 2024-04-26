@@ -3,6 +3,8 @@ package pluginhdlr
 import (
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -10,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func Elem(e interface{}) plugin.Plugin {

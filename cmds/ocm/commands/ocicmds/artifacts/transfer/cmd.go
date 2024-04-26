@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -18,7 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 

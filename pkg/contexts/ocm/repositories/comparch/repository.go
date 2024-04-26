@@ -5,6 +5,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -16,7 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -141,7 +143,7 @@ func (r *RepositoryImpl) LookupComponent(name string) (*repocpi.ComponentAccessI
 		return nil, accessio.ErrClosed
 	}
 	if r.arch.GetName() != name {
-		return nil, errors.ErrNotFound(errors.KIND_COMPONENT, name, Type)
+		return nil, errors.ErrNotFound(errkind.KIND_COMPONENT, name, Type)
 	}
 	return newComponentAccess(r)
 }
@@ -308,7 +310,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 		}
 		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
 	}
-	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "component archive")
+	return nil, errors.ErrNotSupported(errkind.KIND_ACCESSMETHOD, a.GetType(), "component archive")
 }
 
 func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {

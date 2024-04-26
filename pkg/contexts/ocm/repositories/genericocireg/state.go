@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-test/deep"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
@@ -22,7 +23,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
-	"github.com/open-component-model/ocm/pkg/errors"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/utils"
 )

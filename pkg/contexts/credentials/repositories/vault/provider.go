@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/hashicorp/vault-client-go"
+	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const PROVIDER = "ocm.software/credentialprovider/" + Type

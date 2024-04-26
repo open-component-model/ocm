@@ -4,8 +4,9 @@ import (
 	"io"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // Session is a context keeping track of objects requiring a close

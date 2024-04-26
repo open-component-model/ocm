@@ -6,6 +6,7 @@ import (
 
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"golang.org/x/text/cases"
@@ -28,7 +29,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"

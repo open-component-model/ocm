@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"hash"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 func Hash(hash hash.Hash, data []byte) (string, error) {

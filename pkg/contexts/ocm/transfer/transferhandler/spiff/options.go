@@ -1,12 +1,12 @@
 package spiff
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

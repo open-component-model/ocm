@@ -2,6 +2,7 @@ package show
 
 import (
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 )

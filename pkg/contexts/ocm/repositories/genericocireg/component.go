@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -11,9 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const META_SEPARATOR = ".build-"
@@ -150,7 +150,7 @@ func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (*re
 	if c.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	override := utils.Optional(overrides...)
+	override := general.Optional(overrides...)
 	tag, err := toTag(version)
 	if err != nil {
 		return nil, err

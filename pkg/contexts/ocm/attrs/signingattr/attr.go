@@ -1,9 +1,10 @@
 package signingattr
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/context"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
 )

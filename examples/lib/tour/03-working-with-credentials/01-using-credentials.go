@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func UsingCredentialsA(cfg *helper.Config) error {

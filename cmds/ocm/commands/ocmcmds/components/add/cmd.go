@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
@@ -29,7 +30,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 )
 

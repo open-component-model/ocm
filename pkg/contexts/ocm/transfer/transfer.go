@@ -3,6 +3,8 @@ package transfer
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -12,8 +14,7 @@ import (
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -279,7 +280,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 			}
 		}
 		if err != nil {
-			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
+			if !errors.IsErrUnknownKind(err, errkind.KIND_ACCESSMETHOD) {
 				return errors.Wrapf(err, "%s: transferring resource %d", hist, i)
 			}
 			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)\n", hist, i, err)
@@ -317,7 +318,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 			err = errors.Join(err, m.Close())
 		}
 		if err != nil {
-			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
+			if !errors.IsErrUnknownKind(err, errkind.KIND_ACCESSMETHOD) {
 				return errors.Wrapf(err, "%s: transferring source %d", hist, i)
 			}
 			printer.Printf("WARN: %s: transferring source %d: %s (enforce transport by reference)\n", hist, i, err)

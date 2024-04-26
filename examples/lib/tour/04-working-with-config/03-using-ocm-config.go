@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
@@ -13,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func HandleOCMConfig(cfg *helper.Config) error {

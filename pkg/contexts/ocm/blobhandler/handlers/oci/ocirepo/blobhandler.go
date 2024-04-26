@@ -5,8 +5,9 @@ import (
 	"path"
 	"strings"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/mandelsoft/goutils/finalizer"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -27,7 +28,6 @@ import (
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 )
 

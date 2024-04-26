@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -13,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/utils"
 )

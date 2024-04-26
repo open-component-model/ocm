@@ -4,6 +4,8 @@ import (
 	"io"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	helmregistry "helm.sh/helm/v3/pkg/registry"
 
@@ -17,8 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	registry "github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 

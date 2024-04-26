@@ -17,7 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 )
 
 var _ = Describe("docker config", func() {
@@ -152,7 +152,7 @@ var _ = Describe("docker config", func() {
 		It("can access the default context", func() {
 			ctx := credentials.New()
 
-			r := finalizer.GetRuntimeFinalizationRecorder(ctx)
+			r := runtimefinalizer.GetRuntimeFinalizationRecorder(ctx)
 			Expect(r).NotTo(BeNil())
 
 			Must(ctx.RepositoryForConfig([]byte(specdata), nil))

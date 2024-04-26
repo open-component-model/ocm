@@ -3,12 +3,12 @@ package blob
 import (
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Handler struct{}

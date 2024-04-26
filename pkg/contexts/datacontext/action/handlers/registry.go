@@ -7,11 +7,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/semverutils"

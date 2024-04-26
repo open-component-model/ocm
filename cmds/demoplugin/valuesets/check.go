@@ -4,11 +4,12 @@ import (
 	out "fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"

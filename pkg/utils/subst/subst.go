@@ -5,13 +5,13 @@ import (
 	"container/list"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	glog "gopkg.in/op/go-logging.v1"
 	"gopkg.in/yaml.v3"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"

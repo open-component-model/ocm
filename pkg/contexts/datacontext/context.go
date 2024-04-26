@@ -7,15 +7,16 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -66,7 +67,7 @@ func Mode(m ...BuilderMode) BuilderMode {
 	return utils.OptionalDefaulted(MODE_EXTENDED, m...)
 }
 
-type ContextIdentity = finalizer.ObjectIdentity
+type ContextIdentity = runtimefinalizer.ObjectIdentity
 
 type ContextProvider interface {
 	// AttributesContext returns the shared attributes
@@ -135,7 +136,7 @@ type Context interface {
 
 type InternalContext interface {
 	Context
-	finalizer.RecorderProvider
+	runtimefinalizer.RecorderProvider
 	GetKey() interface{}
 	GetAllocatable() refmgmt.Allocatable
 }
@@ -287,7 +288,7 @@ func (c *_context) Logger(messageContext ...logging.MessageContext) logging.Logg
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var contextrange, attrsrange = finalizer.NumberRange{}, finalizer.NumberRange{}
+var contextrange, attrsrange = runtimefinalizer.NumberRange{}, runtimefinalizer.NumberRange{}
 
 type _attributes struct {
 	sync.RWMutex

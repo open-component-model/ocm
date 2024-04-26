@@ -8,11 +8,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )

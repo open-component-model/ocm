@@ -8,12 +8,13 @@ import (
 	"mime"
 	"net/http"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	ocmmime "github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/mimeutils"
 	"github.com/open-component-model/ocm/pkg/optionutils"

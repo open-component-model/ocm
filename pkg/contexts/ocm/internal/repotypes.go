@@ -3,11 +3,11 @@ package internal
 import (
 	"encoding/json"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"

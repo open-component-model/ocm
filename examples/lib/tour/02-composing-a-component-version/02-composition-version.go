@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func ComposingAComponentVersionB() error {

@@ -5,11 +5,11 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )

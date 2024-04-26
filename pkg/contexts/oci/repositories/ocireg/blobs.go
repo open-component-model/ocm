@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/containerd/containerd/remotes"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type BlobContainer interface {

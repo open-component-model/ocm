@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/spiff/dynaml"
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
@@ -14,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

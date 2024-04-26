@@ -3,9 +3,10 @@ package config
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

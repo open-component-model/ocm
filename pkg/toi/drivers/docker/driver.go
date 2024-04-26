@@ -21,10 +21,10 @@ import (
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/docker/registry"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mitchellh/copystructure"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"

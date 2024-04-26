@@ -4,11 +4,11 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/mandelsoft/goutils/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // These constants describe identity attributes predefined by the

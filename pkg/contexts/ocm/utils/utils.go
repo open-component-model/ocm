@@ -1,10 +1,11 @@
 package utils
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func GetOCIArtifactRef(ctxp ocm.ContextProvider, r ocm.ResourceAccess) (string, error) {

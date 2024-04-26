@@ -3,6 +3,7 @@ package rscs
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	compdescv2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

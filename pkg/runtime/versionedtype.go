@@ -3,9 +3,9 @@ package runtime
 import (
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/exp/slices"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"regexp"
 
+	"github.com/mandelsoft/goutils/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )

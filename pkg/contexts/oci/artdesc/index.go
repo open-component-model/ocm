@@ -3,12 +3,12 @@ package artdesc
 import (
 	"encoding/json"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Index ociv1.Index
