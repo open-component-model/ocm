@@ -34,7 +34,8 @@ func (a *Artifact) GavPath() string {
 	return a.GroupPath() + "/" + a.ArtifactId + "/" + a.Version
 }
 
-// FileName returns the Maven Artifact's name with classifier and extension.
+// FileName returns the Maven Artifact's GAV-name with classifier and extension.
+// Which is equal to the URL-path of the artifact in the repository.
 // Default extension is jar.
 func (a *Artifact) FileName() string {
 	path := a.GavPath() + "/" + a.FilePrefix()
@@ -67,7 +68,9 @@ func (a *Artifact) Purl() string {
 	return "pkg:maven/" + a.GroupId + "/" + a.ArtifactId + "@" + a.Version
 }
 
+// ClassifierExtensionFrom extracts the classifier and extension from the filename (without any path prefix).
 func (a *Artifact) ClassifierExtensionFrom(filename string) *Artifact {
+	// TODO should work with pos (path.Basename)?!?
 	s := strings.TrimPrefix(filename, a.FilePrefix())
 	if strings.HasPrefix(s, "-") {
 		s = strings.TrimPrefix(s, "-")
@@ -114,7 +117,8 @@ func ArtifactFromHint(gav string) *Artifact {
 	return artifact
 }
 
-func IsArtifact(fileName string) bool {
+// IsResource returns true if the filename is not a checksum or signature file.
+func IsResource(fileName string) bool {
 	if strings.HasSuffix(fileName, ".asc") {
 		return false
 	}

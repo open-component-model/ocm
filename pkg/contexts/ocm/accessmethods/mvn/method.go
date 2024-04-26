@@ -324,7 +324,7 @@ func filesAndHashes(fileList []string) map[string]crypto.Hash {
 	// Which hash files are available?
 	result := make(map[string]crypto.Hash)
 	for _, file := range fileList {
-		if IsArtifact(file) {
+		if IsResource(file) {
 			result[file] = bestAvailableHash(fileList, file)
 			logger.Debug("found", "file", file)
 		}
