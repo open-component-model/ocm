@@ -82,7 +82,7 @@ $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandels
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	o.prov = routingslip.For(o.OCMContext()).CreateConfigTypeSetConfigProvider().(flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider)
+	o.prov = routingslip.For(o.OCMContext()).CreateConfigTypeSetConfigProvider()
 	o.configopts = o.prov.CreateOptions()
 	o.configopts.AddFlags(fs)
 
