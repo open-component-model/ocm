@@ -20,10 +20,14 @@ func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
 func traverse(hist common.History, o *Object, octx out.Context) []output.Object {
 	blob, err := o.Artifact.Blob()
 	if err != nil {
+		out.Errf(octx, "unable to get artifact blob: %s", err)
+
 		return nil
 	}
 	key := common.NewNameVersion("", blob.Digest().String())
 	if err := hist.Add(oci.KIND_OCIARTIFACT, key); err != nil {
+		out.Errf(octx, "unable to add artifact to history: %s", err)
+
 		return nil
 	}
 	result := []output.Object{o}
