@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/mvn"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
@@ -90,16 +91,22 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	for _, file := range files {
 		log.Debug("uploading", "file", file)
 		artifact = artifact.ClassifierExtensionFrom(file)
+
+		readHash, err := tempFs.Open(file)
+		if err != nil {
+			return nil, err
+		}
+		defer readHash.Close()
+		// MD5 + SHA1 are still the most used ones in the mvn context
+		hr := iotools.NewHashReader(readHash, crypto.SHA256, crypto.SHA1, crypto.MD5)
+		_, _ = hr.CalcHashes()
+
 		reader, err := tempFs.Open(file)
 		if err != nil {
 			return nil, err
 		}
 		defer reader.Close()
-		hash, err := GetHash(crypto.SHA256, tempFs, file)
-		if err != nil {
-			return nil, err
-		}
-		err = deploy(artifact, b.spec.Url, reader, username, password, crypto.SHA256, hash)
+		err = deploy(artifact, b.spec.Url, reader, username, password, hr)
 		if err != nil {
 			return nil, err
 		}
@@ -109,35 +116,17 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	return mvn.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, mvn.WithClassifier(artifact.Classifier), mvn.WithExtension(artifact.Extension)), nil
 }
 
-func GetHash(hash crypto.Hash, fs vfs.FileSystem, path string) (string, error) {
-	reader, err := fs.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer reader.Close()
-	digest := hash.New()
-	if _, err := io.Copy(digest, reader); err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%x", digest.Sum(nil)), nil
-}
-
-func ChecksumHeader(hash crypto.Hash) string {
-	a := strings.ReplaceAll(hash.String(), "-", "")
-	return "X-Checksum-" + a[:1] + strings.ToLower(a[1:])
-}
-
-func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, username string, password string, hash crypto.Hash, digest string) error {
-	// https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact-apis
-	// vs. https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifacts-from-archive
-	// Headers: X-Checksum-Deploy: true, X-Checksum-Sha1: sha1Value, X-Checksum-Sha256: sha256Value, X-Checksum: checksum value (type is resolved by length)
+// deploy an artifact to the specified destination. See https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact
+func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, username string, password string, hashes *iotools.HashReader) error {
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, artifact.Url(url), reader)
 	if err != nil {
 		return err
 	}
 	req.SetBasicAuth(username, password)
-	req.Header.Set("X-Checksum", digest)
-	req.Header.Set(ChecksumHeader(hash), digest)
+	// give the remote server a chance to decide based upon the checksum policy
+	for k, v := range hashes.HttpHeader() {
+		req.Header.Set(k, v)
+	}
 
 	// Execute the request
 	client := &http.Client{}
@@ -168,9 +157,11 @@ func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, username s
 		return err
 	}
 
-	remoteDigest := artifactBody.Checksums[strings.ReplaceAll(strings.ToLower(hash.String()), "-", "")]
+	// let's check only SHA256 for now
+	digest := hashes.GetString(crypto.SHA256)
+	remoteDigest := artifactBody.Checksums[strings.ReplaceAll(strings.ToLower(crypto.SHA256.String()), "-", "")]
 	if remoteDigest == "" {
-		log.Warn("no checksum found for algorithm, we can't guarantee that the artifact has been uploaded correctly", "algorithm", hash)
+		log.Warn("no checksum found for algorithm, we can't guarantee that the artifact has been uploaded correctly", "algorithm", crypto.SHA256)
 	} else if remoteDigest != digest {
 		return fmt.Errorf("failed to upload artifact: checksums do not match")
 	}
