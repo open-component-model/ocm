@@ -202,6 +202,8 @@ func SimpleTarHeader(fs vfs.FileSystem, filepath string) (*tar.Header, error) {
 	return RegularFileInfoHeader(info), nil
 }
 
+// RegularFileInfoHeader creates a tar header for a regular file (`tar.TypeReg`).
+// Besides name and size, the other header fields are set to default values (`fs.ModePerm`, 0, "", `time.Unix(0,0)`).
 func RegularFileInfoHeader(fi fs.FileInfo) *tar.Header {
 	h := &tar.Header{
 		Typeflag:   tar.TypeReg,
@@ -237,6 +239,8 @@ func ListSortedFilesInDir(fs vfs.FileSystem, root string, flat bool) ([]string, 
 	return files, err
 }
 
+// TgzFs creates a tar.gz archive from a filesystem with all files being in the root of the zipped archive.
+// The writer is closed after the archive is written. The TAR-headers are normalized, see RegularFileInfoHeader
 func TgzFs(fs vfs.FileSystem, writer io.Writer) error {
 	zip := gzip.NewWriter(writer)
 	err := TarFlatFs(fs, zip)
