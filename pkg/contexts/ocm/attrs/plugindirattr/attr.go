@@ -11,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -28,6 +29,7 @@ func init() {
 func DefaultDir(fs vfs.FileSystem) string {
 	home, err := os.UserHomeDir()
 	if err != nil {
+		logging.Error(err)
 		return ""
 	}
 

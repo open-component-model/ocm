@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package artdesc
 
 import (
@@ -14,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc/helper"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 const SchemeVersion = helper.SchemeVersion
@@ -237,6 +234,7 @@ func (d *Artifact) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	if d.IsManifest() {
 		m, err := d.Manifest()
 		if err != nil {
+			logging.Error(err)
 			return nil
 		}
 		return m.GetBlobDescriptor(digest)
