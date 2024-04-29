@@ -5,13 +5,15 @@
 package subst
 
 import (
-	"reflect"
+	"container/list"
 
-	"github.com/goccy/go-yaml"
-	"github.com/goccy/go-yaml/ast"
-	"github.com/goccy/go-yaml/parser"
+	"gopkg.in/yaml.v3"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"bytes"
+
+	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -40,106 +42,121 @@ func ParseFile(file string, fss ...vfs.FileSystem) (SubstitutionTarget, error) {
 
 func Parse(data []byte) (SubstitutionTarget, error) {
 	var (
-		err     error
-		content interface{}
-		fi      fileinfo
+		err error
+		fi  fileinfo
 	)
 
 	fi.json = true
-	if err = runtime.DefaultJSONEncoding.Unmarshal(data, &content); err != nil {
-		fi.json = false
-		if err = runtime.DefaultYAMLEncoding.Unmarshal(data, &content); err != nil {
-			return nil, errors.Wrapf(err, "no yaml or json data")
-		}
-		data, err = runtime.DefaultYAMLEncoding.Marshal(content)
-	} else {
-		data, err = runtime.DefaultJSONEncoding.Marshal(content)
-	}
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannor marshal data")
-	}
-	// mixed json/yaml cannot be parsed, modified and marshalled again, correctly
-	// so try to come with pure yaml or pure json.
+	rdr := bytes.NewBuffer(data)
+	jsnDcdr := yqlib.NewJSONDecoder()
 
-	fi.content, err = parser.ParseBytes(data, 0)
-	if err != nil {
-		return nil, errors.Wrapf(err, "invalid YAML")
+	if err := jsnDcdr.Init(rdr); err != nil {
+		return nil, err
 	}
+
+	if fi.content, err = jsnDcdr.Decode(); err != nil {
+		fi.json = false
+		ymlPrfs := yqlib.NewDefaultYamlPreferences()
+		ymlDcdr := yqlib.NewYamlDecoder(ymlPrfs)
+		rdr = bytes.NewBuffer(data)
+		if err := ymlDcdr.Init(rdr); err != nil {
+			return nil, err
+		}
+		if fi.content, err = ymlDcdr.Decode(); err != nil {
+			return nil, err
+		}
+	}
+
+	fi.content.SetDocument(0)
+	fi.content.SetFilename("substitution-target")
+	fi.content.SetFileIndex(0)
+
 	return &fi, nil
 }
 
 type fileinfo struct {
-	content *ast.File
+	content *yqlib.CandidateNode
 	json    bool
 }
 
 func (f *fileinfo) Content() ([]byte, error) {
-	data := []byte(f.content.String())
-
+	var enc yqlib.Encoder
 	if f.json {
-		// TODO: the package seems to keep the file type json/yaml, but I'm not sure
-		var err error
-		data, err = yaml.YAMLToJSON(data)
-		if err != nil {
-			return nil, errors.Wrapf(err, "cannot marshal json")
-		}
+		prfs := yqlib.NewDefaultJsonPreferences()
+		prfs.ColorsEnabled = false
+		enc = yqlib.NewJSONEncoder(prfs)
+	} else {
+		prfs := yqlib.NewDefaultYamlPreferences()
+		enc = yqlib.NewYamlEncoder(prfs)
 	}
-	return data, nil
+
+	buf := bytes.NewBuffer([]byte{})
+	pw := yqlib.NewSinglePrinterWriter(buf)
+	p := yqlib.NewPrinter(enc, pw)
+	inptLst := list.New()
+	inptLst.PushBack(f.content)
+
+	if err := p.PrintResults(inptLst); err == nil {
+		return buf.Bytes(), nil
+	} else {
+		return nil, err
+	}
 }
 
 func (f *fileinfo) SubstituteByData(path string, value []byte) error {
-	var m interface{}
-	err := runtime.DefaultYAMLEncoding.Unmarshal(value, &m)
+	m := &yaml.Node{}
+	err := yaml.Unmarshal(value, m)
 	if err != nil {
 		return err
 	}
-	if f.json {
-		value, err = runtime.DefaultJSONEncoding.Marshal(m)
-	} else {
-		value, err = runtime.DefaultYAMLEncoding.Marshal(m)
-	}
-	if err != nil {
+
+	nd := &yqlib.CandidateNode{}
+	nd.SetDocument(0)
+	nd.SetFilename("value")
+	nd.SetFileIndex(0)
+
+	if err = nd.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
 		return err
 	}
-	return f.substituteByData(path, value)
-}
-
-func (f *fileinfo) substituteByData(path string, value []byte) error {
-	file, err := parser.ParseBytes(value, 0)
-	if err != nil {
-		return errors.Wrapf(err, "cannot unmarshal value")
-	}
-
-	p, err := yaml.PathString("$." + path)
-	if err != nil {
-		return errors.Wrapf(err, "invalid substitution path")
-	}
-
-	return p.ReplaceWithFile(f.content, file)
+	return f.substituteByValue(path, nd)
 }
 
 func (f *fileinfo) SubstituteByValue(path string, value interface{}) error {
-	var (
-		err  error
-		data []byte
-	)
+	var mrshl func(interface{}) ([]byte, error)
 
-	// Do not marshal the value if it's a primitive type.
-	switch reflect.ValueOf(value).Kind() {
-	case reflect.String:
-		data = []byte(value.(string))
-	case reflect.Slice:
-		data = value.([]byte)
-	default:
-		if f.json {
-			data, err = runtime.DefaultJSONEncoding.Marshal(value)
-		} else {
-			data, err = runtime.DefaultYAMLEncoding.Marshal(value)
-		}
-		if err != nil {
-			return err
-		}
+	if f.json {
+		mrshl = runtime.DefaultJSONEncoding.Marshal
+	} else {
+		mrshl = runtime.DefaultYAMLEncoding.Marshal
 	}
 
-	return f.substituteByData(path, data)
+	if bval, err := mrshl(value); err != nil {
+		return err
+	} else {
+		return f.SubstituteByData(path, bval)
+	}
+}
+
+func (f *fileinfo) substituteByValue(path string, value *yqlib.CandidateNode) error {
+
+	inptLst := list.New()
+	inptLst.PushBack(f.content)
+
+	vlLst := list.New()
+	vlLst.PushBack(value)
+
+	ctxt := yqlib.Context{MatchingNodes: inptLst}
+	ctxt.SetVariable("newValue", vlLst)
+
+	yqlib.InitExpressionParser()
+	expr := "." + path + " |= $newValue"
+
+	nd, err := yqlib.ExpressionParser.ParseExpression(expr)
+	if err != nil {
+		return err
+	}
+
+	ngvtr := yqlib.NewDataTreeNavigator()
+	_, err = ngvtr.GetMatchingNodes(ctxt, nd)
+	return err
 }

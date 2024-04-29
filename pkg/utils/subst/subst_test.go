@@ -5,8 +5,6 @@
 package subst
 
 import (
-	"strings"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -32,11 +30,11 @@ data:
 			result, err := content.Content()
 			Expect(err).To(Succeed())
 
-			Expect(strings.Trim(string(result), "\n")).To(Equal(strings.Trim(`
+			Expect(string(result)).To(MatchYAML(`
 data:
   value1: v1
   value2: orig2
-`, "\n")))
+`))
 		})
 
 		It("handles simple block value substitution on yaml", func() {
@@ -48,36 +46,35 @@ data:
 			content, err := Parse([]byte(data))
 			Expect(err).To(Succeed())
 
-			Expect(content.SubstituteByValue("data.value1", `|
-    -----BEGIN CERTIFICATE-----
-    MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh
-    MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
-    d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBH
-    MjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVT
-    MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j
-    b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG
-    9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzfNNNx7a8myaJCtSnX/RrohCgiN9RlUyfuI
-    2/Ou8jqJkTx65qsGGmvPrC3oXgkkRLpimn7Wo6h+4FR1IAWsULecYxpsMNzaHxmx
-    1x7e/dfgy5SDN67sH0NO3Xss0r0upS/kqbitOtSZpLYl6ZtrAGCSYP9PIUkY92eQ
-    q2EGnI/yuum06ZIya7XzV+hdG82MHauVBJVJ8zUtluNJbd134/tJS7SsVQepj5Wz
-    tCO7TG1F8PapspUwtP1MVYwnSlcUfIKdzXOS0xZKBgyMUNGPHgm+F6HmIcr9g+UQ
-    vIOlCsRnKPZzFBQ9RnbDhxSJITRNrw9FDKZJobq7nMWxM4MphQIDAQABo0IwQDAP
-    BgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAdBgNVHQ4EFgQUTiJUIBiV
-    5uNu5g/6+rkS7QYXjzkwDQYJKoZIhvcNAQELBQADggEBAGBnKJRvDkhj6zHd6mcY
-    1Yl9PMWLSn/pvtsrF9+wX3N3KjITOYFnQoQj8kVnNeyIv/iPsGEMNKSuIEyExtv4
-    NeF22d+mQrvHRAiGfzZ0JFrabA0UWTW98kndth/Jsw1HKj2ZL7tcu7XUIOGZX1NG
-    Fdtom/DzMNU+MeKNhJ7jitralj41E6Vf8PlwUHBHQRFXGU7Aj64GxJUTFy8bJZ91
-    8rGOmaFvE7FBcf6IKshPECBV1/MUReXgRPTqh5Uykw7+U0b6LJ3/iyK5S9kJRaTe
-    pLiaWN0bfVKfjllDiIGknibVb63dDcY3fe0Dkhvld1927jyNxF1WW6LZZm6zNTfl
-    MrY=
-    -----END CERTIFICATE-----`)).To(Succeed())
+			Expect(content.SubstituteByValue("data.value1", `-----BEGIN CERTIFICATE-----
+MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh
+MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
+d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBH
+MjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVT
+MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j
+b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzfNNNx7a8myaJCtSnX/RrohCgiN9RlUyfuI
+2/Ou8jqJkTx65qsGGmvPrC3oXgkkRLpimn7Wo6h+4FR1IAWsULecYxpsMNzaHxmx
+1x7e/dfgy5SDN67sH0NO3Xss0r0upS/kqbitOtSZpLYl6ZtrAGCSYP9PIUkY92eQ
+q2EGnI/yuum06ZIya7XzV+hdG82MHauVBJVJ8zUtluNJbd134/tJS7SsVQepj5Wz
+tCO7TG1F8PapspUwtP1MVYwnSlcUfIKdzXOS0xZKBgyMUNGPHgm+F6HmIcr9g+UQ
+vIOlCsRnKPZzFBQ9RnbDhxSJITRNrw9FDKZJobq7nMWxM4MphQIDAQABo0IwQDAP
+BgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAdBgNVHQ4EFgQUTiJUIBiV
+5uNu5g/6+rkS7QYXjzkwDQYJKoZIhvcNAQELBQADggEBAGBnKJRvDkhj6zHd6mcY
+1Yl9PMWLSn/pvtsrF9+wX3N3KjITOYFnQoQj8kVnNeyIv/iPsGEMNKSuIEyExtv4
+NeF22d+mQrvHRAiGfzZ0JFrabA0UWTW98kndth/Jsw1HKj2ZL7tcu7XUIOGZX1NG
+Fdtom/DzMNU+MeKNhJ7jitralj41E6Vf8PlwUHBHQRFXGU7Aj64GxJUTFy8bJZ91
+8rGOmaFvE7FBcf6IKshPECBV1/MUReXgRPTqh5Uykw7+U0b6LJ3/iyK5S9kJRaTe
+pLiaWN0bfVKfjllDiIGknibVb63dDcY3fe0Dkhvld1927jyNxF1WW6LZZm6zNTfl
+MrY=
+-----END CERTIFICATE-----`)).To(Succeed())
 
 			result, err := content.Content()
 			Expect(err).To(Succeed())
 
 			expected := `
 data:
-  value1: |
+  value1: |-
     -----BEGIN CERTIFICATE-----
     MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh
     MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
@@ -102,7 +99,7 @@ data:
     -----END CERTIFICATE-----
   value2: orig2
 `
-			Expect(strings.Trim(string(result), "\n")).To(Equal(strings.Trim(expected, "\n")))
+			Expect(string(result)).To(MatchYAML(expected))
 		})
 
 		It("handles complex value substitution on yaml 1", func() {
@@ -119,13 +116,13 @@ data:
 			result, err := content.Content()
 			Expect(err).To(Succeed())
 
-			Expect(strings.Trim(string(result), "\n")).To(Equal(strings.Trim(`
+			Expect(string(result)).To(MatchYAML(`
 data:
   value1:
     value1: v1
     value2: ""
   value2: orig2
-`, "\n")))
+`))
 		})
 	})
 
@@ -144,11 +141,11 @@ data:
 			result, err := content.Content()
 			Expect(err).To(Succeed())
 
-			Expect(strings.Trim(string(result), "\n")).To(Equal(strings.Trim(`
+			Expect(string(result)).To(MatchYAML(`
 data:
   value1: v1
   value2: orig2
-`, "\n")))
+`))
 		})
 
 		It("handles complex value substitution on yaml 2", func() {
@@ -169,13 +166,13 @@ data:
 			result, err := content.Content()
 			Expect(err).To(Succeed())
 
-			Expect(strings.Trim(string(result), "\n")).To(Equal(strings.Trim(`
+			Expect(string(result)).To(MatchYAML(`
 data:
   value1:
     value1: v1
     value2: ""
   value2: orig2
-`, "\n")))
+`))
 		})
 	})
 
@@ -198,10 +195,10 @@ value2: ""
 
 		result, err := content.Content()
 		Expect(err).To(Succeed())
-
-		Expect(strings.Trim(string(result), "\n")).To(Equal(strings.Trim(`
+		expected := `
 {"data": {"value1": {"value1": "v1", "value2": ""}, "value2": "orig2"}}
-`, "\n")))
+`
+		Expect(string(result)).To(MatchJSON(expected))
 	})
 
 	/*
@@ -260,12 +257,13 @@ data: {
 		result, err := content.Content()
 		Expect(err).To(Succeed())
 
-		Expect(strings.Trim(string(result), "\n")).To(Equal(strings.Trim(`
+		expected := `
 data:
   value1:
     value1: v1
     value2: ""
   value2: orig2
-`, "\n")))
+`
+		Expect(string(result)).To(MatchYAML(expected))
 	})
 })
