@@ -5,15 +5,13 @@
 package subst
 
 import (
+	"bytes"
 	"container/list"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	"gopkg.in/yaml.v3"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
-	"bytes"
-
-	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -138,7 +136,6 @@ func (f *fileinfo) SubstituteByValue(path string, value interface{}) error {
 }
 
 func (f *fileinfo) substituteByValue(path string, value *yqlib.CandidateNode) error {
-
 	inptLst := list.New()
 	inptLst.PushBack(f.content)
 
