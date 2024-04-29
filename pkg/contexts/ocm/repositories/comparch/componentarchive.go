@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package comparch
 
 import (
@@ -18,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
@@ -210,15 +207,18 @@ func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
 		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {
+			logging.Error(err)
 			return ""
 		}
 		m, err := newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
 		if err != nil {
+			logging.Error(err)
 			return ""
 		}
 		defer m.Close()
 		digest, err := blobaccess.Digest(m)
 		if err != nil {
+			logging.Error(err)
 			return ""
 		}
 		return digest.String()
