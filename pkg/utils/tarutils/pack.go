@@ -226,6 +226,9 @@ func RegularFileInfoHeader(fi fs.FileInfo) *tar.Header {
 func ListSortedFilesInDir(fs vfs.FileSystem, root string, flat bool) ([]string, error) {
 	var files []string
 	err := vfs.Walk(fs, root, func(path string, info vfs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if !info.IsDir() {
 			pathOrName := path
 			if flat {
