@@ -7,6 +7,7 @@ package vershdlr
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/Masterminds/semver/v3"
 
@@ -97,6 +98,7 @@ func (h *TypeHandler) all(repo ocm.Repository) ([]output.Object, error) {
 		return nil, err
 	}
 	var result []output.Object
+	sort.Strings(list)
 	for _, l := range list {
 		part, err := h.get(repo, utils.StringSpec(l))
 		if err != nil {
