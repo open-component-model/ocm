@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package artifacthdlr
 
 import (
@@ -11,6 +7,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,6 +31,7 @@ func clean(iterable data.Iterable) data.Iterable {
 		l := len(e.History)
 		blob, err := e.Artifact.Blob()
 		if err != nil {
+			logging.Error(err)
 			return nil
 		}
 
@@ -48,6 +47,7 @@ func clean(iterable data.Iterable) data.Iterable {
 	for i := 0; i < len(data); i++ {
 		e, ok := data[i].(*Object)
 		if !ok {
+			logging.Error(errors.New("unexpected type"))
 			return nil
 		}
 		l := len(e.History)

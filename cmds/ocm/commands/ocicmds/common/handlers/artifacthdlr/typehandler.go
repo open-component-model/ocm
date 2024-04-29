@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package artifacthdlr
 
 import (
@@ -16,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 func Elem(e interface{}) oci.ArtifactAccess {
@@ -54,6 +51,7 @@ func (o *Object) GetKind() string {
 func (o *Object) IsNode() *common.NameVersion {
 	blob, err := o.Artifact.Blob()
 	if err != nil {
+		logging.Error(err)
 		return nil
 	}
 	nv := common.NewNameVersion("", blob.Digest().String())
@@ -78,6 +76,7 @@ func (o *Object) AsManifest() interface{} {
 func (o *Object) String() string {
 	blob, err := o.Artifact.Blob()
 	if err != nil {
+		logging.Error(err)
 		return ""
 	}
 
