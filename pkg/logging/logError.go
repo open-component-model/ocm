@@ -1,7 +1,7 @@
 package logging
 
-func Error(err error, keypairs ...interface{}) {
+func Error(err error) {
 	if err != nil {
-		Context().Logger().Error(err.Error(), keypairs...)
+		println(err.Error())
 	}
 }

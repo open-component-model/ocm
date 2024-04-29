@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package attributes
 
 import (
@@ -12,6 +8,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 func New(ctx clictx.Context) *cobra.Command {
@@ -36,6 +33,7 @@ func Attributes() string {
 	for _, a := range datacontext.DefaultAttributeScheme.KnownTypeNames() {
 		t, err := datacontext.DefaultAttributeScheme.GetType(a)
 		if err != nil {
+			logging.Error(err)
 			continue
 		}
 
