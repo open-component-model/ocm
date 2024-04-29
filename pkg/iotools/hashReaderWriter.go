@@ -6,6 +6,8 @@ import (
 	"hash"
 	"io"
 	"strings"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type HashReader struct {
@@ -55,7 +57,7 @@ func (h *HashReader) CalcHashes() (int64, error) {
 		b = b[:n]                     // reset slice to the actual read bytes
 		cnt += int64(n)
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				err = nil
 			}
 			return cnt, err
