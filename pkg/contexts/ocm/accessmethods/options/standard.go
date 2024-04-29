@@ -59,8 +59,8 @@ var HTTPRedirectOption = RegisterOption(NewBoolOptionType("noredirect", "http re
 // CommentOption.
 var CommentOption = RegisterOption(NewStringOptionType("comment", "comment field value"))
 
-// ClassifierOption the optional classifier of a maven resource
+// ClassifierOption the optional classifier of a maven resource.
 var ClassifierOption = RegisterOption(NewStringOptionType("accessClassifier", "classifier"))
 
-// ExtensionOption the optional extension of a maven resource
+// ExtensionOption the optional extension of a maven resource.
 var ExtensionOption = RegisterOption(NewStringOptionType("accessExtension", "extension name"))

@@ -240,7 +240,7 @@ func ListSortedFilesInDir(fs vfs.FileSystem, root string, flat bool) ([]string, 
 }
 
 // TgzFs creates a tar.gz archive from a filesystem with all files being in the root of the zipped archive.
-// The writer is closed after the archive is written. The TAR-headers are normalized, see RegularFileInfoHeader
+// The writer is closed after the archive is written. The TAR-headers are normalized, see RegularFileInfoHeader.
 func TgzFs(fs vfs.FileSystem, writer io.Writer) error {
 	zip := gzip.NewWriter(writer)
 	err := TarFlatFs(fs, zip)
