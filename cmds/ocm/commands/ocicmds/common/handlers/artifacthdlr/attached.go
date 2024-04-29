@@ -44,6 +44,7 @@ func explodeAttached(o interface{}) []interface{} {
 					s.Digest = nil
 					key, err := Key(a)
 					if err != nil {
+						logging.Error(err)
 						// this is questionable behaviour. :think:
 						return nil
 					}
@@ -59,6 +60,8 @@ func explodeAttached(o interface{}) []interface{} {
 				}
 			}
 		}
+	} else {
+		logging.Error(err)
 	}
 	output.Print(result, "attached %s", dig)
 	return result
