@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package artifacthdlr
 
 import (
@@ -13,6 +9,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 func Attachment(d digest.Digest, suffix string) string {
@@ -29,6 +26,7 @@ func explodeAttached(o interface{}) []interface{} {
 	result := []interface{}{o}
 	blob, err := obj.Artifact.Blob()
 	if err != nil {
+		logging.Error(err)
 		return result
 	}
 	dig := blob.Digest()
