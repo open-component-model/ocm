@@ -13,7 +13,6 @@ import (
 )
 
 var _ = Describe("Hash Reader Writer tests", func() {
-
 	It("Ensure interface implementation", func() {
 		var _ io.Reader = &iotools.HashReader{}
 		var _ io.Reader = (*iotools.HashReader)(nil)
@@ -62,6 +61,13 @@ var _ = Describe("Hash Reader Writer tests", func() {
 		Expect(hr.GetBytes(0)).To(BeNil())
 		Expect(hr.GetString(crypto.SHA1)).To(Equal("5c075ed604db0adc524edd3516e8f0258ca6e58d"))
 
+		hr = iotools.NewHashReader(strings.NewReader(s), crypto.SHA1)
+		cnt, err := hr.CalcHashes()
+		Expect(err).To(BeNil())
+		Expect(cnt).To(Equal(int64(len(s))))
+		Expect(hr.GetBytes(0)).To(BeNil())
+		Expect(hr.GetString(crypto.SHA1)).To(Equal("5c075ed604db0adc524edd3516e8f0258ca6e58d"))
+
 		hr = iotools.NewHashReader(strings.NewReader(s), crypto.SHA1, crypto.MD5)
 		hr.Read(buf)
 		Expect(hr.GetBytes(crypto.SHA256)).To(BeNil())
@@ -70,5 +76,4 @@ var _ = Describe("Hash Reader Writer tests", func() {
 		Expect(hr.GetString(crypto.SHA1)).To(Equal("5c075ed604db0adc524edd3516e8f0258ca6e58d"))
 		Expect(hr.GetString(crypto.SHA1)).To(Equal("5c075ed604db0adc524edd3516e8f0258ca6e58d"))
 	})
-
 })

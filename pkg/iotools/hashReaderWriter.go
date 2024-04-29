@@ -46,8 +46,21 @@ func (h *HashReader) ReadAll() ([]byte, error) {
 	return io.ReadAll(h.reader)
 }
 
+// CalcHashes returns the total number of bytes read and an error if any besides EOF.
 func (h *HashReader) CalcHashes() (int64, error) {
-	return io.Copy(io.Discard, h.reader)
+	b := make([]byte, 0, 512)
+	cnt := int64(0)
+	for {
+		n, err := h.Read(b[0:cap(b)]) // read a chunk, always from the beginning
+		b = b[:n]                     // reset slice to the actual read bytes
+		cnt += int64(n)
+		if err != nil {
+			if err == io.EOF {
+				err = nil
+			}
+			return cnt, err
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +119,7 @@ func getBytes(h hashes, algorithm crypto.Hash) []byte {
 
 func httpHeader(h hashes) map[string]string {
 	headers := make(map[string]string, len(h.hashes()))
-	for algorithm, _ := range h.hashes() {
+	for algorithm := range h.hashes() {
 		headers[headerName(algorithm)] = getString(h, algorithm)
 	}
 	return headers
