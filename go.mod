@@ -25,7 +25,7 @@ require (
 	github.com/docker/docker v26.1.0+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/drone/envsubst v1.0.3
-	github.com/fluxcd/cli-utils v0.36.0-flux.6
+	github.com/fluxcd/cli-utils v0.36.0-flux.7
 	github.com/fluxcd/pkg/ssa v0.38.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/ghodss/yaml v1.0.0
