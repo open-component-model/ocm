@@ -3,6 +3,7 @@ package tarutils_test
 import (
 	"io/fs"
 	"os"
+	"runtime"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	. "github.com/onsi/ginkgo/v2"
@@ -47,7 +48,11 @@ var _ = Describe("tar utils mapping", func() {
 		Expect(err).To(HaveOccurred())
 		Expect(files).To(BeNil())
 		Expect(errors.Is(err, fs.ErrNotExist)).To(BeTrue())
-		Expect(err.Error()).To(ContainSubstring("The system cannot find the path specified."))
+		if runtime.GOOS == "windows" {
+			Expect(err.Error()).To(ContainSubstring("The system cannot find the path specified."))
+		} else {
+			Expect(err.Error()).To(ContainSubstring("no such file or directory"))
+		}
 	})
 
 })
