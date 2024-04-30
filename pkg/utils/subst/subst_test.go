@@ -148,6 +148,44 @@ data:
 `))
 		})
 
+		It("open-component-model/ocm-project issue 179 store object produces invalid yaml", func() {
+			value := `certificate_authority_url: https://example1.com/v1/pki/root/ca/pem
+deployment: deveaws
+deployment_size: xsmall
+domain: example2.com
+landscape_region: eu12
+org: deveaws
+service_hostname_suffix: .example3.com
+service_kubernetes_hostname_suffix: .example4.com
+space: sac`
+			data := `dmi:
+  gcp_project_id: unset
+  orca_env_stable_values: {}
+  protect_persisted_data: ""`
+			content, err := Parse([]byte(data))
+			Expect(err).To(Succeed())
+
+			Expect(content.SubstituteByData("dmi.orca_env_stable_values", []byte(value))).To(Succeed())
+
+			result, err := content.Content()
+			Expect(err).To(Succeed())
+
+			expected := `dmi:
+  gcp_project_id: unset
+  orca_env_stable_values:
+    certificate_authority_url: https://example1.com/v1/pki/root/ca/pem
+    deployment: deveaws
+    deployment_size: xsmall
+    domain: example2.com
+    landscape_region: eu12
+    org: deveaws
+    service_hostname_suffix: .example3.com
+    service_kubernetes_hostname_suffix: .example4.com
+    space: sac
+  protect_persisted_data: ""`
+			Expect(string(result)).To(MatchYAML(expected))
+		})
+
 		It("handles complex value substitution on yaml 2", func() {
 			value := `
 value1: v1
