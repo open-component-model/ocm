@@ -1,6 +1,7 @@
 package identity
 
 import (
+	"net/http"
 	"path"
 
 	. "net/url"
@@ -8,6 +9,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/logging"
 )
@@ -58,4 +60,17 @@ func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) common.Pro
 		return nil
 	}
 	return credentials.Properties()
+}
+
+func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId string) {
+	credentials := GetCredentials(ctx, repoUrl, groupId)
+	if credentials == nil {
+		return
+	}
+	username := credentials[ATTR_USERNAME]
+	password := credentials[ATTR_PASSWORD]
+	if username == "" || password == "" {
+		return
+	}
+	req.SetBasicAuth(username, password)
 }

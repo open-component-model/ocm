@@ -144,7 +144,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	fs := vfsattr.Get(ctx)
 
 	log := log.WithValues("BaseUrl", a.BaseUrl())
-	fileMap, err := a.GavFiles(fs)
+	fileMap, err := a.GavFiles(ctx, fs)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 		metadata.MimeType = artifact.MimeType()
 		if hash > 0 {
 			metadata.HashType = hash
-			metadata.Hash, err = getStringData(metadata.Bin+hashUrlExt(hash), fs)
+			metadata.Hash, err = getStringData(ctx, metadata.Bin+hashUrlExt(hash), fs)
 			if err != nil {
 				return nil, errors.Wrapf(err, "cannot read %s digest of: %s", hash, metadata.Bin)
 			}
@@ -190,7 +190,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 			return nil, err
 		}
 		defer out.Close()
-		reader, err := getReader(metadata.Bin, fs)
+		reader, err := getReader(ctx, metadata.Bin, fs)
 		if err != nil {
 			return nil, err
 		}
@@ -247,12 +247,12 @@ func filterByClassifier(fileMap map[string]crypto.Hash, classifier string) map[s
 	return filtered
 }
 
-func (a *AccessSpec) GavFiles(fs ...vfs.FileSystem) (map[string]crypto.Hash, error) {
+func (a *AccessSpec) GavFiles(ctx accspeccpi.Context, fs ...vfs.FileSystem) (map[string]crypto.Hash, error) {
 	if strings.HasPrefix(a.Repository, "file://") && len(fs) > 0 {
 		dir := a.Repository[7:]
 		return gavFilesFromDisk(fs[0], dir)
 	}
-	return a.gavOnlineFiles()
+	return a.gavOnlineFiles(ctx)
 }
 
 func gavFilesFromDisk(fs vfs.FileSystem, dir string) (map[string]crypto.Hash, error) {
@@ -264,11 +264,11 @@ func gavFilesFromDisk(fs vfs.FileSystem, dir string) (map[string]crypto.Hash, er
 }
 
 // gavOnlineFiles returns the files of the Maven (mvn) artifact in the repository and their available digests.
-func (a *AccessSpec) gavOnlineFiles() (map[string]crypto.Hash, error) {
+func (a *AccessSpec) gavOnlineFiles(ctx accspeccpi.Context) (map[string]crypto.Hash, error) {
 	log := log.WithValues("BaseUrl", a.BaseUrl())
 	log.Debug("gavOnlineFiles")
 
-	reader, err := getReader(a.BaseUrl(), nil)
+	reader, err := getReader(ctx, a.BaseUrl(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -334,8 +334,8 @@ func bestAvailableHash(list []string, filename string) crypto.Hash {
 ////////////////////////////////////////////////////////////////////////////////
 
 // getStringData reads all data from the given URL and returns it as a string.
-func getStringData(url string, fs vfs.FileSystem) (string, error) {
-	r, err := getReader(url, fs)
+func getStringData(ctx accspeccpi.Context, url string, fs vfs.FileSystem) (string, error) {
+	r, err := getReader(ctx, url, fs)
 	if err != nil {
 		return "", err
 	}
@@ -360,7 +360,7 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 		}
 
 		reader := func() (io.ReadCloser, error) {
-			return getReader(meta.Bin, vfsattr.Get(c.GetContext()))
+			return getReader(c.GetContext(), meta.Bin, vfsattr.Get(c.GetContext()))
 		}
 		if meta.Hash != "" {
 			getreader := reader
@@ -379,7 +379,7 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 	return accspeccpi.NewDefaultMethodImpl(c, a, "", a.MimeType(), factory), nil
 }
 
-func getReader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
+func getReader(ctx accspeccpi.Context, url string, fs vfs.FileSystem) (io.ReadCloser, error) {
 	if strings.HasPrefix(url, "file://") {
 		path := url[7:]
 		return fs.OpenFile(path, vfs.O_RDONLY, 0o600)
@@ -389,6 +389,7 @@ func getReader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+	identity.BasicAuth(req, ctx, url, "")
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(req)
 	if err != nil {

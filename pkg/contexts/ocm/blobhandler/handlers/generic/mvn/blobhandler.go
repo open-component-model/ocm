@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/mvn/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/mvn"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/logging"
@@ -53,32 +54,16 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 
 	// setup logger
 	log := log.WithValues("repository", b.spec.Url)
-
 	// identify artifact
 	artifact := mvn.DeSerialize(hint)
 	log = log.WithValues("groupId", artifact.GroupId, "artifactId", artifact.ArtifactId, "version", artifact.Version)
 	log.Debug("identified")
 
-	// get credentials
-	cred := identity.GetCredentials(ctx.GetContext(), b.spec.Url, artifact.GroupPath())
-	if cred == nil {
-		return nil, fmt.Errorf("no credentials found for %s. Couldn't upload '%s'", b.spec.Url, artifact)
-	}
-	username := cred[identity.ATTR_USERNAME]
-	password := cred[identity.ATTR_PASSWORD]
-	if username == "" || password == "" {
-		return nil, fmt.Errorf("credentials for %s are invalid. Username or password missing! Couldn't upload '%s'", b.spec.Url, artifact)
-	}
-	log = log.WithValues("user", username)
-	log.Debug("found credentials")
-
-	// Create a new request
 	blobReader, err := blob.Reader()
 	if err != nil {
 		return nil, err
 	}
 	defer blobReader.Close()
-
 	tempFs, err := tarutils.ExtractTgzToTempFs(blobReader)
 	if err != nil {
 		return nil, err
@@ -106,7 +91,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 			return nil, err
 		}
 		defer reader.Close()
-		err = deploy(artifact, b.spec.Url, reader, username, password, hr)
+		err = deploy(artifact, b.spec.Url, reader, ctx.GetContext(), hr)
 		if err != nil {
 			return nil, err
 		}
@@ -117,12 +102,12 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 }
 
 // deploy an artifact to the specified destination. See https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact
-func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, username string, password string, hashes *iotools.HashReader) error {
+func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, ctx accspeccpi.Context, hashes *iotools.HashReader) error {
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, artifact.Url(url), reader)
 	if err != nil {
 		return err
 	}
-	req.SetBasicAuth(username, password)
+	identity.BasicAuth(req, ctx, url, artifact.GroupPath())
 	// give the remote server a chance to decide based upon the checksum policy
 	for k, v := range hashes.HttpHeader() {
 		req.Header.Set(k, v)
