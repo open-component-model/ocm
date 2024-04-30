@@ -186,6 +186,44 @@ space: sac`
 			Expect(string(result)).To(MatchYAML(expected))
 		})
 
+		It("Store sequence in yaml", func() {
+			value := `- https://example1.com/v1/pki/root/ca/pem
+- deveaws
+- xsmall
+- example2.com
+- eu12
+- deveaws
+- .example3.com
+- .example4.com
+- sac`
+			data := `dmi:
+  gcp_project_id: unset
+  orca_env_stable_values: []
+  protect_persisted_data: ""`
+			content, err := Parse([]byte(data))
+			Expect(err).To(Succeed())
+
+			Expect(content.SubstituteByData("dmi.orca_env_stable_values", []byte(value))).To(Succeed())
+
+			result, err := content.Content()
+			Expect(err).To(Succeed())
+
+			expected := `dmi:
+  gcp_project_id: unset
+  orca_env_stable_values:
+    - https://example1.com/v1/pki/root/ca/pem
+    - deveaws
+    - xsmall
+    - example2.com
+    - eu12
+    - deveaws
+    - .example3.com
+    - .example4.com
+    - sac
+  protect_persisted_data: ""`
+			Expect(string(result)).To(MatchYAML(expected))
+		})
+
 		It("handles complex value substitution on yaml 2", func() {
 			value := `
 value1: v1
