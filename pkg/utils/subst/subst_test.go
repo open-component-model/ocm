@@ -330,6 +330,39 @@ single: 'foo\nbar'`
 		Expect(string(result)).To(MatchYAML(expected))
 	})
 
+	It("handles multiple updates", func() {
+		value1 := `2`
+		value2 := `3`
+
+		data := `data:
+  value1: orig1
+  value2: orig2`
+
+		content, err := Parse([]byte(data))
+		Expect(err).To(Succeed())
+
+		Expect(content.SubstituteByData("data.value1", []byte(value1))).To(Succeed())
+
+		result1, err := content.Content()
+		Expect(err).To(Succeed())
+		expected1 := `data:
+  value1: 2
+  value2: orig2`
+
+		Expect(string(result1)).To(MatchYAML(expected1))
+
+		Expect(content.SubstituteByData("data.value2", []byte(value2))).To(Succeed())
+
+		result2, err := content.Content()
+		Expect(err).To(Succeed())
+
+		expected2 := `data:
+  value1: 2
+  value2: 3`
+
+		Expect(string(result2)).To(MatchYAML(expected2))
+	})
+
 	It("handles complex value substitution on json", func() {
 		value := `
 value1: v1
