@@ -7,16 +7,19 @@ import (
 	"github.com/open-component-model/ocm/pkg/mimeutils"
 )
 
-// Artifact holds the typical Maven coordinates groupId, artifactId, version and packaging.
+// Artifact holds the typical Maven coordinates groupId, artifactId, version. Optional also classifier and extension.
 // https://maven.apache.org/ref/3.9.6/maven-core/artifact-handlers.html
 type Artifact struct {
-	GroupId    string
-	ArtifactId string
-	Version    string
-	Classifier string
-	Extension  string
-	//	Type       string
-	//	Packaging  string
+	// ArtifactId is the name of Maven (mvn) artifact.
+	GroupId string `json:"groupId"`
+	// ArtifactId is the name of Maven (mvn) artifact.
+	ArtifactId string `json:"artifactId"`
+	// Version of the Maven (mvn) artifact.
+	Version string `json:"version"`
+	// Classifier of the Maven (mvn) artifact.
+	Classifier string `json:"classifier"`
+	// Extension of the Maven (mvn) artifact.
+	Extension string `json:"extension"`
 }
 
 // GAV returns the GAV coordinates of the Maven Artifact.
@@ -95,6 +98,17 @@ func (a *Artifact) MimeType() string {
 		return m
 	}
 	return mime.MIME_TGZ
+}
+
+// Copy creates a new Artifact with the same values.
+func (a *Artifact) Copy() *Artifact {
+	return &Artifact{
+		GroupId:    a.GroupId,
+		ArtifactId: a.ArtifactId,
+		Version:    a.Version,
+		Classifier: a.Classifier,
+		Extension:  a.Extension,
+	}
 }
 
 // ArtifactFromHint creates new Artifact from accessspec-hint. See 'GetReferenceHint'.

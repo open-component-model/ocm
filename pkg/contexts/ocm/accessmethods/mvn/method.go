@@ -47,16 +47,8 @@ type AccessSpec struct {
 
 	// Repository is the base URL of the Maven (mvn) repository.
 	Repository string `json:"repository"`
-	// ArtifactId is the name of Maven (mvn) artifact.
-	GroupId string `json:"groupId"`
-	// ArtifactId is the name of Maven (mvn) artifact.
-	ArtifactId string `json:"artifactId"`
-	// Version of the Maven (mvn) artifact.
-	Version string `json:"version"`
-	// Classifier of the Maven (mvn) artifact.
-	Classifier string `json:"classifier"`
-	// Extension of the Maven (mvn) artifact.
-	Extension string `json:"extension"`
+
+	Artifact `json:",inline"`
 }
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
@@ -67,12 +59,13 @@ var log = logging.DynamicLogger(identity.REALM)
 func New(repository, groupId, artifactId, version string, options ...func(*AccessSpec)) *AccessSpec {
 	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
-		Repository:          repository,
-		GroupId:             groupId,
-		ArtifactId:          artifactId,
-		Version:             version,
-		Classifier:          "",
-		Extension:           "",
+		Artifact: Artifact{
+			GroupId:    groupId,
+			ArtifactId: artifactId,
+			Version:    version,
+			Classifier: "",
+			Extension:  "",
+		},
 	}
 	for _, option := range options {
 		option(accessSpec)
@@ -129,21 +122,15 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.Comp
 }
 
 func (a *AccessSpec) BaseUrl() string {
-	return a.Repository + "/" + a.AsArtifact().GavPath()
+	return a.Repository + "/" + a.GavPath()
 }
 
 func (a *AccessSpec) ArtifactUrl() string {
-	return a.AsArtifact().Url(a.Repository)
+	return a.Url(a.Repository)
 }
 
-func (a *AccessSpec) AsArtifact() *Artifact {
-	return &Artifact{
-		GroupId:    a.GroupId,
-		ArtifactId: a.ArtifactId,
-		Version:    a.Version,
-		Classifier: a.Classifier,
-		Extension:  a.Extension,
-	}
+func (a *AccessSpec) NewArtifact() *Artifact {
+	return a.Artifact.Copy()
 }
 
 type meta struct {
@@ -173,7 +160,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	}
 	defer vfs.Cleanup(tempFs)
 
-	artifact := a.AsArtifact()
+	artifact := a.NewArtifact()
 	metadata := meta{}
 	for file, hash := range fileMap {
 		artifact.ClassifierExtensionFrom(file)
@@ -295,7 +282,7 @@ func (a *AccessSpec) gavOnlineFiles() (map[string]crypto.Hash, error) {
 	}
 	var fileList []string
 	var process func(*html.Node)
-	prefix := a.AsArtifact().FilePrefix()
+	prefix := a.FilePrefix()
 	process = func(node *html.Node) {
 		// check if the node is an element node and the tag is "<a href="..." />"
 		if node.Type == html.ElementNode && node.Data == "a" {
@@ -386,10 +373,10 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 			}
 		}
 		acc := blobaccess.DataAccessForReaderFunction(reader, meta.Bin)
-		return accessobj.CachedBlobAccessForWriter(c.GetContext(), a.AsArtifact().MimeType(), accessio.NewDataAccessWriter(acc)), nil
+		return accessobj.CachedBlobAccessForWriter(c.GetContext(), a.MimeType(), accessio.NewDataAccessWriter(acc)), nil
 	}
 	// FIXME add Digest!
-	return accspeccpi.NewDefaultMethodImpl(c, a, "", a.AsArtifact().MimeType(), factory), nil
+	return accspeccpi.NewDefaultMethodImpl(c, a, "", a.MimeType(), factory), nil
 }
 
 func getReader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
