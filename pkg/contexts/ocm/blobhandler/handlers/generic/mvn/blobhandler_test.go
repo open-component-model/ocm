@@ -30,7 +30,6 @@ var _ = Describe("blobhandler generic mvn tests", func() {
 		err := json.Unmarshal([]byte(resp), &body)
 		Expect(err).To(BeNil())
 		Expect(body.Repo).To(Equal("ocm-mvn-test"))
-		//Expect(body.FileName).To(Equal("/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
 		Expect(body.DownloadUri).To(Equal("https://ocm.sofware/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
 		Expect(body.Uri).To(Equal("https://ocm.sofware/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
 		Expect(body.MimeType).To(Equal("application/java-archive"))

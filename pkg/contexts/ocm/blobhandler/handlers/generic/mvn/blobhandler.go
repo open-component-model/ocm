@@ -55,7 +55,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	log := log.WithValues("repository", b.spec.Url)
 
 	// identify artifact
-	artifact := mvn.ArtifactFromHint(hint)
+	artifact := mvn.DeSerialize(hint)
 	log = log.WithValues("groupId", artifact.GroupId, "artifactId", artifact.ArtifactId, "version", artifact.Version)
 	log.Debug("identified")
 

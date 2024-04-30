@@ -27,6 +27,11 @@ func (a *Artifact) GAV() string {
 	return a.GroupId + ":" + a.ArtifactId + ":" + a.Version
 }
 
+// Serialize returns the Artifact as a string (GroupId:ArtifactId:Version:Classifier:Extension).
+func (a *Artifact) Serialize() string {
+	return a.GroupId + ":" + a.ArtifactId + ":" + a.Version + ":" + a.Classifier + ":" + a.Extension
+}
+
 // String returns the GAV coordinates of the Maven Artifact.
 func (a *Artifact) String() string {
 	return a.GAV()
@@ -37,11 +42,11 @@ func (a *Artifact) GavPath() string {
 	return a.GroupPath() + "/" + a.ArtifactId + "/" + a.Version
 }
 
-// FileName returns the Maven Artifact's GAV-name with classifier and extension.
+// FilePath returns the Maven Artifact's GAV-name with classifier and extension.
 // Which is equal to the URL-path of the artifact in the repository.
 // Default extension is jar.
-func (a *Artifact) FileName() string {
-	path := a.GavPath() + "/" + a.FilePrefix()
+func (a *Artifact) FilePath() string {
+	path := a.GavPath() + "/" + a.FileNamePrefix()
 	if a.Classifier != "" {
 		path += "-" + a.Classifier
 	}
@@ -54,7 +59,7 @@ func (a *Artifact) FileName() string {
 }
 
 func (a *Artifact) Url(baseUrl string) string {
-	return baseUrl + "/" + a.FileName()
+	return baseUrl + "/" + a.FilePath()
 }
 
 // GroupPath returns GroupId with `/` instead of `.`.
@@ -62,7 +67,7 @@ func (a *Artifact) GroupPath() string {
 	return strings.ReplaceAll(a.GroupId, ".", "/")
 }
 
-func (a *Artifact) FilePrefix() string {
+func (a *Artifact) FileNamePrefix() string {
 	return a.ArtifactId + "-" + a.Version
 }
 
@@ -74,7 +79,7 @@ func (a *Artifact) Purl() string {
 // ClassifierExtensionFrom extracts the classifier and extension from the filename (without any path prefix).
 func (a *Artifact) ClassifierExtensionFrom(filename string) *Artifact {
 	// TODO should work with pos (path.Basename)?!?
-	s := strings.TrimPrefix(filename, a.FilePrefix())
+	s := strings.TrimPrefix(filename, a.FileNamePrefix())
 	if strings.HasPrefix(s, "-") {
 		s = strings.TrimPrefix(s, "-")
 		i := strings.Index(s, ".")
@@ -111,9 +116,9 @@ func (a *Artifact) Copy() *Artifact {
 	}
 }
 
-// ArtifactFromHint creates new Artifact from accessspec-hint. See 'GetReferenceHint'.
-func ArtifactFromHint(gav string) *Artifact {
-	parts := strings.Split(gav, ":")
+// DeSerialize creates an Artifact from it's serialized form (see Artifact.Serialize).
+func DeSerialize(serializedArtifact string) *Artifact {
+	parts := strings.Split(serializedArtifact, ":")
 	if len(parts) < 3 {
 		return nil
 	}

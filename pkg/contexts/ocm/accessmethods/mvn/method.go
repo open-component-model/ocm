@@ -59,6 +59,7 @@ var log = logging.DynamicLogger(identity.REALM)
 func New(repository, groupId, artifactId, version string, options ...func(*AccessSpec)) *AccessSpec {
 	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
+		Repository:          repository,
 		Artifact: Artifact{
 			GroupId:    groupId,
 			ArtifactId: artifactId,
@@ -99,10 +100,9 @@ func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpe
 	return a
 }
 
-// GetReferenceHint returns the reference hint for the Maven (mvn) artifact. In the following form:
-// groupId:artifactId:version:classifier:extension.
+// GetReferenceHint returns the reference hint for the Maven (mvn) artifact.
 func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) string {
-	return a.GroupId + ":" + a.ArtifactId + ":" + a.Version + ":" + a.Classifier + ":" + a.Extension
+	return a.Serialize()
 }
 
 func (_ *AccessSpec) GetType() string {
@@ -215,7 +215,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	}
 
 	// pack all downloaded files into a tar.gz file
-	tgz, err := vfs.TempFile(fs, "", Type+"-"+artifact.FilePrefix()+"-*.tar.gz")
+	tgz, err := vfs.TempFile(fs, "", Type+"-"+artifact.FileNamePrefix()+"-*.tar.gz")
 	if err != nil {
 		return nil, err
 	}
@@ -282,7 +282,7 @@ func (a *AccessSpec) gavOnlineFiles() (map[string]crypto.Hash, error) {
 	}
 	var fileList []string
 	var process func(*html.Node)
-	prefix := a.FilePrefix()
+	prefix := a.FileNamePrefix()
 	process = func(node *html.Node) {
 		// check if the node is an element node and the tag is "<a href="..." />"
 		if node.Type == html.ElementNode && node.Data == "a" {

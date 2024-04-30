@@ -7,7 +7,7 @@ import (
 
 var _ = Describe("Maven Test Environment", func() {
 
-	It("GAV, GroupPath, FileName", func() {
+	It("GAV, GroupPath, FilePath", func() {
 		artifact := &Artifact{
 			GroupId:    "ocm.software",
 			ArtifactId: "hello-ocm",
@@ -16,7 +16,7 @@ var _ = Describe("Maven Test Environment", func() {
 		}
 		Expect(artifact.GAV()).To(Equal("ocm.software:hello-ocm:0.0.1"))
 		Expect(artifact.GroupPath()).To(Equal("ocm/software"))
-		Expect(artifact.FileName()).To(Equal("ocm/software/hello-ocm/0.0.1/hello-ocm-0.0.1.jar"))
+		Expect(artifact.FilePath()).To(Equal("ocm/software/hello-ocm/0.0.1/hello-ocm-0.0.1.jar"))
 	})
 
 	It("ClassifierExtensionFrom", func() {
@@ -42,12 +42,13 @@ var _ = Describe("Maven Test Environment", func() {
 
 	It("parse GAV", func() {
 		gav := "org.apache.commons:commons-compress:1.26.1:cyclonedx:xml"
-		artifact := ArtifactFromHint(gav)
+		artifact := DeSerialize(gav)
+		Expect(artifact.Serialize()).To(Equal(gav))
 		Expect(artifact.GroupId).To(Equal("org.apache.commons"))
 		Expect(artifact.ArtifactId).To(Equal("commons-compress"))
 		Expect(artifact.Version).To(Equal("1.26.1"))
 		Expect(artifact.Classifier).To(Equal("cyclonedx"))
 		Expect(artifact.Extension).To(Equal("xml"))
-		Expect(artifact.FileName()).To(Equal("org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1-cyclonedx.xml"))
+		Expect(artifact.FilePath()).To(Equal("org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1-cyclonedx.xml"))
 	})
 })
