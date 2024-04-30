@@ -61,7 +61,7 @@ type AccessSpec struct {
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
-var logger = logging.Context().Logger(identity.REALM)
+var log = logging.DynamicLogger(identity.REALM)
 
 // New creates a new Maven (mvn) repository access spec version v1.
 func New(repository, groupId, artifactId, version string, options ...func(*AccessSpec)) *AccessSpec {
@@ -156,7 +156,7 @@ type meta struct {
 func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	fs := vfsattr.Get(ctx)
 
-	log := logger.WithValues("BaseUrl", a.BaseUrl())
+	log := log.WithValues("BaseUrl", a.BaseUrl())
 	fileMap, err := a.GavFiles(fs)
 	if err != nil {
 		return nil, err
@@ -178,7 +178,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	for file, hash := range fileMap {
 		artifact.ClassifierExtensionFrom(file)
 		metadata.Bin = artifact.Url(a.Repository)
-		log = logger.WithValues("file", metadata.Bin)
+		log = log.WithValues("file", metadata.Bin)
 		log.Debug("processing")
 		metadata.MimeType = artifact.MimeType()
 		if hash > 0 {
@@ -278,7 +278,7 @@ func gavFilesFromDisk(fs vfs.FileSystem, dir string) (map[string]crypto.Hash, er
 
 // gavOnlineFiles returns the files of the Maven (mvn) artifact in the repository and their available digests.
 func (a *AccessSpec) gavOnlineFiles() (map[string]crypto.Hash, error) {
-	log := logger.WithValues("BaseUrl", a.BaseUrl())
+	log := log.WithValues("BaseUrl", a.BaseUrl())
 	log.Debug("gavOnlineFiles")
 
 	reader, err := getReader(a.BaseUrl(), nil)
@@ -326,7 +326,7 @@ func filesAndHashes(fileList []string) map[string]crypto.Hash {
 	for _, file := range fileList {
 		if IsResource(file) {
 			result[file] = bestAvailableHash(fileList, file)
-			logger.Debug("found", "file", file)
+			log.Debug("found", "file", file)
 		}
 	}
 	return result

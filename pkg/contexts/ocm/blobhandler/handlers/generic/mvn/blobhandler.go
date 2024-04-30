@@ -31,7 +31,7 @@ func NewArtifactHandler(repospec *Config) cpi.BlobHandler {
 	return &artifactHandler{repospec}
 }
 
-var log = logging.Context().Logger(identity.REALM)
+var log = logging.DynamicLogger(identity.REALM)
 
 func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hint string, _ cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	// check conditions
@@ -52,7 +52,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	}
 
 	// setup logger
-	log = log.WithValues("repository", b.spec.Url)
+	log := log.WithValues("repository", b.spec.Url)
 
 	// identify artifact
 	artifact := mvn.ArtifactFromHint(hint)
