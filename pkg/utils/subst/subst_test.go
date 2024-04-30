@@ -252,6 +252,84 @@ data:
 		})
 	})
 
+	It("handles differing string styles", func() {
+		value := `folded: > 
+  foo
+  bar
+folded_strip: >- 
+  foo
+  bar
+folded_keep: >+
+  foo
+  bar
+literal: | 
+  foo
+  bar
+literal_strip: |-
+  foo
+  bar
+literal_keep: |+
+  foo
+  bar
+double: "foo\nbar"
+single: 'foo\nbar'`
+		data := `data:
+  value1: origs1
+  value2: orig2`
+		content, err := Parse([]byte(data))
+		Expect(err).To(Succeed())
+
+		Expect(content.SubstituteByData("data.value1", []byte(value))).To(Succeed())
+
+		result, err := content.Content()
+		Expect(err).To(Succeed())
+
+		Expect(string(result)).To(MatchYAML(`data:
+  value1:
+    folded: > 
+      foo
+      bar
+    folded_strip: >- 
+      foo
+      bar
+    folded_keep: >+
+      foo
+      bar
+    literal: | 
+      foo
+      bar
+    literal_strip: |-
+      foo
+      bar
+    literal_keep: |+
+      foo
+      bar
+    double: "foo\nbar"
+    single: 'foo\nbar'
+  value2: orig2`))
+	})
+
+	It("handles non-string scalar", func() {
+		value := `2`
+
+		data := `data:
+  value1: orig1
+  value2: orig2`
+
+		content, err := Parse([]byte(data))
+		Expect(err).To(Succeed())
+
+		Expect(content.SubstituteByData("data.value1", []byte(value))).To(Succeed())
+
+		result, err := content.Content()
+		Expect(err).To(Succeed())
+		expected := `data:
+  value1: 2
+  value2: orig2`
+
+		Expect(string(result)).To(MatchYAML(expected))
+	})
+
 	It("handles complex value substitution on json", func() {
 		value := `
 value1: v1
