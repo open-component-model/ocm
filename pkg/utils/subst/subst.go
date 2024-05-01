@@ -108,6 +108,19 @@ func (f *fileinfo) SubstituteByData(path string, value []byte) error {
 		return err
 	}
 
+	if !f.json {
+		var replaceFlowStyle func(*yaml.Node)
+		replaceFlowStyle = func(nd *yaml.Node) {
+			if nd.Style == yaml.FlowStyle {
+				nd.Style = yaml.LiteralStyle
+			}
+			for _, chld := range nd.Content {
+				replaceFlowStyle(chld)
+			}
+		}
+		replaceFlowStyle(m)
+	}
+
 	nd := &yqlib.CandidateNode{}
 	nd.SetDocument(0)
 	nd.SetFilename("value")
