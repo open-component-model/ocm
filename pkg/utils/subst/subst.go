@@ -51,7 +51,7 @@ func Parse(data []byte) (SubstitutionTarget, error) {
 		case mlog.None:
 			fallthrough
 		case mlog.ErrorLevel:
-			lvl = glog.WARNING
+			lvl = glog.ERROR
 		case mlog.WarnLevel:
 			lvl = glog.WARNING
 		case mlog.InfoLevel:
