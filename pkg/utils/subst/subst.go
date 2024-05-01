@@ -7,12 +7,16 @@ package subst
 import (
 	"bytes"
 	"container/list"
+	"sync"
 
+	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
+	glog "gopkg.in/op/go-logging.v1"
 	"gopkg.in/yaml.v3"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -38,7 +42,28 @@ func ParseFile(file string, fss ...vfs.FileSystem) (SubstitutionTarget, error) {
 	return s, nil
 }
 
+var yqLibLogInit sync.Once
+
 func Parse(data []byte) (SubstitutionTarget, error) {
+	yqLibLogInit.Do(func() {
+		var lvl glog.Level
+		switch ocmlog.Context().GetDefaultLevel() {
+		case mlog.None:
+			fallthrough
+		case mlog.ErrorLevel:
+			lvl = glog.WARNING
+		case mlog.WarnLevel:
+			lvl = glog.WARNING
+		case mlog.InfoLevel:
+			lvl = glog.INFO
+		case mlog.DebugLevel:
+			fallthrough
+		case mlog.TraceLevel:
+			lvl = glog.DEBUG
+		}
+		glog.SetLevel(lvl, "yq-lib")
+	})
+
 	var (
 		err error
 		fi  fileinfo
