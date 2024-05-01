@@ -45,7 +45,7 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("handles plugin based entry type", func() {
-		prov := routingslip.For(env.OCMContext()).CreateConfigTypeSetConfigProvider().(flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider)
+		prov := routingslip.For(env.OCMContext()).CreateConfigTypeSetConfigProvider()
 		configopts := prov.CreateOptions()
 		Expect(sliceutils.Transform(configopts.Options(), transformer.GetName[flagsets.Option, string])).To(ConsistOf(
 			"entry", "comment", // default settings

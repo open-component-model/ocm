@@ -18,7 +18,8 @@ const (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Get(ctx ocm.Context) plugins.Set {
+func Get(ctxp ocm.ContextProvider) plugins.Set {
+	ctx := ctxp.OCMContext()
 	path := plugindirattr.Get(ctx)
 
 	// avoid dead lock reading attribute during attribute creation

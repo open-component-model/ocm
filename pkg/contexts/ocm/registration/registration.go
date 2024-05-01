@@ -27,7 +27,8 @@ import (
 )
 
 // RegisterExtensions registers all the extension provided by the found plugin.
-func RegisterExtensions(ctx ocm.Context) error {
+func RegisterExtensions(ctxp ocm.ContextProvider) error {
+	ctx := ctxp.OCMContext()
 	pi := plugincacheattr.Get(ctx)
 
 	logger := Logger(ctx)
