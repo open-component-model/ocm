@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package npm
 
 import (
@@ -20,6 +16,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	npm "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -97,7 +95,7 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.Comp
 
 func (a *AccessSpec) getPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	url := a.Registry + path.Join("/", a.Package, a.Version)
-	r, err := reader(url, vfsattr.Get(ctx))
+	r, err := reader(url, vfsattr.Get(ctx), ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +124,7 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 		}
 
 		f := func() (io.ReadCloser, error) {
-			return reader(meta.Dist.Tarball, vfsattr.Get(c.GetContext()))
+			return reader(meta.Dist.Tarball, vfsattr.Get(c.GetContext()), c.GetContext())
 		}
 		if meta.Dist.Shasum != "" {
 			tf := f
@@ -151,9 +149,7 @@ type meta struct {
 	} `json:"dist"`
 }
 
-func reader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
-	c := &http.Client{}
-
+func reader(url string, fs vfs.FileSystem, ctx cpi.ContextProvider) (io.ReadCloser, error) {
 	if strings.HasPrefix(url, "file://") {
 		path := url[7:]
 		return fs.OpenFile(path, vfs.O_RDONLY, 0o600)
@@ -163,6 +159,8 @@ func reader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+	npm.Authorize(req, ctx, url, "")
+	c := &http.Client{}
 	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
