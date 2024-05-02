@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package genericocireg
 
 import (
@@ -73,12 +69,12 @@ func (c *componentAccessImpl) GetName() string {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func toTag(v string) string {
+func toTag(v string) (string, err) {
 	_, err := semver.NewVersion(v)
 	if err != nil {
-		panic(errors.Wrapf(err, "%s is no semver version", v))
+		return "", err
 	}
-	return strings.ReplaceAll(v, "+", META_SEPARATOR)
+	return strings.ReplaceAll(v, "+", META_SEPARATOR), nil
 }
 
 func toVersion(t string) string {
@@ -132,7 +128,11 @@ func (c *componentAccessImpl) HasVersion(vers string) (bool, error) {
 }
 
 func (c *componentAccessImpl) LookupVersion(version string) (*repocpi.ComponentVersionAccessInfo, error) {
-	acc, err := c.namespace.GetArtifact(toTag(version))
+	tag, err := toTag(version)
+	if err != nil {
+		return nil, err
+	}
+	acc, err := c.namespace.GetArtifact(tag)
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			return nil, cpi.ErrComponentVersionNotFoundWrap(err, c.name, version)
@@ -151,7 +151,11 @@ func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (*re
 		return nil, accessio.ErrReadOnly
 	}
 	override := utils.Optional(overrides...)
-	acc, err := c.namespace.GetArtifact(toTag(version))
+	tag, err := toTag(version)
+	if err != nil {
+		return nil, err
+	}
+	acc, err := c.namespace.GetArtifact(tag)
 	if err == nil {
 		if override {
 			return newComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc, false)
