@@ -3,7 +3,7 @@ package s3
 import (
 	"fmt"
 
-	. "github.com/open-component-model/ocm/pkg/exception"
+	. "github.com/mandelsoft/goutils/exception"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"

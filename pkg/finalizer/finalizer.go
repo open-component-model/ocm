@@ -7,8 +7,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
-
-	"github.com/open-component-model/ocm/pkg/exception"
+	"github.com/mandelsoft/goutils/exception"
 )
 
 type Finalizable interface {

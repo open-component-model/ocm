@@ -8,11 +8,11 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -147,7 +147,7 @@ func (r *registry) Register(h ActionHandler, olist ...Option) error {
 	reg := &registration{
 		handler:  h,
 		versions: versions,
-		priority: generics.Conditional(opts.Priority >= 0, opts.Priority, 10),
+		priority: general.Conditional(opts.Priority >= 0, opts.Priority, 10),
 	}
 
 	for _, s := range opts.Selectors {

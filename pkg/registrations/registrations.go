@@ -11,9 +11,10 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/set"
 	"golang.org/x/exp/slices"
 
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -101,7 +102,7 @@ func (i *RegistrationHandlerInfo[T, O]) GetHandlers(target T) HandlerInfos {
 		prefix := i.prefix.String()
 		if prefix != "" {
 			for i := range infos {
-				infos[i].Name = prefix + generics.Conditional(infos[i].Name == "", "", "/"+infos[i].Name)
+				infos[i].Name = prefix + general.Conditional(infos[i].Name == "", "", "/"+infos[i].Name)
 			}
 		}
 	}
@@ -207,7 +208,7 @@ func (c *handlerRegistrationRegistry[T, O]) GetHandlers(target T) HandlerInfos {
 		infos = append(infos, c.base.GetHandlers(target)...)
 	}
 
-	set := generics.Set[string]{}
+	set := set.New[string]()
 	i := 0
 	for i < len(infos) {
 		if set.Contains(infos[i].Name) {

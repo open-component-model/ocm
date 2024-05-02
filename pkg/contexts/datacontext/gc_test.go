@@ -7,14 +7,14 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
+	"github.com/mandelsoft/goutils/general"
 
 	me "github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 )
 
 var _ = Describe("area test", func() {
-	It("can be garbage collectede", func() {
+	It("can be garbage collected", func() {
 		ctx := me.New()
 		r := runtimefinalizer.GetRuntimeFinalizationRecorder(ctx)
 		id := ctx.GetId()
@@ -28,7 +28,7 @@ var _ = Describe("area test", func() {
 
 	It("provides second reference", func() {
 		// ocmlog.Context().AddRule(logging.NewConditionRule(logging.DebugLevel, me.Realm))
-		multiRefs := generics.Conditional(me.MULTI_REF, 2, 1)
+		multiRefs := general.Conditional(me.MULTI_REF, 2, 1)
 
 		ctx := me.New()
 		Expect(me.GetContextRefCount(ctx)).To(Equal(1))

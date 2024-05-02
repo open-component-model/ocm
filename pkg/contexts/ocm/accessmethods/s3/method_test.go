@@ -13,6 +13,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -25,7 +26,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type mockDownloader struct {
@@ -49,7 +49,7 @@ func checkMarshal(spec *s3.AccessSpec, typ string, fmt string) {
 
 	n := MustWithOffset(1, Calling(ocm.DefaultContext().AccessSpecForConfig(data, nil)))
 	Expect(reflect.TypeOf(n)).To(Equal(reflect.TypeOf(spec)))
-	Expect(n.GetType()).To(Equal(generics.Conditional(typ == "", s3.Type, typ)))
+	Expect(n.GetType()).To(Equal(general.Conditional(typ == "", s3.Type, typ)))
 	data2 := Must(json.Marshal(n))
 	ExpectWithOffset(1, string(data2)).To(StringEqualWithContext(string(data)))
 }

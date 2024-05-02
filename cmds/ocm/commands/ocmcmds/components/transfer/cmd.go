@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -35,7 +36,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -192,7 +192,7 @@ func (a *action) Out() error {
 
 	if a.cmd.BOMFile != "" {
 		bom := BOM{}
-		for _, nv := range generics.KeyList(a.closure) {
+		for _, nv := range maputils.Keys(a.closure, common.CompareNameVersion) {
 			bom.List = append(bom.List, BomEntry{
 				Component: nv.GetName(),
 				Version:   nv.GetVersion(),

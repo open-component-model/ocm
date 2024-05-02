@@ -169,7 +169,7 @@ func (h *Handler) GetForResource(racc cpi.ResourceAccess) (fs vfs.FileSystem, re
 	case mime.MIME_TGZ, mime.MIME_TAR:
 	case MimeOCIImageArtifact:
 	default:
-		if !h.ociConfigtypes.Has(media) && !h.ociConfigtypes.Has(meth.MimeType()) {
+		if !h.ociConfigtypes.Contains(media) && !h.ociConfigtypes.Contains(meth.MimeType()) {
 			return nil, nil, nil
 		}
 	}
@@ -228,7 +228,7 @@ func (h *Handler) getForArtifact(finalize *finalizer.Finalizer, m oci.ArtifactAc
 		return nil, nil, fmt.Errorf("oci artifact is no image manifest")
 	}
 	macc := m.ManifestAccess()
-	if !h.ociConfigtypes.Has(macc.GetDescriptor().Config.MediaType) {
+	if !h.ociConfigtypes.Contains(macc.GetDescriptor().Config.MediaType) {
 		return nil, nil, nil
 	}
 

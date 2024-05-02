@@ -1,13 +1,14 @@
 package ociartifactblob
 
 import (
+	"github.com/mandelsoft/goutils/generics"
+
 	blob "github.com/open-component-model/ocm/pkg/blobaccess/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
@@ -30,7 +31,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, r
 	blobprov := blob.BlobAccessProviderForOCIArtifact(refname, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
-	return cpi.NewArtifactAccessForProvider(generics.As[*M](meta), accprov)
+	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), accprov)
 }
 
 func ResourceAccess(ctx ocm.Context, meta *cpi.ResourceMeta, path string, opts ...Option) cpi.ResourceAccess {

@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 // ResourceInput describe the source for the content of
@@ -61,7 +61,7 @@ func (s *sourceInfo) Sub(indices ...interface{}) SourceInfo {
 	}
 	return &sourceInfo{
 		origin:  s.origin,
-		indices: generics.AppendedSlice(s.indices, indices...),
+		indices: sliceutils.CopyAppend(s.indices, indices...),
 	}
 }
 

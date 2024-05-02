@@ -5,8 +5,7 @@ import (
 	"time"
 
 	"github.com/mandelsoft/goutils/errors"
-
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/mandelsoft/goutils/general"
 )
 
 // ParseDeltaTime parses a time diff relative to the actual
@@ -14,7 +13,7 @@ import (
 func ParseDeltaTime(s string, past bool) (time.Time, error) {
 	var t time.Time
 
-	f := int64(generics.Conditional(past, -1, 1))
+	f := int64(general.Conditional(past, -1, 1))
 
 	if len(s) < 2 {
 		return t, errors.Newf("invalid time diff %q", s)

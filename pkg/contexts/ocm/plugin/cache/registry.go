@@ -1,9 +1,10 @@
 package cache
 
 import (
+	"github.com/mandelsoft/goutils/set"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type ConstraintRegistry[T any, K registry.Key[K]] struct {
@@ -15,7 +16,7 @@ func (r *ConstraintRegistry[T, K]) Lookup(key K) []*T {
 	return r.mapping.LookupHandler(key)
 }
 
-func (r *ConstraintRegistry[T, K]) LookupKeys(key K) generics.Set[K] {
+func (r *ConstraintRegistry[T, K]) LookupKeys(key K) set.Set[K] {
 	return r.mapping.LookupKeys(key)
 }
 
@@ -30,7 +31,7 @@ func (r *ConstraintRegistry[T, K]) LookupFor(name string, key K) []*T {
 	return m.LookupHandler(key)
 }
 
-func (r *ConstraintRegistry[T, K]) LookupKeysFor(name string, key K) generics.Set[K] {
+func (r *ConstraintRegistry[T, K]) LookupKeysFor(name string, key K) set.Set[K] {
 	if name == "" {
 		return r.LookupKeys(key)
 	}

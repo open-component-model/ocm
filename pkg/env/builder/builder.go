@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"github.com/mandelsoft/goutils/exception"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/modern-go/reflect2"
 	"github.com/onsi/ginkgo/v2"
@@ -13,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/env"
-	"github.com/open-component-model/ocm/pkg/exception"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

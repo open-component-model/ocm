@@ -5,12 +5,12 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/set"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -33,7 +33,7 @@ const (
 	STATUS_SKIPPED = "skipped"
 )
 
-var status = generics.Set[string]{}.Add(STATUS_PASSED, STATUS_FAILED, STATUS_SKIPPED)
+var status = set.New[string](STATUS_PASSED, STATUS_FAILED, STATUS_SKIPPED)
 
 var (
 	StatusOption  = options.NewStringMapOptionType("checkStatus", out.Sprintf("status value for check (%s)", strings.Join(utils.StringMapKeys(status), ", ")))
@@ -51,7 +51,7 @@ func New() ppi.ValueSet {
 
 The status entry has the following format:
 - **<code>status</code> *string* status code (passed, failed)
-- **<code>message</code> *string* mwssage
+- **<code>message</code> *string* message
 `),
 	}
 }
@@ -63,7 +63,7 @@ func (v ValueSet) Options() []options.OptionType {
 	}
 }
 
-func (v ValueSet) ValidateSpecification(p ppi.Plugin, spec runtime.TypedObject) (*ppi.ValueSetInfo, error) {
+func (v ValueSet) ValidateSpecification(_ ppi.Plugin, spec runtime.TypedObject) (*ppi.ValueSetInfo, error) {
 	var info ppi.ValueSetInfo
 
 	my := spec.(*Value)
@@ -87,7 +87,7 @@ func (v ValueSet) ValidateSpecification(p ppi.Plugin, spec runtime.TypedObject) 
 	return &info, nil
 }
 
-func (v ValueSet) ComposeSpecification(p ppi.Plugin, opts ppi.Config, config ppi.Config) error {
+func (v ValueSet) ComposeSpecification(_ ppi.Plugin, opts ppi.Config, config ppi.Config) error {
 	list := errors.ErrListf("configuring options")
 
 	if v, ok := opts.GetValue(StatusOption.GetName()); ok {
