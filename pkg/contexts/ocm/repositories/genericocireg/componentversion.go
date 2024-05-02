@@ -218,7 +218,7 @@ func (c *ComponentVersionContainer) Update() error {
 		}
 
 		logger.Debug("add oci artifact")
-		tag, err := toTag(version)
+		tag, err := toTag(c.version)
 		if err != nil {
 			return err
 		}

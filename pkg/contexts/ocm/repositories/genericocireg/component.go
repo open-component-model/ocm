@@ -69,7 +69,7 @@ func (c *componentAccessImpl) GetName() string {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func toTag(v string) (string, err) {
+func toTag(v string) (string, error) {
 	_, err := semver.NewVersion(v)
 	if err != nil {
 		return "", err
