@@ -64,33 +64,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	log = log.WithValues("package", pkg.Name, "version", pkg.Version)
 	log.Debug("identified")
 
-	// get credentials and TODO cache it
-	cred := npmCredentials.GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
-	if cred == nil {
-		return nil, fmt.Errorf("No credentials found for %s. Couldn't upload '%s'.", b.spec.Url, pkg.Name)
-	}
-	log.Debug("found credentials")
-
-	// check if token exists, if not login and retrieve token
-	token := cred[npmCredentials.ATTR_TOKEN]
-	if token == "" {
-		// use user+pass+mail from credentials to login and retrieve bearer token
-		username := cred[npmCredentials.ATTR_USERNAME]
-		password := cred[npmCredentials.ATTR_PASSWORD]
-		email := cred[npmCredentials.ATTR_EMAIL]
-		if username == "" || password == "" || email == "" {
-			return nil, fmt.Errorf("No credentials for %s are invalid. Username, password or email missing! Couldn't upload '%s'.", b.spec.Url, pkg.Name)
-		}
-		log = log.WithValues("user", username, "repo", b.spec.Url)
-		log.Debug("login")
-
-		// TODO: check different kinds of .npmrc content
-		token, err = login(b.spec.Url, username, password, email)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		log.Debug("token found, skipping login")
+	token, err := npmCredentials.BearerToken(ctx.GetContext(), b.spec.Url, pkg.Name)
+	if err != nil {
+		// we assume, it's not possible to publish anonymous - without token
+		return nil, err
 	}
 
 	// check if package exists
