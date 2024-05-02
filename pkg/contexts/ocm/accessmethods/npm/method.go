@@ -94,11 +94,11 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.Comp
 }
 
 func (a *AccessSpec) getPackageMeta(ctx accspeccpi.Context) (*meta, error) {
-	url := a.Registry + path.Join("/", a.Package, a.Version)
-	r, err := reader(url, vfsattr.Get(ctx), ctx)
+	r, err := reader(a, vfsattr.Get(ctx), ctx)
 	if err != nil {
 		return nil, err
 	}
+	url := a.Registry + path.Join("/", a.Package, a.Version)
 	buf := &bytes.Buffer{}
 	_, err = io.Copy(buf, io.LimitReader(r, 200000))
 	if err != nil {
@@ -124,7 +124,7 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 		}
 
 		f := func() (io.ReadCloser, error) {
-			return reader(meta.Dist.Tarball, vfsattr.Get(c.GetContext()), c.GetContext())
+			return reader(a, vfsattr.Get(c.GetContext()), c.GetContext(), meta.Dist.Tarball)
 		}
 		if meta.Dist.Shasum != "" {
 			tf := f
@@ -149,7 +149,11 @@ type meta struct {
 	} `json:"dist"`
 }
 
-func reader(url string, fs vfs.FileSystem, ctx cpi.ContextProvider) (io.ReadCloser, error) {
+func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...string) (io.ReadCloser, error) {
+	url := a.Registry + path.Join("/", a.Package, a.Version)
+	if len(tar) > 0 {
+		url = tar[0]
+	}
 	if strings.HasPrefix(url, "file://") {
 		path := url[7:]
 		return fs.OpenFile(path, vfs.O_RDONLY, 0o600)
@@ -159,7 +163,7 @@ func reader(url string, fs vfs.FileSystem, ctx cpi.ContextProvider) (io.ReadClos
 	if err != nil {
 		return nil, err
 	}
-	npm.Authorize(req, ctx, url, "")
+	npm.Authorize(req, ctx, a.Registry, a.Package)
 	c := &http.Client{}
 	resp, err := c.Do(req)
 	if err != nil {
