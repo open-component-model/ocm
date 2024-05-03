@@ -93,23 +93,27 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.Comp
 	return ""
 }
 
+// PackageUrl returns the URL of the NPM package (Registry/Package/Version).
+func (a *AccessSpec) PackageUrl() string {
+	return a.Registry + path.Join("/", a.Package, a.Version)
+}
+
 func (a *AccessSpec) getPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	r, err := reader(a, vfsattr.Get(ctx), ctx)
 	if err != nil {
 		return nil, err
 	}
-	url := a.Registry + path.Join("/", a.Package, a.Version)
 	buf := &bytes.Buffer{}
 	_, err = io.Copy(buf, io.LimitReader(r, 200000))
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot get version metadata for %s", url)
+		return nil, errors.Wrapf(err, "cannot get version metadata for %s", a.PackageUrl())
 	}
 
 	var metadata meta
 
 	err = json.Unmarshal(buf.Bytes(), &metadata)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", url)
+		return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", a.PackageUrl())
 	}
 	return &metadata, nil
 }
@@ -150,7 +154,7 @@ type meta struct {
 }
 
 func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...string) (io.ReadCloser, error) {
-	url := a.Registry + path.Join("/", a.Package, a.Version)
+	url := a.PackageUrl()
 	if len(tar) > 0 {
 		url = tar[0]
 	}
