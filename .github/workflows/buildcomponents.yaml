@@ -25,7 +25,7 @@ jobs:
       repository-projects: read
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
-        uses: TooMuch4U/actions-clean@v2.1
+        uses: TooMuch4U/actions-clean@v2.2
         
       - name: Checkout
         uses: actions/checkout@v4
