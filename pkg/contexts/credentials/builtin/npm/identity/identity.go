@@ -1,13 +1,8 @@
 package identity
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"net/url"
 	"path"
 
 	. "net/url"
@@ -17,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/npm"
 )
 
 const (
@@ -102,8 +98,7 @@ func BearerToken(ctx cpi.ContextProvider, repoUrl string, pkgName string) (strin
 	log.Debug("login")
 
 	// TODO: check different kinds of .npmrc content
-	token, err := login(repoUrl, username, password, email)
-	return token, err
+	return npm.Login(repoUrl, username, password, email)
 }
 
 // Authorize the given request with the bearer token for the given repository URL and package name.
@@ -116,42 +111,4 @@ func Authorize(req *http.Request, ctx cpi.ContextProvider, repoUrl string, pkgNa
 	} else if token != "" {
 		req.Header.Set("authorization", "Bearer "+token)
 	}
-}
-
-// Login to npm registry (URL) and retrieve bearer token.
-func login(registry string, username string, password string, email string) (string, error) {
-	data := map[string]interface{}{
-		"_id":      "org.couchdb.user:" + username,
-		"name":     username,
-		"email":    email,
-		"password": password,
-		"type":     "user",
-	}
-	marshal, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, registry+"/-/user/org.couchdb.user:"+url.PathEscape(username), bytes.NewReader(marshal))
-	if err != nil {
-		return "", err
-	}
-	req.SetBasicAuth(username, password)
-	req.Header.Set("content-type", "application/json")
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= http.StatusBadRequest {
-		all, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("%d, %s", resp.StatusCode, string(all))
-	}
-	var token struct {
-		Token string `json:"token"`
-	}
-	err = json.NewDecoder(resp.Body).Decode(&token)
-	if err != nil {
-		return "", err
-	}
-	return token.Token, nil
 }
