@@ -48,12 +48,12 @@ var _ = Describe("value substitution in filesystem", func() {
 		err := localize.Substitute(subs, payloadfs)
 		Expect(err).To(Succeed())
 
-		CheckFile("dir/manifest1.yaml", payloadfs, `
+		CheckYAMLFile("dir/manifest1.yaml", payloadfs, `
 manifest:
   value1: config1
   value2: orig2
 `)
-		CheckFile("dir/manifest2.yaml", payloadfs, `
+		CheckYAMLFile("dir/manifest2.yaml", payloadfs, `
 manifest:
   value1: orig1
   value2: config2
@@ -74,7 +74,7 @@ manifest:
 		err := localize.Substitute(subs, payloadfs)
 		Expect(err).To(Succeed())
 
-		CheckFile("dir/manifest1.yaml", payloadfs, `
+		CheckYAMLFile("dir/manifest1.yaml", payloadfs, `
 manifest:
   value1: config1
   value2: config2
@@ -93,7 +93,7 @@ manifest:
 		err := localize.Substitute(subs, payloadfs)
 		Expect(err).To(Succeed())
 
-		CheckFile("dir/some.json", payloadfs, `
+		CheckJSONFile("dir/some.json", payloadfs, `
 {"manifest": {"value1": {"some": {"value": 1}}, "value2": "orig2"}}
 
 `)

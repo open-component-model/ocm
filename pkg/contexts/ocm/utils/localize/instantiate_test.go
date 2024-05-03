@@ -130,7 +130,7 @@ values:
 		fs := memoryfs.New()
 		err := localize.Instantiate(rules, cv, nil, config, fs, RESOURCE_TYPE)
 		Expect(err).To(Succeed())
-		CheckFile("dir/manifest1.yaml", fs, `
+		CheckYAMLFile("dir/manifest1.yaml", fs, `
 manifest:
   value1: ghcr.io/mandelsoft/test:v1
   value2: mine
