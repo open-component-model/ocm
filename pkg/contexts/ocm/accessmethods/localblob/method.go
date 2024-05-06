@@ -1,16 +1,11 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package localblob
 
 import (
 	"encoding/json"
 	"fmt"
 
-	. "github.com/open-component-model/ocm/pkg/exception"
-
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
+	. "github.com/open-component-model/ocm/pkg/exception"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )

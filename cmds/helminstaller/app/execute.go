@@ -1,16 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package app
 
 import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	. "github.com/open-component-model/ocm/pkg/exception"
-	. "github.com/open-component-model/ocm/pkg/finalizer"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -24,6 +17,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
+	. "github.com/open-component-model/ocm/pkg/exception"
+	. "github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/helm/loader"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"

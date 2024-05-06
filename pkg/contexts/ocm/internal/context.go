@@ -1,15 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
 	"context"
 	"reflect"
 	"strings"
-
-	. "github.com/open-component-model/ocm/pkg/finalizer"
 
 	"github.com/modern-go/reflect2"
 
@@ -20,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	. "github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )

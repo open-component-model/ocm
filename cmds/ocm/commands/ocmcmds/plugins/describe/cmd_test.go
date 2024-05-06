@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 //go:build unix
 
 package describe_test
@@ -9,12 +5,12 @@ package describe_test
 import (
 	"bytes"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
-
-	"github.com/mandelsoft/filepath/pkg/filepath"
 )
 
 const PLUGINS = "/testdata"

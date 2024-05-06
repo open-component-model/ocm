@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 // This package has been initially taken from github.com/containers/image
 // and modified to be provide a useful simple API based on
 // an Algorithm interface

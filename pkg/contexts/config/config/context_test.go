@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package config_test
 
 import (
@@ -12,13 +8,12 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/generics"
-
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	local "github.com/open-component-model/ocm/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/generics"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 

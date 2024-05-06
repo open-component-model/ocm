@@ -1,22 +1,17 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package logging_test
 
 import (
 	"bytes"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/logging/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"github.com/tonglil/buflogr"
 
 	local "github.com/open-component-model/ocm/pkg/logging"
+	. "github.com/open-component-model/ocm/pkg/logging/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

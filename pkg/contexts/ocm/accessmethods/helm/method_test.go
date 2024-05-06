@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package helm_test
 
 import (
@@ -10,14 +6,13 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
 	"helm.sh/helm/v3/pkg/chart/loader"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	helm2 "github.com/open-component-model/ocm/pkg/helm"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("Method", func() {

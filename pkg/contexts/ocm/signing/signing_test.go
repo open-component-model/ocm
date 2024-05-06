@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package signing_test
 
 import (
@@ -11,18 +7,13 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
-	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/finalizer"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
@@ -33,13 +24,18 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	tenv "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
+	. "github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha512"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var DefaultContext = ocm.New()

@@ -1,19 +1,14 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package template_test
 
 import (
 	"testing"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"gopkg.in/yaml.v3"
 
+	. "github.com/open-component-model/ocm/pkg/testutils"
 	"github.com/open-component-model/ocm/pkg/utils/template"
 )
 

@@ -1,17 +1,12 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package processing
 
 import (
 	"bytes"
 	"strings"
 
+	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"

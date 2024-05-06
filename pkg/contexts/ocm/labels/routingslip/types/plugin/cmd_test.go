@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package plugin_test
 
 import (
@@ -9,9 +5,6 @@ import (
 	"github.com/mandelsoft/goutils/transformer"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
@@ -19,6 +12,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const ARCH = "/tmp/ca"

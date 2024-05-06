@@ -1,14 +1,8 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package common
 
 import (
 	"encoding/json"
 	"fmt"
-
-	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
@@ -17,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/dryrunoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"

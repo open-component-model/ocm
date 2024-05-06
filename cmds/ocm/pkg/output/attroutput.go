@@ -1,14 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package output
 
 import (
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	. "github.com/open-component-model/ocm/pkg/out"
-
 	"github.com/open-component-model/ocm/pkg/errors"
+	. "github.com/open-component-model/ocm/pkg/out"
 )
 
 type AttrProcessingOutput struct {

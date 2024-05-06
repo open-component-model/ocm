@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package routingslips_test
 
 import (
@@ -9,9 +5,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
@@ -19,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const ARCH = "/tmp/ca"

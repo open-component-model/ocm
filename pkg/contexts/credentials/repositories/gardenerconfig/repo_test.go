@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package gardenerconfig_test
 
 import (
@@ -13,10 +9,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"

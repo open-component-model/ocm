@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 //go:build unix
 
 package plugin_test
@@ -9,8 +5,6 @@ package plugin_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
@@ -18,6 +12,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const PLUGIN = "merge"

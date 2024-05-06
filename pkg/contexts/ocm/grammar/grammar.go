@@ -1,13 +1,8 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package grammar
 
 import (
-	. "github.com/open-component-model/ocm/pkg/regex"
-
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
+	. "github.com/open-component-model/ocm/pkg/regex"
 )
 
 const (

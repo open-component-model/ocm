@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 //go:build unix
 
 package plugin_test
@@ -9,8 +5,6 @@ package plugin_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
@@ -21,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("setup plugin cache", func() {

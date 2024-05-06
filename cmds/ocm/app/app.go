@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 //go:generate go run -mod=mod ../../../hack/generate-docs ../../../docs/reference
 
 package app
@@ -10,10 +6,6 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
-
-	common2 "github.com/open-component-model/ocm/pkg/clisupport"
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -62,14 +54,17 @@ import (
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
+	common2 "github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"

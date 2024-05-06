@@ -1,13 +1,7 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package dockermulti
 
 import (
 	"fmt"
-
-	. "github.com/open-component-model/ocm/pkg/finalizer"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -20,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	. "github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

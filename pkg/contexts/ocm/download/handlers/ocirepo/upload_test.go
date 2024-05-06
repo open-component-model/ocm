@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ocirepo_test
 
 import (
@@ -9,9 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -26,7 +19,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/ocirepo"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const COMP = "github.com/compa"
