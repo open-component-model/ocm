@@ -1,8 +1,6 @@
 package identity
 
 import (
-	"fmt"
-	"net/http"
 	"path"
 
 	. "net/url"
@@ -12,7 +10,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/logging"
-	"github.com/open-component-model/ocm/pkg/npm"
 )
 
 const (
@@ -67,48 +64,4 @@ func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) com
 		return nil
 	}
 	return credentials.Properties()
-}
-
-// BearerToken retrieves the bearer token for the given repository URL and package name.
-// Either it's setup in the credentials or it will login to the registry and retrieve it.
-func BearerToken(ctx cpi.ContextProvider, repoUrl string, pkgName string) (string, error) {
-	// get credentials and TODO cache it
-	cred := GetCredentials(ctx, repoUrl, pkgName)
-	if cred == nil {
-		return "", fmt.Errorf("no credentials found for %s. Couldn't upload '%s'", repoUrl, pkgName)
-	}
-	log := logging.Context().Logger(REALM)
-	log.Debug("found credentials")
-
-	// check if token exists, if not login and retrieve token
-	token := cred[ATTR_TOKEN]
-	if token != "" {
-		log.Debug("token found, skipping login")
-		return token, nil
-	}
-
-	// use user+pass+mail from credentials to login and retrieve bearer token
-	username := cred[ATTR_USERNAME]
-	password := cred[ATTR_PASSWORD]
-	email := cred[ATTR_EMAIL]
-	if username == "" || password == "" || email == "" {
-		return "", fmt.Errorf("credentials for %s are invalid. Username, password or email missing! Couldn't upload '%s'", repoUrl, pkgName)
-	}
-	log = log.WithValues("user", username, "repo", repoUrl)
-	log.Debug("login")
-
-	// TODO: check different kinds of .npmrc content
-	return npm.Login(repoUrl, username, password, email)
-}
-
-// Authorize the given request with the bearer token for the given repository URL and package name.
-// If the token is empty (login failed or credentials not found), it will not be set.
-func Authorize(req *http.Request, ctx cpi.ContextProvider, repoUrl string, pkgName string) {
-	token, err := BearerToken(ctx, repoUrl, pkgName)
-	if err != nil {
-		log := logging.Context().Logger(REALM)
-		log.Debug("Couldn't authorize", "error", err.Error(), "repo", repoUrl, "package", pkgName)
-	} else if token != "" {
-		req.Header.Set("authorization", "Bearer "+token)
-	}
 }

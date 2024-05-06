@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"net/url"
 
-	npmCredentials "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
+	npmLogin "github.com/open-component-model/ocm/pkg/npm"
 )
 
 const BLOB_HANDLER_NAME = "ocm/npmPackage"
@@ -52,7 +52,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	}
 
 	// read package.json from tarball to get name, version, etc.
-	log := logging.Context().Logger(npmCredentials.REALM)
+	log := logging.Context().Logger(npmLogin.REALM)
 	log.Debug("reading package.json from tarball")
 	var pkg *Package
 	pkg, err = prepare(data)
@@ -64,7 +64,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	log = log.WithValues("package", pkg.Name, "version", pkg.Version)
 	log.Debug("identified")
 
-	token, err := npmCredentials.BearerToken(ctx.GetContext(), b.spec.Url, pkg.Name)
+	token, err := npmLogin.BearerToken(ctx.GetContext(), b.spec.Url, pkg.Name)
 	if err != nil {
 		// we assume, it's not possible to publish anonymous - without token
 		return nil, err
