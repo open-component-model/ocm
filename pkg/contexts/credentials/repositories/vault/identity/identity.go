@@ -55,7 +55,6 @@ func init() {
 		ATTR_TOKEN, "vault token",
 		ATTR_ROLEID, "applrole role id",
 		ATTR_SECRETID, "applrole secret id",
-		ATTR_SECRETID, "applrole secret id",
 	})
 	ids := listformat.FormatListElements("", listformat.StringElementDescriptionList{
 		ID_HOSTNAME, "vault server host",
