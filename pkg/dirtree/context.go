@@ -1,10 +1,10 @@
 package dirtree
 
 import (
+	"crypto/sha1" //nolint: gosec // required
 	"fmt"
 	"hash"
 	"io"
-	"crypto/sha1" //nolint: gosec // required
 
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
