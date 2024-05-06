@@ -1,17 +1,12 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package compdesc_test
 
 import (
 	"bytes"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/go-logr/logr"
 	"github.com/mandelsoft/logging"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"github.com/tonglil/buflogr"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"

@@ -1,22 +1,18 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package builder_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const ARCH = "/tmp/ctf"

@@ -1,17 +1,12 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package spiff_test
 
 import (
+	"github.com/mandelsoft/spiff/spiffing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
-	"github.com/mandelsoft/spiff/spiffing"
 
 	"github.com/open-component-model/ocm/pkg/spiff"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("spiff", func() {

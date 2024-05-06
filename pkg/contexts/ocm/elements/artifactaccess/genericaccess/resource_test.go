@@ -1,24 +1,20 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package genericaccess_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactaccess/genericaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const OCIPATH = "/tmp/oci"

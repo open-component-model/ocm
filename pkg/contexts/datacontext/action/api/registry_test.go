@@ -1,19 +1,15 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package api_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type Handler struct {

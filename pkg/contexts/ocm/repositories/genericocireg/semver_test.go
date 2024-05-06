@@ -1,17 +1,12 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package genericocireg_test
 
 import (
+	"github.com/Masterminds/semver/v3"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
-	"github.com/Masterminds/semver/v3"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const META_SEPARATOR = genericocireg.META_SEPARATOR

@@ -1,18 +1,14 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package maplistmerge_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/maplistmerge"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/simplemapmerge"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type Value = me.Value

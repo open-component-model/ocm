@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 // Package repocpi contains the implementation support
 // for repository backends. It offers three methods
 // to create component version, component and repository

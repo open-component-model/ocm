@@ -1,15 +1,11 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package v1_test
 
 import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent/testhelper"
 
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent/testhelper"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
