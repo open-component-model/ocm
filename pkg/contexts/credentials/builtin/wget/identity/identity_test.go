@@ -1,15 +1,11 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package identity_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	. "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 )
 
 var _ = Describe("wget credential management", func() {

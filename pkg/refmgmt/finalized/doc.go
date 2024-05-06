@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 // Package finalized provided a view management for a backend object,
 // which is based on Go Garbage Collection and runtime finalizers.
 // Finalization is not possible in Go, if an object is involved in

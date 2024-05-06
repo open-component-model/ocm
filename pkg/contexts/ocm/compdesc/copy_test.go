@@ -1,21 +1,16 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package compdesc_test
 
 import (
+	"github.com/go-test/deep"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
-	"github.com/go-test/deep"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("Component Descripor Copy Test Suitet", func() {

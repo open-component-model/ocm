@@ -1,12 +1,7 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package signing_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -18,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	rsa_pss "github.com/open-component-model/ocm/pkg/signing/handlers/rsa-pss"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("Simple signing handlers", func() {

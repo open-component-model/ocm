@@ -1,13 +1,8 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package signutils
 
 import (
 	"bytes"
 	"crypto"
-	"crypto/dsa" //nolint: staticcheck // yes
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"crypto/x509"
@@ -17,6 +12,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"crypto/dsa" //nolint: staticcheck // yes
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
