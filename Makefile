@@ -73,7 +73,7 @@ generate:
 
 .PHONY: generate-deepcopy
 generate-deepcopy: controller-gen
-	$(CONTROLLER_GEN)  object:headerFile="hack/boilerplate.go.txt" paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
+	$(CONTROLLER_GEN) paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
@@ -110,13 +110,6 @@ info:
 	@echo "COMMIT        = $(COMMIT)"
 	@echo "GIT_TREE_STATE= $(GIT_TREE_STATE)"
 	@echo "COMPONENTS    = $(COMPONENTS)"
-
-.PHONY: generate-license
-generate-license:
-	for f in $(shell find . -name "*.go" -o -name "*.sh"); do \
-		reuse addheader -r --copyright="SAP SE or an SAP affiliate company and Open Component Model contributors." --license="Apache-2.0" $$f --skip-unrecognised; \
-	done
-
 
 $(GEN)/.exists:
 	@mkdir -p $(GEN)
