@@ -39,6 +39,7 @@ jobs:
         run: |
           cd components/ocmcli
           PATH=$PATH:$(go env GOPATH)/bin make ctf
+
   build-helminstaller:
     name: Build HelmInstaller
     runs-on: large_runner
@@ -65,6 +66,7 @@ jobs:
         run: |
           cd components/helminstaller
           PATH=$PATH:$(go env GOPATH)/bin make ctf
+
   build-helmdemo:
     name: Build HelmDemo
     runs-on: large_runner
@@ -91,6 +93,7 @@ jobs:
         run: |
           cd components/helmdemo
           PATH=$PATH:$(go env GOPATH)/bin make ctf
+
   build-subchartsdemo:
     name: Build Helm SubChartsDemo
     runs-on: large_runner
@@ -117,10 +120,14 @@ jobs:
         run: |
           cd components/subchartsdemo
           PATH=$PATH:$(go env GOPATH)/bin make ctf
+
   build-ecrplugin:
     name: Build ECR Plugin
     runs-on: large_runner
     steps:
+      - name: Self Hosted Runner Post Job Cleanup Action
+        uses: TooMuch4U/actions-clean@v2.2
+        
       - name: Checkout
         uses: actions/checkout@v4
         with:
