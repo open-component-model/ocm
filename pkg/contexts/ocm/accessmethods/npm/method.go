@@ -16,11 +16,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/npm"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -91,23 +93,27 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.Comp
 	return ""
 }
 
+// PackageUrl returns the URL of the NPM package (Registry/Package/Version).
+func (a *AccessSpec) PackageUrl() string {
+	return a.Registry + path.Join("/", a.Package, a.Version)
+}
+
 func (a *AccessSpec) getPackageMeta(ctx accspeccpi.Context) (*meta, error) {
-	url := a.Registry + path.Join("/", a.Package, a.Version)
-	r, err := reader(url, vfsattr.Get(ctx))
+	r, err := reader(a, vfsattr.Get(ctx), ctx)
 	if err != nil {
 		return nil, err
 	}
 	buf := &bytes.Buffer{}
 	_, err = io.Copy(buf, io.LimitReader(r, 200000))
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot get version metadata for %s", url)
+		return nil, errors.Wrapf(err, "cannot get version metadata for %s", a.PackageUrl())
 	}
 
 	var metadata meta
 
 	err = json.Unmarshal(buf.Bytes(), &metadata)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", url)
+		return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", a.PackageUrl())
 	}
 	return &metadata, nil
 }
@@ -122,7 +128,7 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 		}
 
 		f := func() (io.ReadCloser, error) {
-			return reader(meta.Dist.Tarball, vfsattr.Get(c.GetContext()))
+			return reader(a, vfsattr.Get(c.GetContext()), c.GetContext(), meta.Dist.Tarball)
 		}
 		if meta.Dist.Shasum != "" {
 			tf := f
@@ -147,9 +153,11 @@ type meta struct {
 	} `json:"dist"`
 }
 
-func reader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
-	c := &http.Client{}
-
+func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...string) (io.ReadCloser, error) {
+	url := a.PackageUrl()
+	if len(tar) > 0 {
+		url = tar[0]
+	}
 	if strings.HasPrefix(url, "file://") {
 		path := url[7:]
 		return fs.OpenFile(path, vfs.O_RDONLY, 0o600)
@@ -159,6 +167,8 @@ func reader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+	npm.Authorize(req, ctx, a.Registry, a.Package)
+	c := &http.Client{}
 	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
