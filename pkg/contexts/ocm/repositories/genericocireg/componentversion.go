@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package genericocireg
 
 import (
@@ -222,7 +218,11 @@ func (c *ComponentVersionContainer) Update() error {
 		}
 
 		logger.Debug("add oci artifact")
-		if _, err := c.comp.namespace.AddArtifact(c.manifest, toTag(c.version)); err != nil {
+		tag, err := toTag(c.version)
+		if err != nil {
+			return err
+		}
+		if _, err := c.comp.namespace.AddArtifact(c.manifest, tag); err != nil {
 			return fmt.Errorf("unable to add artifact: %w", err)
 		}
 	}
