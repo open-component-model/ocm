@@ -8,6 +8,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"sigs.k8s.io/yaml"
 
@@ -15,7 +16,6 @@ import (
 	local "github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/generics"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 func CheckRefs(ctx config.Context, n int) {

@@ -3,6 +3,7 @@ package composition_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
@@ -20,7 +21,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const COMPONENT = "acme.org/testcomp"

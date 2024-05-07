@@ -3,11 +3,11 @@ package simplemapmerge_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/simplemapmerge"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type Value = me.Value

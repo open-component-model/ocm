@@ -1,16 +1,17 @@
 package compdesc_test
 
 import (
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.software/v3alpha1"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var CD1 = `

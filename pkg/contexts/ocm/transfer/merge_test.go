@@ -3,6 +3,7 @@ package transfer_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/go-test/deep"
 
@@ -16,7 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/maplistmerge"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 func TouchLabels(s, d, e *metav1.Labels) {

@@ -3,10 +3,9 @@ package semverutils
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/Masterminds/semver/v3"
-
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("filter", func() {

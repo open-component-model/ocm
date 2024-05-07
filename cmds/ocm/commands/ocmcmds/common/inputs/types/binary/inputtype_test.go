@@ -2,10 +2,10 @@ package binary
 
 import (
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
-	. "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

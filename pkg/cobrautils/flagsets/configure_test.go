@@ -3,11 +3,11 @@ package flagsets_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 func adder(opts flagsets.ConfigOptions, data flagsets.Config) error {

@@ -3,12 +3,12 @@ package elements_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/blob"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type value struct {

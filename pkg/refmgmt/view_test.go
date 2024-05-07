@@ -7,9 +7,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	refmgmt2 "github.com/open-component-model/ocm/pkg/refmgmt"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 // Objectbase is the base interface for the

@@ -5,6 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -12,7 +13,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("merge config", func() {

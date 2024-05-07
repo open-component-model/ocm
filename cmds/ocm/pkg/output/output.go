@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	. "github.com/open-component-model/ocm/pkg/out"
+
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/errors"
-	. "github.com/open-component-model/ocm/pkg/out"
 )
 
 type Object = interface{}

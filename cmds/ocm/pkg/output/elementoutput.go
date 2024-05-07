@@ -1,11 +1,12 @@
 package output
 
 import (
+	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	. "github.com/open-component-model/ocm/pkg/out"
+
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	. "github.com/open-component-model/ocm/pkg/out"
 )
 
 type ElementOutput struct {

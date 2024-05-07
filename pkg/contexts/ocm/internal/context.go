@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strings"
 
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
@@ -14,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	. "github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -11,7 +13,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
 	"github.com/open-component-model/ocm/pkg/common"
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"

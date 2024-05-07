@@ -4,9 +4,10 @@ import (
 	"regexp"
 	"strings"
 
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+
 	"github.com/spf13/cobra"
 
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 

@@ -5,6 +5,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/logging/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/logging"
 	"github.com/tonglil/buflogr"
@@ -13,8 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	logcfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/logging"
 	log "github.com/open-component-model/ocm/pkg/logging"
-	. "github.com/open-component-model/ocm/pkg/logging/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("logging configuration", func() {
