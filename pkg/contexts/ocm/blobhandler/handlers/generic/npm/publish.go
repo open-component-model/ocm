@@ -6,7 +6,6 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
-	"context"
 	//nolint:gosec // older npm (prior to v5) uses sha1
 	"crypto/sha1"
 	"crypto/sha512"
@@ -16,8 +15,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
-	"net/url"
 )
 
 type Package struct {
@@ -56,43 +53,6 @@ func NewAttachment(data []byte) *Attachment {
 		Data:        data,
 		Length:      len(data),
 	}
-}
-
-// Login to npm registry (URL) and retrieve bearer token.
-func login(registry string, username string, password string, email string) (string, error) {
-	data := map[string]interface{}{
-		"_id":      "org.couchdb.user:" + username,
-		"name":     username,
-		"email":    email,
-		"password": password,
-		"type":     "user",
-	}
-	marshal, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, registry+"/-/user/org.couchdb.user:"+url.PathEscape(username), bytes.NewReader(marshal))
-	if err != nil {
-		return "", err
-	}
-	req.SetBasicAuth(username, password)
-	req.Header.Set("content-type", "application/json")
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= http.StatusBadRequest {
-		all, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("%d, %s", resp.StatusCode, string(all))
-	}
-	var token struct {
-		Token string `json:"token"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&token); err != nil {
-		return "", err
-	}
-	return token.Token, nil
 }
 
 func createSha512(data []byte) string {
