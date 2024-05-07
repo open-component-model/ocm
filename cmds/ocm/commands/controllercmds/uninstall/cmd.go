@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package install
+package uninstall
 
 import (
 	"context"
@@ -11,24 +11,19 @@ import (
 
 	"github.com/fluxcd/pkg/ssa"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/common"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
 var (
 	Names = names.Controller
-	Verb  = verbs.Install
+	Verb  = verbs.Uninstall
 )
 
 type Command struct {
@@ -42,10 +37,9 @@ type Command struct {
 	CertManagerBaseURL       string
 	CertManagerReleaseAPIURL string
 	CertManagerVersion       string
-	DryRun                   bool
-	SkipPreFlightCheck       bool
-	InstallPrerequisites     bool
 	SM                       *ssa.ResourceManager
+	UninstallPrerequisites   bool
+	DryRun                   bool
 }
 
 var _ utils.OCMCommand = (*Command)(nil)
@@ -57,11 +51,12 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "install controller {--version v0.0.1}",
-		Short: "Install either a specific or latest version of the ocm-controller. Optionally install prerequisites required by the controller.",
+		Use:   "uninstall controller",
+		Short: "Uninstalls the ocm-controller and all of its dependencies",
 	}
 }
 
+// AddFlags for the known item to delete.
 func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.Version, "version", "v", "latest", "the version of the controller to install")
 	set.StringVarP(&o.BaseURL, "base-url", "u", "https://github.com/open-component-model/ocm-controller/releases", "the base url to the ocm-controller's release page")
@@ -72,9 +67,8 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.ControllerName, "controller-name", "c", "ocm-controller", "name of the controller that's used for status check")
 	set.StringVarP(&o.Namespace, "namespace", "n", "ocm-system", "the namespace into which the controller is installed")
 	set.DurationVarP(&o.Timeout, "timeout", "t", 1*time.Minute, "maximum time to wait for deployment to be ready")
+	set.BoolVarP(&o.UninstallPrerequisites, "uninstall-prerequisites", "p", false, "uninstall prerequisites required by ocm-controller")
 	set.BoolVarP(&o.DryRun, "dry-run", "d", false, "if enabled, prints the downloaded manifest file")
-	set.BoolVarP(&o.SkipPreFlightCheck, "skip-pre-flight-check", "s", false, "skip the pre-flight check for clusters")
-	set.BoolVarP(&o.InstallPrerequisites, "install-prerequisites", "i", true, "install prerequisites required by ocm-controller")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -89,27 +83,10 @@ func (o *Command) Run() error {
 	}
 
 	o.SM = sm
-
 	ctx := context.Background()
-	if !o.SkipPreFlightCheck {
-		out.Outf(o.Context, "► running pre-install check\n")
-		if err := o.RunPreFlightCheck(ctx); err != nil {
-			if o.InstallPrerequisites {
-				out.Outf(o.Context, "► installing prerequisites\n")
-				if err := o.installPrerequisites(ctx); err != nil {
-					return err
-				}
 
-				out.Outf(o.Context, "✔ successfully installed prerequisites\n")
-			} else {
-				return fmt.Errorf("✗ failed to run pre-flight check: %w\n", err)
-			}
-		}
-	}
-
-	out.Outf(o.Context, "► installing ocm-controller with version %s\n", o.Version)
-	version := o.Version
-	if err := common.Install(
+	out.Outf(o.Context, "► uninstalling ocm-controller with version %s\n", o.Version)
+	if err := common.Uninstall(
 		ctx,
 		o.Context,
 		sm,
@@ -117,72 +94,22 @@ func (o *Command) Run() error {
 		o.BaseURL,
 		"ocm-controller",
 		"install.yaml",
-		version,
+		o.Version,
 		o.DryRun,
 	); err != nil {
 		return err
 	}
 
-	out.Outf(o.Context, "✔ ocm-controller successfully installed\n")
-	return nil
-}
+	out.Outf(o.Context, "✔ ocm-controller successfully uninstalled\n")
 
-// RunPreFlightCheck checks if the target cluster has the following items:
-// - secret containing certificates for the in-cluster registry
-// - flux installed.
-func (o *Command) RunPreFlightCheck(ctx context.Context) error {
-	rcg := genericclioptions.NewConfigFlags(false)
-	cfg, err := rcg.ToRESTConfig()
-	if err != nil {
-		return fmt.Errorf("loading kubeconfig failed: %w", err)
-	}
+	if o.UninstallPrerequisites {
+		out.Outf(o.Context, "► uninstalling cert-manager and issuers\n")
+		if err := o.uninstallPrerequisites(ctx); err != nil {
+			return fmt.Errorf("✗ failed to uninstall pre-requesits: %w\n", err)
+		}
 
-	// bump limits
-	cfg.QPS = 100.0
-	cfg.Burst = 300
-
-	if err := o.checkCertificateSecretExists(ctx, cfg, rcg); err != nil {
-		return fmt.Errorf("ocm-controller requires ocm-registry-tls-certs in ocm-system namespace to exist: %w", err)
-	}
-
-	if err := o.checkFluxExists(ctx, cfg, rcg); err != nil {
-		return err
+		out.Outf(o.Context, "✔ successfully uninstalled prerequisites\n")
 	}
 
 	return nil
-}
-
-func (o *Command) checkCertificateSecretExists(ctx context.Context, cfg *rest.Config, rcg *genericclioptions.ConfigFlags) error {
-	restMapper, err := rcg.ToRESTMapper()
-	if err != nil {
-		return err
-	}
-
-	kubeClient, err := client.New(cfg, client.Options{Mapper: restMapper, Scheme: newScheme()})
-	if err != nil {
-		return err
-	}
-
-	s := &corev1.Secret{}
-	return kubeClient.Get(ctx, types.NamespacedName{
-		Name:      "ocm-registry-tls-certs",
-		Namespace: "ocm-system",
-	}, s)
-}
-
-func (o *Command) checkFluxExists(ctx context.Context, cfg *rest.Config, rcg *genericclioptions.ConfigFlags) error {
-	restMapper, err := rcg.ToRESTMapper()
-	if err != nil {
-		return err
-	}
-
-	kubeClient, err := client.New(cfg, client.Options{Mapper: restMapper, Scheme: newScheme()})
-	if err != nil {
-		return err
-	}
-
-	s := &corev1.Namespace{}
-	return kubeClient.Get(ctx, types.NamespacedName{
-		Name: "flux-system",
-	}, s)
 }
