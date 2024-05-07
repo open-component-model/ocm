@@ -69,7 +69,7 @@ generate:
 
 .PHONY: generate-deepcopy
 generate-deepcopy: controller-gen
-	$(CONTROLLER_GEN) paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
+	$(CONTROLLER_GEN) object paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
