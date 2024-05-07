@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"

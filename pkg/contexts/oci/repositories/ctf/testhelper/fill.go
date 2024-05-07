@@ -2,6 +2,7 @@ package testhelper
 
 import (
 	. "github.com/onsi/gomega"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"

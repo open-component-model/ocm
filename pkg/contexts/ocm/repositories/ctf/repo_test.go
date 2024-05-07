@@ -3,11 +3,12 @@ package ctf_test
 import (
 	"bytes"
 
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	"github.com/tonglil/buflogr"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"

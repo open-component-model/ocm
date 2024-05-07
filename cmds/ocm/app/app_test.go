@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mandelsoft/logging"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/logging"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/tonglil/buflogr"
 

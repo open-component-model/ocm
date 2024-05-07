@@ -1,10 +1,11 @@
 package plugin_test
 
 import (
-	"github.com/mandelsoft/goutils/sliceutils"
-	"github.com/mandelsoft/goutils/transformer"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/mandelsoft/goutils/transformer"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"

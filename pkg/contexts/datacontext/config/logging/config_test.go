@@ -3,9 +3,10 @@ package logging_test
 import (
 	"bytes"
 
-	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/logging"
 	"github.com/tonglil/buflogr"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	. "github.com/onsi/gomega"
+
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"

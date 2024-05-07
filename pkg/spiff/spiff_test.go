@@ -1,9 +1,10 @@
 package spiff_test
 
 import (
-	"github.com/mandelsoft/spiff/spiffing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/spiff/spiffing"
 
 	"github.com/open-component-model/ocm/pkg/spiff"
 	. "github.com/open-component-model/ocm/pkg/testutils"

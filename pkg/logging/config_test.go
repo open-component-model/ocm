@@ -3,10 +3,11 @@ package logging_test
 import (
 	"bytes"
 
-	"github.com/mandelsoft/logging"
-	logcfg "github.com/mandelsoft/logging/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/logging"
+	logcfg "github.com/mandelsoft/logging/config"
 	"github.com/tonglil/buflogr"
 
 	local "github.com/open-component-model/ocm/pkg/logging"

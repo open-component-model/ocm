@@ -5,6 +5,7 @@ package plugin_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"

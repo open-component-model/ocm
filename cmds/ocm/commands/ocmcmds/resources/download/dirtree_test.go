@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/mandelsoft/vfs/pkg/projectionfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/projectionfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"

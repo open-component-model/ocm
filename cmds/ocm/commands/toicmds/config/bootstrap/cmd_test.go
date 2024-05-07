@@ -3,9 +3,10 @@ package bootstrap_test
 import (
 	"bytes"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/config/bootstrap"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"

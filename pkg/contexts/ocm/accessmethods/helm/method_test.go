@@ -6,6 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"helm.sh/helm/v3/pkg/chart/loader"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/helm"

@@ -1,9 +1,8 @@
 package grammar
 
 import (
-	. "github.com/open-component-model/ocm/pkg/regex"
-
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
+	. "github.com/open-component-model/ocm/pkg/regex"
 )
 
 const (

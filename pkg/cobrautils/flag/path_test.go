@@ -6,9 +6,10 @@ package flag_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/cobrautils/flag"
 
 	"github.com/spf13/pflag"
+
+	. "github.com/open-component-model/ocm/pkg/cobrautils/flag"
 )
 
 var _ = Describe("path flags", func() {

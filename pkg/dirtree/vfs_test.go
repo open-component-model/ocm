@@ -4,9 +4,10 @@ import (
 	"archive/tar"
 	"encoding/hex"
 
-	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/dirtree"
 	"github.com/open-component-model/ocm/pkg/env"

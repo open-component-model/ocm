@@ -1,8 +1,9 @@
 package localize_test
 
 import (
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/localize"
 	"github.com/open-component-model/ocm/pkg/runtime"

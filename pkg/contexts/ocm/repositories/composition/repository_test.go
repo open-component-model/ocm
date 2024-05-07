@@ -1,9 +1,10 @@
 package composition_test
 
 import (
-	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
