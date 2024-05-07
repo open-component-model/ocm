@@ -8,6 +8,7 @@ import (
 
 	"github.com/fluxcd/pkg/ssa"
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/common"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -17,15 +18,7 @@ var issuer []byte
 func (o *Command) installPrerequisites(ctx context.Context) error {
 	out.Outf(o.Context, "► installing cert-manager with version %s\n", o.CertManagerVersion)
 
-	version := o.CertManagerVersion
-	if err := o.installManifest(
-		ctx,
-		o.CertManagerReleaseAPIURL,
-		o.CertManagerBaseURL,
-		"cert-manager",
-		"cert-manager.yaml",
-		version,
-	); err != nil {
+	if err := common.Install(ctx, o.Context, o.SM, o.CertManagerReleaseAPIURL, o.CertManagerBaseURL, "cert-manager", "cert-manager.yaml", o.CertManagerVersion, o.DryRun); err != nil {
 		return err
 	}
 
@@ -51,7 +44,7 @@ func (o *Command) createRegistryCertificate() error {
 		return fmt.Errorf("failed to write issuer.yaml file at location: %w", err)
 	}
 
-	objects, err := readObjects(path)
+	objects, err := common.ReadObjects(path)
 	if err != nil {
 		return fmt.Errorf("failed to construct objects to apply: %w", err)
 	}
