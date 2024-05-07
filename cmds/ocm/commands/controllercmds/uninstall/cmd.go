@@ -39,6 +39,7 @@ type Command struct {
 	CertManagerVersion       string
 	SM                       *ssa.ResourceManager
 	UninstallPrerequisites   bool
+	Silent                   bool
 	DryRun                   bool
 }
 
@@ -69,13 +70,21 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.DurationVarP(&o.Timeout, "timeout", "t", 1*time.Minute, "maximum time to wait for deployment to be ready")
 	set.BoolVarP(&o.UninstallPrerequisites, "uninstall-prerequisites", "p", false, "uninstall prerequisites required by ocm-controller")
 	set.BoolVarP(&o.DryRun, "dry-run", "d", false, "if enabled, prints the downloaded manifest file")
+	set.BoolVarP(&o.Silent, "silent", "l", false, "don't fail on error")
 }
 
 func (o *Command) Complete(args []string) error {
 	return nil
 }
 
-func (o *Command) Run() error {
+func (o *Command) Run() (err error) {
+	defer func() {
+		// don't return any errors
+		if o.Silent {
+			err = nil
+		}
+	}()
+
 	kubeconfigArgs := genericclioptions.NewConfigFlags(false)
 	sm, err := NewResourceManager(kubeconfigArgs)
 	if err != nil {

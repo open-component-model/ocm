@@ -8,6 +8,7 @@ import (
 
 	"github.com/fluxcd/pkg/ssa"
 	"github.com/mandelsoft/filepath/pkg/filepath"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/common"
 	"github.com/open-component-model/ocm/pkg/out"
 )
@@ -23,6 +24,11 @@ func (o *Command) installPrerequisites(ctx context.Context) error {
 	}
 
 	out.Outf(o.Context, "✔ cert-manager successfully installed\n")
+
+	if o.DryRun {
+		return nil
+	}
+
 	out.Outf(o.Context, "► creating certificate for internal registry\n")
 
 	if err := o.createRegistryCertificate(); err != nil {

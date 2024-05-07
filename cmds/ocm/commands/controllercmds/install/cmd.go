@@ -45,6 +45,7 @@ type Command struct {
 	DryRun                   bool
 	SkipPreFlightCheck       bool
 	InstallPrerequisites     bool
+	Silent                   bool
 	SM                       *ssa.ResourceManager
 }
 
@@ -75,13 +76,21 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.BoolVarP(&o.DryRun, "dry-run", "d", false, "if enabled, prints the downloaded manifest file")
 	set.BoolVarP(&o.SkipPreFlightCheck, "skip-pre-flight-check", "s", false, "skip the pre-flight check for clusters")
 	set.BoolVarP(&o.InstallPrerequisites, "install-prerequisites", "i", true, "install prerequisites required by ocm-controller")
+	set.BoolVarP(&o.Silent, "silent", "l", false, "don't fail on error")
 }
 
 func (o *Command) Complete(args []string) error {
 	return nil
 }
 
-func (o *Command) Run() error {
+func (o *Command) Run() (err error) {
+	defer func() {
+		// don't return any errors
+		if o.Silent {
+			err = nil
+		}
+	}()
+
 	kubeconfigArgs := genericclioptions.NewConfigFlags(false)
 	sm, err := NewResourceManager(kubeconfigArgs)
 	if err != nil {
