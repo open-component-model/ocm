@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mandelsoft/logging"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -54,8 +55,11 @@ func (o *Object) GetKind() string {
 func (o *Object) IsNode() *common.NameVersion {
 	blob, err := o.Artifact.Blob()
 	if err != nil {
+		logging.DefaultContext().Logger().LogError(err, "failed to fetch blob from artifact")
+
 		return nil
 	}
+
 	nv := common.NewNameVersion("", blob.Digest().String())
 	return &nv
 }

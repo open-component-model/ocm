@@ -7,6 +7,7 @@ package artifacthdlr
 import (
 	"strings"
 
+	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
@@ -29,7 +30,9 @@ func explodeAttached(o interface{}) []interface{} {
 	result := []interface{}{o}
 	blob, err := obj.Artifact.Blob()
 	if err != nil {
-		return result
+		logging.DefaultContext().Logger().LogError(err, "failed to fetch blob from artifact")
+
+		return nil
 	}
 	dig := blob.Digest()
 	prefix := Attachment(dig, "")
@@ -46,9 +49,10 @@ func explodeAttached(o interface{}) []interface{} {
 					s.Digest = nil
 					key, err := Key(a)
 					if err != nil {
-						// this is questionable behaviour. :think:
-						return nil
+						// this list ignores errors as this segment only happens when err == nil.
+						continue
 					}
+
 					att := &Object{
 						History:    hist,
 						Key:        key,

@@ -33,7 +33,9 @@ func clean(iterable data.Iterable) data.Iterable {
 		l := len(e.History)
 		blob, err := e.Artifact.Blob()
 		if err != nil {
-			return nil
+			// ignore if we don't have the artifact and get the next element
+
+			continue
 		}
 
 		if l > depth[blob.Digest()] {
@@ -48,7 +50,9 @@ func clean(iterable data.Iterable) data.Iterable {
 	for i := 0; i < len(data); i++ {
 		e, ok := data[i].(*Object)
 		if !ok {
-			return nil
+			// ignore if we don't have an object and continue cleaning the rest
+
+			continue
 		}
 		l := len(e.History)
 		blob, _ := e.Artifact.Blob()
