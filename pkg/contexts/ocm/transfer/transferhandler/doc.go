@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 // Package transferhandler provides the API for transfer handlers used
 // during the transfer process of an OCM component.
 // There is a common generic transfer functionality in package transfer,

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package comparch
 
 import (
@@ -217,7 +213,10 @@ func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 			return ""
 		}
 		defer m.Close()
-		digest, _ := blobaccess.Digest(m)
+		digest, err := blobaccess.Digest(m)
+		if err != nil {
+			return ""
+		}
 		return digest.String()
 	}
 	return ""

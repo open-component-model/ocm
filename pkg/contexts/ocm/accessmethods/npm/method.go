@@ -86,7 +86,10 @@ func (a *AccessSpec) AccessMethod(c accspeccpi.ComponentVersionAccess) (accspecc
 }
 
 func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.ComponentVersionAccess) string {
-	meta, _ := a.getPackageMeta(access.GetContext())
+	meta, err := a.getPackageMeta(access.GetContext())
+	if err != nil {
+		return ""
+	}
 	if meta != nil {
 		return meta.Dist.Shasum
 	}

@@ -67,6 +67,8 @@ character. The following formats are supported: <code>directory</code>, <code>ta
 ### Examples
 
 ```
+Complete Component Reference Specifications (including all optional arguments):
+
 +ctf+directory::./ocm/ctf//ocm.software/ocmcli:0.7.0
 
 oci::{"baseUrl":"ghcr.io","componentNameMapping":"urlPath","subPath":"open-component-model"}//ocm.software/ocmcli.0.7.0
@@ -74,6 +76,18 @@ oci::{"baseUrl":"ghcr.io","componentNameMapping":"urlPath","subPath":"open-compo
 oci::https://ghcr.io:443/open-component-model//ocm.software/ocmcli:0.7.0
 
 oci::http://localhost:8080/local-component-repository//ocm.software/ocmcli:0.7.0
+
+---
+
+Short-Hand Component Reference Specifications (omitting optional arguments):
+
+./ocm/ctf//ocm.software/ocmcli:0.7.0
+
+ghcr.io/open-component-model//ocm.software/ocmcli:0.7.0
+
+localhost:8080/local-component-repository//ocm.software/ocmcli:0.7.0 (defaulting to https)
+
+http://localhost:8080/local-component-repository//ocm.software/ocmcli:0.7.0
 ```
 
 ### SEE ALSO

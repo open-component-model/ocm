@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ociuploadattr
 
 import (
@@ -127,7 +123,10 @@ func (a *Attribute) GetInfo(ctx cpi.Context) (oci.Repository, *oci.UniformReposi
 }
 
 func (a *Attribute) getBySpec(ctx cpi.Context) (oci.Repository, *oci.UniformRepositorySpec, string, error) {
-	data, _ := a.Repository.MarshalJSON()
+	data, err := a.Repository.MarshalJSON()
+	if err != nil {
+		return nil, nil, "", errors.Wrap(err, a.ref.String())
+	}
 
 	spec, err := a.Repository.Evaluate(ctx.OCIContext())
 	if err != nil {

@@ -1,11 +1,8 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package artdesc
 
 import (
 	"encoding/json"
+	out "fmt"
 
 	"github.com/containerd/containerd/images"
 	"github.com/opencontainers/go-digest"
@@ -235,7 +232,12 @@ func (d *Artifact) ToBlobAccess() (blobaccess.BlobAccess, error) {
 
 func (d *Artifact) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	if d.IsManifest() {
-		m, _ := d.Manifest()
+		m, err := d.Manifest()
+		if err != nil {
+			out.Printf("manifest was empty for artifact digest %s", digest)
+
+			return nil
+		}
 		return m.GetBlobDescriptor(digest)
 	}
 	if d.IsIndex() {

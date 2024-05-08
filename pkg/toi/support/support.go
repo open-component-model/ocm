@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package support
 
 import (
@@ -99,7 +95,10 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.OCMConfig == "" {
-		cfg, _ := utils2.ResolvePath(o.Inputs + "/" + install.InputOCMConfig)
+		cfg, err := utils2.ResolvePath(o.Inputs + "/" + install.InputOCMConfig)
+		if err != nil {
+			return errors.Wrapf(err, "cannot resolve OCM config %q", o.Inputs)
+		}
 		if ok, err := vfs.FileExists(o.FileSystem(), cfg); ok && err == nil {
 			o.OCMConfig = cfg
 		}
@@ -111,7 +110,10 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.Parameters == "" {
-		p, _ := utils2.ResolvePath(o.Inputs + "/" + install.InputParameters)
+		p, err := utils2.ResolvePath(o.Inputs + "/" + install.InputParameters)
+		if err != nil {
+			return errors.Wrapf(err, "cannot resolve path %q", o.Inputs)
+		}
 		if ok, err := vfs.FileExists(o.FileSystem(), p); ok && err == nil {
 			o.Parameters = p
 		}

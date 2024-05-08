@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package common
 
 import (
@@ -111,23 +107,27 @@ func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(h ResourceSpecH
 	listkey := utils.Plural(h.Key(), 0)
 
 	var current string
-	configFile, _ := utils2.ResolvePath(o.ConfigFile)
-	if ok, err := vfs.FileExists(fs, configFile); ok {
+	configFile, err := utils2.ResolvePath(o.ConfigFile)
+	if err != nil {
+		return errors.Wrapf(err, "failed to resolve config file %s", o.ConfigFile)
+	}
+
+	ok, err := vfs.FileExists(fs, configFile)
+	if err != nil {
+		return errors.Wrapf(err, "cannot read %s config file %q", listkey, o.ConfigFile)
+	}
+
+	if ok {
 		fi, err := fs.Stat(configFile)
 		if err != nil {
 			return errors.Wrapf(err, "cannot stat %s config file %q", listkey, o.ConfigFile)
 		}
 		mode = fi.Mode().Perm()
-		if err != nil {
-			return err
-		}
 		data, err := vfs.ReadFile(fs, configFile)
 		if err != nil {
 			return errors.Wrapf(err, "cannot read %s config file %q", listkey, o.ConfigFile)
 		}
 		current = string(data)
-	} else if err != nil {
-		return errors.Wrapf(err, "cannot read %s config file %q", listkey, o.ConfigFile)
 	}
 
 	for _, source := range o.Resources {

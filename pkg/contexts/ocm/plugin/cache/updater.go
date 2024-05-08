@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package cache
 
 import (
@@ -161,7 +157,10 @@ func (o *PluginUpdater) downloadLatest(session ocm.Session, comp ocm.ComponentAc
 		return errors.Wrapf(err, "no versions found for component %s", comp.GetName())
 	}
 
-	versions, _ := semverutils.MatchVersionStrings(vers, o.Constraints...)
+	versions, err := semverutils.MatchVersionStrings(vers, o.Constraints...)
+	if err != nil {
+		return fmt.Errorf("failed to match version strings for component %s: %w", comp.GetName(), err)
+	}
 	if len(versions) == 0 {
 		return fmt.Errorf("no versions for component %s match the constraints", comp.GetName())
 	}
