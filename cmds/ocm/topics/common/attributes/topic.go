@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package attributes
 
 import (
@@ -34,7 +30,11 @@ func Attributes() string {
 	s := ""
 	sep := ""
 	for _, a := range datacontext.DefaultAttributeScheme.KnownTypeNames() {
-		t, _ := datacontext.DefaultAttributeScheme.GetType(a)
+		t, err := datacontext.DefaultAttributeScheme.GetType(a)
+		if err != nil {
+			continue
+		}
+
 		desc := t.Description()
 		if !strings.Contains(desc, "not via command line") {
 			for strings.HasPrefix(desc, "\n") {

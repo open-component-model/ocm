@@ -147,13 +147,15 @@ func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 	}
 
 	switch a.GetKind() {
-	case localblob.Type:
-		return accessSpec.(*localblob.AccessSpec).LocalReference
-	case localociblob.Type:
-		return accessSpec.(*localblob.AccessSpec).LocalReference
+	case localblob.Type, localociblob.Type:
+		if spec, ok := accessSpec.(*localblob.AccessSpec); ok {
+			return spec.LocalReference
+		}
 	case relativeociref.Type:
-		d, _ := accessSpec.(*relativeociref.AccessSpec).GetDigest()
-		return d
+		if spec, ok := accessSpec.(*relativeociref.AccessSpec); ok {
+			d, _ := spec.GetDigest()
+			return d
+		}
 	}
 
 	return ""

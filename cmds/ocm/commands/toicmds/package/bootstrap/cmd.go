@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package bootstrap
 
 import (
@@ -189,7 +185,12 @@ func (o *Command) Complete(args []string) error {
 		return errors.Wrapf(err, "bootstrap resource identity pattern")
 	}
 	if len(o.CredentialsFile) == 0 {
-		if ok, _ := vfs.FileExists(o.FileSystem(), DEFAULT_CREDENTIALS_FILE); ok {
+		ok, err := vfs.FileExists(o.FileSystem(), DEFAULT_CREDENTIALS_FILE)
+		if err != nil {
+			return err
+		}
+
+		if ok {
 			o.CredentialsFile = DEFAULT_CREDENTIALS_FILE
 		}
 	}

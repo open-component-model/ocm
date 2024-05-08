@@ -30,15 +30,20 @@ source-configuration, sourceconfig, srccfg, scfg
       --accessRepository string             repository URL
       --accessType string                   type of blob access specification
       --accessVersion string                version for access specification
+      --body string                         body of a http request
       --bucket string                       bucket name
       --commit string                       git commit id
       --digest string                       blob digest
       --globalAccess YAML                   access specification for global access
+      --header <name>:<value>,<value>,...   http headers (default {})
       --hint string                         (repository) hint for local artifacts
       --mediaType string                    media type for artifact blob representation
+      --noredirect                          http redirect behavior
       --reference string                    reference name
       --region string                       region name
       --size int                            blob size
+      --url string                          artifact or server url
+      --verb string                         http request method
 ```
 
 
@@ -473,7 +478,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This REQUIRED property describes the url from which the resource is to be
     downloaded.
 
-  - **<code>mediaType</code> *string*
+  - **<code>mediaType</code>** *string*
 
     This OPTIONAL property describes the media type of the resource to be
     downloaded. If omitted, ocm tries to read the mediaType from the Content-Type header
@@ -494,7 +499,7 @@ with the field <code>type</code> in the <code>input</code> field:
 
     This OPTIONAL property describes the http body to be included in the request.
 
-  - **<code>noredirect<code>** *bool*
+  - **<code>noredirect</code>** *bool*
 
     This OPTIONAL property describes whether http redirects should be disabled. If omitted,
     it is defaulted to false (so, per default, redirects are enabled).
@@ -801,6 +806,51 @@ shown below.
       The media type of the content
 
   Options used to configure fields: <code>--accessVersion</code>, <code>--bucket</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--region</code>
+
+- Access type <code>wget</code>
+
+  This method implements access to resources stored on an http server.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The <code>url</code> is the url pointing to the http endpoint from which a resource is
+    downloaded. The <code>mimeType</code> can be used to specify the MIME type of the
+    resource.
+
+    This blob type specification supports the following fields:
+    - **<code>url</code>** *string*
+
+    This REQUIRED property describes the url from which the resource is to be
+    downloaded.
+
+    - **<code>mediaType</code>** *string*
+
+    This OPTIONAL property describes the media type of the resource to be
+    downloaded. If omitted, ocm tries to read the mediaType from the Content-Type header
+    of the http response. If the mediaType cannot be set from the Content-Type header as well,
+    ocm tries to deduct the mediaType from the URL. If that is not possible either, the default
+    media type is defaulted to application/octet-stream.
+
+    - **<code>header</code>** *map[string][]string*
+
+    This OPTIONAL property describes the http headers to be set in the http request to the server.
+
+    - **<code>verb</code>** *string*
+
+    This OPTIONAL property describes the http verb (also known as http request method) for the http
+    request. If omitted, the http verb is defaulted to GET.
+
+    - **<code>body</code>** *[]byte*
+
+    This OPTIONAL property describes the http body to be included in the request.
+
+    - **<code>noredirect</code>** *bool*
+
+    This OPTIONAL property describes whether http redirects should be disabled. If omitted,
+    it is defaulted to false (so, per default, redirects are enabled).
+
+  Options used to configure fields: <code>--body</code>, <code>--header</code>, <code>--mediaType</code>, <code>--noredirect</code>, <code>--url</code>, <code>--verb</code>
 
 
 All yaml/json defined resources can be templated.

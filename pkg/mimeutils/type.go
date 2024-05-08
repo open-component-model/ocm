@@ -145,8 +145,7 @@ func TypeByExtension(ext string) string {
 		if c >= utf8RuneSelf {
 			// Slow path.
 			si, _ := mimeTypesLower.Load(strings.ToLower(ext))
-			s, _ := si.(string)
-			return s
+			return si.(string)
 		}
 		if 'A' <= c && c <= 'Z' {
 			lower = append(lower, c+('a'-'A'))
@@ -155,8 +154,7 @@ func TypeByExtension(ext string) string {
 		}
 	}
 	si, _ := mimeTypesLower.Load(string(lower))
-	s, _ := si.(string)
-	return s
+	return si.(string)
 }
 
 // ExtensionsByType returns the extensions known to be associated with the MIME

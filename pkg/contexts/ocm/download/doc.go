@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 // Package download provides an API for resource download handlers.
 // A download handler is used for downloading resoures. By default the native
 // blob as provided by the access method is the resukt of a download.

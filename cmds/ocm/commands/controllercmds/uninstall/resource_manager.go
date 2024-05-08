@@ -1,42 +1,16 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
-package install
+package uninstall
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	"github.com/fluxcd/cli-utils/pkg/kstatus/polling"
 	"github.com/fluxcd/pkg/ssa"
-	"github.com/fluxcd/pkg/ssa/utils"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	apiruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-func readObjects(manifestPath string) ([]*unstructured.Unstructured, error) {
-	fi, err := os.Lstat(manifestPath)
-	if err != nil {
-		return nil, err
-	}
-	if fi.IsDir() || !fi.Mode().IsRegular() {
-		return nil, fmt.Errorf("expected %q to be a file", manifestPath)
-	}
-
-	ms, err := os.Open(manifestPath)
-	if err != nil {
-		return nil, err
-	}
-	defer ms.Close()
-
-	return utils.ReadObjects(bufio.NewReader(ms))
-}
 
 // ownerRef contains the server-side apply field manager and ownership labels group.
 var ownerRef = ssa.Owner{
