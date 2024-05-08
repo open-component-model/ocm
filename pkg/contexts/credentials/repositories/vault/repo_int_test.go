@@ -1,0 +1,386 @@
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+//go:build integration
+
+package vault_test
+
+import (
+	"context"
+	"fmt"
+	"net"
+	"os"
+	"os/exec"
+	"time"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/hashicorp/vault-client-go"
+	"github.com/hashicorp/vault-client-go/schema"
+
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
+	me "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
+)
+
+type vaultMode string
+
+const (
+	HTTP  vaultMode = "dev"
+	HTTPS vaultMode = "dev-tls"
+)
+
+const (
+	VAULT_APP_ROLE       = "ocmrole"
+	VAULT_SECRET         = "mysecret"
+	VAULT_CUSTOM_SECRETS = "secret-list"
+	VAULT_SECRET_2       = "mysecret2"
+
+	VAULT_POLICY_NAME = "ocm"
+
+	VAULT_ROOT_TOKEN = "toorl"
+	VAULT_TLS_DIR    = "./vault-tls"
+)
+
+const (
+	VAULT_POLICY_RULE = `
+path "secret/*"
+{
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+`
+	VAULT_INSUFFICIENT_POLICY_RULE = `
+path "secret/notmysecret"
+{
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+`
+)
+
+var _ = Describe("vault config", func() {
+	var DefaultContext credentials.Context
+	var cancelFunc context.CancelFunc
+	var vaultClient *vault.Client
+	var cmd *exec.Cmd
+
+	ctx := context.Background()
+
+	BeforeEach(func() {
+		cmd, vaultClient, cancelFunc = Must3(StartVaultServer(HTTP, VAULT_ROOT_TOKEN, VAULT_ADDRESS))
+		DefaultContext = credentials.New()
+	})
+
+	AfterEach(func() {
+		cancelFunc()
+		_ = cmd.Wait()
+		Expect(os.RemoveAll(VAULT_TLS_DIR)).To(Succeed())
+	})
+
+	Context("authentication to vault and reading secrets", func() {
+
+		spec := me.NewRepositorySpec("http://"+VAULT_ADDRESS, me.WithPath(VAULT_PATH_REPO1), me.WithMountPath("secret"))
+
+		It("authenticate with token and retrieve credentials", func() {
+			data := map[string]any{
+				"password1": "ocm-password-1",
+				"password2": "ocm-password-2",
+			}
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx,
+				VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteRequest{Data: data},
+				vault.WithMountPath("secret"),
+			))
+
+			consumerId := Must(identity.GetConsumerId(vaultClient.Configuration().Address,
+				"", "secret", VAULT_PATH_REPO1))
+			creds := credentials.NewCredentials(common.Properties{
+				identity.ATTR_AUTHMETH: identity.AUTH_TOKEN,
+				identity.ATTR_TOKEN:    VAULT_ROOT_TOKEN,
+			})
+			DefaultContext.SetCredentialsForConsumer(consumerId, creds)
+
+			repo := Must(DefaultContext.RepositoryForSpec(spec, nil))
+			Expect(repo).ToNot(BeNil())
+
+			c, err := repo.LookupCredentials(VAULT_SECRET)
+			Expect(c.Properties()).To(YAMLEqual(data))
+			Expect(err).To(BeNil())
+		})
+
+		It("authenticate with approle and retrieve credentials", func() {
+			SetUpVaultAccess(ctx, DefaultContext, vaultClient, VAULT_POLICY_RULE)
+
+			data := map[string]any{
+				"password1": "ocm-password-1",
+				"password2": "ocm-password-2",
+			}
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteRequest{Data: data},
+				vault.WithMountPath("secret"),
+			))
+
+			repo := Must(DefaultContext.RepositoryForSpec(spec, nil))
+			Expect(repo).ToNot(BeNil())
+
+			c, err := repo.LookupCredentials(VAULT_SECRET)
+			Expect(c.Properties()).To(YAMLEqual(data))
+			Expect(err).To(BeNil())
+		})
+
+		It("authenticate with approle with unsufficient authorizations and fail to retrieve credentials", func() {
+			SetUpVaultAccess(ctx, DefaultContext, vaultClient, VAULT_INSUFFICIENT_POLICY_RULE)
+
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET, schema.KvV2WriteRequest{
+				Data: map[string]any{
+					"password1": "ocm-password-1",
+					"password2": "ocm-password-2",
+				}},
+				vault.WithMountPath("secret"),
+			))
+
+			repo := Must(DefaultContext.RepositoryForSpec(spec, nil))
+			Expect(repo).ToNot(BeNil())
+
+			c, err := repo.LookupCredentials(VAULT_SECRET)
+			Expect(err).To(HaveOccurred())
+			Expect(c).To(BeNil())
+		})
+
+		It("authenticate with approle and specify a subset of secrets at the specified path in the repository spec", func() {
+			SetUpVaultAccess(ctx, DefaultContext, vaultClient, VAULT_POLICY_RULE)
+
+			data := map[string]any{
+				"password1": "ocm-password-1",
+			}
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteRequest{Data: data},
+				vault.WithMountPath("secret"),
+			))
+
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET_2, schema.KvV2WriteRequest{
+				Data: map[string]any{
+					"password2": "ocm-password-2",
+				}},
+				vault.WithMountPath("secret"),
+			))
+
+			// This is how we restrict the secrets accessible through the respository
+			spec.Secrets = append(spec.Secrets, VAULT_SECRET)
+			repo := Must(DefaultContext.RepositoryForSpec(spec, nil))
+			Expect(repo).ToNot(BeNil())
+
+			c, err := repo.LookupCredentials(VAULT_SECRET)
+			Expect(c).To(YAMLEqual(data))
+			Expect(err).ToNot(HaveOccurred())
+
+			c, err = repo.LookupCredentials(VAULT_SECRET_2)
+			Expect(err).To(BeNil())
+			Expect(c).To(BeNil())
+		})
+
+		It("authenticate with approle and specify a subset of secrets at the specified path in a dedicated secret", func() {
+			SetUpVaultAccess(ctx, DefaultContext, vaultClient, VAULT_POLICY_RULE)
+
+			data := map[string]any{
+				"password1": "ocm-password-1",
+			}
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteRequest{Data: data},
+				vault.WithMountPath("secret"),
+			))
+
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET_2, schema.KvV2WriteRequest{
+				Data: map[string]any{
+					"password2": "ocm-password-2",
+				}},
+				vault.WithMountPath("secret"),
+			))
+
+			// You have to specify a value, but it is essentially a placeholder here
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_CUSTOM_SECRETS, schema.KvV2WriteRequest{
+				Data: map[string]any{
+					"description": "specify a list in the metadata",
+				},
+			},
+				vault.WithMountPath("secret"),
+			))
+			metadata := map[string]any{
+				me.CUSTOM_SECRETS: VAULT_SECRET,
+			}
+			_ = Must(vaultClient.Secrets.KvV2WriteMetadata(ctx, VAULT_PATH_REPO1+"/"+VAULT_CUSTOM_SECRETS,
+				schema.KvV2WriteMetadataRequest{CustomMetadata: metadata},
+				vault.WithMountPath("secret"),
+			))
+
+			// This is how we restrict the secrets accessible through the respository
+			spec.Secrets = append(spec.Secrets, VAULT_CUSTOM_SECRETS)
+			repo := Must(DefaultContext.RepositoryForSpec(spec, nil))
+			Expect(repo).ToNot(BeNil())
+
+			c, err := repo.LookupCredentials(VAULT_SECRET)
+			Expect(c).To(YAMLEqual(data))
+			Expect(err).ToNot(HaveOccurred())
+
+			c, err = repo.LookupCredentials(VAULT_SECRET_2)
+			Expect(err).To(BeNil())
+			Expect(c).To(BeNil())
+		})
+
+		It("authenticate with approle and consume secrets with a consumer id from the provider", func() {
+			SetUpVaultAccess(ctx, DefaultContext, vaultClient, VAULT_POLICY_RULE)
+
+			data := map[string]any{
+				"password1": "ocm-password-1",
+			}
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteRequest{Data: data},
+				vault.WithMountPath("secret"),
+			))
+			cid := hostpath.GetConsumerIdentity(hostpath.IDENTITY_TYPE, "https://test-url.com")
+			cidData := Must(runtime.DefaultJSONEncoding.Marshal(cid))
+			metadata := map[string]any{
+				me.CUSTOM_CONSUMERID: string(cidData),
+			}
+			_ = Must(vaultClient.Secrets.KvV2WriteMetadata(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteMetadataRequest{CustomMetadata: metadata},
+				vault.WithMountPath("secret"),
+			))
+
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET_2, schema.KvV2WriteRequest{
+				Data: map[string]any{
+					"password2": "ocm-password-2",
+				}},
+				vault.WithMountPath("secret"),
+			))
+
+			repo := Must(me.NewRepository(DefaultContext, spec))
+			Expect(repo).ToNot(BeNil())
+			provider := Must(me.NewConsumerProvider(repo))
+			c, ok := provider.Get(cid)
+			Expect(ok).To(BeTrue())
+			Expect(c).ToNot(BeNil())
+		})
+
+		It("authenticate with approle and consume secrets with a consumer id from the credential context", func() {
+			SetUpVaultAccess(ctx, DefaultContext, vaultClient, VAULT_POLICY_RULE)
+
+			data := map[string]any{
+				"password1": "ocm-password-1",
+			}
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteRequest{Data: data},
+				vault.WithMountPath("secret"),
+			))
+			cid := hostpath.GetConsumerIdentity(hostpath.IDENTITY_TYPE, "https://test-url.com")
+			cidData := Must(runtime.DefaultJSONEncoding.Marshal(cid))
+			metadata := map[string]any{
+				me.CUSTOM_CONSUMERID: string(cidData),
+			}
+			_ = Must(vaultClient.Secrets.KvV2WriteMetadata(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteMetadataRequest{CustomMetadata: metadata},
+				vault.WithMountPath("secret"),
+			))
+
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET_2, schema.KvV2WriteRequest{
+				Data: map[string]any{
+					"password2": "ocm-password-2",
+				}},
+				vault.WithMountPath("secret"),
+			))
+
+			spec.PropgateConsumerIdentity = true
+			repo := Must(DefaultContext.RepositoryForSpec(spec))
+			Expect(repo).ToNot(BeNil())
+
+			c := Must(DefaultContext.GetCredentialsForConsumer(cid))
+			Expect(c).To(YAMLEqual(data))
+		})
+	})
+})
+
+func StartVaultServer(mode vaultMode, rootToken, address string) (*exec.Cmd, *vault.Client, context.CancelFunc, error) {
+	cmdctx, cancelFunc := context.WithCancel(context.Background())
+	if mode == "" {
+		mode = HTTP
+	}
+	url := address
+	switch mode {
+	case HTTP:
+		url = "http://" + url
+	case HTTPS:
+		url = "https://" + url
+	}
+
+	cmd := exec.CommandContext(cmdctx, "../../../../../bin/vault", "server", "-"+string(mode), fmt.Sprintf("-dev-root-token-id=%s", rootToken), fmt.Sprintf("-dev-listen-address=%s", address))
+	//cmd.Stdout = os.Stdout
+	//cmd.Stderr = os.Stderr
+
+	vaultClient, err := vault.New(
+		vault.WithAddress(url),
+		vault.WithRequestTimeout(30*time.Second),
+	)
+	if err != nil {
+		return nil, nil, cancelFunc, err
+	}
+
+	// authenticate with root token
+	err = vaultClient.SetToken(rootToken)
+	if err != nil {
+		return nil, nil, cancelFunc, err
+	}
+
+	err = cmd.Start()
+	if err == nil {
+		err = WaitForTCPServer(address, time.Minute)
+	}
+	return cmd, vaultClient, cancelFunc, err
+}
+
+func WaitForTCPServer(address string, dur time.Duration) error {
+	var conn net.Conn
+	var d net.Dialer
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	end := time.Now().Add(dur)
+	err := errors.New("timed out waiting for server to start")
+	for time.Now().Before(end) {
+		conn, err = d.DialContext(ctx, "tcp", address)
+		if err != nil {
+			time.Sleep(time.Second)
+			continue
+		}
+		conn.Close()
+		break
+	}
+	return err
+}
+
+func SetUpVaultAccess(ctx context.Context, credctx credentials.Context, client *vault.Client, policy string) {
+	_ = Must(client.System.AuthEnableMethod(ctx, "approle", schema.AuthEnableMethodRequest{Type: "approle"}))
+	_ = Must(client.System.PoliciesWriteAclPolicy(ctx, VAULT_POLICY_NAME, schema.PoliciesWriteAclPolicyRequest{Policy: policy}))
+	_ = Must(client.Auth.AppRoleWriteRole(ctx, VAULT_APP_ROLE, schema.AppRoleWriteRoleRequest{TokenType: "batch", SecretIdTtl: "10m", TokenTtl: "20m", TokenMaxTtl: "30m", SecretIdNumUses: 40, TokenPolicies: []string{VAULT_POLICY_NAME}}))
+
+	role := Must(client.Auth.AppRoleReadRoleId(ctx, VAULT_APP_ROLE))
+	roleid := role.Data.RoleId
+	// Unfortunately, this function is currently bugged, therefore we fall back to the generic function
+	//secretid := Must(client.Auth.AppRoleWriteSecretId(ctx, VAULT_APP_ROLE, schema.AppRoleWriteSecretIdRequest{}))
+	secret := Must(client.Write(ctx, fmt.Sprintf("/v1/auth/approle/role/%s/secret-id", VAULT_APP_ROLE), map[string]interface{}{}))
+	secretid := secret.Data["secret_id"].(string)
+
+	consumerId := Must(identity.GetConsumerId(client.Configuration().Address, "", "secret", VAULT_PATH_REPO1))
+	creds := credentials.NewCredentials(common.Properties{
+		identity.ATTR_AUTHMETH: identity.AUTH_APPROLE,
+		identity.ATTR_ROLEID:   roleid,
+		identity.ATTR_SECRETID: secretid,
+	})
+	credctx.SetCredentialsForConsumer(consumerId, creds)
+}
