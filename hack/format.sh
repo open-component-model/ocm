@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-#
-# SPDX-License-Identifier: Apache-2.0
-
 set -e
 
 log() {
@@ -14,7 +10,7 @@ log() {
 
 pkgprefix="github.com/open-component-model/ocm"
 
-log "Format with gci"
+log "Format with gci" # gci write --custom-order --skip-generated -s standard -s blank -s dot -s default -s "Prefix(github.com/open-component-model/ocm)"
 GCIFMT=( -s standard -s blank -s dot -s default -s="prefix(${pkgprefix})" --custom-order )
 gci diff --skip-generated "${GCIFMT[@]}"  $@ </dev/null \
   | awk '/^--- / { print $2 }' \

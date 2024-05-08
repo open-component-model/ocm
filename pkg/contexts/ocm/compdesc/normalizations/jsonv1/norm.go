@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 // Package jsonv1 provides a normalization which uses schema specific
 // normalizations.
 // It creates the requested schema for the component descriptor

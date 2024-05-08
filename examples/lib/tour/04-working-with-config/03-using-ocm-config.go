@@ -1,11 +1,9 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package main
 
 import (
 	"fmt"
+
+	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	configcfg "github.com/open-component-model/ocm/pkg/contexts/config/config"
@@ -16,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"sigs.k8s.io/yaml"
 )
 
 func HandleOCMConfig(cfg *helper.Config) error {
