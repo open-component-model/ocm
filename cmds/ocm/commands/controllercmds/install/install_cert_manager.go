@@ -25,6 +25,11 @@ func (o *Command) installPrerequisites(ctx context.Context) error {
 	}
 
 	out.Outf(o.Context, "✔ cert-manager successfully installed\n")
+
+	if o.DryRun {
+		return nil
+	}
+
 	out.Outf(o.Context, "► creating certificate for internal registry\n")
 
 	if err := o.createRegistryCertificate(); err != nil {

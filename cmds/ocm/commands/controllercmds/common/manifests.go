@@ -98,6 +98,7 @@ func fetchObjects(ctx context.Context, octx clictx.Context, releaseURL, baseURL,
 		}
 
 		out.Outf(octx, string(content))
+
 		return nil, nil
 	}
 	out.Outf(octx, "► applying to cluster...\n")
