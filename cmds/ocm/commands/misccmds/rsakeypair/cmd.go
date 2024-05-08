@@ -136,7 +136,10 @@ func (o *Command) Complete(args []string) error {
 	if o.rootcerts != "" {
 		pool, err := signutils.GetCertPool(o.rootcerts, false)
 		if err != nil {
-			path, _ := utils2.ResolvePath(o.rootcerts)
+			path, err := utils2.ResolvePath(o.rootcerts)
+			if err != nil {
+				return errors.Wrapf(err, "failed to resolve root certificates")
+			}
 			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read root cert file %q", o.rootcerts)
@@ -186,7 +189,10 @@ func (o *Command) Complete(args []string) error {
 		raw := []byte(o.cacert)
 		cert, pool, err := signutils.GetCertificate(o.cacert, false)
 		if err != nil {
-			path, _ := utils2.ResolvePath(o.cacert)
+			path, err := utils2.ResolvePath(o.cacert)
+			if err != nil {
+				return errors.Wrapf(err, "failed to resolve cacert file %q", o.cacert)
+			}
 			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read ca cert file %q", o.cacert)
@@ -218,7 +224,10 @@ func (o *Command) Complete(args []string) error {
 	if o.cakey != "" {
 		key, err := parse.ParsePrivateKey(o.cakey)
 		if err != nil {
-			path, _ := utils2.ResolvePath(o.cakey)
+			path, err := utils2.ResolvePath(o.cakey)
+			if err != nil {
+				return errors.Wrapf(err, "failed to resolve ca key file %q", o.cakey)
+			}
 			data, err := vfs.ReadFile(o.Context.FileSystem(), path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot read private key file %q", o.cakey)

@@ -213,7 +213,10 @@ func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 			return ""
 		}
 		defer m.Close()
-		digest, _ := blobaccess.Digest(m)
+		digest, err := blobaccess.Digest(m)
+		if err != nil {
+			return ""
+		}
 		return digest.String()
 	}
 	return ""

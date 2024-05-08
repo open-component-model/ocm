@@ -26,7 +26,12 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 		out.Printf("  Version:         %s\n", src.Version)
 		out.Printf("  Resource:        %s\n", src.Resource)
 		u := src.Repository.AsUniformSpec(p.Context())
-		data, _ := json.Marshal(src.Repository)
+		data, err := json.Marshal(src.Repository)
+		if err != nil {
+			out.Printf("Status:           %s\n", err)
+
+			return
+		}
 		out.Printf("  Repository:      %s\n", u.String())
 		out.Printf("    Specification: %s\n", string(data))
 	} else {

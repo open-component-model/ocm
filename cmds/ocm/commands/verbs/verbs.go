@@ -16,5 +16,6 @@ const (
 	Verify    = "verify"
 	Clean     = "clean"
 	Install   = "install"
+	Uninstall = "uninstall"
 	Execute   = "execute"
 )

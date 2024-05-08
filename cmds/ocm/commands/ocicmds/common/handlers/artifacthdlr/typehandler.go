@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mandelsoft/logging"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -48,7 +49,13 @@ func (o *Object) GetKind() string {
 }
 
 func (o *Object) IsNode() *common.NameVersion {
-	blob, _ := o.Artifact.Blob()
+	blob, err := o.Artifact.Blob()
+	if err != nil {
+		logging.DefaultContext().Logger().LogError(err, "failed to fetch blob from artifact")
+
+		return nil
+	}
+
 	nv := common.NewNameVersion("", blob.Digest().String())
 	return &nv
 }
@@ -69,7 +76,11 @@ func (o *Object) AsManifest() interface{} {
 }
 
 func (o *Object) String() string {
-	blob, _ := o.Artifact.Blob()
+	blob, err := o.Artifact.Blob()
+	if err != nil {
+		return ""
+	}
+
 	dig := blob.Digest()
 	tag := "-"
 	if o.Spec.Tag != nil {
@@ -86,9 +97,13 @@ type Manifest struct {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Key(a oci.ArtifactAccess) common.NameVersion {
-	blob, _ := a.Blob()
-	return common.NewNameVersion("", blob.Digest().String())
+func Key(a oci.ArtifactAccess) (common.NameVersion, error) {
+	blob, err := a.Blob()
+	if err != nil {
+		return common.NameVersion{}, fmt.Errorf("unable to determine blob name: %w", err)
+	}
+
+	return common.NewNameVersion("", blob.Digest().String()), nil
 }
 
 type TypeHandler struct {
@@ -161,8 +176,13 @@ func (h *TypeHandler) get(repo oci.Repository, elemspec utils.ElemSpec) ([]outpu
 		spec = evaluated.Ref
 		namespace = evaluated.Namespace
 		if evaluated.Artifact != nil {
+			key, err := Key(evaluated.Artifact)
+			if err != nil {
+				return nil, fmt.Errorf("unable to determine key for artifact %q: %w", name, err)
+			}
+
 			obj := &Object{
-				Key:       Key(evaluated.Artifact),
+				Key:       key,
 				Spec:      spec,
 				Namespace: namespace,
 				Artifact:  evaluated.Artifact,
@@ -194,8 +214,12 @@ func (h *TypeHandler) get(repo oci.Repository, elemspec utils.ElemSpec) ([]outpu
 			return nil, err
 		}
 		h.session.AddCloser(a)
+		key, err := Key(a)
+		if err != nil {
+			return nil, fmt.Errorf("unable to determine key for artifact %q: %w", name, err)
+		}
 		obj := &Object{
-			Key:       Key(a),
+			Key:       key,
 			Spec:      spec,
 			Namespace: namespace,
 			Artifact:  a,
@@ -215,8 +239,13 @@ func (h *TypeHandler) get(repo oci.Repository, elemspec utils.ElemSpec) ([]outpu
 			t := tag
 			s := spec
 			s.Tag = &t
+			key, err := Key(a)
+			if err != nil {
+				return nil, fmt.Errorf("unable to determine key for artifact %q: %w", name, err)
+			}
+
 			result = append(result, &Object{
-				Key:       Key(a),
+				Key:       key,
 				Spec:      s,
 				Namespace: namespace,
 				Artifact:  a,

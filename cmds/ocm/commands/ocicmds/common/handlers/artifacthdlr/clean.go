@@ -27,7 +27,12 @@ func clean(iterable data.Iterable) data.Iterable {
 		e := it.Next().(*Object)
 		data.Add(e)
 		l := len(e.History)
-		blob, _ := e.Artifact.Blob()
+		blob, err := e.Artifact.Blob()
+		if err != nil {
+			// ignore if we don't have the artifact and get the next element
+
+			continue
+		}
 
 		if l > depth[blob.Digest()] {
 			depth[blob.Digest()] = l
@@ -39,7 +44,12 @@ func clean(iterable data.Iterable) data.Iterable {
 
 	output.Print(data, "clean in")
 	for i := 0; i < len(data); i++ {
-		e := data[i].(*Object)
+		e, ok := data[i].(*Object)
+		if !ok {
+			// ignore if we don't have an object and continue cleaning the rest
+
+			continue
+		}
 		l := len(e.History)
 		blob, _ := e.Artifact.Blob()
 		dig := blob.Digest()

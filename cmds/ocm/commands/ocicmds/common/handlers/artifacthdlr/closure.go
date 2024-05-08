@@ -14,9 +14,16 @@ func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
 }
 
 func traverse(hist common.History, o *Object, octx out.Context) []output.Object {
-	blob, _ := o.Artifact.Blob()
+	blob, err := o.Artifact.Blob()
+	if err != nil {
+		out.Errf(octx, "unable to get artifact blob: %s", err)
+
+		return nil
+	}
 	key := common.NewNameVersion("", blob.Digest().String())
 	if err := hist.Add(oci.KIND_OCIARTIFACT, key); err != nil {
+		out.Errf(octx, "unable to add artifact to history: %s", err)
+
 		return nil
 	}
 	result := []output.Object{o}
@@ -34,9 +41,13 @@ func traverse(hist common.History, o *Object, octx out.Context) []output.Object 
 			if err != nil {
 				out.Errf(octx, "Warning: lookup nested artifact %q [%s]: %s\n", ref.Digest, hist, err)
 			}
+			version, err := Key(nested)
+			if err != nil {
+				out.Errf(octx, "Failed to find nested key %q [%s]: %s\n", ref.Digest, hist, err)
+			}
 			obj := &Object{
 				History: hist.Copy(),
-				Key:     Key(nested),
+				Key:     version,
 				Spec: oci.RefSpec{
 					UniformRepositorySpec: o.Spec.UniformRepositorySpec,
 					ArtSpec: oci.ArtSpec{

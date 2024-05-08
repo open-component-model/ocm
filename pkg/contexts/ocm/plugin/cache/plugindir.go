@@ -54,7 +54,12 @@ func (c *pluginDirImpl) Get(name string) Plugin {
 func (c *pluginDirImpl) add(name string, desc *descriptor.Descriptor, path string, errmsg string, list *errors.ErrorList) {
 	c.plugins[name] = NewPlugin(name, path, desc, errmsg)
 	if path != "" {
-		src, _ := ReadPluginSource(filepath.Dir(path), filepath.Base(path))
+		src, err := ReadPluginSource(filepath.Dir(path), filepath.Base(path))
+		if err != nil && list != nil {
+			list.Add(fmt.Errorf("%s: %s", name, err.Error()))
+			return
+		}
+
 		c.plugins[name].source = src
 	}
 	if errmsg != "" && list != nil {
