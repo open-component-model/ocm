@@ -63,6 +63,11 @@ test:
 	@echo "> Test"
 	@go test  ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
 
+.PHONY: test-all
+test-all: install-requirements
+	@echo "> Integration Test"
+	@go test --tags=integration ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
+
 .PHONY: generate
 generate:
 	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/examples/...
