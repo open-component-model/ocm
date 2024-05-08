@@ -54,7 +54,7 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>scheme</code>: (optional) URL scheme
       - <code>port</code>: (optional) server port
       - <code>namespace</code>: vault namespace
-      - <code>secretEngine</code>: secret engine
+      - <code>mountPath</code>: mount path
       - <code>pathprefix</code>: path prefix for secret
 
 
@@ -63,7 +63,6 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>authmeth</code>: auth method
       - <code>token</code>: vault token
       - <code>roleid</code>: applrole role id
-      - <code>secretid</code>: applrole secret id
       - <code>secretid</code>: applrole secret id
 
     The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
