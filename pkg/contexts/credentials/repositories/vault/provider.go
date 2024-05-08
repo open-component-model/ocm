@@ -3,7 +3,6 @@ package vault
 import (
 	"context"
 	"encoding/json"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"net/http"
 	"path"
 	"strings"
@@ -16,6 +15,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
 )
 
@@ -41,8 +41,10 @@ type ConsumerProvider struct {
 	updated bool
 }
 
-var _ cpi.ConsumerProvider = (*ConsumerProvider)(nil)
-var _ cpi.ConsumerIdentityProvider = (*ConsumerProvider)(nil)
+var (
+	_ cpi.ConsumerProvider         = (*ConsumerProvider)(nil)
+	_ cpi.ConsumerIdentityProvider = (*ConsumerProvider)(nil)
+)
 
 func NewConsumerProvider(repo *Repository) (*ConsumerProvider, error) {
 	src, err := repo.ctx.GetCredentialsForConsumer(repo.id)
@@ -183,7 +185,6 @@ func (p *ConsumerProvider) error(err error, msg string, secret string, keypairs 
 		"error", err.Error(),
 	)...,
 	)
-
 }
 
 func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secret string) (common.Properties, common.Properties, []string, error) {
