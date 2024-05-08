@@ -3,6 +3,8 @@ package vault
 import (
 	"context"
 	"encoding/json"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
+	"net/http"
 	"path"
 	"strings"
 	"sync"
@@ -40,6 +42,7 @@ type ConsumerProvider struct {
 }
 
 var _ cpi.ConsumerProvider = (*ConsumerProvider)(nil)
+var _ cpi.ConsumerIdentityProvider = (*ConsumerProvider)(nil)
 
 func NewConsumerProvider(repo *Repository) (*ConsumerProvider, error) {
 	src, err := repo.ctx.GetCredentialsForConsumer(repo.id)
@@ -53,6 +56,14 @@ func NewConsumerProvider(repo *Repository) (*ConsumerProvider, error) {
 	}, nil
 }
 
+func (p *ConsumerProvider) GetConsumerId(uctx ...internal.UsageContext) internal.ConsumerIdentity {
+	return p.repository.GetConsumerId()
+}
+
+func (p *ConsumerProvider) GetIdentityMatcher() string {
+	return p.repository.GetIdentityMatcher()
+}
+
 func (p *ConsumerProvider) update() error {
 	var err error
 
@@ -60,7 +71,7 @@ func (p *ConsumerProvider) update() error {
 		return nil
 	}
 	p.updated = true
-
+	// internal getCredentialsForConsumer method that passes the repository to skip it in the internal match
 	p.creds, err = p.repository.ctx.GetCredentialsForConsumer(p.repository.id, identity.IdentityMatcher)
 	if err != nil {
 		return err
@@ -104,7 +115,7 @@ func (p *ConsumerProvider) update() error {
 	secrets := slices.Clone(p.repository.spec.Secrets)
 	if len(secrets) == 0 {
 		s, err := client.Secrets.KvV2List(ctx, p.repository.spec.Path,
-			vault.WithMountPath(p.repository.spec.SecretsEngine))
+			vault.WithMountPath(p.repository.spec.MountPath))
 		if err != nil {
 			return err
 		}
@@ -159,14 +170,20 @@ func (p *ConsumerProvider) error(err error, msg string, secret string, keypairs 
 	if err == nil {
 		return
 	}
-	log.Error(msg, append(keypairs,
+	f := log.Info
+	var v *vault.ResponseError
+	if errors.As(err, &v) && v.StatusCode != http.StatusNotFound {
+		f = log.Error
+	}
+	f(msg, append(keypairs,
 		"server", p.repository.spec.ServerURL,
 		"namespace", p.repository.spec.Namespace,
-		"engine", p.repository.spec.SecretsEngine,
+		"engine", p.repository.spec.MountPath,
 		"path", path.Join(p.repository.spec.Path, secret),
 		"error", err.Error(),
 	)...,
 	)
+
 }
 
 func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secret string) (common.Properties, common.Properties, []string, error) {
@@ -174,7 +191,7 @@ func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secre
 
 	secret = path.Join(p.repository.spec.Path, secret)
 	s, err := client.Secrets.KvV2Read(ctx, secret,
-		vault.WithMountPath(p.repository.spec.SecretsEngine))
+		vault.WithMountPath(p.repository.spec.MountPath))
 	if err != nil {
 		return nil, nil, nil, err
 	}

@@ -196,11 +196,19 @@ func (p *consumerProviderRegistry) Get(id ConsumerIdentity) (CredentialsSource, 
 }
 
 func (p *consumerProviderRegistry) Match(pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
-	p.lock.Lock()
-	defer p.lock.Unlock()
+	p.lock.RLock()
+	defer p.lock.RUnlock()
 
 	credsrc, cur := p.explicit.Match(pattern, cur, m)
 	for _, sub := range p.providers {
+		if pr, ok := sub.(ConsumerIdentityProvider); ok {
+			// Some credential providers such as e.g. vault need credentials to be accessed themselves. When credentials
+			// are requested for these providers, the provider itself cannot provide its own credentials. Besides being
+			// an optimization, this primarily prevents deadlock and also a potential endless recursion.
+			if pr.GetConsumerId().Equals(pattern) {
+				continue
+			}
+		}
 		var f CredentialsSource
 		f, cur = sub.Match(pattern, cur, m)
 		if f != nil {
