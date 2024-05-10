@@ -39,11 +39,13 @@ const (
 
 const (
 	VAULT_APP_ROLE       = "ocmrole"
+	VAULT_APP_ROLE1      = "ocmrole1"
 	VAULT_SECRET         = "mysecret"
 	VAULT_CUSTOM_SECRETS = "secret-list"
 	VAULT_SECRET_2       = "mysecret2"
 
-	VAULT_POLICY_NAME = "ocm"
+	VAULT_POLICY_NAME  = "ocm"
+	VAULT_POLICY_NAME1 = "ocm1"
 
 	VAULT_ROOT_TOKEN = "toorl"
 	VAULT_TLS_DIR    = "./vault-tls"
@@ -53,13 +55,13 @@ const (
 	VAULT_POLICY_RULE = `
 path "secret/*"
 {
-  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+  capabilities = ["read","list"]
 }
 `
 	VAULT_INSUFFICIENT_POLICY_RULE = `
 path "secret/notmysecret"
 {
-  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+  capabilities = ["read", "list"]
 }
 `
 )
@@ -86,6 +88,7 @@ var _ = Describe("vault config", func() {
 	Context("authentication to vault and reading secrets", func() {
 
 		spec := me.NewRepositorySpec("http://"+VAULT_ADDRESS, me.WithPath(VAULT_PATH_REPO1), me.WithMountPath("secret"))
+		spec1 := me.NewRepositorySpec("http://"+VAULT_ADDRESS, me.WithPath(VAULT_PATH_REPO2), me.WithMountPath("secret"))
 
 		It("authenticate with token and retrieve credentials", func() {
 			data := map[string]any{
@@ -300,6 +303,88 @@ var _ = Describe("vault config", func() {
 			Expect(repo).ToNot(BeNil())
 
 			c := Must(DefaultContext.GetCredentialsForConsumer(cid))
+			Expect(c).To(YAMLEqual(data))
+		})
+
+		It("recursive authentication", func() {
+			SetUpVaultAccess(ctx, DefaultContext, vaultClient, fmt.Sprintf(`
+path "secret/data/%s/*"
+{
+  capabilities = ["read"]
+}
+path "secret/metadata/%s/*"
+{
+  capabilities = ["list"]
+}
+`, VAULT_PATH_REPO1, VAULT_PATH_REPO1))
+
+			_ = Must(vaultClient.System.PoliciesWriteAclPolicy(ctx, VAULT_POLICY_NAME1, schema.PoliciesWriteAclPolicyRequest{Policy: fmt.Sprintf(`
+path "secret/data/%s/*"
+{
+  capabilities = ["read"]
+}
+path "secret/metadata/%s/*"
+{
+  capabilities = ["list"]
+}
+`, VAULT_PATH_REPO2, VAULT_PATH_REPO2)}))
+			_ = Must(vaultClient.Auth.AppRoleWriteRole(ctx, VAULT_APP_ROLE1, schema.AppRoleWriteRoleRequest{TokenType: "batch", SecretIdTtl: "10m", TokenTtl: "20m", TokenMaxTtl: "30m", SecretIdNumUses: 40, TokenPolicies: []string{VAULT_POLICY_NAME1}}))
+
+			role := Must(vaultClient.Auth.AppRoleReadRoleId(ctx, VAULT_APP_ROLE1))
+			roleid := role.Data.RoleId
+			// Unfortunately, this function is currently bugged, therefore we fall back to the generic function
+			//secretid := Must(client.Auth.AppRoleWriteSecretId(ctx, VAULT_APP_ROLE, schema.AppRoleWriteSecretIdRequest{}))
+			secret := Must(vaultClient.Write(ctx, fmt.Sprintf("/v1/auth/approle/role/%s/secret-id", VAULT_APP_ROLE1), map[string]interface{}{}))
+			secretid := secret.Data["secret_id"].(string)
+
+			// Write a secret with the credentials for vault repo 2 (VAULT_PATH_REPO2) into vault repo 1 and write the
+			// consumer id of vault repo 2 into the secrets metadata
+			consumerId := Must(identity.GetConsumerId(VAULT_HTTP_URL, "", "secret", VAULT_PATH_REPO2))
+			data := map[string]any{
+				identity.ATTR_AUTHMETH: identity.AUTH_APPROLE,
+				identity.ATTR_ROLEID:   roleid,
+				identity.ATTR_SECRETID: secretid,
+			}
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteRequest{Data: data},
+				vault.WithMountPath("secret"),
+			))
+			consumerIdData := Must(runtime.DefaultJSONEncoding.Marshal(consumerId))
+			metadata := map[string]any{
+				me.CUSTOM_CONSUMERID: string(consumerIdData),
+			}
+			_ = Must(vaultClient.Secrets.KvV2WriteMetadata(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET,
+				schema.KvV2WriteMetadataRequest{CustomMetadata: metadata},
+				vault.WithMountPath("secret"),
+			))
+
+			// Write a secret with arbitrary data into vault repo 2
+			data = map[string]any{
+				"password1": "ocm-password-1",
+			}
+			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO2+"/"+VAULT_SECRET,
+				schema.KvV2WriteRequest{Data: data},
+				vault.WithMountPath("secret"),
+			))
+			consumerId = hostpath.GetConsumerIdentity(hostpath.IDENTITY_TYPE, "https://test-url.com")
+			consumerIdData = Must(runtime.DefaultJSONEncoding.Marshal(consumerId))
+			metadata = map[string]any{
+				me.CUSTOM_CONSUMERID: string(consumerIdData),
+			}
+			_ = Must(vaultClient.Secrets.KvV2WriteMetadata(ctx, VAULT_PATH_REPO2+"/"+VAULT_SECRET,
+				schema.KvV2WriteMetadataRequest{CustomMetadata: metadata},
+				vault.WithMountPath("secret"),
+			))
+
+			spec.PropgateConsumerIdentity = true
+			repo := Must(DefaultContext.RepositoryForSpec(spec))
+			Expect(repo).ToNot(BeNil())
+
+			spec1.PropgateConsumerIdentity = true
+			repo = Must(DefaultContext.RepositoryForSpec(spec1))
+			Expect(repo).ToNot(BeNil())
+
+			c := Must(DefaultContext.GetCredentialsForConsumer(consumerId))
 			Expect(c).To(YAMLEqual(data))
 		})
 	})

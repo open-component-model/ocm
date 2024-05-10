@@ -1,13 +1,43 @@
 package internal
 
 import (
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/sliceutils"
+	"slices"
 	"sort"
 	"sync"
 
 	"github.com/mandelsoft/goutils/maputils"
 )
 
-// UsageContext descibes a dediacetd type specific
+type CredentialRecursion []ConsumerIdentity
+
+func (c CredentialRecursion) Contains(identity ConsumerIdentity) bool {
+	return slices.ContainsFunc(c, general.ContainsFuncFor(identity))
+}
+
+func (c CredentialRecursion) Append(identity ConsumerIdentity) CredentialRecursion {
+	return sliceutils.CopyAppendUniqueFunc(c, general.EqualsFuncFor[ConsumerIdentity](), identity)
+}
+
+func CheckHandleProvider(ctx EvaluationContext, prov ConsumerProvider, pattern ConsumerIdentity) bool {
+	if pr, ok := prov.(ConsumerIdentityProvider); ok {
+		r := GetEvaluationContextFor[CredentialRecursion](ctx)
+		if r == nil {
+			r = CredentialRecursion{}
+		}
+		SetEvaluationContextFor(ctx, r.Append(pr.GetConsumerId()))
+		// Some credential providers such as e.g. vault need credentials to be accessed themselves. When credentials
+		// are requested for these providers, the provider itself cannot provide its own credentials. Besides being
+		// an optimization, this primarily prevents deadlock and also a potential endless recursion.
+		if r.Contains(pattern) {
+			return false
+		}
+	}
+	return true
+}
+
+// UsageContext describes a dedicated type specific
 // sub usage kinds for an object requiring credentials.
 // For example, for an object providing a hierarchical
 // namespace this might be a namespace prefix for
@@ -73,7 +103,7 @@ func (c *_consumers) Get(id ConsumerIdentity) (CredentialsSource, bool) {
 
 // Match matches a given request (pattern) against configured
 // identities.
-func (c *_consumers) Match(pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
+func (c *_consumers) Match(ectx EvaluationContext, pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
 	var found *_consumer
 	for _, s := range c.data {
 		if m(pattern, cur, s.identity) {
@@ -195,22 +225,17 @@ func (p *consumerProviderRegistry) Get(id ConsumerIdentity) (CredentialsSource, 
 	return nil, false
 }
 
-func (p *consumerProviderRegistry) Match(pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
+func (p *consumerProviderRegistry) Match(ectx EvaluationContext, pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 
-	credsrc, cur := p.explicit.Match(pattern, cur, m)
+	credsrc, cur := p.explicit.Match(ectx, pattern, cur, m)
 	for _, sub := range p.providers {
-		if pr, ok := sub.(ConsumerIdentityProvider); ok {
-			// Some credential providers such as e.g. vault need credentials to be accessed themselves. When credentials
-			// are requested for these providers, the provider itself cannot provide its own credentials. Besides being
-			// an optimization, this primarily prevents deadlock and also a potential endless recursion.
-			if pr.GetConsumerId().Equals(pattern) {
-				continue
-			}
+		if !CheckHandleProvider(ectx, sub, pattern) {
+			continue
 		}
 		var f CredentialsSource
-		f, cur = sub.Match(pattern, cur, m)
+		f, cur = sub.Match(ectx, pattern, cur, m)
 		if f != nil {
 			credsrc = f
 		}

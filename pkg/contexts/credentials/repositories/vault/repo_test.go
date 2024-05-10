@@ -25,6 +25,7 @@ const (
 	VAULT_NAMESPACE  = "test-namespace"
 	VAULT_MOUNT_PATH = "secret"
 	VAULT_PATH_REPO1 = "mysecrets/repo1"
+	VAULT_PATH_REPO2 = "mysecrets/repo2"
 )
 
 var _ = Describe("", func() {

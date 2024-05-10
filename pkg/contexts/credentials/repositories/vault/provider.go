@@ -73,7 +73,6 @@ func (p *ConsumerProvider) update() error {
 		return nil
 	}
 	p.updated = true
-	// internal getCredentialsForConsumer method that passes the repository to skip it in the internal match
 	p.creds, err = p.repository.ctx.GetCredentialsForConsumer(p.repository.id, identity.IdentityMatcher)
 	if err != nil {
 		return err
@@ -119,6 +118,7 @@ func (p *ConsumerProvider) update() error {
 		s, err := client.Secrets.KvV2List(ctx, p.repository.spec.Path,
 			vault.WithMountPath(p.repository.spec.MountPath))
 		if err != nil {
+			p.error(err, "error listing secrets", "")
 			return err
 		}
 		for _, k := range s.Data.Keys {
@@ -244,7 +244,7 @@ func getProps(data map[string]interface{}) common.Properties {
 func (p *ConsumerProvider) Unregister(id cpi.ProviderIdentity) {
 }
 
-func (p *ConsumerProvider) Match(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
+func (p *ConsumerProvider) Match(ectx cpi.EvaluationContext, req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
 	return p.get(req, cur, m)
 }
 
