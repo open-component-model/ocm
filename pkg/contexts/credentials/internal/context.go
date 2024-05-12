@@ -2,6 +2,8 @@ package internal
 
 import (
 	"context"
+	"fmt"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"golang.org/x/exp/maps"
 	"reflect"
@@ -39,6 +41,12 @@ type EvaluationContext *evaluationContext
 
 type evaluationContext struct {
 	data map[reflect.Type]interface{}
+}
+
+func (e evaluationContext) String() string {
+	return fmt.Sprintf("%v", maputils.Transform(e.data, func(k reflect.Type, v interface{}) (string, string) {
+		return k.Name(), fmt.Sprintf("%v", v)
+	}))
 }
 
 func GetEvaluationContextFor[T any](ectx EvaluationContext) T {

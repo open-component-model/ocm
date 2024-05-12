@@ -306,7 +306,7 @@ var _ = Describe("vault config", func() {
 			Expect(c).To(YAMLEqual(data))
 		})
 
-		It("recursive authentication", func() {
+		FIt("recursive authentication", func() {
 			SetUpVaultAccess(ctx, DefaultContext, vaultClient, fmt.Sprintf(`
 path "secret/data/%s/*"
 {
@@ -380,10 +380,12 @@ path "secret/metadata/%s/*"
 			repo := Must(DefaultContext.RepositoryForSpec(spec))
 			Expect(repo).ToNot(BeNil())
 
+			fmt.Println("***add second provider:")
 			spec1.PropgateConsumerIdentity = true
 			repo = Must(DefaultContext.RepositoryForSpec(spec1))
 			Expect(repo).ToNot(BeNil())
 
+			fmt.Println("***query credential:")
 			c := Must(DefaultContext.GetCredentialsForConsumer(consumerId))
 			Expect(c).To(YAMLEqual(data))
 		})

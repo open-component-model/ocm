@@ -1,8 +1,11 @@
 package internal
 
 import (
+	"fmt"
+	"github.com/mandelsoft/goutils/exception"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/mandelsoft/goutils/stringutils"
 	"slices"
 	"sort"
 	"sync"
@@ -12,29 +15,16 @@ import (
 
 type CredentialRecursion []ConsumerIdentity
 
+func (c CredentialRecursion) String() string {
+	return stringutils.Join(c)
+}
+
 func (c CredentialRecursion) Contains(identity ConsumerIdentity) bool {
 	return slices.ContainsFunc(c, general.ContainsFuncFor(identity))
 }
 
 func (c CredentialRecursion) Append(identity ConsumerIdentity) CredentialRecursion {
 	return sliceutils.CopyAppendUniqueFunc(c, general.EqualsFuncFor[ConsumerIdentity](), identity)
-}
-
-func CheckHandleProvider(ctx EvaluationContext, prov ConsumerProvider, pattern ConsumerIdentity) bool {
-	if pr, ok := prov.(ConsumerIdentityProvider); ok {
-		r := GetEvaluationContextFor[CredentialRecursion](ctx)
-		if r == nil {
-			r = CredentialRecursion{}
-		}
-		SetEvaluationContextFor(ctx, r.Append(pr.GetConsumerId()))
-		// Some credential providers such as e.g. vault need credentials to be accessed themselves. When credentials
-		// are requested for these providers, the provider itself cannot provide its own credentials. Besides being
-		// an optimization, this primarily prevents deadlock and also a potential endless recursion.
-		if r.Contains(pattern) {
-			return false
-		}
-	}
-	return true
 }
 
 // UsageContext describes a dedicated type specific
@@ -225,21 +215,80 @@ func (p *consumerProviderRegistry) Get(id ConsumerIdentity) (CredentialsSource, 
 	return nil, false
 }
 
+func (p *consumerProviderRegistry) checkHandleProvider(ectx EvaluationContext, prov ConsumerProvider, pattern ConsumerIdentity) (rctx EvaluationContext, useprov bool, usestack bool) {
+	if pr, ok := prov.(ConsumerIdentityProvider); ok {
+		r := GetEvaluationContextFor[CredentialRecursion](ectx)
+		if r == nil {
+			r = CredentialRecursion{}
+		}
+		if r.Contains(pr.GetConsumerId()) {
+			return ectx, false, true
+		}
+		r = r.Append(pr.GetConsumerId())
+		// If this is the case, we are in a situation where we exclude all providers (since they are all in the stack).
+		// The follow-up coding would then assume, that it should query the credential repository without any
+		// credentials, since none have been found.
+		// Essentially, this means, we have to return from the entire recursive call stack
+		//if len(r) >= len(p.providers) && r.Contains(pattern) {
+		//	return ectx, false, false
+		//}
+		// Some credential providers such as e.g. vault need credentials to be accessed themselves. When credentials
+		// are requested for these providers, the provider itself cannot provide its own credentials. Besides being
+		// an optimization, this primarily prevents deadlock and also a potential endless recursion.
+		ectx = SetEvaluationContextFor(ectx, r)
+	}
+	return ectx, true, true
+}
+
+type UnwindStack struct {
+	error
+}
+
+func (u *UnwindStack) Unwrap() error {
+	return u.error
+}
+
+func (p *consumerProviderRegistry) catchedMatch(ectx EvaluationContext, sub ConsumerProvider, pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (cs CredentialsSource, ci ConsumerIdentity) {
+	defer exception.CatchError(func(err error) {
+		fmt.Println(err)
+		cs = nil
+		ci = cur
+	}, exception.ByPrototypes(&UnwindStack{}))
+	fmt.Printf("pattern: %s\ncontext: %s\nprovider: %s\n", pattern, ectx, sub)
+	ectx, useprov, _ := p.checkHandleProvider(ectx, sub, pattern)
+	if !useprov {
+		fmt.Println()
+		return nil, cur
+	}
+	fmt.Println("match\n")
+	return sub.Match(ectx, pattern, cur, m)
+}
+
 func (p *consumerProviderRegistry) Match(ectx EvaluationContext, pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 
 	credsrc, cur := p.explicit.Match(ectx, pattern, cur, m)
 	for _, sub := range p.providers {
-		if !CheckHandleProvider(ectx, sub, pattern) {
-			continue
-		}
 		var f CredentialsSource
-		f, cur = sub.Match(ectx, pattern, cur, m)
+		f, cur = p.catchedMatch(ectx, sub, pattern, cur, m)
 		if f != nil {
 			credsrc = f
 		}
 	}
+	// If this is the case, we are in a situation where we have excluded all providers (since they are all in the stack).
+	// If we would simply return with no credentials, the follow-up coding would assume, that it should query the
+	// credential repository without any credentials, since none have been found.
+	// INSTEAD, we have to step down to the previous recursion level and check the other potentially available providers
+	// for credentials.
+	// BUT in case we have explicit credentials, then we should use those.
+	if credsrc == nil {
+		r := GetEvaluationContextFor[CredentialRecursion](ectx)
+		if len(r) == len(p.providers) {
+			exception.Throw(&UnwindStack{fmt.Errorf("impossible credential recursion detected - unwind stack")})
+		}
+	}
+	fmt.Println("credsource return")
 	return credsrc, cur
 }
 

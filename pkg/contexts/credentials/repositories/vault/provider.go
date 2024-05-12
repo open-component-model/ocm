@@ -58,6 +58,10 @@ func NewConsumerProvider(repo *Repository) (*ConsumerProvider, error) {
 	}, nil
 }
 
+func (p *ConsumerProvider) String() string {
+	return p.repository.id.String()
+}
+
 func (p *ConsumerProvider) GetConsumerId(uctx ...internal.UsageContext) internal.ConsumerIdentity {
 	return p.repository.GetConsumerId()
 }
@@ -66,14 +70,14 @@ func (p *ConsumerProvider) GetIdentityMatcher() string {
 	return p.repository.GetIdentityMatcher()
 }
 
-func (p *ConsumerProvider) update() error {
+func (p *ConsumerProvider) update(ectx cpi.EvaluationContext) error {
 	var err error
 
 	if p.updated {
 		return nil
 	}
 	p.updated = true
-	p.creds, err = p.repository.ctx.GetCredentialsForConsumer(p.repository.id, identity.IdentityMatcher)
+	p.creds, err = cpi.GetCredentialsForConsumer(p.repository.ctx, ectx, p.repository.id, identity.IdentityMatcher)
 	if err != nil {
 		return err
 	}
@@ -245,15 +249,15 @@ func (p *ConsumerProvider) Unregister(id cpi.ProviderIdentity) {
 }
 
 func (p *ConsumerProvider) Match(ectx cpi.EvaluationContext, req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
-	return p.get(req, cur, m)
+	return p.get(ectx, req, cur, m)
 }
 
 func (p *ConsumerProvider) Get(req cpi.ConsumerIdentity) (cpi.CredentialsSource, bool) {
-	creds, _ := p.get(req, nil, cpi.CompleteMatch)
+	creds, _ := p.get(nil, req, nil, cpi.CompleteMatch)
 	return creds, creds != nil
 }
 
-func (p *ConsumerProvider) get(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
+func (p *ConsumerProvider) get(ectx cpi.EvaluationContext, req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
 	if req.Equals(p.repository.id) {
 		return nil, cur
 	}
@@ -261,7 +265,7 @@ func (p *ConsumerProvider) get(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentit
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	p.update()
+	p.update(ectx)
 	var creds cpi.CredentialsSource
 
 	for _, a := range p.consumer {
@@ -280,7 +284,7 @@ func (c *ConsumerProvider) ExistsCredentials(name string) (bool, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	err := c.update()
+	err := c.update(nil)
 	if err != nil {
 		return false, err
 	}
@@ -292,7 +296,7 @@ func (c *ConsumerProvider) LookupCredentials(name string) (cpi.Credentials, erro
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	err := c.update()
+	err := c.update(nil)
 	if err != nil {
 		return nil, err
 	}
