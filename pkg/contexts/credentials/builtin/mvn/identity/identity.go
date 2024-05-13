@@ -43,6 +43,7 @@ the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 func GetConsumerId(rawURL, groupId string) cpi.ConsumerIdentity {
 	url, err := Parse(rawURL)
 	if err != nil {
+		debug("GetConsumerId", "error", err.Error(), "url", rawURL)
 		return nil
 	}
 
@@ -56,7 +57,12 @@ func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) common.Pro
 		return nil
 	}
 	credentials, err := cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
-	if credentials == nil || err != nil {
+	if err != nil {
+		debug("GetCredentials", "error", err.Error())
+		return nil
+	}
+	if credentials == nil {
+		debug("no credentials found")
 		return nil
 	}
 	return credentials.Properties()
@@ -73,4 +79,9 @@ func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId strin
 		return
 	}
 	req.SetBasicAuth(username, password)
+}
+
+// debug uses a dynamic logger to log a debug message.
+func debug(msg string, keypairs ...interface{}) {
+	logging.DynamicLogger(REALM).Debug(msg, keypairs...)
 }
