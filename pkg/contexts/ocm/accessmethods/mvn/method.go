@@ -48,7 +48,7 @@ type AccessSpec struct {
 	// Repository is the base URL of the Maven (mvn) repository.
 	Repository string `json:"repository"`
 
-	Artifact `json:",inline"`
+	Coordinates `json:",inline"`
 }
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
@@ -60,7 +60,7 @@ func New(repository, groupId, artifactId, version string, options ...func(*Acces
 	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Repository:          repository,
-		Artifact: Artifact{
+		Coordinates: Coordinates{
 			GroupId:    groupId,
 			ArtifactId: artifactId,
 			Version:    version,
@@ -102,7 +102,7 @@ func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpe
 
 // GetReferenceHint returns the reference hint for the Maven (mvn) artifact.
 func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) string {
-	return a.Serialize()
+	return a.String()
 }
 
 func (_ *AccessSpec) GetType() string {
@@ -129,8 +129,8 @@ func (a *AccessSpec) ArtifactUrl() string {
 	return a.Url(a.Repository)
 }
 
-func (a *AccessSpec) NewArtifact() *Artifact {
-	return a.Artifact.Copy()
+func (a *AccessSpec) NewArtifact() *Coordinates {
+	return a.Coordinates.Copy()
 }
 
 type meta struct {
@@ -163,7 +163,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	artifact := a.NewArtifact()
 	metadata := meta{}
 	for file, hash := range fileMap {
-		_, err := artifact.ClassifierExtensionFrom(file)
+		err := artifact.SetClassifierExtensionBy(file)
 		if err != nil {
 			return nil, err
 		}
@@ -244,13 +244,12 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 }
 
 func filterByClassifier(fileMap map[string]crypto.Hash, classifier string) map[string]crypto.Hash {
-	filtered := make(map[string]crypto.Hash)
-	for file, hash := range fileMap {
-		if strings.Contains(file, "-"+classifier+".") {
-			filtered[file] = hash
+	for file, _ := range fileMap {
+		if !strings.Contains(file, "-"+classifier+".") {
+			delete(fileMap, file)
 		}
 	}
-	return filtered
+	return fileMap
 }
 
 func (a *AccessSpec) GavFiles(ctx accspeccpi.Context, fs ...vfs.FileSystem) (map[string]crypto.Hash, error) {
@@ -395,7 +394,10 @@ func getReader(ctx accspeccpi.Context, url string, fs vfs.FileSystem) (io.ReadCl
 	if err != nil {
 		return nil, err
 	}
-	identity.BasicAuth(req, ctx, url, "")
+	err = identity.BasicAuth(req, ctx, url, "")
+	if err != nil {
+		return nil, err
+	}
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(req)
 	if err != nil {

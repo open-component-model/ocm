@@ -1,6 +1,7 @@
 package identity
 
 import (
+	"errors"
 	"net/http"
 
 	. "net/url"
@@ -39,47 +40,51 @@ the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 		attrs)
 }
 
-func GetConsumerId(rawURL, groupId string) cpi.ConsumerIdentity {
-	url, err := JoinPath(rawURL, groupId)
-	if err != nil {
-		debug("GetConsumerId", "error", err.Error(), "url", rawURL)
-		return nil
-	}
+var identityMatcher = hostpath.IdentityMatcher(ConsumerType)
 
-	return hostpath.GetConsumerIdentity(ConsumerType, url)
+func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
+	return identityMatcher(pattern, cur, id)
 }
 
-func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) common.Properties {
-	id := GetConsumerId(repoUrl, groupId)
+func GetConsumerId(rawURL, groupId string) (cpi.ConsumerIdentity, error) {
+	url, err := JoinPath(rawURL, groupId)
+	if err != nil {
+		return nil, err
+	}
+	return hostpath.GetConsumerIdentity(ConsumerType, url), nil
+}
+
+func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) (common.Properties, error) {
+	id, err := GetConsumerId(repoUrl, groupId)
+	if err != nil {
+		return nil, err
+	}
 	if id == nil {
-		return nil
+		return nil, nil
 	}
 	credentials, err := cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
 	if err != nil {
-		debug("GetCredentials", "error", err.Error())
-		return nil
+		return nil, err
 	}
 	if credentials == nil {
-		debug("no credentials found")
-		return nil
+		return nil, nil
 	}
-	return credentials.Properties()
+	return credentials.Properties(), nil
 }
 
-func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId string) {
-	credentials := GetCredentials(ctx, repoUrl, groupId)
+func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId string) (err error) {
+	credentials, err := GetCredentials(ctx, repoUrl, groupId)
+	if err != nil {
+		return
+	}
 	if credentials == nil {
 		return
 	}
 	username := credentials[Username]
 	password := credentials[Password]
 	if username == "" || password == "" {
-		return
+		return errors.New("missing username or password in credentials")
 	}
 	req.SetBasicAuth(username, password)
-}
-
-// debug uses a dynamic logger to log a debug message.
-func debug(msg string, keypairs ...interface{}) {
-	logging.DynamicLogger(REALM).Debug(msg, keypairs...)
+	return
 }

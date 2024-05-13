@@ -56,7 +56,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	// setup logger
 	log := log.WithValues("repository", b.spec.Url)
 	// identify artifact
-	artifact := mvn.DeSerialize(hint)
+	artifact, err := mvn.Parse(hint)
+	if err != nil {
+		return nil, err
+	}
 	log = log.WithValues("groupId", artifact.GroupId, "artifactId", artifact.ArtifactId, "version", artifact.Version)
 	log.Debug("identified")
 
@@ -77,7 +80,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	for _, file := range files {
 		e := func() (err error) {
 			log.Debug("uploading", "file", file)
-			artifact, err = artifact.ClassifierExtensionFrom(file)
+			err = artifact.SetClassifierExtensionBy(file)
 			if err != nil {
 				return
 			}
@@ -110,12 +113,15 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 }
 
 // deploy an artifact to the specified destination. See https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact
-func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, ctx accspeccpi.Context, hashes *iotools.HashReader) error {
+func deploy(artifact *mvn.Coordinates, url string, reader io.ReadCloser, ctx accspeccpi.Context, hashes *iotools.HashReader) (err error) {
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, artifact.Url(url), reader)
 	if err != nil {
-		return err
+		return
 	}
-	identity.BasicAuth(req, ctx, url, artifact.GroupPath())
+	err = identity.BasicAuth(req, ctx, url, artifact.GroupPath())
+	if err != nil {
+		return
+	}
 	// give the remote server a chance to decide based upon the checksum policy
 	for k, v := range hashes.HttpHeader() {
 		req.Header.Set(k, v)
@@ -125,15 +131,15 @@ func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, ctx accspe
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return
 	}
 	defer resp.Body.Close()
 
 	// Check the response
 	if resp.StatusCode != http.StatusCreated {
-		all, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
+		all, e := io.ReadAll(resp.Body)
+		if e != nil {
+			return e
 		}
 		return fmt.Errorf("http (%d) - failed to upload artifact: %s", resp.StatusCode, string(all))
 	}
@@ -142,12 +148,12 @@ func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, ctx accspe
 	// Validate the response - especially the hash values with the ones we've tried to send
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return
 	}
 	var artifactBody Body
 	err = json.Unmarshal(respBody, &artifactBody)
 	if err != nil {
-		return err
+		return
 	}
 
 	// let's check only SHA256 for now
@@ -159,7 +165,7 @@ func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, ctx accspe
 		return errors.New("failed to upload artifact: checksums do not match")
 	}
 	log.Debug("digests are ok", "remoteDigest", remoteDigest, "digest", digest)
-	return nil
+	return
 }
 
 // Body is the response struct of a deployment from the MVN repository (JFrog Artifactory).

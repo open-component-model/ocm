@@ -10,7 +10,7 @@ Provided blobs use the following media type: `application/x-tgz`
 ### Description
 
 This method implements the access of a resource hosted by a maven repository or a 
-complete resource set denoted by a GAV. 
+complete resource set denoted by a GAV (GroupId, ArtifactId, Version). 
 
 ### Specification Versions
 
