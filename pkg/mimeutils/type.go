@@ -97,13 +97,14 @@ var builtinTypesLower = map[string]string{
 
 var once sync.Once // guards initMime
 
-var testInitMime func()
+var testInitMime, osInitMime func()
 
 func initMime() {
 	if fn := testInitMime; fn != nil {
 		fn()
 	} else {
 		setMimeTypes(builtinTypesLower, builtinTypesLower)
+		osInitMime()
 	}
 }
 
@@ -145,7 +146,8 @@ func TypeByExtension(ext string) string {
 		if c >= utf8RuneSelf {
 			// Slow path.
 			si, _ := mimeTypesLower.Load(strings.ToLower(ext))
-			return si.(string)
+			s, _ := si.(string)
+			return s
 		}
 		if 'A' <= c && c <= 'Z' {
 			lower = append(lower, c+('a'-'A'))
@@ -154,7 +156,8 @@ func TypeByExtension(ext string) string {
 		}
 	}
 	si, _ := mimeTypesLower.Load(string(lower))
-	return si.(string)
+	s, _ := si.(string)
+	return s
 }
 
 // ExtensionsByType returns the extensions known to be associated with the MIME
