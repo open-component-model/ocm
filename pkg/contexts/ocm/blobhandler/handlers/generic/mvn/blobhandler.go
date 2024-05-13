@@ -156,7 +156,7 @@ func deploy(artifact *mvn.Artifact, url string, reader io.ReadCloser, ctx accspe
 	if remoteDigest == "" {
 		log.Warn("no checksum found for algorithm, we can't guarantee that the artifact has been uploaded correctly", "algorithm", crypto.SHA256)
 	} else if remoteDigest != digest {
-		return fmt.Errorf("failed to upload artifact: checksums do not match")
+		return errors.New("failed to upload artifact: checksums do not match")
 	}
 	log.Debug("digests are ok", "remoteDigest", remoteDigest, "digest", digest)
 	return nil
