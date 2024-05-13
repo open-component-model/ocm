@@ -74,26 +74,28 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 		return nil, err
 	}
 	for _, file := range files {
-		log.Debug("uploading", "file", file)
-		artifact = artifact.ClassifierExtensionFrom(file)
+		e := func() (err error) {
+			log.Debug("uploading", "file", file)
+			artifact = artifact.ClassifierExtensionFrom(file)
+			readHash, err := tempFs.Open(file)
+			if err != nil {
+				return
+			}
+			defer readHash.Close()
+			// MD5 + SHA1 are still the most used ones in the mvn context
+			hr := iotools.NewHashReader(readHash, crypto.SHA256, crypto.SHA1, crypto.MD5)
+			_, _ = hr.CalcHashes()
 
-		readHash, err := tempFs.Open(file)
-		if err != nil {
-			return nil, err
-		}
-		defer readHash.Close()
-		// MD5 + SHA1 are still the most used ones in the mvn context
-		hr := iotools.NewHashReader(readHash, crypto.SHA256, crypto.SHA1, crypto.MD5)
-		_, _ = hr.CalcHashes()
-
-		reader, err := tempFs.Open(file)
-		if err != nil {
-			return nil, err
-		}
-		defer reader.Close()
-		err = deploy(artifact, b.spec.Url, reader, ctx.GetContext(), hr)
-		if err != nil {
-			return nil, err
+			reader, err := tempFs.Open(file)
+			if err != nil {
+				return
+			}
+			defer reader.Close()
+			err = deploy(artifact, b.spec.Url, reader, ctx.GetContext(), hr)
+			return
+		}()
+		if e != nil {
+			return nil, e
 		}
 	}
 
