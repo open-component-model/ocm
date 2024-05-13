@@ -23,7 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
-const BLOB_HANDLER_NAME = "ocm/" + resourcetypes.MVN_ARTIFACT
+const BlobHandlerName = "ocm/" + resourcetypes.MVN_ARTIFACT
 
 type artifactHandler struct {
 	spec *Config

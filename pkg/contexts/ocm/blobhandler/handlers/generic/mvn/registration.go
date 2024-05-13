@@ -33,7 +33,7 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 }
 
 func init() {
-	cpi.RegisterBlobHandlerRegistrationHandler(BLOB_HANDLER_NAME, &RegistrationHandler{})
+	cpi.RegisterBlobHandlerRegistrationHandler(BlobHandlerName, &RegistrationHandler{})
 }
 
 type RegistrationHandler struct{}
@@ -63,7 +63,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 
 func (r *RegistrationHandler) GetHandlers(_ cpi.Context) registrations.HandlerInfos {
 	return registrations.NewLeafHandlerInfo("uploading mvn artifacts", `
-The <code>`+BLOB_HANDLER_NAME+`</code> uploader is able to upload mvn artifacts (whole GAV only!)
+The <code>`+BlobHandlerName+`</code> uploader is able to upload mvn artifacts (whole GAV only!)
 as artifact archive according to the mvn artifact spec.
 If registered the default mime type is: `+mime.MIME_TGZ+`
 
