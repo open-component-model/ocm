@@ -41,14 +41,13 @@ the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 }
 
 func GetConsumerId(rawURL, groupId string) cpi.ConsumerIdentity {
-	url, err := Parse(rawURL)
+	url, err := JoinPath(rawURL, groupId)
 	if err != nil {
 		debug("GetConsumerId", "error", err.Error(), "url", rawURL)
 		return nil
 	}
 
-	url.Path = path.Join(url.Path, groupId)
-	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url.String())
+	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url)
 }
 
 func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) common.Properties {
