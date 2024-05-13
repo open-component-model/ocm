@@ -6,7 +6,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -14,16 +13,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/npm"
 	"github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("NPM config - .npmrc", func() {
 
 	props := common.Properties{
-		npmCredentials.ATTR_TOKEN: "npm_TOKEN",
+		npmCredentials.Token: "npm_TOKEN",
 	}
 
 	props2 := common.Properties{
-		npmCredentials.ATTR_TOKEN: "bearer_TOKEN",
+		npmCredentials.Token: "bearer_TOKEN",
 	}
 
 	var DefaultContext credentials.Context
@@ -69,7 +69,7 @@ var _ = Describe("NPM config - .npmrc", func() {
 
 		Must(ctx.RepositoryForConfig([]byte(specdata), nil))
 
-		ci := cpi.NewConsumerIdentity(npmCredentials.CONSUMER_TYPE)
+		ci := cpi.NewConsumerIdentity(npmCredentials.ConsumerType)
 		Expect(ci).NotTo(BeNil())
 		credentials := Must(cpi.CredentialsForConsumer(ctx.CredentialsContext(), ci))
 		Expect(credentials).NotTo(BeNil())

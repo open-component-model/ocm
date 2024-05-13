@@ -2,7 +2,6 @@ package identity
 
 import (
 	"net/http"
-	"path"
 
 	. "net/url"
 
@@ -15,27 +14,27 @@ import (
 )
 
 const (
-	// CONSUMER_TYPE is the mvn repository type.
-	CONSUMER_TYPE = "Repository.maven.apache.org"
+	// ConsumerType is the mvn repository type.
+	ConsumerType = "Repository.maven.apache.org"
 
-	// ATTR_USERNAME is the username attribute. Required for login at any mvn registry.
-	ATTR_USERNAME = cpi.ATTR_USERNAME
-	// ATTR_PASSWORD is the password attribute. Required for login at any mvn registry.
-	ATTR_PASSWORD = cpi.ATTR_PASSWORD
+	// Username is the username attribute. Required for login at any mvn registry.
+	Username = cpi.ATTR_USERNAME
+	// Password is the password attribute. Required for login at any mvn registry.
+	Password = cpi.ATTR_PASSWORD
 )
 
-// Logging Realm.
+// REALM the logging realm / prefix.
 var REALM = logging.DefineSubRealm("Maven repository", "mvn")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
-		ATTR_USERNAME, "the basic auth user name",
-		ATTR_PASSWORD, "the basic auth password",
+		Username, "the basic auth user name",
+		Password, "the basic auth password",
 	})
 
-	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `MVN repository
+	cpi.RegisterStandardIdentity(ConsumerType, hostpath.IdentityMatcher(ConsumerType), `MVN repository
 
-It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
+It matches the <code>`+ConsumerType+`</code> consumer type and additionally acts like 
 the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 		attrs)
 }
@@ -47,7 +46,7 @@ func GetConsumerId(rawURL, groupId string) cpi.ConsumerIdentity {
 		return nil
 	}
 
-	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url)
+	return hostpath.GetConsumerIdentity(ConsumerType, url)
 }
 
 func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) common.Properties {
@@ -72,8 +71,8 @@ func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId strin
 	if credentials == nil {
 		return
 	}
-	username := credentials[ATTR_USERNAME]
-	password := credentials[ATTR_PASSWORD]
+	username := credentials[Username]
+	password := credentials[Password]
 	if username == "" || password == "" {
 		return
 	}

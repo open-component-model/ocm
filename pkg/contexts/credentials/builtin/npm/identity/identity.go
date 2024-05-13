@@ -11,33 +11,33 @@ import (
 )
 
 const (
-	// CONSUMER_TYPE is the npm repository type.
-	CONSUMER_TYPE = "Registry.npmjs.com"
+	// ConsumerType is the npm repository type.
+	ConsumerType = "Registry.npmjs.com"
 
-	// ATTR_USERNAME is the username attribute. Required for login at any npm registry.
-	ATTR_USERNAME = cpi.ATTR_USERNAME
-	// ATTR_PASSWORD is the password attribute. Required for login at any npm registry.
-	ATTR_PASSWORD = cpi.ATTR_PASSWORD
-	// ATTR_EMAIL is the email attribute. Required for login at any npm registry.
-	ATTR_EMAIL = cpi.ATTR_EMAIL
-	// ATTR_TOKEN is the token attribute. May exist after login at any npm registry.
-	ATTR_TOKEN = cpi.ATTR_TOKEN
+	// Username is the username attribute. Required for login at any npm registry.
+	Username = cpi.ATTR_USERNAME
+	// Password is the password attribute. Required for login at any npm registry.
+	Password = cpi.ATTR_PASSWORD
+	// Email is the email attribute. Required for login at any npm registry.
+	Email = cpi.ATTR_EMAIL
+	// Token is the token attribute. May exist after login at any npm registry.
+	Token = cpi.ATTR_TOKEN
 )
 
-// Logging Realm.
+// REALM the logging realm / prefix.
 var REALM = logging.DefineSubRealm("NPM registry", "NPM")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
-		ATTR_USERNAME, "the basic auth user name",
-		ATTR_PASSWORD, "the basic auth password",
-		ATTR_EMAIL, "NPM registry, require an email address",
-		ATTR_TOKEN, "the token attribute. May exist after login at any npm registry. Check your .npmrc file!",
+		Username, "the basic auth user name",
+		Password, "the basic auth password",
+		Email, "NPM registry, require an email address",
+		Token, "the token attribute. May exist after login at any npm registry. Check your .npmrc file!",
 	})
 
-	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `NPM repository
+	cpi.RegisterStandardIdentity(ConsumerType, hostpath.IdentityMatcher(ConsumerType), `NPM repository
 
-It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
+It matches the <code>`+ConsumerType+`</code> consumer type and additionally acts like 
 the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 		attrs)
 }
@@ -49,7 +49,7 @@ func GetConsumerId(rawURL string, pkgName string) cpi.ConsumerIdentity {
 		return nil
 	}
 
-	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url)
+	return hostpath.GetConsumerIdentity(ConsumerType, url)
 }
 
 func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) common.Properties {
