@@ -163,7 +163,10 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	artifact := a.NewArtifact()
 	metadata := meta{}
 	for file, hash := range fileMap {
-		artifact.ClassifierExtensionFrom(file)
+		_, err := artifact.ClassifierExtensionFrom(file)
+		if err != nil {
+			return nil, err
+		}
 		metadata.Bin = artifact.Url(a.Repository)
 		log = log.WithValues("file", metadata.Bin)
 		log.Debug("processing")

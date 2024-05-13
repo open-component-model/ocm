@@ -1,6 +1,7 @@
 package mvn
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -77,14 +78,14 @@ func (a *Artifact) Purl() string {
 }
 
 // ClassifierExtensionFrom extracts the classifier and extension from the filename (without any path prefix).
-func (a *Artifact) ClassifierExtensionFrom(filename string) *Artifact {
-	// TODO should work with pos (path.Basename)?!?
+func (a *Artifact) ClassifierExtensionFrom(filename string) (*Artifact, error) {
+	// TODO should work with both (path.Basename)?!?
 	s := strings.TrimPrefix(filename, a.FileNamePrefix())
 	if strings.HasPrefix(s, "-") {
 		s = strings.TrimPrefix(s, "-")
 		i := strings.Index(s, ".")
 		if i < 0 {
-			panic("no extension after classifier found in filename: " + filename)
+			return nil, fmt.Errorf("no extension after classifier found in filename: %s", filename)
 		}
 		a.Classifier = s[:i]
 		s = strings.TrimPrefix(s, a.Classifier)
@@ -92,7 +93,7 @@ func (a *Artifact) ClassifierExtensionFrom(filename string) *Artifact {
 		a.Classifier = ""
 	}
 	a.Extension = strings.TrimPrefix(s, ".")
-	return a
+	return a, nil
 }
 
 // MimeType returns the MIME type of the Maven Artifact based on the file extension.

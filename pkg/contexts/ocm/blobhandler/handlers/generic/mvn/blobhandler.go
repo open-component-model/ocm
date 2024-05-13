@@ -77,7 +77,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	for _, file := range files {
 		e := func() (err error) {
 			log.Debug("uploading", "file", file)
-			artifact = artifact.ClassifierExtensionFrom(file)
+			artifact, err = artifact.ClassifierExtensionFrom(file)
+			if err != nil {
+				return
+			}
 			readHash, err := tempFs.Open(file)
 			if err != nil {
 				return
