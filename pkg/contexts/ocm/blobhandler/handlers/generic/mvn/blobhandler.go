@@ -85,8 +85,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 			defer readHash.Close()
 			// MD5 + SHA1 are still the most used ones in the mvn context
 			hr := iotools.NewHashReader(readHash, crypto.SHA256, crypto.SHA1, crypto.MD5)
-			_, _ = hr.CalcHashes()
-
+			_, err = hr.CalcHashes()
+			if err != nil {
+				return
+			}
 			reader, err := tempFs.Open(file)
 			if err != nil {
 				return
