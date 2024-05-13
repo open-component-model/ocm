@@ -1,8 +1,6 @@
 package identity
 
 import (
-	"path"
-
 	. "net/url"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -45,13 +43,13 @@ the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 }
 
 func GetConsumerId(rawURL string, pkgName string) cpi.ConsumerIdentity {
-	url, err := Parse(rawURL)
+	url, err := JoinPath(rawURL, pkgName)
 	if err != nil {
+		debug("GetConsumerId", "error", err.Error(), "url", rawURL)
 		return nil
 	}
 
-	url.Path = path.Join(url.Path, pkgName)
-	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url.String())
+	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url)
 }
 
 func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) common.Properties {
@@ -64,4 +62,9 @@ func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) com
 		return nil
 	}
 	return credentials.Properties()
+}
+
+// debug uses a dynamic logger to log a debug message.
+func debug(msg string, keypairs ...interface{}) {
+	logging.DynamicLogger(REALM).Debug(msg, keypairs...)
 }
