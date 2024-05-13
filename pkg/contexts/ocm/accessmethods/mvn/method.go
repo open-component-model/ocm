@@ -185,32 +185,35 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 		}
 
 		// download the artifact into the temporary file system
-		out, err := tempFs.Create(file)
-		if err != nil {
-			return nil, err
-		}
-		defer out.Close()
-		reader, err := getReader(ctx, metadata.Bin, fs)
-		if err != nil {
-			return nil, err
-		}
-		defer reader.Close()
-
-		if hash > 0 {
-			dreader := iotools.NewDigestReaderWithHash(hash, reader)
-			_, err = io.Copy(out, dreader)
+		e := func() (err error) {
+			out, err := tempFs.Create(file)
 			if err != nil {
-				return nil, err
+				return
 			}
-			sum := dreader.Digest().Encoded()
-			if metadata.Hash != sum {
-				return nil, errors.Newf("checksum mismatch for %s", metadata.Bin)
-			}
-		} else {
-			_, err = io.Copy(out, reader)
+			defer out.Close()
+			reader, err := getReader(ctx, metadata.Bin, fs)
 			if err != nil {
-				return nil, err
+				return
 			}
+			defer reader.Close()
+			if hash > 0 {
+				dreader := iotools.NewDigestReaderWithHash(hash, reader)
+				_, err = io.Copy(out, dreader)
+				if err != nil {
+					return
+				}
+				sum := dreader.Digest().Encoded()
+				if metadata.Hash != sum {
+					return errors.Newf("checksum mismatch for %s", metadata.Bin)
+				}
+			} else {
+				_, err = io.Copy(out, reader)
+				return
+			}
+			return
+		}()
+		if e != nil {
+			return nil, e
 		}
 	}
 
