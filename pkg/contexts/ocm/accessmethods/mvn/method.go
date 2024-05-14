@@ -244,7 +244,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 }
 
 func filterByClassifier(fileMap map[string]crypto.Hash, classifier string) map[string]crypto.Hash {
-	for file, _ := range fileMap {
+	for file := range fileMap {
 		if !strings.Contains(file, "-"+classifier+".") {
 			delete(fileMap, file)
 		}
