@@ -347,6 +347,7 @@ func getStringData(ctx accspeccpi.Context, url string, fs vfs.FileSystem) (strin
 	if err != nil {
 		return "", err
 	}
+	defer r.Close()
 	b, err := io.ReadAll(r)
 	if err != nil {
 		return "", err
