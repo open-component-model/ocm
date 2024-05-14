@@ -411,10 +411,10 @@ func getReader(ctx accspeccpi.Context, url string, fs vfs.FileSystem) (io.ReadCl
 		defer resp.Body.Close()
 		buf := &bytes.Buffer{}
 		_, err = io.Copy(buf, io.LimitReader(resp.Body, 2000))
-		if err != nil {
-			return nil, errors.Newf("http %s error - %s", resp.Status, url)
+		if err == nil {
+			log.Error("http", "code", resp.Status, "url", url, "body", buf.String())
 		}
-		return nil, errors.Newf("http %s error - %s returned: %s", resp.Status, url, buf.String())
+		return nil, errors.Newf("http %s error - %s", resp.Status, url)
 	}
 	return resp.Body, nil
 }
