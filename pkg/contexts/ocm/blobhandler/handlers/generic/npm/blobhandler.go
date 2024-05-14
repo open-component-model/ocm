@@ -11,13 +11,12 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 	npmLogin "github.com/open-component-model/ocm/pkg/npm"
 )
 
-const BLOB_HANDLER_NAME = "ocm/" + resourcetypes.NPM_PACKAGE
+const BLOB_HANDLER_NAME = "ocm/npmPackage"
 
 type artifactHandler struct {
 	spec *Config

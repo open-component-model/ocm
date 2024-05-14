@@ -81,7 +81,7 @@ func (r *Repository) Read(force bool) error {
 
 func newCredentials(token string) cpi.Credentials {
 	props := common.Properties{
-		npmCredentials.Token: token,
+		npmCredentials.ATTR_TOKEN: token,
 	}
 	return cpi.NewCredentials(props)
 }

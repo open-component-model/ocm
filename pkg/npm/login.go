@@ -66,16 +66,16 @@ func BearerToken(ctx cpi.ContextProvider, repoUrl string, pkgName string) (strin
 	log.Debug("found credentials")
 
 	// check if token exists, if not login and retrieve token
-	token := cred[identity.Token]
+	token := cred[identity.ATTR_TOKEN]
 	if token != "" {
 		log.Debug("token found, skipping login")
 		return token, nil
 	}
 
 	// use user+pass+mail from credentials to login and retrieve bearer token
-	username := cred[identity.Username]
-	password := cred[identity.Password]
-	email := cred[identity.Email]
+	username := cred[identity.ATTR_USERNAME]
+	password := cred[identity.ATTR_PASSWORD]
+	email := cred[identity.ATTR_EMAIL]
 	if username == "" || password == "" || email == "" {
 		return "", fmt.Errorf("credentials for %s are invalid. Username, password or email missing! Couldn't upload '%s'", repoUrl, pkgName)
 	}
