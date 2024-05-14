@@ -152,6 +152,9 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	if a.Classifier != "" {
 		fileMap = filterByClassifier(fileMap, a.Classifier)
 	}
+	if len(fileMap) < 1 {
+		return nil, errors.New("no maven artifact files found")
+	}
 	singleBinary := len(fileMap) == 1
 
 	tempFs, err := osfs.NewTempFileSystem()
