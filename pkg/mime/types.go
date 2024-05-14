@@ -1,5 +1,11 @@
 package mime
 
+import (
+	"mime"
+
+	"github.com/open-component-model/ocm/pkg/logging"
+)
+
 const (
 	MIME_TEXT  = "text/plain"
 	MIME_OCTET = "application/octet-stream"
@@ -19,3 +25,26 @@ const (
 
 	MIME_JAR = "application/x-jar"
 )
+
+func init() {
+	ocmTypes := map[string]string{
+		// added entries
+		".txt":    MIME_TEXT,
+		".yaml":   MIME_YAML_OFFICIAL,
+		".gzip":   MIME_GZIP,
+		".tar":    MIME_TAR,
+		".tgz":    MIME_TGZ,
+		".tar.gz": MIME_TGZ,
+		".pom":    MIME_XML,
+		".zip":    MIME_GZIP,
+		".jar":    MIME_JAR,
+		".module": MIME_JSON, // gradle module metadata
+	}
+
+	for k, v := range ocmTypes {
+		err := mime.AddExtensionType(k, v)
+		if err != nil {
+			logging.DynamicLogger(logging.DefineSubRealm("mimeutils")).Error("failed to add extension type", "extension", k, "type", v, "error", err)
+		}
+	}
+}

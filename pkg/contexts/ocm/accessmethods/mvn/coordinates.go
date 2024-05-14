@@ -2,12 +2,12 @@ package mvn
 
 import (
 	"fmt"
+	"mime"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/mimeutils"
+	ocmmime "github.com/open-component-model/ocm/pkg/mime"
 )
 
 // Coordinates holds the typical Maven coordinates groupId, artifactId, version. Optional also classifier and extension.
@@ -95,11 +95,11 @@ func (c *Coordinates) SetClassifierExtensionBy(filename string) error {
 // MimeType returns the MIME type of the Maven Coordinates based on the file extension.
 // Default is application/x-tgz.
 func (c *Coordinates) MimeType() string {
-	m := mimeutils.TypeByExtension("." + c.Extension)
+	m := mime.TypeByExtension("." + c.Extension)
 	if m != "" {
 		return m
 	}
-	return mime.MIME_TGZ
+	return ocmmime.MIME_TGZ
 }
 
 // Copy creates a new Coordinates with the same values.
