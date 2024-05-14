@@ -15,13 +15,13 @@ import (
 )
 
 const (
-	// ConsumerType is the mvn repository type.
-	ConsumerType = "Repository.maven.apache.org"
+	// CONSUMER_TYPE is the mvn repository type.
+	CONSUMER_TYPE = "MavenRepository"
 
-	// Username is the username attribute. Required for login at any mvn registry.
-	Username = cpi.ATTR_USERNAME
-	// Password is the password attribute. Required for login at any mvn registry.
-	Password = cpi.ATTR_PASSWORD
+	// ATTR_USERNAME is the username attribute. Required for login at any mvn registry.
+	ATTR_USERNAME = cpi.ATTR_USERNAME
+	// ATTR_PASSWORD is the password attribute. Required for login at any mvn registry.
+	ATTR_PASSWORD = cpi.ATTR_PASSWORD
 )
 
 // REALM the logging realm / prefix.
@@ -29,18 +29,18 @@ var REALM = logging.DefineSubRealm("Maven repository", "mvn")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
-		Username, "the basic auth user name",
-		Password, "the basic auth password",
+		ATTR_USERNAME, "the basic auth user name",
+		ATTR_PASSWORD, "the basic auth password",
 	})
 
-	cpi.RegisterStandardIdentity(ConsumerType, hostpath.IdentityMatcher(ConsumerType), `MVN repository
+	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `MVN repository
 
-It matches the <code>`+ConsumerType+`</code> consumer type and additionally acts like 
+It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
 the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 		attrs)
 }
 
-var identityMatcher = hostpath.IdentityMatcher(ConsumerType)
+var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
 
 func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 	return identityMatcher(pattern, cur, id)
@@ -51,7 +51,7 @@ func GetConsumerId(rawURL, groupId string) (cpi.ConsumerIdentity, error) {
 	if err != nil {
 		return nil, err
 	}
-	return hostpath.GetConsumerIdentity(ConsumerType, url), nil
+	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url), nil
 }
 
 func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) (common.Properties, error) {
@@ -80,8 +80,8 @@ func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId strin
 	if credentials == nil {
 		return
 	}
-	username := credentials[Username]
-	password := credentials[Password]
+	username := credentials[ATTR_USERNAME]
+	password := credentials[ATTR_PASSWORD]
 	if username == "" || password == "" {
 		return errors.New("missing username or password in credentials")
 	}
