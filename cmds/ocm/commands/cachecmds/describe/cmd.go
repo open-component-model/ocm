@@ -1,6 +1,7 @@
 package describe
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/names"
@@ -9,7 +10,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 

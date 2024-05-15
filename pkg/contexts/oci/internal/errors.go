@@ -3,8 +3,9 @@ package internal
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const (

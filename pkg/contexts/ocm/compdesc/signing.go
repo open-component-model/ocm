@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"hash"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -206,7 +207,7 @@ func Verify(cd *ComponentDescriptor, registry signing.Registry, signatureName st
 	sctx := &signing.DefaultSigningContext{
 		Hash:      hasher.Crypto(),
 		PublicKey: publicKey,
-		RootCerts: utils.Optional(rootCA),
+		RootCerts: general.Optional(rootCA),
 		Issuer:    registry.GetIssuer(signatureName),
 	}
 	err := verifier.Verify(matchingSignature.Digest.Value, matchingSignature.ConvertToSigning(), sctx)

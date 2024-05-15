@@ -4,7 +4,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/mandelsoft/goutils/maputils"
 )
 
 // UsageContext descibes a dediacetd type specific
@@ -151,7 +151,7 @@ func (p *consumerProviderRegistry) Register(id ProviderIdentity, c ConsumerProvi
 
 	p.unregister(id)
 	p.providers[id] = c
-	p.ordered = generics.MapValues(p.providers)
+	p.ordered = maputils.OrderedValues(p.providers)
 	sort.Slice(p.ordered, func(a, b int) bool {
 		return priority(p.ordered[a]) < priority(p.ordered[b])
 	})
@@ -167,7 +167,7 @@ func (p *consumerProviderRegistry) unregister(id ProviderIdentity) {
 	p.explicit.Unregister(id)
 	if _, ok := p.providers[id]; ok {
 		delete(p.providers, id)
-		p.ordered = generics.MapValues(p.providers)
+		p.ordered = maputils.OrderedValues(p.providers)
 		sort.Slice(p.ordered, func(a, b int) bool {
 			return priority(p.ordered[a]) < priority(p.ordered[b])
 		})

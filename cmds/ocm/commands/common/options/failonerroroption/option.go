@@ -1,10 +1,10 @@
 package failonerroroption
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func From(o options.OptionSetProvider) *Option {

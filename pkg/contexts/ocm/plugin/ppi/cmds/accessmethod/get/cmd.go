@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -14,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	commonppi "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

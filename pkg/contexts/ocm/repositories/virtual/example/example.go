@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -18,8 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/virtual"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ import (
 func NewRepository(ctx cpi.ContextProvider, fs vfs.FileSystem, readonly bool, path ...string) (cpi.Repository, error) {
 	var err error
 
-	p := utils.Optional(path...)
+	p := general.Optional(path...)
 	if p != "" && p != "/" {
 		fs, err = projectionfs.New(fs, p)
 		if err != nil {

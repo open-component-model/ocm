@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/cli"
@@ -19,7 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocihelm "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/helm"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/generics"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )

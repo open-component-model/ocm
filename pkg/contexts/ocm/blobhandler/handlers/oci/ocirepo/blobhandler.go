@@ -5,8 +5,10 @@ import (
 	"path"
 	"strings"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/mandelsoft/goutils/finalizer"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -27,8 +29,6 @@ import (
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 func init() {
@@ -89,7 +89,7 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 	}
 	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView]); ok {
 		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci blob handler with ocm access source",
-			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
+			sliceutils.CopyAppend[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
 	} else {
 		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci blob handler", values...)
@@ -182,11 +182,11 @@ func (b *artifactHandler) CheckBlob(blob cpi.BlobAccess, artType, hint string, g
 		name = path.Join(prefix, mapped)
 		if mapped == orig {
 			log.Debug("namespace derived from hint",
-				generics.AppendedSlice[any](values, "namespace", name),
+				sliceutils.CopyAppend[any](values, "namespace", name),
 			)
 		} else {
 			log.Debug("mapped namespace derived from hint",
-				generics.AppendedSlice[any](values, "namespace", name),
+				sliceutils.CopyAppend[any](values, "namespace", name),
 			)
 		}
 
@@ -231,7 +231,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView]); ok {
 		// prepare for optimized point to point implementation
 		log.Debug("oci artifact handler with ocm access source",
-			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
+			sliceutils.CopyAppend[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
 		if ocimeth, ok := m.Source().Unwrap().(ociartifact.AccessMethodImpl); !keep && ok {
 			art, _, err = ocimeth.GetArtifact()
@@ -283,11 +283,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		name = path.Join(prefix, mapped)
 		if mapped == orig {
 			log.Debug("namespace derived from hint",
-				generics.AppendedSlice[any](values, "namespace", name),
+				sliceutils.CopyAppend[any](values, "namespace", name),
 			)
 		} else {
 			log.Debug("mapped namespace derived from hint",
-				generics.AppendedSlice[any](values, "namespace", name),
+				sliceutils.CopyAppend[any](values, "namespace", name),
 			)
 		}
 

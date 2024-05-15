@@ -7,11 +7,11 @@ import (
 
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
+	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/exp/maps"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type AuthMethod interface {

@@ -4,10 +4,10 @@ import (
 	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
+	"github.com/mandelsoft/goutils/set"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type Credentials struct {
@@ -58,7 +58,7 @@ func (c *Credentials) GetProperty(name string) string {
 	return c.get()[name]
 }
 
-func (c *Credentials) PropertyNames() generics.Set[string] {
+func (c *Credentials) PropertyNames() set.Set[string] {
 	return c.get().Names()
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/containerd/containerd/errdefs"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -15,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/logging"
 )
 

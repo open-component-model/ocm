@@ -10,12 +10,12 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/mandelsoft/goutils/general"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	local "github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 func CheckRefs(ctx config.Context, n int) {
@@ -174,7 +174,7 @@ var _ = Describe("generic config handling", func() {
 		Expect(target.used).NotTo(BeNil())
 		Expect(target.used.GetId()).To(Equal(cfgctx.GetId()))
 
-		CheckRefs(cfgctx, generics.Conditional(datacontext.MULTI_REF, 2, 1)) // config context stored in target with separate ref
+		CheckRefs(cfgctx, general.Conditional(datacontext.MULTI_REF, 2, 1)) // config context stored in target with separate ref
 		target.used.GetId()
 	})
 })

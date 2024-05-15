@@ -3,7 +3,7 @@ package compdesc
 import (
 	"reflect"
 
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/mandelsoft/goutils/sliceutils"
 )
 
 // unfortunately this does not work as expected in Go, because result parameters
@@ -13,13 +13,13 @@ import (
 func And[T any](sel ...any) T {
 	var r T
 	h := selhandler[reflect.TypeOf(r)].(handler[T])
-	return h.And(generics.ConvertSliceTo[T](sel)...)
+	return h.And(sliceutils.Convert[T](sel)...)
 }
 
 func Or[T any](sel ...any) T {
 	var r T
 	h := selhandler[reflect.TypeOf(r)].(handler[T])
-	return h.Or(generics.ConvertSliceTo[T](sel)...)
+	return h.Or(sliceutils.Convert[T](sel)...)
 }
 
 func Not[T any](sel any) T {

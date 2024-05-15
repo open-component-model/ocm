@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/exp/maps"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )

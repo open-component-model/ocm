@@ -1,10 +1,11 @@
 package vault
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Repository struct {

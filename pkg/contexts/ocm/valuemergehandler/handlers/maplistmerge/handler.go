@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const ALGORITHM = "mapListMerge"

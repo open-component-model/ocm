@@ -5,6 +5,9 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -13,8 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/virtual"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +24,7 @@ func NewRepository(ctxp cpi.ContextProvider, names ...string) cpi.Repository {
 	var repositories *Repositories
 
 	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
-	name := utils.Optional(names...)
+	name := general.Optional(names...)
 	if name != "" {
 		repositories = ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
 		if repo := repositories.GetRepository(name); repo != nil {

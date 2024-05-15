@@ -1,8 +1,9 @@
 package hashattr
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"

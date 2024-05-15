@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func ReadConfiguration(ctx ocm.Context, cfg *helper.Config) error {

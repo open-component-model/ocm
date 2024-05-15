@@ -22,7 +22,7 @@
 package exception
 
 import (
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 type Matcher func(err error) bool

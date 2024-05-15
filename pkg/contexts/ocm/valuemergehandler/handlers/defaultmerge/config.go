@@ -2,8 +2,9 @@ package defaultmerge
 
 import (
 	// special case to resolve dependency cycles.
+	"github.com/mandelsoft/goutils/errors"
+
 	hpi "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Mode string

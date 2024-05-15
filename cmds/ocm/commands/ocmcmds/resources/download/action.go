@@ -6,6 +6,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
@@ -17,7 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 

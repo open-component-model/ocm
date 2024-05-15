@@ -3,6 +3,7 @@ package transfer
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -27,7 +28,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 var (

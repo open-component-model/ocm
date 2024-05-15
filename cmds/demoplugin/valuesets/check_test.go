@@ -79,6 +79,7 @@ var _ = Describe("demoplugin", func() {
 			Expect(registration.RegisterExtensions(env)).To(Succeed())
 			p := registry.Get("demo")
 			Expect(p).NotTo(BeNil())
+			Expect(p.Error()).To(Equal(""))
 
 			env.OCMCompositionRepository("test", func() {
 				env.ComponentVersion(COMP, VERS, func() {

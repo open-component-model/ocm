@@ -3,8 +3,9 @@ package finalizer
 import (
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type readcloser = io.ReadCloser

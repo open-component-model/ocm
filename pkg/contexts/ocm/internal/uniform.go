@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -128,7 +128,7 @@ func (s *specHandlers) KnownTypeNames() []string {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
-	return utils.StringMapKeys(s.handlers)
+	return maputils.OrderedKeys(s.handlers)
 }
 
 func (s *specHandlers) GetHandlers(typ string) []RepositorySpecHandler {

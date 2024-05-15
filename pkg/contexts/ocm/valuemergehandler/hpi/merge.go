@@ -3,8 +3,9 @@ package hpi
 import (
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func AsValue(v interface{}) (*Value, error) {

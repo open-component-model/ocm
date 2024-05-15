@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -16,7 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/template"
@@ -260,7 +261,7 @@ func Validate(r *ResourceInput, ctx inputs.Context, inputFilePath string) error 
 				if err != nil {
 					if errors.IsErrUnknown(err) {
 						//nolint: errorlint // No way I can untagle this.
-						err.(errors.Kinded).SetKind(errors.KIND_ACCESSMETHOD)
+						err.(errors.Kinded).SetKind(errkind.KIND_ACCESSMETHOD)
 					}
 					raw, _ := r.Access.GetRaw()
 					allErrs = append(allErrs, field.Invalid(fldPath.Child("access"), string(raw), err.Error()))

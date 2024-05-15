@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/mandelsoft/goutils/set"
 )
 
 // Properties describes a set of name/value pairs.
@@ -50,8 +50,8 @@ func (p Properties) Match(obj map[string]string) (bool, error) {
 }
 
 // Names returns the set of property names.
-func (c Properties) Names() generics.Set[string] {
-	return generics.KeySet(c)
+func (c Properties) Names() set.Set[string] {
+	return set.KeySet(c)
 }
 
 // String returns a string representation.

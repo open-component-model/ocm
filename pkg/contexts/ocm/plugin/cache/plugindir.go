@@ -6,13 +6,13 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/info"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type PluginDir = *pluginDirImpl
@@ -37,7 +37,7 @@ func (c *pluginDirImpl) PluginNames() []string {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	return utils.StringMapKeys(c.plugins)
+	return maputils.OrderedKeys(c.plugins)
 }
 
 func (c *pluginDirImpl) Get(name string) Plugin {

@@ -10,12 +10,12 @@ import (
 	"github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/configfile"
 	"github.com/docker/cli/cli/config/types"
+	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -84,7 +84,7 @@ func (r *Repository) Read(force bool) error {
 	var (
 		data []byte
 		err  error
-		id   finalizer.ObjectIdentity
+		id   runtimefinalizer.ObjectIdentity
 	)
 	if r.path != "" {
 		path, err := utils.ResolvePath(r.path)
@@ -98,7 +98,7 @@ func (r *Repository) Read(force bool) error {
 		id = cpi.ProviderIdentity(PROVIDER + "/" + path)
 	} else if len(r.data) > 0 {
 		data = r.data
-		id = finalizer.NewObjectIdentity(PROVIDER)
+		id = runtimefinalizer.NewObjectIdentity(PROVIDER)
 	}
 
 	cfg, err := config.LoadFromReader(bytes.NewBuffer(data))

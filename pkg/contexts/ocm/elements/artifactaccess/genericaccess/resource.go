@@ -1,11 +1,12 @@
 package genericaccess
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, access ocm.AccessSpec) (cpi.ArtifactAccess[M], error) {
@@ -13,7 +14,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, a
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid external access method %q", access.GetKind())
 	}
-	return cpi.NewArtifactAccessForProvider(generics.As[*M](meta), prov), nil
+	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), prov), nil
 }
 
 func MustAccess[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, access ocm.AccessSpec) cpi.ArtifactAccess[M] {

@@ -7,10 +7,12 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/modern-go/reflect2"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -329,14 +331,14 @@ func (d *defaultScheme[T, R]) Decode(data []byte, unmarshal Unmarshaler) (T, err
 				if !reflect2.IsNil(o) {
 					return o, nil
 				}
-			} else if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
+			} else if !errors.IsErrUnknownKind(err, errkind.KIND_OBJECTTYPE) {
 				return _nil, err
 			}
 		}
 		if d.acceptUnknown {
 			return un, nil
 		}
-		return _nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, to.GetType())
+		return _nil, errors.ErrUnknown(errkind.KIND_OBJECTTYPE, to.GetType())
 	}
 	return decoder.Decode(data, unmarshal)
 }
@@ -365,14 +367,14 @@ func (d *defaultScheme[T, R]) EnforceDecode(data []byte, unmarshal Unmarshaler) 
 			if err == nil {
 				return o, nil
 			}
-			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
+			if !errors.IsErrUnknownKind(err, errkind.KIND_OBJECTTYPE) {
 				return un, err
 			}
 		}
 		if d.acceptUnknown {
 			return un, nil
 		}
-		return un, errors.ErrUnknown(errors.KIND_OBJECTTYPE, un.GetType())
+		return un, errors.ErrUnknown(errkind.KIND_OBJECTTYPE, un.GetType())
 	}
 	o, err := decoder.Decode(data, unmarshal)
 	if err != nil {
@@ -411,11 +413,11 @@ func (d *defaultScheme[T, R]) Convert(o TypedObject) (T, error) {
 			if err == nil {
 				return object, nil
 			}
-			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
+			if !errors.IsErrUnknownKind(err, errkind.KIND_OBJECTTYPE) {
 				return _nil, err
 			}
 		}
-		return _nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, o.GetType())
+		return _nil, errors.ErrUnknown(errkind.KIND_OBJECTTYPE, o.GetType())
 	}
 	r, err := decoder.Decode(data, DefaultJSONEncoding)
 	if err != nil {
@@ -446,12 +448,12 @@ func MustNewDefaultTypeScheme[T TypedObject, R TypedObjectType[T]](protoUnstr Un
 }
 
 func NewTypeScheme[T TypedObject, R TypedObjectType[T]](base ...TypeScheme[T, R]) TypeScheme[T, R] {
-	s, _ := NewDefaultTypeScheme[T](nil, false, nil, generics.ConvertSlice[TypeScheme[T, R], TypeScheme[T, R]](base...)...)
+	s, _ := NewDefaultTypeScheme[T](nil, false, nil, base...)
 	return s
 }
 
 func NewDefaultTypeScheme[T TypedObject, R TypedObjectType[T]](protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder[T], base ...TypeScheme[T, R]) (TypeScheme[T, R], error) {
-	s, err := NewDefaultScheme[T](protoUnstr, acceptUnknown, defaultdecoder, generics.ConvertSlice[TypeScheme[T, R], Scheme[T, R]](base...)...)
+	s, err := NewDefaultScheme[T](protoUnstr, acceptUnknown, defaultdecoder, generics.Cast[Scheme[T, R]](general.Optional(base...)))
 	if err != nil {
 		return nil, err
 	}
@@ -463,5 +465,5 @@ func (s *defaultTypeScheme[T, R]) Register(t R) {
 }
 
 func (s *defaultTypeScheme[T, R]) GetType(name string) R {
-	return generics.As[R](s.GetDecoder(name))
+	return generics.Cast[R](s.GetDecoder(name))
 }

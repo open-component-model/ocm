@@ -4,6 +4,8 @@ import (
 	"crypto/x509/pkix"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/set"
 	"github.com/opencontainers/go-digest"
 	"golang.org/x/exp/slices"
 
@@ -11,8 +13,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
@@ -27,7 +27,7 @@ const (
 type RoutingSlipIndex map[digest.Digest]*HistoryEntry
 
 func (s RoutingSlipIndex) Leaves() []digest.Digest {
-	found := generics.Set[digest.Digest]{}
+	found := set.Set[digest.Digest]{}
 	for _, e := range s {
 		found.Add(e.Digest)
 	}
@@ -76,14 +76,14 @@ func (s RoutingSlipIndex) Verify(ctx Context, name string, issuer *pkix.Name, si
 		}
 	}
 
-	found := generics.Set[digest.Digest]{}
+	found := set.Set[digest.Digest]{}
 	for _, id := range leaves {
 		s.verify(ctx, name, id, acc, found)
 	}
 	return nil
 }
 
-func (s RoutingSlipIndex) verify(ctx Context, name string, id digest.Digest, acc SlipAccess, found generics.Set[digest.Digest]) error {
+func (s RoutingSlipIndex) verify(ctx Context, name string, id digest.Digest, acc SlipAccess, found set.Set[digest.Digest]) error {
 	cur := s[id]
 	if cur == nil {
 		return errors.ErrNotFound(KIND_ENTRY, id.String(), name)

@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type ComponentContainer interface {

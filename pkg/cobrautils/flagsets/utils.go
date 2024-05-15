@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func OptionString(option ConfigOptionType) string {

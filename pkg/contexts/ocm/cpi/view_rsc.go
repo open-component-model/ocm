@@ -3,6 +3,8 @@ package cpi
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -10,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	cpi "github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

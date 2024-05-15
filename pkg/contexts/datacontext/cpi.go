@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/logging"
 	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/finalized"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 )
 
 // NewContextBase creates a context base implementation supporting
@@ -192,13 +193,13 @@ type contextBase struct {
 	delegates
 
 	finalizer *finalizer.Finalizer
-	recorder  *finalizer.RuntimeFinalizationRecoder
+	recorder  *runtimefinalizer.RuntimeFinalizationRecoder
 }
 
 var _ Context = (*contextBase)(nil)
 
 func newContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes, updater *Updater, delegates Delegates) *contextBase {
-	recorder := &finalizer.RuntimeFinalizationRecoder{}
+	recorder := &runtimefinalizer.RuntimeFinalizationRecoder{}
 	id := ContextIdentity(fmt.Sprintf("%s/%d", typ, contextrange.NextId()))
 	c := &contextBase{
 		ctxtype:    typ,
@@ -250,7 +251,7 @@ func (c *contextBase) GetAttributes() Attributes {
 	return c.attributes
 }
 
-func (c *contextBase) GetRecorder() *finalizer.RuntimeFinalizationRecoder {
+func (c *contextBase) GetRecorder() *runtimefinalizer.RuntimeFinalizationRecoder {
 	return c.recorder
 }
 

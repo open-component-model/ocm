@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	ociid "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

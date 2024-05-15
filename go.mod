@@ -1,8 +1,6 @@
 module github.com/open-component-model/ocm
 
-go 1.22.0
-
-toolchain go1.22.2
+go 1.22.1
 
 replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 
@@ -40,7 +38,7 @@ require (
 	github.com/klauspost/compress v1.17.8
 	github.com/klauspost/pgzip v1.2.6
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
-	github.com/mandelsoft/goutils v0.0.0-20240422120338-5e35748a0391
+	github.com/mandelsoft/goutils v0.0.0-20240510154642-0f1a031c54cb
 	github.com/mandelsoft/logging v0.0.0-20240201091719-67180059d6bf
 	github.com/mandelsoft/spiff v1.7.0-beta-5
 	github.com/mandelsoft/vfs v0.4.3
@@ -214,6 +212,7 @@ require (
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
+	github.com/gowebpki/jcs v1.0.1 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

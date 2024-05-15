@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 func CommonName(n string) *pkix.Name {

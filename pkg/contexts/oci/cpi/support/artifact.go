@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -13,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 var ErrNoIndex = errors.New("manifest does not support access to subsequent artifacts")

@@ -3,8 +3,9 @@ package iotools
 import (
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/sliceutils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +54,7 @@ var _ io.ReadCloser = (*readCloser)(nil)
 
 // Deprecated: use AddReaderCloser .
 func AddCloser(reader io.ReadCloser, closer io.Closer, msg ...string) io.ReadCloser {
-	return AddReaderCloser(reader, closer, generics.ConvertSliceTo[any](msg)...)
+	return AddReaderCloser(reader, closer, sliceutils.Convert[any](msg)...)
 }
 
 func ReadCloser(r io.Reader) io.ReadCloser {

@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/grammar"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -90,7 +91,7 @@ func ParseRepoToSpec(ctx Context, ref string, create ...bool) (RepositorySpec, e
 		return nil, errors.ErrInvalidWrap(err, KIND_REPOSITORYSPEC, ref)
 	}
 	if !uni.CreateIfMissing {
-		uni.CreateIfMissing = utils.Optional(create...)
+		uni.CreateIfMissing = general.Optional(create...)
 	}
 	repoSpec, err := ctx.MapUniformRepositorySpec(&uni)
 	if err != nil {

@@ -5,6 +5,9 @@ import (
 	"path"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -13,8 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -71,7 +72,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[cpi.AccessMethod]); ok {
 		// prepare for optimized point to point implementation
 		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci generic artifact handler with ocm access source",
-			generics.AppendedSlice[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
+			sliceutils.CopyAppend[any](values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
 	} else {
 		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci generic artifact handler", values...)

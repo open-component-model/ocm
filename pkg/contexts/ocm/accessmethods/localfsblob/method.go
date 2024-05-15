@@ -1,7 +1,7 @@
 package localfsblob
 
 import (
-	. "github.com/open-component-model/ocm/pkg/exception"
+	. "github.com/mandelsoft/goutils/exception"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"

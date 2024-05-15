@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/mandelsoft/goutils/generics"
 )
 
 // HandleOption handles an option value (O) to be transferred to an

@@ -5,8 +5,7 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
-
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 // MatchVersionStrings returns an ordered list of versions filtered by the given

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/DataDog/gostackparse"
+	"github.com/mandelsoft/goutils/exception"
 	"github.com/mandelsoft/vfs/pkg/composefs"
 	"github.com/mandelsoft/vfs/pkg/layerfs"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
@@ -21,7 +22,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/exception"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -16,10 +17,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/toi/install"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type ExecutorOptions struct {
@@ -88,14 +88,14 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.Config != "" && o.ConfigData == nil {
-		o.ConfigData, err = utils2.ReadFile(o.Config, o.FileSystem())
+		o.ConfigData, err = utils.ReadFile(o.Config, o.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "cannot read config %q", o.Config)
 		}
 	}
 
 	if o.OCMConfig == "" {
-		cfg, err := utils2.ResolvePath(o.Inputs + "/" + install.InputOCMConfig)
+		cfg, err := utils.ResolvePath(o.Inputs + "/" + install.InputOCMConfig)
 		if err != nil {
 			return errors.Wrapf(err, "cannot resolve OCM config %q", o.Inputs)
 		}
@@ -110,7 +110,7 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.Parameters == "" {
-		p, err := utils2.ResolvePath(o.Inputs + "/" + install.InputParameters)
+		p, err := utils.ResolvePath(o.Inputs + "/" + install.InputParameters)
 		if err != nil {
 			return errors.Wrapf(err, "cannot resolve path %q", o.Inputs)
 		}
@@ -120,7 +120,7 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.Parameters != "" && o.ParameterData == nil {
-		o.ParameterData, err = utils2.ReadFile(o.Parameters, o.FileSystem())
+		o.ParameterData, err = utils.ReadFile(o.Parameters, o.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "cannot read parameters %q", o.Config)
 		}

@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

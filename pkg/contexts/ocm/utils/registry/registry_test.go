@@ -4,8 +4,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/goutils/set"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 var aKey = registry.RegistrationKey{}.SetArtifact("a", "")
@@ -85,7 +86,7 @@ var _ = Describe("lookup", func() {
 			reg.Register(registry.RegistrationKey{}.SetArtifact("a1", "m"), "testa")
 
 			keys := reg.LookupKeys(aKey)
-			Expect(keys).To(Equal(generics.NewSet(amKey, am1Key)))
+			Expect(keys).To(Equal(set.New(amKey, am1Key)))
 		})
 
 		It("fills missing", func() {
@@ -94,7 +95,7 @@ var _ = Describe("lookup", func() {
 			reg.Register(registry.RegistrationKey{}.SetArtifact("a1", "m"), "testa")
 
 			keys := reg.LookupKeys(mKey)
-			Expect(keys).To(Equal(generics.NewSet(a1mKey)))
+			Expect(keys).To(Equal(set.New(a1mKey)))
 		})
 		It("fills more specific media", func() {
 			reg.Register(registry.RegistrationKey{}.SetArtifact("a", "m+tar"), "test")
@@ -102,7 +103,7 @@ var _ = Describe("lookup", func() {
 			reg.Register(registry.RegistrationKey{}.SetArtifact("a1", "m"), "testa")
 
 			keys := reg.LookupKeys(amKey)
-			Expect(keys).To(Equal(generics.NewSet(amtarKey)))
+			Expect(keys).To(Equal(set.New(amtarKey)))
 		})
 	})
 })

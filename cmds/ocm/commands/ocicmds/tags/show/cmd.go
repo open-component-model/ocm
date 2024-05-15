@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -14,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )

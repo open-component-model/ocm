@@ -3,8 +3,9 @@ package descriptor
 import (
 	"sort"
 
+	"github.com/mandelsoft/goutils/sliceutils"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type Named interface {
@@ -53,5 +54,5 @@ next:
 		}
 		list = append(list, e)
 	}
-	return generics.AppendedSlice(l, list...)
+	return sliceutils.CopyAppend(l, list...)
 }

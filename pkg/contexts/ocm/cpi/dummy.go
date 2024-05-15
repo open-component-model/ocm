@@ -3,10 +3,11 @@ package cpi
 import (
 	"strconv"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type DummyComponentVersionAccess struct {

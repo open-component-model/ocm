@@ -44,12 +44,11 @@ func clean(iterable data.Iterable) data.Iterable {
 
 	output.Print(data, "clean in")
 	for i := 0; i < len(data); i++ {
-		e, ok := data[i].(*Object)
-		if !ok {
+		if data[i] == nil {
 			// ignore if we don't have an object and continue cleaning the rest
-
 			continue
 		}
+		e := data[i].(*Object) // internal function is called only on *Object, if not, panic early to indicate misuse
 		l := len(e.History)
 		blob, _ := e.Artifact.Blob()
 		dig := blob.Digest()

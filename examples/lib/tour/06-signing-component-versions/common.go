@@ -6,6 +6,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -18,8 +21,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/textblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"

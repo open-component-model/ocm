@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -12,7 +13,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/fileblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 

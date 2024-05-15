@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -11,7 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 )
 
 type plug = plugin.Plugin
@@ -48,7 +50,7 @@ func (p *PluginHandler) Info(spec *AccessSpec) (*ppi.AccessSpecInfo, error) {
 func (p *PluginHandler) AccessMethod(spec *AccessSpec, cv cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	mspec := p.GetAccessMethodDescriptor(spec.GetKind(), spec.GetVersion())
 	if mspec == nil {
-		return nil, errors.ErrNotFound(errors.KIND_ACCESSMETHOD, spec.GetType(), descriptor.KIND_PLUGIN, p.Name())
+		return nil, errors.ErrNotFound(errkind.KIND_ACCESSMETHOD, spec.GetType(), descriptor.KIND_PLUGIN, p.Name())
 	}
 
 	creddata, err := p.getCredentialData(spec, cv)

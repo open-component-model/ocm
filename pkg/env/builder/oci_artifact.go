@@ -1,10 +1,11 @@
 package builder
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const (

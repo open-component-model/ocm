@@ -5,6 +5,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/mandelsoft/goutils/finalizer"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -12,7 +14,6 @@ import (
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )

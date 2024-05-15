@@ -3,12 +3,12 @@ package support
 import (
 	"compress/gzip"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type ManifestAccess struct {

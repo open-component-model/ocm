@@ -1,6 +1,7 @@
 package comparch
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -13,7 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
@@ -199,7 +200,7 @@ func (c *componentArchiveContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 		}
 		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
 	}
-	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "component archive")
+	return nil, errors.ErrNotSupported(errkind.KIND_ACCESSMETHOD, a.GetType(), "component archive")
 }
 
 func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {

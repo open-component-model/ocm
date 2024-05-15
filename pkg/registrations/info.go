@@ -3,7 +3,8 @@ package registrations
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/mandelsoft/goutils/general"
+
 	"github.com/open-component-model/ocm/pkg/listformat"
 )
 
@@ -23,11 +24,11 @@ func (h HandlerInfos) Description(i int) string {
 	var desc string
 
 	if h[i].Node {
-		desc = "[" + generics.Conditional(h[i].ShortDesc == "", "intermediate", strings.Trim(h[i].ShortDesc, "\n")) + "]"
+		desc = "[" + general.Conditional(h[i].ShortDesc == "", "intermediate", strings.Trim(h[i].ShortDesc, "\n")) + "]"
 	} else {
 		desc = h[i].ShortDesc
 	}
-	return desc + generics.Conditional(h[i].Description == "", "", "\n\n"+strings.Trim(h[i].Description, "\n"))
+	return desc + general.Conditional(h[i].Description == "", "", "\n\n"+strings.Trim(h[i].Description, "\n"))
 }
 
 type HandlerInfo struct {

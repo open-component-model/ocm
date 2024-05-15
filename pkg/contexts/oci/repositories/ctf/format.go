@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -12,7 +13,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const (

@@ -3,10 +3,12 @@ package add
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
@@ -29,8 +31,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 var (
@@ -238,7 +238,7 @@ func (o *Command) Run() error {
 	}
 
 	if err == nil {
-		err = comp.ProcessComponents(o.Context, ictx, repo, generics.Conditional(o.Closure, lookupoption.From(o).Resolver, nil), thdlr, h, elems)
+		err = comp.ProcessComponents(o.Context, ictx, repo, general.Conditional(o.Closure, lookupoption.From(o).Resolver, nil), thdlr, h, elems)
 		cerr := repo.Close()
 		if err == nil {
 			err = cerr
