@@ -1,9 +1,9 @@
-## ocm controller install &mdash; Install Either A Specific Or Latest Version Of The Ocm-Controller. Optionally Install Prerequisites Required By The Controller.
+## ocm controller uninstall &mdash; Uninstalls The Ocm-Controller And All Of Its Dependencies
 
 ### Synopsis
 
 ```
-ocm controller install controller {--version v0.0.1}
+ocm controller uninstall controller
 ```
 
 ### Options
@@ -15,13 +15,12 @@ ocm controller install controller {--version v0.0.1}
       --cert-manager-version string           version for cert-manager (default "v1.13.2")
   -c, --controller-name string                name of the controller that's used for status check (default "ocm-controller")
   -d, --dry-run                               if enabled, prints the downloaded manifest file
-  -h, --help                                  help for install
-  -i, --install-prerequisites                 install prerequisites required by ocm-controller (default true)
+  -h, --help                                  help for uninstall
   -n, --namespace string                      the namespace into which the controller is installed (default "ocm-system")
   -a, --release-api-url string                the base url to the ocm-controller's API release page (default "https://api.github.com/repos/open-component-model/ocm-controller/releases")
   -l, --silent                                don't fail on error
-  -s, --skip-pre-flight-check                 skip the pre-flight check for clusters
   -t, --timeout duration                      maximum time to wait for deployment to be ready (default 1m0s)
+  -p, --uninstall-prerequisites               uninstall prerequisites required by ocm-controller
   -v, --version string                        the version of the controller to install (default "latest")
 ```
 
