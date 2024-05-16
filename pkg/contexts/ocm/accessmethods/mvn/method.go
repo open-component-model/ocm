@@ -52,7 +52,7 @@ type AccessSpec struct {
 	Coordinates `json:",inline"`
 }
 
-// Option defines the interface function "ApplyTo()"
+// Option defines the interface function "ApplyTo()".
 type Option = optionutils.Option[*AccessSpec]
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
