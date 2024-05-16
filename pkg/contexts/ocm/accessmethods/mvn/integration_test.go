@@ -15,6 +15,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
 	. "github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 var _ = Describe("online accessmethods.mvn.AccessSpec integration tests", func() {
@@ -74,5 +75,24 @@ var _ = Describe("online accessmethods.mvn.AccessSpec integration tests", func()
 		- https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.26.1/  // cyclonedx
 		- https://repo1.maven.org/maven2/cn/afternode/commons/commons/1.6/ // gradle module!
 		*/
+	})
+
+	// https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.9.6
+	It("apache-maven, 'bin' zip + tar.gz only!", func() {
+		acc := mvn.New("https://repo1.maven.org/maven2", "org.apache.maven", "apache-maven", "3.9.6", mvn.WithClassifier("bin"))
+		Expect(acc).ToNot(BeNil())
+		Expect(acc.BaseUrl()).To(Equal("https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.9.6"))
+		files, err := acc.GavFiles(cv.GetContext())
+		Expect(err).ToNot(HaveOccurred())
+		Expect(files).To(HaveLen(8)) // the repo contains 8 files...
+		m := Must(acc.AccessMethod(cv))
+		defer m.Close()
+		Expect(err).ToNot(HaveOccurred())
+		Expect(m.MimeType()).To(Equal(mime.MIME_TGZ))
+		r := Must(m.Reader())
+		defer r.Close()
+		list, err := tarutils.ListArchiveContentFromReader(r)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(list).To(HaveLen(2)) // ...but with the classifier set, we're interested only in two!
 	})
 })
