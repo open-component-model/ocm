@@ -152,6 +152,28 @@ type meta struct {
 	Bin      string      `json:"bin"`
 }
 
+func update(a *AccessSpec, file string, hash crypto.Hash, metadata *meta, ctx accspeccpi.Context, fs vfs.FileSystem) error {
+	artifact := a.NewArtifact()
+	err := artifact.SetClassifierExtensionBy(file)
+	if err != nil {
+		return err
+	}
+	metadata.Bin = artifact.Url(a.Repository)
+	log := log.WithValues("file", metadata.Bin)
+	log.Debug("processing")
+	metadata.MimeType = artifact.MimeType()
+	if hash > 0 {
+		metadata.HashType = hash
+		metadata.Hash, err = getStringData(ctx, metadata.Bin+hashUrlExt(hash), fs)
+		if err != nil {
+			return errors.Wrapf(err, "cannot read %s digest of: %s", hash, metadata.Bin)
+		}
+	} else {
+		log.Warn("no digest available")
+	}
+	return nil
+}
+
 func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	fs := vfsattr.Get(ctx)
 
@@ -164,43 +186,31 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	if a.Classifier != "" {
 		fileMap = filterByClassifier(fileMap, a.Classifier)
 	}
-	if len(fileMap) < 1 {
-		return nil, errors.New("no maven artifact files found")
-	}
-	singleBinary := len(fileMap) == 1
 
+	switch l := len(fileMap); {
+	case l <= 0:
+		return nil, errors.New("no maven artifact files found")
+	case l == 1 && (a.Extension != "" || a.Classifier != ""):
+		metadata := meta{}
+		for file, hash := range fileMap {
+			update(a, file, hash, &metadata, ctx, fs)
+		}
+		return &metadata, nil
+		// default: continue below with: create tempFs where all files can be downloaded to and packed together as tar.gz
+	}
+
+	if (a.Extension == "") != (a.Classifier == "") { // XOR
+		log.Warn("Either classifier or extension have been specified, which results in an incomplete GAV!")
+	}
 	tempFs, err := osfs.NewTempFileSystem()
 	if err != nil {
 		return nil, err
 	}
 	defer vfs.Cleanup(tempFs)
 
-	artifact := a.NewArtifact()
 	metadata := meta{}
 	for file, hash := range fileMap {
-		err := artifact.SetClassifierExtensionBy(file)
-		if err != nil {
-			return nil, err
-		}
-		metadata.Bin = artifact.Url(a.Repository)
-		log = log.WithValues("file", metadata.Bin)
-		log.Debug("processing")
-		metadata.MimeType = artifact.MimeType()
-		if hash > 0 {
-			metadata.HashType = hash
-			metadata.Hash, err = getStringData(ctx, metadata.Bin+hashUrlExt(hash), fs)
-			if err != nil {
-				return nil, errors.Wrapf(err, "cannot read %s digest of: %s", hash, metadata.Bin)
-			}
-		} else {
-			log.Warn("no digest available")
-		}
-
-		// single binary dependency, this will never be a complete GAV - no maven uploader support!
-		if a.Extension != "" || singleBinary && a.Classifier != "" {
-			// in case you want to transport <packaging>pom</packaging>, then you should NOT set the extension
-			return &metadata, nil
-		}
+		update(a, file, hash, &metadata, ctx, fs)
 
 		// download the artifact into the temporary file system
 		e := func() (err error) {
@@ -222,7 +232,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 				}
 				sum := dreader.Digest().Encoded()
 				if metadata.Hash != sum {
-					return errors.Newf("checksum mismatch for %s", metadata.Bin)
+					return errors.Newf("%s digest mismatch: expected %s, found %s", metadata.HashType, metadata.Hash, sum)
 				}
 			} else {
 				_, err = io.Copy(out, reader)
@@ -236,7 +246,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	}
 
 	// pack all downloaded files into a tar.gz file
-	tgz, err := vfs.TempFile(fs, "", Type+"-"+artifact.FileNamePrefix()+"-*.tar.gz")
+	tgz, err := vfs.TempFile(fs, "", Type+"-"+a.NewArtifact().FileNamePrefix()+"-*.tar.gz")
 	if err != nil {
 		return nil, err
 	}
