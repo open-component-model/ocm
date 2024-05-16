@@ -26,6 +26,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
@@ -51,12 +52,15 @@ type AccessSpec struct {
 	Coordinates `json:",inline"`
 }
 
+// Option defines the interface function "ApplyTo()"
+type Option = optionutils.Option[*AccessSpec]
+
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
 var log = logging.DynamicLogger(identity.REALM)
 
 // New creates a new Maven (mvn) repository access spec version v1.
-func New(repository, groupId, artifactId, version string, options ...func(*AccessSpec)) *AccessSpec {
+func New(repository, groupId, artifactId, version string, options ...Option) *AccessSpec {
 	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Repository:          repository,
@@ -68,24 +72,32 @@ func New(repository, groupId, artifactId, version string, options ...func(*Acces
 			Extension:  "",
 		},
 	}
-	for _, option := range options {
-		option(accessSpec)
-	}
+	optionutils.ApplyOptions(accessSpec, options...)
 	return accessSpec
 }
 
+// classifier Option for Maven (mvn) Coordinates.
+type classifier string
+
+func (c classifier) ApplyTo(a *AccessSpec) {
+	a.Classifier = string(c)
+}
+
 // WithClassifier sets the classifier of the Maven (mvn) artifact.
-func WithClassifier(classifier string) func(*AccessSpec) {
-	return func(a *AccessSpec) {
-		a.Classifier = classifier
-	}
+func WithClassifier(c string) Option {
+	return classifier(c)
+}
+
+// extension Option for Maven (mvn) Coordinates.
+type extension string
+
+func (e extension) ApplyTo(a *AccessSpec) {
+	a.Extension = string(e)
 }
 
 // WithExtension sets the extension of the Maven (mvn) artifact.
-func WithExtension(extension string) func(*AccessSpec) {
-	return func(a *AccessSpec) {
-		a.Extension = extension
-	}
+func WithExtension(e string) Option {
+	return extension(e)
 }
 
 func (a *AccessSpec) Describe(_ accspeccpi.Context) string {
