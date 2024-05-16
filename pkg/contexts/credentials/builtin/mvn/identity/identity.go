@@ -6,7 +6,6 @@ import (
 
 	. "net/url"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
@@ -54,37 +53,31 @@ func GetConsumerId(rawURL, groupId string) (cpi.ConsumerIdentity, error) {
 	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url), nil
 }
 
-func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) (common.Properties, error) {
+func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) (cpi.Credentials, error) {
 	id, err := GetConsumerId(repoUrl, groupId)
 	if err != nil {
 		return nil, err
 	}
 	if id == nil {
+		logging.DynamicLogger(REALM).Debug("No consumer identity found.", "url", repoUrl, "groupId", groupId)
 		return nil, nil
 	}
-	credentials, err := cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
-	if err != nil {
-		return nil, err
-	}
-	if credentials == nil {
-		return nil, nil
-	}
-	return credentials.Properties(), nil
+	return cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
+
 }
 
 func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId string) (err error) {
 	credentials, err := GetCredentials(ctx, repoUrl, groupId)
 	if err != nil {
-		return
+		return err
 	}
 	if credentials == nil {
-		return
+		logging.DynamicLogger(REALM).Debug("No credentials found. BasicAuth not required?", "url", repoUrl, "groupId", groupId, "req", req)
+		return nil
 	}
-	username := credentials[ATTR_USERNAME]
-	password := credentials[ATTR_PASSWORD]
-	if username == "" || password == "" {
+	if !credentials.ExistsProperty(ATTR_USERNAME) || !credentials.ExistsProperty(ATTR_PASSWORD) {
 		return errors.New("missing username or password in credentials")
 	}
-	req.SetBasicAuth(username, password)
+	req.SetBasicAuth(credentials.GetProperty(ATTR_USERNAME), credentials.GetProperty(ATTR_PASSWORD))
 	return
 }
