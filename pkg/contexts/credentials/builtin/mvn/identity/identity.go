@@ -72,7 +72,7 @@ func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId strin
 		return err
 	}
 	if credentials == nil {
-		logging.DynamicLogger(REALM).Debug("No credentials found. BasicAuth not required?", "url", repoUrl, "groupId", groupId, "req", req)
+		logging.DynamicLogger(REALM).Debug("No credentials found. BasicAuth not required?", "url", repoUrl, "groupId", groupId)
 		return nil
 	}
 	if !credentials.ExistsProperty(ATTR_USERNAME) || !credentials.ExistsProperty(ATTR_PASSWORD) {
