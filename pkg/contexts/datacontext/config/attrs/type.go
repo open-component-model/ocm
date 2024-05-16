@@ -3,9 +3,10 @@ package attrs
 import (
 	"encoding/json"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

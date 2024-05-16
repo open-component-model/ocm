@@ -4,12 +4,13 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -20,7 +21,7 @@ const CONTEXT_TYPE = "credentials" + datacontext.OCM_CONTEXT_SUFFIX
 // for a configured consumer id. If non-empty it
 // must start with a DNSname identifying the origin of the
 // provider followed by a slash and a local arbitrary identity.
-type ProviderIdentity = finalizer.ObjectIdentity
+type ProviderIdentity = runtimefinalizer.ObjectIdentity
 
 type ContextProvider interface {
 	CredentialsContext() Context

@@ -6,9 +6,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"sigs.k8s.io/yaml"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func MustProtoType(proto interface{}) reflect.Type {

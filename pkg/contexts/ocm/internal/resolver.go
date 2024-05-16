@@ -4,12 +4,13 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/general"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -92,7 +93,7 @@ func NewResolverRule(prefix string, spec RepositorySpec, prio ...int) *ResolverR
 		prefix: prefix,
 		path:   p,
 		spec:   spec,
-		prio:   utils.OptionalDefaulted(10, prio...),
+		prio:   general.OptionalDefaulted(10, prio...),
 	}
 }
 

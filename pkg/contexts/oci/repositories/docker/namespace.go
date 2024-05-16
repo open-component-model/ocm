@@ -8,6 +8,7 @@ import (
 	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/types"
 	dockertypes "github.com/docker/docker/api/types/image"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 
@@ -17,7 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type blobHandler struct {

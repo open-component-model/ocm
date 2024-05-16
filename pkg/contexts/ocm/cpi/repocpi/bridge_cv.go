@@ -6,6 +6,9 @@ import (
 	"io"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -16,11 +19,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -57,7 +59,7 @@ type _componentVersionAccessBridgeBase = resource.ResourceImplBase[cpi.Component
 // implement provider-agnostic parts of the ComponentVersionAccess API.
 type componentVersionAccessBridge struct {
 	lock sync.Mutex
-	id   finalizer.ObjectIdentity
+	id   runtimefinalizer.ObjectIdentity
 
 	*_componentVersionAccessBridgeBase
 	ctx     cpi.Context
@@ -84,7 +86,7 @@ func newComponentVersionAccessBridge(name, version string, impl ComponentVersion
 	}
 	b := &componentVersionAccessBridge{
 		_componentVersionAccessBridgeBase: base,
-		id:                                finalizer.NewObjectIdentity(fmt.Sprintf("%s:%s", name, version)),
+		id:                                runtimefinalizer.NewObjectIdentity(fmt.Sprintf("%s:%s", name, version)),
 		ctx:                               impl.GetContext(),
 		name:                              name,
 		version:                           version,

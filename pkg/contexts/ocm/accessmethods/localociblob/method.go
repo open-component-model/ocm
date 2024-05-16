@@ -1,7 +1,7 @@
 package localociblob
 
 import (
-	. "github.com/open-component-model/ocm/pkg/exception"
+	. "github.com/mandelsoft/goutils/exception"
 
 	"github.com/opencontainers/go-digest"
 

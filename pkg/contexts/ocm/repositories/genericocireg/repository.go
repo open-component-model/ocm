@@ -7,6 +7,9 @@ import (
 	"path"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -14,8 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type OCIBasedRepository interface {
@@ -84,7 +85,7 @@ func (r *RepositoryImpl) GetContext() cpi.Context {
 
 func (r *RepositoryImpl) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
 	prefix := r.meta.SubPath
-	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
+	if c, ok := general.Optional(uctx...).(credentials.StringUsageContext); ok {
 		prefix = path.Join(prefix, componentmapping.ComponentDescriptorNamespace, c.String())
 	}
 	if p, ok := r.ocirepo.(credentials.ConsumerIdentityProvider); ok {

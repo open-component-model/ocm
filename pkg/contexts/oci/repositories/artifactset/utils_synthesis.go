@@ -3,8 +3,9 @@ package artifactset
 import (
 	"fmt"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/mandelsoft/goutils/finalizer"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer/filters"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const SynthesizedBlobFormat = "+tar+gzip"

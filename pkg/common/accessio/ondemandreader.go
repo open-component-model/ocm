@@ -4,7 +4,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 type ReaderProvider interface {

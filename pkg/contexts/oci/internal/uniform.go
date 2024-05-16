@@ -8,11 +8,11 @@ import (
 	"sync"
 
 	"github.com/containerd/containerd/reference"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

@@ -26,3 +26,10 @@ func ApplyOption[T any](opt *T, tgt **T) {
 		*tgt = opt
 	}
 }
+
+// GetOptionFlag returns the flag value used to set a bool option
+// based on optionally specified explicit value(s).
+// The default value is to enable the option (true).
+func GetOptionFlag(list ...bool) bool {
+	return utils.OptionalDefaultedBool(true, list...)
+}

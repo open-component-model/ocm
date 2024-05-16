@@ -6,9 +6,8 @@ import (
 	"os"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/sirupsen/logrus"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type ResettableReader struct {

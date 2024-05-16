@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	ociid "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	ccfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func UsingConfigs() error {

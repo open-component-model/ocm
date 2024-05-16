@@ -6,16 +6,16 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 
 	me "github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 
 var _ = Describe("area test", func() {
 	It("can be garbage collected", func() {
 		ctx := me.New()
 
-		r := finalizer.GetRuntimeFinalizationRecorder(ctx)
+		r := runtimefinalizer.GetRuntimeFinalizationRecorder(ctx)
 		Expect(r).NotTo(BeNil())
 
 		runtime.GC()

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"path"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -11,9 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
@@ -170,7 +170,7 @@ func (s *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 
 func (s *RepositorySpec) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
 	prefix := s.SubPath
-	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
+	if c, ok := general.Optional(uctx...).(credentials.StringUsageContext); ok {
 		prefix = path.Join(prefix, componentmapping.ComponentDescriptorNamespace, c.String())
 	}
 	return credentials.GetProvidedConsumerId(s.RepositorySpec, credentials.StringUsageContext(prefix))

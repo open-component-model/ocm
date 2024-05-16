@@ -3,7 +3,7 @@ package internal
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 const KIND_CONFIGTYPE = "config type"

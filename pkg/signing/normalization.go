@@ -3,7 +3,7 @@ package signing
 import (
 	"encoding/json"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 type null struct{}

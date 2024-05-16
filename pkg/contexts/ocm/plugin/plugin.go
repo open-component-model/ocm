@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -32,7 +34,6 @@ import (
 	vscompose "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/valueset/compose"
 	vsval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/valueset/validate"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

@@ -6,26 +6,26 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/finalized"
 )
 
 type Interface interface {
-	GetId() finalizer.ObjectIdentity
+	GetId() runtimefinalizer.ObjectIdentity
 	GetSelf() Interface
 
-	GetRefId() finalizer.ObjectIdentity
+	GetRefId() runtimefinalizer.ObjectIdentity
 }
 
 type object struct {
 	refmgmt.Allocatable
-	recorder *finalizer.RuntimeFinalizationRecoder
-	name     finalizer.ObjectIdentity
+	recorder *runtimefinalizer.RuntimeFinalizationRecoder
+	name     runtimefinalizer.ObjectIdentity
 }
 
-func (o *object) GetId() finalizer.ObjectIdentity {
+func (o *object) GetId() runtimefinalizer.ObjectIdentity {
 	return o.name
 }
 
@@ -35,7 +35,7 @@ func (o *object) GetSelf() Interface {
 }
 
 func (o *object) cleanup() error {
-	o.recorder.Record(finalizer.ObjectIdentity(o.name))
+	o.recorder.Record(runtimefinalizer.ObjectIdentity(o.name))
 	return nil
 }
 
@@ -47,7 +47,7 @@ type view struct {
 var _ Interface = (*view)(nil)
 
 func newView(o *object) (Interface, error) {
-	ref, err := finalized.NewFinalizedView(o.Allocatable, finalizer.NewObjectIdentity("test"), o.recorder)
+	ref, err := finalized.NewFinalizedView(o.Allocatable, runtimefinalizer.NewObjectIdentity("test"), o.recorder)
 	if err != nil {
 		return nil, err
 	}
@@ -57,13 +57,13 @@ func newView(o *object) (Interface, error) {
 	}, nil
 }
 
-func (v *view) GetRefId() finalizer.ObjectIdentity {
+func (v *view) GetRefId() runtimefinalizer.ObjectIdentity {
 	return v.ref.GetRefId()
 }
 
-func New(name string, rec *finalizer.RuntimeFinalizationRecoder) Interface {
+func New(name string, rec *runtimefinalizer.RuntimeFinalizationRecoder) Interface {
 	o := &object{
-		name:     finalizer.ObjectIdentity(name),
+		name:     runtimefinalizer.ObjectIdentity(name),
 		recorder: rec,
 	}
 	o.Allocatable = refmgmt.NewAllocatable(o.cleanup, true)
@@ -75,10 +75,10 @@ func New(name string, rec *finalizer.RuntimeFinalizationRecoder) Interface {
 ////////////////////////////////////////////////////////////////////////////////
 
 var _ = Describe("finalized ref", func() {
-	var rec *finalizer.RuntimeFinalizationRecoder
+	var rec *runtimefinalizer.RuntimeFinalizationRecoder
 
 	BeforeEach(func() {
-		rec = &finalizer.RuntimeFinalizationRecoder{}
+		rec = &runtimefinalizer.RuntimeFinalizationRecoder{}
 	})
 
 	It("cleanup ref and object", func() {

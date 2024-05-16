@@ -3,13 +3,13 @@ package dockerconfig
 import (
 	dockercli "github.com/docker/cli/cli/config"
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/defaultconfigregistry"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func init() {

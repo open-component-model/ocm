@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

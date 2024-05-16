@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/semverutils"
 )
 
@@ -74,4 +75,12 @@ func ParseNameVersion(s string) (NameVersion, error) {
 		return NameVersion{}, errors.ErrInvalid("name:version", s)
 	}
 	return NewNameVersion(strings.TrimSpace(a[0]), strings.TrimSpace(a[1])), nil
+}
+
+func CompareNameVersion(a, b NameVersion) int {
+	d := strings.Compare(a.name, b.name)
+	if d == 0 {
+		d = strings.Compare(a.version, b.version)
+	}
+	return d
 }

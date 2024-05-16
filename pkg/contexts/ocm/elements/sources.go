@@ -1,8 +1,9 @@
 package elements
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type SourceMetaOption interface {

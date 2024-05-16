@@ -1,14 +1,16 @@
 package standard
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/set"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func init() {
@@ -26,8 +28,8 @@ type Options struct {
 	enforceTransport  *bool
 	overwrite         *bool
 	skipUpdate        *bool
-	omitAccessTypes   utils.StringSet
-	omitArtifactTypes utils.StringSet
+	omitAccessTypes   set.Set[string]
+	omitArtifactTypes set.Set[string]
 	resolver          ocm.ComponentVersionResolver
 }
 
@@ -111,12 +113,12 @@ func (o *Options) ApplyTransferOption(target transferhandler.TransferOptions) er
 	}
 	if o.omitAccessTypes != nil {
 		if opts, ok := target.(OmitAccessTypesOption); ok {
-			opts.SetOmittedAccessTypes(utils.StringMapKeys(o.omitAccessTypes)...)
+			opts.SetOmittedAccessTypes(maputils.OrderedKeys(o.omitAccessTypes)...)
 		}
 	}
 	if o.omitArtifactTypes != nil {
 		if opts, ok := target.(OmitArtifactTypesOption); ok {
-			opts.SetOmittedArtifactTypes(utils.StringMapKeys(o.omitAccessTypes)...)
+			opts.SetOmittedArtifactTypes(maputils.OrderedKeys(o.omitAccessTypes)...)
 		}
 	}
 	if o.resolver != nil {
@@ -136,7 +138,7 @@ func (o *Options) SetEnforceTransport(enforce bool) {
 }
 
 func (o *Options) IsTransportEnforced() bool {
-	return utils.AsBool(o.enforceTransport)
+	return optionutils.AsBool(o.enforceTransport)
 }
 
 func (o *Options) SetOverwrite(overwrite bool) {
@@ -144,7 +146,7 @@ func (o *Options) SetOverwrite(overwrite bool) {
 }
 
 func (o *Options) IsOverwrite() bool {
-	return utils.AsBool(o.overwrite)
+	return optionutils.AsBool(o.overwrite)
 }
 
 func (o *Options) SetSkipUpdate(skipupdate bool) {
@@ -152,7 +154,7 @@ func (o *Options) SetSkipUpdate(skipupdate bool) {
 }
 
 func (o *Options) IsSkipUpdate() bool {
-	return utils.AsBool(o.skipUpdate)
+	return optionutils.AsBool(o.skipUpdate)
 }
 
 func (o *Options) SetRecursive(recursive bool) {
@@ -160,7 +162,7 @@ func (o *Options) SetRecursive(recursive bool) {
 }
 
 func (o *Options) IsRecursive() bool {
-	return utils.AsBool(o.recursive)
+	return optionutils.AsBool(o.recursive)
 }
 
 func (o *Options) SetResourcesByValue(resourcesByValue bool) {
@@ -168,7 +170,7 @@ func (o *Options) SetResourcesByValue(resourcesByValue bool) {
 }
 
 func (o *Options) IsResourcesByValue() bool {
-	return utils.AsBool(o.resourcesByValue)
+	return optionutils.AsBool(o.resourcesByValue)
 }
 
 func (o *Options) SetLocalResourcesByValue(resourcesByValue bool) {
@@ -176,7 +178,7 @@ func (o *Options) SetLocalResourcesByValue(resourcesByValue bool) {
 }
 
 func (o *Options) IsLocalResourcesByValue() bool {
-	return utils.AsBool(o.localByValue)
+	return optionutils.AsBool(o.localByValue)
 }
 
 func (o *Options) SetSourcesByValue(sourcesByValue bool) {
@@ -184,7 +186,7 @@ func (o *Options) SetSourcesByValue(sourcesByValue bool) {
 }
 
 func (o *Options) IsSourcesByValue() bool {
-	return utils.AsBool(o.sourcesByValue)
+	return optionutils.AsBool(o.sourcesByValue)
 }
 
 func (o *Options) SetKeepGlobalAccess(keepGlobalAccess bool) {
@@ -192,7 +194,7 @@ func (o *Options) SetKeepGlobalAccess(keepGlobalAccess bool) {
 }
 
 func (o *Options) IsKeepGlobalAccess() bool {
-	return utils.AsBool(o.keepGlobalAccess)
+	return optionutils.AsBool(o.keepGlobalAccess)
 }
 
 func (o *Options) SetRetries(retries int) {
@@ -219,11 +221,11 @@ func (o *Options) SetStopOnExistingVersion(stopOnExistingVersion bool) {
 }
 
 func (o *Options) IsStopOnExistingVersion() bool {
-	return utils.AsBool(o.stopOnExisting)
+	return optionutils.AsBool(o.stopOnExisting)
 }
 
 func (o *Options) SetOmittedAccessTypes(list ...string) {
-	o.omitAccessTypes = utils.StringSet{}
+	o.omitAccessTypes = set.New[string]()
 	for _, t := range list {
 		o.omitAccessTypes.Add(t)
 	}
@@ -231,7 +233,7 @@ func (o *Options) SetOmittedAccessTypes(list ...string) {
 
 func (o *Options) AddOmittedAccessTypes(list ...string) {
 	if o.omitAccessTypes == nil {
-		o.omitAccessTypes = utils.StringSet{}
+		o.omitAccessTypes = set.New[string]()
 	}
 	for _, t := range list {
 		o.omitAccessTypes.Add(t)
@@ -242,7 +244,7 @@ func (o *Options) GetOmittedAccessTypes() []string {
 	if o.omitAccessTypes == nil {
 		return nil
 	}
-	return utils.StringMapKeys(o.omitAccessTypes)
+	return maputils.OrderedKeys(o.omitAccessTypes)
 }
 
 func (o *Options) IsAccessTypeOmitted(t string) bool {
@@ -257,7 +259,7 @@ func (o *Options) IsAccessTypeOmitted(t string) bool {
 }
 
 func (o *Options) SetOmittedArtifactTypes(list ...string) {
-	o.omitArtifactTypes = utils.StringSet{}
+	o.omitArtifactTypes = set.New[string]()
 	for _, t := range list {
 		o.omitArtifactTypes.Add(t)
 	}
@@ -265,7 +267,7 @@ func (o *Options) SetOmittedArtifactTypes(list ...string) {
 
 func (o *Options) AddOmittedArtifactTypes(list ...string) {
 	if o.omitArtifactTypes == nil {
-		o.omitArtifactTypes = utils.StringSet{}
+		o.omitArtifactTypes = set.New[string]()
 	}
 	for _, t := range list {
 		o.omitArtifactTypes.Add(t)
@@ -276,7 +278,7 @@ func (o *Options) GetOmittedArtifactTypes() []string {
 	if o.omitArtifactTypes == nil {
 		return nil
 	}
-	return utils.StringMapKeys(o.omitArtifactTypes)
+	return maputils.OrderedKeys(o.omitArtifactTypes)
 }
 
 func (o *Options) IsArtifactTypeOmitted(t string) bool {
@@ -315,7 +317,7 @@ func (o *enforceTransportOption) ApplyTransferOption(to transferhandler.Transfer
 // as if the component version were not present at the destination.
 func EnforceTransport(args ...bool) transferhandler.TransferOption {
 	return &enforceTransportOption{
-		enforce: utils.GetOptionFlag(args...),
+		enforce: optionutils.GetOptionFlag(args...),
 	}
 }
 
@@ -343,7 +345,7 @@ func (o *overwriteOption) ApplyTransferOption(to transferhandler.TransferOptions
 // Overwrite enables the modification of digest relevant information in a component version.
 func Overwrite(args ...bool) transferhandler.TransferOption {
 	return &overwriteOption{
-		overwrite: utils.GetOptionFlag(args...),
+		overwrite: optionutils.GetOptionFlag(args...),
 	}
 }
 
@@ -367,7 +369,7 @@ func (o skipUpdateOption) ApplyTransferOption(to transferhandler.TransferOptions
 
 // SkipUpdate enables the modification of non-digest (volatile) relevant information in a component version.
 func SkipUpdate(args ...bool) transferhandler.TransferOption {
-	return skipUpdateOption(utils.GetOptionFlag(args...))
+	return skipUpdateOption(optionutils.GetOptionFlag(args...))
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -419,7 +421,7 @@ func (o *recursiveOption) ApplyTransferOption(to transferhandler.TransferOptions
 
 // Recursive enables the transport of the reference closure of a component version.
 func Recursive(args ...bool) transferhandler.TransferOption {
-	return &recursiveOption{flag: utils.GetOptionFlag(args...)}
+	return &recursiveOption{flag: optionutils.GetOptionFlag(args...)}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -445,7 +447,7 @@ func (o *resourcesByValueOption) ApplyTransferOption(to transferhandler.Transfer
 
 // ResourcesByValue enables the transport a resources by values instead of by-reference.
 func ResourcesByValue(args ...bool) transferhandler.TransferOption {
-	return &resourcesByValueOption{flag: utils.GetOptionFlag(args...)}
+	return &resourcesByValueOption{flag: optionutils.GetOptionFlag(args...)}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -471,7 +473,7 @@ func (o *intrscsByValueOption) ApplyTransferOption(to transferhandler.TransferOp
 
 // LocalResourcesByValue enables the transport a local (relation) resources by values instead of by-reference.
 func LocalResourcesByValue(args ...bool) transferhandler.TransferOption {
-	return &intrscsByValueOption{flag: utils.GetOptionFlag(args...)}
+	return &intrscsByValueOption{flag: optionutils.GetOptionFlag(args...)}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -497,7 +499,7 @@ func (o *sourcesByValueOption) ApplyTransferOption(to transferhandler.TransferOp
 
 // SourcesByValue enables the transport a sources by values instead of by-reference.
 func SourcesByValue(args ...bool) transferhandler.TransferOption {
-	return &sourcesByValueOption{flag: utils.GetOptionFlag(args...)}
+	return &sourcesByValueOption{flag: optionutils.GetOptionFlag(args...)}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -551,7 +553,7 @@ func (o *keepGlobalOption) ApplyTransferOption(to transferhandler.TransferOption
 
 // KeepGlobalAccess enables to keep local blobs if uploaders are used to upload imported blobs.
 func KeepGlobalAccess(args ...bool) transferhandler.TransferOption {
-	return &keepGlobalOption{flag: utils.GetOptionFlag(args...)}
+	return &keepGlobalOption{flag: optionutils.GetOptionFlag(args...)}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -577,7 +579,7 @@ func (o *stopOnExistingVersionOption) ApplyTransferOption(to transferhandler.Tra
 
 // StopOnExistingVersion stops the recursion on component versions already present in target.
 func StopOnExistingVersion(args ...bool) transferhandler.TransferOption {
-	return &stopOnExistingVersionOption{flag: utils.GetOptionFlag(args...)}
+	return &stopOnExistingVersionOption{flag: optionutils.GetOptionFlag(args...)}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -596,7 +598,7 @@ type omitAccessTypesOption struct {
 func (o *omitAccessTypesOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
 	if eff, ok := to.(OmitAccessTypesOption); ok {
 		if o.add {
-			eff.SetOmittedAccessTypes(generics.AppendedSlice(eff.GetOmittedAccessTypes(), o.list...)...)
+			eff.SetOmittedAccessTypes(sliceutils.CopyAppend(eff.GetOmittedAccessTypes(), o.list...)...)
 		} else {
 			eff.SetOmittedAccessTypes(o.list...)
 		}

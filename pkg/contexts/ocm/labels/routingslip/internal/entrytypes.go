@@ -6,14 +6,15 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets/flagsetscheme"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -74,7 +75,7 @@ func (_ *UnknownEntry) IsUnknown() bool {
 }
 
 func (u *UnknownEntry) Describe(ctx Context) string {
-	keys := utils.StringMapKeys(u.Object)
+	keys := maputils.OrderedKeys(u.Object)
 	cnt := 0
 	desc := []string{}
 	delta := 0
@@ -144,7 +145,7 @@ func ToGenericEntry(spec Entry) (*GenericEntry, error) {
 }
 
 func NewGenericEntry(data []byte, unmarshaler ...runtime.Unmarshaler) (Entry, error) {
-	return generics.AsE[Entry](newGenericEntry(data, utils.Optional(unmarshaler...)))
+	return generics.CastPointerR[Entry](newGenericEntry(data, utils.Optional(unmarshaler...)))
 }
 
 func newGenericEntry(data []byte, unmarshaler runtime.Unmarshaler) (*GenericEntry, error) {

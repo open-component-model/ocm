@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/xeipuuv/gojsonschema"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/registrations"
 )
 

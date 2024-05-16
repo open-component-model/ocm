@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -12,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func Elem(e interface{}) oci.ArtifactAccess {

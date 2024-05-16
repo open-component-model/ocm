@@ -9,6 +9,7 @@ import (
 
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes/docker/config"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -18,7 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
-	"github.com/open-component-model/ocm/pkg/errors"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/utils"

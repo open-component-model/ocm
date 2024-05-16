@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mandelsoft/goutils/errors"
 	parse "github.com/mandelsoft/spiff/dynaml/x509"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
@@ -22,7 +23,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/encrypt"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"

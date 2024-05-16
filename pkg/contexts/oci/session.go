@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type NamespaceContainer interface {

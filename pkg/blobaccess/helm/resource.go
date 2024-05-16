@@ -3,6 +3,7 @@ package helm
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -11,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/helm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocihelm "github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/helm"
 	"github.com/open-component-model/ocm/pkg/helm/loader"
 	"github.com/open-component-model/ocm/pkg/optionutils"

@@ -3,13 +3,13 @@ package artifacthdlr
 import (
 	"strings"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 func Attachment(d digest.Digest, suffix string) string {
@@ -19,10 +19,8 @@ func Attachment(d digest.Digest, suffix string) string {
 var ExplodeAttached = processing.Explode(explodeAttached)
 
 func explodeAttached(o interface{}) []interface{} {
-	obj, ok := o.(*Object)
-	if !ok {
-		return nil
-	}
+	// internal function must be called correctly, otherwise early panic
+	obj := o.(*Object)
 	result := []interface{}{o}
 	blob, err := obj.Artifact.Blob()
 	if err != nil {
@@ -33,7 +31,7 @@ func explodeAttached(o interface{}) []interface{} {
 	dig := blob.Digest()
 	prefix := Attachment(dig, "")
 	list, err := obj.Namespace.ListTags()
-	hist := generics.AppendedSlice(obj.History, common.NewNameVersion("", dig.String()))
+	hist := sliceutils.CopyAppend(obj.History, common.NewNameVersion("", dig.String()))
 	if err == nil {
 		for _, l := range list {
 			if strings.HasPrefix(l, prefix) {

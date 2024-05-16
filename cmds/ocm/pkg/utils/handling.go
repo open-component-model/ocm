@@ -5,8 +5,8 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type ElemSpec interface {

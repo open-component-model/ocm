@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"golang.org/x/text/cases"
@@ -28,8 +31,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
@@ -99,7 +100,7 @@ type ElementFileSource struct {
 
 func NewElementFileSource(path string, fss ...vfs.FileSystem) addhdlrs.ElementSource {
 	return &ElementFileSource{
-		filesystem: accessio.FileSystem(fss...),
+		filesystem: utils2.FileSystem(fss...),
 		path:       addhdlrs.NewSourceInfo(path),
 	}
 }
@@ -136,7 +137,7 @@ type ElementMetaDataSpecificationsProvider struct {
 
 func NewElementMetaDataSpecificationsProvider(name string, adder flagsets.ConfigAdder, types ...flagsets.ConfigOptionType) *ElementMetaDataSpecificationsProvider {
 	meta := flagsets.NewPlainConfigProvider(name, flagsets.ComposedAdder(addMeta(name), adder),
-		generics.AppendedSlice(types,
+		sliceutils.CopyAppend(types,
 			flagsets.NewYAMLOptionType(name, fmt.Sprintf("%s meta data (yaml)", name)),
 			flagsets.NewStringOptionType("name", fmt.Sprintf("%s name", name)),
 			flagsets.NewStringOptionType("version", fmt.Sprintf("%s version", name)),
@@ -234,7 +235,7 @@ func NewContentResourceSpecificationProvider(ctx clictx.Context, name string, ad
 		DefaultType: deftype,
 		ctx:         ctx,
 		ElementMetaDataSpecificationsProvider: NewElementMetaDataSpecificationsProvider(name, flagsets.ComposedAdder(addContentMeta, adder),
-			generics.AppendedSlice(types,
+			sliceutils.CopyAppend(types,
 				flagsets.NewStringOptionType("type", fmt.Sprintf("%s type", name)),
 			)...,
 		),
@@ -385,7 +386,7 @@ func NewResourceAdderCommand(ctx clictx.Context, h ResourceSpecHandler, provider
 		opts = append(opts, o)
 	}
 	return ResourceAdderCommand{
-		BaseCommand: utils.NewBaseCommand(ctx, generics.AppendedSlice[options.Options](opts,
+		BaseCommand: utils.NewBaseCommand(ctx, sliceutils.CopyAppend[options.Options](opts,
 			fileoption.NewCompArch(),
 			dryrunoption.New(fmt.Sprintf("evaluate and print %s specifications", h.Key()), true),
 			templateroption.New(""),

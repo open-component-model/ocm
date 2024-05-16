@@ -3,6 +3,7 @@ package logopts
 import (
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/logging/config"
 	"github.com/mandelsoft/logging/logrusr"
@@ -13,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/logforward"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

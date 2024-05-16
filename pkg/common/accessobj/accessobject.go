@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type DescriptorHandlerFactory func(fs vfs.FileSystem) StateHandler

@@ -5,6 +5,8 @@ import (
 	"io"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -18,9 +20,7 @@ import (
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const CONTEXT_TYPE = "ocm.cmd" + datacontext.OCM_CONTEXT_SUFFIX
@@ -120,7 +120,7 @@ type gcWrapper struct {
 }
 
 func newView(c *_context, ref ...bool) Context {
-	if utils.Optional(ref...) {
+	if general.Optional(ref...) {
 		return datacontext.FinalizedContext[gcWrapper](c)
 	}
 	return c

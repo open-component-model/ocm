@@ -7,6 +7,10 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -14,13 +18,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/signing/tsa"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 var REALM = logging.NewRealm("signing")
@@ -109,7 +109,7 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 		s := NewWalkingState(cv.GetContext().LoggingContext().WithContext(REALM))
 		state = &s
 	}
-	dc, err := apply(*state, cv, opts, utils.Optional(closecv...))
+	dc, err := apply(*state, cv, opts, general.Optional(closecv...))
 	if err != nil {
 		return nil, err
 	}
@@ -702,5 +702,5 @@ func GetDigestMode(cd *compdesc.ComponentDescriptor, def ...string) string {
 			return DIGESTMODE_LOCAL
 		}
 	}
-	return utils.Optional(def...)
+	return general.Optional(def...)
 }

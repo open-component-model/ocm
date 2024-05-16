@@ -5,10 +5,9 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"golang.org/x/exp/slices"
-
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +78,7 @@ func (h *History) Add(kind string, nv NameVersion) error {
 
 // Append provides a new extended history without cycle check.
 func (h History) Append(nv ...NameVersion) History {
-	return generics.AppendedSlice(h, nv...)
+	return sliceutils.CopyAppend(h, nv...)
 }
 
 func (h History) Copy() History {

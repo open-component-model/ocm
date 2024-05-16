@@ -1,9 +1,10 @@
 package utils
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // WalkingStep is used to process a component version during graph traversal.

@@ -5,9 +5,8 @@ import (
 	"encoding/csv"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type stringColonStringSliceValue[T ~map[string][]string] struct {

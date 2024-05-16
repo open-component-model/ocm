@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -14,11 +16,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha512"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const OciArtifactDigestV1 string = "ociArtifactDigest/v1"
@@ -38,7 +38,7 @@ func init() {
 }
 
 func New(algo string, ts ...string) cpi.BlobDigester {
-	norm := utils.OptionalDefaulted(OciArtifactDigestV1, ts...)
+	norm := general.OptionalDefaulted(OciArtifactDigestV1, ts...)
 	return &Digester{
 		cpi.DigesterType{
 			HashAlgorithm:          algo,

@@ -3,9 +3,10 @@ package vault
 import (
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault"

@@ -1,6 +1,7 @@
 package get
 
 import (
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -18,7 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 var (
@@ -116,7 +116,7 @@ func getTreewide(opts *output.Options) output.Output {
 
 func mapGetRegularOutput(e interface{}) interface{} {
 	r := common.Elem(e)
-	return generics.AppendedSlice(elemhdlr.MapMetaOutput(e), r.Type, string(r.Relation))
+	return sliceutils.CopyAppend(elemhdlr.MapMetaOutput(e), r.Type, string(r.Relation))
 }
 
 func mapGetWideOutput(e interface{}) interface{} {
