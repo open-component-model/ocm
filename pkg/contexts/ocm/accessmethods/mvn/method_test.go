@@ -18,7 +18,7 @@ import (
 
 const (
 	mvnPATH  = "/testdata/.m2/repository"
-	FAILPATH = "/testdata"
+	FAILPATH = "/testdata/fail"
 )
 
 var _ = Describe("local accessmethods.mvn.AccessSpec tests", func() {
@@ -72,8 +72,13 @@ var _ = Describe("local accessmethods.mvn.AccessSpec tests", func() {
 		Expect(dr.Digest().String()).To(Equal("SHA-1:34ccdeb9c008f8aaef90873fc636b09d3ae5c709"))
 	})
 
+	It("Describe", func() {
+		acc := mvn.New("file://"+FAILPATH, "test", "repository", "42", mvn.WithExtension("pom"))
+		Expect(acc.Describe(nil)).To(Equal("Maven (mvn) package 'test:repository:42::pom' in repository 'file:///testdata/fail' path 'test/repository/42/repository-42.pom'"))
+	})
+
 	It("detects digests mismatch", func() {
-		acc := mvn.New("file://"+FAILPATH, "fail", "repository", "42", mvn.WithExtension("pom"))
+		acc := mvn.New("file://"+FAILPATH, "test", "repository", "42", mvn.WithExtension("pom"))
 		m := Must(acc.AccessMethod(cv))
 		defer m.Close()
 		_, err := m.Reader()

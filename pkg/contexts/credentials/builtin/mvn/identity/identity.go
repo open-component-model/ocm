@@ -63,7 +63,6 @@ func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) (cpi.Crede
 		return nil, nil
 	}
 	return cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
-
 }
 
 func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId string) (err error) {
