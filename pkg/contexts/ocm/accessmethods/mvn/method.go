@@ -101,7 +101,7 @@ func WithExtension(e string) Option {
 }
 
 func (a *AccessSpec) Describe(_ accspeccpi.Context) string {
-	return fmt.Sprintf("Maven (mvn) package %s:%s:%s in repository %s", a.GroupId, a.ArtifactId, a.Version, a.Repository)
+	return fmt.Sprintf("Maven (mvn) package '%s' in repository '%s' path '%s'", a.Coordinates.String(), a.Repository, a.Coordinates.FilePath())
 }
 
 func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
