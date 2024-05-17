@@ -214,22 +214,22 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 		update(a, file, hash, &metadata, ctx, fs)
 
 		// download the artifact into the temporary file system
-		e := func() (err error) {
+		e := func() error {
 			out, err := tempFs.Create(file)
 			if err != nil {
-				return
+				return err
 			}
 			defer out.Close()
 			reader, err := getReader(ctx, metadata.Bin, fs)
 			if err != nil {
-				return
+				return err
 			}
 			defer reader.Close()
 			if hash > 0 {
 				dreader := iotools.NewDigestReaderWithHash(hash, reader)
 				_, err = io.Copy(out, dreader)
 				if err != nil {
-					return
+					return err
 				}
 				sum := dreader.Digest().Encoded()
 				if metadata.Hash != sum {
@@ -237,9 +237,9 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 				}
 			} else {
 				_, err = io.Copy(out, reader)
-				return
+				return err
 			}
-			return
+			return err
 		}()
 		if e != nil {
 			return nil, e
