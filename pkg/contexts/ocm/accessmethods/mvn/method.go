@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path"
 	"sort"
 	"strings"
 
@@ -280,7 +281,7 @@ func filterByClassifier(fileMap map[string]crypto.Hash, classifier string) map[s
 
 func (a *AccessSpec) GavFiles(ctx accspeccpi.Context, fs ...vfs.FileSystem) (map[string]crypto.Hash, error) {
 	if strings.HasPrefix(a.Repository, "file://") {
-		dir := a.Repository[7:]
+		dir := path.Join(a.Repository[7:], a.GavPath())
 		return gavFilesFromDisk(utils.FileSystem(fs...), dir)
 	}
 	return a.gavOnlineFiles(ctx)
