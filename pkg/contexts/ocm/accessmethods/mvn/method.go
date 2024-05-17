@@ -28,6 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
@@ -278,9 +279,9 @@ func filterByClassifier(fileMap map[string]crypto.Hash, classifier string) map[s
 }
 
 func (a *AccessSpec) GavFiles(ctx accspeccpi.Context, fs ...vfs.FileSystem) (map[string]crypto.Hash, error) {
-	if strings.HasPrefix(a.Repository, "file://") && len(fs) > 0 {
+	if strings.HasPrefix(a.Repository, "file://") {
 		dir := a.Repository[7:]
-		return gavFilesFromDisk(fs[0], dir)
+		return gavFilesFromDisk(utils.FileSystem(fs...), dir)
 	}
 	return a.gavOnlineFiles(ctx)
 }
@@ -339,7 +340,7 @@ func filesAndHashes(fileList []string) map[string]crypto.Hash {
 	sort.Strings(fileList)
 
 	// Which hash files are available?
-	result := make(map[string]crypto.Hash)
+	result := make(map[string]crypto.Hash, len(fileList)/2)
 	for _, file := range fileList {
 		if IsResource(file) {
 			result[file] = bestAvailableHash(fileList, file)
