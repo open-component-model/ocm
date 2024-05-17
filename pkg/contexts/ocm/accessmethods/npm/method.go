@@ -170,7 +170,10 @@ func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...st
 	if err != nil {
 		return nil, err
 	}
-	npm.Authorize(req, ctx, a.Registry, a.Package)
+	err = npm.Authorize(req, ctx, a.Registry, a.Package)
+	if err != nil {
+		return nil, err
+	}
 	c := &http.Client{}
 	resp, err := c.Do(req)
 	if err != nil {

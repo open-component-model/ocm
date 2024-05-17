@@ -29,6 +29,7 @@ func Login(registry string, username string, password string, email string) (str
 	if err != nil {
 		return "", err
 	}
+	// PUT https://staging.repositories.cloud.sap/stage/repository/363001268081-20240426-12350868-423/-/user/org.couchdb.user:EF25JcIYOlXA4Ui
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, registry+"/-/user/org.couchdb.user:"+url.PathEscape(username), bytes.NewReader(marshal))
 	if err != nil {
 		return "", err
@@ -58,29 +59,31 @@ func Login(registry string, username string, password string, email string) (str
 // Either it's setup in the credentials or it will login to the registry and retrieve it.
 func BearerToken(ctx cpi.ContextProvider, repoUrl string, pkgName string) (string, error) {
 	// get credentials and TODO cache it
-	cred := identity.GetCredentials(ctx, repoUrl, pkgName)
-	if cred == nil {
+	credentials, err := identity.GetCredentials(ctx, repoUrl, pkgName)
+	if err != nil {
+		return "", err
+	}
+	if credentials == nil {
 		return "", fmt.Errorf("no credentials found for %s. Couldn't upload '%s'", repoUrl, pkgName)
 	}
 	log := logging.Context().Logger(identity.REALM)
 	log.Debug("found credentials")
 
 	// check if token exists, if not login and retrieve token
-	token := cred[identity.ATTR_TOKEN]
+	token := credentials.GetProperty(identity.ATTR_TOKEN)
 	if token != "" {
 		log.Debug("token found, skipping login")
 		return token, nil
 	}
 
 	// use user+pass+mail from credentials to login and retrieve bearer token
-	username := cred[identity.ATTR_USERNAME]
-	password := cred[identity.ATTR_PASSWORD]
-	email := cred[identity.ATTR_EMAIL]
+	username := credentials.GetProperty(identity.ATTR_USERNAME)
+	password := credentials.GetProperty(identity.ATTR_PASSWORD)
+	email := credentials.GetProperty(identity.ATTR_EMAIL)
 	if username == "" || password == "" || email == "" {
 		return "", fmt.Errorf("credentials for %s are invalid. Username, password or email missing! Couldn't upload '%s'", repoUrl, pkgName)
 	}
-	log = log.WithValues("user", username, "repo", repoUrl)
-	log.Debug("login")
+	log.Debug("login", "user", username, "repo", repoUrl)
 
 	// TODO: check different kinds of .npmrc content
 	return Login(repoUrl, username, password, email)
@@ -88,12 +91,12 @@ func BearerToken(ctx cpi.ContextProvider, repoUrl string, pkgName string) (strin
 
 // Authorize the given request with the bearer token for the given repository URL and package name.
 // If the token is empty (login failed or credentials not found), it will not be set.
-func Authorize(req *http.Request, ctx cpi.ContextProvider, repoUrl string, pkgName string) {
+func Authorize(req *http.Request, ctx cpi.ContextProvider, repoUrl string, pkgName string) error {
 	token, err := BearerToken(ctx, repoUrl, pkgName)
 	if err != nil {
-		log := logging.Context().Logger(identity.REALM)
-		log.Debug("Couldn't authorize", "error", err.Error(), "repo", repoUrl, "package", pkgName)
+		return err
 	} else if token != "" {
-		req.Header.Set("authorization", "Bearer "+token)
+		req.Header.Set("Authorization", "Bearer "+token)
 	}
+	return nil
 }

@@ -104,8 +104,8 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("authorization", "Bearer "+token)
-	req.Header.Set("content-type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
 
 	// send PUT request - upload tgz
 	client := http.Client{}
@@ -133,7 +133,7 @@ func packageExists(repoUrl string, pkg Package, token string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	req.Header.Set("authorization", "Bearer "+token)
+	req.Header.Set("Authorization", "Bearer "+token)
 	resp, err := client.Do(req)
 	if err != nil {
 		return false, err
