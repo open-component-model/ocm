@@ -123,8 +123,19 @@ func (f *fileinfo) Content() ([]byte, error) {
 }
 
 func (f *fileinfo) SubstituteByData(path string, value []byte) error {
+	var node interface{}
+	err := runtime.DefaultYAMLEncoding.Unmarshal(value, &node)
+	if err != nil {
+		return err
+	}
+	if f.json {
+		value, err = runtime.DefaultJSONEncoding.Marshal(node)
+	} else {
+		value, err = runtime.DefaultYAMLEncoding.Marshal(node)
+	}
+
 	m := &yaml.Node{}
-	err := yaml.Unmarshal(value, m)
+	err = yaml.Unmarshal(value, m)
 	if err != nil {
 		return err
 	}
