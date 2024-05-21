@@ -250,17 +250,17 @@ func (u *UnwindStack) Unwrap() error {
 
 func (p *consumerProviderRegistry) catchedMatch(ectx EvaluationContext, sub ConsumerProvider, pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (cs CredentialsSource, ci ConsumerIdentity) {
 	defer exception.CatchError(func(err error) {
-		fmt.Println(err)
+		log.Trace("caught unwind stack error: {{error}}", "error", err)
 		cs = nil
 		ci = cur
 	}, exception.ByPrototypes(&UnwindStack{}))
-	fmt.Printf("pattern: %s\ncontext: %s\nprovider: %s\n", pattern, ectx, sub)
+	log.Trace("pattern: {{pattern}}\ncontext: {{context}}\nprovider: {{provider}}",
+		"pattern", pattern, "context", ectx, "provider", sub)
 	ectx, useprov, _ := p.checkHandleProvider(ectx, sub, pattern)
 	if !useprov {
-		fmt.Println()
 		return nil, cur
 	}
-	fmt.Println("match\n")
+	log.Trace("attempt match with provider: {{provider}}", "provider", sub)
 	return sub.Match(ectx, pattern, cur, m)
 }
 
@@ -284,11 +284,13 @@ func (p *consumerProviderRegistry) Match(ectx EvaluationContext, pattern Consume
 	// BUT in case we have explicit credentials, then we should use those.
 	if credsrc == nil {
 		r := GetEvaluationContextFor[CredentialRecursion](ectx)
-		if len(r) == len(p.providers) {
+		// unwind the stack only makes sense when we are in a recursive call, thus we have at least one provider on the
+		// credential recursion stack
+		if len(r) > 0 && len(r) == len(p.providers) {
 			exception.Throw(&UnwindStack{fmt.Errorf("impossible credential recursion detected - unwind stack")})
 		}
 	}
-	fmt.Println("credsource return")
+	log.Trace("return credential source")
 	return credsrc, cur
 }
 
