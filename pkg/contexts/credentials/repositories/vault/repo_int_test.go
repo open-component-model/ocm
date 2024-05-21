@@ -306,7 +306,7 @@ var _ = Describe("vault config", func() {
 			Expect(c).To(YAMLEqual(data))
 		})
 
-		FIt("recursive authentication", func() {
+		It("recursive authentication", func() {
 			SetUpVaultAccess(ctx, DefaultContext, vaultClient, fmt.Sprintf(`
 path "secret/data/%s/*"
 {
@@ -388,6 +388,46 @@ path "secret/metadata/%s/*"
 			fmt.Println("***query credential:")
 			c := Must(DefaultContext.GetCredentialsForConsumer(consumerId))
 			Expect(c).To(YAMLEqual(data))
+		})
+
+		//D(irect):
+		//  - has general credentials matching parent path of P2
+		//  - has credentials for P1
+		//P1:
+		//  - has specialized credentials for P2
+		//P2:
+		//  - has credentials for C
+		//
+		//
+		//query C:
+		//- D:   -> nothing
+		//- P1: query P1
+		//    - D: -> found
+		//    - P1:   omit (recursion)
+		//    - P2: query P2
+		//        - D: -> found
+		//        - P1:   omit (recursion)
+		//        - P2:   omit (recursion)
+		//		  explore, whether an additional attempt with P1 BUT only with credentialless providers / direct creds
+		//		  would work as a general solution.
+		//        -> select D(P2)     WRONG        (a1)
+		//- P2: query P2
+		//    - D: -> found
+		//    - P1: query P1
+		//        - D: found
+		//        - P1: omit (recursion)
+		//        - P2: omit (recursion)
+		//        -> select D(P1)     CORRECT      (b)
+		//      -> found
+		//    - P2: omit (recursion)
+		//    -> select P1(P2)  CORRECT            (a2)
+		//  -> found
+		//-> select P2(C)
+		//
+		// The Problem here is, that the case a1 and case b are formally indistinguishable. While a2 and b lead to the
+		// correct result, we would fail in a1.
+		It("recursive authentication with overlapping credentials", func() {
+			//TODO
 		})
 	})
 })
