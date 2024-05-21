@@ -3,12 +3,12 @@ package internal
 import (
 	"context"
 	"fmt"
-	"github.com/mandelsoft/goutils/maputils"
-	"github.com/open-component-model/ocm/pkg/generics"
-	"golang.org/x/exp/maps"
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/maputils"
+	"golang.org/x/exp/maps"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
@@ -54,7 +54,7 @@ func GetEvaluationContextFor[T any](ectx EvaluationContext) T {
 	if ectx.data == nil {
 		return _nil
 	}
-	return generics.As[T](ectx.data[generics.TypeOf[T]()])
+	return generics.Cast[T](ectx.data[generics.TypeOf[T]()])
 }
 
 func SetEvaluationContextFor(ectx EvaluationContext, e any) EvaluationContext {
@@ -244,6 +244,7 @@ var emptyIdentity = ConsumerIdentity{}
 func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers ...IdentityMatcher) (CredentialsSource, error) {
 	return c.getCredentialsForConsumer(nil, identity, matchers...)
 }
+
 func (c *_context) getCredentialsForConsumer(ectx EvaluationContext, identity ConsumerIdentity, matchers ...IdentityMatcher) (CredentialsSource, error) {
 	err := c.Update()
 	if err != nil {

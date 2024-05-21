@@ -2,15 +2,15 @@ package internal
 
 import (
 	"fmt"
-	"github.com/mandelsoft/goutils/exception"
-	"github.com/mandelsoft/goutils/general"
-	"github.com/mandelsoft/goutils/sliceutils"
-	"github.com/mandelsoft/goutils/stringutils"
 	"slices"
 	"sort"
 	"sync"
 
+	"github.com/mandelsoft/goutils/exception"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/mandelsoft/goutils/stringutils"
 )
 
 type CredentialRecursion []ConsumerIdentity
@@ -225,16 +225,6 @@ func (p *consumerProviderRegistry) checkHandleProvider(ectx EvaluationContext, p
 			return ectx, false, true
 		}
 		r = r.Append(pr.GetConsumerId())
-		// If this is the case, we are in a situation where we exclude all providers (since they are all in the stack).
-		// The follow-up coding would then assume, that it should query the credential repository without any
-		// credentials, since none have been found.
-		// Essentially, this means, we have to return from the entire recursive call stack
-		//if len(r) >= len(p.providers) && r.Contains(pattern) {
-		//	return ectx, false, false
-		//}
-		// Some credential providers such as e.g. vault need credentials to be accessed themselves. When credentials
-		// are requested for these providers, the provider itself cannot provide its own credentials. Besides being
-		// an optimization, this primarily prevents deadlock and also a potential endless recursion.
 		ectx = SetEvaluationContextFor(ectx, r)
 	}
 	return ectx, true, true
