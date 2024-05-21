@@ -38,7 +38,7 @@ jobs:
       - name: Unit test
         run: |
           PATH=$PATH:$(go env GOPATH)/bin make build
-          PATH=$PATH:$(go env GOPATH)/bin make test
+          PATH=$PATH:$(go env GOPATH)/bin make test-all
 
   lint:
     name: Lint

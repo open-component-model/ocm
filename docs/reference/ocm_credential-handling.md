@@ -128,7 +128,7 @@ The following credential consumer types are used/supported:
       - <code>scheme</code>: (optional) URL scheme
       - <code>port</code>: (optional) server port
       - <code>namespace</code>: vault namespace
-      - <code>secretEngine</code>: secret engine
+      - <code>mountPath</code>: mount path
       - <code>pathprefix</code>: path prefix for secret
 
 
@@ -137,7 +137,6 @@ The following credential consumer types are used/supported:
       - <code>authmeth</code>: auth method
       - <code>token</code>: vault token
       - <code>roleid</code>: applrole role id
-      - <code>secretid</code>: applrole secret id
       - <code>secretid</code>: applrole secret id
 
     The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
@@ -315,7 +314,7 @@ The following types are currently available:
     - <code>scheme</code>: (optional) URL scheme
     - <code>port</code>: (optional) server port
     - <code>namespace</code>: vault namespace
-    - <code>secretEngine</code>: secret engine
+    - <code>mountPath</code>: mount path
     - <code>pathprefix</code>: path prefix for secret
 
 
@@ -324,7 +323,6 @@ The following types are currently available:
     - <code>authmeth</code>: auth method
     - <code>token</code>: vault token
     - <code>roleid</code>: applrole role id
-    - <code>secretid</code>: applrole secret id
     - <code>secretid</code>: applrole secret id
 
   The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
@@ -335,7 +333,7 @@ The following types are currently available:
     The repository specification supports the following fields:
       - <code>serverURL</code>: *string* (required): the URL of the vault instance
       - <code>namespace</code>: *string* (optional): the namespace used to evaluate secrets
-      - <code>secretsEngine</code>: *string* (optional): the secrets engine to use (default: secrets)
+      - <code>mountPath</code>: *string* (optional): the mount path to use (default: secrets)
       - <code>path</code>: *string* (optional): the path prefix used to lookup secrets
       - <code>secrets</code>: *[]string* (optional): list of secrets
       - <code>propagateConsumerIdentity</code>: *bool*(optional): evaluate metadata for consumer id propagation

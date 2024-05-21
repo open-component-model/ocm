@@ -1,3 +1,3 @@
-//go:generate mdref --headings --list docsrc .
+//go:generate mdref --headings docsrc .
 
 package tour

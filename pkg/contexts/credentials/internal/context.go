@@ -2,9 +2,13 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/maputils"
+	"golang.org/x/exp/maps"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
@@ -30,7 +34,36 @@ type ContextProvider interface {
 type ConsumerProvider interface {
 	Unregister(id ProviderIdentity)
 	Get(id ConsumerIdentity) (CredentialsSource, bool)
-	Match(id ConsumerIdentity, cur ConsumerIdentity, matcher IdentityMatcher) (CredentialsSource, ConsumerIdentity)
+	Match(ectx EvaluationContext, id ConsumerIdentity, cur ConsumerIdentity, matcher IdentityMatcher) (CredentialsSource, ConsumerIdentity)
+}
+
+type EvaluationContext *evaluationContext
+
+type evaluationContext struct {
+	data map[reflect.Type]interface{}
+}
+
+func (e evaluationContext) String() string {
+	return fmt.Sprintf("%v", maputils.Transform(e.data, func(k reflect.Type, v interface{}) (string, string) {
+		return k.Name(), fmt.Sprintf("%v", v)
+	}))
+}
+
+func GetEvaluationContextFor[T any](ectx EvaluationContext) T {
+	var _nil T
+	if ectx.data == nil {
+		return _nil
+	}
+	return generics.Cast[T](ectx.data[generics.TypeOf[T]()])
+}
+
+func SetEvaluationContextFor(ectx EvaluationContext, e any) EvaluationContext {
+	if ectx.data == nil {
+		ectx.data = map[reflect.Type]interface{}{}
+	}
+	n := &evaluationContext{maps.Clone(ectx.data)}
+	n.data[reflect.TypeOf(e)] = e
+	return n
 }
 
 type Context interface {
@@ -53,6 +86,7 @@ type Context interface {
 	UnregisterConsumerProvider(id ProviderIdentity)
 
 	GetCredentialsForConsumer(ConsumerIdentity, ...IdentityMatcher) (CredentialsSource, error)
+	getCredentialsForConsumer(EvaluationContext, ConsumerIdentity, ...IdentityMatcher) (CredentialsSource, error)
 	SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource)
 	SetCredentialsForConsumerWithProvider(pid ProviderIdentity, identity ConsumerIdentity, creds CredentialsSource)
 
@@ -208,17 +242,24 @@ func (c *_context) CredentialsForConfig(data []byte, unmarshaler runtime.Unmarsh
 var emptyIdentity = ConsumerIdentity{}
 
 func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers ...IdentityMatcher) (CredentialsSource, error) {
+	return c.getCredentialsForConsumer(nil, identity, matchers...)
+}
+
+func (c *_context) getCredentialsForConsumer(ectx EvaluationContext, identity ConsumerIdentity, matchers ...IdentityMatcher) (CredentialsSource, error) {
 	err := c.Update()
 	if err != nil {
 		return nil, err
 	}
 
+	if ectx == nil {
+		ectx = &evaluationContext{}
+	}
 	m := c.defaultMatcher(identity, matchers...)
 	var credsrc CredentialsSource
 	if m == nil {
 		credsrc, _ = c.consumerProviders.Get(identity)
 	} else {
-		credsrc, _ = c.consumerProviders.Match(identity, nil, m)
+		credsrc, _ = c.consumerProviders.Match(ectx, identity, nil, m)
 	}
 	if credsrc == nil {
 		credsrc, _ = c.consumerProviders.Get(emptyIdentity)
@@ -269,4 +310,13 @@ func (c *_context) RegisterConsumerProvider(id ProviderIdentity, provider Consum
 
 func (c *_context) UnregisterConsumerProvider(id ProviderIdentity) {
 	c.consumerProviders.Unregister(id)
+}
+
+///////////////////////////////////////
+
+func GetCredentialsForConsumer(ctx Context, ectx EvaluationContext, identity ConsumerIdentity, matchers ...IdentityMatcher) (CredentialsSource, error) {
+	if ectx == nil {
+		ectx = &evaluationContext{}
+	}
+	return ctx.getCredentialsForConsumer(ectx, identity, matchers...)
 }

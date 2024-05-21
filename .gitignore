@@ -19,3 +19,4 @@ bin/
 go.mod.bak
 dist/
 .cache_ggshield
+.DS_Store
