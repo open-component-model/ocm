@@ -45,12 +45,12 @@ ifneq ("v$(GO_BINDATA)",$(GO_BINDATA_VERSION))
 endif
 VAULT_VERSION := 1.16.2
 VAULT := $(shell ($(LOCALBIN)/vault --version 2>/dev/null || echo 0.0) | sed 's/.*Vault v\([0-9\.]*\).*/\1/')
-ifeq ($(VAULT), $(VAULT_VERSION))
+ifneq ($(VAULT), $(VAULT_VERSION))
 	deps += vault
 endif
 OCI_REGISTRY_VERSION := 3.0.0-alpha.1
 OCI_REGISTRY := $(shell (registry --version 2>/dev/null || echo 0.0) | sed 's/.* v\([0-9a-z\.\-]*\).*/\1/')
-ifeq ($(OCI_REGISTRY), $(OCI_REGISTRY_VERSION))
+ifneq ($(OCI_REGISTRY), $(OCI_REGISTRY_VERSION))
 	deps += oci-registry
 endif
 

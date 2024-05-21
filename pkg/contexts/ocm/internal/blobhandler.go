@@ -33,9 +33,9 @@ type StorageContext interface {
 	GetImplementationRepositoryType() ImplementationRepositoryType
 }
 
-// BlobHandler s the interface for a dedicated handling of storing blobs
+// BlobHandler is the interface for a dedicated handling of storing blobs
 // for the LocalBlob access method in a dedicated kind of repository.
-// with the possibility of access by an external distribution spec.
+// With the possibility of access by an external distribution spec
 // (besides of the blob storage as part of a component version).
 // The technical repository to use should be derivable from the chosen
 // component directory or passed together with the storage context.

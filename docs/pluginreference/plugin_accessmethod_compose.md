@@ -35,6 +35,9 @@ by the plugin name.
 The following predefined option types can be used:
 
 
+  - <code>accessClassifier</code>: [*string*] mvn classifier
+  - <code>accessExtension</code>: [*string*] mvn extension name
+  - <code>accessGroup</code>: [*string*] GroupID or namespace
   - <code>accessHostname</code>: [*string*] hostname used for access
   - <code>accessPackage</code>: [*string*] package or object name
   - <code>accessRegistry</code>: [*string*] registry base URL
