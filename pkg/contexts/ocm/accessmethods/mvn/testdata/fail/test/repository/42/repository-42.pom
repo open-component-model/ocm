@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>fail</groupId>
+	<artifactId>repository</artifactId>
+	<version>42</version>
+	<packaging>pom</packaging>
+	<name>ocm</name>
+	<description>test</description>
+	<organization>
+		<name>SAP SE</name>
+		<url>https://www.sap.com</url>
+	</organization>
+</project>

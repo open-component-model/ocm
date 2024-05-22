@@ -18,6 +18,7 @@ ocm controller uninstall controller
   -h, --help                                  help for uninstall
   -n, --namespace string                      the namespace into which the controller is installed (default "ocm-system")
   -a, --release-api-url string                the base url to the ocm-controller's API release page (default "https://api.github.com/repos/open-component-model/ocm-controller/releases")
+  -l, --silent                                don't fail on error
   -t, --timeout duration                      maximum time to wait for deployment to be ready (default 1m0s)
   -p, --uninstall-prerequisites               uninstall prerequisites required by ocm-controller
   -v, --version string                        the version of the controller to install (default "latest")

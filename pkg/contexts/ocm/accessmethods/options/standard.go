@@ -18,6 +18,9 @@ var ReferenceOption = RegisterOption(NewStringOptionType("reference", "reference
 // PackageOption.
 var PackageOption = RegisterOption(NewStringOptionType("accessPackage", "package or object name"))
 
+// GroupOption.
+var GroupOption = RegisterOption(NewStringOptionType("accessGroup", "GroupID or namespace"))
+
 // RepositoryOption.
 var RepositoryOption = RegisterOption(NewStringOptionType("accessRepository", "repository URL"))
 
@@ -53,7 +56,11 @@ var HTTPBodyOption = RegisterOption(NewStringOptionType("body", "body of a http 
 
 var HTTPRedirectOption = RegisterOption(NewBoolOptionType("noredirect", "http redirect behavior"))
 
-////////////////////////////////////////////////////////////////////////////////
-
 // CommentOption.
 var CommentOption = RegisterOption(NewStringOptionType("comment", "comment field value"))
+
+// ClassifierOption the optional classifier of a maven resource.
+var ClassifierOption = RegisterOption(NewStringOptionType("accessClassifier", "mvn classifier"))
+
+// ExtensionOption the optional extension of a maven resource.
+var ExtensionOption = RegisterOption(NewStringOptionType("accessExtension", "mvn extension name"))
