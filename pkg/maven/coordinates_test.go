@@ -1,14 +1,20 @@
-package mvn
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+package maven_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	me "github.com/open-component-model/ocm/pkg/maven"
 )
 
 var _ = Describe("Maven Test Environment", func() {
 
 	It("GAV, GroupPath, FilePath", func() {
-		artifact := &Coordinates{
+		artifact := &me.Coordinates{
 			GroupId:    "ocm.software",
 			ArtifactId: "hello-ocm",
 			Version:    "0.0.1",
@@ -20,7 +26,7 @@ var _ = Describe("Maven Test Environment", func() {
 	})
 
 	It("SetClassifierExtensionBy", func() {
-		artifact := &Coordinates{
+		artifact := &me.Coordinates{
 			GroupId:    "ocm.software",
 			ArtifactId: "hello-ocm",
 			Version:    "0.0.1",
@@ -33,16 +39,16 @@ var _ = Describe("Maven Test Environment", func() {
 		Expect(artifact.Classifier).To(Equal("tests"))
 		Expect(artifact.Extension).To(Equal("jar"))
 
-		artifact.ArtifactId = "apache-maven"
+		artifact.ArtifactId = "apache-me"
 		artifact.Version = "3.9.6"
-		artifact.SetClassifierExtensionBy("apache-maven-3.9.6-bin.tar.gz")
+		artifact.SetClassifierExtensionBy("apache-me-3.9.6-bin.tar.gz")
 		Expect(artifact.Classifier).To(Equal("bin"))
 		Expect(artifact.Extension).To(Equal("tar.gz"))
 	})
 
 	It("parse GAV", func() {
 		gav := "org.apache.commons:commons-compress:1.26.1:cyclonedx:xml"
-		artifact, err := Parse(gav)
+		artifact, err := me.Parse(gav)
 		Expect(err).To(BeNil())
 		Expect(artifact.String()).To(Equal(gav))
 		Expect(artifact.GroupId).To(Equal("org.apache.commons"))

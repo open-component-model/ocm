@@ -62,6 +62,13 @@ type Attribute struct {
 	Filesystem vfs.FileSystem
 }
 
+func New(path string, fss ...vfs.FileSystem) *Attribute {
+	return &Attribute{
+		Path:       path,
+		Filesystem: utils.FileSystem(fss...),
+	}
+}
+
 func (a *Attribute) CreateTempFile(pat string) (vfs.File, error) {
 	err := a.Filesystem.MkdirAll(a.Path, 0o777)
 	if err != nil {
@@ -73,8 +80,15 @@ func (a *Attribute) CreateTempFile(pat string) (vfs.File, error) {
 ////////////////////////////////////////////////////////////////////////////////
 
 func Get(ctx datacontext.Context) *Attribute {
-	v := ctx.GetAttributes().GetAttribute(ATTR_KEY)
-	fs := utils.FileSystem(vfsattr.Get(ctx))
+	var v interface{}
+	var fs vfs.FileSystem
+
+	if ctx != nil {
+		v = ctx.GetAttributes().GetAttribute(ATTR_KEY)
+		fs = utils.FileSystem(vfsattr.Get(ctx))
+	}
+	fs = utils.FileSystem(fs)
+
 	if v != nil {
 		a := v.(*Attribute)
 		if a.Filesystem == nil {

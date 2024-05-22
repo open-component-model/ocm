@@ -1,7 +1,12 @@
-package mvn
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+package maven
 
 import (
 	"fmt"
+	"github.com/mandelsoft/goutils/generics"
 	"mime"
 	"path"
 	"path/filepath"
@@ -20,9 +25,24 @@ type Coordinates struct {
 	// Version of the Maven (mvn) artifact.
 	Version string `json:"version"`
 	// Classifier of the Maven (mvn) artifact.
-	Classifier string `json:"classifier"`
+	Classifier string `json:"classifier"` //TODO: make it a pointer to differentiate between empty and none
 	// Extension of the Maven (mvn) artifact.
 	Extension string `json:"extension"`
+}
+
+func NewCoordinates(groupId, artifactId, version string, other ...string) *Coordinates {
+	c := &Coordinates{
+		GroupId:    groupId,
+		ArtifactId: artifactId,
+		Version:    version,
+	}
+	if len(other) > 0 {
+		c.Classifier = other[0]
+	}
+	if len(other) > 1 {
+		c.Extension = other[1]
+	}
+	return c
 }
 
 // GAV returns the GAV coordinates of the Maven Coordinates.
@@ -38,6 +58,10 @@ func (c *Coordinates) String() string {
 // GavPath returns the Maven repository path.
 func (c *Coordinates) GavPath() string {
 	return c.GroupPath() + "/" + c.ArtifactId + "/" + c.Version
+}
+
+func (c *Coordinates) GavUrl(repoUrl string) string {
+	return repoUrl + "/" + c.GavPath()
 }
 
 // FilePath returns the Maven Coordinates's GAV-name with classifier and extension.
@@ -104,16 +128,10 @@ func (c *Coordinates) MimeType() string {
 
 // Copy creates a new Coordinates with the same values.
 func (c *Coordinates) Copy() *Coordinates {
-	return &Coordinates{
-		GroupId:    c.GroupId,
-		ArtifactId: c.ArtifactId,
-		Version:    c.Version,
-		Classifier: c.Classifier,
-		Extension:  c.Extension,
-	}
+	return generics.Pointer(*c)
 }
 
-// Parse creates an Coordinates from it's serialized form (see Coordinates.String).
+// Parse creates a Coordinates from it's serialized form (see Coordinates.String).
 func Parse(serializedArtifact string) (*Coordinates, error) {
 	parts := strings.Split(serializedArtifact, ":")
 	if len(parts) < 3 {

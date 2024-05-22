@@ -321,12 +321,29 @@ func ForTemporaryFile(mime string, temp vfs.File, fss ...vfs.FileSystem) BlobAcc
 	})
 }
 
+func ForTemporaryFileWithMeta(mime string, digest digest.Digest, size int64, temp vfs.File, fss ...vfs.FileSystem) BlobAccess {
+	return bpi.NewBlobAccessForBase(bpi.BaseAccessForDataAccessAndMeta(mime, &temporaryFileBlob{
+		_blobAccess: ForFile(mime, temp.Name(), fss...),
+		filesystem:  utils.FileSystem(fss...),
+		path:        temp.Name(),
+		file:        temp,
+	}, digest, size))
+}
+
 func ForTemporaryFilePath(mime string, temp string, fss ...vfs.FileSystem) BlobAccess {
 	return bpi.NewBlobAccessForBase(&temporaryFileBlob{
 		_blobAccess: ForFile(mime, temp, fss...),
 		filesystem:  utils.FileSystem(fss...),
 		path:        temp,
 	})
+}
+
+func ForTemporaryFilePathWithMeta(mime string, digest digest.Digest, size int64, temp string, fss ...vfs.FileSystem) BlobAccess {
+	return bpi.NewBlobAccessForBase(bpi.BaseAccessForDataAccessAndMeta(mime, &temporaryFileBlob{
+		_blobAccess: ForFile(mime, temp, fss...),
+		filesystem:  utils.FileSystem(fss...),
+		path:        temp,
+	}, digest, size))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

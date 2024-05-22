@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto"
 	"fmt"
+	"github.com/open-component-model/ocm/pkg/maven"
 	"io"
 	"net/http"
 	"path"
@@ -22,7 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/mvn/identity"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/maven/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/iotools"
@@ -51,7 +52,7 @@ type AccessSpec struct {
 	// Repository is the base URL of the Maven (mvn) repository.
 	Repository string `json:"repository"`
 
-	Coordinates `json:",inline"`
+	maven.Coordinates `json:",inline"`
 }
 
 // Option defines the interface function "ApplyTo()".
@@ -66,7 +67,7 @@ func New(repository, groupId, artifactId, version string, options ...Option) *Ac
 	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Repository:          repository,
-		Coordinates: Coordinates{
+		Coordinates: maven.Coordinates{
 			GroupId:    groupId,
 			ArtifactId: artifactId,
 			Version:    version,
@@ -143,7 +144,7 @@ func (a *AccessSpec) ArtifactUrl() string {
 	return a.Url(a.Repository)
 }
 
-func (a *AccessSpec) NewArtifact() *Coordinates {
+func (a *AccessSpec) GetCoordinates() *maven.Coordinates {
 	return a.Coordinates.Copy()
 }
 
@@ -155,7 +156,7 @@ type meta struct {
 }
 
 func update(a *AccessSpec, file string, hash crypto.Hash, metadata *meta, ctx accspeccpi.Context, fs vfs.FileSystem) error {
-	artifact := a.NewArtifact()
+	artifact := a.GetCoordinates()
 	err := artifact.SetClassifierExtensionBy(file)
 	if err != nil {
 		return err
@@ -248,7 +249,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 	}
 
 	// pack all downloaded files into a tar.gz file
-	tgz, err := vfs.TempFile(fs, "", Type+"-"+a.NewArtifact().FileNamePrefix()+"-*.tar.gz")
+	tgz, err := vfs.TempFile(fs, "", Type+"-"+a.GetCoordinates().FileNamePrefix()+"-*.tar.gz")
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +344,7 @@ func filesAndHashes(fileList []string) map[string]crypto.Hash {
 	// Which hash files are available?
 	result := make(map[string]crypto.Hash, len(fileList)/2)
 	for _, file := range fileList {
-		if IsResource(file) {
+		if maven.IsResource(file) {
 			result[file] = bestAvailableHash(fileList, file)
 			log.Debug("found", "file", file)
 		}
@@ -365,8 +366,8 @@ func bestAvailableHash(list []string, filename string) crypto.Hash {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// getStringData reads all data from the given URL and returns it as a string.
 func getStringData(ctx accspeccpi.Context, url string, fs vfs.FileSystem) (string, error) {
+	// getStringData reads all data from the given URL and returns it as a string.
 	r, err := getReader(ctx, url, fs)
 	if err != nil {
 		return "", err

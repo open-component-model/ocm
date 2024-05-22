@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"encoding/json"
 	"fmt"
+	"github.com/open-component-model/ocm/pkg/maven"
 	"io"
 	"net/http"
 	"strings"
@@ -12,7 +13,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/mvn/identity"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/maven/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/mvn"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
@@ -56,7 +57,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	// setup logger
 	log := log.WithValues("repository", b.spec.Url)
 	// identify artifact
-	artifact, err := mvn.Parse(hint)
+	artifact, err := maven.Parse(hint)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +114,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 }
 
 // deploy an artifact to the specified destination. See https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact
-func deploy(artifact *mvn.Coordinates, url string, reader io.ReadCloser, ctx accspeccpi.Context, hashes *iotools.HashReader) (err error) {
+func deploy(artifact *maven.Coordinates, url string, reader io.ReadCloser, ctx accspeccpi.Context, hashes *iotools.HashReader) (err error) {
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, artifact.Url(url), reader)
 	if err != nil {
 		return

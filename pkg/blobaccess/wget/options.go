@@ -64,6 +64,9 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.LoggingContext != nil {
 		opts.LoggingContext = o.LoggingContext
 	}
+	if o.Credentials != nil {
+		opts.Credentials = o.Credentials
+	}
 	if o.Header != nil {
 		opts.Header = o.Header
 	}
