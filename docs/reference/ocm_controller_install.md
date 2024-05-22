@@ -19,6 +19,7 @@ ocm controller install controller {--version v0.0.1}
   -i, --install-prerequisites                 install prerequisites required by ocm-controller (default true)
   -n, --namespace string                      the namespace into which the controller is installed (default "ocm-system")
   -a, --release-api-url string                the base url to the ocm-controller's API release page (default "https://api.github.com/repos/open-component-model/ocm-controller/releases")
+  -l, --silent                                don't fail on error
   -s, --skip-pre-flight-check                 skip the pre-flight check for clusters
   -t, --timeout duration                      maximum time to wait for deployment to be ready (default 1m0s)
   -v, --version string                        the version of the controller to install (default "latest")

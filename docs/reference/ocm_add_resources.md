@@ -30,6 +30,9 @@ resources, resource, res, r
 
 ```
       --access YAML                         blob access specification (YAML)
+      --accessClassifier string             mvn classifier
+      --accessExtension string              mvn extension name
+      --accessGroup string                  GroupID or namespace
       --accessHostname string               hostname used for access
       --accessPackage string                package or object name
       --accessRegistry string               registry base URL
@@ -689,6 +692,41 @@ shown below.
       a second external access method specification.
 
   Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
+
+- Access type <code>mvn</code>
+
+  This method implements the access of a Maven (mvn) artifact in a Maven repository.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The type specific specification fields are:
+
+    - **<code>repository</code>** *string*
+
+      Base URL of the Maven (mvn) repository
+
+    - **<code>groupId</code>** *string*
+
+      The groupId of the Maven (mvn) artifact
+
+    - **<code>artifactId</code>** *string*
+
+      The artifactId of the Maven (mvn) artifact
+
+    - **<code>version</code>** *string*
+
+      The version name of the Maven (mvn) artifact
+
+    - **<code>classifier</code>** *string*
+
+      The optional classifier of the Maven (mvn) artifact
+
+    - **<code>extension</code>** *string*
+
+      The optional extension of the Maven (mvn) artifact
+
+  Options used to configure fields: <code>--accessClassifier</code>, <code>--accessExtension</code>, <code>--accessGroup</code>, <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
 
 - Access type <code>none</code>
 

@@ -38,10 +38,8 @@ func ParseFile(file string, fss ...vfs.FileSystem) (SubstitutionTarget, error) {
 	return s, nil
 }
 
-var yqLibLogInit sync.Once
-
 func Parse(data []byte) (SubstitutionTarget, error) {
-	yqLibLogInit.Do(func() {
+	sync.OnceFunc(func() {
 		var lvl glog.Level
 		switch ocmlog.Context().GetDefaultLevel() {
 		case mlog.None:
@@ -58,7 +56,7 @@ func Parse(data []byte) (SubstitutionTarget, error) {
 			lvl = glog.DEBUG
 		}
 		glog.SetLevel(lvl, "yq-lib")
-	})
+	})()
 
 	var (
 		err error
