@@ -14,7 +14,7 @@ import (
 
 const (
 	// CONSUMER_TYPE is the npm repository type.
-	CONSUMER_TYPE = "Registry.npmjs.com"
+	CONSUMER_TYPE = "NpmRegistry"
 
 	// ATTR_USERNAME is the username attribute. Required for login at any npm registry.
 	ATTR_USERNAME = cpi.ATTR_USERNAME
@@ -27,7 +27,7 @@ const (
 )
 
 // Logging Realm.
-var REALM = logging.DefineSubRealm("NPM registry", "NPM")
+var REALM = logging.DefineSubRealm("NPM registry", "npm")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{

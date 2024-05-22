@@ -60,8 +60,13 @@ force-test:
 
 .PHONY: test
 test:
-	@echo "> Test"
+	@echo "> Run Unit Tests"
 	@go test  ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
+
+.PHONY: test-all
+test-all: install-requirements
+	@echo "> Run All Tests"
+	@go test --tags=integration ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
 
 .PHONY: generate
 generate:

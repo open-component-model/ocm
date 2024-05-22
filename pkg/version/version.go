@@ -45,6 +45,16 @@ func (info Info) String() string {
 	return info.GitVersion
 }
 
+// String returns info as a short semantic version string (0.8.15).
+func (info Info) SemVer() string {
+	return info.Major + "." + info.Minor + "." + info.Patch
+}
+
+// String returns current Release version.
+func Current() string {
+	return Get().SemVer()
+}
+
 // GetInterface returns the overall codebase version. It's for detecting
 // what code a binary was built from.
 // These variables typically come from -ldflags settings and in

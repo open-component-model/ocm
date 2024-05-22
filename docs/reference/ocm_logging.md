@@ -18,7 +18,6 @@ The following *tags* are used by the command line tool:
 
 The following *realms* are used by the command line tool:
   - <code>ocm</code>: general realm used for the ocm go library.
-  - <code>ocm/NPM</code>: NPM registry
   - <code>ocm/accessmethod/ociartifact</code>: access method ociArtifact
   - <code>ocm/accessmethod/wget</code>: access method for wget
   - <code>ocm/blobaccess/wget</code>: blob access for wget
@@ -28,6 +27,8 @@ The following *realms* are used by the command line tool:
   - <code>ocm/credentials/dockerconfig</code>: docker config handling as credential repository
   - <code>ocm/credentials/vault</code>: HashiCorp Vault Access
   - <code>ocm/downloader</code>: Downloaders
+  - <code>ocm/mvn</code>: Maven repository
+  - <code>ocm/npm</code>: NPM registry
   - <code>ocm/oci/mapping</code>: OCM to OCI Registry Mapping
   - <code>ocm/oci/ocireg</code>: OCI repository handling
   - <code>ocm/plugins</code>: OCM plugin handling
