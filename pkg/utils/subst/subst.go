@@ -133,7 +133,9 @@ func (f *fileinfo) SubstituteByData(path string, value []byte) error {
 	} else {
 		value, err = runtime.DefaultYAMLEncoding.Marshal(node)
 	}
-
+	if err != nil {
+		return err
+	}
 	m := &yaml.Node{}
 	err = yaml.Unmarshal(value, m)
 	if err != nil {
