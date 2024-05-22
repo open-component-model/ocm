@@ -14,16 +14,19 @@ const (
 	// HELM_CHART describes a helm chart, either stored as OCI artifact or as tar
 	// blob (tar media type).
 	HELM_CHART = "helmChart"
-	// NPM_PACKAGE describes an NPM package.
+	// NPM_PACKAGE describes a Node.js (npm) package.
 	NPM_PACKAGE = "npmPackage"
+	// MVN_ARTIFACT describes a Maven artifact (jar).
+	MVN_ARTIFACT = "mvnArtifact"
 	// BLUEPRINT describes a Gardener Landscaper blueprint which is an artifact used in its installations describing
 	// how to deploy a software component.
 	BLUEPRINT        = "landscaper.gardener.cloud/blueprint"
 	BLUEPRINT_LEGACY = "blueprint"
 	// BLOB describes any anonymous untyped blob data.
 	BLOB = "blob"
+	// DIRECTORY_TREE describes a directory structure.
+	DIRECTORY_TREE = "directoryTree"
 	// FILESYSTEM describes a directory structure stored as archive (tar, tgz).
-	DIRECTORY_TREE    = "directoryTree"
 	FILESYSTEM        = DIRECTORY_TREE
 	FILESYSTEM_LEGACY = "filesystem"
 	// EXECUTABLE describes an OS executable.

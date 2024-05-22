@@ -11,7 +11,7 @@ type Option = optionutils.Option[*Options]
 
 type Options struct {
 	Namespace                string   `json:"namespace,omitempty"`
-	SecretsEngine            string   `json:"secretsEngine,omitempty"`
+	MountPath                string   `json:"mountPath,omitempty"`
 	Path                     string   `json:"path,omitempty"`
 	Secrets                  []string `json:"secrets,omitempty"`
 	PropgateConsumerIdentity bool     `json:"propagateConsumerIdentity,omitempty"`
@@ -23,8 +23,8 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.Namespace != "" {
 		opts.Namespace = o.Namespace
 	}
-	if o.SecretsEngine != "" {
-		opts.SecretsEngine = o.SecretsEngine
+	if o.MountPath != "" {
+		opts.MountPath = o.MountPath
 	}
 	if o.Path != "" {
 		opts.Path = o.Path
@@ -49,14 +49,14 @@ func WithNamespace(s string) Option {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type se string
+type m string
 
-func (o se) ApplyTo(opts *Options) {
-	opts.SecretsEngine = string(o)
+func (o m) ApplyTo(opts *Options) {
+	opts.MountPath = string(o)
 }
 
-func WithSecretsEngine(s string) Option {
-	return se(s)
+func WithMountPath(s string) Option {
+	return m(s)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

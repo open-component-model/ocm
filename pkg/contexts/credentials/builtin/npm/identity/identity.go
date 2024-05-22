@@ -24,7 +24,7 @@ const (
 )
 
 // Logging Realm.
-var REALM = logging.DefineSubRealm("NPM registry", "NPM")
+var REALM = logging.DefineSubRealm("NPM registry", "npm")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{

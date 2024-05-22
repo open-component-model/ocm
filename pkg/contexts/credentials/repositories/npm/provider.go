@@ -15,7 +15,7 @@ var _ cpi.ConsumerProvider = (*ConsumerProvider)(nil)
 func (p *ConsumerProvider) Unregister(_ cpi.ProviderIdentity) {
 }
 
-func (p *ConsumerProvider) Match(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
+func (p *ConsumerProvider) Match(ectx cpi.EvaluationContext, req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
 	return p.get(req, cur, m)
 }
 

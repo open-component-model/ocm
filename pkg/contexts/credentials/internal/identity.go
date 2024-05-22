@@ -103,6 +103,10 @@ func NewConsumerIdentity(typ string, attrs ...string) ConsumerIdentity {
 	return r
 }
 
+func ConsumerIdentityEqual(a, b ConsumerIdentity) bool {
+	return a.Equals(b)
+}
+
 // IsSet checks whether an identity is given.
 func (i ConsumerIdentity) IsSet() bool {
 	return len(i) != 0

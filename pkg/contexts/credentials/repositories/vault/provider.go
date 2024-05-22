@@ -3,6 +3,7 @@ package vault
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"path"
 	"strings"
 	"sync"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
 )
 
@@ -29,17 +31,31 @@ type mapping struct {
 	Name string
 }
 
-type ConsumerProvider struct {
-	lock        sync.Mutex
-	credentials map[string]cpi.DirectCredentials
-	repository  *Repository
+type credentialCache struct {
 	creds       cpi.CredentialsSource
+	credentials map[string]cpi.DirectCredentials
 	consumer    []*mapping
+}
+
+func newCredentialCache(creds cpi.CredentialsSource) *credentialCache {
+	return &credentialCache{
+		creds:       creds,
+		credentials: map[string]cpi.DirectCredentials{},
+	}
+}
+
+type ConsumerProvider struct {
+	lock       sync.Mutex
+	repository *Repository
+	cache      *credentialCache
 
 	updated bool
 }
 
-var _ cpi.ConsumerProvider = (*ConsumerProvider)(nil)
+var (
+	_ cpi.ConsumerProvider         = (*ConsumerProvider)(nil)
+	_ cpi.ConsumerIdentityProvider = (*ConsumerProvider)(nil)
+)
 
 func NewConsumerProvider(repo *Repository) (*ConsumerProvider, error) {
 	src, err := repo.ctx.GetCredentialsForConsumer(repo.id)
@@ -47,25 +63,32 @@ func NewConsumerProvider(repo *Repository) (*ConsumerProvider, error) {
 		return nil, err
 	}
 	return &ConsumerProvider{
-		creds:       src,
-		repository:  repo,
-		credentials: map[string]cpi.DirectCredentials{},
+		cache:      newCredentialCache(src),
+		repository: repo,
 	}, nil
 }
 
-func (p *ConsumerProvider) update() error {
-	var err error
+func (p *ConsumerProvider) String() string {
+	return p.repository.id.String()
+}
 
+func (p *ConsumerProvider) GetConsumerId(uctx ...internal.UsageContext) internal.ConsumerIdentity {
+	return p.repository.GetConsumerId()
+}
+
+func (p *ConsumerProvider) GetIdentityMatcher() string {
+	return p.repository.GetIdentityMatcher()
+}
+
+func (p *ConsumerProvider) update(ectx cpi.EvaluationContext) error {
 	if p.updated {
 		return nil
 	}
-	p.updated = true
-
-	p.creds, err = p.repository.ctx.GetCredentialsForConsumer(p.repository.id, identity.IdentityMatcher)
+	credsrc, err := cpi.GetCredentialsForConsumer(p.repository.ctx, ectx, p.repository.id, identity.IdentityMatcher)
 	if err != nil {
 		return err
 	}
-	creds, err := p.creds.Credentials(p.repository.ctx)
+	creds, err := credsrc.Credentials(p.repository.ctx)
 	if err != nil {
 		return err
 	}
@@ -73,9 +96,6 @@ func (p *ConsumerProvider) update() error {
 	if err != nil {
 		return err
 	}
-
-	p.credentials = map[string]cpi.DirectCredentials{}
-	p.consumer = nil
 
 	ctx := context.Background()
 
@@ -100,12 +120,15 @@ func (p *ConsumerProvider) update() error {
 		return err
 	}
 
+	cache := newCredentialCache(credsrc)
+
 	// TODO: support for pure path based access for other secret engine types
 	secrets := slices.Clone(p.repository.spec.Secrets)
 	if len(secrets) == 0 {
 		s, err := client.Secrets.KvV2List(ctx, p.repository.spec.Path,
-			vault.WithMountPath(p.repository.spec.SecretsEngine))
+			vault.WithMountPath(p.repository.spec.MountPath))
 		if err != nil {
+			p.error(err, "error listing secrets", "")
 			return err
 		}
 		for _, k := range s.Data.Keys {
@@ -125,16 +148,18 @@ func (p *ConsumerProvider) update() error {
 				}
 			}
 			if len(id) > 0 {
-				p.consumer = append(p.consumer, &mapping{
+				cache.consumer = append(cache.consumer, &mapping{
 					Id:   cpi.ConsumerIdentity(id),
 					Name: n,
 				})
 			}
 			if len(creds) > 0 {
-				p.credentials[n] = cpi.DirectCredentials(creds)
+				cache.credentials[n] = cpi.DirectCredentials(creds)
 			}
 		}
 	}
+	p.cache = cache
+	p.updated = true
 	return nil
 }
 
@@ -159,10 +184,15 @@ func (p *ConsumerProvider) error(err error, msg string, secret string, keypairs 
 	if err == nil {
 		return
 	}
-	log.Error(msg, append(keypairs,
+	f := log.Info
+	var v *vault.ResponseError
+	if errors.As(err, &v) && v.StatusCode != http.StatusNotFound {
+		f = log.Error
+	}
+	f(msg, append(keypairs,
 		"server", p.repository.spec.ServerURL,
 		"namespace", p.repository.spec.Namespace,
-		"engine", p.repository.spec.SecretsEngine,
+		"engine", p.repository.spec.MountPath,
 		"path", path.Join(p.repository.spec.Path, secret),
 		"error", err.Error(),
 	)...,
@@ -174,7 +204,7 @@ func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secre
 
 	secret = path.Join(p.repository.spec.Path, secret)
 	s, err := client.Secrets.KvV2Read(ctx, secret,
-		vault.WithMountPath(p.repository.spec.SecretsEngine))
+		vault.WithMountPath(p.repository.spec.MountPath))
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -226,16 +256,16 @@ func getProps(data map[string]interface{}) common.Properties {
 func (p *ConsumerProvider) Unregister(id cpi.ProviderIdentity) {
 }
 
-func (p *ConsumerProvider) Match(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
-	return p.get(req, cur, m)
+func (p *ConsumerProvider) Match(ectx cpi.EvaluationContext, req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
+	return p.get(ectx, req, cur, m)
 }
 
 func (p *ConsumerProvider) Get(req cpi.ConsumerIdentity) (cpi.CredentialsSource, bool) {
-	creds, _ := p.get(req, nil, cpi.CompleteMatch)
+	creds, _ := p.get(nil, req, nil, cpi.CompleteMatch)
 	return creds, creds != nil
 }
 
-func (p *ConsumerProvider) get(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
+func (p *ConsumerProvider) get(ectx cpi.EvaluationContext, req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
 	if req.Equals(p.repository.id) {
 		return nil, cur
 	}
@@ -243,13 +273,17 @@ func (p *ConsumerProvider) get(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentit
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	p.update()
+	err := p.update(ectx)
+	if err != nil {
+		log.Info("error accessing credentials provider", "error", err)
+	}
+
 	var creds cpi.CredentialsSource
 
-	for _, a := range p.consumer {
+	for _, a := range p.cache.consumer {
 		if m(req, cur, a.Id) {
 			cur = a.Id
-			creds = p.credentials[a.Name]
+			creds = p.cache.credentials[a.Name]
 		}
 	}
 	return creds, cur
@@ -262,11 +296,11 @@ func (c *ConsumerProvider) ExistsCredentials(name string) (bool, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	err := c.update()
+	err := c.update(nil)
 	if err != nil {
 		return false, err
 	}
-	_, ok := c.credentials[name]
+	_, ok := c.cache.credentials[name]
 	return ok, nil
 }
 
@@ -274,11 +308,11 @@ func (c *ConsumerProvider) LookupCredentials(name string) (cpi.Credentials, erro
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	err := c.update()
+	err := c.update(nil)
 	if err != nil {
 		return nil, err
 	}
-	src, ok := c.credentials[name]
+	src, ok := c.cache.credentials[name]
 	if ok {
 		return src, nil
 	}

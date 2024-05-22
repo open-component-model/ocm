@@ -38,10 +38,8 @@ func ParseFile(file string, fss ...vfs.FileSystem) (SubstitutionTarget, error) {
 	return s, nil
 }
 
-var yqLibLogInit sync.Once
-
 func Parse(data []byte) (SubstitutionTarget, error) {
-	yqLibLogInit.Do(func() {
+	sync.OnceFunc(func() {
 		var lvl glog.Level
 		switch ocmlog.Context().GetDefaultLevel() {
 		case mlog.None:
@@ -58,7 +56,7 @@ func Parse(data []byte) (SubstitutionTarget, error) {
 			lvl = glog.DEBUG
 		}
 		glog.SetLevel(lvl, "yq-lib")
-	})
+	})()
 
 	var (
 		err error
@@ -123,8 +121,21 @@ func (f *fileinfo) Content() ([]byte, error) {
 }
 
 func (f *fileinfo) SubstituteByData(path string, value []byte) error {
+	var node interface{}
+	err := runtime.DefaultYAMLEncoding.Unmarshal(value, &node)
+	if err != nil {
+		return err
+	}
+	if f.json {
+		value, err = runtime.DefaultJSONEncoding.Marshal(node)
+	} else {
+		value, err = runtime.DefaultYAMLEncoding.Marshal(node)
+	}
+	if err != nil {
+		return err
+	}
 	m := &yaml.Node{}
-	err := yaml.Unmarshal(value, m)
+	err = yaml.Unmarshal(value, m)
 	if err != nil {
 		return err
 	}

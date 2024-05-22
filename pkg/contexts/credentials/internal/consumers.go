@@ -1,13 +1,33 @@
 package internal
 
 import (
+	"fmt"
+	"slices"
 	"sort"
 	"sync"
 
+	"github.com/mandelsoft/goutils/exception"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/mandelsoft/goutils/stringutils"
 )
 
-// UsageContext descibes a dediacetd type specific
+type CredentialRecursion []ConsumerIdentity
+
+func (c CredentialRecursion) String() string {
+	return stringutils.Join(c)
+}
+
+func (c CredentialRecursion) Contains(identity ConsumerIdentity) bool {
+	return slices.ContainsFunc(c, general.ContainsFuncFor(identity))
+}
+
+func (c CredentialRecursion) Append(identity ConsumerIdentity) CredentialRecursion {
+	return sliceutils.CopyAppendUniqueFunc(c, general.EqualsFuncFor[ConsumerIdentity](), identity)
+}
+
+// UsageContext describes a dedicated type specific
 // sub usage kinds for an object requiring credentials.
 // For example, for an object providing a hierarchical
 // namespace this might be a namespace prefix for
@@ -73,7 +93,7 @@ func (c *_consumers) Get(id ConsumerIdentity) (CredentialsSource, bool) {
 
 // Match matches a given request (pattern) against configured
 // identities.
-func (c *_consumers) Match(pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
+func (c *_consumers) Match(ectx EvaluationContext, pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
 	var found *_consumer
 	for _, s := range c.data {
 		if m(pattern, cur, s.identity) {
@@ -195,18 +215,72 @@ func (p *consumerProviderRegistry) Get(id ConsumerIdentity) (CredentialsSource, 
 	return nil, false
 }
 
-func (p *consumerProviderRegistry) Match(pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
-	p.lock.Lock()
-	defer p.lock.Unlock()
+func (p *consumerProviderRegistry) checkHandleProvider(ectx EvaluationContext, prov ConsumerProvider, pattern ConsumerIdentity) (rctx EvaluationContext, useprov bool, usestack bool) {
+	if pr, ok := prov.(ConsumerIdentityProvider); ok {
+		r := GetEvaluationContextFor[CredentialRecursion](ectx)
+		if r == nil {
+			r = CredentialRecursion{}
+		}
+		if r.Contains(pr.GetConsumerId()) {
+			return ectx, false, true
+		}
+		r = r.Append(pr.GetConsumerId())
+		ectx = SetEvaluationContextFor(ectx, r)
+	}
+	return ectx, true, true
+}
 
-	credsrc, cur := p.explicit.Match(pattern, cur, m)
+type UnwindStack struct {
+	error
+}
+
+func (u *UnwindStack) Unwrap() error {
+	return u.error
+}
+
+func (p *consumerProviderRegistry) catchedMatch(ectx EvaluationContext, sub ConsumerProvider, pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (cs CredentialsSource, ci ConsumerIdentity) {
+	defer exception.CatchError(func(err error) {
+		log.Trace("caught unwind stack error: {{error}}", "error", err)
+		cs = nil
+		ci = cur
+	}, exception.ByPrototypes(&UnwindStack{}))
+	log.Trace("pattern: {{pattern}}\ncontext: {{context}}\nprovider: {{provider}}",
+		"pattern", pattern, "context", ectx, "provider", sub)
+	ectx, useprov, _ := p.checkHandleProvider(ectx, sub, pattern)
+	if !useprov {
+		return nil, cur
+	}
+	log.Trace("attempt match with provider: {{provider}}", "provider", sub)
+	return sub.Match(ectx, pattern, cur, m)
+}
+
+func (p *consumerProviderRegistry) Match(ectx EvaluationContext, pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+
+	credsrc, cur := p.explicit.Match(ectx, pattern, cur, m)
 	for _, sub := range p.providers {
 		var f CredentialsSource
-		f, cur = sub.Match(pattern, cur, m)
+		f, cur = p.catchedMatch(ectx, sub, pattern, cur, m)
 		if f != nil {
 			credsrc = f
 		}
 	}
+	// If this is the case, we are in a situation where we have excluded all providers (since they are all in the stack).
+	// If we would simply return with no credentials, the follow-up coding would assume, that it should query the
+	// credential repository without any credentials, since none have been found.
+	// INSTEAD, we have to step down to the previous recursion level and check the other potentially available providers
+	// for credentials.
+	// BUT in case we have explicit credentials, then we should use those.
+	if credsrc == nil {
+		r := GetEvaluationContextFor[CredentialRecursion](ectx)
+		// unwind the stack only makes sense when we are in a recursive call, thus we have at least one provider on the
+		// credential recursion stack
+		if len(r) > 0 && len(r) == len(p.providers) {
+			exception.Throw(&UnwindStack{fmt.Errorf("impossible credential recursion detected - unwind stack")})
+		}
+	}
+	log.Trace("return credential source")
 	return credsrc, cur
 }
 

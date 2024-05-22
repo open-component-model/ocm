@@ -46,7 +46,7 @@ The repository specification supports the following fields:
 ` + listformat.FormatListElements("", listformat.StringElementDescriptionList{
 	"serverURL", "*string* (required): the URL of the vault instance",
 	"namespace", "*string* (optional): the namespace used to evaluate secrets",
-	"secretsEngine", "*string* (optional): the secrets engine to use (default: secrets)",
+	"mountPath", "*string* (optional): the mount path to use (default: secrets)",
 	"path", "*string* (optional): the path prefix used to lookup secrets",
 	"secrets", "*[]string* (optional): list of secrets",
 	"propagateConsumerIdentity", "*bool*(optional): evaluate metadata for consumer id propagation",
