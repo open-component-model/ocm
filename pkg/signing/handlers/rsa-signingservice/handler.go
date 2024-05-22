@@ -43,7 +43,7 @@ func NewHandler() signing.Signer {
 }
 
 func (h *Handler) Algorithm() string {
-	return Algorithm
+	return h.algo
 }
 
 func (h *Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (signature *signing.Signature, err error) {
