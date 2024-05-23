@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/maven"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 	"github.com/opencontainers/go-digest"
@@ -44,14 +45,12 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 		return nil, err
 	}
 
-	if s.Classifier != "" || s.Extension != "" {
-		fileMap = maven.FilterByCoordinates(fileMap, s.coords)
-	}
+	fileMap = s.coords.FilterFileMap(fileMap)
 
 	switch l := len(fileMap); {
 	case l <= 0:
 		return nil, errors.New("no maven artifact files found")
-	case l == 1 && s.Extension != "":
+	case l == 1 && optionutils.AsValue(s.Extension) != "" && s.Classifier != nil:
 		for file, hash := range fileMap {
 			metadata, err := maven.GetFileMeta(s.repoUrl, s.coords, file, hash, creds, s.options.FileSystem)
 			if err != nil {

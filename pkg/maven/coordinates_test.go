@@ -7,55 +7,47 @@ package maven_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	me "github.com/open-component-model/ocm/pkg/maven"
+	"github.com/open-component-model/ocm/pkg/optionutils"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("Maven Test Environment", func() {
 
 	It("GAV, GroupPath, FilePath", func() {
-		artifact := &me.Coordinates{
-			GroupId:    "ocm.software",
-			ArtifactId: "hello-ocm",
-			Version:    "0.0.1",
-			Extension:  "jar",
-		}
-		Expect(artifact.GAV()).To(Equal("ocm.software:hello-ocm:0.0.1"))
-		Expect(artifact.GroupPath()).To(Equal("ocm/software"))
-		Expect(artifact.FilePath()).To(Equal("ocm/software/hello-ocm/0.0.1/hello-ocm-0.0.1.jar"))
+		coords := me.NewCoordinates("ocm.software", "hello-ocm", "0.0.1", me.WithExtension("jar"))
+		Expect(coords.GAV()).To(Equal("ocm.software:hello-ocm:0.0.1"))
+		Expect(coords.GroupPath()).To(Equal("ocm/software"))
+		Expect(coords.FilePath()).To(Equal("ocm/software/hello-ocm/0.0.1/hello-ocm-0.0.1.jar"))
 	})
 
 	It("SetClassifierExtensionBy", func() {
-		artifact := &me.Coordinates{
-			GroupId:    "ocm.software",
-			ArtifactId: "hello-ocm",
-			Version:    "0.0.1",
-		}
-		artifact.SetClassifierExtensionBy("hello-ocm-0.0.1.pom")
-		Expect(artifact.Classifier).To(Equal(""))
-		Expect(artifact.Extension).To(Equal("pom"))
+		coords := me.NewCoordinates("ocm.software", "hello-ocm", "0.0.1")
+		MustBeSuccessful(coords.SetClassifierExtensionBy("hello-ocm-0.0.1.pom"))
+		Expect(coords.Classifier).To(BeNil())
+		Expect(optionutils.AsValue(coords.Extension)).To(Equal("pom"))
 
-		artifact.SetClassifierExtensionBy("hello-ocm-0.0.1-tests.jar")
-		Expect(artifact.Classifier).To(Equal("tests"))
-		Expect(artifact.Extension).To(Equal("jar"))
+		MustBeSuccessful(coords.SetClassifierExtensionBy("hello-ocm-0.0.1-tests.jar"))
+		Expect(optionutils.AsValue(coords.Classifier)).To(Equal("tests"))
+		Expect(optionutils.AsValue(coords.Extension)).To(Equal("jar"))
 
-		artifact.ArtifactId = "apache-me"
-		artifact.Version = "3.9.6"
-		artifact.SetClassifierExtensionBy("apache-me-3.9.6-bin.tar.gz")
-		Expect(artifact.Classifier).To(Equal("bin"))
-		Expect(artifact.Extension).To(Equal("tar.gz"))
+		coords.ArtifactId = "apache-me"
+		coords.Version = "3.9.6"
+		MustBeSuccessful(coords.SetClassifierExtensionBy("apache-me-3.9.6-bin.tar.gz"))
+		Expect(optionutils.AsValue(coords.Classifier)).To(Equal("bin"))
+		Expect(optionutils.AsValue(coords.Extension)).To(Equal("tar.gz"))
 	})
 
 	It("parse GAV", func() {
 		gav := "org.apache.commons:commons-compress:1.26.1:cyclonedx:xml"
-		artifact, err := me.Parse(gav)
+		coords, err := me.Parse(gav)
 		Expect(err).To(BeNil())
-		Expect(artifact.String()).To(Equal(gav))
-		Expect(artifact.GroupId).To(Equal("org.apache.commons"))
-		Expect(artifact.ArtifactId).To(Equal("commons-compress"))
-		Expect(artifact.Version).To(Equal("1.26.1"))
-		Expect(artifact.Classifier).To(Equal("cyclonedx"))
-		Expect(artifact.Extension).To(Equal("xml"))
-		Expect(artifact.FilePath()).To(Equal("org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1-cyclonedx.xml"))
+		Expect(coords.String()).To(Equal(gav))
+		Expect(coords.GroupId).To(Equal("org.apache.commons"))
+		Expect(coords.ArtifactId).To(Equal("commons-compress"))
+		Expect(coords.Version).To(Equal("1.26.1"))
+		Expect(optionutils.AsValue(coords.Classifier)).To(Equal("cyclonedx"))
+		Expect(optionutils.AsValue(coords.Extension)).To(Equal("xml"))
+		Expect(coords.FilePath()).To(Equal("org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1-cyclonedx.xml"))
 	})
 })

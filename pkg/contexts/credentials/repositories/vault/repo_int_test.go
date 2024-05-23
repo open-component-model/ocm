@@ -5,7 +5,6 @@ package vault_test
 import (
 	"context"
 	"fmt"
-	"net"
 	"os"
 	"os/exec"
 	"time"
@@ -461,30 +460,9 @@ func StartVaultServer(mode vaultMode, rootToken, address string) (*exec.Cmd, *va
 
 	err = cmd.Start()
 	if err == nil {
-		err = WaitForTCPServer(address, time.Minute)
+		err = PingTCPServer(address, time.Minute)
 	}
 	return cmd, vaultClient, cancelFunc, err
-}
-
-func WaitForTCPServer(address string, dur time.Duration) error {
-	var conn net.Conn
-	var d net.Dialer
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
-	end := time.Now().Add(dur)
-	err := errors.New("timed out waiting for server to start")
-	for time.Now().Before(end) {
-		conn, err = d.DialContext(ctx, "tcp", address)
-		if err != nil {
-			time.Sleep(time.Second)
-			continue
-		}
-		conn.Close()
-		break
-	}
-	return err
 }
 
 func SetUpVaultAccess(ctx context.Context, credctx credentials.Context, client *vault.Client, policy string) {

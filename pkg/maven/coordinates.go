@@ -5,8 +5,11 @@
 package maven
 
 import (
+	"crypto"
 	"fmt"
 	"github.com/mandelsoft/goutils/generics"
+	. "github.com/mandelsoft/goutils/regexutils"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"mime"
 	"path"
 	"path/filepath"
@@ -14,6 +17,34 @@ import (
 
 	ocmmime "github.com/open-component-model/ocm/pkg/mime"
 )
+
+type CoordinateOption = optionutils.Option[*Coordinates]
+
+type WithClassifier string
+
+func WithOptionalClassifier(c *string) CoordinateOption {
+	if c != nil {
+		return WithClassifier(*c)
+	}
+	return nil
+}
+
+func (o WithClassifier) ApplyTo(c *Coordinates) {
+	c.Classifier = optionutils.PointerTo(string(o))
+}
+
+type WithExtension string
+
+func WithOptionalExtension(e *string) CoordinateOption {
+	if e != nil {
+		return WithExtension(*e)
+	}
+	return nil
+}
+
+func (o WithExtension) ApplyTo(c *Coordinates) {
+	c.Extension = optionutils.PointerTo(string(o))
+}
 
 // Coordinates holds the typical Maven coordinates groupId, artifactId, version. Optional also classifier and extension.
 // https://maven.apache.org/ref/3.9.6/maven-core/artifact-handlers.html
@@ -25,34 +56,30 @@ type Coordinates struct {
 	// Version of the Maven (mvn) artifact.
 	Version string `json:"version"`
 	// Classifier of the Maven (mvn) artifact.
-	Classifier string `json:"classifier"` //TODO: make it a pointer to differentiate between empty and none
+	Classifier *string `json:"classifier,omitempty"` //TODO: make it a pointer to differentiate between empty and none
 	// Extension of the Maven (mvn) artifact.
-	Extension string `json:"extension"`
+	Extension *string `json:"extension,omitempty"`
 }
 
-func NewCoordinates(groupId, artifactId, version string, other ...string) *Coordinates {
+func NewCoordinates(groupId, artifactId, version string, opts ...CoordinateOption) *Coordinates {
 	c := &Coordinates{
 		GroupId:    groupId,
 		ArtifactId: artifactId,
 		Version:    version,
 	}
-	if len(other) > 0 {
-		c.Classifier = other[0]
-	}
-	if len(other) > 1 {
-		c.Extension = other[1]
-	}
+	optionutils.ApplyOptions(c, opts...)
 	return c
 }
 
 // GAV returns the GAV coordinates of the Maven Coordinates.
 func (c *Coordinates) GAV() string {
+	NewCoordinates("a", "b", "c", WithClassifier("a"), WithExtension("c"))
 	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version
 }
 
-// String returns the Coordinates as a string (GroupId:ArtifactId:Version:Classifier:Extension).
+// String returns the Coordinates as a string (GroupId:ArtifactId:Version:WithClassifier:WithExtension).
 func (c *Coordinates) String() string {
-	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version + ":" + c.Classifier + ":" + c.Extension
+	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version + ":" + optionutils.AsValue(c.Classifier) + ":" + optionutils.AsValue(c.Extension)
 }
 
 // GavPath returns the Maven repository path.
@@ -61,6 +88,9 @@ func (c *Coordinates) GavPath() string {
 }
 
 func (c *Coordinates) GavUrl(repoUrl string) string {
+	if strings.HasSuffix(repoUrl, "/") {
+		return repoUrl + c.GavPath()
+	}
 	return repoUrl + "/" + c.GavPath()
 }
 
@@ -69,11 +99,11 @@ func (c *Coordinates) GavUrl(repoUrl string) string {
 // Default extension is jar.
 func (c *Coordinates) FilePath() string {
 	path := c.GavPath() + "/" + c.FileNamePrefix()
-	if c.Classifier != "" {
-		path += "-" + c.Classifier
+	if optionutils.AsValue(c.Classifier) != "" {
+		path += "-" + *c.Classifier
 	}
-	if c.Extension != "" {
-		path += "." + c.Extension
+	if optionutils.AsValue(c.Extension) != "" {
+		path += "." + *c.Extension
 	} else {
 		path += ".jar"
 	}
@@ -81,6 +111,9 @@ func (c *Coordinates) FilePath() string {
 }
 
 func (c *Coordinates) Url(baseUrl string) string {
+	if strings.HasSuffix(baseUrl, "/") {
+		return baseUrl + c.FilePath()
+	}
 	return baseUrl + "/" + c.FilePath()
 }
 
@@ -107,19 +140,19 @@ func (c *Coordinates) SetClassifierExtensionBy(filename string) error {
 		if i < 0 {
 			return fmt.Errorf("no extension after classifier found in filename: %s", filename)
 		}
-		c.Classifier = s[:i]
-		s = strings.TrimPrefix(s, c.Classifier)
+		c.Classifier = optionutils.PointerTo(s[:i])
+		s = strings.TrimPrefix(s, optionutils.AsValue(c.Classifier))
 	} else {
-		c.Classifier = ""
+		c.Classifier = nil
 	}
-	c.Extension = strings.TrimPrefix(s, ".")
+	c.Extension = optionutils.PointerTo(strings.TrimPrefix(s, "."))
 	return nil
 }
 
 // MimeType returns the MIME type of the Maven Coordinates based on the file extension.
 // Default is application/x-tgz.
 func (c *Coordinates) MimeType() string {
-	m := mime.TypeByExtension("." + c.Extension)
+	m := mime.TypeByExtension("." + optionutils.AsValue(c.Extension))
 	if m != "" {
 		return m
 	}
@@ -131,24 +164,49 @@ func (c *Coordinates) Copy() *Coordinates {
 	return generics.Pointer(*c)
 }
 
+func (c *Coordinates) FilterFileMap(fileMap map[string]crypto.Hash) map[string]crypto.Hash {
+	if c.Classifier == nil && c.Extension == nil {
+		return fileMap
+	}
+	exp := Literal(c.ArtifactId + "-" + c.Version)
+	if optionutils.AsValue(c.Classifier) != "" {
+		exp = Sequence(exp, Literal("-"+*c.Classifier))
+	}
+	if optionutils.AsValue(c.Extension) != "" {
+		if c.Classifier == nil {
+			exp = Sequence(exp, Optional(Literal("-"), Match(".+")))
+		}
+		exp = Sequence(exp, Literal("."+*c.Extension))
+	} else {
+		exp = Sequence(exp, Literal("."), Match(".*"))
+	}
+	exp = Anchored(exp)
+	for file := range fileMap {
+		if !exp.MatchString(file) {
+			delete(fileMap, file)
+		}
+	}
+	return fileMap
+}
+
 // Parse creates a Coordinates from it's serialized form (see Coordinates.String).
 func Parse(serializedArtifact string) (*Coordinates, error) {
 	parts := strings.Split(serializedArtifact, ":")
 	if len(parts) < 3 {
-		return nil, fmt.Errorf("invalid artifact string: %s", serializedArtifact)
+		return nil, fmt.Errorf("invalid coordination string: %s", serializedArtifact)
 	}
-	artifact := &Coordinates{
+	coords := &Coordinates{
 		GroupId:    parts[0],
 		ArtifactId: parts[1],
 		Version:    parts[2],
 	}
 	if len(parts) >= 4 {
-		artifact.Classifier = parts[3]
+		coords.Classifier = optionutils.PointerTo(parts[3])
 	}
 	if len(parts) >= 5 {
-		artifact.Extension = parts[4]
+		coords.Extension = optionutils.PointerTo(parts[4])
 	}
-	return artifact, nil
+	return coords, nil
 }
 
 // IsResource returns true if the filename is not a checksum or signature file.

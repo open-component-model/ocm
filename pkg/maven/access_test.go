@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	me "github.com/open-component-model/ocm/pkg/maven"
@@ -31,19 +32,25 @@ var _ = Describe("local accessmethods.me.AccessSpec tests", func() {
 		repoUrl := "file://" + mvnPATH
 		coords := me.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
 		files := Must(me.GavFiles(repoUrl, coords, nil, env.FileSystem()))
-		Expect(files).To(YAMLEqual("sdk-modules-bom-5.7.0.pom: 3"))
+		Expect(files).To(YAMLEqual(`
+sdk-modules-bom-5.7.0-random-content.json: 3
+sdk-modules-bom-5.7.0-random-content.txt: 3
+sdk-modules-bom-5.7.0-sources.jar: 3
+sdk-modules-bom-5.7.0.jar: 3
+sdk-modules-bom-5.7.0.pom: 3
+`))
 	})
 
 	It("accesses local artifact file with extension", func() {
 		repoUrl := "file://" + mvnPATH
-		coords := me.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", "", "pom")
+		coords := me.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithClassifier(""), me.WithExtension("pom"))
 		hash := Must(me.GetHash(coords.Url(repoUrl), nil, crypto.SHA1, env.FileSystem()))
 		Expect(hash).To(Equal("34ccdeb9c008f8aaef90873fc636b09d3ae5c709"))
 	})
 
-	FIt("", func() {
+	It("", func() {
 		repoUrl := "file://" + mvnPATH
-		coords := me.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", "", "pom")
+		coords := me.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithExtension("pom"))
 		meta := Must(me.GetFileMeta(repoUrl, coords, "sdk-modules-bom-5.7.0.pom", crypto.SHA1, nil, env.FileSystem()))
 		Expect(meta).To(YAMLEqual(`
   Hash: 34ccdeb9c008f8aaef90873fc636b09d3ae5c709
@@ -53,35 +60,56 @@ var _ = Describe("local accessmethods.me.AccessSpec tests", func() {
 `))
 	})
 
-	//It("accesses local artifact with extension", func() {
-	//	acc := me.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithExtension("pom"))
-	//	m := Must(acc.AccessMethod(cv))
-	//	defer m.Close()
-	//	Expect(m.MimeType()).To(Equal(mime.MIME_XML))
-	//	r := Must(m.Reader())
-	//	defer r.Close()
-	//	dr := iotools.NewDigestReaderWithHash(crypto.SHA1, r)
-	//	for {
-	//		var buf [8096]byte
-	//		_, err := dr.Read(buf[:])
-	//		if err != nil {
-	//			break
-	//		}
-	//	}
-	//	Expect(dr.Size()).To(Equal(int64(7153)))
-	//	Expect(dr.Digest().String()).To(Equal("SHA-1:34ccdeb9c008f8aaef90873fc636b09d3ae5c709"))
-	//})
-	//
-	//It("Describe", func() {
-	//	acc := me.New("file://"+FAILPATH, "test", "repository", "42", me.WithExtension("pom"))
-	//	Expect(acc.Describe(nil)).To(Equal("Maven (me) package 'test:repository:42::pom' in repository 'file:///testdata/fail' path 'test/repository/42/repository-42.pom'"))
-	//})
-	//
-	//It("detects digests mismatch", func() {
-	//	acc := me.New("file://"+FAILPATH, "test", "repository", "42", me.WithExtension("pom"))
-	//	m := Must(acc.AccessMethod(cv))
-	//	defer m.Close()
-	//	_, err := m.Reader()
-	//	Expect(err).To(MatchError(ContainSubstring("SHA-1 digest mismatch: expected 44a77645201d1a8fc5213ace787c220eabbd0967, found b3242b8c31f8ce14f729b8fd132ac77bc4bc5bf7")))
-	//})
+	Context("filtering", func() {
+		var (
+			files  map[string]crypto.Hash
+			coords *me.Coordinates
+		)
+		BeforeEach(func() {
+			repoUrl := "file://" + mvnPATH
+			coords = me.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
+			files = Must(me.GavFiles(repoUrl, coords, nil, env.FileSystem()))
+		})
+
+		It("filters nothing", func() {
+			Expect(coords.FilterFileMap(files)).To(Equal(files))
+		})
+		It("filter by empty classifier", func() {
+			coords.Classifier = optionutils.PointerTo("")
+			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
+sdk-modules-bom-5.7.0.jar: 3
+sdk-modules-bom-5.7.0.pom: 3
+`))
+		})
+		It("filter by non-empty classifier", func() {
+			coords.Classifier = optionutils.PointerTo("random-content")
+			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
+sdk-modules-bom-5.7.0-random-content.json: 3
+sdk-modules-bom-5.7.0-random-content.txt: 3
+`))
+		})
+		It("filter by extension", func() {
+			coords.Extension = optionutils.PointerTo("jar")
+			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
+sdk-modules-bom-5.7.0-sources.jar: 3
+sdk-modules-bom-5.7.0.jar: 3
+`))
+		})
+
+		It("filter by empty classifier and extension", func() {
+			coords.Classifier = optionutils.PointerTo("")
+			coords.Extension = optionutils.PointerTo("jar")
+			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
+sdk-modules-bom-5.7.0.jar: 3
+`))
+		})
+
+		It("filter by non-empty classifier and extension", func() {
+			coords.Classifier = optionutils.PointerTo("sources")
+			coords.Extension = optionutils.PointerTo("jar")
+			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
+sdk-modules-bom-5.7.0-sources.jar: 3
+`))
+		})
+	})
 })

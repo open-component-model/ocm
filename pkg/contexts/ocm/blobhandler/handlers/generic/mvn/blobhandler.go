@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/open-component-model/ocm/pkg/maven"
+	"github.com/open-component-model/ocm/pkg/optionutils"
 	"io"
 	"net/http"
 	"strings"
@@ -110,7 +111,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	}
 
 	log.Debug("done", "artifact", artifact)
-	return mvn.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, mvn.WithClassifier(artifact.Classifier), mvn.WithExtension(artifact.Extension)), nil
+	return mvn.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, mvn.WithClassifier(optionutils.AsValue(artifact.Classifier)), mvn.WithExtension(optionutils.AsValue(artifact.Extension))), nil
 }
 
 // deploy an artifact to the specified destination. See https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact

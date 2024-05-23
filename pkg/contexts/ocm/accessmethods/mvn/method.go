@@ -71,8 +71,6 @@ func New(repository, groupId, artifactId, version string, options ...Option) *Ac
 			GroupId:    groupId,
 			ArtifactId: artifactId,
 			Version:    version,
-			Classifier: "",
-			Extension:  "",
 		},
 	}
 	optionutils.ApplyOptions(accessSpec, options...)
@@ -83,7 +81,7 @@ func New(repository, groupId, artifactId, version string, options ...Option) *Ac
 type classifier string
 
 func (c classifier) ApplyTo(a *AccessSpec) {
-	a.Classifier = string(c)
+	a.Classifier = optionutils.PointerTo(string(c))
 }
 
 // WithClassifier sets the classifier of the Maven (mvn) artifact.
@@ -95,7 +93,7 @@ func WithClassifier(c string) Option {
 type extension string
 
 func (e extension) ApplyTo(a *AccessSpec) {
-	a.Extension = string(e)
+	a.Extension = optionutils.PointerTo(string(e))
 }
 
 // WithExtension sets the extension of the Maven (mvn) artifact.
@@ -186,14 +184,14 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 		return nil, err
 	}
 
-	if a.Classifier != "" {
-		fileMap = filterByClassifier(fileMap, a.Classifier)
+	if optionutils.AsValue(a.Classifier) != "" {
+		fileMap = filterByClassifier(fileMap, *a.Classifier)
 	}
 
 	switch l := len(fileMap); {
 	case l <= 0:
 		return nil, errors.New("no maven artifact files found")
-	case l == 1 && (a.Extension != "" || a.Classifier != ""):
+	case l == 1 && (optionutils.AsValue(a.Extension) != "" || optionutils.AsValue(a.Classifier) != ""):
 		metadata := meta{}
 		for file, hash := range fileMap {
 			update(a, file, hash, &metadata, ctx, fs)
@@ -202,7 +200,7 @@ func (a *AccessSpec) GetPackageMeta(ctx accspeccpi.Context) (*meta, error) {
 		// default: continue below with: create tempFs where all files can be downloaded to and packed together as tar.gz
 	}
 
-	if (a.Extension == "") != (a.Classifier == "") { // XOR
+	if (optionutils.AsValue(a.Extension) == "") != (optionutils.AsValue(a.Classifier) == "") { // XOR
 		log.Warn("Either classifier or extension have been specified, which results in an incomplete GAV!")
 	}
 	tempFs, err := osfs.NewTempFileSystem()

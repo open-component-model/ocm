@@ -16,11 +16,15 @@ func DataAccessForMaven(repoUrl, groupId, artifactId, version string, opts ...Op
 func BlobAccessForMaven(repoUrl, groupId, artifactId, version string, opts ...Option) (blobaccess.BlobAccess, error) {
 	eff := optionutils.EvalOptions(opts...)
 	s := &spec{
-		coords:  maven.NewCoordinates(groupId, artifactId, version, eff.Classifier, eff.Extension),
+		coords:  maven.NewCoordinates(groupId, artifactId, version, maven.WithOptionalClassifier(eff.Classifier), maven.WithOptionalExtension(eff.Extension)),
 		repoUrl: repoUrl,
 		options: eff,
 	}
 	return s.getBlobAccess()
+}
+
+func BlobAccessForMavenCoords(repoUrl string, coords *maven.Coordinates, opts ...Option) (blobaccess.BlobAccess, error) {
+	return BlobAccessForMaven(repoUrl, coords.GroupId, coords.ArtifactId, coords.Version, append([]Option{WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension)}, opts...)...)
 }
 
 func BlobAccessProviderForMaven(repoUrl, groupId, artifactId, version string, opts ...Option) bpi.BlobAccessProvider {
@@ -28,4 +32,8 @@ func BlobAccessProviderForMaven(repoUrl, groupId, artifactId, version string, op
 		b, err := BlobAccessForMaven(repoUrl, groupId, artifactId, version, opts...)
 		return b, err
 	})
+}
+
+func BlobAccessProviderForMavenCoords(repoUrl string, coords *maven.Coordinates, opts ...Option) bpi.BlobAccessProvider {
+	return BlobAccessProviderForMaven(repoUrl, coords.GroupId, coords.ArtifactId, coords.Version, append([]Option{WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension)}, opts...)...)
 }

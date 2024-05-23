@@ -27,9 +27,9 @@ type Options struct {
 	// Credentials allows to pass credentials and certificates for the http communication
 	Credentials credentials.Credentials
 	// Classifier defines the classifier of the maven file coordinates
-	Classifier string
+	Classifier *string
 	// Extension defines the extension of the maven file coordinates
-	Extension string
+	Extension *string
 }
 
 func (o *Options) Logger(keyValuePairs ...interface{}) logging.Logger {
@@ -88,10 +88,10 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.Credentials != nil {
 		opts.Credentials = o.Credentials
 	}
-	if o.Classifier != "" {
+	if o.Classifier != nil {
 		opts.Classifier = o.Classifier
 	}
-	if o.Extension != "" {
+	if o.Extension != nil {
 		opts.Extension = o.Extension
 	}
 }
@@ -157,11 +157,18 @@ func WithCredentials(c credentials.Credentials) Option {
 type classifier string
 
 func (o classifier) ApplyTo(opts *Options) {
-	opts.Classifier = string(o)
+	opts.Classifier = optionutils.PointerTo(string(o))
 }
 
 func WithClassifier(c string) Option {
 	return classifier(c)
+}
+
+func WithOptionalClassifier(c *string) Option {
+	if c != nil {
+		return WithClassifier(*c)
+	}
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -169,11 +176,18 @@ func WithClassifier(c string) Option {
 type extension string
 
 func (o extension) ApplyTo(opts *Options) {
-	opts.Extension = string(o)
+	opts.Extension = optionutils.PointerTo(string(o))
 }
 
 func WithExtension(e string) Option {
 	return extension(e)
+}
+
+func WithOptionalExtension(e *string) Option {
+	if e != nil {
+		return WithExtension(*e)
+	}
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
