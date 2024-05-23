@@ -1,7 +1,8 @@
 package check
 
 import (
-	"github.com/open-component-model/ocm/pkg/optionutils"
+	"github.com/mandelsoft/goutils/optionutils"
+
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
