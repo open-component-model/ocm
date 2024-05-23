@@ -13,6 +13,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/maven/identity"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/maven"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -142,4 +144,14 @@ func blobAccessForRepositoryAccess(meta *BlobMeta, creds maven.Credentials, opts
 	}
 	acc := blobaccess.DataAccessForReaderFunction(reader, meta.Url)
 	return accessobj.CachedBlobAccessForWriterWithCache(opts.Cache(), meta.MimeType, accessio.NewDataAccessWriter(acc)), nil
+}
+
+func MapCredentials(creds credentials.Credentials) maven.Credentials {
+	if creds == nil || (!creds.ExistsProperty(identity.ATTR_USERNAME) && !creds.ExistsProperty(identity.ATTR_PASSWORD)) {
+		return nil
+	}
+	return &maven.BasicAuthCredentials{
+		Username: creds.GetProperty(identity.ATTR_USERNAME),
+		Password: creds.GetProperty(identity.ATTR_PASSWORD),
+	}
 }

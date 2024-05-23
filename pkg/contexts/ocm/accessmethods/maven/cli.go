@@ -1,4 +1,4 @@
-package mvn
+package maven
 
 import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"

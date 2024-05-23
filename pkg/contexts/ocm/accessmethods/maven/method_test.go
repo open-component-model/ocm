@@ -1,0 +1,132 @@
+package maven_test
+
+import (
+	"crypto"
+	me "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/maven"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
+	"time"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
+	"github.com/open-component-model/ocm/pkg/iotools"
+	"github.com/open-component-model/ocm/pkg/mime"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+)
+
+const (
+	mvnPATH               = "/testdata/.m2/repository"
+	FAILPATH              = "/testdata/fail"
+	MAVEN_CENTRAL         = "https://repo.maven.apache.org/maven2/"
+	MAVEN_CENTRAL_ADDRESS = "repo.maven.apache.org:443"
+	MAVEN_GROUP_ID        = "maven"
+	MAVEN_ARTIFACT_ID     = "maven"
+	MAVEN_VERSION         = "1.1"
+)
+
+var _ = Describe("local accessmethods.mvn.AccessSpec tests", func() {
+	var env *Builder
+	var cv ocm.ComponentVersionAccess
+
+	BeforeEach(func() {
+		env = NewBuilder(TestData())
+		cv = &cpi.DummyComponentVersionAccess{env.OCMContext()}
+	})
+
+	AfterEach(func() {
+		env.Cleanup()
+	})
+
+	It("accesses local artifact", func() {
+		acc := me.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
+		m := Must(acc.AccessMethod(cv))
+		defer m.Close()
+		Expect(m.MimeType()).To(Equal(mime.MIME_TGZ))
+		r := Must(m.Reader())
+		defer r.Close()
+		dr := iotools.NewDigestReaderWithHash(crypto.SHA1, r)
+		for {
+			var buf [8096]byte
+			_, err := dr.Read(buf[:])
+			if err != nil {
+				break
+			}
+		}
+		Expect(dr.Size()).To(Equal(int64(1109)))
+		Expect(dr.Digest().String()).To(Equal("SHA-1:4ee125ffe4f7690588833f1217a13cc741e4df5f"))
+	})
+
+	It("accesses local artifact with empty classifier and with extension", func() {
+		acc := me.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithClassifier(""), me.WithExtension("pom"))
+		m := Must(acc.AccessMethod(cv))
+		defer Close(m)
+		Expect(m.MimeType()).To(Equal(mime.MIME_XML))
+		r := Must(m.Reader())
+		defer Close(r)
+
+		dr := iotools.NewDigestReaderWithHash(crypto.SHA1, r)
+		for {
+			var buf [8096]byte
+			_, err := dr.Read(buf[:])
+			if err != nil {
+				break
+			}
+		}
+
+		Expect(dr.Size()).To(Equal(int64(7153)))
+		Expect(dr.Digest().String()).To(Equal("SHA-1:34ccdeb9c008f8aaef90873fc636b09d3ae5c709"))
+	})
+
+	It("accesses local artifact with extension", func() {
+		acc := me.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithExtension("pom"))
+		m := Must(acc.AccessMethod(cv))
+		defer m.Close()
+		Expect(m.MimeType()).To(Equal(mime.MIME_TGZ))
+		r := Must(m.Reader())
+		defer r.Close()
+		dr := iotools.NewDigestReaderWithHash(crypto.SHA1, r)
+		list := Must(tarutils.ListArchiveContentFromReader(dr))
+		Expect(list).To(HaveLen(1))
+		Expect(dr.Size()).To(Equal(int64(1109)))
+		Expect(dr.Digest().String()).To(Equal("SHA-1:4ee125ffe4f7690588833f1217a13cc741e4df5f"))
+	})
+
+	It("Describe", func() {
+		acc := me.New("file://"+FAILPATH, "test", "repository", "42", me.WithExtension("pom"))
+		Expect(acc.Describe(nil)).To(Equal("Maven (mvn) package 'test:repository:42::pom' in repository 'file:///testdata/fail' path 'test/repository/42/repository-42.pom'"))
+	})
+
+	It("detects digests mismatch", func() {
+		acc := me.New("file://"+FAILPATH, "test", "repository", "42", me.WithExtension("pom"))
+		m := Must(acc.AccessMethod(cv))
+		defer m.Close()
+		_, err := m.Reader()
+		Expect(err).To(MatchError(ContainSubstring("SHA-1 digest mismatch: expected 44a77645201d1a8fc5213ace787c220eabbd0967, found b3242b8c31f8ce14f729b8fd132ac77bc4bc5bf7")))
+	})
+
+	Context("me http repository", func() {
+		if PingTCPServer(MAVEN_CENTRAL_ADDRESS, time.Second) == nil {
+			It("blobaccess for gav", func() {
+				acc := me.New(MAVEN_CENTRAL, MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION)
+				m := Must(acc.AccessMethod(cv))
+				defer Close(m)
+				files := Must(tarutils.ListArchiveContentFromReader(Must(m.Reader())))
+				Expect(files).To(ConsistOf(
+					"maven-1.1-RC1.javadoc.javadoc.jar",
+					"maven-1.1-sources.jar",
+					"maven-1.1.jar",
+					"maven-1.1.pom",
+				))
+			})
+
+			It("inexpensive id", func() {
+				acc := me.New(MAVEN_CENTRAL, MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION, me.WithClassifier(""), me.WithExtension("pom"))
+				Expect(acc.GetInexpensiveContentVersionIdentity(cv)).To(Equal("4fb753e1a4ab7acebc39557f1aa292052775b0d8"))
+			})
+		}
+	})
+})

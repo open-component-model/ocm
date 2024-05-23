@@ -43,20 +43,10 @@ func (o *Options) Cache() *tmpcache.Attribute {
 	return tmpcache.Get(o.CachingContext)
 }
 
-func mapCredentials(creds credentials.Credentials) maven.Credentials {
-	if creds == nil || (!creds.ExistsProperty(identity.ATTR_USERNAME) && !creds.ExistsProperty(identity.ATTR_PASSWORD)) {
-		return nil
-	}
-	return &maven.BasicAuthCredentials{
-		Username: creds.GetProperty(identity.ATTR_USERNAME),
-		Password: creds.GetProperty(identity.ATTR_PASSWORD),
-	}
-}
-
 func (o *Options) GetCredentials(repoUrl, groupId string) (maven.Credentials, error) {
 	switch {
 	case o.Credentials != nil:
-		return mapCredentials(o.Credentials), nil
+		return MapCredentials(o.Credentials), nil
 	case o.CredentialContext != nil:
 		consumerid, err := identity.GetConsumerId(repoUrl, groupId)
 		if err != nil {
@@ -66,7 +56,7 @@ func (o *Options) GetCredentials(repoUrl, groupId string) (maven.Credentials, er
 		if err != nil {
 			return nil, err
 		}
-		return mapCredentials(creds), nil
+		return MapCredentials(creds), nil
 	default:
 		return nil, nil
 	}

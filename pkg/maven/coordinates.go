@@ -152,9 +152,12 @@ func (c *Coordinates) SetClassifierExtensionBy(filename string) error {
 // MimeType returns the MIME type of the Maven Coordinates based on the file extension.
 // Default is application/x-tgz.
 func (c *Coordinates) MimeType() string {
-	m := mime.TypeByExtension("." + optionutils.AsValue(c.Extension))
-	if m != "" {
-		return m
+	if c.Extension != nil && c.Classifier != nil {
+		m := mime.TypeByExtension("." + optionutils.AsValue(c.Extension))
+		if m != "" {
+			return m
+		}
+		return ocmmime.MIME_OCTET
 	}
 	return ocmmime.MIME_TGZ
 }

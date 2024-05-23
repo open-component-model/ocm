@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"encoding/json"
 	"fmt"
+	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/maven"
 	"github.com/open-component-model/ocm/pkg/maven"
 	"github.com/open-component-model/ocm/pkg/optionutils"
 	"io"
@@ -15,7 +16,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/maven/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/mvn"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
@@ -111,7 +111,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	}
 
 	log.Debug("done", "artifact", artifact)
-	return mvn.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, mvn.WithClassifier(optionutils.AsValue(artifact.Classifier)), mvn.WithExtension(optionutils.AsValue(artifact.Extension))), nil
+	return access.New(b.spec.Url, artifact.GroupId, artifact.ArtifactId, artifact.Version, maven.WithClassifier(optionutils.AsValue(artifact.Classifier)), maven.WithExtension(optionutils.AsValue(artifact.Extension))), nil
 }
 
 // deploy an artifact to the specified destination. See https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact

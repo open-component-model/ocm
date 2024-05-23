@@ -17,13 +17,13 @@ import (
 )
 
 const (
-	mvnPATH  = "/testdata/.m2/repository"
-	FAILPATH = "/testdata/.m2/fail"
-
-	MAVEN_CENTRAL     = "https://repo.maven.apache.org/maven2/"
-	MAVEN_GROUP_ID    = "maven"
-	MAVEN_ARTIFACT_ID = "maven"
-	MAVEN_VERSION     = "1.1"
+	mvnPATH               = "/testdata/.m2/repository"
+	FAILPATH              = "/testdata/.m2/fail"
+	MAVEN_CENTRAL_ADDRESS = "repo.maven.apache.org:443"
+	MAVEN_CENTRAL         = "https://repo.maven.apache.org/maven2/"
+	MAVEN_GROUP_ID        = "maven"
+	MAVEN_ARTIFACT_ID     = "maven"
+	MAVEN_VERSION         = "1.1"
 )
 
 var _ = Describe("blobaccess for maven", func() {
@@ -109,7 +109,7 @@ var _ = Describe("blobaccess for maven", func() {
 	})
 
 	Context("maven http repository", func() {
-		if PingTCPServer("repo.maven.apache.org:443", time.Second) == nil {
+		if PingTCPServer(MAVEN_CENTRAL_ADDRESS, time.Second) == nil {
 			var coords *maven.Coordinates
 			BeforeEach(func() {
 				coords = maven.NewCoordinates(MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION)
