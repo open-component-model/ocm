@@ -117,7 +117,7 @@ func TransferApplication() (rerr error) {
 	}
 
 	// if you know you have an OCI registry based OCM repository
-	// repoSpec := ocireg.NewRepositorySpec(cfg.Repository)
+	// repoSpec := ocireg.NewRepositorySpec(cfg.RepoUrl)
 
 	// if you want to provide specific credentials....
 	// target, err := octx.RepositoryForSpec(repoSpec, cfg.GetCredentials())

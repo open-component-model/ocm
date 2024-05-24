@@ -117,7 +117,7 @@ func (a *RepositoryImpl) getIndex() *index.RepositoryIndex {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// cpi.Repository methods
+// cpi.RepoUrl methods
 
 func (r *RepositoryImpl) ExistsArtifact(name string, tag string) (bool, error) {
 	return r.getIndex().HasArtifact(name, tag), nil

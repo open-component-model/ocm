@@ -87,11 +87,8 @@ func (c *Coordinates) GavPath() string {
 	return c.GroupPath() + "/" + c.ArtifactId + "/" + c.Version
 }
 
-func (c *Coordinates) GavUrl(repoUrl string) string {
-	if strings.HasSuffix(repoUrl, "/") {
-		return repoUrl + c.GavPath()
-	}
-	return repoUrl + "/" + c.GavPath()
+func (c *Coordinates) GavLocation(repo *Repository) *Location {
+	return repo.AddPath(c.GavPath())
 }
 
 // FilePath returns the Maven Coordinates's GAV-name with classifier and extension.
@@ -110,11 +107,8 @@ func (c *Coordinates) FilePath() string {
 	return path
 }
 
-func (c *Coordinates) Url(baseUrl string) string {
-	if strings.HasSuffix(baseUrl, "/") {
-		return baseUrl + c.FilePath()
-	}
-	return baseUrl + "/" + c.FilePath()
+func (c *Coordinates) Location(repo *Repository) *Location {
+	return repo.AddPath(c.FilePath())
 }
 
 // GroupPath returns GroupId with `/` instead of `.`.
@@ -143,7 +137,7 @@ func (c *Coordinates) SetClassifierExtensionBy(filename string) error {
 		c.Classifier = optionutils.PointerTo(s[:i])
 		s = strings.TrimPrefix(s, optionutils.AsValue(c.Classifier))
 	} else {
-		c.Classifier = nil
+		c.Classifier = optionutils.PointerTo("")
 	}
 	c.Extension = optionutils.PointerTo(strings.TrimPrefix(s, "."))
 	return nil

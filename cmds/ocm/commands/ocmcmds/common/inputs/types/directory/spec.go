@@ -14,7 +14,7 @@ import (
 
 type Spec struct {
 	cpi.MediaFileSpec `json:",inline"`
-	// PreserveDir defines that the directory specified in the Path field should be included in the blob.
+	// PreserveDir defines that the directory specified in the BasePath field should be included in the blob.
 	// Only supported for Type dir.
 	PreserveDir *bool `json:"preserveDir,omitempty"`
 	// IncludeFiles is a list of shell file name patterns that describe the files that should be included.

@@ -8,23 +8,99 @@ import (
 	"bytes"
 	"context"
 	"crypto"
+	"encoding/json"
 	"github.com/cloudflare/cfssl/log"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 	"golang.org/x/net/html"
 	"io"
 	"net/http"
-	"path"
+	"net/url"
 	"strings"
 )
+
+type Repository struct {
+	Location
+}
+
+type Location struct {
+	url  string
+	path string
+	fs   vfs.FileSystem
+}
+
+func (l *Location) MarshalJSON() ([]byte, error) {
+	return json.Marshal(l.String())
+}
+
+func (l *Location) IsFileSystem() bool {
+	return l.path != ""
+}
+
+func (l *Location) AddPath(path string) *Location {
+	result := *l
+	var p *string
+	if result.url != "" {
+		p = &result.url
+	} else {
+		p = &result.path
+	}
+
+	if !strings.HasSuffix(*p, "/") {
+		*p += "/"
+	}
+	*p += path
+	return &result
+}
+
+func (l *Location) AddExtension(ext string) *Location {
+	result := *l
+	var p *string
+	if result.url != "" {
+		p = &result.url
+	} else {
+		p = &result.path
+	}
+
+	*p += "." + ext
+	return &result
+}
+
+func (l *Location) String() string {
+	return general.Conditional(l.path != "", l.path, l.url)
+}
+
+func NewFileRepository(path string, fss ...vfs.FileSystem) *Repository {
+	return &Repository{Location{
+		path: path,
+		fs:   utils.FileSystem(fss...),
+	}}
+}
+
+func NewUrlRepository(repoUrl string, fss ...vfs.FileSystem) (*Repository, error) {
+	u, err := url.Parse(repoUrl)
+	if err != nil {
+		return nil, err
+	}
+	if u.Scheme == "file" {
+		if u.Host != "" && u.Host != "localhost" {
+			return nil, errors.Newf("named host not supported for url file scheme: %q", repoUrl)
+		}
+		return NewFileRepository(u.Path, fss...), nil
+	}
+	return &Repository{Location{
+		url: repoUrl,
+	}}, nil
+}
 
 type FileMeta struct {
 	MimeType string
 	HashType crypto.Hash
 	Hash     string
-	Url      string
+	Location *Location
 }
 
 type Credentials interface {
@@ -40,9 +116,9 @@ func (b *BasicAuthCredentials) SetForRequest(req *http.Request) error {
 	return nil
 }
 
-func GetHash(url string, creds Credentials, hash crypto.Hash, fss ...vfs.FileSystem) (string, error) {
+func (l *Location) GetHash(creds Credentials, hash crypto.Hash) (string, error) {
 	// getStringData reads all data from the given URL and returns it as a string.
-	r, err := GetReader(url+HashUrlExt(hash), creds, fss...)
+	r, err := l.AddExtension(HashExt(hash)).GetReader(creds)
 	if err != nil {
 		return "", err
 	}
@@ -54,14 +130,12 @@ func GetHash(url string, creds Credentials, hash crypto.Hash, fss ...vfs.FileSys
 	return string(b), nil
 }
 
-func GetReader(url string, creds Credentials, fss ...vfs.FileSystem) (io.ReadCloser, error) {
-	if strings.HasPrefix(url, "file://") {
-		fs := utils.FileSystem(fss...)
-		path := url[7:]
-		return fs.OpenFile(path, vfs.O_RDONLY, 0o600)
+func (l *Location) GetReader(creds Credentials) (io.ReadCloser, error) {
+	if l.path != "" {
+		return l.fs.OpenFile(l.path, vfs.O_RDONLY, 0o600)
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, l.url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -81,30 +155,30 @@ func GetReader(url string, creds Credentials, fss ...vfs.FileSystem) (io.ReadClo
 		buf := &bytes.Buffer{}
 		_, err = io.Copy(buf, io.LimitReader(resp.Body, 2000))
 		if err == nil {
-			Log.Error("http", "code", resp.Status, "url", url, "body", buf.String())
+			Log.Error("http", "code", resp.Status, "repo", l.url, "body", buf.String())
 		}
-		return nil, errors.Newf("http %s error - %s", resp.Status, url)
+		return nil, errors.Newf("http %s error - %s", resp.Status, l.url)
 	}
 	return resp.Body, nil
 }
 
-func GetFileMeta(repoUrl string, c *Coordinates, file string, hash crypto.Hash, creds Credentials, fss ...vfs.FileSystem) (*FileMeta, error) {
+func (r *Repository) GetFileMeta(c *Coordinates, file string, hash crypto.Hash, creds Credentials) (*FileMeta, error) {
 	coords := c.Copy()
 	err := coords.SetClassifierExtensionBy(file)
 	if err != nil {
 		return nil, err
 	}
 	metadata := &FileMeta{
-		Url:      coords.Url(repoUrl),
+		Location: coords.Location(r),
 		MimeType: coords.MimeType(),
 	}
-	log := Log.WithValues("file", metadata.Url)
+	log := Log.WithValues("file", metadata.Location.String())
 	log.Debug("processing")
 	if hash > 0 {
 		metadata.HashType = hash
-		metadata.Hash, err = GetHash(metadata.Url, creds, hash, fss...)
+		metadata.Hash, err = metadata.Location.GetHash(creds, hash)
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot read %s digest of: %s", hash, metadata.Url)
+			return nil, errors.Wrapf(err, "cannot read %s digest of: %s", hash, metadata.Location)
 		}
 	} else {
 		log.Warn("no digest available")
@@ -112,12 +186,11 @@ func GetFileMeta(repoUrl string, c *Coordinates, file string, hash crypto.Hash, 
 	return metadata, nil
 }
 
-func GavFiles(repoUrl string, coords *Coordinates, creds Credentials, fss ...vfs.FileSystem) (map[string]crypto.Hash, error) {
-	if strings.HasPrefix(repoUrl, "file://") {
-		dir := path.Join(repoUrl[7:], coords.GavPath())
-		return gavFilesFromDisk(utils.FileSystem(fss...), dir)
+func (r *Repository) GavFiles(coords *Coordinates, creds Credentials) (map[string]crypto.Hash, error) {
+	if r.path != "" {
+		return gavFilesFromDisk(r.fs, coords.GavLocation(r).path)
 	}
-	return gavOnlineFiles(repoUrl, coords, creds)
+	return gavOnlineFiles(r, coords, creds)
 }
 
 func gavFilesFromDisk(fs vfs.FileSystem, dir string) (map[string]crypto.Hash, error) {
@@ -129,11 +202,11 @@ func gavFilesFromDisk(fs vfs.FileSystem, dir string) (map[string]crypto.Hash, er
 }
 
 // gavOnlineFiles returns the files of the Maven (mvn) artifact in the repository and their available digests.
-func gavOnlineFiles(repoUrl string, coords *Coordinates, creds Credentials) (map[string]crypto.Hash, error) {
-	log := Log.WithValues("BaseUrl", repoUrl)
+func gavOnlineFiles(repo *Repository, coords *Coordinates, creds Credentials) (map[string]crypto.Hash, error) {
+	log := Log.WithValues("RepoUrl", repo.String(), "GAV", coords.GavPath())
 	log.Debug("gavOnlineFiles")
 
-	reader, err := GetReader(coords.GavUrl(repoUrl), creds, nil)
+	reader, err := coords.GavLocation(repo).GetReader(creds)
 	if err != nil {
 		return nil, err
 	}

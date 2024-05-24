@@ -37,6 +37,6 @@ var _ = Describe("", func() {
 		defer Close(cv)
 		MustBeSuccessful(cv.SetResourceAccess(me.ResourceAccess(e.OCMContext(), cpi.NewResourceMeta("helm1", "blob", metav1.LocalRelation), "/testdata/testchart1", me.WithFileSystem(e.FileSystem()))))
 		MustBeSuccessful(cv.SetResourceAccess(me.ResourceAccess(e.OCMContext(), cpi.NewResourceMeta("helm2", "blob", metav1.LocalRelation), "/testdata/testchart2", me.WithFileSystem(e.FileSystem()))))
-		MustBeSuccessful(ctf.AddComponentVersion(cv))
+		MustBeSuccessful(ctf.AddComponentVersion(cv, true))
 	})
 })

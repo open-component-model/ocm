@@ -10,7 +10,7 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 		Type, AddConfig,
 		options.RepositoryOption,
 		options.GroupOption,
-		options.PackageOption,
+		options.ArtifactOption,
 		options.VersionOption,
 		// optional
 		options.ClassifierOption,
@@ -19,7 +19,7 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "repository")
+	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "repoUrl")
 	flagsets.AddFieldByOptionP(opts, options.GroupOption, config, "groupId")
 	flagsets.AddFieldByOptionP(opts, options.PackageOption, config, "artifactId")
 	flagsets.AddFieldByOptionP(opts, options.VersionOption, config, "version")
@@ -36,7 +36,7 @@ This method implements the access of a Maven (mvn) artifact in a Maven repositor
 var formatV1 = `
 The type specific specification fields are:
 
-- **<code>repository</code>** *string*
+- **<code>repoUrl</code>** *string*
 
   Base URL of the Maven (mvn) repository
 

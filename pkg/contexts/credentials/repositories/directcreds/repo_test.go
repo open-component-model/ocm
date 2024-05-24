@@ -30,7 +30,7 @@ var _ = Describe("direct credentials", func() {
 	It("deserializes credentials spec", func() {
 		spec, err := DefaultContext.RepositoryForConfig([]byte(propsdata), nil)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(spec).String()).To(Equal("*directcreds.Repository"))
+		Expect(reflect.TypeOf(spec).String()).To(Equal("*directcreds.RepoUrl"))
 	})
 
 	It("resolved direct credentials", func() {

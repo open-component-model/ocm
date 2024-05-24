@@ -82,7 +82,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 
 	mem, ok := repo.(*memory.Repository)
 	if !ok {
-		return fmt.Errorf("invalid type assertion of type %T to memory.Repository", repo)
+		return fmt.Errorf("invalid type assertion of type %T to memory.RepoUrl", repo)
 	}
 
 	for i, e := range a.Credentials {

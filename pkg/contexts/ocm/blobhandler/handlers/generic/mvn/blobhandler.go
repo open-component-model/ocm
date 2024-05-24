@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"encoding/json"
 	"fmt"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/maven"
 	"github.com/open-component-model/ocm/pkg/maven"
 	"github.com/open-component-model/ocm/pkg/optionutils"
@@ -80,30 +81,33 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 		return nil, err
 	}
 	for _, file := range files {
-		e := func() (err error) {
+		e := func() error {
 			log.Debug("uploading", "file", file)
-			err = artifact.SetClassifierExtensionBy(file)
+			err := artifact.SetClassifierExtensionBy(file)
 			if err != nil {
-				return
+				return err
 			}
 			readHash, err := tempFs.Open(file)
 			if err != nil {
-				return
+				return err
 			}
 			defer readHash.Close()
 			// MD5 + SHA1 are still the most used ones in the mvn context
 			hr := iotools.NewHashReader(readHash, crypto.SHA256, crypto.SHA1, crypto.MD5)
 			_, err = hr.CalcHashes()
 			if err != nil {
-				return
+				return err
 			}
 			reader, err := tempFs.Open(file)
 			if err != nil {
-				return
+				return err
 			}
 			defer reader.Close()
-			err = deploy(artifact, b.spec.Url, reader, ctx.GetContext(), hr)
-			return
+			repo, err := maven.NewUrlRepository(b.spec.Url, vfsattr.Get(ctx.GetContext()))
+			if err != nil {
+				return err
+			}
+			return deploy(artifact, repo, reader, ctx.GetContext(), hr)
 		}()
 		if e != nil {
 			return nil, e
@@ -115,12 +119,12 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 }
 
 // deploy an artifact to the specified destination. See https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact
-func deploy(artifact *maven.Coordinates, url string, reader io.ReadCloser, ctx accspeccpi.Context, hashes *iotools.HashReader) (err error) {
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, artifact.Url(url), reader)
+func deploy(coords *maven.Coordinates, repo *maven.Repository, reader io.ReadCloser, ctx accspeccpi.Context, hashes *iotools.HashReader) (err error) {
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, coords.Location(repo).String(), reader)
 	if err != nil {
 		return
 	}
-	err = identity.BasicAuth(req, ctx, url, artifact.GroupPath())
+	err = identity.BasicAuth(req, ctx, repo.String(), coords.GroupPath())
 	if err != nil {
 		return
 	}
@@ -143,9 +147,9 @@ func deploy(artifact *maven.Coordinates, url string, reader io.ReadCloser, ctx a
 		if e != nil {
 			return e
 		}
-		return fmt.Errorf("http (%d) - failed to upload artifact: %s", resp.StatusCode, string(all))
+		return fmt.Errorf("http (%d) - failed to upload coords: %s", resp.StatusCode, string(all))
 	}
-	log.Debug("uploaded", "artifact", artifact, "extension", artifact.Extension, "classifier", artifact.Classifier)
+	log.Debug("uploaded", "coords", coords, "extension", coords.Extension, "classifier", coords.Classifier)
 
 	// Validate the response - especially the hash values with the ones we've tried to send
 	respBody, err := io.ReadAll(resp.Body)
@@ -162,9 +166,9 @@ func deploy(artifact *maven.Coordinates, url string, reader io.ReadCloser, ctx a
 	digest := hashes.GetString(crypto.SHA256)
 	remoteDigest := artifactBody.Checksums[strings.ReplaceAll(strings.ToLower(crypto.SHA256.String()), "-", "")]
 	if remoteDigest == "" {
-		log.Warn("no checksum found for algorithm, we can't guarantee that the artifact has been uploaded correctly", "algorithm", crypto.SHA256)
+		log.Warn("no checksum found for algorithm, we can't guarantee that the coords has been uploaded correctly", "algorithm", crypto.SHA256)
 	} else if remoteDigest != digest {
-		return errors.New("failed to upload artifact: checksums do not match")
+		return errors.New("failed to upload coords: checksums do not match")
 	}
 	log.Debug("digests are ok", "remoteDigest", remoteDigest, "digest", digest)
 	return

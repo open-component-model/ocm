@@ -32,7 +32,7 @@ func (d *Descriptor) Capabilities() []string {
 		caps = append(caps, "Access Methods")
 	}
 	if len(d.Uploaders) > 0 {
-		caps = append(caps, "Repository Uploaders")
+		caps = append(caps, "RepoUrl Uploaders")
 	}
 	if len(d.Downloaders) > 0 {
 		caps = append(caps, "Resource Downloaders")

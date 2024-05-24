@@ -28,7 +28,7 @@ func (k RepositoryContext) String() string {
 
 func (k RepositoryContext) Describe() string {
 	if k.HasRepo() {
-		return fmt.Sprintf("Default Repository Upload:\n  Context Type:   %s\n  RepositoryType: %s", k.ContextType, k.RepositoryType)
+		return fmt.Sprintf("Default RepoUrl Upload:\n  Context Type:   %s\n  RepositoryType: %s", k.ContextType, k.RepositoryType)
 	}
 	return ""
 }

@@ -34,11 +34,11 @@ type ImageMapping struct {
 
 	// The optional variants for the value determination
 
-	// Path in target to substitute by the image tag/digest
+	// BasePath in target to substitute by the image tag/digest
 	Tag string `json:"tag,omitempty"`
-	// Path in target to substitute the image repository
+	// BasePath in target to substitute the image repository
 	Repository string `json:"repository,omitempty"`
-	// Path in target to substitute the complete image
+	// BasePath in target to substitute the complete image
 	Image string `json:"image,omitempty"`
 }
 

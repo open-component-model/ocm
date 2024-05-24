@@ -9,31 +9,31 @@ import (
 
 type BlobMeta = maven.FileMeta
 
-func DataAccessForMaven(repoUrl, groupId, artifactId, version string, opts ...Option) (blobaccess.DataAccess, error) {
-	return BlobAccessForMaven(repoUrl, groupId, artifactId, version, opts...)
+func DataAccessForMaven(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) (blobaccess.DataAccess, error) {
+	return BlobAccessForMaven(repo, groupId, artifactId, version, opts...)
 }
 
-func BlobAccessForMaven(repoUrl, groupId, artifactId, version string, opts ...Option) (blobaccess.BlobAccess, error) {
+func BlobAccessForMaven(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) (blobaccess.BlobAccess, error) {
 	eff := optionutils.EvalOptions(opts...)
 	s := &spec{
 		coords:  maven.NewCoordinates(groupId, artifactId, version, maven.WithOptionalClassifier(eff.Classifier), maven.WithOptionalExtension(eff.Extension)),
-		repoUrl: repoUrl,
+		repo:    repo,
 		options: eff,
 	}
 	return s.getBlobAccess()
 }
 
-func BlobAccessForMavenCoords(repoUrl string, coords *maven.Coordinates, opts ...Option) (blobaccess.BlobAccess, error) {
-	return BlobAccessForMaven(repoUrl, coords.GroupId, coords.ArtifactId, coords.Version, append([]Option{WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension)}, opts...)...)
+func BlobAccessForMavenCoords(repo *maven.Repository, coords *maven.Coordinates, opts ...Option) (blobaccess.BlobAccess, error) {
+	return BlobAccessForMaven(repo, coords.GroupId, coords.ArtifactId, coords.Version, append([]Option{WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension)}, opts...)...)
 }
 
-func BlobAccessProviderForMaven(repoUrl, groupId, artifactId, version string, opts ...Option) bpi.BlobAccessProvider {
+func BlobAccessProviderForMaven(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) bpi.BlobAccessProvider {
 	return bpi.BlobAccessProviderFunction(func() (bpi.BlobAccess, error) {
-		b, err := BlobAccessForMaven(repoUrl, groupId, artifactId, version, opts...)
+		b, err := BlobAccessForMaven(repo, groupId, artifactId, version, opts...)
 		return b, err
 	})
 }
 
-func BlobAccessProviderForMavenCoords(repoUrl string, coords *maven.Coordinates, opts ...Option) bpi.BlobAccessProvider {
-	return BlobAccessProviderForMaven(repoUrl, coords.GroupId, coords.ArtifactId, coords.Version, append([]Option{WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension)}, opts...)...)
+func BlobAccessProviderForMavenCoords(repo *maven.Repository, coords *maven.Coordinates, opts ...Option) bpi.BlobAccessProvider {
+	return BlobAccessProviderForMaven(repo, coords.GroupId, coords.ArtifactId, coords.Version, append([]Option{WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension)}, opts...)...)
 }

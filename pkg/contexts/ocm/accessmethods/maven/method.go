@@ -29,8 +29,8 @@ func init() {
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
-	// Repository is the base URL of the Maven (mvn) repository.
-	Repository string `json:"repository"`
+	// RepoUrl is the base URL of the Maven (mvn) repository.
+	RepoUrl string `json:"repoUrl"`
 
 	maven.Coordinates `json:",inline"`
 }
@@ -58,14 +58,25 @@ var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 func New(repository, groupId, artifactId, version string, opts ...Option) *AccessSpec {
 	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
-		Repository:          repository,
+		RepoUrl:             repository,
 		Coordinates:         *maven.NewCoordinates(groupId, artifactId, version, opts...),
 	}
 	return accessSpec
 }
 
+// NewForCoordinates creates a new Maven (mvn) repository access spec version v1.
+func NewForCoordinates(repository string, coords *maven.Coordinates, opts ...Option) *AccessSpec {
+	optionutils.ApplyOptions(coords, opts...)
+	accessSpec := &AccessSpec{
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
+		RepoUrl:             repository,
+		Coordinates:         *coords,
+	}
+	return accessSpec
+}
+
 func (a *AccessSpec) Describe(_ accspeccpi.Context) string {
-	return fmt.Sprintf("Maven (mvn) package '%s' in repository '%s' path '%s'", a.Coordinates.String(), a.Repository, a.Coordinates.FilePath())
+	return fmt.Sprintf("Maven (mvn) package '%s' in repository '%s' path '%s'", a.Coordinates.String(), a.RepoUrl, a.Coordinates.FilePath())
 }
 
 func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
@@ -87,23 +98,33 @@ func (_ *AccessSpec) GetType() string {
 
 func (a *AccessSpec) AccessMethod(cv accspeccpi.ComponentVersionAccess) (accspeccpi.AccessMethod, error) {
 	octx := cv.GetContext()
+
+	repo, err := maven.NewUrlRepository(a.RepoUrl, vfsattr.Get(cv.GetContext()))
+	if err != nil {
+		return nil, err
+	}
+
 	factory := func() (blobaccess.BlobAccess, error) {
-		return mavenblob.BlobAccessForMavenCoords(a.Repository, &a.Coordinates,
+		return mavenblob.BlobAccessForMavenCoords(repo, &a.Coordinates,
 			mavenblob.WithCredentialContext(octx),
 			mavenblob.WithLoggingContext(octx),
-			mavenblob.WithFileSystem(vfsattr.Get(octx)))
+			mavenblob.WithCachingFileSystem(vfsattr.Get(octx)))
 	}
 	return accspeccpi.AccessMethodForImplementation(accspeccpi.NewDefaultMethodImpl(cv, a, "", a.MimeType(), factory), nil)
 }
 
 func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv accspeccpi.ComponentVersionAccess) string {
-	creds, err := identity.GetCredentials(cv.GetContext(), a.Repository, a.GroupId)
+	creds, err := identity.GetCredentials(cv.GetContext(), a.RepoUrl, a.GroupId)
 	if err != nil {
 		return ""
 	}
 	mvncreds := mavenblob.MapCredentials(creds)
 	fs := vfsattr.Get(cv.GetContext())
-	files, err := maven.GavFiles(a.Repository, &a.Coordinates, mvncreds, fs)
+	repo, err := maven.NewUrlRepository(a.RepoUrl, fs)
+	if err != nil {
+		return ""
+	}
+	files, err := repo.GavFiles(&a.Coordinates, mvncreds)
 	if err != nil {
 		return ""
 	}
@@ -115,18 +136,22 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv accspeccpi.Componen
 		return ""
 	}
 	for _, h := range files {
-		id, _ := maven.GetHash(a.Url(a.Repository), mvncreds, h, fs)
+		id, _ := a.Location(repo).GetHash(mvncreds, h)
 		return id
 	}
 	return ""
 }
 
 func (a *AccessSpec) BaseUrl() string {
-	return a.Repository + "/" + a.GavPath()
+	return a.RepoUrl + "/" + a.GavPath()
 }
 
 func (a *AccessSpec) ArtifactUrl() string {
-	return a.Url(a.Repository)
+	repo, err := maven.NewUrlRepository(a.RepoUrl)
+	if err != nil {
+		return ""
+	}
+	return a.Location(repo).String()
 }
 
 func (a *AccessSpec) GetCoordinates() *maven.Coordinates {

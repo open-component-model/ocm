@@ -22,7 +22,7 @@ type Options struct {
 	CredentialContext credentials.Context
 	LoggingContext    logging.Context
 	CachingContext    datacontext.Context
-	FileSystem        vfs.FileSystem
+	CachingFileSystem vfs.FileSystem
 	CachingPath       string
 	// Credentials allows to pass credentials and certificates for the http communication
 	Credentials credentials.Credentials
@@ -38,17 +38,21 @@ func (o *Options) Logger(keyValuePairs ...interface{}) logging.Logger {
 
 func (o *Options) Cache() *tmpcache.Attribute {
 	if o.CachingPath != "" {
-		return tmpcache.New(o.CachingPath, o.FileSystem)
+		return tmpcache.New(o.CachingPath, o.CachingFileSystem)
 	}
 	return tmpcache.Get(o.CachingContext)
 }
 
-func (o *Options) GetCredentials(repoUrl, groupId string) (maven.Credentials, error) {
+func (o *Options) GetCredentials(repo *maven.Repository, groupId string) (maven.Credentials, error) {
+	if repo.IsFileSystem() {
+		return nil, nil
+	}
+
 	switch {
 	case o.Credentials != nil:
 		return MapCredentials(o.Credentials), nil
 	case o.CredentialContext != nil:
-		consumerid, err := identity.GetConsumerId(repoUrl, groupId)
+		consumerid, err := identity.GetConsumerId(repo.String(), groupId)
 		if err != nil {
 			return nil, err
 		}
@@ -72,8 +76,8 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.LoggingContext != nil {
 		opts.LoggingContext = o.LoggingContext
 	}
-	if o.FileSystem != nil {
-		opts.FileSystem = o.FileSystem
+	if o.CachingFileSystem != nil {
+		opts.CachingFileSystem = o.CachingFileSystem
 	}
 	if o.Credentials != nil {
 		opts.Credentials = o.Credentials
@@ -121,10 +125,10 @@ type fileSystem struct {
 }
 
 func (o *fileSystem) ApplyTo(opts *Options) {
-	opts.FileSystem = o.fs
+	opts.CachingFileSystem = o.fs
 }
 
-func WithFileSystem(fs vfs.FileSystem) Option {
+func WithCachingFileSystem(fs vfs.FileSystem) Option {
 	return &fileSystem{fs: fs}
 }
 

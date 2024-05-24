@@ -62,7 +62,7 @@ var _ = Describe("docker config", func() {
 
 		It("resolves repository", func() {
 			repo := Must(DefaultContext.RepositoryForConfig([]byte(specdata), nil))
-			Expect(reflect.TypeOf(repo).String()).To(Equal("*dockerconfig.Repository"))
+			Expect(reflect.TypeOf(repo).String()).To(Equal("*dockerconfig.RepoUrl"))
 		})
 
 		It("retrieves credentials", func() {
@@ -122,7 +122,7 @@ var _ = Describe("docker config", func() {
 
 		It("resolves repository", func() {
 			repo := Must(DefaultContext.RepositoryForConfig([]byte(specdata), nil))
-			Expect(reflect.TypeOf(repo).String()).To(Equal("*dockerconfig.Repository"))
+			Expect(reflect.TypeOf(repo).String()).To(Equal("*dockerconfig.RepoUrl"))
 		})
 
 		It("retrieves credentials", func() {

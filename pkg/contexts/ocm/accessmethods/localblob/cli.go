@@ -41,7 +41,7 @@ The type specific specification fields are:
 
 - **<code>localReference</code>** *string*
 
-  Repository type specific location information as string. The value
+  RepoUrl type specific location information as string. The value
   may encode any deep structure, but typically just an access path is sufficient.
 
 - **<code>mediaType</code>** *string*

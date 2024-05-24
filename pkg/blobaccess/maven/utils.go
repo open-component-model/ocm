@@ -29,7 +29,7 @@ type coords = *maven.Coordinates
 
 type spec struct {
 	coords
-	repoUrl string
+	repo    *maven.Repository
 	options *Options
 }
 
@@ -37,12 +37,12 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
-	log := s.options.Logger("BaseUrl", s.repoUrl)
-	creds, err := s.options.GetCredentials(s.repoUrl, s.GroupId)
+	log := s.options.Logger("RepoUrl", s.repo.String())
+	creds, err := s.options.GetCredentials(s.repo, s.GroupId)
 	if err != nil {
 		return nil, err
 	}
-	fileMap, err := maven.GavFiles(s.repoUrl, s.coords, creds, s.options.FileSystem)
+	fileMap, err := s.repo.GavFiles(s.coords, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -54,11 +54,11 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 		return nil, errors.New("no maven artifact files found")
 	case l == 1 && optionutils.AsValue(s.Extension) != "" && s.Classifier != nil:
 		for file, hash := range fileMap {
-			metadata, err := maven.GetFileMeta(s.repoUrl, s.coords, file, hash, creds, s.options.FileSystem)
+			metadata, err := s.repo.GetFileMeta(s.coords, file, hash, creds)
 			if err != nil {
 				return nil, err
 			}
-			return blobAccessForRepositoryAccess(metadata, creds, s.options, s.options.FileSystem)
+			return blobAccessForRepositoryAccess(metadata, creds, s.options)
 		}
 		// default: continue below with: create tmpfs where all files can be downloaded to and packed together as tar.gz
 	}
@@ -73,7 +73,7 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 
 	for file, hash := range fileMap {
 		loop := finalize.Nested()
-		metadata, err := maven.GetFileMeta(s.repoUrl, s.coords, file, hash, creds, s.options.FileSystem)
+		metadata, err := s.repo.GetFileMeta(s.coords, file, hash, creds)
 		if err != nil {
 			return nil, err
 		}
@@ -85,7 +85,7 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 		}
 		loop.Close(out)
 
-		reader, err := maven.GetReader(metadata.Url, creds, s.options.FileSystem)
+		reader, err := metadata.Location.GetReader(creds)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +111,7 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 	}
 
 	// pack all downloaded files into a tar.gz file
-	fs := utils.FileSystem(s.options.FileSystem)
+	fs := utils.FileSystem(s.options.CachingFileSystem)
 	tgz, err := vfs.TempFile(fs, "", "maven-"+s.coords.FileNamePrefix()+"-*.tar.gz")
 	if err != nil {
 		return nil, err
@@ -128,9 +128,9 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 	return blobaccess.ForTemporaryFilePathWithMeta(mime.MIME_TGZ, dw.Digest(), dw.Size(), tgz.Name(), fs), nil
 }
 
-func blobAccessForRepositoryAccess(meta *BlobMeta, creds maven.Credentials, opts *Options, fss ...vfs.FileSystem) (bpi.BlobAccess, error) {
+func blobAccessForRepositoryAccess(meta *BlobMeta, creds maven.Credentials, opts *Options) (bpi.BlobAccess, error) {
 	reader := func() (io.ReadCloser, error) {
-		return maven.GetReader(meta.Url, creds, fss...)
+		return meta.Location.GetReader(creds)
 	}
 	if meta.Hash != "" {
 		getreader := reader
@@ -142,7 +142,7 @@ func blobAccessForRepositoryAccess(meta *BlobMeta, creds maven.Credentials, opts
 			return iotools.VerifyingReaderWithHash(readCloser, meta.HashType, meta.Hash), nil
 		}
 	}
-	acc := blobaccess.DataAccessForReaderFunction(reader, meta.Url)
+	acc := blobaccess.DataAccessForReaderFunction(reader, meta.Location.String())
 	return accessobj.CachedBlobAccessForWriterWithCache(opts.Cache(), meta.MimeType, accessio.NewDataAccessWriter(acc)), nil
 }
 

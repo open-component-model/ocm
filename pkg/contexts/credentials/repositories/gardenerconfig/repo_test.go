@@ -91,7 +91,7 @@ var _ = Describe("gardener config", func() {
 		repo, err := defaultContext.RepositoryForConfig([]byte(specdata), nil)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(repo).ToNot(BeNil())
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*gardenerconfig.Repository"))
+		Expect(reflect.TypeOf(repo).String()).To(Equal("*gardenerconfig.RepoUrl"))
 	})
 
 	It("retrieves credentials from unencrypted server", func() {

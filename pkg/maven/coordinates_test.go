@@ -24,7 +24,8 @@ var _ = Describe("Maven Test Environment", func() {
 	It("SetClassifierExtensionBy", func() {
 		coords := me.NewCoordinates("ocm.software", "hello-ocm", "0.0.1")
 		MustBeSuccessful(coords.SetClassifierExtensionBy("hello-ocm-0.0.1.pom"))
-		Expect(coords.Classifier).To(BeNil())
+		Expect(coords.Classifier).ToNot(BeNil())
+		Expect(optionutils.AsValue(coords.Classifier)).To(Equal(""))
 		Expect(optionutils.AsValue(coords.Extension)).To(Equal("pom"))
 
 		MustBeSuccessful(coords.SetClassifierExtensionBy("hello-ocm-0.0.1-tests.jar"))
