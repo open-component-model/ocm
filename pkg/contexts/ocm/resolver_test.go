@@ -51,7 +51,7 @@ var _ = Describe("resolver", func() {
 		cv := Must(ctx.GetResolver().LookupComponentVersion(COMPONENT, VERSION))
 
 		/*
-			err := cv.RepoUrl().Close()
+			err := cv.Repository().Close()
 			if err != nil {
 				defer cv.Close()
 				Expect(err).To(Succeed())

@@ -46,7 +46,7 @@ var _ = Describe("alias credentials", func() {
 
 		repo, err := DefaultContext.RepositoryForConfig([]byte(specdata), nil)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*memory.RepoUrl"))
+		Expect(reflect.TypeOf(repo).String()).To(Equal("*memory.Repository"))
 	})
 
 	It("sets and retrieves credentials", func() {

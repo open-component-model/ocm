@@ -15,7 +15,6 @@ import (
 type Spec struct {
 	cpi.PathSpec `json:",inline"`
 	// RepoUrl defines the url from which the artifact is downloaded.
-	// RepoUrl is the base URL of the Maven (mvn) repository.
 	RepoUrl string `json:"repoUrl,omitempty"`
 
 	maven.Coordinates `json:",inline"`

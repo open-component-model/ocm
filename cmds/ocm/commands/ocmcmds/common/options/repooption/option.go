@@ -94,7 +94,7 @@ Dedicated OCM repository types:
 	s += listformat.FormatMapElements("", runtime.KindToVersionList(ocm.DefaultContext().RepositoryTypes().KnownTypeNames()))
 
 	s += `
-OCI RepoUrl types (using standard component repository to OCI mapping):
+OCI Repository types (using standard component repository to OCI mapping):
 `
 	s += listformat.FormatMapElements("", runtime.KindToVersionList(oci.DefaultContext().RepositoryTypes().KnownTypeNames(), genericocireg.Excludes...))
 	return s

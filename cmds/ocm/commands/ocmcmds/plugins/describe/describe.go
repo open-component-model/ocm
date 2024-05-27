@@ -32,7 +32,7 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 
 			return
 		}
-		out.Printf("  RepoUrl:      %s\n", u.String())
+		out.Printf("  Repository:      %s\n", u.String())
 		out.Printf("    Specification: %s\n", string(data))
 	} else {
 		out.Printf("Source:           manually installed\n")

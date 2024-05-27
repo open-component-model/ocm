@@ -17,7 +17,7 @@ var _ = Describe("Config deserialization Test Environment", func() {
 	})
 
 	It("deserializes struct", func() {
-		cfg := Must(registrations.DecodeConfig[mvn.Config](`{"RepoUrl":"test"}`))
+		cfg := Must(registrations.DecodeConfig[mvn.Config](`{"url":"test"}`))
 		Expect(cfg).To(Equal(&mvn.Config{Url: "test"}))
 	})
 })

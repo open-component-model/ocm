@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "OCI Registry OCM RepoUrl Test Suite")
+	RunSpecs(t, "OCI Registry OCM Repository Test Suite")
 }

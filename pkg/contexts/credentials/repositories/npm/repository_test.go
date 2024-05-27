@@ -48,7 +48,7 @@ var _ = Describe("NPM config - .npmrc", func() {
 
 	It("resolves repository", func() {
 		repo := Must(DefaultContext.RepositoryForConfig([]byte(specdata), nil))
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*npm.RepoUrl"))
+		Expect(reflect.TypeOf(repo).String()).To(Equal("*npm.Repository"))
 	})
 
 	It("retrieves credentials", func() {

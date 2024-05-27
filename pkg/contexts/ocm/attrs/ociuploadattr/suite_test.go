@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "OCI Upload RepoUrl Attribute")
+	RunSpecs(t, "OCI Upload Repository Attribute")
 }

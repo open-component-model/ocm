@@ -43,7 +43,7 @@ func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descrip
 	if len(d.Uploaders) > 0 {
 		out.Printf("\n")
 		// a working type inference would be really great
-		ListElements[descriptor.UploaderDescriptor, descriptor.UploaderKey]("RepoUrl Uploaders", d.Uploaders, out)
+		ListElements[descriptor.UploaderDescriptor, descriptor.UploaderKey]("Repository Uploaders", d.Uploaders, out)
 	}
 	if len(d.Downloaders) > 0 {
 		out.Printf("\n")

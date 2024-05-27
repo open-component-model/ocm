@@ -1,4 +1,4 @@
-package genericocireg_test
+package mavenblob_test
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Generic OCI OCM Repository Test Suite")
+	RunSpecs(t, "Maven Blob Access Test Suite")
 }

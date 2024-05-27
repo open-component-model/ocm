@@ -146,7 +146,7 @@ var _ = Describe("generic credentials", func() {
 
 			repo, err := ctx.RepositoryForSpec(spec)
 			Expect(err).To(Succeed())
-			Expect(reflect.TypeOf(repo).String()).To(Equal("*memory.RepoUrl"))
+			Expect(reflect.TypeOf(repo).String()).To(Equal("*memory.Repository"))
 		})
 
 		It("applies a config for consumers", func() {

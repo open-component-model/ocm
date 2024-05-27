@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "OCM Virtual RepoUrl Suite")
+	RunSpecs(t, "OCM Virtual Repository Suite")
 }

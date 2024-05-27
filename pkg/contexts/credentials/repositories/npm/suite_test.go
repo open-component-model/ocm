@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "NPM RepoUrl tests")
+	RunSpecs(t, "NPM Repository tests")
 }

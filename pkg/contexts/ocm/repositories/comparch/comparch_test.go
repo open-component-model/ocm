@@ -39,7 +39,7 @@ const (
 	COMPONENT_VERSION = "1.0.0"
 )
 
-var _ = Describe("RepoUrl", func() {
+var _ = Describe("Repository", func() {
 
 	It("marshal/unmarshal simple", func() {
 		octx := ocm.DefaultContext()
