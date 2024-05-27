@@ -7,9 +7,11 @@ package maven_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	me "github.com/open-component-model/ocm/pkg/maven"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/mandelsoft/goutils/optionutils"
+
+	me "github.com/open-component-model/ocm/pkg/maven"
 )
 
 var _ = Describe("Maven Test Environment", func() {

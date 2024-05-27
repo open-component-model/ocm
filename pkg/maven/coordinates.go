@@ -7,13 +7,15 @@ package maven
 import (
 	"crypto"
 	"fmt"
-	"github.com/mandelsoft/goutils/generics"
-	. "github.com/mandelsoft/goutils/regexutils"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"mime"
 	"path"
 	"path/filepath"
 	"strings"
+
+	. "github.com/mandelsoft/goutils/regexutils"
+
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	ocmmime "github.com/open-component-model/ocm/pkg/mime"
 )

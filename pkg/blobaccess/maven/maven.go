@@ -1,9 +1,10 @@
 package maven
 
 import (
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/maven"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 type (
