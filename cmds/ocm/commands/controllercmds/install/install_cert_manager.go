@@ -11,26 +11,25 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/common"
-	"github.com/open-component-model/ocm/pkg/out"
 )
 
 //go:embed issuer/registry_certificate.yaml
 var issuer []byte
 
 func (o *Command) installPrerequisites(ctx context.Context) error {
-	out.Outf(o.Context, "► installing cert-manager with version %s\n", o.CertManagerVersion)
+	common.Outf(o.Context, o.DryRun, "► installing cert-manager with version %s\n", o.CertManagerVersion)
 
 	if err := common.Install(ctx, o.Context, o.SM, o.CertManagerReleaseAPIURL, o.CertManagerBaseURL, "cert-manager", "cert-manager.yaml", o.CertManagerVersion, o.DryRun); err != nil {
 		return err
 	}
 
-	out.Outf(o.Context, "✔ cert-manager successfully installed\n")
+	common.Outf(o.Context, o.DryRun, "✔ cert-manager successfully installed\n")
 
 	if o.DryRun {
 		return nil
 	}
 
-	out.Outf(o.Context, "► creating certificate for internal registry\n")
+	common.Outf(o.Context, o.DryRun, "► creating certificate for internal registry\n")
 
 	if err := o.createRegistryCertificate(); err != nil {
 		return fmt.Errorf("✗ failed to create registry certificate: %w", err)

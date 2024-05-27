@@ -50,9 +50,8 @@ var _ = Describe("Test Environment", func() {
 	It("uninstall latest version", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("controller", "uninstall", "-d", "-u", testServer.URL, "-a", testServer.URL)).To(Succeed())
+		fmt.Println(buf.String())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`► uninstalling ocm-controller with version latest
-► got latest version "v0.0.1-test"
-✔ successfully fetched install file
 test: content
 ✔ ocm-controller successfully uninstalled
 `))
@@ -61,8 +60,8 @@ test: content
 	It("uninstall specific version", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("controller", "uninstall", "-d", "-u", testServer.URL, "-a", testServer.URL, "-v", "v0.1.0-test-2")).To(Succeed())
+		fmt.Println(buf.String())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`► uninstalling ocm-controller with version v0.1.0-test-2
-✔ successfully fetched install file
 test: content
 ✔ ocm-controller successfully uninstalled
 `))
