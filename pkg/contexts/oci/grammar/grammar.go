@@ -3,7 +3,7 @@ package grammar
 import (
 	"strings"
 
-	. "github.com/open-component-model/ocm/pkg/regex"
+	. "github.com/mandelsoft/goutils/regexutils"
 )
 
 const (

@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
@@ -16,7 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	ocmmime "github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

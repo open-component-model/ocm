@@ -1,7 +1,7 @@
 package github
 
 import (
-	"github.com/open-component-model/ocm/pkg/optionutils"
+	"github.com/mandelsoft/goutils/optionutils"
 )
 
 type Option = optionutils.Option[*Options]

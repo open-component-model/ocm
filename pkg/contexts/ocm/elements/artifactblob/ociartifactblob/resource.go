@@ -2,6 +2,7 @@ package ociartifactblob
 
 import (
 	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	blob "github.com/open-component-model/ocm/pkg/blobaccess/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -9,7 +10,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 const TYPE = resourcetypes.OCI_IMAGE

@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 type Result struct {

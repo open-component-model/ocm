@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -14,7 +15,6 @@ import (
 	ocihelm "github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/helm"
 	"github.com/open-component-model/ocm/pkg/helm/loader"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

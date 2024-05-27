@@ -5,12 +5,12 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 )
