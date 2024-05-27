@@ -130,4 +130,10 @@ var _ = Describe("repository", func() {
 		cv.GetDescriptor().Provider.Name = "acme.org"
 		ExpectError(cl.Close()).To(MatchError(accessobj.ErrReadOnly))
 	})
+
+	It("provides early error", func() {
+		repo := me.NewRepository(ctx)
+		cv := me.NewComponentVersion(ctx, "a", "1.0")
+		ExpectError(repo.AddComponentVersion(cv)).To(MatchError("component.name: Does not match pattern '^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$'"))
+	})
 })

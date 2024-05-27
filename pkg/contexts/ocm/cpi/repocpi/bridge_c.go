@@ -134,6 +134,11 @@ func (c *componentAccessBridge) AddVersion(cv cpi.ComponentVersionAccess, opts *
 		return err
 	}
 
+	err = compdesc.Validate(cv.GetDescriptor())
+	if err != nil {
+		return err
+	}
+
 	forcestore := c.IsOwned(cv)
 	if !forcestore {
 		eff, err := c.NewVersion(cv.GetVersion(), optionutils.AsValue(opts.Overwrite))
