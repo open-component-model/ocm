@@ -1,7 +1,7 @@
 package grammar
 
 import (
-	. "github.com/open-component-model/ocm/pkg/regex"
+	. "github.com/mandelsoft/goutils/regexutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 )

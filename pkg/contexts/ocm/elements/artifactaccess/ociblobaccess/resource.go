@@ -1,6 +1,7 @@
 package github
 
 import (
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -10,7 +11,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactaccess/genericaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 const TYPE = resourcetypes.BLOB
