@@ -75,7 +75,6 @@ func NewCoordinates(groupId, artifactId, version string, opts ...CoordinateOptio
 
 // GAV returns the GAV coordinates of the Maven Coordinates.
 func (c *Coordinates) GAV() string {
-	NewCoordinates("a", "b", "c", WithClassifier("a"), WithExtension("c"))
 	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version
 }
 
@@ -93,20 +92,24 @@ func (c *Coordinates) GavLocation(repo *Repository) *Location {
 	return repo.AddPath(c.GavPath())
 }
 
+func (c *Coordinates) FileName() string {
+	file := c.FileNamePrefix()
+	if optionutils.AsValue(c.Classifier) != "" {
+		file += "-" + *c.Classifier
+	}
+	if optionutils.AsValue(c.Extension) != "" {
+		file += "." + *c.Extension
+	} else {
+		file += ".jar"
+	}
+	return file
+}
+
 // FilePath returns the Maven Coordinates's GAV-name with classifier and extension.
 // Which is equal to the URL-path of the artifact in the repository.
 // Default extension is jar.
 func (c *Coordinates) FilePath() string {
-	path := c.GavPath() + "/" + c.FileNamePrefix()
-	if optionutils.AsValue(c.Classifier) != "" {
-		path += "-" + *c.Classifier
-	}
-	if optionutils.AsValue(c.Extension) != "" {
-		path += "." + *c.Extension
-	} else {
-		path += ".jar"
-	}
-	return path
+	return c.GavPath() + "/" + c.FileName()
 }
 
 func (c *Coordinates) Location(repo *Repository) *Location {

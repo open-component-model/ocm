@@ -1,22 +1,58 @@
-package mvn
+package maven
 
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/mandelsoft/goutils/errors"
-
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/maven"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/registrations"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
+func init() {
+	cpi.RegisterBlobHandlerRegistrationHandler(BlobHandlerName, &RegistrationHandler{})
+}
+
 type Config struct {
-	Url string `json:"url"`
+	Url        string         `json:"url"`
+	Path       string         `json:"path"`
+	FileSystem vfs.FileSystem `json:"-"`
+}
+
+func NewFileConfig(path string, fss ...vfs.FileSystem) *Config {
+	return &Config{
+		Path:       path,
+		FileSystem: utils.FileSystem(fss...),
+	}
+}
+
+func NewUrlConfig(url string, fss ...vfs.FileSystem) *Config {
+	return &Config{
+		Url:        url,
+		FileSystem: utils.FileSystem(fss...),
+	}
 }
 
 type rawConfig Config
+
+func (c *Config) GetRepository(ctx cpi.ContextProvider) (*maven.Repository, error) {
+	if c.Url != "" && c.Path != "" {
+		return nil, fmt.Errorf("cannot specify both url and path")
+	}
+	if c.Url != "" {
+		return maven.NewUrlRepository(c.Url, general.OptionalDefaulted(vfsattr.Get(ctx.OCMContext()), c.FileSystem))
+	}
+	if c.Path != "" {
+		return maven.NewFileRepository(c.Path, general.OptionalDefaulted(vfsattr.Get(ctx.OCMContext()), c.FileSystem)), nil
+	}
+	return nil, fmt.Errorf("must specify either url or path")
+}
 
 func (c *Config) UnmarshalJSON(data []byte) error {
 	err := json.Unmarshal(data, &c.Url)
@@ -33,10 +69,6 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func init() {
-	cpi.RegisterBlobHandlerRegistrationHandler(BlobHandlerName, &RegistrationHandler{})
-}
-
 type RegistrationHandler struct{}
 
 var _ cpi.BlobHandlerRegistrationHandler = (*RegistrationHandler)(nil)
@@ -46,7 +78,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 		return true, fmt.Errorf("invalid %s handler %q", resourcetypes.MAVEN_ARTIFACT, handler)
 	}
 	if config == nil {
-		return true, fmt.Errorf("mvn target specification required")
+		return true, fmt.Errorf("maven target specification required")
 	}
 	cfg, err := registrations.DecodeConfig[Config](config)
 	if err != nil {

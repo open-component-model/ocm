@@ -2,6 +2,7 @@ package maven_test
 
 import (
 	"crypto"
+	"io"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -50,7 +51,7 @@ sdk-modules-bom-5.7.0.pom: 3
 		Expect(hash).To(Equal("34ccdeb9c008f8aaef90873fc636b09d3ae5c709"))
 	})
 
-	It("", func() {
+	It("access dedicated file", func() {
 		coords := me.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithClassifier(""), me.WithExtension("pom"))
 		meta := Must(repo.GetFileMeta(coords, "sdk-modules-bom-5.7.0.pom", crypto.SHA1, nil))
 		Expect(meta).To(YAMLEqual(`
@@ -110,6 +111,22 @@ sdk-modules-bom-5.7.0.jar: 3
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0-sources.jar: 3
 `))
+		})
+
+		It("download dedicated file", func() {
+			coords := me.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithClassifier(""), me.WithExtension("pom"))
+			reader := Must(repo.Download(coords, nil, true))
+			data := Must(io.ReadAll(reader))
+			Expect(len(data)).To(Equal(7153))
+			MustBeSuccessful(reader.Close())
+		})
+
+		It("download dedicated file with filed digest verification", func() {
+			coords := me.NewCoordinates("test", "repository", "42", me.WithClassifier(""), me.WithExtension("pom"))
+			repo := me.NewFileRepository(FAILPATH, env)
+			reader := Must(repo.Download(coords, nil, true))
+			_ = Must(io.ReadAll(reader))
+			Expect(reader.Close()).To(MatchError("SHA-1 digest mismatch: expected 44a77645201d1a8fc5213ace787c220eabbd0967, found b3242b8c31f8ce14f729b8fd132ac77bc4bc5bf7"))
 		})
 	})
 })

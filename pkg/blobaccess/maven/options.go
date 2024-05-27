@@ -10,7 +10,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/maven/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
@@ -56,15 +55,7 @@ func (o *Options) GetCredentials(repo *maven.Repository, groupId string) (maven.
 	case o.Credentials != nil:
 		return MapCredentials(o.Credentials), nil
 	case o.CredentialContext != nil:
-		consumerid, err := identity.GetConsumerId(repo.String(), groupId)
-		if err != nil {
-			return nil, err
-		}
-		creds, err := credentials.CredentialsForConsumer(o.CredentialContext, consumerid, identity.IdentityMatcher)
-		if err != nil {
-			return nil, err
-		}
-		return MapCredentials(creds), nil
+		return GetCredentials(o.CredentialContext, repo, groupId)
 	default:
 		return nil, nil
 	}

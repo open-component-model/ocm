@@ -1,14 +1,10 @@
 package identity
 
 import (
-	"errors"
-	"net/http"
-
 	. "net/url"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/logging"
 )
@@ -63,20 +59,4 @@ func GetCredentials(ctx cpi.ContextProvider, repoUrl, groupId string) (cpi.Crede
 		return nil, nil
 	}
 	return cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
-}
-
-func BasicAuth(req *http.Request, ctx accspeccpi.Context, repoUrl, groupId string) (err error) {
-	credentials, err := GetCredentials(ctx, repoUrl, groupId)
-	if err != nil {
-		return err
-	}
-	if credentials == nil {
-		logging.DynamicLogger(REALM).Debug("No credentials found. BasicAuth not required?", "url", repoUrl, "groupId", groupId)
-		return nil
-	}
-	if !credentials.ExistsProperty(ATTR_USERNAME) || !credentials.ExistsProperty(ATTR_PASSWORD) {
-		return errors.New("missing username or password in credentials")
-	}
-	req.SetBasicAuth(credentials.GetProperty(ATTR_USERNAME), credentials.GetProperty(ATTR_PASSWORD))
-	return
 }

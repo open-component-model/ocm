@@ -1,4 +1,4 @@
-package mvn_test
+package maven_test
 
 import (
 	"testing"

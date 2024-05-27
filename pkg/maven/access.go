@@ -9,12 +9,16 @@ import (
 	"context"
 	"crypto"
 	"encoding/json"
+	"fmt"
 	"github.com/cloudflare/cfssl/log"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
+	"golang.org/x/exp/maps"
 	"golang.org/x/net/html"
 	"io"
 	"net/http"
@@ -162,6 +166,155 @@ func (l *Location) GetReader(creds Credentials) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
+func (r *Repository) Url() (string, error) {
+	if r.url != "" {
+		return r.url, nil
+	}
+	p, err := vfs.Canonical(r.fs, r.path, false)
+	if err != nil {
+		return "", err
+	}
+	return "file://localhost" + p, nil
+}
+
+// Body is the response struct of a deployment from the MVN repository (JFrog Artifactory).
+type Body struct {
+	Repo        string            `json:"repo"`
+	Path        string            `json:"path"`
+	DownloadUri string            `json:"downloadUri"`
+	Uri         string            `json:"uri"`
+	MimeType    string            `json:"mimeType"`
+	Size        string            `json:"size"`
+	Checksums   map[string]string `json:"checksums"`
+}
+
+func (r *Repository) Download(coords *Coordinates, creds Credentials, enforceVerification ...bool) (io.ReadCloser, error) {
+	files, err := r.GavFiles(coords, creds)
+	if err != nil {
+		return nil, err
+	}
+	algorithm, ok := files[coords.FileName()]
+	if !ok {
+		return nil, errors.ErrNotFound("file", coords.FileName(), coords.GAV())
+	}
+
+	var digest string
+	loc := coords.Location(r)
+	if algorithm != 0 {
+		digestFile := loc.AddExtension(HashExt(algorithm))
+		reader, err := digestFile.GetReader(creds)
+		if err != nil {
+			return nil, err
+		}
+		digestData, err := io.ReadAll(reader)
+		if err != nil {
+			return nil, err
+		}
+		digest = string(digestData)
+	} else {
+		if general.Optional(enforceVerification...) {
+			return nil, fmt.Errorf("unable to verify, no digest available in target repository")
+		}
+	}
+
+	reader, err := loc.GetReader(creds)
+	if err != nil {
+		return nil, err
+	}
+	if algorithm != 0 {
+		reader = iotools.VerifyingReaderWithHash(reader, algorithm, digest)
+	}
+	return reader, nil
+}
+
+func (r *Repository) Upload(coords *Coordinates, reader io.ReadCloser, creds Credentials, hashes iotools.Hashes) (rerr error) {
+	finalize := finalizer.Finalizer{}
+	defer finalize.FinalizeWithErrorPropagation(&rerr)
+
+	loc := coords.Location(r)
+	if r.IsFileSystem() {
+		err := loc.fs.MkdirAll(vfs.Dir(loc.fs, loc.path), 0o755)
+		if err != nil {
+			return err
+		}
+		f, err := loc.fs.OpenFile(loc.path, vfs.O_WRONLY|vfs.O_CREATE|vfs.O_TRUNC, 0o644)
+		if err != nil {
+			return err
+		}
+		finalize.Close(f)
+
+		_, err = io.Copy(f, reader)
+		if err != nil {
+			return err
+		}
+
+		for algorithm := range hashes {
+			digest := hashes.GetString(algorithm)
+			p := loc.path + "." + HashExt(algorithm)
+			err = vfs.WriteFile(loc.fs, p, []byte(digest), 0o644)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, loc.String(), reader)
+	if err != nil {
+		return err
+	}
+	if creds != nil {
+		err = creds.SetForRequest(req)
+		if err != nil {
+			return err
+		}
+	}
+	// give the remote server a chance to decide based upon the checksum policy
+	for k, v := range hashes.AsHttpHeader() {
+		req.Header[k] = v
+	}
+
+	// Execute the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	finalize.Close(resp.Body)
+
+	// Check the response
+	if resp.StatusCode != http.StatusCreated {
+		all, e := io.ReadAll(resp.Body)
+		if e != nil {
+			return e
+		}
+		return fmt.Errorf("http (%d) - failed to upload coords: %s", resp.StatusCode, string(all))
+	}
+	Log.Debug("uploaded", "coords", coords, "extension", coords.Extension, "classifier", coords.Classifier)
+
+	// Validate the response - especially the hash values with the ones we've tried to send
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	var artifactBody Body
+	err = json.Unmarshal(respBody, &artifactBody)
+	if err != nil {
+		return err
+	}
+
+	algorithm := bestAvailableHash(maps.Keys(hashes))
+	digest := hashes.GetString(algorithm)
+	remoteDigest := artifactBody.Checksums[strings.ReplaceAll(strings.ToLower(algorithm.String()), "-", "")]
+	if remoteDigest == "" {
+		Log.Warn("no checksum found for algorithm, we can't guarantee that the coords has been uploaded correctly", "algorithm", algorithm.String())
+	} else if remoteDigest != digest {
+		return errors.New("failed to upload coords: checksums do not match")
+	}
+	Log.Debug("digests are ok", "remoteDigest", remoteDigest, "digest", digest)
+	return err
+}
+
 func (r *Repository) GetFileMeta(c *Coordinates, file string, hash crypto.Hash, creds Credentials) (*FileMeta, error) {
 	coords := c.Copy()
 	err := coords.SetClassifierExtensionBy(file)
@@ -247,7 +400,7 @@ func filesAndHashes(fileList []string) map[string]crypto.Hash {
 	result := make(map[string]crypto.Hash, len(fileList)/2)
 	for _, file := range fileList {
 		if IsResource(file) {
-			result[file] = bestAvailableHash(fileList, file)
+			result[file] = bestAvailableHashForFile(fileList, file)
 			log.Debug("found", "file", file)
 		}
 	}

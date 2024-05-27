@@ -156,3 +156,15 @@ func MapCredentials(creds credentials.Credentials) maven.Credentials {
 		Password: creds.GetProperty(identity.ATTR_PASSWORD),
 	}
 }
+
+func GetCredentials(ctx credentials.ContextProvider, repo *Repository, groupId string) (maven.Credentials, error) {
+	consumerid, err := identity.GetConsumerId(repo.String(), groupId)
+	if err != nil {
+		return nil, err
+	}
+	creds, err := credentials.CredentialsForConsumer(ctx, consumerid, identity.IdentityMatcher)
+	if err != nil {
+		return nil, err
+	}
+	return MapCredentials(creds), nil
+}
