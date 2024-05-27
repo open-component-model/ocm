@@ -26,7 +26,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
-const BlobHandlerName = "ocm/" + resourcetypes.MVN_ARTIFACT
+const BlobHandlerName = "ocm/" + resourcetypes.MAVEN_ARTIFACT
 
 type artifactHandler struct {
 	spec *Config
@@ -44,7 +44,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 		return nil, nil
 	}
 	mimeType := blob.MimeType()
-	if resourcetypes.MVN_ARTIFACT != resourceType {
+	if resourcetypes.MAVEN_ARTIFACT != resourceType {
 		log.Debug("not a MVN artifact", "resourceType", resourceType)
 		return nil, nil
 	}

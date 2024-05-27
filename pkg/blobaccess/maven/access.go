@@ -7,8 +7,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
-type BlobMeta = maven.FileMeta
-
 func DataAccessForMaven(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) (blobaccess.DataAccess, error) {
 	return BlobAccessForMaven(repo, groupId, artifactId, version, opts...)
 }

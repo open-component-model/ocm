@@ -40,6 +40,9 @@ func (o *Options) Cache() *tmpcache.Attribute {
 	if o.CachingPath != "" {
 		return tmpcache.New(o.CachingPath, o.CachingFileSystem)
 	}
+	if o.CachingContext == nil {
+		return tmpcache.Get(o.CredentialContext)
+	}
 	return tmpcache.Get(o.CachingContext)
 }
 
@@ -120,19 +123,45 @@ func WithLoggingContext(ctx logging.ContextProvider) Option {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type fileSystem struct {
+type cachingContext struct {
+	datacontext.Context
+}
+
+func (o cachingContext) ApplyTo(opts *Options) {
+	opts.CachingContext = o
+}
+
+func WithCachingContext(ctx datacontext.Context) Option {
+	return cachingContext{ctx}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type cachingFileSystem struct {
 	fs vfs.FileSystem
 }
 
-func (o *fileSystem) ApplyTo(opts *Options) {
+func (o *cachingFileSystem) ApplyTo(opts *Options) {
 	opts.CachingFileSystem = o.fs
 }
 
 func WithCachingFileSystem(fs vfs.FileSystem) Option {
-	return &fileSystem{fs: fs}
+	return &cachingFileSystem{fs: fs}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+type cachingPath string
+
+func (o cachingPath) ApplyTo(opts *Options) {
+	opts.CachingPath = string(o)
+}
+
+func WithCachingPath(p string) Option {
+	return cachingPath(p)
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 type creds struct {
 	credentials.Credentials

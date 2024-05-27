@@ -43,7 +43,7 @@ var _ cpi.BlobHandlerRegistrationHandler = (*RegistrationHandler)(nil)
 
 func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, config cpi.BlobHandlerConfig, olist ...cpi.BlobHandlerOption) (bool, error) {
 	if handler != "" {
-		return true, fmt.Errorf("invalid %s handler %q", resourcetypes.MVN_ARTIFACT, handler)
+		return true, fmt.Errorf("invalid %s handler %q", resourcetypes.MAVEN_ARTIFACT, handler)
 	}
 	if config == nil {
 		return true, fmt.Errorf("mvn target specification required")
@@ -54,7 +54,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 	}
 
 	ctx.BlobHandlers().Register(NewArtifactHandler(cfg),
-		cpi.ForArtifactType(resourcetypes.MVN_ARTIFACT),
+		cpi.ForArtifactType(resourcetypes.MAVEN_ARTIFACT),
 		cpi.ForMimeType(mime.MIME_TGZ),
 		cpi.NewBlobHandlerOptions(olist...),
 	)
