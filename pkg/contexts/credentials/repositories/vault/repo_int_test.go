@@ -12,6 +12,8 @@ import (
 
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
+	"github.com/mandelsoft/goutils/errors"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -20,7 +22,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	me "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 )
@@ -328,7 +329,7 @@ path "secret/metadata/%s/*"
 			role := Must(vaultClient.Auth.AppRoleReadRoleId(ctx, VAULT_APP_ROLE1))
 			roleid := role.Data.RoleId
 			// Unfortunately, this function is currently bugged, therefore we fall back to the generic function
-			//secretid := Must(client.Auth.AppRoleWriteSecretId(ctx, VAULT_APP_ROLE, schema.AppRoleWriteSecretIdRequest{}))
+			// secretid := Must(client.Auth.AppRoleWriteSecretId(ctx, VAULT_APP_ROLE, schema.AppRoleWriteSecretIdRequest{}))
 			secret := Must(vaultClient.Write(ctx, fmt.Sprintf("/v1/auth/approle/role/%s/secret-id", VAULT_APP_ROLE1), map[string]interface{}{}))
 			secretid := secret.Data["secret_id"].(string)
 
@@ -385,18 +386,18 @@ path "secret/metadata/%s/*"
 			Expect(c).To(YAMLEqual(data))
 		})
 
-		//D(irect):
+		// D(irect):
 		//  - has general credentials matching parent path of P2
 		//  - has credentials for P1
-		//P1:
+		// P1:
 		//  - has specialized credentials for P2
-		//P2:
+		// P2:
 		//  - has credentials for C
 		//
 		//
-		//query C:
-		//- D:   -> nothing
-		//- P1: query P1
+		// query C:
+		// - D:   -> nothing
+		// - P1: query P1
 		//    - D: -> found
 		//    - P1:   omit (recursion)
 		//    - P2: query P2
@@ -406,7 +407,7 @@ path "secret/metadata/%s/*"
 		//		  explore, whether an additional attempt with P1 BUT only with credentialless providers / direct creds
 		//		  would work as a general solution.
 		//        -> select D(P2)     WRONG        (a1)
-		//- P2: query P2
+		// - P2: query P2
 		//    - D: -> found
 		//    - P1: query P1
 		//        - D: found
@@ -417,12 +418,12 @@ path "secret/metadata/%s/*"
 		//    - P2: omit (recursion)
 		//    -> select P1(P2)  CORRECT            (a2)
 		//  -> found
-		//-> select P2(C)
+		// -> select P2(C)
 		//
 		// The Problem here is, that the case a1 and case b are formally indistinguishable. While a2 and b lead to the
 		// correct result, we would fail in a1.
 		It("recursive authentication with overlapping credentials", func() {
-			//TODO
+			// TODO
 		})
 	})
 })
@@ -441,8 +442,8 @@ func StartVaultServer(mode vaultMode, rootToken, address string) (*exec.Cmd, *va
 	}
 
 	cmd := exec.CommandContext(cmdctx, "../../../../../bin/vault", "server", "-"+string(mode), fmt.Sprintf("-dev-root-token-id=%s", rootToken), fmt.Sprintf("-dev-listen-address=%s", address))
-	//cmd.Stdout = os.Stdout
-	//cmd.Stderr = os.Stderr
+	// cmd.Stdout = os.Stdout
+	// cmd.Stderr = os.Stderr
 
 	vaultClient, err := vault.New(
 		vault.WithAddress(url),
@@ -494,7 +495,7 @@ func SetUpVaultAccess(ctx context.Context, credctx credentials.Context, client *
 	role := Must(client.Auth.AppRoleReadRoleId(ctx, VAULT_APP_ROLE))
 	roleid := role.Data.RoleId
 	// Unfortunately, this function is currently bugged, therefore we fall back to the generic function
-	//secretid := Must(client.Auth.AppRoleWriteSecretId(ctx, VAULT_APP_ROLE, schema.AppRoleWriteSecretIdRequest{}))
+	// secretid := Must(client.Auth.AppRoleWriteSecretId(ctx, VAULT_APP_ROLE, schema.AppRoleWriteSecretIdRequest{}))
 	secret := Must(client.Write(ctx, fmt.Sprintf("/v1/auth/approle/role/%s/secret-id", VAULT_APP_ROLE), map[string]interface{}{}))
 	secretid := secret.Data["secret_id"].(string)
 

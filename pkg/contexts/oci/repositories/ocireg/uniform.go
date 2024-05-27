@@ -1,9 +1,10 @@
 package ocireg
 
 import (
+	regex "github.com/mandelsoft/goutils/regexutils"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	"github.com/open-component-model/ocm/pkg/regex"
 )
 
 func init() {

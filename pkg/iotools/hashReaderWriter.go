@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 type HashReader struct {
