@@ -1,7 +1,7 @@
 package identity
 
 import (
-	. "net/url"
+	"net/url"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -48,11 +48,11 @@ func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 }
 
 func GetConsumerId(rawURL, groupId string) (cpi.ConsumerIdentity, error) {
-	url, err := JoinPath(rawURL, groupId)
+	_url, err := url.JoinPath(rawURL, groupId)
 	if err != nil {
 		return nil, err
 	}
-	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url), nil
+	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, _url), nil
 }
 
 func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) (cpi.Credentials, error) {
