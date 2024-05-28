@@ -6,7 +6,7 @@ import (
 	"regexp"
 )
 
-// sha512- or SHA-512:
+// Regular expression matching: e.g. 'sha512-', 'SHA-1:', 'Sha-256:', 'sHA42-',.
 var re = regexp.MustCompile(`(?i)^sha(\d+-|\-\d+:)`)
 
 // DecodeBase64ToHex decodes a base64 encoded string and returns the hex representation.
