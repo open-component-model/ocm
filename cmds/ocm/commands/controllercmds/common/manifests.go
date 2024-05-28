@@ -27,7 +27,7 @@ func Install(ctx context.Context, octx clictx.Context, sm *ssa.ResourceManager, 
 		return fmt.Errorf("✗ failed to apply manifests: %w", err)
 	}
 
-	out.Outf(octx, "► waiting for ocm deployment to be ready\n")
+	Outf(octx, dryRun, "► waiting for ocm deployment to be ready\n")
 	if err = sm.Wait(objects, ssa.DefaultWaitOptions()); err != nil {
 		return fmt.Errorf("✗ failed to wait for objects to be ready: %w", err)
 	}
@@ -50,7 +50,7 @@ func Uninstall(ctx context.Context, octx clictx.Context, sm *ssa.ResourceManager
 		return fmt.Errorf("✗ failed to delete manifests: %w", err)
 	}
 
-	out.Outf(octx, "► waiting for ocm deployment to be deleted\n")
+	Outf(octx, dryRun, "► waiting for ocm deployment to be deleted\n")
 	if err = sm.WaitForTermination(objects, ssa.DefaultWaitOptions()); err != nil {
 		return fmt.Errorf("✗ failed to wait for objects to be deleted: %w", err)
 	}
@@ -64,7 +64,7 @@ func fetchObjects(ctx context.Context, octx clictx.Context, releaseURL, baseURL,
 		if err != nil {
 			return nil, fmt.Errorf("✗ failed to retrieve latest version for %s: %w", manifest, err)
 		}
-		out.Outf(octx, "► got latest version %q\n", latest)
+		Outf(octx, dryRun, "► got latest version %q\n", latest)
 		version = latest
 	} else {
 		exists, err := existingVersion(ctx, releaseURL, version)
@@ -90,7 +90,7 @@ func fetchObjects(ctx context.Context, octx clictx.Context, releaseURL, baseURL,
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil, fmt.Errorf("✗ failed to find %s file at location: %w", filename, err)
 	}
-	out.Outf(octx, "✔ successfully fetched install file\n")
+	Outf(octx, dryRun, "✔ successfully fetched install file\n")
 	if dryRun {
 		content, err := os.ReadFile(path)
 		if err != nil {
@@ -101,7 +101,7 @@ func fetchObjects(ctx context.Context, octx clictx.Context, releaseURL, baseURL,
 
 		return nil, nil
 	}
-	out.Outf(octx, "► applying to cluster...\n")
+	Outf(octx, dryRun, "► applying to cluster...\n")
 
 	objects, err := ReadObjects(path)
 	if err != nil {
