@@ -93,7 +93,7 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>password</code>: the basic auth password
 
 
-  - <code>NpmRegistry</code>: NPM repository
+  - <code>NpmRegistry</code>: NPM registry
 
     It matches the <code>NpmRegistry</code> consumer type and additionally acts like
     the <code>hostpath</code> type.
