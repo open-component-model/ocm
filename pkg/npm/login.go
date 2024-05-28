@@ -29,7 +29,6 @@ func Login(registry string, username string, password string, email string) (str
 	if err != nil {
 		return "", err
 	}
-	// PUT https://staging.repositories.cloud.sap/stage/repository/363001268081-20240426-12350868-423/-/user/org.couchdb.user:EF25JcIYOlXA4Ui
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, registry+"/-/user/org.couchdb.user:"+url.PathEscape(username), bytes.NewReader(marshal))
 	if err != nil {
 		return "", err
