@@ -2,11 +2,11 @@ package maven_test
 
 import (
 	"encoding/json"
+	"github.com/open-component-model/ocm/pkg/maven/maventest"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -28,7 +28,7 @@ var _ = Describe("blobhandler generic maven tests", func() {
 	var repo *maven.Repository
 
 	BeforeEach(func() {
-		env = NewBuilder(TestData())
+		env = NewBuilder(maventest.TestData())
 		repo = maven.NewFileRepository(MAVEN_PATH, env.FileSystem())
 	})
 

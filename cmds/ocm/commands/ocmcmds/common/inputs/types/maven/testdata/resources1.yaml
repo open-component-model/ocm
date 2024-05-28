@@ -2,7 +2,7 @@ name: myblob
 type: mavenArtifact
 input:
   type: maven
-  path: .m2/repository
+  path: ../maven/testdata/.m2/repository
   groupId: com.sap.cloud.sdk
   artifactId: sdk-modules-bom
   version: 5.7.0

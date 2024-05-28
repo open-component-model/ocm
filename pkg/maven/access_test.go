@@ -6,13 +6,13 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/goutils/optionutils"
 
 	me "github.com/open-component-model/ocm/pkg/maven"
+	"github.com/open-component-model/ocm/pkg/maven/maventest"
 )
 
 const (
@@ -25,7 +25,7 @@ var _ = Describe("local accessmethods.me.AccessSpec tests", func() {
 	var repo *me.Repository
 
 	BeforeEach(func() {
-		env = NewBuilder(TestData())
+		env = NewBuilder(maventest.TestData())
 		repo = me.NewFileRepository(MAVEN_PATH, env.FileSystem())
 	})
 

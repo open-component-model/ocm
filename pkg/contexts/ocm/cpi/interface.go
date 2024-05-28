@@ -110,10 +110,6 @@ func DefaultBlobHandlerProvider(ctx Context) BlobHandlerProvider {
 	return internal.DefaultBlobHandlerProvider(ctx)
 }
 
-func New() Context {
-	return internal.Builder{}.New()
-}
-
 func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) *ResourceMeta {
 	return compdesc.NewResourceMeta(name, typ, relation)
 }

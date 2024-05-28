@@ -2,11 +2,11 @@ package maven_test
 
 import (
 	"crypto"
+	"github.com/open-component-model/ocm/pkg/maven/maventest"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -20,7 +20,7 @@ import (
 
 const (
 	MAVEN_PATH            = "/testdata/.m2/repository"
-	FAILPATH              = "/testdata/fail"
+	FAILPATH              = "/testdata/.m2/fail"
 	MAVEN_CENTRAL         = "https://repo.maven.apache.org/maven2/"
 	MAVEN_CENTRAL_ADDRESS = "repo.maven.apache.org:443"
 	MAVEN_GROUP_ID        = "maven"
@@ -33,7 +33,7 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 	var cv ocm.ComponentVersionAccess
 
 	BeforeEach(func() {
-		env = NewBuilder(TestData())
+		env = NewBuilder(maventest.TestData())
 		cv = &cpi.DummyComponentVersionAccess{env.OCMContext()}
 	})
 
@@ -56,8 +56,8 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 				break
 			}
 		}
-		Expect(dr.Size()).To(Equal(int64(1109)))
-		Expect(dr.Digest().String()).To(Equal("SHA-1:4ee125ffe4f7690588833f1217a13cc741e4df5f"))
+		Expect(dr.Size()).To(Equal(int64(1570)))
+		Expect(dr.Digest().String()).To(Equal("SHA-1:359d02795bcc737e81c7f2f0ac32f49351d41867"))
 	})
 
 	It("accesses local artifact with empty classifier and with extension", func() {
@@ -90,14 +90,15 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 		defer Close(r)
 		dr := iotools.NewDigestReaderWithHash(crypto.SHA1, r)
 		list := Must(tarutils.ListArchiveContentFromReader(dr))
-		Expect(list).To(HaveLen(1))
+		Expect(list).To(ConsistOf("sdk-modules-bom-5.7.0.pom"))
+
 		Expect(dr.Size()).To(Equal(int64(1109)))
 		Expect(dr.Digest().String()).To(Equal("SHA-1:4ee125ffe4f7690588833f1217a13cc741e4df5f"))
 	})
 
 	It("Describe", func() {
 		acc := me.New("file://"+FAILPATH, "test", "repository", "42", me.WithExtension("pom"))
-		Expect(acc.Describe(nil)).To(Equal("Maven package 'test:repository:42::pom' in repository 'file:///testdata/fail' path 'test/repository/42/repository-42.pom'"))
+		Expect(acc.Describe(nil)).To(Equal("Maven package 'test:repository:42::pom' in repository 'file:///testdata/.m2/fail' path 'test/repository/42/repository-42.pom'"))
 	})
 
 	It("detects digests mismatch", func() {

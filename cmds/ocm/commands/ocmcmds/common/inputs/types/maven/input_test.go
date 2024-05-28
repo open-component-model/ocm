@@ -2,6 +2,7 @@ package maven_test
 
 import (
 	"crypto"
+	"github.com/open-component-model/ocm/pkg/maven/maventest"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
@@ -24,7 +25,7 @@ var _ = Describe("Test Environment", func() {
 	var env *TestEnv
 
 	BeforeEach(func() {
-		env = NewTestEnv(TestData())
+		env = NewTestEnv(TestData(), maventest.TestData("/maven/testdata"))
 
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "--provider", "mandelsoft", "--file", ARCH)).To(Succeed())
 	})
@@ -61,7 +62,7 @@ name: testdata
 type: mavenArtifact
 `
 		Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "maven",
-			"--inputPath", "testdata/.m2/repository", "--groupId", "com.sap.cloud.sdk", "--artifactId", "sdk-modules-bom",
+			"--inputPath", "/maven/testdata/.m2/repository", "--groupId", "com.sap.cloud.sdk", "--artifactId", "sdk-modules-bom",
 			"--inputVersion", "5.7.0", "--classifier", "", "--extension", "pom")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
@@ -80,7 +81,7 @@ name: testdata
 type: mavenArtifact
 `
 		Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "maven",
-			"--inputPath", "testdata/.m2/repository", "--groupId", "com.sap.cloud.sdk", "--artifactId", "sdk-modules-bom",
+			"--inputPath", "/maven/testdata/.m2/repository", "--groupId", "com.sap.cloud.sdk", "--artifactId", "sdk-modules-bom",
 			"--inputVersion", "5.7.0", "--extension", "pom")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
