@@ -118,12 +118,13 @@ func (a *AccessSpec) GetPackageVersion(ctx accspeccpi.Context) (*npm.Version, er
 	var version npm.Version
 	err = json.Unmarshal(buf, &version)
 	if err != nil || version.Dist.Tarball == "" {
+		// ugly fallback as workaround for https://github.com/sonatype/nexus-public/issues/224
 		var project npm.Project
-		err = json.Unmarshal(buf, &project)
+		err = json.Unmarshal(buf, &project) // parse the complete project
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", a.PackageVersionUrl())
 		}
-		v, ok := project.Version[a.Version]
+		v, ok := project.Version[a.Version] // and pick only the specified version
 		if !ok {
 			return nil, errors.Newf("version '%s' doesn't exist", a.Version)
 		}
