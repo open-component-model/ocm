@@ -6,13 +6,20 @@ import (
 )
 
 var (
-	HintOption         = options.HintOption
-	MediaTypeOption    = options.MediatypeOption
+	HintOption      = options.HintOption
+	MediaTypeOption = options.MediatypeOption
+
 	URLOption          = options.URLOption
 	HTTPHeaderOption   = options.HTTPHeaderOption
 	HTTPVerbOption     = options.HTTPVerbOption
 	HTTPBodyOption     = options.HTTPBodyOption
 	HTTPRedirectOption = options.HTTPRedirectOption
+
+	RepositoryOption = options.RepositoryOption
+	GroupOption      = options.GroupOption
+	ArtifactOption   = options.ArtifactOption
+	ClassifierOption = options.ClassifierOption
+	ExtensionOption  = options.ExtensionOption
 )
 
 // string options

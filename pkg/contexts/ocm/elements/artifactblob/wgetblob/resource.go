@@ -14,7 +14,7 @@ import (
 const TYPE = resourcetypes.BLOB
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, url string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(append([]Option{WithCredentialContext(ctx), WithLoggingContext(ctx)}, opts...)...)
+	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithCredentialContext(ctx))...)
 
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)

@@ -3,11 +3,14 @@ package env
 import (
 	"bytes"
 	"fmt"
+	"runtime"
 	"runtime/debug"
 	"strings"
 
 	"github.com/DataDog/gostackparse"
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/exception"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/composefs"
 	"github.com/mandelsoft/vfs/pkg/layerfs"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
@@ -21,7 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -199,27 +202,7 @@ type tdOpt struct {
 	modifiable bool
 }
 
-func TestData(paths ...string) tdOpt {
-	path := "/testdata"
-	source := "testdata"
-
-	switch len(paths) {
-	case 0:
-	case 1:
-		source = paths[0]
-	case 2:
-		source = paths[0]
-		path = paths[1]
-	default:
-		panic("invalid number of arguments")
-	}
-	return tdOpt{
-		path:   path,
-		source: source,
-	}
-}
-
-func ModifiableTestData(paths ...string) tdOpt {
+func testData(modifiable bool, paths ...string) tdOpt {
 	path := "/testdata"
 	source := "testdata"
 
@@ -236,8 +219,83 @@ func ModifiableTestData(paths ...string) tdOpt {
 	return tdOpt{
 		path:       path,
 		source:     source,
-		modifiable: true,
+		modifiable: modifiable,
 	}
+}
+
+func TestData(paths ...string) tdOpt {
+	return testData(false, paths...)
+}
+
+func ModifiableTestData(paths ...string) tdOpt {
+	return testData(true, paths...)
+}
+
+func projectTestData(modifiable bool, source string, dest ...string) Option {
+	path := "."
+	for count := 0; count < 20; count++ {
+		if ok, err := vfs.FileExists(osfs.OsFs, filepath.Join(path, "go.mod")); err != nil || ok {
+			if err != nil {
+				panic(err)
+			}
+			path = filepath.Join(path, source)
+			break
+		}
+		if count == 19 {
+			panic("could not find go.mod (within 20 steps)")
+		}
+
+		path = filepath.Join(path, "..")
+	}
+
+	return testData(modifiable, path, general.OptionalDefaulted("/testdata", dest...))
+}
+
+func ProjectTestData(source string, dest ...string) Option {
+	return projectTestData(false, source, dest...)
+}
+
+func ModifiableProjectTestData(source string, dest ...string) Option {
+	return projectTestData(true, source, dest...)
+}
+
+func projectTestDataForCaller(modifiable bool, dest ...string) Option {
+	pc, _, _, ok := runtime.Caller(2)
+	if !ok {
+		panic("unable to find caller")
+	}
+
+	// Get the function details from the program counter
+	caller := runtime.FuncForPC(pc)
+	if caller == nil {
+		panic("unable to find caller")
+	}
+
+	fullFuncName := caller.Name()
+
+	// Split the name to extract the package path
+	// Assuming the format: "package/path.functionName"
+	lastSlashIndex := strings.LastIndex(fullFuncName, "/")
+	if lastSlashIndex == -1 {
+		panic("unable to find package name")
+	}
+
+	funcIndex := strings.Index(fullFuncName[lastSlashIndex:], ".")
+	packagePath := fullFuncName[:lastSlashIndex+funcIndex]
+	path, ok := strings.CutPrefix(packagePath, "github.com/open-component-model/ocm/")
+	if !ok {
+		panic("unable to find package name")
+	}
+
+	return projectTestData(modifiable, filepath.Join(path, "testdata"), dest...)
+}
+
+func ProjectTestDataForCaller(dest ...string) Option {
+	return projectTestDataForCaller(false, dest...)
+}
+
+func ModifiableProjectTestDataForCaller(dest ...string) Option {
+	return projectTestDataForCaller(true, dest...)
 }
 
 func (o tdOpt) OptionHandler() OptionHandler {

@@ -48,7 +48,7 @@ func (m *ImageMapping) Evaluate(idx int, cv ocm.ComponentVersionAccess, resolver
 	name := "image mapping"
 	if m.Name != "" {
 		name = fmt.Sprintf("%s %q", name, m.Name)
-	} else { //nolint: gocritic // yes
+	} else {
 		if idx >= 0 {
 			name = fmt.Sprintf("%s %d", name, idx+1)
 		}

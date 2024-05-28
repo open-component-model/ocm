@@ -35,7 +35,7 @@ Virtual filesystem to use for command line context.
 
 func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error) {
 	if _, ok := v.(vfs.FileSystem); !ok {
-		return nil, fmt.Errorf("vfs.FileSystem required")
+		return nil, fmt.Errorf("vfs.CachingFileSystem required")
 	}
 	return nil, nil
 }

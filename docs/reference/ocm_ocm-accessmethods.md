@@ -183,40 +183,40 @@ shown below.
 
   Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
 
-- Access type <code>mvn</code>
+- Access type <code>maven</code>
 
-  This method implements the access of a Maven (mvn) artifact in a Maven repository.
+  This method implements the access of a Maven artifact in a Maven repository.
 
   The following versions are supported:
   - Version <code>v1</code>
 
     The type specific specification fields are:
 
-    - **<code>repository</code>** *string*
+    - **<code>repoUrl</code>** *string*
 
-      Base URL of the Maven (mvn) repository
+      URL of the Maven repository
 
     - **<code>groupId</code>** *string*
 
-      The groupId of the Maven (mvn) artifact
+      The groupId of the Maven artifact
 
     - **<code>artifactId</code>** *string*
 
-      The artifactId of the Maven (mvn) artifact
+      The artifactId of the Maven artifact
 
     - **<code>version</code>** *string*
 
-      The version name of the Maven (mvn) artifact
+      The version name of the Maven artifact
 
     - **<code>classifier</code>** *string*
 
-      The optional classifier of the Maven (mvn) artifact
+      The optional classifier of the Maven artifact
 
     - **<code>extension</code>** *string*
 
-      The optional extension of the Maven (mvn) artifact
+      The optional extension of the Maven artifact
 
-  Options used to configure fields: <code>--accessClassifier</code>, <code>--accessExtension</code>, <code>--accessGroup</code>, <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--artifactId</code>, <code>--classifier</code>, <code>--extension</code>, <code>--groupId</code>
 
 - Access type <code>none</code>
 
