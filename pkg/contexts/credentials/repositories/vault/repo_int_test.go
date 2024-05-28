@@ -9,12 +9,13 @@ import (
 	"os/exec"
 	"time"
 
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
 	"github.com/mandelsoft/goutils/errors"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -22,7 +23,6 @@ import (
 	me "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type vaultMode string

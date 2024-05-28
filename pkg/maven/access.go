@@ -10,20 +10,22 @@ import (
 	"crypto"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/cloudflare/cfssl/log"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"golang.org/x/exp/maps"
+	"golang.org/x/net/html"
+
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
-	"golang.org/x/exp/maps"
-	"golang.org/x/net/html"
-	"io"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
 type Repository struct {

@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/exception"
 )
 

@@ -134,6 +134,9 @@ linters-settings:
     line-length: 120
   gosec:
     exclude-generated: true
+  gocritic:
+    disabled-checks:
+      - elseif
 
 issues:
   exclude:

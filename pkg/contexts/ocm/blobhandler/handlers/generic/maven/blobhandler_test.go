@@ -2,14 +2,6 @@ package maven_test
 
 import (
 	"encoding/json"
-	"github.com/mandelsoft/goutils/sliceutils"
-	"github.com/mandelsoft/vfs/pkg/vfs"
-	mavenblob "github.com/open-component-model/ocm/pkg/blobaccess/maven"
-	me "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/generic/maven"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/maven"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -17,6 +9,16 @@ import (
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	mavenblob "github.com/open-component-model/ocm/pkg/blobaccess/maven"
+	me "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/generic/maven"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/maven"
 )
 
 const mvnPATH = "/testdata/.m2/repository"

@@ -2,12 +2,14 @@ package uninstall
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"os"
 
+	_ "embed"
+
 	"github.com/fluxcd/pkg/ssa"
 	"github.com/mandelsoft/filepath/pkg/filepath"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/common"
 	"github.com/open-component-model/ocm/pkg/out"
 )

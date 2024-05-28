@@ -82,7 +82,7 @@ shown below.
 
     - **<code>repoUrl</code>**  *string*
 
-      Repository URL with or without scheme.
+      RepoUrl URL with or without scheme.
 
     - **<code>ref</code>** (optional) *string*
 
@@ -183,7 +183,7 @@ shown below.
 
   Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
 
-- Access type <code>mvn</code>
+- Access type <code>maven</code>
 
   This method implements the access of a Maven (mvn) artifact in a Maven repository.
 
@@ -192,7 +192,7 @@ shown below.
 
     The type specific specification fields are:
 
-    - **<code>repository</code>** *string*
+    - **<code>repoUrl</code>** *string*
 
       Base URL of the Maven (mvn) repository
 
@@ -216,7 +216,7 @@ shown below.
 
       The optional extension of the Maven (mvn) artifact
 
-  Options used to configure fields: <code>--accessClassifier</code>, <code>--accessExtension</code>, <code>--accessGroup</code>, <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--artifactId</code>, <code>--classifier</code>, <code>--extension</code>, <code>--groupId</code>
 
 - Access type <code>none</code>
 

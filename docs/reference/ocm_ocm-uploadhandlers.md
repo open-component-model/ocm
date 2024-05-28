@@ -73,9 +73,9 @@ The following handler names are possible:
 
     sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
 
-  - <code>ocm/mvnArtifact</code>: uploading mvn artifacts
+  - <code>ocm/mavenArtifact</code>: uploading mvn artifacts
 
-    The <code>ocm/mvnArtifact</code> uploader is able to upload mvn artifacts (whole GAV only!)
+    The <code>ocm/mavenArtifact</code> uploader is able to upload mvn artifacts (whole GAV only!)
     as artifact archive according to the mvn artifact spec.
     If registered the default mime type is: application/x-tgz
 

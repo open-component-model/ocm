@@ -24,20 +24,21 @@ resource-configuration, resourceconfig, rsccfg, rcfg
 
 ```
       --access YAML                         blob access specification (YAML)
-      --accessClassifier string             mvn classifier
-      --accessExtension string              mvn extension name
-      --accessGroup string                  GroupID or namespace
       --accessHostname string               hostname used for access
       --accessPackage string                package or object name
       --accessRegistry string               registry base URL
       --accessRepository string             repository URL
       --accessType string                   type of blob access specification
       --accessVersion string                version for access specification
+      --artifactId string                   artifact id
       --body string                         body of a http request
       --bucket string                       bucket name
+      --classifier string                   mvn classifier
       --commit string                       git commit id
       --digest string                       blob digest
+      --extension string                    mvn extension name
       --globalAccess YAML                   access specification for global access
+      --groupId string                      group id or namespace
       --header <name>:<value>,<value>,...   http headers (default {})
       --hint string                         (repository) hint for local artifacts
       --mediaType string                    media type for artifact blob representation
@@ -53,7 +54,11 @@ resource-configuration, resourceconfig, rsccfg, rcfg
 #### Input Specification Options
 
 ```
+      --artifactId string                   artifact id
       --body string                         body of a http request
+      --classifier string                   mvn classifier
+      --extension string                    mvn extension name
+      --groupId string                      group id or namespace
       --header <name>:<value>,<value>,...   http headers (default {})
       --hint string                         (repository) hint for local artifacts
       --input YAML                          blob input specification (YAML)
@@ -368,6 +373,40 @@ with the field <code>type</code> in the <code>input</code> field:
 
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputHelmRepository</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
 
+- Input type <code>maven</code>
+
+  The <code>repoUrl<code> is the url pointing either to the http endpoint of a maven
+  repository (e.g. https://repo.maven.apache.org/maven2/) or to a file system based
+  maven repository (e.g. file://local/directory).
+
+  This blob type specification supports the following fields:
+  - **<code>repoUrl</code>** *string*
+
+    This REQUIRED property describes the url from which the resource is to be
+    accessed.
+
+  - **<code>groupId</code>** *string*
+
+    This REQUIRED property describes the groupId of a maven artifact.
+
+  - **<code>artifactId</code>** *string*
+  	
+    This REQUIRED property describes artifactId of a maven artifact.
+
+  - **<code>version</code>** *string*
+
+    This REQUIRED property describes the version of a maven artifact.
+
+  - **<code>classifier</code>** *string*
+
+    This OPTIONAL property describes the classifier of a maven artifact.
+
+  - **<code>extension</code>** *string*
+
+    This OPTIONAL property describes the extension of a maven artifact.
+
+  Options used to configure fields: <code>--artifactId</code>, <code>--classifier</code>, <code>--extension</code>, <code>--groupId</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--url</code>
+
 - Input type <code>ociArtifact</code>
 
   The path must denote an OCI image reference.
@@ -582,7 +621,7 @@ shown below.
 
     - **<code>repoUrl</code>**  *string*
 
-      Repository URL with or without scheme.
+      RepoUrl URL with or without scheme.
 
     - **<code>ref</code>** (optional) *string*
 
@@ -683,7 +722,7 @@ shown below.
 
   Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
 
-- Access type <code>mvn</code>
+- Access type <code>maven</code>
 
   This method implements the access of a Maven (mvn) artifact in a Maven repository.
 
@@ -692,7 +731,7 @@ shown below.
 
     The type specific specification fields are:
 
-    - **<code>repository</code>** *string*
+    - **<code>repoUrl</code>** *string*
 
       Base URL of the Maven (mvn) repository
 
@@ -716,7 +755,7 @@ shown below.
 
       The optional extension of the Maven (mvn) artifact
 
-  Options used to configure fields: <code>--accessClassifier</code>, <code>--accessExtension</code>, <code>--accessGroup</code>, <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--artifactId</code>, <code>--classifier</code>, <code>--extension</code>, <code>--groupId</code>
 
 - Access type <code>none</code>
 

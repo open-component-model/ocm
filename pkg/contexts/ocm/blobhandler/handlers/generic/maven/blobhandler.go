@@ -2,8 +2,10 @@ package maven
 
 import (
 	"crypto"
+
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	mavenblob "github.com/open-component-model/ocm/pkg/blobaccess/maven"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/maven/identity"
 	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/maven"

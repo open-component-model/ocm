@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/mandelsoft/goutils/sliceutils"
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"golang.org/x/text/cases"
@@ -33,6 +32,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 const ComponentVersionTag = "<componentversion>"

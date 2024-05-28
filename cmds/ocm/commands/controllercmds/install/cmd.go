@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/fluxcd/pkg/ssa"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	corev1 "k8s.io/api/core/v1"
@@ -15,6 +14,7 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"

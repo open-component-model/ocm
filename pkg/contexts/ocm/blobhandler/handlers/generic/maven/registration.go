@@ -3,9 +3,11 @@ package maven
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"

@@ -7,14 +7,15 @@ package mavenblob_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/mavenblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/maven"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const (

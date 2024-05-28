@@ -58,7 +58,7 @@ type Coordinates struct {
 	// Version of the Maven (mvn) artifact.
 	Version string `json:"version"`
 	// Classifier of the Maven (mvn) artifact.
-	Classifier *string `json:"classifier,omitempty"` //TODO: make it a pointer to differentiate between empty and none
+	Classifier *string `json:"classifier,omitempty"`
 	// Extension of the Maven (mvn) artifact.
 	Extension *string `json:"extension,omitempty"`
 }

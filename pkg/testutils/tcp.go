@@ -6,9 +6,10 @@ package testutils
 
 import (
 	"context"
-	"github.com/mandelsoft/goutils/errors"
 	"net"
 	"time"
+
+	"github.com/mandelsoft/goutils/errors"
 )
 
 func PingTCPServer(address string, dur time.Duration) error {

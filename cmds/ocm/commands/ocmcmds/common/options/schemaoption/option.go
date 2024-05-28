@@ -2,12 +2,12 @@ package schemaoption
 
 import (
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )

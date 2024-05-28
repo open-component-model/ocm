@@ -5,15 +5,17 @@
 package maven_test
 
 import (
+	"time"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	me "github.com/open-component-model/ocm/pkg/blobaccess/maven"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/open-component-model/ocm/pkg/maven"
 	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	me "github.com/open-component-model/ocm/pkg/blobaccess/maven"
+	"github.com/open-component-model/ocm/pkg/maven"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
-	"time"
 )
 
 const (

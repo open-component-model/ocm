@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/fluxcd/pkg/ssa"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/out"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 func Install(ctx context.Context, octx clictx.Context, sm *ssa.ResourceManager, releaseURL, baseURL, manifest, filename, version string, dryRun bool) error {

@@ -5,11 +5,14 @@
 package maven
 
 import (
+	"io"
+
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
@@ -22,8 +25,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
-	"github.com/opencontainers/go-digest"
-	"io"
 )
 
 type coords = *maven.Coordinates
