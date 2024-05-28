@@ -111,6 +111,7 @@ func (a *AccessSpec) GetPackageVersion(ctx accspeccpi.Context) (*npm.Version, er
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
 	buf, err := io.ReadAll(r)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get version metadata for %s", a.PackageVersionUrl())
@@ -200,7 +201,7 @@ func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...st
 	}
 	if resp.StatusCode == http.StatusNotFound {
 		// maybe it's stupid Nexus - https://github.com/sonatype/nexus-public/issues/224?
-		defer resp.Body.Close()
+		resp.Body.Close()
 
 		url = a.PackageUrl()
 		req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
