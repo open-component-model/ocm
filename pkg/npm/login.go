@@ -55,6 +55,17 @@ func Login(registry string, username string, password string, email string) (str
 	return token.Token, nil
 }
 
+func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) (string, string, error) {
+	credentials, err := identity.GetCredentials(ctx, repoUrl, pkgName)
+	if err != nil {
+		return "", "", err
+	}
+	if credentials == nil {
+		return "", "", fmt.Errorf("no credentials found for %s. Couldn't access '%s'", repoUrl, pkgName)
+	}
+	return credentials.GetProperty(identity.ATTR_USERNAME), credentials.GetProperty(identity.ATTR_PASSWORD), nil
+}
+
 // BearerToken retrieves the bearer token for the given repository URL and package name.
 // Either it's setup in the credentials or it will login to the registry and retrieve it.
 func BearerToken(ctx cpi.ContextProvider, repoUrl string, pkgName string) (string, error) {
@@ -64,7 +75,7 @@ func BearerToken(ctx cpi.ContextProvider, repoUrl string, pkgName string) (strin
 		return "", err
 	}
 	if credentials == nil {
-		return "", fmt.Errorf("no credentials found for %s. Couldn't upload '%s'", repoUrl, pkgName)
+		return "", fmt.Errorf("no credentials found for %s. Couldn't access '%s'", repoUrl, pkgName)
 	}
 	log := logging.Context().Logger(identity.REALM)
 	log.Debug("found credentials")
@@ -86,7 +97,8 @@ func BearerToken(ctx cpi.ContextProvider, repoUrl string, pkgName string) (strin
 	log.Debug("login", "user", username, "repo", repoUrl)
 
 	// TODO: check different kinds of .npmrc content
-	return Login(repoUrl, username, password, email)
+	token, err = Login(repoUrl, username, password, email)
+	return token, err
 }
 
 // Authorize the given request with the bearer token for the given repository URL and package name.
@@ -97,6 +109,17 @@ func Authorize(req *http.Request, ctx cpi.ContextProvider, repoUrl string, pkgNa
 		return err
 	} else if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	return nil
+}
+
+func BasicAuth(req *http.Request, ctx cpi.ContextProvider, repoUrl string, pkgName string) error {
+	username, password, err := GetCredentials(ctx, repoUrl, pkgName)
+	if err != nil {
+		return err
+	}
+	if username != "" && password != "" {
+		req.SetBasicAuth(username, password)
 	}
 	return nil
 }
