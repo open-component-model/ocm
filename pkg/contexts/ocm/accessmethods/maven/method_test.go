@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	mvnPATH               = "/testdata/.m2/repository"
+	MAVEN_PATH            = "/testdata/.m2/repository"
 	FAILPATH              = "/testdata/fail"
 	MAVEN_CENTRAL         = "https://repo.maven.apache.org/maven2/"
 	MAVEN_CENTRAL_ADDRESS = "repo.maven.apache.org:443"
@@ -28,7 +28,7 @@ const (
 	MAVEN_VERSION         = "1.1"
 )
 
-var _ = Describe("local accessmethods.mvn.AccessSpec tests", func() {
+var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 	var env *Builder
 	var cv ocm.ComponentVersionAccess
 
@@ -42,7 +42,7 @@ var _ = Describe("local accessmethods.mvn.AccessSpec tests", func() {
 	})
 
 	It("accesses local artifact", func() {
-		acc := me.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
+		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
 		m := Must(acc.AccessMethod(cv))
 		defer Close(m)
 		Expect(m.MimeType()).To(Equal(mime.MIME_TGZ))
@@ -61,7 +61,7 @@ var _ = Describe("local accessmethods.mvn.AccessSpec tests", func() {
 	})
 
 	It("accesses local artifact with empty classifier and with extension", func() {
-		acc := me.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithClassifier(""), me.WithExtension("pom"))
+		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithClassifier(""), me.WithExtension("pom"))
 		m := Must(acc.AccessMethod(cv))
 		defer Close(m)
 		Expect(m.MimeType()).To(Equal(mime.MIME_XML))
@@ -82,7 +82,7 @@ var _ = Describe("local accessmethods.mvn.AccessSpec tests", func() {
 	})
 
 	It("accesses local artifact with extension", func() {
-		acc := me.New("file://"+mvnPATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithExtension("pom"))
+		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithExtension("pom"))
 		m := Must(acc.AccessMethod(cv))
 		defer Close(m)
 		Expect(m.MimeType()).To(Equal(mime.MIME_TGZ))
@@ -97,7 +97,7 @@ var _ = Describe("local accessmethods.mvn.AccessSpec tests", func() {
 
 	It("Describe", func() {
 		acc := me.New("file://"+FAILPATH, "test", "repository", "42", me.WithExtension("pom"))
-		Expect(acc.Describe(nil)).To(Equal("Maven (mvn) package 'test:repository:42::pom' in repository 'file:///testdata/fail' path 'test/repository/42/repository-42.pom'"))
+		Expect(acc.Describe(nil)).To(Equal("Maven package 'test:repository:42::pom' in repository 'file:///testdata/fail' path 'test/repository/42/repository-42.pom'"))
 	})
 
 	It("detects digests mismatch", func() {

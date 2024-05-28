@@ -31,7 +31,7 @@ The type specific specification fields are:
 
 - **<code>repoUrl</code>**  *string*
 
-  RepoUrl URL with or without scheme.
+  Repository URL with or without scheme.
 
 - **<code>ref</code>** (optional) *string*
 

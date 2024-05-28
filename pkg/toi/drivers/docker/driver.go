@@ -159,7 +159,7 @@ func pullImage(ctx context.Context, cli command.Cli, imageName string) error {
 		return fmt.Errorf("unable to parse normalized name: %w", err)
 	}
 
-	// Resolve the RepoUrl name from fqn to RepositoryInfo
+	// Resolve the Repository name from fqn to RepositoryInfo
 	repoInfo, err := registry.ParseRepositoryInfo(ref)
 	if err != nil {
 		return fmt.Errorf("unable to parse repository info: %w", err)

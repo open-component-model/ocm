@@ -11,7 +11,7 @@ import (
 func DescribePlugin(p plugin.Plugin, out common.Printer) {
 	out.Printf("Plugin Name:      %s\n", p.Name())
 	out.Printf("Plugin Version:   %s\n", p.Version())
-	out.Printf("BasePath:             %s\n", p.Path())
+	out.Printf("Path:             %s\n", p.Path())
 
 	if !p.IsValid() {
 		out.Printf("Status:           %s\n", p.Error())

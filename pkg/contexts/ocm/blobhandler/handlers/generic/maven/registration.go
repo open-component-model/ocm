@@ -97,13 +97,13 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 }
 
 func (r *RegistrationHandler) GetHandlers(_ cpi.Context) registrations.HandlerInfos {
-	return registrations.NewLeafHandlerInfo("uploading mvn artifacts", `
-The <code>`+BlobHandlerName+`</code> uploader is able to upload mvn artifacts (whole GAV only!)
-as artifact archive according to the mvn artifact spec.
+	return registrations.NewLeafHandlerInfo("uploading maven artifacts", `
+The <code>`+BlobHandlerName+`</code> uploader is able to upload maven artifacts (whole GAV only!)
+as artifact archive according to the maven artifact spec.
 If registered the default mime type is: `+mime.MIME_TGZ+`
 
 It accepts a plain string for the URL or a config with the following field:
-'url': the URL of the mvn repository.
+'url': the URL of the maven repository.
 `,
 	)
 }

@@ -10,17 +10,17 @@ import (
 )
 
 const (
-	// CONSUMER_TYPE is the mvn repository type.
+	// CONSUMER_TYPE is the maven repository type.
 	CONSUMER_TYPE = "MavenRepository"
 
-	// ATTR_USERNAME is the username attribute. Required for login at any mvn registry.
+	// ATTR_USERNAME is the username attribute. Required for login at any maven registry.
 	ATTR_USERNAME = cpi.ATTR_USERNAME
-	// ATTR_PASSWORD is the password attribute. Required for login at any mvn registry.
+	// ATTR_PASSWORD is the password attribute. Required for login at any maven registry.
 	ATTR_PASSWORD = cpi.ATTR_PASSWORD
 )
 
 // REALM the logging realm / prefix.
-var REALM = logging.DefineSubRealm("Maven repository", "mvn")
+var REALM = logging.DefineSubRealm("Maven repository", "maven")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{

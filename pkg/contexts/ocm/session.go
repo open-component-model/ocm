@@ -102,7 +102,7 @@ func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository
 	// The repo's closer function should only be added once with add closer. Otherwise, it would be attempted to close
 	// an already closed object. Thus, we only want to add the repo's closer function, if it was not already cached
 	// (and thus, consequently already added to the sessions close).
-	// Session has to take over responsibility for open repositories for the RepoUrl Cache because the objects
+	// Session has to take over responsibility for open repositories for the Repository Cache because the objects
 	// opened during a session have to be closed in the reverse order they were opened (e.g. components opened based
 	// on a previously opened repository have to be closed first).
 	if !cached {

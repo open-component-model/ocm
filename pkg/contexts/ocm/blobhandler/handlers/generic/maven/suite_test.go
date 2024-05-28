@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Maven (mvn) Test Suite")
+	RunSpecs(t, "Maven Test Suite")
 }

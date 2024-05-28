@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package mavenblob_test
 
 import (
@@ -19,8 +15,8 @@ import (
 )
 
 const (
-	mvnPATH               = "/testdata/.m2/repository"
-	FAILPATH              = "/testdata/.m2/fail"
+	MAVEN_PATH            = "/testdata/.m2/repository"
+	FAIL_PATH             = "/testdata/.m2/fail"
 	MAVEN_CENTRAL_ADDRESS = "repo.maven.apache.org:443"
 	MAVEN_CENTRAL         = "https://repo.maven.apache.org/maven2/"
 	MAVEN_GROUP_ID        = "maven"
@@ -36,7 +32,7 @@ var _ = Describe("blobaccess for maven", func() {
 
 		BeforeEach(func() {
 			env = NewBuilder(TestData())
-			repo = maven.NewFileRepository(mvnPATH, env.FileSystem())
+			repo = maven.NewFileRepository(MAVEN_PATH, env.FileSystem())
 		})
 
 		AfterEach(func() {

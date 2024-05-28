@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package maven
 
 import (
@@ -28,55 +24,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
+type FileMeta struct {
+	MimeType string
+	HashType crypto.Hash
+	Hash     string
+	Location *Location
+}
+
 type Repository struct {
 	Location
-}
-
-type Location struct {
-	url  string
-	path string
-	fs   vfs.FileSystem
-}
-
-func (l *Location) MarshalJSON() ([]byte, error) {
-	return json.Marshal(l.String())
-}
-
-func (l *Location) IsFileSystem() bool {
-	return l.path != ""
-}
-
-func (l *Location) AddPath(path string) *Location {
-	result := *l
-	var p *string
-	if result.url != "" {
-		p = &result.url
-	} else {
-		p = &result.path
-	}
-
-	if !strings.HasSuffix(*p, "/") {
-		*p += "/"
-	}
-	*p += path
-	return &result
-}
-
-func (l *Location) AddExtension(ext string) *Location {
-	result := *l
-	var p *string
-	if result.url != "" {
-		p = &result.url
-	} else {
-		p = &result.path
-	}
-
-	*p += "." + ext
-	return &result
-}
-
-func (l *Location) String() string {
-	return general.Conditional(l.path != "", l.path, l.url)
 }
 
 func NewFileRepository(path string, fss ...vfs.FileSystem) *Repository {
@@ -100,72 +56,6 @@ func NewUrlRepository(repoUrl string, fss ...vfs.FileSystem) (*Repository, error
 	return &Repository{Location{
 		url: repoUrl,
 	}}, nil
-}
-
-type FileMeta struct {
-	MimeType string
-	HashType crypto.Hash
-	Hash     string
-	Location *Location
-}
-
-type Credentials interface {
-	SetForRequest(req *http.Request) error
-}
-type BasicAuthCredentials struct {
-	Username string
-	Password string
-}
-
-func (b *BasicAuthCredentials) SetForRequest(req *http.Request) error {
-	req.SetBasicAuth(b.Username, b.Password)
-	return nil
-}
-
-func (l *Location) GetHash(creds Credentials, hash crypto.Hash) (string, error) {
-	// getStringData reads all data from the given URL and returns it as a string.
-	r, err := l.AddExtension(HashExt(hash)).GetReader(creds)
-	if err != nil {
-		return "", err
-	}
-	defer r.Close()
-	b, err := io.ReadAll(r)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
-}
-
-func (l *Location) GetReader(creds Credentials) (io.ReadCloser, error) {
-	if l.path != "" {
-		return l.fs.OpenFile(l.path, vfs.O_RDONLY, 0o600)
-	}
-
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, l.url, nil)
-	if err != nil {
-		return nil, err
-	}
-	if creds != nil {
-		err = creds.SetForRequest(req)
-		if err != nil {
-			return nil, err
-		}
-	}
-	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		defer resp.Body.Close()
-		buf := &bytes.Buffer{}
-		_, err = io.Copy(buf, io.LimitReader(resp.Body, 2000))
-		if err == nil {
-			Log.Error("http", "code", resp.Status, "repo", l.url, "body", buf.String())
-		}
-		return nil, errors.Newf("http %s error - %s", resp.Status, l.url)
-	}
-	return resp.Body, nil
 }
 
 func (r *Repository) Url() (string, error) {
@@ -356,7 +246,7 @@ func gavFilesFromDisk(fs vfs.FileSystem, dir string) (map[string]crypto.Hash, er
 	return filesAndHashes(files), nil
 }
 
-// gavOnlineFiles returns the files of the Maven (mvn) artifact in the repository and their available digests.
+// gavOnlineFiles returns the files of the Maven artifact in the repository and their available digests.
 func gavOnlineFiles(repo *Repository, coords *Coordinates, creds Credentials) (map[string]crypto.Hash, error) {
 	log := Log.WithValues("RepoUrl", repo.String(), "GAV", coords.GavPath())
 	log.Debug("gavOnlineFiles")
@@ -407,4 +297,111 @@ func filesAndHashes(fileList []string) map[string]crypto.Hash {
 		}
 	}
 	return result
+}
+
+type Location struct {
+	url  string
+	path string
+	fs   vfs.FileSystem
+}
+
+func (l *Location) MarshalJSON() ([]byte, error) {
+	return json.Marshal(l.String())
+}
+
+func (l *Location) IsFileSystem() bool {
+	return l.path != ""
+}
+
+func (l *Location) AddPath(path string) *Location {
+	result := *l
+	var p *string
+	if result.url != "" {
+		p = &result.url
+	} else {
+		p = &result.path
+	}
+
+	if !strings.HasSuffix(*p, "/") {
+		*p += "/"
+	}
+	*p += path
+	return &result
+}
+
+func (l *Location) AddExtension(ext string) *Location {
+	result := *l
+	var p *string
+	if result.url != "" {
+		p = &result.url
+	} else {
+		p = &result.path
+	}
+
+	*p += "." + ext
+	return &result
+}
+
+func (l *Location) String() string {
+	return general.Conditional(l.path != "", l.path, l.url)
+}
+
+func (l *Location) GetHash(creds Credentials, hash crypto.Hash) (string, error) {
+	// getStringData reads all data from the given URL and returns it as a string.
+	r, err := l.AddExtension(HashExt(hash)).GetReader(creds)
+	if err != nil {
+		return "", err
+	}
+	defer r.Close()
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
+func (l *Location) GetReader(creds Credentials) (io.ReadCloser, error) {
+	if l.path != "" {
+		return l.fs.OpenFile(l.path, vfs.O_RDONLY, 0o600)
+	}
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, l.url, nil)
+	if err != nil {
+		return nil, err
+	}
+	if creds != nil {
+		err = creds.SetForRequest(req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		defer resp.Body.Close()
+		buf := &bytes.Buffer{}
+		_, err = io.Copy(buf, io.LimitReader(resp.Body, 2000))
+		if err == nil {
+			Log.Error("http", "code", resp.Status, "repo", l.url, "body", buf.String())
+		}
+		return nil, errors.Newf("http %s error - %s", resp.Status, l.url)
+	}
+	return resp.Body, nil
+}
+
+type Credentials interface {
+	SetForRequest(req *http.Request) error
+}
+
+type BasicAuthCredentials struct {
+	Username string
+	Password string
+}
+
+func (b *BasicAuthCredentials) SetForRequest(req *http.Request) error {
+	req.SetBasicAuth(b.Username, b.Password)
+	return nil
 }

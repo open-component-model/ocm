@@ -44,7 +44,7 @@ func CreateTarFromFs(fs vfs.FileSystem, path string, compress func(w io.Writer) 
 type TarFileSystemOptions struct {
 	IncludeFiles []string
 	ExcludeFiles []string
-	// PreserveDir defines that the directory specified in the BasePath field should be included in the blob.
+	// PreserveDir defines that the directory specified in the Path field should be included in the blob.
 	// Only supported for Type dir.
 	PreserveDir    bool
 	FollowSymlinks bool

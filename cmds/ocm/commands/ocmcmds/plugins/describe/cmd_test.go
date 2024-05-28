@@ -39,7 +39,7 @@ var _ = Describe("Test Environment", func() {
 			`
 Plugin Name:      action
 Plugin Version:   v1
-BasePath:             ` + path + `/action
+Path:             ` + path + `/action
 Status:           valid
 Source:           manually installed
 Capabilities:     Actions
@@ -64,7 +64,7 @@ Actions:
 ----------------------
 Plugin Name:      test
 Plugin Version:   v1
-BasePath:             ` + path + `/test
+Path:             ` + path + `/test
 Status:           valid
 Source:           manually installed
 Capabilities:     Access Methods

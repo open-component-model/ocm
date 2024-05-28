@@ -30,7 +30,7 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 }
 
 var usage = `
-This method implements the access of a Maven (mvn) artifact in a Maven repository.
+This method implements the access of a Maven artifact in a Maven repository.
 `
 
 var formatV1 = `
@@ -38,25 +38,25 @@ The type specific specification fields are:
 
 - **<code>repoUrl</code>** *string*
 
-  Base URL of the Maven (mvn) repository
+  URL of the Maven repository
 
 - **<code>groupId</code>** *string*
 
-  The groupId of the Maven (mvn) artifact
+  The groupId of the Maven artifact
 
 - **<code>artifactId</code>** *string*
 
-  The artifactId of the Maven (mvn) artifact
+  The artifactId of the Maven artifact
 
 - **<code>version</code>** *string*
 
-  The version name of the Maven (mvn) artifact
+  The version name of the Maven artifact
 
 - **<code>classifier</code>** *string*
 
-  The optional classifier of the Maven (mvn) artifact
+  The optional classifier of the Maven artifact
 
 - **<code>extension</code>** *string*
 
-  The optional extension of the Maven (mvn) artifact
+  The optional extension of the Maven artifact
 `

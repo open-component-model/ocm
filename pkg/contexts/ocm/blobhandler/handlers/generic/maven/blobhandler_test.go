@@ -21,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/maven"
 )
 
-const mvnPATH = "/testdata/.m2/repository"
+const MAVEN_PATH = "/testdata/.m2/repository"
 
 var _ = Describe("blobhandler generic maven tests", func() {
 	var env *Builder
@@ -29,7 +29,7 @@ var _ = Describe("blobhandler generic maven tests", func() {
 
 	BeforeEach(func() {
 		env = NewBuilder(TestData())
-		repo = maven.NewFileRepository(mvnPATH, env.FileSystem())
+		repo = maven.NewFileRepository(MAVEN_PATH, env.FileSystem())
 	})
 
 	It("Unmarshal upload response Body", func() {

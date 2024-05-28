@@ -44,7 +44,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 		return nil, nil
 	}
 	if mime.MIME_TGZ != mimeType {
-		log.Debug("not a tarball, can't be a complete mvn GAV", "mimeType", mimeType)
+		log.Debug("not a tarball, can't be a complete maven GAV", "mimeType", mimeType)
 		return nil, nil
 	}
 
@@ -92,7 +92,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 			return nil, err
 		}
 		loop.Close(readHash)
-		// MD5 + SHA1 are still the most used ones in the mvn context
+		// MD5 + SHA1 are still the most used ones in the maven context
 		hr := iotools.NewHashReader(readHash, crypto.SHA256, crypto.SHA1, crypto.MD5)
 		_, err = hr.CalcHashes()
 		if err != nil {

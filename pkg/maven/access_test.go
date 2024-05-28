@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	mvnPATH  = "/testdata/.m2/repository"
-	FAILPATH = "/testdata/.m2/fail"
+	MAVEN_PATH = "/testdata/.m2/repository"
+	FAIL_PATH  = "/testdata/.m2/fail"
 )
 
 var _ = Describe("local accessmethods.me.AccessSpec tests", func() {
@@ -26,7 +26,7 @@ var _ = Describe("local accessmethods.me.AccessSpec tests", func() {
 
 	BeforeEach(func() {
 		env = NewBuilder(TestData())
-		repo = me.NewFileRepository(mvnPATH, env.FileSystem())
+		repo = me.NewFileRepository(MAVEN_PATH, env.FileSystem())
 	})
 
 	AfterEach(func() {
@@ -123,7 +123,7 @@ sdk-modules-bom-5.7.0-sources.jar: 3
 
 		It("download dedicated file with filed digest verification", func() {
 			coords := me.NewCoordinates("test", "repository", "42", me.WithClassifier(""), me.WithExtension("pom"))
-			repo := me.NewFileRepository(FAILPATH, env)
+			repo := me.NewFileRepository(FAIL_PATH, env)
 			reader := Must(repo.Download(coords, nil, true))
 			_ = Must(io.ReadAll(reader))
 			Expect(reader.Close()).To(MatchError("SHA-1 digest mismatch: expected 44a77645201d1a8fc5213ace787c220eabbd0967, found b3242b8c31f8ce14f729b8fd132ac77bc4bc5bf7"))

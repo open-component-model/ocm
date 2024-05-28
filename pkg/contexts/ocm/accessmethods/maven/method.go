@@ -14,7 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-// Type is the access type of Maven (mvn) repository.
+// Type is the access type of Maven repository.
 const (
 	Type   = "maven"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
@@ -25,11 +25,11 @@ func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 }
 
-// AccessSpec describes the access for a Maven (mvn) artifact.
+// AccessSpec describes the access for a Maven artifact.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
-	// RepoUrl is the base URL of the Maven (mvn) repository.
+	// RepoUrl is the base URL of the Maven repository.
 	RepoUrl string `json:"repoUrl"`
 
 	maven.Coordinates `json:",inline"`
@@ -54,7 +54,7 @@ func WithOptionalExtension(e *string) Option {
 
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
-// New creates a new Maven (mvn) repository access spec version v1.
+// New creates a new Maven repository access spec version v1.
 func New(repository, groupId, artifactId, version string, opts ...Option) *AccessSpec {
 	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
@@ -64,7 +64,7 @@ func New(repository, groupId, artifactId, version string, opts ...Option) *Acces
 	return accessSpec
 }
 
-// NewForCoordinates creates a new Maven (mvn) repository access spec version v1.
+// NewForCoordinates creates a new Maven repository access spec version v1.
 func NewForCoordinates(repository string, coords *maven.Coordinates, opts ...Option) *AccessSpec {
 	optionutils.ApplyOptions(coords, opts...)
 	accessSpec := &AccessSpec{
@@ -76,7 +76,7 @@ func NewForCoordinates(repository string, coords *maven.Coordinates, opts ...Opt
 }
 
 func (a *AccessSpec) Describe(_ accspeccpi.Context) string {
-	return fmt.Sprintf("Maven (mvn) package '%s' in repository '%s' path '%s'", a.Coordinates.String(), a.RepoUrl, a.Coordinates.FilePath())
+	return fmt.Sprintf("Maven package '%s' in repository '%s' path '%s'", a.Coordinates.String(), a.RepoUrl, a.Coordinates.FilePath())
 }
 
 func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {

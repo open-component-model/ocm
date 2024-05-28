@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package maven
 
 import (
@@ -51,15 +47,15 @@ func (o WithExtension) ApplyTo(c *Coordinates) {
 // Coordinates holds the typical Maven coordinates groupId, artifactId, version. Optional also classifier and extension.
 // https://maven.apache.org/ref/3.9.6/maven-core/artifact-handlers.html
 type Coordinates struct {
-	// GroupId of the Maven (mvn) artifact.
+	// GroupId of the Maven artifact.
 	GroupId string `json:"groupId"`
-	// ArtifactId of the Maven (mvn) artifact.
+	// ArtifactId of the Maven artifact.
 	ArtifactId string `json:"artifactId"`
-	// Version of the Maven (mvn) artifact.
+	// Version of the Maven artifact.
 	Version string `json:"version"`
-	// Classifier of the Maven (mvn) artifact.
+	// Classifier of the Maven artifact.
 	Classifier *string `json:"classifier,omitempty"`
-	// Extension of the Maven (mvn) artifact.
+	// Extension of the Maven artifact.
 	Extension *string `json:"extension,omitempty"`
 }
 

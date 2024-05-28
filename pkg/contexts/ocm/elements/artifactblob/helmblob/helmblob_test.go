@@ -1,12 +1,7 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package helmblob_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -31,7 +26,6 @@ var _ = Describe("", func() {
 	})
 
 	It("", func() {
-		Expect(1).To(Equal(1))
 		ctf := Must(ctfocm.Open(e, accessobj.ACC_CREATE, "/repo", 0o700, e, ctfocm.FormatDirectory))
 		defer Close(ctf)
 		cv := Must(ctf.NewComponentVersion("ocm.software/test-component", "1.0.0"))
