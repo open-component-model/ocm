@@ -40,16 +40,16 @@ The following predefined option types can be used:
   - <code>accessRegistry</code>: [*string*] registry base URL
   - <code>accessRepository</code>: [*string*] repository URL
   - <code>accessVersion</code>: [*string*] version for access specification
-  - <code>artifactId</code>: [*string*] artifact id
+  - <code>artifactId</code>: [*string*] maven artifact id
   - <code>body</code>: [*string*] body of a http request
   - <code>bucket</code>: [*string*] bucket name
-  - <code>classifier</code>: [*string*] mvn classifier
+  - <code>classifier</code>: [*string*] maven classifier
   - <code>comment</code>: [*string*] comment field value
   - <code>commit</code>: [*string*] git commit id
   - <code>digest</code>: [*string*] blob digest
-  - <code>extension</code>: [*string*] mvn extension name
+  - <code>extension</code>: [*string*] maven extension name
   - <code>globalAccess</code>: [*map[string]YAML*] access specification for global access
-  - <code>groupId</code>: [*string*] group id or namespace
+  - <code>groupId</code>: [*string*] maven group id
   - <code>header</code>: [*string:string,string*] http headers
   - <code>hint</code>: [*string*] (repository) hint for local artifacts
   - <code>mediaType</code>: [*string*] media type for artifact blob representation
