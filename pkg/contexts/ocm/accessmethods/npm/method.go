@@ -111,16 +111,15 @@ func (a *AccessSpec) GetPackageVersion(ctx accspeccpi.Context) (*npm.Version, er
 	if err != nil {
 		return nil, err
 	}
-	buf := &bytes.Buffer{}
-	_, err = io.Copy(buf, io.LimitReader(r, 200000))
+	buf, err := io.ReadAll(r)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get version metadata for %s", a.PackageVersionUrl())
 	}
 	var version npm.Version
-	err = json.Unmarshal(buf.Bytes(), &version)
+	err = json.Unmarshal(buf, &version)
 	if err != nil || version.Dist.Tarball == "" {
 		var project npm.Project
-		err = json.Unmarshal(buf.Bytes(), &project)
+		err = json.Unmarshal(buf, &project)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", a.PackageVersionUrl())
 		}
