@@ -3,6 +3,7 @@ package subst
 import (
 	"bytes"
 	"container/list"
+	"regexp"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -120,39 +121,41 @@ func (f *fileinfo) Content() ([]byte, error) {
 	}
 }
 
+var sniffJson = regexp.MustCompile(`\s*(\{|\[|")`)
+
 func (f *fileinfo) SubstituteByData(path string, value []byte) error {
-	var valueData interface{}
 	var err error
-	var candidateNodePopulated bool
+
+	if sniffJson.Match(value) && !f.json {
+		// yaml is generally a superset of json so we could just insert the json value
+		// into a yaml file and have a valid yaml.
+		// However having a yaml file that looks like a mix of yaml and json is off putting.
+		// So if the value looks like json and the target file is yaml we will first
+		// attempt to re-enode the value as yaml before inserting into the target document.
+		// However... we don't want to perform re-encoding for everything because if the
+		// value is actually yaml with some snippets in json style for readability
+		// purposes we don't want to unecessarily lose that styling.  Hence the initial
+		// sniff test for json instead of always re-encoding.
+		var valueData interface{}
+		if err = runtime.DefaultJSONEncoding.Unmarshal(value, &valueData); err == nil {
+			if value, err = runtime.DefaultYAMLEncoding.Marshal(valueData); err != nil {
+				return err
+			}
+		}
+	}
+
+	m := &yaml.Node{}
+	if err = yaml.Unmarshal(value, m); err != nil {
+		return err
+	}
 
 	nd := &yqlib.CandidateNode{}
 	nd.SetDocument(0)
 	nd.SetFilename("value")
 	nd.SetFileIndex(0)
 
-	if err = runtime.DefaultJSONEncoding.Unmarshal(value, &valueData); err == nil && f.json {
-		// value and target are json, just unmarshal json bytes into candidatenode
-		if err = nd.UnmarshalJSON(value); err != nil {
-			return err
-		}
-		candidateNodePopulated = true
-	} else if err == nil {
-		// value is json but target is not.  Call SubstituteByValue and it will call us
-		// back with yaml bytes
-		if value, err = runtime.DefaultYAMLEncoding.Marshal(valueData); err != nil {
-			return err
-		}
-	}
-
-	if !candidateNodePopulated {
-		// value is yaml and target is same or json.  Use yaml as is
-		m := &yaml.Node{}
-		if err = yaml.Unmarshal(value, m); err != nil {
-			return err
-		}
-		if err = nd.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
-			return err
-		}
+	if err = nd.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
+		return err
 	}
 
 	return f.substituteByValue(path, nd)
