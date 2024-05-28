@@ -3,14 +3,14 @@ package env
 import (
 	"bytes"
 	"fmt"
-	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/mandelsoft/goutils/general"
 	"runtime"
 	"runtime/debug"
 	"strings"
 
 	"github.com/DataDog/gostackparse"
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/exception"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/composefs"
 	"github.com/mandelsoft/vfs/pkg/layerfs"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
