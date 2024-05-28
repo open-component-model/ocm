@@ -1,6 +1,8 @@
 package subst
 
 import (
+	"strings"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -345,6 +347,59 @@ single: 'foo\nbar'`
     double: "foo\nbar"
     single: 'foo\nbar'
   value2: orig2`))
+	})
+
+	It("stores string that is compatible with zero style into yaml using zero style", func() {
+		value := `{"foo": "bar"}`
+		data := `data: ~`
+
+		content, err := Parse([]byte(data))
+		Expect(err).To(Succeed())
+
+		Expect(content.SubstituteByData("data", []byte(value))).To(Succeed())
+
+		result, err := content.Content()
+		Expect(err).To(Succeed())
+		expected := `data:
+  foo: bar`
+
+		Expect(strings.TrimSpace(string(result))).To(Equal(expected))
+	})
+
+	It("stores string that requires double quote style with yaml using double quote style", func() {
+		value := `{"foo": "true"}`
+		data := `data: ~`
+
+		content, err := Parse([]byte(data))
+		Expect(err).To(Succeed())
+
+		Expect(content.SubstituteByData("data", []byte(value))).To(Succeed())
+
+		result, err := content.Content()
+		Expect(err).To(Succeed())
+		expected := `data:
+  foo: "true"`
+
+		Expect(strings.TrimSpace(string(result))).To(Equal(expected))
+	})
+
+	It("stores string that is compatible with literal style into yaml using literal style", func() {
+		value := `{"foo": "bar\ncar"}`
+		data := `data: ~`
+
+		content, err := Parse([]byte(data))
+		Expect(err).To(Succeed())
+
+		Expect(content.SubstituteByData("data", []byte(value))).To(Succeed())
+
+		result, err := content.Content()
+		Expect(err).To(Succeed())
+		expected := `data:
+  foo: |-
+    bar
+    car`
+
+		Expect(strings.TrimSpace(string(result))).To(Equal(expected))
 	})
 
 	It("handles non-string scalar", func() {

@@ -121,46 +121,40 @@ func (f *fileinfo) Content() ([]byte, error) {
 }
 
 func (f *fileinfo) SubstituteByData(path string, value []byte) error {
-	var node interface{}
-	err := runtime.DefaultYAMLEncoding.Unmarshal(value, &node)
-	if err != nil {
-		return err
-	}
-	if f.json {
-		value, err = runtime.DefaultJSONEncoding.Marshal(node)
-	} else {
-		value, err = runtime.DefaultYAMLEncoding.Marshal(node)
-	}
-	if err != nil {
-		return err
-	}
-	m := &yaml.Node{}
-	err = yaml.Unmarshal(value, m)
-	if err != nil {
-		return err
-	}
-
-	if !f.json {
-		var replaceFlowStyle func(*yaml.Node)
-		replaceFlowStyle = func(nd *yaml.Node) {
-			if nd.Style == yaml.FlowStyle {
-				nd.Style = yaml.LiteralStyle
-			}
-			for _, chld := range nd.Content {
-				replaceFlowStyle(chld)
-			}
-		}
-		replaceFlowStyle(m)
-	}
+	var valueData interface{}
+	var err error
+	var candidateNodePopulated bool
 
 	nd := &yqlib.CandidateNode{}
 	nd.SetDocument(0)
 	nd.SetFilename("value")
 	nd.SetFileIndex(0)
 
-	if err = nd.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
-		return err
+	if err = runtime.DefaultJSONEncoding.Unmarshal(value, &valueData); err == nil && f.json {
+		// value and target are json, just unmarshal json bytes into candidatenode
+		if err = nd.UnmarshalJSON(value); err != nil {
+			return err
+		}
+		candidateNodePopulated = true
+	} else if err == nil {
+		// value is json but target is not.  Call SubstituteByValue and it will call us
+		// back with yaml bytes
+		if value, err = runtime.DefaultYAMLEncoding.Marshal(valueData); err != nil {
+			return err
+		}
 	}
+
+	if !candidateNodePopulated {
+		// value is yaml and target is same or json.  Use yaml as is
+		m := &yaml.Node{}
+		if err = yaml.Unmarshal(value, m); err != nil {
+			return err
+		}
+		if err = nd.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
+			return err
+		}
+	}
+
 	return f.substituteByValue(path, nd)
 }
 
