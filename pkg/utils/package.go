@@ -2,12 +2,56 @@ package utils
 
 import (
 	"fmt"
+	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	"golang.org/x/mod/modfile"
 	"reflect"
 	"runtime"
 	"strings"
 )
 
-const MODULE_PATH = "github.com/open-component-model/ocm"
+func GetRelativePathToProjectRoot(i ...int) (string, error) {
+	iterations := general.OptionalDefaulted(20, i...)
+
+	path := "."
+	for count := 0; count < iterations; count++ {
+		if ok, err := vfs.FileExists(osfs.OsFs, filepath.Join(path, "go.mod")); err != nil || ok {
+			if err != nil {
+				return "", fmt.Errorf("failed to check if go.mod exists: %v", err)
+			}
+			return path, nil
+		}
+		if count == iterations {
+			return "", fmt.Errorf("could not find go.mod (within %d steps)", iterations)
+		}
+		path = filepath.Join(path, "..")
+	}
+	return "", nil
+}
+
+func GetModuleName() (string, error) {
+	pathToRoot, err := GetRelativePathToProjectRoot()
+	if err != nil {
+		return "", err
+	}
+	pathToGoMod := filepath.Join(pathToRoot, "go.mod")
+	// Read the content of the go.mod file
+	data, err := vfs.ReadFile(osfs.OsFs, pathToGoMod)
+	if err != nil {
+		return "", err
+	}
+
+	// Parse the go.mod file
+	modFile, err := modfile.Parse("go.mod", data, nil)
+	if err != nil {
+		return "", fmt.Errorf("error parsing go.mod file: %w", err)
+	}
+
+	// Print the module path
+	return modFile.Module.Mod.Path, nil
+}
 
 func GetPackageNameForFunc(i interface{}) (string, error) {
 	// Get the function's pointer
@@ -36,9 +80,13 @@ func GetPackagePathFromProjectRootForFunc(i interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	path, ok := strings.CutPrefix(pkg, "github.com/open-component-model/ocm/")
+	mod, err := GetModuleName()
+	if err != nil {
+		return "", err
+	}
+	path, ok := strings.CutPrefix(pkg, mod)
 	if !ok {
-		return "", fmt.Errorf("prefix %q not found in %q", MODULE_PATH, pkg)
+		return "", fmt.Errorf("prefix %q not found in %q", mod, pkg)
 	}
 	return path, nil
 }

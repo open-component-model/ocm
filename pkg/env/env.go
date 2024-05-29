@@ -232,23 +232,13 @@ func ModifiableTestData(paths ...string) tdOpt {
 }
 
 func projectTestData(modifiable bool, source string, dest ...string) Option {
-	path := "."
-	for count := 0; count < 20; count++ {
-		if ok, err := vfs.FileExists(osfs.OsFs, filepath.Join(path, "go.mod")); err != nil || ok {
-			if err != nil {
-				panic(err)
-			}
-			path = filepath.Join(path, source)
-			break
-		}
-		if count == 19 {
-			panic("could not find go.mod (within 20 steps)")
-		}
-
-		path = filepath.Join(path, "..")
+	pathToRoot, err := utils.GetRelativePathToProjectRoot()
+	if err != nil {
+		panic(err)
 	}
+	pathToTestdata := filepath.Join(pathToRoot, source)
 
-	return testData(modifiable, path, general.OptionalDefaulted("/testdata", dest...))
+	return testData(modifiable, pathToTestdata, general.OptionalDefaulted("/testdata", dest...))
 }
 
 func ProjectTestData(source string, dest ...string) Option {
@@ -282,7 +272,12 @@ func projectTestDataForCaller(modifiable bool, dest ...string) Option {
 
 	funcIndex := strings.Index(fullFuncName[lastSlashIndex:], ".")
 	packagePath := fullFuncName[:lastSlashIndex+funcIndex]
-	path, ok := strings.CutPrefix(packagePath, "github.com/open-component-model/ocm/")
+
+	moduleName, err := utils.GetModuleName()
+	if err != nil {
+		panic(err)
+	}
+	path, ok := strings.CutPrefix(packagePath, moduleName)
 	if !ok {
 		panic("unable to find package name")
 	}
