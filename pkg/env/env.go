@@ -3,7 +3,6 @@ package env
 import (
 	"bytes"
 	"fmt"
-	"runtime"
 	"runtime/debug"
 	"strings"
 
@@ -25,7 +24,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/testutils"
 	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils/pkgutils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -232,23 +233,13 @@ func ModifiableTestData(paths ...string) tdOpt {
 }
 
 func projectTestData(modifiable bool, source string, dest ...string) Option {
-	path := "."
-	for count := 0; count < 20; count++ {
-		if ok, err := vfs.FileExists(osfs.OsFs, filepath.Join(path, "go.mod")); err != nil || ok {
-			if err != nil {
-				panic(err)
-			}
-			path = filepath.Join(path, source)
-			break
-		}
-		if count == 19 {
-			panic("could not find go.mod (within 20 steps)")
-		}
-
-		path = filepath.Join(path, "..")
+	pathToRoot, err := testutils.GetRelativePathToProjectRoot()
+	if err != nil {
+		panic(err)
 	}
+	pathToTestdata := filepath.Join(pathToRoot, source)
 
-	return testData(modifiable, path, general.OptionalDefaulted("/testdata", dest...))
+	return testData(modifiable, pathToTestdata, general.OptionalDefaulted("/testdata", dest...))
 }
 
 func ProjectTestData(source string, dest ...string) Option {
@@ -260,29 +251,16 @@ func ModifiableProjectTestData(source string, dest ...string) Option {
 }
 
 func projectTestDataForCaller(modifiable bool, dest ...string) Option {
-	pc, _, _, ok := runtime.Caller(2)
-	if !ok {
-		panic("unable to find caller")
+	packagePath, err := pkgutils.GetPackageName(2)
+	if err != nil {
+		panic(err)
 	}
 
-	// Get the function details from the program counter
-	caller := runtime.FuncForPC(pc)
-	if caller == nil {
-		panic("unable to find caller")
+	moduleName, err := testutils.GetModuleName()
+	if err != nil {
+		panic(err)
 	}
-
-	fullFuncName := caller.Name()
-
-	// Split the name to extract the package path
-	// Assuming the format: "package/path.functionName"
-	lastSlashIndex := strings.LastIndex(fullFuncName, "/")
-	if lastSlashIndex == -1 {
-		panic("unable to find package name")
-	}
-
-	funcIndex := strings.Index(fullFuncName[lastSlashIndex:], ".")
-	packagePath := fullFuncName[:lastSlashIndex+funcIndex]
-	path, ok := strings.CutPrefix(packagePath, "github.com/open-component-model/ocm/")
+	path, ok := strings.CutPrefix(packagePath, moduleName+"/")
 	if !ok {
 		panic("unable to find package name")
 	}
