@@ -7,6 +7,14 @@ import (
 	"strings"
 )
 
+// GetPackageName gets the package name for an object, a type, a function or a caller offset.
+//
+// Examples:
+//
+//	GetPackageName(1)
+//	GetPackageName(&MyStruct{})
+//	GetPackageName(GetPackageName)
+//	GetPackageName(generics.TypeOf[MyStruct]())
 func GetPackageName(i ...interface{}) (string, error) {
 	if len(i) == 0 {
 		i = []interface{}{0}
