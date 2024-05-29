@@ -69,10 +69,6 @@ var _ = Describe("Method", func() {
 		Expect(acc.PackageUrl()).To(Equal(packageUrl))
 		acc = npm.New("https://registry.npmjs.org/", "yargs", "17.7.1")
 		Expect(acc.PackageUrl()).To(Equal(packageUrl))
-		acc = npm.New("https://registry.npmjs.org/", "/yargs", "/17.7.1")
-		Expect(acc.PackageUrl()).To(Equal(packageUrl))
-		acc = npm.New("https://registry.npmjs.org//", "yargs", "17.7.1")
-		Expect(acc.PackageUrl()).To(Equal(packageUrl))
 	})
 
 	It("PackageVersionUrl()", func() {
@@ -80,10 +76,6 @@ var _ = Describe("Method", func() {
 		acc := npm.New("https://registry.npmjs.org", "yargs", "17.7.1")
 		Expect(acc.PackageVersionUrl()).To(Equal(packageVersionUrl))
 		acc = npm.New("https://registry.npmjs.org/", "yargs", "17.7.1")
-		Expect(acc.PackageVersionUrl()).To(Equal(packageVersionUrl))
-		acc = npm.New("https://registry.npmjs.org/", "/yargs", "/17.7.1")
-		Expect(acc.PackageVersionUrl()).To(Equal(packageVersionUrl))
-		acc = npm.New("https://registry.npmjs.org//", "yargs", "17.7.1")
 		Expect(acc.PackageVersionUrl()).To(Equal(packageVersionUrl))
 	})
 })

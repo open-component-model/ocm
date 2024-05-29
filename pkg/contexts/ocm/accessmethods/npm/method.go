@@ -98,12 +98,12 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.Comp
 
 // PackageUrl returns the URL of the NPM package (Registry/Package).
 func (a *AccessSpec) PackageUrl() string {
-	return a.Registry[:8] + path.Clean(path.Join(a.Registry[8:], a.Package))
+	return strings.TrimSuffix(a.Registry, "/") + path.Join("/", a.Package)
 }
 
 // PackageVersionUrl returns the URL of the NPM package-version (Registry/Package/Version).
 func (a *AccessSpec) PackageVersionUrl() string {
-	return a.Registry[:8] + path.Clean(path.Join(a.PackageUrl()[8:], a.Version))
+	return strings.TrimSuffix(a.Registry, "/") + path.Join("/", a.Package, a.Version)
 }
 
 func (a *AccessSpec) GetPackageVersion(ctx accspeccpi.Context) (*npm.Version, error) {
