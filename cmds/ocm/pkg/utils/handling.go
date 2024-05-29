@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 )
 

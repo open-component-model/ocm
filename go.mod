@@ -14,6 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.21
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.28.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.54.3
+	github.com/cloudflare/cfssl v0.0.0-20180223231731-4e2dcbde5004
 	github.com/containerd/containerd v1.7.17
 	github.com/containerd/log v0.1.0
 	github.com/containers/image/v5 v5.31.0
@@ -38,7 +39,7 @@ require (
 	github.com/klauspost/compress v1.17.8
 	github.com/klauspost/pgzip v1.2.6
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
-	github.com/mandelsoft/goutils v0.0.0-20240523093855-5385ed52b460
+	github.com/mandelsoft/goutils v0.0.0-20240527090454-525d51156f92
 	github.com/mandelsoft/logging v0.0.0-20240201091719-67180059d6bf
 	github.com/mandelsoft/spiff v1.7.0-beta-5
 	github.com/mandelsoft/vfs v0.4.3
