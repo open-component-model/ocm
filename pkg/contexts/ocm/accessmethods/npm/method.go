@@ -86,7 +86,7 @@ func (a *AccessSpec) AccessMethod(c accspeccpi.ComponentVersionAccess) (accspecc
 }
 
 func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.ComponentVersionAccess) string {
-	meta, err := a.getPackageMeta(access.GetContext())
+	meta, err := a.GetPackageVersion(access.GetContext())
 	if err != nil {
 		return ""
 	}
@@ -96,42 +96,69 @@ func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.Comp
 	return ""
 }
 
-// PackageUrl returns the URL of the NPM package (Registry/Package/Version).
+// PackageUrl returns the URL of the NPM package (Registry/Package).
 func (a *AccessSpec) PackageUrl() string {
-	return a.Registry + path.Join("/", a.Package, a.Version)
+	return strings.TrimSuffix(a.Registry, "/") + path.Join("/", a.Package)
 }
 
-func (a *AccessSpec) getPackageMeta(ctx accspeccpi.Context) (*meta, error) {
+// PackageVersionUrl returns the URL of the NPM package-version (Registry/Package/Version).
+func (a *AccessSpec) PackageVersionUrl() string {
+	return strings.TrimSuffix(a.Registry, "/") + path.Join("/", a.Package, a.Version)
+}
+
+func (a *AccessSpec) GetPackageVersion(ctx accspeccpi.Context) (*npm.Version, error) {
 	r, err := reader(a, vfsattr.Get(ctx), ctx)
 	if err != nil {
 		return nil, err
 	}
-	buf := &bytes.Buffer{}
-	_, err = io.Copy(buf, io.LimitReader(r, 200000))
+	defer r.Close()
+	buf, err := io.ReadAll(r)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot get version metadata for %s", a.PackageUrl())
+		return nil, errors.Wrapf(err, "cannot get version metadata for %s", a.PackageVersionUrl())
 	}
-
-	var metadata meta
-
-	err = json.Unmarshal(buf.Bytes(), &metadata)
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", a.PackageUrl())
+	var version npm.Version
+	err = json.Unmarshal(buf, &version)
+	if err != nil || version.Dist.Tarball == "" {
+		// ugly fallback as workaround for https://github.com/sonatype/nexus-public/issues/224
+		var project npm.Project
+		err = json.Unmarshal(buf, &project) // parse the complete project
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", a.PackageVersionUrl())
+		}
+		v, ok := project.Version[a.Version] // and pick only the specified version
+		if !ok {
+			return nil, errors.Newf("version '%s' doesn't exist", a.Version)
+		}
+		version = v
 	}
-	return &metadata, nil
+	return &version, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.AccessMethodImpl, error) {
 	factory := func() (blobaccess.BlobAccess, error) {
-		meta, err := a.getPackageMeta(c.GetContext())
+		meta, err := a.GetPackageVersion(c.GetContext())
 		if err != nil {
 			return nil, err
 		}
 
 		f := func() (io.ReadCloser, error) {
 			return reader(a, vfsattr.Get(c.GetContext()), c.GetContext(), meta.Dist.Tarball)
+		}
+		if meta.Dist.Integrity != "" {
+			tf := f
+			f = func() (io.ReadCloser, error) {
+				r, err := tf()
+				if err != nil {
+					return nil, err
+				}
+				digest, err := iotools.DecodeBase64ToHex(meta.Dist.Integrity)
+				if err != nil {
+					return nil, err
+				}
+				return iotools.VerifyingReaderWithHash(r, crypto.SHA512, digest), nil
+			}
 		}
 		if meta.Dist.Shasum != "" {
 			tf := f
@@ -149,15 +176,8 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (accspeccpi.A
 	return accspeccpi.NewDefaultMethodImpl(c, a, "", mime.MIME_TGZ, factory), nil
 }
 
-type meta struct {
-	Dist struct {
-		Shasum  string `json:"shasum"`
-		Tarball string `json:"tarball"`
-	} `json:"dist"`
-}
-
 func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...string) (io.ReadCloser, error) {
-	url := a.PackageUrl()
+	url := a.PackageVersionUrl()
 	if len(tar) > 0 {
 		url = tar[0]
 	}
@@ -170,12 +190,38 @@ func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...st
 	if err != nil {
 		return nil, err
 	}
-	npm.Authorize(req, ctx, a.Registry, a.Package)
+	err = npm.BasicAuth(req, ctx, a.Registry, a.Package)
+	if err != nil {
+		return nil, err
+	}
 	c := &http.Client{}
 	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		// maybe it's stupid Nexus - https://github.com/sonatype/nexus-public/issues/224?
+		url = a.PackageUrl()
+		req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+		if err != nil {
+			return nil, err
+		}
+		err = npm.BasicAuth(req, ctx, a.Registry, a.Package)
+		if err != nil {
+			return nil, err
+		}
+
+		// close body before overwriting to close any pending connections
+		resp.Body.Close()
+		resp, err = c.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		defer resp.Body.Close()
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		defer resp.Body.Close()
 		buf := &bytes.Buffer{}
@@ -185,5 +231,9 @@ func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...st
 		}
 		return nil, errors.Newf("version meta data request %s provides %s: %s", url, resp.Status, buf.String())
 	}
-	return resp.Body, nil
+	content, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return io.NopCloser(bytes.NewBuffer(content)), nil
 }
