@@ -258,7 +258,7 @@ func projectTestDataForCaller(modifiable bool, dest ...string) Option {
 	if err != nil {
 		panic(err)
 	}
-	path, ok := strings.CutPrefix(packagePath, moduleName)
+	path, ok := strings.CutPrefix(packagePath, moduleName+"/")
 	if !ok {
 		panic("unable to find package name")
 	}

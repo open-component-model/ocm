@@ -115,16 +115,24 @@ func GetPackageNameForFunc(f ...interface{}) (string, error) {
 	return getPackageNameForFuncPC(ptr)
 }
 
-func GetPackagePathFromProjectRootForFunc(i interface{}) (string, error) {
-	pkg, err := GetPackageNameForFunc(i)
-	if err != nil {
-		return "", err
+func GetPackagePathFromProjectRootForFunc(f ...interface{}) (string, error) {
+	var pkg string
+	var err error
+
+	if len(f) > 0 {
+		pkg, err = GetPackageNameForFunc(f)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		pkg, err = GetPackageNameForCaller(1)
 	}
+
 	mod, err := GetModuleName()
 	if err != nil {
 		return "", err
 	}
-	path, ok := strings.CutPrefix(pkg, mod)
+	path, ok := strings.CutPrefix(pkg, mod+"/")
 	if !ok {
 		return "", fmt.Errorf("prefix %q not found in %q", mod, pkg)
 	}
