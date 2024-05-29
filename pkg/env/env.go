@@ -24,7 +24,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/testutils"
 	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils/pkgutils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -231,7 +233,7 @@ func ModifiableTestData(paths ...string) tdOpt {
 }
 
 func projectTestData(modifiable bool, source string, dest ...string) Option {
-	pathToRoot, err := utils.GetRelativePathToProjectRoot()
+	pathToRoot, err := testutils.GetRelativePathToProjectRoot()
 	if err != nil {
 		panic(err)
 	}
@@ -249,12 +251,12 @@ func ModifiableProjectTestData(source string, dest ...string) Option {
 }
 
 func projectTestDataForCaller(modifiable bool, dest ...string) Option {
-	packagePath, err := utils.GetPackageNameForCaller(2)
+	packagePath, err := pkgutils.GetPackageName(2)
 	if err != nil {
 		panic(err)
 	}
 
-	moduleName, err := utils.GetModuleName()
+	moduleName, err := testutils.GetModuleName()
 	if err != nil {
 		panic(err)
 	}
