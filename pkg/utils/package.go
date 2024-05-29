@@ -61,22 +61,9 @@ func GetModuleName() (string, error) {
 	return modFile.Module.Mod.Path, nil
 }
 
-func GetPackageNameForFunc(i ...interface{}) (string, error) {
-	// if no function is passed, assume the package name should be determined for the caller of this function
-	pc, _, _, ok := runtime.Caller(1)
-	if !ok {
-		panic("unable to find caller")
-	}
-
-	// Get the function's pointer
-	var ptr uintptr
-	if len(i) > 0 {
-		ptr = reflect.ValueOf(general.Optional(i...)).Pointer()
-	} else {
-		ptr = pc
-	}
+func getPackageNameForFuncPC(pc uintptr) (string, error) {
 	// Retrieve the function's runtime information
-	funcForPC := runtime.FuncForPC(ptr)
+	funcForPC := runtime.FuncForPC(pc)
 	if funcForPC == nil {
 		return "", fmt.Errorf("could not determine package name")
 	}
@@ -94,6 +81,38 @@ func GetPackageNameForFunc(i ...interface{}) (string, error) {
 	packagePath := fullFuncName[:lastSlashIndex+funcIndex]
 
 	return packagePath, nil
+}
+
+// GetPackageNameForCaller returns the package name of the function calling this function.
+// The parameter offset is useful if this function is used within another utility function. With an offset of 1, you
+// could specify that it should not return the package name of the immediate caller (the other utility function), but
+// the package name of the function calling the utility function.
+func GetPackageNameForCaller(offset ...int) (string, error) {
+	pc, _, _, ok := runtime.Caller(general.OptionalDefaulted(0, offset...) + 1)
+	if !ok {
+		panic("unable to find caller")
+	}
+	return getPackageNameForFuncPC(pc)
+}
+
+// GetPackageNameForFunc provides the package name of a function. The function has to be passed as parameter. If no
+// parameter is passed, the GetPackageNameForFunc will default to returning the package name of the calling function.
+func GetPackageNameForFunc(f ...interface{}) (string, error) {
+	// if no function is passed, assume the package name should be determined for the caller of this function
+	pc, _, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("unable to find caller")
+	}
+
+	// Get the function's pointer
+	var ptr uintptr
+	if len(f) > 0 {
+		ptr = reflect.ValueOf(general.Optional(f...)).Pointer()
+	} else {
+		ptr = pc
+	}
+
+	return getPackageNameForFuncPC(ptr)
 }
 
 func GetPackagePathFromProjectRootForFunc(i interface{}) (string, error) {

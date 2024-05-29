@@ -3,7 +3,6 @@ package env
 import (
 	"bytes"
 	"fmt"
-	"runtime"
 	"runtime/debug"
 	"strings"
 
@@ -250,28 +249,10 @@ func ModifiableProjectTestData(source string, dest ...string) Option {
 }
 
 func projectTestDataForCaller(modifiable bool, dest ...string) Option {
-	pc, _, _, ok := runtime.Caller(2)
-	if !ok {
-		panic("unable to find caller")
+	packagePath, err := utils.GetPackageNameForCaller(2)
+	if err != nil {
+		panic(err)
 	}
-
-	// Get the function details from the program counter
-	caller := runtime.FuncForPC(pc)
-	if caller == nil {
-		panic("unable to find caller")
-	}
-
-	fullFuncName := caller.Name()
-
-	// Split the name to extract the package path
-	// Assuming the format: "package/path.functionName"
-	lastSlashIndex := strings.LastIndex(fullFuncName, "/")
-	if lastSlashIndex == -1 {
-		panic("unable to find package name")
-	}
-
-	funcIndex := strings.Index(fullFuncName[lastSlashIndex:], ".")
-	packagePath := fullFuncName[:lastSlashIndex+funcIndex]
 
 	moduleName, err := utils.GetModuleName()
 	if err != nil {
