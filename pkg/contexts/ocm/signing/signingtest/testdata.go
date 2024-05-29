@@ -1,4 +1,4 @@
-package maventest
+package signingtest
 
 import (
 	"github.com/open-component-model/ocm/pkg/env"

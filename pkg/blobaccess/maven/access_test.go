@@ -1,8 +1,9 @@
 package maven_test
 
 import (
-	"github.com/open-component-model/ocm/pkg/maven/maventest"
 	"time"
+
+	"github.com/open-component-model/ocm/pkg/maven/maventest"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -45,8 +46,12 @@ var _ = Describe("blobaccess for maven", func() {
 			b := Must(me.BlobAccessForMaven(repo, coords.GroupId, coords.ArtifactId, coords.Version, me.WithCachingFileSystem(env.FileSystem())))
 			defer Close(b, "blobaccess")
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			Expect(files).To(ConsistOf("sdk-modules-bom-5.7.0.pom", "sdk-modules-bom-5.7.0.jar", "sdk-modules-bom-5.7.0-random-content.txt",
-				"sdk-modules-bom-5.7.0-random-content.json", "sdk-modules-bom-5.7.0-sources.jar"))
+			Expect(files).To(ConsistOf(
+				"sdk-modules-bom-5.7.0.pom",
+				"sdk-modules-bom-5.7.0.jar",
+				"sdk-modules-bom-5.7.0-random-content.txt",
+				"sdk-modules-bom-5.7.0-random-content.json",
+				"sdk-modules-bom-5.7.0-sources.jar"))
 		})
 
 		It("blobaccess for files with the same classifier", func() {

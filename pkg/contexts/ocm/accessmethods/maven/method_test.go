@@ -2,8 +2,9 @@ package maven_test
 
 import (
 	"crypto"
-	"github.com/open-component-model/ocm/pkg/maven/maventest"
 	"time"
+
+	"github.com/open-component-model/ocm/pkg/maven/maventest"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -48,16 +49,16 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 		Expect(m.MimeType()).To(Equal(mime.MIME_TGZ))
 		r := Must(m.Reader())
 		defer Close(r)
-		dr := iotools.NewDigestReaderWithHash(crypto.SHA1, r)
-		for {
-			var buf [8096]byte
-			_, err := dr.Read(buf[:])
-			if err != nil {
-				break
-			}
-		}
-		Expect(dr.Size()).To(Equal(int64(1570)))
-		Expect(dr.Digest().String()).To(Equal("SHA-1:359d02795bcc737e81c7f2f0ac32f49351d41867"))
+		dr := iotools.NewDigestReaderWithHash(crypto.SHA256, r)
+		li := Must(tarutils.ListArchiveContentFromReader(dr))
+		Expect(li).To(ConsistOf(
+			"sdk-modules-bom-5.7.0-random-content.json",
+			"sdk-modules-bom-5.7.0-random-content.txt",
+			"sdk-modules-bom-5.7.0-sources.jar",
+			"sdk-modules-bom-5.7.0.jar",
+			"sdk-modules-bom-5.7.0.pom"))
+		Expect(dr.Size()).To(Equal(int64(maventest.ARTIFACT_SIZE)))
+		Expect(dr.Digest().String()).To(Equal("SHA-256:" + maventest.ARTIFACT_DIGEST))
 	})
 
 	It("accesses local artifact with empty classifier and with extension", func() {
@@ -78,7 +79,7 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 		}
 
 		Expect(dr.Size()).To(Equal(int64(7153)))
-		Expect(dr.Digest().String()).To(Equal("SHA-1:34ccdeb9c008f8aaef90873fc636b09d3ae5c709"))
+		Expect(dr.Digest().String()).To(Equal(maventest.POM_SHA1))
 	})
 
 	It("accesses local artifact with extension", func() {
