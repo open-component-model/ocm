@@ -199,10 +199,9 @@ func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...st
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNotFound {
 		// maybe it's stupid Nexus - https://github.com/sonatype/nexus-public/issues/224?
-		resp.Body.Close()
-
 		url = a.PackageUrl()
 		req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
 		if err != nil {
@@ -212,10 +211,15 @@ func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...st
 		if err != nil {
 			return nil, err
 		}
+
+		// close body before overwriting to close any pending connections
+		resp.Body.Close()
 		resp, err = c.Do(req)
 		if err != nil {
 			return nil, err
 		}
+
+		defer resp.Body.Close()
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -227,5 +231,9 @@ func reader(a *AccessSpec, fs vfs.FileSystem, ctx cpi.ContextProvider, tar ...st
 		}
 		return nil, errors.Newf("version meta data request %s provides %s: %s", url, resp.Status, buf.String())
 	}
-	return resp.Body, nil
+	content, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return io.NopCloser(bytes.NewBuffer(content)), nil
 }
