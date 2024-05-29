@@ -14,7 +14,6 @@ import (
 var _ = Describe("Config deserialization Test Environment", func() {
 	It("read .npmrc", func() {
 		ctx := credentials.New()
-
 		repo := Must(npm.NewRepository(ctx, "testdata/.npmrc"))
 		Expect(Must(repo.LookupCredentials("registry.npmjs.org")).Properties()).To(Equal(common.Properties{identity.ATTR_TOKEN: "npm_TOKEN"}))
 		Expect(Must(repo.LookupCredentials("npm.registry.acme.com/api/npm")).Properties()).To(Equal(common.Properties{identity.ATTR_TOKEN: "bearer_TOKEN"}))
@@ -22,12 +21,9 @@ var _ = Describe("Config deserialization Test Environment", func() {
 
 	It("propagates credentials", func() {
 		ctx := credentials.New()
-
 		spec := npm.NewRepositorySpec("testdata/.npmrc")
-
 		_ = Must(ctx.RepositoryForSpec(spec))
-		id, err := identity.GetConsumerId("registry.npmjs.org", "pkg")
-		Expect(err).To(BeNil())
+		id := Must(identity.GetConsumerId("registry.npmjs.org", "pkg"))
 		creds := Must(credentials.CredentialsForConsumer(ctx, id))
 		Expect(creds).NotTo(BeNil())
 		Expect(creds.GetProperty(identity.ATTR_TOKEN)).To(Equal("npm_TOKEN"))
@@ -39,5 +35,4 @@ var _ = Describe("Config deserialization Test Environment", func() {
 		Expect(t).NotTo(BeNil())
 		Expect(t.Description()).NotTo(Equal(""))
 	})
-
 })
