@@ -126,7 +126,7 @@ var sniffJson = regexp.MustCompile(`\s*(\{|\[|")`)
 func (f *fileinfo) SubstituteByData(path string, value []byte) error {
 	var err error
 
-	if sniffJson.Match(value) && !f.json {
+	if !f.json && sniffJson.Match(value) {
 		// yaml is generally a superset of json so we could just insert the json value
 		// into a yaml file and have a valid yaml.
 		// However having a yaml file that looks like a mix of yaml and json is off putting.
