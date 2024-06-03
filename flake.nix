@@ -118,5 +118,10 @@
           program = self.packages.${system}.${pname} + "/bin/ecrplugin";
         };
       });
+      
+      legacyPackages = forAllSystems (system: rec {
+        nixpkgs = nixpkgsFor.${system};
+      });
+
     };
 }
