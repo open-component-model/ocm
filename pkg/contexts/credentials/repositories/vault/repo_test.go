@@ -7,12 +7,12 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	me "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const (

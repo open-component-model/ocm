@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
+	crds "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/logging"
@@ -64,14 +65,8 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	log = log.WithValues("package", pkg.Name, "version", pkg.Version)
 	log.Debug("identified")
 
-	token, err := npmLogin.BearerToken(ctx.GetContext(), b.spec.Url, pkg.Name)
-	if err != nil {
-		// we assume, it's not possible to publish anonymous - without token
-		return nil, err
-	}
-
 	// check if package exists
-	exists, err := packageExists(b.spec.Url, *pkg, token)
+	exists, err := packageExists(b.spec.Url, *pkg, ctx.GetContext())
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +99,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("authorization", "Bearer "+token)
-	req.Header.Set("content-type", "application/json")
+	err = npmLogin.Authorize(req, ctx.GetContext(), b.spec.Url, pkg.Name)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
 
 	// send PUT request - upload tgz
 	client := http.Client{}
@@ -127,13 +125,16 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 }
 
 // Check if package already exists in npm registry. If it does, checks if it's the same.
-func packageExists(repoUrl string, pkg Package, token string) (bool, error) {
+func packageExists(repoUrl string, pkg Package, ctx crds.ContextProvider) (bool, error) {
 	client := http.Client{}
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, repoUrl+"/"+url.PathEscape(pkg.Name)+"/"+url.PathEscape(pkg.Version), nil)
 	if err != nil {
 		return false, err
 	}
-	req.Header.Set("authorization", "Bearer "+token)
+	err = npmLogin.Authorize(req, ctx, repoUrl, pkg.Name)
+	if err != nil {
+		return false, err
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return false, err

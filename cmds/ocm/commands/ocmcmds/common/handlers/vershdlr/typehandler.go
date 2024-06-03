@@ -6,8 +6,8 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
-
 	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"

@@ -65,7 +65,7 @@ func (r *Repository) Read(force bool) error {
 	}
 
 	if r.path == "" {
-		return fmt.Errorf("npmrc path not provided")
+		return errors.New("npmrc path not provided")
 	}
 	cfg, path, err := readNpmConfigFile(r.path)
 	if err != nil {

@@ -4,10 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/mandelsoft/logging"
-
 	"github.com/open-component-model/ocm/pkg/blobaccess/wget"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 )
 
 type (
@@ -15,20 +12,8 @@ type (
 	Option  = wget.Option
 )
 
-func WithCredentialContext(ctx credentials.ContextProvider) Option {
-	return wget.WithCredentialContext(ctx)
-}
-
-func WithLoggingContext(ctx logging.ContextProvider) Option {
-	return wget.WithLoggingContext(ctx)
-}
-
 func WithMimeType(mime string) Option {
 	return wget.WithMimeType(mime)
-}
-
-func WithCredentials(c credentials.Credentials) Option {
-	return wget.WithCredentials(c)
 }
 
 func WithHeader(h http.Header) Option {

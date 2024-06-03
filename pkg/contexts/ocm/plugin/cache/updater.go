@@ -194,7 +194,7 @@ func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAcc
 				break
 			}
 			wrong = r
-		} else { //nolint: gocritic // yes
+		} else {
 			if name != "" {
 				wrong = r
 			}

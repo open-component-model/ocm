@@ -135,7 +135,7 @@ data: some very important data required to understand this component
 		// component version.
 		// The above case could be written as follows, also:
 		res := textblob.ResourceAccess(cv.GetContext(), meta, yamldata,
-			textblob.WithimeType(mime.MIME_YAML))
+			textblob.WithMimeType(mime.MIME_YAML))
 		err = cv.SetResourceAccess(res)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")

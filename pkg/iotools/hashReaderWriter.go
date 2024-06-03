@@ -5,42 +5,79 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"net/http"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
+
+type Hashes map[crypto.Hash]hash.Hash
+
+func NewHashes(algorithms ...crypto.Hash) Hashes {
+	hashMap := make(Hashes, len(algorithms))
+	for _, algorithm := range algorithms {
+		hashMap[algorithm] = algorithm.New()
+	}
+	return hashMap
+}
+
+func (h Hashes) Write(c int, buf []byte) {
+	if c > 0 {
+		for _, hash := range h {
+			hash.Write(buf[:c])
+		}
+	}
+}
+
+func (h Hashes) AsHttpHeader() http.Header {
+	headers := make(http.Header, len(h))
+	for algorithm := range h {
+		headers.Set(headerName(algorithm), h.GetString(algorithm))
+	}
+	return headers
+}
+
+func (h Hashes) GetBytes(algorithm crypto.Hash) []byte {
+	hash := h[algorithm]
+	if hash != nil {
+		return hash.Sum(nil)
+	}
+	return nil
+}
+
+func (h Hashes) GetString(algorithm crypto.Hash) string {
+	return fmt.Sprintf("%x", h.GetBytes(algorithm))
+}
+
+func headerName(algorithm crypto.Hash) string {
+	a := strings.ReplaceAll(algorithm.String(), "-", "")
+	return "X-Checksum-" + a[:1] + strings.ToLower(a[1:])
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type HashReader struct {
 	reader  io.Reader
-	hashMap map[crypto.Hash]hash.Hash
+	hashMap Hashes
 }
 
 func NewHashReader(delegate io.Reader, algorithms ...crypto.Hash) *HashReader {
 	newInstance := HashReader{
 		reader:  delegate,
-		hashMap: initMap(algorithms),
+		hashMap: NewHashes(algorithms...),
 	}
 	return &newInstance
 }
 
 func (h *HashReader) Read(buf []byte) (int, error) {
 	c, err := h.reader.Read(buf)
-	return write(h, c, buf, err)
+	if err == nil {
+		h.hashMap.Write(c, buf)
+	}
+	return c, err
 }
 
-func (h *HashReader) GetString(algorithm crypto.Hash) string {
-	return getString(h, algorithm)
-}
-
-func (h *HashReader) GetBytes(algorithm crypto.Hash) []byte {
-	return getBytes(h, algorithm)
-}
-
-func (h *HashReader) HttpHeader() map[string]string {
-	return httpHeader(h)
-}
-
-func (h *HashReader) hashes() map[crypto.Hash]hash.Hash {
+func (h *HashReader) Hashes() Hashes {
 	return h.hashMap
 }
 
@@ -69,84 +106,25 @@ func (h *HashReader) CalcHashes() (int64, error) {
 
 type HashWriter struct {
 	writer  io.Writer
-	hashMap map[crypto.Hash]hash.Hash
+	hashMap Hashes
 }
 
 func NewHashWriter(w io.Writer, algorithms ...crypto.Hash) *HashWriter {
 	newInstance := HashWriter{
 		writer:  w,
-		hashMap: initMap(algorithms),
+		hashMap: NewHashes(algorithms...),
 	}
 	return &newInstance
 }
 
 func (h *HashWriter) Write(buf []byte) (int, error) {
 	c, err := h.writer.Write(buf)
-	return write(h, c, buf, err)
-}
-
-func (h *HashWriter) GetString(algorithm crypto.Hash) string {
-	return getString(h, algorithm)
-}
-
-func (h *HashWriter) GetBytes(algorithm crypto.Hash) []byte {
-	return getBytes(h, algorithm)
-}
-
-func (h *HashWriter) HttpHeader() map[string]string {
-	return httpHeader(h)
-}
-
-func (h *HashWriter) hashes() map[crypto.Hash]hash.Hash {
-	return h.hashMap
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type hashes interface {
-	hashes() map[crypto.Hash]hash.Hash
-}
-
-func getString(h hashes, algorithm crypto.Hash) string {
-	return fmt.Sprintf("%x", getBytes(h, algorithm))
-}
-
-func getBytes(h hashes, algorithm crypto.Hash) []byte {
-	hash := h.hashes()[algorithm]
-	if hash != nil {
-		return hash.Sum(nil)
-	}
-	return nil
-}
-
-func httpHeader(h hashes) map[string]string {
-	headers := make(map[string]string, len(h.hashes()))
-	for algorithm := range h.hashes() {
-		headers[headerName(algorithm)] = getString(h, algorithm)
-	}
-	return headers
-}
-
-func initMap(algorithms []crypto.Hash) map[crypto.Hash]hash.Hash {
-	hashMap := make(map[crypto.Hash]hash.Hash, len(algorithms))
-	for _, algorithm := range algorithms {
-		hashMap[algorithm] = algorithm.New()
-	}
-	return hashMap
-}
-
-func write(h hashes, c int, buf []byte, err error) (int, error) {
-	if err == nil && c > 0 {
-		for _, hash := range h.hashes() {
-			hash.Write(buf[:c])
-		}
+	if err == nil {
+		h.hashMap.Write(c, buf)
 	}
 	return c, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-func headerName(hash crypto.Hash) string {
-	a := strings.ReplaceAll(hash.String(), "-", "")
-	return "X-Checksum-" + a[:1] + strings.ToLower(a[1:])
+func (h *HashWriter) Hashes() Hashes {
+	return h.hashMap
 }

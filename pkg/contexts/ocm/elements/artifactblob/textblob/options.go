@@ -30,7 +30,7 @@ func WithGlobalAccess(a cpi.AccessSpec) Option {
 ////////////////////////////////////////////////////////////////////////////////
 // Local Options
 
-func WithimeType(mime string) Option {
+func WithMimeType(mime string) Option {
 	return datablob.WithMimeType(mime)
 }
 

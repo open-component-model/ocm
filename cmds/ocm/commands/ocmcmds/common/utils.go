@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-	
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
