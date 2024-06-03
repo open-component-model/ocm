@@ -90,7 +90,7 @@ settings for the given object and calls the appropriate
 methods on this object (after a type cast).
 
 Here is the code snippet from the apply method of the credential
-config object ([.../pkg/contexts/credentials/config/type.go](../../../../../pkg/contexts/credentials/config/type.go)):
+config object ([.../pkg/contexts/credentials/config/type.go](../../../../pkg/contexts/credentials/config/type.go)):
 
 ```go
 {{include}{../../../../../pkg/contexts/credentials/config/type.go}{apply}}

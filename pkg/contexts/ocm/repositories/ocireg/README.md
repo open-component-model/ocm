@@ -40,4 +40,4 @@ The type specific specification fields are:
 
 ### Go Bindings
 
-The Go binding can be found [here](../../../oci/repositories/ocireg/type.go).
+The Go binding can be found [here](../../../../../pkg/contexts/oci/repositories/ocireg/type.go).

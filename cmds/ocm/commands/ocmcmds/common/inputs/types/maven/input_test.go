@@ -2,6 +2,7 @@ package maven_test
 
 import (
 	"crypto"
+
 	"github.com/open-component-model/ocm/pkg/maven/maventest"
 
 	. "github.com/mandelsoft/goutils/testutils"
@@ -44,7 +45,7 @@ var _ = Describe("Test Environment", func() {
 		access := Must(env.Context.OCMContext().AccessSpecForSpec(cd.Resources[0].Access)).(*localblob.AccessSpec)
 		Expect(access.MediaType).To(Equal(mime.MIME_TGZ))
 		fi := Must(env.FileSystem().Stat(env.Join(ARCH, "blobs", access.LocalReference)))
-		Expect(fi.Size()).To(Equal(int64(1570)))
+		Expect(fi.Size()).To(Equal(int64(maventest.ARTIFACT_SIZE)))
 		li := Must(tarutils.ListArchiveContent(env.Join(ARCH, "blobs", access.LocalReference), env.FileSystem()))
 		Expect(li).To(ConsistOf(
 			"sdk-modules-bom-5.7.0-random-content.json",
@@ -53,7 +54,7 @@ var _ = Describe("Test Environment", func() {
 			"sdk-modules-bom-5.7.0.jar",
 			"sdk-modules-bom-5.7.0.pom"))
 		Expect(cd.Resources[0].Digest.HashAlgorithm).To(Equal(crypto.SHA256.String()))
-		Expect(cd.Resources[0].Digest.Value).To(Equal("16cfb5ced0ea7688dba14aeb0d3aa76ad46e4661bfcc556ffd7287de3b2f7152"))
+		Expect(cd.Resources[0].Digest.Value).To(Equal(maventest.ARTIFACT_DIGEST))
 	})
 
 	It("add maven from file system described by cli options", func() {
