@@ -14,7 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.21
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.28.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.54.3
-	github.com/cloudflare/cfssl v0.0.0-20180223231731-4e2dcbde5004
+	github.com/cloudflare/cfssl v1.6.5
 	github.com/containerd/containerd v1.7.17
 	github.com/containerd/log v0.1.0
 	github.com/containers/image/v5 v5.31.0
