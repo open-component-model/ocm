@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package credentials
 
 import (
@@ -9,11 +5,11 @@ import (
 	"crypto/x509"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

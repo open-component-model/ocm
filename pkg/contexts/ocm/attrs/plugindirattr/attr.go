@@ -26,7 +26,7 @@ func init() {
 }
 
 func DefaultDir(fs vfs.FileSystem) string {
-	home, _ := os.UserHomeDir()
+	home, _ := os.UserHomeDir() // use home if provided
 	if home != "" {
 		dir := filepath.Join(home, DEFAULT_PLUGIN_DIR)
 		if ok, err := vfs.DirExists(fs, dir); ok && err == nil {

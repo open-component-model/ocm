@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package gardenerconfig
 
 import (
@@ -15,6 +11,7 @@ import (
 	"net/url"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -22,7 +19,7 @@ import (
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 )
 
 type Cipher string
@@ -174,7 +171,7 @@ func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 			// the secret server might be temporarily not available.
 			// for these situations we should allow a retry at a later point in time
 			// while keeping the old data for the moment.
-			if errors.IsRetryable(err) {
+			if errkind.IsRetryable(err) {
 				// TODO: log error
 				return nil, nil
 			}

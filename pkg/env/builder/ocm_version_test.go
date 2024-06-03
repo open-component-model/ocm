@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package builder_test
 
 import (
@@ -21,9 +17,9 @@ import (
 
 const ARCH = "/tmp/ctf"
 const ARCH2 = "/tmp/ctf2"
-const PROVIDER = "mandelsoft"
+const PROVIDER = "open-component-model"
 const VERSION = "v1"
-const COMPONENT = "github.com/mandelsoft/test"
+const COMPONENT = "github.com/open-component-model/test"
 const OUT = "/tmp/res"
 
 var _ = Describe("Transfer handler", func() {

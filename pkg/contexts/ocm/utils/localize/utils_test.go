@@ -1,13 +1,6 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package localize_test
 
 import (
-	"fmt"
-	"strings"
-
 	. "github.com/onsi/gomega"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -52,9 +45,14 @@ func UnmarshalInstRules(data string) *localize.InstantiationRules {
 	return &v
 }
 
-func CheckFile(path string, fs vfs.FileSystem, content string) {
+func CheckYAMLFile(path string, fs vfs.FileSystem, content string) {
 	data, err := vfs.ReadFile(fs, path)
 	ExpectWithOffset(1, err).To(Succeed())
-	fmt.Printf("\n%s\n", string(data))
-	ExpectWithOffset(1, strings.Trim(string(data), "\n")).To(Equal(strings.Trim(content, "\n")))
+	ExpectWithOffset(1, string(data)).To(MatchYAML(content))
+}
+
+func CheckJSONFile(path string, fs vfs.FileSystem, content string) {
+	data, err := vfs.ReadFile(fs, path)
+	ExpectWithOffset(1, err).To(Succeed())
+	ExpectWithOffset(1, string(data)).To(MatchJSON(content))
 }

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package add_test
 
 import (
@@ -89,13 +85,13 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("creates ctf and adds component", func() {
-		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "testdata/component.yaml")).To(Succeed())
+		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "testdata/component-constructor.yaml")).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
 		CheckComponent(env, nil)
 	})
 
 	It("creates ctf and adds components", func() {
-		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/components.yaml")).To(Succeed())
+		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/component-constructor.yaml")).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
 		CheckComponent(env, nil)
 	})
@@ -160,7 +156,7 @@ var _ = Describe("Test Environment", func() {
 		})
 
 		It("creates ctf and adds components", func() {
-			Expect(env.Execute("add", "c", "-fcCV", "--lookup", LOOKUP, "--file", ARCH, "testdata/component.yaml")).To(Succeed())
+			Expect(env.Execute("add", "c", "-fcCV", "--lookup", LOOKUP, "--file", ARCH, "testdata/component-constructor.yaml")).To(Succeed())
 			Expect(env.DirExists(ARCH)).To(BeTrue())
 			CheckComponent(env, func(repo ocm.Repository) {
 				cv := MustWithOffset(2, R(repo.LookupComponentVersion(COMPONENT, VERSION)))

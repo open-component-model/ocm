@@ -1,16 +1,13 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package cpi
 
 import (
 	"strconv"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type DummyComponentVersionAccess struct {
@@ -29,6 +26,13 @@ func (d *DummyComponentVersionAccess) Close() error {
 
 func (d *DummyComponentVersionAccess) IsClosed() bool {
 	return false
+}
+
+func (d *DummyComponentVersionAccess) IsReadOnly() bool {
+	return true
+}
+
+func (d *DummyComponentVersionAccess) SetReadOnly() {
 }
 
 func (d *DummyComponentVersionAccess) Dup() (ComponentVersionAccess, error) {

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package signing
 
 import (
@@ -9,10 +5,11 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/mandelsoft/goutils/set"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
@@ -129,8 +126,8 @@ var _ HandlerRegistry = (*handlerRegistry)(nil)
 
 func NewHandlerRegistry(parents ...HandlerRegistry) HandlerRegistry {
 	return &handlerRegistry{
-		_hasherRegistry: NewHasherRegistry(generics.ConvertSliceWith(toHasherRegistry, parents)...),
-		_signerRegistry: NewSignerRegistry(generics.ConvertSliceWith(toSignerRegistry, parents)...),
+		_hasherRegistry: NewHasherRegistry(sliceutils.ConvertWith(parents, toHasherRegistry)...),
+		_signerRegistry: NewSignerRegistry(sliceutils.ConvertWith(parents, toSignerRegistry)...),
 	}
 }
 
@@ -210,7 +207,7 @@ func (r *signerRegistry) SignerNames() []string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	names := generics.Set[string]{}
+	names := set.Set[string]{}
 	for n := range r.signers {
 		names.Add(n)
 	}
@@ -308,7 +305,7 @@ func (r *hasherRegistry) HasherNames() []string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	names := generics.Set[string]{}
+	names := set.New[string]()
 	for n := range r.hasher {
 		names.Add(n)
 	}

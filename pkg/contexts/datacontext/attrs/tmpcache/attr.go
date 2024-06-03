@@ -1,19 +1,15 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package tmpcache
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -66,6 +62,13 @@ type Attribute struct {
 	Filesystem vfs.FileSystem
 }
 
+func New(path string, fss ...vfs.FileSystem) *Attribute {
+	return &Attribute{
+		Path:       path,
+		Filesystem: utils.FileSystem(fss...),
+	}
+}
+
 func (a *Attribute) CreateTempFile(pat string) (vfs.File, error) {
 	err := a.Filesystem.MkdirAll(a.Path, 0o777)
 	if err != nil {
@@ -76,18 +79,24 @@ func (a *Attribute) CreateTempFile(pat string) (vfs.File, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var def = &Attribute{
-	Path: os.TempDir(),
-}
-
 func Get(ctx datacontext.Context) *Attribute {
-	v := ctx.GetAttributes().GetAttribute(ATTR_KEY)
-	a := def
+	var v interface{}
+	var fs vfs.FileSystem
+
+	if ctx != nil {
+		v = ctx.GetAttributes().GetAttribute(ATTR_KEY)
+		fs = utils.FileSystem(vfsattr.Get(ctx))
+	}
+	fs = utils.FileSystem(fs)
 
 	if v != nil {
-		a, _ = v.(*Attribute)
+		a := v.(*Attribute)
+		if a.Filesystem == nil {
+			a.Filesystem = fs
+		}
+		return a
 	}
-	return &Attribute{a.Path, vfsattr.Get(ctx)}
+	return &Attribute{fs.FSTempDir(), fs}
 }
 
 func Set(ctx datacontext.Context, a *Attribute) {

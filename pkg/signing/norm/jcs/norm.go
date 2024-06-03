@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package jcs
 
 import (
@@ -11,10 +7,11 @@ import (
 	"strconv"
 
 	"github.com/cyberphone/json-canonicalization/go/src/webpki.org/jsoncanonicalizer"
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/maputils"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 var Type = normalization{}
@@ -74,11 +71,11 @@ func (n *normalized) ToString(gap string) string {
 }
 
 func (l *normalized) String() string {
-	return string(utils.Must(json.Marshal(l.value)))
+	return string(general.Must(json.Marshal(l.value)))
 }
 
 func (l *normalized) Formatted() string {
-	return string(utils.Must(json.MarshalIndent(l.value, "", "  ")))
+	return string(general.Must(json.MarshalIndent(l.value, "", "  ")))
 }
 
 func (n *normalized) Marshal(gap string) ([]byte, error) {
@@ -110,7 +107,7 @@ func toString(v interface{}, gap string) string {
 		ngap := gap + "  "
 		s := "{"
 		sep := ""
-		keys := utils.StringMapKeys(castIn)
+		keys := maputils.OrderedKeys(castIn)
 		for _, n := range keys {
 			v := castIn[n] //nolint: govet // yes
 			sep = "\n" + gap

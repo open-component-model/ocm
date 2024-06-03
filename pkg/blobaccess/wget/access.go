@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package wget
 
 import (
@@ -12,15 +8,15 @@ import (
 	"mime"
 	"net/http"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	ocmmime "github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/mimeutils"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -136,7 +132,7 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 			"extract mime type from url")
 		ext, err := utils.GetFileExtensionFromUrl(url)
 		if err == nil && ext != "" {
-			eff.MimeType = mimeutils.TypeByExtension(ext)
+			eff.MimeType = mime.TypeByExtension(ext)
 		} else if err != nil {
 			log.Debug(err.Error())
 		}

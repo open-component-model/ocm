@@ -1,10 +1,8 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package github
 
 import (
+	"github.com/mandelsoft/goutils/optionutils"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -12,7 +10,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactaccess/genericaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 const TYPE = resourcetypes.BLOB

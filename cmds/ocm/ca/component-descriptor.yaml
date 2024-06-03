@@ -1,0 +1,10 @@
+apiVersion: ocm.software/v3alpha1
+kind: ComponentVersion
+metadata:
+  creationTime: "2024-05-03T09:43:30Z"
+  name: test.com/postgresql
+  provider:
+    name: test.com
+  version: 14.0.5
+repositoryContexts: []
+spec: {}

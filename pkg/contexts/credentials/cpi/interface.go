@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package cpi
 
 // This is the Context Provider Interface for credential providers
@@ -34,6 +30,7 @@ type (
 	GenericRepositorySpec  = internal.GenericRepositorySpec
 	GenericCredentialsSpec = internal.GenericCredentialsSpec
 	DirectCredentials      = internal.DirectCredentials
+	EvaluationContext      = internal.EvaluationContext
 )
 
 type (
@@ -104,6 +101,18 @@ func CredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, matchers .
 
 func RequiredCredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, matchers ...IdentityMatcher) (Credentials, error) {
 	return internal.CredentialsForConsumer(ctx, id, true, matchers...)
+}
+
+func GetCredentialsForConsumer(ctx Context, ectx EvaluationContext, identity ConsumerIdentity, matchers ...IdentityMatcher) (CredentialsSource, error) {
+	return internal.GetCredentialsForConsumer(ctx, ectx, identity, matchers...)
+}
+
+func GetEvaluationContextFor[T any](ectx EvaluationContext) T {
+	return internal.GetEvaluationContextFor[T](ectx)
+}
+
+func SetEvaluationContextFor(ectx EvaluationContext, e any) {
+	internal.SetEvaluationContextFor(ectx, e)
 }
 
 var (

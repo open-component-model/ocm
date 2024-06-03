@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 // Package jsonv1 provides a normalization which uses schema specific
 // normalizations.
 // It creates the requested schema for the component descriptor
@@ -9,8 +5,10 @@
 package jsonv1
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 )
 
 const Algorithm = compdesc.JsonNormalisationV1
@@ -25,7 +23,7 @@ func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, erro
 	cv := compdesc.DefaultSchemes[cd.SchemaVersion()]
 	if cv == nil {
 		if cv == nil {
-			return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, cd.SchemaVersion())
+			return nil, errors.ErrNotSupported(errkind.KIND_SCHEMAVERSION, cd.SchemaVersion())
 		}
 	}
 	v, err := cv.ConvertFrom(cd)

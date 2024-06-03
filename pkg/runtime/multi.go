@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package runtime
 
 import (
@@ -9,7 +5,9 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
+
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -71,7 +69,7 @@ func (m *multiFormatVersion[T]) Decode(data []byte, unmarshaler Unmarshaler) (T,
 	}
 
 	if u.GetType() != u.GetKind() || m.formats.GetFormat(u.GetType()) == nil {
-		return _nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, u.GetType())
+		return _nil, errors.ErrUnknown(errkind.KIND_OBJECTTYPE, u.GetType())
 	}
 
 	var def T
@@ -108,7 +106,7 @@ func (m *multiFormatVersion[T]) Decode(data []byte, unmarshaler Unmarshaler) (T,
 	if found {
 		return def, defErr
 	}
-	return _nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, u.GetType())
+	return _nil, errors.ErrUnknown(errkind.KIND_OBJECTTYPE, u.GetType())
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,7 +189,7 @@ func (r *formatVersionRegistry[I]) Decode(data []byte, unmarshaler Unmarshaler) 
 	if fmt := r.formats[u.GetType()]; fmt != nil {
 		return fmt.Decode(data, unmarshaler)
 	}
-	return _nil, errors.ErrNotSupported(errors.KIND_OBJECTTYPE, u.GetType())
+	return _nil, errors.ErrNotSupported(errkind.KIND_OBJECTTYPE, u.GetType())
 }
 
 func (r *formatVersionRegistry[I]) Encode(obj I, marshaler Marshaler) ([]byte, error) {
@@ -204,7 +202,7 @@ func (r *formatVersionRegistry[I]) Encode(obj I, marshaler Marshaler) ([]byte, e
 	if fmt := r.formats[obj.GetType()]; fmt != nil {
 		return fmt.Encode(obj, marshaler)
 	}
-	return nil, errors.ErrNotSupported(errors.KIND_OBJECTTYPE, obj.GetType())
+	return nil, errors.ErrNotSupported(errkind.KIND_OBJECTTYPE, obj.GetType())
 }
 
 func (r *formatVersionRegistry[I]) KnownFormats() map[string]FormatVersion[I] {

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package keyoption
 
 import (
@@ -10,12 +6,12 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -47,7 +43,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
 	fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
 	fs.StringArrayVarP(&o.issuers, "issuer", "I", nil, "issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>")
-	fs.StringArrayVarP(&o.rootCAs, "ca-cert", "", nil, "additional root certificate authorities")
+	fs.StringArrayVarP(&o.rootCAs, "ca-cert", "", nil, "additional root certificate authorities (for signing certificates)")
 }
 
 func (o *Option) Configure(ctx clictx.Context) error {

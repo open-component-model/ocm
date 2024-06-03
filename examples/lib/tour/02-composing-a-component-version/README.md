@@ -212,7 +212,7 @@ The above case could also be written as follows:
 
 ```go
 		res := textblob.ResourceAccess(cv.GetContext(), meta, yamldata,
-			textblob.WithimeType(mime.MIME_YAML))
+			textblob.WithMimeType(mime.MIME_YAML))
 		err = cv.SetResourceAccess(res)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")

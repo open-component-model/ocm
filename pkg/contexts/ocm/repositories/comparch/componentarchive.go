@@ -1,10 +1,7 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package comparch
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -17,7 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
@@ -80,6 +77,10 @@ func (c *ComponentArchive) IsReadOnly() bool {
 	return c.container.IsReadOnly()
 }
 
+func (c *ComponentArchive) SetReadOnly() {
+	c.container.SetReadOnly()
+}
+
 // Repository returns a non referencing repository which does not
 // close the archive.
 func (c *ComponentArchive) Repository() cpi.Repository {
@@ -134,6 +135,10 @@ func (c *componentArchiveContainer) Repository() cpi.Repository {
 
 func (c *componentArchiveContainer) IsReadOnly() bool {
 	return c.fsacc.IsReadOnly()
+}
+
+func (c *componentArchiveContainer) SetReadOnly() {
+	c.fsacc.SetReadOnly()
 }
 
 func (c *componentArchiveContainer) Update() error {
@@ -195,7 +200,7 @@ func (c *componentArchiveContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 		}
 		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
 	}
-	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "component archive")
+	return nil, errors.ErrNotSupported(errkind.KIND_ACCESSMETHOD, a.GetType(), "component archive")
 }
 
 func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
@@ -209,7 +214,10 @@ func (c *componentArchiveContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 			return ""
 		}
 		defer m.Close()
-		digest, _ := blobaccess.Digest(m)
+		digest, err := blobaccess.Digest(m)
+		if err != nil {
+			return ""
+		}
 		return digest.String()
 	}
 	return ""

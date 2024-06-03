@@ -1,17 +1,14 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package repocpi
 
 import (
 	"io"
 	"sync/atomic"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -29,7 +26,14 @@ type StorageBackendImpl interface {
 	io.Closer
 	GetContext() cpi.Context
 	GetSpecification() cpi.RepositorySpec
-	IsReadOnly() bool
+
+	// IsReadOnly returns readonly mode for repo,
+	// if key is given for the dedicated component version access.
+	IsReadOnly(key ...common.NameVersion) bool
+
+	// SetReadOnly sets readonly mode for repo,
+	// if key is given for the dedicated component version access.
+	SetReadOnly(key ...common.NameVersion)
 
 	ComponentLister() cpi.ComponentLister
 	HasComponent(name string) (bool, error)
@@ -88,6 +92,14 @@ func (s *storageBackendRepository) Close() error {
 		return ErrClosed
 	}
 	return s.impl.Close()
+}
+
+func (s *storageBackendRepository) IsReadOnly() bool {
+	return s.impl.IsReadOnly()
+}
+
+func (s *storageBackendRepository) SetReadOnly() {
+	s.impl.SetReadOnly()
 }
 
 func (s *storageBackendRepository) GetContext() cpi.Context {
@@ -242,7 +254,11 @@ func (s *storageBackendComponentVersion) Repository() cpi.Repository {
 }
 
 func (s *storageBackendComponentVersion) IsReadOnly() bool {
-	return s.comp.repo.impl.IsReadOnly()
+	return s.comp.repo.impl.IsReadOnly() || s.comp.repo.impl.IsReadOnly(s.name)
+}
+
+func (s *storageBackendComponentVersion) SetReadOnly() {
+	s.comp.repo.impl.SetReadOnly(s.name)
 }
 
 func (s *storageBackendComponentVersion) GetDescriptor() *compdesc.ComponentDescriptor {

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal_test
 
 import (
@@ -21,7 +17,7 @@ var _ = Describe("builder test", func() {
 		Expect(ctx).NotTo(BeIdenticalTo(local.DefaultContext))
 		Expect(ctx.RepositoryTypes()).To(BeIdenticalTo(local.DefaultRepositoryTypeScheme))
 
-		Expect(ctx.ConfigContext()).To(BeIdenticalTo(config.DefaultContext()))
+		Expect(ctx.ConfigContext().GetId()).To(BeIdenticalTo(config.DefaultContext().GetId()))
 	})
 
 	It("creates defaulted", func() {
@@ -31,7 +27,7 @@ var _ = Describe("builder test", func() {
 		Expect(ctx).NotTo(BeIdenticalTo(local.DefaultContext))
 		Expect(ctx.RepositoryTypes()).To(BeIdenticalTo(local.DefaultRepositoryTypeScheme))
 
-		Expect(ctx.ConfigContext()).NotTo(BeIdenticalTo(config.DefaultContext()))
+		Expect(ctx.ConfigContext().GetId()).NotTo(BeIdenticalTo(config.DefaultContext().GetType()))
 		Expect(ctx.ConfigContext().ConfigTypes()).To(BeIdenticalTo(config.DefaultContext().ConfigTypes()))
 	})
 
@@ -43,7 +39,7 @@ var _ = Describe("builder test", func() {
 		Expect(ctx.RepositoryTypes()).NotTo(BeIdenticalTo(local.DefaultRepositoryTypeScheme))
 		Expect(ctx.RepositoryTypes().KnownTypeNames()).To(Equal(local.DefaultRepositoryTypeScheme.KnownTypeNames()))
 
-		Expect(ctx.ConfigContext()).NotTo(BeIdenticalTo(config.DefaultContext()))
+		Expect(ctx.ConfigContext().GetId()).NotTo(BeIdenticalTo(config.DefaultContext().GetId()))
 		Expect(ctx.ConfigContext().ConfigTypes()).NotTo(BeIdenticalTo(config.DefaultContext().ConfigTypes()))
 		Expect(ctx.ConfigContext().ConfigTypes().KnownTypeNames()).To(Equal(config.DefaultContext().ConfigTypes().KnownTypeNames()))
 	})

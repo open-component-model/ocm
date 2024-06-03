@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package grammar
 
 import (
@@ -11,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	gr "github.com/open-component-model/ocm/pkg/regex"
+	gr "github.com/mandelsoft/goutils/regexutils"
 )
 
 func TestConfig(t *testing.T) {
@@ -49,6 +45,12 @@ func Type(t string) string {
 		return t
 	}
 	return t + "::"
+}
+func Scheme(sc string) string {
+	if sc == "" {
+		return sc
+	}
+	return sc + "://"
 }
 func Sub(t string) string {
 	if t == "" {
@@ -90,6 +92,7 @@ var _ = Describe("ref matching", func() {
 
 	Context("complete refs", func() {
 		t := "OCIRepository"
+		sc := "http"
 		s := "mandelsoft/cnudie"
 		v := "v1"
 
@@ -98,10 +101,12 @@ var _ = Describe("ref matching", func() {
 
 		It("succeeds", func() {
 			for _, ut := range []string{"", t} {
-				for _, us := range []string{"", s} {
-					for _, uv := range []string{"", v} {
-						ref := Type(ut) + h + Sub(us) + "//" + c + Vers(uv)
-						CheckRef(ref, ut, h, us, c, uv)
+				for _, usc := range []string{"", sc} {
+					for _, us := range []string{"", s} {
+						for _, uv := range []string{"", v} {
+							ref := Type(ut) + Scheme(usc) + h + Sub(us) + "//" + c + Vers(uv)
+							CheckRef(ref, ut, usc, h, us, c, uv)
+						}
 					}
 				}
 			}
@@ -129,10 +134,10 @@ var _ = Describe("ref matching", func() {
 
 	Context("repo", func() {
 		It("succeeds", func() {
-			Check("directory::ghcr.io/sub/path", AnchoredRepositoryRegexp, "directory", "ghcr.io", "sub/path")
-			Check("ghcr.io/sub/path", AnchoredRepositoryRegexp, "", "ghcr.io", "sub/path")
-			Check("ghcr.io", AnchoredRepositoryRegexp, "", "ghcr.io", "")
-			Check("ghcr.io/sub/path", AnchoredRepositoryRegexp, "", "ghcr.io", "sub/path")
+			Check("directory::ghcr.io/sub/path", AnchoredRepositoryRegexp, "directory", "", "ghcr.io", "sub/path")
+			Check("ghcr.io/sub/path", AnchoredRepositoryRegexp, "", "", "ghcr.io", "sub/path")
+			Check("ghcr.io", AnchoredRepositoryRegexp, "", "", "ghcr.io", "")
+			Check("ghcr.io/sub/path", AnchoredRepositoryRegexp, "", "", "ghcr.io", "sub/path")
 		})
 		It("fails", func() {
 			Check("/ghcr.io/sub/path", AnchoredRepositoryRegexp)

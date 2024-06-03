@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package get
 
 import (
@@ -9,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mandelsoft/goutils/set"
 	"github.com/spf13/cobra"
 
 	handler "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
@@ -20,7 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
-	"github.com/open-component-model/ocm/pkg/generics"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -154,7 +150,7 @@ func mapGetWideOutput(e interface{}) interface{} {
 		}
 	}
 
-	actions := generics.Set[string]{}
+	actions := set.New[string]()
 	for _, a := range d.Actions {
 		actions.Add(a.Name)
 	}

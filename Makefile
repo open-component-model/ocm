@@ -1,7 +1,3 @@
-# SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-#
-# SPDX-License-Identifier: Apache-2.0
-
 NAME                                           := ocm
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 GITHUBORG                                      ?= open-component-model
@@ -11,7 +7,7 @@ EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-par
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 
-CONTROLLER_TOOLS_VERSION ?= v0.9.0
+CONTROLLER_TOOLS_VERSION ?= v0.14.0
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 
 CREDS    ?=
@@ -64,16 +60,21 @@ force-test:
 
 .PHONY: test
 test:
-	@echo "> Test"
+	@echo "> Run Unit Tests"
 	@go test  ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
+
+.PHONY: test-all
+test-all: install-requirements
+	@echo "> Run All Tests"
+	@go test --tags=integration ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
 
 .PHONY: generate
 generate:
-	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminst/... $(REPO_ROOT)/examples/...
+	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/examples/...
 
 .PHONY: generate-deepcopy
 generate-deepcopy: controller-gen
-	$(CONTROLLER_GEN)  object:headerFile="hack/boilerplate.go.txt" paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
+	$(CONTROLLER_GEN) object paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
@@ -110,13 +111,6 @@ info:
 	@echo "COMMIT        = $(COMMIT)"
 	@echo "GIT_TREE_STATE= $(GIT_TREE_STATE)"
 	@echo "COMPONENTS    = $(COMPONENTS)"
-
-.PHONY: generate-license
-generate-license:
-	for f in $(shell find . -name "*.go" -o -name "*.sh"); do \
-		reuse addheader -r --copyright="SAP SE or an SAP affiliate company and Open Component Model contributors." --license="Apache-2.0" $$f --skip-unrecognised; \
-	done
-
 
 $(GEN)/.exists:
 	@mkdir -p $(GEN)

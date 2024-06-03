@@ -1,17 +1,13 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package vfsattr
 
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -39,7 +35,7 @@ Virtual filesystem to use for command line context.
 
 func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error) {
 	if _, ok := v.(vfs.FileSystem); !ok {
-		return nil, fmt.Errorf("vfs.FileSystem required")
+		return nil, fmt.Errorf("vfs.CachingFileSystem required")
 	}
 	return nil, nil
 }

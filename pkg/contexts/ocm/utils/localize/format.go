@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package localize
 
 import (
@@ -9,10 +5,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -51,7 +48,7 @@ func (m *ImageMapping) Evaluate(idx int, cv ocm.ComponentVersionAccess, resolver
 	name := "image mapping"
 	if m.Name != "" {
 		name = fmt.Sprintf("%s %q", name, m.Name)
-	} else { //nolint: gocritic // yes
+	} else {
 		if idx >= 0 {
 			name = fmt.Sprintf("%s %d", name, idx+1)
 		}

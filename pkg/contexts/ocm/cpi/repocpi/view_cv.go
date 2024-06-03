@@ -1,13 +1,11 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package repocpi
 
 import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -19,7 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -74,6 +71,7 @@ type ComponentVersionAccessBridge interface {
 	AddBlob(blob cpi.BlobAccess, arttype, refName string, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error)
 
 	IsReadOnly() bool
+	SetReadOnly()
 
 	// ShouldUpdate checks, whether an update is indicated
 	// by the state of object, considering persistence, lazy, discard
@@ -140,6 +138,14 @@ func NewComponentVersionAccess(name, version string, impl ComponentVersionAccess
 
 func (c *componentVersionAccessView) Unwrap() interface{} {
 	return c.bridge
+}
+
+func (c *componentVersionAccessView) IsReadOnly() bool {
+	return c.bridge.IsReadOnly()
+}
+
+func (c *componentVersionAccessView) SetReadOnly() {
+	c.bridge.SetReadOnly()
 }
 
 func (c *componentVersionAccessView) Close() error {

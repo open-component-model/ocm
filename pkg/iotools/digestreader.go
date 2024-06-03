@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package iotools
 
 import (
@@ -9,9 +5,8 @@ import (
 	"hash"
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // wow. digest does support a map with supported digesters. Unfortunately this one does not

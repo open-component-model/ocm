@@ -1,38 +1,34 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package plugin_test
 
 import (
-	"encoding/json"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/mandelsoft/goutils/transformer"
+	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 )
 
 const CA = "/tmp/ca"
 const VERSION = "v1"
 
 var _ = Describe("Add with new access method", func() {
-	var env *TestEnv
+	var env *Environment
 	var ctx ocm.Context
 	var registry plugins.Set
 
 	BeforeEach(func() {
-		env = NewTestEnv(TestData())
+		env = NewEnvironment(TestData())
 		ctx = env.OCMContext()
 
 		plugindirattr.Set(ctx, "testdata")
@@ -40,40 +36,43 @@ var _ = Describe("Add with new access method", func() {
 		Expect(registration.RegisterExtensions(ctx)).To(Succeed())
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
-
-		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "--provider", "mandelsoft", "--file", CA)).To(Succeed())
 	})
 
 	AfterEach(func() {
 		env.Cleanup()
 	})
 
-	It("adds external resource by options", func() {
-		Expect(env.Execute("add", "resources", CA,
-			"--type", "testContent",
-			"--name", "text",
-			"--version", "v0.1.0",
-			"--accessType", "test",
-			"--accessPath", "textfile",
-			"--mediaType", "text/plain")).To(Succeed())
-		data := Must(env.ReadFile(env.Join(CA, comparch.ComponentDescriptorFileName)))
-		cd := Must(compdesc.Decode(data))
-		Expect(len(cd.Resources)).To(Equal(1))
+	It("handles resource options", func() {
+		at := ctx.AccessMethods().GetType("test")
+		Expect(at).NotTo(BeNil())
 
-		r := Must(cd.GetResourceByIdentity(metav1.NewIdentity("text")))
-		Expect(r.Type).To(Equal("testContent"))
-		Expect(r.Version).To(Equal("v0.1.0"))
-		Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
+		h := at.ConfigOptionTypeSetHandler()
+		Expect(h).NotTo(BeNil())
+		Expect(h.GetName()).To(Equal("test"))
 
-		Expect(r.Access.GetType()).To(Equal("test"))
-		acc := Must(env.OCMContext().AccessSpecForSpec(r.Access))
-		var myacc AccessSpec
+		ot := h.OptionTypes()
+		Expect(len(ot)).To(Equal(2))
 
-		MustBeSuccessful(json.Unmarshal(Must(json.Marshal(acc)), &myacc))
-		Expect(myacc).To(Equal(AccessSpec{Type: "test", Path: "textfile", MediaType: "text/plain"}))
+		opts := h.CreateOptions()
+		Expect(sliceutils.Transform(opts.Options(), transformer.GetName[flagsets.Option, string])).To(ConsistOf(
+			"mediaType", "accessPath"))
 
-		m := Must(acc.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()}))
-		data = Must(m.Get())
-		Expect(string(data)).To(Equal("test content\n{\"mediaType\":\"text/plain\",\"path\":\"textfile\",\"type\":\"test\"}\n"))
+		fs := &pflag.FlagSet{}
+		fs.SortFlags = true
+		opts.AddFlags(fs)
+
+		Expect("\n" + fs.FlagUsages()).To(Equal(`
+      --accessPath string   file path
+      --mediaType string    media type for artifact blob representation
+`))
+
+		MustBeSuccessful(fs.Parse([]string{"--accessPath", "filepath", "--" + options.MediatypeOption.GetName(), "yaml"}))
+
+		cfg := flagsets.Config{}
+		MustBeSuccessful(h.ApplyConfig(opts, cfg))
+		Expect(cfg).To(YAMLEqual(`
+mediaType: yaml
+path: filepath
+`))
 	})
 })

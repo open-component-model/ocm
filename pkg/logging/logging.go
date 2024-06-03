@@ -1,18 +1,13 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package logging
 
 import (
 	"encoding/json"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
 	"github.com/opencontainers/go-digest"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // REALM is used to tag all logging done by this library with the ocm tag.
@@ -112,4 +107,23 @@ func ConfigureGlobal(config *logcfg.Config, extra ...string) error {
 // DynamicLogger gets an unbound logger based on the default library logging context.
 func DynamicLogger(messageContext ...logging.MessageContext) logging.UnboundLogger {
 	return logging.DynamicLogger(Context(), messageContext...)
+}
+
+var (
+	contexts []*StaticContext
+	lock     sync.Mutex
+)
+
+func PushContext(ctx logging.Context) {
+	lock.Lock()
+	defer lock.Unlock()
+	contexts = append(contexts, logContext)
+	SetContext(ctx)
+}
+
+func PopContext() {
+	lock.Lock()
+	defer lock.Unlock()
+	logContext = contexts[len(contexts)-1]
+	contexts = contexts[:len(contexts)-1]
 }

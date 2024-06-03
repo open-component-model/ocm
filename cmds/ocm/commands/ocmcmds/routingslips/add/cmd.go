@@ -1,13 +1,10 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package add
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -25,7 +22,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/spi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
@@ -82,7 +78,7 @@ $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandels
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	o.prov = routingslip.For(o.OCMContext()).CreateConfigTypeSetConfigProvider().(flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider)
+	o.prov = routingslip.For(o.OCMContext()).CreateConfigTypeSetConfigProvider()
 	o.configopts = o.prov.CreateOptions()
 	o.configopts.AddFlags(fs)
 

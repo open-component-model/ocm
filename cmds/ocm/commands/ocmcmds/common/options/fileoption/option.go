@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package fileoption
 
 import (
@@ -62,6 +58,7 @@ func (o *Option) GetPath(args []string, fss ...vfs.FileSystem) (string, []string
 	if ok, err := vfs.Exists(fs, args[0]); !ok || err != nil {
 		return o.Path, args
 	}
+	// ignored: I can't rewrite this whole segment.
 	if ok, _ := vfs.IsDir(fs, args[0]); ok {
 		return args[0], args[1:]
 	}

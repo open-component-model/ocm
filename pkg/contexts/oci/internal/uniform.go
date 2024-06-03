@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
@@ -11,10 +7,12 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/containerd/containerd/reference"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -84,21 +82,34 @@ func (u *UniformRepositorySpec) RepositoryRef() string {
 	return fmt.Sprintf("%s%s://%s", t, u.Scheme, u.Host)
 }
 
+func (u *UniformRepositorySpec) SetType(typ string) {
+	t, _ := grammar.SplitTypeSpec(typ)
+	u.Type = t
+	u.TypeHint = typ
+}
+
 func (u *UniformRepositorySpec) String() string {
 	return u.RepositoryRef()
 }
 
 func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepositorySpec {
-	scheme := ""
-	parsed, err := url.Parse(host)
+	s := ""
+	h := host
+	var parsed *url.URL
+	ref, err := reference.Parse(host)
 	if err == nil {
-		host = parsed.Host
-		scheme = parsed.Scheme
+		parsed, err = url.Parse("https://" + ref.Locator)
+	} else {
+		parsed, err = url.Parse(host)
+	}
+	if err == nil {
+		s = parsed.Scheme
+		h = parsed.Host
 	}
 	u := &UniformRepositorySpec{
 		Type:   typ,
-		Scheme: scheme,
-		Host:   host,
+		Scheme: s,
+		Host:   h,
 	}
 	return u
 }
@@ -167,6 +178,14 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	deferr := errors.ErrNotSupported("uniform repository ref", u.String())
+
+	if u.Info != "" && string(u.Info[0]) == "{" && u.Host == "" && u.Scheme == "" {
+		data, err := runtime.CompleteSpecWithType(u.Type, []byte(u.Info))
+		if err != nil {
+			return nil, err
+		}
+		return ctx.RepositorySpecForConfig(data, runtime.DefaultJSONEncoding)
+	}
 
 	if u.Type == "" {
 		if u.Info != "" {

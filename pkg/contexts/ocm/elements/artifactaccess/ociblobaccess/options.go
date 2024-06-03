@@ -1,11 +1,7 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package github
 
 import (
-	"github.com/open-component-model/ocm/pkg/optionutils"
+	"github.com/mandelsoft/goutils/optionutils"
 )
 
 type Option = optionutils.Option[*Options]

@@ -1,15 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package localize
 
 import (
-	yaml "github.com/goccy/go-yaml"
-	"github.com/goccy/go-yaml/ast"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils/subst"
 )
 
@@ -72,6 +66,10 @@ func SubstituteMappingsForData(subs ValueMappings, data []byte) ([]byte, error) 
 	return target.Content()
 }
 
+/*
+2024-04-28 Don't see any use of this in either ocm or ocm-controller
+As it exposes the implementation detail of what YAML model we use
+_and_ we're switching to yqlib from goccy comment it out.
 func Set(content *ast.File, path string, value *ast.File) error {
 	p, err := yaml.PathString("$." + path)
 	if err != nil {
@@ -79,3 +77,4 @@ func Set(content *ast.File, path string, value *ast.File) error {
 	}
 	return p.ReplaceWithFile(content, value)
 }
+*/

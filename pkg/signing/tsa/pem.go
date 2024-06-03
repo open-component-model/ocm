@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package tsa
 
 import (
@@ -9,8 +5,7 @@ import (
 
 	"github.com/InfiniteLoopSpace/go_S-MIME/asn1"
 	cms "github.com/InfiniteLoopSpace/go_S-MIME/cms/protocol"
-
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 const PRM_BLOCK_TYPE = "TIMESTAMP INFO"

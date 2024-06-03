@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package textblob
 
 import (
@@ -34,7 +30,7 @@ func WithGlobalAccess(a cpi.AccessSpec) Option {
 ////////////////////////////////////////////////////////////////////////////////
 // Local Options
 
-func WithimeType(mime string) Option {
+func WithMimeType(mime string) Option {
 	return datablob.WithMimeType(mime)
 }
 

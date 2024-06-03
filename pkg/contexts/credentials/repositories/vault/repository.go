@@ -1,14 +1,11 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package vault
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Repository struct {
@@ -24,7 +21,7 @@ var (
 )
 
 func NewRepository(ctx cpi.Context, spec *RepositorySpec) (*Repository, error) {
-	id, err := identity.GetConsumerId(spec.ServerURL, spec.Namespace, spec.SecretsEngine, spec.Path)
+	id, err := identity.GetConsumerId(spec.ServerURL, spec.Namespace, spec.MountPath, spec.Path)
 	if err != nil {
 		return nil, err
 	}

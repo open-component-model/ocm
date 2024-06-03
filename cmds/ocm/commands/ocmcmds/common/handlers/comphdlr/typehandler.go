@@ -1,14 +1,12 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package comphdlr
 
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
@@ -18,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 )
 
@@ -117,6 +114,7 @@ func (h *TypeHandler) all(repo ocm.Repository) ([]output.Object, error) {
 		return nil, err
 	}
 	var result []output.Object
+	sort.Strings(list)
 	for _, l := range list {
 		part, err := h.get(repo, utils.StringSpec(l))
 		if err != nil {
@@ -131,11 +129,14 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	return h.get(h.repobase, elemspec)
 }
 
-func (h *TypeHandler) filterVersions(vers []string) []string {
+func (h *TypeHandler) filterVersions(vers []string) ([]string, error) {
 	if len(h.constraints) == 0 && !h.latest {
-		return vers
+		return vers, nil
 	}
-	versions, _ := semverutils.MatchVersionStrings(vers, h.constraints...)
+	versions, err := semverutils.MatchVersionStrings(vers, h.constraints...)
+	if err != nil {
+		return nil, fmt.Errorf("invalid constraints: %v", err)
+	}
 	if h.latest && len(versions) > 1 {
 		versions = versions[len(versions)-1:]
 	}
@@ -143,7 +144,7 @@ func (h *TypeHandler) filterVersions(vers []string) []string {
 	for _, v := range versions {
 		vers = append(vers, v.Original())
 	}
-	return vers
+	return vers, nil
 }
 
 func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]output.Object, error) {
@@ -228,7 +229,10 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 			if err != nil {
 				return nil, err
 			}
-			versions = h.filterVersions(versions)
+			versions, err = h.filterVersions(versions)
+			if err != nil {
+				return nil, err
+			}
 
 			for _, vers := range versions {
 				v, err := h.session.GetComponentVersion(component, vers)

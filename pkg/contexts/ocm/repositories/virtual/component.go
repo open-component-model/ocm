@@ -1,14 +1,11 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package virtual
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type componentAccessImpl struct {
@@ -72,7 +69,7 @@ func (c *componentAccessImpl) LookupVersion(version string) (*repocpi.ComponentV
 }
 
 func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (*repocpi.ComponentVersionAccessInfo, error) {
-	override := utils.Optional(overrides...)
+	override := general.Optional(overrides...)
 	ok, err := c.HasVersion(version)
 	if err == nil && ok {
 		if override {

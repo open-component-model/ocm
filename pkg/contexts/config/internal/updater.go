@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
@@ -26,29 +22,52 @@ type Updater interface {
 	RUnlock()
 }
 
+// updater implements the Updater interface.
+// It must be prepared to work with an internal config context
+// representation. Therefore, it must pass a self reference
+// of the context to outbound calls.
 type updater struct {
 	sync.RWMutex
 	ctx            Context
-	target         interface{}
+	targetFunc     func() interface{}
 	lastGeneration int64
 	inupdate       bool
+}
+
+// TargetFunction can be used to map any type specific factory function
+// to a target function returning a formal interface{} type.
+func TargetFunction[T any](f func() T) func() interface{} {
+	return func() interface{} { return f() }
 }
 
 // NewUpdater create a configuration updater for a configuration target
 // based on a dedicated configuration context.
 func NewUpdater(ctx Context, target interface{}) Updater {
+	var targetFunc func() interface{}
+	if f, ok := target.(func() interface{}); ok {
+		targetFunc = f
+	} else {
+		targetFunc = func() interface{} { return target }
+	}
 	return &updater{
-		ctx:    ctx,
-		target: target,
+		ctx:        ctx,
+		targetFunc: targetFunc,
+	}
+}
+
+func NewUpdaterForFactory[T any](ctx Context, t func() T) Updater {
+	return &updater{
+		ctx:        ctx,
+		targetFunc: TargetFunction(t),
 	}
 }
 
 func (u *updater) GetContext() Context {
-	return u.ctx
+	return u.ctx.ConfigContext()
 }
 
 func (u *updater) GetTarget() interface{} {
-	return u.target
+	return u.targetFunc()
 }
 
 func (u *updater) State() (int64, bool) {
@@ -66,7 +85,7 @@ func (u *updater) Update() error {
 	u.inupdate = true
 	u.Unlock()
 
-	gen, err := u.ctx.ApplyTo(u.lastGeneration, u.target)
+	gen, err := u.ctx.ApplyTo(u.lastGeneration, u.GetTarget())
 
 	u.Lock()
 	defer u.Unlock()

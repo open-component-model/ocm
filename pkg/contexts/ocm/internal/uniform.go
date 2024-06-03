@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
@@ -9,12 +5,12 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -27,6 +23,8 @@ const (
 type UniformRepositorySpec struct {
 	// Type
 	Type string `json:"type,omitempty"`
+	// Scheme
+	Scheme string `json:"scheme,omitempty"`
 	// Host is the hostname of an ocm ref.
 	Host string `json:"host,omitempty"`
 	// SubPath is the sub path spec used to host component versions
@@ -36,7 +34,7 @@ type UniformRepositorySpec struct {
 
 	// CreateIfMissing indicates whether a file based or dynamic repo should be created if it does not exist
 	CreateIfMissing bool `json:"createIfMissing,omitempty"`
-	// TypeHintshould be set if CreateIfMissing is true to help to decide what kind of repo to create
+	// TypeHint should be set if CreateIfMissing is true to help to decide what kind of repo to create
 	TypeHint string `json:"typeHint,omitempty"`
 }
 
@@ -130,7 +128,7 @@ func (s *specHandlers) KnownTypeNames() []string {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
-	return utils.StringMapKeys(s.handlers)
+	return maputils.OrderedKeys(s.handlers)
 }
 
 func (s *specHandlers) GetHandlers(typ string) []RepositorySpecHandler {
@@ -150,6 +148,14 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 	var err error
 	s.lock.RLock()
 	defer s.lock.RUnlock()
+
+	if u.Info != "" && string(u.Info[0]) == "{" && u.Host == "" && u.Scheme == "" && u.SubPath == "" {
+		data, err := runtime.CompleteSpecWithType(u.Type, []byte(u.Info))
+		if err != nil {
+			return nil, err
+		}
+		return ctx.RepositorySpecForConfig(data, runtime.DefaultJSONEncoding)
+	}
 
 	deferr := errors.ErrNotSupported("uniform repository ref", u.String())
 	if u.Type == "" {

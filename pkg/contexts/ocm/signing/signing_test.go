@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package signing_test
 
 import (
@@ -9,13 +5,14 @@ import (
 	"fmt"
 	"time"
 
+	. "github.com/mandelsoft/goutils/finalizer"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing/signingtest"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/finalizer"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -33,7 +30,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	tenv "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
@@ -63,7 +59,7 @@ var _ = Describe("access method", func() {
 	var env *Builder
 
 	BeforeEach(func() {
-		env = NewBuilder(tenv.ModifiableTestData())
+		env = NewBuilder(signingtest.ModifiableTestData())
 		env.RSAKeyPair(SIGNATURE, SIGNATURE2)
 	})
 

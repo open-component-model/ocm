@@ -15,7 +15,7 @@ var _ cpi.ConsumerProvider = (*ConsumerProvider)(nil)
 func (p *ConsumerProvider) Unregister(_ cpi.ProviderIdentity) {
 }
 
-func (p *ConsumerProvider) Match(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
+func (p *ConsumerProvider) Match(ectx cpi.EvaluationContext, req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
 	return p.get(req, cur, m)
 }
 
@@ -35,8 +35,12 @@ func (p *ConsumerProvider) get(requested cpi.ConsumerIdentity, currentFound cpi.
 	var creds cpi.CredentialsSource
 
 	for key, value := range all {
-		id := npm.GetConsumerId("https://"+key, "")
-
+		id, err := npm.GetConsumerId("https://"+key, "")
+		if err != nil {
+			log := logging.Context().Logger(npm.REALM)
+			log.LogError(err, "Failed to get consumer id", "key", key, "value", value)
+			return nil, nil
+		}
 		if m(requested, currentFound, id) {
 			creds = newCredentials(value)
 			currentFound = id

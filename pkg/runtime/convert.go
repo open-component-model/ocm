@@ -1,15 +1,11 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package runtime
 
 import (
 	"fmt"
 	"reflect"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
 )
 
 type Converter[T VersionedTypedObject, V TypedObject] interface {
@@ -50,7 +46,7 @@ type formatVersion[T VersionedTypedObject, I VersionedTypedObject, V TypedObject
 }
 
 func (c *formatVersion[T, I, V]) Encode(object T, marshaler Marshaler) ([]byte, error) {
-	i, err := generics.Cast[I](object)
+	i, err := generics.TryCastE[I](object)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +70,7 @@ func (c *formatVersion[T, I, V]) Decode(data []byte, unmarshaler Unmarshaler) (T
 	if err != nil {
 		return _nil, err
 	}
-	return generics.Cast[T](i)
+	return generics.TryCastE[T](i)
 }
 
 // caster applies an implementation to interface upcast for a format version,
@@ -117,7 +113,7 @@ var _ FormatVersion[VersionedTypedObject] = (*caster[VersionedTypedObject, imple
 func NewSimpleVersion[T VersionedTypedObject, I VersionedTypedObject]() FormatVersion[T] {
 	var proto I // first time use of typed structure nil pointers
 
-	_, err := generics.Cast[T](proto)
+	_, err := generics.TryCastE[T](proto)
 	if err != nil {
 		var t *T
 		panic(fmt.Errorf("invalid type %T: does not implement required interface %s", proto, reflect.TypeOf(t).Elem()))

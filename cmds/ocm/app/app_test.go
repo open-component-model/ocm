@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package app_test
 
 import (
@@ -72,7 +68,9 @@ var _ = Describe("Test Environment", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
+V[2] warn realm ocm realm test
 ERROR <nil> error realm ocm realm test
+V[2] ctxwarn realm ocm realm test
 ERROR <nil> ctxerror realm ocm realm test
 `))
 	})
@@ -137,7 +135,9 @@ ERROR <nil> ctxerror realm ocm realm test
 		Expect(err).To(Succeed())
 
 		fmt.Printf("%s\n", string(data))
-		Expect(len(string(data))).To(Equal(181))
+		// {"level":"error","msg":"error","realm":"test","time":"2024-03-27 09:54:19"}
+		// {"level":"error","msg":"ctxerror","realm":"test","time":"2024-03-27 09:54:19"}
+		Expect(len(string(data))).To(Equal(312))
 	})
 
 	It("sets attr from file", func() {

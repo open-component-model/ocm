@@ -1,21 +1,11 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package install
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/fluxcd/pkg/ssa"
-	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	corev1 "k8s.io/api/core/v1"
@@ -24,11 +14,11 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/out"
 )
 
 var (
@@ -50,11 +40,13 @@ type Command struct {
 	DryRun                   bool
 	SkipPreFlightCheck       bool
 	InstallPrerequisites     bool
+	Silent                   bool
+	SM                       *ssa.ResourceManager
 }
 
 var _ utils.OCMCommand = (*Command)(nil)
 
-// NewCommand creates a new controller cdommand.
+// NewCommand creates a new controller command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, utils.Names(Names, names...)...)
 }
@@ -79,89 +71,20 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.BoolVarP(&o.DryRun, "dry-run", "d", false, "if enabled, prints the downloaded manifest file")
 	set.BoolVarP(&o.SkipPreFlightCheck, "skip-pre-flight-check", "s", false, "skip the pre-flight check for clusters")
 	set.BoolVarP(&o.InstallPrerequisites, "install-prerequisites", "i", true, "install prerequisites required by ocm-controller")
+	set.BoolVarP(&o.Silent, "silent", "l", false, "don't fail on error")
 }
 
 func (o *Command) Complete(args []string) error {
 	return nil
 }
 
-func (o *Command) Run() error {
-	ctx := context.Background()
-	if !o.SkipPreFlightCheck {
-		out.Outf(o.Context, "► running pre-install check\n")
-		if err := o.RunPreFlightCheck(ctx); err != nil {
-			if o.InstallPrerequisites {
-				out.Outf(o.Context, "► installing prerequisites\n")
-				if err := o.installPrerequisites(ctx); err != nil {
-					return err
-				}
-
-				out.Outf(o.Context, "✔ successfully installed prerequisites\n")
-			} else {
-				return fmt.Errorf("✗ failed to run pre-flight check: %w\n", err)
-			}
+func (o *Command) Run() (err error) {
+	defer func() {
+		// don't return any errors
+		if o.Silent {
+			err = nil
 		}
-	}
-
-	out.Outf(o.Context, "► installing ocm-controller with version %s\n", o.Version)
-	version := o.Version
-	if err := o.installManifest(
-		ctx,
-		o.ReleaseAPIURL,
-		o.BaseURL,
-		"ocm-controller",
-		"install.yaml",
-		version,
-	); err != nil {
-		return err
-	}
-
-	out.Outf(o.Context, "✔ ocm-controller successfully installed\n")
-	return nil
-}
-
-func (o *Command) installManifest(ctx context.Context, releaseURL, baseURL, manifest, filename, version string) error {
-	if version == "latest" {
-		latest, err := o.getLatestVersion(ctx, releaseURL)
-		if err != nil {
-			return fmt.Errorf("✗ failed to retrieve latest version for %s: %w", manifest, err)
-		}
-		out.Outf(o.Context, "► got latest version %q\n", latest)
-		version = latest
-	} else {
-		exists, err := o.existingVersion(ctx, releaseURL, version)
-		if err != nil {
-			return fmt.Errorf("✗ failed to check if version exists: %w", err)
-		}
-		if !exists {
-			return fmt.Errorf("✗ version %q does not exist", version)
-		}
-	}
-
-	temp, err := os.MkdirTemp("", manifest+"-download")
-	if err != nil {
-		return fmt.Errorf("✗ failed to create temp folder: %w", err)
-	}
-	defer os.RemoveAll(temp)
-
-	if err := o.fetch(ctx, baseURL, version, temp, filename); err != nil {
-		return fmt.Errorf("✗ failed to download install.yaml file: %w", err)
-	}
-
-	path := filepath.Join(temp, filename)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return fmt.Errorf("✗ failed to find %s file at location: %w", filename, err)
-	}
-	out.Outf(o.Context, "✔ successfully fetched install file\n")
-	if o.DryRun {
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("✗ failed to read %s file at location: %w", filename, err)
-		}
-		out.Outf(o.Context, string(content))
-		return nil
-	}
-	out.Outf(o.Context, "► applying to cluster...\n")
+	}()
 
 	kubeconfigArgs := genericclioptions.NewConfigFlags(false)
 	sm, err := NewResourceManager(kubeconfigArgs)
@@ -169,112 +92,42 @@ func (o *Command) installManifest(ctx context.Context, releaseURL, baseURL, mani
 		return fmt.Errorf("✗ failed to create resource manager: %w", err)
 	}
 
-	objects, err := readObjects(path)
-	if err != nil {
-		return fmt.Errorf("✗ failed to construct objects to apply: %w", err)
+	o.SM = sm
+
+	ctx := context.Background()
+	if !o.SkipPreFlightCheck {
+		common.Outf(o.Context, o.DryRun, "► running pre-install check\n")
+		if err := o.RunPreFlightCheck(ctx); err != nil {
+			if o.InstallPrerequisites {
+				common.Outf(o.Context, o.DryRun, "► installing prerequisites\n")
+				if err := o.installPrerequisites(ctx); err != nil {
+					return err
+				}
+
+				common.Outf(o.Context, o.DryRun, "✔ successfully installed prerequisites\n")
+			} else {
+				return fmt.Errorf("✗ failed to run pre-flight check: %w\n", err)
+			}
+		}
 	}
 
-	if _, err := sm.ApplyAllStaged(context.Background(), objects, ssa.DefaultApplyOptions()); err != nil {
-		return fmt.Errorf("✗ failed to apply manifests: %w", err)
+	common.Outf(o.Context, o.DryRun, "► installing ocm-controller with version %s\n", o.Version)
+	version := o.Version
+	if err := common.Install(
+		ctx,
+		o.Context,
+		sm,
+		o.ReleaseAPIURL,
+		o.BaseURL,
+		"ocm-controller",
+		"install.yaml",
+		version,
+		o.DryRun,
+	); err != nil {
+		return err
 	}
 
-	out.Outf(o.Context, "► waiting for ocm deployment to be ready\n")
-	if err = sm.Wait(objects, ssa.DefaultWaitOptions()); err != nil {
-		return fmt.Errorf("✗ failed to wait for objects to be ready: %w", err)
-	}
-
-	return nil
-}
-
-// getLatestVersion calls the GitHub API and returns the latest released version.
-func (o *Command) getLatestVersion(ctx context.Context, url string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url+"/latest", nil)
-	if err != nil {
-		return "", err
-	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("GitHub API call failed: %w", err)
-	}
-
-	if res.Body != nil {
-		defer res.Body.Close()
-	}
-
-	type meta struct {
-		Tag string `json:"tag_name"`
-	}
-	var m meta
-	if err := json.NewDecoder(res.Body).Decode(&m); err != nil {
-		return "", fmt.Errorf("decoding GitHub API response failed: %w", err)
-	}
-
-	return m.Tag, err
-}
-
-// existingVersion calls the GitHub API to confirm the given version does exist.
-func (o *Command) existingVersion(ctx context.Context, url, version string) (bool, error) {
-	if !strings.HasPrefix(version, "v") {
-		version = "v" + version
-	}
-
-	ghURL := fmt.Sprintf(url+"/tags/%s", version)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ghURL, nil)
-	if err != nil {
-		return false, fmt.Errorf("GitHub API call failed: %w", err)
-	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return false, err
-	}
-
-	if res.Body != nil {
-		defer res.Body.Close()
-	}
-
-	switch res.StatusCode {
-	case http.StatusOK:
-		return true, nil
-	case http.StatusNotFound:
-		return false, nil
-	default:
-		return false, fmt.Errorf("GitHub API returned an unexpected status code (%d)", res.StatusCode)
-	}
-}
-
-func (o *Command) fetch(ctx context.Context, url, version, dir, filename string) error {
-	ghURL := fmt.Sprintf("%s/latest/download/%s", url, filename)
-	if strings.HasPrefix(version, "v") {
-		ghURL = fmt.Sprintf("%s/download/%s/%s", url, version, filename)
-	}
-
-	req, err := http.NewRequest(http.MethodGet, ghURL, nil)
-	if err != nil {
-		return fmt.Errorf("failed to create HTTP request for %s, error: %w", ghURL, err)
-	}
-
-	resp, err := http.DefaultClient.Do(req.WithContext(ctx))
-	if err != nil {
-		return fmt.Errorf("failed to download manifests.tar.gz from %s, error: %w", ghURL, err)
-	}
-	defer resp.Body.Close()
-
-	// check response
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to download %s from %s, status: %s", filename, ghURL, resp.Status)
-	}
-
-	wf, err := os.OpenFile(filepath.Join(dir, filename), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o777)
-	if err != nil {
-		return fmt.Errorf("failed to open temp file: %w", err)
-	}
-
-	if _, err := io.Copy(wf, resp.Body); err != nil {
-		return fmt.Errorf("failed to write to temp file: %w", err)
-	}
-
+	common.Outf(o.Context, o.DryRun, "✔ ocm-controller successfully installed\n")
 	return nil
 }
 

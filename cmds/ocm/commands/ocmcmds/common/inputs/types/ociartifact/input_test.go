@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ociartifact_test
 
 import (
@@ -163,7 +159,7 @@ var _ = Describe("Test Environment", func() {
 		})
 
 		It("creates ctf and adds component", func() {
-			Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "testdata/component.yaml")).To(Succeed())
+			Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "testdata/component-constructor.yaml")).To(Succeed())
 			Expect(env.DirExists(ARCH)).To(BeTrue())
 			CheckComponent(env)
 		})

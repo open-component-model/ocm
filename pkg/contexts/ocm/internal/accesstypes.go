@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
@@ -9,15 +5,16 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets/flagsetscheme"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type AccessType flagsetscheme.VersionTypedObjectType[AccessSpec]
@@ -140,7 +137,7 @@ func (_ *UnknownAccessSpec) IsUnknown() bool {
 }
 
 func (s *UnknownAccessSpec) AccessMethod(ComponentVersionAccess) (AccessMethod, error) {
-	return nil, errors.ErrUnknown(errors.KIND_ACCESSMETHOD, s.GetType())
+	return nil, errors.ErrUnknown(errkind.KIND_ACCESSMETHOD, s.GetType())
 }
 
 func (s *UnknownAccessSpec) GetInexpensiveContentVersionIdentity(ComponentVersionAccess) string {
@@ -189,7 +186,7 @@ func ToGenericAccessSpec(spec AccessSpec) (*GenericAccessSpec, error) {
 }
 
 func NewGenericAccessSpec(data []byte, unmarshaler ...runtime.Unmarshaler) (AccessSpec, error) {
-	return generics.AsE[AccessSpec](newGenericAccessSpec(data, utils.Optional(unmarshaler...)))
+	return generics.CastPointerR[AccessSpec](newGenericAccessSpec(data, general.Optional(unmarshaler...)))
 }
 
 func newGenericAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (*GenericAccessSpec, error) {
@@ -226,7 +223,7 @@ func (s *GenericAccessSpec) AccessMethod(acc ComponentVersionAccess) (AccessMeth
 		return nil, err
 	}
 	if _, ok := spec.(*GenericAccessSpec); ok {
-		return nil, errors.ErrUnknown(errors.KIND_ACCESSMETHOD, s.GetType())
+		return nil, errors.ErrUnknown(errkind.KIND_ACCESSMETHOD, s.GetType())
 	}
 	return spec.AccessMethod(acc)
 }

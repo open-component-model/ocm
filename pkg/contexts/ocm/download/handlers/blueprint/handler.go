@@ -1,10 +1,8 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package blueprint
 
 import (
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -13,8 +11,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	registry "github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -33,7 +29,7 @@ var (
 )
 
 type Handler struct {
-	ociConfigMimeTypes generics.Set[string]
+	ociConfigMimeTypes set.Set[string]
 }
 
 func init() {
@@ -62,7 +58,7 @@ func New(configmimetypes ...string) *Handler {
 		configmimetypes = []string{CONFIG_MIME_TYPE}
 	}
 	return &Handler{
-		ociConfigMimeTypes: generics.NewSet[string](configmimetypes...),
+		ociConfigMimeTypes: set.New[string](configmimetypes...),
 	}
 }
 

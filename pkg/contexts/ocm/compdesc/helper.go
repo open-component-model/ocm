@@ -1,16 +1,13 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package compdesc
 
 import (
 	"bytes"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
+
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils/selector"
 )
@@ -217,7 +214,7 @@ func (cd *ComponentDescriptor) GetResourcesByType(rtype string, selectors ...Ide
 // GetResourcesByName returns all local and external resources with a name.
 func (cd *ComponentDescriptor) GetResourcesByName(name string, selectors ...IdentitySelector) (Resources, error) {
 	return cd.GetResourcesBySelectors(
-		generics.AppendedSlice[IdentitySelector](selectors, ByName(name)),
+		sliceutils.CopyAppend[IdentitySelector](selectors, ByName(name)),
 		nil)
 }
 
@@ -344,7 +341,7 @@ func (cd *ComponentDescriptor) GetReferenceIndexByIdentity(id v1.Identity) int {
 // GetReferencesByName returns references that match the given name.
 func (cd *ComponentDescriptor) GetReferencesByName(name string, selectors ...IdentitySelector) (References, error) {
 	return cd.GetReferencesBySelectors(
-		generics.AppendedSlice[IdentitySelector](selectors, ByName(name)),
+		sliceutils.CopyAppend[IdentitySelector](selectors, ByName(name)),
 		nil)
 }
 

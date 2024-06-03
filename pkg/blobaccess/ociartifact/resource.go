@@ -1,17 +1,14 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ociartifact
 
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/optionutils"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 func BlobAccessForOCIArtifact(refname string, opts ...Option) (blobaccess.BlobAccess, string, error) {

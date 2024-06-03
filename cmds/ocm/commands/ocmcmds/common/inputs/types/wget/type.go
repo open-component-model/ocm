@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package wget
 
 import (
@@ -26,7 +22,7 @@ This blob type specification supports the following fields:
   This REQUIRED property describes the url from which the resource is to be
   downloaded.
 
-- **<code>mediaType</code> *string*
+- **<code>mediaType</code>** *string*
 
   This OPTIONAL property describes the media type of the resource to be 
   downloaded. If omitted, ocm tries to read the mediaType from the Content-Type header
@@ -47,7 +43,7 @@ This blob type specification supports the following fields:
   
   This OPTIONAL property describes the http body to be included in the request.
 
-- **<code>noredirect<code>** *bool*
+- **<code>noredirect</code>** *bool*
 
   This OPTIONAL property describes whether http redirects should be disabled. If omitted,
   it is defaulted to false (so, per default, redirects are enabled).

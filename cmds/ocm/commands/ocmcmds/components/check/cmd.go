@@ -1,14 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package check
 
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/check"
-	"github.com/open-component-model/ocm/pkg/optionutils"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/util/json"
 
@@ -24,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/check"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 

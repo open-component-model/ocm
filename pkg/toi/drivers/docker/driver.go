@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package docker
 
 import (
@@ -19,16 +15,17 @@ import (
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	registrytypes "github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/docker/registry"
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/set"
 	"github.com/mitchellh/copystructure"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
@@ -47,7 +44,7 @@ const (
 	falseAsString = "false"
 )
 
-var Options = generics.NewSet[string](
+var Options = set.New[string](
 	OptionQuiet,
 	OptionCleanup,
 	OptionPullPolicy,
@@ -156,8 +153,8 @@ func (d *Driver) SetContainerErr(w io.Writer) {
 	d.containerErr = w
 }
 
-func pullImage(ctx context.Context, cli command.Cli, image string) error {
-	ref, err := reference.ParseNormalizedNamed(image)
+func pullImage(ctx context.Context, cli command.Cli, imageName string) error {
+	ref, err := reference.ParseNormalizedNamed(imageName)
 	if err != nil {
 		return fmt.Errorf("unable to parse normalized name: %w", err)
 	}
@@ -168,18 +165,18 @@ func pullImage(ctx context.Context, cli command.Cli, image string) error {
 		return fmt.Errorf("unable to parse repository info: %w", err)
 	}
 
-	authConfig := command.ResolveAuthConfig(ctx, cli, repoInfo.Index)
+	authConfig := command.ResolveAuthConfig(cli.ConfigFile(), repoInfo.Index)
 
 	encodedAuth, err := registrytypes.EncodeAuthConfig(authConfig)
 	if err != nil {
 		return fmt.Errorf("unable encode auth: %w", err)
 	}
 
-	options := types.ImagePullOptions{
+	options := image.PullOptions{
 		RegistryAuth: encodedAuth,
 	}
 
-	responseBody, err := cli.Client().ImagePull(ctx, image, options)
+	responseBody, err := cli.Client().ImagePull(ctx, imageName, options)
 	if err != nil {
 		return fmt.Errorf("unable to pull image: %w", err)
 	}
@@ -254,7 +251,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}
 
 	if d.config[OptionCleanup] == trueAsString {
-		defer cli.Client().ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{})
+		defer cli.Client().ContainerRemove(ctx, resp.ID, container.RemoveOptions{})
 	}
 
 	containerUID := getContainerUserID(ii.Config.User)
@@ -277,7 +274,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}
 	tarContent.Close()
 
-	attach, err := cli.Client().ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
+	attach, err := cli.Client().ContainerAttach(ctx, resp.ID, container.AttachOptions{
 		Stream: true,
 		Stdout: true,
 		Stderr: true,
@@ -310,7 +307,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 		}
 	}()
 
-	if err = cli.Client().ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+	if err = cli.Client().ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		return nil, fmt.Errorf("cannot start container: %w", err)
 	}
 	statusc, errc := cli.Client().ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)

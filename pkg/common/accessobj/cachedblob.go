@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package accessobj
 
 import (
@@ -33,10 +29,14 @@ type CachedBlobAccess struct {
 var _ bpi.BlobAccessBase = (*CachedBlobAccess)(nil)
 
 func CachedBlobAccessForWriter(ctx datacontext.Context, mime string, src accessio.DataWriter) blobaccess.BlobAccess {
+	return CachedBlobAccessForWriterWithCache(tmpcache.Get(ctx), mime, src)
+}
+
+func CachedBlobAccessForWriterWithCache(cache *tmpcache.Attribute, mime string, src accessio.DataWriter) blobaccess.BlobAccess {
 	return bpi.NewBlobAccessForBase(&CachedBlobAccess{
 		source: src,
 		mime:   mime,
-		cache:  tmpcache.Get(ctx),
+		cache:  cache,
 	})
 }
 

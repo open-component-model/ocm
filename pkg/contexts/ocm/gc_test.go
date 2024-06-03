@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ocm_test
 
 import (
@@ -12,14 +8,14 @@ import (
 	. "github.com/onsi/gomega"
 
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 )
 
 var _ = Describe("area test", func() {
 	It("can be garbage collected", func() {
 		ctx := me.New()
 
-		r := finalizer.GetRuntimeFinalizationRecorder(ctx)
+		r := runtimefinalizer.GetRuntimeFinalizationRecorder(ctx)
 		Expect(r).NotTo(BeNil())
 
 		runtime.GC()

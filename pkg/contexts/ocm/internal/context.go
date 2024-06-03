@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
@@ -9,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/mandelsoft/goutils/finalizer"
 
 	"github.com/modern-go/reflect2"
 
@@ -21,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const CONTEXT_TYPE = "ocm" + datacontext.OCM_CONTEXT_SUFFIX
@@ -127,9 +124,8 @@ type _context struct {
 	_InternalContext
 	updater cfgcpi.Updater
 
-	sharedattributes datacontext.AttributesContext
-	credctx          credentials.Context
-	ocictx           oci.Context
+	credctx credentials.Context
+	ocictx  oci.Context
 
 	knownRepositoryTypes RepositoryTypeScheme
 	knownAccessTypes     AccessTypeScheme
@@ -141,7 +137,10 @@ type _context struct {
 	resolver      *resolver
 }
 
-var _ Context = &_context{}
+var (
+	_ Context                          = (*_context)(nil)
+	_ datacontext.ViewCreator[Context] = (*_context)(nil)
+)
 
 // gcWrapper is used as garbage collectable
 // wrapper for a context implementation
@@ -151,15 +150,21 @@ type gcWrapper struct {
 	*_context
 }
 
+func newView(c *_context, ref ...bool) Context {
+	if utils.Optional(ref...) {
+		return datacontext.FinalizedContext[gcWrapper](c)
+	}
+	return c
+}
+
 func (w *gcWrapper) SetContext(c *_context) {
 	w._context = c
 }
 
 func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry, repodel RepositoryDelegationRegistry, delegates datacontext.Delegates) Context {
 	c := &_context{
-		sharedattributes:     credctx.AttributesContext(),
-		credctx:              credctx,
-		ocictx:               ocictx,
+		credctx:              datacontext.PersistentContextRef(credctx),
+		ocictx:               datacontext.PersistentContextRef(ocictx),
 		specHandlers:         specHandlers,
 		blobHandlers:         blobHandlers,
 		blobDigesters:        blobDigesters,
@@ -172,17 +177,21 @@ func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme Repo
 		c.knownRepositoryTypes = NewRepositoryTypeScheme(&delegatingDecoder{ctx: c, delegate: repodel}, reposcheme)
 	}
 	c._InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.GetAttributes(), delegates)
-	c.updater = cfgcpi.NewUpdater(credctx.ConfigContext(), c)
+	c.updater = cfgcpi.NewUpdaterForFactory(credctx.ConfigContext(), c.OCMContext)
 	c.resolver = &resolver{
 		ctx:              c,
 		MatchingResolver: NewMatchingResolver(c),
 	}
 	c.Finalizer().With(c.resolver.Finalize)
-	return datacontext.FinalizedContext[gcWrapper](c)
+	return newView(c, true)
+}
+
+func (c *_context) CreateView() Context {
+	return newView(c, true)
 }
 
 func (c *_context) OCMContext() Context {
-	return c
+	return newView(c)
 }
 
 func (c *_context) Update() error {
@@ -190,7 +199,7 @@ func (c *_context) Update() error {
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
-	return c.sharedattributes
+	return c.credctx.AttributesContext()
 }
 
 func (c *_context) ConfigContext() config.Context {

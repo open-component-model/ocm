@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package flag
 
 import (
@@ -9,9 +5,8 @@ import (
 	"encoding/csv"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type stringColonStringSliceValue[T ~map[string][]string] struct {

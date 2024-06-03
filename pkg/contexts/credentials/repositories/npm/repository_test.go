@@ -13,7 +13,7 @@ import (
 	npmCredentials "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/npm"
-	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 )
 
 var _ = Describe("NPM config - .npmrc", func() {
@@ -64,7 +64,7 @@ var _ = Describe("NPM config - .npmrc", func() {
 	It("can access the default context", func() {
 		ctx := credentials.New()
 
-		r := finalizer.GetRuntimeFinalizationRecorder(ctx)
+		r := runtimefinalizer.GetRuntimeFinalizationRecorder(ctx)
 		Expect(r).NotTo(BeNil())
 
 		Must(ctx.RepositoryForConfig([]byte(specdata), nil))

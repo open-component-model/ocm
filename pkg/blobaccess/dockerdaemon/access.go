@@ -1,11 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package dockerdaemon
 
 import (
 	"fmt"
+
+	"github.com/mandelsoft/goutils/optionutils"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
@@ -13,7 +11,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 func (o *Options) OCIContext() oci.Context {

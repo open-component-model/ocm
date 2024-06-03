@@ -1,11 +1,7 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package optionutils
 
 import (
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/mandelsoft/goutils/generics"
 )
 
 /////////////////////////////////////////////////////////////////////////////(//
@@ -25,7 +21,7 @@ type targetInterfaceWrapper[B any, W any /*B*/] struct {
 }
 
 func (w *targetInterfaceWrapper[B, W]) ApplyTo(opts W) {
-	w.option.ApplyTo(generics.As[B](opts))
+	w.option.ApplyTo(generics.Cast[B](opts))
 }
 
 // MapOptionTarget maps the option target interface from

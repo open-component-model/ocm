@@ -1,21 +1,17 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package blobaccess
 
 import (
 	"io"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -222,7 +218,7 @@ type AnnotatedBlobAccess[T DataAccess] interface {
 
 type annotatedBlobAccessView[T DataAccess] struct {
 	_blobAccess
-	id         finalizer.ObjectIdentity
+	id         runtimefinalizer.ObjectIdentity
 	annotation T
 }
 
@@ -236,7 +232,7 @@ func (a *annotatedBlobAccessView[T]) Dup() (BlobAccess, error) {
 		return nil, err
 	}
 	return &annotatedBlobAccessView[T]{
-		id:          finalizer.NewObjectIdentity(a.id.String()),
+		id:          runtimefinalizer.NewObjectIdentity(a.id.String()),
 		_blobAccess: b,
 		annotation:  a.annotation,
 	}, nil
@@ -254,7 +250,7 @@ func ForDataAccess[T DataAccess](digest digest.Digest, size int64, mimeType stri
 	a := bpi.BaseAccessForDataAccessAndMeta(mimeType, access, digest, size)
 
 	return &annotatedBlobAccessView[T]{
-		id:          finalizer.NewObjectIdentity("annotatedBlobAccess"),
+		id:          runtimefinalizer.NewObjectIdentity("annotatedBlobAccess"),
 		_blobAccess: bpi.NewBlobAccessForBase(a),
 		annotation:  access,
 	}
@@ -325,12 +321,29 @@ func ForTemporaryFile(mime string, temp vfs.File, fss ...vfs.FileSystem) BlobAcc
 	})
 }
 
+func ForTemporaryFileWithMeta(mime string, digest digest.Digest, size int64, temp vfs.File, fss ...vfs.FileSystem) BlobAccess {
+	return bpi.NewBlobAccessForBase(bpi.BaseAccessForDataAccessAndMeta(mime, &temporaryFileBlob{
+		_blobAccess: ForFile(mime, temp.Name(), fss...),
+		filesystem:  utils.FileSystem(fss...),
+		path:        temp.Name(),
+		file:        temp,
+	}, digest, size))
+}
+
 func ForTemporaryFilePath(mime string, temp string, fss ...vfs.FileSystem) BlobAccess {
 	return bpi.NewBlobAccessForBase(&temporaryFileBlob{
 		_blobAccess: ForFile(mime, temp, fss...),
 		filesystem:  utils.FileSystem(fss...),
 		path:        temp,
 	})
+}
+
+func ForTemporaryFilePathWithMeta(mime string, digest digest.Digest, size int64, temp string, fss ...vfs.FileSystem) BlobAccess {
+	return bpi.NewBlobAccessForBase(bpi.BaseAccessForDataAccessAndMeta(mime, &temporaryFileBlob{
+		_blobAccess: ForFile(mime, temp, fss...),
+		filesystem:  utils.FileSystem(fss...),
+		path:        temp,
+	}, digest, size))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

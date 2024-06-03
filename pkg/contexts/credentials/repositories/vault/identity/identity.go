@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package identity
 
 import (
@@ -9,9 +5,10 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/listformat"
 )
 
@@ -19,12 +16,12 @@ const CONSUMER_TYPE = "HashiCorpVault"
 
 // identity properties.
 const (
-	ID_HOSTNAME     = hostpath.ID_HOSTNAME
-	ID_SCHEMA       = hostpath.ID_SCHEME
-	ID_PORT         = hostpath.ID_PORT
-	ID_PATHPREFIX   = hostpath.ID_PATHPREFIX
-	ID_SECRETENGINE = "secretEngine"
-	ID_NAMESPACE    = "namespace"
+	ID_HOSTNAME   = hostpath.ID_HOSTNAME
+	ID_SCHEMA     = hostpath.ID_SCHEME
+	ID_PORT       = hostpath.ID_PORT
+	ID_PATHPREFIX = hostpath.ID_PATHPREFIX
+	ID_MOUNTPATH  = "mountPath"
+	ID_NAMESPACE  = "namespace"
 )
 
 // credential properties.
@@ -46,7 +43,7 @@ func IdentityMatcher(request, cur, id cpi.ConsumerIdentity) bool {
 	if id[ID_NAMESPACE] != request[ID_NAMESPACE] {
 		return false
 	}
-	if id[ID_SECRETENGINE] != "" && id[ID_SECRETENGINE] != request[ID_SECRETENGINE] {
+	if id[ID_MOUNTPATH] != "" && id[ID_MOUNTPATH] != request[ID_MOUNTPATH] {
 		return false
 	}
 	return identityMatcher(request, cur, id)
@@ -58,14 +55,13 @@ func init() {
 		ATTR_TOKEN, "vault token",
 		ATTR_ROLEID, "applrole role id",
 		ATTR_SECRETID, "applrole secret id",
-		ATTR_SECRETID, "applrole secret id",
 	})
 	ids := listformat.FormatListElements("", listformat.StringElementDescriptionList{
 		ID_HOSTNAME, "vault server host",
 		ID_SCHEMA, "(optional) URL scheme",
 		ID_PORT, "(optional) server port",
 		ID_NAMESPACE, "vault namespace",
-		ID_SECRETENGINE, "secret engine",
+		ID_MOUNTPATH, "mount path",
 		ID_PATHPREFIX, "path prefix for secret",
 	})
 	cpi.RegisterStandardIdentity(CONSUMER_TYPE, identityMatcher,
@@ -79,7 +75,7 @@ The only supported auth methods, so far, are <code>token</code> and <code>approl
 `)
 }
 
-func GetConsumerId(serverurl string, namespace string, secretengine string, secretpath string) (cpi.ConsumerIdentity, error) {
+func GetConsumerId(serverurl string, namespace string, mountpath string, secretpath string) (cpi.ConsumerIdentity, error) {
 	if serverurl == "" {
 		return nil, errors.Newf("server address must be given")
 	}
@@ -109,8 +105,8 @@ func GetConsumerId(serverurl string, namespace string, secretengine string, secr
 	if namespace != "" {
 		id[ID_NAMESPACE] = namespace
 	}
-	if secretengine != "" {
-		id[ID_SECRETENGINE] = secretengine
+	if mountpath != "" {
+		id[ID_MOUNTPATH] = mountpath
 	}
 
 	if secretpath != "" {
@@ -119,8 +115,8 @@ func GetConsumerId(serverurl string, namespace string, secretengine string, secr
 	return id, nil
 }
 
-func GetCredentials(ctx cpi.ContextProvider, serverurl, namespace string, secretengine, secretpath string) (cpi.Credentials, error) {
-	id, err := GetConsumerId(serverurl, namespace, secretengine, secretpath)
+func GetCredentials(ctx cpi.ContextProvider, serverurl, namespace string, mountpath, secretpath string) (cpi.Credentials, error) {
+	id, err := GetConsumerId(serverurl, namespace, mountpath, secretpath)
 	if err != nil {
 		return nil, err
 	}

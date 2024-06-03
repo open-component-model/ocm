@@ -1,19 +1,15 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package vault
 
 import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/optionutils"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/vault/identity"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -57,8 +53,8 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi
 	}
 	spec := *a
 	spec.Secrets = slices.Clone(a.Secrets)
-	if spec.SecretsEngine == "" {
-		spec.SecretsEngine = "secrets"
+	if spec.MountPath == "" {
+		spec.MountPath = "secret"
 	}
 	return repos.GetRepository(ctx, &spec)
 }
@@ -74,7 +70,7 @@ func (a *RepositorySpec) GetKey() cpi.ProviderIdentity {
 }
 
 func (a *RepositorySpec) GetConsumerId(uctx ...internal.UsageContext) internal.ConsumerIdentity {
-	id, err := identity.GetConsumerId(a.ServerURL, a.Namespace, a.SecretsEngine, a.Path)
+	id, err := identity.GetConsumerId(a.ServerURL, a.Namespace, a.MountPath, a.Path)
 	if err != nil {
 		return nil
 	}

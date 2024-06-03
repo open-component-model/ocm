@@ -38,7 +38,8 @@ jobs:
       - name: Unit test
         run: |
           PATH=$PATH:$(go env GOPATH)/bin make build
-          PATH=$PATH:$(go env GOPATH)/bin make test
+          PATH=$PATH:$(go env GOPATH)/bin make test-all
+
   lint:
     name: Lint
     runs-on: large_runner
@@ -71,10 +72,14 @@ jobs:
       - name: Lint
         run: |
           PATH=$PATH:$(go env GOPATH)/bin make check
+
   generate:
     name: DeepCopy verification
     runs-on: large_runner
     steps:
+      - name: Self Hosted Runner Post Job Cleanup Action
+        uses: TooMuch4U/actions-clean@v2.2
+        
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -99,3 +104,4 @@ jobs:
       - name: Check for diff
         run: |
           git diff --exit-code --shortstat
+  

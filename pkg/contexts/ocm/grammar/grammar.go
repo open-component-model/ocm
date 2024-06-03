@@ -1,11 +1,7 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package grammar
 
 import (
-	. "github.com/open-component-model/ocm/pkg/regex"
+	. "github.com/mandelsoft/goutils/regexutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 )
@@ -30,7 +26,19 @@ var (
 	// AnchoredRepositoryRegexp parses a uniform repository spec.
 	AnchoredRepositoryRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
-		Capture(grammar.DomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+		grammar.SchemeDomainPortRegexp, Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+	)
+
+	// AnchoredSchemedHostPortRepositoryRegexp parses a uniform repository spec.
+	AnchoredSchemedHostPortRepositoryRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		grammar.SchemedHostPortRegexp, Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+	)
+
+	// AnchoredHostWithPortRepositoryRegexp parses a uniform repository spec.
+	AnchoredHostWithPortRepositoryRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		grammar.SchemeHostPortRegexp, Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
 	)
 
 	// AnchoredGenericRepositoryRegexp describes a CTF reference.
@@ -54,7 +62,29 @@ var (
 	// It provides 5 captures: type, repository host port, sub path, component and version.
 	AnchoredReferenceRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
-		Capture(grammar.DomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+		grammar.SchemeDomainPortRegexp, Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+		Literal("//"), Capture(ComponentRegexp),
+		Optional(Literal(VersionSeparator), Capture(VersionRegexp)),
+	)
+
+	// AnchoredSchemedHostPortReferenceRegexp parses a complete string representation for default component references
+	// including the repository part. Since the type is optional, the scheme is required to allow for a distinction
+	// from filepaths.
+	// It provides 6 captures: type, scheme, repository host port, sub path, component and version.
+	AnchoredSchemedHostPortReferenceRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		grammar.SchemedHostPortRegexp, Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+		Literal("//"), Capture(ComponentRegexp),
+		Optional(Literal(VersionSeparator), Capture(VersionRegexp)),
+	)
+
+	// AnchoredHostWithPortReferenceRegexp parses a complete string representation for default component references
+	// including the repository part. Since the type is optional, the scheme is required to allow for a distinction
+	// from filepaths.
+	// It provides 6 captures: type, scheme, repository host port, sub path, component and version.
+	AnchoredHostWithPortReferenceRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		grammar.SchemeHostPortRegexp, Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
 		Literal("//"), Capture(ComponentRegexp),
 		Optional(Literal(VersionSeparator), Capture(VersionRegexp)),
 	)

@@ -1,12 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package rscs
 
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -19,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	compdescv2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -165,17 +161,6 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *addhdlrs.ResourceInpu
 	}
 	if err := compdescv2.ValidateResource(fldPath, rsc, false); err != nil {
 		allErrs = append(allErrs, err...)
-	}
-
-	if input.Access != nil {
-		if r.Relation == metav1.LocalRelation {
-			allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "access requires external relation"))
-		}
-	}
-	if input.Input != nil {
-		if r.Relation != metav1.LocalRelation {
-			allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "input requires local relation"))
-		}
 	}
 	return allErrs.ToAggregate()
 }

@@ -1,13 +1,12 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ocirepo
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -23,9 +22,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +31,7 @@ type handler struct {
 }
 
 func New(repospec ...*ociuploadattr.Attribute) download.Handler {
-	return &handler{spec: utils.Optional(repospec...)}
+	return &handler{spec: general.Optional(repospec...)}
 }
 
 func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (accepted bool, target string, err error) {

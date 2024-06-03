@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package rsa
 
 import (
@@ -13,8 +9,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 )
 
 func GetPublicKey(key interface{}) (*rsa.PublicKey, *pkix.Name, error) {
@@ -77,7 +73,7 @@ func KeyData(key interface{}) ([]byte, error) {
 func PemBlockForKey(priv interface{}, gen ...bool) (*pem.Block, error) {
 	switch k := priv.(type) {
 	case *rsa.PublicKey:
-		if utils.Optional(gen...) {
+		if general.Optional(gen...) {
 			bytes, err := x509.MarshalPKIXPublicKey(k)
 			if err != nil {
 				panic(err)

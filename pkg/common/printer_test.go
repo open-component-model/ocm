@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package common
 
 import (
@@ -48,6 +44,12 @@ var _ = Describe("Printer", func() {
 		Expect(buf.String()).To(Equal("line\n  test\n  next\n"))
 		printer.Printf("back\n")
 		Expect(buf.String()).To(Equal("line\n  test\n  next\nback\n"))
+	})
+
+	It("defaults printer", func() {
+		Expect(AssurePrinter(nil)).To(BeIdenticalTo(NonePrinter))
+		p := NewPrinter(nil)
+		Expect(AssurePrinter(p)).To(BeIdenticalTo(p))
 	})
 
 	Context("loggging", func() {

@@ -1,16 +1,13 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package schemaoption
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
@@ -49,7 +46,7 @@ func (o *Option) Complete() error {
 				}
 			}
 			if s == nil {
-				return errors.ErrUnknown(errors.KIND_SCHEMAVERSION, o.Schema)
+				return errors.ErrUnknown(errkind.KIND_SCHEMAVERSION, o.Schema)
 			}
 		}
 	}

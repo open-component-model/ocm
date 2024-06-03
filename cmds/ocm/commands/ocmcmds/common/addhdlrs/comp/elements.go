@@ -1,14 +1,11 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package comp
 
 import (
 	"fmt"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/mandelsoft/goutils/finalizer"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -24,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -85,7 +82,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 	}
 	comp, err := repo.LookupComponent(r.Name)
 	if err != nil {
-		return errors.ErrNotFound(errors.KIND_COMPONENT, r.Name)
+		return errors.ErrNotFound(errkind.KIND_COMPONENT, r.Name)
 	}
 	final.Close(comp)
 
@@ -103,7 +100,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 	}
 	if schema != "" {
 		if compdesc.DefaultSchemes[schema] == nil {
-			return errors.ErrUnknown(errors.KIND_SCHEMAVERSION, schema)
+			return errors.ErrUnknown(errkind.KIND_SCHEMAVERSION, schema)
 		}
 		cd.Metadata.ConfiguredVersion = schema
 	}

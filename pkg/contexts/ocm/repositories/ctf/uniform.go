@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ctf
 
 import (
@@ -20,7 +16,7 @@ func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
 	cpi.RegisterRepositorySpecHandler(h, ctf.Type)
-	cpi.RegisterRepositorySpecHandler(h, "ctf")
+	cpi.RegisterRepositorySpecHandler(h, ctf.AltType)
 	for _, f := range SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 	}

@@ -1,12 +1,10 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package add
 
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -33,8 +31,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 var (
@@ -74,15 +70,15 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "[<options>] [--version <version>] [<ctf archive>] {<components.yaml>}",
+		Use:   "[<options>] [--version <version>] [<ctf archive>] {<component-constructor.yaml>}",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add component version(s) to a (new) transport archive",
 		Example: `
 <pre>
-$ ocm add componentversions --file ctf --version 1.0 components.yaml
+$ ocm add componentversions --file ctf --version 1.0 component-constructor.yaml
 </pre>
 
-and a file <code>components.yaml</code>:
+and a file <code>component-constructor.yaml</code>:
 
 <pre>
 name: ocm.software/demo/test
@@ -114,8 +110,8 @@ The resource <code>text</code> is taken from a file <code>testdata</code> locate
 next to the description file.
 `,
 		Long: `
-Add component versions specified by a description file to a Common Transport
-Archive. This might be either a directory prepared to host component version
+Add component versions specified by a constructor file to a Common Transport
+Archive. The archive might be either a directory prepared to host component version
 content or a tar/tgz file (see option --type).
 
 If option <code>--create</code> is given, the archive is created first. An
@@ -242,7 +238,7 @@ func (o *Command) Run() error {
 	}
 
 	if err == nil {
-		err = comp.ProcessComponents(o.Context, ictx, repo, generics.Conditional(o.Closure, lookupoption.From(o).Resolver, nil), thdlr, h, elems)
+		err = comp.ProcessComponents(o.Context, ictx, repo, general.Conditional(o.Closure, lookupoption.From(o).Resolver, nil), thdlr, h, elems)
 		cerr := repo.Close()
 		if err == nil {
 			err = cerr

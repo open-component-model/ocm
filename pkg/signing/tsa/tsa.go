@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package tsa
 
 import (
@@ -14,8 +10,8 @@ import (
 	"github.com/InfiniteLoopSpace/go_S-MIME/oid"
 	tsa "github.com/InfiniteLoopSpace/go_S-MIME/timestamp"
 	"github.com/go-test/deep"
+	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )

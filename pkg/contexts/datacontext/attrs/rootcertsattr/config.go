@@ -1,16 +1,12 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package rootcertsattr
 
 import (
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -62,7 +58,7 @@ func (a *Config) AddRootCertificate(chain signutils.GenericCertificateChain) err
 
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	if t, ok := target.(Context); ok {
-		if t.AttributesContext() == t { // apply only to root context
+		if t.AttributesContext().IsAttributesContext() { // apply only to root context
 			return errors.Wrapf(a.ApplyToAttribute(Get(t)), "applying config to certattr failed")
 		}
 	}

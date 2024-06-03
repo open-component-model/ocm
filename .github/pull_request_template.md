@@ -11,6 +11,7 @@ Please include a summary of the changes and the related issue. Please also inclu
 ## What type of PR is this? (check all applicable)
 
 - [ ] 🍕 Feature
+- [ ] 🎇 Restructuring
 - [ ] 🐛 Bug Fix
 - [ ] 📝 Documentation Update
 - [ ] 🎨 Style

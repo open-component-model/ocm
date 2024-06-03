@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package genericocireg
 
 import (
@@ -11,14 +7,16 @@ import (
 	"path"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type OCIBasedRepository interface {
@@ -40,11 +38,12 @@ func GetOCIRepository(r cpi.Repository) ocicpi.Repository {
 }
 
 type RepositoryImpl struct {
-	bridge  repocpi.RepositoryBridge
-	ctx     cpi.Context
-	meta    ComponentRepositoryMeta
-	nonref  cpi.Repository
-	ocirepo oci.Repository
+	bridge   repocpi.RepositoryBridge
+	ctx      cpi.Context
+	meta     ComponentRepositoryMeta
+	nonref   cpi.Repository
+	ocirepo  oci.Repository
+	readonly bool
 }
 
 var (
@@ -52,7 +51,8 @@ var (
 	_ credentials.ConsumerIdentityProvider = (*RepositoryImpl)(nil)
 )
 
-func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) cpi.Repository {
+func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository) cpi.Repository {
+	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
 	impl := &RepositoryImpl{
 		ctx:     ctx,
 		meta:    *DefaultComponentRepositoryMeta(meta),
@@ -63,6 +63,15 @@ func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.R
 
 func (r *RepositoryImpl) Close() error {
 	return r.ocirepo.Close()
+}
+
+func (r *RepositoryImpl) IsReadOnly() bool {
+	// TODO: extend OCI to query ReadOnly mode
+	return r.readonly
+}
+
+func (r *RepositoryImpl) SetReadOnly() {
+	r.readonly = true
 }
 
 func (r *RepositoryImpl) SetBridge(base repocpi.RepositoryBridge) {
@@ -76,7 +85,7 @@ func (r *RepositoryImpl) GetContext() cpi.Context {
 
 func (r *RepositoryImpl) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
 	prefix := r.meta.SubPath
-	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
+	if c, ok := general.Optional(uctx...).(credentials.StringUsageContext); ok {
 		prefix = path.Join(prefix, componentmapping.ComponentDescriptorNamespace, c.String())
 	}
 	if p, ok := r.ocirepo.(credentials.ConsumerIdentityProvider); ok {

@@ -1,12 +1,11 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package main
 
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/mandelsoft/goutils/errors"
+	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	configcfg "github.com/open-component-model/ocm/pkg/contexts/config/config"
@@ -15,9 +14,7 @@ import (
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"sigs.k8s.io/yaml"
 )
 
 // TYPE is the name of our new configuration object type.

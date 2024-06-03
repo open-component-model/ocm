@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package composition_test
 
 import (
@@ -9,10 +5,13 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
@@ -20,7 +19,6 @@ import (
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
@@ -96,5 +94,46 @@ var _ = Describe("repository", func() {
 
 		MustBeSuccessful(finalize.Finalize())
 		Expect(refmgmt.ReferenceCount(repo)).To(Equal(1))
+	})
+
+	It("readonly mode on repo", func() {
+		env := builder.NewBuilder(env.FileSystem(memoryfs.New(), ""))
+
+		env.OCMCompositionRepository("test", func() {
+			env.Component(COMPONENT, func() {
+				env.Version(VERSION, func() {
+					env.Provider("acme.org")
+					env.Resource("text", VERSION, "special", metav1.LocalRelation, func() {
+						env.BlobStringData(mime.MIME_TEXT, "testdata")
+					})
+				})
+			})
+		})
+
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize, "final")
+
+		sess := ocm.NewSession(nil)
+		repo := me.NewRepository(env, "test")
+		sess.AddCloser(repo)
+		finalize.Close(sess, "repo")
+
+		repo.SetReadOnly()
+		Expect(repo.IsReadOnly()).To(BeTrue())
+
+		cv := Must(repo.LookupComponentVersion(COMPONENT, VERSION))
+		cl := accessio.OnceCloser(cv)
+		sess.AddCloser(cl)
+
+		Expect(cv.IsReadOnly()).To(BeTrue())
+
+		cv.GetDescriptor().Provider.Name = "acme.org"
+		ExpectError(cl.Close()).To(MatchError(accessobj.ErrReadOnly))
+	})
+
+	It("provides early error", func() {
+		repo := me.NewRepository(ctx)
+		cv := me.NewComponentVersion(ctx, "a", "1.0")
+		ExpectError(repo.AddComponentVersion(cv)).To(MatchError("component.name: Does not match pattern '^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$'"))
 	})
 })

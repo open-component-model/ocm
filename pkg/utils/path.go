@@ -6,10 +6,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // ResolvePath handles the ~ notation for the home directory.

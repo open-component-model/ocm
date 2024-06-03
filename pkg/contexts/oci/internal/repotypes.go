@@ -1,17 +1,13 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
 	"encoding/json"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -122,7 +118,7 @@ func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error
 }
 
 func NewGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	return generics.AsE[RepositorySpec](newGenericRepositorySpec(data, unmarshaler))
+	return generics.CastPointerR[RepositorySpec](newGenericRepositorySpec(data, unmarshaler))
 }
 
 func newGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (*GenericRepositorySpec, error) {

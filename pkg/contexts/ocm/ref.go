@@ -1,18 +1,15 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ocm
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/grammar"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -33,27 +30,57 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 		})
 	}
 	match := grammar.AnchoredRepositoryRegexp.FindSubmatch([]byte(ref))
-	if match == nil {
-		match = grammar.AnchoredGenericRepositoryRegexp.FindSubmatch([]byte(ref))
-		if match == nil {
-			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
-		}
+	if match != nil {
 		h := string(match[1])
 		t, _ := grammar.SplitTypeSpec(h)
 		return cpi.HandleRef(UniformRepositorySpec{
 			Type:            t,
 			TypeHint:        h,
-			Info:            string(match[2]),
+			Scheme:          string(match[2]),
+			Host:            string(match[3]),
+			SubPath:         string(match[4]),
 			CreateIfMissing: create,
 		})
+	}
+
+	match = grammar.AnchoredSchemedHostPortRepositoryRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		return cpi.HandleRef(UniformRepositorySpec{
+			Type:            t,
+			TypeHint:        h,
+			Scheme:          string(match[2]),
+			Host:            string(match[3]),
+			SubPath:         string(match[4]),
+			CreateIfMissing: create,
+		})
+	}
+
+	match = grammar.AnchoredHostWithPortRepositoryRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		return cpi.HandleRef(UniformRepositorySpec{
+			Type:            t,
+			TypeHint:        h,
+			Scheme:          string(match[2]),
+			Host:            string(match[3]),
+			SubPath:         string(match[4]),
+			CreateIfMissing: create,
+		})
+	}
+
+	match = grammar.AnchoredGenericRepositoryRegexp.FindSubmatch([]byte(ref))
+	if match == nil {
+		return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
 	}
 	h := string(match[1])
 	t, _ := grammar.SplitTypeSpec(h)
 	return cpi.HandleRef(UniformRepositorySpec{
 		Type:            t,
 		TypeHint:        h,
-		Host:            string(match[2]),
-		SubPath:         string(match[3]),
+		Info:            string(match[2]),
 		CreateIfMissing: create,
 	})
 }
@@ -64,7 +91,7 @@ func ParseRepoToSpec(ctx Context, ref string, create ...bool) (RepositorySpec, e
 		return nil, errors.ErrInvalidWrap(err, KIND_REPOSITORYSPEC, ref)
 	}
 	if !uni.CreateIfMissing {
-		uni.CreateIfMissing = utils.Optional(create...)
+		uni.CreateIfMissing = general.Optional(create...)
 	}
 	repoSpec, err := ctx.MapUniformRepositorySpec(&uni)
 	if err != nil {
@@ -90,6 +117,75 @@ func ParseRef(ref string) (RefSpec, error) {
 	var spec RefSpec
 	v := ""
 	match := grammar.AnchoredReferenceRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		v = string(match[6])
+		s := string(match[2])
+		h := string(match[1])
+		t, _ := grammar.SplitTypeSpec(h)
+		spec = RefSpec{
+			UniformRepositorySpec{
+				Type:            t,
+				TypeHint:        h,
+				Scheme:          s,
+				Host:            string(match[3]),
+				SubPath:         string(match[4]),
+				CreateIfMissing: create,
+			},
+			CompSpec{
+				Component: string(match[5]),
+				Version:   nil,
+			},
+		}
+	}
+
+	if match == nil {
+		match = grammar.AnchoredSchemedHostPortReferenceRegexp.FindSubmatch([]byte(ref))
+		if match != nil {
+			v = string(match[6])
+			s := string(match[2])
+			h := string(match[1])
+			t, _ := grammar.SplitTypeSpec(h)
+			spec = RefSpec{
+				UniformRepositorySpec{
+					Type:            t,
+					TypeHint:        h,
+					Scheme:          s,
+					Host:            string(match[3]),
+					SubPath:         string(match[4]),
+					CreateIfMissing: create,
+				},
+				CompSpec{
+					Component: string(match[5]),
+					Version:   nil,
+				},
+			}
+		}
+	}
+
+	if match == nil {
+		match = grammar.AnchoredHostWithPortReferenceRegexp.FindSubmatch([]byte(ref))
+		if match != nil {
+			v = string(match[6])
+			s := string(match[2])
+			h := string(match[1])
+			t, _ := grammar.SplitTypeSpec(h)
+			spec = RefSpec{
+				UniformRepositorySpec{
+					Type:            t,
+					TypeHint:        h,
+					Scheme:          s,
+					Host:            string(match[3]),
+					SubPath:         string(match[4]),
+					CreateIfMissing: create,
+				},
+				CompSpec{
+					Component: string(match[5]),
+					Version:   nil,
+				},
+			}
+		}
+	}
+
 	if match == nil {
 		match = grammar.AnchoredGenericReferenceRegexp.FindSubmatch([]byte(ref))
 		if match == nil {
@@ -110,29 +206,15 @@ func ParseRef(ref string) (RefSpec, error) {
 				Version:   nil,
 			},
 		}
-	} else {
-		v = string(match[5])
-		h := string(match[1])
-		t, _ := grammar.SplitTypeSpec(h)
-		spec = RefSpec{
-			UniformRepositorySpec{
-				Type:            t,
-				TypeHint:        h,
-				Host:            string(match[2]),
-				SubPath:         string(match[3]),
-				CreateIfMissing: create,
-			},
-			CompSpec{
-				Component: string(match[4]),
-				Version:   nil,
-			},
-		}
 	}
+
 	if v != "" {
 		spec.Version = &v
 	}
 	var err error
-	spec.UniformRepositorySpec, err = cpi.HandleRef(spec.UniformRepositorySpec)
+	if spec.Info == "" || !(string(spec.Info[0]) == "{") {
+		spec.UniformRepositorySpec, err = cpi.HandleRef(spec.UniformRepositorySpec)
+	}
 	return spec, err
 }
 

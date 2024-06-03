@@ -1,16 +1,12 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package options
 
 import (
 	"reflect"
 
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -108,7 +104,7 @@ func FindOptions[T any](s OptionSetProvider) []T {
 	t := generics.TypeOf[T]()
 	for _, o := range s.AsOptionSet() {
 		if reflect.TypeOf(o).AssignableTo(t) {
-			found = append(found, generics.As[T](o))
+			found = append(found, generics.Cast[T](o))
 		}
 		if set, ok := o.(OptionSetProvider); ok {
 			found = append(found, FindOptions[T](set)...)

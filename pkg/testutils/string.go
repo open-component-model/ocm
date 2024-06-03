@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package testutils
 
 import (
@@ -11,10 +7,9 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Substitutions = map[string]string

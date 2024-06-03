@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package identity
 
 import (
@@ -58,7 +54,7 @@ func GetConsumerId(serverurl string, repo ...string) cpi.ConsumerIdentity {
 	port := ""
 	if serverurl != "" {
 		u, err := url.Parse(serverurl)
-		if err != nil {
+		if err == nil {
 			host = u.Host
 		}
 	}

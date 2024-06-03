@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ociartifact
 
 import (
@@ -10,8 +6,10 @@ import (
 	"strings"
 	"sync"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/mandelsoft/goutils/finalizer"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -24,10 +22,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // Type is the access type of a oci registry.
@@ -176,7 +172,7 @@ func NewMethod(ctx accspeccpi.ContextProvider, a accspeccpi.AccessSpec, ref stri
 		reference: ref,
 		ctx:       ctx.OCMContext(),
 	}
-	return accspeccpi.AccessMethodForImplementation(m, m.eval(utils.Optional(repo...)))
+	return accspeccpi.AccessMethodForImplementation(m, m.eval(general.Optional(repo...)))
 }
 
 func (_ *accessMethod) IsLocal() bool {

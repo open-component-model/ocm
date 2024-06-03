@@ -164,20 +164,32 @@ differ, because the code always describes the latest version):
 
 ```
 resources of the latest version:
-  version:  0.6.0
+  version:  0.10.0
   provider: ocm.software
    1: name:           ocmcli
       extra identity: "architecture"="amd64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:6672528b57fd77cefa4c5a3395431b6a5aa14dc3ddad3ffe52343a7a518c2cd3[]
+      access:         Local blob sha256:e2d8f578083e9317bd199b3f374b7ea60e7f28cf989e8d39ae0ea54ac4fa8847[]
    2: name:           ocmcli
       extra identity: "architecture"="arm64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:9088cb8bbef1593b905d6bd3af6652165ff82cebd0d86540a7be9637324d036b[]
-   3: name:           ocmcli-image
+      access:         Local blob sha256:2acef3da732a6674fb047f3d60f0dabcbb60ffeb8dd362a169df97c4dc4489a8[]
+   3: name:           ocmcli
+      extra identity: "architecture"="arm64","os"="darwin"
+      resource type:  executable
+      access:         Local blob sha256:b05fbc5e8aaa3622e2ecc39ead7f066030fd183c625b0dc202dbac8131f06d1d[]
+   4: name:           ocmcli
+      extra identity: "architecture"="amd64","os"="darwin"
+      resource type:  executable
+      access:         Local blob sha256:aec88249f7e5a395eaa18ac6017831b275c7de90d3c10f0cd9e572027ad6c6e9[]
+   5: name:           ocmcli
+      extra identity: "architecture"="amd64","os"="windows"
+      resource type:  executable
+      access:         Local blob sha256:cdbac49bd004aa2a8b89fafb9e845f45bfcfaab2df402296f55b403b9b1035a2[]
+   6: name:           ocmcli-image
       extra identity: 
       resource type:  ociImage
-      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.6.0
+      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.10.0
 ```
 
 Resources have some metadata, like their identity and a resource type.

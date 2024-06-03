@@ -1,12 +1,6 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ocireg
 
 import (
-	"strings"
-
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
@@ -36,20 +30,7 @@ type RepositorySpec = genericocireg.RepositorySpec
 // If no ocm meta is given, the subPath part is extracted from the base URL.
 // Otherwise, the given URL is used as OCI registry URL as it is.
 func NewRepositorySpec(baseURL string, metas ...*ComponentRepositoryMeta) *RepositorySpec {
-	meta := utils.Optional(metas...)
-	if meta == nil {
-		scheme := ""
-		if idx := strings.Index(baseURL, "://"); idx > 0 {
-			scheme = baseURL[:idx+3]
-			baseURL = baseURL[idx+3:]
-		}
-		if idx := strings.Index(baseURL, "/"); idx > 0 {
-			meta = NewComponentRepositoryMeta(baseURL[idx+1:])
-			baseURL = scheme + baseURL[:idx]
-		}
-	}
-
-	return genericocireg.NewRepositorySpec(ocireg.NewRepositorySpec(baseURL), meta)
+	return genericocireg.NewRepositorySpec(ocireg.NewRepositorySpec(baseURL), utils.Optional(metas...))
 }
 
 func NewComponentRepositoryMeta(subPath string, mapping ...ComponentNameMapping) *ComponentRepositoryMeta {

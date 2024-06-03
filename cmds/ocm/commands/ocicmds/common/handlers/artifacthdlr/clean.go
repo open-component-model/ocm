@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package artifacthdlr
 
 import (
@@ -31,7 +27,12 @@ func clean(iterable data.Iterable) data.Iterable {
 		e := it.Next().(*Object)
 		data.Add(e)
 		l := len(e.History)
-		blob, _ := e.Artifact.Blob()
+		blob, err := e.Artifact.Blob()
+		if err != nil {
+			// ignore if we don't have the artifact and get the next element
+
+			continue
+		}
 
 		if l > depth[blob.Digest()] {
 			depth[blob.Digest()] = l
@@ -43,7 +44,11 @@ func clean(iterable data.Iterable) data.Iterable {
 
 	output.Print(data, "clean in")
 	for i := 0; i < len(data); i++ {
-		e := data[i].(*Object)
+		if data[i] == nil {
+			// ignore if we don't have an object and continue cleaning the rest
+			continue
+		}
+		e := data[i].(*Object) // internal function is called only on *Object, if not, panic early to indicate misuse
 		l := len(e.History)
 		blob, _ := e.Artifact.Blob()
 		dig := blob.Digest()

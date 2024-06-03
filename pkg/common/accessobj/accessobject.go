@@ -1,17 +1,13 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package accessobj
 
 import (
 	"fmt"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type DescriptorHandlerFactory func(fs vfs.FileSystem) StateHandler
@@ -148,6 +144,10 @@ func (a *AccessObject) IsClosed() bool {
 
 func (a *AccessObject) IsReadOnly() bool {
 	return a.state.IsReadOnly()
+}
+
+func (a *AccessObject) SetReadOnly() {
+	a.state.SetReadOnly()
 }
 
 func (a *AccessObject) updateDescriptor() (bool, error) {

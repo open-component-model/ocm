@@ -18,9 +18,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: '${{ github.workspace }}/go.mod'
           
       - name: Blackduck Full Scan
-        uses: mercedesbenzio/detect-action@v1
+        uses: mercedesbenzio/detect-action@v2
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS

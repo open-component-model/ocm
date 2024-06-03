@@ -1,12 +1,9 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package logopts
 
 import (
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/logging/config"
 	"github.com/mandelsoft/logging/logrusr"
@@ -17,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/logforward"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -87,7 +83,7 @@ func (o *Options) Configure(ctx ocm.Context, logctx logging.Context) error {
 		}
 		logctx.SetDefaultLevel(l)
 	} else {
-		logctx.SetDefaultLevel(logging.ErrorLevel)
+		logctx.SetDefaultLevel(logging.WarnLevel)
 	}
 	logcfg := &config.Config{DefaultLevel: logging.LevelName(logctx.GetDefaultLevel())}
 

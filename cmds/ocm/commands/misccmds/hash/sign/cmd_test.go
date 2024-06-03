@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package sign_test
 
 import (
@@ -10,6 +6,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing/signingtest"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
@@ -19,7 +16,7 @@ var _ = Describe("Test Environment", func() {
 	var env *TestEnv
 
 	BeforeEach(func() {
-		env = NewTestEnv(TestData("../../../../../../pkg/contexts/ocm/signing/testdata"))
+		env = NewTestEnv(signingtest.TestData())
 	})
 
 	AfterEach(func() {

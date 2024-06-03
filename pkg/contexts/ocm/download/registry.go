@@ -1,23 +1,19 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package download
 
 import (
 	"sort"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/registrations"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
 )
 
 const ALL = "*"
@@ -93,16 +89,16 @@ func AsHandlerRegistrationRegistry(r Registry) registrations.HandlerRegistration
 type _registry struct {
 	registrations.HandlerRegistrationRegistry[Target, HandlerOption]
 
-	id       finalizer.ObjectIdentity
+	id       runtimefinalizer.ObjectIdentity
 	lock     sync.RWMutex
 	base     Registry
 	handlers *registry.Registry[Handler, registry.RegistrationKey]
 }
 
 func NewRegistry(base ...Registry) Registry {
-	b := utils.Optional(base...)
+	b := general.Optional(base...)
 	return &_registry{
-		id:                          finalizer.NewObjectIdentity("downloader.registry.ocm.software"),
+		id:                          runtimefinalizer.NewObjectIdentity("downloader.registry.ocm.software"),
 		base:                        b,
 		HandlerRegistrationRegistry: NewHandlerRegistrationRegistry(AsHandlerRegistrationRegistry(b)),
 		handlers:                    registry.NewRegistry[Handler, registry.RegistrationKey](),

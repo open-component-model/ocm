@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package npm
 
 import (
@@ -13,11 +9,12 @@ import (
 	"net/http"
 	"net/url"
 
-	npmCredentials "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
+	crds "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
+	npmLogin "github.com/open-component-model/ocm/pkg/npm"
 )
 
 const BLOB_HANDLER_NAME = "ocm/npmPackage"
@@ -56,7 +53,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	}
 
 	// read package.json from tarball to get name, version, etc.
-	log := logging.Context().Logger(npmCredentials.REALM)
+	log := logging.Context().Logger(npmLogin.REALM)
 	log.Debug("reading package.json from tarball")
 	var pkg *Package
 	pkg, err = prepare(data)
@@ -68,37 +65,8 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	log = log.WithValues("package", pkg.Name, "version", pkg.Version)
 	log.Debug("identified")
 
-	// get credentials and TODO cache it
-	cred := npmCredentials.GetCredentials(ctx.GetContext(), b.spec.Url, pkg.Name)
-	if cred == nil {
-		return nil, fmt.Errorf("No credentials found for %s. Couldn't upload '%s'.", b.spec.Url, pkg.Name)
-	}
-	log.Debug("found credentials")
-
-	// check if token exists, if not login and retrieve token
-	token := cred[npmCredentials.ATTR_TOKEN]
-	if token == "" {
-		// use user+pass+mail from credentials to login and retrieve bearer token
-		username := cred[npmCredentials.ATTR_USERNAME]
-		password := cred[npmCredentials.ATTR_PASSWORD]
-		email := cred[npmCredentials.ATTR_EMAIL]
-		if username == "" || password == "" || email == "" {
-			return nil, fmt.Errorf("No credentials for %s are invalid. Username, password or email missing! Couldn't upload '%s'.", b.spec.Url, pkg.Name)
-		}
-		log = log.WithValues("user", username, "repo", b.spec.Url)
-		log.Debug("login")
-
-		// TODO: check different kinds of .npmrc content
-		token, err = login(b.spec.Url, username, password, email)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		log.Debug("token found, skipping login")
-	}
-
 	// check if package exists
-	exists, err := packageExists(b.spec.Url, *pkg, token)
+	exists, err := packageExists(b.spec.Url, *pkg, ctx.GetContext())
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +99,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("authorization", "Bearer "+token)
-	req.Header.Set("content-type", "application/json")
+	err = npmLogin.Authorize(req, ctx.GetContext(), b.spec.Url, pkg.Name)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
 
 	// send PUT request - upload tgz
 	client := http.Client{}
@@ -151,4 +122,51 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	}
 	log.Debug("successfully uploaded")
 	return npm.New(b.spec.Url, pkg.Name, pkg.Version), nil
+}
+
+// Check if package already exists in npm registry. If it does, checks if it's the same.
+func packageExists(repoUrl string, pkg Package, ctx crds.ContextProvider) (bool, error) {
+	client := http.Client{}
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, repoUrl+"/"+url.PathEscape(pkg.Name)+"/"+url.PathEscape(pkg.Version), nil)
+	if err != nil {
+		return false, err
+	}
+	err = npmLogin.Authorize(req, ctx, repoUrl, pkg.Name)
+	if err != nil {
+		return false, err
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		// artifact doesn't exist, it's safe to upload
+		return false, nil
+	}
+
+	// artifact exists, let's check if it's the same
+	all, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return false, fmt.Errorf("http (%d) - %s", resp.StatusCode, string(all))
+	}
+	var data map[string]interface{}
+	err = json.Unmarshal(all, &data)
+	if err != nil {
+		return false, err
+	}
+	dist := data["dist"].(map[string]interface{})
+	if pkg.Dist.Integrity == dist["integrity"] {
+		// sha-512 sum is the same, we can skip the upload
+		return true, nil
+	}
+	if pkg.Dist.Shasum == dist["shasum"] {
+		// sha-1 sum is the same, we can skip the upload
+		return true, nil
+	}
+
+	return false, fmt.Errorf("artifact already exists but has different shasum or integrity")
 }

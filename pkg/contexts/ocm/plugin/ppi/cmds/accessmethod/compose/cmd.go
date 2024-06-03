@@ -1,18 +1,15 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package compose
 
 import (
 	"encoding/json"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -78,7 +75,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	k, v := runtime.KindVersion(opts.Name)
 	m := p.GetAccessMethod(k, v)
 	if m == nil {
-		return errors.ErrUnknown(errors.KIND_ACCESSMETHOD, opts.Name)
+		return errors.ErrUnknown(errkind.KIND_ACCESSMETHOD, opts.Name)
 	}
 	err := opts.Options.ConvertFor(m.Options()...)
 	if err != nil {

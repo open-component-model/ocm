@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func FileInfo(ctx clictx.Context, path string, inputFilePath string) (os.FileInfo, string, error) {

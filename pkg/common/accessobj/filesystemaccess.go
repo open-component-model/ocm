@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package accessobj
 
 import (
@@ -33,6 +29,10 @@ func NewFileSystemBlobAccess(access *AccessObject) *FileSystemBlobAccess {
 
 func (a *FileSystemBlobAccess) Access() *AccessObject {
 	return a.base
+}
+
+func (a *FileSystemBlobAccess) SetReadOnly() {
+	a.base.SetReadOnly()
 }
 
 func (a *FileSystemBlobAccess) IsReadOnly() bool {

@@ -1,19 +1,16 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package repocpi
 
 import (
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/optionutils"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 )
@@ -133,6 +130,11 @@ func (c *componentAccessBridge) AddVersion(cv cpi.ComponentVersionAccess, opts *
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 
 	cvbridge, err := GetComponentVersionAccessBridge(cv)
+	if err != nil {
+		return err
+	}
+
+	err = compdesc.Validate(cv.GetDescriptor())
 	if err != nil {
 		return err
 	}

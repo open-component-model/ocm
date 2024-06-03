@@ -1,24 +1,21 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package plugin_test
 
 import (
-	"bytes"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/mandelsoft/goutils/transformer"
+	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 )
 
 const ARCH = "/tmp/ca"
@@ -27,18 +24,10 @@ const COMP = "test.de/x"
 const PROVIDER = "acme.org"
 
 var _ = Describe("Test Environment", func() {
-	var env *TestEnv
+	var env *Environment
 
 	BeforeEach(func() {
-		env = NewTestEnv()
-		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-			env.Component(COMP, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-				})
-			})
-		})
-		env.RSAKeyPair(PROVIDER)
+		env = NewEnvironment(TestData())
 
 		ctx := env.OCMContext()
 		plugindirattr.Set(ctx, "testdata")
@@ -52,18 +41,30 @@ var _ = Describe("Test Environment", func() {
 		env.Cleanup()
 	})
 
-	It("adds entry by plugin option", func() {
-		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("add", "routingslip", ARCH, PROVIDER, "test", "--accessPath", "some path", "--mediaType", "media type")).To(Succeed())
-		Expect(buf.String()).To(StringEqualTrimmedWithContext(
-			`
+	It("handles plugin based entry type", func() {
+		prov := routingslip.For(env.OCMContext()).CreateConfigTypeSetConfigProvider()
+		configopts := prov.CreateOptions()
+		Expect(sliceutils.Transform(configopts.Options(), transformer.GetName[flagsets.Option, string])).To(ConsistOf(
+			"entry", "comment", // default settings
+			"mediaType", "accessPath", // by plugin
+		))
+
+		fs := &pflag.FlagSet{}
+		fs.SortFlags = true
+		configopts.AddFlags(fs)
+		Expect("\n" + fs.FlagUsages()).To(Equal(`
+      --accessPath string   file path
+      --comment string      comment field value
+      --entry YAML          routing slip entry specification (YAML)
+      --mediaType string    media type for artifact blob representation
 `))
-		repo := Must(ctf.Open(env, accessobj.ACC_READONLY, ARCH, 0, env))
-		defer Close(repo, "repo")
-		cv := Must(repo.LookupComponentVersion(COMP, VERSION))
-		defer Close(cv, "cv")
-		slip := Must(routingslip.GetSlip(cv, PROVIDER))
-		Expect(slip.Len()).To(Equal(1))
-		Expect(Must(slip.Get(0).Payload.Evaluate(env.OCMContext())).Describe(env.OCMContext())).To(Equal("a test"))
+		MustBeSuccessful(fs.Parse([]string{"--accessPath", "some path", "--" + options.MediatypeOption.GetName(), "media type"}))
+		prov.SetTypeName("test")
+		data := Must(prov.GetConfigFor(configopts))
+		Expect(data).To(YAMLEqual(`
+type: test
+mediaType: media type
+path: some path
+`))
 	})
 })

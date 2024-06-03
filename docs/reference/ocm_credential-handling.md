@@ -128,7 +128,7 @@ The following credential consumer types are used/supported:
       - <code>scheme</code>: (optional) URL scheme
       - <code>port</code>: (optional) server port
       - <code>namespace</code>: vault namespace
-      - <code>secretEngine</code>: secret engine
+      - <code>mountPath</code>: mount path
       - <code>pathprefix</code>: path prefix for secret
 
 
@@ -137,7 +137,6 @@ The following credential consumer types are used/supported:
       - <code>authmeth</code>: auth method
       - <code>token</code>: vault token
       - <code>roleid</code>: applrole role id
-      - <code>secretid</code>: applrole secret id
       - <code>secretid</code>: applrole secret id
 
     The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
@@ -157,6 +156,30 @@ The following credential consumer types are used/supported:
       - <code>certificateAuthority</code>: TLS certificate authority
 
 
+  - <code>MavenRepository</code>: MVN repository
+
+    It matches the <code>MavenRepository</code> consumer type and additionally acts like
+    the <code>hostpath</code> type.
+
+    Credential consumers of the consumer type MavenRepository evaluate the following credential properties:
+
+      - <code>username</code>: the basic auth user name
+      - <code>password</code>: the basic auth password
+
+
+  - <code>NpmRegistry</code>: NPM registry
+
+    It matches the <code>NpmRegistry</code> consumer type and additionally acts like
+    the <code>hostpath</code> type.
+
+    Credential consumers of the consumer type NpmRegistry evaluate the following credential properties:
+
+      - <code>username</code>: the basic auth user name
+      - <code>password</code>: the basic auth password
+      - <code>email</code>: NPM registry, require an email address
+      - <code>token</code>: the token attribute. May exist after login at any npm registry. Check your .npmrc file!
+
+
   - <code>OCIRegistry</code>: OCI registry credential matcher
 
     It matches the <code>OCIRegistry</code> consumer type and additionally acts like
@@ -168,19 +191,6 @@ The following credential consumer types are used/supported:
       - <code>password</code>: the basic auth password
       - <code>identityToken</code>: the bearer token used for non-basic auth authorization
       - <code>certificateAuthority</code>: the certificate authority certificate used to verify certificates
-
-
-  - <code>Registry.npmjs.com</code>: NPM repository
-
-    It matches the <code>Registry.npmjs.com</code> consumer type and additionally acts like
-    the <code>hostpath</code> type.
-
-    Credential consumers of the consumer type Registry.npmjs.com evaluate the following credential properties:
-
-      - <code>username</code>: the basic auth user name
-      - <code>password</code>: the basic auth password
-      - <code>email</code>: NPM registry, require an email address
-      - <code>token</code>: the token attribute. May exist after login at any npm registry. Check your .npmrc file!
 
 
   - <code>S3</code>: S3 credential matcher
@@ -248,6 +258,16 @@ behaviours are described in the following list:
 
 ### Credential Providers
 
+Credential providers offer sets of named credentials from variuos sources,
+which might be directly mapped to consumer identities (if supported
+by the provider type).
+
+The type <code>Credentials</code> can be used to inline
+credentials in credential configuration objects
+to configure mappings of consumer identities to a credential
+set (see [ocm configfile](ocm_configfile.md)).
+
+The following types are currently available:
 
 - Credential provider <code>Credentials</code>
 
@@ -305,7 +325,7 @@ behaviours are described in the following list:
     - <code>scheme</code>: (optional) URL scheme
     - <code>port</code>: (optional) server port
     - <code>namespace</code>: vault namespace
-    - <code>secretEngine</code>: secret engine
+    - <code>mountPath</code>: mount path
     - <code>pathprefix</code>: path prefix for secret
 
 
@@ -314,7 +334,6 @@ behaviours are described in the following list:
     - <code>authmeth</code>: auth method
     - <code>token</code>: vault token
     - <code>roleid</code>: applrole role id
-    - <code>secretid</code>: applrole secret id
     - <code>secretid</code>: applrole secret id
 
   The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
@@ -325,7 +344,7 @@ behaviours are described in the following list:
     The repository specification supports the following fields:
       - <code>serverURL</code>: *string* (required): the URL of the vault instance
       - <code>namespace</code>: *string* (optional): the namespace used to evaluate secrets
-      - <code>secretsEngine</code>: *string* (optional): the secrets engine to use (default: secrets)
+      - <code>mountPath</code>: *string* (optional): the mount path to use (default: secrets)
       - <code>path</code>: *string* (optional): the path prefix used to lookup secrets
       - <code>secrets</code>: *[]string* (optional): list of secrets
       - <code>propagateConsumerIdentity</code>: *bool*(optional): evaluate metadata for consumer id propagation
@@ -355,4 +374,10 @@ behaviours are described in the following list:
 ##### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+
+
+
+##### Additional Links
+
+* [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
 

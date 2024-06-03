@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package grammar
 
 import (
@@ -11,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	tool "github.com/open-component-model/ocm/pkg/regex"
+	tool "github.com/mandelsoft/goutils/regexutils"
 )
 
 func TestConfig(t *testing.T) {

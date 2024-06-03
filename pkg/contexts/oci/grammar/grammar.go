@@ -1,13 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package grammar
 
 import (
 	"strings"
 
-	. "github.com/open-component-model/ocm/pkg/regex"
+	. "github.com/mandelsoft/goutils/regexutils"
 )
 
 const (
@@ -50,14 +46,14 @@ var (
 	// repository name components.
 	RepositorySeparatorRegexp = Literal(RepositorySeparator)
 
-	// alphaNumericRegexp defines the alpha numeric atom, typically a
+	// AlphaNumericRegexp defines the alpha numeric atom, typically a
 	// component of names. This only allows lower case characters and digits.
 	AlphaNumericRegexp = Match(`[a-z0-9]+`)
 
-	// separatorRegexp defines the separators allowed to be embedded in name
+	// SeparatorRegexp defines the separators allowed to be embedded in name
 	// components. This allow one period, one or two underscore and multiple
 	// dashes.
-	separatorRegexp = Match(`(?:[._]|__|[-]*)`)
+	SeparatorRegexp = Match(`(?:[._]|__|[-]*)`)
 
 	// dockerOrgSeparatorRegexp defines the separators allowed to be
 	// embedded in a docker organization name.
@@ -76,7 +72,7 @@ var (
 	// separated by one period, one or two underscore and multiple dashes.
 	NameComponentRegexp = Sequence(
 		AlphaNumericRegexp,
-		Optional(Repeated(separatorRegexp, AlphaNumericRegexp)))
+		Optional(Repeated(SeparatorRegexp, AlphaNumericRegexp)))
 
 	// DomainComponentRegexp restricts the registry domain component of a
 	// repository name to start with a component as defined by DomainPortRegexp
@@ -84,6 +80,10 @@ var (
 	DomainComponentRegexp = Match(`(?:[a-zA-Z0-9]|(?:[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]))`)
 
 	IPRegexp = Sequence(Match("[0-9]+"), Literal(`.`), Match("[0-9]+"), Literal(`.`), Match("[0-9]+"), Literal(`.`), Match("[0-9]+"))
+
+	SchemeRegexp = Sequence(Capture(Match("[a-z]+")), Literal(`://`))
+
+	AnchoredSchemedRegexp = Anchored(Optional(SchemeRegexp), Capture(Match(".*")))
 
 	// DomainRegexp defines the structure of potential domain components
 	// that may be part of image names. This is purposely a subset of what is
@@ -101,10 +101,47 @@ var (
 		DomainRegexp,
 		Optional(Literal(`:`), Match(`[0-9]+`)))
 
+	// SchemeDomainPortRegexp defines the structure of potential domain components
+	// that may be part of image names. This is purposely a subset of what is
+	// allowed by DNS to ensure backwards compatibility with Docker image
+	// names followed by an optional port part.
+	SchemeDomainPortRegexp = Sequence(
+		Optional(SchemeRegexp),
+		Capture(DomainPortRegexp))
+
 	// HostPortRegexp describes a non-DNS simple hostname like localhost.
 	HostPortRegexp = Sequence(
 		Or(DomainComponentRegexp, IPRegexp),
 		Optional(Literal(`:`), Match(`[0-9]+`)))
+
+	// SchemedHostPortRegexp describes a non-DNS simple hostname with scheme like https://localhost.
+	SchemedHostPortRegexp = Sequence(
+		SchemeRegexp,
+		Capture(HostPortRegexp))
+
+	SchemeHostPortRegexp = Sequence(
+		Optional(SchemeRegexp),
+		Capture(ReqHostPortRegexp))
+
+	// SchemedHostPortArtifactRegexp describes a non-DNS simple hostname with scheme like https://localhost/repository:1.0.0 with the scheme being required.
+	AnchoredTypedSchemedHostPortArtifactRegexp = Anchored(Sequence(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Optional(SchemeRegexp),
+		Capture(Or(HostPortRegexp, DomainPortRegexp)),
+		Literal("/"),
+		Literal("/"),
+		CapturedArtifactVersionRegexp))
+
+	ReqHostPortRegexp = Sequence(
+		Or(DomainComponentRegexp, IPRegexp),
+		Literal(`:`), Match(`[0-9]+`))
+
+	AnchoredTypedOptSchemedReqHostReqPortArtifactRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Optional(SchemeRegexp),
+		Capture(ReqHostPortRegexp),
+		Match(RepositorySeparator),
+		Optional(CapturedArtifactVersionRegexp))
 
 	PathRegexp = Sequence(
 		Optional(Literal("/")),
@@ -124,7 +161,7 @@ var (
 	// DigestRegexp matches valid digests.
 	DigestRegexp = Match(`[A-Za-z][A-Za-z0-9]*(?:[-_+.][A-Za-z][A-Za-z0-9]*)*[:][[:xdigit:]]{32,}`)
 
-	// RepositoryRegexp is the format of a repository ppart of references.
+	// RepositoryRegexp is the format of a repository part of references.
 	RepositoryRegexp = Sequence(
 		NameComponentRegexp,
 		Optional(Repeated(RepositorySeparatorRegexp, NameComponentRegexp)))

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package plugincacheattr
 
 import (
@@ -18,7 +14,8 @@ const (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Get(ctx ocm.Context) plugins.Set {
+func Get(ctxp ocm.ContextProvider) plugins.Set {
+	ctx := ctxp.OCMContext()
 	path := plugindirattr.Get(ctx)
 
 	// avoid dead lock reading attribute during attribute creation

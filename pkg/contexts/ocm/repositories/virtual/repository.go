@@ -1,10 +1,7 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package virtual
 
 import (
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
 )
@@ -18,9 +15,9 @@ type RepositoryImpl struct {
 
 var _ repocpi.RepositoryImpl = (*RepositoryImpl)(nil)
 
-func NewRepository(ctx cpi.Context, acc Access) cpi.Repository {
+func NewRepository(ctxp cpi.ContextProvider, acc Access) cpi.Repository {
 	impl := &RepositoryImpl{
-		ctx:    ctx,
+		ctx:    datacontext.InternalContextRef(ctxp.OCMContext()),
 		access: acc,
 	}
 	return repocpi.NewRepository(impl, "OCM repo[Simple]")
@@ -28,6 +25,14 @@ func NewRepository(ctx cpi.Context, acc Access) cpi.Repository {
 
 func (r *RepositoryImpl) Close() error {
 	return r.access.Close()
+}
+
+func (r *RepositoryImpl) IsReadOnly() bool {
+	return r.access.IsReadOnly()
+}
+
+func (r *RepositoryImpl) SetReadOnly() {
+	r.access.SetReadOnly()
 }
 
 func (r *RepositoryImpl) SetBridge(base repocpi.RepositoryBridge) {

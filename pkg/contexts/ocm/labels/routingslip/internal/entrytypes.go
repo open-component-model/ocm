@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
@@ -10,12 +6,15 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/modern-go/reflect2"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets/flagsetscheme"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -42,14 +41,18 @@ type (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type EntryTypeScheme = flagsetscheme.TypeScheme[Entry, EntryType]
+type EntryTypeScheme = flagsetscheme.ExtendedTypeScheme[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider]
+
+func unwrapTypeScheme(s EntryTypeScheme) flagsetscheme.TypeScheme[Entry, EntryType] {
+	return s.Unwrap()
+}
 
 func NewEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
-	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", &UnknownEntry{}, true, base...)
+	return flagsetscheme.NewTypeSchemeWrapper[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider](flagsetscheme.NewTypeScheme[Entry, EntryType, flagsetscheme.TypeScheme[Entry, EntryType]]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", &UnknownEntry{}, true, sliceutils.Transform(base, unwrapTypeScheme)...))
 }
 
 func NewStrictEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
-	return flagsetscheme.NewTypeScheme[Entry, EntryType, EntryTypeScheme]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", nil, false, base...)
+	return flagsetscheme.NewTypeSchemeWrapper[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider](flagsetscheme.NewTypeScheme[Entry, EntryType, flagsetscheme.TypeScheme[Entry, EntryType]]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", nil, false, sliceutils.Transform(base, unwrapTypeScheme)...))
 }
 
 func CreateEntry(t runtime.TypedObject) (Entry, error) {
@@ -72,7 +75,7 @@ func (_ *UnknownEntry) IsUnknown() bool {
 }
 
 func (u *UnknownEntry) Describe(ctx Context) string {
-	keys := utils.StringMapKeys(u.Object)
+	keys := maputils.OrderedKeys(u.Object)
 	cnt := 0
 	desc := []string{}
 	delta := 0
@@ -142,7 +145,7 @@ func ToGenericEntry(spec Entry) (*GenericEntry, error) {
 }
 
 func NewGenericEntry(data []byte, unmarshaler ...runtime.Unmarshaler) (Entry, error) {
-	return generics.AsE[Entry](newGenericEntry(data, utils.Optional(unmarshaler...)))
+	return generics.CastPointerR[Entry](newGenericEntry(data, utils.Optional(unmarshaler...)))
 }
 
 func newGenericEntry(data []byte, unmarshaler runtime.Unmarshaler) (*GenericEntry, error) {

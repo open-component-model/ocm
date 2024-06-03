@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package signingattr
 
 import (
@@ -10,13 +6,13 @@ import (
 	"encoding/json"
 	"encoding/pem"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"golang.org/x/exp/slices"
 
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/rootcertsattr"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
@@ -210,10 +206,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	t, ok := target.(Context)
 	if !ok {
 		if t, ok := target.(datacontext.AttributesContext); ok {
-			// datacontext.Context is implemented by all context types.
-			// Therefore, we have to check for the root context, this is the one
-			// identical to the attributes context of a context.
-			if t.AttributesContext() == t {
+			if t.AttributesContext().IsAttributesContext() {
 				return errors.Wrapf(a.ApplyToRootCertsAttr(rootcertsattr.Get(t)), "applying config to certattr failed")
 			}
 		}

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package localize_test
 
 import (
@@ -130,7 +126,7 @@ values:
 		fs := memoryfs.New()
 		err := localize.Instantiate(rules, cv, nil, config, fs, RESOURCE_TYPE)
 		Expect(err).To(Succeed())
-		CheckFile("dir/manifest1.yaml", fs, `
+		CheckYAMLFile("dir/manifest1.yaml", fs, `
 manifest:
   value1: ghcr.io/mandelsoft/test:v1
   value2: mine

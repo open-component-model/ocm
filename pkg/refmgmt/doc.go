@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 // Package refmgmt provides a simple wrapper, which can be used
 // to map a closable object type into an interface supporting reference
 // counting and supporting a Dup() method.

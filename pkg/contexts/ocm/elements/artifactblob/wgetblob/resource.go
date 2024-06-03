@@ -1,23 +1,20 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package wgetblob
 
 import (
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/optionutils"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess/wget"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 )
 
 const TYPE = resourcetypes.BLOB
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, url string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(append([]Option{WithCredentialContext(ctx), WithLoggingContext(ctx)}, opts...)...)
+	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithCredentialContext(ctx))...)
 
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)
@@ -26,7 +23,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, u
 	blobprov := wget.BlobAccessProviderForWget(url, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, eff.Hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
-	return cpi.NewArtifactAccessForProvider(generics.As[*M](meta), accprov)
+	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), accprov)
 }
 
 func ResourceAccess(ctx ocm.Context, meta *ocm.ResourceMeta, url string, opts ...Option) cpi.ResourceAccess {

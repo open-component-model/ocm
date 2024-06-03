@@ -183,6 +183,41 @@ shown below.
 
   Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
 
+- Access type <code>maven</code>
+
+  This method implements the access of a Maven artifact in a Maven repository.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The type specific specification fields are:
+
+    - **<code>repoUrl</code>** *string*
+
+      URL of the Maven repository
+
+    - **<code>groupId</code>** *string*
+
+      The groupId of the Maven artifact
+
+    - **<code>artifactId</code>** *string*
+
+      The artifactId of the Maven artifact
+
+    - **<code>version</code>** *string*
+
+      The version name of the Maven artifact
+
+    - **<code>classifier</code>** *string*
+
+      The optional classifier of the Maven artifact
+
+    - **<code>extension</code>** *string*
+
+      The optional extension of the Maven artifact
+
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--artifactId</code>, <code>--classifier</code>, <code>--extension</code>, <code>--groupId</code>
+
 - Access type <code>none</code>
 
   dummy resource with no access
@@ -309,6 +344,51 @@ shown below.
       The media type of the content
 
   Options used to configure fields: <code>--accessVersion</code>, <code>--bucket</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--region</code>
+
+- Access type <code>wget</code>
+
+  This method implements access to resources stored on an http server.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The <code>url</code> is the url pointing to the http endpoint from which a resource is
+    downloaded. The <code>mimeType</code> can be used to specify the MIME type of the
+    resource.
+
+    This blob type specification supports the following fields:
+    - **<code>url</code>** *string*
+
+    This REQUIRED property describes the url from which the resource is to be
+    downloaded.
+
+    - **<code>mediaType</code>** *string*
+
+    This OPTIONAL property describes the media type of the resource to be
+    downloaded. If omitted, ocm tries to read the mediaType from the Content-Type header
+    of the http response. If the mediaType cannot be set from the Content-Type header as well,
+    ocm tries to deduct the mediaType from the URL. If that is not possible either, the default
+    media type is defaulted to application/octet-stream.
+
+    - **<code>header</code>** *map[string][]string*
+
+    This OPTIONAL property describes the http headers to be set in the http request to the server.
+
+    - **<code>verb</code>** *string*
+
+    This OPTIONAL property describes the http verb (also known as http request method) for the http
+    request. If omitted, the http verb is defaulted to GET.
+
+    - **<code>body</code>** *[]byte*
+
+    This OPTIONAL property describes the http body to be included in the request.
+
+    - **<code>noredirect</code>** *bool*
+
+    This OPTIONAL property describes whether http redirects should be disabled. If omitted,
+    it is defaulted to false (so, per default, redirects are enabled).
+
+  Options used to configure fields: <code>--body</code>, <code>--header</code>, <code>--mediaType</code>, <code>--noredirect</code>, <code>--url</code>, <code>--verb</code>
 
 
 ### SEE ALSO

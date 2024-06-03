@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package version
 
 import (
@@ -11,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+
+	"github.com/open-component-model/ocm"
 )
 
 var (
@@ -19,6 +17,13 @@ var (
 	gitTreeState string
 	buildDate    = "1970-01-01T00:00:00Z"
 )
+
+func init() {
+	if gitVersion == "0.0.0-dev" {
+		// gitVersion = strings.TrimSpace(string(MustAsset("../../VERSION")))
+		gitVersion = strings.TrimSpace(ocm.Version)
+	}
+}
 
 type Info struct {
 	Major        string `json:"major"`
@@ -38,6 +43,16 @@ type Info struct {
 // String returns info as a human-friendly version string.
 func (info Info) String() string {
 	return info.GitVersion
+}
+
+// String returns info as a short semantic version string (0.8.15).
+func (info Info) SemVer() string {
+	return info.Major + "." + info.Minor + "." + info.Patch
+}
+
+// String returns current Release version.
+func Current() string {
+	return Get().SemVer()
 }
 
 // GetInterface returns the overall codebase version. It's for detecting

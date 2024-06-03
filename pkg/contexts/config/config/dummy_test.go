@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package config_test
 
 import (
@@ -50,7 +46,18 @@ func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 		d.applied = append(d.applied, a)
 		return nil
 	}
+	c, ok := target.(*dummyTarget)
+	if ok {
+		c.used = ctx
+		return nil
+	}
 	return cpi.ErrNoContext(DummyType)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type dummyTarget struct {
+	used config.Context
 }
 
 ////////////////////////////////////////////////////////////////////////////////

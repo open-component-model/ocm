@@ -1,15 +1,11 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package registry
 
 import (
 	"strings"
 
+	"github.com/mandelsoft/goutils/set"
 	"golang.org/x/exp/slices"
 
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -80,8 +76,8 @@ func (p *Registry[H, K]) LookupHandler(key K) []H {
 	return p.lookupMedia(key.SetArtifact("", mediatype))
 }
 
-func (p *Registry[H, K]) LookupKeys(key K) generics.Set[K] {
-	found := generics.Set[K]{}
+func (p *Registry[H, K]) LookupKeys(key K) set.Set[K] {
+	found := set.New[K]()
 
 	if len(p.LookupHandler(key)) > 0 {
 		found.Add(key)

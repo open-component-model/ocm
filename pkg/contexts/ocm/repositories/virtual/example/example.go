@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package example
 
 import (
@@ -12,6 +8,8 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -22,8 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/virtual"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +27,7 @@ import (
 func NewRepository(ctx cpi.ContextProvider, fs vfs.FileSystem, readonly bool, path ...string) (cpi.Repository, error) {
 	var err error
 
-	p := utils.Optional(path...)
+	p := general.Optional(path...)
 	if p != "" && p != "/" {
 		fs, err = projectionfs.New(fs, p)
 		if err != nil {
@@ -68,6 +64,10 @@ func NewAccess(fs vfs.FileSystem, readonly bool) (*Access, error) {
 
 func (a *Access) IsReadOnly() bool {
 	return a.readonly
+}
+
+func (a *Access) SetReadOnly() {
+	a.readonly = true
 }
 
 func (a *Access) Reset() error {
@@ -140,7 +140,7 @@ func (a *Access) GetComponentVersion(comp, version string) (virtual.VersionAcces
 	} else {
 		cd = i.CD()
 	}
-	return &VersionAccess{a, cd.GetName(), cd.GetVersion(), cd.Copy()}, nil
+	return &VersionAccess{a, cd.GetName(), cd.GetVersion(), a.readonly, cd.Copy()}, nil
 }
 
 func (a *Access) Close() error {
@@ -150,10 +150,11 @@ func (a *Access) Close() error {
 var _ virtual.Access = (*Access)(nil)
 
 type VersionAccess struct {
-	access *Access
-	comp   string
-	vers   string
-	desc   *compdesc.ComponentDescriptor
+	access   *Access
+	comp     string
+	vers     string
+	readonly bool
+	desc     *compdesc.ComponentDescriptor
 }
 
 func (v *VersionAccess) GetDescriptor() *compdesc.ComponentDescriptor {
@@ -219,7 +220,11 @@ func (v *VersionAccess) Close() error {
 }
 
 func (v *VersionAccess) IsReadOnly() bool {
-	return v.access.readonly
+	return v.readonly || v.access.readonly
+}
+
+func (v *VersionAccess) SetReadOnly() {
+	v.readonly = true
 }
 
 func (v *VersionAccess) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {

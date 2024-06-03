@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package accessmethods
 
 import (
@@ -11,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/cmds/demoplugin/common"
 	"github.com/open-component-model/ocm/cmds/demoplugin/config"
@@ -20,7 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -104,7 +100,11 @@ func (a *AccessMethod) ComposeAccessSpecification(p ppi.Plugin, opts ppi.Config,
 func (a *AccessMethod) Reader(p ppi.Plugin, spec ppi.AccessSpec, creds credentials.Credentials) (io.ReadCloser, error) {
 	my := spec.(*AccessSpec)
 
-	cfg, _ := p.GetConfig()
+	cfg, err := p.GetConfig()
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't get config for access method %s", my.MediaType)
+	}
+
 	root := os.TempDir()
 	if cfg != nil && cfg.(*config.Config).AccessMethods.Path != "" {
 		root = cfg.(*config.Config).Uploaders.Path

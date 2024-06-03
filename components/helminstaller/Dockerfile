@@ -1,9 +1,9 @@
-FROM --platform=$BUILDPLATFORM golang:1.21 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.22 AS builder
 ARG COMMIT EFFECTIVE_VERSION GIT_TREE_STATE
 ARG TARGETOS TARGETARCH
 
 WORKDIR /go/src/github.com/open-component-model/ocm/
-COPY go.* ./
+COPY go.* *.go VERSION ./
 COPY pkg pkg
 COPY cmds cmds
 COPY hack/generate-docs hack/generate-docs

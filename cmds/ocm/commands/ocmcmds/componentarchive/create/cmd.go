@@ -1,24 +1,21 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package create
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -26,7 +23,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 var (
@@ -91,7 +87,7 @@ func (o *Command) Complete(args []string) error {
 	o.Version = args[1]
 
 	for _, a := range args[2:] {
-		o.Labels, err = common.AddParsedLabel(o.FileSystem(), o.Labels, a)
+		o.Labels, err = clisupport.AddParsedLabel(o.FileSystem(), o.Labels, a)
 		if err != nil {
 			return err
 		}
@@ -104,7 +100,7 @@ func (o *Command) Complete(args []string) error {
 			o.Provider = a
 			continue
 		}
-		o.ProviderLabels, err = common.AddParsedLabel(o.FileSystem(), o.ProviderLabels, a)
+		o.ProviderLabels, err = clisupport.AddParsedLabel(o.FileSystem(), o.ProviderLabels, a)
 		if err != nil {
 			return err
 		}

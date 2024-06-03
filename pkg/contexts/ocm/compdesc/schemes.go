@@ -1,14 +1,12 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package compdesc
 
 import (
 	"sort"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 )
 
 const DefaultSchemeVersion = "v2"
@@ -74,7 +72,7 @@ func Decode(data []byte, opts ...DecodeOption) (*ComponentDescriptor, error) {
 	}
 	version := DefaultSchemes[scheme]
 	if version == nil {
-		return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, scheme)
+		return nil, errors.ErrNotSupported(errkind.KIND_SCHEMAVERSION, scheme)
 	}
 
 	versioned, err := version.Decode(data, o)
@@ -164,7 +162,7 @@ func Convert(obj *ComponentDescriptor, opts ...EncodeOption) (ComponentDescripto
 	cv := DefaultSchemes[o.SchemaVersion]
 	if cv == nil {
 		if cv == nil {
-			return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, o.SchemaVersion)
+			return nil, errors.ErrNotSupported(errkind.KIND_SCHEMAVERSION, o.SchemaVersion)
 		}
 	}
 	return cv.ConvertFrom(obj)

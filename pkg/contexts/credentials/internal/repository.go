@@ -1,12 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
+	"github.com/mandelsoft/goutils/set"
+
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type Repository interface {
@@ -19,7 +16,7 @@ type Credentials interface {
 	CredentialsSource
 	ExistsProperty(name string) bool
 	GetProperty(name string) string
-	PropertyNames() generics.Set[string]
+	PropertyNames() set.Set[string]
 	Properties() common.Properties
 }
 
@@ -45,7 +42,7 @@ func (c DirectCredentials) GetProperty(name string) string {
 	return c[name]
 }
 
-func (c DirectCredentials) PropertyNames() generics.Set[string] {
+func (c DirectCredentials) PropertyNames() set.Set[string] {
 	return common.Properties(c).Names()
 }
 

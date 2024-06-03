@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package npm_test
 
 import (
@@ -9,15 +5,15 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/mime"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const NPMPATH = "/testdata/registry"
@@ -65,5 +61,21 @@ var _ = Describe("Method", func() {
 		defer m.Close()
 		_, err := m.Reader()
 		Expect(err).To(MatchError(ContainSubstring("SHA-1 digest mismatch: expected 44a77645201d1a8fc5213ace787c220eabbd0967, found 34a77645201d1a8fc5213ace787c220eabbd0967")))
+	})
+
+	It("PackageUrl()", func() {
+		packageUrl := "https://registry.npmjs.org/yargs"
+		acc := npm.New("https://registry.npmjs.org", "yargs", "17.7.1")
+		Expect(acc.PackageUrl()).To(Equal(packageUrl))
+		acc = npm.New("https://registry.npmjs.org/", "yargs", "17.7.1")
+		Expect(acc.PackageUrl()).To(Equal(packageUrl))
+	})
+
+	It("PackageVersionUrl()", func() {
+		packageVersionUrl := "https://registry.npmjs.org/yargs/17.7.1"
+		acc := npm.New("https://registry.npmjs.org", "yargs", "17.7.1")
+		Expect(acc.PackageVersionUrl()).To(Equal(packageVersionUrl))
+		acc = npm.New("https://registry.npmjs.org/", "yargs", "17.7.1")
+		Expect(acc.PackageVersionUrl()).To(Equal(packageVersionUrl))
 	})
 })

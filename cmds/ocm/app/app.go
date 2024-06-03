@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 //go:generate go run -mod=mod ../../../hack/generate-docs ../../../docs/reference
 
 package app
@@ -14,6 +10,7 @@ import (
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -24,7 +21,6 @@ import (
 	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
-	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins"
@@ -45,6 +41,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/hash"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/install"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/list"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/show"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
@@ -61,6 +58,7 @@ import (
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
+	common2 "github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -73,7 +71,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/defaultconfigregistry"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/version"
@@ -94,9 +91,9 @@ type CLIOptions struct {
 }
 
 var desc = `
-The Open Component Model command line client support the work with OCM
+The Open Component Model command line client supports the work with OCM
 artifacts, like Component Archives, Common Transport Archive,
-Component Repositories, and component versions.
+Component Repositories, and Component Versions.
 
 Additionally it provides some limited support for the docker daemon, OCI artifacts and
 registries.
@@ -234,6 +231,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 
 	cmd.AddCommand(check.NewCommand(opts.Context))
 	cmd.AddCommand(get.NewCommand(opts.Context))
+	cmd.AddCommand(list.NewCommand(opts.Context))
 	cmd.AddCommand(create.NewCommand(opts.Context))
 	cmd.AddCommand(add.NewCommand(opts.Context))
 	cmd.AddCommand(sign.NewCommand(opts.Context))

@@ -1,14 +1,12 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package sign
 
 import (
+	"crypto/x509"
 	"crypto/x509/pkix"
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -18,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
@@ -36,6 +33,7 @@ type Command struct {
 
 	pubFile  string
 	rootFile string
+	rootCAs  []string
 
 	stype string
 	priv  signutils.GenericPrivateKey
@@ -72,7 +70,9 @@ $ ocm sign hash key.priv SHA-256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6c
 func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.stype, "algorithm", "S", rsa.Algorithm, "signature algorithm")
 	set.StringVarP(&o.pubFile, "publicKey", "", "", "public key certificate file")
-	set.StringVarP(&o.rootFile, "rootCerts", "", "", "root certificates file")
+	set.StringVarP(&o.rootFile, "rootCerts", "", "", "root certificates file (deprecated)")
+	set.StringArrayVarP(&o.rootCAs, "ca-cert", "", nil, "additional root certificate authorities (for signing certificates)")
+
 }
 
 func (o *Command) Complete(args []string) error {
@@ -106,6 +106,28 @@ func (o *Command) Complete(args []string) error {
 		o.roots, err = signutils.GetCertPool(roots, false)
 		if err != nil {
 			return err
+		}
+	}
+
+	if len(o.rootCAs) > 0 {
+		var list []*x509.Certificate
+		for _, r := range o.rootCAs {
+			data, err := utils2.ReadFile(r, o.FileSystem())
+			if err != nil {
+				return errors.Wrapf(err, "root CA")
+			}
+			certs, err := signutils.GetCertificateChain(data, false)
+			if err != nil {
+				return errors.Wrapf(err, "root CA")
+			}
+			list = append(list, certs...)
+		}
+		if o.roots != nil {
+			for _, c := range list {
+				o.roots.(*x509.CertPool).AddCert(c)
+			}
+		} else {
+			o.roots = list
 		}
 	}
 

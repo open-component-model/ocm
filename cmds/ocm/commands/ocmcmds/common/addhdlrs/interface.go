@@ -1,19 +1,16 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package addhdlrs
 
 import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 // ResourceInput describe the source for the content of
@@ -64,7 +61,7 @@ func (s *sourceInfo) Sub(indices ...interface{}) SourceInfo {
 	}
 	return &sourceInfo{
 		origin:  s.origin,
-		indices: generics.AppendedSlice(s.indices, indices...),
+		indices: sliceutils.CopyAppend(s.indices, indices...),
 	}
 }
 
@@ -101,7 +98,7 @@ type ElementSpec interface {
 // component versions.
 type Element interface {
 	// Source provides info about the source the element has been
-	// derived from. (for example a component.yaml or resources.yaml).
+	// derived from. (for example a component-constructor.yaml or resources.yaml).
 	Source() SourceInfo
 	// Spec provides access to the element specification.
 	Spec() ElementSpec

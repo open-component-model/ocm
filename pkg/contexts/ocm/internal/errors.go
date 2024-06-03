@@ -1,18 +1,16 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 )
 
 const (
-	KIND_COMPONENT        = errors.KIND_COMPONENT
+	KIND_COMPONENT        = errkind.KIND_COMPONENT
 	KIND_COMPONENTVERSION = "component version"
 	KIND_RESOURCE         = "component resource"
 	KIND_SOURCE           = "component source"

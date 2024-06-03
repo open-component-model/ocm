@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package main
 
 import (
@@ -9,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -22,8 +21,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/textblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
@@ -144,7 +141,7 @@ data: some very important data required to understand this component
 		// component version.
 		// The above case could be written as follows, also:
 		res := textblob.ResourceAccess(cv.GetContext(), meta, yamldata,
-			textblob.WithimeType(mime.MIME_YAML))
+			textblob.WithMimeType(mime.MIME_YAML))
 		err = cv.SetResourceAccess(res)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")

@@ -1,15 +1,13 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package virtual_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/layerfs"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -25,12 +23,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/virtual/example"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 var _ = Describe("virtual repo", func() {
-	var env *TestEnv
+	var env *Builder
 	var repo ocm.Repository
 	var access *example.Access
 
@@ -43,7 +40,7 @@ var _ = Describe("virtual repo", func() {
 
 	Context("readonly", func() {
 		BeforeEach(func() {
-			env = NewTestEnv(TestData())
+			env = NewBuilder(TestData())
 			access = Must(example.NewAccess(Must(projectionfs.New(env, "testdata")), true))
 			repo = virtual.NewRepository(env.OCMContext(), access)
 		})
@@ -74,7 +71,7 @@ var _ = Describe("virtual repo", func() {
 
 	Context("modifiable", func() {
 		BeforeEach(func() {
-			env = NewTestEnv(TestData())
+			env = NewBuilder(TestData())
 
 			fs := Must(projectionfs.New(env, "testdata"))
 			fs = layerfs.New(memoryfs.New(), fs)

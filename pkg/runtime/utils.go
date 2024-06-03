@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package runtime
 
 import (
@@ -10,9 +6,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
 	"sigs.k8s.io/yaml"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func MustProtoType(proto interface{}) reflect.Type {
@@ -122,3 +117,21 @@ func CheckSpecification(data []byte) error {
 }
 
 // --- end check ---
+
+func CompleteSpecWithType(typ string, data []byte) ([]byte, error) {
+	var m map[string]interface{}
+	err := DefaultJSONEncoding.Unmarshal(data, &m)
+	if err != nil {
+		return nil, err
+	}
+	if typ != "" {
+		if m["type"] != nil && m["type"] != typ {
+			return nil, fmt.Errorf("type mismatch between type in reference \"%s\" and type in json spec \"%s\"", typ, m["type"])
+		}
+		m["type"] = typ
+		return DefaultJSONEncoding.Marshal(m)
+	} else if m["type"] == nil {
+		return nil, fmt.Errorf("type missing")
+	}
+	return data, nil
+}

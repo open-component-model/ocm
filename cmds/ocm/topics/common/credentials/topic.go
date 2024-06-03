@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package attributes
 
 import (
@@ -133,6 +129,16 @@ behaviours are described in the following list:
 
 ### Credential Providers
 
+Credential providers offer sets of named credentials from variuos sources,
+which might be directly mapped to consumer identities (if supported
+by the provider type).
+
+The type <code>Credentials</code> can be used to inline
+credentials in credential configuration objects
+to configure mappings of consumer identities to a credential
+set (see <CMD>ocm configfile</CMD>).
+
+The following types are currently available:
 ` + ctx.CredentialsContext().RepositoryTypes().Describe(),
 	}
 }

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package uploaders
 
 import (
@@ -11,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/cmds/demoplugin/accessmethods"
 	"github.com/open-component-model/ocm/cmds/demoplugin/common"
@@ -19,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -80,7 +76,11 @@ func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype, hint string, repo pp
 	var file *os.File
 	var err error
 
-	cfg, _ := p.GetConfig()
+	cfg, err := p.GetConfig()
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "can't get config for access method %s", mediatype)
+	}
+
 	root := os.TempDir()
 	if cfg != nil && cfg.(*config.Config).Uploaders.Path != "" {
 		root = cfg.(*config.Config).Uploaders.Path

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package common
 
 import (
@@ -9,13 +5,13 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/set"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
@@ -303,7 +299,7 @@ func DescribeLabelMergeSpecifications(d *descriptor.Descriptor, out common.Print
 type ValueSetInfo struct {
 	Name        string
 	Description string
-	Purposes    generics.Set[string]
+	Purposes    set.Set[string]
 	Versions    map[string]*ValueSetVersion
 }
 
@@ -322,7 +318,7 @@ func GetValueSetInfo(valuesets []descriptor.ValueSetDescriptor) map[string]*Valu
 				Name:        m.Name,
 				Description: m.Description,
 				Versions:    map[string]*ValueSetVersion{},
-				Purposes:    generics.NewSet(m.Purposes...),
+				Purposes:    set.New(m.Purposes...),
 			}
 			found[m.Name] = i
 		} else {

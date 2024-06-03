@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package options
 
 // HintOption.
@@ -21,6 +17,12 @@ var ReferenceOption = RegisterOption(NewStringOptionType("reference", "reference
 
 // PackageOption.
 var PackageOption = RegisterOption(NewStringOptionType("accessPackage", "package or object name"))
+
+// ArtifactOption.
+var ArtifactOption = RegisterOption(NewStringOptionType("artifactId", "maven artifact id"))
+
+// GroupOption.
+var GroupOption = RegisterOption(NewStringOptionType("groupId", "maven group id"))
 
 // RepositoryOption.
 var RepositoryOption = RegisterOption(NewStringOptionType("accessRepository", "repository URL"))
@@ -57,7 +59,11 @@ var HTTPBodyOption = RegisterOption(NewStringOptionType("body", "body of a http 
 
 var HTTPRedirectOption = RegisterOption(NewBoolOptionType("noredirect", "http redirect behavior"))
 
-////////////////////////////////////////////////////////////////////////////////
-
 // CommentOption.
 var CommentOption = RegisterOption(NewStringOptionType("comment", "comment field value"))
+
+// ClassifierOption the optional classifier of a maven resource.
+var ClassifierOption = RegisterOption(NewStringOptionType("classifier", "maven classifier"))
+
+// ExtensionOption the optional extension of a maven resource.
+var ExtensionOption = RegisterOption(NewStringOptionType("extension", "maven extension name"))

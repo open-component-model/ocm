@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package output
 
 import (
@@ -11,10 +7,10 @@ import (
 
 	. "github.com/open-component-model/ocm/pkg/out"
 
+	"github.com/mandelsoft/goutils/errors"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Object = interface{}

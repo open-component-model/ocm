@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package genericocireg_test
 
 import (
@@ -13,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
@@ -47,7 +44,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	ocmtesthelper "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
@@ -77,6 +73,15 @@ var _ = Describe("component repository mapping", func() {
 
 	AfterEach(func() {
 		vfs.Cleanup(tempfs)
+	})
+
+	It("Don't Panik! When it's not a semver.org conform version. #756", func() {
+		repo := Must(DefaultContext.RepositoryForSpec(spec))
+		comp := Must(repo.LookupComponent(COMPONENT))
+		cva, err := comp.NewVersion("v1.two.zeo-2")
+		Expect(err).To(HaveOccurred())
+		Expect(cva).To(BeNil())
+		Expect(err.Error()).To(Equal("Invalid Semantic Version"))
 	})
 
 	It("creates a dummy component", func() {

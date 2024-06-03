@@ -1,0 +1,24 @@
+kind: Component
+metadata:
+  name: ocm-core
+  displayName: OCM Core Library
+  description: OCM Core Library
+  labels:
+    language: go
+  tags:
+    - ocm
+    - open-source
+    - inner-source
+spec:
+  type:
+    name: Library
+    lifecycle: production
+  team:
+    name: ocm
+  logo: https://ocm.software/images/logo-image.png
+  docs:
+    techDocsLinks:
+      - name: OCM Core Library
+        url: https://github.com/open-component-model/ocm#ocm-library
+        icon: .sa-icon--sys-help-2
+        description: OCM Core Library

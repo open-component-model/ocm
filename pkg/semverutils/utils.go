@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package semverutils
 
 import (
@@ -9,8 +5,7 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
-
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 // MatchVersionStrings returns an ordered list of versions filtered by the given

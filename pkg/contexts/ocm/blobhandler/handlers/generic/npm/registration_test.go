@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package npm_test
 
 import (
@@ -21,7 +17,7 @@ var _ = Describe("Config deserialization Test Environment", func() {
 	})
 
 	It("deserializes struct", func() {
-		cfg := Must(registrations.DecodeConfig[npm.Config](`{"Url":"test"}`))
+		cfg := Must(registrations.DecodeConfig[npm.Config](`{"url":"test"}`))
 		Expect(cfg).To(Equal(&npm.Config{Url: "test"}))
 	})
 })

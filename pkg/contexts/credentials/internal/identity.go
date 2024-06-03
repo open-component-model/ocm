@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
@@ -105,6 +101,10 @@ func NewConsumerIdentity(typ string, attrs ...string) ConsumerIdentity {
 		i += 2
 	}
 	return r
+}
+
+func ConsumerIdentityEqual(a, b ConsumerIdentity) bool {
+	return a.Equals(b)
 }
 
 // IsSet checks whether an identity is given.

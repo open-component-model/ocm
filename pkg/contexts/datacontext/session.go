@@ -1,15 +1,12 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package datacontext
 
 import (
 	"io"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // Session is a context keeping track of objects requiring a close
@@ -18,6 +15,10 @@ import (
 // Added closers may be closed prio to the session without causing
 // errors.
 type Session interface {
+	// Closer adds a closer returned by a function call providing a closer and an error
+	// to the session if not error is returned. The results of the call are forwarded to
+	// the own result. Unfortunately, Go does not support type parameters for methods,
+	// therefore only an io.Closer can be returned a function result.
 	Closer(closer io.Closer, extra ...interface{}) (io.Closer, error)
 	GetOrCreate(key interface{}, creator func(SessionBase) Session) Session
 	AddCloser(closer io.Closer, callbacks ...accessio.CloserCallback) io.Closer

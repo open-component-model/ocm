@@ -1,13 +1,10 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package ppi
 
 import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
@@ -15,7 +12,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -253,7 +250,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		if m.Version() != "" {
 			n += runtime.VersionSeparator + m.Version()
 		}
-		return errors.ErrAlreadyExists(errors.KIND_ACCESSMETHOD, n)
+		return errors.ErrAlreadyExists(errkind.KIND_ACCESSMETHOD, n)
 	}
 
 	var optlist []CLIOption

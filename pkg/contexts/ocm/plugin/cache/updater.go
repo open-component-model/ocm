@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package cache
 
 import (
@@ -13,6 +9,7 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"sigs.k8s.io/yaml"
@@ -23,7 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/extraid"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
@@ -161,7 +157,10 @@ func (o *PluginUpdater) downloadLatest(session ocm.Session, comp ocm.ComponentAc
 		return errors.Wrapf(err, "no versions found for component %s", comp.GetName())
 	}
 
-	versions, _ := semverutils.MatchVersionStrings(vers, o.Constraints...)
+	versions, err := semverutils.MatchVersionStrings(vers, o.Constraints...)
+	if err != nil {
+		return fmt.Errorf("failed to match version strings for component %s: %w", comp.GetName(), err)
+	}
 	if len(versions) == 0 {
 		return fmt.Errorf("no versions for component %s match the constraints", comp.GetName())
 	}
@@ -195,7 +194,7 @@ func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAcc
 				break
 			}
 			wrong = r
-		} else { //nolint: gocritic // yes
+		} else {
 			if name != "" {
 				wrong = r
 			}

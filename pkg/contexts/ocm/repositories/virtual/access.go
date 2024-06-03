@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package virtual
 
 import (
@@ -17,6 +13,7 @@ type VersionAccess interface {
 	Close() error
 
 	IsReadOnly() bool
+	SetReadOnly()
 	GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string
 }
 
@@ -29,6 +26,7 @@ type Access interface {
 	GetComponentVersion(comp, version string) (VersionAccess, error)
 
 	IsReadOnly() bool
+	SetReadOnly()
 	Close() error
 }
 

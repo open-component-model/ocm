@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package common
 
 import (
@@ -12,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/logging"
+
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Flusher interface {
@@ -58,10 +56,7 @@ func NewPrinter(writer io.Writer) Printer {
 }
 
 func AssurePrinter(p Printer) Printer {
-	if p != nil {
-		return p
-	}
-	return NewPrinter(nil)
+	return utils.OptionalDefaulted(NonePrinter, p)
 }
 
 func NewBufferedPrinter() (Printer, *bytes.Buffer) {

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal_test
 
 import (
@@ -22,7 +18,7 @@ var _ = Describe("builder test", func() {
 		Expect(ctx).NotTo(BeIdenticalTo(local.DefaultContext))
 		Expect(ctx.RepositoryTypes()).To(BeIdenticalTo(local.DefaultRepositoryTypeScheme))
 
-		Expect(ctx.ConfigContext()).To(BeIdenticalTo(config.DefaultContext()))
+		Expect(ctx.ConfigContext().GetId()).To(BeIdenticalTo(config.DefaultContext().GetId()))
 
 		Expect(ctx.CredentialsContext()).To(BeIdenticalTo(credentials.DefaultContext()))
 	})

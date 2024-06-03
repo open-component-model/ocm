@@ -1,13 +1,8 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/modern-go/reflect2"
-
-	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 // CredentialsSource is a factory for effective credentials.
@@ -29,5 +24,5 @@ func (c CredentialsChain) Credentials(ctx Context, creds ...CredentialsSource) (
 	if len(creds) == 0 {
 		return c[0].Credentials(ctx, c[1:]...)
 	}
-	return c[0].Credentials(ctx, generics.AppendedSlice(c[1:], creds...)...)
+	return c[0].Credentials(ctx, sliceutils.CopyAppend(c[1:], creds...)...)
 }

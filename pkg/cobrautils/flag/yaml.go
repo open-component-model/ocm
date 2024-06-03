@@ -1,17 +1,12 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package flag
 
 import (
 	"encoding/json"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
-
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type YAMLValue[T any] struct {

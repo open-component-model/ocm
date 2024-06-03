@@ -1,20 +1,16 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package accessobj
 
 import (
 	"fmt"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // These objects deal with descriptor based state descriptions
@@ -114,6 +110,8 @@ type State interface {
 
 	// Update updates the technical representation in its persistence
 	Update() (bool, error)
+
+	SetReadOnly()
 }
 
 type state struct {
@@ -201,6 +199,10 @@ func NewBlobStateForObject(mode AccessMode, obj interface{}, p StateHandler) (St
 		return nil, err
 	}
 	return NewBlobStateForBlob(mode, blobaccess.ForData("", data), p)
+}
+
+func (s *state) SetReadOnly() {
+	s.mode |= ACC_READONLY
 }
 
 func (s *state) IsReadOnly() bool {

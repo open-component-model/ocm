@@ -1,17 +1,15 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package internal
 
 import (
 	"context"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // OCM_CONFIG_TYPE_SUFFIX is the standard suffix used for configuration
@@ -130,7 +128,10 @@ type _context struct {
 	description string
 }
 
-var _ Context = &_context{}
+var (
+	_ Context                          = (*_context)(nil)
+	_ datacontext.ViewCreator[Context] = (*_context)(nil)
+)
 
 // gcWrapper is used as garbage collectable
 // wrapper for a context implementation
@@ -138,6 +139,13 @@ var _ Context = &_context{}
 type gcWrapper struct {
 	datacontext.GCWrapper
 	*_context
+}
+
+func newView(c *_context, ref ...bool) Context {
+	if utils.Optional(ref...) {
+		return datacontext.FinalizedContext[gcWrapper](c)
+	}
+	return c
 }
 
 func (w *gcWrapper) SetContext(c *_context) {
@@ -153,14 +161,18 @@ func newContext(shared datacontext.AttributesContext, reposcheme ConfigTypeSchem
 		},
 	}
 	c._InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes(), delegates)
-	c.updater = NewUpdater(c, c)
-	datacontext.AssureUpdater(shared, NewUpdater(c, shared))
+	c.updater = NewUpdaterForFactory(c, c.ConfigContext) // provide target as new view to internal context
+	datacontext.AssureUpdater(shared, NewUpdater(c, datacontext.PersistentContextRef(shared)))
 
-	return datacontext.FinalizedContext[gcWrapper](c)
+	return newView(c, true)
+}
+
+func (c *_context) CreateView() Context {
+	return newView(c, true)
 }
 
 func (c *_context) ConfigContext() Context {
-	return c
+	return newView(c)
 }
 
 func (c *_context) Update() error {
@@ -177,7 +189,7 @@ func (c *_context) WithInfo(desc string) Context {
 	if c.description != "" {
 		desc = desc + "--" + c.description
 	}
-	return &_context{c.coreContext, desc}
+	return newView(&_context{c.coreContext, desc})
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
@@ -203,7 +215,9 @@ func (c *_context) GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler
 
 func (c *_context) ApplyConfig(spec Config, desc string) error {
 	var unknown error
-	spec = (&AppliedConfig{config: spec}).eval(c)
+
+	// use temporary view for outbound calls
+	spec = (&AppliedConfig{config: spec}).eval(newView(c))
 	if IsGeneric(spec) {
 		unknown = errors.ErrUnknown(KIND_CONFIGTYPE, spec.GetType())
 	}

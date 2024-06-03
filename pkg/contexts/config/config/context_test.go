@@ -1,22 +1,28 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package config_test
 
 import (
 	"os"
 	"reflect"
+	"runtime"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/mandelsoft/goutils/general"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	local "github.com/open-component-model/ocm/pkg/contexts/config/config"
-	"github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
+
+func CheckRefs(ctx config.Context, n int) {
+	runtime.GC()
+	time.Sleep(time.Second)
+	Expect(datacontext.GetContextRefCount(ctx)).To(Equal(n)) // all temp refs have been finalized
+}
 
 var _ = Describe("generic config handling", func() {
 
@@ -41,6 +47,8 @@ var _ = Describe("generic config handling", func() {
 		Expect(err).To(Succeed())
 		Expect(config.IsGeneric(result)).To(BeFalse())
 		Expect(reflect.TypeOf(result).String()).To(Equal("*config.Config"))
+
+		CheckRefs(cfgctx, 1)
 	})
 
 	It("it applies to existing context", func() {
@@ -57,6 +65,8 @@ var _ = Describe("generic config handling", func() {
 		Expect(len(cfgs)).To(Equal(3))
 
 		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("alice", ""), NewConfig("", "bob")}))
+
+		CheckRefs(cfgctx, 1)
 	})
 
 	It("it applies nested to existing context", func() {
@@ -73,6 +83,8 @@ var _ = Describe("generic config handling", func() {
 		Expect(len(cfgs)).To(Equal(4))
 
 		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("alice", ""), NewConfig("", "bob")}))
+
+		CheckRefs(cfgctx, 1)
 	})
 
 	It("it applies unknown type to existing context", func() {
@@ -82,7 +94,7 @@ var _ = Describe("generic config handling", func() {
 
 		err = cfgctx.ApplyConfig(cfg, "testconfig")
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(testutils.StringEqualWithContext("testconfig: config apply errors: {config entry 0--testconfig: config type \"Dummy\" is unknown, config entry 1--testconfig: config type \"Dummy\" is unknown}"))
+		Expect(err.Error()).To(StringEqualWithContext("testconfig: config apply errors: {config entry 0--testconfig: config type \"Dummy\" is unknown, config entry 1--testconfig: config type \"Dummy\" is unknown}"))
 		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
 		Expect(gen).To(Equal(int64(3)))
 		Expect(len(cfgs)).To(Equal(3))
@@ -90,6 +102,8 @@ var _ = Describe("generic config handling", func() {
 		RegisterAt(scheme)
 		d := newDummy(cfgctx)
 		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("alice", ""), NewConfig("", "bob")}))
+
+		CheckRefs(cfgctx, 1)
 	})
 
 	It("it applies composed config to existing context", func() {
@@ -110,6 +124,8 @@ var _ = Describe("generic config handling", func() {
 		Expect(len(cfgs)).To(Equal(3))
 
 		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("alice", ""), NewConfig("", "bob")}))
+
+		CheckRefs(cfgctx, 1)
 	})
 
 	It("it applies composed config set to existing context", func() {
@@ -138,5 +154,27 @@ var _ = Describe("generic config handling", func() {
 		Expect(gen).To(Equal(int64(3)))
 		Expect(len(cfgs)).To(Equal(3))
 		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("", "bob"), NewConfig("alice", "")}))
+
+		CheckRefs(cfgctx, 1)
+	})
+
+	It("it applies compig to storing target", func() {
+		RegisterAt(scheme)
+		d := newDummy(cfgctx)
+
+		cfg := NewConfig("alice", "")
+
+		err := cfgctx.ApplyConfig(cfg, "testconfig")
+		Expect(err).To(Succeed())
+
+		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("alice", "")}))
+
+		target := dummyTarget{}
+		MustBeSuccessful(cfgctx.ApplyTo(0, &target))
+		Expect(target.used).NotTo(BeNil())
+		Expect(target.used.GetId()).To(Equal(cfgctx.GetId()))
+
+		CheckRefs(cfgctx, general.Conditional(datacontext.MULTI_REF, 2, 1)) // config context stored in target with separate ref
+		target.used.GetId()
 	})
 })

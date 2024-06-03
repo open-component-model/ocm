@@ -1,11 +1,8 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package semverutils
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/Masterminds/semver/v3"
 	"golang.org/x/exp/slices"
@@ -23,6 +20,30 @@ func (c VersionCache) Get(v string) (*semver.Version, error) {
 	}
 	c[v] = s
 	return s, nil
+}
+
+func (c VersionCache) Compare(a, b string) int {
+	va, err := c.Get(a)
+	if err != nil {
+		return strings.Compare(a, b)
+	}
+	vb, err := c.Get(b)
+	if err != nil {
+		return strings.Compare(a, b)
+	}
+	return va.Compare(vb)
+}
+
+func Compare(a, b string) int {
+	va, err := semver.NewVersion(a)
+	if err != nil {
+		return strings.Compare(a, b)
+	}
+	vb, err := semver.NewVersion(b)
+	if err != nil {
+		return strings.Compare(a, b)
+	}
+	return va.Compare(vb)
 }
 
 func SortVersions(vers []string) error {

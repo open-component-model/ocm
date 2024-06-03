@@ -1,19 +1,15 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package accessio
 
 import (
 	"fmt"
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/compression"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -44,7 +40,7 @@ func NopWriteCloser(w io.Writer) io.WriteCloser {
 
 // Deprecated: use iotools.BlobData.
 func AddCloser(reader io.ReadCloser, closer io.Closer, msg ...string) io.ReadCloser {
-	return iotools.AddReaderCloser(reader, closer, generics.ConvertSliceTo[any](msg)...)
+	return iotools.AddReaderCloser(reader, closer, sliceutils.AsAny(msg)...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

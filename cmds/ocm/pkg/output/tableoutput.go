@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package output
 
 import (
@@ -9,9 +5,12 @@ import (
 
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/pkg/semverutils"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type SortFields interface {
@@ -126,7 +125,7 @@ func (this *TableProcessingOutput) Out() error {
 			if n < this.opts.FixedColums {
 				return errors.Newf("field '%s' not possible", k)
 			}
-			cmp := compareColumn(idxs[key])
+			cmp := compareColumn(idxs[key], strings.Contains(strings.ToLower(key), "version"))
 			if this.opts.FixedColums > 0 {
 				sortFixed(this.opts.FixedColums, slice, cmp)
 			} else {
@@ -139,12 +138,23 @@ func (this *TableProcessingOutput) Out() error {
 	return this.ElementOutput.Out()
 }
 
-func compareColumn(c int) CompareFunction {
+// compareColumn returns a compare function for a dedicated output column.
+// if vers is set to true, a semver based comparison is applied, otherwise
+// a regular string comparison.
+func compareColumn(c int, vers ...bool) CompareFunction {
+	if utils.Optional(vers...) {
+		return _compareColumn(c, semverutils.VersionCache{}.Compare)
+	} else {
+		return _compareColumn(c, strings.Compare)
+	}
+}
+
+func _compareColumn(c int, cmp func(a, b string) int) CompareFunction {
 	return func(a interface{}, b interface{}) int {
 		aa := a.([]string)
 		ab := b.([]string)
 		if len(aa) > c && len(ab) > c {
-			return strings.Compare(aa[c], ab[c])
+			return cmp(aa[c], ab[c])
 		}
 		return len(aa) - len(ab)
 	}

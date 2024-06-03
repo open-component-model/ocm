@@ -3,7 +3,7 @@
 ### Synopsis
 
 ```
-ocm add componentversions [<options>] [--version <version>] [<ctf archive>] {<components.yaml>}
+ocm add componentversions [<options>] [--version <version>] [<ctf archive>] {<component-constructor.yaml>}
 ```
 
 ##### Aliases
@@ -36,8 +36,8 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Description
 
 
-Add component versions specified by a description file to a Common Transport
-Archive. This might be either a directory prepared to host component version
+Add component versions specified by a constructor file to a Common Transport
+Archive. The archive might be either a directory prepared to host component version
 content or a tar/tgz file (see option --type).
 
 If option <code>--create</code> is given, the archive is created first. An
@@ -149,11 +149,11 @@ script with the <code>script</code> option family.
 
 
 <pre>
-$ ocm add componentversions &dash;&dash;file ctf &dash;&dash;version 1.0 components.yaml
+$ ocm add componentversions &dash;&dash;file ctf &dash;&dash;version 1.0 component&dash;constructor.yaml
 </pre>
 
 
-and a file <code>components.yaml</code>:
+and a file <code>component-constructor.yaml</code>:
 
 
 <pre>

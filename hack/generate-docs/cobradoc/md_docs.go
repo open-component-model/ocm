@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package cobradoc
 
 import (
@@ -13,10 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-
-	"github.com/mandelsoft/filepath/pkg/filepath"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/cobrautils/groups"

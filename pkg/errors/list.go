@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package errors
 
 import (
@@ -20,6 +16,10 @@ func Join(errs ...error) error {
 type ErrorList struct { //nolint: errname // Intentional naming.
 	msg    string
 	errors []error
+}
+
+func (l *ErrorList) Unwrap() []error {
+	return l.errors
 }
 
 func (l *ErrorList) Error() string {

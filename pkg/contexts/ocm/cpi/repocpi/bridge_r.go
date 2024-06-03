@@ -1,14 +1,11 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package repocpi
 
 import (
 	"io"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -24,6 +21,9 @@ type RepositoryImpl interface {
 	SetBridge(bridge RepositoryBridge)
 
 	GetContext() cpi.Context
+
+	IsReadOnly() bool
+	SetReadOnly()
 
 	GetSpecification() cpi.RepositorySpec
 	ComponentLister() cpi.ComponentLister
@@ -67,6 +67,14 @@ func (b *repositoryBridge) Close() error {
 
 func (b *repositoryBridge) GetContext() cpi.Context {
 	return b.ctx
+}
+
+func (b *repositoryBridge) IsReadOnly() bool {
+	return b.impl.IsReadOnly()
+}
+
+func (b *repositoryBridge) SetReadOnly() {
+	b.impl.SetReadOnly()
 }
 
 func (b *repositoryBridge) Unwrap() interface{} {

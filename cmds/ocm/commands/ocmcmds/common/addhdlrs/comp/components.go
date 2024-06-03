@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package comp
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/set"
+	"github.com/mandelsoft/goutils/sliceutils"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -12,9 +13,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -23,16 +21,16 @@ func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Reposit
 
 	for _, elem := range elems {
 		if r, ok := elem.Spec().(*ResourceSpec); ok {
-			list.Add(addhdlrs.ValidateElementSpecIdentities("resource", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.Resources)))
-			list.Add(addhdlrs.ValidateElementSpecIdentities("source", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.Sources)))
-			list.Add(addhdlrs.ValidateElementSpecIdentities("reference", elem.Source().String(), generics.ConvertSliceTo[addhdlrs.ElementSpec](r.References)))
+			list.Add(addhdlrs.ValidateElementSpecIdentities("resource", elem.Source().String(), sliceutils.Convert[addhdlrs.ElementSpec](r.Resources)))
+			list.Add(addhdlrs.ValidateElementSpecIdentities("source", elem.Source().String(), sliceutils.Convert[addhdlrs.ElementSpec](r.Sources)))
+			list.Add(addhdlrs.ValidateElementSpecIdentities("reference", elem.Source().String(), sliceutils.Convert[addhdlrs.ElementSpec](r.References)))
 		}
 	}
 	if err := list.Result(); err != nil {
 		return err
 	}
 
-	index := generics.Set[common.NameVersion]{}
+	index := set.New[common.NameVersion]()
 	for _, elem := range elems {
 		if r, ok := elem.Spec().(*ResourceSpec); ok {
 			index.Add(common.NewNameVersion(r.Name, r.Version))

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package cpi
 
 // This is the Context Provider Interface for credential providers
@@ -60,6 +56,10 @@ type Updater = internal.Updater
 
 func NewUpdater(ctx Context, target interface{}) Updater {
 	return internal.NewUpdater(ctx, target)
+}
+
+func NewUpdaterForFactory[T any](ctx Context, f func() T) Updater {
+	return internal.NewUpdaterForFactory(ctx, f)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

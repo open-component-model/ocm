@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package genericocireg
 
 import (
@@ -9,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/set"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -27,8 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
@@ -91,6 +88,10 @@ func (c *ComponentVersionContainer) Close() error {
 	return c.access.Close()
 }
 
+func (c *ComponentVersionContainer) SetReadOnly() {
+	c.state.SetReadOnly()
+}
+
 func (c *ComponentVersionContainer) Check() error {
 	if c.version != c.GetDescriptor().Version {
 		return errors.ErrInvalid("component version", c.GetDescriptor().Version)
@@ -137,7 +138,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 		return m, err
 	}
 
-	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "oci registry")
+	return nil, errors.ErrNotSupported(errkind.KIND_ACCESSMETHOD, a.GetType(), "oci registry")
 }
 
 func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
@@ -147,13 +148,15 @@ func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 	}
 
 	switch a.GetKind() {
-	case localblob.Type:
-		return accessSpec.(*localblob.AccessSpec).LocalReference
-	case localociblob.Type:
-		return accessSpec.(*localblob.AccessSpec).LocalReference
+	case localblob.Type, localociblob.Type:
+		if spec, ok := accessSpec.(*localblob.AccessSpec); ok {
+			return spec.LocalReference
+		}
 	case relativeociref.Type:
-		d, _ := accessSpec.(*relativeociref.AccessSpec).GetDigest()
-		return d
+		if spec, ok := accessSpec.(*relativeociref.AccessSpec); ok {
+			d, _ := spec.GetDigest()
+			return d
+		}
 	}
 
 	return ""
@@ -175,7 +178,7 @@ func (c *ComponentVersionContainer) Update() error {
 	if c.state.HasChanged() {
 		logger.Debug("update component version")
 		desc := c.GetDescriptor()
-		layers := generics.Set[int]{}
+		layers := set.Set[int]{}
 		for i := range c.manifest.GetDescriptor().Layers {
 			layers.Add(i)
 		}
@@ -218,7 +221,11 @@ func (c *ComponentVersionContainer) Update() error {
 		}
 
 		logger.Debug("add oci artifact")
-		if _, err := c.comp.namespace.AddArtifact(c.manifest, toTag(c.version)); err != nil {
+		tag, err := toTag(c.version)
+		if err != nil {
+			return err
+		}
+		if _, err := c.comp.namespace.AddArtifact(c.manifest, tag); err != nil {
 			return fmt.Errorf("unable to add artifact: %w", err)
 		}
 	}

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package finalizer_test
 
 import (
@@ -12,7 +8,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
-	"github.com/open-component-model/ocm/pkg/exception"
+	"github.com/mandelsoft/goutils/exception"
+
 	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 

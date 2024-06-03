@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package optionutils
 
 import (
@@ -29,4 +25,11 @@ func ApplyOption[T any](opt *T, tgt **T) {
 	if opt != nil {
 		*tgt = opt
 	}
+}
+
+// GetOptionFlag returns the flag value used to set a bool option
+// based on optionally specified explicit value(s).
+// The default value is to enable the option (true).
+func GetOptionFlag(list ...bool) bool {
+	return utils.OptionalDefaultedBool(true, list...)
 }

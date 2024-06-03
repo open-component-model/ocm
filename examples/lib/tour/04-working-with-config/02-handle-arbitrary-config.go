@@ -1,13 +1,10 @@
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package main
 
 import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	configcfg "github.com/open-component-model/ocm/pkg/contexts/config/config"
@@ -15,7 +12,6 @@ import (
 	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func credConfig(cfg *helper.Config) (config.Config, error) {

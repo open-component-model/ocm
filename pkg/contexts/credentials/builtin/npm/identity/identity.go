@@ -1,11 +1,8 @@
 package identity
 
 import (
-	"path"
+	"net/url"
 
-	. "net/url"
-
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/listformat"
@@ -14,7 +11,7 @@ import (
 
 const (
 	// CONSUMER_TYPE is the npm repository type.
-	CONSUMER_TYPE = "Registry.npmjs.com"
+	CONSUMER_TYPE = "NpmRegistry"
 
 	// ATTR_USERNAME is the username attribute. Required for login at any npm registry.
 	ATTR_USERNAME = cpi.ATTR_USERNAME
@@ -27,7 +24,7 @@ const (
 )
 
 // Logging Realm.
-var REALM = logging.DefineSubRealm("NPM registry", "NPM")
+var REALM = logging.DefineSubRealm("NPM registry", "npm")
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
@@ -37,31 +34,35 @@ func init() {
 		ATTR_TOKEN, "the token attribute. May exist after login at any npm registry. Check your .npmrc file!",
 	})
 
-	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `NPM repository
+	cpi.RegisterStandardIdentity(CONSUMER_TYPE, hostpath.IdentityMatcher(CONSUMER_TYPE), `NPM registry
 
 It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
 the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 		attrs)
 }
 
-func GetConsumerId(rawURL string, pkgName string) cpi.ConsumerIdentity {
-	url, err := Parse(rawURL)
-	if err != nil {
-		return nil
-	}
+var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
 
-	url.Path = path.Join(url.Path, pkgName)
-	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, url.String())
+func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
+	return identityMatcher(pattern, cur, id)
 }
 
-func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) common.Properties {
-	id := GetConsumerId(repoUrl, pkgName)
+func GetConsumerId(rawURL, groupId string) (cpi.ConsumerIdentity, error) {
+	_url, err := url.JoinPath(rawURL, groupId)
+	if err != nil {
+		return nil, err
+	}
+	return hostpath.GetConsumerIdentity(CONSUMER_TYPE, _url), nil
+}
+
+func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) (cpi.Credentials, error) {
+	id, err := GetConsumerId(repoUrl, pkgName)
+	if err != nil {
+		return nil, err
+	}
 	if id == nil {
-		return nil
+		logging.DynamicLogger(REALM).Debug("No consumer identity found.", "url", repoUrl, "groupId", pkgName)
+		return nil, nil
 	}
-	credentials, err := cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
-	if credentials == nil || err != nil {
-		return nil
-	}
-	return credentials.Properties()
+	return cpi.CredentialsForConsumer(ctx.CredentialsContext(), id)
 }

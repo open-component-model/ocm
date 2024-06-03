@@ -122,6 +122,8 @@ jobs:
       id-token: write
       packages: write
     steps:
+    - name: Self Hosted Runner Post Job Cleanup Action
+      uses: TooMuch4U/actions-clean@v2.2
     - name: Generate token
       id: generate_token
       uses: tibdex/github-app-token@v2
@@ -140,10 +142,10 @@ jobs:
         go-version-file: '${{ github.workspace }}/go.mod'
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@b6a39da80722a2cb0ef5d197531764a89b5d48c3 # v0.15.8
+      uses: anchore/sbom-action/download-syft@e8d2a6937ecead383dfe75190d104edd1f9c5751 # v0.16.0
 
     - name: Setup Cosign
-      uses: sigstore/cosign-installer@v3.4.0
+      uses: sigstore/cosign-installer@v3.5.0
 
     - name: Setup git config
       run: |
@@ -191,6 +193,7 @@ jobs:
     - name: Update Release Notes File
       env:
         RELEASE_NOTES: ${{ steps.release-notes.outputs.body }}
+        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }}; then
           >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
@@ -210,8 +213,10 @@ jobs:
         fi
 
     - name: Create and Push Release
+      env:
+        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
-        git checkout --detach HEAD
+        # git checkout --detach HEAD
         echo -n "${RELEASE_VERSION#v}" > VERSION
         git add VERSION
         git commit -m "Release $RELEASE_VERSION"

@@ -3,10 +3,11 @@ package npm
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	npmCredentials "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/npm/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -64,7 +65,7 @@ func (r *Repository) Read(force bool) error {
 	}
 
 	if r.path == "" {
-		return fmt.Errorf("npmrc path not provided")
+		return errors.New("npmrc path not provided")
 	}
 	cfg, path, err := readNpmConfigFile(r.path)
 	if err != nil {

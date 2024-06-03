@@ -1,19 +1,15 @@
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package wget
 
 import (
 	"io"
 	"net/http"
 
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
-	"github.com/open-component-model/ocm/pkg/optionutils"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -67,6 +63,9 @@ func (o *Options) ApplyTo(opts *Options) {
 	}
 	if o.LoggingContext != nil {
 		opts.LoggingContext = o.LoggingContext
+	}
+	if o.Credentials != nil {
+		opts.Credentials = o.Credentials
 	}
 	if o.Header != nil {
 		opts.Header = o.Header

@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package comparch
 
 import (
@@ -9,9 +5,12 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
@@ -19,7 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/repocpi"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -33,7 +32,8 @@ type RepositoryImpl struct {
 
 var _ repocpi.RepositoryImpl = (*RepositoryImpl)(nil)
 
-func NewRepository(ctx cpi.Context, s *RepositorySpec) (cpi.Repository, error) {
+func NewRepository(ctxp cpi.ContextProvider, s *RepositorySpec) (cpi.Repository, error) {
+	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
 	if s.GetPathFileSystem() == nil {
 		s.SetPathFileSystem(vfsattr.Get(ctx))
 	}
@@ -55,6 +55,14 @@ func newRepository(a *ComponentArchive) (main, nonref cpi.Repository) {
 
 func (r *RepositoryImpl) Close() error {
 	return r.arch.container.Close()
+}
+
+func (r *RepositoryImpl) IsReadOnly() bool {
+	return r.arch.IsReadOnly()
+}
+
+func (r *RepositoryImpl) SetReadOnly() {
+	r.arch.SetReadOnly()
 }
 
 func (r *RepositoryImpl) SetBridge(base repocpi.RepositoryBridge) {
@@ -135,7 +143,7 @@ func (r *RepositoryImpl) LookupComponent(name string) (*repocpi.ComponentAccessI
 		return nil, accessio.ErrClosed
 	}
 	if r.arch.GetName() != name {
-		return nil, errors.ErrNotFound(errors.KIND_COMPONENT, name, Type)
+		return nil, errors.ErrNotFound(errkind.KIND_COMPONENT, name, Type)
 	}
 	return newComponentAccess(r)
 }
@@ -256,6 +264,10 @@ func (c *ComponentVersionContainer) IsReadOnly() bool {
 	return c.comp.repo.arch.IsReadOnly()
 }
 
+func (c *ComponentVersionContainer) SetReadOnly() {
+	c.comp.repo.arch.SetReadOnly()
+}
+
 func (c *ComponentVersionContainer) Update() error {
 	desc := c.comp.repo.arch.GetDescriptor()
 	*desc = *c.descriptor.Copy()
@@ -298,7 +310,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 		}
 		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
 	}
-	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "component archive")
+	return nil, errors.ErrNotSupported(errkind.KIND_ACCESSMETHOD, a.GetType(), "component archive")
 }
 
 func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
@@ -312,7 +324,10 @@ func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 			return ""
 		}
 		defer m.Close()
-		digest, _ := blobaccess.Digest(m)
+		digest, err := blobaccess.Digest(m)
+		if err != nil {
+			return ""
+		}
 		return digest.String()
 	}
 	return ""

@@ -1,12 +1,9 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package describe
 
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -22,7 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -103,7 +99,7 @@ var outputs = output.NewOutputs(getRegular, output.Outputs{}).AddChainedManifest
 
 func getRegular(opts *output.Options) output.Output {
 	return output.NewProcessingFunctionOutput(opts, processing.Chain(opts.LogContext()),
-		generics.Conditional(From(opts).BlobFiles, outInfoWithFiles, outInfo))
+		general.Conditional(From(opts).BlobFiles, outInfoWithFiles, outInfo))
 }
 
 func infoChain(options *output.Options) processing.ProcessChain {

@@ -1,0 +1,32 @@
+kind: Component
+metadata:
+  name: ocm-cli
+  displayName: OCM CLI
+  description: OCM Command Line Interface
+  longDescription: |-
+    The OCM CLI can be used to interact with OCM components. It makes it easy to create component versions and embed them in software lifecyce processes.
+  labels:
+    language: go
+  tags:
+    - open-component-model
+    - ocm
+    - cli
+    - open-source
+    - inner-source
+spec:
+  type:
+    name: CLI
+    lifecycle: production
+  team:
+    name: ocm
+  logo: https://ocm.software/images/logo-image.png
+  docs:
+    techDocsLinks:
+      - name: OCM Documentation
+        url: https://ocm.software
+        icon: .sa-icon--sys-help-2
+        description: Documentation
+      - name: OCM Command Line Client
+        url: https://github.com/open-component-model/ocm/blob/main/docs/reference/ocm.md
+        icon: .sa-icon--sys-help-2
+        description: Open Component Model Command Line Client

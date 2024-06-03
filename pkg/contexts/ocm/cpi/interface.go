@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 package cpi
 
 // This is the Context Provider Interface for credential providers
@@ -9,12 +5,12 @@ package cpi
 import (
 	_ "unsafe"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -27,7 +23,7 @@ var TAG_BLOBHANDLER = logging.DefineTag("blobhandler", "execution of blob handle
 
 func BlobHandlerLogger(ctx Context, messageContext ...logging.MessageContext) logging.Logger {
 	if len(messageContext) > 0 {
-		messageContext = generics.AppendedSlice[logging.MessageContext](messageContext, TAG_BLOBHANDLER)
+		messageContext = sliceutils.CopyAppend[logging.MessageContext](messageContext, TAG_BLOBHANDLER)
 		return ctx.Logger(messageContext...)
 	} else {
 		return ctx.Logger(TAG_BLOBHANDLER)
@@ -112,10 +108,6 @@ func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {
 
 func DefaultBlobHandlerProvider(ctx Context) BlobHandlerProvider {
 	return internal.DefaultBlobHandlerProvider(ctx)
-}
-
-func New() Context {
-	return internal.Builder{}.New()
 }
 
 func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) *ResourceMeta {

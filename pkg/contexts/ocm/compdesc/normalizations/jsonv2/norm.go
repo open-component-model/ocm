@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 // Package jsonv2 provides a normalization which is completely based on the
 // abstract (internal) version of the component descriptor and is therefore
 // agnostic of the final serialization format. Signatures using this algorithm
