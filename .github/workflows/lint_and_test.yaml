@@ -68,7 +68,6 @@ jobs:
       - name: Setup lint
         run: |
           make -f hack/Makefile golangci-lint
-          #curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
       - name: Lint
         run: |
           PATH=$PATH:$(go env GOPATH)/bin make check
@@ -79,7 +78,7 @@ jobs:
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@v2.2
-        
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -104,4 +103,4 @@ jobs:
       - name: Check for diff
         run: |
           git diff --exit-code --shortstat
-  
+

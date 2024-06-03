@@ -10,7 +10,7 @@ else
 	detected_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown')
 endif
 
-deps := 
+deps :=
 # TODO exact versions to compare
 gSED := $(shell (sed --version 2>/dev/null || echo 0.0) | head -n 1 | sed 's/.*(GNU sed) \([0-9\.]*\).*/\1/')
 ifeq ("v$(gSED)","v0.0")
@@ -33,7 +33,7 @@ ifeq ("v$(JQ)","v0.0")
 	deps += $(detected_OS)_jq
 endif
 
-GOLANGCILINT_VERSION := "v1.54.2"
+GOLANGCILINT_VERSION := "v1.58.1"
 GOLANGCILINTV := $(shell (golangci-lint --version 2>/dev/null || echo 0.0.0) | sed 's/.*v\([0-9\.]*\) .*/\1/')
 ifneq ("v$(GOLANGCILINTV)",$(GOLANGCILINT_VERSION))
   deps += golangci-lint
