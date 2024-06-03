@@ -69,6 +69,21 @@ func NewCoordinates(groupId, artifactId, version string, opts ...CoordinateOptio
 	return c
 }
 
+// IsPackage returns true if the complete GAV content is addressed.
+func (c *Coordinates) IsPackage() bool {
+	return c.Classifier == nil && c.Extension == nil
+}
+
+// IsFile returns true if a dedicated single file is addressed.
+func (c *Coordinates) IsFile() bool {
+	return c.Classifier != nil && c.Extension != nil
+}
+
+// IsFileSet returns true if a file pattern is specified (and therefore, potentially multiple files are addressed).
+func (c *Coordinates) IsFileSet() bool {
+	return c.IsPackage() || !c.IsFile()
+}
+
 // GAV returns the GAV coordinates of the Maven Coordinates.
 func (c *Coordinates) GAV() string {
 	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version

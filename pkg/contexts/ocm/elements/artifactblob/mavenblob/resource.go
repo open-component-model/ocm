@@ -14,7 +14,7 @@ import (
 const TYPE = resourcetypes.MAVEN_ARTIFACT
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, repo *maven.Repository, groupId, artifactId, version string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithCredentialContext(ctx))...)
+	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithCredentialContext(ctx), WithHint(maven.NewCoordinates(groupId, artifactId, version).GAV()))...)
 
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)

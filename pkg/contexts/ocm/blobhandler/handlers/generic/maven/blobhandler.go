@@ -60,7 +60,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	if err != nil {
 		return nil, err
 	}
-	if coords.Classifier != nil || coords.Extension != nil {
+	if !coords.IsPackage() {
 		return nil, nil
 	}
 	log = log.WithValues("groupId", coords.GroupId, "artifactId", coords.ArtifactId, "version", coords.Version)

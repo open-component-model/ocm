@@ -95,5 +95,9 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		mavenblob.WithCachingFileSystem(vfsattr.Get(ctx)),
 	)
 
+	if s.IsPackage() {
+		return access, s.GAV(), err
+	}
+
 	return access, "", err
 }
