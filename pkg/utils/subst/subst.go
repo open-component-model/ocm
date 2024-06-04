@@ -3,6 +3,7 @@ package subst
 import (
 	"bytes"
 	"container/list"
+	"regexp"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -120,37 +121,32 @@ func (f *fileinfo) Content() ([]byte, error) {
 	}
 }
 
-func (f *fileinfo) SubstituteByData(path string, value []byte) error {
-	var node interface{}
-	err := runtime.DefaultYAMLEncoding.Unmarshal(value, &node)
-	if err != nil {
-		return err
-	}
-	if f.json {
-		value, err = runtime.DefaultJSONEncoding.Marshal(node)
-	} else {
-		value, err = runtime.DefaultYAMLEncoding.Marshal(node)
-	}
-	if err != nil {
-		return err
-	}
-	m := &yaml.Node{}
-	err = yaml.Unmarshal(value, m)
-	if err != nil {
-		return err
-	}
+var sniffJson = regexp.MustCompile(`^\s*(\{|\[|")`)
 
-	if !f.json {
-		var replaceFlowStyle func(*yaml.Node)
-		replaceFlowStyle = func(nd *yaml.Node) {
-			if nd.Style == yaml.FlowStyle {
-				nd.Style = yaml.LiteralStyle
-			}
-			for _, chld := range nd.Content {
-				replaceFlowStyle(chld)
+func (f *fileinfo) SubstituteByData(path string, value []byte) error {
+	var err error
+
+	if !f.json && sniffJson.Match(value) {
+		// yaml is generally a superset of json so we could just insert the json value
+		// into a yaml file and have a valid yaml.
+		// However having a yaml file that looks like a mix of yaml and json is off putting.
+		// So if the value looks like json and the target file is yaml we will first
+		// attempt to re-enode the value as yaml before inserting into the target document.
+		// However... we don't want to perform re-encoding for everything because if the
+		// value is actually yaml with some snippets in json style for readability
+		// purposes we don't want to unecessarily lose that styling.  Hence the initial
+		// sniff test for json instead of always re-encoding.
+		var valueData interface{}
+		if err = runtime.DefaultJSONEncoding.Unmarshal(value, &valueData); err == nil {
+			if value, err = runtime.DefaultYAMLEncoding.Marshal(valueData); err != nil {
+				return err
 			}
 		}
-		replaceFlowStyle(m)
+	}
+
+	m := &yaml.Node{}
+	if err = yaml.Unmarshal(value, m); err != nil {
+		return err
 	}
 
 	nd := &yqlib.CandidateNode{}
@@ -161,6 +157,7 @@ func (f *fileinfo) SubstituteByData(path string, value []byte) error {
 	if err = nd.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
 		return err
 	}
+
 	return f.substituteByValue(path, nd)
 }
 
