@@ -1,0 +1,14 @@
+components:
+- name: ocm.software/demo/test
+  version: 1.0.0
+  provider:
+    name: ocm.software
+  resources:
+    - name: mavenartifact
+      type: mavenArtifact
+      input:
+        type: maven
+        path: /maven/testdata/.m2/repository
+        groupId: "com.sap.cloud.sdk"
+        artifactId: "sdk-modules-bom"
+        version: "5.7.0"

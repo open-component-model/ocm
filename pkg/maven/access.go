@@ -43,7 +43,7 @@ func NewFileRepository(path string, fss ...vfs.FileSystem) *Repository {
 }
 
 func NewUrlRepository(repoUrl string, fss ...vfs.FileSystem) (*Repository, error) {
-	u, err := url.Parse(repoUrl)
+	u, err := url.ParseRequestURI(repoUrl)
 	if err != nil {
 		return nil, err
 	}

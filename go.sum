@@ -682,10 +682,10 @@ github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0
 github.com/mailru/easyjson v0.7.7/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
 github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3 h1:oo9nIgnyiBgYPbcZslRT4y29siuL5EoNJ/t1tr0xEVQ=
 github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3/go.mod h1:LxhqC7khDoRENwooP6f/vWvia9ivj6TqLYrR39zqkN0=
-github.com/mandelsoft/goutils v0.0.0-20240527090454-525d51156f92 h1:JKHpPtPpkCA7AVRv5trXmqAcncjbfkjiv4x7wGSJnEc=
-github.com/mandelsoft/goutils v0.0.0-20240527090454-525d51156f92/go.mod h1:EbNqk9JceSMq7MJuALB/vlOpoD4MAGE0TenM9TR+C0o=
-github.com/mandelsoft/logging v0.0.0-20240326140403-99e2fb8bdce6 h1:xLaVUuFrXqcAZJ2rGZdRHX1Qe4AvxZINJ5XAXKmL2uc=
-github.com/mandelsoft/logging v0.0.0-20240326140403-99e2fb8bdce6/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
+github.com/mandelsoft/goutils v0.0.0-20240604075441-f06e2890eea3 h1:jSXyDjsOuy0DUCzDUCrZS/QMJZ2we1HQfLCpb0D7cnY=
+github.com/mandelsoft/goutils v0.0.0-20240604075441-f06e2890eea3/go.mod h1:EbNqk9JceSMq7MJuALB/vlOpoD4MAGE0TenM9TR+C0o=
+github.com/mandelsoft/logging v0.0.0-20240201091719-67180059d6bf h1:WEmgzeArDbp6Aw34jmziMIE5ygo2zpl/atXRq3D7lSw=
+github.com/mandelsoft/logging v0.0.0-20240201091719-67180059d6bf/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
 github.com/mandelsoft/spiff v1.7.0-beta-5 h1:3kC10nTviDQhL8diSxp7i4IC2iSiDg6KPbH1CAq7Lfw=
 github.com/mandelsoft/spiff v1.7.0-beta-5/go.mod h1:TwEeOPuRZxlzQBCLEyVTlHmBSruSGGNdiQ2fovVJ8ao=
 github.com/mandelsoft/vfs v0.4.3 h1:2UMrxQkMXkcHyuqSFhgFDupQ1fmqpKLZuu04DOHx1PA=
