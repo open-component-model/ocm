@@ -45,12 +45,6 @@ jobs:
           ${diff}
           \`\`\`
           EOF
-
-          cat << EOF >> "$GITHUB_OUTPUT"
-          body=\`\`\`diff
-          ${diff}
-          \`\`\`
-          EOF
       - name: Create pull request
         id: create_pull_request
         uses: peter-evans/create-pull-request@v6
@@ -58,7 +52,6 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
           commit-message: update vendorHash
           title: Update vendorHash in flake.nix
-          body: ${{ steps.check-diff.outputs.body }}
           branch: nix/flake
           committer: OCMBot <ocmbot@users.noreply.github.com>
           add-paths: |
