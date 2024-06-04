@@ -2,6 +2,7 @@ package add
 
 import (
 	"fmt"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
@@ -64,7 +65,8 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		templateroption.New(""),
 		dryrunoption.New("evaluate and print component specifications", true),
 		lookupoption.New(),
-		rscbyvalueoption.New()),
+		rscbyvalueoption.New(),
+		uploaderoption.New(ctx.OCMContext())),
 	}, utils.Names(Names, names...)...)
 }
 
@@ -181,6 +183,11 @@ func (o *Command) Complete(args []string) error {
 	o.Handler = ctf.GetFormat(format)
 	if o.Handler == nil {
 		return accessio.ErrInvalidFileFormat(format.String())
+	}
+
+	err = uploaderoption.From(o).Register(o)
+	if err != nil {
+		return err
 	}
 
 	return nil
