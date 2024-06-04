@@ -45,17 +45,22 @@ jobs:
           ${diff}
           \`\`\`
           EOF
+      - name: Commit
+        run: |
+          diff=$(git diff)
+          if [[ ! -z "$diff" ]]; then
+            git config --global user.name "ocmbot"
+            git config --global user.email "ocmbot@users.noreply.github.com"
+            git commit -S -am "update vendorHash"
+          fi
       - name: Create pull request
         id: create_pull_request
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ steps.generate_token.outputs.token }}
-          commit-message: update vendorHash
           title: Update vendorHash in flake.nix
           branch: nix/flake
-          committer: OCMBot <ocmbot@users.noreply.github.com>
           team-reviewers: ocm-dev
-          signoff: true
           add-paths: |
             flake.nix
             flake.lock
