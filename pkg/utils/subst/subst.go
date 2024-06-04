@@ -121,7 +121,7 @@ func (f *fileinfo) Content() ([]byte, error) {
 	}
 }
 
-var sniffJson = regexp.MustCompile(`\s*(\{|\[|")`)
+var sniffJson = regexp.MustCompile(`^\s*(\{|\[|")`)
 
 func (f *fileinfo) SubstituteByData(path string, value []byte) error {
 	var err error
