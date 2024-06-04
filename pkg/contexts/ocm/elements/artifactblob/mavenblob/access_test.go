@@ -3,7 +3,6 @@ package mavenblob_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/maven/maventest"
 	. "github.com/open-component-model/ocm/pkg/testutils"
@@ -48,7 +47,7 @@ var _ = Describe("blobaccess for maven", func() {
 				maven.WithClassifier("random-content"), maven.WithExtension("json"))
 
 			a := me.ResourceAccessForMavenCoords(env.OCMContext(), Must(elements.ResourceMeta("mavenblob", resourcetypes.OCM_JSON, elements.WithLocalRelation())), repo, coords, me.WithCachingFileSystem(env.FileSystem()))
-			Expect(Must(a.Access()).(ocm.HintProvider).GetReferenceHint(cv)).To(Equal(""))
+			Expect(a.ReferenceHint()).To(Equal(""))
 			b := Must(a.BlobAccess())
 			defer Close(b)
 			Expect(string(Must(b.Get()))).To(Equal(`{"some": "test content"}`))
@@ -67,8 +66,7 @@ var _ = Describe("blobaccess for maven", func() {
 			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
 
 			a := me.ResourceAccessForMavenCoords(env.OCMContext(), Must(elements.ResourceMeta("mavenblob", resourcetypes.OCM_JSON, elements.WithLocalRelation())), repo, coords, me.WithCachingFileSystem(env.FileSystem()))
-			Expect(Must(a.Access()).(ocm.HintProvider).GetReferenceHint(cv)).To(Equal(coords.GAV()))
+			Expect(a.ReferenceHint()).To(Equal(coords.GAV()))
 		})
-
 	})
 })

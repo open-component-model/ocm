@@ -24,7 +24,7 @@ func WithOptionalClassifier(c *string) CoordinateOption {
 	if c != nil {
 		return WithClassifier(*c)
 	}
-	return nil
+	return &optionutils.NoOption[*Coordinates]{}
 }
 
 func (o WithClassifier) ApplyTo(c *Coordinates) {
@@ -37,70 +37,111 @@ func WithOptionalExtension(e *string) CoordinateOption {
 	if e != nil {
 		return WithExtension(*e)
 	}
-	return nil
+	return &optionutils.NoOption[*Coordinates]{}
 }
 
 func (o WithExtension) ApplyTo(c *Coordinates) {
 	c.Extension = optionutils.PointerTo(string(o))
 }
 
-// Coordinates holds the typical Maven coordinates groupId, artifactId, version. Optional also classifier and extension.
-// https://maven.apache.org/ref/3.9.6/maven-core/artifact-handlers.html
-type Coordinates struct {
-	// GroupId of the Maven artifact.
-	GroupId string `json:"groupId"`
-	// ArtifactId of the Maven artifact.
-	ArtifactId string `json:"artifactId"`
-	// Version of the Maven artifact.
-	Version string `json:"version"`
+type FileCoordinates struct {
 	// Classifier of the Maven artifact.
 	Classifier *string `json:"classifier,omitempty"`
 	// Extension of the Maven artifact.
 	Extension *string `json:"extension,omitempty"`
 }
 
+// IsPackage returns true if the complete GAV content is addressed.
+func (c *FileCoordinates) IsPackage() bool {
+	return c.Classifier == nil && c.Extension == nil
+}
+
+// IsFile returns true if a dedicated single file is addressed.
+func (c *FileCoordinates) IsFile() bool {
+	return c.Classifier != nil && c.Extension != nil
+}
+
+// IsFileSet returns true if a file pattern is specified (and therefore, potentially multiple files are addressed).
+func (c *FileCoordinates) IsFileSet() bool {
+	return c.IsPackage() || !c.IsFile()
+}
+
+// MimeType returns the MIME type of the Maven Coordinates based on the file extension.
+// Default is application/x-tgz.
+func (c *FileCoordinates) MimeType() string {
+	if c.Extension != nil && c.Classifier != nil {
+		m := mime.TypeByExtension("." + optionutils.AsValue(c.Extension))
+		if m != "" {
+			return m
+		}
+		return ocmmime.MIME_OCTET
+	}
+	return ocmmime.MIME_TGZ
+}
+
+type PackageCoordinates struct {
+	// GroupId of the Maven artifact.
+	GroupId string `json:"groupId"`
+	// ArtifactId of the Maven artifact.
+	ArtifactId string `json:"artifactId"`
+	// Version of the Maven artifact.
+	Version string `json:"version"`
+}
+
+// GAV returns the GAV coordinates of the Maven Coordinates.
+func (c *PackageCoordinates) GAV() string {
+	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version
+}
+
+func (c *PackageCoordinates) String() string {
+	return c.GAV()
+}
+
+// GavPath returns the Maven repository path.
+func (c *PackageCoordinates) GavPath() string {
+	return c.GroupPath() + "/" + c.ArtifactId + "/" + c.Version
+}
+
+func (c *PackageCoordinates) GavLocation(repo *Repository) *Location {
+	return repo.AddPath(c.GavPath())
+}
+
+// GroupPath returns GroupId with `/` instead of `.`.
+func (c *PackageCoordinates) GroupPath() string {
+	return strings.ReplaceAll(c.GroupId, ".", "/")
+}
+
+func (c *PackageCoordinates) FileNamePrefix() string {
+	return c.ArtifactId + "-" + c.Version
+}
+
+// Purl returns the Package URL of the Maven Coordinates.
+func (c *PackageCoordinates) Purl() string {
+	return "pkg:maven/" + c.GroupId + "/" + c.ArtifactId + "@" + c.Version
+}
+
+// Coordinates holds the typical Maven coordinates groupId, artifactId, version. Optional also classifier and extension.
+// https://maven.apache.org/ref/3.9.6/maven-core/artifact-handlers.html
+type Coordinates struct {
+	PackageCoordinates `json:",inline"`
+	FileCoordinates    `json:",inline"`
+}
+
 func NewCoordinates(groupId, artifactId, version string, opts ...CoordinateOption) *Coordinates {
 	c := &Coordinates{
-		GroupId:    groupId,
-		ArtifactId: artifactId,
-		Version:    version,
+		PackageCoordinates: PackageCoordinates{
+			GroupId:    groupId,
+			ArtifactId: artifactId,
+			Version:    version,
+		},
 	}
 	optionutils.ApplyOptions(c, opts...)
 	return c
 }
 
-// IsPackage returns true if the complete GAV content is addressed.
-func (c *Coordinates) IsPackage() bool {
-	return c.Classifier == nil && c.Extension == nil
-}
-
-// IsFile returns true if a dedicated single file is addressed.
-func (c *Coordinates) IsFile() bool {
-	return c.Classifier != nil && c.Extension != nil
-}
-
-// IsFileSet returns true if a file pattern is specified (and therefore, potentially multiple files are addressed).
-func (c *Coordinates) IsFileSet() bool {
-	return c.IsPackage() || !c.IsFile()
-}
-
-// GAV returns the GAV coordinates of the Maven Coordinates.
-func (c *Coordinates) GAV() string {
-	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version
-}
-
 // String returns the Coordinates as a string (GroupId:ArtifactId:Version:WithClassifier:WithExtension).
 func (c *Coordinates) String() string {
 	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version + ":" + optionutils.AsValue(c.Classifier) + ":" + optionutils.AsValue(c.Extension)
-}
-
-// GavPath returns the Maven repository path.
-func (c *Coordinates) GavPath() string {
-	return c.GroupPath() + "/" + c.ArtifactId + "/" + c.Version
-}
-
-func (c *Coordinates) GavLocation(repo *Repository) *Location {
-	return repo.AddPath(c.GavPath())
 }
 
 func (c *Coordinates) FileName() string {
@@ -127,20 +168,6 @@ func (c *Coordinates) Location(repo *Repository) *Location {
 	return repo.AddPath(c.FilePath())
 }
 
-// GroupPath returns GroupId with `/` instead of `.`.
-func (c *Coordinates) GroupPath() string {
-	return strings.ReplaceAll(c.GroupId, ".", "/")
-}
-
-func (c *Coordinates) FileNamePrefix() string {
-	return c.ArtifactId + "-" + c.Version
-}
-
-// Purl returns the Package URL of the Maven Coordinates.
-func (c *Coordinates) Purl() string {
-	return "pkg:maven/" + c.GroupId + "/" + c.ArtifactId + "@" + c.Version
-}
-
 // SetClassifierExtensionBy extracts the classifier and extension from the filename (without any path prefix).
 func (c *Coordinates) SetClassifierExtensionBy(filename string) error {
 	s := strings.TrimPrefix(path.Base(filename), c.FileNamePrefix())
@@ -157,19 +184,6 @@ func (c *Coordinates) SetClassifierExtensionBy(filename string) error {
 	}
 	c.Extension = optionutils.PointerTo(strings.TrimPrefix(s, "."))
 	return nil
-}
-
-// MimeType returns the MIME type of the Maven Coordinates based on the file extension.
-// Default is application/x-tgz.
-func (c *Coordinates) MimeType() string {
-	if c.Extension != nil && c.Classifier != nil {
-		m := mime.TypeByExtension("." + optionutils.AsValue(c.Extension))
-		if m != "" {
-			return m
-		}
-		return ocmmime.MIME_OCTET
-	}
-	return ocmmime.MIME_TGZ
 }
 
 // Copy creates a new Coordinates with the same values.
@@ -208,11 +222,7 @@ func Parse(serializedArtifact string) (*Coordinates, error) {
 	if len(parts) < 3 {
 		return nil, fmt.Errorf("invalid coordination string: %s", serializedArtifact)
 	}
-	coords := &Coordinates{
-		GroupId:    parts[0],
-		ArtifactId: parts[1],
-		Version:    parts[2],
-	}
+	coords := NewCoordinates(parts[0], parts[1], parts[2])
 	if len(parts) >= 4 {
 		coords.Classifier = optionutils.PointerTo(parts[3])
 	}

@@ -6,6 +6,7 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	mavenacc "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/maven"
 	"github.com/open-component-model/ocm/pkg/maven"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 	"strings"
@@ -40,7 +41,7 @@ var _ = Describe("Test Environment", func() {
 		env.Cleanup()
 	})
 
-	It("upload maven package from localblob", func() {
+	It("upload maven package from localblob during transfer", func() {
 		coords := maven.NewCoordinates(maventest.GROUP_ID, maventest.ARTIFACT_ID, maventest.VERSION)
 		Expect(env.Execute("add", "cv", "-fc", "--file", ARCH, "testdata/components.yaml")).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
@@ -55,6 +56,30 @@ var _ = Describe("Test Environment", func() {
 
 		Expect(env.Execute("transfer", "ctf", ARCH, DEST_ARCH, "--uploader", "ocm/mavenArtifact=file://localhost/mavenrepo")).To(Succeed())
 		Expect(env.DirExists(DEST_ARCH)).To(BeTrue())
+		Expect(env.DirExists("/mavenrepo/" + coords.GavPath())).To(BeTrue())
+		mavenrepo := maven.NewFileRepository("/mavenrepo", env.FileSystem())
+		Expect(mavenrepo.GavFiles(coords, nil)).To(YAMLEqual(`
+sdk-modules-bom-5.7.0-random-content.json: 5
+sdk-modules-bom-5.7.0-random-content.txt: 5
+sdk-modules-bom-5.7.0-sources.jar: 5
+sdk-modules-bom-5.7.0.jar: 5
+sdk-modules-bom-5.7.0.pom: 5`))
+	})
+
+	It("upload maven package from localblob during component composition", func() {
+		coords := maven.NewCoordinates(maventest.GROUP_ID, maventest.ARTIFACT_ID, maventest.VERSION)
+		Expect(env.Execute("add", "cv", "-fc", "--file", ARCH, "testdata/components.yaml", "--uploader", "ocm/mavenArtifact=file://localhost/mavenrepo")).To(Succeed())
+		Expect(env.DirExists(ARCH)).To(BeTrue())
+		repo := Must(ctf.Open(env, ctf.ACC_READONLY, ARCH, 0, env))
+		defer Close(repo)
+		cv := Must(repo.LookupComponentVersion(COMPONENT, VERSION))
+		defer Close(cv)
+		Expect(len(cv.GetDescriptor().Resources)).To(Equal(1))
+		acc := Must(env.OCMContext().AccessSpecForSpec(cv.GetDescriptor().Resources[0].Access))
+		Expect(acc.IsLocal(env.OCMContext())).To(BeFalse())
+		Expect(acc.GetKind()).To(Equal(mavenacc.Type))
+		Expect(acc.(*mavenacc.AccessSpec).GAV()).To(Equal(strings.Join([]string{maventest.GROUP_ID, maventest.ARTIFACT_ID, maventest.VERSION}, ":")))
+
 		Expect(env.DirExists("/mavenrepo/" + coords.GavPath())).To(BeTrue())
 		mavenrepo := maven.NewFileRepository("/mavenrepo", env.FileSystem())
 		Expect(mavenrepo.GavFiles(coords, nil)).To(YAMLEqual(`

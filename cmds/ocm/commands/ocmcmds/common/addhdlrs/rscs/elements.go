@@ -130,6 +130,10 @@ type ResourceSpec struct {
 
 var _ addhdlrs.ElementSpec = (*ResourceSpec)(nil)
 
+func (r *ResourceSpec) GetType() string {
+	return r.Type
+}
+
 func (r *ResourceSpec) GetRawIdentity() metav1.Identity {
 	return r.ElementMeta.GetRawIdentity()
 }
