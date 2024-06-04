@@ -42,10 +42,10 @@ linters:
     - nlreturn         # Use empty line at least before return/break/continue.
     - goerr113         # Do not define dynamic errors with Errorf.
     - varnamelen       # m, d, p < These are not so meaningful variables.
-    - testpackage      # Blackbox testing is preffered.
+    - testpackage      # Blackbox testing is preferred.
     - funlen           # Break long functions.
     - gomnd            # Give constant values a name with constants.
-    - ireturn          # Accept interface, return concrate.
+    - ireturn          # Accept interface, return concrete.
     - nestif           # Some nexted if statements are 8 or 9 deep.
     - dupl             # Check code duplications.
     - cyclop           # Complex functions are not good.

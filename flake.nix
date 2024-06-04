@@ -3,7 +3,7 @@
 
   inputs = {
     # NixPkgs (nixos-23.11)
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -28,7 +28,7 @@
           inherit (pkgs) stdenv lib ;
         in
         {
-          ${pname} = pkgs.buildGo121Module rec {
+          ${pname} = pkgs.buildGo122Module rec {
             inherit pname self;
             version = lib.fileContents ./VERSION;
             gitCommit = if (self ? rev) then self.rev else self.dirtyRev;
@@ -86,7 +86,7 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [ 
-              go_1_21   # golang 1.21
+              go_1_22   # golang 1.22
               gopls     # go language server
               gotools   # go imports
               go-tools  # static checks
