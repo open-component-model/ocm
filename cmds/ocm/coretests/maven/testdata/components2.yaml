@@ -1,0 +1,15 @@
+components:
+- name: ocm.software/demo/test
+  version: 1.0.0
+  provider:
+    name: ocm.software
+  resources:
+    - name: mavenartifact
+      type: mavenArtifact
+      version: "1.1"
+      access:
+        type: maven
+        repoUrl: "https://repo.maven.apache.org/maven2/"
+        groupId: "maven"
+        artifactId: "maven"
+        version: "1.1"

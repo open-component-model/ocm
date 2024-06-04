@@ -60,6 +60,10 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 		Expect(dr.Size()).To(Equal(int64(maventest.ARTIFACT_SIZE)))
 		Expect(dr.Digest().String()).To(Equal("SHA-256:" + maventest.ARTIFACT_DIGEST))
 	})
+	It("test empty repoUrl", func() {
+		acc := me.New("", "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
+		ExpectError(acc.AccessMethod(cv)).ToNot(BeNil())
+	})
 
 	It("accesses local artifact with empty classifier and with extension", func() {
 		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithClassifier(""), me.WithExtension("pom"))

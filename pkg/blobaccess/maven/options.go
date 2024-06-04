@@ -22,10 +22,8 @@ type Options struct {
 	CachingPath       string
 	// Credentials allows to pass credentials and certificates for the http communication
 	Credentials credentials.Credentials
-	// Classifier defines the classifier of the maven file coordinates
-	Classifier *string
-	// Extension defines the extension of the maven file coordinates
-	Extension *string
+
+	maven.FileCoordinates
 }
 
 func (o *Options) Logger(keyValuePairs ...interface{}) logging.Logger {
@@ -179,7 +177,7 @@ func WithOptionalClassifier(c *string) Option {
 	if c != nil {
 		return WithClassifier(*c)
 	}
-	return nil
+	return &optionutils.NoOption[*Options]{}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -198,7 +196,7 @@ func WithOptionalExtension(e *string) Option {
 	if e != nil {
 		return WithExtension(*e)
 	}
-	return nil
+	return &optionutils.NoOption[*Options]{}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

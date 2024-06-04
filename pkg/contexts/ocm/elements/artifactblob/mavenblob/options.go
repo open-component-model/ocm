@@ -10,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/api"
+	"github.com/open-component-model/ocm/pkg/maven"
 )
 
 type Option = optionutils.Option[*Options]
@@ -38,6 +39,13 @@ func (o *Options) Apply(opts ...Option) {
 
 func WithHint(h string) Option {
 	return api.WrapHint[Options](h)
+}
+
+func WithHintForCoords(coords *maven.Coordinates) Option {
+	if coords.IsPackage() {
+		return WithHint(coords.GAV())
+	}
+	return optionutils.NoOption[*Options]{}
 }
 
 func WithGlobalAccess(a cpi.AccessSpec) Option {

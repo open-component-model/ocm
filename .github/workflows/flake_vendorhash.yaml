@@ -1,11 +1,11 @@
-name: "Flake vendorHash Updater"
+name: "Flake.nix vendorHash updater"
 on:
   push:
     branches: 
     - main
     paths:
-    - 'go.mod'
-    - 'go.sum'
+    - go.mod
+    - go.sum
   workflow_dispatch:
   workflow_call:
     
@@ -19,7 +19,7 @@ jobs:
       - name: Generate token
         id: generate_token
         uses: tibdex/github-app-token@v2
-        with:
+        with: # OCMBot
           app_id: ${{ secrets.OCMBOT_APP_ID }}
           private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
       - name: Checkout repository
@@ -27,12 +27,8 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ steps.generate_token.outputs.token }}
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+        uses: DeterminateSystems/nix-installer-action@v12
       - name: Update ocm vendor hash
         run: nix run .#nixpkgs.nix-update -- --flake --version=skip ocm
       - name: Check diff
@@ -49,14 +45,29 @@ jobs:
           ${diff}
           \`\`\`
           EOF
-          echo "push='true'" >> $GITHUB_ENV
-      - name: Push changes
-        if: github.event.pull_request.head.repo.fork == false && env.push == 'true'
+      - name: Commit
         run: |
           diff=$(git diff)
           if [[ ! -z "$diff" ]]; then
-            git config --global user.name "ocm-vendorhash"
-            git config --global user.email "ocm-vendorhash@users.noreply.github.com"
-            git commit -am "flake: update ocm vendorHash"
-            git push
+            git config --global user.name "ocmbot"
+            git config --global user.email "ocmbot@users.noreply.github.com"
+            git commit -S -am "update vendorHash"
           fi
+      - name: Create pull request
+        id: create_pull_request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          title: Update vendorHash in flake.nix
+          branch: nix/flake
+          team-reviewers: ocm-dev
+          add-paths: |
+            flake.nix
+            flake.lock
+      - name: Enable pull request auto merge
+        if: ${{ steps.create_pull_request.outputs.pull-request-number }}
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          pull-request-number: ${{ steps.create_pull_request.outputs.pull-request-number }}
+          merge-method: squash
