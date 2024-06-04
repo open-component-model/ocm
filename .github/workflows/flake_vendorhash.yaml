@@ -54,6 +54,8 @@ jobs:
           title: Update vendorHash in flake.nix
           branch: nix/flake
           committer: OCMBot <ocmbot@users.noreply.github.com>
+          team-reviewers: ocm-dev
+          signoff: true
           add-paths: |
             flake.nix
             flake.lock
