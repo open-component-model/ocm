@@ -27,6 +27,12 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ steps.generate_token.outputs.token }}
+      - name: Import GPG key for git commit signing
+        run: |
+          echo "${{ secrets.OCMBOT_SIGNING_KEY }}" | base64 --decode | gpg --import
+          git config --global user.signingkey "${{ secrets.OCMBOT_SIGNING_KEY_ID }}"
+          git config --global user.name "ocmbot"
+          git config --global user.email "ocmbot@users.noreply.github.com"
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v12
       - name: Update ocm vendor hash
@@ -45,21 +51,15 @@ jobs:
           ${diff}
           \`\`\`
           EOF
-      - name: Commit
-        run: |
-          diff=$(git diff)
-          if [[ ! -z "$diff" ]]; then
-            git config --global user.name "ocmbot"
-            git config --global user.email "ocmbot@users.noreply.github.com"
-            git commit -S -am "update vendorHash"
-          fi
       - name: Create pull request
         id: create_pull_request
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ steps.generate_token.outputs.token }}
+          commit-message: update vendorHash
           title: Update vendorHash in flake.nix
           branch: nix/flake
+          committer: OCMBot <ocmbot@users.noreply.github.com>
           team-reviewers: ocm-dev
           add-paths: |
             flake.nix
