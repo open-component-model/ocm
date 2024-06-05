@@ -4,6 +4,7 @@ import (
 	"crypto"
 
 	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/ioutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	mavenblob "github.com/open-component-model/ocm/pkg/blobaccess/maven"
@@ -18,7 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
-const BlobHandlerName = "ocm/" + resourcetypes.MAVEN_ARTIFACT
+const BlobHandlerName = "ocm/" + resourcetypes.MAVEN_PACKAGE
 
 type artifactHandler struct {
 	spec *Config
@@ -34,12 +35,16 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
+	if hint == "" {
+		log.Warn("maven package hint is empty, skipping upload")
+		return nil, nil
+	}
 	// check conditions
 	if b.spec == nil {
 		return nil, nil
 	}
 	mimeType := blob.MimeType()
-	if resourcetypes.MAVEN_ARTIFACT != resourceType {
+	if resourcetypes.MAVEN_PACKAGE != resourceType {
 		log.Debug("not a MVN artifact", "resourceType", resourceType)
 		return nil, nil
 	}
@@ -98,7 +103,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 		if err != nil {
 			return nil, err
 		}
-		reader, err := tempFs.Open(file)
+		reader, err := ioutils.NewDupReadCloser(tempFs.Open(file))
 		if err != nil {
 			return nil, err
 		}

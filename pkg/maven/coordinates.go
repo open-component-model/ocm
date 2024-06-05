@@ -216,11 +216,11 @@ func (c *Coordinates) FilterFileMap(fileMap map[string]crypto.Hash) map[string]c
 	return fileMap
 }
 
-// Parse creates a Coordinates from it's serialized form (see Coordinates.String).
+// Parse creates a Coordinates from its serialized form (see Coordinates.String).
 func Parse(serializedArtifact string) (*Coordinates, error) {
 	parts := strings.Split(serializedArtifact, ":")
 	if len(parts) < 3 {
-		return nil, fmt.Errorf("invalid coordination string: %s", serializedArtifact)
+		return nil, fmt.Errorf("invalid coordination string: %q", serializedArtifact)
 	}
 	coords := NewCoordinates(parts[0], parts[1], parts[2])
 	if len(parts) >= 4 {

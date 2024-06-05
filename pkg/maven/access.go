@@ -15,6 +15,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/ioutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"golang.org/x/exp/maps"
 	"golang.org/x/net/html"
@@ -119,7 +120,7 @@ func (r *Repository) Download(coords *Coordinates, creds Credentials, enforceVer
 	return reader, nil
 }
 
-func (r *Repository) Upload(coords *Coordinates, reader io.ReadCloser, creds Credentials, hashes iotools.Hashes) (rerr error) {
+func (r *Repository) Upload(coords *Coordinates, reader ioutils.DupReadCloser, creds Credentials, hashes iotools.Hashes) (rerr error) {
 	finalize := finalizer.Finalizer{}
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
@@ -150,7 +151,10 @@ func (r *Repository) Upload(coords *Coordinates, reader io.ReadCloser, creds Cre
 		}
 		return nil
 	}
-
+	reader, err := reader.Dup()
+	if rerr != nil {
+		return err
+	}
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, loc.String(), reader)
 	if err != nil {
 		return err

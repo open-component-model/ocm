@@ -10,7 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/maven"
 )
 
-const TYPE = resourcetypes.MAVEN_ARTIFACT
+const TYPE = resourcetypes.MAVEN_PACKAGE
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, repoUrl, groupId, artifactId, version string, opts ...Option) cpi.ArtifactAccess[M] {
 	if meta.GetType() == "" {

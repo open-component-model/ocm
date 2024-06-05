@@ -60,7 +60,7 @@ var _ = Describe("Test Environment", func() {
 	It("add maven from file system described by cli options", func() {
 		meta := `
 name: testdata
-type: mavenArtifact
+type: mavenPackage
 `
 		Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "maven",
 			"--inputPath", "/maven/testdata/.m2/repository", "--groupId", "com.sap.cloud.sdk", "--artifactId", "sdk-modules-bom",
@@ -79,7 +79,7 @@ type: mavenArtifact
 	It("add maven file from file system described by cli options", func() {
 		meta := `
 name: testdata
-type: mavenArtifact
+type: mavenPackage
 `
 		Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "maven",
 			"--inputPath", "/maven/testdata/.m2/repository", "--groupId", "com.sap.cloud.sdk", "--artifactId", "sdk-modules-bom",
