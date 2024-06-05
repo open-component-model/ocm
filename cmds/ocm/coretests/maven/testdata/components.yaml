@@ -4,8 +4,8 @@ components:
   provider:
     name: ocm.software
   resources:
-    - name: mavenartifact
-      type: mavenArtifact
+    - name: mavengav
+      type: mavenPackage
       input:
         type: maven
         path: /maven/testdata/.m2/repository

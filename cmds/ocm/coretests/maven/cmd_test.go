@@ -54,7 +54,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(acc.IsLocal(env.OCMContext())).To(BeTrue())
 		Expect(acc.(*localblob.AccessSpec).ReferenceName).To(Equal(strings.Join([]string{maventest.GROUP_ID, maventest.ARTIFACT_ID, maventest.VERSION}, ":")))
 
-		Expect(env.Execute("transfer", "ctf", ARCH, DEST_ARCH, "--uploader", "ocm/mavenArtifact=file://localhost/mavenrepo")).To(Succeed())
+		Expect(env.Execute("transfer", "ctf", ARCH, DEST_ARCH, "--uploader", "ocm/mavenPackage=file://localhost/mavenrepo")).To(Succeed())
 		Expect(env.DirExists(DEST_ARCH)).To(BeTrue())
 		Expect(env.DirExists("/mavenrepo/" + coords.GavPath())).To(BeTrue())
 		mavenrepo := maven.NewFileRepository("/mavenrepo", env.FileSystem())
@@ -68,7 +68,7 @@ sdk-modules-bom-5.7.0.pom: 5`))
 
 	It("upload maven package from localblob during component composition", func() {
 		coords := maven.NewCoordinates(maventest.GROUP_ID, maventest.ARTIFACT_ID, maventest.VERSION)
-		Expect(env.Execute("add", "cv", "-fc", "--file", ARCH, "testdata/components.yaml", "--uploader", "ocm/mavenArtifact=file://localhost/mavenrepo")).To(Succeed())
+		Expect(env.Execute("add", "cv", "-fc", "--file", ARCH, "testdata/components.yaml", "--uploader", "ocm/mavenPackage=file://localhost/mavenrepo")).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
 		repo := Must(ctf.Open(env, ctf.ACC_READONLY, ARCH, 0, env))
 		defer Close(repo)
@@ -108,7 +108,7 @@ sdk-modules-bom-5.7.0.pom: 5`))
 				Expect(acc.IsLocal(env.OCMContext())).To(BeFalse())
 				Expect(acc.(ocm.HintProvider).GetReferenceHint(cv)).To(Equal(coords.GAV()))
 
-				Expect(env.Execute("transfer", "ctf", ARCH, DEST_ARCH, "--copy-resources", "--uploader", "ocm/mavenArtifact=file://localhost/mavenrepo")).To(Succeed())
+				Expect(env.Execute("transfer", "ctf", ARCH, DEST_ARCH, "--copy-resources", "--uploader", "ocm/mavenPackage=file://localhost/mavenrepo")).To(Succeed())
 				Expect(env.DirExists(DEST_ARCH)).To(BeTrue())
 				Expect(env.DirExists("/mavenrepo/" + coords.GavPath())).To(BeTrue())
 				mavenrepo := maven.NewFileRepository("/mavenrepo", env.FileSystem())

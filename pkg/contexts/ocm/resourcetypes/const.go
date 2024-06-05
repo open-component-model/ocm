@@ -16,8 +16,8 @@ const (
 	HELM_CHART = "helmChart"
 	// NPM_PACKAGE describes a Node.js (npm) package.
 	NPM_PACKAGE = "npmPackage"
-	// MAVEN_ARTIFACT describes a Maven artifact (jar).
-	MAVEN_ARTIFACT = "mavenArtifact"
+	// MAVEN_PACKAGE describes a Maven artifact (jar).
+	MAVEN_PACKAGE = "mavenPackage"
 	// BLUEPRINT describes a Gardener Landscaper blueprint which is an artifact used in its installations describing
 	// how to deploy a software component.
 	BLUEPRINT        = "landscaper.gardener.cloud/blueprint"

@@ -1,5 +1,5 @@
 name: myblob
-type: mavenArtifact
+type: mavenPackage
 input:
   type: maven
   path: ../maven/testdata/.m2/repository
