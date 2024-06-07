@@ -9,9 +9,9 @@ import (
 
 	"github.com/mandelsoft/logging"
 
+	"github.com/mandelsoft/goutils/testutils"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
-	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var AddOne = func(logger logging.Logger) func(e interface{}) interface{} {

@@ -10,6 +10,8 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/exception"
 	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/pkgutils"
+	"github.com/mandelsoft/goutils/testutils"
 	"github.com/mandelsoft/vfs/pkg/composefs"
 	"github.com/mandelsoft/vfs/pkg/layerfs"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
@@ -24,9 +26,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocm "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/testutils"
 	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/utils/pkgutils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

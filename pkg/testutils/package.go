@@ -6,11 +6,10 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/pkgutils"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"golang.org/x/mod/modfile"
-
-	"github.com/open-component-model/ocm/pkg/utils/pkgutils"
 )
 
 const GO_MOD = "go.mod"

@@ -1,9 +1,9 @@
 package simplelistmerge_test
 
 import (
+	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/simplelistmerge"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"

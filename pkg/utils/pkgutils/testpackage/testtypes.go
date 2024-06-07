@@ -1,9 +1,8 @@
 package testpackage
 
 import (
+	"github.com/mandelsoft/goutils/pkgutils"
 	"github.com/mandelsoft/goutils/sliceutils"
-
-	"github.com/open-component-model/ocm/pkg/utils/pkgutils"
 )
 
 type (

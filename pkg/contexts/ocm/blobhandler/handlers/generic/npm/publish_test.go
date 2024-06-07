@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"os"
 
+	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("NPM Publish Test Environment", func() {

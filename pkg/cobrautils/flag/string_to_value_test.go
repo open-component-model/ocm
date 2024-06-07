@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/mandelsoft/goutils/testutils"
 )
 
 var _ = Describe("value map", func() {
