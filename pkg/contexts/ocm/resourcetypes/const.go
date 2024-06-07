@@ -16,7 +16,10 @@ const (
 	HELM_CHART = "helmChart"
 	// NPM_PACKAGE describes a Node.js (npm) package.
 	NPM_PACKAGE = "npmPackage"
-	// MAVEN_PACKAGE describes a Maven artifact (jar).
+	// MAVEN_PACKAGE describes the complete content addressed by a GAV.
+	// The term Maven Package is introduced in the context of ocm since the term Maven Artifact (as used by Maven
+	// itself) is quite ambiguous since it may refer either to the complete content addressed by a GAV or to a single
+	// file addressed by a GAVCE.
 	MAVEN_PACKAGE = "mavenPackage"
 	// BLUEPRINT describes a Gardener Landscaper blueprint which is an artifact used in its installations describing
 	// how to deploy a software component.
