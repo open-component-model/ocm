@@ -7,7 +7,7 @@ import (
 
 	"github.com/mandelsoft/goutils/optionutils"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/wget"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
@@ -146,7 +146,7 @@ func (m *accessMethod) getBlob() (blobaccess.BlobAccess, error) {
 		return m.blob, nil
 	}
 
-	blob, err := wget.BlobAccessForWget(m.spec.URL,
+	blob, err := wget.BlobAccess(m.spec.URL,
 		wget.WithMimeType(m.spec.MediaType),
 		wget.WithCredentialContext(m.comp.GetContext()),
 		wget.WithLoggingContext(m.comp.GetContext()),

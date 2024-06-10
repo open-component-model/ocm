@@ -1,13 +1,14 @@
-package standard
+package blobaccess
 
 import (
 	"bytes"
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
-
-	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/mandelsoft/goutils/ioutils"
 )
+
+type _nopCloser = ioutils.NopCloser
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -17,9 +18,9 @@ type readerAccess struct {
 	origin string
 }
 
-var _ bpi.DataSource = (*readerAccess)(nil)
+var _ DataSource = (*readerAccess)(nil)
 
-func DataAccessForReaderFunction(reader func() (io.ReadCloser, error), origin string) bpi.DataAccess {
+func DataAccessForReaderFunction(reader func() (io.ReadCloser, error), origin string) DataAccess {
 	return &readerAccess{reader: reader, origin: origin}
 }
 

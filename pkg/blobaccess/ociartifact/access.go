@@ -10,7 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 )
 
-func BlobAccessForOCIArtifact(refname string, opts ...Option) (bpi.BlobAccess, string, error) {
+func BlobAccess(refname string, opts ...Option) (bpi.BlobAccess, string, error) {
 	eff := optionutils.EvalOptions(opts...)
 
 	eff.Printf("image %s\n", refname)
@@ -47,9 +47,9 @@ func BlobAccessForOCIArtifact(refname string, opts ...Option) (bpi.BlobAccess, s
 	return blob, version, nil
 }
 
-func BlobAccessProviderForOCIArtifact(name string, opts ...Option) bpi.BlobAccessProvider {
+func Provider(name string, opts ...Option) bpi.BlobAccessProvider {
 	return bpi.BlobAccessProviderFunction(func() (bpi.BlobAccess, error) {
-		b, _, err := BlobAccessForOCIArtifact(name, opts...)
+		b, _, err := BlobAccess(name, opts...)
 		return b, err
 	})
 }

@@ -43,7 +43,7 @@ var _ = Describe("blobaccess for maven", func() {
 		It("blobaccess for gav", func() {
 			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
 
-			b := Must(me.BlobAccessForMaven(repo, coords.GroupId, coords.ArtifactId, coords.Version, me.WithCachingFileSystem(env.FileSystem())))
+			b := Must(me.BlobAccess(repo, coords.GroupId, coords.ArtifactId, coords.Version, me.WithCachingFileSystem(env.FileSystem())))
 			defer Close(b, "blobaccess")
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
 			Expect(files).To(ConsistOf(
@@ -58,7 +58,7 @@ var _ = Describe("blobaccess for maven", func() {
 			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0",
 				maven.WithClassifier("random-content"))
 
-			b := Must(me.BlobAccessForMavenCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
+			b := Must(me.BlobAccessForCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
 			defer Close(b, "blobaccess")
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
 			Expect(files).To(ConsistOf("sdk-modules-bom-5.7.0-random-content.txt",
@@ -69,7 +69,7 @@ var _ = Describe("blobaccess for maven", func() {
 			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0",
 				maven.WithClassifier(""))
 
-			b := Must(me.BlobAccessForMavenCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
+			b := Must(me.BlobAccessForCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
 			defer Close(b, "blobaccess")
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
 			Expect(files).To(ConsistOf("sdk-modules-bom-5.7.0.pom",
@@ -80,7 +80,7 @@ var _ = Describe("blobaccess for maven", func() {
 			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0",
 				maven.WithExtension("jar"))
 
-			b := Must(me.BlobAccessForMavenCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
+			b := Must(me.BlobAccessForCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
 			defer Close(b, "blobaccess")
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
 			Expect(files).To(ConsistOf("sdk-modules-bom-5.7.0-sources.jar",
@@ -91,7 +91,7 @@ var _ = Describe("blobaccess for maven", func() {
 			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0",
 				maven.WithExtension("txt"))
 
-			b := Must(me.BlobAccessForMavenCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
+			b := Must(me.BlobAccessForCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
 			defer Close(b, "blobaccess")
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
 			Expect(files).To(ConsistOf("sdk-modules-bom-5.7.0-random-content.txt"))
@@ -101,7 +101,7 @@ var _ = Describe("blobaccess for maven", func() {
 			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0",
 				maven.WithClassifier("random-content"), maven.WithExtension("json"))
 
-			b := Must(me.BlobAccessForMavenCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
+			b := Must(me.BlobAccessForCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
 			defer Close(b, "blobaccess")
 			Expect(string(Must(b.Get()))).To(Equal(`{"some": "test content"}`))
 		})
@@ -115,7 +115,7 @@ var _ = Describe("blobaccess for maven", func() {
 			})
 			It("blobaccess for gav", func() {
 				repo := Must(maven.NewUrlRepository(MAVEN_CENTRAL))
-				b := Must(me.BlobAccessForMavenCoords(repo, coords))
+				b := Must(me.BlobAccessForCoords(repo, coords))
 				defer Close(b, "blobaccess")
 				files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
 				Expect(files).To(ConsistOf(

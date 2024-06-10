@@ -89,7 +89,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 			return nil, "", err
 		}
 	}
-	access, err := mavenblob.BlobAccessForMavenCoords(repo, &s.Coordinates,
+	access, err := mavenblob.BlobAccessForCoords(repo, &s.Coordinates,
 		mavenblob.WithCredentialContext(ctx),
 		mavenblob.WithLoggingContext(ctx),
 		mavenblob.WithCachingFileSystem(vfsattr.Get(ctx)),

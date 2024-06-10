@@ -53,6 +53,13 @@ func (o *Options) ApplyTo(opts *Options) {
 	}
 }
 
+func (o *Options) OCIContext() oci.Context {
+	if o.Context == nil {
+		return oci.DefaultContext()
+	}
+	return o.Context
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type context struct {

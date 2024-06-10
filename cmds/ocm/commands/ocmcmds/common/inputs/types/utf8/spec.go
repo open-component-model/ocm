@@ -121,7 +121,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	if err != nil {
 		return nil, "", err
 	}
-	return s.ProcessBlob(ctx, blobaccess.DataAccessForBytes(data), ctx.FileSystem())
+	return s.ProcessBlob(ctx, blobaccess.DataAccessForData(data), ctx.FileSystem())
 }
 
 func Prepare(raw []byte) (interface{}, error) {

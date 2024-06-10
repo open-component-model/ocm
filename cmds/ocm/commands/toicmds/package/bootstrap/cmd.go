@@ -200,7 +200,7 @@ func (o *Command) Complete(args []string) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed reading credentials file %q", o.CredentialsFile)
 		}
-		o.Credentials = blobaccess.DataAccessForBytes(data, o.CredentialsFile)
+		o.Credentials = blobaccess.DataAccessForData(data, o.CredentialsFile)
 	}
 	if len(o.ParameterFile) == 0 {
 		if ok, _ := vfs.FileExists(o.FileSystem(), DEFAULT_PARAMETER_FILE); ok {
@@ -212,7 +212,7 @@ func (o *Command) Complete(args []string) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed reading parameter file %q", o.ParameterFile)
 		}
-		o.Parameters = blobaccess.DataAccessForBytes(data, o.ParameterFile)
+		o.Parameters = blobaccess.DataAccessForData(data, o.ParameterFile)
 	}
 	return nil
 }

@@ -1,13 +1,12 @@
-package standard_test
+package file_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	me "github.com/open-component-model/ocm/pkg/blobaccess"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
-	me "github.com/open-component-model/ocm/pkg/blobaccess"
 )
 
 var _ = Describe("temp file management", func() {
@@ -58,7 +57,7 @@ var _ = Describe("temp file management", func() {
 		Expect(blob.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, name)).To(BeFalse())
 	})
-	
+
 	It("temp file blob access", func() {
 		value := []byte("this is a test")
 		tmp, err := me.NewTempFile("", "test*.tmp", tempfs)

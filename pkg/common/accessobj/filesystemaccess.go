@@ -9,7 +9,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -75,7 +76,7 @@ func (a *FileSystemBlobAccess) GetBlobData(digest digest.Digest) (int64, blobacc
 	}
 	path := a.DigestPath(digest)
 	if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
-		return blobaccess.BLOB_UNKNOWN_SIZE, blobaccess.DataAccessForFile(a.base.GetFileSystem(), path), nil
+		return blobaccess.BLOB_UNKNOWN_SIZE, file.DataAccess(a.base.GetFileSystem(), path), nil
 	} else {
 		if err != nil {
 			return blobaccess.BLOB_UNKNOWN_SIZE, nil, err
@@ -91,7 +92,7 @@ func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (blobaccess.DataAc
 
 	path := a.BlobPath(name)
 	if ok, err := vfs.IsDir(a.base.GetFileSystem(), path); ok {
-		tempfile, err := blobaccess.NewTempFile(os.TempDir(), "COMPARCH")
+		tempfile, err := file.NewTempFile(os.TempDir(), "COMPARCH")
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +107,7 @@ func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (blobaccess.DataAc
 		}
 
 		if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
-			return blobaccess.DataAccessForFile(a.base.GetFileSystem(), path), nil
+			return file.DataAccess(a.base.GetFileSystem(), path), nil
 		} else {
 			if err != nil {
 				return nil, err

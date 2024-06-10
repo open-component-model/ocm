@@ -6,7 +6,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/iotools"
 )
 
@@ -34,7 +34,7 @@ func (d *readerWriter) WriteTo(w Writer) (size int64, dig digest.Digest, err err
 	dr := iotools.NewDefaultDigestReader(d.reader)
 	_, err = io.Copy(w, dr)
 	if err != nil {
-		return BLOB_UNKNOWN_SIZE, BLOB_UNKNOWN_DIGEST, err
+		return blobaccess.BLOB_UNKNOWN_SIZE, blobaccess.BLOB_UNKNOWN_DIGEST, err
 	}
 	return dr.Size(), dr.Digest(), err
 }
@@ -50,7 +50,7 @@ func NewDataAccessWriter(acc blobaccess.DataAccess) DataWriter {
 func (d *dataAccessWriter) WriteTo(w Writer) (int64, digest.Digest, error) {
 	r, err := d.access.Reader()
 	if err != nil {
-		return BLOB_UNKNOWN_SIZE, BLOB_UNKNOWN_DIGEST, err
+		return blobaccess.BLOB_UNKNOWN_SIZE, blobaccess.BLOB_UNKNOWN_DIGEST, err
 	}
 	return (&readerWriter{r}).WriteTo(w)
 }
@@ -64,5 +64,5 @@ func NewWriteAtWriter(at func(w io.WriterAt) error) DataWriter {
 }
 
 func (d *writerAtWrapper) WriteTo(w Writer) (int64, digest.Digest, error) {
-	return BLOB_UNKNOWN_SIZE, BLOB_UNKNOWN_DIGEST, d.writer(w)
+	return blobaccess.BLOB_UNKNOWN_SIZE, blobaccess.BLOB_UNKNOWN_DIGEST, d.writer(w)
 }

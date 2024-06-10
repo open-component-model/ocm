@@ -3,7 +3,6 @@ package signing
 import (
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"time"
 
 	"github.com/mandelsoft/goutils/errors"
 
@@ -47,25 +46,4 @@ func VerifyCertDN(intermediate signutils.GenericCertificateChain, root signutils
 		}
 	}
 	return errors.ErrNotSupported("codesign", "", "certificate")
-}
-
-// Deprecated: use signutils.CreateCertificate.
-func CreateCertificate(subject pkix.Name, validFrom *time.Time,
-	validity time.Duration, pub interface{},
-	ca *x509.Certificate, priv interface{}, isCA bool, names ...string,
-) ([]byte, error) {
-	spec := &signutils.Specification{
-		RootCAs:      ca,
-		IsCA:         isCA,
-		PublicKey:    pub,
-		CAPrivateKey: priv,
-		CAChain:      ca,
-		Subject:      subject,
-		Usages:       signutils.Usages{x509.ExtKeyUsageCodeSigning},
-		Validity:     validity,
-		NotBefore:    validFrom,
-		Hosts:        names,
-	}
-	_, data, err := signutils.CreateCertificate(spec)
-	return data, err
 }

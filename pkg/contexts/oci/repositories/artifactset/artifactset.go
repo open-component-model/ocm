@@ -7,20 +7,22 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
 )
 
 const (
-	MAINARTIFACT_ANNOTATION = "software.ocm/main"
-	TAGS_ANNOTATION         = "software.ocm/tags"
-	TYPE_ANNOTATION         = "software.ocm/type"
+	MAINARTIFACT_ANNOTATION = annotations.MAINARTIFACT_ANNOTATION
 
-	OCITAG_ANNOTATION = "org.opencontainers.image.ref.name"
+	TAGS_ANNOTATION = annotations.TAGS_ANNOTATION
+	TYPE_ANNOTATION = annotations.TYPE_ANNOTATION
+
+	OCITAG_ANNOTATION = annotations.OCITAG_ANNOTATION
 )
 
 func RetrieveMainArtifactFromIndex(index *artdesc.Index) string {

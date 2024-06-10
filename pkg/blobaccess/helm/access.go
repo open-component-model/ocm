@@ -10,21 +10,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/helm/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocihelm "github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/helm"
 	"github.com/open-component-model/ocm/pkg/helm/loader"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-func (o *Options) OCIContext() oci.Context {
-	if o.Context == nil {
-		return oci.DefaultContext()
-	}
-	return o.Context
-}
-
-func BlobAccessForHelmChart(path string, opts ...Option) (blob bpi.BlobAccess, name, version string, err error) {
+func BlobAccess(path string, opts ...Option) (blob bpi.BlobAccess, name, version string, err error) {
 	eff := optionutils.EvalOptions(opts...)
 	ctx := eff.OCIContext()
 	fs := utils.FileSystem(eff.FileSystem)
@@ -81,9 +73,9 @@ func BlobAccessForHelmChart(path string, opts ...Option) (blob bpi.BlobAccess, n
 	return blob, chart.Name(), vers, err
 }
 
-func BlobAccessProviderForHelmChart(name string, opts ...Option) bpi.BlobAccessProvider {
+func Provider(name string, opts ...Option) bpi.BlobAccessProvider {
 	return bpi.BlobAccessProviderFunction(func() (bpi.BlobAccess, error) {
-		b, _, _, err := BlobAccessForHelmChart(name, opts...)
+		b, _, _, err := BlobAccess(name, opts...)
 		return b, err
 	})
 }

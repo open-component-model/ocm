@@ -6,7 +6,8 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/helm"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -40,7 +41,7 @@ func (l *vfsLoader) ChartArchive() (blobaccess.BlobAccess, error) {
 	if ok, err := vfs.IsFile(l.fs, l.path); !ok || err != nil {
 		return nil, err
 	}
-	return blobaccess.ForFile(helm.ChartMediaType, l.path, l.fs), nil
+	return file.BlobAccess(helm.ChartMediaType, l.path, l.fs), nil
 }
 
 func (l *vfsLoader) ChartArtefactSet() (blobaccess.BlobAccess, error) {

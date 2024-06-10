@@ -1,4 +1,4 @@
-package standard_test
+package file_test
 
 import (
 	"testing"

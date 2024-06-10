@@ -55,7 +55,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
-	access, err := wget.BlobAccessForWget(s.URL,
+	access, err := wget.BlobAccess(s.URL,
 		wget.WithCredentialContext(ctx),
 		wget.WithLoggingContext(ctx),
 		wget.WithMimeType(s.MimeType),

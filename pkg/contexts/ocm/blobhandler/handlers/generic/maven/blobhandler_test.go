@@ -2,7 +2,6 @@ package maven_test
 
 import (
 	"encoding/json"
-	"github.com/open-component-model/ocm/pkg/maven/maventest"
 	"os"
 
 	. "github.com/mandelsoft/goutils/testutils"
@@ -19,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/maven"
+	"github.com/open-component-model/ocm/pkg/maven/maventest"
 )
 
 const MAVEN_PATH = "/testdata/.m2/repository"
@@ -64,7 +64,7 @@ var _ = Describe("blobhandler generic maven tests", func() {
 	It("Upload artifact to file system", func() {
 		env.OCMContext().BlobHandlers().Register(me.NewArtifactHandler(me.NewFileConfig("target", env.FileSystem())))
 		coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
-		bacc := Must(mavenblob.BlobAccessForMavenCoords(repo, coords, mavenblob.WithCachingFileSystem(env.FileSystem())))
+		bacc := Must(mavenblob.BlobAccessForCoords(repo, coords, mavenblob.WithCachingFileSystem(env.FileSystem())))
 		defer Close(bacc)
 		ocmrepo := composition.NewRepository(env)
 		defer Close(ocmrepo)

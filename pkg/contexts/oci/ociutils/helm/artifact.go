@@ -11,7 +11,8 @@ import (
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/registry"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
@@ -68,7 +69,7 @@ func TransferAsArtifact(loader loader.Loader, ns oci.NamespaceAccess) (*chart.Ch
 		if err != nil {
 			return chart, nil, err
 		}
-		blob = blobaccess.ForFile(registry.ChartLayerMediaType, path, osfs.New())
+		blob = file.BlobAccess(registry.ChartLayerMediaType, path, osfs.New())
 	} else {
 		defer blob.Close()
 	}

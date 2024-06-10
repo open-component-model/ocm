@@ -40,7 +40,7 @@ var _ = Describe("", func() {
 		spec, err := artifactset.NewRepositorySpec(accessobj.ACC_READONLY, "/tmp/set", accessio.PathFileSystem(env))
 		Expect(err).To(Succeed())
 
-		r, err := cpi.DefaultContext.RepositoryForSpec(spec)
+		r, err := cpi.DefaultContext().RepositoryForSpec(spec)
 		Expect(err).To(Succeed())
 		defer Close(r)
 		ns, err := r.LookupNamespace("")

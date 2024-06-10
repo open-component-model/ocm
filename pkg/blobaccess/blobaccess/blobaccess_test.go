@@ -10,8 +10,9 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -43,7 +44,7 @@ var _ = Describe("blob access ref counting", func() {
 		temp := Must(os.CreateTemp("", "testfile*"))
 		path := temp.Name()
 		temp.Close()
-		blob := blobaccess.ForTemporaryFilePath(mime.MIME_TEXT, path, osfs.OsFs)
+		blob := file.BlobAccessForTemporaryFilePath(mime.MIME_TEXT, path)
 
 		Expect(vfs.FileExists(osfs.OsFs, path)).To(BeTrue())
 

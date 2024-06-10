@@ -1,4 +1,4 @@
-package standard
+package blobaccess
 
 import (
 	"bytes"
@@ -11,10 +11,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/iotools"
 	mimetypes "github.com/open-component-model/ocm/pkg/mime"
 )
-
-type _nopCloser = iotools.NopCloser
-
-////////////////////////////////////////////////////////////////////////////////
 
 type bytesAccess struct {
 	_nopCloser

@@ -53,7 +53,7 @@ func (s *Options) getVariant(ctx oci.Context, finalize *Finalizer, variant strin
 	return art, nil
 }
 
-func BlobAccessForMultiImageFromDockerDaemon(opts ...Option) (bpi.BlobAccess, error) {
+func BlobAccess(opts ...Option) (bpi.BlobAccess, error) {
 	eff := optionutils.EvalOptions(opts...)
 	ctx := eff.OCIContext()
 
@@ -149,8 +149,8 @@ func BlobAccessForMultiImageFromDockerDaemon(opts ...Option) (bpi.BlobAccess, er
 	return blob, nil
 }
 
-func BlobAccessProviderForMultiImageFromDockerDaemon(opts ...Option) bpi.BlobAccessProvider {
+func Provider(opts ...Option) bpi.BlobAccessProvider {
 	return bpi.BlobAccessProviderFunction(func() (bpi.BlobAccess, error) {
-		return BlobAccessForMultiImageFromDockerDaemon(opts...)
+		return BlobAccess(opts...)
 	})
 }

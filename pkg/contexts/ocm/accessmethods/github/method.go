@@ -14,7 +14,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/oauth2"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
 	hd "github.com/open-component-model/ocm/pkg/common/accessio/downloader/http"

@@ -2,6 +2,8 @@ package signing
 
 import (
 	"crypto/x509"
+	"crypto/x509/pkix"
+	"time"
 
 	parse "github.com/mandelsoft/spiff/dynaml/x509"
 
@@ -27,4 +29,25 @@ func ParsePrivateKey(data []byte) (interface{}, error) {
 // Deprecated: use signutils.SystemCertPool.
 func BaseRootPool() (*x509.CertPool, error) {
 	return signutils.SystemCertPool()
+}
+
+// Deprecated: use signutils.CreateCertificate.
+func CreateCertificate(subject pkix.Name, validFrom *time.Time,
+	validity time.Duration, pub interface{},
+	ca *x509.Certificate, priv interface{}, isCA bool, names ...string,
+) ([]byte, error) {
+	spec := &signutils.Specification{
+		RootCAs:      ca,
+		IsCA:         isCA,
+		PublicKey:    pub,
+		CAPrivateKey: priv,
+		CAChain:      ca,
+		Subject:      subject,
+		Usages:       signutils.Usages{x509.ExtKeyUsageCodeSigning},
+		Validity:     validity,
+		NotBefore:    validFrom,
+		Hosts:        names,
+	}
+	_, data, err := signutils.CreateCertificate(spec)
+	return data, err
 }

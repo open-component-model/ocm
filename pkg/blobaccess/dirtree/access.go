@@ -15,15 +15,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
-func DataAccessForDirTree(path string, opts ...Option) (bpi.DataAccess, error) {
-	blobAccess, err := BlobAccessForDirTree(path, opts...)
+func DataAccess(path string, opts ...Option) (bpi.DataAccess, error) {
+	blobAccess, err := BlobAccess(path, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return blobAccess, nil
 }
 
-func BlobAccessForDirTree(path string, opts ...Option) (_ bpi.BlobAccess, rerr error) {
+func BlobAccess(path string, opts ...Option) (_ bpi.BlobAccess, rerr error) {
 	eff := optionutils.EvalOptions(opts...)
 	fs := utils.FileSystem(eff.FileSystem)
 
@@ -70,8 +70,8 @@ func BlobAccessForDirTree(path string, opts ...Option) (_ bpi.BlobAccess, rerr e
 	return temp.AsBlob(eff.MimeType), nil
 }
 
-func BlobAccessProviderForDirTree(path string, opts ...Option) bpi.BlobAccessProvider {
+func Provider(path string, opts ...Option) bpi.BlobAccessProvider {
 	return bpi.BlobAccessProviderFunction(func() (bpi.BlobAccess, error) {
-		return BlobAccessForDirTree(path, opts...)
+		return BlobAccess(path, opts...)
 	})
 }

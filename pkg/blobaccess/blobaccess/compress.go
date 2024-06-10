@@ -10,29 +10,29 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
-	compression2 "github.com/open-component-model/ocm/pkg/common/compression"
+	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type compression struct {
-	blob BlobAccess
+type _compression struct {
+	blob bpi.BlobAccess
 }
 
-var _ bpi.BlobAccessBase = (*compression)(nil)
+var _ bpi.BlobAccessBase = (*_compression)(nil)
 
-func (c *compression) Close() error {
+func (c *_compression) Close() error {
 	return c.blob.Close()
 }
 
-func (c *compression) Get() ([]byte, error) {
+func (c *_compression) Get() ([]byte, error) {
 	r, err := c.blob.Reader()
 	if err != nil {
 		return nil, err
 	}
 	defer r.Close()
-	rr, _, err := compression2.AutoDecompress(r)
+	rr, _, err := compression.AutoDecompress(r)
 	if err != nil {
 		return nil, err
 	}
@@ -59,13 +59,13 @@ func (r *reader) Close() error {
 	return errors.Join(err, r.err)
 }
 
-func (c *compression) Reader() (io.ReadCloser, error) {
+func (c *_compression) Reader() (io.ReadCloser, error) {
 	r, err := c.blob.Reader()
 	if err != nil {
 		return nil, err
 	}
 	defer r.Close()
-	rr, _, err := compression2.AutoDecompress(r)
+	rr, _, err := compression.AutoDecompress(r)
 	if err != nil {
 		return nil, err
 	}
@@ -83,11 +83,11 @@ func (c *compression) Reader() (io.ReadCloser, error) {
 	return outr, nil
 }
 
-func (c *compression) Digest() digest.Digest {
-	return BLOB_UNKNOWN_DIGEST
+func (c *_compression) Digest() digest.Digest {
+	return bpi.BLOB_UNKNOWN_DIGEST
 }
 
-func (c *compression) MimeType() string {
+func (c *_compression) MimeType() string {
 	m := c.blob.MimeType()
 	if mime.IsGZip(m) {
 		return m
@@ -95,20 +95,20 @@ func (c *compression) MimeType() string {
 	return m + "+gzip"
 }
 
-func (c *compression) DigestKnown() bool {
+func (c *_compression) DigestKnown() bool {
 	return false
 }
 
-func (c *compression) Size() int64 {
-	return BLOB_UNKNOWN_SIZE
+func (c *_compression) Size() int64 {
+	return bpi.BLOB_UNKNOWN_SIZE
 }
 
-func WithCompression(blob BlobAccess) (BlobAccess, error) {
+func WithCompression(blob bpi.BlobAccess) (bpi.BlobAccess, error) {
 	b, err := blob.Dup()
 	if err != nil {
 		return nil, err
 	}
-	return bpi.NewBlobAccessForBase(&compression{
+	return bpi.NewBlobAccessForBase(&_compression{
 		blob: b,
 	}), nil
 }
@@ -116,7 +116,7 @@ func WithCompression(blob BlobAccess) (BlobAccess, error) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type decompression struct {
-	blob BlobAccess
+	blob bpi.BlobAccess
 }
 
 var _ bpi.BlobAccessBase = (*decompression)(nil)
@@ -131,7 +131,7 @@ func (c *decompression) Get() ([]byte, error) {
 		return nil, err
 	}
 	defer r.Close()
-	rr, _, err := compression2.AutoDecompress(r)
+	rr, _, err := compression.AutoDecompress(r)
 	if err != nil {
 		return nil, err
 	}
@@ -149,12 +149,12 @@ func (c *decompression) Reader() (io.ReadCloser, error) {
 		return nil, err
 	}
 	defer r.Close()
-	rr, _, err := compression2.AutoDecompress(r)
+	rr, _, err := compression.AutoDecompress(r)
 	return rr, err
 }
 
 func (c *decompression) Digest() digest.Digest {
-	return BLOB_UNKNOWN_DIGEST
+	return bpi.BLOB_UNKNOWN_DIGEST
 }
 
 func (c *decompression) MimeType() string {
@@ -170,10 +170,10 @@ func (c *decompression) DigestKnown() bool {
 }
 
 func (c *decompression) Size() int64 {
-	return BLOB_UNKNOWN_SIZE
+	return bpi.BLOB_UNKNOWN_SIZE
 }
 
-func WithDecompression(blob BlobAccess) (BlobAccess, error) {
+func WithDecompression(blob bpi.BlobAccess) (bpi.BlobAccess, error) {
 	b, err := blob.Dup()
 	if err != nil {
 		return nil, err

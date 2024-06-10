@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	. "github.com/mandelsoft/goutils/finalizer"
-
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -92,7 +91,7 @@ func (s *Spec) getVariant(ctx clictx.Context, finalize *Finalizer, variant strin
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
-	blob, err := dockermulti.BlobAccessForMultiImageFromDockerDaemon(
+	blob, err := dockermulti.BlobAccess(
 		dockermulti.WithContext(ctx),
 		dockermulti.WithPrinter(ctx.Printer()),
 		dockermulti.WithVariants(s.Variants...),

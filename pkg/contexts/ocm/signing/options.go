@@ -145,13 +145,6 @@ func SignerByAlgo(algo string) Option {
 	return &signer{algo, nil, ""}
 }
 
-// SignerByName set a signer by algorithm name.
-//
-// Deprecated: use SignerByAlgo.
-func SignerByName(algo string) Option {
-	return SignerByAlgo(algo)
-}
-
 func (o *signer) ApplySigningOption(opts *Options) {
 	n := strings.TrimSpace(o.name)
 	if n != "" {

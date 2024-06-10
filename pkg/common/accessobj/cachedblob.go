@@ -7,8 +7,9 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
@@ -52,21 +53,21 @@ func (c *CachedBlobAccess) setup() error {
 		return nil
 	}
 
-	file, err := c.cache.CreateTempFile("blob*")
+	f, err := c.cache.CreateTempFile("blob*")
 	if err != nil {
 		return fmt.Errorf("unable to create temporary file: %w", err)
 	}
-	defer file.Close()
+	defer f.Close()
 
-	c.path = file.Name()
+	c.path = f.Name()
 
-	c.size, c.digest, err = c.source.WriteTo(file)
+	c.size, c.digest, err = c.source.WriteTo(f)
 	if err != nil {
-		defer c.cache.Filesystem.Remove(file.Name())
-		return fmt.Errorf("unable to write source to file '%s': %w", file.Name(), err)
+		defer c.cache.Filesystem.Remove(f.Name())
+		return fmt.Errorf("unable to write source to file '%s': %w", f.Name(), err)
 	}
 
-	c.effective = blobaccess.ForFile(c.mime, c.path, c.cache.Filesystem)
+	c.effective = file.BlobAccess(c.mime, c.path, c.cache.Filesystem)
 
 	return nil
 }
@@ -111,9 +112,9 @@ func (c *CachedBlobAccess) Close() error {
 func (c *CachedBlobAccess) Digest() digest.Digest {
 	err := c.setup()
 	if err != nil {
-		return accessio.BLOB_UNKNOWN_DIGEST
+		return bpi.BLOB_UNKNOWN_DIGEST
 	}
-	if c.digest == accessio.BLOB_UNKNOWN_DIGEST {
+	if c.digest == bpi.BLOB_UNKNOWN_DIGEST {
 		return c.effective.Digest()
 	}
 	return c.digest
@@ -130,9 +131,9 @@ func (c *CachedBlobAccess) DigestKnown() bool {
 func (c *CachedBlobAccess) Size() int64 {
 	err := c.setup()
 	if err != nil {
-		return accessio.BLOB_UNKNOWN_SIZE
+		return blobaccess.BLOB_UNKNOWN_SIZE
 	}
-	if c.size == accessio.BLOB_UNKNOWN_SIZE {
+	if c.size == blobaccess.BLOB_UNKNOWN_SIZE {
 		return c.effective.Size()
 	}
 	return c.size

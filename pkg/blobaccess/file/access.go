@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
@@ -51,6 +52,9 @@ func (a *fileDataAccess) Reader() (io.ReadCloser, error) {
 	return file, nil
 }
 
+// Validate checks if the access is valid, meaning
+// it can provide data. Here, this means
+// that the file exists.
 func (a *fileDataAccess) Validate() error {
 	ok, err := vfs.Exists(a.fs, a.path)
 	if err != nil {
@@ -128,7 +132,7 @@ func BlobAccess(mime string, path string, fss ...vfs.FileSystem) bpi.BlobAccess 
 	}
 }
 
-func ProviderForFile(mime string, path string, fss ...vfs.FileSystem) bpi.BlobAccessProvider {
+func Provider(mime string, path string, fss ...vfs.FileSystem) bpi.BlobAccessProvider {
 	return bpi.BlobAccessProviderFunction(func() (bpi.BlobAccess, error) {
 		return BlobAccess(mime, path, fss...), nil
 	})
@@ -224,49 +228,39 @@ func (b *temporaryFileBlob) Path() string {
 	return b.path
 }
 
-func ForTemporaryFile(mime string, temp vfs.File, fss ...vfs.FileSystem) bpi.BlobAccess {
-	return bpi.NewBlobAccessForBase(&temporaryFileBlob{
-		_blobAccess: BlobAccess(mime, temp.Name(), fss...),
-		filesystem:  utils.FileSystem(fss...),
+func BlobAccessForTemporaryFile(mime string, temp vfs.File, opts ...Option) bpi.BlobAccess {
+	eff := optionutils.EvalOptions(opts...)
+	t := &temporaryFileBlob{
+		_blobAccess: BlobAccess(mime, temp.Name(), eff.FileSystem),
+		filesystem:  utils.FileSystem(eff.FileSystem),
 		path:        temp.Name(),
 		file:        temp,
-	})
+	}
+	// TODO: handle FileLocation interface in combination with partially set meta data.
+	if eff.Digest != "" || eff.GetSize() != bpi.BLOB_UNKNOWN_SIZE {
+		return bpi.NewBlobAccessForBase(bpi.BaseAccessForDataAccessAndMeta(mime, t, eff.Digest, eff.GetSize()))
+	}
+	return bpi.NewBlobAccessForBase(t)
 }
 
-func ForTemporaryFileWithMeta(mime string, digest digest.Digest, size int64, temp vfs.File, fss ...vfs.FileSystem) bpi.BlobAccess {
+func BlobAccessForTemporaryFilePath(mime string, temp string, opts ...Option) bpi.BlobAccess {
+	eff := optionutils.EvalOptions(opts...)
 	return bpi.NewBlobAccessForBase(bpi.BaseAccessForDataAccessAndMeta(mime, &temporaryFileBlob{
-		_blobAccess: BlobAccess(mime, temp.Name(), fss...),
-		filesystem:  utils.FileSystem(fss...),
-		path:        temp.Name(),
-		file:        temp,
-	}, digest, size))
-}
-
-func ForTemporaryFilePath(mime string, temp string, fss ...vfs.FileSystem) bpi.BlobAccess {
-	return bpi.NewBlobAccessForBase(&temporaryFileBlob{
-		_blobAccess: BlobAccess(mime, temp, fss...),
-		filesystem:  utils.FileSystem(fss...),
+		_blobAccess: BlobAccess(mime, temp, eff.FileSystem),
+		filesystem:  utils.FileSystem(eff.FileSystem),
 		path:        temp,
-	})
-}
-
-func ForTemporaryFilePathWithMeta(mime string, digest digest.Digest, size int64, temp string, fss ...vfs.FileSystem) bpi.BlobAccess {
-	return bpi.NewBlobAccessForBase(bpi.BaseAccessForDataAccessAndMeta(mime, &temporaryFileBlob{
-		_blobAccess: BlobAccess(mime, temp, fss...),
-		filesystem:  utils.FileSystem(fss...),
-		path:        temp,
-	}, digest, size))
+	}, eff.Digest, eff.GetSize()))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // TempFile holds a temporary file that should be kept open.
 // Close should never be called directly.
-// It can be passed to another responsibility realm by calling Release
+// It can be passed to another responsibility realm by calling Release-
 // For example to be transformed into a TemporaryBlobAccess.
 // Close will close and remove an unreleased file and does
 // nothing if it has been released.
-// If it has been releases the new realm is responsible.
+// If it has been released the new realm is responsible.
 // to close and remove it.
 type TempFile struct {
 	lock       sync.Mutex
@@ -298,6 +292,9 @@ func (t *TempFile) FileSystem() vfs.FileSystem {
 	return t.filesystem
 }
 
+// Release passes the responsibility for closing and removing
+// the temporary file to another realm. After calling this method
+// the TempFile object will not handle these operations anymore, if it is closed.
 func (t *TempFile) Release() vfs.File {
 	t.lock.Lock()
 	defer t.lock.Unlock()
@@ -322,9 +319,11 @@ func (t *TempFile) Sync() error {
 }
 
 func (t *TempFile) AsBlob(mime string) bpi.BlobAccess {
-	return ForTemporaryFile(mime, t.Release(), t.filesystem)
+	return BlobAccessForTemporaryFile(mime, t.Release(), WithFileSystem(t.filesystem))
 }
 
+// Close closes and removes the temporary file as long it has not
+// been released before by calling Release.
 func (t *TempFile) Close() error {
 	t.lock.Lock()
 	defer t.lock.Unlock()

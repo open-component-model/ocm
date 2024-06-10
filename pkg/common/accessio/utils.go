@@ -5,13 +5,8 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/mandelsoft/goutils/sliceutils"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/compression"
-	"github.com/open-component-model/ocm/pkg/iotools"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type closableReader struct {
@@ -37,39 +32,6 @@ func NopWriteCloser(w io.Writer) io.WriteCloser {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-// Deprecated: use iotools.BlobData.
-func AddCloser(reader io.ReadCloser, closer io.Closer, msg ...string) io.ReadCloser {
-	return iotools.AddReaderCloser(reader, closer, sliceutils.AsAny(msg)...)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-// Deprecated: use blobaccess.BlobData.
-func BlobData(blob blobaccess.DataGetter, err error) ([]byte, error) {
-	if err != nil {
-		return nil, err
-	}
-	return blob.Get()
-}
-
-// Deprecated: use blobaccess.BlobReader.
-func BlobReader(blob blobaccess.DataReader, err error) (io.ReadCloser, error) {
-	if err != nil {
-		return nil, err
-	}
-	return blob.Reader()
-}
-
-// Deprecated: use utils.FileSystem.
-func FileSystem(fss ...vfs.FileSystem) vfs.FileSystem {
-	return utils.FileSystem(fss...)
-}
-
-// Deprecated: use utils.DefaultedFileSystem.
-func DefaultedFileSystem(def vfs.FileSystem, fss ...vfs.FileSystem) vfs.FileSystem {
-	return utils.DefaultedFileSystem(def, fss...)
-}
 
 type once struct {
 	callbacks []CloserCallback

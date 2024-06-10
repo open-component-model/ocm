@@ -1,6 +1,9 @@
 package bpi
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/blobaccess/internal"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -25,6 +28,8 @@ type (
 
 	Validatable = utils.Validatable
 
+	DataReader   = internal.DataReader
+	DataGetter   = internal.DataGetter
 	DataSource   = internal.DataSource
 	DigestSource = internal.DigestSource
 	MimeType     = internal.MimeType
@@ -36,4 +41,12 @@ type BlobAccessProviderFunction func() (BlobAccess, error)
 
 func (p BlobAccessProviderFunction) BlobAccess() (BlobAccess, error) {
 	return p()
+}
+
+func ErrBlobNotFound(digest digest.Digest) error {
+	return errors.ErrNotFound(KIND_BLOB, digest.String())
+}
+
+func IsErrBlobNotFound(err error) bool {
+	return errors.IsErrNotFoundKind(err, KIND_BLOB)
 }
