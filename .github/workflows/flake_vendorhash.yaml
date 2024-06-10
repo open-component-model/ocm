@@ -58,4 +58,4 @@ jobs:
         run: |
           FILE=flake.nix
           echo "{\"message\":\"auto update vendor hash\",\"content\":\"$(base64 -w0 ${FILE})\",\"sha\":\"$(git rev-parse :${FILE})\"}" > input.json
-          gh api -X PUT https://api.github.com/repos/hilmarf/ocm/contents/${FILE} --input input.json
+          gh api -X PUT https://api.github.com/repos/open-component-model/ocm/contents/${FILE} --input input.json
