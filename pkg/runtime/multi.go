@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/set"
 
 	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -32,8 +33,8 @@ func NewMultiFormatVersion[T VersionedTypedObject](kind string, formats FormatVe
 		return nil, fmt.Errorf("%s is no base type name (should be %s, but has version %s)", kind, k, v)
 	}
 	// check, whether for all formats the appropriate anonymous format is present
-	aliases := utils.StringSet{}
-	found := utils.StringSet{}
+	aliases := set.New[string]()
+	found := set.New[string]()
 	for n := range formats.KnownFormats() {
 		k, _ := KindVersion(n)
 		if n == k {
@@ -44,7 +45,7 @@ func NewMultiFormatVersion[T VersionedTypedObject](kind string, formats FormatVe
 	aliases.Add(kind)
 	if !reflect.DeepEqual(aliases, found) {
 		for k := range found {
-			aliases.Remove(k)
+			aliases.Delete(k)
 		}
 		return nil, errors.Newf("missing base formats %s", utils.StringMapKeys(aliases))
 	}

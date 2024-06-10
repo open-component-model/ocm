@@ -9,7 +9,6 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
@@ -54,7 +53,7 @@ func (s *Options) getVariant(ctx oci.Context, finalize *Finalizer, variant strin
 	return art, nil
 }
 
-func BlobAccessForMultiImageFromDockerDaemon(opts ...Option) (blobaccess.BlobAccess, error) {
+func BlobAccessForMultiImageFromDockerDaemon(opts ...Option) (bpi.BlobAccess, error) {
 	eff := optionutils.EvalOptions(opts...)
 	ctx := eff.OCIContext()
 
@@ -72,7 +71,7 @@ func BlobAccessForMultiImageFromDockerDaemon(opts ...Option) (blobaccess.BlobAcc
 		return nil, fmt.Errorf("no versio specified")
 	}
 
-	feedback := func(blob blobaccess.BlobAccess, art cpi.ArtifactAccess) error {
+	feedback := func(blob bpi.BlobAccess, art cpi.ArtifactAccess) error {
 		desc := artdesc.DefaultBlobDescriptor(blob)
 		if art.IsManifest() {
 			cfgBlob, err := art.ManifestAccess().GetConfigBlob()
@@ -97,7 +96,7 @@ func BlobAccessForMultiImageFromDockerDaemon(opts ...Option) (blobaccess.BlobAcc
 
 	blob, err := artifactset.SynthesizeArtifactBlobFor(version, func() (fac artifactset.ArtifactFactory, main bool, err error) {
 		var art cpi.ArtifactAccess
-		var blob blobaccess.BlobAccess
+		var blob bpi.BlobAccess
 
 		switch {
 		case i > len(eff.Variants):

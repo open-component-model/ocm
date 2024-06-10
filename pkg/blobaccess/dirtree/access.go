@@ -8,8 +8,8 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
@@ -42,7 +42,7 @@ func BlobAccessForDirTree(path string, opts ...Option) (_ bpi.BlobAccess, rerr e
 		FollowSymlinks: utils.AsBool(eff.FollowSymlinks),
 	}
 
-	temp, err := blobaccess.NewTempFile(fs.FSTempDir(), "resourceblob*.tgz", fs)
+	temp, err := file.NewTempFile(fs.FSTempDir(), "resourceblob*.tgz", fs)
 	if err != nil {
 		return nil, err
 	}

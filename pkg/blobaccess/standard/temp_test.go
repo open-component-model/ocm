@@ -1,4 +1,4 @@
-package blobaccess_test
+package standard_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
@@ -7,7 +7,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	me "github.com/open-component-model/ocm/pkg/blobaccess"
 )
 
 var _ = Describe("temp file management", func() {
@@ -24,20 +24,22 @@ var _ = Describe("temp file management", func() {
 	})
 
 	It("temp file exists", func() {
-		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
+		tmp, err := me.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		defer tmp.Close()
 		Expect(vfs.FileExists(tempfs, tmp.Name())).To(BeTrue())
 	})
+
 	It("temp file deleted on close", func() {
-		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
+		tmp, err := me.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		name := tmp.Name()
 		Expect(tmp.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, name)).To(BeFalse())
 	})
+
 	It("temp file released", func() {
-		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
+		tmp, err := me.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		name := tmp.Name()
 		file := tmp.Release()
@@ -45,8 +47,9 @@ var _ = Describe("temp file management", func() {
 		Expect(tmp.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, name)).To(BeTrue())
 	})
+
 	It("temp file blob", func() {
-		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
+		tmp, err := me.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		name := tmp.Name()
 		blob := tmp.AsBlob("ttt")
@@ -55,9 +58,10 @@ var _ = Describe("temp file management", func() {
 		Expect(blob.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, name)).To(BeFalse())
 	})
+	
 	It("temp file blob access", func() {
 		value := []byte("this is a test")
-		tmp, err := blobaccess.NewTempFile("", "test*.tmp", tempfs)
+		tmp, err := me.NewTempFile("", "test*.tmp", tempfs)
 		Expect(err).To(Succeed())
 		tmp.Writer().Write(value)
 		Expect(tmp.Sync()).To(Succeed())

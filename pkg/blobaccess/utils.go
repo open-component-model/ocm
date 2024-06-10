@@ -3,97 +3,15 @@ package blobaccess
 import (
 	"bytes"
 	"io"
-	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/iotools"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func Cast[I interface{}](acc BlobAccess) I {
 	return bpi.Cast[I](acc)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-// TempFile holds a temporary file that should be kept open.
-// Close should never be called directly.
-// It can be passed to another responsibility realm by calling Release
-// For example to be transformed into a TemporaryBlobAccess.
-// Close will close and remove an unreleased file and does
-// nothing if it has been released.
-// If it has been releases the new realm is responsible.
-// to close and remove it.
-type TempFile struct {
-	lock       sync.Mutex
-	temp       vfs.File
-	filesystem vfs.FileSystem
-}
-
-func NewTempFile(dir string, pattern string, fss ...vfs.FileSystem) (*TempFile, error) {
-	fs := utils.FileSystem(fss...)
-	temp, err := vfs.TempFile(fs, dir, pattern)
-	if err != nil {
-		return nil, err
-	}
-	return &TempFile{
-		temp:       temp,
-		filesystem: fs,
-	}, nil
-}
-
-func (t *TempFile) Name() string {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	return t.temp.Name()
-}
-
-func (t *TempFile) FileSystem() vfs.FileSystem {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	return t.filesystem
-}
-
-func (t *TempFile) Release() vfs.File {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	if t.temp != nil {
-		t.temp.Sync()
-	}
-	tmp := t.temp
-	t.temp = nil
-	return tmp
-}
-
-func (t *TempFile) Writer() io.Writer {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	return t.temp
-}
-
-func (t *TempFile) Sync() error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	return t.temp.Sync()
-}
-
-func (t *TempFile) AsBlob(mime string) BlobAccess {
-	return ForTemporaryFile(mime, t.Release(), t.filesystem)
-}
-
-func (t *TempFile) Close() error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	if t.temp != nil {
-		name := t.temp.Name()
-		t.temp.Close()
-		t.temp = nil
-		return t.filesystem.Remove(name)
-	}
-	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -10,8 +10,9 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
+	"github.com/open-component-model/ocm/pkg/blobaccess/standard"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -123,7 +124,7 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 		return nil, err
 	}
 	log.Debug("created", "file", tgz.Name())
-	return blobaccess.ForTemporaryFilePathWithMeta(mime.MIME_TGZ, dw.Digest(), dw.Size(), tgz.Name(), fs), nil
+	return file.ForTemporaryFilePathWithMeta(mime.MIME_TGZ, dw.Digest(), dw.Size(), tgz.Name(), fs), nil
 }
 
 func blobAccessForRepositoryAccess(meta *BlobMeta, creds maven.Credentials, opts *Options) (bpi.BlobAccess, error) {
@@ -140,7 +141,7 @@ func blobAccessForRepositoryAccess(meta *BlobMeta, creds maven.Credentials, opts
 			return iotools.VerifyingReaderWithHash(readCloser, meta.HashType, meta.Hash), nil
 		}
 	}
-	acc := blobaccess.DataAccessForReaderFunction(reader, meta.Location.String())
+	acc := standard.DataAccessForReaderFunction(reader, meta.Location.String())
 	return accessobj.CachedBlobAccessForWriterWithCache(opts.Cache(), meta.MimeType, accessio.NewDataAccessWriter(acc)), nil
 }
 

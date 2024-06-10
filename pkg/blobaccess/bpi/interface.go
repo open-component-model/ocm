@@ -3,6 +3,7 @@ package bpi
 import (
 	"github.com/open-component-model/ocm/pkg/blobaccess/internal"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -22,6 +23,9 @@ type (
 	BlobAccessBase     = internal.BlobAccessBase
 	BlobAccessProvider = internal.BlobAccessProvider
 
+	Validatable = utils.Validatable
+
+	DataSource   = internal.DataSource
 	DigestSource = internal.DigestSource
 	MimeType     = internal.MimeType
 )

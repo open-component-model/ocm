@@ -5,13 +5,12 @@ import (
 
 	"github.com/mandelsoft/goutils/optionutils"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 )
 
-func BlobAccessForOCIArtifact(refname string, opts ...Option) (blobaccess.BlobAccess, string, error) {
+func BlobAccessForOCIArtifact(refname string, opts ...Option) (bpi.BlobAccess, string, error) {
 	eff := optionutils.EvalOptions(opts...)
 
 	eff.Printf("image %s\n", refname)

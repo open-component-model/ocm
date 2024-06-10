@@ -5,7 +5,6 @@ import (
 
 	"github.com/mandelsoft/goutils/optionutils"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
@@ -44,7 +43,7 @@ func BlobAccessProviderForImageFromDockerDaemon(name string, opts ...Option) bpi
 	})
 }
 
-func BlobAccessForImageFromDockerDaemon(name string, opts ...Option) (blobaccess.BlobAccess, string, error) {
+func BlobAccessForImageFromDockerDaemon(name string, opts ...Option) (bpi.BlobAccess, string, error) {
 	eff := optionutils.EvalOptions(opts...)
 	ctx := eff.OCIContext()
 

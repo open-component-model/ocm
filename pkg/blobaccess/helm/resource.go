@@ -7,7 +7,6 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/helm/identity"
@@ -25,7 +24,7 @@ func (o *Options) OCIContext() oci.Context {
 	return o.Context
 }
 
-func BlobAccessForHelmChart(path string, opts ...Option) (blob blobaccess.BlobAccess, name, version string, err error) {
+func BlobAccessForHelmChart(path string, opts ...Option) (blob bpi.BlobAccess, name, version string, err error) {
 	eff := optionutils.EvalOptions(opts...)
 	ctx := eff.OCIContext()
 	fs := utils.FileSystem(eff.FileSystem)

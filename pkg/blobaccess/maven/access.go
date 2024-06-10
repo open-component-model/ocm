@@ -3,16 +3,15 @@ package maven
 import (
 	"github.com/mandelsoft/goutils/optionutils"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/maven"
 )
 
-func DataAccessForMaven(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) (blobaccess.DataAccess, error) {
+func DataAccessForMaven(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) (bpi.DataAccess, error) {
 	return BlobAccessForMaven(repo, groupId, artifactId, version, opts...)
 }
 
-func BlobAccessForMaven(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) (blobaccess.BlobAccess, error) {
+func BlobAccessForMaven(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) (bpi.BlobAccess, error) {
 	eff := optionutils.EvalOptions(opts...)
 	s := &spec{
 		coords:  maven.NewCoordinates(groupId, artifactId, version, maven.WithOptionalClassifier(eff.Classifier), maven.WithOptionalExtension(eff.Extension)),
@@ -22,7 +21,7 @@ func BlobAccessForMaven(repo *maven.Repository, groupId, artifactId, version str
 	return s.getBlobAccess()
 }
 
-func BlobAccessForMavenCoords(repo *maven.Repository, coords *maven.Coordinates, opts ...Option) (blobaccess.BlobAccess, error) {
+func BlobAccessForMavenCoords(repo *maven.Repository, coords *maven.Coordinates, opts ...Option) (bpi.BlobAccess, error) {
 	return BlobAccessForMaven(repo, coords.GroupId, coords.ArtifactId, coords.Version, optionutils.WithDefaults(opts, WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension))...)
 }
 

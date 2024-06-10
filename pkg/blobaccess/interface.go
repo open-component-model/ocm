@@ -22,6 +22,7 @@ type (
 	BlobAccess         = internal.BlobAccess
 	BlobAccessProvider = internal.BlobAccessProvider
 
+	DataSource   = internal.DataSource
 	DigestSource = internal.DigestSource
 	MimeType     = internal.MimeType
 )

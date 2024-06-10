@@ -11,8 +11,9 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/optionutils"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
+	"github.com/open-component-model/ocm/pkg/blobaccess/standard"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/wget/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -24,7 +25,7 @@ const (
 	CACHE_CONTENT_THRESHOLD = 4096
 )
 
-func DataAccessForWget(url string, opts ...Option) (blobaccess.DataAccess, error) {
+func DataAccessForWget(url string, opts ...Option) (bpi.DataAccess, error) {
 	blobAccess, err := BlobAccessForWget(url, opts...)
 	if err != nil {
 		return nil, err
@@ -32,7 +33,7 @@ func DataAccessForWget(url string, opts ...Option) (blobaccess.DataAccess, error
 	return blobAccess, nil
 }
 
-func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rerr error) {
+func BlobAccessForWget(url string, opts ...Option) (_ bpi.BlobAccess, rerr error) {
 	eff := optionutils.EvalOptions(opts...)
 	log := eff.Logger("URL", url)
 
@@ -147,7 +148,7 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 	var blob cpi.BlobAccess
 	if resp.ContentLength < 0 || resp.ContentLength > CACHE_CONTENT_THRESHOLD {
 		log.Debug("download to file because content length is unknown or greater than {{threshold}}", "threshold", CACHE_CONTENT_THRESHOLD)
-		f, err := blobaccess.NewTempFile("", "wget")
+		f, err := file.NewTempFile("", "wget")
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +167,7 @@ func BlobAccessForWget(url string, opts ...Option) (_ blobaccess.BlobAccess, rer
 		if err != nil {
 			return nil, err
 		}
-		blob = blobaccess.ForData(eff.MimeType, buf)
+		blob = standard.ForData(eff.MimeType, buf)
 	}
 
 	return blob, nil
