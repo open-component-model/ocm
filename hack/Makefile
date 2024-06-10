@@ -33,7 +33,7 @@ ifeq ("v$(JQ)","v0.0")
 	deps += $(detected_OS)_jq
 endif
 
-GOLANGCILINT_VERSION := "v1.54.2"
+GOLANGCILINT_VERSION := "v1.59.1"
 GOLANGCILINTV := $(shell (golangci-lint --version 2>/dev/null || echo 0.0.0) | sed 's/.*v\([0-9\.]*\) .*/\1/')
 ifneq ("v$(GOLANGCILINTV)",$(GOLANGCILINT_VERSION))
   deps += golangci-lint
@@ -42,6 +42,11 @@ GO_BINDATA_VERSION := "v3.1.3"
 GO_BINDATA := $(shell (go-bindata -version 2>/dev/null || echo 0.0.0) | head -n 1 | sed 's/.*go-bindata \([0-9\.]*\).*/\1/')
 ifneq ("v$(GO_BINDATA)",$(GO_BINDATA_VERSION))
 	deps += go-bindata
+endif
+GCI_VERSION := "v0.13.4"
+GCI := $(shell (gci --version 2>/dev/null || echo 0.0) | sed 's/.* \([0-9\.]*\).*/\1/')
+ifneq ("v$(GCI)", $(GCI_VERSION))
+	deps += gci
 endif
 VAULT_VERSION := 1.16.2
 VAULT := $(shell ($(LOCALBIN)/vault --version 2>/dev/null || echo 0.0) | sed 's/.*Vault v\([0-9\.]*\).*/\1/')
@@ -57,6 +62,10 @@ endif
 .PHONY: install-requirements
 install-requirements: $(deps) $(GOPATH)/bin/goimports mdref
 #	@$(REPO_ROOT)/hack/install-requirements.sh
+
+.PHONY: gci
+gci:
+	go install -v github.com/daixiang0/gci@$(GCI_VERSION)
 
 .PHONY: golangci-lint
 golangci-lint:
