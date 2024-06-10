@@ -6,9 +6,9 @@ import (
 	"runtime"
 	"time"
 
+	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/goutils/general"
 	"sigs.k8s.io/yaml"

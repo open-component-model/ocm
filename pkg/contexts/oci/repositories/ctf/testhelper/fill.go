@@ -4,6 +4,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/testutils"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/blobaccess"
@@ -11,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
 //nolint:gosec // digests of test manifests

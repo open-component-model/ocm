@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
+	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 

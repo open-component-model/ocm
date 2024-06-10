@@ -8,8 +8,8 @@ import (
 
 	"github.com/mandelsoft/logging"
 
+	"github.com/mandelsoft/goutils/testutils"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
-	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("Printer", func() {

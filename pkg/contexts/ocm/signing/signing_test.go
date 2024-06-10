@@ -6,6 +6,7 @@ import (
 	"time"
 
 	. "github.com/mandelsoft/goutils/finalizer"
+	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
@@ -13,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing/signingtest"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"

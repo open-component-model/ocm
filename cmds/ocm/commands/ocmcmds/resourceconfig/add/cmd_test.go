@@ -5,7 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
-	"github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/mandelsoft/goutils/testutils"
 )
 
 const SPECFILE = "/tmp/resources.yaml"
