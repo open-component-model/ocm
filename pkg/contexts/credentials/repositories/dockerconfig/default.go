@@ -3,7 +3,6 @@ package dockerconfig
 import (
 	dockercli "github.com/docker/cli/cli/config"
 	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -16,18 +15,15 @@ func init() {
 	defaultconfigregistry.RegisterDefaultConfigHandler(DefaultConfigHandler, desc)
 }
 
-func DefaultConfigHandler(cfg config.Context) error {
+func DefaultConfigHandler(cfg config.Context) (string, config.Config, error) {
 	// use docker config as default config for ocm cli
 	d := filepath.Join(dockercli.Dir(), dockercli.ConfigFileName)
 	if ok, err := vfs.FileExists(osfs.New(), d); ok && err == nil {
 		ccfg := credcfg.New()
 		ccfg.AddRepository(NewRepositorySpec(d, true))
-		err = cfg.ApplyConfig(ccfg, d)
-		if err != nil {
-			return errors.Wrapf(err, "cannot apply docker config %q", d)
-		}
+		return d, ccfg, nil
 	}
-	return nil
+	return "", nil, nil
 }
 
 var desc = `

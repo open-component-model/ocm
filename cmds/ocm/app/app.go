@@ -7,10 +7,11 @@ import (
 	"strings"
 	"unicode"
 
+	config2 "github.com/open-component-model/ocm/cmds/ocm/clippi/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/clicfgattr"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
-	"github.com/mandelsoft/goutils/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -58,36 +59,21 @@ import (
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
-	common2 "github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/defaultconfigregistry"
 	"github.com/open-component-model/ocm/pkg/out"
-	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
 type CLIOptions struct {
-	keyoption.Option
+	config2.Config
+	Completed bool
+	Version   bool
 
-	Completed   bool
-	Config      []string
-	ConfigSets  []string
-	Credentials []string
-	Context     clictx.Context
-	Settings    []string
-	Verbose     bool
-	LogOpts     logopts.Options
-	Version     bool
+	*config2.EvaluatedOptions
+	Context clictx.Context
 }
 
 var desc = `
@@ -183,6 +169,7 @@ func NewCliCommandForArgs(ctx clictx.Context, args []string, mod ...func(clictx.
 	if err != nil {
 		return nil, err
 	}
+	clicfgattr.Set(ctx.OCMContext(), &opts.Config)
 	cmd := newCliCommand(opts, mod...)
 	cmd.SetArgs(args)
 	return cmd, nil
@@ -306,15 +293,9 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 }
 
 func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
-	fs.StringArrayVarP(&o.Config, "config", "", nil, "configuration file")
-	fs.StringSliceVarP(&o.ConfigSets, "config-set", "", nil, "apply configuration set")
-	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
-	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
-	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "deprecated: enable logrus verbose logging")
-	fs.BoolVarP(&o.Version, "version", "", false, "show version") // otherwise it is implicitly added by cobra
+	o.Config.AddFlags(fs)
 
-	o.LogOpts.AddFlags(fs)
-	o.Option.AddFlags(fs)
+	fs.BoolVarP(&o.Version, "version", "", false, "show version") // otherwise it is implicitly added by cobra
 }
 
 func (o *CLIOptions) Close() error {
@@ -322,6 +303,8 @@ func (o *CLIOptions) Close() error {
 }
 
 func (o *CLIOptions) Complete() error {
+	var err error
+
 	if o.Completed {
 		return nil
 	}
@@ -331,95 +314,8 @@ func (o *CLIOptions) Complete() error {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	err := o.LogOpts.Configure(o.Context.OCMContext(), nil)
-	if err != nil {
-		return err
-	}
-
-	if len(o.Config) == 0 {
-		_, err = utils.Configure(o.Context.OCMContext(), "", vfsattr.Get(o.Context))
-		if err != nil {
-			return err
-		}
-	}
-	for _, config := range o.Config {
-		_, err = utils.Configure(o.Context.OCMContext(), config, vfsattr.Get(o.Context))
-		if err != nil {
-			return err
-		}
-	}
-
-	err = o.Option.Configure(o.Context)
-	if err != nil {
-		return err
-	}
-
-	if o.Keys.HasKeys() {
-		def := signingattr.Get(o.Context.OCMContext())
-		err = signingattr.Set(o.Context.OCMContext(), signing.NewRegistry(def.HandlerRegistry(), signing.NewKeyRegistry(o.Keys, def.KeyRegistry())))
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, n := range o.ConfigSets {
-		err := o.Context.ConfigContext().ApplyConfigSet(n)
-		if err != nil {
-			return err
-		}
-	}
-
-	id := credentials.ConsumerIdentity{}
-	attrs := common.Properties{}
-	for _, s := range o.Credentials {
-		i := strings.Index(s, "=")
-		if i < 0 {
-			return errors.ErrInvalid("credential setting", s)
-		}
-		name := s[:i]
-		value := s[i+1:]
-		if strings.HasPrefix(name, ":") {
-			if len(attrs) != 0 {
-				o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
-				id = credentials.ConsumerIdentity{}
-				attrs = common.Properties{}
-			}
-			name = name[1:]
-			id[name] = value
-		} else {
-			attrs[name] = value
-		}
-		if len(name) == 0 {
-			return errors.ErrInvalid("credential setting", s)
-		}
-	}
-	if len(attrs) != 0 {
-		o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
-	} else if len(id) != 0 {
-		return errors.Newf("empty credential attribute set for %s", id.String())
-	}
-
-	set, err := common2.ParseLabels(o.Context.FileSystem(), o.Settings, "attribute setting")
-	if err != nil {
-		return errors.Wrapf(err, "invalid attribute setting")
-	}
-	if len(set) > 0 {
-		ctx := o.Context.ConfigContext()
-		spec := datacfg.New()
-		for _, s := range set {
-			attr := s.Name
-			eff := datacontext.DefaultAttributeScheme.Shortcuts()[attr]
-			if eff != "" {
-				attr = eff
-			}
-			err = spec.AddRawAttribute(attr, s.Value)
-			if err != nil {
-				return errors.Wrapf(err, "attribute %s", s.Name)
-			}
-		}
-		_ = ctx.ApplyConfig(spec, "cli")
-	}
-	return registration.RegisterExtensions(o.Context.OCMContext())
+	o.EvaluatedOptions, err = o.Config.Evaluate(o.Context.OCMContext())
+	return err
 }
 
 func prepare(s string) string {

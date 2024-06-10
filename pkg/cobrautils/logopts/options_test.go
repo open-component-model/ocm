@@ -19,11 +19,13 @@ var _ = Describe("log configuration", func() {
 		ctx := clictx.New()
 
 		opts := Options{
-			LogLevel: "debug",
-			LogKeys: []string{
-				"tag=trace",
-				"/realm=info",
-				"/+all=info",
+			ConfigFragment: ConfigFragment{
+				LogLevel: "debug",
+				LogKeys: []string{
+					"tag=trace",
+					"/realm=info",
+					"/+all=info",
+				},
 			},
 		}
 

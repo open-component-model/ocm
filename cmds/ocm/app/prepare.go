@@ -60,6 +60,7 @@ func Prepare(ctx clictx.Context, args []string) (*CLIOptions, []string, error) {
 	if help {
 		args = append([]string{"--help"}, args...)
 	}
+
 	return opts, args, opts.Complete()
 }
 
