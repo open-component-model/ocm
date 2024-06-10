@@ -8,7 +8,7 @@ on:
     - go.sum
   workflow_dispatch:
   workflow_call:
-    
+
 jobs:
   updateVendorHash:
     runs-on: ubuntu-latest
@@ -25,22 +25,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           token: ${{ steps.generate_token.outputs.token }}
-          persist-credentials: false
-      - name: Enable GPG signing
-        run: |         
-          echo '#!/bin/bash' > gpg-wrapper
-          echo 'gpg --passphrase "'${{ secrets.OCMBOT_SIGNING_KEY_PASS }}'" --yes --batch --pinentry-mode loopback $@ <&0' >> gpg-wrapper
-          echo 'exit $?' >> gpg-wrapper
-          chmod +x gpg-wrapper
-          echo -n "${{ secrets.OCMBOT_SIGNING_KEY }}" | base64 -d | ./gpg-wrapper --import
-          git config --global gpg.program "$(realpath gpg-wrapper)"
-          git config --global user.name ocmbot[bot]
-          git config --global user.email 125909804+ocmbot[bot]@users.noreply.github.com
-          git config --global user.signingkey ${{ secrets.OCMBOT_SIGNING_KEY_ID }}
-          git config --global commit.gpgsign true
-          git config --global tag.gpgsign true
+      - name: Enable gh-CLI
+        uses: actions4gh/setup-gh@v1.0.2
+        id: setup-gh
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v12
       - name: Update ocm vendor hash
@@ -54,49 +44,18 @@ jobs:
             exit 0
           fi
           cat << EOF >> "${GITHUB_STEP_SUMMARY}"
-          \`\`\`diff
-          ${diff}
-          \`\`\`
-          EOF
-          cat << EOF >> body
-          This PR updates the vendorHash in flake.nix.
+          Updates the vendorHash in \`flake.nix\`
           \`\`\`bash
           nix run .#nixpkgs.nix-update -- --flake --version=skip ocm
           \`\`\`
+          produced:
           \`\`\`diff
           ${diff}
           \`\`\`
           EOF
-          echo "body=$(realpath body)" >> "$GITHUB_OUTPUT"
-      - name: Commit
+      - name: Create Commit
+        # https://docs.github.com/de/rest/repos/contents?apiVersion=2022-11-28#create-or-update-file-contents
         run: |
-          diff=$(git diff)
-          if [[ ! -z "$diff" ]]; then
-            git add flake.*
-            git commit -S -m "update vendorHash"
-          fi
-      - name: Create pull request
-        id: create_pull_request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ steps.generate_token.outputs.token }}
-          title: Update vendorHash in flake.nix
-          body-path: ${{ steps.check-diff.outputs.body }}
-          branch: nix/flake
-          committer: ocmbot[bot] <125909804+ocmbot[bot]@users.noreply.github.com>
-          author: ocmbot[bot] <125909804+ocmbot[bot]@users.noreply.github.com>
-          team-reviewers: ocm-dev
-          add-paths: |
-            flake.nix
-            flake.lock
-      - name: Enable pull request auto merge
-        if: ${{ steps.create_pull_request.outputs.pull-request-number }}
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          token: ${{ steps.generate_token.outputs.token }}
-          pull-request-number: ${{ steps.create_pull_request.outputs.pull-request-number }}
-          merge-method: squash
-      - name: Cleanup
-        if: always()
-        run: |
-          rm -rf gpg-wrapper
+          FILE=flake.nix
+          echo "{\"message\":\"auto update vendor hash\",\"content\":\"$(base64 -w0 ${FILE})\",\"sha\":\"$(git rev-parse :${FILE})\"}" > input.json
+          gh api -X PUT https://api.github.com/repos/hilmarf/ocm/contents/${FILE} --input input.json
