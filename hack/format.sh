@@ -33,6 +33,6 @@ for dir in "${directories[@]}"; do
 done
 
 # Format the files using gofmt with xargs
-printf '%s\0' "${files[@]}" | xargs -0 gofmt -s -w
+printf '%s\0' "${files[@]}" | xargs -0 gofumpt -d -e -l -w
 
 log "Format done"

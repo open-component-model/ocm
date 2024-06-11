@@ -48,6 +48,11 @@ GCI := $(shell (gci --version 2>/dev/null || echo 0.0) | sed 's/.* \([0-9\.]*\).
 ifneq ("v$(GCI)", $(GCI_VERSION))
 	deps += gci
 endif
+GOFUMPT_VERSION := "v0.6.0"
+GOFUMPT := $(shell (gofumpt --version 2>/dev/null || echo 0.0) | sed 's/\(v[0-9\.]*\).*/\1/')
+ifneq ("$(GOFUMPT)", $(GOFUMPT_VERSION))
+	deps += gofumpt
+endif
 VAULT_VERSION := 1.16.2
 VAULT := $(shell ($(LOCALBIN)/vault --version 2>/dev/null || echo 0.0) | sed 's/.*Vault v\([0-9\.]*\).*/\1/')
 ifneq ($(VAULT), $(VAULT_VERSION))
@@ -66,6 +71,10 @@ install-requirements: $(deps) $(GOPATH)/bin/goimports mdref
 .PHONY: gci
 gci:
 	go install -v github.com/daixiang0/gci@$(GCI_VERSION)
+
+.PHONY: gofumpt
+gofumpt:
+	go install -v mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
 
 .PHONY: golangci-lint
 golangci-lint:
