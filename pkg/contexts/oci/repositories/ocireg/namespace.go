@@ -83,7 +83,6 @@ func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
 		var err error
 
 		resolver, err = n.repo.getResolver(n.impl.GetNamespace())
-
 		if err != nil {
 			return nil, fmt.Errorf("unable get resolver: %w", err)
 		}

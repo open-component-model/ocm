@@ -14,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-//nolint:gosec // digests of test manifests
 const (
 	TAG             = "v1"
 	DIGEST_MANIFEST = "3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"

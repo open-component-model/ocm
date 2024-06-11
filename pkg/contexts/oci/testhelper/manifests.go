@@ -1,4 +1,3 @@
-//nolint:gosec // digests of test manifests
 package testhelper
 
 import (
