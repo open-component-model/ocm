@@ -31,6 +31,7 @@ var _ options.Options = (*Option)(nil)
 func (o *Option) GetError() error {
 	return o.err
 }
+
 func (o *Option) SetError(err error) {
 	o.err = err
 }
@@ -42,7 +43,7 @@ func (o *Option) AddError(err error) {
 	if o.err == nil {
 		o.err = errors.ErrList().Add(err)
 	} else {
-		if l, ok := o.err.(*errors.ErrorList); ok {
+		if l, ok := o.err.(*errors.ErrorList); ok { //nolint:errorlint // has to be of type ErrorList to call its method
 			l.Add(err)
 		} else {
 			o.err = errors.ErrList().Add(o.err, err)

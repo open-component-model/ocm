@@ -5,9 +5,9 @@ import (
 
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/goutils/testutils"
 	"github.com/spf13/pflag"
 
-	"github.com/mandelsoft/goutils/testutils"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/runtime"

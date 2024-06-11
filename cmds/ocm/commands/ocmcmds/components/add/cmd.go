@@ -2,7 +2,6 @@ package add
 
 import (
 	"fmt"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
@@ -20,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -58,15 +58,16 @@ type Command struct {
 }
 
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
-		formatoption.New(ctf.GetFormats()...),
-		fileoption.New("transport-archive"),
-		schemaoption.New(compdesc.DefaultSchemeVersion),
-		templateroption.New(""),
-		dryrunoption.New("evaluate and print component specifications", true),
-		lookupoption.New(),
-		rscbyvalueoption.New(),
-		uploaderoption.New(ctx.OCMContext())),
+	return utils.SetupCommand(&Command{
+		BaseCommand: utils.NewBaseCommand(ctx,
+			formatoption.New(ctf.GetFormats()...),
+			fileoption.New("transport-archive"),
+			schemaoption.New(compdesc.DefaultSchemeVersion),
+			templateroption.New(""),
+			dryrunoption.New("evaluate and print component specifications", true),
+			lookupoption.New(),
+			rscbyvalueoption.New(),
+			uploaderoption.New(ctx.OCMContext())),
 	}, utils.Names(Names, names...)...)
 }
 

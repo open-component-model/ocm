@@ -76,7 +76,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 
 func Lookup(prefix string, cache plugins.Set) []output.Object {
 	var objs []output.Object
-	prefix = prefix + "."
+	prefix += "."
 	for _, n := range cache.PluginNames() {
 		if strings.HasPrefix(n, prefix) {
 			objs = append(objs, &Object{cache.Get(n)})

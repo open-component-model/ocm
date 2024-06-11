@@ -38,7 +38,6 @@ func (o *Option) SetLatest(latest ...bool) *Option {
 }
 
 func (o *Option) Usage() string {
-
 	s := `
 If the option <code>--constraints</code> is given, and no version is specified
 for a component, only versions matching the given version constraints

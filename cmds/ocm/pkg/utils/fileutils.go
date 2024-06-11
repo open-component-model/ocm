@@ -5,12 +5,12 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // IsExecutable returns true if a given file is executable.
 func IsExecutable(path string, fss ...vfs.FileSystem) bool {
-	stat, err := accessio.FileSystem(fss...).Stat(path)
+	stat, err := utils.FileSystem(fss...).Stat(path)
 	if err != nil {
 		return false
 	}
@@ -18,14 +18,14 @@ func IsExecutable(path string, fss ...vfs.FileSystem) bool {
 	if !mode.IsRegular() {
 		return false
 	}
-	if (mode & 0111) == 0 {
+	if (mode & 0o111) == 0 {
 		return false
 	}
 	return true
 }
 
 // SplitPathList splits a path list.
-// This is based on genSplit from strings/strings.go
+// This is based on genSplit from strings/strings.go.
 func SplitPathList(pathList string) []string {
 	if pathList == "" {
 		return nil

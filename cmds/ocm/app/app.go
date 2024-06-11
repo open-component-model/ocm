@@ -451,7 +451,7 @@ func NewVersionCommand(ctx clictx.Context) *cobra.Command {
 		Run: func(_ *cobra.Command, _ []string) {
 			v := version.Get()
 			s := fmt.Sprintf("%#v", v)
-			out.Outf(ctx, "%s\n", prepare(s[strings.Index(s, "{"):]))
+			out.Outf(ctx, "%s\n", prepare(s[strings.Index(s, "{"):])) //nolint:gocritic // yes
 		},
 	}
 }

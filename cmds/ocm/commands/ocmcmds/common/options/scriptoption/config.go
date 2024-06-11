@@ -6,7 +6,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -79,7 +78,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 			if spec.Path == "" {
 				return errors.Newf("script or path must be set for entry %q", t.Script)
 			}
-			data, err := utils.ReadFile(spec.Path, accessio.FileSystem(spec.FileSystem, t.FileSystem))
+			data, err := utils.ReadFile(spec.Path, utils.FileSystem(spec.FileSystem, t.FileSystem))
 			if err != nil {
 				return errors.Wrapf(err, "script file %q", spec.Path)
 			}

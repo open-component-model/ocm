@@ -64,7 +64,7 @@ func (o *Options) OptimizeColumns(n int) *Options {
 }
 
 // WithStatusCheck provides the possibility to check every entry to
-// influence the final out status
+// influence the final out status.
 func (o *Options) WithStatusCheck(f StatusCheckFunction) *Options {
 	o.StatusCheck = f
 	return o

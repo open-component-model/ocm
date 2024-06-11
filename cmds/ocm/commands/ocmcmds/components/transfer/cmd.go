@@ -135,7 +135,6 @@ func (o *Command) Run() error {
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)...)
 	thdlr, err := spiff.New(transferopts)
-
 	if err != nil {
 		return err
 	}

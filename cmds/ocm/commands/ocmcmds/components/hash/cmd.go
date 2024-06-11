@@ -179,9 +179,7 @@ func (h *action) Close() error {
 func (h *action) Out() error {
 	if len(h.norms) > 1 {
 		dir := h.mode.outfile
-		if strings.HasSuffix(dir, ".ncd") {
-			dir = dir[:len(dir)-4]
-		}
+		dir = strings.TrimSuffix(dir, ".ncd")
 		err := h.ctx.FileSystem().Mkdir(dir, 0o755)
 		if err != nil {
 			return fmt.Errorf("cannot create output dir %s", dir)
@@ -249,7 +247,7 @@ func (h *action) _manifester(e interface{}) *Manifest {
 
 	if p.Descriptor == nil {
 		if p.Error == nil {
-			m.Error = fmt.Sprintf("<unknown component version>")
+			m.Error = "<unknown component version>"
 		} else {
 			m.Error = p.Error.Error()
 		}

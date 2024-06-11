@@ -4,8 +4,10 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
-const TYPE = "ociArtifact"
-const LEGACY_TYPE = "ociImage"
+const (
+	TYPE        = "ociArtifact"
+	LEGACY_TYPE = "ociImage"
+)
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))

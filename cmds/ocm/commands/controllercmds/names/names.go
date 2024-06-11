@@ -1,5 +1,3 @@
 package names
 
-var (
-	Controller = []string{"controller"}
-)
+var Controller = []string{"controller"}
