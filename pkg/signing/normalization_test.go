@@ -142,7 +142,8 @@ var _ = Describe("normalization", func() {
 								},
 								Labels: nil,
 							},
-						}},
+						},
+					},
 					Access: ociartifact.New("blob"),
 				},
 			},
@@ -152,7 +153,6 @@ var _ = Describe("normalization", func() {
 	cd = compdesc.DefaultComponent(cd)
 
 	It("Normalizes struct without excludes", func() {
-
 		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 
@@ -270,7 +270,6 @@ var _ = Describe("normalization", func() {
 	})
 
 	It("Normalizes struct without repositoryContexts", func() {
-
 		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"repositoryContexts": nil,
@@ -383,7 +382,6 @@ var _ = Describe("normalization", func() {
 	})
 
 	It("Normalizes struct without access", func() {
-
 		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"resources": signing.ArrayExcludes{
@@ -496,7 +494,6 @@ var _ = Describe("normalization", func() {
 	})
 
 	It("Normalizes struct without resources of type localBlob", func() {
-
 		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"resources": signing.DynamicArrayExcludes{
@@ -746,7 +743,6 @@ resources:
 	})
 
 	It("Normalizes struct without no-signing resource labels", func() {
-
 		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"resources": signing.ArrayExcludes{
@@ -850,7 +846,6 @@ resources:
 	})
 
 	It("Normalizes cd", func() {
-
 		entries, err := signing.PrepareNormalization(entry.New(), cd, CDExcludes)
 		Expect(err).To(Succeed())
 		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
@@ -964,7 +959,6 @@ resources:
 		})
 
 		It("Normalizes cd", func() {
-
 			entries, err := signing.PrepareNormalization(jcs.New(), cd, CDExcludes)
 			Expect(err).To(Succeed())
 			Expect(entries.String()).To(StringEqualTrimmedWithContext(`

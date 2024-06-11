@@ -12,9 +12,7 @@ import (
 )
 
 var _ = Describe("utils", func() {
-
 	Context("WriteFileToTARArchive", func() {
-
 		It("should write file", func() {
 			fname := "testfile"
 			content := []byte("testcontent")
@@ -37,7 +35,6 @@ var _ = Describe("utils", func() {
 
 			_, err = tr.Next()
 			Expect(err).To(Equal(io.EOF))
-
 		})
 
 		It("should write empty file", func() {
@@ -78,7 +75,5 @@ var _ = Describe("utils", func() {
 			contentReader := bytes.NewReader([]byte{})
 			Expect(utils.WriteFileToTARArchive("testfile", contentReader, nil)).To(MatchError("archiveWriter must not be nil"))
 		})
-
 	})
-
 })

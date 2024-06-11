@@ -20,8 +20,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const CTF = "/tmp/ctf"
-const OCM = "/testdata/bin/ocm" + download.EXECUTABLE_SUFFIX
+const (
+	CTF = "/tmp/ctf"
+	OCM = "/testdata/bin/ocm" + download.EXECUTABLE_SUFFIX
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv

@@ -33,7 +33,6 @@ func New(n string, hist ...string) *Elem {
 }
 
 var _ = Describe("processing buffer", func() {
-
 	Context("history", func() {
 		It("compare", func() {
 			Expect(common.CompareHistoryElement(New("a"), New("b")) < 0).To(BeTrue())
@@ -57,7 +56,6 @@ var _ = Describe("processing buffer", func() {
 
 			Expect(common.CompareHistoryElement(New("a", "a"), New("a")) > 0).To(BeTrue())
 			Expect(common.CompareHistoryElement(New("a", "a"), New("b")) < 0).To(BeTrue())
-
 		})
 		It("sort", func() {
 			s := []*Elem{
@@ -90,6 +88,5 @@ var _ = Describe("processing buffer", func() {
 
 			Expect(s).To(Equal(r))
 		})
-
 	})
 })

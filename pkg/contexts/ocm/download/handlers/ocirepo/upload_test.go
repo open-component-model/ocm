@@ -25,20 +25,28 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const COMP = "github.com/compa"
-const VERS = "1.0.0"
-const CTF = "ctf"
+const (
+	COMP = "github.com/compa"
+	VERS = "1.0.0"
+	CTF  = "ctf"
+)
 
-const HINT = "ocm.software/test"
-const UPLOAD = "ocm.software/upload"
+const (
+	HINT   = "ocm.software/test"
+	UPLOAD = "ocm.software/upload"
+)
 
-const TARGETHOST = "target"
-const TARGETPATH = "/tmp/target"
+const (
+	TARGETHOST = "target"
+	TARGETPATH = "/tmp/target"
+)
 
-const OCIHOST = "source"
-const OCIPATH = "/tmp/source"
-const OCINAMESPACE = "ocm/value"
-const OCIVERSION = "v2.0"
+const (
+	OCIHOST      = "source"
+	OCIPATH      = "/tmp/source"
+	OCINAMESPACE = "ocm/value"
+	OCIVERSION   = "v2.0"
+)
 
 const ARTIFACTSET = "/tmp/set.tgz"
 

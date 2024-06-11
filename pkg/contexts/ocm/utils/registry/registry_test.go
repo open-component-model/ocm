@@ -9,12 +9,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 )
 
-var aKey = registry.RegistrationKey{}.SetArtifact("a", "")
-var mKey = registry.RegistrationKey{}.SetArtifact("", "m")
-var amKey = registry.RegistrationKey{}.SetArtifact("a", "m")
-var a1mKey = registry.RegistrationKey{}.SetArtifact("a1", "m")
-var am1Key = registry.RegistrationKey{}.SetArtifact("a", "m1")
-var amtarKey = registry.RegistrationKey{}.SetArtifact("a", "m+tar")
+var (
+	aKey     = registry.RegistrationKey{}.SetArtifact("a", "")
+	mKey     = registry.RegistrationKey{}.SetArtifact("", "m")
+	amKey    = registry.RegistrationKey{}.SetArtifact("a", "m")
+	a1mKey   = registry.RegistrationKey{}.SetArtifact("a1", "m")
+	am1Key   = registry.RegistrationKey{}.SetArtifact("a", "m1")
+	amtarKey = registry.RegistrationKey{}.SetArtifact("a", "m+tar")
+)
 
 var _ = Describe("lookup", func() {
 	var reg *registry.Registry[string, registry.RegistrationKey]

@@ -5,13 +5,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/open-component-model/ocm/pkg/maven/maventest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/mavenblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/maven"
+	"github.com/open-component-model/ocm/pkg/maven/maventest"
 )
 
 const (
@@ -25,7 +25,6 @@ const (
 )
 
 var _ = Describe("blobaccess for maven", func() {
-
 	Context("maven filesystem repository", func() {
 		var env *Builder
 		var repo *maven.Repository

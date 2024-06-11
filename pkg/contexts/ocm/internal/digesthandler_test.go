@@ -93,8 +93,7 @@ var _ = Describe("blob digester registry test", func() {
 	)
 })
 
-type accessMethod struct {
-}
+type accessMethod struct{}
 
 var _ internal.AccessMethodImpl = (*accessMethod)(nil)
 

@@ -46,18 +46,21 @@ func Type(t string) string {
 	}
 	return t + "::"
 }
+
 func Scheme(sc string) string {
 	if sc == "" {
 		return sc
 	}
 	return sc + "://"
 }
+
 func Sub(t string) string {
 	if t == "" {
 		return t
 	}
 	return "/" + t
 }
+
 func Vers(t string) string {
 	if t == "" {
 		return t
@@ -168,7 +171,5 @@ var _ = Describe("ref matching", func() {
 			CheckVers("ghcr.io:v1")
 			CheckVers(":v1")
 		})
-
 	})
-
 })

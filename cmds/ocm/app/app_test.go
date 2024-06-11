@@ -148,5 +148,4 @@ ERROR <nil> ctxerror realm ocm realm test
 		attr = mapocirepoattr.Get(env.Context)
 		Expect(attr.Mode).To(Equal(mapocirepoattr.ShortHashMode))
 	})
-
 })

@@ -23,6 +23,7 @@ func Type(t string) string {
 	}
 	return t + "::"
 }
+
 func FileFormat(t, f string) string {
 	if t == "" {
 		return f
@@ -32,6 +33,7 @@ func FileFormat(t, f string) string {
 	}
 	return t + "+" + f
 }
+
 func FileType(t, f string) string {
 	if t != "" {
 		return t
@@ -39,18 +41,21 @@ func FileType(t, f string) string {
 		return f
 	}
 }
+
 func Scheme(s string) string {
 	if s == "" {
 		return s
 	}
 	return s + "://"
 }
+
 func Sub(t string) string {
 	if t == "" {
 		return t
 	}
 	return "/" + t
 }
+
 func Vers(t, d string) string {
 	if t == "" && d == "" {
 		return ""
@@ -559,7 +564,6 @@ var _ = Describe("ref parsing", func() {
 		CheckRef("::ghcr.io/", &oci.RefSpec{UniformRepositorySpec: ghcr})
 	})
 	It("succeeds", func() {
-
 		CheckRef("ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu"}})
 		CheckRef("ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu", Tag: &tag}})
 		CheckRef("test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu"}})
@@ -702,7 +706,6 @@ var _ = Describe("ref parsing", func() {
 				Info:   "/tmp/ctf",
 			},
 		})
-
 	})
 
 	It("json spec", func() {
@@ -757,7 +760,6 @@ var _ = Describe("ref parsing", func() {
 		CheckRef("test/ubuntu@4711", nil)
 		CheckRef("test/ubuntu:v1@4711", nil)
 		CheckRef("ghcr.io/test/ubuntu:v1@4711", nil)
-
 	})
 	It("repo", func() {
 		CheckRepo("ghcr.io", &oci.UniformRepositorySpec{

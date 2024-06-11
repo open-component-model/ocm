@@ -15,7 +15,6 @@ import (
 )
 
 var _ = Describe("repository", func() {
-
 	It("finalizes with context", func() {
 		ctx := ocm.New(datacontext.MODE_EXTENDED)
 

@@ -18,8 +18,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-const ORG = "acme.org"
-const OTHER = "ocm.software"
+const (
+	ORG   = "acme.org"
+	OTHER = "ocm.software"
+)
 
 var _ = Describe("management", func() {
 	var env *builder.Builder

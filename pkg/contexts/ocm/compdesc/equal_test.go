@@ -660,5 +660,4 @@ var _ = Describe("equivalence", func() {
 			CheckNotEquivalent(b.Equivalent(a))
 		})
 	})
-
 })

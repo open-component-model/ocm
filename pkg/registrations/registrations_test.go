@@ -9,11 +9,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type Target interface {
-}
+type Target interface{}
 
-type Option struct {
-}
+type Option struct{}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Test instantiation of generic type
@@ -34,8 +32,7 @@ func NewRegistrationHandlerInfo(path string, handler HandlerRegistrationHandler)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type Handler struct {
-}
+type Handler struct{}
 
 func (b Handler) Do() {
 }

@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing/signingtest"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
@@ -30,6 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing/signingtest"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
@@ -40,20 +40,24 @@ import (
 
 var DefaultContext = ocm.New()
 
-const ARCH = "/tmp/ctf"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENTA = "github.com/mandelsoft/test"
-const COMPONENTB = "github.com/mandelsoft/ref"
-const COMPONENTC = "github.com/mandelsoft/ref2"
-const COMPONENTD = "github.com/mandelsoft/top"
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	ARCH       = "/tmp/ctf"
+	PROVIDER   = "mandelsoft"
+	VERSION    = "v1"
+	COMPONENTA = "github.com/mandelsoft/test"
+	COMPONENTB = "github.com/mandelsoft/ref"
+	COMPONENTC = "github.com/mandelsoft/ref2"
+	COMPONENTD = "github.com/mandelsoft/top"
+	OUT        = "/tmp/res"
+	OCIPATH    = "/tmp/oci"
+	OCIHOST    = "alias"
+)
 
-const SIGNATURE = "test"
-const SIGNATURE2 = "second"
-const SIGN_ALGO = rsa.Algorithm
+const (
+	SIGNATURE  = "test"
+	SIGNATURE2 = "second"
+	SIGN_ALGO  = rsa.Algorithm
+)
 
 var _ = Describe("access method", func() {
 	var env *Builder
@@ -289,7 +293,6 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			Expect(err.Error()).To(StringEqualTrimmedWithContext("github.com/mandelsoft/test:v1: signature digest (0ae7ab0c1578d1292922b2a3884833c380a57df2cc7dfab7213ee051b092edc3) does not match found digest (" + digestA + ")"))
 			// Reset to original to avoid write back in readonly mode
 			cv.GetDescriptor().Signatures[0].Digest.Value = digestA
-
 		},
 			Entry(DIGESTMODE_TOP, DIGESTMODE_TOP),
 			Entry(DIGESTMODE_LOCAL, DIGESTMODE_LOCAL),
@@ -341,7 +344,6 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			dig, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
 			Expect(dig.Value).To(Equal(digestA))
-
 		},
 			Entry(DIGESTMODE_TOP, DIGESTMODE_TOP),
 			Entry(DIGESTMODE_LOCAL, DIGESTMODE_LOCAL),
@@ -911,7 +913,6 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 		)
 
 		DescribeTable("fixes digest mode", func(subst Substitutions, mopts ...ocm.ModificationOption) {
-
 			setup(mopts...)
 
 			var finalizer Finalizer
@@ -1375,7 +1376,6 @@ func (*EntryLocal) Check1Corrupt(cva ocm.ComponentVersionAccess, f *Finalizer, _
 	cva.GetDescriptor().Resources[0].Digest.Value = wrongDigest
 	MustBeSuccessful(cva.Update())
 	Check(f.Finalize)
-
 }
 
 func (*EntryLocal) Check2Ref(cv ocm.ComponentVersionAccess, name string, d string) {

@@ -16,7 +16,6 @@ import (
 )
 
 var _ = Describe("merge config", func() {
-
 	spec1 := Must(v1.NewMergeAlgorithmSpecification("test", "config1"))
 	spec2 := Must(v1.NewMergeAlgorithmSpecification("algo", "config2"))
 

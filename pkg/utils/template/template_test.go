@@ -19,9 +19,7 @@ func TestConfig(t *testing.T) {
 }
 
 var _ = Describe("Template", func() {
-
 	Context("Parse Arguments", func() {
-
 		It("should parse one argument after a '--'", func() {
 			opts := template.Options{}
 			Expect(opts.Complete(nil)).To(Succeed())

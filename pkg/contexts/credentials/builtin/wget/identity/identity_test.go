@@ -9,7 +9,6 @@ import (
 )
 
 var _ = Describe("wget credential management", func() {
-
 	Context("with path", func() {
 		pat := credentials.ConsumerIdentity{
 			ID_HOSTNAME:   "host",
@@ -143,5 +142,4 @@ var _ = Describe("wget credential management", func() {
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
 		})
 	})
-
 })

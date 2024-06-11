@@ -36,19 +36,23 @@ import (
 
 const PLUGIN = "test"
 
-const ARCH = "ctf"
-const OUT = "/tmp/res"
-const COMP = "github.com/mandelsoft/comp"
-const VERS = "1.0.0"
-const PROVIDER = "mandelsoft"
-const RSCTYPE = "TestArtifact"
-const MEDIA = "text/plain"
+const (
+	ARCH     = "ctf"
+	OUT      = "/tmp/res"
+	COMP     = "github.com/mandelsoft/comp"
+	VERS     = "1.0.0"
+	PROVIDER = "mandelsoft"
+	RSCTYPE  = "TestArtifact"
+	MEDIA    = "text/plain"
+)
 
-const REPOTYPE = "test/v1"
-const ACCTYPE = "test/v1"
-const REPO = "plugin"
-const CONTENT = "some test content\n"
-const HINT = "given"
+const (
+	REPOTYPE = "test/v1"
+	ACCTYPE  = "test/v1"
+	REPO     = "plugin"
+	CONTENT  = "some test content\n"
+	HINT     = "given"
+)
 
 type RepoSpec struct {
 	runtime.ObjectVersionedType
@@ -84,8 +88,8 @@ var _ = Describe("setup plugin cache", func() {
 	var repodir string
 	var env *Builder
 
-	var accessSpec = NewAccessSpec(MEDIA, "given", REPO)
-	var repoSpec = NewRepoSpec(REPO)
+	accessSpec := NewAccessSpec(MEDIA, "given", REPO)
+	repoSpec := NewRepoSpec(REPO)
 
 	BeforeEach(func() {
 		repodir = Must(os.MkdirTemp(os.TempDir(), "uploadtest-*"))
@@ -134,7 +138,7 @@ var _ = Describe("setup plugin cache", func() {
 		Expect(name).To(Equal("testuploader"))
 		Expect(keys).To(Equal(plugin2.UploaderKeySet{}.Add(plugin2.UploaderKey{}.SetArtifact(RSCTYPE, ""))))
 
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target repo")
 
 		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, tgt, Must(standard.New(standard.ResourcesByValue()))))
@@ -169,7 +173,7 @@ var _ = Describe("setup plugin cache", func() {
 		repospec := Must(json.Marshal(repoSpec))
 		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "plugin/test", repospec))
 
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target repo")
 
 		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, tgt, Must(standard.New(standard.ResourcesByValue()))))

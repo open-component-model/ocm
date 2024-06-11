@@ -13,14 +13,18 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const C1 = "github.com/gardener/landscaper"
-const C11 = "github.com/gardener/landscaper/container-deployer"
-const C12 = "github.com/gardener/landscaper/helm-deployer"
-const C13 = "github.com/gardener/landscaper/manifest-deployer"
-const C14 = "github.com/gardener/landscaper/mock-deployer"
+const (
+	C1  = "github.com/gardener/landscaper"
+	C11 = "github.com/gardener/landscaper/container-deployer"
+	C12 = "github.com/gardener/landscaper/helm-deployer"
+	C13 = "github.com/gardener/landscaper/manifest-deployer"
+	C14 = "github.com/gardener/landscaper/mock-deployer"
+)
 
-const CS = "github.com/gardener/landscaper-service"
-const CI = "github.com/gardener/landscaper-instance"
+const (
+	CS = "github.com/gardener/landscaper-service"
+	CI = "github.com/gardener/landscaper-instance"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
@@ -102,7 +106,6 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("lists all components in a deep structure", func() {
-
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "resources", "--recursive", "-o", "tree", "--repo", ARCH, CS+":"+VERSION)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
@@ -124,5 +127,4 @@ COMPONENT                                                     NAME              
             └─                                                mock-deployer-blueprint      v1               PlainText local
 `))
 	})
-
 })

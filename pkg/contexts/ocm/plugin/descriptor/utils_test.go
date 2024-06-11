@@ -6,7 +6,6 @@ import (
 )
 
 var _ = Describe("utils", func() {
-
 	It("merges lists", func() {
 		l1 := List[StringName]{"a", "b"}
 		l2 := List[StringName]{"b", "c"}

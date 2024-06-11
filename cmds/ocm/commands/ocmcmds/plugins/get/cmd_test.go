@@ -50,5 +50,4 @@ PLUGIN VERSION SOURCE DESCRIPTION                    ACCESSMETHODS UPLOADERS DOW
 test   v1      local  a test plugin without function test[v1]
 `))
 	})
-
 })

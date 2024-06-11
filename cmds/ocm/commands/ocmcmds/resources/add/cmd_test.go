@@ -30,10 +30,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const ARCH = "/tmp/ca"
-const VERSION = "v1"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "ghcr.io"
+const (
+	ARCH    = "/tmp/ca"
+	VERSION = "v1"
+	OCIPATH = "/tmp/oci"
+	OCIHOST = "ghcr.io"
+)
 
 func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, ff ...func(r compdesc.Resource)) {
 	rblob := blobaccess.ForFile(mime.MIME_TEXT, "/testdata/testcontent", env)

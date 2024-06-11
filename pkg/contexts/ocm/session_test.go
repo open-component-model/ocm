@@ -22,7 +22,6 @@ func (*test_spec) Key() (string, error) {
 }
 
 var _ = Describe("session", func() {
-
 	It("spec without key function", func() {
 		spec := ocmreg.NewRepositorySpec("gcr.io", nil)
 		key := Must(utils.Key(spec))

@@ -122,7 +122,6 @@ var _ = Describe("virtual repo", func() {
 
 			a = Must(r.Access())
 			Expect(a.GetInexpensiveContentVersionIdentity(vers)).To(Equal("sha256:" + dig))
-
 		},
 			Entry("with direct mode", false, localblob.Type),
 			Entry("with composition mode", true, compose.Type),

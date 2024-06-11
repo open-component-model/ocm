@@ -14,7 +14,6 @@ var _ = Describe("errors", func() {
 
 			Expect(errors.IsErrReadOnlyKind(uerr, "KIND")).To(BeTrue())
 			Expect(errors.IsErrReadOnlyKind(uerr, "other")).To(BeFalse())
-
 		})
 		It("message with elem", func() {
 			uerr := errors.ErrReadOnly("KIND", "obj")
@@ -33,7 +32,6 @@ var _ = Describe("errors", func() {
 
 			Expect(errors.IsErrUnknownKind(uerr, "KIND")).To(BeTrue())
 			Expect(errors.IsErrUnknownKind(uerr, "other")).To(BeFalse())
-
 		})
 		It("find error in history", func() {
 			uerr := errors.ErrUnknown("KIND", "obj")
@@ -43,5 +41,4 @@ var _ = Describe("errors", func() {
 			Expect(errors.IsErrUnknownKind(werr, "other")).To(BeFalse())
 		})
 	})
-
 })

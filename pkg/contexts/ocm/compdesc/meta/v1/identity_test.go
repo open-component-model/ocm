@@ -41,6 +41,5 @@ var _ = Describe("identity", func() {
 			CheckNotLocalHashEqual(a.Equivalent(b))
 			CheckNotLocalHashEqual(b.Equivalent(a))
 		})
-
 	})
 })

@@ -27,12 +27,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const COMP = "github.com/compa"
-const VERS = "1.0.0"
-const CA = "ca"
-const CTF = "ctf"
-const COPY = "./ctf.copy"
-const TARGET = "/tmp/target"
+const (
+	COMP   = "github.com/compa"
+	VERS   = "1.0.0"
+	CA     = "ca"
+	CTF    = "ctf"
+	COPY   = "./ctf.copy"
+	TARGET = "/tmp/target"
+)
 
 const OCISRC = "/tmp/source"
 
@@ -74,7 +76,7 @@ var _ = Describe("upload", func() {
 		oca := accessio.OnceCloser(ca)
 		defer Close(oca)
 
-		ctf := Must(ctfocm.Create(env.OCMContext(), accessobj.ACC_CREATE, CTF, 0700, env))
+		ctf := Must(ctfocm.Create(env.OCMContext(), accessobj.ACC_CREATE, CTF, 0o700, env))
 		octf := accessio.OnceCloser(ctf)
 		defer Close(octf)
 
@@ -107,7 +109,7 @@ transferring version "github.com/compa:1.0.0"...
 
 `))
 
-		copy := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, COPY, 0700, env))
+		copy := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, COPY, 0o700, env))
 		defer Close(copy)
 
 		// check type

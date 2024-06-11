@@ -21,7 +21,7 @@ func NormalizeYAML(y string) string {
 }
 
 var _ = Describe("serialization", func() {
-	var CDv2 = NormalizeYAML(`
+	CDv2 := NormalizeYAML(`
   component:
     componentReferences: []
     name: github.com/vasu1124/introspect
@@ -81,7 +81,7 @@ var _ = Describe("serialization", func() {
     schemaVersion: v2 
 `)
 
-	var CDv3 = NormalizeYAML(fmt.Sprintf(`
+	CDv3 := NormalizeYAML(fmt.Sprintf(`
 apiVersion: %s
 kind: ComponentVersion
 metadata:

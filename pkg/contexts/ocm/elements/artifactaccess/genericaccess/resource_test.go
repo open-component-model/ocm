@@ -17,8 +17,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	OCIPATH = "/tmp/oci"
+	OCIHOST = "alias"
+)
 
 var _ = Describe("dir tree resource access", func() {
 	var env *Builder

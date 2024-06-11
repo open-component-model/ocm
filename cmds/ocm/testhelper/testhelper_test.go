@@ -8,7 +8,6 @@ import (
 )
 
 var _ = Describe("Test Environment", func() {
-
 	It("loads test environment", func() {
 		h := NewTestEnv(TestData())
 		defer h.Cleanup()

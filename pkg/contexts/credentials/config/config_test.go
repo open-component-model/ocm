@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/mandelsoft/goutils/testutils"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -36,7 +37,6 @@ var _ = Describe("generic credentials", func() {
 	_ = props
 
 	Context("serialize", func() {
-
 		It("serializes repository spec not in map", func() {
 			mapdata := "{\"repositories\":{\"repository\":{\"repoName\":\"test\",\"type\":\"Memory\"}}}"
 			type S struct {
@@ -95,7 +95,6 @@ var _ = Describe("generic credentials", func() {
 		})
 
 		It("composes a config for repositories", func() {
-
 			cfg := localconfig.New()
 
 			cfg.AddRepository(repospec, direct)
@@ -111,7 +110,6 @@ var _ = Describe("generic credentials", func() {
 		})
 
 		It("composes a config for aliases", func() {
-
 			cfg := localconfig.New()
 
 			cfg.AddAlias("alias", repospec, direct)
@@ -207,6 +205,5 @@ consumers:
 
 			Expect(result.Properties()).To(Equal(props))
 		})
-
 	})
 })

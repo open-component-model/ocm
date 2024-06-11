@@ -25,7 +25,6 @@ func normalize(i interface{}) ([]byte, error) {
 }
 
 var _ = Describe("oci config", func() {
-
 	spec := ocireg.NewRepositorySpec("ghcr.io")
 	data, err := normalize(spec)
 	Expect(err).To(Succeed())

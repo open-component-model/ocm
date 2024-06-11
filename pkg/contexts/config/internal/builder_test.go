@@ -34,5 +34,4 @@ var _ = Describe("builder test", func() {
 		Expect(ctx.ConfigTypes()).NotTo(BeIdenticalTo(local.DefaultConfigTypeScheme))
 		Expect(len(ctx.ConfigTypes().KnownTypeNames())).To(Equal(0))
 	})
-
 })

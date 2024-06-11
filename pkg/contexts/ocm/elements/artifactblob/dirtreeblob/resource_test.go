@@ -65,7 +65,7 @@ var _ = Describe("dir tree resource access", func() {
 			me.WithGlobalAccess(global),
 		)
 
-		arch := Must(ctf.Create(env, accessobj.ACC_CREATE, "ctf", 0700, env, accessobj.FormatDirectory))
+		arch := Must(ctf.Create(env, accessobj.ACC_CREATE, "ctf", 0o700, env, accessobj.FormatDirectory))
 		c := Must(arch.LookupComponent("arcme.org/test"))
 		v := Must(c.NewVersion("v1.0.0"))
 

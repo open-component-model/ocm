@@ -197,5 +197,4 @@ var _ = Describe("gardener config", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(credentialsFromRepo).To(Equal(expectedCreds))
 	})
-
 })

@@ -8,7 +8,6 @@ import (
 )
 
 var _ = Describe("Blob Inputs", func() {
-
 	It("missing input", func() {
 		in := `
 access:

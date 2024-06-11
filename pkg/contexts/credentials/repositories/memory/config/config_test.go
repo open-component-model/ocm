@@ -14,7 +14,6 @@ import (
 )
 
 var _ = Describe("configure credentials", func() {
-
 	var env *Environment
 	var ctx credentials.Context
 	var cfg config.Context

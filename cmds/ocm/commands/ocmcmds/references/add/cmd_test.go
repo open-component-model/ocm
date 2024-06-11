@@ -8,14 +8,17 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
 	"github.com/mandelsoft/goutils/testutils"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 )
 
-const ARCH = "/tmp/ca"
-const VERSION = "v1.1.1"
-const REF = "github.com/mandelsoft/ref"
+const (
+	ARCH    = "/tmp/ca"
+	VERSION = "v1.1.1"
+	REF     = "github.com/mandelsoft/ref"
+)
 
 func CheckReference(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, add ...func(compdesc.ComponentReference)) {
 	rs, _ := cd.GetReferencesByName(name)

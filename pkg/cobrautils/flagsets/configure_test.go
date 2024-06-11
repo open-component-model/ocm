@@ -60,5 +60,4 @@ var _ = Describe("configure", func() {
 		Expect(flags.Parse([]string{"--entryType=t1", "--common=string", "--t1=value", "--t2=value"})).To(Succeed())
 		ExpectError(prov.GetConfigFor(opts)).To(MatchError(`option "t2" given, but not possible for entry type t1`))
 	})
-
 })

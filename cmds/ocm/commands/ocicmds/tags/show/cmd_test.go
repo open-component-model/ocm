@@ -12,15 +12,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const ARCH = "/tmp/ctf"
-const NAMESAPCE = "mandelsoft/test"
-const V13 = "v1.3"
-const V131 = "v1.3.1"
-const V132 = "v1.3.2"
-const V132x = "v1.3.2-beta.1"
-const V14 = "v1.4"
-const V2 = "v2.0"
-const OTHERVERS = "sometag"
+const (
+	ARCH      = "/tmp/ctf"
+	NAMESAPCE = "mandelsoft/test"
+	V13       = "v1.3"
+	V131      = "v1.3.1"
+	V132      = "v1.3.2"
+	V132x     = "v1.3.2-beta.1"
+	V14       = "v1.4"
+	V2        = "v2.0"
+	OTHERVERS = "sometag"
+)
 
 var _ = Describe("Show OCI Tags", func() {
 	var env *TestEnv

@@ -18,7 +18,6 @@ import (
 
 var _ = Describe("blob access ref counting", func() {
 	It("handles ref count less access", func() {
-
 		blob := blobaccess.ForString(mime.MIME_TEXT, "test")
 		dup := Must(blob.Dup())
 		MustBeSuccessful(blob.Close())

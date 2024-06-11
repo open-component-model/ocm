@@ -24,11 +24,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
-const ARCH = "/tmp/ctf"
-const VERSION = "1.0.0"
-const COMPONENT = "ocm.software/demo/test"
+const (
+	OCIPATH   = "/tmp/oci"
+	OCIHOST   = "alias"
+	ARCH      = "/tmp/ctf"
+	VERSION   = "1.0.0"
+	COMPONENT = "ocm.software/demo/test"
+)
 
 func CheckComponent(env *TestEnv) {
 	repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))

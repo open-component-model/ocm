@@ -26,16 +26,13 @@ func mapversion(s *semver.Version) (*semver.Version, error) {
 }
 
 var _ = Describe("ref parsing", func() {
-
 	It("omit v", func() {
-
 		s := Must(semver.NewVersion("1.0.0-rc.1+65"))
 
 		v := Must(mapversion(s))
 		Expect(v.Original()).To(Equal("1.0.0-rc.1" + META_SEPARATOR + "65"))
 	})
 	It("keep v", func() {
-
 		s := Must(semver.NewVersion("v1.0.0-rc.1+65"))
 
 		s.Metadata()
@@ -43,12 +40,10 @@ var _ = Describe("ref parsing", func() {
 		Expect(v.Original()).To(Equal("v1.0.0-rc.1" + META_SEPARATOR + "65"))
 	})
 	It("no meta", func() {
-
 		s := Must(semver.NewVersion("v1.0.0-rc.1"))
 
 		s.Metadata()
 		v := Must(mapversion(s))
 		Expect(v.Original()).To(Equal("v1.0.0-rc.1"))
 	})
-
 })

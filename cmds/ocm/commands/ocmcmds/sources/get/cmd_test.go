@@ -12,11 +12,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
-const ARCH = "/tmp/ca"
-const VERSION = "v1"
-const COMP = "test.de/x"
-const COMP2 = "test.de/y"
-const PROVIDER = "mandelsoft"
+const (
+	ARCH     = "/tmp/ca"
+	VERSION  = "v1"
+	COMP     = "test.de/x"
+	COMP2    = "test.de/y"
+	PROVIDER = "mandelsoft"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv

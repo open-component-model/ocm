@@ -25,7 +25,6 @@ func CheckRefs(ctx config.Context, n int) {
 }
 
 var _ = Describe("generic config handling", func() {
-
 	var scheme config.ConfigTypeScheme
 	var cfgctx config.Context
 
@@ -88,7 +87,6 @@ var _ = Describe("generic config handling", func() {
 	})
 
 	It("it applies unknown type to existing context", func() {
-
 		cfg, err := cfgctx.GetConfigForData(testdataconfig, nil)
 		Expect(err).To(Succeed())
 

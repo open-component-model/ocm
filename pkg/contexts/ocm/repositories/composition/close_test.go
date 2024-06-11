@@ -20,8 +20,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	OCIPATH = "/tmp/oci"
+	OCIHOST = "alias"
+)
 
 const RES = "ref"
 
@@ -37,7 +39,6 @@ var _ = Describe("cached access method blob", func() {
 	})
 
 	Context("ocireg", func() {
-
 		BeforeEach(func() {
 			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 				OCIManifest1(env)

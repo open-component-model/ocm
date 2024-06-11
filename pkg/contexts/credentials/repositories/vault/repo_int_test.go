@@ -80,7 +80,6 @@ var _ = Describe("vault config", func() {
 	})
 
 	Context("authentication to vault and reading secrets", func() {
-
 		spec := me.NewRepositorySpec("http://"+VAULT_ADDRESS, me.WithPath(VAULT_PATH_REPO1), me.WithMountPath("secret"))
 		spec1 := me.NewRepositorySpec("http://"+VAULT_ADDRESS, me.WithPath(VAULT_PATH_REPO2), me.WithMountPath("secret"))
 
@@ -138,7 +137,8 @@ var _ = Describe("vault config", func() {
 				Data: map[string]any{
 					"password1": "ocm-password-1",
 					"password2": "ocm-password-2",
-				}},
+				},
+			},
 				vault.WithMountPath("secret"),
 			))
 
@@ -164,7 +164,8 @@ var _ = Describe("vault config", func() {
 			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET_2, schema.KvV2WriteRequest{
 				Data: map[string]any{
 					"password2": "ocm-password-2",
-				}},
+				},
+			},
 				vault.WithMountPath("secret"),
 			))
 
@@ -196,7 +197,8 @@ var _ = Describe("vault config", func() {
 			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET_2, schema.KvV2WriteRequest{
 				Data: map[string]any{
 					"password2": "ocm-password-2",
-				}},
+				},
+			},
 				vault.WithMountPath("secret"),
 			))
 
@@ -253,7 +255,8 @@ var _ = Describe("vault config", func() {
 			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET_2, schema.KvV2WriteRequest{
 				Data: map[string]any{
 					"password2": "ocm-password-2",
-				}},
+				},
+			},
 				vault.WithMountPath("secret"),
 			))
 
@@ -288,7 +291,8 @@ var _ = Describe("vault config", func() {
 			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET_2, schema.KvV2WriteRequest{
 				Data: map[string]any{
 					"password2": "ocm-password-2",
-				}},
+				},
+			},
 				vault.WithMountPath("secret"),
 			))
 

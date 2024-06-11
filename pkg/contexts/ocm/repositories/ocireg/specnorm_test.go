@@ -10,7 +10,6 @@ import (
 )
 
 var _ = Describe("ref parsing", func() {
-
 	Context("deserialization", func() {
 		It("handles regular spec", func() {
 			spec := `

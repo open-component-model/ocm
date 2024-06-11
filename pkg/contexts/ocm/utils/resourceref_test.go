@@ -18,17 +18,19 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-const ARCH = "/tmp/ctf"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENT = "github.com/mandelsoft/test"
-const COMPONENT2 = "github.com/mandelsoft/test2"
-const COMPONENT3 = "github.com/mandelsoft/test3"
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
-const SIGNATURE = "test"
-const SIGN_ALGO = rsa.Algorithm
+const (
+	ARCH       = "/tmp/ctf"
+	PROVIDER   = "mandelsoft"
+	VERSION    = "v1"
+	COMPONENT  = "github.com/mandelsoft/test"
+	COMPONENT2 = "github.com/mandelsoft/test2"
+	COMPONENT3 = "github.com/mandelsoft/test3"
+	OUT        = "/tmp/res"
+	OCIPATH    = "/tmp/oci"
+	OCIHOST    = "alias"
+	SIGNATURE  = "test"
+	SIGN_ALGO  = rsa.Algorithm
+)
 
 func CheckResourceRef(cv ocm.ComponentVersionAccess, name string, path ...metav1.Identity) {
 	data := Must(utils.GetResourceDataForRef(cv, metav1.NewNestedResourceRef(metav1.NewIdentity(name), path)))

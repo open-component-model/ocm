@@ -31,17 +31,21 @@ import (
 
 const PLUGIN = "test"
 
-const ARCH = "ctf"
-const COMP = "github.com/mandelsoft/comp"
-const VERS = "1.0.0"
-const PROVIDER = "mandelsoft"
-const RSCTYPE = "TestArtifact"
-const MEDIA = "text/plain"
+const (
+	ARCH     = "ctf"
+	COMP     = "github.com/mandelsoft/comp"
+	VERS     = "1.0.0"
+	PROVIDER = "mandelsoft"
+	RSCTYPE  = "TestArtifact"
+	MEDIA    = "text/plain"
+)
 
-const REPOTYPE = "test/v1"
-const ACCTYPE = "test/v1"
-const CONTENT = "some test content\n"
-const HINT = "given"
+const (
+	REPOTYPE = "test/v1"
+	ACCTYPE  = "test/v1"
+	CONTENT  = "some test content\n"
+	HINT     = "given"
+)
 
 type AccessSpec struct {
 	runtime.ObjectVersionedType
@@ -121,6 +125,5 @@ var _ = Describe("setup plugin cache", func() {
 		Expect(string(data)).To(StringEqualTrimmedWithContext(`
 downloaded
 ` + CONTENT))
-
 	})
 })

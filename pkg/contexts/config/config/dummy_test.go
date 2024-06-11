@@ -80,6 +80,7 @@ func (d *dummyContext) getApplied() []*Config {
 	d.update()
 	return d.applied
 }
+
 func (d *dummyContext) update() error {
 	gen, err := d.config.ApplyTo(d.lastGeneration, d)
 	d.lastGeneration = gen

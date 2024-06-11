@@ -9,7 +9,6 @@ import (
 )
 
 var _ = Describe("normalization", func() {
-
 	It("compares with substitution variables", func() {
 		exp := "A ${TEST}."
 		res := "A testcase."

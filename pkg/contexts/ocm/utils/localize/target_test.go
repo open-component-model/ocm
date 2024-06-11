@@ -17,7 +17,6 @@ import (
 )
 
 var _ = Describe("value substitution in single target", func() {
-
 	Context("localize", func() {
 		const (
 			ARCHIVE   = "archive.ctf"
@@ -78,7 +77,6 @@ var _ = Describe("value substitution in single target", func() {
 		})
 
 		It("uses multiple resolved image ref data from component version", func() {
-
 			mappings := UnmarshalImageMappings(`
 - name: test1
   repository: a.b.rep
@@ -104,7 +102,7 @@ var _ = Describe("value substitution in single target", func() {
 	})
 
 	Context("substitute", func() {
-		var data = []byte(`
+		data := []byte(`
 manifest:
   value1: orig1
   value2: orig2

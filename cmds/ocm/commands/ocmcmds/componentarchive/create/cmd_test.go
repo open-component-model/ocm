@@ -49,7 +49,6 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("creates comp arch", func() {
-
 		plabels := metav1.Labels{}
 		plabels.Set("email", "info@mandelsoft.de")
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", "v1", "--provider", "mandelsoft", "--file", "/tmp/ca",
@@ -76,7 +75,6 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("creates comp arch with "+compdescv3.VersionName, func() {
-
 		plabels := metav1.Labels{}
 		plabels.Set("email", "info@mandelsoft.de")
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", "v1", "--provider", "mandelsoft", "--file", "/tmp/ca",

@@ -9,7 +9,6 @@ import (
 )
 
 var _ = Describe("ctf management", func() {
-
 	Context("with path", func() {
 		pat := credentials.ConsumerIdentity{
 			identity.ID_HOSTNAME:   "host",
@@ -143,5 +142,4 @@ var _ = Describe("ctf management", func() {
 			Expect(identity.IdentityMatcher(pat, pat, id)).To(BeFalse())
 		})
 	})
-
 })

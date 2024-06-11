@@ -9,11 +9,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 )
 
-type Value = me.Value
-type Config = me.Config
+type (
+	Value  = me.Value
+	Config = me.Config
+)
 
-var NewConfig = me.NewConfig
-var New = me.New
+var (
+	NewConfig = me.NewConfig
+	New       = me.New
+)
 
 var _ = Describe("list merge", func() {
 	handler := New()

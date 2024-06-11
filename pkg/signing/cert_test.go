@@ -17,7 +17,6 @@ import (
 func CreateCertificate(subject pkix.Name, validFrom *time.Time, validity time.Duration,
 	pub interface{}, ca *x509.Certificate, priv interface{}, isCA bool, names ...string,
 ) ([]byte, error) {
-
 	spec := &signutils.Specification{
 		RootCAs:      ca,
 		IsCA:         isCA,
@@ -57,7 +56,6 @@ var _ = Describe("normalization", func() {
 	}
 
 	Context("foreignly signed", func() {
-
 		certData, err := CreateCertificate(subject, nil, 10*time.Hour, pub, ca, capriv, false)
 		Expect(err).To(Succeed())
 

@@ -38,17 +38,19 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-const ARCH = "/tmp/ctf"
-const ARCH2 = "/tmp/ctf2"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENT = "github.com/mandelsoft/test"
-const COMPONENT2 = "github.com/mandelsoft/test2"
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
-const SIGNATURE = "test"
-const SIGN_ALGO = rsa.Algorithm
+const (
+	ARCH       = "/tmp/ctf"
+	ARCH2      = "/tmp/ctf2"
+	PROVIDER   = "mandelsoft"
+	VERSION    = "v1"
+	COMPONENT  = "github.com/mandelsoft/test"
+	COMPONENT2 = "github.com/mandelsoft/test2"
+	OUT        = "/tmp/res"
+	OCIPATH    = "/tmp/oci"
+	OCIHOST    = "alias"
+	SIGNATURE  = "test"
+	SIGN_ALGO  = rsa.Algorithm
+)
 
 type optionsChecker struct {
 	standard.TransferOptionsCreator
@@ -100,7 +102,6 @@ var _ = Describe("Transfer handler", func() {
 				})
 			})
 		})
-
 	})
 
 	AfterEach(func() {
@@ -112,7 +113,7 @@ var _ = Describe("Transfer handler", func() {
 		defer Close(src, "source")
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
 		defer Close(cv, "source cv")
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target")
 
 		tcv := Must(tgt.NewComponentVersion(cv.GetName(), cv.GetVersion()))
@@ -137,7 +138,7 @@ var _ = Describe("Transfer handler", func() {
 		defer Close(src, "source")
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
 		defer Close(cv, "source cv")
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target")
 
 		// handler, err := standard.New(standard.ResourcesByValue())
@@ -176,7 +177,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		defer Close(src, "source")
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
 		defer Close(cv, "source cv")
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target")
 
 		// handler, err := standard.New(standard.ResourcesByValue())
@@ -265,7 +266,6 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		nested.Close(tcv, "target cv")
 		Expect(tcd).To(DeepEqual(tcv.GetDescriptor()))
 		MustBeSuccessful(nested.Finalize())
-
 	},
 		Entry("without preserve global",
 			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
@@ -290,7 +290,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		defer Close(src, "source")
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
 		defer Close(cv, "source cv")
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target")
 
 		// transfer by reference, first
@@ -404,7 +404,6 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		ntcd := tcv.GetDescriptor()
 		Expect(tcd).To(DeepEqual(ntcd))
 		MustBeSuccessful(nested.Finalize())
-
 	},
 		Entry("without preserve global",
 			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
@@ -427,7 +426,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		Expect(err).To(Succeed())
 		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
 		Expect(err).To(Succeed())
-		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env)
 		Expect(err).To(Succeed())
 		defer tgt.Close()
 
@@ -465,7 +464,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		Expect(err).To(Succeed())
 		childSrc, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
 		Expect(err).To(Succeed())
-		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env)
 		Expect(err).To(Succeed())
 		defer tgt.Close()
 		handler, err := standard.New(standard.Recursive(), standard.Resolver(childSrc))
@@ -505,7 +504,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 
 		Expect(len(cv.GetDescriptor().Signatures)).To(Equal(1))
 
-		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env)
 		Expect(err).To(Succeed())
 		defer tgt.Close()
 		handler, err := standard.New(standard.ResourcesByValue())

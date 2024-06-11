@@ -28,7 +28,6 @@ func normalize(i interface{}) ([]byte, error) {
 }
 
 var _ = Describe("command config", func() {
-
 	ocispec := ocireg.NewRepositorySpec("ghcr.io")
 
 	ocidata, err := normalize(ocispec)
@@ -41,9 +40,7 @@ var _ = Describe("command config", func() {
 	specdata := "{\"ociRepositories\":{\"oci\":" + string(ocidata) + "},\"ocmRepositories\":{\"ocm\":" + string(ocmdata) + "},\"type\":\"" + config.OCMCmdConfigType + "\"}"
 
 	Context("serialize", func() {
-
 		It("serializes config", func() {
-
 			cfg := config.New()
 			err := cfg.AddOCIRepository("oci", ocispec)
 			Expect(err).To(Succeed())

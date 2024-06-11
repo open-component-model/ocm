@@ -83,7 +83,6 @@ var _ = Describe("Validation", func() {
 		})
 
 		Context("#Metadata", func() {
-
 			It("should forbid if the component schemaVersion is missing", func() {
 				comp := ComponentDescriptor{}
 
@@ -101,7 +100,6 @@ var _ = Describe("Validation", func() {
 					"Field": Equal("apiVersion"),
 				}))))
 			})
-
 		})
 
 		Context("#ObjectMeta", func() {
@@ -126,7 +124,6 @@ var _ = Describe("Validation", func() {
 					"Field": Equal("metadata.name"),
 				}))))
 			})
-
 		})
 
 		Context("#Sources", func() {

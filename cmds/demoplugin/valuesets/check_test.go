@@ -20,10 +20,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-const ARCH = "/tmp/ctf"
-const COMP = "acme.org/test"
-const VERS = "1.0.0"
-const PROV = "acme.org"
+const (
+	ARCH = "/tmp/ctf"
+	COMP = "acme.org/test"
+	VERS = "1.0.0"
+	PROV = "acme.org"
+)
 
 var _ = Describe("demoplugin", func() {
 	/*

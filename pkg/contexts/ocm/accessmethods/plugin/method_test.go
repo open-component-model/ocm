@@ -19,10 +19,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 )
 
-const ARCH = "ctf"
-const COMP = "github.com/mandelsoft/comp"
-const VERS = "1.0.0"
-const PROVIDER = "mandelsoft"
+const (
+	ARCH     = "ctf"
+	COMP     = "github.com/mandelsoft/comp"
+	VERS     = "1.0.0"
+	PROVIDER = "mandelsoft"
+)
 
 var _ = Describe("setup plugin cache", func() {
 	var ctx ocm.Context
@@ -54,7 +56,6 @@ someattr: value
 	})
 
 	It("registers access methods", func() {
-
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.Component(COMP, func() {
 				env.Version(VERS, func() {

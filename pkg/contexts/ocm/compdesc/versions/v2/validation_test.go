@@ -85,7 +85,6 @@ var _ = Describe("Validation", func() {
 		})
 
 		Context("#Metadata", func() {
-
 			It("should forbid if the component schemaVersion is missing", func() {
 				comp := ComponentDescriptor{
 					Metadata: meta.Metadata{},
@@ -105,7 +104,6 @@ var _ = Describe("Validation", func() {
 					"Field": Equal("meta.schemaVersion"),
 				}))))
 			})
-
 		})
 
 		Context("#ObjectMeta", func() {
@@ -130,7 +128,6 @@ var _ = Describe("Validation", func() {
 					"Field": Equal("component.name"),
 				}))))
 			})
-
 		})
 
 		Context("#Sources", func() {
@@ -387,7 +384,6 @@ var _ = Describe("Validation", func() {
 		})
 
 		Context("#labels", func() {
-
 			It("should forbid if labels are defined multiple times in the same context", func() {
 				comp.ComponentReferences = []ComponentReference{
 					{

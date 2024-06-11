@@ -8,7 +8,6 @@ import (
 )
 
 var _ = Describe("*** basic types", func() {
-
 	Context("type name", func() {
 		It("one arg", func() {
 			t := runtime.TypeName("test")

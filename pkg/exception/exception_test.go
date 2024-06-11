@@ -84,7 +84,6 @@ var _ = Describe("exceptions", func() {
 	})
 
 	Context("with matchers", func() {
-
 		caller := func(e error, args ...interface{}) (err error) {
 			defer exception.PropagateException(&err, exception.ByPrototypes(MyException{}))
 			_caller(e, args...)

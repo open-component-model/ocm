@@ -112,5 +112,4 @@ var _ = Describe("cached blob", func() {
 		Expect(err).To(Succeed())
 		Expect(len(dir)).To(Equal(0))
 	})
-
 })

@@ -8,7 +8,6 @@ import (
 )
 
 var _ = Describe("utils", func() {
-
 	It("strips media type", func() {
 		Expect(artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest)).To(Equal("application/vnd.oci.image.manifest.v1"))
 		Expect(artdesc.ToContentMediaType(artdesc.MediaTypeImageIndex)).To(Equal("application/vnd.oci.image.index.v1"))

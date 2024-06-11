@@ -52,7 +52,7 @@ var _ = Describe("ctf management", func() {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)
 
-		r := Must(ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700))
+		r := Must(ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0o700))
 		finalize.Close(r)
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 

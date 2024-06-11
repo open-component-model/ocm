@@ -26,5 +26,4 @@ var _ = Describe("area test", func() {
 		Expect(reflect.TypeOf(dctx).String()).To(Equal("*internal.gcWrapper"))
 		Expect(dctx).To(BeIdenticalTo(DefaultContext))
 	})
-
 })

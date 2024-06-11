@@ -36,7 +36,6 @@ var _ = Describe("action registry", func() {
 	})
 
 	Context("plain", func() {
-
 		It("registers", func() {
 			Expect(registry.SupportedActionVersions(NAME)).To(Equal([]string{"v1", "v2"}))
 		})

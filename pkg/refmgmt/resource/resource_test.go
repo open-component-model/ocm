@@ -90,7 +90,6 @@ func New(name string) Resource {
 
 var _ = Describe("ref test", func() {
 	It("handles main ref", func() {
-
 		r := New("alice")
 
 		Expect(r.IsClosed()).To(BeFalse())
@@ -102,7 +101,6 @@ var _ = Describe("ref test", func() {
 	})
 
 	It("handle last closed view", func() {
-
 		r := New("alice")
 		Expect(r.IsClosed()).To(BeFalse())
 		v := Must(r.Dup())

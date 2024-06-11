@@ -8,14 +8,15 @@ import (
 	"github.com/mandelsoft/goutils/testutils"
 )
 
-const SPECFILE = "/tmp/sources.yaml"
-const VERSION = "v1"
+const (
+	SPECFILE = "/tmp/sources.yaml"
+	VERSION  = "v1"
+)
 
 func CheckSpec(env *TestEnv, spec string) {
 	data, err := env.ReadFile(SPECFILE)
 	ExpectWithOffset(1, err).To(Succeed())
 	ExpectWithOffset(1, string(data)).To(testutils.StringEqualTrimmedWithContext(spec))
-
 }
 
 var _ = Describe("Add sources", func() {

@@ -46,5 +46,4 @@ var _ = Describe("consumer id handling", func() {
 			ociidentity.ATTR_PASSWORD: "password",
 		}))
 	})
-
 })

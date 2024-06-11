@@ -34,5 +34,4 @@ var _ = Describe("filter", func() {
 		MustFailWithMessage(err, "invalid semver versions: 1.x")
 		Expect(r).To(Equal(semver.Collection{V10, V19, V20}))
 	})
-
 })

@@ -10,7 +10,6 @@ import (
 )
 
 var _ = Describe("Config deserialization Test Environment", func() {
-
 	It("deserializes string", func() {
 		cfg := Must(registrations.DecodeConfig[maven.Config]("test"))
 		Expect(cfg).To(Equal(&maven.Config{Url: "test"}))

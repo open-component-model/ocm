@@ -117,7 +117,7 @@ var _ = Describe("syntheses", func() {
 		nested := finalize.Nested()
 
 		// setup the scene
-		r := Must(ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700))
+		r := Must(ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0o700))
 		nested.Close(r, "create ctf")
 		n := Must(r.LookupNamespace("mandelsoft/test"))
 		nested.Close(n, "ns")

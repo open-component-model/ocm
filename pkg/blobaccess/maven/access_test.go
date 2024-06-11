@@ -3,8 +3,6 @@ package maven_test
 import (
 	"time"
 
-	"github.com/open-component-model/ocm/pkg/maven/maventest"
-
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -12,6 +10,7 @@ import (
 
 	me "github.com/open-component-model/ocm/pkg/blobaccess/maven"
 	"github.com/open-component-model/ocm/pkg/maven"
+	"github.com/open-component-model/ocm/pkg/maven/maventest"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
@@ -26,7 +25,6 @@ const (
 )
 
 var _ = Describe("blobaccess for maven", func() {
-
 	Context("maven filesystem repository", func() {
 		var env *Builder
 		var repo *maven.Repository

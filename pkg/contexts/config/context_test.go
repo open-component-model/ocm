@@ -14,7 +14,6 @@ import (
 )
 
 var _ = Describe("config handling", func() {
-
 	var scheme config.ConfigTypeScheme
 	var cfgctx config.Context
 
@@ -74,7 +73,6 @@ var _ = Describe("config handling", func() {
 	})
 
 	It("it applies generic to new context", func() {
-
 		cfg := NewConfig("a", "b")
 		data, err := json.Marshal(cfg)
 		Expect(err).To(Succeed())
@@ -88,5 +86,4 @@ var _ = Describe("config handling", func() {
 		d := newDummy(cfgctx)
 		Expect(d.getApplied()).To(Equal([]*Config{cfg}))
 	})
-
 })

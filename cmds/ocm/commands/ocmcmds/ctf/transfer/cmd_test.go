@@ -21,13 +21,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const ARCH = "/tmp/ctf"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENT = "github.com/mandelsoft/test"
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	ARCH      = "/tmp/ctf"
+	PROVIDER  = "mandelsoft"
+	VERSION   = "v1"
+	COMPONENT = "github.com/mandelsoft/test"
+	OUT       = "/tmp/res"
+	OCIPATH   = "/tmp/oci"
+	OCIHOST   = "alias"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv

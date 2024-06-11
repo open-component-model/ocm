@@ -51,5 +51,4 @@ var _ = Describe("yaml flags", func() {
 		Expect(flags.Parse([]string{"--flag", value})).To(Succeed())
 		Expect(flag).To(Equal(&T{"va"}))
 	})
-
 })

@@ -12,8 +12,7 @@ import (
 )
 
 var _ = Describe("Method", func() {
-
-	var data = `globalAccess:
+	data := `globalAccess:
   digest: sha256:1bf729fa00e355199e711933ccfa27467ee3d2de1343aef2a7c1ecbdf885e63a
   mediaType: application/tar+gzip
   ref: ghcr.io/vasu1124/ocm/component-descriptors/github.com/vasu1124/introspect-delivery

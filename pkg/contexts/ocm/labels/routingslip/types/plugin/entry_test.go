@@ -64,5 +64,4 @@ var _ = Describe("setup plugin cache", func() {
 			"mediaType": "a simple test",
 		}))
 	})
-
 })

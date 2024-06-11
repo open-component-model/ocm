@@ -29,5 +29,4 @@ var _ = Describe("path flags", func() {
 		PathArrayVarPF(flags, &val, "path", "p", []string{`/foo/bar`, `other/path`}, "help message")
 		Expect(val).To(Equal([]string{"/foo/bar", "other/path"}))
 	})
-
 })

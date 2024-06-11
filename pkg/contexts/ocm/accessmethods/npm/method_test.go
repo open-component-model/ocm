@@ -3,21 +3,23 @@ package npm_test
 import (
 	"crypto"
 
+	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 
-	. "github.com/mandelsoft/goutils/testutils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/iotools"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const NPMPATH = "/testdata/registry"
-const FAILPATH = "/testdata/failregistry"
+const (
+	NPMPATH  = "/testdata/registry"
+	FAILPATH = "/testdata/failregistry"
+)
 
 var _ = Describe("Method", func() {
 	var env *Builder

@@ -14,7 +14,6 @@ func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 }
 
 var _ = Describe("ctf management", func() {
-
 	Context("with path", func() {
 		pat := credentials.ConsumerIdentity{
 			hostpath.ID_HOSTNAME:   "host",
@@ -202,5 +201,4 @@ var _ = Describe("ctf management", func() {
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
 		})
 	})
-
 })

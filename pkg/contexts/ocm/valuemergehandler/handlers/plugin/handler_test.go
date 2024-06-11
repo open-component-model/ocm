@@ -16,8 +16,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 )
 
-const PLUGIN = "merge"
-const ALGORITHM = "acme.org/test"
+const (
+	PLUGIN    = "merge"
+	ALGORITHM = "acme.org/test"
+)
 
 var _ = Describe("plugin value merge handler", func() {
 	var ctx ocm.Context

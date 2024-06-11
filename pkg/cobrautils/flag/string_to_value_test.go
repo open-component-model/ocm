@@ -4,9 +4,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/spf13/pflag"
-
 	"github.com/mandelsoft/goutils/testutils"
+	"github.com/spf13/pflag"
 )
 
 var _ = Describe("value map", func() {
@@ -74,5 +73,4 @@ var _ = Describe("value map", func() {
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(Equal("invalid argument \"a\" for \"--flag\" flag: expected <name>=<value>"))
 	})
-
 })

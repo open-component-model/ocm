@@ -21,7 +21,6 @@ import (
 )
 
 var _ = Describe("docker config", func() {
-
 	props := common.Properties{
 		"username":      "mandelsoft",
 		"password":      "password",

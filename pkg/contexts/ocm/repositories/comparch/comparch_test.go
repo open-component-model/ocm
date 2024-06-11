@@ -40,7 +40,6 @@ const (
 )
 
 var _ = Describe("Repository", func() {
-
 	It("marshal/unmarshal simple", func() {
 		octx := ocm.DefaultContext()
 		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, TEST_FILEPATH))

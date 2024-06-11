@@ -22,11 +22,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-const ARCH = "/tmp/ctf"
-const TARGET = "/tmp/target"
-const COMPONENT = "acme.org/routingslip"
-const VERSION = "1.0.0"
-const LOCAL = "local.org"
+const (
+	ARCH      = "/tmp/ctf"
+	TARGET    = "/tmp/target"
+	COMPONENT = "acme.org/routingslip"
+	VERSION   = "1.0.0"
+	LOCAL     = "local.org"
+)
 
 var _ = Describe("management", func() {
 	var env *builder.Builder

@@ -15,8 +15,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	OCIPATH = "/tmp/oci"
+	OCIHOST = "alias"
+)
 
 var _ = Describe("Method", func() {
 	var env *Builder

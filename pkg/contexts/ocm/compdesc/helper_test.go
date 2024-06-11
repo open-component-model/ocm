@@ -11,7 +11,6 @@ import (
 )
 
 var _ = Describe("helper", func() {
-
 	It("should inject a new repository context if none is defined", func() {
 		cd := &compdesc.ComponentDescriptor{}
 		compdesc.DefaultComponent(cd)
@@ -185,7 +184,6 @@ var _ = Describe("helper", func() {
 				Expect(res).To(Equal(compdesc.Resources{r4v3}))
 				res = Must(cd.GetResourcesBySelectors([]compdesc.IdentitySelector{compdesc.WithExtraIdentity("extra", "value")}, nil))
 				Expect(res).To(Equal(compdesc.Resources{r4v3}))
-
 			})
 			It("selects none with wrong extra identity value", func() {
 				_, err := cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.WithExtraIdentity("extra", "other")})
@@ -422,7 +420,6 @@ var _ = Describe("helper", func() {
 				Expect(res).To(Equal(compdesc.References{r4v3}))
 				res = Must(cd.GetReferencesBySelectors([]compdesc.IdentitySelector{compdesc.WithExtraIdentity("extra", "value")}, nil))
 				Expect(res).To(Equal(compdesc.References{r4v3}))
-
 			})
 			It("selects none with wrong extra identity value", func() {
 				_, err := cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.WithExtraIdentity("extra", "other")})

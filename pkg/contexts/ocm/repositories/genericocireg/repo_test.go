@@ -50,8 +50,10 @@ import (
 
 var DefaultContext = ocm.New()
 
-const COMPONENT = "github.com/mandelsoft/ocm"
-const TESTBASE = "testbase.de"
+const (
+	COMPONENT = "github.com/mandelsoft/ocm"
+	TESTBASE  = "testbase.de"
+)
 
 var _ = Describe("component repository mapping", func() {
 	var tempfs vfs.FileSystem
@@ -221,7 +223,7 @@ var _ = Describe("component repository mapping", func() {
 
 		// create artifactset
 		opts := Must(accessio.AccessOptions(nil, accessio.PathFileSystem(tempfs)))
-		r := Must(artifactset.FormatTGZ.Create("test.tgz", opts, 0700))
+		r := Must(artifactset.FormatTGZ.Create("test.tgz", opts, 0o700))
 		testhelper.DefaultManifestFill(r)
 		r.Annotate(artifactset.MAINARTIFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)
 		Expect(r.Close()).To(Succeed())

@@ -15,12 +15,14 @@ import (
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 )
 
-const ARCH = "/tmp/ctf"
-const ARCH2 = "/tmp/ctf2"
-const PROVIDER = "open-component-model"
-const VERSION = "v1"
-const COMPONENT = "github.com/open-component-model/test"
-const OUT = "/tmp/res"
+const (
+	ARCH      = "/tmp/ctf"
+	ARCH2     = "/tmp/ctf2"
+	PROVIDER  = "open-component-model"
+	VERSION   = "v1"
+	COMPONENT = "github.com/open-component-model/test"
+	OUT       = "/tmp/res"
+)
 
 var _ = Describe("Transfer handler", func() {
 	var env *Builder

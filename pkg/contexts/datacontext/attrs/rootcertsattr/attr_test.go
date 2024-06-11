@@ -63,5 +63,4 @@ var _ = Describe("attribute", func() {
 		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())
 		Expect(me.Get(ctx).HasRootCertificates()).To(BeTrue())
 	})
-
 })

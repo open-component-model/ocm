@@ -17,11 +17,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer/filters"
 )
 
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
+const (
+	OUT     = "/tmp/res"
+	OCIPATH = "/tmp/oci"
+)
 
 var _ = Describe("transfer OCI artifacts", func() {
-
 	var env *Builder
 	var idesc *artdesc.Descriptor
 
@@ -46,7 +47,7 @@ var _ = Describe("transfer OCI artifacts", func() {
 		art := Must(src.LookupArtifact(OCINAMESPACE3, OCIINDEXVERSION))
 		finalize.Close(art, "source artifact")
 
-		tgt := Must(ctf.Create(env.OCIContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCIContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target")
 		ns := Must(tgt.LookupNamespace(OCINAMESPACE3))
 		defer Close(ns, "target namespace")
@@ -94,7 +95,6 @@ var _ = Describe("transfer OCI artifacts", func() {
 		data = Must(blob.Get())
 		Expect(string(data)).To(Equal(OCILAYER2))
 		Expect(manifests[2].Platform).To(Equal(&artdesc.Platform{OS: "darwin", Architecture: "arm64"}))
-
 	})
 
 	Context("with filter", func() {
@@ -108,7 +108,7 @@ var _ = Describe("transfer OCI artifacts", func() {
 			art := Must(src.LookupArtifact(OCINAMESPACE3, OCIINDEXVERSION))
 			finalize.Close(art, "source artifact")
 
-			tgt := Must(ctf.Create(env.OCIContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+			tgt := Must(ctf.Create(env.OCIContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 			defer Close(tgt, "target")
 			ns := Must(tgt.LookupNamespace(OCINAMESPACE3))
 			defer Close(ns, "target namespace")
@@ -158,7 +158,7 @@ var _ = Describe("transfer OCI artifacts", func() {
 			art := Must(src.LookupArtifact(OCINAMESPACE3, OCIINDEXVERSION))
 			finalize.Close(art, "source artifact")
 
-			tgt := Must(ctf.Create(env.OCIContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+			tgt := Must(ctf.Create(env.OCIContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 			defer Close(tgt, "target")
 			ns := Must(tgt.LookupNamespace(OCINAMESPACE3))
 			defer Close(ns, "target namespace")

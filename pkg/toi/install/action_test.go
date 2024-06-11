@@ -22,8 +22,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
-const COMPONENT = "acme.org/test"
-const VERSION = "0.1.0"
+const (
+	COMPONENT = "acme.org/test"
+	VERSION   = "0.1.0"
+)
 
 type Driver struct {
 	install.Driver
@@ -289,5 +291,4 @@ creds: []
 testparam: value
 `))
 	})
-
 })

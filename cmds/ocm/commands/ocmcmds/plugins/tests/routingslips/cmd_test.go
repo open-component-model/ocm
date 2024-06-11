@@ -17,10 +17,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 )
 
-const ARCH = "/tmp/ca"
-const VERSION = "v1"
-const COMP = "test.de/x"
-const PROVIDER = "acme.org"
+const (
+	ARCH     = "/tmp/ca"
+	VERSION  = "v1"
+	COMP     = "test.de/x"
+	PROVIDER = "acme.org"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv

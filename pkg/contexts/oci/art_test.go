@@ -35,5 +35,4 @@ var _ = Describe("art parsing", func() {
 		CheckArt("ubu@ntu", nil)
 		CheckArt("ubu@sha256:123", nil)
 	})
-
 })

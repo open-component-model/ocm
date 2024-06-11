@@ -29,5 +29,4 @@ var _ = Describe("path flags", func() {
 		PathVarP(flags, &val, "path", "p", `/t/bugrepo/postgresql-14.0.5.tgz`, "help message")
 		Expect(val).To(Equal("/t/bugrepo/postgresql-14.0.5.tgz"))
 	})
-
 })

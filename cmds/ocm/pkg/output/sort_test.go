@@ -8,7 +8,6 @@ import (
 )
 
 var _ = Describe("sort", func() {
-
 	h1i2a1b3 := []string{"h1", "i2", "a1", "b3"}
 	h2i2a1b3 := []string{"h2", "i2", "a1", "b3"}
 	h1i2a3b2 := []string{"h1", "i2", "a3", "b2"}
@@ -70,7 +69,7 @@ var _ = Describe("sort", func() {
 			h2i2a2b1,
 		}
 		slice = data.IndexedSliceAccess(values)
-		//slice.SortIndexed(compare_fixed_column(1, 2))
+		// slice.SortIndexed(compare_fixed_column(1, 2))
 		sortFixed(1, slice, compareColumn(2))
 		Expect(slice).To(Equal(data.IndexedSliceAccess{
 			h1i2a1b3,
@@ -81,5 +80,4 @@ var _ = Describe("sort", func() {
 			h2i2a3b2,
 		}))
 	})
-
 })

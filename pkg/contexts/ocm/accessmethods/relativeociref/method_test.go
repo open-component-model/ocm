@@ -19,12 +19,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	OCIPATH = "/tmp/oci"
+	OCIHOST = "alias"
+)
 
-const COMP = "acme.org/compo"
-const COMPVERS = "v1.0.0"
-const RES = "ref"
+const (
+	COMP     = "acme.org/compo"
+	COMPVERS = "v1.0.0"
+	RES      = "ref"
+)
 
 var _ = Describe("Method", func() {
 	var env *Builder

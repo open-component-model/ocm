@@ -13,8 +13,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
-var Retry = accessio.Retry
-var RetriableError = accessio.RetriableError
+var (
+	Retry          = accessio.Retry
+	RetriableError = accessio.RetriableError
+)
 
 var _ = Describe("retry", func() {
 	It("retries to success", func() {

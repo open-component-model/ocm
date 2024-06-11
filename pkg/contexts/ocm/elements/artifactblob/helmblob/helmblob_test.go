@@ -18,7 +18,6 @@ var _ = Describe("", func() {
 
 	BeforeEach(func() {
 		e = NewBuilder(env.TestData())
-
 	})
 
 	AfterEach(func() {

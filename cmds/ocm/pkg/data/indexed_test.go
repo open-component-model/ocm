@@ -6,9 +6,7 @@ import (
 )
 
 var _ = Describe("slice", func() {
-
 	Context("move", func() {
-
 		It("backward move non-overlap", func() {
 			data := IndexedSliceAccess{0, 1, 2, 3, 4, 5, 6, 7, 8}
 			data.Move(5, 7, 1)

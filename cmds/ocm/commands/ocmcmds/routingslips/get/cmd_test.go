@@ -19,11 +19,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-const ARCH = "/tmp/ca"
-const VERSION = "v1"
-const COMP = "test.de/x"
-const PROVIDER = "acme.org"
-const OTHER = "a.company.com"
+const (
+	ARCH     = "/tmp/ca"
+	VERSION  = "v1"
+	COMP     = "test.de/x"
+	PROVIDER = "acme.org"
+	OTHER    = "a.company.com"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
@@ -79,7 +81,6 @@ comment ` + e1a.Timestamp.String() + ` Comment: first entry
 	})
 
 	It("gets single entry", func() {
-
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "routingslip", "-v", ARCH)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(

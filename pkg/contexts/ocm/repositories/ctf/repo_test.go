@@ -28,8 +28,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
-const COMPONENT = "github.com/mandelsoft/ocm"
-const VERSION = "1.0.0"
+const (
+	COMPONENT = "github.com/mandelsoft/ocm"
+	VERSION   = "1.0.0"
+)
 
 var _ = Describe("access method", func() {
 	var fs vfs.FileSystem

@@ -26,25 +26,33 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
 )
 
-const COMPARCH = "/tmp/ca"
-const ARCH = "/tmp/ctf"
-const ARCH2 = "/tmp/ctf2"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENTA = "github.com/mandelsoft/test"
-const COMPONENTB = "github.com/mandelsoft/ref"
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	COMPARCH   = "/tmp/ca"
+	ARCH       = "/tmp/ctf"
+	ARCH2      = "/tmp/ctf2"
+	PROVIDER   = "mandelsoft"
+	VERSION    = "v1"
+	COMPONENTA = "github.com/mandelsoft/test"
+	COMPONENTB = "github.com/mandelsoft/ref"
+	OUT        = "/tmp/res"
+	OCIPATH    = "/tmp/oci"
+	OCIHOST    = "alias"
+)
 
-const SIGNATURE = "test"
-const SIGN_ALGO = rsa.Algorithm
+const (
+	SIGNATURE = "test"
+	SIGN_ALGO = rsa.Algorithm
+)
 
-const PUBKEY = "/tmp/pub"
-const PRIVKEY = "/tmp/priv"
+const (
+	PUBKEY  = "/tmp/pub"
+	PRIVKEY = "/tmp/priv"
+)
 
-const D_COMPONENTA = "01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d"
-const D_COMPONENTB = "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
+const (
+	D_COMPONENTA = "01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d"
+	D_COMPONENTB = "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
+)
 
 var substitutions = Substitutions{
 	"test": D_COMPONENTA,
@@ -186,7 +194,6 @@ successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
 			session.AddCloser(cv)
 			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTB))
 		})
-
 	})
 
 	Context("incomplete ctf", func() {

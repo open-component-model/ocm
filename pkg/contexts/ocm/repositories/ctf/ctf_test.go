@@ -81,6 +81,5 @@ var _ = Describe("access method", func() {
 			spec := Must(ocm.ParseRepoToSpec(ctx, "ca::test/repository"))
 			Expect(comparch.NewRepositorySpec(ctf.ACC_WRITABLE, "test/repository", accessio.PathFileSystem(fs))).To(DeepEqual(spec))
 		})
-
 	})
 })

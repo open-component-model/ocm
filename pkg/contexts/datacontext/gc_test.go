@@ -23,7 +23,6 @@ var _ = Describe("area test", func() {
 		runtime.GC()
 		time.Sleep(time.Second)
 		Expect(r.Get()).To(ConsistOf(id))
-
 	})
 
 	It("provides second reference", func() {

@@ -20,7 +20,6 @@ func (t *TestOption) AddFlags(fs *pflag.FlagSet) {
 var _ options.Options = (*TestOption)(nil)
 
 var _ = Describe("options", func() {
-
 	It("skips unknown option", func() {
 		set := options.OptionSet{}
 

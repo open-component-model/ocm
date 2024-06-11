@@ -23,15 +23,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
-const ARCH = "/tmp/ctf"
-const LOOKUP = "/tmp/lookup"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENT = "github.com/mandelsoft/test"
-const COMPONENT2 = "github.com/mandelsoft/test2"
-const OUT = "/tmp/res"
+const (
+	OCIPATH    = "/tmp/oci"
+	OCIHOST    = "alias"
+	ARCH       = "/tmp/ctf"
+	LOOKUP     = "/tmp/lookup"
+	PROVIDER   = "mandelsoft"
+	VERSION    = "v1"
+	COMPONENT  = "github.com/mandelsoft/test"
+	COMPONENT2 = "github.com/mandelsoft/test2"
+	OUT        = "/tmp/res"
+)
 
 func CheckComponent(env *TestEnv, handler func(ocm.Repository)) {
 	repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))

@@ -161,7 +161,6 @@ utilities:
 		})
 
 		It("uses resolved library from component version", func() {
-
 			configs := UnmarshalConfigurations(`
 - name: test1
   file: file1
@@ -185,7 +184,6 @@ utilities:
 		})
 
 		It("uses templated configRules", func() {
-
 			configs := UnmarshalConfigurations(`
 - name: test1
   file: file1
