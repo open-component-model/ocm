@@ -201,6 +201,26 @@ func (a ActionDescriptor) GetDescription() string {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type CommandDescriptor struct {
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Usage       string `json:"usage,omitempty"`
+	Short       string `json:"short,omitempty"`
+	Example     string `json:"example,omitempty"`
+	Realm       string `json:"realm,omitempty"`
+	Verb        string `json:"verb,omitempty"`
+}
+
+func (a CommandDescriptor) GetName() string {
+	return a.Name
+}
+
+func (a CommandDescriptor) GetDescription() string {
+	return a.Description
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type CLIOption struct {
 	Name        string `json:"name"`
 	Type        string `json:"type,omitempty"`

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
@@ -40,6 +41,8 @@ type plugin struct {
 	valuesets map[string]map[string]ValueSet
 	setScheme map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
+	clicmds map[string]Command
+
 	configParser func(message json.RawMessage) (interface{}, error)
 }
 
@@ -64,6 +67,8 @@ func NewPlugin(name string, version string) Plugin {
 
 		valuesets: map[string]map[string]ValueSet{},
 		setScheme: map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]{},
+
+		clicmds: map[string]Command{},
 
 		descriptor: descriptor.Descriptor{
 			Version:       descriptor.VERSION,
@@ -107,6 +112,22 @@ func (p *plugin) SetDescriptorTweaker(t func(descriptor descriptor.Descriptor) d
 func (p *plugin) SetConfigParser(config func(raw json.RawMessage) (interface{}, error)) {
 	p.configParser = config
 }
+
+func (p *plugin) GetConfig() (interface{}, error) {
+	if len(p.options.Config) == 0 {
+		return nil, nil
+	}
+	if p.configParser == nil {
+		var cfg interface{}
+		if err := json.Unmarshal(p.options.Config, &cfg); err != nil {
+			return nil, err
+		}
+		return &cfg, nil
+	}
+	return p.configParser(p.options.Config)
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 func (p *plugin) RegisterDownloader(arttype, mediatype string, hdlr Downloader) error {
 	key := DownloaderKey{}.SetArtifact(arttype, mediatype)
@@ -164,6 +185,8 @@ func (p *plugin) GetDownloaderFor(arttype, mediatype string) Downloader {
 	}
 	return h[0]
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 func (p *plugin) RegisterRepositoryContextUploader(contexttype, repotype, arttype, mediatype string, u Uploader) error {
 	if contexttype == "" || repotype == "" {
@@ -244,6 +267,8 @@ func (p *plugin) DecodeUploadTargetSpecification(data []byte) (UploadTargetSpec,
 	return o, nil
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	if p.GetAccessMethod(m.Name(), m.Version()) != nil {
 		n := m.Name()
@@ -315,6 +340,8 @@ func (p *plugin) GetAccessMethod(name string, version string) AccessMethod {
 	return p.methods[n]
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 func (p *plugin) RegisterAction(a Action) error {
 	if p.GetAction(a.Name()) != nil {
 		return errors.ErrAlreadyExists("action", a.Name())
@@ -343,6 +370,8 @@ func (p *plugin) DecodeAction(data []byte) (ActionSpec, error) {
 func (p *plugin) GetAction(name string) Action {
 	return p.actions[name]
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 func (p *plugin) RegisterValueMergeHandler(a ValueMergeHandler) error {
 	if p.GetValueMergeHandler(a.Name()) != nil {
@@ -383,19 +412,7 @@ func (p *plugin) GetLabelMergeSpecification(id string) *descriptor.LabelMergeSpe
 	return p.mergespecs[id]
 }
 
-func (p *plugin) GetConfig() (interface{}, error) {
-	if len(p.options.Config) == 0 {
-		return nil, nil
-	}
-	if p.configParser == nil {
-		var cfg interface{}
-		if err := json.Unmarshal(p.options.Config, &cfg); err != nil {
-			return nil, err
-		}
-		return &cfg, nil
-	}
-	return p.configParser(p.options.Config)
-}
+////////////////////////////////////////////////////////////////////////////////
 
 func (p *plugin) DecodeValueSet(purpose string, data []byte) (runtime.TypedObject, error) {
 	schemes := p.setScheme[purpose]
@@ -499,4 +516,22 @@ func (p *plugin) RegisterValueSet(s ValueSet) error {
 		sets[s.Name()+"/"+vers] = s
 	}
 	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (p *plugin) GetCommand(name string) Command {
+	return p.clicmds[name]
+}
+
+func (p *plugin) RegisterCommand(c Command) error {
+	if p.GetCommand(c.Name()) != nil {
+		return errors.ErrAlreadyExists("cli command spec", c.Name())
+	}
+	p.clicmds[c.Name()] = c
+	return nil
+}
+
+func (p *plugin) Commands() []Command {
+	return maputils.OrderedValues(p.clicmds)
 }

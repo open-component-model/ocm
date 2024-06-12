@@ -1,0 +1,3 @@
+type: cli.ocm.config.ocm.software/v1
+logging:
+  logLevel: debug

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io"
 
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
@@ -63,6 +65,10 @@ type Plugin interface {
 	RegisterValueSet(h ValueSet) error
 	DecodeValueSet(purpose string, data []byte) (runtime.TypedObject, error)
 	GetValueSet(purpose, name, version string) ValueSet
+
+	RegisterCommand(c Command) error
+	GetCommand(name string) Command
+	Commands() []Command
 
 	GetOptions() *Options
 	GetConfig() (interface{}, error)
@@ -177,4 +183,17 @@ type ValueSet interface {
 
 	ValidateSpecification(p Plugin, spec runtime.TypedObject) (info *ValueSetInfo, err error)
 	ComposeSpecification(p Plugin, opts Config, config Config) error
+}
+
+// Command is the interface for a CLI command provided by a plugin.
+type Command interface {
+	Name() string
+	Description() string
+	Usage() string
+	Short() string
+	Example() string
+	Verb() string
+	Realm() string
+
+	Command() *cobra.Command
 }
