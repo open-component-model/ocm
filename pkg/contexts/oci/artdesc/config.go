@@ -5,7 +5,7 @@ import (
 
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 )
 
 type ImageConfig = ociv1.Image

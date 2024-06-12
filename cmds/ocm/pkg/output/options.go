@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/logging"
 	"github.com/spf13/pflag"
 
@@ -143,7 +144,7 @@ func (o *Options) Configure(ctx clictx.Context) error {
 		o.Output = f(o)
 	}
 
-	var avail utils.StringSlice
+	var avail sliceutils.OrderedSlice[string]
 
 	var fields []string
 

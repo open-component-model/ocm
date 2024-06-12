@@ -25,7 +25,7 @@ import (
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mitchellh/copystructure"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )

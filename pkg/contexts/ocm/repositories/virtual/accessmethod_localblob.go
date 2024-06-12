@@ -6,7 +6,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 )

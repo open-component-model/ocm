@@ -25,7 +25,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, n
 		version = eff.Blob.Version
 	}
 	hint := ociartifact.Hint(optionutils.AsValue(eff.Blob.Origin), locator, eff.Hint, version)
-	blobprov := dockerdaemon.BlobAccessProviderForImageFromDockerDaemon(name, &eff.Blob)
+	blobprov := dockerdaemon.Provider(name, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
 	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), accprov)

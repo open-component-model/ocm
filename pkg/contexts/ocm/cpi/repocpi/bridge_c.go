@@ -7,7 +7,7 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/optionutils"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compositionmodeattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"

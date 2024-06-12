@@ -4,7 +4,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"

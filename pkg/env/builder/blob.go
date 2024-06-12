@@ -39,6 +39,6 @@ func (b *Builder) BlobFromDirTree(path string, opts ...dirtree.Option) {
 		b.fail("access already set")
 	}
 	var err error
-	*(b.blob), err = dirtree.BlobAccessForDirTree(path, append([]dirtree.Option{dirtree.WithFileSystem(b.FileSystem())}, opts...)...)
+	*(b.blob), err = dirtree.BlobAccess(path, append([]dirtree.Option{dirtree.WithFileSystem(b.FileSystem())}, opts...)...)
 	b.failOn(err)
 }

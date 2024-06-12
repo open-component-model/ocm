@@ -5,6 +5,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -17,15 +18,15 @@ func ForCachedBlobAccess(blob BlobAccess, fss ...vfs.FileSystem) (BlobAccess, er
 	}
 	defer r.Close()
 
-	file, err := vfs.TempFile(fs, "", "cachedBlob*")
+	f, err := vfs.TempFile(fs, "", "cachedBlob*")
 	if err != nil {
 		return nil, err
 	}
-	_, err = io.Copy(file, r)
+	_, err = io.Copy(f, r)
 	if err != nil {
 		return nil, err
 	}
-	file.Close()
+	f.Close()
 
-	return ForTemporaryFilePath(blob.MimeType(), file.Name(), fs), nil
+	return file.BlobAccessForTemporaryFilePath(blob.MimeType(), f.Name(), file.WithFileSystem(fs)), nil
 }

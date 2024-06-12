@@ -4,6 +4,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"

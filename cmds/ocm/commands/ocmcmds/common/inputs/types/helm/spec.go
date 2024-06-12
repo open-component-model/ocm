@@ -99,7 +99,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blob 
 		override = false
 	}
 
-	blob, name, vers, err := helm.BlobAccessForHelmChart(path,
+	blob, name, vers, err := helm.BlobAccess(path,
 		helm.WithContext(ctx),
 		helm.WithFileSystem(ctx.FileSystem()),
 		helm.WithPrinter(ctx.Printer()),

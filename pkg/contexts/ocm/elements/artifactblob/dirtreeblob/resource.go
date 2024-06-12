@@ -18,7 +18,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, p
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)
 	}
-	blobprov := dirtree.BlobAccessProviderForDirTree(path, &eff.Blob)
+	blobprov := dirtree.Provider(path, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, eff.Hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
 	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), accprov)

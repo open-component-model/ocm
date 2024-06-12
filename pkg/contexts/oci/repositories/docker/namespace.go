@@ -12,7 +12,7 @@ import (
 	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"

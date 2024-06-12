@@ -4,14 +4,14 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	cpi "github.com/open-component-model/ocm/pkg/contexts/oci/types"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Option = optionutils.Option[*Options]
 
 type Options struct {
-	Context         oci.Context
+	Context         cpi.Context
 	Name            string
 	Version         string
 	OverrideVersion *bool
@@ -42,14 +42,14 @@ func (o *Options) ApplyTo(opts *Options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type context struct {
-	oci.Context
+	cpi.Context
 }
 
 func (o context) ApplyTo(opts *Options) {
 	opts.Context = o
 }
 
-func WithContext(ctx oci.ContextProvider) Option {
+func WithContext(ctx cpi.ContextProvider) Option {
 	return context{ctx.OCIContext()}
 }
 

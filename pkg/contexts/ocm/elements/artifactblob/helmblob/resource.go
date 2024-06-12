@@ -19,7 +19,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, p
 		meta.SetType(TYPE)
 	}
 	hint := eff.Hint
-	blobprov := helm.BlobAccessProviderForHelmChart(path, &eff.Blob)
+	blobprov := helm.Provider(path, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
 	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), accprov)

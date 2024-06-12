@@ -64,7 +64,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		return nil, "", fmt.Errorf("resource type is dir but a file was provided")
 	}
 
-	access, err := dirtree.BlobAccessForDirTree(inputPath,
+	access, err := dirtree.BlobAccess(inputPath,
 		dirtree.WithMimeType(s.MediaType),
 		dirtree.WithFileSystem(fs),
 		dirtree.WithCompressWithGzip(s.Compress()),

@@ -5,6 +5,7 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/iotools"
 )
@@ -23,7 +24,7 @@ func (d *AccessDataWriter) WriteTo(w accessio.Writer) (int64, digest.Digest, err
 	dw := iotools.NewDefaultDigestWriter(accessio.NopWriteCloser(w))
 	err := d.plugin.Get(dw, d.creds, d.accspec)
 	if err != nil {
-		return accessio.BLOB_UNKNOWN_SIZE, accessio.BLOB_UNKNOWN_DIGEST, err
+		return blobaccess.BLOB_UNKNOWN_SIZE, blobaccess.BLOB_UNKNOWN_DIGEST, err
 	}
 	return dw.Size(), dw.Digest(), nil
 }

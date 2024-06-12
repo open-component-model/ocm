@@ -12,7 +12,7 @@ import (
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
@@ -39,7 +39,7 @@ func (f *fakeSource) GetManifest(ctx context.Context, instanceDigest *digest.Dig
 func (f *fakeSource) GetBlob(ctx context.Context, bi types.BlobInfo, bc types.BlobInfoCache) (io.ReadCloser, int64, error) {
 	_, blob, err := f.blobs.GetBlobData(bi.Digest)
 	if err != nil {
-		return nil, accessio.BLOB_UNKNOWN_SIZE, err
+		return nil, blobaccess.BLOB_UNKNOWN_SIZE, err
 	}
 
 	r, err := blob.Reader()
@@ -87,7 +87,7 @@ func (a *artBlobCache) AddBlob(blob blobaccess.BlobAccess) (int64, digest.Digest
 }
 
 func (c *artBlobCache) AddData(data blobaccess.DataAccess) (int64, digest.Digest, error) {
-	return c.AddBlob(blobaccess.ForDataAccess(accessio.BLOB_UNKNOWN_DIGEST, accessio.BLOB_UNKNOWN_SIZE, "", data))
+	return c.AddBlob(blobaccess.ForDataAccess(blobaccess.BLOB_UNKNOWN_DIGEST, blobaccess.BLOB_UNKNOWN_SIZE, "", data))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

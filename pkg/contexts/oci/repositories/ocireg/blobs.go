@@ -8,6 +8,7 @@ import (
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -96,13 +97,13 @@ func NewBlobContainer(cache accessio.BlobCache, mime string, fetcher resolve.Fet
 func (n *blobContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	logrus.Debugf("orig get %s %s\n", n.mime, digest)
 	acc, err := NewDataAccess(n.fetcher, digest, n.mime, false)
-	return accessio.BLOB_UNKNOWN_SIZE, acc, err
+	return blobaccess.BLOB_UNKNOWN_SIZE, acc, err
 }
 
 func (n *blobContainer) AddBlob(blob cpi.BlobAccess) (int64, digest.Digest, error) {
 	err := push(dummyContext, n.pusher, blob)
 	if err != nil {
-		return accessio.BLOB_UNKNOWN_SIZE, accessio.BLOB_UNKNOWN_DIGEST, err
+		return blobaccess.BLOB_UNKNOWN_SIZE, blobaccess.BLOB_UNKNOWN_DIGEST, err
 	}
 	return blob.Size(), blob.Digest(), err
 }

@@ -167,6 +167,10 @@ func BaseAccessForDataAccess(mime string, acc DataAccess) BlobAccessBase {
 	}
 }
 
+// BaseAccessForDataAccessAndMeta provides a BlobAccessBase for a DataAccess
+// adding the additional blob access metadata (mime, digest, and size).
+// Digest and size can be set to unknown using the constants (BLOB_UNKNOWN_DIGEST
+// and BLOB_UNKNOWN_SIZE).
 func BaseAccessForDataAccessAndMeta(mime string, acc DataAccess, dig digest.Digest, size int64) BlobAccessBase {
 	return &closableBlobAccess{
 		blobAccess: blobAccess{mimeType: mime, _dataAccess: acc, digest: dig, size: size},
@@ -209,6 +213,10 @@ func ForStaticDataAccess(mime string, acc DataAccess) StaticBlobAccess {
 	}
 }
 
+// ForStaticDataAccessAndMeta provides a StaticBlobAccess for a DataAccess
+// adding the additional blob access metadata (mime, digest, and size).
+// Digest and size can be set to unknown using the constants (BLOB_UNKNOWN_DIGEST
+// and BLOB_UNKNOWN_SIZE).
 func ForStaticDataAccessAndMeta(mime string, acc DataAccess, dig digest.Digest, size int64) StaticBlobAccess {
 	return &staticBlobAccess{
 		blobAccess: blobAccess{mimeType: mime, _dataAccess: acc, digest: dig, size: size},

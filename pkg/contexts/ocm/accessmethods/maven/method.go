@@ -5,7 +5,7 @@ import (
 
 	"github.com/mandelsoft/goutils/optionutils"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	mavenblob "github.com/open-component-model/ocm/pkg/blobaccess/maven"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/maven/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
@@ -108,7 +108,7 @@ func (a *AccessSpec) AccessMethod(cv accspeccpi.ComponentVersionAccess) (accspec
 	}
 
 	factory := func() (blobaccess.BlobAccess, error) {
-		return mavenblob.BlobAccessForMavenCoords(repo, &a.Coordinates,
+		return mavenblob.BlobAccessForCoords(repo, &a.Coordinates,
 			mavenblob.WithCredentialContext(octx),
 			mavenblob.WithLoggingContext(octx),
 			mavenblob.WithCachingFileSystem(vfsattr.Get(octx)))

@@ -8,7 +8,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
-	ociartifact2 "github.com/open-component-model/ocm/pkg/blobaccess/ociartifact"
+	ociartifactblob "github.com/open-component-model/ocm/pkg/blobaccess/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer/filters"
@@ -47,7 +47,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) CreateFilter() ociartifact2.Option {
+func (s *Spec) CreateFilter() ociartifactblob.Option {
 	var filter []filters.Filter
 
 	for _, v := range s.Platforms {
@@ -57,18 +57,18 @@ func (s *Spec) CreateFilter() ociartifact2.Option {
 		}
 	}
 	if len(filter) > 0 {
-		return ociartifact2.WithFilter(filters.Or(filter...))
+		return ociartifactblob.WithFilter(filters.Or(filter...))
 	}
 	return nil
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
 	filter := s.CreateFilter()
-	blob, version, err := ociartifact2.BlobAccessForOCIArtifact(s.Path,
+	blob, version, err := ociartifactblob.BlobAccess(s.Path,
 		filter,
-		ociartifact2.WithContext(ctx),
-		ociartifact2.WithPrinter(ctx.Printer()),
-		ociartifact2.WithVersion(info.ComponentVersion.GetVersion()),
+		ociartifactblob.WithContext(ctx),
+		ociartifactblob.WithPrinter(ctx.Printer()),
+		ociartifactblob.WithVersion(info.ComponentVersion.GetVersion()),
 	)
 	if err != nil {
 		return nil, "", err

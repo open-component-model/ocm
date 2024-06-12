@@ -2,9 +2,11 @@ package blobaccess
 
 import (
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 )
 
-func Digest(access DataAccess) (digest.Digest, error) {
+func Digest(access bpi.DataAccess) (digest.Digest, error) {
 	reader, err := access.Reader()
 	if err != nil {
 		return "", err

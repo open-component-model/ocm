@@ -8,9 +8,9 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"

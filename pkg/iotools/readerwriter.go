@@ -5,7 +5,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/generics"
-	"github.com/mandelsoft/goutils/sliceutils"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,11 +50,6 @@ type readCloser struct {
 }
 
 var _ io.ReadCloser = (*readCloser)(nil)
-
-// Deprecated: use AddReaderCloser .
-func AddCloser(reader io.ReadCloser, closer io.Closer, msg ...string) io.ReadCloser {
-	return AddReaderCloser(reader, closer, sliceutils.Convert[any](msg)...)
-}
 
 func ReadCloser(r io.Reader) io.ReadCloser {
 	return AddReaderCloser(r, nil)

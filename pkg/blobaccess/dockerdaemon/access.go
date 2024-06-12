@@ -5,17 +5,16 @@ import (
 
 	"github.com/mandelsoft/goutils/optionutils"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
+	cpi "github.com/open-component-model/ocm/pkg/contexts/oci/types"
 )
 
-func (o *Options) OCIContext() oci.Context {
+func (o *Options) OCIContext() cpi.Context {
 	if o.Context == nil {
-		return oci.DefaultContext()
+		return cpi.DefaultContext()
 	}
 	return o.Context
 }
@@ -37,14 +36,15 @@ func ImageInfoFor(name string, opts ...Option) (locator string, version string, 
 	return locator, version, nil
 }
 
-func BlobAccessProviderForImageFromDockerDaemon(name string, opts ...Option) bpi.BlobAccessProvider {
+func Provider(name string, opts ...Option) bpi.BlobAccessProvider {
 	return bpi.BlobAccessProviderFunction(func() (bpi.BlobAccess, error) {
-		b, _, err := BlobAccessForImageFromDockerDaemon(name, opts...)
+		b, _, err := BlobAccess(name, opts...)
 		return b, err
 	})
 }
 
-func BlobAccessForImageFromDockerDaemon(name string, opts ...Option) (blobaccess.BlobAccess, string, error) {
+// BlobAccess returns a BlobAccess for the image with the given name.
+func BlobAccess(name string, opts ...Option) (bpi.BlobAccess, string, error) {
 	eff := optionutils.EvalOptions(opts...)
 	ctx := eff.OCIContext()
 
@@ -62,7 +62,7 @@ func BlobAccessForImageFromDockerDaemon(name string, opts ...Option) (blobaccess
 		return nil, "", err
 	}
 	blob, err := artifactset.SynthesizeArtifactBlob(ns, version,
-		func(art oci.ArtifactAccess) error {
+		func(art cpi.ArtifactAccess) error {
 			if eff.Origin != nil {
 				art.Artifact().SetAnnotation(annotations.COMPVERS_ANNOTATION, eff.Origin.String())
 			}

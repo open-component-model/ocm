@@ -9,7 +9,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/registry"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -29,7 +30,7 @@ type ChartAccess interface {
 
 func newFileAccess(c *chartAccess, path string, mime string) blobaccess.BlobAccess {
 	c.refcnt++
-	return blobaccess.ForFileWithCloser(refmgmt.CloserFunc(c.unref), mime, path, c.fs)
+	return file.BlobAccessWithCloser(refmgmt.CloserFunc(c.unref), mime, path, c.fs)
 }
 
 type chartAccess struct {

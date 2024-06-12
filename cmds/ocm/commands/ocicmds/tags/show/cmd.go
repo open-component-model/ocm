@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -16,7 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/out"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 var (
@@ -89,7 +89,7 @@ func (o *Command) Run() error {
 	}
 
 	versions := Versions{}
-	tags := utils2.StringSlice{}
+	tags := sliceutils.OrderedSlice[string]{}
 	repo := repooption.From(o)
 
 	var art oci.ArtifactAccess
@@ -127,7 +127,7 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	tags = utils2.StringSlice(list)
+	tags = sliceutils.OrderedSlice[string](list)
 	// determine version base set
 	if art != nil {
 		dig := art.Digest()
@@ -137,7 +137,7 @@ func (o *Command) Run() error {
 				return err
 			}
 			if a.Digest() != dig {
-				tags.Delete(i)
+				tags.DeleteIndex(i)
 				i--
 			} else {
 				v, err := semver.NewVersion(tags[i])

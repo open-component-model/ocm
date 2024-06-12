@@ -57,7 +57,7 @@ var _ = Describe("normalization", func() {
 			Province:      []string{"BW"},
 		}, interBytes, ca, interpriv, 1*time.Hour))
 
-		acc := blobaccess.DataAccessForBytes(pemBytes)
+		acc := blobaccess.DataAccessForData(pemBytes)
 		certs := Must(signutils.GetCertificateChain(acc, false))
 		Expect(len(certs)).To(Equal(3))
 

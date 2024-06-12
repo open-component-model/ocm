@@ -8,22 +8,22 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
-func DataAccessForDirTree(path string, opts ...Option) (bpi.DataAccess, error) {
-	blobAccess, err := BlobAccessForDirTree(path, opts...)
+func DataAccess(path string, opts ...Option) (bpi.DataAccess, error) {
+	blobAccess, err := BlobAccess(path, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return blobAccess, nil
 }
 
-func BlobAccessForDirTree(path string, opts ...Option) (_ bpi.BlobAccess, rerr error) {
+func BlobAccess(path string, opts ...Option) (_ bpi.BlobAccess, rerr error) {
 	eff := optionutils.EvalOptions(opts...)
 	fs := utils.FileSystem(eff.FileSystem)
 
@@ -42,7 +42,7 @@ func BlobAccessForDirTree(path string, opts ...Option) (_ bpi.BlobAccess, rerr e
 		FollowSymlinks: utils.AsBool(eff.FollowSymlinks),
 	}
 
-	temp, err := blobaccess.NewTempFile(fs.FSTempDir(), "resourceblob*.tgz", fs)
+	temp, err := file.NewTempFile(fs.FSTempDir(), "resourceblob*.tgz", fs)
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +70,8 @@ func BlobAccessForDirTree(path string, opts ...Option) (_ bpi.BlobAccess, rerr e
 	return temp.AsBlob(eff.MimeType), nil
 }
 
-func BlobAccessProviderForDirTree(path string, opts ...Option) bpi.BlobAccessProvider {
+func Provider(path string, opts ...Option) bpi.BlobAccessProvider {
 	return bpi.BlobAccessProviderFunction(func() (bpi.BlobAccess, error) {
-		return BlobAccessForDirTree(path, opts...)
+		return BlobAccess(path, opts...)
 	})
 }

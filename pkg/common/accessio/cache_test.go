@@ -1,14 +1,13 @@
 package accessio_test
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
@@ -31,7 +30,7 @@ var _ = Describe("cache management", func() {
 		source, err = accessio.NewDefaultBlobCache()
 		Expect(err).To(Succeed())
 
-		td1_size, td1_digest, err = source.AddData(blobaccess.DataAccessForBytes([]byte("testdata")))
+		td1_size, td1_digest, err = source.AddData(blobaccess.DataAccessForData([]byte("testdata")))
 		Expect(err).To(Succeed())
 
 		cache, err = accessio.CachedAccess(source, nil, local)

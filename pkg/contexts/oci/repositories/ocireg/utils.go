@@ -12,7 +12,7 @@ import (
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -38,7 +38,7 @@ func NewDataAccess(fetcher remotes.Fetcher, digest digest.Digest, mimeType strin
 	desc := artdesc.Descriptor{
 		MediaType: mimeType,
 		Digest:    digest,
-		Size:      accessio.BLOB_UNKNOWN_SIZE,
+		Size:      blobaccess.BLOB_UNKNOWN_SIZE,
 	}
 	if !delayed {
 		reader, err = fetcher.Fetch(dummyContext, desc)

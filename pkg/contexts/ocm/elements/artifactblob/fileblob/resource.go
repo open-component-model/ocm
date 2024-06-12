@@ -4,7 +4,8 @@ import (
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/file"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -26,14 +27,14 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, media str
 	var blobprov blobaccess.BlobAccessProvider
 	switch eff.Compression {
 	case NONE:
-		blobprov = blobaccess.ProviderForFile(media, path, eff.FileSystem)
+		blobprov = file.Provider(media, path, eff.FileSystem)
 	case COMPRESSION:
-		blob := blobaccess.ForFile(media, path, eff.FileSystem)
+		blob := file.BlobAccess(media, path, eff.FileSystem)
 		defer blob.Close()
 		blob, _ = blobaccess.WithCompression(blob)
 		blobprov = blobaccess.ProviderForBlobAccess(blob)
 	case DECOMPRESSION:
-		blob := blobaccess.ForFile(media, path, eff.FileSystem)
+		blob := file.BlobAccess(media, path, eff.FileSystem)
 		defer blob.Close()
 		blob, _ = blobaccess.WithDecompression(blob)
 		blobprov = blobaccess.ProviderForBlobAccess(blob)

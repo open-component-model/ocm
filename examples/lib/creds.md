@@ -120,7 +120,7 @@ consumer ids always feature the attribute `type`, describing the kind of
 context.
 
 For example, to describe the request for credentials for
-an [OCI registry](../../pkg/contexts/oci/identity/identity.go) and repository,
+an [OCI registry](../../pkg/contexts/credentials/builtin/oci/identity/identity.go) and repository,
 the type value is `oci.CONSUMER_TYPE`. Additionally, the following
 attributes are used to fully describe the usage context.
 

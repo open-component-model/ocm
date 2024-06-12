@@ -19,7 +19,7 @@ import (
 	"github.com/modern-go/reflect2"
 	"golang.org/x/exp/slices"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 

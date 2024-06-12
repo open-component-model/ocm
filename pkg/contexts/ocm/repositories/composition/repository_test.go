@@ -8,7 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/blobaccess/bpi"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"

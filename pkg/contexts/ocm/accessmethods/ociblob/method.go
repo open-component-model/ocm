@@ -8,7 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"

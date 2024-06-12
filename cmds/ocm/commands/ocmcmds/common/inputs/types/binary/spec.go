@@ -36,5 +36,5 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
-	return s.ProcessBlob(ctx, blobaccess.DataAccessForBytes([]byte(s.Data)), ctx.FileSystem())
+	return s.ProcessBlob(ctx, blobaccess.DataAccessForData([]byte(s.Data)), ctx.FileSystem())
 }
