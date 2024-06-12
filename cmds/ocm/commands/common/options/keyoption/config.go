@@ -17,11 +17,11 @@ import (
 )
 
 type ConfigFragment struct {
-	DefaultName string   `json:"defaultName"`
-	PublicKeys  []string `json:"publicKeys"`
-	PrivateKeys []string `json:"privateKeys"`
-	Issuers     []string `json:"issuers"`
-	RootCAs     []string `json:"rootCAs"`
+	DefaultName string   `json:"defaultName,omitempty"`
+	PublicKeys  []string `json:"publicKeys,omitempty"`
+	PrivateKeys []string `json:"privateKeys,omitempty"`
+	Issuers     []string `json:"issuers,omitempty"`
+	RootCAs     []string `json:"rootCAs,omitempty"`
 }
 
 func (c *ConfigFragment) AddFlags(fs *pflag.FlagSet) {

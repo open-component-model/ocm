@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 
 	. "github.com/open-component-model/ocm/pkg/out"
 
@@ -31,6 +32,12 @@ type Output interface {
 	Out() error
 }
 
+// Destination is an optional interface for outputs to
+// set the payload output stream to use.
+type Destination interface {
+	SetDestination(io.Writer)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type NopOutput struct{}
@@ -55,21 +62,35 @@ type Manifest interface {
 	AsManifest() interface{}
 }
 
+type manifest struct {
+	data interface{}
+}
+
+func (m *manifest) AsManifest() interface{} {
+	return m.data
+}
+
+func AsManifest(i interface{}) Manifest {
+	return &manifest{i}
+}
+
 type ManifestOutput struct {
-	opts    *Options
-	data    []Object
-	Status  error
-	Context Context
+	DestinationOutput
+	opts   *Options
+	data   []Object
+	Status error
+	out    io.Writer
 }
 
 func NewManifestOutput(opts *Options) ManifestOutput {
 	return ManifestOutput{
-		opts:    opts,
-		Context: opts.Context,
-		data:    []Object{},
+		DestinationOutput: DestinationOutput{
+			Context: opts.Context,
+		},
+		opts: opts,
+		data: []Object{},
 	}
 }
-
 func (this *ManifestOutput) Add(e interface{}) error {
 	this.data = append(this.data, e)
 	if this.opts.StatusCheck != nil {
@@ -92,12 +113,12 @@ type YAMLOutput struct {
 
 func (this *YAMLOutput) Out() error {
 	for _, m := range this.data {
-		Outf(this.Context, "---\n")
+		this.Print("---\n")
 		d, err := yaml.Marshal(m.(Manifest).AsManifest())
 		if err != nil {
 			return err
 		}
-		this.Context.StdOut().Write(d)
+		this.Write(d)
 	}
 	return this.ManifestOutput.Out()
 }
@@ -163,7 +184,7 @@ func (this *JSONOutput) Out() error {
 		buf.WriteByte('\n')
 		d = buf.Bytes()
 	}
-	this.Context.StdOut().Write(d)
+	this.Write(d)
 	return this.ManifestOutput.Out()
 }
 
@@ -278,6 +299,10 @@ func (this Outputs) AddChainedManifestOutputs(chain ChainFunction) Outputs {
 		return NewProcessingJSONOutput(opts, chain(opts), false)
 	}
 	return this
+}
+
+func DefaultYAMLOutput(opts *Options) Output {
+	return &YAMLOutput{NewManifestOutput(opts)}
 }
 
 var log bool

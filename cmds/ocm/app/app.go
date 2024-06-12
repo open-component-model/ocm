@@ -169,7 +169,7 @@ func NewCliCommandForArgs(ctx clictx.Context, args []string, mod ...func(clictx.
 	if err != nil {
 		return nil, err
 	}
-	clicfgattr.Set(ctx.OCMContext(), &opts.Config)
+	clicfgattr.Set(ctx.OCMContext(), opts.ConfigForward)
 	cmd := newCliCommand(opts, mod...)
 	cmd.SetArgs(args)
 	return cmd, nil
