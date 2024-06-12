@@ -81,6 +81,9 @@ func (a *annotatedBlobAccessView[T]) Source() T {
 // It closes the wrapped access, if closed.
 // If the wrapped data access does not need a close, the BlobAccess
 // does not need a close, also.
+// It adds the additional blob access metadata (mime, digest, and size).
+// Digest and size can be set to unknown using the constants (BLOB_UNKNOWN_DIGEST
+// and BLOB_UNKNOWN_SIZE).
 func ForDataAccess[T bpi.DataAccess](digest digest.Digest, size int64, mimeType string, access T) AnnotatedBlobAccess[T] {
 	a := bpi.BaseAccessForDataAccessAndMeta(mimeType, access, digest, size)
 

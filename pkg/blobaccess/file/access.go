@@ -187,6 +187,9 @@ var (
 	_ bpi.FileLocation   = (*temporaryFileBlob)(nil)
 )
 
+// Validate checks if the access is valid, meaning
+// it can provide data. Here, this means
+// that the file exists.
 func (b *temporaryFileBlob) Validate() error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
