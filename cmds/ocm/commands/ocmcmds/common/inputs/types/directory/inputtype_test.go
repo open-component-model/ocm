@@ -11,8 +11,8 @@ import (
 var _ = Describe("Input Type", func() {
 	var env *InputTest
 
-	var True = true
-	var False = false
+	True := true
+	False := false
 
 	BeforeEach(func() {
 		env = NewInputTest(TYPE)
@@ -40,5 +40,4 @@ var _ = Describe("Input Type", func() {
 			FollowSymlinks: &True,
 		})
 	})
-
 })

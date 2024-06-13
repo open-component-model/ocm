@@ -23,7 +23,6 @@ import (
 var DefaultContext = ocm.New()
 
 var _ = Describe("access method", func() {
-
 	legacy := "{\"type\":\"localFilesystemBlob\",\"fileName\":\"anydigest\",\"mediaType\":\"application/json\"}"
 
 	Context("local access method", func() {
@@ -47,7 +46,7 @@ var _ = Describe("access method", func() {
 			data := Must(os.ReadFile("testdata/descriptor/component-descriptor.yaml"))
 			cd := Must(compdesc.Decode(data))
 
-			ca := Must(comparch.New(DefaultContext, accessobj.ACC_CREATE, nil, nil, nil, 0600))
+			ca := Must(comparch.New(DefaultContext, accessobj.ACC_CREATE, nil, nil, nil, 0o600))
 			defer Close(ca, "component archive")
 
 			ca.GetDescriptor().Name = "acme.org/dummy"

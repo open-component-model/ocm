@@ -97,5 +97,4 @@ var _ = Describe("blobhandler generic maven tests", func() {
 			"sdk-modules-bom-5.7.0.pom.sha1",
 			"sdk-modules-bom-5.7.0.pom.sha256"))
 	})
-
 })

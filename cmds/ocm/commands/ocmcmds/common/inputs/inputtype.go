@@ -96,8 +96,7 @@ func (*InputSpecBase) GetInputVersion(ctx Context) string {
 }
 
 type (
-	InputSpecDecoder  = runtime.TypedObjectDecoder[InputSpec]
-	_InputSpecDecoder = runtime.TypedObjectDecoder[InputSpec]
+	InputSpecDecoder = runtime.TypedObjectDecoder[InputSpec]
 )
 
 type InputType interface {
@@ -210,7 +209,7 @@ func (t *inputTypeScheme) GetInputType(name string) InputType {
 	if d == nil {
 		return nil
 	}
-	return d.(InputType)
+	return d
 }
 
 func (t *inputTypeScheme) Register(rtype InputType) {
@@ -231,7 +230,7 @@ func (t *inputTypeScheme) CreateInputSpec(obj runtime.TypedObject) (InputSpec, e
 		if err != nil {
 			return nil, err
 		}
-		return r.(InputSpec), nil
+		return r, nil
 	}
 	if u, ok := obj.(*runtime.UnstructuredTypedObject); ok {
 		raw, err := u.GetRaw()

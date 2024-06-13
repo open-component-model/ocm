@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/goutils/testutils"
 	"github.com/mandelsoft/logging"
 
-	"github.com/mandelsoft/goutils/testutils"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
@@ -114,7 +114,6 @@ V[3] add one to number num 3
 			Expect(r).To(Equal(data.IndexedSliceAccess([]interface{}{
 				2, 4, 3, 6, 4, 8,
 			})))
-
 		})
 	})
 

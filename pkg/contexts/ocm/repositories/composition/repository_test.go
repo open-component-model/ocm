@@ -23,11 +23,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
-const COMPONENT = "acme.org/testcomp"
-const VERSION = "1.0.0"
+const (
+	COMPONENT = "acme.org/testcomp"
+	VERSION   = "1.0.0"
+)
 
 var _ = Describe("repository", func() {
-	var ctx = ocm.DefaultContext()
+	ctx := ocm.DefaultContext()
 
 	It("handles cvs", func() {
 		finalize := finalizer.Finalizer{}

@@ -51,7 +51,6 @@ func NewTestClient(fn RoundTripFunc) *http.Client {
 	return &http.Client{
 		Transport: fn,
 	}
-
 }
 
 var _ = Describe("Method", func() {

@@ -93,5 +93,4 @@ var _ = Describe("resettable reader", func() {
 
 		Expect(vfs.Exists(osfs.New(), w.path)).To(BeFalse())
 	})
-
 })

@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mandelsoft/goutils/errors"
 	// "github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 
-	"github.com/mandelsoft/goutils/errors"
 	"github.com/open-component-model/ocm/examples/lib/helper"
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -26,8 +26,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const componentName = "github.com/mandelsoft/test1"
-const componentVersion = "0.1.0"
+const (
+	componentName    = "github.com/mandelsoft/test1"
+	componentVersion = "0.1.0"
+)
 
 const resourceName = "package"
 

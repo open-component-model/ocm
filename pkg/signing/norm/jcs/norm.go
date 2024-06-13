@@ -109,7 +109,7 @@ func toString(v interface{}, gap string) string {
 		sep := ""
 		keys := maputils.OrderedKeys(castIn)
 		for _, n := range keys {
-			v := castIn[n] //nolint: govet // yes
+			v := castIn[n]
 			sep = "\n" + gap
 			s = fmt.Sprintf("%s%s  %s: %s", s, sep, n, toString(v, ngap))
 		}

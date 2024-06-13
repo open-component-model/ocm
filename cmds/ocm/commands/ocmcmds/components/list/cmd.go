@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/vershdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
@@ -81,11 +80,6 @@ func (o *Command) Run() error {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-
-func addIdentityField(e interface{}) []string {
-	p := e.(*comphdlr.Object)
-	return []string{p.Identity.String()}
-}
 
 func TableOutput(opts *output.Options, mapping processing.MappingFunction) *output.TableOutput {
 	return &output.TableOutput{

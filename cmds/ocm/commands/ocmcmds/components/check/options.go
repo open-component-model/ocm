@@ -37,8 +37,8 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Option) Usage() string {
 	s := `
-If the options <code>--local-resources</code> and/or <code>--local-sources</code> are given the
-the check additionally assures that all resources or sources are included into the component version.
+If the options <code>--local-resources</code> and/or <code>--local-sources</code> are given the 
+check additionally assures that all resources or sources are included into the component version.
 This means that they are using local access methods, only.
 `
 	return s

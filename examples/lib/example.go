@@ -10,8 +10,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-const componentName = "ocm.software/toi/demo/helmdemo"
-const componentVersion = "0.3.0-rc.2"
+const (
+	componentName    = "ocm.software/toi/demo/helmdemo"
+	componentVersion = "0.3.0-rc.2"
+)
 
 const resourceName = "package"
 

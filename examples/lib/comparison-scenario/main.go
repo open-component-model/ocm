@@ -8,8 +8,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils/template"
 )
 
-const COMPONENT_NAME = "acme.org/podinfo"
-const COMPONENT_VERSION = "0.1.0"
+const (
+	COMPONENT_NAME    = "acme.org/podinfo"
+	COMPONENT_VERSION = "0.1.0"
+)
 
 // CFG is the path to the file containing the credentials
 var CFG = "config/config.yaml"

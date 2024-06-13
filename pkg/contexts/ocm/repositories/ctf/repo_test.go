@@ -7,7 +7,6 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 
 	"github.com/mandelsoft/logging"
@@ -15,6 +14,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/tonglil/buflogr"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -28,8 +28,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 )
 
-const COMPONENT = "github.com/mandelsoft/ocm"
-const VERSION = "1.0.0"
+const (
+	COMPONENT = "github.com/mandelsoft/ocm"
+	VERSION   = "1.0.0"
+)
 
 var _ = Describe("access method", func() {
 	var fs vfs.FileSystem

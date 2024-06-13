@@ -59,5 +59,4 @@ var _ = Describe("OCI CPI utils", func() {
 			"a/b",
 		}))
 	})
-
 })

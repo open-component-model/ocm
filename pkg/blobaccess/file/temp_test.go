@@ -3,10 +3,11 @@ package file_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	me "github.com/open-component-model/ocm/pkg/blobaccess"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	me "github.com/open-component-model/ocm/pkg/blobaccess"
 )
 
 var _ = Describe("temp file management", func() {

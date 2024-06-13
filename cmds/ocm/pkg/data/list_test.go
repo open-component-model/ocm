@@ -6,9 +6,7 @@ import (
 )
 
 var _ = Describe("linked list", func() {
-
 	Context("add", func() {
-
 		It("end", func() {
 			list := NewLinkedList()
 

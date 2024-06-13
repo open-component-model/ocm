@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -33,7 +34,7 @@ func Write(cfg *helper.Config) error {
 
 	fmt.Printf("persisting public key to %s", KEYFILE)
 	pubkey := signingattr.Get(ctx).GetPublicKey("acme.org")
-	file, err := os.OpenFile(KEYFILE, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
+	file, err := os.OpenFile(KEYFILE, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot persist public key")
 	}

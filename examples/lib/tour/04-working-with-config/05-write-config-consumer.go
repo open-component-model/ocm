@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"

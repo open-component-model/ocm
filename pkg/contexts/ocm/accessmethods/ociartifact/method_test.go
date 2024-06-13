@@ -3,10 +3,10 @@ package ociartifact_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -15,8 +15,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	OCIPATH = "/tmp/oci"
+	OCIHOST = "alias"
+)
 
 var _ = Describe("Method", func() {
 	var env *Builder

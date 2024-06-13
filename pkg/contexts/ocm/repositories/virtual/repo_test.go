@@ -4,7 +4,6 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -122,7 +122,6 @@ var _ = Describe("virtual repo", func() {
 
 			a = Must(r.Access())
 			Expect(a.GetInexpensiveContentVersionIdentity(vers)).To(Equal("sha256:" + dig))
-
 		},
 			Entry("with direct mode", false, localblob.Type),
 			Entry("with composition mode", true, compose.Type),

@@ -75,8 +75,7 @@ type ActionResultV2 struct {
 	Data                        string `json:"data"`
 }
 
-type convertSpecV2 struct {
-}
+type convertSpecV2 struct{}
 
 func (c convertSpecV2) ConvertFrom(in *ActionSpec) (*ActionSpecV2, error) {
 	return &ActionSpecV2{
@@ -92,8 +91,7 @@ func (c convertSpecV2) ConvertTo(in *ActionSpecV2) (*ActionSpec, error) {
 	}, nil
 }
 
-type convertResultV2 struct {
-}
+type convertResultV2 struct{}
 
 func (c convertResultV2) ConvertFrom(in *ActionResult) (*ActionResultV2, error) {
 	return &ActionResultV2{

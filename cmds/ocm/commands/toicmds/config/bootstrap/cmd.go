@@ -181,13 +181,10 @@ func (a *action) Out() error {
 		return nil
 	}
 
-	err = nil
 	if len(spec.Scheme) > 0 && a.cmd.ParameterFile != "" {
 		schemeFile := a.cmd.ParameterFile
-		if strings.HasSuffix(schemeFile, ".yaml") {
-			schemeFile = schemeFile[:len(schemeFile)-5]
-		}
-		schemeFile = schemeFile + ".jsonscheme"
+		schemeFile = strings.TrimSuffix(schemeFile, ".yaml")
+		schemeFile += ".jsonscheme"
 		err = vfs.WriteFile(a.cmd.FileSystem(), schemeFile, spec.Scheme, 0o644)
 		if err != nil {
 			out.Errf(a.cmd.Context, "writing scheme file %s failed: %s\n", schemeFile, err)
@@ -223,7 +220,8 @@ func (a *action) handle(kind, path string, cv ocm.ComponentVersionAccess, spec *
 					l = len(c)
 					err = vfs.WriteFile(a.cmd.FileSystem(), path, c, 0o600)
 				default:
-					data, err := runtime.DefaultYAMLEncoding.Marshal(spec.Content)
+					var data []byte
+					data, err = runtime.DefaultYAMLEncoding.Marshal(spec.Content)
 					if err != nil {
 						data = spec.Content
 					}
@@ -249,7 +247,7 @@ func (a *action) download(kind, path string, cv ocm.ComponentVersionAccess, spec
 		return errors.Wrapf(err, "%s resource", kind)
 	}
 	out.Outf(a.cmd.Context, "downloading %s...\n", kind)
-	ok, path, err := download.For(a.cmd.Context).DownloadAsBlob(common.NewPrinter(a.cmd.StdOut()), res, path, a.cmd.FileSystem())
+	ok, _, err := download.For(a.cmd.Context).DownloadAsBlob(common.NewPrinter(a.cmd.StdOut()), res, path, a.cmd.FileSystem())
 	if err != nil {
 		return err
 	}

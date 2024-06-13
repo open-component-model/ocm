@@ -19,8 +19,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 )
 
-const CA = "/tmp/ca"
-const VERSION = "v1"
+const (
+	CA      = "/tmp/ca"
+	VERSION = "v1"
+)
 
 var _ = Describe("Add with new access method", func() {
 	var env *Environment

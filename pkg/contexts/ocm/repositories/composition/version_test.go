@@ -19,7 +19,7 @@ import (
 )
 
 var _ = Describe("version", func() {
-	var ctx = ocm.DefaultContext()
+	ctx := ocm.DefaultContext()
 
 	It("handles anonymous version", func() {
 		finalize := finalizer.Finalizer{}

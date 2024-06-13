@@ -19,8 +19,7 @@ func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{})
 }
 
-type AttributeType struct {
-}
+type AttributeType struct{}
 
 func (a AttributeType) Name() string {
 	return ATTR_KEY
@@ -60,9 +59,7 @@ var _ = Describe("generic attributes", func() {
 	})
 
 	Context("applies", func() {
-
 		It("applies later attribute config", func() {
-
 			sub := credentials.WithConfigs(ctx).New()
 			spec := local.New()
 			Expect(spec.AddAttribute(ATTR_KEY, attribute)).To(Succeed())
@@ -72,7 +69,6 @@ var _ = Describe("generic attributes", func() {
 		})
 
 		It("applies earlier attribute config", func() {
-
 			spec := local.New()
 			Expect(spec.AddAttribute(ATTR_KEY, attribute)).To(Succeed())
 			Expect(ctx.ApplyConfig(spec, "test")).To(Succeed())

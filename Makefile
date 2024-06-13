@@ -46,31 +46,37 @@ install-requirements:
 .PHONY: prepare
 prepare: generate format generate-deepcopy build test check
 
+EFFECTIVE_DIRECTORIES := $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/cmds/ecrplugin/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/examples/... $(REPO_ROOT)/pkg/...
+
 .PHONY: format
 format:
-	@$(REPO_ROOT)/hack/format.sh $(REPO_ROOT)/pkg $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller $(REPO_ROOT)/cmds/ecrplugin $(REPO_ROOT)/cmds/demoplugin
+	@$(REPO_ROOT)/hack/format.sh $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: check
 check:
-	@$(REPO_ROOT)/hack/check.sh --golangci-lint-config=./.golangci.yaml $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/cmds/ecrplugin/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
+	@$(REPO_ROOT)/hack/check.sh --golangci-lint-config=./.golangci.yaml $(EFFECTIVE_DIRECTORIES)
+
+.PHONY: check-and-fix
+check-and-fix:
+	@$(REPO_ROOT)/hack/check.sh --fix --golangci-lint-config=./.golangci.yaml $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: force-test
 force-test:
-	@go test -parallel=1 --count=1 $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/ecrplugin/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
+	@go test --count=1 $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: test
 test:
-	@echo "> Run Unit Tests"
-	@go test  ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
+	@echo "> Run Tests"
+	@go test  --tags=integration $(EFFECTIVE_DIRECTORIES)
 
-.PHONY: test-all
-test-all: install-requirements
-	@echo "> Run All Tests"
-	@go test --tags=integration ./examples/lib/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
+.PHONY: unit-test
+unit-test:
+	@echo "> Run Unit Tests"
+	@go test $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: generate
 generate:
-	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg/... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/examples/...
+	@$(REPO_ROOT)/hack/generate.sh $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: generate-deepcopy
 generate-deepcopy: controller-gen

@@ -40,5 +40,7 @@ func (m *Binary) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-var _ json.Marshaler = (*Binary)(nil) //nolint: gofumpt // yes
-var _ json.Unmarshaler = (*Binary)(nil)
+var (
+	_ json.Marshaler   = (*Binary)(nil)
+	_ json.Unmarshaler = (*Binary)(nil)
+)

@@ -14,7 +14,6 @@ import (
 )
 
 var _ = Describe("temp file management", func() {
-
 	Context("compress", func() {
 		It("compress access", func() {
 			blob := blobaccess.ForString(mime.MIME_TEXT, "testdata")
@@ -77,5 +76,4 @@ var _ = Describe("temp file management", func() {
 			Expect(string(data)).To(Equal("testdata"))
 		})
 	})
-
 })

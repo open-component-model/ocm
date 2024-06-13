@@ -1,18 +1,19 @@
 package add_test
 
 import (
+	"strings"
+	"time"
+
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	mavenacc "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/maven"
-	"github.com/open-component-model/ocm/pkg/maven"
-	"strings"
-	"time"
-
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/maven"
 	"github.com/open-component-model/ocm/pkg/maven/maventest"
 )
 
@@ -24,11 +25,13 @@ const (
 	MAVEN_VERSION         = "1.1"
 )
 
-const ARCH = "/tmp/ctf"
-const DEST_ARCH = "/tmp/ctf-dest"
-const VERSION = "1.0.0"
-const COMPONENT = "ocm.software/demo/test"
-const OUT = "/tmp/res"
+const (
+	ARCH      = "/tmp/ctf"
+	DEST_ARCH = "/tmp/ctf-dest"
+	VERSION   = "1.0.0"
+	COMPONENT = "ocm.software/demo/test"
+	OUT       = "/tmp/res"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv

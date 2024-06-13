@@ -143,11 +143,11 @@ func DescribeAccessMethods(d *descriptor.Descriptor, out common.Printer) {
 		if m.Description != "" {
 			out.Printf("%s\n", utils2.IndentLines(m.Description, "    "))
 		}
-		out := out.AddGap("  ") //nolint: govet // just use always out
+		out := out.AddGap("  ")
 		out.Printf("Versions:\n")
 		for _, vn := range utils2.StringMapKeys(m.Versions) {
 			out.Printf("- Version: %s\n", vn)
-			out := out.AddGap("  ") //nolint: govet // just use always out
+			out := out.AddGap("  ")
 			v := m.Versions[vn]
 			if v.Format != "" {
 				out.Printf("%s\n", v.Format)
@@ -227,7 +227,7 @@ func DescribeActions(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out c
 			out.Printf("  Info:\n")
 			out.Printf("%s\n", utils2.IndentLines(a.ActionDesc, "    "))
 		}
-		out := out.AddGap("  ") //nolint: govet // just use always out
+		out := out.AddGap("  ")
 		if a.BestVersion == "" {
 			out.Printf("No version matches actual ocm version!\n")
 		}
@@ -372,11 +372,11 @@ func DescribeValueSets(d *descriptor.Descriptor, out common.Printer) {
 		if m.Description != "" {
 			out.Printf("%s\n", utils2.IndentLines(m.Description, "    "))
 		}
-		out := out.AddGap("  ") //nolint: govet // just use always out
+		out := out.AddGap("  ")
 		out.Printf("Versions:\n")
 		for _, vn := range utils2.StringMapKeys(m.Versions) {
 			out.Printf("- Version: %s\n", vn)
-			out := out.AddGap("  ") //nolint: govet // just use always out
+			out := out.AddGap("  ")
 			v := m.Versions[vn]
 			if v.Format != "" {
 				out.Printf("%s\n", v.Format)
@@ -411,7 +411,7 @@ func ListElements[E DescribableElement[C], C Describable](msg string, elems []E,
 	for _, n := range utils2.StringMapKeys(keys) {
 		m := keys[n]
 		out.Printf("- Name: %s\n", n)
-		out := out.AddGap("  ") //nolint: govet // just use always out
+		out := out.AddGap("  ")
 		if m.GetDescription() != "" {
 			desc := m.GetDescription()
 			if !strings.HasSuffix(desc, "\n") {

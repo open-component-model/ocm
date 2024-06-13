@@ -11,7 +11,6 @@ import (
 )
 
 var _ = Describe("Maven Test Environment", func() {
-
 	It("GAV, GroupPath, FilePath", func() {
 		coords := me.NewCoordinates("ocm.software", "hello-ocm", "0.0.1", me.WithExtension("jar"))
 		Expect(coords.GAV()).To(Equal("ocm.software:hello-ocm:0.0.1"))

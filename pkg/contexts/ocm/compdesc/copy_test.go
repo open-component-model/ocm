@@ -17,7 +17,6 @@ import (
 var _ = Describe("Component Descripor Copy Test Suitet", func() {
 	Context("compdesc copy", func() {
 		It("copies CD", func() {
-
 			labels := v1.Labels{
 				*Must(v1.NewLabel("label", "value",
 					v1.WithVersion("v1"),

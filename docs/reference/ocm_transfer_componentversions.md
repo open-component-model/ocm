@@ -204,9 +204,9 @@ The uploader name may be a path expression with the following possibilities:
 
     sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
 
-  - <code>ocm/mavenArtifact</code>: uploading maven artifacts
+  - <code>ocm/mavenPackage</code>: uploading maven artifacts
 
-    The <code>ocm/mavenArtifact</code> uploader is able to upload maven artifacts (whole GAV only!)
+    The <code>ocm/mavenPackage</code> uploader is able to upload maven artifacts (whole GAV only!)
     as artifact archive according to the maven artifact spec.
     If registered the default mime type is: application/x-tgz
 

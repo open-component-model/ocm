@@ -135,7 +135,6 @@ var _ = Describe("labels", func() {
 		It("detects equal", func() {
 			eq := labels.Equivalent(labels.Copy())
 			CheckEquivalent(eq)
-
 		})
 
 		It("detects volatile value modification", func() {

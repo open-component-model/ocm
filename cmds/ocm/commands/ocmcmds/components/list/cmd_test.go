@@ -12,15 +12,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
-const ARCH = "/tmp/ca"
-const ARCH2 = "/tmp/ca2"
-const VERSION = "v1"
-const VERSION11 = "v1.1"
-const VERSION2 = "v2"
-const COMP = "test.de/x"
-const COMP2 = "test.de/y"
-const COMP3 = "test.de/z"
-const PROVIDER = "mandelsoft"
+const (
+	ARCH      = "/tmp/ca"
+	ARCH2     = "/tmp/ca2"
+	VERSION   = "v1"
+	VERSION11 = "v1.1"
+	VERSION2  = "v2"
+	COMP      = "test.de/x"
+	COMP2     = "test.de/y"
+	COMP3     = "test.de/z"
+	PROVIDER  = "mandelsoft"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
@@ -143,7 +145,6 @@ COMPONENT VERSION MESSAGE
 test.de/x v1.1    
 `))
 		})
-
 	})
 
 	Context("ctf", func() {

@@ -93,7 +93,6 @@ type RepositoryTarget interface {
 // to a dedicated object, which wants to be configured.
 // --- begin method apply ---.
 func (c *ExampleConfigSpec) ApplyTo(_ cpi.Context, tgt interface{}) error {
-
 	switch t := tgt.(type) {
 	// if the target is a credentials context
 	// configure the credentials to be used for the
@@ -148,7 +147,6 @@ func init() {
 // --- end init ---.
 
 func WriteConfigType(cfg *helper.Config) error {
-
 	// after preparing a new special config type
 	// we can feed it into the config management.
 	// because of the registration the config management

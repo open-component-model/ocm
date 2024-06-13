@@ -16,6 +16,7 @@ func Type(t string) string {
 	}
 	return t + "::"
 }
+
 func FileFormat(t, f string) string {
 	if t == "" {
 		return f
@@ -25,6 +26,7 @@ func FileFormat(t, f string) string {
 	}
 	return t + "+" + f
 }
+
 func FileType(t, f string) string {
 	if t != "" {
 		return t
@@ -32,18 +34,21 @@ func FileType(t, f string) string {
 		return f
 	}
 }
+
 func Scheme(s string) string {
 	if s == "" {
 		return s
 	}
 	return s + "://"
 }
+
 func Sub(t string) string {
 	if t == "" {
 		return t
 	}
 	return "/" + t
 }
+
 func Vers(t string) string {
 	if t == "" {
 		return t

@@ -10,6 +10,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
 	"github.com/mandelsoft/goutils/testutils"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -26,15 +27,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const ARCH = "/tmp/ctf"
-const ARCH2 = "/tmp/ctf2"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENT = "github.com/mandelsoft/test"
-const COMPONENT2 = "github.com/mandelsoft/test2"
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	ARCH       = "/tmp/ctf"
+	ARCH2      = "/tmp/ctf2"
+	PROVIDER   = "mandelsoft"
+	VERSION    = "v1"
+	COMPONENT  = "github.com/mandelsoft/test"
+	COMPONENT2 = "github.com/mandelsoft/test2"
+	OUT        = "/tmp/res"
+	OCIPATH    = "/tmp/oci"
+	OCIHOST    = "alias"
+)
 
 const script1 = `
 rules:
@@ -56,9 +59,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 `
 
 var _ = Describe("Transfer handler", func() {
-
 	It("handles bool", func() {
-
 		handler, err := spiff.New(spiff.Script([]byte(script1)))
 		Expect(err).To(Succeed())
 
@@ -74,7 +75,6 @@ var _ = Describe("Transfer handler", func() {
 	})
 
 	It("handles componentversion", func() {
-
 		handler, err := spiff.New(spiff.Script([]byte(script1)))
 		Expect(err).To(Succeed())
 
@@ -92,7 +92,6 @@ var _ = Describe("Transfer handler", func() {
 	})
 
 	It("handles simple componentversion", func() {
-
 		handler, err := spiff.New(spiff.Script([]byte(script1)))
 		Expect(err).To(Succeed())
 		binding := map[string]interface{}{
@@ -177,7 +176,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(err).To(Succeed())
 			cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
 			Expect(err).To(Succeed())
-			tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+			tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env)
 			Expect(err).To(Succeed())
 			defer tgt.Close()
 
@@ -227,7 +226,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(err).To(Succeed())
 			cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
 			Expect(err).To(Succeed())
-			tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+			tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env)
 			Expect(err).To(Succeed())
 			defer tgt.Close()
 
@@ -278,7 +277,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(err).To(Succeed())
 			childSrc, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
 			Expect(err).To(Succeed())
-			tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+			tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env)
 			Expect(err).To(Succeed())
 			defer tgt.Close()
 			handler, err := standard.New(standard.Recursive(), standard.Resolver(childSrc))

@@ -28,20 +28,26 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-const ARCH = "/tmp/ctf"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENTA = "github.com/mandelsoft/test"
-const COMPONENTB = "github.com/mandelsoft/ref"
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	ARCH       = "/tmp/ctf"
+	PROVIDER   = "mandelsoft"
+	VERSION    = "v1"
+	COMPONENTA = "github.com/mandelsoft/test"
+	COMPONENTB = "github.com/mandelsoft/ref"
+	OUT        = "/tmp/res"
+	OCIPATH    = "/tmp/oci"
+	OCIHOST    = "alias"
+)
 
-const SIGNATURE = "test"
-const SIGN_ALGO = rsa.Algorithm
+const (
+	SIGNATURE = "test"
+	SIGN_ALGO = rsa.Algorithm
+)
 
-const PUBKEY = "/tmp/pub"
-const PRIVKEY = "/tmp/priv"
+const (
+	PUBKEY  = "/tmp/pub"
+	PRIVKEY = "/tmp/priv"
+)
 
 var _ = Describe("access method", func() {
 	var (

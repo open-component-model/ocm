@@ -72,7 +72,6 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.pubFile, "publicKey", "", "", "public key certificate file")
 	set.StringVarP(&o.rootFile, "rootCerts", "", "", "root certificates file (deprecated)")
 	set.StringArrayVarP(&o.rootCAs, "ca-cert", "", nil, "additional root certificate authorities (for signing certificates)")
-
 }
 
 func (o *Command) Complete(args []string) error {

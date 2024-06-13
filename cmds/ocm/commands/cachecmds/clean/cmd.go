@@ -91,9 +91,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-
 	cnt, ncnt, fcnt, size, nsize, fsize, err := o.cache.Cleanup(common.NewPrinter(o.Context.StdErr()), &o.before, o.dryrun)
-
 	if err != nil {
 		return err
 	}

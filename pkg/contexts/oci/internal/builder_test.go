@@ -68,5 +68,4 @@ var _ = Describe("builder test", func() {
 		Expect(ctx.CredentialsContext()).NotTo(BeIdenticalTo(credentials.DefaultContext()))
 		Expect(len(ctx.CredentialsContext().RepositoryTypes().KnownTypeNames())).To(Equal(0))
 	})
-
 })

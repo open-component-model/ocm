@@ -6,14 +6,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/goutils/testutils"
 	"github.com/mandelsoft/logging"
 
-	"github.com/mandelsoft/goutils/testutils"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
 
 var _ = Describe("Printer", func() {
-
 	var buf *bytes.Buffer
 	var printer Printer
 
@@ -97,6 +96,5 @@ V[3] line 1
 V[3] line 2
 `))
 		})
-
 	})
 })

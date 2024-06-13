@@ -21,7 +21,7 @@ func Gather(i data.Iterable) *Result {
 	r := &Result{}
 	r.wg.Add(1)
 	go func() {
-		//defer GinkgoRecover()
+		// defer GinkgoRecover()
 		r.result = data.Slice(i)
 		r.wg.Done()
 	}()
@@ -49,7 +49,6 @@ var _ = Describe("processing buffer", func() {
 	})
 
 	Context("index array", func() {
-
 		It("after empty", func() {
 			i := IndexArray{}
 			Expect(i.After(IndexArray{1, 2, 3})).To(BeFalse())
@@ -64,7 +63,6 @@ var _ = Describe("processing buffer", func() {
 			Expect(i.After(IndexArray{1, 2, 2})).To(BeTrue())
 			Expect(i.After(IndexArray{1, 1, 3})).To(BeTrue())
 			Expect(i.After(IndexArray{0, 2, 3})).To(BeTrue())
-
 		})
 		It("after deeper level", func() {
 			i := IndexArray{1, 2, 3}
@@ -151,7 +149,6 @@ var _ = Describe("processing buffer", func() {
 			buf.Close()
 			Expect(promise.Get()).To(Equal([]interface{}{0, 1, 2, 3}))
 			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{0, 1, 2, 3}))
-
 		})
 
 		It("add filtered", func() {

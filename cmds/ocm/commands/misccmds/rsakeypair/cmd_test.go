@@ -38,7 +38,6 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("create key pair", func() {
-
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "key.priv")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
@@ -67,7 +66,6 @@ created rsa key pair key.priv[key.pub]
 	})
 
 	It("create self-signed key pair", func() {
-
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "key.priv", "CN=mandelsoft")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`

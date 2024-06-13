@@ -55,5 +55,4 @@ var _ = Describe("yaml flags", func() {
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(Equal("invalid argument \"a\" for \"--flag\" flag: expected <name>=<value>"))
 	})
-
 })

@@ -133,7 +133,7 @@ func Format(opts *output.Options) processing.ProcessChain {
 		if schema == "" {
 			schema = compdescv2.SchemaVersion
 		}
-		out, err := compdesc.Convert(desc, compdesc.SchemaVersion(o.Schema))
+		out, err := compdesc.Convert(desc, compdesc.SchemaVersion(schema))
 		if err != nil {
 			return &FailedEntry{
 				Scheme:  desc.SchemaVersion(),

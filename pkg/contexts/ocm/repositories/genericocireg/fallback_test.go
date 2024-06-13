@@ -5,11 +5,11 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/mandelsoft/goutils/testutils"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 var _ = Describe("decode fallback", func() {
-
 	It("creates a dummy component", func() {
 		specdata := `
 type: other/v1

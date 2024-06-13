@@ -30,15 +30,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const ARCH = "/tmp/ctf"
-const ARCH2 = "/tmp/ctf2"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENT = "github.com/mandelsoft/test"
-const COMPONENT2 = "github.com/mandelsoft/test2"
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	ARCH       = "/tmp/ctf"
+	ARCH2      = "/tmp/ctf2"
+	PROVIDER   = "mandelsoft"
+	VERSION    = "v1"
+	COMPONENT  = "github.com/mandelsoft/test"
+	COMPONENT2 = "github.com/mandelsoft/test2"
+	OUT        = "/tmp/res"
+	OCIPATH    = "/tmp/oci"
+	OCIHOST    = "alias"
+)
 
 func FakeOCIRegBaseFunction(ctx *storagecontext.StorageContext) string {
 	return "baseurl.io"
@@ -87,7 +89,7 @@ var _ = Describe("oci artifact transfer", func() {
 
 		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer tgt.Close()
 
 		opts := &standard.Options{}
@@ -126,7 +128,7 @@ var _ = Describe("oci artifact transfer", func() {
 
 		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer tgt.Close()
 
 		opts := &standard.Options{}
@@ -164,7 +166,7 @@ var _ = Describe("oci artifact transfer", func() {
 
 		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer tgt.Close()
 
 		opts := &standard.Options{}
@@ -205,7 +207,7 @@ var _ = Describe("oci artifact transfer", func() {
 
 		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
 		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer tgt.Close()
 
 		opts := &standard.Options{}

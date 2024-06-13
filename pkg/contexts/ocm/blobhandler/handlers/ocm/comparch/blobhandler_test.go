@@ -78,5 +78,4 @@ var _ = Describe("blobhandler", func() {
 			Expect(found).To(Equal(spec))
 		})
 	})
-
 })

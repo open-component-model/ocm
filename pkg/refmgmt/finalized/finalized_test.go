@@ -136,7 +136,5 @@ var _ = Describe("finalized ref", func() {
 			rrefid,
 			id,
 		))
-
 	})
-
 })

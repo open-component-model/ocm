@@ -406,5 +406,4 @@ var _ = Describe("wget access method", func() {
 		noredirectContent := Must(noredirectMethod.Get())
 		Expect(string(noredirectContent)).To(Equal(NOREDIRECT_CONTENT))
 	})
-
 })

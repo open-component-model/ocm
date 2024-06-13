@@ -236,7 +236,6 @@ var _ = Describe("blob handler registry test", func() {
 
 				h = copy.LookupHandler(internal.ImplementationRepositoryType{internal.CONTEXT_TYPE, REPO}, ART, mime.MIME_OCTET)
 				Expect(h).To(Equal(internal.MultiBlobHandler{new}))
-
 			},
 			Entry("plain", &reg),
 			Entry("extended", &ext),

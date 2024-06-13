@@ -17,11 +17,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/toi"
 )
 
-const ARCH = "/tmp/ctf"
-const VERSION = "v1"
-const COMP1 = "test.de/a"
-const COMP2 = "test.de/b"
-const PROVIDER = "mandelsoft"
+const (
+	ARCH     = "/tmp/ctf"
+	VERSION  = "v1"
+	COMP1    = "test.de/a"
+	COMP2    = "test.de/b"
+	PROVIDER = "mandelsoft"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv

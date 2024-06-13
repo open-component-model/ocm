@@ -20,15 +20,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const CTF = "ctf"
-const COMPONENT = "fabianburth.org/component"
-const VERSION = "v1.0"
-const ARTIFACT_NAME = "artifact"
-const ARTIFACT_VERSION = "v1.0"
+const (
+	CTF              = "ctf"
+	COMPONENT        = "fabianburth.org/component"
+	VERSION          = "v1.0"
+	ARTIFACT_NAME    = "artifact"
+	ARTIFACT_VERSION = "v1.0"
+)
 
 var _ = Describe("Method", func() {
-
-	var data = `globalAccess:
+	data := `globalAccess:
   digest: sha256:1bf729fa00e355199e711933ccfa27467ee3d2de1343aef2a7c1ecbdf885e63a
   mediaType: application/tar+gzip
   ref: ghcr.io/vasu1124/ocm/component-descriptors/github.com/vasu1124/introspect-delivery

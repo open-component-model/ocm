@@ -17,7 +17,6 @@ import (
 )
 
 var _ = Describe("NPM config - .npmrc", func() {
-
 	props := common.Properties{
 		npmCredentials.ATTR_TOKEN: "npm_TOKEN",
 	}

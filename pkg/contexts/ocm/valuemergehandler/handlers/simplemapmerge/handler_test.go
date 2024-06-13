@@ -10,16 +10,22 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/hpi"
 )
 
-type Value = me.Value
-type Config = me.Config
+type (
+	Value  = me.Value
+	Config = me.Config
+)
 
-const ALGORITHM = me.ALGORITHM
-const MODE_NONE = me.MODE_NONE
-const MODE_LOCAL = me.MODE_LOCAL
-const MODE_INBOUND = me.MODE_INBOUND
+const (
+	ALGORITHM    = me.ALGORITHM
+	MODE_NONE    = me.MODE_NONE
+	MODE_LOCAL   = me.MODE_LOCAL
+	MODE_INBOUND = me.MODE_INBOUND
+)
 
-var NewConfig = me.NewConfig
-var New = me.New
+var (
+	NewConfig = me.NewConfig
+	New       = me.New
+)
 
 var _ = Describe("list merge", func() {
 	handler := New()
@@ -165,6 +171,5 @@ var _ = Describe("list merge", func() {
 			MustBeSuccessful(b.GetValue(&r))
 			Expect(r).To(DeepEqual(d1))
 		})
-
 	})
 })

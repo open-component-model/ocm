@@ -13,12 +13,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const ARCH = "/tmp/ca"
-const VERSION = "v1"
-const COMP = "test.de/x"
-const COMP2 = "test.de/y"
-const COMP3 = "test.de/z"
-const PROVIDER = "mandelsoft"
+const (
+	ARCH     = "/tmp/ca"
+	VERSION  = "v1"
+	COMP     = "test.de/x"
+	COMP2    = "test.de/y"
+	COMP3    = "test.de/z"
+	PROVIDER = "mandelsoft"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
@@ -107,7 +109,6 @@ COMPONENT    NAME     VERSION IDENTITY TYPE      RELATION
    └─        testdata v1               PlainText local
 `))
 		})
-
 	})
 
 	Context("ctf", func() {

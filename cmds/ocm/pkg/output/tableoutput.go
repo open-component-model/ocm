@@ -97,7 +97,6 @@ columns:
 }
 
 func (this *TableProcessingOutput) Out() error {
-
 	sort := this.opts.Sort
 	slice := data.IndexedSliceAccess(data.Slice(this.Elems))
 	if len(slice) == 0 {

@@ -12,14 +12,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	cliutils "github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	common2 "github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errkind"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/template"
 )
 
@@ -38,7 +36,7 @@ func ProcessDescriptions(ctx clictx.Context, printer common2.Printer, templ temp
 	if err != nil {
 		return nil, nil, err
 	}
-	ictx.Printf("found %d %s\n", len(elems), utils.Plural(h.Key(), len(elems)))
+	ictx.Printf("found %d %s\n", len(elems), cliutils.Plural(h.Key(), len(elems)))
 	return elems, ictx, nil
 }
 
@@ -76,10 +74,10 @@ func DetermineElementsForSource(ctx clictx.Context, ictx inputs.Context, templ t
 		ictx := ictx.Section("processing document %d...", i)
 
 		var list []json.RawMessage
-		listkey := utils.Plural(h.Key(), 0)
+		listkey := cliutils.Plural(h.Key(), 0)
 		if reslist, ok := tmp[listkey]; ok {
 			if len(tmp) != 1 {
-				return nil, errors.Newf("invalid %s spec %d: either a list or a single spec possible for %s (found keys %s)", h.Key(), i, listkey, utils2.StringMapKeys(tmp))
+				return nil, errors.Newf("invalid %s spec %d: either a list or a single spec possible for %s (found keys %s)", h.Key(), i, listkey, utils.StringMapKeys(tmp))
 			}
 			l, ok := reslist.([]interface{})
 			if !ok {
@@ -97,7 +95,7 @@ func DetermineElementsForSource(ctx clictx.Context, ictx inputs.Context, templ t
 			if entry, ok := tmp[h.Key()]; ok {
 				if m, ok := entry.(map[string]interface{}); ok {
 					if len(tmp) != 1 {
-						return nil, errors.Newf("invalid %s spec %d: either a list or a single spec possible for %s (found keys %s)", h.Key(), i, listkey, utils2.StringMapKeys(tmp))
+						return nil, errors.Newf("invalid %s spec %d: either a list or a single spec possible for %s (found keys %s)", h.Key(), i, listkey, utils.StringMapKeys(tmp))
 					}
 					tmp = m
 				}
@@ -196,7 +194,7 @@ func DecodeElement(data []byte, h ElementSpecHandler) (ElementSpec, error) {
 		return nil, err
 	}
 	// delete(plainOrig, "input")
-	err = utils.CheckForUnknown(nil, plainOrig, plainAccepted).ToAggregate()
+	err = cliutils.CheckForUnknown(nil, plainOrig, plainAccepted).ToAggregate()
 	return result, err
 }
 
@@ -240,7 +238,7 @@ func CheckForUnknown(fldPath *field.Path, plainOrig, accepted interface{}) error
 	if err != nil {
 		return err
 	}
-	return utils.CheckForUnknown(fldPath, plainOrig, plainAccepted).ToAggregate()
+	return cliutils.CheckForUnknown(fldPath, plainOrig, plainAccepted).ToAggregate()
 }
 
 func Validate(r *ResourceInput, ctx inputs.Context, inputFilePath string) error {
@@ -260,12 +258,11 @@ func Validate(r *ResourceInput, ctx inputs.Context, inputFilePath string) error 
 				acc, err := r.Access.Evaluate(ctx.OCMContext())
 				if err != nil {
 					if errors.IsErrUnknown(err) {
-						//nolint: errorlint // No way I can untagle this.
 						err.(errors.Kinded).SetKind(errkind.KIND_ACCESSMETHOD)
 					}
 					raw, _ := r.Access.GetRaw()
 					allErrs = append(allErrs, field.Invalid(fldPath.Child("access"), string(raw), err.Error()))
-				} else if acc.(ocm.AccessSpec).IsLocal(ctx.OCMContext()) {
+				} else if acc.IsLocal(ctx.OCMContext()) {
 					kind := runtime.GetKind(r.Access)
 					allErrs = append(allErrs, field.Invalid(fldPath.Child("access", "type"), kind, "local access no possible"))
 				}
@@ -319,7 +316,7 @@ func ValidateElementSpecIdentities(kind string, src string, elems []ElementSpec)
 
 func PrintElements(p common2.Printer, elems []Element, outfile string, fss ...vfs.FileSystem) error {
 	if outfile != "" && outfile != "-" {
-		f, err := accessio.FileSystem(fss...).OpenFile(outfile, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0o644)
+		f, err := utils.FileSystem(fss...).OpenFile(outfile, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0o644)
 		if err != nil {
 			return errors.Wrapf(err, "cannot create output file %q", outfile)
 		}

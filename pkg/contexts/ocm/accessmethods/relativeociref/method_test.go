@@ -4,12 +4,12 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
 	"github.com/mandelsoft/goutils/finalizer"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/relativeociref"
@@ -19,12 +19,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 )
 
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	OCIPATH = "/tmp/oci"
+	OCIHOST = "alias"
+)
 
-const COMP = "acme.org/compo"
-const COMPVERS = "v1.0.0"
-const RES = "ref"
+const (
+	COMP     = "acme.org/compo"
+	COMPVERS = "v1.0.0"
+	RES      = "ref"
+)
 
 var _ = Describe("Method", func() {
 	var env *Builder

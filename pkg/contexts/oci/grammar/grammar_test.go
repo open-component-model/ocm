@@ -38,12 +38,14 @@ func Type(t string) string {
 	}
 	return t + "::"
 }
+
 func Sub(t string) string {
 	if t == "" {
 		return t
 	}
 	return "/" + t
 }
+
 func Vers(t string) string {
 	if t == "" {
 		return t
@@ -52,7 +54,6 @@ func Vers(t string) string {
 }
 
 var _ = Describe("ref matching", func() {
-
 	Context("parts", func() {
 		It("path port", func() {
 			Check("/some/path/docker.sock:100", tool.Anchored(tool.Capture(PathPortRegexp)), "/some/path/docker.sock:100")
@@ -80,5 +81,4 @@ var _ = Describe("ref matching", func() {
 			CheckURI("DockerDaemon::unix://some/path/docker.sock:100//repo:test", t, s, p[1:], r, v, "")
 		})
 	})
-
 })

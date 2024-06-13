@@ -66,6 +66,7 @@ $ ocm install plugin -r demo
 `,
 	}
 }
+
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.RemoveMode, "remove", "r", false, "remove plugin")
 	fs.BoolVarP(&o.UpdateMode, "update", "u", false, "update plugin")

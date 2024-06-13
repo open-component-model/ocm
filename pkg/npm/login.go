@@ -34,7 +34,7 @@ func Login(registry string, username string, password string, email string) (str
 		return "", err
 	}
 	req.SetBasicAuth(username, password)
-	req.Header.Set("content-type", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err

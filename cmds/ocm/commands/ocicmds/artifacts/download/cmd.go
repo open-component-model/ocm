@@ -149,7 +149,8 @@ func (d *download) Save(o *artifacthdlr.Object, f string) error {
 		return err
 	}
 
-	if len(opts.Layers) > 0 {
+	switch {
+	case len(opts.Layers) > 0:
 		var finalize finalizer.Finalizer
 		defer finalize.Finalize()
 
@@ -176,7 +177,7 @@ func (d *download) Save(o *artifacthdlr.Object, f string) error {
 			if len(opts.Layers) > 1 {
 				name = fmt.Sprintf("%s-%d", f, l)
 			}
-			file, err := dest.PathFilesystem.OpenFile(name, vfs.O_CREATE|vfs.O_TRUNC|vfs.O_WRONLY, 0640)
+			file, err := dest.PathFilesystem.OpenFile(name, vfs.O_CREATE|vfs.O_TRUNC|vfs.O_WRONLY, 0o640)
 			if err != nil {
 				return errors.Wrapf(err, "cannot create target file %s for layer %d", name, l)
 			}
@@ -188,7 +189,7 @@ func (d *download) Save(o *artifacthdlr.Object, f string) error {
 			out.Outf(d.opts.Context, "%s: layer %d: %d byte(s) downloaded\n", name, l, n)
 			nested.Finalize()
 		}
-	} else if opts.DirTree {
+	case opts.DirTree:
 		format := formatoption.From(d.opts)
 
 		if !art.IsManifest() {
@@ -232,7 +233,7 @@ func (d *download) Save(o *artifacthdlr.Object, f string) error {
 		} else {
 			return accessio.CopyFileSystem(format.Format, fs, "/", dest.PathFilesystem, f, 0o640)
 		}
-	} else {
+	default:
 		blob, err := art.Blob()
 		if err != nil {
 			return err

@@ -131,15 +131,13 @@ type encoder interface {
 	getEncoder() int
 }
 
-type object struct {
-}
+type object struct{}
 
 func (_ *object) getEncoder() int {
 	return 1
 }
 
 var _ = Describe("versioned types", func() {
-
 	var versions runtime.Scheme[TestSpecRealm, TestType]
 
 	versions = runtime.MustNewDefaultScheme[TestSpecRealm, TestType](nil, false, nil)

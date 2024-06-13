@@ -129,7 +129,7 @@ func PrintIndex(pr common.Printer, i cpi.IndexAccess, listFiles bool) {
 		pr.Printf("  digest: %s\n", l.Digest)
 		if l.Platform != nil {
 			pr.Printf("  platform:\n")
-			pr := pr.AddGap("    ") //nolint: govet // yes
+			pr := pr.AddGap("    ")
 			optS(pr, "OS           ", l.Platform.OS)
 			optS(pr, "Architecture ", l.Platform.Architecture)
 			optS(pr, "OSCersion    ", l.Platform.OSVersion)

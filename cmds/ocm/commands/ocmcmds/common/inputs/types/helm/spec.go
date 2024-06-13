@@ -51,11 +51,12 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 		if s.CACertFile != "" {
 			path = fldPath.Child("caCertFile")
 			inputInfo, filePath, err := inputs.FileInfo(ctx, s.CACertFile, inputFilePath)
-			if err != nil {
+			switch {
+			case err != nil:
 				allErrs = append(allErrs, field.Invalid(path, filePath, err.Error()))
-			} else if !inputInfo.Mode().IsRegular() {
+			case !inputInfo.Mode().IsRegular():
 				allErrs = append(allErrs, field.Invalid(path, filePath, "caCertFile is no regular file"))
-			} else {
+			default:
 				_, err = LoadCertificateBundle(s.CACertFile, ctx.FileSystem())
 				if err != nil {
 					allErrs = append(allErrs, field.Invalid(path, s.CACertFile, err.Error()))

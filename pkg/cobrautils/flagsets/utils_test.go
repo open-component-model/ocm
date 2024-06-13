@@ -9,8 +9,10 @@ import (
 
 type Config = flagsets.Config
 
-var GetField = flagsets.GetField
-var SetField = flagsets.SetField
+var (
+	GetField = flagsets.GetField
+	SetField = flagsets.SetField
+)
 
 var _ = Describe("config", func() {
 	Context("get", func() {

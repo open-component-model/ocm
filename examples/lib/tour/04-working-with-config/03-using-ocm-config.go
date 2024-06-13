@@ -17,7 +17,6 @@ import (
 )
 
 func HandleOCMConfig(cfg *helper.Config) error {
-
 	// Although the configuration of an OCM context can
 	// be done by a sequence of explicit calls the mechanism
 	// shown in the example before, is used to provide a simple

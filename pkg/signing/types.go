@@ -50,7 +50,7 @@ func (d *DefaultSigningContext) GetIssuer() *pkix.Name {
 	return d.Issuer
 }
 
-type Signature struct { //nolint: musttag // only for string output
+type Signature struct {
 	Value     string
 	MediaType string
 	Algorithm string
@@ -58,7 +58,7 @@ type Signature struct { //nolint: musttag // only for string output
 }
 
 func (s *Signature) String() string {
-	data, err := json.Marshal(s)
+	data, err := json.Marshal(s) //nolint:musttag // only for string output
 	if err != nil {
 		logrus.Error(err)
 	}

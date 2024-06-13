@@ -1,8 +1,6 @@
 package skipupdateoption
 
 import (
-	"fmt"
-
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -42,12 +40,12 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Option) Usage() string {
-	return fmt.Sprintf(`
+	return `
 With the option <code>--no-update</code> existing versions in the target
 repository will not be touched at all. An additional specification of the
 option <code>--overwrite</code> is ignored. By default, updates of
 volative (non-signature-relevant) information is enabled, but the
 modification of non-volatile data is prohibited unless the overwrite
 option is given.
-`)
+`
 }

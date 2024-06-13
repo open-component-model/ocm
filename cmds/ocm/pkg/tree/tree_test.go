@@ -93,7 +93,6 @@ func Check(t tree.TreeObjects, result string) {
 }
 
 var _ = Describe("tree", func() {
-
 	It("composes flat tree", func() {
 		data := []tree.Object{
 			E("a"),

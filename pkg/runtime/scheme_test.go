@@ -29,14 +29,20 @@ type T2 struct {
 func (t *T1) TFunc() {}
 func (t *T2) TFunc() {}
 
-var T1Decoder = runtime.MustNewDirectDecoder[T](&T1{})
-var T2Decoder = runtime.MustNewDirectDecoder[T](&T2{})
+var (
+	T1Decoder = runtime.MustNewDirectDecoder[T](&T1{})
+	T2Decoder = runtime.MustNewDirectDecoder[T](&T2{})
+)
 
-var t1data = []byte(`{"type":"t1","t1":"v1"}`)
-var t2data = []byte(`{"type":"t2","t2":"v2"}`)
+var (
+	t1data = []byte(`{"type":"t1","t1":"v1"}`)
+	t2data = []byte(`{"type":"t2","t2":"v2"}`)
+)
 
-var t1 = &T1{runtime.ObjectTypedObject{"t1"}, "v1"}
-var t2 = &T2{runtime.ObjectTypedObject{"t2"}, "v2"}
+var (
+	t1 = &T1{runtime.ObjectTypedObject{"t1"}, "v1"}
+	t2 = &T2{runtime.ObjectTypedObject{"t2"}, "v2"}
+)
 
 var _ = Describe("scheme", func() {
 	var scheme runtime.Scheme[T, TType]

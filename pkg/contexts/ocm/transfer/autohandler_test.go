@@ -57,5 +57,4 @@ var _ = Describe("auto detection", func() {
 
 		Expect(err).To(Equal(errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "error")))
 	})
-
 })

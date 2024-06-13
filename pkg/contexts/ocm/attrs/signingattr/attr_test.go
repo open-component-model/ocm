@@ -72,5 +72,4 @@ EVQVGDF6KNU=
 		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())
 		Expect(rootcertsattr.Get(ocmctx).HasRootCertificates()).To(BeTrue())
 	})
-
 })

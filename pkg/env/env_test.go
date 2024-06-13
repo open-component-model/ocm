@@ -11,7 +11,6 @@ import (
 )
 
 var _ = Describe("Environment", func() {
-
 	It("loads environment", func() {
 		h := NewEnvironment(TestData())
 		defer h.Cleanup()
@@ -25,5 +24,4 @@ var _ = Describe("Environment", func() {
 		h := NewEnvironment(OCMContext(ctx), FileSystem(osfs.OsFs))
 		Expect(h.OCMContext()).To(BeIdenticalTo(ctx))
 	})
-
 })

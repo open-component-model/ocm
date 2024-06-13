@@ -22,7 +22,6 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("creates common transport archive", func() {
-
 		Expect(env.Execute("create", "ctf", "-ft", "directory", ARCH)).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
 		Expect(env.ReadTextFile(env.Join(ARCH, ctf.ArtifactIndexFileName))).To(Equal("{\"schemaVersion\":1,\"artifacts\":null}"))

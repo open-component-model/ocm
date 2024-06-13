@@ -17,9 +17,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 )
 
-const ARCH = "ctf"
-const COMPONENT = "ocm.software/test"
-const VERSION = "1.0.0"
+const (
+	ARCH      = "ctf"
+	COMPONENT = "ocm.software/test"
+	VERSION   = "1.0.0"
+)
 
 var _ = Describe("resolver", func() {
 	var env *Builder
@@ -40,7 +42,6 @@ var _ = Describe("resolver", func() {
 	})
 
 	It("lookup cv per standard resolver", func() {
-
 		// ocmlog.Context().AddRule(logging.NewConditionRule(logging.TraceLevel, accessio.ALLOC_REALM))
 
 		ctx := ocm.New()

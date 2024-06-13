@@ -18,12 +18,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/check"
 )
 
-const ARCH = "/tmp/ca"
-const VERSION = "v1"
-const COMP = "test.de/x"
-const COMP2 = "test.de/y"
-const COMP3 = "test.de/z"
-const COMP4 = "test.de/a"
+const (
+	ARCH    = "/tmp/ca"
+	VERSION = "v1"
+	COMP    = "test.de/x"
+	COMP2   = "test.de/y"
+	COMP3   = "test.de/z"
+	COMP4   = "test.de/a"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *Builder

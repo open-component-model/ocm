@@ -13,9 +13,11 @@ func Elem(e interface{}) *compdesc.Resource {
 	return e.(*elemhdlr.Object).Element.(*compdesc.Resource)
 }
 
-var WithVersionConstraints = elemhdlr.WithVersionConstraints
-var LatestOnly = elemhdlr.LatestOnly
-var OptionsFor = elemhdlr.OptionsFor
+var (
+	WithVersionConstraints = elemhdlr.WithVersionConstraints
+	LatestOnly             = elemhdlr.LatestOnly
+	OptionsFor             = elemhdlr.OptionsFor
+)
 
 type typeFilter struct {
 	types []string

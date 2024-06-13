@@ -14,10 +14,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const ARCH = "/tmp/ctf"
-const VERSION = "v1"
-const NS = "mandelsoft/test"
-const OUT = "/tmp/res"
+const (
+	ARCH    = "/tmp/ctf"
+	VERSION = "v1"
+	NS      = "mandelsoft/test"
+	OUT     = "/tmp/res"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv

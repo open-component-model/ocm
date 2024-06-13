@@ -17,7 +17,6 @@ import (
 )
 
 var _ = Describe("image value mapping", func() {
-
 	const (
 		ARCHIVE   = "archive.ctf"
 		COMPONENT = "github.com/comp"
@@ -61,7 +60,6 @@ var _ = Describe("image value mapping", func() {
 	})
 
 	It("uses image ref data from component version", func() {
-
 		mappings := UnmarshalLocalizations(`
 - name: test1
   file: file1
@@ -80,7 +78,6 @@ var _ = Describe("image value mapping", func() {
 	})
 
 	It("uses multiple resolved image ref data from component version", func() {
-
 		mappings := UnmarshalLocalizations(`
 - name: test1
   file: file1

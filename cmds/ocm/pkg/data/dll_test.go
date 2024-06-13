@@ -6,9 +6,7 @@ import (
 )
 
 var _ = Describe("simple data processing", func() {
-
 	Context("add", func() {
-
 		It("end", func() {
 			root := DLL{}
 
@@ -45,7 +43,6 @@ var _ = Describe("simple data processing", func() {
 		})
 	})
 	Context("remove", func() {
-
 		It("end", func() {
 			root := DLL{}
 
@@ -80,8 +77,6 @@ var _ = Describe("simple data processing", func() {
 
 			Expect(d2.Next()).To(BeNil())
 			Expect(d2.Prev()).To(BeIdenticalTo(&root))
-
 		})
 	})
-
 })

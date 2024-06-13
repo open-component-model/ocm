@@ -46,7 +46,7 @@ var _ = Describe("artifact management", func() {
 	})
 
 	It("creates with default format", func() {
-		a, err := artifactset.FormatDirectory.Create("test", opts, 0700)
+		a, err := artifactset.FormatDirectory.Create("test", opts, 0o700)
 		Expect(err).To(Succeed())
 		Expect(vfs.DirExists(tempfs, "test/"+artifactset.BlobsDirectoryName)).To(BeTrue())
 
@@ -63,7 +63,7 @@ var _ = Describe("artifact management", func() {
 		opts, err := accessio.AccessOptions(&artifactset.Options{}, opts, artifactset.StructureFormat(format))
 		Expect(err).To(Succeed())
 
-		a, err := artifactset.FormatDirectory.Create("test", opts, 0700)
+		a, err := artifactset.FormatDirectory.Create("test", opts, 0o700)
 		Expect(err).To(Succeed())
 		Expect(vfs.DirExists(tempfs, "test/"+artifactset.BlobsDirectoryName)).To(BeTrue())
 
@@ -91,7 +91,7 @@ var _ = Describe("artifact management", func() {
 		opts, err := accessio.AccessOptions(&artifactset.Options{}, opts, artifactset.StructureFormat(format))
 		Expect(err).To(Succeed())
 
-		a, err := artifactset.FormatTGZ.Create("test.tgz", opts, 0600)
+		a, err := artifactset.FormatTGZ.Create("test.tgz", opts, 0o600)
 		Expect(err).To(Succeed())
 
 		defaultManifestFill(a)
@@ -144,7 +144,7 @@ var _ = Describe("artifact management", func() {
 		opts, err := accessio.AccessOptions(&artifactset.Options{FormatVersion: format}, opts, accessio.File(file))
 		Expect(err).To(Succeed())
 
-		a, err := artifactset.FormatTGZ.Create("", opts, 0600)
+		a, err := artifactset.FormatTGZ.Create("", opts, 0o600)
 		Expect(err).To(Succeed())
 
 		defaultManifestFill(a)
@@ -192,7 +192,7 @@ var _ = Describe("artifact management", func() {
 		TestForAllFormats("read from filesystem artifact", func(format string) {
 			opts := Must(accessio.AccessOptions(&artifactset.Options{}, opts, artifactset.StructureFormat(format)))
 
-			a := Must(artifactset.FormatDirectory.Create("test", opts, 0700))
+			a := Must(artifactset.FormatDirectory.Create("test", opts, 0o700))
 			Expect(vfs.DirExists(tempfs, "test/"+artifactset.BlobsDirectoryName)).To(BeTrue())
 			defaultManifestFill(a)
 			Expect(a.Close()).To(Succeed())
@@ -211,7 +211,7 @@ var _ = Describe("artifact management", func() {
 		TestForAllFormats("read from tgz artifact", func(format string) {
 			opts := Must(accessio.AccessOptions(&artifactset.Options{}, opts, artifactset.StructureFormat(format)))
 
-			a := Must(artifactset.FormatTGZ.Create("test.tgz", opts, 0700))
+			a := Must(artifactset.FormatTGZ.Create("test.tgz", opts, 0o700))
 			defaultManifestFill(a)
 			Expect(a.Close()).To(Succeed())
 

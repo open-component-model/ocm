@@ -194,7 +194,6 @@ func (r *RepositoryImpl) ExistsArtifact(name string, version string) (bool, erro
 	}
 	ref := r.GetRef(name, version)
 	_, _, err = res.Resolve(context.Background(), ref)
-
 	if err != nil {
 		if errdefs.IsNotFound(err) {
 			return false, nil

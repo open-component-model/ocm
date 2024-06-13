@@ -6,8 +6,8 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -18,8 +18,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const COMP = "acme.org/mytestcomponent"
-const VERS = "1.0.0"
+const (
+	COMP = "acme.org/mytestcomponent"
+	VERS = "1.0.0"
+)
 
 func CTFExample() (rerr error) {
 	var finalize finalizer.Finalizer
@@ -68,7 +70,6 @@ func CTFExample() (rerr error) {
 			blobaccess.ForString(mime.MIME_TEXT, "testdata"),
 			"", nil,
 		)
-
 		if err != nil {
 			return errors.Wrapf(err, "cannot add resource")
 		}

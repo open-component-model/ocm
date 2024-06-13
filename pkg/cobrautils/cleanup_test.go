@@ -9,7 +9,6 @@ import (
 )
 
 var _ = Describe("processing buffer", func() {
-
 	Context("cleanup", func() {
 		It("handles list with text", func() {
 			s := cobrautils.CleanMarkdown(`

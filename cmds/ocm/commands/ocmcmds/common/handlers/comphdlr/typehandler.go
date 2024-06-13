@@ -135,7 +135,7 @@ func (h *TypeHandler) filterVersions(vers []string) ([]string, error) {
 	}
 	versions, err := semverutils.MatchVersionStrings(vers, h.constraints...)
 	if err != nil {
-		return nil, fmt.Errorf("invalid constraints: %v", err)
+		return nil, fmt.Errorf("invalid constraints: %w", err)
 	}
 	if h.latest && len(versions) > 1 {
 		versions = versions[len(versions)-1:]

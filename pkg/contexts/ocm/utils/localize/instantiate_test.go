@@ -28,7 +28,6 @@ import (
 const RESOURCE_TYPE = "gitOpsTemplate"
 
 var _ = Describe("image value mapping", func() {
-
 	const (
 		ARCHIVE   = "archive.ctf"
 		COMPONENT = "github.com/comp"

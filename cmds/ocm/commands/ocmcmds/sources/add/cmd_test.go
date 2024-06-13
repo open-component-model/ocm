@@ -9,8 +9,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	"github.com/open-component-model/ocm/pkg/blobaccess"
 
+	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -19,11 +19,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const ARCH = "/tmp/ca"
-const VERSION = "v1"
+const (
+	ARCH    = "/tmp/ca"
+	VERSION = "v1"
+)
 
 func CheckArchiveSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
-
 	r, err := cd.GetSourceByIdentity(metav1.NewIdentity(name))
 	Expect(err).To(Succeed())
 	Expect(r.Version).To(Equal(VERSION))

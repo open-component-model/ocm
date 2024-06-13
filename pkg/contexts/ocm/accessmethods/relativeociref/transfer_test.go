@@ -66,7 +66,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 		cv, err := src.LookupComponentVersion(COMP, COMPVERS)
 		Expect(err).To(Succeed())
-		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env)
 		Expect(err).To(Succeed())
 		defer tgt.Close()
 		opts := &standard.Options{}
@@ -121,7 +121,7 @@ var _ = Describe("Transfer handler", func() {
 		cv, err := src.LookupComponentVersion(COMP, COMPVERS)
 		Expect(err).To(Succeed())
 
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer tgt.Close()
 		opts := &standard.Options{}
 		opts.SetResourcesByValue(true)

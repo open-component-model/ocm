@@ -24,15 +24,19 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 )
 
-const COMP = "github.com/compa"
-const VERS = "1.0.0"
-const CA = "ca"
-const CTF = "ctf"
-const COPY = "ctf.copy"
-const TARGET = "/tmp/target"
+const (
+	COMP   = "github.com/compa"
+	VERS   = "1.0.0"
+	CA     = "ca"
+	CTF    = "ctf"
+	COPY   = "ctf.copy"
+	TARGET = "/tmp/target"
+)
 
-const OCIHOST = "alias"
-const OCIPATH = "/tmp/source"
+const (
+	OCIHOST = "alias"
+	OCIPATH = "/tmp/source"
+)
 
 var _ = Describe("upload", func() {
 	var env *Builder
@@ -62,7 +66,7 @@ var _ = Describe("upload", func() {
 		oca := accessio.OnceCloser(ca)
 		defer Close(oca)
 
-		ctf := Must(ctfocm.Create(env.OCMContext(), accessobj.ACC_CREATE, CTF, 0700, env))
+		ctf := Must(ctfocm.Create(env.OCMContext(), accessobj.ACC_CREATE, CTF, 0o700, env))
 		octf := accessio.OnceCloser(ctf)
 		defer Close(octf)
 
@@ -80,7 +84,7 @@ var _ = Describe("upload", func() {
 	It("validated original oci manifest", func() {
 		ctx := env.OCMContext()
 
-		ocirepo := Must(ctfoci.Open(ctx, accessobj.ACC_READONLY, OCIPATH, 0700, env))
+		ocirepo := Must(ctfoci.Open(ctx, accessobj.ACC_READONLY, OCIPATH, 0o700, env))
 		defer Close(ocirepo, "ocoirepo")
 
 		ns := Must(ocirepo.LookupNamespace(OCINAMESPACE))
@@ -95,7 +99,7 @@ var _ = Describe("upload", func() {
 	It("validated original digest", func() {
 		ctx := env.OCMContext()
 
-		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0700, env))
+		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0o700, env))
 		defer Close(ctf, "ctf")
 
 		cv := Must(ctf.LookupComponentVersion(COMP, VERS))
@@ -111,7 +115,7 @@ var _ = Describe("upload", func() {
 	It("transfers oci artifact", func() {
 		ctx := env.OCMContext()
 
-		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0700, env))
+		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0o700, env))
 		defer Close(ctf, "ctf")
 
 		cv := Must(ctf.LookupComponentVersion(COMP, VERS))
@@ -122,7 +126,7 @@ var _ = Describe("upload", func() {
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
 
 		// transfer component
-		copy := Must(ctfocm.Create(ctx, accessobj.ACC_CREATE, COPY, 0700, env))
+		copy := Must(ctfocm.Create(ctx, accessobj.ACC_CREATE, COPY, 0o700, env))
 		ocopy := accessio.OnceCloser(copy)
 		defer Close(ocopy)
 
@@ -154,7 +158,7 @@ var _ = Describe("upload", func() {
 	It("transfers oci artifact with named handler and object config", func() {
 		ctx := env.OCMContext()
 
-		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0700, env))
+		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0o700, env))
 		defer Close(ctf, "ctf")
 
 		cv := Must(ctf.LookupComponentVersion(COMP, VERS))
@@ -165,7 +169,7 @@ var _ = Describe("upload", func() {
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
 
 		// transfer component
-		copy := Must(ctfocm.Create(ctx, accessobj.ACC_CREATE, COPY, 0700, env))
+		copy := Must(ctfocm.Create(ctx, accessobj.ACC_CREATE, COPY, 0o700, env))
 		ocopy := accessio.OnceCloser(copy)
 		defer Close(ocopy)
 
@@ -197,7 +201,7 @@ var _ = Describe("upload", func() {
 	It("transfers oci artifact with named handler and string config", func() {
 		ctx := env.OCMContext()
 
-		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0700, env))
+		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0o700, env))
 		defer Close(ctf, "ctf")
 
 		cv := Must(ctf.LookupComponentVersion(COMP, VERS))
@@ -208,7 +212,7 @@ var _ = Describe("upload", func() {
 		Expect(acc.GetKind()).To(Equal(localblob.Type))
 
 		// transfer component
-		copy := Must(ctfocm.Create(ctx, accessobj.ACC_CREATE, COPY, 0700, env))
+		copy := Must(ctfocm.Create(ctx, accessobj.ACC_CREATE, COPY, 0o700, env))
 		ocopy := accessio.OnceCloser(copy)
 		defer Close(ocopy)
 

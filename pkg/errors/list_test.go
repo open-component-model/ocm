@@ -65,5 +65,4 @@ var _ = Describe("error list", func() {
 			Expect(exp.Error()).To(Equal("\"test\" is invalid"))
 		})
 	})
-
 })

@@ -83,7 +83,6 @@ var _ = Describe("*** unstructured", func() {
 	})
 
 	Context("unstructured match", func() {
-
 		It("matches complete", func() {
 			a := runtime.UnstructuredMap{
 				"map": map[string]interface{}{

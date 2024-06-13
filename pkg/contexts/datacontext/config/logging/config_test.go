@@ -36,7 +36,7 @@ var _ = Describe("logging configuration", func() {
 	})
 
 	AfterEach(func() {
-		//logging.SetDefaultContext(orig)
+		// logging.SetDefaultContext(orig)
 	})
 	_ = cfg
 	_ = orig

@@ -30,15 +30,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-const ARCH = "/tmp/ctf"
-const ARCH2 = "/tmp/ctf2"
-const PROVIDER = "mandelsoft"
-const VERSION = "v1"
-const COMPONENT = "github.com/mandelsoft/test"
-const COMPONENT2 = "github.com/mandelsoft/test2"
-const OUT = "/tmp/res"
-const OCIPATH = "/tmp/oci"
-const OCIHOST = "alias"
+const (
+	ARCH       = "/tmp/ctf"
+	ARCH2      = "/tmp/ctf2"
+	PROVIDER   = "mandelsoft"
+	VERSION    = "v1"
+	COMPONENT  = "github.com/mandelsoft/test"
+	COMPONENT2 = "github.com/mandelsoft/test2"
+	OUT        = "/tmp/res"
+	OCIPATH    = "/tmp/oci"
+	OCIHOST    = "alias"
+)
 
 func CheckComponentInArchive(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
 	tgt, err := ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, out, 0, accessio.PathFileSystem(env.FileSystem()))
@@ -251,7 +253,6 @@ transferring version "github.com/mandelsoft/test:v1"...
 	})
 
 	It("transfers ctf to ctf+tgz with config option", func() {
-
 		cfg := handlercfg.NewConfig()
 		cfg.ResourcesByValue = utils.BoolP(true)
 

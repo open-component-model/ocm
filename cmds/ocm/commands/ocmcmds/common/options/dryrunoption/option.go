@@ -30,6 +30,7 @@ func New(usage string, out bool) *Option {
 		usage: usage,
 	}
 }
+
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.DryRun, "dry-run", "", false, o.usage)
 	if o.out {

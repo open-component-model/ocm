@@ -15,7 +15,6 @@ import (
 var DefaultContext = credentials.New()
 
 var _ = Describe("alias credentials", func() {
-
 	props := common.Properties{
 		"user":     "USER",
 		"password": "PASSWORD",
@@ -68,5 +67,4 @@ var _ = Describe("alias credentials", func() {
 		Expect(err).To(Succeed())
 		Expect(creds.Properties()).To(Equal(props))
 	})
-
 })

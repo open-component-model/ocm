@@ -55,5 +55,4 @@ panic.*
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(Equal("exception"))
 	})
-
 })
