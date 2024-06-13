@@ -37,9 +37,7 @@ jobs:
           go-version-file: '${{ github.workspace }}/go.mod'
       - name: Test
         run: |
-          PATH=$PATH:$(go env GOPATH)/bin make build
-          PATH=$PATH:$(go env GOPATH)/bin make -f hack/Makefile vault
-          PATH=$PATH:$(go env GOPATH)/bin make test
+          PATH=$PATH:$(go env GOPATH)/bin make build install-requirements test
 
   lint:
     name: Lint
