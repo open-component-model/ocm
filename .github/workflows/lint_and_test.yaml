@@ -35,10 +35,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: '${{ github.workspace }}/go.mod'
-      - name: Unit test
+      - name: Test
         run: |
-          PATH=$PATH:$(go env GOPATH)/bin make build
-          PATH=$PATH:$(go env GOPATH)/bin make test
+          PATH=$PATH:$(go env GOPATH)/bin make build install-requirements test
 
   lint:
     name: Lint
