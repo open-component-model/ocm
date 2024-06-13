@@ -65,7 +65,7 @@ force-test:
 	@go test --count=1 $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: test
-test: install-requirements
+test:
 	@echo "> Run Tests"
 	@go test  --tags=integration $(EFFECTIVE_DIRECTORIES)
 
