@@ -562,7 +562,6 @@ object.
 
 ```go
 func (c *ExampleConfigSpec) ApplyTo(_ cpi.Context, tgt interface{}) error {
-
 	switch t := tgt.(type) {
 	// if the target is a credentials context
 	// configure the credentials to be used for the

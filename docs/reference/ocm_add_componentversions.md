@@ -15,22 +15,23 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Options
 
 ```
-      --addenv                 access environment for templating
-  -C, --complete               include all referenced component version
-  -L, --copy-local-resources   transfer referenced local resources by-value
-  -V, --copy-resources         transfer referenced resources by-value
-  -c, --create                 (re)create archive
-      --dry-run                evaluate and print component specifications
-  -F, --file string            target file/directory (default "transport-archive")
-  -f, --force                  remove existing content
-  -h, --help                   help for componentversions
-      --lookup stringArray     repository name or spec for closure lookup fallback
-  -O, --output string          output file for dry-run
-  -S, --scheme string          schema version (default "v2")
-  -s, --settings stringArray   settings file with variable settings (yaml)
-      --templater string       templater to use (go, none, spiff, subst) (default "subst")
-  -t, --type string            archive format (directory, tar, tgz) (default "directory")
-  -v, --version string         default version for components
+      --addenv                    access environment for templating
+  -C, --complete                  include all referenced component version
+  -L, --copy-local-resources      transfer referenced local resources by-value
+  -V, --copy-resources            transfer referenced resources by-value
+  -c, --create                    (re)create archive
+      --dry-run                   evaluate and print component specifications
+  -F, --file string               target file/directory (default "transport-archive")
+  -f, --force                     remove existing content
+  -h, --help                      help for componentversions
+      --lookup stringArray        repository name or spec for closure lookup fallback
+  -O, --output string             output file for dry-run
+  -S, --scheme string             schema version (default "v2")
+  -s, --settings stringArray      settings file with variable settings (yaml)
+      --templater string          templater to use (go, none, spiff, subst) (default "subst")
+  -t, --type string               archive format (directory, tar, tgz) (default "directory")
+      --uploader <name>=<value>   repository uploader (<name>[:<artifact type>[:<media type>]]=<JSON target config) (default [])
+  -v, --version string            default version for components
 ```
 
 ### Description
@@ -143,6 +144,67 @@ transferred. This behaviour can be further influenced by specifying a transfer
 script with the <code>script</code> option family.
 
 
+
+If the <code>--uploader</code> option is specified, appropriate uploader handlers
+are configured for the operation. It has the following format
+
+<center>
+    <pre>&lt;name>:&lt;artifact type>:&lt;media type>=&lt;yaml target config></pre>
+</center>
+
+The uploader name may be a path expression with the following possibilities:
+  - <code>ocm/ociArtifacts</code>: downloading OCI artifacts
+
+    The <code>ociArtifacts</code> downloader is able to download OCI artifacts
+    as artifact archive according to the OCI distribution spec.
+    The following artifact media types are supported:
+      - <code>application/vnd.oci.image.manifest.v1+tar</code>
+      - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
+      - <code>application/vnd.oci.image.index.v1+tar</code>
+      - <code>application/vnd.oci.image.index.v1+tar+gzip</code>
+      - <code>application/vnd.docker.distribution.manifest.v2+tar</code>
+      - <code>application/vnd.docker.distribution.manifest.v2+tar+gzip</code>
+      - <code>application/vnd.docker.distribution.manifest.list.v2+tar</code>
+      - <code>application/vnd.docker.distribution.manifest.list.v2+tar+gzip</code>
+
+    By default, it is registered for these mimetypes.
+
+    It accepts a config with the following fields:
+      - <code>namespacePrefix</code>: a namespace prefix used for the uploaded artifacts
+      - <code>ociRef</code>: an OCI repository reference
+      - <code>repository</code>: an OCI repository specification for the target OCI registry
+
+    Alternatively, a single string value can be given representing an OCI repository
+    reference.
+
+  - <code>ocm/npmPackage</code>: uploading npm artifacts
+
+    The <code>ocm/npmPackage</code> uploader is able to upload npm artifacts
+    as artifact archive according to the npm package spec.
+    If registered the default mime type is: application/x-tgz
+
+    It accepts a plain string for the URL or a config with the following field:
+    'url': the URL of the npm repository.
+
+  - <code>plugin</code>: [downloaders provided by plugins]
+
+    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
+
+  - <code>ocm/mavenPackage</code>: uploading maven artifacts
+
+    The <code>ocm/mavenPackage</code> uploader is able to upload maven artifacts (whole GAV only!)
+    as artifact archive according to the maven artifact spec.
+    If registered the default mime type is: application/x-tgz
+
+    It accepts a plain string for the URL or a config with the following field:
+    'url': the URL of the maven repository.
+
+
+
+See [ocm ocm-uploadhandlers](ocm_ocm-uploadhandlers.md) for further details on using
+upload handlers.
+
+
 ### Examples
 
 
@@ -207,4 +269,5 @@ next to the description file.
 * [<b>ocm add resources</b>](ocm_add_resources.md)	 &mdash; add resources to a component version
 * [<b>ocm add references</b>](ocm_add_references.md)	 &mdash; add aggregation information to a component version
 * [<b>ocm ocm-labels</b>](ocm_ocm-labels.md)	 &mdash; Labels and Label Merging
+* [<b>ocm ocm-uploadhandlers</b>](ocm_ocm-uploadhandlers.md)	 &mdash; List of all available upload handlers
 

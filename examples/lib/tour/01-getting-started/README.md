@@ -164,32 +164,32 @@ differ, because the code always describes the latest version):
 
 ```
 resources of the latest version:
-  version:  0.10.0
+  version:  0.11.0
   provider: ocm.software
    1: name:           ocmcli
       extra identity: "architecture"="amd64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:e2d8f578083e9317bd199b3f374b7ea60e7f28cf989e8d39ae0ea54ac4fa8847[]
+      access:         Local blob sha256:28c39f8c1623d50398e916494582ebdeaf608dd8e27d112d01625bb903b95ecf[]
    2: name:           ocmcli
       extra identity: "architecture"="arm64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:2acef3da732a6674fb047f3d60f0dabcbb60ffeb8dd362a169df97c4dc4489a8[]
+      access:         Local blob sha256:c9f1eb5ba391e0cfe1c84e34d8b7e9923b061e5917c12c73e21f6a4d300813d8[]
    3: name:           ocmcli
       extra identity: "architecture"="arm64","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:b05fbc5e8aaa3622e2ecc39ead7f066030fd183c625b0dc202dbac8131f06d1d[]
+      access:         Local blob sha256:8dafc347d7129d3ff3b4f54cc9d82d8852980dc38e778c96aa82b16d1ddb4288[]
    4: name:           ocmcli
       extra identity: "architecture"="amd64","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:aec88249f7e5a395eaa18ac6017831b275c7de90d3c10f0cd9e572027ad6c6e9[]
+      access:         Local blob sha256:611d693ec021a2c6001d515c3d896ac769beab39de4f859d9a7bc0bcdba10f3e[]
    5: name:           ocmcli
       extra identity: "architecture"="amd64","os"="windows"
       resource type:  executable
-      access:         Local blob sha256:cdbac49bd004aa2a8b89fafb9e845f45bfcfaab2df402296f55b403b9b1035a2[]
+      access:         Local blob sha256:884d76b98fe37c0fdb0a9d1f3707eb98e6bfc0385658ba4f6890b2de75fb331e[]
    6: name:           ocmcli-image
       extra identity: 
       resource type:  ociImage
-      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.10.0
+      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.11.0
 ```
 
 Resources have some metadata, like their identity and a resource type.
@@ -276,7 +276,7 @@ Now, we just read the content and copy it to the intended
 output file (`/tmp/ocmcli`).
 
 ```go
-	file, err := os.OpenFile("/tmp/ocmcli", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0766)
+	file, err := os.OpenFile("/tmp/ocmcli", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o766)
 	if err != nil {
 		return errors.Wrapf(err, "cannot open output file")
 	}

@@ -30,7 +30,7 @@ or
 </center>
 
 Notice that this notation optionally also allows a double slash to
-seperate &lt;domain>[:&lt;port>] and &lt;repository>. While it is
+separate &lt;domain>[:&lt;port>] and &lt;repository>. While it is
 not necessary for unambiguous parsing here, it is supported for
 consistency with the other notations.
 

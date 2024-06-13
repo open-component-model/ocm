@@ -18,7 +18,7 @@ gci diff --skip-generated "${GCIFMT[@]}" "${@%/...}" </dev/null \
     gci write --skip-generated  "${GCIFMT[@]}" "{}"
 log "Format done"
 
-log "Format with gofmt"
+log "Format with gofumpt"
 # Specify the pattern or criteria to identify generated files
 GENERATED_FILES_PATTERN="*_generated*.go"
 
