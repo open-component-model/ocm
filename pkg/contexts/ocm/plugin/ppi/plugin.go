@@ -5,9 +5,11 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/maputils"
 	"golang.org/x/exp/slices"
 
+	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -301,9 +303,11 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	if vers == "" {
 		meth := descriptor.AccessMethodDescriptor{
 			ValueSetDefinition: descriptor.ValueSetDefinition{
-				Name:        m.Name(),
-				Description: m.Description(),
-				Format:      m.Format(),
+				ValueTypeDefinition: descriptor.ValueTypeDefinition{
+					Name:        m.Name(),
+					Description: m.Description(),
+					Format:      m.Format(),
+				},
 			},
 			SupportContentIdentity: idp,
 		}
@@ -314,11 +318,13 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	}
 	meth := descriptor.AccessMethodDescriptor{
 		ValueSetDefinition: descriptor.ValueSetDefinition{
-			Name:        m.Name(),
-			Version:     vers,
-			Description: m.Description(),
-			Format:      m.Format(),
-			CLIOptions:  optlist,
+			ValueTypeDefinition: descriptor.ValueTypeDefinition{
+				Name:        m.Name(),
+				Version:     vers,
+				Description: m.Description(),
+				Format:      m.Format(),
+			},
+			CLIOptions: optlist,
 		},
 		SupportContentIdentity: idp,
 	}
@@ -467,9 +473,11 @@ func (p *plugin) RegisterValueSet(s ValueSet) error {
 	if vers == "" {
 		set := descriptor.ValueSetDescriptor{
 			ValueSetDefinition: descriptor.ValueSetDefinition{
-				Name:        s.Name(),
-				Description: s.Description(),
-				Format:      s.Format(),
+				ValueTypeDefinition: descriptor.ValueTypeDefinition{
+					Name:        s.Name(),
+					Description: s.Description(),
+					Format:      s.Format(),
+				},
 			},
 			Purposes: slices.Clone(s.Purposes()),
 		}
@@ -492,11 +500,13 @@ func (p *plugin) RegisterValueSet(s ValueSet) error {
 	}
 	set := descriptor.ValueSetDescriptor{
 		ValueSetDefinition: descriptor.ValueSetDefinition{
-			Name:        s.Name(),
-			Version:     vers,
-			Description: s.Description(),
-			Format:      s.Format(),
-			CLIOptions:  optlist,
+			ValueTypeDefinition: descriptor.ValueTypeDefinition{
+				Name:        s.Name(),
+				Version:     vers,
+				Description: s.Description(),
+				Format:      s.Format(),
+			},
+			CLIOptions: optlist,
 		},
 		Purposes: slices.Clone(s.Purposes()),
 	}
@@ -546,4 +556,48 @@ func (p *plugin) RegisterCommand(c Command) error {
 
 func (p *plugin) Commands() []Command {
 	return maputils.OrderedValues(p.clicmds)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (p *plugin) GetConfigType(name string) *descriptor.ConfigTypeDescriptor {
+	var def *descriptor.ConfigTypeDescriptor
+	for _, d := range p.descriptor.ConfigTypes {
+		v := d.Name
+		if d.Version != "" {
+			v += runtime.VersionSeparator + d.Version
+		}
+		if v == name {
+			return &d
+		}
+		if d.Name == name && (def == nil || d.Version == "v1") {
+			def = generics.Pointer(d)
+		}
+	}
+	return def
+}
+
+func (p *plugin) RegisterConfigType(t config.ConfigType) error {
+	name := t.GetKind()
+	version := ""
+	if t.GetType() != t.GetKind() {
+		version = t.GetVersion()
+	}
+	if f := p.GetConfigType(t.GetType()); f != nil {
+		if version == f.Version {
+			return errors.ErrAlreadyExists("config type", t.GetType())
+		}
+	}
+
+	p.descriptor.ConfigTypes = append(p.descriptor.ConfigTypes, descriptor.ConfigTypeDescriptor{
+		Name:        name,
+		Version:     version,
+		Description: t.Usage(),
+		// TODO: separate format and description
+	})
+	return nil
+}
+
+func (p *plugin) ConfigTypes() []descriptor.ConfigTypeDescriptor {
+	return slices.Clone(p.descriptor.ConfigTypes)
 }

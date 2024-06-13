@@ -30,7 +30,7 @@ var _ = Describe("cliplugin", func() {
 			env = NewTestEnv(TestData())
 
 			cache.DirectoryCache.Reset()
-			plugindirattr.Set(env.OCMContext(), "testdata")
+			plugindirattr.Set(env.OCMContext(), "testdata/plugins")
 
 			registry := plugincacheattr.Get(env)
 			Expect(registration.RegisterExtensions(env)).To(Succeed())
@@ -46,7 +46,7 @@ var _ = Describe("cliplugin", func() {
 		It("run plugin based ocm command", func() {
 			var buf bytes.Buffer
 
-			MustBeSuccessful(env.CatchOutput(&buf).Execute("rhabarber", "-d", "apr/1"))
+			MustBeSuccessful(env.CatchOutput(&buf).Execute("--config", "testdata/config.yaml", "rhabarber", "-d", "jul/10"))
 
 			Expect("\n" + buf.String()).To(Equal(`
 Yeah, it's rhabarb season - happy rhabarbing!
@@ -60,7 +60,7 @@ Yeah, it's rhabarb season - happy rhabarbing!
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 Plugin Name:      cliplugin
 Plugin Version:   ` + version.Get().String() + `
-Path:             testdata/cliplugin
+Path:             testdata/plugins/cliplugin
 Status:           valid
 Source:           manually installed
 Capabilities:     CLI Commands

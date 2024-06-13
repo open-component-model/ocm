@@ -17,6 +17,8 @@ func main() {
 	p.SetLong("The plugin offers the top-level command rhabarber")
 
 	p.RegisterCommand(clicmd.NewCLICommand(rhabarber.New()))
+	p.RegisterConfigType(rhabarber.RhabarberType)
+	p.RegisterConfigType(rhabarber.RhabarberTypeV1)
 	err := cmds.NewPluginCommand(p).Execute(os.Args[1:])
 	if err != nil {
 		os.Exit(1)

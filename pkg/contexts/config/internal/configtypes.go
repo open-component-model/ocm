@@ -146,6 +146,8 @@ func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
 	if IsGeneric(cfg) {
 		s.unknown = true
 		return nil, errors.ErrUnknown(KIND_CONFIGTYPE, s.GetType())
+	} else {
+		s.unknown = false
 	}
 	return cfg, nil
 }
@@ -153,7 +155,7 @@ func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
 func (s *GenericConfig) ApplyTo(ctx Context, target interface{}) error {
 	spec, err := s.Evaluate(ctx)
 	if err != nil {
-		return err
+		return nil
 	}
 	return spec.ApplyTo(ctx, target)
 }

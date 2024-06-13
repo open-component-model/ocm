@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
@@ -69,6 +70,10 @@ type Plugin interface {
 	RegisterCommand(c Command) error
 	GetCommand(name string) Command
 	Commands() []Command
+
+	RegisterConfigType(c cpi.ConfigType) error
+	GetConfigType(name string) *descriptor.ConfigTypeDescriptor
+	ConfigTypes() []descriptor.ConfigTypeDescriptor
 
 	GetOptions() *Options
 	GetConfig() (interface{}, error)

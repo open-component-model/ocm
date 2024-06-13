@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/spf13/cobra"
 )
@@ -44,31 +45,59 @@ var months = map[string]int{
 }
 
 func (c *command) Run(cmd *cobra.Command, args []string) error {
-	d := time.Now()
-	if c.date != "" {
-		parts := strings.Split(c.date, "/")
-		if len(parts) != 2 {
-			return fmt.Errorf("invalid date, expected MM/DD")
-		}
-		month, err := strconv.Atoi(parts[0])
-		if err != nil {
-			month = months[strings.ToLower(parts[0])]
-			if month == 0 {
-				return errors.Wrapf(err, "invalid month")
-			}
-		}
-		day, err := strconv.Atoi(parts[1])
-		if err != nil {
-			return errors.Wrapf(err, "invalid day")
-		}
-		logging.Context().Logger().Debug("testing rhabarb season", "date", d.String())
-		d = time.Date(d.Year(), time.Month(month), day, 0, 0, 0, 0, time.Local)
+
+	season := Season{
+		Start: "mar/1",
+		End:   "apr/30",
 	}
 
-	if d.Month() >= time.March && d.Month() <= time.April {
+	ctx := ocm.FromContext(cmd.Context())
+	ctx.ConfigContext().ApplyTo(0, &season)
+
+	start, err := ParseDate(season.Start)
+	if err != nil {
+		return errors.Wrapf(err, "invalid season start")
+	}
+
+	end, err := ParseDate(season.End)
+	if err != nil {
+		return errors.Wrapf(err, "invalid season end")
+	}
+	end = end.Add(time.Hour * 24)
+
+	d := time.Now()
+	if c.date != "" {
+		d, err = ParseDate(c.date)
+		if err != nil {
+			return err
+		}
+	}
+
+	logging.Context().Logger().Debug("testing rhabarb season", "date", d.String())
+	if d.After(start) && d.Before(end) {
 		fmt.Printf("Yeah, it's rhabarb season - happy rhabarbing!\n")
 	} else {
 		fmt.Printf("Sorry, but you have to stay hungry.\n")
 	}
 	return nil
+}
+
+func ParseDate(s string) (time.Time, error) {
+	parts := strings.Split(s, "/")
+	if len(parts) != 2 {
+		return time.Time{}, fmt.Errorf("invalid date, expected MM/DD")
+	}
+	month, err := strconv.Atoi(parts[0])
+	if err != nil {
+		month = months[strings.ToLower(parts[0])]
+		if month == 0 {
+			return time.Time{}, errors.Wrapf(err, "invalid month")
+		}
+	}
+	day, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return time.Time{}, errors.Wrapf(err, "invalid day")
+	}
+
+	return time.Date(time.Now().Year(), time.Month(month), day, 0, 0, 0, 0, time.Local), nil
 }

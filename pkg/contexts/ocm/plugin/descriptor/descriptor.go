@@ -23,6 +23,7 @@ type Descriptor struct {
 	LabelMergeSpecifications List[LabelMergeSpecification]     `json:"labelMergeSpecifications,omitempty"`
 	ValueSets                List[ValueSetDescriptor]          `json:"valuesets,omitempty"`
 	Commands                 List[CommandDescriptor]           `json:"commands,omitempty"`
+	ConfigTypes              List[ConfigTypeDescriptor]        `json:"configTypes,omitempty"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,6 +120,21 @@ type AccessMethodDescriptor struct {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type ValueTypeDefinition struct {
+	Name        string `json:"name"`
+	Version     string `json:"version,omitempty"`
+	Description string `json:"description"`
+	Format      string `json:"format"`
+}
+
+func (d ValueTypeDefinition) GetName() string {
+	return d.Name
+}
+
+func (d ValueTypeDefinition) GetDescription() string {
+	return d.Description
+}
+
 type ValueSetDescriptor struct {
 	ValueSetDefinition `json:",inline"`
 	Purposes           []string `json:"purposes"`
@@ -127,19 +143,8 @@ type ValueSetDescriptor struct {
 const PURPOSE_ROUTINGSLIP = "routingslip"
 
 type ValueSetDefinition struct {
-	Name        string      `json:"name"`
-	Version     string      `json:"version,omitempty"`
-	Description string      `json:"description"`
-	Format      string      `json:"format"`
-	CLIOptions  []CLIOption `json:"options,omitempty"`
-}
-
-func (d ValueSetDefinition) GetName() string {
-	return d.Name
-}
-
-func (d ValueSetDefinition) GetDescription() string {
-	return d.Description
+	ValueTypeDefinition
+	CLIOptions []CLIOption `json:"options,omitempty"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -222,6 +227,10 @@ func (a CommandDescriptor) GetName() string {
 func (a CommandDescriptor) GetDescription() string {
 	return a.Description
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ConfigTypeDescriptor = ValueTypeDefinition
 
 ////////////////////////////////////////////////////////////////////////////////
 
