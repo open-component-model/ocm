@@ -32,8 +32,8 @@ type DeployDescriptor struct {
 }
 
 func EvaluateDeployDescriptor(cv ocm.ComponentVersionAccess, res ocm.ResourceAccess, resolver ocm.ComponentVersionResolver,
-	config template.Values, path string, fss ...vfs.FileSystem) ([]byte, *chart.Chart, string, error) {
-
+	config template.Values, path string, fss ...vfs.FileSystem,
+) ([]byte, *chart.Chart, string, error) {
 	fs := utils.FileSystem(fss...)
 	id := res.Meta().GetIdentity(cv.GetDescriptor().Resources)
 

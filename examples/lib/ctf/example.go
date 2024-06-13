@@ -18,8 +18,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const COMP = "acme.org/mytestcomponent"
-const VERS = "1.0.0"
+const (
+	COMP = "acme.org/mytestcomponent"
+	VERS = "1.0.0"
+)
 
 func CTFExample() (rerr error) {
 	var finalize finalizer.Finalizer
@@ -68,7 +70,6 @@ func CTFExample() (rerr error) {
 			blobaccess.ForString(mime.MIME_TEXT, "testdata"),
 			"", nil,
 		)
-
 		if err != nil {
 			return errors.Wrapf(err, "cannot add resource")
 		}

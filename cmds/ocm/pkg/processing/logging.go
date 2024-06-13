@@ -5,5 +5,3 @@ import (
 )
 
 var REALM = ocmlog.DefineSubRealm("output processing chains", "processing")
-
-// var logger = ocmlog.DynamicLogger()

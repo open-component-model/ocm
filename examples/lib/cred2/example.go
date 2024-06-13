@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/examples/lib/helper"
 	"github.com/open-component-model/ocm/pkg/blobaccess"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -80,7 +81,6 @@ func SimpleWriteWithCredentials() (ferr error) {
 		Type:     resourcetypes.OCI_IMAGE,
 		Relation: metav1.ExternalRelation,
 	}, imageAccess)
-
 	if err != nil {
 		return errors.Wrapf(err, "cannot add image resource")
 	}
