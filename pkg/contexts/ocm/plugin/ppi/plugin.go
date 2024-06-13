@@ -528,6 +528,18 @@ func (p *plugin) RegisterCommand(c Command) error {
 	if p.GetCommand(c.Name()) != nil {
 		return errors.ErrAlreadyExists("cli command spec", c.Name())
 	}
+	if c.Realm() != "" && c.Verb() == "" {
+		return errors.Newf("realm requires verb")
+	}
+	p.descriptor.Commands = append(p.descriptor.Commands, descriptor.CommandDescriptor{
+		Name:        c.Name(),
+		Description: c.Description(),
+		Usage:       c.Usage(),
+		Short:       c.Short(),
+		Example:     c.Example(),
+		Realm:       c.Realm(),
+		Verb:        c.Verb(),
+	})
 	p.clicmds[c.Name()] = c
 	return nil
 }

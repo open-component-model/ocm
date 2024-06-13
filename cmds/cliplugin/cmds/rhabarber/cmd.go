@@ -66,9 +66,9 @@ func (c *command) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	if d.Month() >= time.March && d.Month() <= time.April {
-		fmt.Printf("Yeah, it's rhabarb season - happy rhabarbing!")
+		fmt.Printf("Yeah, it's rhabarb season - happy rhabarbing!\n")
 	} else {
-		fmt.Printf("Sorry, but you have to stay hungry.")
+		fmt.Printf("Sorry, but you have to stay hungry.\n")
 	}
 	return nil
 }

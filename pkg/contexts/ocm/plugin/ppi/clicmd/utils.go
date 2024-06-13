@@ -24,6 +24,10 @@ var _ ppi.Command = (*CobraCommand)(nil)
 // verb and realm are used to add the command at the appropriate places in
 // the command hierarchy of the ocm CLI.
 // If nothing is specified, the command will be a new top-level command.
+// To access the configured ocm context use the Context attribute
+// of the cobra command. The ocm context is bound to it.
+//
+//	ocm.FromContext(cmd.Context())
 func NewCLICommand(cmd *cobra.Command, args ...string) ppi.Command {
 	verb := ""
 	realm := ""

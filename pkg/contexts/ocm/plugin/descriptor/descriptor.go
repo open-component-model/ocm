@@ -22,6 +22,7 @@ type Descriptor struct {
 	ValueMergeHandlers       List[ValueMergeHandlerDescriptor] `json:"valueMergeHandlers,omitempty"`
 	LabelMergeSpecifications List[LabelMergeSpecification]     `json:"labelMergeSpecifications,omitempty"`
 	ValueSets                List[ValueSetDescriptor]          `json:"valuesets,omitempty"`
+	Commands                 List[CommandDescriptor]           `json:"commands,omitempty"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,6 +49,9 @@ func (d *Descriptor) Capabilities() []string {
 	}
 	if len(d.LabelMergeSpecifications) > 0 {
 		caps = append(caps, "Label Merge Specs")
+	}
+	if len(d.Commands) > 0 {
+		caps = append(caps, "CLI Commands")
 	}
 	return caps
 }

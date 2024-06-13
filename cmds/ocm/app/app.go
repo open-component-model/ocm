@@ -8,10 +8,11 @@ import (
 	"unicode"
 
 	config2 "github.com/open-component-model/ocm/cmds/ocm/clippi/config"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/plugin"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/clicfgattr"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
-
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -283,6 +284,57 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	help.AddCommand(topicocmlabels.New(ctx))
 	help.AddCommand(attributes.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
+
+	// register CLI extension commands
+	pi := plugincacheattr.Get(ctx)
+
+	for _, n := range pi.PluginNames() {
+		p := pi.Get(n)
+		if !p.IsValid() {
+			continue
+		}
+		for _, c := range p.GetDescriptor().Commands {
+			if c.Verb != "" {
+				v := cobrautils.Find(cmd, c.Verb)
+				if v == nil {
+					out.Errf(opts.Context, "unknown verb %q for cli command %q of plugin %q", c.Verb, c.Name, p.Name())
+				} else {
+					s := cobrautils.Find(v, c.Name)
+					if s != nil {
+						out.Errf(opts.Context, "duplicate cli command %q of plugin %q for verb %q", c.Name, p.Name(), c.Verb)
+					} else {
+						v.AddCommand(plugin.NewCommand(ctx, p, c.Name))
+					}
+				}
+
+				if c.Realm != "" {
+					r := cobrautils.Find(cmd, c.Realm)
+					if r == nil {
+						out.Errf(opts.Context, "unknown realm %q for cli command %q of plugin %q", c.Realm, c.Name, p.Name())
+					} else {
+						v := cobrautils.Find(r, c.Name)
+						if v == nil {
+							out.Errf(opts.Context, "unknown object %q for cli command %q of plugin %q", c.Realm, c.Name, p.Name())
+						} else {
+							s := cobrautils.Find(v, c.Verb)
+							if s != nil {
+								out.Errf(opts.Context, "duplicate cli command %q of plugin %q for realm %q verb %q", c.Name, p.Name(), c.Realm, c.Verb)
+							} else {
+								v.AddCommand(plugin.NewCommand(ctx, p, c.Verb))
+							}
+						}
+					}
+				}
+			} else {
+				s := cobrautils.Find(cmd, c.Name)
+				if s != nil {
+					out.Errf(opts.Context, "duplicate top-level cli command %q of plugin %q", c.Name, p.Name())
+				} else {
+					cmd.AddCommand(plugin.NewCommand(ctx, p, c.Name))
+				}
+			}
+		}
+	}
 
 	for _, m := range mod {
 		if m != nil {

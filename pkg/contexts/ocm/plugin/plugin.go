@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/clicfgattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
@@ -24,6 +25,7 @@ import (
 	accval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action/execute"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/command"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler"
 	merge "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler/execute"
@@ -344,6 +346,25 @@ func (p *pluginImpl) ComposeValueSet(purpose, name string, opts flagsets.ConfigO
 	}
 	for k, v := range r {
 		base[k] = v
+	}
+	return nil
+}
+
+func (p *pluginImpl) Command(name string, writer io.Writer, cmdargs []string) error {
+	args := append([]string{command.Name, name}, cmdargs...)
+
+	var r io.Reader
+	a := clicfgattr.Get(p.Context())
+	if a != nil {
+		cfg, err := json.Marshal(a)
+		if err != nil {
+			return errors.Wrapf(err, "cannot marshal CLI config")
+		}
+		r = bytes.NewBuffer(cfg)
+	}
+	_, err := p.Exec(r, writer, args...)
+	if err != nil {
+		return err
 	}
 	return nil
 }
