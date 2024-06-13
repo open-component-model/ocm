@@ -70,6 +70,11 @@ func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descrip
 		out.Printf("Label Merge Specifications:\n")
 		DescribeLabelMergeSpecifications(d, out)
 	}
+	if len(d.Commands) > 0 {
+		out.Printf("\n")
+		out.Printf("CLI Extensions:\n")
+		DescribeCLIExtensions(d, out)
+	}
 }
 
 type MethodInfo struct {
@@ -384,6 +389,40 @@ func DescribeValueSets(d *descriptor.Descriptor, out common.Printer) {
 			if len(v.Options) > 0 {
 				out.Printf("Command Line Options:")
 				out.Printf("%s\n", utils2.FormatMap("", v.Options))
+			}
+		}
+	}
+}
+
+func DescribeCLIExtensions(d *descriptor.Descriptor, out common.Printer) {
+	handlers := map[string]descriptor.CommandDescriptor{}
+	for _, h := range d.Commands {
+		handlers[h.GetName()] = h
+	}
+
+	for _, n := range utils2.StringMapKeys(handlers) {
+		a := handlers[n]
+		s := a.Short
+		if s != "" {
+			s = " (" + s + ")"
+		}
+		out.Printf("- Name: %s%s\n", n, s)
+		if a.Description != "" {
+			if len(a.Verb) > 0 {
+				out.Printf("  Verb:  %s\n", a.Verb)
+			}
+			if len(a.Realm) > 0 {
+				out.Printf("  Realm: %s\n", a.Realm)
+			}
+			if len(a.Usage) > 0 {
+				out.Printf("  Usage: %s\n", a.Usage)
+			}
+			if a.Description != "" {
+				out.Printf("%s\n", utils2.IndentLines(a.Description, "    "))
+			}
+			if a.Example != "" {
+				out.Printf("  Example:\n")
+				out.Printf("%s\n", utils2.IndentLines(a.Example, "    "))
 			}
 		}
 	}

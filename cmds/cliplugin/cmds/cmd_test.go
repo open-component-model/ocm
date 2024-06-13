@@ -9,11 +9,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
+	"github.com/open-component-model/ocm/pkg/version"
 )
 
 const ARCH = "/tmp/ctf"
@@ -50,6 +50,28 @@ var _ = Describe("cliplugin", func() {
 
 			Expect("\n" + buf.String()).To(Equal(`
 Yeah, it's rhabarb season - happy rhabarbing!
+`))
+		})
+
+		It("describe", func() {
+			var buf bytes.Buffer
+
+			MustBeSuccessful(env.CatchOutput(&buf).Execute("describe", "plugin", "cliplugin"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+Plugin Name:      cliplugin
+Plugin Version:   ` + version.Get().String() + `
+Path:             testdata/cliplugin
+Status:           valid
+Source:           manually installed
+Capabilities:     CLI Commands
+Description: 
+      The plugin offers the top-level command rhabarber
+
+CLI Extensions:
+- Name: rhabarber (determine whether we are in rhubarb season)
+  Usage: rhabarber <options>
+    The rhubarb season is between march and april.
+*** found 1 plugins
 `))
 		})
 	})
