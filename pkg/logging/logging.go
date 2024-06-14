@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
 	"github.com/opencontainers/go-digest"
@@ -21,12 +22,15 @@ type StaticContext struct {
 	lock    sync.Mutex
 }
 
-func NewContext(ctx logging.Context) *StaticContext {
+func NewContext(ctx logging.Context, global ...bool) *StaticContext {
 	if ctx == nil {
 		ctx = logging.DefaultContext()
 	}
+	if !general.Optional(global...) {
+		ctx = ctx.WithContext(REALM)
+	}
 	return &StaticContext{
-		Context: ctx.WithContext(REALM),
+		Context: ctx,
 		applied: map[string]struct{}{},
 	}
 }
@@ -53,15 +57,18 @@ func (s *StaticContext) Configure(config *logcfg.Config, extra ...string) error 
 		return nil
 	}
 	s.applied[d] = struct{}{}
-	return logcfg.Configure(logContext, config)
+	return logcfg.Configure(s.Context, config)
 }
 
 // global is a wrapper for the default global log content.
-var global = NewContext(nil)
+var global = NewContext(nil, true)
 
-// logContext is the global ocm log context.
+// ocm is a wrapper for the default ocm log content.
+var ocm = NewContext(nil)
+
+// logContext is the ocm log context.
 // It can be replaced by SetContext.
-var logContext = global
+var logContext = ocm
 
 // SetContext sets a new preconfigured context.
 // This function should be called prior to any configuration
@@ -96,6 +103,12 @@ func LogContext(ctx logging.Context, provider logging.ContextProvider) logging.C
 // provided by this package.
 func Configure(config *logcfg.Config, extra ...string) error {
 	return logContext.Configure(config, extra...)
+}
+
+// ConfigureOCM applies configuration for the default global log context
+// provided by this package.
+func ConfigureOCM(config *logcfg.Config, extra ...string) error {
+	return ocm.Configure(config, extra...)
 }
 
 // ConfigureGlobal applies configuration for the default global log context

@@ -155,7 +155,7 @@ func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
 func (s *GenericConfig) ApplyTo(ctx Context, target interface{}) error {
 	spec, err := s.Evaluate(ctx)
 	if err != nil {
-		return nil
+		return err
 	}
 	return spec.ApplyTo(ctx, target)
 }

@@ -7,10 +7,13 @@ import (
 	"time"
 
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/spf13/cobra"
+
+	"github.com/mandelsoft/logging"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
+
+var log = logging.DynamicLogger(logging.DefaultContext(), logging.NewRealm("cliplugin/rhabarber"))
 
 func New() *cobra.Command {
 	cmd := &command{}
@@ -73,7 +76,7 @@ func (c *command) Run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	logging.Context().Logger().Debug("testing rhabarb season", "date", d.String())
+	log.Debug("testing rhabarb season", "date", d.String())
 	if d.After(start) && d.Before(end) {
 		fmt.Printf("Yeah, it's rhabarb season - happy rhabarbing!\n")
 	} else {

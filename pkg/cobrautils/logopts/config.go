@@ -7,6 +7,8 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/logging/config"
+	"github.com/mandelsoft/logging/logrusl"
+	"github.com/mandelsoft/logging/logrusl/adapter"
 	"github.com/mandelsoft/logging/logrusr"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
@@ -24,9 +26,11 @@ type ConfigFragment struct {
 	LogFileName string   `json:"logFileName,omitempty"`
 	LogConfig   string   `json:"logConfig,omitempty"`
 	LogKeys     []string `json:"logKeys,omitempty"`
+	Json        bool     `json:"json,omitempty"`
 }
 
 func (c *ConfigFragment) AddFlags(fs *pflag.FlagSet) {
+	fs.BoolVarP(&c.Json, "logJson", "", false, "log as json instead of human readable logs")
 	fs.StringVarP(&c.LogLevel, "loglevel", "l", "", "set log level")
 	fs.StringVarP(&c.LogFileName, "logfile", "L", "", "set log file")
 	fs.StringVarP(&c.LogConfig, "logconfig", "", "", "log config")
@@ -53,18 +57,25 @@ func (c *ConfigFragment) Evaluate(ctx ocm.Context, logctx logging.Context) (*Eva
 	opts.LogForward = &config.Config{DefaultLevel: logging.LevelName(logctx.GetDefaultLevel())}
 
 	fs := vfsattr.Get(ctx)
-	if c.LogFileName != "" {
+	if c.LogFileName != "" && GlobalLogFileOverride == "" {
 		if opts.LogFile == nil {
 			opts.LogFile, err = LogFileFor(c.LogFileName, fs)
 			if err != nil {
 				return nil, errors.Wrapf(err, "cannot open log file %q", opts.LogFile)
 			}
 		}
-		log := logrus.New()
-		log.SetFormatter(&logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"})
-		log.SetOutput(opts.LogFile.File())
-		logctx.SetBaseLogger(logrusr.New(log))
-		runtime.SetFinalizer(log, func(_ *logrus.Logger) { opts.LogFile.Close() })
+		ConfigureLogrusFor(logctx, !c.Json, opts.LogFile)
+		if logctx == logging.DefaultContext() {
+			GlobalLogFile = opts.LogFile
+		}
+	} else {
+		// overwrite current log formatter in case of a logrus logger is
+		// used as logging backend.
+		var f logrus.Formatter = adapter.NewJSONFormatter()
+		if !c.Json {
+			f = adapter.NewTextFmtFormatter()
+		}
+		logrusr.SetFormatter(logging.UnwrapLogSink(logctx.GetSink()), f)
 	}
 
 	if c.LogConfig != "" {
@@ -118,4 +129,17 @@ func (c *ConfigFragment) Evaluate(ctx ocm.Context, logctx logging.Context) (*Eva
 	logforward.Set(ctx.AttributesContext(), opts.LogForward)
 
 	return &opts, nil
+}
+
+func ConfigureLogrusFor(logctx logging.Context, human bool, logfile *LogFile) {
+	settings := logrusl.Adapter().WithWriter(logfile.File())
+	if human {
+		settings = settings.Human()
+	} else {
+		settings = settings.WithFormatter(&logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"})
+	}
+
+	log := settings.NewLogrus()
+	logctx.SetBaseLogger(logrusr.New(log))
+	runtime.SetFinalizer(log, func(_ *logrus.Logger) { logfile.Close() })
 }

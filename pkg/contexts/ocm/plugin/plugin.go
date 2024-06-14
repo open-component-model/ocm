@@ -4,17 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mandelsoft/goutils/finalizer"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/command"
 	"io"
+	"os"
 	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
+	"github.com/open-component-model/ocm/pkg/cobrautils/logopts/config"
+	cfgconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -29,6 +31,7 @@ import (
 	accval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action/execute"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/command"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler"
 	merge "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler/execute"
@@ -367,32 +370,63 @@ func (p *pluginImpl) Command(name string, reader io.Reader, writer io.Writer, cm
 
 	args := []string{command.Name}
 
+	logfile, err := os.CreateTemp("", "ocm-cli-plugin-*")
+	if rerr != nil {
+		return err
+	}
+	logfile.Close()
+	finalize.With(func() error {
+		return os.Remove(logfile.Name())
+	}, "failed to remove temporary log file %s", logfile.Name())
+
+	clicfg, err := cfgconfig.NewAggregator(false, config.New(logfile.Name()))
+	if rerr != nil {
+		return err
+	}
 	if a != nil && cmd.CLIConfigRequired {
-		cfg, err := json.Marshal(a)
-		if err != nil {
-			return errors.Wrapf(err, "cannot marshal CLI config")
-		}
-		// cannot use a vfs here, since it's not possible to pass it to the plugin
-		fs := osfs.New()
-		f, err = vfs.TempFile(fs, "", "cli-config-*")
-		if err != nil {
-			return err
-		}
-
-		finalize.With(func() error {
-			return fs.Remove(f.Name())
-		}, "failed to remove temporary config file %s", f.Name())
-
-		_, err = f.Write(cfg)
-		err = f.Close()
-		if err != nil {
-			return err
-		}
-		args = append(args, "--"+command.OptCliConfig, f.Name())
+		clicfg.AddConfig(a)
+	}
+	cfgdata, err := json.Marshal(clicfg.Get())
+	if err != nil {
+		return errors.Wrapf(err, "cannot marshal CLI config")
 	}
 
-	args = append(append(args, name), cmdargs...)
-	_, err := p.Exec(reader, writer, args...)
+	// cannot use a vfs here, since it's not possible to pass it to the plugin
+	f, err = os.CreateTemp("", "cli-config-*")
+	if err != nil {
+		return err
+	}
+	finalize.With(func() error {
+		return os.Remove(f.Name())
+	}, "failed to remove temporary config file %s", f.Name())
+
+	_, err = f.Write(cfgdata)
+	if err != nil {
+		f.Close()
+		return err
+	}
+	err = f.Close()
+	if err != nil {
+		return err
+	}
+	args = append(append(args, "--"+command.OptCliConfig, f.Name(), name), cmdargs...)
+
+	_, err = p.Exec(reader, writer, args...)
+
+	r, oerr := os.OpenFile(logfile.Name(), vfs.O_RDONLY, 0o600)
+	if oerr == nil {
+		defer r.Close()
+		w := p.ctx.LoggingContext().Tree().LogWriter()
+		if w == nil {
+			if logopts.GlobalLogFile != nil {
+				w = logopts.GlobalLogFile.File()
+			}
+			if w == nil {
+				w = os.Stderr
+			}
+		}
+		io.Copy(w, r)
+	}
 	if err != nil {
 		return err
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/clicfgattr"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -366,8 +367,18 @@ func (o *CLIOptions) Complete() error {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
+	old := o.Context.ConfigContext().SkipUnknownConfig(true)
+	defer o.Context.ConfigContext().SkipUnknownConfig(old)
+
 	o.EvaluatedOptions, err = o.Config.Evaluate(o.Context.OCMContext())
-	return err
+	if err != nil {
+		return err
+	}
+	err = registration.RegisterExtensions(o.Context)
+	if err != nil {
+		return err
+	}
+	return o.Context.ConfigContext().Validate()
 }
 
 func prepare(s string) string {

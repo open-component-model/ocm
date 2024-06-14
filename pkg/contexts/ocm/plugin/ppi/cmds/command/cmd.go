@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"io"
 	"os"
 	"strings"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

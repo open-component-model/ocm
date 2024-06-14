@@ -79,6 +79,9 @@ func (c *Config) ApplyTo(ctx cpi.Context, target interface{}) error {
 	case "default":
 		return local.Configure(&c.Settings, c.ExtraId)
 
+	case "ocm":
+		return local.ConfigureOCM(&c.Settings, c.ExtraId)
+
 	case "global":
 		return local.ConfigureGlobal(&c.Settings, c.ExtraId)
 

@@ -18,7 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -180,7 +179,7 @@ func (c *Config) Evaluate(ctx ocm.Context) (*EvaluatedOptions, error) {
 	}
 	cfg.AddConfig(c)
 	opts.ConfigForward = cfg.Get()
-	return opts, registration.RegisterExtensions(ctx)
+	return opts, nil
 }
 
 func (c *Config) ApplyTo(_ config.Context, target interface{}) error {

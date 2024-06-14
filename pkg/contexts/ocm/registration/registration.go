@@ -3,8 +3,7 @@ package registration
 import (
 	"golang.org/x/exp/slices"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/config/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -147,7 +146,7 @@ func RegisterExtensions(ctxp ocm.ContextProvider) error {
 			if registry.GetType(name) != nil {
 				logger.Error("config type {{type}} already registered", "type", name)
 			}
-			t := cpi2.NewConfigType[*config.GenericConfig](name, s.Description)
+			t := plugin.New(name, s.Description)
 			registry.Register(t)
 		}
 	}

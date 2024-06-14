@@ -34,11 +34,22 @@ func (a *Aggregator) AddConfig(cfg cpi.Config) error {
 	} else {
 		if a.aggr == nil {
 			a.aggr = New()
-			err := a.aggr.AddConfig(a.cfg)
-			if err != nil {
-				return err
+			if m, ok := a.cfg.(*Config); ok {
+				// transfer initial config aggregation
+				for _, c := range m.Configurations {
+					err := a.aggr.AddConfig(c)
+					if err != nil {
+						return err
+					}
+				}
+			} else {
+				// add initial config to new aggregation
+				err := a.aggr.AddConfig(a.cfg)
+				if err != nil {
+					return err
+				}
 			}
-			cfg = a.aggr
+			a.cfg = a.aggr
 		}
 		err := a.aggr.AddConfig(cfg)
 		if err != nil {

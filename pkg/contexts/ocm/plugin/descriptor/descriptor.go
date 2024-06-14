@@ -54,6 +54,9 @@ func (d *Descriptor) Capabilities() []string {
 	if len(d.Commands) > 0 {
 		caps = append(caps, "CLI Commands")
 	}
+	if len(d.ConfigTypes) > 0 {
+		caps = append(caps, "Config Types")
+	}
 	return caps
 }
 

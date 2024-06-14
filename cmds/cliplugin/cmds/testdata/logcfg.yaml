@@ -1,0 +1,29 @@
+{
+  "type":"generic.config.ocm.software",
+  "configurations":[
+      {
+        "config":["testdata/config.yaml"],
+        "logging":{},
+        "signing":{},
+        "type":"cli.ocm.config.ocm.software/v1"
+      },
+      {
+        "type": "logging.config.ocm.software/v1",
+        "contextType": "global",
+        "settings": {
+          "rules": [
+            {
+              "rule": {
+                "level": "Debug",
+                "conditions": [
+                  {
+                    "realmprefix": "cliplugin",
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+}

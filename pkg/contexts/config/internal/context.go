@@ -46,6 +46,20 @@ type Context interface {
 
 	ConfigTypes() ConfigTypeScheme
 
+	// SkipUnknownConfig can be used to control the behaviour
+	// for processing unknown configuration object types.
+	// It returns the previous mode valid before setting the
+	// new one.
+	SkipUnknownConfig(bool) bool
+
+	// Validate validates the applied configuration for not using
+	// unknown configuration types, anymore. This can be used after setting
+	// SkipUnknownConfig, to check whether there are still unknown types
+	// which will be skipped. It does not provide information, whether
+	// config objects were skipped for previous object configuration
+	// requests.
+	Validate() error
+
 	// GetConfigForData deserialize configuration objects for known
 	// configuration types.
 	GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
@@ -120,7 +134,8 @@ type coreContext struct {
 
 	knownConfigTypes ConfigTypeScheme
 
-	configs *ConfigStore
+	configs           *ConfigStore
+	skipUnknownConfig bool
 }
 
 type _context struct {
@@ -201,6 +216,12 @@ func (c *_context) ConfigTypes() ConfigTypeScheme {
 	return c.knownConfigTypes
 }
 
+func (c *_context) SkipUnknownConfig(b bool) bool {
+	old := c.skipUnknownConfig
+	c.skipUnknownConfig = b
+	return old
+}
+
 func (c *_context) ConfigForData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
 	return c.knownConfigTypes.Decode(data, unmarshaler)
 }
@@ -217,14 +238,19 @@ func (c *_context) ApplyConfig(spec Config, desc string) error {
 	var unknown error
 
 	// use temporary view for outbound calls
-	spec = (&AppliedConfig{config: spec}).eval(newView(c))
-	if IsGeneric(spec) {
-		unknown = errors.ErrUnknown(KIND_CONFIGTYPE, spec.GetType())
+	spec, err := (&AppliedConfig{config: spec}).eval(newView(c))
+	if err != nil {
+		if !errors.IsErrUnknownKind(err, KIND_CONFIGTYPE) {
+			return errors.Wrapf(err, "%s", desc)
+		}
+		if !c.skipUnknownConfig {
+			unknown = err
+		}
+		err = nil
 	}
 
 	c.configs.Apply(spec, desc)
 
-	var err error
 	for {
 		// apply directly and also indirectly described configurations
 		if gen, in := c.updater.State(); err != nil || in || gen >= c.configs.Generation() {
@@ -236,8 +262,7 @@ func (c *_context) ApplyConfig(spec Config, desc string) error {
 		}
 	}
 
-	err = errors.Wrapf(err, "%s", desc)
-	return err
+	return errors.Wrapf(err, "%s", desc)
 }
 
 func (c *_context) ApplyData(data []byte, unmarshaler runtime.Unmarshaler, desc string) (Config, error) {
@@ -275,12 +300,27 @@ func (c *_context) ApplyTo(gen int64, target interface{}) (int64, error) {
 
 	list := errors.ErrListf("config apply errors")
 	for _, cfg := range cfgs {
-		err := errors.Wrapf(cfg.config.ApplyTo(c.WithInfo(cfg.description), target), "%s", cfg.description)
+		err := cfg.config.ApplyTo(c.WithInfo(cfg.description), target)
+		if c.skipUnknownConfig && errors.IsErrUnknownKind(err, KIND_CONFIGTYPE) {
+			err = nil
+		}
+		err = errors.Wrapf(err, "%s", cfg.description)
 		if !IsErrNoContext(err) {
 			list.Add(err)
 		}
 	}
 	return cur, list.Result()
+}
+
+func (c *_context) Validate() error {
+	list := errors.ErrList()
+
+	_, cfgs := c.configs.GetConfigForSelector(c, AllAppliedConfigs)
+	for _, cfg := range cfgs {
+		_, err := cfg.eval(newView(c))
+		list.Add(err)
+	}
+	return list.Result()
 }
 
 func (c *_context) AddConfigSet(name string, set *ConfigSet) {

@@ -60,7 +60,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 }
 
 const usage = `
-The config type <code>` + ConfigType + `</code> can be used tto configure the season for rhubarb:
+The config type <code>` + ConfigType + `</code> can be used to configure the season for rhubarb:
 
 <pre>
     type: ` + ConfigType + `
