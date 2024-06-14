@@ -53,5 +53,5 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	return o.plugin.Command(o.name, o.StdOut(), o.args)
+	return o.plugin.Command(o.name, o.StdIn(), o.StdOut(), o.args)
 }

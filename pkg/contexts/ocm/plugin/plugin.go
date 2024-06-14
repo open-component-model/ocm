@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/command"
 	"io"
 	"strings"
 	"sync"
@@ -25,7 +29,6 @@ import (
 	accval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action/execute"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/command"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler"
 	merge "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler/execute"
@@ -350,19 +353,46 @@ func (p *pluginImpl) ComposeValueSet(purpose, name string, opts flagsets.ConfigO
 	return nil
 }
 
-func (p *pluginImpl) Command(name string, writer io.Writer, cmdargs []string) error {
-	args := append([]string{command.Name, name}, cmdargs...)
+func (p *pluginImpl) Command(name string, reader io.Reader, writer io.Writer, cmdargs []string) (rerr error) {
+	var finalize finalizer.Finalizer
+	cmd := p.GetDescriptor().Commands.Get(name)
+	if cmd == nil {
+		return errors.ErrNotFound("command", name)
+	}
 
-	var r io.Reader
+	defer finalize.FinalizeWithErrorPropagationf(&rerr, "error processing plugin command call %s", name)
+
+	var f vfs.File
 	a := clicfgattr.Get(p.Context())
-	if a != nil {
+
+	args := []string{command.Name}
+
+	if a != nil && cmd.CLIConfigRequired {
 		cfg, err := json.Marshal(a)
 		if err != nil {
 			return errors.Wrapf(err, "cannot marshal CLI config")
 		}
-		r = bytes.NewBuffer(cfg)
+		// cannot use a vfs here, since it's not possible to pass it to the plugin
+		fs := osfs.New()
+		f, err = vfs.TempFile(fs, "", "cli-config-*")
+		if err != nil {
+			return err
+		}
+
+		finalize.With(func() error {
+			return fs.Remove(f.Name())
+		}, "failed to remove temporary config file %s", f.Name())
+
+		_, err = f.Write(cfg)
+		err = f.Close()
+		if err != nil {
+			return err
+		}
+		args = append(args, "--"+command.OptCliConfig, f.Name())
 	}
-	_, err := p.Exec(r, writer, args...)
+
+	args = append(append(args, name), cmdargs...)
+	_, err := p.Exec(reader, writer, args...)
 	if err != nil {
 		return err
 	}

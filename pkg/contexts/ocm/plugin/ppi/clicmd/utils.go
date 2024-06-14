@@ -1,6 +1,8 @@
 package clicmd
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	_ "github.com/open-component-model/ocm/cmds/ocm/clippi/config"
 
 	"github.com/spf13/cobra"
@@ -11,9 +13,10 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 type CobraCommand struct {
-	cmd   *cobra.Command
-	verb  string
-	realm string
+	cmd               *cobra.Command
+	verb              string
+	realm             string
+	cliConfigRequired bool
 }
 
 var _ ppi.Command = (*CobraCommand)(nil)
@@ -28,17 +31,12 @@ var _ ppi.Command = (*CobraCommand)(nil)
 // of the cobra command. The ocm context is bound to it.
 //
 //	ocm.FromContext(cmd.Context())
-func NewCLICommand(cmd *cobra.Command, args ...string) ppi.Command {
-	verb := ""
-	realm := ""
-
-	if len(args) > 0 {
-		verb = args[0]
+func NewCLICommand(cmd *cobra.Command, opts ...Option) (ppi.Command, error) {
+	eff := optionutils.EvalOptions(opts...)
+	if eff.Verb == "" && eff.Realm != "" {
+		return nil, errors.New("realm without verb not allowed")
 	}
-	if len(args) > 0 {
-		realm = args[1]
-	}
-	return &CobraCommand{cmd, verb, realm}
+	return &CobraCommand{cmd, eff.Verb, eff.Realm, optionutils.AsBool(eff.RequireCLIConfig, false)}, nil
 }
 
 func (c *CobraCommand) Name() string {
@@ -67,6 +65,10 @@ func (c *CobraCommand) Verb() string {
 
 func (c *CobraCommand) Realm() string {
 	return c.realm
+}
+
+func (c *CobraCommand) CLIConfigRequired() bool {
+	return c.cliConfigRequired
 }
 
 func (c *CobraCommand) Command() *cobra.Command {

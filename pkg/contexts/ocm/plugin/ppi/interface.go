@@ -199,6 +199,7 @@ type Command interface {
 	Example() string
 	Verb() string
 	Realm() string
+	CLIConfigRequired() bool
 
 	Command() *cobra.Command
 }

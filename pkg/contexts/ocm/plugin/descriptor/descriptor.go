@@ -211,13 +211,14 @@ func (a ActionDescriptor) GetDescription() string {
 ////////////////////////////////////////////////////////////////////////////////
 
 type CommandDescriptor struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	Usage       string `json:"usage,omitempty"`
-	Short       string `json:"short,omitempty"`
-	Example     string `json:"example,omitempty"`
-	Realm       string `json:"realm,omitempty"`
-	Verb        string `json:"verb,omitempty"`
+	Name              string `json:"name"`
+	Description       string `json:"description,omitempty"`
+	Usage             string `json:"usage,omitempty"`
+	Short             string `json:"short,omitempty"`
+	Example           string `json:"example,omitempty"`
+	Realm             string `json:"realm,omitempty"`
+	Verb              string `json:"verb,omitempty"`
+	CLIConfigRequired bool   `json:"cliconfig,omitempty"`
 }
 
 func (a CommandDescriptor) GetName() string {

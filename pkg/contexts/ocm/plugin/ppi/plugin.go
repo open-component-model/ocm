@@ -542,13 +542,14 @@ func (p *plugin) RegisterCommand(c Command) error {
 		return errors.Newf("realm requires verb")
 	}
 	p.descriptor.Commands = append(p.descriptor.Commands, descriptor.CommandDescriptor{
-		Name:        c.Name(),
-		Description: c.Description(),
-		Usage:       c.Usage(),
-		Short:       c.Short(),
-		Example:     c.Example(),
-		Realm:       c.Realm(),
-		Verb:        c.Verb(),
+		Name:              c.Name(),
+		Description:       c.Description(),
+		Usage:             c.Usage(),
+		Short:             c.Short(),
+		Example:           c.Example(),
+		Realm:             c.Realm(),
+		Verb:              c.Verb(),
+		CLIConfigRequired: c.CLIConfigRequired(),
 	})
 	p.clicmds[c.Name()] = c
 	return nil
