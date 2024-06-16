@@ -186,7 +186,11 @@ func (a *action) Close() error {
 func (a *action) Out() error {
 	a.printer.Printf("%d versions transferred\n", len(a.closure))
 	if a.errors.Result() != nil {
-		return fmt.Errorf("transfer finished with %d error(s)", a.errors.Len())
+		sum := "Error summary:"
+		for _, e := range a.errors.Entries() {
+			sum = fmt.Sprintf("%s\n- %s", sum, e)
+		}
+		return fmt.Errorf("transfer finished with %d error(s)\n%s\n", a.errors.Len(), sum)
 	}
 
 	if a.cmd.BOMFile != "" {
