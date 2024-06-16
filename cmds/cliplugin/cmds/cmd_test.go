@@ -6,23 +6,26 @@ import (
 	"bytes"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/logging/logrusl"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+
+	"github.com/mandelsoft/logging/logrusl"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
-const ARCH = "/tmp/ctf"
-const COMP = "acme.org/test"
-const VERS = "1.0.0"
-const PROV = "acme.org"
+const (
+	ARCH = "/tmp/ctf"
+	COMP = "acme.org/test"
+	VERS = "1.0.0"
+	PROV = "acme.org"
+)
 
 var _ = Describe("cliplugin", func() {
-
 	Context("lib", func() {
 		var env *TestEnv
 
@@ -76,7 +79,6 @@ Yeah, it's rhabarb season - happy rhabarbing!
 
 			Expect(env.CatchOutput(&buf).Execute("--config", "testdata/err.yaml", "rhabarber", "-d", "jul/10")).To(
 				MatchError(`config type "err.config.acme.org" is unknown`))
-
 		})
 
 		It("describe", func() {

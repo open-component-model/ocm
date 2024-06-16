@@ -71,4 +71,5 @@ apabilities of the plugin.
 
 ##### Additional Help Topics
 
+* [plugin <b>command</b>](plugin_command.md)	 &mdash; CLI command extensions
 * [plugin <b>descriptor</b>](plugin_descriptor.md)	 &mdash; Plugin Descriptor Format Description

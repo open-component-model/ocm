@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/logging"
 	"github.com/spf13/cobra"
 
-	"github.com/mandelsoft/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
@@ -48,7 +48,6 @@ var months = map[string]int{
 }
 
 func (c *command) Run(cmd *cobra.Command, args []string) error {
-
 	season := Season{
 		Start: "mar/1",
 		End:   "apr/30",
@@ -102,5 +101,5 @@ func ParseDate(s string) (time.Time, error) {
 		return time.Time{}, errors.Wrapf(err, "invalid day")
 	}
 
-	return time.Date(time.Now().Year(), time.Month(month), day, 0, 0, 0, 0, time.Local), nil
+	return time.Date(time.Now().Year(), time.Month(month), day, 0, 0, 0, 0, time.Local), nil //nolint:gosmopolitan // yes
 }

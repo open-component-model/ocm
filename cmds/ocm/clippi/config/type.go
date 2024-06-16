@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/keyoption"
 	common2 "github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
@@ -22,7 +24,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/spf13/pflag"
 )
 
 const (

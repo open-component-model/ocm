@@ -486,11 +486,11 @@ func DescribeConfigTypes(d *descriptor.Descriptor, out common.Printer) {
 		if m.Description != "" {
 			out.Printf("%s\n", utils2.IndentLines(m.Description, "    "))
 		}
-		out := out.AddGap("  ") //nolint: govet // just use always out
+		out := out.AddGap("  ")
 		out.Printf("Versions:\n")
 		for _, vn := range utils2.StringMapKeys(m.Versions) {
 			out.Printf("- Version: %s\n", vn)
-			out := out.AddGap("  ") //nolint: govet // just use always out
+			out := out.AddGap("  ")
 			v := m.Versions[vn]
 			if v.Format != "" {
 				out.Printf("%s\n", v.Format)

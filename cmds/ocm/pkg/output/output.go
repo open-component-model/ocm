@@ -79,7 +79,6 @@ type ManifestOutput struct {
 	opts   *Options
 	data   []Object
 	Status error
-	out    io.Writer
 }
 
 func NewManifestOutput(opts *Options) ManifestOutput {
@@ -91,6 +90,7 @@ func NewManifestOutput(opts *Options) ManifestOutput {
 		data: []Object{},
 	}
 }
+
 func (this *ManifestOutput) Add(e interface{}) error {
 	this.data = append(this.data, e)
 	if this.opts.StatusCheck != nil {
