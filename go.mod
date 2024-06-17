@@ -36,7 +36,7 @@ require (
 	github.com/google/go-github/v45 v45.2.0
 	github.com/hashicorp/vault-client-go v0.4.3
 	github.com/imdario/mergo v0.3.16
-	github.com/klauspost/compress v1.17.8
+	github.com/klauspost/compress v1.17.9
 	github.com/klauspost/pgzip v1.2.6
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
 	github.com/mandelsoft/goutils v0.0.0-20240608132424-ec9fb7fa611a
@@ -44,7 +44,7 @@ require (
 	github.com/mandelsoft/spiff v1.7.0-beta-5
 	github.com/mandelsoft/vfs v0.4.3
 	github.com/marstr/guid v1.1.0
-	github.com/mikefarah/yq/v4 v4.44.1
+	github.com/mikefarah/yq/v4 v4.44.2
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mittwald/go-helm-client v0.12.9
 	github.com/modern-go/reflect2 v1.0.2
@@ -72,12 +72,12 @@ require (
 	golang.org/x/text v0.16.0
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1
-	helm.sh/helm/v3 v3.15.1
-	k8s.io/api v0.30.1
-	k8s.io/apiextensions-apiserver v0.30.1
-	k8s.io/apimachinery v0.30.1
-	k8s.io/cli-runtime v0.30.1
-	k8s.io/client-go v0.30.1
+	helm.sh/helm/v3 v3.15.2
+	k8s.io/api v0.30.2
+	k8s.io/apiextensions-apiserver v0.30.2
+	k8s.io/apimachinery v0.30.2
+	k8s.io/cli-runtime v0.30.2
+	k8s.io/client-go v0.30.2
 	sigs.k8s.io/controller-runtime v0.18.4
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -166,12 +166,12 @@ require (
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/elliotchance/orderedmap v1.5.1 // indirect
+	github.com/elliotchance/orderedmap v1.6.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.1 // indirect
 	github.com/evanphx/json-patch v5.7.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.9.0 // indirect
 	github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f // indirect
-	github.com/fatih/color v1.16.0 // indirect
+	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fvbommel/sortorder v1.1.0 // indirect
@@ -191,7 +191,7 @@ require (
 	github.com/go-openapi/validate v0.24.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/goccy/go-json v0.10.2 // indirect
+	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/goccy/go-yaml v1.11.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
@@ -344,8 +344,8 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiserver v0.30.1 // indirect
-	k8s.io/component-base v0.30.1 // indirect
+	k8s.io/apiserver v0.30.2 // indirect
+	k8s.io/component-base v0.30.2 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	k8s.io/kubectl v0.30.0 // indirect
