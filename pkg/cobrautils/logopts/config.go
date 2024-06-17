@@ -1,18 +1,18 @@
 package logopts
 
 import (
-	"runtime"
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/logging/config"
-	"github.com/mandelsoft/logging/logrusl"
 	"github.com/mandelsoft/logging/logrusl/adapter"
 	"github.com/mandelsoft/logging/logrusr"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 
+	logdata "github.com/open-component-model/ocm/pkg/cobrautils/logopts/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/logforward"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -22,11 +22,13 @@ import (
 // ConfigFragment is a serializable log config used
 // for CLI commands.
 type ConfigFragment struct {
-	LogLevel    string   `json:"logLevel,omitempty"`
-	LogFileName string   `json:"logFileName,omitempty"`
-	LogConfig   string   `json:"logConfig,omitempty"`
-	LogKeys     []string `json:"logKeys,omitempty"`
-	Json        bool     `json:"json,omitempty"`
+	LogLevel  string   `json:"logLevel,omitempty"`
+	LogConfig string   `json:"logConfig,omitempty"`
+	LogKeys   []string `json:"logKeys,omitempty"`
+	Json      bool     `json:"json,omitempty"`
+
+	// LogFileName is a CLI option, only. Do not serialize and forward
+	LogFileName string `json:"-"`
 }
 
 func (c *ConfigFragment) AddFlags(fs *pflag.FlagSet) {
@@ -37,60 +39,27 @@ func (c *ConfigFragment) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&c.LogKeys, "logkeys", "", nil, "log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])")
 }
 
-func (c *ConfigFragment) Evaluate(ctx ocm.Context, logctx logging.Context) (*EvaluatedOptions, error) {
-	var err error
-	var opts EvaluatedOptions
-
-	for logctx.Tree().GetBaseContext() != nil {
-		logctx = logctx.Tree().GetBaseContext()
-	}
-
-	if c.LogLevel != "" {
-		l, err := logging.ParseLevel(c.LogLevel)
-		if err != nil {
-			return nil, errors.Wrapf(err, "invalid log level %q", c.LogLevel)
-		}
-		logctx.SetDefaultLevel(l)
-	} else {
-		logctx.SetDefaultLevel(logging.WarnLevel)
-	}
-	opts.LogForward = &config.Config{DefaultLevel: logging.LevelName(logctx.GetDefaultLevel())}
-
-	fs := vfsattr.Get(ctx)
-	if c.LogFileName != "" && GlobalLogFileOverride == "" {
-		if opts.LogFile == nil {
-			opts.LogFile, err = LogFileFor(c.LogFileName, fs)
-			if err != nil {
-				return nil, errors.Wrapf(err, "cannot open log file %q", opts.LogFile)
-			}
-		}
-		ConfigureLogrusFor(logctx, !c.Json, opts.LogFile)
-		if logctx == logging.DefaultContext() {
-			GlobalLogFile = opts.LogFile
-		}
-	} else {
-		// overwrite current log formatter in case of a logrus logger is
-		// used as logging backend.
-		var f logrus.Formatter = adapter.NewJSONFormatter()
-		if !c.Json {
-			f = adapter.NewTextFmtFormatter()
-		}
-		logrusr.SetFormatter(logging.UnwrapLogSink(logctx.GetSink()), f)
-	}
+func (c *ConfigFragment) GetLogConfig(fss ...vfs.FileSystem) (*config.Config, error) {
+	var (
+		err error
+		cfg *config.Config
+	)
 
 	if c.LogConfig != "" {
-		var cfg []byte
+		var data []byte
 		if strings.HasPrefix(c.LogConfig, "@") {
-			cfg, err = utils.ReadFile(c.LogConfig[1:], fs)
+			data, err = utils.ReadFile(c.LogConfig[1:], utils.FileSystem(fss...))
 			if err != nil {
 				return nil, errors.Wrapf(err, "cannot read logging config file %q", c.LogConfig[1:])
 			}
 		} else {
-			cfg = []byte(c.LogConfig)
+			data = []byte(c.LogConfig)
 		}
-		if err = config.ConfigureWithData(logctx, cfg); err != nil {
+		if cfg, err = config.EvaluateFromData(data); err != nil {
 			return nil, errors.Wrapf(err, "invalid logging config: %q", c.LogConfig)
 		}
+	} else {
+		cfg = &config.Config{DefaultLevel: "Warn"}
 	}
 
 	for _, t := range c.LogKeys {
@@ -103,7 +72,6 @@ func (c *ConfigFragment) Evaluate(ctx ocm.Context, logctx logging.Context) (*Eva
 			}
 			t = t[:i]
 		}
-		var cond []logging.Condition
 		var cfgcond []config.Condition
 
 		for _, tag := range strings.Split(t, ",") {
@@ -111,35 +79,68 @@ func (c *ConfigFragment) Evaluate(ctx ocm.Context, logctx logging.Context) (*Eva
 			if strings.HasPrefix(tag, "/") {
 				realm := tag[1:]
 				if strings.HasPrefix(realm, "+") {
-					cond = append(cond, logging.NewRealmPrefix(realm[1:]))
 					cfgcond = append(cfgcond, config.RealmPrefix(realm[1:]))
 				} else {
-					cond = append(cond, logging.NewRealm(realm))
 					cfgcond = append(cfgcond, config.Realm(realm))
 				}
 			} else {
-				cond = append(cond, logging.NewTag(tag))
 				cfgcond = append(cfgcond, config.Tag(tag))
 			}
 		}
-		rule := logging.NewConditionRule(level, cond...)
-		opts.LogForward.Rules = append(opts.LogForward.Rules, config.ConditionalRule(logging.LevelName(level), cfgcond...))
-		logctx.AddRule(rule)
+		cfg.Rules = append(cfg.Rules, config.ConditionalRule(logging.LevelName(level), cfgcond...))
 	}
+
+	if c.LogLevel != "" {
+		_, err := logging.ParseLevel(c.LogLevel)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid log level %q", c.LogLevel)
+		}
+		cfg.DefaultLevel = c.LogLevel
+	}
+
+	return cfg, nil
+}
+
+func (c *ConfigFragment) Evaluate(ctx ocm.Context, logctx logging.Context, main bool) (*EvaluatedOptions, error) {
+	var err error
+	var opts EvaluatedOptions
+
+	for logctx.Tree().GetBaseContext() != nil {
+		logctx = logctx.Tree().GetBaseContext()
+	}
+
+	fs := vfsattr.Get(ctx)
+	if main && c.LogFileName != "" && logdata.GlobalLogFileOverride == "" {
+		if opts.LogFile == nil {
+			opts.LogFile, err = logdata.LogFileFor(c.LogFileName, fs)
+			if err != nil {
+				return nil, errors.Wrapf(err, "cannot open log file %q", opts.LogFile)
+			}
+		}
+		logdata.ConfigureLogrusFor(logctx, !c.Json, opts.LogFile)
+		if logctx == logging.DefaultContext() {
+			logdata.GlobalLogFile = opts.LogFile
+		}
+	} else {
+		// overwrite current log formatter in case of a logrus logger is
+		// used as logging backend.
+		var f logrus.Formatter = adapter.NewJSONFormatter()
+		if !c.Json {
+			f = adapter.NewTextFmtFormatter()
+		}
+		logrusr.SetFormatter(logging.UnwrapLogSink(logctx.GetSink()), f)
+	}
+
+	cfg, err := c.GetLogConfig(fs)
+	if err != nil {
+		return &opts, err
+	}
+	err = config.Configure(logctx, cfg)
+	if err != nil {
+		return &opts, err
+	}
+	opts.LogForward = cfg
 	logforward.Set(ctx.AttributesContext(), opts.LogForward)
 
 	return &opts, nil
-}
-
-func ConfigureLogrusFor(logctx logging.Context, human bool, logfile *LogFile) {
-	settings := logrusl.Adapter().WithWriter(logfile.File())
-	if human {
-		settings = settings.Human()
-	} else {
-		settings = settings.WithFormatter(&logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"})
-	}
-
-	log := settings.NewLogrus()
-	logctx.SetBaseLogger(logrusr.New(log))
-	runtime.SetFinalizer(log, func(_ *logrus.Logger) { logfile.Close() })
 }

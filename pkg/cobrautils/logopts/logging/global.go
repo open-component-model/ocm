@@ -1,4 +1,4 @@
-package logopts
+package logging
 
 var (
 	GlobalLogFile         *LogFile

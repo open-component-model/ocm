@@ -2,7 +2,6 @@ package clicmd
 
 import (
 	_ "github.com/open-component-model/ocm/cmds/ocm/clippi/config"
-	_ "github.com/open-component-model/ocm/pkg/cobrautils/logopts/config"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/optionutils"

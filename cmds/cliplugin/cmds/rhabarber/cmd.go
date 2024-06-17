@@ -6,6 +6,9 @@ import (
 	"strings"
 	"time"
 
+	// bind OCM configuration.
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/config"
+
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/spf13/cobra"
@@ -13,12 +16,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
+const Name = "rhabarber"
+
 var log = logging.DynamicLogger(logging.DefaultContext(), logging.NewRealm("cliplugin/rhabarber"))
 
 func New() *cobra.Command {
 	cmd := &command{}
 	c := &cobra.Command{
-		Use:   "rhabarber <options>",
+		Use:   Name + " <options>",
 		Short: "determine whether we are in rhubarb season",
 		Long:  "The rhubarb season is between march and april.",
 		RunE:  cmd.Run,

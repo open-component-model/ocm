@@ -12,6 +12,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	logging2 "github.com/open-component-model/ocm/pkg/cobrautils/logopts/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -43,12 +44,12 @@ var _ = Describe("log file", func() {
 
 		MustBeSuccessful(opts.Configure(ctx, lctx))
 
-		Expect(GetLogFileFor(opts.LogFileName, fs)).NotTo(BeNil())
+		Expect(logging2.GetLogFileFor(opts.LogFileName, fs)).NotTo(BeNil())
 		lctx = nil
 		for i := 1; i < 100; i++ {
 			time.Sleep(1 * time.Millisecond)
 			runtime.GC()
 		}
-		Expect(GetLogFileFor(opts.LogFileName, fs)).To(BeNil())
+		Expect(logging2.GetLogFileFor(opts.LogFileName, fs)).To(BeNil())
 	})
 })

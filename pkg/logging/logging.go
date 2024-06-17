@@ -105,7 +105,7 @@ func Configure(config *logcfg.Config, extra ...string) error {
 	return logContext.Configure(config, extra...)
 }
 
-// ConfigureOCM applies configuration for the default global log context
+// ConfigureOCM applies configuration for the default global ocm log context
 // provided by this package.
 func ConfigureOCM(config *logcfg.Config, extra ...string) error {
 	return ocm.Configure(config, extra...)

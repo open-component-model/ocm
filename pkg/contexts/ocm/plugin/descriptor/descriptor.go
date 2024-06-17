@@ -9,11 +9,12 @@ import (
 const VERSION = "v1"
 
 type Descriptor struct {
-	Version       string `json:"version,omitempty"`
-	PluginName    string `json:"pluginName"`
-	PluginVersion string `json:"pluginVersion"`
-	Short         string `json:"shortDescription"`
-	Long          string `json:"description"`
+	Version        string `json:"version,omitempty"`
+	PluginName     string `json:"pluginName"`
+	PluginVersion  string `json:"pluginVersion"`
+	Short          string `json:"shortDescription"`
+	Long           string `json:"description"`
+	ForwardLogging bool   `json:"forwardLogging"`
 
 	Actions                  []ActionDescriptor                `json:"actions,omitempty"`
 	AccessMethods            []AccessMethodDescriptor          `json:"accessMethods,omitempty"`

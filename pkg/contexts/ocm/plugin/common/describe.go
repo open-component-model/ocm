@@ -411,7 +411,7 @@ func DescribeCLIExtensions(d *descriptor.Descriptor, out common.Printer) {
 		if s != "" {
 			s = " (" + s + ")"
 		}
-		out.Printf("- Name: %s%s\n", n, s)
+		out.Printf("- Name:  %s%s\n", n, s)
 		if a.Description != "" {
 			if len(a.Verb) > 0 {
 				out.Printf("  Verb:  %s\n", a.Verb)

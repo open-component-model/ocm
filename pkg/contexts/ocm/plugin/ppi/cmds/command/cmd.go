@@ -2,16 +2,12 @@ package command
 
 import (
 	"context"
-	"io"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
-	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
@@ -30,21 +26,17 @@ described by an access method descriptor (<CMD>` + p.Name() + ` descriptor</CMD>
 	var cliconfig string
 	cmd.Flags().StringVarP(&cliconfig, OptCliConfig, "", "", "path to cli configuration file")
 
-	octx := ocm.DefaultContext()
-	ctx := octx.BindTo(context.Background())
 	for _, n := range p.Commands() {
 		c := n.Command()
 		c.TraverseChildren = true
 
 		nested := c.PreRunE
 		c.PreRunE = func(cmd *cobra.Command, args []string) error {
-			c.SetContext(ctx)
-			if cliconfig != "" {
-				err := ConfigureFromFile(octx, cliconfig)
-				if err != nil {
-					return err
-				}
+			ctx, err := ConfigureFromFile(context.Background(), cliconfig)
+			if err != nil {
+				return err
 			}
+			c.SetContext(ctx)
 			if nested != nil {
 				return nested(cmd, args)
 			}
@@ -55,31 +47,14 @@ described by an access method descriptor (<CMD>` + p.Name() + ` descriptor</CMD>
 	return cmd
 }
 
-func ConfigureFromStdIn(ctx ocm.Context) error {
-	raw, err := io.ReadAll(os.Stdin)
+func ConfigureFromFile(ctx context.Context, path string) (context.Context, error) {
+	data, err := os.ReadFile(path)
 	if err != nil {
-		return err
-	}
-	if strings.TrimSpace(string(raw)) == "" {
-		return nil
-	}
-	_, err = ctx.ConfigContext().ApplyData(raw, runtime.DefaultYAMLEncoding, " cli config")
-	// Ugly, enforce configuration update
-	ctx.GetResolver()
-	return err
-}
-
-func ConfigureFromFile(ctx ocm.Context, path string) (rerr error) {
-	raw, err := os.ReadFile(path)
-	if err != nil {
-		return err
+		return ctx, err
 	}
 
-	if strings.TrimSpace(string(raw)) == "" {
-		return nil
+	if handler != nil {
+		return handler.HandleConfig(ctx, data)
 	}
-	_, err = ctx.ConfigContext().ApplyData(raw, runtime.DefaultYAMLEncoding, " cli config")
-	// Ugly, enforce configuration update
-	ctx.GetResolver()
-	return err
+	return ctx, nil
 }

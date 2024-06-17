@@ -25,6 +25,8 @@ const (
 	PROV = "acme.org"
 )
 
+const KIND = "rhabarber"
+
 var _ = Describe("cliplugin", func() {
 	Context("lib", func() {
 		var env *TestEnv
@@ -49,7 +51,7 @@ var _ = Describe("cliplugin", func() {
 		It("run plugin based ocm command", func() {
 			var buf bytes.Buffer
 
-			MustBeSuccessful(env.CatchOutput(&buf).Execute("--config", "testdata/config.yaml", "rhabarber", "-d", "jul/10"))
+			MustBeSuccessful(env.CatchOutput(&buf).Execute("--config", "testdata/config.yaml", "check", KIND, "-d", "jul/10"))
 
 			Expect("\n" + buf.String()).To(Equal(`
 Yeah, it's rhabarb season - happy rhabarbing!
@@ -63,21 +65,21 @@ Yeah, it's rhabarb season - happy rhabarbing!
 			lctx := env.OCMContext().LoggingContext()
 			lctx.SetBaseLogger(logrusl.WithWriter(&stdlog).NewLogr())
 			MustBeSuccessful(env.CatchOutput(&stdout).
-				Execute("--config", "testdata/logcfg.yaml", "rhabarber", "-d", "jul/10"))
+				Execute("--config", "testdata/logcfg.yaml", "check", KIND, "-d", "jul/10"))
 
 			Expect("\n" + stdout.String()).To(Equal(`
 Yeah, it's rhabarb season - happy rhabarbing!
 `))
 			// {"date":".*","level":"debug","msg":"testing rhabarb season","realm":"cliplugin/rhabarber","time":".*"}
 			Expect(stdlog.String()).To(StringMatchTrimmedWithContext(`
-.{25} debug   \[cliplugin/rhabarber\] "testing rhabarb season" date=".{30}"
+[^ ]* debug   \[cliplugin/rhabarber\] "testing rhabarb season" date="[^"]*"
 `))
 		})
 
-		It("fails for undeclared confiug", func() {
+		It("fails for undeclared config", func() {
 			var buf bytes.Buffer
 
-			Expect(env.CatchOutput(&buf).Execute("--config", "testdata/err.yaml", "rhabarber", "-d", "jul/10")).To(
+			Expect(env.CatchOutput(&buf).Execute("--config", "testdata/err.yaml", "check", KIND, "-d", "jul/10")).To(
 				MatchError(`config type "err.config.acme.org" is unknown`))
 		})
 
@@ -96,7 +98,8 @@ Description:
       The plugin offers the top-level command rhabarber
 
 CLI Extensions:
-- Name: rhabarber (determine whether we are in rhubarb season)
+- Name:  rhabarber (determine whether we are in rhubarb season)
+  Verb:  check
   Usage: rhabarber <options>
     The rhubarb season is between march and april.
 

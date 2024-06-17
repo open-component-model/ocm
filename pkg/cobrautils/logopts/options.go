@@ -5,6 +5,7 @@ import (
 	"github.com/mandelsoft/logging/config"
 	"github.com/spf13/pflag"
 
+	logging2 "github.com/open-component-model/ocm/pkg/cobrautils/logopts/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
@@ -36,7 +37,7 @@ an <code>@</code>, the logging configuration is taken from a file.
 
 type EvaluatedOptions struct {
 	LogForward *config.Config
-	LogFile    *LogFile
+	LogFile    *logging2.LogFile
 }
 
 func (o *EvaluatedOptions) Close() error {
@@ -65,6 +66,6 @@ func (o *Options) Close() error {
 func (o *Options) Configure(ctx ocm.Context, logctx logging.Context) error {
 	var err error
 
-	o.EvaluatedOptions, err = o.ConfigFragment.Evaluate(ctx, logctx)
+	o.EvaluatedOptions, err = o.ConfigFragment.Evaluate(ctx, logctx, true)
 	return err
 }

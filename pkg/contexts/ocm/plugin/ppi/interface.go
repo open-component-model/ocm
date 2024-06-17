@@ -42,6 +42,7 @@ type Plugin interface {
 	SetShort(s string)
 	SetLong(s string)
 	SetConfigParser(config func(raw json.RawMessage) (interface{}, error))
+	ForwardLogging(b ...bool)
 
 	RegisterDownloader(arttype, mediatype string, u Downloader) error
 	GetDownloader(name string) Downloader

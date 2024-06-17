@@ -371,7 +371,7 @@ func (o *CLIOptions) Complete() error {
 	old := o.Context.ConfigContext().SkipUnknownConfig(true)
 	defer o.Context.ConfigContext().SkipUnknownConfig(old)
 
-	o.EvaluatedOptions, err = o.Config.Evaluate(o.Context.OCMContext())
+	o.EvaluatedOptions, err = o.Config.Evaluate(o.Context.OCMContext(), true)
 	if err != nil {
 		return err
 	}

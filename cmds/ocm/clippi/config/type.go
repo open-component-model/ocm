@@ -9,6 +9,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/keyoption"
 	common2 "github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
+	logdata "github.com/open-component-model/ocm/pkg/cobrautils/logopts/logging"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	config2 "github.com/open-component-model/ocm/pkg/contexts/config/config"
@@ -40,13 +41,16 @@ func init() {
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
-	Config      []string                 `json:"config,omitempty"`
 	ConfigSets  []string                 `json:"configSets,omitempty"`
 	Credentials []string                 `json:"credentials,omitempty"`
 	Settings    []string                 `json:"settings,omitempty"`
 	Verbose     bool                     `json:"verbose,omitempty"`
 	Signing     keyoption.ConfigFragment `json:"signing,omitempty"`
 	Logging     logopts.ConfigFragment   `json:"logging,omitempty"`
+
+	// ConfigFiles describes the cli argument for additional config files.
+	// This is not persisted since it is resolved by the first evaluation.
+	ConfigFiles []string `json:"-"`
 }
 
 // New creates a new memory ConfigSpec.
@@ -61,7 +65,7 @@ func (c *Config) GetType() string {
 }
 
 func (c *Config) AddFlags(fs *pflag.FlagSet) {
-	fs.StringArrayVarP(&c.Config, "config", "", nil, "configuration file")
+	fs.StringArrayVarP(&c.ConfigFiles, "config", "", nil, "configuration file")
 	fs.StringSliceVarP(&c.ConfigSets, "config-set", "", nil, "apply configuration set")
 	fs.StringArrayVarP(&c.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&c.Settings, "attribute", "X", nil, "attribute setting")
@@ -71,14 +75,14 @@ func (c *Config) AddFlags(fs *pflag.FlagSet) {
 	c.Signing.AddFlags(fs)
 }
 
-func (c *Config) Evaluate(ctx ocm.Context) (*EvaluatedOptions, error) {
+func (c *Config) Evaluate(ctx ocm.Context, main bool) (*EvaluatedOptions, error) {
 	c.Type = ConfigTypeV1
 	cfg, err := config2.NewAggregator(true)
 	if err != nil {
 		return nil, err
 	}
 
-	logopts, err := c.Logging.Evaluate(ctx, logging.Context())
+	logopts, err := c.Logging.Evaluate(ctx, logging.Context(), main)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +93,7 @@ func (c *Config) Evaluate(ctx ocm.Context) (*EvaluatedOptions, error) {
 		return opts, err
 	}
 
-	if len(c.Config) == 0 {
+	if len(c.ConfigFiles) == 0 {
 		_, eff, err := utils.Configure2(ctx, "", vfsattr.Get(ctx))
 		if eff != nil {
 			err = cfg.AddConfig(eff)
@@ -98,7 +102,7 @@ func (c *Config) Evaluate(ctx ocm.Context) (*EvaluatedOptions, error) {
 			return opts, err
 		}
 	}
-	for _, config := range c.Config {
+	for _, config := range c.ConfigFiles {
 		_, eff, err := utils.Configure2(ctx, config, vfsattr.Get(ctx))
 		if eff != nil {
 			err = cfg.AddConfig(eff)
@@ -183,13 +187,25 @@ func (c *Config) Evaluate(ctx ocm.Context) (*EvaluatedOptions, error) {
 	return opts, nil
 }
 
-func (c *Config) ApplyTo(_ config.Context, target interface{}) error {
+func (c *Config) ApplyTo(cctx config.Context, target interface{}) error {
+	// first: check for logging config for subsequent command calls
+	if lc, ok := target.(*logdata.LoggingConfiguration); ok {
+		cfg, err := c.Logging.GetLogConfig(vfsattr.Get(cctx))
+		if err != nil {
+			return err
+		}
+		lc.LogConfig = *cfg
+		lc.Json = c.Logging.Json
+		return nil
+	}
+
+	// second: main target is an ocm context
 	ctx, ok := target.(cpi.Context)
 	if !ok {
 		return config.ErrNoContext(ConfigType)
 	}
 
-	opts, err := c.Evaluate(ctx)
+	opts, err := c.Evaluate(ctx, false)
 	if err != nil {
 		return err
 	}

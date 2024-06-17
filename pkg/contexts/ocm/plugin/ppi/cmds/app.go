@@ -45,6 +45,7 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 		Short:                 short,
 		Long:                  p.Descriptor().Long,
 		Version:               p.Version(),
+		PersistentPreRunE:     pcmd.PreRunE,
 		TraverseChildren:      true,
 		SilenceUsage:          true,
 		DisableFlagsInUseLine: true,
@@ -87,6 +88,13 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 
 type Error struct {
 	Error string `json:"error"`
+}
+
+func (p *PluginCommand) PreRunE(cmd *cobra.Command, args []string) error {
+	if handler != nil {
+		return handler.HandleConfig(p.plugin.GetOptions().LogConfig)
+	}
+	return nil
 }
 
 func (p *PluginCommand) Execute(args []string) error {

@@ -131,7 +131,8 @@ var _ = Describe("setup plugin cache", func() {
 		defer Close(cv, "source version")
 
 		_, _, err := plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}"))
-		MustFailWithMessage(err, "plugin uploader test/testuploader: path missing in repository spec")
+		fmt.Printf("error %q\n", err)
+		MustFailWithMessage(err, "plugin uploader test/testuploader: error processing plugin command upload: path missing in repository spec")
 		repospec := Must(json.Marshal(repoSpec))
 		name, keys, err := plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", repospec)
 		MustBeSuccessful(err)
@@ -169,7 +170,8 @@ var _ = Describe("setup plugin cache", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv, "source version")
 
-		MustFailWithMessage(blobhandler.RegisterHandlerByName(ctx, "plugin/test", []byte("{}"), blobhandler.ForArtifactType(RSCTYPE)), "plugin uploader test/testuploader: path missing in repository spec")
+		MustFailWithMessage(blobhandler.RegisterHandlerByName(ctx, "plugin/test", []byte("{}"), blobhandler.ForArtifactType(RSCTYPE)),
+			"plugin uploader test/testuploader: error processing plugin command upload: path missing in repository spec")
 		repospec := Must(json.Marshal(repoSpec))
 		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "plugin/test", repospec))
 

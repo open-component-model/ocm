@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/maputils"
 	"golang.org/x/exp/slices"
@@ -113,6 +114,10 @@ func (p *plugin) SetDescriptorTweaker(t func(descriptor descriptor.Descriptor) d
 
 func (p *plugin) SetConfigParser(config func(raw json.RawMessage) (interface{}, error)) {
 	p.configParser = config
+}
+
+func (p *plugin) ForwardLogging(b ...bool) {
+	p.descriptor.ForwardLogging = general.OptionalDefaultedBool(true, b...)
 }
 
 func (p *plugin) GetConfig() (interface{}, error) {
@@ -540,6 +545,9 @@ func (p *plugin) RegisterCommand(c Command) error {
 	}
 	if c.Realm() != "" && c.Verb() == "" {
 		return errors.Newf("realm requires verb")
+	}
+	if c.Command().HasSubCommands() && c.Verb() != "" {
+		return errors.Newf("no sub commands allowd for CLI command for verb")
 	}
 	p.descriptor.Commands = append(p.descriptor.Commands, descriptor.CommandDescriptor{
 		Name:              c.Name(),

@@ -14,9 +14,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
-	"github.com/open-component-model/ocm/pkg/cobrautils/logopts/config"
-	cfgconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/pkg/cobrautils/logopts/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -82,6 +80,64 @@ func (p *pluginImpl) SetConfig(config json.RawMessage) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	p.config = config
+}
+
+func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) (result []byte, rerr error) {
+	var (
+		finalize finalizer.Finalizer
+		err      error
+		logfile  *os.File
+	)
+
+	defer finalize.FinalizeWithErrorPropagationf(&rerr, "error processing plugin command %s", args[0])
+
+	if p.GetDescriptor().ForwardLogging {
+		logfile, err = os.CreateTemp("", "ocm-plugin-log-*")
+		if rerr != nil {
+			return nil, err
+		}
+		logfile.Close()
+		finalize.With(func() error {
+			return os.Remove(logfile.Name())
+		}, "failed to remove temporary log file %s", logfile.Name())
+
+		lcfg := &logging.LoggingConfiguration{}
+		_, err = p.Context().ConfigContext().ApplyTo(0, lcfg)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot extract plugin logging configration")
+		}
+		lcfg.LogFileName = logfile.Name()
+		data, err := json.Marshal(lcfg)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot marshal plugin logging configration")
+		}
+		args = append([]string{"--" + ppi.OptPlugingLogConfig, string(data)}, args...)
+	}
+
+	if len(p.config) == 0 {
+		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args)
+	} else {
+		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args, "config", p.config)
+	}
+	data, err := cache.Exec(p.Path(), p.config, r, w, args...)
+
+	if logfile != nil {
+		r, oerr := os.OpenFile(logfile.Name(), vfs.O_RDONLY, 0o600)
+		if oerr == nil {
+			finalize.Close(r, "plugin logfile", logfile.Name())
+			w := p.ctx.LoggingContext().Tree().LogWriter()
+			if w == nil {
+				if logging.GlobalLogFile != nil {
+					w = logging.GlobalLogFile.File()
+				}
+				if w == nil {
+					w = os.Stderr
+				}
+			}
+			io.Copy(w, r)
+		}
+	}
+	return data, err
 }
 
 func (p *pluginImpl) MergeValue(specification *valuemergehandler.Specification, local, inbound valuemergehandler.Value) (bool, *valuemergehandler.Value, error) {
@@ -301,15 +357,6 @@ func (p *pluginImpl) Download(name string, r io.Reader, artType, mimeType, targe
 	return m.Path != "", m.Path, nil
 }
 
-func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) ([]byte, error) {
-	if len(p.config) == 0 {
-		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args)
-	} else {
-		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args, "config", p.config)
-	}
-	return cache.Exec(p.Path(), p.config, r, w, args...)
-}
-
 func (p *pluginImpl) ValidateValueSet(purpose string, spec []byte) (*ppi.ValueSetInfo, error) {
 	result, err := p.Exec(nil, nil, valueset.Name, vsval.Name, purpose, string(spec))
 	if err != nil {
@@ -366,69 +413,36 @@ func (p *pluginImpl) Command(name string, reader io.Reader, writer io.Writer, cm
 	defer finalize.FinalizeWithErrorPropagationf(&rerr, "error processing plugin command call %s", name)
 
 	var f vfs.File
-	a := clicfgattr.Get(p.Context())
 
 	args := []string{command.Name}
 
-	logfile, err := os.CreateTemp("", "ocm-cli-plugin-*")
-	if rerr != nil {
-		return err
-	}
-	logfile.Close()
-	finalize.With(func() error {
-		return os.Remove(logfile.Name())
-	}, "failed to remove temporary log file %s", logfile.Name())
-
-	clicfg, err := cfgconfig.NewAggregator(false, config.New(logfile.Name()))
-	if rerr != nil {
-		return err
-	}
+	a := clicfgattr.Get(p.Context())
 	if a != nil && cmd.CLIConfigRequired {
-		clicfg.AddConfig(a)
-	}
-	cfgdata, err := json.Marshal(clicfg.Get())
-	if err != nil {
-		return errors.Wrapf(err, "cannot marshal CLI config")
-	}
-
-	// cannot use a vfs here, since it's not possible to pass it to the plugin
-	f, err = os.CreateTemp("", "cli-config-*")
-	if err != nil {
-		return err
-	}
-	finalize.With(func() error {
-		return os.Remove(f.Name())
-	}, "failed to remove temporary config file %s", f.Name())
-
-	_, err = f.Write(cfgdata)
-	if err != nil {
-		f.Close()
-		return err
-	}
-	err = f.Close()
-	if err != nil {
-		return err
-	}
-	args = append(append(args, "--"+command.OptCliConfig, f.Name(), name), cmdargs...)
-
-	_, err = p.Exec(reader, writer, args...)
-
-	r, oerr := os.OpenFile(logfile.Name(), vfs.O_RDONLY, 0o600)
-	if oerr == nil {
-		defer r.Close()
-		w := p.ctx.LoggingContext().Tree().LogWriter()
-		if w == nil {
-			if logopts.GlobalLogFile != nil {
-				w = logopts.GlobalLogFile.File()
-			}
-			if w == nil {
-				w = os.Stderr
-			}
+		cfgdata, err := json.Marshal(a)
+		if err != nil {
+			return errors.Wrapf(err, "cannot marshal CLI config")
 		}
-		io.Copy(w, r)
+		// cannot use a vfs here, since it's not possible to pass it to the plugin
+		f, err = os.CreateTemp("", "cli-om-config-*")
+		if err != nil {
+			return err
+		}
+		finalize.With(func() error {
+			return os.Remove(f.Name())
+		}, "failed to remove temporary config file %s", f.Name())
+
+		_, err = f.Write(cfgdata)
+		if err != nil {
+			f.Close()
+			return err
+		}
+		err = f.Close()
+		if err != nil {
+			return err
+		}
+		args = append(append(args, "--"+command.OptCliConfig, f.Name(), name), cmdargs...)
 	}
-	if err != nil {
-		return err
-	}
-	return nil
+
+	_, err := p.Exec(reader, writer, args...)
+	return err
 }

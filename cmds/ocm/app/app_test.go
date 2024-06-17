@@ -64,9 +64,10 @@ var _ = Describe("Test Environment", func() {
 		var m map[string]interface{}
 		Expect(json.Unmarshal(buf.Bytes(), &m)).To(Succeed())
 	})
+
 	It("do logging", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "logtest")).To(Succeed())
+		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "-X", "plugindir=xxx", "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
 V[2] warn realm ocm realm test
 ERROR <nil> error realm ocm realm test
@@ -139,7 +140,11 @@ ERROR <nil> ctxerror realm ocm realm test
 		// 2024-06-16T13:59:34+02:00 error   [test] error
 		// 2024-06-16T13:59:34+02:00 warning [test] ctxwarn
 		// 2024-06-16T13:59:34+02:00 error   [test] ctxerror
-		Expect(len(string(data))).To(Equal(192))
+		Expect(string(data)).To(MatchRegexp(`.* warning \[test\] warn
+.* error   \[test\] error
+.* warning \[test\] ctxwarn
+.* error   \[test\] ctxerror
+`))
 	})
 
 	It("sets attr from file", func() {
