@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
@@ -299,14 +300,14 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 			if c.Verb != "" {
 				v := cobrautils.Find(cmd, c.Verb)
 				if v == nil {
-					out.Errf(opts.Context, "unknown verb %q for cli command %q of plugin %q", c.Verb, c.Name, p.Name())
+					v := verbs.NewCommand(ctx, c.Verb, "additional plugin based commands")
+					cmd.AddCommand(v)
+				}
+				s := cobrautils.Find(v, c.Name)
+				if s != nil {
+					out.Errf(opts.Context, "duplicate cli command %q of plugin %q for verb %q", c.Name, p.Name(), c.Verb)
 				} else {
-					s := cobrautils.Find(v, c.Name)
-					if s != nil {
-						out.Errf(opts.Context, "duplicate cli command %q of plugin %q for verb %q", c.Name, p.Name(), c.Verb)
-					} else {
-						v.AddCommand(plugin.NewCommand(ctx, p, c.Name))
-					}
+					v.AddCommand(plugin.NewCommand(ctx, p, c.Name))
 				}
 
 				if c.Realm != "" {
