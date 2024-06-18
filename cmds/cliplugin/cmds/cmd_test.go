@@ -84,6 +84,46 @@ Yeah, it's rhabarb season - happy rhabarbing!
 				MatchError(`config type "err.config.acme.org" is unknown`))
 		})
 
+		It("shows command help", func() {
+			var buf bytes.Buffer
+
+			MustBeSuccessful(env.CatchOutput(&buf).Execute("check", KIND, "--help", "xxx"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+ocm check rhabarber — Determine Whether We Are In Rhubarb Season
+
+Synopsis:
+  ocm check rhabarber <options>
+
+Flags:
+  -d, --date string   the date to ask for (MM/DD)
+  -h, --help          help for rhabarber
+
+Description:
+  The rhubarb season is between march and april.
+
+`))
+		})
+
+		FIt("shows command help from main command", func() {
+			var buf bytes.Buffer
+
+			MustBeSuccessful(env.CatchOutput(&buf).Execute("help", "check", KIND))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+ocm check rhabarber — Determine Whether We Are In Rhubarb Season
+
+Synopsis:
+  ocm check rhabarber <options>
+
+Flags:
+  -d, --date string   the date to ask for (MM/DD)
+  -h, --help          help for rhabarber
+
+Description:
+  The rhubarb season is between march and april.
+
+`))
+		})
+
 		It("describe", func() {
 			var buf bytes.Buffer
 

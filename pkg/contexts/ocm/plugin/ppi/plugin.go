@@ -8,8 +8,10 @@ import (
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/maputils"
+	"github.com/spf13/cobra"
 	"golang.org/x/exp/slices"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
@@ -535,6 +537,11 @@ func (p *plugin) RegisterValueSet(s ValueSet) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+var (
+	dummyMain = cobrautils.TweakCommand(&cobra.Command{Use: "ocm <sub command>"}, nil)
+	verbs     = map[string]*cobra.Command{}
+)
+
 func (p *plugin) GetCommand(name string) Command {
 	return p.clicmds[name]
 }
@@ -546,7 +553,8 @@ func (p *plugin) RegisterCommand(c Command) error {
 	if c.Realm() != "" && c.Verb() == "" {
 		return errors.Newf("realm requires verb")
 	}
-	if c.Command().HasSubCommands() && c.Verb() != "" {
+	cmd := c.Command()
+	if cmd.HasSubCommands() && c.Verb() != "" {
 		return errors.Newf("no sub commands allowd for CLI command for verb")
 	}
 	p.descriptor.Commands = append(p.descriptor.Commands, descriptor.CommandDescriptor{
@@ -559,6 +567,34 @@ func (p *plugin) RegisterCommand(c Command) error {
 		Verb:              c.Verb(),
 		CLIConfigRequired: c.CLIConfigRequired(),
 	})
+
+	parent := dummyMain
+	if c.Verb() != "" {
+		v := verbs[c.Verb()]
+		if v == nil {
+			v = &cobra.Command{Use: c.Verb() + " <sub command>"}
+			verbs[c.Name()] = v
+			parent.AddCommand(v)
+		}
+		parent = v
+	}
+	helper := *cmd
+	parent.AddCommand(&helper)
+	orig := cmd.HelpFunc()
+	cmd.SetHelpFunc(func(_ *cobra.Command, args []string) {
+		eff := &helper
+		if len(args) > 0 {
+			for i := range len(args) {
+				if args[i] == "--help" {
+					if cmd.HasSubCommands() {
+						eff, _, _ = cmd.Find(args[i+1:])
+					}
+				}
+			}
+		}
+		orig(eff, args)
+	})
+
 	p.clicmds[c.Name()] = c
 	return nil
 }

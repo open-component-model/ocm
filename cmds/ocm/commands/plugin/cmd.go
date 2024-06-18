@@ -31,6 +31,7 @@ func NewCommand(ctx clictx.Context, plugin plugin.Plugin, name string, names ...
 
 	cmd := utils.SetupCommand(me, utils.Names([]string{me.pcmd.Name}, names...)...)
 	cmd.DisableFlagParsing = true
+	cmd.SetHelpFunc(me.help)
 	return cmd
 }
 
@@ -54,4 +55,8 @@ func (o *Command) Complete(args []string) error {
 
 func (o *Command) Run() error {
 	return o.plugin.Command(o.name, o.StdIn(), o.StdOut(), o.args)
+}
+
+func (o *Command) help(cmd *cobra.Command, args []string) {
+	o.plugin.Command(o.name, o.StdIn(), o.StdOut(), append([]string{"--help"}, o.args...))
 }

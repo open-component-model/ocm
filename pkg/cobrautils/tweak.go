@@ -11,7 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
-func TweakCommand(cmd *cobra.Command, ctx out.Context) {
+func TweakCommand(cmd *cobra.Command, ctx out.Context) *cobra.Command {
 	if ctx != nil {
 		cmd.SetOut(ctx.StdOut())
 		cmd.SetErr(ctx.StdErr())
@@ -22,6 +22,7 @@ func TweakCommand(cmd *cobra.Command, ctx out.Context) {
 	SupportNestedHelpFunc(cmd)
 	cmd.SetHelpTemplate(HelpTemplate)
 	cmd.SetUsageTemplate(UsageTemplate)
+	return cmd
 }
 
 // SupportNestedHelpFunc adds support help evaluation of given nested command path.

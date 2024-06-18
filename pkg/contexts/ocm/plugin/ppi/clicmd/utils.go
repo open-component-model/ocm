@@ -36,6 +36,7 @@ func NewCLICommand(cmd *cobra.Command, opts ...Option) (ppi.Command, error) {
 	if eff.Verb == "" && eff.Realm != "" {
 		return nil, errors.New("realm without verb not allowed")
 	}
+	cmd.DisableFlagsInUseLine = true
 	return &CobraCommand{cmd, eff.Verb, eff.Realm, optionutils.AsBool(eff.RequireCLIConfig, false)}, nil
 }
 
