@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/logging/logrusl"
 	"github.com/mandelsoft/logging/logrusl/adapter"
 	"github.com/mandelsoft/logging/logrusr"
+	"github.com/mandelsoft/logging/utils"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/sirupsen/logrus"
 )
@@ -47,7 +48,7 @@ func (c *LoggingConfiguration) Apply() error {
 }
 
 func ConfigureLogrusFor(logctx logging.Context, human bool, logfile *LogFile) {
-	settings := logrusl.Adapter().WithWriter(logfile.File())
+	settings := logrusl.Adapter().WithWriter(utils.NewSyncWriter(logfile.File()))
 	if human {
 		settings = settings.Human()
 	} else {

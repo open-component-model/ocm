@@ -6,6 +6,7 @@ import (
 	"bytes"
 
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mandelsoft/logging/utils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
@@ -63,7 +64,7 @@ Yeah, it's rhabarb season - happy rhabarbing!
 			var stdlog bytes.Buffer
 
 			lctx := env.OCMContext().LoggingContext()
-			lctx.SetBaseLogger(logrusl.WithWriter(&stdlog).NewLogr())
+			lctx.SetBaseLogger(logrusl.WithWriter(utils.NewSyncWriter(&stdlog)).NewLogr())
 			MustBeSuccessful(env.CatchOutput(&stdout).
 				Execute("--config", "testdata/logcfg.yaml", "check", KIND, "-d", "jul/10"))
 

@@ -692,6 +692,12 @@ github.com/mandelsoft/logging v0.0.0-20240615201642-fe32f981337d h1:41As3yI4OS5b
 github.com/mandelsoft/logging v0.0.0-20240615201642-fe32f981337d/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
 github.com/mandelsoft/logging v0.0.0-20240616114550-e270f0a328c2 h1:c6NIjE9C+aHXSKZkaM0xysdnGgPslfevHcRu+JclINc=
 github.com/mandelsoft/logging v0.0.0-20240616114550-e270f0a328c2/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
+github.com/mandelsoft/logging v0.0.0-20240618071109-6b7bc4aeef05 h1:g7RQacJZSWVDqA2/0lXD6ZXgle0HMgS78HxGLfPzf7k=
+github.com/mandelsoft/logging v0.0.0-20240618071109-6b7bc4aeef05/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
+github.com/mandelsoft/logging v0.0.0-20240618073323-3ddfeaaa3285 h1:HXkwGat439AbEdS85QjYGs55ASyVqW2FFdsWJYpq3h8=
+github.com/mandelsoft/logging v0.0.0-20240618073323-3ddfeaaa3285/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
+github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a h1:MAvh0gbP2uwKmf7wWCkYCzrYa6vPjBvYeGhoUlVHwtI=
+github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
 github.com/mandelsoft/spiff v1.7.0-beta-5 h1:3kC10nTviDQhL8diSxp7i4IC2iSiDg6KPbH1CAq7Lfw=
 github.com/mandelsoft/spiff v1.7.0-beta-5/go.mod h1:TwEeOPuRZxlzQBCLEyVTlHmBSruSGGNdiQ2fovVJ8ao=
 github.com/mandelsoft/vfs v0.4.3 h1:2UMrxQkMXkcHyuqSFhgFDupQ1fmqpKLZuu04DOHx1PA=

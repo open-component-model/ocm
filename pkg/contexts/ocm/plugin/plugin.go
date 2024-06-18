@@ -134,7 +134,18 @@ func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) (result []by
 					w = os.Stderr
 				}
 			}
-			io.Copy(w, r)
+
+			// weaken the sync problem when merging log files.
+			// If a SyncWriter is used, the copy is done under a write lock.
+			// This is only a solution, if the log records are written
+			// by single write calls.
+			// The underlying logging apis do not expose their
+			// sync mechanism for writing log records.
+			if writer, ok := w.(io.ReaderFrom); ok {
+				writer.ReadFrom(r)
+			} else {
+				io.Copy(w, r)
+			}
 		}
 	}
 	return data, err
