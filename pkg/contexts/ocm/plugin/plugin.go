@@ -451,8 +451,9 @@ func (p *pluginImpl) Command(name string, reader io.Reader, writer io.Writer, cm
 		if err != nil {
 			return err
 		}
-		args = append(append(args, "--"+command.OptCliConfig, f.Name(), name), cmdargs...)
+		args = append(args, "--"+command.OptCliConfig, f.Name(), name)
 	}
+	args = append(append(args, name), cmdargs...)
 
 	_, err := p.Exec(reader, writer, args...)
 	return err

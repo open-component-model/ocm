@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 )
@@ -26,7 +27,9 @@ described by an access method descriptor (<CMD>` + p.Name() + ` descriptor</CMD>
 	var cliconfig string
 	cmd.Flags().StringVarP(&cliconfig, OptCliConfig, "", "", "path to cli configuration file")
 
+	found := false
 	for _, n := range p.Commands() {
+		found = true
 		c := n.Command()
 		c.TraverseChildren = true
 
@@ -43,6 +46,9 @@ described by an access method descriptor (<CMD>` + p.Name() + ` descriptor</CMD>
 			return nil
 		}
 		cmd.AddCommand(n.Command())
+	}
+	if found {
+		cobrautils.TweakHelpCommandFor(cmd)
 	}
 	return cmd
 }

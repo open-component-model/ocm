@@ -68,13 +68,8 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 	cmd.AddCommand(command.New(p))
 
 	cmd.InitDefaultHelpCmd()
-	var help *cobra.Command
-	for _, c := range cmd.Commands() {
-		if c.Name() == "help" {
-			help = c
-			break
-		}
-	}
+	help := cobrautils.GetHelpCommand(cmd)
+
 	// help.Use="help <topic>"
 	help.DisableFlagsInUseLine = true
 	cmd.AddCommand(descriptor.New())

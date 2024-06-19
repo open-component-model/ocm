@@ -1,9 +1,12 @@
 package cobrautils
 
 import (
+	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"golang.org/x/text/cases"
@@ -13,6 +16,8 @@ import (
 )
 
 var templatefuncs = map[string]interface{}{
+	"useLine":                useLine,
+	"commandPath":            commandPath,
 	"indent":                 indent,
 	"skipCommand":            skipCommand,
 	"soleCommand":            soleCommand,
@@ -20,6 +25,52 @@ var templatefuncs = map[string]interface{}{
 	"substituteCommandLinks": substituteCommandLinks,
 	"flagUsages":             flagUsages,
 	"commandList":            commandList,
+}
+
+const COMMAND_PATH_SUBSTITUTION = "ocm.software/commandPathSubstitution"
+
+func SetCommandSubstitutionForTree(cmd *cobra.Command, remove int, prepend []string) {
+	SetCommandSubstitution(cmd, remove, prepend)
+	for _, c := range cmd.Commands() {
+		SetCommandSubstitutionForTree(c, remove, prepend)
+	}
+}
+
+func SetCommandSubstitution(cmd *cobra.Command, remove int, prepend []string) {
+	if cmd.Annotations == nil {
+		cmd.Annotations = map[string]string{}
+	}
+	cmd.Annotations[COMMAND_PATH_SUBSTITUTION] = fmt.Sprintf("%d:%s", remove, strings.Join(prepend, " "))
+}
+
+func useLine(c *cobra.Command) string {
+	cp := commandPath(c)
+	i := strings.Index(c.Use, " ")
+	if i > 0 {
+		cp += c.Use[i:]
+	}
+	if !c.DisableFlagsInUseLine && c.HasAvailableFlags() && !strings.Contains(cp, "[flags]") {
+		cp += " [flags]"
+	}
+	return cp
+}
+
+func commandPath(c *cobra.Command) string {
+	if c.Annotations != nil {
+		subst := c.Annotations[COMMAND_PATH_SUBSTITUTION]
+		if subst != "" {
+			i := strings.Index(subst, ":")
+			if i > 0 {
+				remove, err := strconv.Atoi(subst[:i])
+				if err == nil {
+					fields := strings.Split(c.CommandPath(), " ")
+					fields = sliceutils.CopyAppend(strings.Split(subst[i+1:], " "), fields[remove:]...)
+					return strings.Join(fields, " ")
+				}
+			}
+		}
+	}
+	return c.CommandPath()
 }
 
 func flagUsages(fs *pflag.FlagSet) string {

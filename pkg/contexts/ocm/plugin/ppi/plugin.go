@@ -537,11 +537,6 @@ func (p *plugin) RegisterValueSet(s ValueSet) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var (
-	dummyMain = cobrautils.TweakCommand(&cobra.Command{Use: "ocm <sub command>"}, nil)
-	verbs     = map[string]*cobra.Command{}
-)
-
 func (p *plugin) GetCommand(name string) Command {
 	return p.clicmds[name]
 }
@@ -568,33 +563,25 @@ func (p *plugin) RegisterCommand(c Command) error {
 		CLIConfigRequired: c.CLIConfigRequired(),
 	})
 
-	parent := dummyMain
+	path := []string{"ocm"}
 	if c.Verb() != "" {
-		v := verbs[c.Verb()]
-		if v == nil {
-			v = &cobra.Command{Use: c.Verb() + " <sub command>"}
-			verbs[c.Name()] = v
-			parent.AddCommand(v)
-		}
-		parent = v
+		path = append(path, c.Verb())
 	}
-	helper := *cmd
-	parent.AddCommand(&helper)
-	orig := cmd.HelpFunc()
-	cmd.SetHelpFunc(func(_ *cobra.Command, args []string) {
-		eff := &helper
-		if len(args) > 0 {
-			for i := range len(args) {
-				if args[i] == "--help" {
-					if cmd.HasSubCommands() {
-						eff, _, _ = cmd.Find(args[i+1:])
-					}
-				}
-			}
-		}
-		orig(eff, args)
-	})
+	cobrautils.SetCommandSubstitutionForTree(cmd, 2, path)
 
+	orig := cmd.HelpFunc()
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		var err error
+		// look for arguments of the command.
+		// wrong args passed to help function, instead
+		// of the sub command args, the complete command line is
+		// passed.
+		_, args, err = cmd.Root().Traverse(args)
+		if len(args) > 0 && err == nil {
+			cmd, args, _ = cmd.Find(args)
+		}
+		orig(cmd, args)
+	})
 	p.clicmds[c.Name()] = c
 	return nil
 }

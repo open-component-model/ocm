@@ -1,6 +1,7 @@
 package cobrautils
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 
 func TweakCommand(cmd *cobra.Command, ctx out.Context) *cobra.Command {
 	if ctx != nil {
+		cmd.UseLine()
 		cmd.SetOut(ctx.StdOut())
 		cmd.SetErr(ctx.StdErr())
 		cmd.SetIn(ctx.StdIn())
@@ -127,4 +129,65 @@ func CleanMarkdown(s string) string {
 		r = append(r, l)
 	}
 	return strings.Join(r, "\n")
+}
+
+func GetHelpCommand(cmd *cobra.Command) *cobra.Command {
+	for _, c := range cmd.Commands() {
+		if c.Name() == "help" {
+			return c
+		}
+	}
+	return nil
+}
+
+// TweakHelpCommandFor generates a help command similar to the default cobra one,
+// which forwards the additional arguments to the help function.
+func TweakHelpCommandFor(c *cobra.Command) *cobra.Command {
+	c.InitDefaultHelpCmd()
+	defhelp := GetHelpCommand(c)
+	c.SetHelpCommand(nil)
+	c.RemoveCommand(defhelp)
+
+	var help *cobra.Command
+	help = &cobra.Command{
+		Use:   "help [command]",
+		Short: "Help about any command",
+		Long: `Help provides help for any command in the application.
+Simply type ` + c.Name() + ` help [path to command] for full details.`,
+		ValidArgsFunction: func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			var completions []string
+			cmd, _, e := c.Root().Find(args)
+			if e != nil {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+			if cmd == nil {
+				// Root help command.
+				cmd = c.Root()
+			}
+			for _, subCmd := range cmd.Commands() {
+				if subCmd.IsAvailableCommand() || subCmd == help {
+					if strings.HasPrefix(subCmd.Name(), toComplete) {
+						completions = append(completions, fmt.Sprintf("%s\t%s", subCmd.Name(), subCmd.Short))
+					}
+				}
+			}
+			return completions, cobra.ShellCompDirectiveNoFileComp
+		},
+		Run: func(c *cobra.Command, args []string) {
+			cmd, subargs, e := c.Parent().Find(args)
+			if cmd == nil || e != nil {
+				c.Printf("Unknown help topic %#q\n", args)
+				cobra.CheckErr(c.Root().Usage())
+			} else {
+				cmd.InitDefaultHelpFlag()    // make possible 'help' flag to be shown
+				cmd.InitDefaultVersionFlag() // make possible 'version' flag to be shown
+				cmd.HelpFunc()(cmd, subargs)
+			}
+		},
+		GroupID: defhelp.GroupID,
+	}
+
+	c.SetHelpCommand(help)
+	c.AddCommand(help)
+	return help
 }

@@ -254,14 +254,9 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.OverviewCommand(creds.NewCommand(opts.Context)))
 
 	opts.AddFlags(cmd.Flags())
-	cmd.InitDefaultHelpCmd()
-	var help *cobra.Command
-	for _, c := range cmd.Commands() {
-		if c.Name() == "help" {
-			help = c
-			break
-		}
-	}
+
+	help := cobrautils.TweakHelpCommandFor(cmd)
+
 	// help.Use="help <topic>"
 	help.DisableFlagsInUseLine = true
 	cmd.AddCommand(topicconfig.New(ctx))

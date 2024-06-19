@@ -3,6 +3,7 @@ package plugin
 import (
 	"strings"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -58,5 +59,5 @@ func (o *Command) Run() error {
 }
 
 func (o *Command) help(cmd *cobra.Command, args []string) {
-	o.plugin.Command(o.name, o.StdIn(), o.StdOut(), append([]string{"--help"}, o.args...))
+	o.plugin.Command(o.name, o.StdIn(), o.StdOut(), sliceutils.CopyAppend(args, "--help"))
 }

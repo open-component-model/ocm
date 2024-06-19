@@ -19,13 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
-const (
-	ARCH = "/tmp/ctf"
-	COMP = "acme.org/test"
-	VERS = "1.0.0"
-	PROV = "acme.org"
-)
-
 const KIND = "rhabarber"
 
 var _ = Describe("cliplugin", func() {
@@ -87,7 +80,7 @@ Yeah, it's rhabarb season - happy rhabarbing!
 		It("shows command help", func() {
 			var buf bytes.Buffer
 
-			MustBeSuccessful(env.CatchOutput(&buf).Execute("check", KIND, "--help", "xxx"))
+			MustBeSuccessful(env.CatchOutput(&buf).Execute("check", KIND, "--help"))
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 ocm check rhabarber — Determine Whether We Are In Rhubarb Season
 
@@ -104,7 +97,7 @@ Description:
 `))
 		})
 
-		FIt("shows command help from main command", func() {
+		It("shows command help from main command", func() {
 			var buf bytes.Buffer
 
 			MustBeSuccessful(env.CatchOutput(&buf).Execute("help", "check", KIND))
