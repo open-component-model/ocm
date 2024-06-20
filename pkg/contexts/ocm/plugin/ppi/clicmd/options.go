@@ -8,6 +8,7 @@ import (
 type Options struct {
 	RequireCLIConfig *bool
 	Verb             string
+	ObjectType       string
 	Realm            string
 }
 
@@ -19,15 +20,10 @@ func (o *Options) ApplyTo(opts *Options) {
 	if opts == nil {
 		return
 	}
-	if o.Verb != "" {
-		opts.Verb = o.Verb
-	}
-	if o.Realm != "" {
-		opts.Realm = o.Realm
-	}
-	if o.RequireCLIConfig != nil {
-		opts.RequireCLIConfig = o.RequireCLIConfig
-	}
+	optionutils.Transfer(&opts.Verb, o.Verb)
+	optionutils.Transfer(&opts.ObjectType, o.ObjectType)
+	optionutils.Transfer(&opts.Realm, o.Realm)
+	optionutils.Transfer(&opts.RequireCLIConfig, o.RequireCLIConfig)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,6 +36,18 @@ func (o verb) ApplyTo(opts *Options) {
 
 func WithVerb(v string) Option {
 	return verb(v)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type objtype string
+
+func (o objtype) ApplyTo(opts *Options) {
+	opts.ObjectType = string(o)
+}
+
+func WithObjectType(r string) Option {
+	return objtype(r)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

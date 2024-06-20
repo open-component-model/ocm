@@ -552,6 +552,11 @@ func (p *plugin) RegisterCommand(c Command) error {
 	if cmd.HasSubCommands() && c.Verb() != "" {
 		return errors.Newf("no sub commands allowd for CLI command for verb")
 	}
+
+	objtype := c.ObjectType()
+	if objtype == c.Name() {
+		objtype = ""
+	}
 	p.descriptor.Commands = append(p.descriptor.Commands, descriptor.CommandDescriptor{
 		Name:              c.Name(),
 		Description:       c.Description(),
@@ -559,15 +564,18 @@ func (p *plugin) RegisterCommand(c Command) error {
 		Short:             c.Short(),
 		Example:           c.Example(),
 		Realm:             c.Realm(),
+		ObjectType:        objtype,
 		Verb:              c.Verb(),
 		CLIConfigRequired: c.CLIConfigRequired(),
 	})
 
 	path := []string{"ocm"}
 	if c.Verb() != "" {
-		path = append(path, c.Verb())
+		path = append(path, c.Verb(), c.ObjectType())
+		cobrautils.SetCommandSubstitutionForTree(cmd, 3, path)
+	} else {
+		cobrautils.SetCommandSubstitutionForTree(cmd, 2, path)
 	}
-	cobrautils.SetCommandSubstitutionForTree(cmd, 2, path)
 
 	orig := cmd.HelpFunc()
 	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {

@@ -19,7 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
-const KIND = "rhabarber"
+const KIND = "rhubarb"
 
 var _ = Describe("cliplugin", func() {
 	Context("lib", func() {
@@ -82,14 +82,14 @@ Yeah, it's rhabarb season - happy rhabarbing!
 
 			MustBeSuccessful(env.CatchOutput(&buf).Execute("check", KIND, "--help"))
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-ocm check rhabarber — Determine Whether We Are In Rhubarb Season
+ocm check rhubarb — Determine Whether We Are In Rhubarb Season
 
 Synopsis:
-  ocm check rhabarber <options>
+  ocm check rhubarb <options>
 
 Flags:
   -d, --date string   the date to ask for (MM/DD)
-  -h, --help          help for rhabarber
+  -h, --help          help for check
 
 Description:
   The rhubarb season is between march and april.
@@ -102,14 +102,14 @@ Description:
 
 			MustBeSuccessful(env.CatchOutput(&buf).Execute("help", "check", KIND))
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-ocm check rhabarber — Determine Whether We Are In Rhubarb Season
+ocm check rhubarb — Determine Whether We Are In Rhubarb Season
 
 Synopsis:
-  ocm check rhabarber <options>
+  ocm check rhubarb <options>
 
 Flags:
   -d, --date string   the date to ask for (MM/DD)
-  -h, --help          help for rhabarber
+  -h, --help          help for check
 
 Description:
   The rhubarb season is between march and april.
@@ -129,12 +129,13 @@ Status:           valid
 Source:           manually installed
 Capabilities:     CLI Commands, Config Types
 Description: 
-      The plugin offers the top-level command rhabarber
+      The plugin offers the check command for object type rhubarb to check the rhubarb season.
 
 CLI Extensions:
-- Name:  rhabarber (determine whether we are in rhubarb season)
-  Verb:  check
-  Usage: rhabarber <options>
+- Name:   check (determine whether we are in rhubarb season)
+  Object: rhubarb
+  Verb:   check
+  Usage:  check rhubarb <options>
     The rhubarb season is between march and april.
 
 Config Types for CLI Command Extensions:

@@ -6,7 +6,7 @@ import (
 	// enable mandelsoft plugin logging configuration.
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/logging"
 
-	"github.com/open-component-model/ocm/cmds/cliplugin/cmds/rhabarber"
+	"github.com/open-component-model/ocm/cmds/cliplugin/cmds/check"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/clicmd"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds"
@@ -17,17 +17,17 @@ func main() {
 	p := ppi.NewPlugin("cliplugin", version.Get().String())
 
 	p.SetShort("Demo plugin with a simple cli extension")
-	p.SetLong("The plugin offers the top-level command rhabarber")
+	p.SetLong("The plugin offers the check command for object type rhubarb to check the rhubarb season.")
 
-	cmd, err := clicmd.NewCLICommand(rhabarber.New(), clicmd.WithCLIConfig(), clicmd.WithVerb("check"))
+	cmd, err := clicmd.NewCLICommand(check.New(), clicmd.WithCLIConfig(), clicmd.WithObjectType("rhubarb"), clicmd.WithVerb("check"))
 	if err != nil {
 		os.Exit(1)
 	}
 	p.RegisterCommand(cmd)
 	p.ForwardLogging()
 
-	p.RegisterConfigType(rhabarber.RhabarberType)
-	p.RegisterConfigType(rhabarber.RhabarberTypeV1)
+	p.RegisterConfigType(check.RhabarberType)
+	p.RegisterConfigType(check.RhabarberTypeV1)
 	err = cmds.NewPluginCommand(p).Execute(os.Args[1:])
 	if err != nil {
 		os.Exit(1)

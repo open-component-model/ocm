@@ -16,6 +16,7 @@ type CobraCommand struct {
 	cmd               *cobra.Command
 	verb              string
 	realm             string
+	objname           string
 	cliConfigRequired bool
 }
 
@@ -37,7 +38,7 @@ func NewCLICommand(cmd *cobra.Command, opts ...Option) (ppi.Command, error) {
 		return nil, errors.New("realm without verb not allowed")
 	}
 	cmd.DisableFlagsInUseLine = true
-	return &CobraCommand{cmd, eff.Verb, eff.Realm, optionutils.AsBool(eff.RequireCLIConfig, false)}, nil
+	return &CobraCommand{cmd, eff.Verb, eff.Realm, eff.ObjectType, optionutils.AsBool(eff.RequireCLIConfig, false)}, nil
 }
 
 func (c *CobraCommand) Name() string {
@@ -58,6 +59,13 @@ func (c *CobraCommand) Short() string {
 
 func (c *CobraCommand) Example() string {
 	return c.cmd.Example
+}
+
+func (c *CobraCommand) ObjectType() string {
+	if c.objname == "" {
+		return c.Name()
+	}
+	return c.objname
 }
 
 func (c *CobraCommand) Verb() string {

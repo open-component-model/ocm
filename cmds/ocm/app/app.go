@@ -293,30 +293,34 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 		}
 		for _, c := range p.GetDescriptor().Commands {
 			if c.Verb != "" {
+				objtype := c.Name
+				if c.ObjectType != "" {
+					objtype = c.ObjectType
+				}
 				v := cobrautils.Find(cmd, c.Verb)
 				if v == nil {
 					v := verbs.NewCommand(ctx, c.Verb, "additional plugin based commands")
 					cmd.AddCommand(v)
 				}
-				s := cobrautils.Find(v, c.Name)
+				s := cobrautils.Find(v, objtype)
 				if s != nil {
-					out.Errf(opts.Context, "duplicate cli command %q of plugin %q for verb %q", c.Name, p.Name(), c.Verb)
+					out.Errf(opts.Context, "duplicate cli command %q of plugin %q for verb %q", objtype, p.Name(), c.Verb)
 				} else {
-					v.AddCommand(plugin.NewCommand(ctx, p, c.Name))
+					v.AddCommand(plugin.NewCommand(ctx, p, c.Name, objtype))
 				}
 
 				if c.Realm != "" {
 					r := cobrautils.Find(cmd, c.Realm)
 					if r == nil {
-						out.Errf(opts.Context, "unknown realm %q for cli command %q of plugin %q", c.Realm, c.Name, p.Name())
+						out.Errf(opts.Context, "unknown realm %q for cli command %q of plugin %q", c.Realm, objtype, p.Name())
 					} else {
-						v := cobrautils.Find(r, c.Name)
+						v := cobrautils.Find(r, objtype)
 						if v == nil {
-							out.Errf(opts.Context, "unknown object %q for cli command %q of plugin %q", c.Realm, c.Name, p.Name())
+							out.Errf(opts.Context, "unknown object %q for cli command %q of plugin %q", c.Realm, objtype, p.Name())
 						} else {
 							s := cobrautils.Find(v, c.Verb)
 							if s != nil {
-								out.Errf(opts.Context, "duplicate cli command %q of plugin %q for realm %q verb %q", c.Name, p.Name(), c.Realm, c.Verb)
+								out.Errf(opts.Context, "duplicate cli command %q of plugin %q for realm %q verb %q", objtype, p.Name(), c.Realm, c.Verb)
 							} else {
 								v.AddCommand(plugin.NewCommand(ctx, p, c.Verb))
 							}

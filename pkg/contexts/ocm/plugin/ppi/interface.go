@@ -193,12 +193,26 @@ type ValueSet interface {
 
 // Command is the interface for a CLI command provided by a plugin.
 type Command interface {
+	// Name of command used in the plugin.
+	// This is also the default object type and is used to
+	// name top-level commands in the CLI.
 	Name() string
 	Description() string
 	Usage() string
 	Short() string
 	Example() string
+	// ObjectType is optional and can be used
+	// together with a verb. It then is used as
+	// sub command name for the object type.
+	// By default, the command name is used.
+	ObjectType() string
+	// Verb is optional and can be set
+	// to place the command in the verb hierarchy of
+	// the OCM CLI. It is used together with the ObjectType.
+	// (command will be *ocm <verb> <object type>*.
 	Verb() string
+	// Realm is optional and is used to place the command
+	// in a realm. This requires a verb.
 	Realm() string
 	CLIConfigRequired() bool
 

@@ -1,4 +1,4 @@
-package rhabarber
+package check
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
-const Name = "rhabarber"
+const Name = "check"
 
 var log = logging.DynamicLogger(logging.DefaultContext(), logging.NewRealm("cliplugin/rhabarber"))
 

@@ -411,16 +411,34 @@ func DescribeCLIExtensions(d *descriptor.Descriptor, out common.Printer) {
 		if s != "" {
 			s = " (" + s + ")"
 		}
-		out.Printf("- Name:  %s%s\n", n, s)
+		out.Printf("- Name:   %s%s\n", n, s)
 		if a.Description != "" {
+			if len(a.ObjectType) > 0 {
+				out.Printf("  Object: %s\n", a.ObjectType)
+			}
 			if len(a.Verb) > 0 {
-				out.Printf("  Verb:  %s\n", a.Verb)
+				out.Printf("  Verb:   %s\n", a.Verb)
 			}
 			if len(a.Realm) > 0 {
-				out.Printf("  Realm: %s\n", a.Realm)
+				out.Printf("  Realm:  %s\n", a.Realm)
 			}
 			if len(a.Usage) > 0 {
-				out.Printf("  Usage: %s\n", a.Usage)
+				usage := ""
+				if a.Verb != "" {
+					usage += " " + a.Verb
+					if a.ObjectType != "" {
+						usage += " " + a.ObjectType
+					} else {
+						usage += " " + a.Name
+					}
+				} else {
+					usage += " " + a.Name
+				}
+				i := strings.Index(a.Usage, " ")
+				if i > 0 {
+					usage += a.Usage[i:]
+				}
+				out.Printf("  Usage:  %s\n", usage[1:])
 			}
 			if a.Description != "" {
 				out.Printf("%s\n", utils2.IndentLines(a.Description, "    "))

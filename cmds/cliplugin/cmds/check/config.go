@@ -1,4 +1,4 @@
-package rhabarber
+package check
 
 import (
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"

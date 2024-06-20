@@ -217,6 +217,7 @@ func (a ActionDescriptor) GetDescription() string {
 type CommandDescriptor struct {
 	Name              string `json:"name"`
 	Description       string `json:"description,omitempty"`
+	ObjectType        string `json:"objectName,omitempty"`
 	Usage             string `json:"usage,omitempty"`
 	Short             string `json:"short,omitempty"`
 	Example           string `json:"example,omitempty"`
