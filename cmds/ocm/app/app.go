@@ -299,7 +299,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 				}
 				v := cobrautils.Find(cmd, c.Verb)
 				if v == nil {
-					v := verbs.NewCommand(ctx, c.Verb, "additional plugin based commands")
+					v = verbs.NewCommand(ctx, c.Verb, "additional plugin based commands")
 					cmd.AddCommand(v)
 				}
 				s := cobrautils.Find(v, objtype)

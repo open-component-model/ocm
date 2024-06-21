@@ -38,7 +38,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 PLUGIN VERSION SOURCE DESCRIPTION                    CAPABILITIES
-test   v1      local  a test plugin without function accessmethods
+test   v1      local  a test plugin without function Access Methods
 `))
 	})
 	It("get plugins with additional info", func() {
