@@ -10,6 +10,8 @@ COMMIT                                         := $(shell git rev-parse --verify
 CONTROLLER_TOOLS_VERSION ?= v0.14.0
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 
+PLATFORMS = windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64
+
 CREDS    ?=
 OCM      := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
 CTF_TYPE ?= tgz
@@ -39,6 +41,12 @@ build: ${SOURCES}
 	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/cliplugin ./cmds/cliplugin
 	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
 
+
+build-platforms: $(GEN)/.exists $(SOURCES)
+	@for i in $(PLATFORMS); do \
+    echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i); \
+    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build ./cmds/ocm ./cmds/helminstaller ./cmds/ecrplugin; \
+    done
 
 .PHONY: install-requirements
 install-requirements:

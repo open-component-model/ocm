@@ -93,11 +93,7 @@ func getWide(opts *output.Options) output.Output {
 
 func mapGetRegularOutput(e interface{}) interface{} {
 	p := handler.Elem(e)
-	loc := "local"
-	src := p.GetSource()
-	if src != nil {
-		loc = src.Component + ":" + src.Version
-	}
+	loc := p.GetInstallationInfo().GetInstallationSourceDescription()
 
 	features := p.GetDescriptor().Capabilities()
 	return []string{p.Name(), p.Version(), loc, p.Message(), strings.Join(features, ",")}

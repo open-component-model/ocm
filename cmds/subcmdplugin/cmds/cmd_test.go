@@ -9,21 +9,19 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 )
 
 var _ = Describe("subcmdplugin", func() {
 	Context("lib", func() {
 		var env *TestEnv
+		var plugins TempPluginDir
 
 		BeforeEach(func() {
 			env = NewTestEnv(TestData())
-
-			cache.DirectoryCache.Reset()
-			plugindirattr.Set(env.OCMContext(), "testdata/plugins")
+			plugins = Must(ConfigureTestPlugins(env, "testdata/plugins"))
 
 			registry := plugincacheattr.Get(env)
 			//	Expect(registration.RegisterExtensions(env)).To(Succeed())
@@ -33,6 +31,7 @@ var _ = Describe("subcmdplugin", func() {
 		})
 
 		AfterEach(func() {
+			plugins.Cleanup()
 			env.Cleanup()
 		})
 

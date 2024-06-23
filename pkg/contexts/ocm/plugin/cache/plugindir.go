@@ -7,12 +7,14 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/info"
+	"github.com/open-component-model/ocm/pkg/filelock"
 )
 
 type PluginDir = *pluginDirImpl
@@ -54,7 +56,7 @@ func (c *pluginDirImpl) Get(name string) Plugin {
 func (c *pluginDirImpl) add(name string, desc *descriptor.Descriptor, path string, errmsg string, list *errors.ErrorList) {
 	c.plugins[name] = NewPlugin(name, path, desc, errmsg)
 	if path != "" {
-		src, err := ReadPluginSource(filepath.Dir(path), filepath.Base(path))
+		src, err := readPluginInstalltionInfo(filepath.Dir(path), filepath.Base(path))
 		if err != nil && list != nil {
 			list.Add(fmt.Errorf("%s: %s", name, err.Error()))
 			return
@@ -68,8 +70,31 @@ func (c *pluginDirImpl) add(name string, desc *descriptor.Descriptor, path strin
 }
 
 func (c *pluginDirImpl) scan(path string) error {
+	fs := osfs.OsFs
+
+	ok, err := vfs.Exists(fs, path)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return nil
+	}
+	ok, err = vfs.IsDir(fs, path)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("plugin path %q is no directory", path)
+	}
+	lockfile, err := filelock.MutexFor(path)
+	if err != nil {
+		return err
+	}
+
+	var finalize finalizer.Finalizer
+	defer finalize.Finalize()
+
 	DirectoryCache.numOfScans++
-	fs := osfs.New()
 	entries, err := vfs.ReadDir(fs, path)
 	if err != nil {
 		return err
@@ -77,21 +102,60 @@ func (c *pluginDirImpl) scan(path string) error {
 	list := errors.ErrListf("scanning %q", path)
 	for _, fi := range entries {
 		if fi.Mode()&0o001 != 0 {
-			execpath := filepath.Join(path, fi.Name())
-			desc, err := GetPluginInfo(execpath)
+			loop := finalize.Nested()
+			lock, err := lockfile.Lock()
 			if err != nil {
-				c.add(fi.Name(), nil, execpath, err.Error(), list)
-				continue
+				return err
 			}
+			loop.Close(lock)
 
-			if desc.PluginName != fi.Name() {
-				c.add(fi.Name(), nil, execpath, fmt.Sprintf("nmatching plugin name %q", desc.PluginName), list)
-				continue
+			execpath := filepath.Join(path, fi.Name())
+			desc, err := getCachedPluginInfo(path, fi.Name())
+
+			errmsg := ""
+
+			if err != nil {
+				errmsg = err.Error()
+			} else {
+				if desc.PluginName != fi.Name() {
+					errmsg = fmt.Sprintf("nmatching plugin name %q", desc.PluginName)
+				}
 			}
-			c.add(desc.PluginName, desc, execpath, "", nil)
+			c.add(fi.Name(), desc, execpath, errmsg, list)
+			loop.Finalize()
 		}
 	}
 	return list.Result()
+}
+
+func GetCachedPluginInfo(dir string, name string) (*descriptor.Descriptor, error) {
+	l, err := filelock.LockDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	defer l.Close()
+	return getCachedPluginInfo(dir, name)
+}
+
+func getCachedPluginInfo(dir string, name string) (*descriptor.Descriptor, error) {
+	src, err := readPluginInstalltionInfo(dir, name)
+	if err != nil {
+		return nil, err
+	}
+	execpath := filepath.Join(dir, name)
+	if !src.IsValidPluginInfo(execpath) {
+		mod, err := src.UpdatePluginInfo(filepath.Join(dir, name))
+		if err != nil {
+			return nil, err
+		}
+		if mod {
+			err := writePluginInstallationInfo(src, dir, name)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return src.PluginInfo.Descriptor, nil
 }
 
 func GetPluginInfo(execpath string) (*descriptor.Descriptor, error) {

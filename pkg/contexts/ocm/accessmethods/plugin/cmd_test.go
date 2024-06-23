@@ -4,6 +4,8 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 	. "github.com/open-component-model/ocm/pkg/env"
 
 	"github.com/mandelsoft/goutils/sliceutils"
@@ -13,9 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 )
 
@@ -28,19 +27,19 @@ var _ = Describe("Add with new access method", func() {
 	var env *Environment
 	var ctx ocm.Context
 	var registry plugins.Set
+	var plugins TempPluginDir
 
 	BeforeEach(func() {
 		env = NewEnvironment(TestData())
 		ctx = env.OCMContext()
-
-		plugindirattr.Set(ctx, "testdata")
-		registry = plugincacheattr.Get(ctx)
+		plugins, registry = Must2(ConfigureTestPlugins2(env, "testdata"))
 		Expect(registration.RegisterExtensions(ctx)).To(Succeed())
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 	})
 
 	AfterEach(func() {
+		plugins.Cleanup()
 		env.Cleanup()
 	})
 

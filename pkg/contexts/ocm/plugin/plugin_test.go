@@ -6,6 +6,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 
 	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -27,12 +28,16 @@ import (
 var _ = Describe("setup plugin cache", func() {
 	var ctx ocm.Context
 	var registry plugins.Set
+	var plugins TempPluginDir
 
 	BeforeEach(func() {
 		cache.DirectoryCache.Reset()
 		ctx = ocm.New()
-		plugindirattr.Set(ctx, "testdata")
-		registry = plugincacheattr.Get(ctx)
+		plugins, registry = Must2(ConfigureTestPlugins2(ctx, "testdata"))
+	})
+
+	AfterEach(func() {
+		plugins.Cleanup()
 	})
 
 	It("finds plugin", func() {
@@ -52,7 +57,7 @@ var _ = Describe("setup plugin cache", func() {
 
 	It("scans only once", func() {
 		ctx = ocm.New()
-		plugindirattr.Set(ctx, "testdata")
+		plugindirattr.Set(ctx, plugins.Path())
 		registry = plugincacheattr.Get(ctx)
 
 		p := registry.Get("test")

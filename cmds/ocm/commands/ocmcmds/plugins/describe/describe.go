@@ -19,8 +19,8 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 	}
 	out.Printf("Status:           %s\n", "valid")
 	d := p.GetDescriptor()
-	src := p.GetSource()
-	if src != nil {
+	src := p.GetInstallationInfo()
+	if src != nil && src.HasSourceInfo() {
 		out.Printf("Source:\n")
 		out.Printf("  Component:       %s\n", src.Component)
 		out.Printf("  Version:         %s\n", src.Version)

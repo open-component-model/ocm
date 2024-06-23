@@ -6,16 +6,15 @@ import (
 	"bytes"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/logging/utils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 
 	"github.com/mandelsoft/logging/logrusl"
+	"github.com/mandelsoft/logging/utils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
@@ -24,12 +23,11 @@ const KIND = "rhubarb"
 var _ = Describe("cliplugin", func() {
 	Context("lib", func() {
 		var env *TestEnv
+		var plugins TempPluginDir
 
 		BeforeEach(func() {
 			env = NewTestEnv(TestData())
-
-			cache.DirectoryCache.Reset()
-			plugindirattr.Set(env.OCMContext(), "testdata/plugins")
+			plugins = Must(ConfigureTestPlugins(env, "testdata/plugins"))
 
 			registry := plugincacheattr.Get(env)
 			//	Expect(registration.RegisterExtensions(env)).To(Succeed())
@@ -39,6 +37,7 @@ var _ = Describe("cliplugin", func() {
 		})
 
 		AfterEach(func() {
+			plugins.Cleanup()
 			env.Cleanup()
 		})
 
@@ -124,7 +123,7 @@ Description:
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 Plugin Name:      cliplugin
 Plugin Version:   ` + version.Get().String() + `
-Path:             testdata/plugins/cliplugin
+Path:             ` + plugins.Path() + `/cliplugin
 Status:           valid
 Source:           manually installed
 Capabilities:     CLI Commands, Config Types
