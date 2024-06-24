@@ -6,8 +6,10 @@ on:
     paths:
     - go.mod
     - go.sum
-  workflow_dispatch:
-  workflow_call:
+  pull_request:
+    paths:
+    - go.mod
+    - go.sum
 
 jobs:
   updateVendorHash:
@@ -36,12 +38,14 @@ jobs:
       - name: Update ocm vendor hash
         run: nix run .#nixpkgs.nix-update -- --flake --version=skip ocm
       - name: Check diff and create action summary
-        id: check-diff
+        id: diff
         run: |
           diff=$(git diff)
           if [[ -z "$diff" ]]; then
             echo "Everything is tidy."
             exit 0
+          else
+            echo "exists=true" >> "$GITHUB_OUTPUT"
           fi
           cat << EOF >> "${GITHUB_STEP_SUMMARY}"
           Updates the vendorHash in \`flake.nix\`
@@ -54,8 +58,9 @@ jobs:
           \`\`\`
           EOF
       - name: Create Commit
+        if: ${{ steps.diff.outputs.exists }}
         # https://docs.github.com/de/rest/repos/contents?apiVersion=2022-11-28#create-or-update-file-contents
         run: |
           FILE=flake.nix
-          echo "{\"message\":\"auto update vendor hash\",\"content\":\"$(base64 -w0 ${FILE})\",\"sha\":\"$(git rev-parse :${FILE})\"}" > input.json
-          gh api -X PUT https://api.github.com/repos/open-component-model/ocm/contents/${FILE} --input input.json
+          echo "{\"message\":\"auto update vendor hash\",\"content\":\"$(base64 -w0 ${FILE})\",\"sha\":\"$(git rev-parse :${FILE})\",\"branch\":\"${{ github.head_ref }}\"}" > input.json
+          gh api -X PUT https://api.github.com/repos/${{ github.repository }}/contents/${FILE} --input input.json
