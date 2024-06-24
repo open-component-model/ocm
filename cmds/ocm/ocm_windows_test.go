@@ -23,7 +23,6 @@ var _ = Describe("OCM command line test Environment on Windows", func() {
 	It("Add OCI image resource fails when a cache directory is specified on Windows", func() {
 		// ocm create ca --file ca --scheme ocm.software/v3alpha1 --provider test.com test.com/postgresql 14.0.5
 		Expect(env.Execute("create", "ca", "--file", "ca", "--scheme", "ocm.software/v3alpha1", "--provider", "test.com", "test.com/postgresql", "14.0.5")).To(Succeed())
-
 		// ocm add resource --file ca --name bitnami-shell --type ociImage --accessType ociArtifact --version 10 --reference bitnami/postgresql:16.2.0-debian-11-r1
 		Expect(env.Execute("--config", "/testdata/ocmconfig-windows-cache.yaml", "add", "resource", "--file", "ca", "--name", "bitnami-shell", "--type", "ociImage", "--accessType", "ociArtifact", "--version", "10", "--reference", "bitnami/postgresql:16.2.0-debian-11-r1")).To(Succeed())
 	})
