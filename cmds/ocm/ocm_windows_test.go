@@ -1,4 +1,4 @@
-//go:build !windows
+//go:build windows
 
 package main_test
 
@@ -8,7 +8,7 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 )
 
-var _ = Describe("OCM command line test Environment (!windows)", func() {
+var _ = Describe("OCM command line test Environment on Windows", func() {
 	var env *TestEnv
 
 	BeforeEach(func() {
@@ -19,10 +19,12 @@ var _ = Describe("OCM command line test Environment (!windows)", func() {
 		env.Cleanup()
 	})
 
+	// https://github.com/open-component-model/ocm-project/issues/22
 	It("Add OCI image resource fails when a cache directory is specified on Windows", func() {
 		// ocm create ca --file ca --scheme ocm.software/v3alpha1 --provider test.com test.com/postgresql 14.0.5
 		Expect(env.Execute("create", "ca", "--file", "ca", "--scheme", "ocm.software/v3alpha1", "--provider", "test.com", "test.com/postgresql", "14.0.5")).To(Succeed())
+
 		// ocm add resource --file ca --name bitnami-shell --type ociImage --accessType ociArtifact --version 10 --reference bitnami/postgresql:16.2.0-debian-11-r1
-		Expect(env.Execute("--config", "/testdata/ocmconfig-cache.yaml", "add", "resource", "--file", "ca", "--name", "bitnami-shell", "--type", "ociImage", "--accessType", "ociArtifact", "--version", "10", "--reference", "bitnami/postgresql:16.2.0-debian-11-r1")).To(Succeed())
+		Expect(env.Execute("--config", "/testdata/ocmconfig-windows-cache.yaml", "add", "resource", "--file", "ca", "--name", "bitnami-shell", "--type", "ociImage", "--accessType", "ociArtifact", "--version", "10", "--reference", "bitnami/postgresql:16.2.0-debian-11-r1")).To(Succeed())
 	})
 })
