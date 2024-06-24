@@ -1,5 +1,0 @@
-type: generic.config.ocm.software/v1
-configurations:
-  - type: attributes.config.ocm.software
-    attributes:
-      cache: "/tmp/ocm-cache"
