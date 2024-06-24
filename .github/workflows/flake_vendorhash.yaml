@@ -62,5 +62,10 @@ jobs:
         # https://docs.github.com/de/rest/repos/contents?apiVersion=2022-11-28#create-or-update-file-contents
         run: |
           FILE=flake.nix
-          echo "{\"message\":\"auto update vendor hash\",\"content\":\"$(base64 -w0 ${FILE})\",\"sha\":\"$(git rev-parse :${FILE})\",\"branch\":\"${{ github.head_ref }}\"}" > input.json
+          BRANCH=${{ github.head_ref }}          
+          echo "{\"message\":\"auto update vendor hash\",\"content\":\"$(base64 -w0 ${FILE})\",\"sha\":\"$(git rev-parse :${FILE})\"" > input.json
+          if [[ -n "$BRANCH" ]]; then
+            echo ",\"branch\":\"${{ github.head_ref }}\"" >> input.json
+          fi
+          echo "}" >> input.json
           gh api -X PUT https://api.github.com/repos/${{ github.repository }}/contents/${FILE} --input input.json
