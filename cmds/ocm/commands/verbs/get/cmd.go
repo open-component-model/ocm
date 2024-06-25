@@ -3,6 +3,7 @@ package get
 import (
 	"github.com/spf13/cobra"
 
+	config "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/config/get"
 	credentials "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials/get"
 	artifacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/get"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
@@ -29,5 +30,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(credentials.NewCommand(ctx))
 	cmd.AddCommand(plugins.NewCommand(ctx))
 	cmd.AddCommand(routingslips.NewCommand(ctx))
+	cmd.AddCommand(config.NewCommand(ctx))
 	return cmd
 }

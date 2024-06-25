@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"io"
 
+	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
@@ -39,6 +42,7 @@ type Plugin interface {
 	SetShort(s string)
 	SetLong(s string)
 	SetConfigParser(config func(raw json.RawMessage) (interface{}, error))
+	ForwardLogging(b ...bool)
 
 	RegisterDownloader(arttype, mediatype string, u Downloader) error
 	GetDownloader(name string) Downloader
@@ -63,6 +67,14 @@ type Plugin interface {
 	RegisterValueSet(h ValueSet) error
 	DecodeValueSet(purpose string, data []byte) (runtime.TypedObject, error)
 	GetValueSet(purpose, name, version string) ValueSet
+
+	RegisterCommand(c Command) error
+	GetCommand(name string) Command
+	Commands() []Command
+
+	RegisterConfigType(c cpi.ConfigType) error
+	GetConfigType(name string) *descriptor.ConfigTypeDescriptor
+	ConfigTypes() []descriptor.ConfigTypeDescriptor
 
 	GetOptions() *Options
 	GetConfig() (interface{}, error)
@@ -177,4 +189,32 @@ type ValueSet interface {
 
 	ValidateSpecification(p Plugin, spec runtime.TypedObject) (info *ValueSetInfo, err error)
 	ComposeSpecification(p Plugin, opts Config, config Config) error
+}
+
+// Command is the interface for a CLI command provided by a plugin.
+type Command interface {
+	// Name of command used in the plugin.
+	// This is also the default object type and is used to
+	// name top-level commands in the CLI.
+	Name() string
+	Description() string
+	Usage() string
+	Short() string
+	Example() string
+	// ObjectType is optional and can be used
+	// together with a verb. It then is used as
+	// sub command name for the object type.
+	// By default, the command name is used.
+	ObjectType() string
+	// Verb is optional and can be set
+	// to place the command in the verb hierarchy of
+	// the OCM CLI. It is used together with the ObjectType.
+	// (command will be *ocm <verb> <object type>*.
+	Verb() string
+	// Realm is optional and is used to place the command
+	// in a realm. This requires a verb.
+	Realm() string
+	CLIConfigRequired() bool
+
+	Command() *cobra.Command
 }

@@ -23,6 +23,7 @@ ocm get [<options>] <sub command> ...
 
 * [ocm get <b>artifacts</b>](ocm_get_artifacts.md)	 &mdash; get artifact version
 * [ocm get <b>componentversions</b>](ocm_get_componentversions.md)	 &mdash; get component version
+* [ocm get <b>config</b>](ocm_get_config.md)	 &mdash; Get evaluated config for actual command call
 * [ocm get <b>credentials</b>](ocm_get_credentials.md)	 &mdash; Get credentials for a dedicated consumer spec
 * [ocm get <b>plugins</b>](ocm_get_plugins.md)	 &mdash; get plugins
 * [ocm get <b>references</b>](ocm_get_references.md)	 &mdash; get references of a component version

@@ -179,7 +179,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 		digestA := "01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d"
 		digestB := "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
 
-		localDigests := common.Properties{
+		localDigests := Substitutions{
 			"D_COMPA": digestA,
 			"D_COMPB": digestB,
 		}
@@ -522,7 +522,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 		D_COMPC := "b376a7b440c0b1e506e54a790966119a8e229cf9226980b84c628d77ef06fc58"
 		D_COMPD := "64674d3e2843d36c603f44477e4cd66ee85fe1a91227bbcd271202429024ed61"
 
-		localDigests := common.Properties{
+		localDigests := Substitutions{
 			"D_DATAA":    D_DATAA,
 			"D_DATAB":    D_DATAB,
 			"D_DATAB512": D_DATAB512,
@@ -1349,7 +1349,7 @@ const wrongDigest = "0a835d52867572bdaf7da7fb35ee59ad45c3db2dacdeeca62178edd5d07
 
 type EntryCheck interface {
 	Mode() string
-	Check1CheckD(cvd ocm.ComponentVersionAccess, d common.Properties)
+	Check1CheckD(cvd ocm.ComponentVersionAccess, d Substitutions)
 	Check1CheckA(cva ocm.ComponentVersionAccess, d *metav1.DigestSpec, mopts ...ocm.ModificationOption)
 	Check1Corrupt(cva ocm.ComponentVersionAccess, f *Finalizer, cvd ocm.ComponentVersionAccess)
 
@@ -1362,7 +1362,7 @@ func (*EntryLocal) Mode() string {
 	return DIGESTMODE_LOCAL
 }
 
-func (*EntryLocal) Check1CheckD(cvd ocm.ComponentVersionAccess, _ common.Properties) {
+func (*EntryLocal) Check1CheckD(cvd ocm.ComponentVersionAccess, _ Substitutions) {
 	ExpectWithOffset(1, cvd.GetDescriptor().NestedDigests).To(BeNil())
 }
 
@@ -1392,7 +1392,7 @@ func (*EntryTop) Mode() string {
 	return DIGESTMODE_TOP
 }
 
-func (*EntryTop) Check1CheckD(cvd ocm.ComponentVersionAccess, digests common.Properties) {
+func (*EntryTop) Check1CheckD(cvd ocm.ComponentVersionAccess, digests Substitutions) {
 	ExpectWithOffset(1, cvd.GetDescriptor().NestedDigests).NotTo(BeNil())
 	ExpectWithOffset(1, cvd.GetDescriptor().NestedDigests.String()).To(StringEqualTrimmedWithContext(`
 github.com/mandelsoft/ref:v1: SHA-256:${D_COMPB}[jsonNormalisation/v1]

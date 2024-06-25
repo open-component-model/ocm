@@ -10,7 +10,7 @@ command line options of the main command (see [ocm](ocm.md)).
 
 The following options are available in the currently used version of the
 OCM library:
-- <code>github.com/mandelsoft/logforward</code>: *logconfig* Logging config structure used for config forwarding
+- <code>github.com/mandelsoft/logforward</code> [<code>logfwd</code>]: *logconfig* Logging config structure used for config forwarding
 
   This attribute is used to specify a logging configuration intended
   to be forwarded to other tools.
@@ -133,7 +133,7 @@ OCM library:
 
   Directory to look for OCM plugin executables.
 
-- <code>github.com/mandelsoft/ocm/rootcerts</code>: *JSON*
+- <code>github.com/mandelsoft/ocm/rootcerts</code> [<code>rootcerts</code>]: *JSON*
 
   General root certificate settings given as JSON document with the following
   format:
@@ -184,6 +184,10 @@ OCM library:
   The temporary blob cache is used to accessing large blobs from remote sytems.
   The are temporarily stored in the filesystem, instead of the memory, to avoid
   blowing up the memory consumption.
+
+- <code>ocm.software/cliconfig</code> [<code>cliconfig</code>]: *cliconfigr* Configuration Object passed to command line pluging.
+
+
 
 - <code>ocm.software/compositionmode</code> [<code>compositionmode</code>]: *bool* (default: false
 

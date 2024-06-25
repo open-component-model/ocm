@@ -1,14 +1,14 @@
 package logopts
 
 import (
+	"encoding/json"
 	"fmt"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/logging/config"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -19,11 +19,13 @@ var _ = Describe("log configuration", func() {
 		ctx := clictx.New()
 
 		opts := Options{
-			LogLevel: "debug",
-			LogKeys: []string{
-				"tag=trace",
-				"/realm=info",
-				"/+all=info",
+			ConfigFragment: ConfigFragment{
+				LogLevel: "debug",
+				LogKeys: []string{
+					"tag=trace",
+					"/realm=info",
+					"/+all=info",
+				},
 			},
 		}
 
@@ -43,5 +45,14 @@ var _ = Describe("log configuration", func() {
 		Expect(logctx.Logger(logging.NewRealm("realm")).Enabled(logging.DebugLevel)).To(BeFalse())
 		Expect(logctx.Logger(logging.NewRealm("realm/test")).Enabled(logging.InfoLevel)).To(BeTrue())
 		Expect(logctx.Logger(logging.NewRealm("realm/test")).Enabled(logging.DebugLevel)).To(BeTrue())
+	})
+
+	Context("serialize", func() {
+		It("does not serialize log file name", func() {
+			var c ConfigFragment
+			c.LogFileName = "test"
+			data := Must(json.Marshal(&c))
+			Expect(string(data)).To(Equal("{}"))
+		})
 	})
 })

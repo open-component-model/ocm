@@ -5,15 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/pkg/cobrautils/logopts/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/clicfgattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
@@ -24,6 +29,7 @@ import (
 	accval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action/execute"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/command"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler"
 	merge "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/mergehandler/execute"
@@ -74,6 +80,75 @@ func (p *pluginImpl) SetConfig(config json.RawMessage) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	p.config = config
+}
+
+func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) (result []byte, rerr error) {
+	var (
+		finalize finalizer.Finalizer
+		err      error
+		logfile  *os.File
+	)
+
+	defer finalize.FinalizeWithErrorPropagationf(&rerr, "error processing plugin command %s", args[0])
+
+	if p.GetDescriptor().ForwardLogging {
+		logfile, err = os.CreateTemp("", "ocm-plugin-log-*")
+		if rerr != nil {
+			return nil, err
+		}
+		logfile.Close()
+		finalize.With(func() error {
+			return os.Remove(logfile.Name())
+		}, "failed to remove temporary log file %s", logfile.Name())
+
+		lcfg := &logging.LoggingConfiguration{}
+		_, err = p.Context().ConfigContext().ApplyTo(0, lcfg)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot extract plugin logging configration")
+		}
+		lcfg.LogFileName = logfile.Name()
+		data, err := json.Marshal(lcfg)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot marshal plugin logging configration")
+		}
+		args = append([]string{"--" + ppi.OptPlugingLogConfig, string(data)}, args...)
+	}
+
+	if len(p.config) == 0 {
+		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args)
+	} else {
+		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args, "config", p.config)
+	}
+	data, err := cache.Exec(p.Path(), p.config, r, w, args...)
+
+	if logfile != nil {
+		r, oerr := os.OpenFile(logfile.Name(), vfs.O_RDONLY, 0o600)
+		if oerr == nil {
+			finalize.Close(r, "plugin logfile", logfile.Name())
+			w := p.ctx.LoggingContext().Tree().LogWriter()
+			if w == nil {
+				if logging.GlobalLogFile != nil {
+					w = logging.GlobalLogFile.File()
+				}
+				if w == nil {
+					w = os.Stderr
+				}
+			}
+
+			// weaken the sync problem when merging log files.
+			// If a SyncWriter is used, the copy is done under a write lock.
+			// This is only a solution, if the log records are written
+			// by single write calls.
+			// The underlying logging apis do not expose their
+			// sync mechanism for writing log records.
+			if writer, ok := w.(io.ReaderFrom); ok {
+				writer.ReadFrom(r)
+			} else {
+				io.Copy(w, r)
+			}
+		}
+	}
+	return data, err
 }
 
 func (p *pluginImpl) MergeValue(specification *valuemergehandler.Specification, local, inbound valuemergehandler.Value) (bool, *valuemergehandler.Value, error) {
@@ -293,15 +368,6 @@ func (p *pluginImpl) Download(name string, r io.Reader, artType, mimeType, targe
 	return m.Path != "", m.Path, nil
 }
 
-func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) ([]byte, error) {
-	if len(p.config) == 0 {
-		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args)
-	} else {
-		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args, "config", p.config)
-	}
-	return cache.Exec(p.Path(), p.config, r, w, args...)
-}
-
 func (p *pluginImpl) ValidateValueSet(purpose string, spec []byte) (*ppi.ValueSetInfo, error) {
 	result, err := p.Exec(nil, nil, valueset.Name, vsval.Name, purpose, string(spec))
 	if err != nil {
@@ -346,4 +412,49 @@ func (p *pluginImpl) ComposeValueSet(purpose, name string, opts flagsets.ConfigO
 		base[k] = v
 	}
 	return nil
+}
+
+func (p *pluginImpl) Command(name string, reader io.Reader, writer io.Writer, cmdargs []string) (rerr error) {
+	var finalize finalizer.Finalizer
+	cmd := p.GetDescriptor().Commands.Get(name)
+	if cmd == nil {
+		return errors.ErrNotFound("command", name)
+	}
+
+	defer finalize.FinalizeWithErrorPropagationf(&rerr, "error processing plugin command call %s", name)
+
+	var f vfs.File
+
+	args := []string{command.Name}
+
+	a := clicfgattr.Get(p.Context())
+	if a != nil && cmd.CLIConfigRequired {
+		cfgdata, err := json.Marshal(a)
+		if err != nil {
+			return errors.Wrapf(err, "cannot marshal CLI config")
+		}
+		// cannot use a vfs here, since it's not possible to pass it to the plugin
+		f, err = os.CreateTemp("", "cli-om-config-*")
+		if err != nil {
+			return err
+		}
+		finalize.With(func() error {
+			return os.Remove(f.Name())
+		}, "failed to remove temporary config file %s", f.Name())
+
+		_, err = f.Write(cfgdata)
+		if err != nil {
+			f.Close()
+			return err
+		}
+		err = f.Close()
+		if err != nil {
+			return err
+		}
+		args = append(args, "--"+command.OptCliConfig, f.Name(), name)
+	}
+	args = append(append(args, name), cmdargs...)
+
+	_, err := p.Exec(reader, writer, args...)
+	return err
 }

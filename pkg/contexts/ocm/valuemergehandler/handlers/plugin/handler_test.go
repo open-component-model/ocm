@@ -6,10 +6,10 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/valuemergehandler/handlers/defaultmerge"
@@ -24,16 +24,18 @@ const (
 var _ = Describe("plugin value merge handler", func() {
 	var ctx ocm.Context
 	var env *Builder
+	var plugins TempPluginDir
 	var registry valuemergehandler.Registry
 
 	BeforeEach(func() {
 		env = NewBuilder(nil)
 		ctx = env.OCMContext()
-		plugindirattr.Set(ctx, "testdata")
+		plugins = Must(ConfigureTestPlugins(ctx, "testdata"))
 		registry = valuemergehandler.For(ctx)
 	})
 
 	AfterEach(func() {
+		plugins.Cleanup()
 		env.Cleanup()
 	})
 

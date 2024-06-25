@@ -68,14 +68,15 @@ type AppliedConfig struct {
 	description string
 }
 
-func (c *AppliedConfig) eval(ctx Context) Config {
+func (c *AppliedConfig) eval(ctx Context) (Config, error) {
 	if e, ok := c.config.(Evaluator); ok {
 		n, err := e.Evaluate(ctx)
-		if err == nil {
-			c.config = n
+		if err != nil {
+			return c.config, err
 		}
+		c.config = n
 	}
-	return c.config
+	return c.config, nil
 }
 
 type ConfigStore struct {

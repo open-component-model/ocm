@@ -42,7 +42,7 @@ func TargetFunction[T any](f func() T) func() interface{} {
 
 // NewUpdater create a configuration updater for a configuration target
 // based on a dedicated configuration context.
-func NewUpdater(ctx Context, target interface{}) Updater {
+func NewUpdater(ctx ContextProvider, target interface{}) Updater {
 	var targetFunc func() interface{}
 	if f, ok := target.(func() interface{}); ok {
 		targetFunc = f
@@ -50,14 +50,14 @@ func NewUpdater(ctx Context, target interface{}) Updater {
 		targetFunc = func() interface{} { return target }
 	}
 	return &updater{
-		ctx:        ctx,
+		ctx:        ctx.ConfigContext(),
 		targetFunc: targetFunc,
 	}
 }
 
-func NewUpdaterForFactory[T any](ctx Context, t func() T) Updater {
+func NewUpdaterForFactory[T any](ctx ContextProvider, t func() T) Updater {
 	return &updater{
-		ctx:        ctx,
+		ctx:        ctx.ConfigContext(),
 		targetFunc: TargetFunction(t),
 	}
 }

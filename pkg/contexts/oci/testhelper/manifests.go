@@ -1,7 +1,8 @@
 package testhelper
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/mandelsoft/goutils/testutils"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
@@ -23,7 +24,7 @@ const (
 	OCILAYER     = "manifestlayer"
 )
 
-var OCIDigests = common.Properties{
+var OCIDigests = testutils.Substitutions{
 	"D_OCIMANIFEST1":     D_OCIMANIFEST1,
 	"H_OCIARCHMANIFEST1": H_OCIARCHMANIFEST1,
 	"D_OCIMANIFEST2":     D_OCIMANIFEST2,

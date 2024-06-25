@@ -1,7 +1,8 @@
 package testhelper
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/mandelsoft/goutils/testutils"
+
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/blob"
 	"github.com/open-component-model/ocm/pkg/env/builder"
@@ -17,7 +18,7 @@ func TextResourceDigestSpec(d string) *metav1.DigestSpec {
 	}
 }
 
-var Digests = common.Properties{
+var Digests = testutils.Substitutions{
 	"D_TESTDATA":  D_TESTDATA,
 	"D_OTHERDATA": D_OTHERDATA,
 }

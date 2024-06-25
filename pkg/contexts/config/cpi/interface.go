@@ -54,11 +54,11 @@ func IsGeneric(cfg Config) bool {
 
 type Updater = internal.Updater
 
-func NewUpdater(ctx Context, target interface{}) Updater {
+func NewUpdater(ctx ContextProvider, target interface{}) Updater {
 	return internal.NewUpdater(ctx, target)
 }
 
-func NewUpdaterForFactory[T any](ctx Context, f func() T) Updater {
+func NewUpdaterForFactory[T any](ctx ContextProvider, f func() T) Updater {
 	return internal.NewUpdaterForFactory(ctx, f)
 }
 

@@ -146,6 +146,8 @@ func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
 	if IsGeneric(cfg) {
 		s.unknown = true
 		return nil, errors.ErrUnknown(KIND_CONFIGTYPE, s.GetType())
+	} else {
+		s.unknown = false
 	}
 	return cfg, nil
 }

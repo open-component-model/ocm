@@ -64,30 +64,30 @@ type OptionHandler interface {
 	Propagate(e *Environment)
 }
 
-type dummyOptionHandler struct{}
+type DefaultOptionHandler struct{}
 
-var _ OptionHandler = (*dummyOptionHandler)(nil)
+var _ OptionHandler = (*DefaultOptionHandler)(nil)
 
-func (o dummyOptionHandler) Propagate(e *Environment) {
+func (o DefaultOptionHandler) Propagate(e *Environment) {
 }
 
-func (o dummyOptionHandler) OCMContext() ocm.Context {
+func (o DefaultOptionHandler) OCMContext() ocm.Context {
 	return nil
 }
 
-func (o dummyOptionHandler) GetFilesystem() vfs.FileSystem {
+func (o DefaultOptionHandler) GetFilesystem() vfs.FileSystem {
 	return nil
 }
 
-func (o dummyOptionHandler) GetFailHandler() FailHandler {
+func (o DefaultOptionHandler) GetFailHandler() FailHandler {
 	return nil
 }
 
-func (o dummyOptionHandler) GetEnvironment() *Environment {
+func (o DefaultOptionHandler) GetEnvironment() *Environment {
 	return nil
 }
 
-func (dummyOptionHandler) Mount(*composefs.ComposedFileSystem) error {
+func (DefaultOptionHandler) Mount(*composefs.ComposedFileSystem) error {
 	return nil
 }
 
@@ -125,7 +125,7 @@ func (FailHandler) Propagate(e *Environment) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type fsOpt struct {
-	dummyOptionHandler
+	DefaultOptionHandler
 	path string
 	fs   vfs.FileSystem
 }
@@ -158,7 +158,7 @@ func (o fsOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 ////////////////////////////////////////////////////////////////////////////////
 
 type ctxOpt struct {
-	dummyOptionHandler
+	DefaultOptionHandler
 	ctx ocm.Context
 }
 
@@ -179,7 +179,7 @@ func (o ctxOpt) OCMContext() ocm.Context {
 ////////////////////////////////////////////////////////////////////////////////
 
 type propOpt struct {
-	dummyOptionHandler
+	DefaultOptionHandler
 }
 
 func UseAsContextFileSystem() Option {
@@ -197,7 +197,7 @@ func (o ctxOpt) Propagate(e *Environment) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type tdOpt struct {
-	dummyOptionHandler
+	DefaultOptionHandler
 	path       string
 	source     string
 	modifiable bool
@@ -306,7 +306,7 @@ func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 ////////////////////////////////////////////////////////////////////////////////
 
 type envOpt struct {
-	dummyOptionHandler
+	DefaultOptionHandler
 	env *Environment
 }
 

@@ -1,20 +1,13 @@
 package keyoption
 
 import (
-	"crypto/x509"
-	"fmt"
-	"reflect"
-	"strings"
-
-	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/signutils"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -29,102 +22,24 @@ func New() *Option {
 	return &Option{}
 }
 
+type EvaluatedOptions struct {
+	RootCerts signutils.GenericCertificatePool
+	Keys      signing.KeyRegistry
+}
+
 type Option struct {
-	DefaultName string
-	publicKeys  []string
-	privateKeys []string
-	issuers     []string
-	rootCAs     []string
-	RootCerts   signutils.GenericCertificatePool
-	Keys        signing.KeyRegistry
+	ConfigFragment
+	*EvaluatedOptions
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
-	fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
-	fs.StringArrayVarP(&o.issuers, "issuer", "I", nil, "issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>")
-	fs.StringArrayVarP(&o.rootCAs, "ca-cert", "", nil, "additional root certificate authorities (for signing certificates)")
+	o.ConfigFragment.AddFlags(fs)
 }
 
-func (o *Option) Configure(ctx clictx.Context) error {
-	if o.Keys == nil {
-		o.Keys = signing.NewKeyRegistry()
-	}
-	err := o.HandleKeys(ctx, "public key", o.publicKeys, o.Keys.RegisterPublicKey)
-	if err != nil {
-		return err
-	}
-	err = o.HandleKeys(ctx, "private key", o.privateKeys, o.Keys.RegisterPrivateKey)
-	if err != nil {
-		return err
-	}
-	for _, i := range o.issuers {
-		name := o.DefaultName
-		is := i
-		sep := strings.Index(i, ":=")
-		if sep >= 0 {
-			name = i[:sep]
-			is = i[sep+1:]
-		}
-		old := o.Keys.GetIssuer(name)
-		dn, err := signutils.ParseDN(is)
-		if err != nil {
-			return errors.Wrapf(err, "issuer %q", i)
-		}
-		if old != nil && !reflect.DeepEqual(old, dn) {
-			return fmt.Errorf("issuer already set (%s)", i)
-		}
-
-		o.Keys.RegisterIssuer(name, dn)
-	}
-
-	if len(o.rootCAs) > 0 {
-		var list []*x509.Certificate
-		for _, r := range o.rootCAs {
-			data, err := utils.ReadFile(r, ctx.FileSystem())
-			if err != nil {
-				return errors.Wrapf(err, "root CA")
-			}
-			certs, err := signutils.GetCertificateChain(data, false)
-			if err != nil {
-				return errors.Wrapf(err, "root CA")
-			}
-			list = append(list, certs...)
-		}
-		o.RootCerts = list
-	}
-	return nil
-}
-
-func (o *Option) HandleKeys(ctx clictx.Context, desc string, keys []string, add func(string, interface{})) error {
-	name := o.DefaultName
-	for _, k := range keys {
-		file := k
-		sep := strings.Index(k, "=")
-		if sep > 0 {
-			name = k[:sep]
-			file = k[sep+1:]
-		}
-		if len(file) == 0 {
-			return errors.Newf("%s: empty file name", desc)
-		}
-		var data []byte
-		var err error
-		switch file[0] {
-		case '=', '!', '@':
-			data, err = utils.ResolveData(file, ctx.FileSystem())
-		default:
-			data, err = utils.ReadFile(file, ctx.FileSystem())
-		}
-		if err != nil {
-			return errors.Wrapf(err, "cannot read %s file %q", desc, file)
-		}
-		if name == "" {
-			return errors.Newf("%s: key name required", desc)
-		}
-		add(name, data)
-	}
-	return nil
+func (o *Option) Configure(ctx ocm.Context) error {
+	var err error
+	o.EvaluatedOptions, err = o.ConfigFragment.Evaluate(ctx, nil)
+	return err
 }
 
 func Usage() string {

@@ -7,11 +7,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -26,6 +26,7 @@ const (
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
+	var plugins TempPluginDir
 
 	BeforeEach(func() {
 		env = NewTestEnv()
@@ -39,7 +40,8 @@ var _ = Describe("Test Environment", func() {
 		env.RSAKeyPair(PROVIDER)
 
 		ctx := env.OCMContext()
-		plugindirattr.Set(ctx, "testdata")
+		plugins = Must(ConfigureTestPlugins(env, "testdata"))
+
 		registry := plugincacheattr.Get(ctx)
 		Expect(registration.RegisterExtensions(ctx)).To(Succeed())
 		p := registry.Get("test")
@@ -47,6 +49,7 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	AfterEach(func() {
+		plugins.Cleanup()
 		env.Cleanup()
 	})
 

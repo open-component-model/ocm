@@ -9,8 +9,9 @@ plugin <subcommand> <options> <args>
 ### Options
 
 ```
-  -c, --config YAML   plugin configuration
-  -h, --help          help for plugin
+  -c, --config YAML       plugin configuration
+  -h, --help              help for plugin
+      --log-config YAML   ocm logging configuration
 ```
 
 ### Description
@@ -71,4 +72,5 @@ apabilities of the plugin.
 
 ##### Additional Help Topics
 
+* [plugin <b>command</b>](plugin_command.md)	 &mdash; CLI command extensions
 * [plugin <b>descriptor</b>](plugin_descriptor.md)	 &mdash; Plugin Descriptor Format Description

@@ -64,9 +64,10 @@ var _ = Describe("Test Environment", func() {
 		var m map[string]interface{}
 		Expect(json.Unmarshal(buf.Bytes(), &m)).To(Succeed())
 	})
+
 	It("do logging", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "logtest")).To(Succeed())
+		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "-X", "plugindir=xxx", "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
 V[2] warn realm ocm realm test
 ERROR <nil> error realm ocm realm test
@@ -135,9 +136,15 @@ ERROR <nil> ctxerror realm ocm realm test
 		Expect(err).To(Succeed())
 
 		fmt.Printf("%s\n", string(data))
-		// {"level":"error","msg":"error","realm":"test","time":"2024-03-27 09:54:19"}
-		// {"level":"error","msg":"ctxerror","realm":"test","time":"2024-03-27 09:54:19"}
-		Expect(len(string(data))).To(Equal(312))
+		// 2024-06-16T13:59:34+02:00 warning [test] warn
+		// 2024-06-16T13:59:34+02:00 error   [test] error
+		// 2024-06-16T13:59:34+02:00 warning [test] ctxwarn
+		// 2024-06-16T13:59:34+02:00 error   [test] ctxerror
+		Expect(string(data)).To(MatchRegexp(`.* warning \[test\] warn
+.* error   \[test\] error
+.* warning \[test\] ctxwarn
+.* error   \[test\] ctxerror
+`))
 	})
 
 	It("sets attr from file", func() {

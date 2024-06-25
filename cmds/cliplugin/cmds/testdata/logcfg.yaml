@@ -1,0 +1,13 @@
+type: generic.config.ocm.software
+configurations:
+  - type: rhabarber.config.acme.org
+    start: jul/1
+    end: jul/31
+  - type: logging.config.ocm.software/v1
+    contextType: "global"
+    settings:
+      rules:
+        - rule:
+            level: "Debug"
+            conditions:
+            - realmprefix: "cliplugin"

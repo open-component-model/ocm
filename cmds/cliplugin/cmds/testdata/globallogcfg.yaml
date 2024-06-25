@@ -1,0 +1,27 @@
+{
+  "type":"generic.config.ocm.software",
+  "configurations":[
+    {"configurations":[
+      {
+        "type": "logging.config.ocm.software/v1",
+        "contextType": "global",
+        "settings": {
+          "rules": [
+            {
+              "rule": {
+                "level": "Debug",
+                "conditions": [
+                  {
+                    "realmprefix": "cliplugin",
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+     "type":"generic.config.ocm.software"
+    }
+  ]
+}

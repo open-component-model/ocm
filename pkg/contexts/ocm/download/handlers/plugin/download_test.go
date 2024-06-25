@@ -9,6 +9,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -17,8 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/plugin"
@@ -68,14 +67,14 @@ var _ = Describe("setup plugin cache", func() {
 	var registry plugins.Set
 	var repodir string
 	var env *Builder
+	var plugins TempPluginDir
 
 	BeforeEach(func() {
 		repodir = Must(os.MkdirTemp(os.TempDir(), "uploadtest-*"))
 
 		env = NewBuilder(nil)
 		ctx = env.OCMContext()
-		plugindirattr.Set(ctx, "testdata")
-		registry = plugincacheattr.Get(ctx)
+		plugins, registry = Must2(ConfigureTestPlugins2(env, "testdata"))
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 
@@ -83,6 +82,7 @@ var _ = Describe("setup plugin cache", func() {
 	})
 
 	AfterEach(func() {
+		plugins.Cleanup()
 		env.Cleanup()
 		os.RemoveAll(repodir)
 	})

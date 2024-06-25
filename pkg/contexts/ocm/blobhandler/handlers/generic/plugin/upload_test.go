@@ -10,6 +10,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -19,8 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/generic/plugin"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -87,6 +86,7 @@ var _ = Describe("setup plugin cache", func() {
 	var registry plugins.Set
 	var repodir string
 	var env *Builder
+	var plugins TempPluginDir
 
 	accessSpec := NewAccessSpec(MEDIA, "given", REPO)
 	repoSpec := NewRepoSpec(REPO)
@@ -96,8 +96,7 @@ var _ = Describe("setup plugin cache", func() {
 
 		env = NewBuilder(nil)
 		ctx = env.OCMContext()
-		plugindirattr.Set(ctx, "testdata")
-		registry = plugincacheattr.Get(ctx)
+		plugins, registry = Must2(ConfigureTestPlugins2(env, "testdata"))
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 
@@ -119,6 +118,7 @@ var _ = Describe("setup plugin cache", func() {
 	})
 
 	AfterEach(func() {
+		plugins.Cleanup()
 		env.Cleanup()
 		os.RemoveAll(repodir)
 	})
@@ -131,7 +131,8 @@ var _ = Describe("setup plugin cache", func() {
 		defer Close(cv, "source version")
 
 		_, _, err := plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}"))
-		MustFailWithMessage(err, "plugin uploader test/testuploader: path missing in repository spec")
+		fmt.Printf("error %q\n", err)
+		MustFailWithMessage(err, "plugin uploader test/testuploader: error processing plugin command upload: path missing in repository spec")
 		repospec := Must(json.Marshal(repoSpec))
 		name, keys, err := plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", repospec)
 		MustBeSuccessful(err)
@@ -169,7 +170,8 @@ var _ = Describe("setup plugin cache", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv, "source version")
 
-		MustFailWithMessage(blobhandler.RegisterHandlerByName(ctx, "plugin/test", []byte("{}"), blobhandler.ForArtifactType(RSCTYPE)), "plugin uploader test/testuploader: path missing in repository spec")
+		MustFailWithMessage(blobhandler.RegisterHandlerByName(ctx, "plugin/test", []byte("{}"), blobhandler.ForArtifactType(RSCTYPE)),
+			"plugin uploader test/testuploader: error processing plugin command upload: path missing in repository spec")
 		repospec := Must(json.Marshal(repoSpec))
 		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "plugin/test", repospec))
 
