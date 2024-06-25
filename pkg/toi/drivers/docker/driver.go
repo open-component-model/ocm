@@ -207,7 +207,10 @@ func (d *Driver) initializeDockerCli() (command.Cli, error) {
 	}
 
 	if d.config[OptionQuiet] == "1" {
-		cli.Apply(command.WithCombinedStreams(io.Discard))
+		err = cli.Apply(command.WithCombinedStreams(io.Discard))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	d.dockerCli = cli
@@ -259,7 +262,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error staging files: %w", err)
 	}
-	options := types.CopyToContainerOptions{
+	options := container.CopyToContainerOptions{
 		AllowOverwriteDirWithFile: false,
 	}
 	// This copies the tar to the root of the container. The tar has been assembled using the
