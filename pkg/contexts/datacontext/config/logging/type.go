@@ -4,6 +4,7 @@ import (
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
 
+	logdata "github.com/open-component-model/ocm/pkg/cobrautils/logopts/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	local "github.com/open-component-model/ocm/pkg/logging"
@@ -30,7 +31,7 @@ type Config struct {
 	ContextType string        `json:"contextType,omitempty"`
 	Settings    logcfg.Config `json:"settings"`
 
-	// ExtraId is used to the context type "default" or "global" to be able
+	// ExtraId is used for the context type "default", "ocm" or "global" to be able
 	// to reapply the same config again using a different
 	// identity given by the settings hash + the id.
 	ExtraId string `json:"extraId,omitempty"`
@@ -67,11 +68,17 @@ func (c *Config) GetType() string {
 }
 
 func (c *Config) ApplyTo(ctx cpi.Context, target interface{}) error {
-	lctx, ok := target.(logging.ContextProvider)
-	if !ok {
-		return cpi.ErrNoContext("logging context")
+	// first: check for forward configuration
+	if lc, ok := target.(*logdata.LoggingConfiguration); ok {
+		switch c.ContextType {
+		case "default", "ocm", "global", "slave":
+			lc.LogConfig.DefaultLevel = c.Settings.DefaultLevel
+			lc.LogConfig.Rules = append(lc.LogConfig.Rules, c.Settings.Rules...)
+		}
+		return nil
 	}
 
+	// second: main use case is to configure vrious logging contexts
 	switch c.ContextType {
 	// configure local static logging context.
 	// here, config is only applied once for every
@@ -79,8 +86,14 @@ func (c *Config) ApplyTo(ctx cpi.Context, target interface{}) error {
 	case "default":
 		return local.Configure(&c.Settings, c.ExtraId)
 
+	case "ocm":
+		return local.ConfigureOCM(&c.Settings, c.ExtraId)
+
 	case "global":
 		return local.ConfigureGlobal(&c.Settings, c.ExtraId)
+
+	case "slave":
+		return nil
 
 	// configure logging context providers.
 	case "":
@@ -97,6 +110,10 @@ func (c *Config) ApplyTo(ctx cpi.Context, target interface{}) error {
 		if dc.GetType() != c.ContextType {
 			return cpi.ErrNoContext(c.ContextType)
 		}
+	}
+	lctx, ok := target.(logging.ContextProvider)
+	if !ok {
+		return cpi.ErrNoContext("logging context")
 	}
 	return logcfg.DefaultRegistry().Configure(lctx.LoggingContext(), &c.Settings)
 }

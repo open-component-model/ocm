@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -30,21 +29,18 @@ func DefaultConfig() (string, error) {
 	return filepath.Join(d, ConfigFileName), nil
 }
 
-func DefaultConfigHandler(cfg config.Context) error {
+func DefaultConfigHandler(cfg config.Context) (string, config.Config, error) {
 	// use docker config as default config for ocm cli
 	d, err := DefaultConfig()
 	if err != nil {
-		return nil
+		return "", nil, nil
 	}
-	if ok, err := vfs.FileExists(osfs.New(), d); ok && err == nil {
+	if ok, err := vfs.FileExists(osfs.OsFs, d); ok && err == nil {
 		ccfg := credcfg.New()
 		ccfg.AddRepository(NewRepositorySpec(d, true))
-		err = cfg.ApplyConfig(ccfg, d)
-		if err != nil {
-			return errors.Wrapf(err, "cannot apply npm config %q", d)
-		}
+		return d, ccfg, nil
 	}
-	return nil
+	return "", nil, nil
 }
 
 var desc = fmt.Sprintf(`

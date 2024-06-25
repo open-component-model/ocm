@@ -1,6 +1,9 @@
 package output
 
 import (
+	"fmt"
+	"io"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	. "github.com/open-component-model/ocm/pkg/out"
 
@@ -9,11 +12,46 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
-type ElementOutput struct {
-	source  ProcessingSource
-	Elems   data.Iterable
+type DestinationOutput struct {
 	Context Context
-	Status  error
+	out     io.Writer
+}
+
+var _ Destination = (*DestinationOutput)(nil)
+
+func (this *DestinationOutput) SetDestination(d io.Writer) {
+	this.out = d
+}
+
+func (this *DestinationOutput) Printf(msg string, args ...interface{}) {
+	if this.out != nil {
+		fmt.Fprintf(this.out, msg, args...)
+	} else {
+		fmt.Fprintf(this.Context.StdOut(), msg, args...)
+	}
+}
+
+func (this *DestinationOutput) Print(args ...interface{}) {
+	if this.out != nil {
+		fmt.Fprint(this.out, args...)
+	} else {
+		fmt.Fprint(this.Context.StdOut(), args...)
+	}
+}
+
+func (this *DestinationOutput) Write(data []byte) (int, error) {
+	if this.out != nil {
+		return this.out.Write(data)
+	} else {
+		return this.Context.StdOut().Write(data)
+	}
+}
+
+type ElementOutput struct {
+	DestinationOutput
+	source ProcessingSource
+	Elems  data.Iterable
+	Status error
 }
 
 var _ Output = (*ElementOutput)(nil)

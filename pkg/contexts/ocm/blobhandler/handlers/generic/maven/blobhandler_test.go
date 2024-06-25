@@ -32,6 +32,10 @@ var _ = Describe("blobhandler generic maven tests", func() {
 		repo = maven.NewFileRepository(MAVEN_PATH, env.FileSystem())
 	})
 
+	AfterEach(func() {
+		env.Cleanup()
+	})
+
 	It("Unmarshal upload response Body", func() {
 		resp := `{ "repo" : "ocm-mvn-test",
 		  			"path" : "/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar",

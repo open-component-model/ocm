@@ -1,10 +1,10 @@
 package cobrautils
 
-const HelpTemplate = "{{.CommandPath}} \u2014 {{title .Short}}" + `{{if .IsAvailableCommand}}
+const HelpTemplate = "{{commandPath .}} \u2014 {{title .Short}}" + `{{if .IsAvailableCommand}}
 
 Synopsis:{{if .Runnable}}
-  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
-  {{if or .Runnable (soleCommand .Use)}}{{if .HasAvailableLocalFlags}}{{.CommandPath}} [<options>] <sub-command> ...{{else}}{{.CommandPath}} <sub-command> ...{{end}}{{else}}{{.UseLine}}{{end}}{{end}}{{if gt (len .Aliases) 0}}
+  {{useLine .}}{{end}}{{if .HasAvailableSubCommands}}
+  {{if or .Runnable (soleCommand .Use)}}{{if .HasAvailableLocalFlags}}{{commandPath .}} [<options>] <sub-command> ...{{else}}{{commandPath .}} <sub-command> ...{{end}}{{else}}{{useLine .}}{{end}}{{end}}{{if gt (len .Aliases) 0}}
 
 Aliases:
   {{.NameAndAliases}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
@@ -20,20 +20,20 @@ Global Flags:
 
 Description:
 {{with (or .Long .Short)}}{{. | substituteCommandLinks | trimTrailingWhitespaces | indent 2}}{{end}}{{if .HasAvailableSubCommands}}
-  Use {{.CommandPath}} <command> -h for additional help.
+  Use {{commandPath .}} <command> -h for additional help.
 {{end}}{{if .HasExample}}
 
 Examples:
 {{.Example | indent 2}}{{end}}{{if .HasHelpSubCommands}}
 
 Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
-  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+  {{rpad (commandPath .) .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
 {{end}}
 `
 
 const UsageTemplate = `Synopsis:{{if .Runnable}}
-  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}{{if .HasAvailableLocalFlags}}
-  {{.CommandPath}} [<options>] <sub-command> ...{{else}}{{.CommandPath}} <sub-command> ...{{end}}{{end}}{{if gt (len .Aliases) 0}}
+  {{useLine .}}{{end}}{{if .HasAvailableSubCommands}}{{if .HasAvailableLocalFlags}}
+  {{commandPath .}} [<options>] <sub-command> ...{{else}}{{commandPath .}} <sub-command> ...{{end}}{{end}}{{if gt (len .Aliases) 0}}
 
 Aliases:
   {{.NameAndAliases}}{{end}}{{if .HasExample}}
@@ -51,7 +51,7 @@ Global Flags:
 {{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
 
 Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
-  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+  {{rpad (commandPath .) .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
 
-Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+Use "{{commandPath .}} [command] --help" for more information about a command.{{end}}
 `

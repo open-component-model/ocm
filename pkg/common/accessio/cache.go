@@ -232,8 +232,8 @@ func (c *blobCache) AddBlob(blob blobaccess.BlobAccess) (int64, digest.Digest, e
 	if err != nil {
 		return blobaccess.BLOB_UNKNOWN_SIZE, "", errors.Wrapf(err, "cannot create blob file in cache")
 	}
-	defer writer.Close()
 	size, err := io.Copy(writer, reader)
+	writer.Close()
 	if err != nil {
 		c.cache.Remove(tmp)
 		return blobaccess.BLOB_UNKNOWN_SIZE, "", err

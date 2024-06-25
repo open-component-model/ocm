@@ -70,6 +70,16 @@ func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descrip
 		out.Printf("Label Merge Specifications:\n")
 		DescribeLabelMergeSpecifications(d, out)
 	}
+	if len(d.Commands) > 0 {
+		out.Printf("\n")
+		out.Printf("CLI Extensions:\n")
+		DescribeCLIExtensions(d, out)
+	}
+	if len(d.ConfigTypes) > 0 {
+		out.Printf("\n")
+		out.Printf("Config Types for CLI Command Extensions:\n")
+		DescribeConfigTypes(d, out)
+	}
 }
 
 type MethodInfo struct {
@@ -384,6 +394,124 @@ func DescribeValueSets(d *descriptor.Descriptor, out common.Printer) {
 			if len(v.Options) > 0 {
 				out.Printf("Command Line Options:")
 				out.Printf("%s\n", utils2.FormatMap("", v.Options))
+			}
+		}
+	}
+}
+
+func DescribeCLIExtensions(d *descriptor.Descriptor, out common.Printer) {
+	handlers := map[string]descriptor.CommandDescriptor{}
+	for _, h := range d.Commands {
+		handlers[h.GetName()] = h
+	}
+
+	for _, n := range utils2.StringMapKeys(handlers) {
+		a := handlers[n]
+		s := a.Short
+		if s != "" {
+			s = " (" + s + ")"
+		}
+		out.Printf("- Name:   %s%s\n", n, s)
+		if a.Description != "" {
+			if len(a.ObjectType) > 0 {
+				out.Printf("  Object: %s\n", a.ObjectType)
+			}
+			if len(a.Verb) > 0 {
+				out.Printf("  Verb:   %s\n", a.Verb)
+			}
+			if len(a.Realm) > 0 {
+				out.Printf("  Realm:  %s\n", a.Realm)
+			}
+			if len(a.Usage) > 0 {
+				usage := ""
+				if a.Verb != "" {
+					usage += " " + a.Verb
+					if a.ObjectType != "" {
+						usage += " " + a.ObjectType
+					} else {
+						usage += " " + a.Name
+					}
+				} else {
+					usage += " " + a.Name
+				}
+				i := strings.Index(a.Usage, " ")
+				if i > 0 {
+					usage += a.Usage[i:]
+				}
+				out.Printf("  Usage:  %s\n", usage[1:])
+			}
+			if a.Description != "" {
+				out.Printf("%s\n", utils2.IndentLines(a.Description, "    "))
+			}
+			if a.Example != "" {
+				out.Printf("  Example:\n")
+				out.Printf("%s\n", utils2.IndentLines(a.Example, "    "))
+			}
+		}
+	}
+}
+
+type TypeInfo struct {
+	Name        string
+	Description string
+	Versions    map[string]*TypeVersion
+}
+
+type TypeVersion struct {
+	Name   string
+	Format string
+}
+
+func GetTypeInfo(types []descriptor.ConfigTypeDescriptor) map[string]*TypeInfo {
+	found := map[string]*TypeInfo{}
+	for _, m := range types {
+		i := found[m.Name]
+		if i == nil {
+			i = &TypeInfo{
+				Name:        m.Name,
+				Description: m.Description,
+				Versions:    map[string]*TypeVersion{},
+			}
+			found[m.Name] = i
+		}
+		if i.Description == "" {
+			i.Description = m.Description
+		}
+		vers := m.Version
+		if m.Version == "" {
+			vers = "v1"
+		}
+		v := i.Versions[vers]
+		if v == nil {
+			v = &TypeVersion{
+				Name: vers,
+			}
+			i.Versions[vers] = v
+		}
+		if v.Format == "" {
+			v.Format = m.Format
+		}
+	}
+	return found
+}
+
+func DescribeConfigTypes(d *descriptor.Descriptor, out common.Printer) {
+	types := GetTypeInfo(d.ConfigTypes)
+
+	for _, n := range utils2.StringMapKeys(types) {
+		out.Printf("- Name: %s\n", n)
+		m := types[n]
+		if m.Description != "" {
+			out.Printf("%s\n", utils2.IndentLines(m.Description, "    "))
+		}
+		out := out.AddGap("  ")
+		out.Printf("Versions:\n")
+		for _, vn := range utils2.StringMapKeys(m.Versions) {
+			out.Printf("- Version: %s\n", vn)
+			out := out.AddGap("  ")
+			v := m.Versions[vn]
+			if v.Format != "" {
+				out.Printf("%s\n", v.Format)
 			}
 		}
 	}

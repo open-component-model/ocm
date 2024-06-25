@@ -25,6 +25,16 @@ The following configuration types are supported:
          &lt;name>: &lt;yaml defining the attribute>
          ...
   </pre>
+- <code>cli.ocm.config.ocm.software</code>
+  The config type <code>cli.ocm.config.ocm.software</code> is used to handle the
+  main configuration flags of the OCM command line tool.
+
+  <pre>
+      type: cli.ocm.config.ocm.software
+      aliases:
+         &lt;name>: &lt;OCI registry specification>
+         ...
+  </pre>
 - <code>credentials.config.ocm.software</code>
   The config type <code>credentials.config.ocm.software</code> can be used to define a list
   of arbitrary configuration specifications:

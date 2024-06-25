@@ -223,6 +223,9 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 		})
 	} else {
 		if component == nil {
+			if repo == nil {
+				return nil, errors.Wrapf(err, "%s: invalid component version reference", name)
+			}
 			return h.all(repo)
 		} else {
 			versions, err := component.ListVersions()

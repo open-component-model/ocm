@@ -93,35 +93,9 @@ func getWide(opts *output.Options) output.Output {
 
 func mapGetRegularOutput(e interface{}) interface{} {
 	p := handler.Elem(e)
-	loc := "local"
-	src := p.GetSource()
-	if src != nil {
-		loc = src.Component + ":" + src.Version
-	}
+	loc := p.GetInstallationInfo().GetInstallationSourceDescription()
 
-	var features []string
-	if len(p.GetDescriptor().AccessMethods) > 0 {
-		features = append(features, "accessmethods")
-	}
-	if len(p.GetDescriptor().Uploaders) > 0 {
-		features = append(features, "uploaders")
-	}
-	if len(p.GetDescriptor().Downloaders) > 0 {
-		features = append(features, "downloaders")
-	}
-	if len(p.GetDescriptor().Actions) > 0 {
-		features = append(features, "actions")
-	}
-	if len(p.GetDescriptor().ValueSets) > 0 {
-		features = append(features, "valuesets")
-	}
-	if len(p.GetDescriptor().ValueMergeHandlers) > 0 {
-		features = append(features, "mergehandlers")
-	}
-	if len(p.GetDescriptor().LabelMergeSpecifications) > 0 {
-		features = append(features, "mergespecs")
-	}
-
+	features := p.GetDescriptor().Capabilities()
 	return []string{p.Name(), p.Version(), loc, p.Message(), strings.Join(features, ",")}
 }
 

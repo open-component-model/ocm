@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"runtime"
+	"time"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -20,15 +22,73 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/extraid"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/pkg/filelock"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
-type PluginSource struct {
-	Repository *cpi.GenericRepositorySpec `json:"repository"`
-	Component  string                     `json:"component"`
-	Version    string                     `json:"version"`
-	Resource   string                     `json:"resource"`
+type PluginInfo struct {
+	Size       int64                  `json:"size,omitempty"`
+	ModTime    time.Time              `json:"modtime,omitempty"`
+	Descriptor *descriptor.Descriptor `json:"descriptor,omitempty"`
+}
+
+type PluginSourceInfo struct {
+	Repository *cpi.GenericRepositorySpec `json:"repository,omitempty"`
+	Component  string                     `json:"component,omitempty"`
+	Version    string                     `json:"version,omitempty"`
+	Resource   string                     `json:"resource,omitempty"`
+}
+
+type PluginInstallationInfo struct {
+	PluginSourceInfo `json:",inline"`
+	PluginInfo       *PluginInfo `json:"info,omitempty"`
+}
+
+func (p *PluginInstallationInfo) GetInstallationSourceDescription() string {
+	if p != nil && p.HasSourceInfo() {
+		return p.Component + ":" + p.Version
+	}
+	return "local"
+}
+
+func (p *PluginInstallationInfo) HasSourceInfo() bool {
+	return p.Repository != nil && p.Component != "" && p.Version != "" && p.Resource != ""
+}
+
+func (p *PluginInstallationInfo) IsValidPluginInfo(execpath string) bool {
+	if !p.HasPluginInfo() {
+		return false
+	}
+	fi, err := os.Stat(execpath)
+	if err != nil {
+		return false
+	}
+	return fi.Size() == p.PluginInfo.Size && fi.ModTime() == p.PluginInfo.ModTime
+}
+
+func (p *PluginInstallationInfo) UpdatePluginInfo(execpath string) (bool, error) {
+	desc, err := GetPluginInfo(execpath)
+	if err != nil {
+		return false, err
+	}
+	fi, err := os.Stat(execpath)
+	if err != nil {
+		return false, err
+	}
+	n := &PluginInfo{
+		Size:       fi.Size(),
+		ModTime:    fi.ModTime(),
+		Descriptor: desc,
+	}
+	mod := !reflect.DeepEqual(n, p.PluginInfo)
+	p.PluginInfo = n
+	return mod, nil
+}
+
+func (p *PluginInstallationInfo) HasPluginInfo() bool {
+	return p.PluginInfo != nil
 }
 
 type PluginUpdater struct {
@@ -48,19 +108,6 @@ func NewPluginUpdater(ctx ocm.ContextProvider, printer common.Printer) *PluginUp
 		Context: ctx.OCMContext(),
 		Printer: common.AssurePrinter(printer),
 	}
-}
-
-func (o *PluginUpdater) SetupCurrent(name string) error {
-	dir := plugindirattr.Get(o.Context)
-	if dir == "" {
-		return fmt.Errorf("no plugin dir configured")
-	}
-	src, err := ReadPluginSource(dir, name)
-	if err != nil {
-		return nil
-	}
-	o.Current = src.Version
-	return nil
 }
 
 func (o *PluginUpdater) Remove(session ocm.Session, name string) error {
@@ -87,9 +134,12 @@ func (o *PluginUpdater) Update(session ocm.Session, name string) error {
 	if dir == "" {
 		return fmt.Errorf("no plugin dir configured")
 	}
-	src, err := ReadPluginSource(dir, name)
+	src, err := readPluginInstalltionInfo(dir, name)
 	if err != nil {
 		return err
+	}
+	if !src.HasSourceInfo() {
+		return fmt.Errorf("no source information available for plugin %s", name)
 	}
 	o.Current = src.Version
 	repo, err := session.LookupRepository(o.Context, src.Repository)
@@ -236,10 +286,6 @@ func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAcc
 		}
 		o.Printer.Printf("%s", string(data))
 	} else {
-		err := o.SetupCurrent(desc.PluginName)
-		if err != nil {
-			return err
-		}
 		if cv.GetVersion() == o.Current {
 			o.Printer.Printf("version %s already installed\n", o.Current)
 			if !o.Force {
@@ -248,6 +294,12 @@ func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAcc
 		}
 		dir := plugindirattr.Get(o.Context)
 		if dir != "" {
+			lock, err := filelock.LockDir(dir)
+			if err != nil {
+				return err
+			}
+			defer lock.Close()
+
 			target := filepath.Join(dir, desc.PluginName)
 
 			verb := "installing"
@@ -273,7 +325,7 @@ func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAcc
 			_, err = io.Copy(dst, src)
 			utils2.IgnoreError(src.Close())
 			utils2.IgnoreError(os.Remove(file.Name()))
-			utils2.IgnoreError(WritePluginSource(dir, cv, found.Meta().Name, desc.PluginName))
+			utils2.IgnoreError(SetPluginSourceInfo(dir, cv, found.Meta().Name, desc.PluginName))
 			if err != nil {
 				return errors.Wrapf(err, "cannot copy plugin file %s", target)
 			}
@@ -293,19 +345,30 @@ func RemovePluginSource(dir string, name string) error {
 	return RemoveFile(filepath.Join(dir, "."+name+".info"))
 }
 
-func WritePluginSource(dir string, cv ocm.ComponentVersionAccess, rsc, name string) error {
+func SetPluginSourceInfo(dir string, cv ocm.ComponentVersionAccess, rsc, name string) error {
+	src, err := readPluginInstalltionInfo(dir, name)
+	if err != nil {
+		return err
+	}
 	spec, err := cpi.ToGenericRepositorySpec(cv.Repository().GetSpecification())
 	if err != nil {
 		return err
 	}
-	cv.Repository().GetSpecification()
-	src := &PluginSource{
+	src.PluginSourceInfo = PluginSourceInfo{
 		Repository: spec,
 		Component:  cv.GetName(),
 		Version:    cv.GetVersion(),
 		Resource:   rsc,
 	}
 
+	_, err = src.UpdatePluginInfo(filepath.Join(dir, name))
+	if err != nil {
+		return err
+	}
+	return writePluginInstallationInfo(src, dir, name)
+}
+
+func writePluginInstallationInfo(src *PluginInstallationInfo, dir string, name string) error {
 	data, err := json.Marshal(src)
 	if err != nil {
 		return err
@@ -314,13 +377,16 @@ func WritePluginSource(dir string, cv ocm.ComponentVersionAccess, rsc, name stri
 	return os.WriteFile(filepath.Join(dir, "."+name+".info"), data, 0o644)
 }
 
-func ReadPluginSource(dir string, name string) (*PluginSource, error) {
+func readPluginInstalltionInfo(dir string, name string) (*PluginInstallationInfo, error) {
 	data, err := os.ReadFile(filepath.Join(dir, "."+name+".info"))
 	if err != nil {
-		return nil, fmt.Errorf("no source information available for plugin %s", name)
+		if !errors.Is(err, os.ErrNotExist) {
+			return nil, errors.Wrapf(err, "cannot read plugin info for %s", name)
+		}
+		return &PluginInstallationInfo{}, nil
 	}
 
-	var src PluginSource
+	var src PluginInstallationInfo
 	if err := json.Unmarshal(data, &src); err != nil {
 		return nil, errors.Wrapf(err, "cannot unmarshal source information")
 	}

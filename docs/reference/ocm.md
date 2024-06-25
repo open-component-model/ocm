@@ -16,6 +16,7 @@ ocm [<options>] <sub command> ...
   -C, --cred stringArray          credential setting
   -h, --help                      help for ocm
   -I, --issuer stringArray        issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>
+      --logJson                   log as json instead of human readable logs
       --logconfig string          log config
   -L, --logfile string            set log file
       --logkeys stringArray       log tags/realms(with leading /) to be enabled ([/[+]]name{,[/[+]]name}[=level])
@@ -117,7 +118,7 @@ an <code>@</code>, the logging configuration is taken from a file.
 
 The value can be a simple type or a JSON/YAML string for complex values
 (see [ocm attributes](ocm_attributes.md). The following attributes are supported:
-- <code>github.com/mandelsoft/logforward</code>: *logconfig* Logging config structure used for config forwarding
+- <code>github.com/mandelsoft/logforward</code> [<code>logfwd</code>]: *logconfig* Logging config structure used for config forwarding
 
   This attribute is used to specify a logging configuration intended
   to be forwarded to other tools.
@@ -240,7 +241,7 @@ The value can be a simple type or a JSON/YAML string for complex values
 
   Directory to look for OCM plugin executables.
 
-- <code>github.com/mandelsoft/ocm/rootcerts</code>: *JSON*
+- <code>github.com/mandelsoft/ocm/rootcerts</code> [<code>rootcerts</code>]: *JSON*
 
   General root certificate settings given as JSON document with the following
   format:
@@ -291,6 +292,10 @@ The value can be a simple type or a JSON/YAML string for complex values
   The temporary blob cache is used to accessing large blobs from remote sytems.
   The are temporarily stored in the filesystem, instead of the memory, to avoid
   blowing up the memory consumption.
+
+- <code>ocm.software/cliconfig</code> [<code>cliconfig</code>]: *cliconfigr* Configuration Object passed to command line pluging.
+
+
 
 - <code>ocm.software/compositionmode</code> [<code>compositionmode</code>]: *bool* (default: false
 

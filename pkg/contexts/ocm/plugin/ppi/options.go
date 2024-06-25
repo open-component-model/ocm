@@ -8,10 +8,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 )
 
+const (
+	OptPluginConfig     = "config"
+	OptPlugingLogConfig = "log-config"
+)
+
 type Options struct {
-	Config json.RawMessage
+	Config    json.RawMessage
+	LogConfig json.RawMessage
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	flag.YAMLVarP(fs, &o.Config, "config", "c", nil, "plugin configuration")
+	flag.YAMLVarP(fs, &o.Config, OptPluginConfig, "c", nil, "plugin configuration")
+	flag.YAMLVarP(fs, &o.LogConfig, OptPlugingLogConfig, "", nil, "ocm logging configuration")
 }

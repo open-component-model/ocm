@@ -9,11 +9,12 @@ import (
 const VERSION = "v1"
 
 type Descriptor struct {
-	Version       string `json:"version,omitempty"`
-	PluginName    string `json:"pluginName"`
-	PluginVersion string `json:"pluginVersion"`
-	Short         string `json:"shortDescription"`
-	Long          string `json:"description"`
+	Version        string `json:"version,omitempty"`
+	PluginName     string `json:"pluginName"`
+	PluginVersion  string `json:"pluginVersion"`
+	Short          string `json:"shortDescription"`
+	Long           string `json:"description"`
+	ForwardLogging bool   `json:"forwardLogging"`
 
 	Actions                  []ActionDescriptor                `json:"actions,omitempty"`
 	AccessMethods            []AccessMethodDescriptor          `json:"accessMethods,omitempty"`
@@ -22,6 +23,8 @@ type Descriptor struct {
 	ValueMergeHandlers       List[ValueMergeHandlerDescriptor] `json:"valueMergeHandlers,omitempty"`
 	LabelMergeSpecifications List[LabelMergeSpecification]     `json:"labelMergeSpecifications,omitempty"`
 	ValueSets                List[ValueSetDescriptor]          `json:"valuesets,omitempty"`
+	Commands                 List[CommandDescriptor]           `json:"commands,omitempty"`
+	ConfigTypes              List[ConfigTypeDescriptor]        `json:"configTypes,omitempty"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,6 +51,12 @@ func (d *Descriptor) Capabilities() []string {
 	}
 	if len(d.LabelMergeSpecifications) > 0 {
 		caps = append(caps, "Label Merge Specs")
+	}
+	if len(d.Commands) > 0 {
+		caps = append(caps, "CLI Commands")
+	}
+	if len(d.ConfigTypes) > 0 {
+		caps = append(caps, "Config Types")
 	}
 	return caps
 }
@@ -115,6 +124,21 @@ type AccessMethodDescriptor struct {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type ValueTypeDefinition struct {
+	Name        string `json:"name"`
+	Version     string `json:"version,omitempty"`
+	Description string `json:"description"`
+	Format      string `json:"format"`
+}
+
+func (d ValueTypeDefinition) GetName() string {
+	return d.Name
+}
+
+func (d ValueTypeDefinition) GetDescription() string {
+	return d.Description
+}
+
 type ValueSetDescriptor struct {
 	ValueSetDefinition `json:",inline"`
 	Purposes           []string `json:"purposes"`
@@ -123,19 +147,8 @@ type ValueSetDescriptor struct {
 const PURPOSE_ROUTINGSLIP = "routingslip"
 
 type ValueSetDefinition struct {
-	Name        string      `json:"name"`
-	Version     string      `json:"version,omitempty"`
-	Description string      `json:"description"`
-	Format      string      `json:"format"`
-	CLIOptions  []CLIOption `json:"options,omitempty"`
-}
-
-func (d ValueSetDefinition) GetName() string {
-	return d.Name
-}
-
-func (d ValueSetDefinition) GetDescription() string {
-	return d.Description
+	ValueTypeDefinition
+	CLIOptions []CLIOption `json:"options,omitempty"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -198,6 +211,32 @@ func (a ActionDescriptor) GetName() string {
 func (a ActionDescriptor) GetDescription() string {
 	return a.Description
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type CommandDescriptor struct {
+	Name              string `json:"name"`
+	Description       string `json:"description,omitempty"`
+	ObjectType        string `json:"objectName,omitempty"`
+	Usage             string `json:"usage,omitempty"`
+	Short             string `json:"short,omitempty"`
+	Example           string `json:"example,omitempty"`
+	Realm             string `json:"realm,omitempty"`
+	Verb              string `json:"verb,omitempty"`
+	CLIConfigRequired bool   `json:"cliconfig,omitempty"`
+}
+
+func (a CommandDescriptor) GetName() string {
+	return a.Name
+}
+
+func (a CommandDescriptor) GetDescription() string {
+	return a.Description
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ConfigTypeDescriptor = ValueTypeDefinition
 
 ////////////////////////////////////////////////////////////////////////////////
 

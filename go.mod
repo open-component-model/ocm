@@ -20,8 +20,8 @@ require (
 	github.com/containers/image/v5 v5.31.1
 	github.com/cyberphone/json-canonicalization v0.0.0-20231217050601-ba74d44ecf5f
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v26.1.4+incompatible
-	github.com/docker/docker v26.1.4+incompatible
+	github.com/docker/cli v27.0.1+incompatible
+	github.com/docker/docker v27.0.1+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/cli-utils v0.36.0-flux.7
@@ -36,11 +36,12 @@ require (
 	github.com/google/go-github/v45 v45.2.0
 	github.com/hashicorp/vault-client-go v0.4.3
 	github.com/imdario/mergo v0.3.16
+	github.com/juju/fslock v0.0.0-20160525022230-4d5c94c67b4b
 	github.com/klauspost/compress v1.17.9
 	github.com/klauspost/pgzip v1.2.6
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
-	github.com/mandelsoft/goutils v0.0.0-20240608132424-ec9fb7fa611a
-	github.com/mandelsoft/logging v0.0.0-20240201091719-67180059d6bf
+	github.com/mandelsoft/goutils v0.0.0-20240623134558-383cb09dec16
+	github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a
 	github.com/mandelsoft/spiff v1.7.0-beta-5
 	github.com/mandelsoft/vfs v0.4.3
 	github.com/marstr/guid v1.1.0

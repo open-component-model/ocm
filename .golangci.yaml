@@ -88,6 +88,9 @@ linters:
     - sqlclosecheck
     - wastedassign
 
+    # Disabled because of deprecation
+    - execinquery
+
 linters-settings:
   gci:
     sections:

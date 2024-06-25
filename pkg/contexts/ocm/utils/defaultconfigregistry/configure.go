@@ -8,7 +8,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/listformat"
 )
 
-type DefaultConfigHandler func(cfg config.Context) error
+type DefaultConfigHandler func(cfg config.Context) (string, config.Config, error)
 
 type defaultConfigurationRegistry struct {
 	lock sync.Mutex

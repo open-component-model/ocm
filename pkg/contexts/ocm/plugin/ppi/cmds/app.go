@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/command"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/describe"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/info"
@@ -44,6 +45,7 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 		Short:                 short,
 		Long:                  p.Descriptor().Long,
 		Version:               p.Version(),
+		PersistentPreRunE:     pcmd.PreRunE,
 		TraverseChildren:      true,
 		SilenceUsage:          true,
 		DisableFlagsInUseLine: true,
@@ -63,15 +65,11 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 	cmd.AddCommand(upload.New(p))
 	cmd.AddCommand(download.New(p))
 	cmd.AddCommand(valueset.New(p))
+	cmd.AddCommand(command.New(p))
 
 	cmd.InitDefaultHelpCmd()
-	var help *cobra.Command
-	for _, c := range cmd.Commands() {
-		if c.Name() == "help" {
-			help = c
-			break
-		}
-	}
+	help := cobrautils.GetHelpCommand(cmd)
+
 	// help.Use="help <topic>"
 	help.DisableFlagsInUseLine = true
 	cmd.AddCommand(descriptor.New())
@@ -85,6 +83,13 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 
 type Error struct {
 	Error string `json:"error"`
+}
+
+func (p *PluginCommand) PreRunE(cmd *cobra.Command, args []string) error {
+	if handler != nil {
+		return handler.HandleConfig(p.plugin.GetOptions().LogConfig)
+	}
+	return nil
 }
 
 func (p *PluginCommand) Execute(args []string) error {

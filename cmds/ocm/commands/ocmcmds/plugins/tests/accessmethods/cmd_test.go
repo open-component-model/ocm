@@ -7,10 +7,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -28,13 +27,13 @@ var _ = Describe("Add with new access method", func() {
 	var env *TestEnv
 	var ctx ocm.Context
 	var registry plugins.Set
+	var plugins TempPluginDir
 
 	BeforeEach(func() {
 		env = NewTestEnv(TestData())
 		ctx = env.OCMContext()
+		plugins, registry = Must2(ConfigureTestPlugins2(env, "testdata"))
 
-		plugindirattr.Set(ctx, "testdata")
-		registry = plugincacheattr.Get(ctx)
 		Expect(registration.RegisterExtensions(ctx)).To(Succeed())
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
@@ -43,6 +42,7 @@ var _ = Describe("Add with new access method", func() {
 	})
 
 	AfterEach(func() {
+		plugins.Cleanup()
 		env.Cleanup()
 	})
 

@@ -111,7 +111,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		o.Recursively = !o.local
 	}
 
-	err := o.Option.Configure(ctx)
+	err := o.Option.Configure(ctx.OCMContext())
 	if err != nil {
 		return err
 	}
