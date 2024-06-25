@@ -20,8 +20,8 @@ require (
 	github.com/containers/image/v5 v5.31.1
 	github.com/cyberphone/json-canonicalization v0.0.0-20231217050601-ba74d44ecf5f
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v26.1.4+incompatible
-	github.com/docker/docker v27.0.0+incompatible
+	github.com/docker/cli v27.0.1+incompatible
+	github.com/docker/docker v27.0.1+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/cli-utils v0.36.0-flux.7
