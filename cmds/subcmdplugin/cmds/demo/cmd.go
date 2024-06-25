@@ -22,8 +22,7 @@ func New() *cobra.Command {
 	return c
 }
 
-type command struct {
-}
+type command struct{}
 
 func (c *command) Run(cmd *cobra.Command, args []string) error {
 	fmt.Printf("demo command called with arguments %v\n", args)

@@ -3,10 +3,10 @@ package main
 import (
 	"os"
 
-	"github.com/open-component-model/ocm/cmds/subcmdplugin/cmds/group"
 	// enable mandelsoft plugin logging configuration.
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/logging"
 
+	"github.com/open-component-model/ocm/cmds/subcmdplugin/cmds/group"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/clicmd"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds"
