@@ -7,15 +7,15 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/api/utils/blobaccess"
+	"github.com/open-component-model/ocm/api/utils/accessio"
+	"github.com/open-component-model/ocm/api/utils/accessobj"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/ctf"
+	"github.com/open-component-model/ocm/api/ocm/extensions/resourcetypes"
+	"github.com/open-component-model/ocm/api/utils/mime"
 )
 
 const (

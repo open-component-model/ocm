@@ -6,11 +6,11 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	ociid "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
-	ccfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/api/credentials"
+	ociid "github.com/open-component-model/ocm/api/credentials/builtin/oci/identity"
+	ccfg "github.com/open-component-model/ocm/api/credentials/config"
+	"github.com/open-component-model/ocm/api/credentials/extensions/repositories/directcreds"
+	"github.com/open-component-model/ocm/api/ocm"
 )
 
 func UsingConfigs() error {

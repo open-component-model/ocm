@@ -9,12 +9,12 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	mavenacc "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/maven"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/maven"
-	"github.com/open-component-model/ocm/pkg/maven/maventest"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/accessmethods/localblob"
+	mavenacc "github.com/open-component-model/ocm/api/ocm/extensions/accessmethods/maven"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/ctf"
+	"github.com/open-component-model/ocm/api/tech/maven"
+	"github.com/open-component-model/ocm/api/tech/maven/maventest"
 )
 
 const (

@@ -5,8 +5,8 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/composition"
 )
 
 func ComposingAComponentVersionB() error {

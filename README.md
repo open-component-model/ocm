@@ -45,7 +45,7 @@ The `ocm` CLI documentation can be found [here](<(https://github.com/open-compon
 The code for the CLI can be found in [package `cmds/ocm`](https://github.com/open-component-model/ocm/blob/main/cmds/ocm).
 
 The OCI and OCM support can be found in packages
-[`pkg/contexts/oci`](pkg/contexts/oci) and [`pkg/contexts/ocm`](pkg/contexts/ocm).
+[`pkg/contexts/oci`](pkg/contexts/oci) and [`api/ocm`](api/ocm).
 
 ## Installation
 

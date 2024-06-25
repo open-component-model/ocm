@@ -13,12 +13,12 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	env2 "github.com/open-component-model/ocm/pkg/env"
-	"github.com/open-component-model/ocm/pkg/utils/tarutils"
+	env2 "github.com/open-component-model/ocm/api/helper/env"
+	"github.com/open-component-model/ocm/api/oci/extensions/repositories/artifactset"
+	metav1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/extensions/resourcetypes"
+	"github.com/open-component-model/ocm/api/utils/accessio"
+	"github.com/open-component-model/ocm/api/utils/tarutils"
 )
 
 const (

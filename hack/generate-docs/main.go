@@ -6,8 +6,8 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/hack/generate-docs/cobradoc"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/ocm/extensions/attrs/plugindirattr"
 )
 
 func main() {

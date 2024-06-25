@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/open-component-model/ocm/api/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/app"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 func main() {

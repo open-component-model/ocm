@@ -7,6 +7,14 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/comparch"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer"
+	"github.com/open-component-model/ocm/api/utils/accessio"
+	"github.com/open-component-model/ocm/api/utils/accessobj"
+	"github.com/open-component-model/ocm/api/utils/out"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -14,16 +22,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/cmds/ocm/common/output"
+	"github.com/open-component-model/ocm/cmds/ocm/common/utils"
 )
 
 var (

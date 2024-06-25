@@ -4,15 +4,15 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations/jsonv1"
-	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/listformat"
-	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/ocm/compdesc"
+	"github.com/open-component-model/ocm/api/ocm/compdesc/normalizations/jsonv1"
+	"github.com/open-component-model/ocm/api/ocm/extensions/attrs/signingattr"
+	ocmsign "github.com/open-component-model/ocm/api/ocm/tools/signing"
+	"github.com/open-component-model/ocm/api/tech/signing"
+	"github.com/open-component-model/ocm/api/tech/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/api/utils/listformat"
+	"github.com/open-component-model/ocm/cmds/ocm/common/options"
 )
 
 func From(o options.OptionSetProvider) *Option {

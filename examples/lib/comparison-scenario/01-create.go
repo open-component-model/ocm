@@ -6,15 +6,15 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactaccess/helmaccess"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactaccess/ociartifactaccess"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/fileblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/api/ocm"
+	metav1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/elements"
+	"github.com/open-component-model/ocm/api/ocm/elements/artifactaccess/helmaccess"
+	"github.com/open-component-model/ocm/api/ocm/elements/artifactaccess/ociartifactaccess"
+	"github.com/open-component-model/ocm/api/ocm/elements/artifactblob/fileblob"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/composition"
+	"github.com/open-component-model/ocm/api/ocm/extensions/resourcetypes"
+	"github.com/open-component-model/ocm/api/utils/mime"
 )
 
 const (

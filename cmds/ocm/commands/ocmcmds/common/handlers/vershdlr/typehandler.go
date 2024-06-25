@@ -8,11 +8,11 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/semverutils"
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/utils/semverutils"
+	"github.com/open-component-model/ocm/cmds/ocm/common/output"
+	"github.com/open-component-model/ocm/cmds/ocm/common/utils"
 )
 
 func Elem(e interface{}) *Object {

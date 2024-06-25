@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/utils"
+	"github.com/open-component-model/ocm/api/utils/cobrautils/flag"
 )
 
 type Registration struct {

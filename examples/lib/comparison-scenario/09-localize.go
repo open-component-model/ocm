@@ -11,17 +11,17 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/localize"
-	"github.com/open-component-model/ocm/pkg/helm/loader"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/utils/tarutils"
-	"github.com/open-component-model/ocm/pkg/utils/template"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/compdesc"
+	v1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/extensions/download"
+	ocmutils "github.com/open-component-model/ocm/api/ocm/ocmutils"
+	"github.com/open-component-model/ocm/api/ocm/ocmutils/localize"
+	"github.com/open-component-model/ocm/api/tech/helm/loader"
+	"github.com/open-component-model/ocm/api/utils/runtime"
+	"github.com/open-component-model/ocm/api/utils"
+	"github.com/open-component-model/ocm/api/utils/tarutils"
+	"github.com/open-component-model/ocm/api/utils/template"
 )
 
 type DeployDescriptor struct {

@@ -6,14 +6,14 @@ import (
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/goutils/sliceutils"
 
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer/transferhandler"
+	"github.com/open-component-model/ocm/api/utils/out"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
-	"github.com/open-component-model/ocm/pkg/out"
 )
 
 func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Repository, complete ocm.ComponentVersionResolver, thdlr transferhandler.TransferHandler, h *ResourceSpecHandler, elems []addhdlrs.Element) (err error) {

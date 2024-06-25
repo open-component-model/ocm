@@ -9,8 +9,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.software/v3alpha1"
+	compdescv3 "github.com/open-component-model/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1"
+	"github.com/open-component-model/ocm/api/utils/accessio"
 )
 
 const (

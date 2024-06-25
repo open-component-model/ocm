@@ -8,16 +8,16 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/credentials"
+	"github.com/open-component-model/ocm/api/datacontext/action"
+	utils2 "github.com/open-component-model/ocm/api/utils"
+	"github.com/open-component-model/ocm/api/utils/out"
+	"github.com/open-component-model/ocm/api/utils/runtime"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
-	"github.com/open-component-model/ocm/pkg/out"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/cmds/ocm/common/utils"
 )
 
 var (

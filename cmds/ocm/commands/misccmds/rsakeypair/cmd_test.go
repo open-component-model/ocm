@@ -12,12 +12,12 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
-	"github.com/open-component-model/ocm/pkg/encrypt"
-	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
+	"github.com/open-component-model/ocm/api/credentials"
+	"github.com/open-component-model/ocm/api/ocm/extensions/attrs/signingattr"
+	"github.com/open-component-model/ocm/api/tech/signing"
+	"github.com/open-component-model/ocm/api/tech/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/api/tech/signing/signutils"
+	"github.com/open-component-model/ocm/api/utils/encrypt"
 )
 
 var ISSUER = &pkix.Name{CommonName: "mandelsoft"}

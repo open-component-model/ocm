@@ -7,20 +7,20 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/util/json"
 
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/ocmutils/check"
+	utils2 "github.com/open-component-model/ocm/api/utils"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/failonerroroption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/check"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/cmds/ocm/common/output"
+	"github.com/open-component-model/ocm/cmds/ocm/common/processing"
+	"github.com/open-component-model/ocm/cmds/ocm/common/utils"
 )
 
 var (

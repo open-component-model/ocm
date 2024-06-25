@@ -7,21 +7,21 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/api/oci/testhelper"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/api/oci"
+	"github.com/open-component-model/ocm/api/oci/extensions/repositories/artifactset"
+	metav1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/ctf"
+	"github.com/open-component-model/ocm/api/utils/accessio"
+	"github.com/open-component-model/ocm/api/utils/accessobj"
+	"github.com/open-component-model/ocm/api/utils/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 	me "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 )
 
 const (

@@ -7,13 +7,13 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	configcfg "github.com/open-component-model/ocm/pkg/contexts/config/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	configcfg "github.com/open-component-model/ocm/api/config/extensions/config"
+	"github.com/open-component-model/ocm/api/credentials"
+	credcfg "github.com/open-component-model/ocm/api/credentials/config"
+	"github.com/open-component-model/ocm/api/credentials/extensions/repositories/dockerconfig"
+	"github.com/open-component-model/ocm/api/oci"
+	"github.com/open-component-model/ocm/api/ocm"
+	utils "github.com/open-component-model/ocm/api/ocm/ocmutils"
 )
 
 func HandleOCMConfig(cfg *helper.Config) error {

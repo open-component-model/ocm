@@ -9,9 +9,9 @@ import (
 
 	"github.com/mandelsoft/goutils/testutils"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
+	"github.com/open-component-model/ocm/api/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/comparch"
 )
 
 const (

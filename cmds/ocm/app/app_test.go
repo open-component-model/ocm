@@ -16,10 +16,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tonglil/buflogr"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/mapocirepoattr"
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
-	"github.com/open-component-model/ocm/pkg/logging/testhelper"
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/ocm/extensions/attrs/mapocirepoattr"
+	ocmlog "github.com/open-component-model/ocm/api/utils/logging"
+	"github.com/open-component-model/ocm/api/utils/logging/testhelper"
 )
 
 var realm = logging.NewRealm("test")

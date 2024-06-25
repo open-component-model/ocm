@@ -7,12 +7,12 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/set"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/api/ocm/extensions/accessmethods/options"
+	"github.com/open-component-model/ocm/api/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/api/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/api/utils"
+	"github.com/open-component-model/ocm/api/utils/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/api/utils/runtime"
 )
 
 const NAME = "check"

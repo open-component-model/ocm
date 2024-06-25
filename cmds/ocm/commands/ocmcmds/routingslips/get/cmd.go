@@ -6,6 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/api/clictx"
+	common2 "github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/ocm"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/failonerroroption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
@@ -14,11 +17,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/routingslips/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	common2 "github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/cmds/ocm/common/output"
+	"github.com/open-component-model/ocm/cmds/ocm/common/utils"
 )
 
 var (

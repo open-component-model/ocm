@@ -10,13 +10,13 @@ import (
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/datacontext"
+	"github.com/open-component-model/ocm/api/utils"
+	"github.com/open-component-model/ocm/api/utils/blobaccess"
+	"github.com/open-component-model/ocm/api/utils/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/api/utils/runtime"
 )
 
 const KIND_INPUTTYPE = "input type"

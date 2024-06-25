@@ -1,11 +1,11 @@
 package uploaderoption
 
 import (
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/blobhandler"
+	"github.com/open-component-model/ocm/api/utils/listformat"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/optutils"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler"
-	"github.com/open-component-model/ocm/pkg/listformat"
+	"github.com/open-component-model/ocm/cmds/ocm/common/options"
 )
 
 type Registration = optutils.Registration

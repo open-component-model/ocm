@@ -5,12 +5,12 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/api/clictx"
+	cfgcpi "github.com/open-component-model/ocm/api/config/cpi"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer/transferhandler"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer/transferhandler/spiff"
+	"github.com/open-component-model/ocm/api/utils"
+	"github.com/open-component-model/ocm/cmds/ocm/common/options"
 )
 
 func From(o options.OptionSetProvider) *Option {

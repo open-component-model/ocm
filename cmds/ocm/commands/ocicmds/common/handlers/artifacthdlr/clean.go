@@ -3,10 +3,10 @@ package artifacthdlr
 import (
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/cmds/ocm/common/data"
+	"github.com/open-component-model/ocm/cmds/ocm/common/output"
+	"github.com/open-component-model/ocm/cmds/ocm/common/processing"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -122,7 +122,7 @@ might be attached to any kind of contexts. They are inherited along a
 context  usage relation (for example ocm -> oci -> credentials -> config).
 
 If a context type supports multiple extension types there is typically
-a dedicated sub package for this type (for example `github.com/open-component-model/pkg/contexts/ocm/accessmethods`), which again
+a dedicated sub package for this type (for example `github.com/open-component-model/api/ocm/extensions/accessmethods`), which again
 contains the various implementation types in sub packages.
 
 ### The OCM context organization

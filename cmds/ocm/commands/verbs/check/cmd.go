@@ -3,10 +3,10 @@ package check
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/api/clictx"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/check"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/common/utils"
 )
 
 // NewCommand creates a new command.

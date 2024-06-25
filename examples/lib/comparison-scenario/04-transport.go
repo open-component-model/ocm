@@ -6,11 +6,11 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/ocireg"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer/transferhandler/standard"
 )
 
 func Transport(cfg *helper.Config) error {

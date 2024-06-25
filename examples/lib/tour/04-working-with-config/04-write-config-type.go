@@ -8,13 +8,13 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	configcfg "github.com/open-component-model/ocm/pkg/contexts/config/config"
-	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	configcfg "github.com/open-component-model/ocm/api/config/extensions/config"
+	"github.com/open-component-model/ocm/api/config/cpi"
+	"github.com/open-component-model/ocm/api/credentials"
+	ociidentity "github.com/open-component-model/ocm/api/credentials/builtin/oci/identity"
+	"github.com/open-component-model/ocm/api/oci"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/utils/runtime"
 )
 
 // TYPE is the name of our new configuration object type.

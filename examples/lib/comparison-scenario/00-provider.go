@@ -6,10 +6,10 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/ocireg"
+	"github.com/open-component-model/ocm/api/ocm/tools/signing"
+	utils "github.com/open-component-model/ocm/api/ocm/ocmutils"
 )
 
 func ReadConfiguration(ctx ocm.Context, cfg *helper.Config) error {

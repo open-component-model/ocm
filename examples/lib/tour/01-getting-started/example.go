@@ -9,14 +9,14 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/extraid"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/semverutils"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/ocm"
+	metav1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/extensions/download"
+	"github.com/open-component-model/ocm/api/ocm/extraid"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/ocireg"
+	utils "github.com/open-component-model/ocm/api/ocm/ocmutils"
+	"github.com/open-component-model/ocm/api/utils/semverutils"
 )
 
 func GettingStarted() error {
@@ -46,7 +46,7 @@ func GettingStarted() error {
 	// form as part of other resources, for example
 	// Kubernetes resources.
 	// The available repository implementations can be found
-	// under .../pkg/contexts/ocm/repositories.
+	// under .../api/ocm/extensions/repositories.
 	// --- begin repository spec ---
 	spec := ocireg.NewRepositorySpec("ghcr.io/open-component-model/ocm")
 	// --- end repository spec ---

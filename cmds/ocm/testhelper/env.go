@@ -6,16 +6,16 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/config"
+	"github.com/open-component-model/ocm/api/credentials"
+	"github.com/open-component-model/ocm/api/datacontext"
+	"github.com/open-component-model/ocm/api/helper/builder"
+	"github.com/open-component-model/ocm/api/helper/env"
+	"github.com/open-component-model/ocm/api/oci"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/utils/accessio"
 	"github.com/open-component-model/ocm/cmds/ocm/app"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/env"
-	"github.com/open-component-model/ocm/pkg/env/builder"
 )
 
 type CLI struct {

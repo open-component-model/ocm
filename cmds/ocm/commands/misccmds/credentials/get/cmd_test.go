@@ -8,9 +8,9 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/api/credentials"
+	"github.com/open-component-model/ocm/api/credentials/builtin/oci/identity"
+	"github.com/open-component-model/ocm/api/credentials/cpi"
 )
 
 var _ = Describe("Test Environment", func() {

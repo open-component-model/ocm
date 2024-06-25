@@ -7,13 +7,13 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/api/clictx"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/oci"
+	"github.com/open-component-model/ocm/api/oci/artdesc"
+	"github.com/open-component-model/ocm/cmds/ocm/common/output"
+	"github.com/open-component-model/ocm/cmds/ocm/common/tree"
+	"github.com/open-component-model/ocm/cmds/ocm/common/utils"
 )
 
 func Elem(e interface{}) oci.ArtifactAccess {

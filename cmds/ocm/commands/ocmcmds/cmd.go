@@ -3,6 +3,7 @@ package ocmcmds
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/api/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/ctf"
@@ -14,12 +15,11 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sourceconfig"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/cmds/ocm/common/utils"
 	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
 	topicocmdownloaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/downloadhandlers"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 // NewCommand creates a new command.

@@ -3,7 +3,7 @@ package topicconfig
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/api/clictx"
 )
 
 func New(ctx clictx.Context) *cobra.Command {

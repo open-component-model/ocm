@@ -12,7 +12,7 @@ PODINFO_VERSION = 6.3.5
 PODINFO_CHART_VERSION = 6.3.5
 
 REPO_ROOT                                     := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        = $(shell go run $(REPO_ROOT)/pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
+VERSION                                        = $(shell go run $(REPO_ROOT)/api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 HELMINSTVERSION                               ?= $(VERSION)

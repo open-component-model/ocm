@@ -8,16 +8,16 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/utils/tarutils"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/ocm"
+	metav1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/extensions/download"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/ocireg"
+	"github.com/open-component-model/ocm/api/ocm/tools/signing"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	ocmutils "github.com/open-component-model/ocm/api/ocm/ocmutils"
+	"github.com/open-component-model/ocm/api/utils/tarutils"
 )
 
 func TransportTo(target ocm.Repository, src string) error {

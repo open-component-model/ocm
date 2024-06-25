@@ -6,13 +6,13 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	ociidentity "github.com/open-component-model/ocm/api/credentials/builtin/oci/identity"
+	"github.com/open-component-model/ocm/api/oci"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/ocireg"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	utils "github.com/open-component-model/ocm/api/ocm/ocmutils"
 )
 
 // --- begin read config ---

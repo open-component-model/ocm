@@ -6,9 +6,9 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/api/config"
+	"github.com/open-component-model/ocm/api/config/cpi"
+	"github.com/open-component-model/ocm/api/utils/runtime"
 )
 
 const CFGFILE = "examples/lib/config3/config.yaml"

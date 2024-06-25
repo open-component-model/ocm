@@ -3,9 +3,9 @@ package skipdigestoption
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/utils/cobrautils/flag"
+	"github.com/open-component-model/ocm/cmds/ocm/common/options"
 )
 
 func From(o options.OptionSetProvider) *Option {

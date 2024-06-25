@@ -1,7 +1,7 @@
 package elemhdlr
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/cmds/ocm/common/data"
 )
 
 type Objects []*Object

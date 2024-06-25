@@ -11,13 +11,13 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
+	env2 "github.com/open-component-model/ocm/api/helper/env"
+	metav1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/extensions/resourcetypes"
+	"github.com/open-component-model/ocm/api/ocm/extraid"
+	"github.com/open-component-model/ocm/api/utils/accessio"
+	"github.com/open-component-model/ocm/api/utils/mime"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/cli/download"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/extraid"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	env2 "github.com/open-component-model/ocm/pkg/env"
-	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 const (

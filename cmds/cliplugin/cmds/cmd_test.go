@@ -8,14 +8,14 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/api/ocm/plugin/testutils"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/testutils"
 
 	"github.com/mandelsoft/logging/logrusl"
 	"github.com/mandelsoft/logging/utils"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/version"
+	"github.com/open-component-model/ocm/api/ocm/extensions/attrs/plugincacheattr"
+	"github.com/open-component-model/ocm/api/version"
 )
 
 const KIND = "rhubarb"

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/utils/template"
+	"github.com/open-component-model/ocm/api/utils/template"
 )
 
 const (

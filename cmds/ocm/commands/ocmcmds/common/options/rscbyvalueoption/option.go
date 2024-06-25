@@ -3,10 +3,10 @@ package rscbyvalueoption
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer/transferhandler"
+	"github.com/open-component-model/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/api/utils/cobrautils/flag"
+	"github.com/open-component-model/ocm/cmds/ocm/common/options"
 )
 
 func From(o options.OptionSetProvider) *Option {

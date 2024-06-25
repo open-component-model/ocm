@@ -3,12 +3,12 @@ package common
 import (
 	"github.com/Masterminds/semver/v3"
 
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/utils"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/cmds/ocm/common/options"
 )
 
 type Option interface {

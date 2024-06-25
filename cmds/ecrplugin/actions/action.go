@@ -12,10 +12,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/mandelsoft/goutils/errors"
 
-	ocmcreds "github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/actions/oci-repository-prepare"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	ocmcreds "github.com/open-component-model/ocm/api/credentials"
+	"github.com/open-component-model/ocm/api/oci/extensions/actions/oci-repository-prepare"
+	"github.com/open-component-model/ocm/api/ocm/extensions/accessmethods/s3/identity"
+	"github.com/open-component-model/ocm/api/ocm/plugin/ppi"
 )
 
 type Action struct{}

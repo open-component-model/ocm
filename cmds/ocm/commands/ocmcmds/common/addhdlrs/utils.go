@@ -11,14 +11,14 @@ import (
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"github.com/open-component-model/ocm/api/clictx"
+	common2 "github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/utils"
+	"github.com/open-component-model/ocm/api/utils/errkind"
+	"github.com/open-component-model/ocm/api/utils/runtime"
+	"github.com/open-component-model/ocm/api/utils/template"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	cliutils "github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	common2 "github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/errkind"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/utils/template"
+	cliutils "github.com/open-component-model/ocm/cmds/ocm/common/utils"
 )
 
 func ProcessDescriptions(ctx clictx.Context, printer common2.Printer, templ template.Options, h ElementSpecHandler, sources []ElementSource) ([]Element, inputs.Context, error) {

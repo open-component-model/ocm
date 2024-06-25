@@ -129,7 +129,7 @@ issues:
   exclude-dirs:
     - "hack"
     # External code from containerd/containerd
-    - "pkg/docker"
+    - "api/tech/docker"
   exclude:
     - composites
   exclude-rules:

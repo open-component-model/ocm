@@ -3,13 +3,13 @@ package describe
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/api/clictx"
 	cache "github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/describe"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/describe"
 	plugins "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/describe"
 	_package "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/package/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/common/utils"
 )
 
 // NewCommand creates a new command.

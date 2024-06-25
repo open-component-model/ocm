@@ -3,8 +3,8 @@ package download
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/api/utils"
+	"github.com/open-component-model/ocm/cmds/ocm/common/output"
 )
 
 func From(o *output.Options) *Option {

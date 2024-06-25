@@ -6,14 +6,14 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	configcfg "github.com/open-component-model/ocm/pkg/contexts/config/config"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
+	configcfg "github.com/open-component-model/ocm/api/config/extensions/config"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/attrs/signingattr"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/composition"
+	"github.com/open-component-model/ocm/api/ocm/tools/signing"
+	"github.com/open-component-model/ocm/api/utils/runtime"
+	"github.com/open-component-model/ocm/api/tech/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/api/tech/signing/signutils"
 )
 
 func prepareComponentInRepo(ctx ocm.Context, cfg *helper.Config) error {

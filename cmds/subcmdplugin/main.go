@@ -4,13 +4,13 @@ import (
 	"os"
 
 	// enable mandelsoft plugin logging configuration.
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/logging"
+	_ "github.com/open-component-model/ocm/api/ocm/plugin/ppi/logging"
 
+	"github.com/open-component-model/ocm/api/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/api/ocm/plugin/ppi/clicmd"
+	"github.com/open-component-model/ocm/api/ocm/plugin/ppi/cmds"
+	"github.com/open-component-model/ocm/api/version"
 	"github.com/open-component-model/ocm/cmds/subcmdplugin/cmds/group"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/clicmd"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds"
-	"github.com/open-component-model/ocm/pkg/version"
 )
 
 func main() {

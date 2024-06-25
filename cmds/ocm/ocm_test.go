@@ -8,8 +8,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
+	"github.com/open-component-model/ocm/api/oci/extensions/attrs/cacheattr"
+	"github.com/open-component-model/ocm/api/utils/accessio"
 )
 
 var _ = Describe("OCM command line test Environment", func() {

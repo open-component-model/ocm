@@ -1,0 +1,31 @@
+package ocm_test
+
+import (
+	"encoding/json"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/api/oci/extensions/repositories/empty"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/repositories/genericocireg"
+	ocmreg "github.com/open-component-model/ocm/api/ocm/extensions/repositories/ocireg"
+	"github.com/open-component-model/ocm/api/utils/runtime"
+)
+
+var DefaultContext = ocm.New()
+
+var _ = Describe("access method", func() {
+	It("instantiate repo mapped to empty oci repo", func() {
+		backendSpec := genericocireg.NewRepositorySpec(
+			empty.NewRepositorySpec(),
+			ocmreg.NewComponentRepositoryMeta("", ocmreg.OCIRegistryDigestMapping))
+		data, err := json.Marshal(backendSpec)
+		Expect(err).To(Succeed())
+		Expect(string(data)).To(Equal("{\"componentNameMapping\":\"sha256-digest\",\"type\":\"Empty\"}"))
+
+		repo, err := DefaultContext.RepositoryForConfig(data, runtime.DefaultYAMLEncoding)
+		Expect(err).To(Succeed())
+		Expect(repo).NotTo(BeNil())
+	})
+})

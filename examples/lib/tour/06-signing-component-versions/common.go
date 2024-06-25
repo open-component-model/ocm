@@ -10,20 +10,20 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 
 	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/dockermultiblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/textblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/semverutils"
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
+	"github.com/open-component-model/ocm/api/utils/blobaccess"
+	"github.com/open-component-model/ocm/api/common/common"
+	"github.com/open-component-model/ocm/api/ocm"
+	"github.com/open-component-model/ocm/api/ocm/extensions/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/api/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/api/ocm/elements"
+	"github.com/open-component-model/ocm/api/ocm/elements/artifactblob/dockermultiblob"
+	"github.com/open-component-model/ocm/api/ocm/elements/artifactblob/textblob"
+	"github.com/open-component-model/ocm/api/ocm/extensions/resourcetypes"
+	utils "github.com/open-component-model/ocm/api/ocm/ocmutils"
+	"github.com/open-component-model/ocm/api/utils/mime"
+	"github.com/open-component-model/ocm/api/utils/semverutils"
+	"github.com/open-component-model/ocm/api/tech/signing/signutils"
 )
 
 // setupVersion configures a component version.
@@ -67,7 +67,7 @@ func setupVersion(cv ocm.ComponentVersionAccess) error {
 	// Here, we just use an image provided by the
 	// OCM ecosystem.
 	// Supported access types can be found under
-	// .../pkg/contexts/ocm/accessmethods.
+	// .../api/ocm/extensions/accessmethods.
 	acc := ociartifact.New("ghcr.io/open-component-model/ocm/ocm.software/toi/installers/helminstaller/helminstaller:0.4.0")
 
 	// Once we have both, the metadata and the content specification,

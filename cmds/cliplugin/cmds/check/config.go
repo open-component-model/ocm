@@ -1,8 +1,8 @@
 package check
 
 import (
-	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	cfgcpi "github.com/open-component-model/ocm/api/config/cpi"
+	"github.com/open-component-model/ocm/api/utils/runtime"
 )
 
 const (

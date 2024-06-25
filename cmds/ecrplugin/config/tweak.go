@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/api/ocm/plugin/ppi"
 )
 
 func TweakDescriptor(d ppi.Descriptor, cfg *Config) ppi.Descriptor {

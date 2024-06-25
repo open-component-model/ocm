@@ -93,7 +93,7 @@ for this kind of repository, we can just refer to it.
 Here, we just use an image provided by the
 OCM ecosystem.
 Supported access types can be found under
-.../pkg/contexts/ocm/accessmethods.
+.../api/ocm/extensions/accessmethods.
 
 ```go
 {{include}{../../02-composing-a-component-version/01-basic-componentversion-creation.go}{setup image access}}

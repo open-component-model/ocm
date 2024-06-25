@@ -5,12 +5,12 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"github.com/open-component-model/ocm/api/datacontext/attrs/vfsattr"
+	"github.com/open-component-model/ocm/api/tech/maven"
+	"github.com/open-component-model/ocm/api/utils/blobaccess"
+	mavenblob "github.com/open-component-model/ocm/api/utils/blobaccess/maven"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/blobaccess"
-	mavenblob "github.com/open-component-model/ocm/pkg/blobaccess/maven"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	"github.com/open-component-model/ocm/pkg/maven"
 )
 
 type Spec struct {

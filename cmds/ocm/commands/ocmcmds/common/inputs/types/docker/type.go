@@ -1,8 +1,8 @@
 package docker
 
 import (
+	"github.com/open-component-model/ocm/api/oci/annotations"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
 )
 
 const TYPE = "docker"
