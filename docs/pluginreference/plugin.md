@@ -9,8 +9,9 @@ plugin <subcommand> <options> <args>
 ### Options
 
 ```
-  -c, --config YAML   plugin configuration
-  -h, --help          help for plugin
+  -c, --config YAML       plugin configuration
+  -h, --help              help for plugin
+      --log-config YAML   ocm logging configuration
 ```
 
 ### Description

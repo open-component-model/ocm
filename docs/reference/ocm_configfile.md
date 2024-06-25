@@ -144,14 +144,6 @@ The following configuration types are supported:
 
   At least the given values must be present in the certificate
   to be accepted for a successful signature validation.
-- <code>logfile.ocm.config.ocm.software</code>
-  The config type <code>logfile.ocm.config.ocm.software</code> is used to override
-  the logging destination and enforce the logging to a dedicated log file.
-
-  <pre>
-      type: logfile.ocm.config.ocm.software
-      logFile: /tmp/ocm-cli-log-0815
-  </pre>
 - <code>logging.config.ocm.software</code>
   The config type <code>logging.config.ocm.software</code> can be used to configure the logging
   aspect of a dedicated context type:
