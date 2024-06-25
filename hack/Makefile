@@ -66,7 +66,6 @@ endif
 
 .PHONY: install-requirements
 install-requirements: $(deps) $(GOPATH)/bin/goimports mdref
-#	@$(REPO_ROOT)/hack/install-requirements.sh
 
 .PHONY: gci
 gci:
