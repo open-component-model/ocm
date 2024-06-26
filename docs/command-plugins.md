@@ -41,18 +41,33 @@ func init() {
 
 #### CLI Commands
 
-CLI commands are simple configured `cobra.Command` objects.
-They are registered at the plugin object with
+CLI commands are provided by the registratuon interface `ppi.Command`. It
+provides some command metadata and a `cobra.Command` object.
 
-```
-        cmd, err := clicmd.NewCLICommand(NewCommand(), clicmd.WithCLIConfig(), clicmd.WithVerb("check"))
-	if err != nil {
-		os.Exit(1)
-	}
-	p.RegisterCommand(NewCommand())
+Commands are then registered at the plugin object with
+
+```go
+    p.RegisterCommand(cmd)
 ```
 
-with coding similar to
+The plugin programming interface supports the generation of an extension command directly from a
+`cobra.command` object using the method `NewCLICommand` from the `ppi.clicmd` package.
+It takes some options to specify the command embedding and extracts the other command attributes
+directly from the preconfigured cobra command.
+
+Otherwise, the `ppi.Command` interface  can be implemented without requiring a cobra command..
+
+A sample code could look like this:
+
+```go
+    cmd, err := clicmd.NewCLICommand(NewCommand(), clicmd.WithCLIConfig(), clicmd.WithVerb("check"))
+    if err != nil {
+        os.Exit(1)
+    }
+    p.RegisterCommand(cmd)
+```
+
+with coding for the cobra command similar to
 
 ```
 
@@ -77,10 +92,6 @@ func (c *command) Run(cmd *cobra.Command, args []string) error {
    ...
 }
 ```
-
-The plugin programming interface supports the generation of an extension command directly from a
-cobra command object using the method `NewCLICommand` from the `ppi.clicmd` package.
-Otherwise the `ppi.Command` interface  can be implemented without requiring a cobra command..
 
 If the code wants to use the config framework, for example to
 - use the OCM library again

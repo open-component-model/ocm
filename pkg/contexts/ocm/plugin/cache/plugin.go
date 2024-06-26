@@ -11,7 +11,7 @@ type Plugin = *pluginImpl
 // //nolint: errname // is no error.
 type pluginImpl struct {
 	name        string
-	source      *PluginInstallationInfo
+	info        *PluginInstallationInfo
 	descriptor  *descriptor.Descriptor
 	path        string
 	error       string
@@ -36,8 +36,14 @@ func NewPlugin(name string, path string, desc *descriptor.Descriptor, errmsg str
 	return p
 }
 
-func (p *pluginImpl) GetInstallationInfo() *PluginInstallationInfo {
-	return p.source
+func (p *pluginImpl) GetSourceInfo() *PluginSourceInfo {
+	if p.info == nil {
+		return nil
+	}
+	if p.info.HasSourceInfo() {
+		return &p.info.PluginSourceInfo
+	}
+	return nil
 }
 
 func (p *pluginImpl) GetDescriptor() *descriptor.Descriptor {

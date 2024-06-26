@@ -62,7 +62,7 @@ func (c *pluginDirImpl) add(name string, desc *descriptor.Descriptor, path strin
 			return
 		}
 
-		c.plugins[name].source = src
+		c.plugins[name].info = src
 	}
 	if errmsg != "" && list != nil {
 		list.Add(fmt.Errorf("%s: %s", name, errmsg))
