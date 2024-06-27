@@ -44,7 +44,7 @@ func init() {
 CLI commands are provided by the registratuon interface `ppi.Command`. It
 provides some command metadata and a `cobra.Command` object.
 
-Commands are then registered at the plugin object with
+Commands are then registered at the plugin object with:
 
 ```go
     p.RegisterCommand(cmd)
@@ -55,7 +55,7 @@ The plugin programming interface supports the generation of an extension command
 It takes some options to specify the command embedding and extracts the other command attributes
 directly from the preconfigured cobra command.
 
-Otherwise, the `ppi.Command` interface  can be implemented without requiring a cobra command..
+Otherwise, the `ppi.Command` interface  can be implemented without requiring a cobra command.
 
 A sample code could look like this:
 

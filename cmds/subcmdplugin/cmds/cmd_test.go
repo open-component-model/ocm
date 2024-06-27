@@ -69,7 +69,8 @@ Synopsis:
   ocm group demo <options> [flags]
 
 Flags:
-  -h, --help   help for demo
+  -h, --help             help for demo
+      --version string   some overloaded option
 
 Description:
   a demo command in a provided command group
@@ -111,7 +112,8 @@ Synopsis:
   ocm group demo <options> [flags]
 
 Flags:
-  -h, --help   help for demo
+  -h, --help             help for demo
+      --version string   some overloaded option
 
 Description:
   a demo command in a provided command group
