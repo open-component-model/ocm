@@ -19,12 +19,16 @@ func New() *cobra.Command {
 		Long:  "a demo command in a provided command group",
 		RunE:  cmd.Run,
 	}
+
+	c.Flags().StringVarP(&cmd.version, "version", "", "", "some overloaded option")
 	return c
 }
 
-type command struct{}
+type command struct {
+	version string
+}
 
 func (c *command) Run(cmd *cobra.Command, args []string) error {
-	fmt.Printf("demo command called with arguments %v\n", args)
+	fmt.Printf("demo command called with arguments %v (and version option %s)\n", args, c.version)
 	return nil
 }

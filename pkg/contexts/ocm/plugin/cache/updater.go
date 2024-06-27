@@ -41,20 +41,24 @@ type PluginSourceInfo struct {
 	Resource   string                     `json:"resource,omitempty"`
 }
 
-type PluginInstallationInfo struct {
-	PluginSourceInfo `json:",inline"`
-	PluginInfo       *PluginInfo `json:"info,omitempty"`
+func (p *PluginSourceInfo) HasSourceInfo() bool {
+	return p != nil && p.Repository != nil && p.Component != "" && p.Version != "" && p.Resource != ""
 }
 
-func (p *PluginInstallationInfo) GetInstallationSourceDescription() string {
+func (p *PluginSourceInfo) GetDescription() string {
 	if p != nil && p.HasSourceInfo() {
 		return p.Component + ":" + p.Version
 	}
 	return "local"
 }
 
+type PluginInstallationInfo struct {
+	PluginSourceInfo `json:",inline"`
+	PluginInfo       *PluginInfo `json:"info,omitempty"`
+}
+
 func (p *PluginInstallationInfo) HasSourceInfo() bool {
-	return p.Repository != nil && p.Component != "" && p.Version != "" && p.Resource != ""
+	return p != nil && p.PluginSourceInfo.HasSourceInfo()
 }
 
 func (p *PluginInstallationInfo) IsValidPluginInfo(execpath string) bool {

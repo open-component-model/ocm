@@ -35,9 +35,14 @@ described by an access method descriptor (<CMD>` + p.Name() + ` descriptor</CMD>
 
 		nested := c.PreRunE
 		c.PreRunE = func(cmd *cobra.Command, args []string) error {
-			ctx, err := ConfigureFromFile(context.Background(), cliconfig)
-			if err != nil {
-				return err
+			var err error
+
+			ctx := context.Background()
+			if cliconfig != "" {
+				ctx, err = ConfigureFromFile(ctx, cliconfig)
+				if err != nil {
+					return err
+				}
 			}
 			c.SetContext(ctx)
 			if nested != nil {
