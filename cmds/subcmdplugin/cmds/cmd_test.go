@@ -35,6 +35,21 @@ var _ = Describe("subcmdplugin", func() {
 			env.Cleanup()
 		})
 
+		Context("error handling", func() {
+			It("provides error", func() {
+				var buf bytes.Buffer
+
+				ExpectError(env.CatchOutput(&buf).Execute("group", "demo", "--version=error")).To(MatchError("error processing plugin command command: demo error"))
+			})
+
+			It("provides error and error outputp", func() {
+				var buf bytes.Buffer
+
+				ExpectError(env.CatchOutput(&buf).Execute("group", "demo", "--version=error this is an error my friend")).To(MatchError(`error processing plugin command command: demo error: with stderr
+this is an error my friend`))
+			})
+		})
+
 		Context("local help", func() {
 			It("shows group command help", func() {
 				var buf bytes.Buffer

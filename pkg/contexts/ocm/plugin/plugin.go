@@ -421,7 +421,7 @@ func (p *pluginImpl) Command(name string, reader io.Reader, writer io.Writer, cm
 		return errors.ErrNotFound("command", name)
 	}
 
-	defer finalize.FinalizeWithErrorPropagationf(&rerr, "error processing plugin command call %s", name)
+	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
 	var f vfs.File
 
