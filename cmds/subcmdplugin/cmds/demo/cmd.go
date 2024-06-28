@@ -2,6 +2,8 @@ package demo
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	// bind OCM configuration.
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/config"
@@ -30,5 +32,12 @@ type command struct {
 
 func (c *command) Run(cmd *cobra.Command, args []string) error {
 	fmt.Printf("demo command called with arguments %v (and version option %s)\n", args, c.version)
+	if strings.HasPrefix(c.version, "error") {
+		msg := strings.TrimSpace(c.version[5:])
+		if len(msg) != 0 {
+			fmt.Fprintf(os.Stderr, "this is an error my friend\n")
+		}
+		return fmt.Errorf("demo error")
+	}
 	return nil
 }
