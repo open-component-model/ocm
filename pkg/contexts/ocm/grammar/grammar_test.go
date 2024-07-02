@@ -79,7 +79,7 @@ var _ = Describe("ref matching", func() {
 		})
 	})
 
-	FContext("versions", func() {
+	Context("versions", func() {
 		It("matches versions", func() {
 			Expect(VersionRegexp.MatchString("v1.1.1")).To(BeTrue())
 			Expect(VersionRegexp.MatchString("v1")).To(BeTrue())
