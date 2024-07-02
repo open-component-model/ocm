@@ -79,7 +79,7 @@ var _ = Describe("ref matching", func() {
 		})
 	})
 
-	Context("versions", func() {
+	FContext("versions", func() {
 		It("matches versions", func() {
 			Expect(VersionRegexp.MatchString("v1.1.1")).To(BeTrue())
 			Expect(VersionRegexp.MatchString("v1")).To(BeTrue())
@@ -90,6 +90,14 @@ var _ = Describe("ref matching", func() {
 			Expect(VersionRegexp.MatchString("v1.1.1-rc.1")).To(BeTrue())
 			Expect(VersionRegexp.MatchString("v1-rc.1")).To(BeTrue())
 			Expect(VersionRegexp.MatchString("1.1.1-rc.1")).To(BeTrue())
+		})
+
+		It("matches complex semver", func() {
+			Expect(VersionRegexp.MatchString("0.2.3+2024.T06b")).To(BeTrue())
+		})
+
+		It("matches complex semver with v prefix", func() {
+			Expect(VersionRegexp.MatchString("v0.2.3+2024.T06b")).To(BeTrue())
 		})
 	})
 
