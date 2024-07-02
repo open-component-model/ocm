@@ -20,7 +20,7 @@ var (
 
 	VersionRegexp = Sequence(Optional(Literal("v")), Numeric, Repetition(0, 2, Literal("."), Numeric),
 		Optional(Literal("-"), Repeated(CharSet("0-9A-Za-z-")), OptionalRepeated(Literal("."), Repeated(CharSet("0-9A-Za-z-")))),
-		Optional(Literal("+"), Repeated(CharSet("0-9A-Za-z-"))),
+		Optional(Literal("+"), Repeated(CharSet("0-9A-Za-z-"))), OptionalRepeated(Literal("."), Repeated(CharSet("0-9A-Za-z-"))),
 	)
 
 	// AnchoredRepositoryRegexp parses a uniform repository spec.

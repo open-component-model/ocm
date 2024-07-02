@@ -91,6 +91,14 @@ var _ = Describe("ref matching", func() {
 			Expect(VersionRegexp.MatchString("v1-rc.1")).To(BeTrue())
 			Expect(VersionRegexp.MatchString("1.1.1-rc.1")).To(BeTrue())
 		})
+
+		It("matches complex semver", func() {
+			Expect(VersionRegexp.MatchString("0.2.3+2024.T06b")).To(BeTrue())
+		})
+
+		It("matches complex semver with v prefix", func() {
+			Expect(VersionRegexp.MatchString("v0.2.3+2024.T06b")).To(BeTrue())
+		})
 	})
 
 	Context("complete refs", func() {
