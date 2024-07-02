@@ -3,6 +3,7 @@ package pubsub
 import (
 	"sync"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"golang.org/x/exp/maps"
 
@@ -26,7 +27,18 @@ var DefaultRegistry = NewProviderRegistry()
 // It does not handle the pub sub system, but just the persistence of
 // a pub sub specification configured for a dedicated type of repository.
 type Provider interface {
-	For(repo cpi.Repository) (PubSubSpec, error)
+	GetPubSubSpec(repo cpi.Repository) (PubSubSpec, error)
+	SetPubSubSpec(repo cpi.Repository, spec PubSubSpec) error
+}
+
+type NopProvider struct{}
+
+func (p NopProvider) GetPubSubSpec(repo cpi.Repository) (PubSubSpec, error) {
+	return nil, nil
+}
+
+func (p NopProvider) SetPubSubSpec(repo cpi.Repository, spec PubSubSpec) error {
+	return errors.ErrNotSupported("pub/sub configuration")
 }
 
 func NewProviderRegistry(base ...ProviderRegistry) ProviderRegistry {

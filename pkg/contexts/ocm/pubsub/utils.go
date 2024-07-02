@@ -1,15 +1,25 @@
 package pubsub
 
 import (
+	"github.com/mandelsoft/goutils/errors"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
+func SetForRepo(repo cpi.Repository, spec PubSubSpec) error {
+	prov := For(repo.GetContext()).For(repo.GetSpecification().GetKind())
+	if prov != nil {
+		return prov.SetPubSubSpec(repo, spec)
+	}
+	return errors.ErrNotSupported("pub/sub config")
+}
+
 func SpecForRepo(repo cpi.Repository) (PubSubSpec, error) {
 	prov := For(repo.GetContext()).For(repo.GetSpecification().GetKind())
 	if prov != nil {
-		return prov.For(repo)
+		return prov.GetPubSubSpec(repo)
 	}
 	return nil, nil
 }
