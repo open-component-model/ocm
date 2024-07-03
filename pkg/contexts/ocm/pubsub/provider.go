@@ -22,6 +22,10 @@ type ProviderRegistry interface {
 
 var DefaultRegistry = NewProviderRegistry()
 
+func RegisterProvider(repokind string, prov Provider) {
+	DefaultRegistry.Register(repokind, prov)
+}
+
 // A Provider is able to extract a pub sub configuration for
 // an ocm repository (typically registered for a dedicated type of repository).
 // It does not handle the pub sub system, but just the persistence of

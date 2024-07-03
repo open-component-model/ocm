@@ -67,6 +67,17 @@ func (s *Spec) Describe(_ cpi.Context) string {
 	return fmt.Sprintf("compound pub/sub specification with %d emtries", len(s.Specifications))
 }
 
+func (s *Spec) Effective() pubsub.PubSubSpec {
+	switch len(s.Specifications) {
+	case 0:
+		return nil
+	case 1:
+		return s.Specifications[0]
+	default:
+		return s
+	}
+}
+
 // Method finally registers events at contained methods.
 type Method struct {
 	meths []pubsub.PubSubMethod
