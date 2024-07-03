@@ -24,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/pubsub"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/routingslips"
@@ -246,6 +247,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.HideCommand(plugins.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(action.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(routingslips.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(pubsub.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.OverviewCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.OverviewCommand(ocicmds.NewCommand(opts.Context)))

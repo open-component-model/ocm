@@ -15,4 +15,5 @@ var (
 	Plugins                = []string{"plugins", "plugin", "p"}
 	Action                 = []string{"action"}
 	RoutingSlips           = []string{"routingslips", "routingslip", "rs"}
+	PubSub                 = []string{"pubsub", "ps"}
 )
