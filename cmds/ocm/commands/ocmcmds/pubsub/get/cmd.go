@@ -25,7 +25,7 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	Specs []string
+	RepoSpecs []string
 }
 
 var _ utils.OCMCommand = (*Command)(nil)
@@ -49,12 +49,12 @@ assigned to the repository, it is shown.
 }
 
 func (o *Command) Complete(args []string) error {
-	o.Specs = args
+	o.RepoSpecs = args
 	return nil
 }
 
 func (o *Command) Run() error {
-	return utils.HandleOutputsFor("repository spec", output.From(o), o.transform, o.Specs...)
+	return utils.HandleOutputsFor("repository spec", output.From(o), o.transform, o.RepoSpecs...)
 }
 
 func (o *Command) transform(in string) *Repo {

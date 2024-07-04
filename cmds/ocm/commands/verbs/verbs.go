@@ -2,6 +2,7 @@ package verbs
 
 const (
 	Get       = "get"
+	Set       = "set"
 	List      = "list"
 	Check     = "check"
 	Describe  = "describe"

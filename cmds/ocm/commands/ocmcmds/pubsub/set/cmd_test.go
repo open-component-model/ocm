@@ -1,24 +1,24 @@
-package get_test
+package set_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub/providers/ocireg"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub/providers/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const ARCH = "ctf"
-const ARCH2 = "ctf2"
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
@@ -26,54 +26,58 @@ var _ = Describe("Test Environment", func() {
 	BeforeEach(func() {
 		env = NewTestEnv()
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory)
-		env.OCMCommonTransport(ARCH2, accessio.FormatDirectory)
+
 		attr := pubsub.For(env)
 		attr.ProviderRegistry.Register(ctf.Type, &ocireg.Provider{})
 		attr.TypeScheme.Register(pubsub.NewPubSubType[*Spec](Type))
 		attr.TypeScheme.Register(pubsub.NewPubSubType[*Spec](TypeV1))
-
-		repo := Must(ctf.Open(env, ctf.ACC_WRITABLE, ARCH, 0o600, env))
-		defer repo.Close()
-		MustBeSuccessful(pubsub.SetForRepo(repo, NewSpec("testtarget")))
 	})
 
 	AfterEach(func() {
 		env.Cleanup()
 	})
 
-	It("get pubsub", func() {
+	It("sets pubsub", func() {
 		var buf bytes.Buffer
 
-		MustBeSuccessful(env.CatchOutput(&buf).Execute("get", "pubsub", ARCH))
+		spec := Must(json.Marshal(NewSpec("testtarget")))
+
+		MustBeSuccessful(env.CatchOutput(&buf).Execute("set", "pubsub", ARCH, string(spec)))
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-REPOSITORY PUBSUBTYPE ERROR
-ctf        test       
+set pubsub spec "test" for repository "ctf"
+`))
+
+		repo := Must(ctf.Open(env, ctf.ACC_WRITABLE, ARCH, 0o600, env))
+		defer Close(repo)
+		raw := Must(pubsub.SpecForRepo(repo))
+		Expect(raw).To(YAMLEqual(spec))
+	})
+
+	It("removes pubsub for non-existing", func() {
+		var buf bytes.Buffer
+
+		MustBeSuccessful(env.CatchOutput(&buf).Execute("set", "pubsub", ARCH))
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+no pubsub spec configured for repository "ctf"
 `))
 	})
 
-	It("get pubsub list", func() {
+	It("removes pubsub", func() {
 		var buf bytes.Buffer
 
-		MustBeSuccessful(env.CatchOutput(&buf).Execute("get", "pubsub", ARCH, ARCH2, "ARCH2"))
-		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-REPOSITORY PUBSUBTYPE ERROR
-ctf        test       
-ctf2       -          
-ARCH2                 repository "ARCH2" is unknown
-`))
-	})
+		repo := Must(ctf.Open(env, ctf.ACC_WRITABLE, ARCH, 0o600, env))
+		err := pubsub.SetForRepo(repo, NewSpec("testtarget"))
+		MustBeSuccessful(repo.Close())
+		MustBeSuccessful(err)
 
-	It("get pubsub yaml", func() {
-		var buf bytes.Buffer
-
-		MustBeSuccessful(env.CatchOutput(&buf).Execute("get", "pubsub", ARCH, "-o", "yaml"))
+		MustBeSuccessful(env.CatchOutput(&buf).Execute("set", "pubsub", ARCH))
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
----
-pubsub:
-  target: testtarget
-  type: test
-repository: ctf
+removed pubsub spec "test" for repository "ctf"
 `))
+
+		repo = Must(ctf.Open(env, ctf.ACC_WRITABLE, ARCH, 0o600, env))
+		defer Close(repo)
+		Expect(Must(pubsub.SpecForRepo(repo))).To(BeNil())
 	})
 })
 

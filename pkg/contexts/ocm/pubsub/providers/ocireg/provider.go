@@ -44,7 +44,7 @@ func (p *Provider) GetPubSubSpec(repo repocpi.Repository) (pubsub.PubSubSpec, er
 
 	ocirepo := path.Join(gen.Meta().SubPath, componentmapping.ComponentDescriptorNamespace)
 	acc, err := gen.OCIRepository().LookupArtifact(ocirepo, META)
-	if errors.IsErrNotFound(err) {
+	if errors.IsErrNotFound(err) || errors.IsErrUnknown(err) {
 		return nil, nil
 	}
 	if err != nil {
@@ -109,7 +109,7 @@ func (p *Provider) SetPubSubSpec(repo cpi.Repository, spec pubsub.PubSubSpec) er
 
 	acc, err := ns.GetArtifact(META)
 	if err != nil {
-		if errors.IsErrNotFound(err) {
+		if errors.IsErrNotFound(err) || errors.IsErrUnknown(err) {
 			if spec == nil {
 				return nil
 			}
@@ -145,20 +145,30 @@ func (p *Provider) SetPubSubSpec(repo cpi.Repository, spec pubsub.PubSubSpec) er
 	}
 
 	blob := blobaccess.ForData(PubSubLayerMimeTye, data)
-	for _, l := range m.GetDescriptor().Layers {
+	layers := m.GetDescriptor().Layers
+	for i := 0; i < len(layers); i++ {
+		l := layers[i]
 		if l.MediaType == PubSubLayerMimeTye {
-			m.AddBlob(blob)
-			l.Digest = blob.Digest()
-			b, err := ns.AddArtifact(m, META)
-			if b != nil {
-				b.Close()
+			if data != nil {
+				m.AddBlob(blob)
+				l.Digest = blob.Digest()
+				b, err := ns.AddArtifact(m, META)
+				if b != nil {
+					b.Close()
+				}
+				return err
+			} else {
+				layers = append(layers[:i], layers[i+1:]...)
+				i--
 			}
-			return err
 		}
 	}
-	_, err = m.AddLayer(blob, nil)
-	if err != nil {
-		return err
+	m.GetDescriptor().Layers = layers
+	if data != nil {
+		_, err = m.AddLayer(blob, nil)
+		if err != nil {
+			return err
+		}
 	}
 	b, err := ns.AddArtifact(m, META)
 	if b != nil {
