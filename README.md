@@ -7,18 +7,18 @@
 
 The Open Component Model (OCM) is an open standard to describe software bills of delivery (SBOD). OCM is a technology-agnostic and machine-readable format focused on the software artifacts that must be delivered for software products.
 
-Check out the [the main OCM project web page](https://ocm.software) to find out what OCM offers you for implementing a secure software supply chain. It is your central entry point to all kind of OCM related [docs and guides](https://ocm.software/docs/overview/context), the [OCM specification](https://ocm.software/docs/overview/specification/) and all project [github repositories](https://github.com/open-component-model). It also offers a [Getting Started](https://ocm.software/docs/getting-started/) to quickly make your hands dirty with OCM, its toolset and concepts :smiley:
+Check out the [the main OCM project web page](https://ocm.software) to find out what OCM offers you for implementing a secure software supply chain. It is your central entry point to all kind of OCM related [docs and guides](https://ocm.software/docs/overview/about), the [OCM specification](https://ocm.software/docs/overview/specification/) and all project [github repositories](https://github.com/open-component-model). It also offers a [Getting Started](https://ocm.software/docs/getting-started/) to quickly make your hands dirty with OCM, its toolset and concepts :smiley:
 
 ## OCM Specifications
 
-OCM describes delivery [artifacts](docs/ocm/model.md#artifacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories). It defines a set of semantic, formatting, and other types of specifications that can be found in the [`ocm-spec` repository](https://github.com/open-component-model/ocm-spec). Start learning about the core concepts of OCM elements [here](https://github.com/open-component-model/ocm-spec/tree/main/doc/specification/elements).
+OCM describes delivery [artifacts](https://github.com/open-component-model/ocm-spec/tree/main/doc/01-model/02-elements-toplevel.md#artifacts-resources-and-sources) that can be accessed from many types of [component repositories](https://github.com/open-component-model/ocm-spec/tree/main/doc/01-model/01-model.md#component-repositories). It defines a set of semantic, formatting, and other types of specifications that can be found in the [`ocm-spec` repository](https://github.com/open-component-model/ocm-spec). Start learning about the core concepts of OCM elements [here](https://github.com/open-component-model/ocm-spec/tree/main/doc/01-model/02-elements-toplevel.md#model-elements).
 
 ## OCM Library
 
 This project provides a Go library containing an API for interacting with the
 [Open Component Model (OCM)](https://github.com/open-component-model/ocm-spec) elements and mechanisms.
 
-The library currently supports the following [repository mappings](docs/ocm/interoperability.md):
+The library currently supports the following [repository mappings](https://github.com/open-component-model/ocm-spec/tree/main/doc/03-persistence/02-mappings.md#mappings-for-ocm-persistence):
 
 - **OCI**: Use the repository prefix path of an OCI repository to implement an OCM
   repository.
@@ -118,10 +118,10 @@ podman build -t ocm --build-arg GO_VERSION=1.22 --build-arg ALPINE_VERSION=3.19 
 ```
 
 ## Examples
+
 An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](https://github.com/open-component-model/ocm/blob/main/examples/make/Makefile).
 
 More comprehensive examples can be taken from the [`components`](https://github.com/open-component-model/ocm/tree/main/components) contained in this repository. [Here](components/helmdemo/README.md) a complete component build including a multi-arch image is done and finally packaged into a CTF archive which can be tranported into an OCI repository. See the readme files for details.
-
 
 ## Contributing
 
