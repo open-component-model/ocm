@@ -18,8 +18,16 @@ const (
 )
 
 func init() {
-	pubsub.RegisterType(pubsub.NewPubSubType[*Spec](Type))
-	pubsub.RegisterType(pubsub.NewPubSubType[*Spec](TypeV1))
+	pubsub.RegisterType(pubsub.NewPubSubType[*Spec](Type,
+		pubsub.WithDesciption("a pub/sub system forwarding events to described sub-level systems.")))
+	pubsub.RegisterType(pubsub.NewPubSubType[*Spec](TypeV1,
+		pubsub.WithFormatSpec(`It is describe by the following field:
+
+- **<code>specifications</code>**  *list of pubsub specs*
+
+  A list of nested sub-level specifications the events should be 
+  forwarded to.
+`)))
 }
 
 // Spec provides a pub sub adapter registering events at its provider.

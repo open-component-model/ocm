@@ -36,7 +36,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "{<ocm repository>} [<pub/sub specification>]",
-		Short: "Get the pubsub spec for an ocm repository",
+		Short: "Set the pubsub spec for an ocm repository",
 		Long: `
 A repository may be able to store a publish/subscribe specification
 to propagate the creation or update of component version.
@@ -44,6 +44,10 @@ If such an implementation is available this command can be used
 to set the pub/sub specification for a repository.
 If no specification is given an existing specification
 will be removed for the given repository.
+The specification
+can be queried with the <CMD>ocm get pubsub</CMD>.
+Types and specification formats are shown for the topic
+<CMD>ocm ocm-pubsub</CMD>.
 `,
 		Args: cobra.RangeArgs(1, 2),
 	}

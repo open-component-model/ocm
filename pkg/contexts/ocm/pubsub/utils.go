@@ -2,9 +2,11 @@ package pubsub
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -42,4 +44,32 @@ func Notify(repo cpi.Repository, nv common.NameVersion) error {
 		return err
 	}
 	return m.NotifyComponentVersion(nv)
+}
+
+func PubSubUsage(scheme TypeScheme, providers ProviderRegistry, cli bool) string {
+	s := `
+An OCM repository can be configured to propagate change events via a 
+publish/subscribe system, if there is a persistence provider for the dedicated
+repository type. If available any know publish/subscribe system can
+be configured with <CMD>ocm set pubsub</CMD> and shown with
+<CMD>ocm get pubsub</CMD>.. Hereby, the pub/sub system 
+is described by a typed specification.
+
+The following list describes the supported publish/subscribe system types, their
+specificaton versions and formats:
+`
+	if len(scheme.KnownTypes()) == 0 {
+		s += "There are currently no known pub/sub types!"
+	} else {
+		s += scheme.Describe()
+	}
+
+	list := maputils.OrderedKeys(providers.KnownProviders())
+	if len(list) == 0 {
+		s += "There are currently no persistence providers!"
+	} else {
+		s += "There are persistence providers for the following repository types:\n"
+		s += listformat.FormatList("", list...)
+	}
+	return s
 }

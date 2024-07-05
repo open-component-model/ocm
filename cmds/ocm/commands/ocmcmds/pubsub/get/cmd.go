@@ -43,7 +43,8 @@ func (o *Command) ForName(name string) *cobra.Command {
 A repository may be able to store a publish/subscribe specification
 to propagate the creation or update of component version.
 If such an implementation is available and a specification is
-assigned to the repository, it is shown.
+assigned to the repository, it is shown. The specification
+can be set with the <CMD>ocm set pubsub</CMD>.
 `,
 	}
 }
