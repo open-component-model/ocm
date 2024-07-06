@@ -56,7 +56,7 @@ set pubsub spec "test" for repository "ctf"
 	It("removes pubsub for non-existing", func() {
 		var buf bytes.Buffer
 
-		MustBeSuccessful(env.CatchOutput(&buf).Execute("set", "pubsub", ARCH))
+		MustBeSuccessful(env.CatchOutput(&buf).Execute("set", "pubsub", "-d", ARCH))
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 no pubsub spec configured for repository "ctf"
 `))
@@ -70,7 +70,7 @@ no pubsub spec configured for repository "ctf"
 		MustBeSuccessful(repo.Close())
 		MustBeSuccessful(err)
 
-		MustBeSuccessful(env.CatchOutput(&buf).Execute("set", "pubsub", ARCH))
+		MustBeSuccessful(env.CatchOutput(&buf).Execute("set", "pubsub", "-d", ARCH))
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 removed pubsub spec "test" for repository "ctf"
 `))

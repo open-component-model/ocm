@@ -1,7 +1,10 @@
 package set
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -21,6 +24,8 @@ var (
 
 type Command struct {
 	utils.BaseCommand
+
+	Delete bool
 
 	RepoSpec string
 	Spec     []byte
@@ -53,14 +58,25 @@ Types and specification formats are shown for the topic
 	}
 }
 
+func (o *Command) AddFlags(set *pflag.FlagSet) {
+	set.BoolVarP(&o.Delete, "delete", "d", false, "delete pub/sub configuration")
+}
+
 func (o *Command) Complete(args []string) error {
 	var err error
 
 	o.RepoSpec = args[0]
 	if len(args) > 1 {
+		if o.Delete {
+			return fmt.Errorf("delete does not require a specification argument")
+		}
 		o.Spec, err = utils2.ResolveData(args[1], o.FileSystem())
 		if err != nil {
 			return err
+		}
+	} else {
+		if !o.Delete {
+			return fmt.Errorf("pub/sub specification argument required")
 		}
 	}
 	return nil
