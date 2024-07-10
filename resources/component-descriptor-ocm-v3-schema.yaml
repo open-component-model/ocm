@@ -107,32 +107,6 @@ $defs:
     required:
       - 'type'
 
-  githubAccess:
-    type: 'object'
-    required:
-      - 'type'
-      - 'repoUrl'
-      - 'ref'
-    properties:
-      type:
-        type: 'string'
-        enum: ['github']
-      repoUrl:
-        type: 'string'
-      ref:
-        type: 'string'
-      commit:
-        type: 'string'
-
-  noneAccess:
-    type: 'object'
-    required:
-      - 'type'
-    properties:
-      type:
-        type: 'string'
-        enum: ['None']
-
   sourceDefinition:
     type: 'object'
     required:
@@ -153,10 +127,7 @@ $defs:
       labels:
         $ref: '#/$defs/labels'
       access:
-        anyOf:
-          - $ref: '#/$defs/access'
-          - $ref: '#/$defs/githubAccess'
-          - $ref: '#/$defs/httpAccess'
+        $ref: '#/$defs/access'
 
   digestSpec:
     type: 'object'
@@ -285,7 +256,7 @@ $defs:
           - type: 'null'
           - $ref: '#/$defs/digestSpec'
 
-  resourceType:
+  resourceDefinition:
     type: 'object'
     description: 'base type for resources'
     required:
@@ -314,148 +285,7 @@ $defs:
       labels:
         $ref: '#/$defs/labels'
       access:
-        anyOf:
-          - $ref: '#/$defs/access'
-          - $ref: '#/$defs/ociBlobAccess'
-          - $ref: '#/$defs/localFilesystemBlobAccess'
-          - $ref: '#/$defs/localOciBlobAccess'
-      digest:
-        oneOf:
-          - type: 'null'
-          - $ref: '#/$defs/digestSpec'
-
-  ociImageAccess:
-    type: 'object'
-    required:
-      - 'type'
-      - 'imageReference'
-    properties:
-      type:
-        type: 'string'
-        enum: ['ociRegistry']
-      imageReference:
-        type: 'string'
-
-  ociBlobAccess:
-    type: 'object'
-    required:
-      - 'type'
-      - 'layer'
-    properties:
-      type:
-        type: 'string'
-        enum: [ 'ociBlob' ]
-      ref:
-        description: 'A oci reference to the manifest'
-        type: 'string'
-      mediaType:
-        description: 'The media type of the object this access refers to'
-        type: 'string'
-      digest:
-        description: 'The digest of the targeted content'
-        type: 'string'
-      size:
-        description: 'The size in bytes of the blob'
-        type: 'number'
-
-  localFilesystemBlobAccess:
-    type: 'object'
-    required:
-      - 'type'
-      - 'filename'
-    properties:
-      type:
-        type: 'string'
-        enum: [ 'localFilesystemBlob' ]
-      filename:
-        description: 'filename of the blob that is located in the "blobs" directory'
-        type: 'string'
-
-  localOciBlobAccess:
-    type: 'object'
-    required:
-      - 'type'
-      - 'filename'
-    properties:
-      type:
-        type: 'string'
-        enum: [ 'localOciBlob' ]
-      digest:
-        description: 'digest of the layer within the current component descriptor'
-        type: 'string'
-
-  ociImageResource:
-    type: 'object'
-    required:
-      - 'name'
-      - 'version'
-      - 'type'
-      - 'access'
-    properties:
-      name:
-        type: 'string'
-        $ref: '#/$defs/identityAttributeKey'
-      extraIdentity:
-        $ref: '#/$defs/identityAttribute'
-      version:
-        $ref: '#/$defs/relaxedSemver'
-      type:
-        type: 'string'
-        enum: ['ociImage']
-      labels:
-        $ref: '#/$defs/labels'
-      access:
-        $ref: '#/$defs/ociImageAccess'
-      digest:
-        oneOf:
-          - type: 'null'
-          - $ref: '#/$defs/digestSpec'
-
-
-  httpAccess:
-    type: 'object'
-    required:
-      - 'type'
-      - 'url'
-    properties:
-      type:
-        type: 'string'
-        enum: ['http']
-      url:
-        type: 'string'
-
-  genericAccess:
-    type: 'object'
-    required:
-      - 'type'
-    properties:
-      type:
-        type: 'string'
-        enum: ['generic']
-
-  genericResource:
-    type: 'object'
-    required:
-      - 'name'
-      - 'version'
-      - 'type'
-      - 'access'
-    additionalProperties: false
-    properties:
-      name:
-        type: 'string'
-        $ref: '#/$defs/identityAttributeKey'
-      extraIdentity:
-        $ref: '#/$defs/identityAttribute'
-      version:
-        $ref: '#/$defs/relaxedSemver'
-      type:
-        type: 'string'
-        enum: ['generic']
-      labels:
-        $ref: '#/$defs/labels'
-      access:
-        $ref: '#/$defs/genericAccess'
+        $ref: '#/$defs/access'
       digest:
         oneOf:
           - type: 'null'
@@ -488,10 +318,7 @@ $defs:
       resources:
         type: 'array'
         items:
-          anyOf:
-            - $ref: '#/$defs/resourceType'
-            - $ref: '#/$defs/ociImageResource'
-            - $ref: '#/$defs/genericResource'
+          $ref: '#/$defs/resourceDefinition'
 
 type: 'object'
 required:
