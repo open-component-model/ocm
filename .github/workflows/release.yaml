@@ -142,7 +142,7 @@ jobs:
         go-version-file: '${{ github.workspace }}/go.mod'
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@e8d2a6937ecead383dfe75190d104edd1f9c5751 # v0.16.0
+      uses: anchore/sbom-action/download-syft@95b086ac308035dc0850b3853be5b7ab108236a8 # v0.16.1
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.5.0
@@ -225,7 +225,7 @@ jobs:
         git push origin ${{ env.RELEASE_VERSION }}
 
     - name: Run GoReleaser
-      uses: goreleaser/goreleaser-action@v5
+      uses: goreleaser/goreleaser-action@v6
       with:
         distribution: goreleaser
         version: latest
