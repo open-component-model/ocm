@@ -291,7 +291,7 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *cpi.SourceMeta, ac
 	return errors.ErrUnknown(cpi.KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
 }
 
-func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, modopts ...internal.ModificationOption) error {
+func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, modopts ...internal.TargetOption) error {
 	cpi.Logger(c).Debug("adding source blob", "source", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
@@ -414,7 +414,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		curidx := cd.GetResourceIndex(&res.ResourceMeta)
 		var idx int
 		if opts.TargetElement != nil {
-			idx = opts.TargetElement.GetTargetIndex(cd.Resources)
+			idx = opts.TargetElement.GetTargetIndex(cd.Resources, &meta.ElementMeta)
 			if idx == -1 && curidx >= 0 {
 				if res.Version == cd.Resources[curidx].Version {
 					return fmt.Errorf("adding a new resource with same base identity requires different version")
@@ -527,17 +527,17 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 	return hashAlgo, digester, value
 }
 
-func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, modopts ...internal.ModificationOption) error {
+func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, optslist ...internal.TargetOption) error {
 	return setAccess(c, "source", art,
 		func(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
-			return c.SetSource(meta, acc, modopts...)
+			return c.SetSource(meta, acc, optslist...)
 		},
 		func(meta *cpi.SourceMeta, blob cpi.BlobAccess, hint string, global cpi.AccessSpec) error {
-			return c.SetSourceBlob(meta, blob, hint, global, modopts...)
+			return c.SetSourceBlob(meta, blob, hint, global, optslist...)
 		})
 }
 
-func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, modopts ...internal.ModificationOption) error {
+func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, optslist ...internal.TargetOption) error {
 	if c.bridge.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -547,9 +547,7 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		Access:     acc,
 	}
 
-	ctx := c.bridge.GetContext()
-	opts := internal.NewModificationOptions(modopts...)
-	cpi.CompleteModificationOptions(ctx, opts)
+	opts := internal.NewTargetOptions(optslist...)
 
 	return c.Execute(func() error {
 		var old *compdesc.Source
@@ -562,7 +560,7 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		curidx := cd.GetSourceIndex(&res.SourceMeta)
 		var idx int
 		if opts.TargetElement != nil {
-			idx = opts.TargetElement.GetTargetIndex(cd.Sources)
+			idx = opts.TargetElement.GetTargetIndex(cd.Sources, &meta.ElementMeta)
 			if idx == -1 && curidx >= 0 {
 				if res.Version == cd.Sources[curidx].Version {
 					return fmt.Errorf("adding a new source with same base identity requires different version")

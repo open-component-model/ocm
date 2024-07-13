@@ -9,7 +9,10 @@ import (
 )
 
 type (
-	TargetElement       = internal.TargetElement
+	TargetElement = internal.TargetElement
+	TargetOption  = internal.TargetOption
+	TargetOptions = internal.TargetOptions
+
 	ModificationOption  = internal.ModificationOption
 	ModificationOptions = internal.ModificationOptions
 
@@ -60,7 +63,9 @@ func TargetIndex(idx int) internal.TargetIndex {
 	return internal.TargetIndex(-1)
 }
 
-const AppendResource = internal.TargetIndex(-1)
+const AppendElement = internal.TargetIndex(-1)
+
+var ReplaceElement = internal.ReplaceElement
 
 func TargetIdentity(id v1.Identity) internal.TargetIdentity {
 	return internal.TargetIdentity(id)

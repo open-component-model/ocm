@@ -88,6 +88,54 @@ func UseBlobHandlers(h BlobHandlerProvider) BlobOptionImpl {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// TargetElement described the index used to set the
+// resource or source for the SetXXX calls.
+// If -1 is returned an append is enforced.
+type TargetElement interface {
+	GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) int
+}
+
+type TargetOptionImpl interface {
+	TargetOption
+	ModificationOption
+	BlobModificationOption
+}
+
+type TargetOptions struct {
+	TargetElement TargetElement
+}
+
+type TargetOption interface {
+	ApplyTargetOption(options *TargetOptions)
+}
+
+func (m *TargetOptions) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m *TargetOptions) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m *TargetOptions) ApplyTargetOption(opts *TargetOptions) {
+	optionutils.Transfer(&opts.TargetElement, m.TargetElement)
+}
+
+func (m *TargetOptions) ApplyTargetOptions(list ...TargetOption) *TargetOptions {
+	for _, o := range list {
+		if o != nil {
+			o.ApplyTargetOption(m)
+		}
+	}
+	return m
+}
+
+func NewTargetOptions(list ...TargetOption) *TargetOptions {
+	var m TargetOptions
+	m.ApplyTargetOptions(list...)
+	return &m
+}
+
 type ModificationOption interface {
 	ApplyModificationOption(opts *ModificationOptions)
 }
@@ -97,14 +145,9 @@ type ModOptionImpl interface {
 	BlobModificationOption
 }
 
-// TargetElement described the index used to set the
-// resource or source for the SetXXX calls.
-// If -1 is returned an append is enforced.
-type TargetElement interface {
-	GetTargetIndex(resources compdesc.ElementAccessor) int
-}
-
 type ModificationOptions struct {
+	TargetOptions
+
 	// ModifyResource disables the modification of signature releveant
 	// resource parts.
 	ModifyResource *bool
@@ -124,8 +167,6 @@ type ModificationOptions struct {
 
 	// SkipDigest disabled digest creation (for legacy code, only!)
 	SkipDigest *bool
-
-	TargetElement TargetElement
 }
 
 func (m *ModificationOptions) IsModifyResource() bool {
@@ -158,13 +199,13 @@ func (m *ModificationOptions) ApplyBlobModificationOption(opts *BlobModification
 }
 
 func (m *ModificationOptions) ApplyModificationOption(opts *ModificationOptions) {
+	m.TargetOptions.ApplyTargetOption(&opts.TargetOptions)
 	optionutils.Transfer(&opts.ModifyResource, m.ModifyResource)
 	optionutils.Transfer(&opts.AcceptExistentDigests, m.AcceptExistentDigests)
 	optionutils.Transfer(&opts.SkipDigest, m.SkipDigest)
 	optionutils.Transfer(&opts.SkipVerify, m.SkipVerify)
 	optionutils.Transfer(&opts.HasherProvider, m.HasherProvider)
 	optionutils.Transfer(&opts.DefaultHashAlgorithm, m.DefaultHashAlgorithm)
-	optionutils.Transfer(&opts.TargetElement, m.TargetElement)
 }
 
 func (m *ModificationOptions) GetHasher(algo ...string) Hasher {
@@ -181,7 +222,7 @@ func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 
 type TargetIndex int
 
-func (m TargetIndex) GetTargetIndex(resources compdesc.ElementAccessor) int {
+func (m TargetIndex) GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) int {
 	if int(m) >= resources.Len() {
 		return -1
 	}
@@ -193,6 +234,10 @@ func (m TargetIndex) ApplyBlobModificationOption(opts *BlobModificationOptions) 
 }
 
 func (m TargetIndex) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m TargetIndex) ApplyTargetOption(opts *TargetOptions) {
 	opts.TargetElement = m
 }
 
@@ -200,7 +245,7 @@ func (m TargetIndex) ApplyModificationOption(opts *ModificationOptions) {
 
 type TargetIdentity v1.Identity
 
-func (m TargetIdentity) GetTargetIndex(resources compdesc.ElementAccessor) int {
+func (m TargetIdentity) GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) int {
 	for i := 0; i < resources.Len(); i++ {
 		r := resources.Get(i)
 		if r.GetMeta().GetIdentity(resources).Equals(v1.Identity(m)) {
@@ -215,6 +260,38 @@ func (m TargetIdentity) ApplyBlobModificationOption(opts *BlobModificationOption
 }
 
 func (m TargetIdentity) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m TargetIdentity) ApplyTargetOption(opts *TargetOptions) {
+	opts.TargetElement = m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type replaceElement struct{}
+
+var ReplaceElement TargetOption = replaceElement{}
+
+func (m replaceElement) GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) int {
+	id := meta.GetIdentity(resources)
+	for i := 0; i < resources.Len(); i++ {
+		if resources.Get(i).GetMeta().GetIdentity(resources).Equals(id) {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m replaceElement) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m replaceElement) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m replaceElement) ApplyTargetOption(opts *TargetOptions) {
 	opts.TargetElement = m
 }
 

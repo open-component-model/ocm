@@ -3,12 +3,12 @@ package srcs
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -51,8 +51,8 @@ func (h *ResourceSpecHandler) AddFlags(opts *pflag.FlagSet) {
 	h.options.AddFlags(opts)
 }
 
-func (h *ResourceSpecHandler) getModOpts() []ocm.ModificationOption {
-	return options.FindOptions[ocm.ModificationOption](h.options)
+func (h *ResourceSpecHandler) getTargetOpts() []ocm.TargetOption {
+	return options.FindOptions[ocm.TargetOption](h.options)
 }
 
 func (*ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
@@ -82,7 +82,7 @@ func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Eleme
 		},
 		Type: spec.Type,
 	}
-	return v.SetSource(meta, acc, h.getModOpts()...)
+	return v.SetSource(meta, acc, h.getTargetOpts()...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

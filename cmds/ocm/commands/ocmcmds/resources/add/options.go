@@ -20,10 +20,18 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 			return
 		}
 	}
-	fs.BoolVarP(&o.Replace, "replace", "R", false, "replace existing (re)sources")
+	fs.BoolVarP(&o.Replace, "replace", "R", false, "replace existing elements")
+}
+
+func (o *Options) ApplyBlobModificationOption(opts *ocm.BlobModificationOptions) {
+	o.ApplyTargetOption(&opts.TargetOptions)
 }
 
 func (o *Options) ApplyModificationOption(opts *ocm.ModificationOptions) {
+	o.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (o *Options) ApplyTargetOption(opts *ocm.TargetOptions) {
 	if !o.Replace {
 		opts.TargetElement = ocm.AppendElement
 	}

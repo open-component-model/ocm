@@ -145,10 +145,10 @@ type ComponentVersionAccess interface {
 	GetSourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]SourceAccess, error)
 	// SetSource updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
-	SetSource(*SourceMeta, compdesc.AccessSpec, ...ModificationOption) error
+	SetSource(*SourceMeta, compdesc.AccessSpec, ...TargetOption) error
 	// SetSourceByAccess updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
-	SetSourceByAccess(art SourceAccess, opts ...ModificationOption) error
+	SetSourceByAccess(art SourceAccess, opts ...TargetOption) error
 
 	GetReference(meta metav1.Identity) (ComponentReference, error)
 	GetReferenceIndex(meta metav1.Identity) int
@@ -167,7 +167,7 @@ type ComponentVersionAccess interface {
 	AdjustSourceAccess(meta *SourceMeta, acc compdesc.AccessSpec) error
 	// SetSourceBlob updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
-	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...ModificationOption) error
+	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...TargetOption) error
 
 	// AccessMethod provides an access method implementation for
 	// an access spec. This might be a repository local implementation

@@ -6,7 +6,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -22,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
