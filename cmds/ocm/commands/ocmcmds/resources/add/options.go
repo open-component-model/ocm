@@ -1,0 +1,30 @@
+package add
+
+import (
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+)
+
+type Options struct {
+	Replace bool
+}
+
+var _ ocm.ModificationOption = (*Options)(nil)
+
+func (o *Options) AddFlags(fs *pflag.FlagSet) {
+	f := fs.Lookup("replace")
+	if f != nil {
+		if bp := generics.Cast[*bool](f.Value); bp != nil {
+			return
+		}
+	}
+	fs.BoolVarP(&o.Replace, "replace", "R", false, "replace existing (re)sources")
+}
+
+func (o *Options) ApplyModificationOption(opts *ocm.ModificationOptions) {
+	if !o.Replace {
+		opts.TargetElement = ocm.AppendElement
+	}
+}

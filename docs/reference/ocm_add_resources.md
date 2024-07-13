@@ -20,6 +20,7 @@ resources, resource, res, r
   -F, --file string                         target file/directory (default "component-archive")
   -h, --help                                help for resources
   -O, --output string                       output file for dry-run
+  -R, --replace                             replace existing resources
   -s, --settings stringArray                settings file with variable settings (yaml)
       --skip-digest-generation              skip digest creation
       --templater string                    templater to use (go, none, spiff, subst) (default "subst")

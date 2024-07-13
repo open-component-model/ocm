@@ -305,6 +305,12 @@ func (cd *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
 	return -1
 }
 
+// GetSourcesByName returns all sources with a name.
+func (cd *ComponentDescriptor) GetSourcesByName(name string, selectors ...IdentitySelector) (Sources, error) {
+	return cd.GetSourcesByIdentitySelectors(
+		sliceutils.CopyAppend[IdentitySelector](selectors, ByName(name))...)
+}
+
 // GetReferenceByIdentity returns reference that matches the given identity.
 func (cd *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (ComponentReference, error) {
 	dig := id.Digest()

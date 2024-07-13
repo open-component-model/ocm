@@ -115,6 +115,10 @@ func (d *DummyComponentVersionAccess) GetReferenceByIndex(i int) (ComponentRefer
 	return ComponentReference{}, errors.ErrInvalid("reference index", strconv.Itoa(i))
 }
 
+func (d *DummyComponentVersionAccess) GetSourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]SourceAccess, error) {
+	return nil, errors.ErrInvalid("source", name)
+}
+
 func (d *DummyComponentVersionAccess) AccessMethod(spec AccessSpec) (AccessMethod, error) {
 	if spec.IsLocal(d.Context) {
 		return nil, errors.ErrNotSupported("local access method")
@@ -149,19 +153,19 @@ func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compd
 	return errors.ErrNotSupported("resource modification")
 }
 
-func (d *DummyComponentVersionAccess) SetResourceAccess(art ResourceAccess, modopts ...BlobModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResourceByAccess(art ResourceAccess, modopts ...BlobModificationOption) error {
 	return errors.ErrNotSupported("resource modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error {
+func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...ModificationOption) error {
 	return errors.ErrNotSupported("source modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.AccessSpec) error {
+func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.AccessSpec, opts ...ModificationOption) error {
 	return errors.ErrNotSupported("source modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess) error {
+func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess, opts ...ModificationOption) error {
 	return errors.ErrNotSupported()
 }
 

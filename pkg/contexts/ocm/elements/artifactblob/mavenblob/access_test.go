@@ -51,7 +51,7 @@ var _ = Describe("blobaccess for maven", func() {
 			defer Close(b)
 			Expect(string(Must(b.Get()))).To(Equal(`{"some": "test content"}`))
 
-			MustBeSuccessful(cv.SetResourceAccess(a))
+			MustBeSuccessful(cv.SetResourceByAccess(a))
 			r := Must(cv.GetResourceByIndex(0))
 			m := Must(r.AccessMethod())
 			defer Close(m)

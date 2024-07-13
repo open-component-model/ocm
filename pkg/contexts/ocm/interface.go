@@ -161,6 +161,10 @@ func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) 
 	return compdesc.NewResourceMeta(name, typ, relation)
 }
 
+func NewSourceMeta(name string, typ string) *SourceMeta {
+	return compdesc.NewSourceMeta(name, typ)
+}
+
 ///////////////////////////////////////////////////////
 
 func BlobAccessForAccessMethod(m AccessMethod) (blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView], error) {

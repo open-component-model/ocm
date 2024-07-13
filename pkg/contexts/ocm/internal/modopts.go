@@ -3,6 +3,8 @@ package internal
 import (
 	"github.com/mandelsoft/goutils/optionutils"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -95,6 +97,13 @@ type ModOptionImpl interface {
 	BlobModificationOption
 }
 
+// TargetElement described the index used to set the
+// resource or source for the SetXXX calls.
+// If -1 is returned an append is enforced.
+type TargetElement interface {
+	GetTargetIndex(resources compdesc.ElementAccessor) int
+}
+
 type ModificationOptions struct {
 	// ModifyResource disables the modification of signature releveant
 	// resource parts.
@@ -115,6 +124,8 @@ type ModificationOptions struct {
 
 	// SkipDigest disabled digest creation (for legacy code, only!)
 	SkipDigest *bool
+
+	TargetElement TargetElement
 }
 
 func (m *ModificationOptions) IsModifyResource() bool {
@@ -147,16 +158,13 @@ func (m *ModificationOptions) ApplyBlobModificationOption(opts *BlobModification
 }
 
 func (m *ModificationOptions) ApplyModificationOption(opts *ModificationOptions) {
-	optionutils.ApplyOption(m.ModifyResource, &opts.ModifyResource)
-	optionutils.ApplyOption(m.AcceptExistentDigests, &opts.AcceptExistentDigests)
-	optionutils.ApplyOption(m.SkipDigest, &opts.SkipDigest)
-	optionutils.ApplyOption(m.SkipVerify, &opts.SkipVerify)
-	if m.HasherProvider != nil {
-		opts.HasherProvider = m.HasherProvider
-	}
-	if m.DefaultHashAlgorithm != "" {
-		opts.DefaultHashAlgorithm = m.DefaultHashAlgorithm
-	}
+	optionutils.Transfer(&opts.ModifyResource, m.ModifyResource)
+	optionutils.Transfer(&opts.AcceptExistentDigests, m.AcceptExistentDigests)
+	optionutils.Transfer(&opts.SkipDigest, m.SkipDigest)
+	optionutils.Transfer(&opts.SkipVerify, m.SkipVerify)
+	optionutils.Transfer(&opts.HasherProvider, m.HasherProvider)
+	optionutils.Transfer(&opts.DefaultHashAlgorithm, m.DefaultHashAlgorithm)
+	optionutils.Transfer(&opts.TargetElement, m.TargetElement)
 }
 
 func (m *ModificationOptions) GetHasher(algo ...string) Hasher {
@@ -167,6 +175,47 @@ func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 	var m ModificationOptions
 	m.ApplyModificationOptions(list...)
 	return &m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type TargetIndex int
+
+func (m TargetIndex) GetTargetIndex(resources compdesc.ElementAccessor) int {
+	if int(m) >= resources.Len() {
+		return -1
+	}
+	return int(m)
+}
+
+func (m TargetIndex) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m TargetIndex) ApplyModificationOption(opts *ModificationOptions) {
+	opts.TargetElement = m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type TargetIdentity v1.Identity
+
+func (m TargetIdentity) GetTargetIndex(resources compdesc.ElementAccessor) int {
+	for i := 0; i < resources.Len(); i++ {
+		r := resources.Get(i)
+		if r.GetMeta().GetIdentity(resources).Equals(v1.Identity(m)) {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m TargetIdentity) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m TargetIdentity) ApplyModificationOption(opts *ModificationOptions) {
+	opts.TargetElement = m
 }
 
 ////////////////////////////////////////////////////////////////////////////////

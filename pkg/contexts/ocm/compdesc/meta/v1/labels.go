@@ -131,15 +131,17 @@ func (l Labels) GetDef(name string) *Label {
 	return nil
 }
 
-// SetDef ets a label definition.
+// SetDef sets a label definition.
 func (l *Labels) SetDef(name string, value *Label) {
+	n := *value
+	n.Name = name
 	for i, label := range *l {
 		if label.Name == name {
-			(*l)[i] = *value
+			(*l)[i] = n
 			return
 		}
 	}
-	*l = append(*l, *value)
+	*l = append(*l, n)
 }
 
 // Get returns the label value with the given name as json string.

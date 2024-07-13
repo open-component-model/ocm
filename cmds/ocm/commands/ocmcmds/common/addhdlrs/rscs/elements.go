@@ -34,16 +34,23 @@ var (
 )
 
 func New(opts ...ocm.ModificationOption) *ResourceSpecHandler {
+	set := options.OptionSet{skipdigestoption.New()}
 	if len(opts) > 0 {
-		return &ResourceSpecHandler{opts: ocm.NewModificationOptions(opts...)}
+		return &ResourceSpecHandler{options: set, opts: ocm.NewModificationOptions(opts...)}
 	}
-	return &ResourceSpecHandler{}
+	return &ResourceSpecHandler{options: set}
+}
+
+func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
+	h.options = append(h.options, opts...)
+	return h
+}
+
+func (h *ResourceSpecHandler) GetOptions() options.OptionSet {
+	return h.options
 }
 
 func (h *ResourceSpecHandler) AddFlags(opts *pflag.FlagSet) {
-	if len(h.options) == 0 {
-		h.options = options.OptionSet{skipdigestoption.New()}
-	}
 	h.options.AddFlags(opts)
 }
 

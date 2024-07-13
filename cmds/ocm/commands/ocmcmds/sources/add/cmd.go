@@ -1,6 +1,7 @@
 package add
 
 import (
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -27,7 +28,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.NewResourceAdderCommand(ctx, srcs.ResourceSpecHandler{}, common.NewContentResourceSpecificationProvider(ctx, "source", nil, "")),
+			common.NewResourceAdderCommand(ctx, srcs.New().WithCLIOptions(&add.Options{}), common.NewContentResourceSpecificationProvider(ctx, "source", nil, "")),
 		},
 		utils.Names(Names, names...)...,
 	)

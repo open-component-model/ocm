@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/rscs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/srcs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -31,6 +32,7 @@ const (
 
 type ResourceSpecHandler struct {
 	rschandler *rscs.ResourceSpecHandler
+	srchandler *srcs.ResourceSpecHandler
 	version    string
 	schema     string
 }
@@ -41,11 +43,18 @@ var (
 )
 
 func New(v string, schema string, opts ...ocm.ModificationOption) *ResourceSpecHandler {
-	return &ResourceSpecHandler{rschandler: rscs.New(opts...), version: v, schema: schema}
+	return &ResourceSpecHandler{rschandler: rscs.New(opts...), srchandler: srcs.New(), version: v, schema: schema}
 }
 
 func (h *ResourceSpecHandler) AddFlags(fs *pflag.FlagSet) {
 	h.rschandler.AddFlags(fs)
+	h.srchandler.AddFlags(fs)
+}
+
+func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
+	h.rschandler.WithCLIOptions(opts...)
+	h.srchandler.WithCLIOptions(opts...)
+	return h
 }
 
 func (*ResourceSpecHandler) Key() string {
@@ -94,6 +103,13 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 
 	cd := cv.GetDescriptor()
 
+	opts := h.srchandler.GetOptions()[0].(*add.Options)
+	if !opts.Replace {
+		cd.Resources = nil
+		cd.Sources = nil
+		cd.References = nil
+	}
+
 	schema := h.schema
 	if r.Meta.ConfiguredVersion != "" {
 		schema = r.Meta.ConfiguredVersion
@@ -111,7 +127,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 		cd.CreationTime = metav1.NewTimestampP()
 	}
 
-	err = handle(ctx, ictx, elem.Source(), cv, r.Sources, srcs.ResourceSpecHandler{})
+	err = handle(ctx, ictx, elem.Source(), cv, r.Sources, h.srchandler)
 	if err != nil {
 		return err
 	}

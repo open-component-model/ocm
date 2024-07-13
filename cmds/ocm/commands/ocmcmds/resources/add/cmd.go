@@ -27,7 +27,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.NewResourceAdderCommand(ctx, rscs.New(), NewResourceSpecificationsProvider(ctx, "")),
+			common.NewResourceAdderCommand(ctx, rscs.New().WithCLIOptions(&Options{}), NewResourceSpecificationsProvider(ctx, "")),
 		},
 		utils.Names(Names, names...)...,
 	)

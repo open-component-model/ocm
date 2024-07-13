@@ -3,11 +3,13 @@ package cpi
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/hashattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
 type (
+	TargetElement       = internal.TargetElement
 	ModificationOption  = internal.ModificationOption
 	ModificationOptions = internal.ModificationOptions
 
@@ -52,6 +54,16 @@ func UseBlobHandlers(h BlobHandlerProvider) internal.BlobOptionImpl {
 
 func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 	return internal.NewModificationOptions(list...)
+}
+
+func TargetIndex(idx int) internal.TargetIndex {
+	return internal.TargetIndex(-1)
+}
+
+const AppendResource = internal.TargetIndex(-1)
+
+func TargetIdentity(id v1.Identity) internal.TargetIdentity {
+	return internal.TargetIdentity(id)
 }
 
 func ModifyResource(flag ...bool) internal.ModOptionImpl {

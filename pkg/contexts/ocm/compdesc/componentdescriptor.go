@@ -206,6 +206,17 @@ func (o *ElementMeta) SetExtraIdentity(identity metav1.Identity) {
 	o.ExtraIdentity = identity
 }
 
+func (o *ElementMeta) AddExtraIdentity(identity metav1.Identity) {
+	if o.ExtraIdentity == nil {
+		o.ExtraIdentity = identity
+	} else {
+		o.ExtraIdentity = o.ExtraIdentity.Copy()
+		for k, v := range identity {
+			o.ExtraIdentity[k] = v
+		}
+	}
+}
+
 // GetIdentity returns the identity of the object.
 func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
@@ -502,6 +513,24 @@ func (o *SourceMeta) Copy() *SourceMeta {
 	}
 }
 
+func (o *SourceMeta) WithVersion(v string) *SourceMeta {
+	r := *o
+	r.Version = v
+	return &r
+}
+
+func (o *SourceMeta) WithExtraIdentity(extras ...string) *SourceMeta {
+	r := *o
+	r.AddExtraIdentity(NewExtraIdentity(extras...))
+	return &r
+}
+
+func (o *SourceMeta) WithLabel(l *Label) *SourceMeta {
+	r := *o
+	r.Labels.SetDef(l.Name, l)
+	return &r
+}
+
 func NewSourceMeta(name, typ string) *SourceMeta {
 	return &SourceMeta{
 		ElementMeta: ElementMeta{Name: name},
@@ -707,6 +736,24 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 		Digest:      o.Digest.Copy(),
 	}
 	return r
+}
+
+func (o *ResourceMeta) WithVersion(v string) *ResourceMeta {
+	r := *o
+	r.Version = v
+	return &r
+}
+
+func (o *ResourceMeta) WithExtraIdentity(extras ...string) *ResourceMeta {
+	r := *o
+	r.AddExtraIdentity(NewExtraIdentity(extras...))
+	return &r
+}
+
+func (o *ResourceMeta) WithLabel(l *Label) *ResourceMeta {
+	r := *o
+	r.Labels.SetDef(l.Name, l)
+	return &r
 }
 
 func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) *ResourceMeta {

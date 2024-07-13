@@ -66,5 +66,5 @@ to add to a component version.
 }
 
 func (o *Command) Run() error {
-	return o.ProcessResourceDescriptions(rscadd.ResourceSpecHandler{})
+	return o.ProcessResourceDescriptions(rscadd.New())
 }

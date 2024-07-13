@@ -291,7 +291,7 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *cpi.SourceMeta, ac
 	return errors.ErrUnknown(cpi.KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
 }
 
-func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, modopts ...internal.ModificationOption) error {
 	cpi.Logger(c).Debug("adding source blob", "source", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
@@ -301,7 +301,7 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cp
 		return fmt.Errorf("unable to add blob: (component %s:%s source %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
-	if err := c.SetSource(meta, acc); err != nil {
+	if err := c.SetSource(meta, acc, modopts...); err != nil {
 		return fmt.Errorf("unable to set source: %w", err)
 	}
 
@@ -361,7 +361,7 @@ func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessVie
 	return setblob(meta, blob, hint, global)
 }
 
-func (c *componentVersionAccessView) SetResourceAccess(art cpi.ResourceAccess, modopts ...cpi.BlobModificationOption) error {
+func (c *componentVersionAccessView) SetResourceByAccess(art cpi.ResourceAccess, modopts ...cpi.BlobModificationOption) error {
 	return setAccess(c, "resource", art,
 		func(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
 			return c.SetResource(meta, acc, cpi.NewBlobModificationOptions(modopts...))
@@ -410,7 +410,19 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		}
 
 		cd := c.bridge.GetDescriptor()
-		idx := cd.GetResourceIndex(&res.ResourceMeta)
+
+		curidx := cd.GetResourceIndex(&res.ResourceMeta)
+		var idx int
+		if opts.TargetElement != nil {
+			idx = opts.TargetElement.GetTargetIndex(cd.Resources)
+			if idx == -1 && curidx >= 0 {
+				if res.Version == cd.Resources[curidx].Version {
+					return fmt.Errorf("adding a new resource with same base identity requires different version")
+				}
+			}
+		} else {
+			idx = curidx
+		}
 		if idx >= 0 {
 			old = &cd.Resources[idx]
 		}
@@ -515,12 +527,17 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 	return hashAlgo, digester, value
 }
 
-func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess) error {
+func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, modopts ...internal.ModificationOption) error {
 	return setAccess(c, "source", art,
-		c.SetSource, c.SetSourceBlob)
+		func(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
+			return c.SetSource(meta, acc, modopts...)
+		},
+		func(meta *cpi.SourceMeta, blob cpi.BlobAccess, hint string, global cpi.AccessSpec) error {
+			return c.SetSourceBlob(meta, blob, hint, global, modopts...)
+		})
 }
 
-func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
+func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, modopts ...internal.ModificationOption) error {
 	if c.bridge.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -529,12 +546,36 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		SourceMeta: *meta.Copy(),
 		Access:     acc,
 	}
+
+	ctx := c.bridge.GetContext()
+	opts := internal.NewModificationOptions(modopts...)
+	cpi.CompleteModificationOptions(ctx, opts)
+
 	return c.Execute(func() error {
+		var old *compdesc.Source
+
 		if res.Version == "" {
 			res.Version = c.bridge.GetVersion()
 		}
 		cd := c.bridge.GetDescriptor()
-		if idx := cd.GetSourceIndex(&res.SourceMeta); idx == -1 {
+
+		curidx := cd.GetSourceIndex(&res.SourceMeta)
+		var idx int
+		if opts.TargetElement != nil {
+			idx = opts.TargetElement.GetTargetIndex(cd.Sources)
+			if idx == -1 && curidx >= 0 {
+				if res.Version == cd.Sources[curidx].Version {
+					return fmt.Errorf("adding a new source with same base identity requires different version")
+				}
+			}
+		} else {
+			idx = curidx
+		}
+		if idx >= 0 {
+			old = &cd.Sources[idx]
+		}
+
+		if old == nil {
 			cd.Sources = append(cd.Sources, *res)
 		} else {
 			cd.Sources[idx] = *res
@@ -673,6 +714,19 @@ func (c *componentVersionAccessView) GetSourceByIndex(i int) (cpi.SourceAccess, 
 	}
 	r := c.GetDescriptor().Sources[i]
 	return cpi.NewSourceAccess(c, r.Access, r.SourceMeta), nil
+}
+
+func (c *componentVersionAccessView) GetSourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]cpi.SourceAccess, error) {
+	sources, err := c.GetDescriptor().GetSourcesByName(name, selectors...)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []cpi.SourceAccess{}
+	for _, resource := range sources {
+		result = append(result, cpi.NewSourceAccess(c, resource.Access, resource.SourceMeta))
+	}
+	return result, nil
 }
 
 func (c *componentVersionAccessView) GetSources() []cpi.SourceAccess {
