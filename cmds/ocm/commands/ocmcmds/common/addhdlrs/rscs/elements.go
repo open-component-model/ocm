@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -24,8 +23,8 @@ const (
 )
 
 type ResourceSpecHandler struct {
-	options options.OptionSet
-	opts    *ocm.ModificationOptions
+	addhdlrs.ResourceSpecHandlerBase
+	opts *ocm.ModificationOptions
 }
 
 var (
@@ -34,28 +33,22 @@ var (
 )
 
 func New(opts ...ocm.ModificationOption) *ResourceSpecHandler {
-	set := options.OptionSet{skipdigestoption.New()}
+	h := &ResourceSpecHandler{ResourceSpecHandlerBase: addhdlrs.NewBase(options.OptionSet{skipdigestoption.New()})}
 	if len(opts) > 0 {
-		return &ResourceSpecHandler{options: set, opts: ocm.NewModificationOptions(opts...)}
+		h.opts = ocm.NewModificationOptions(opts...)
 	}
-	return &ResourceSpecHandler{options: set}
-}
-
-func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
-	h.options = append(h.options, opts...)
 	return h
 }
 
-func (h *ResourceSpecHandler) GetOptions() options.OptionSet {
-	return h.options
-}
-
-func (h *ResourceSpecHandler) AddFlags(opts *pflag.FlagSet) {
-	h.options.AddFlags(opts)
+func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
+	return &ResourceSpecHandler{
+		h.ResourceSpecHandlerBase.WithCLIOptions(opts...),
+		h.opts,
+	}
 }
 
 func (h *ResourceSpecHandler) getModOpts() []ocm.ModificationOption {
-	opts := options.FindOptions[ocm.ModificationOption](h.options)
+	opts := options.FindOptions[ocm.ModificationOption](h.GetOptions())
 	if h.opts != nil {
 		opts = append(opts, h.opts)
 	}

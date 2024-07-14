@@ -3,7 +3,6 @@ package srcs
 import (
 	"fmt"
 
-	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -18,7 +17,7 @@ import (
 )
 
 type ResourceSpecHandler struct {
-	options options.OptionSet
+	addhdlrs.ResourceSpecHandlerBase
 }
 
 var (
@@ -27,7 +26,7 @@ var (
 )
 
 func New(opts ...options.Options) *ResourceSpecHandler {
-	return &ResourceSpecHandler{options: opts}
+	return &ResourceSpecHandler{addhdlrs.NewBase(opts...)}
 }
 
 func (ResourceSpecHandler) Key() string {
@@ -39,20 +38,9 @@ func (ResourceSpecHandler) RequireInputs() bool {
 }
 
 func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
-	h.options = append(h.options, opts...)
-	return h
-}
-
-func (h *ResourceSpecHandler) GetOptions() options.OptionSet {
-	return h.options
-}
-
-func (h *ResourceSpecHandler) AddFlags(opts *pflag.FlagSet) {
-	h.options.AddFlags(opts)
-}
-
-func (h *ResourceSpecHandler) getTargetOpts() []ocm.TargetOption {
-	return options.FindOptions[ocm.TargetOption](h.options)
+	return &ResourceSpecHandler{
+		h.ResourceSpecHandlerBase.WithCLIOptions(opts...),
+	}
 }
 
 func (*ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
@@ -82,7 +70,7 @@ func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Eleme
 		},
 		Type: spec.Type,
 	}
-	return v.SetSource(meta, acc, h.getTargetOpts()...)
+	return v.SetSource(meta, acc, h.GetTargetOpts()...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

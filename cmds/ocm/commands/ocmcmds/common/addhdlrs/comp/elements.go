@@ -33,6 +33,7 @@ const (
 type ResourceSpecHandler struct {
 	rschandler *rscs.ResourceSpecHandler
 	srchandler *srcs.ResourceSpecHandler
+	refhandler *refs.ResourceSpecHandler
 	version    string
 	schema     string
 }
@@ -43,17 +44,25 @@ var (
 )
 
 func New(v string, schema string, opts ...ocm.ModificationOption) *ResourceSpecHandler {
-	return &ResourceSpecHandler{rschandler: rscs.New(opts...), srchandler: srcs.New(), version: v, schema: schema}
+	return &ResourceSpecHandler{
+		rschandler: rscs.New(opts...),
+		srchandler: srcs.New(),
+		refhandler: refs.New(),
+		version:    v,
+		schema:     schema,
+	}
 }
 
 func (h *ResourceSpecHandler) AddFlags(fs *pflag.FlagSet) {
 	h.rschandler.AddFlags(fs)
 	h.srchandler.AddFlags(fs)
+	h.refhandler.AddFlags(fs)
 }
 
 func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
 	h.rschandler.WithCLIOptions(opts...)
 	h.srchandler.WithCLIOptions(opts...)
+	h.refhandler.WithCLIOptions(opts...)
 	return h
 }
 
@@ -135,7 +144,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 	if err != nil {
 		return err
 	}
-	err = handle(ctx, ictx, elem.Source(), cv, r.References, refs.ResourceSpecHandler{})
+	err = handle(ctx, ictx, elem.Source(), cv, r.References, h.refhandler)
 	if err != nil {
 		return err
 	}

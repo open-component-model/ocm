@@ -59,16 +59,20 @@ func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 	return internal.NewModificationOptions(list...)
 }
 
-func TargetIndex(idx int) internal.TargetIndex {
+func TargetIndex(idx int) internal.TargetOptionImpl {
 	return internal.TargetIndex(-1)
 }
 
 const AppendElement = internal.TargetIndex(-1)
 
-var ReplaceElement = internal.ReplaceElement
+var UpdateElement = internal.UpdateElement
 
-func TargetIdentity(id v1.Identity) internal.TargetIdentity {
+func TargetIdentity(id v1.Identity) internal.TargetOptionImpl {
 	return internal.TargetIdentity(id)
+}
+
+func TargetIdentityOrCreate(id v1.Identity) internal.TargetOptionImpl {
+	return internal.TargetIdentityOrAppend(id)
 }
 
 func ModifyResource(flag ...bool) internal.ModOptionImpl {

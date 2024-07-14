@@ -157,6 +157,11 @@ func (o *ElementMeta) GetName() string {
 	return o.Name
 }
 
+// GetMeta returns the element meta.
+func (r *ElementMeta) GetMeta() *ElementMeta {
+	return r
+}
+
 // GetExtraIdentity returns the extra identity of the object.
 func (o *ElementMeta) GetExtraIdentity() metav1.Identity {
 	if o.ExtraIdentity == nil {
@@ -332,7 +337,7 @@ type ObjectMetaAccessor interface {
 
 // ElementMetaAccessor provides generic access an elements meta information.
 type ElementMetaAccessor interface {
-	GetMeta() *ElementMeta
+	ElementMetaProvider
 	Equivalent(ElementMetaAccessor) equivalent.EqualState
 }
 
@@ -362,6 +367,10 @@ func GetIndexByIdentity(a ElementAccessor, id metav1.Identity) int {
 type ElementAccessor interface {
 	Len() int
 	Get(i int) ElementMetaAccessor
+}
+
+type ElementMetaProvider interface {
+	GetMeta() *ElementMeta
 }
 
 // ElementArtifactAccessor provides access to generic artifact information of an element.
@@ -451,10 +460,6 @@ func (s Sources) Copy() Sources {
 type Source struct {
 	SourceMeta `json:",inline"`
 	Access     AccessSpec `json:"access"`
-}
-
-func (s *Source) GetMeta() *ElementMeta {
-	return &s.ElementMeta
 }
 
 func (s *Source) GetAccess() AccessSpec {
@@ -629,10 +634,6 @@ type Resource struct {
 	// Access describes the type specific method to
 	// access the defined resource.
 	Access AccessSpec `json:"access"`
-}
-
-func (r *Resource) GetMeta() *ElementMeta {
-	return &r.ElementMeta
 }
 
 func (r *Resource) GetAccess() AccessSpec {
@@ -828,15 +829,25 @@ func (r ComponentReference) String() string {
 	return fmt.Sprintf("%s[%s:%s]", r.Name, r.ComponentName, r.Version)
 }
 
+// WithVersion returns a new reference with a dedicated version.
+func (o *ComponentReference) WithVersion(v string) *ComponentReference {
+	n := o.Copy()
+	n.Version = v
+	return n
+}
+
+// WithExtraIdentity returns a new reference with a dedicated version.
+func (o *ComponentReference) WithExtraIdentity(extras ...string) *ComponentReference {
+	n := o.Copy()
+	n.AddExtraIdentity(NewExtraIdentity(extras...))
+	return n
+}
+
 // Fresh returns a digest-free copy.
 func (o *ComponentReference) Fresh() *ComponentReference {
 	n := o.Copy()
 	n.Digest = nil
 	return n
-}
-
-func (r *ComponentReference) GetMeta() *ElementMeta {
-	return &r.ElementMeta
 }
 
 func (r *ComponentReference) GetDigest() *metav1.DigestSpec {

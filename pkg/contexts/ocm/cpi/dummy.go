@@ -169,7 +169,7 @@ func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess, opts .
 	return errors.ErrNotSupported()
 }
 
-func (d *DummyComponentVersionAccess) SetReference(ref *ComponentReference) error {
+func (d *DummyComponentVersionAccess) SetReference(ref *ComponentReference, opts ...TargetOption) error {
 	return errors.ErrNotSupported()
 }
 

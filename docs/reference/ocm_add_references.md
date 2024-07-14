@@ -20,6 +20,7 @@ references, reference, refs
   -F, --file string            target file/directory (default "component-archive")
   -h, --help                   help for references
   -O, --output string          output file for dry-run
+  -R, --replace                replace existing elements
   -s, --settings stringArray   settings file with variable settings (yaml)
       --templater string       templater to use (go, none, spiff, subst) (default "subst")
 ```

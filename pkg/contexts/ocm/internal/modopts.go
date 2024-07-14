@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -92,7 +94,7 @@ func UseBlobHandlers(h BlobHandlerProvider) BlobOptionImpl {
 // resource or source for the SetXXX calls.
 // If -1 is returned an append is enforced.
 type TargetElement interface {
-	GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) int
+	GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error)
 }
 
 type TargetOptionImpl interface {
@@ -222,11 +224,11 @@ func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 
 type TargetIndex int
 
-func (m TargetIndex) GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) int {
-	if int(m) >= resources.Len() {
-		return -1
+func (m TargetIndex) GetTargetIndex(elems compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error) {
+	if int(m) >= elems.Len() {
+		return -1, nil
 	}
-	return int(m)
+	return int(m), nil
 }
 
 func (m TargetIndex) ApplyBlobModificationOption(opts *BlobModificationOptions) {
@@ -243,16 +245,37 @@ func (m TargetIndex) ApplyTargetOption(opts *TargetOptions) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type TargetIdentityOrAppend v1.Identity
+
+func (m TargetIdentityOrAppend) GetTargetIndex(elems compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error) {
+	idx, _ := TargetIdentity(m).GetTargetIndex(elems, meta)
+	return idx, nil
+}
+
+func (m TargetIdentityOrAppend) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m TargetIdentityOrAppend) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m TargetIdentityOrAppend) ApplyTargetOption(opts *TargetOptions) {
+	opts.TargetElement = m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type TargetIdentity v1.Identity
 
-func (m TargetIdentity) GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) int {
-	for i := 0; i < resources.Len(); i++ {
-		r := resources.Get(i)
-		if r.GetMeta().GetIdentity(resources).Equals(v1.Identity(m)) {
-			return i
+func (m TargetIdentity) GetTargetIndex(elems compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error) {
+	for i := 0; i < elems.Len(); i++ {
+		r := elems.Get(i)
+		if r.GetMeta().GetIdentity(elems).Equals(v1.Identity(m)) {
+			return i, nil
 		}
 	}
-	return -1
+	return -1, fmt.Errorf("element %s not found", v1.Identity(m))
 }
 
 func (m TargetIdentity) ApplyBlobModificationOption(opts *BlobModificationOptions) {
@@ -271,16 +294,16 @@ func (m TargetIdentity) ApplyTargetOption(opts *TargetOptions) {
 
 type replaceElement struct{}
 
-var ReplaceElement TargetOption = replaceElement{}
+var UpdateElement = replaceElement{}
 
-func (m replaceElement) GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) int {
-	id := meta.GetIdentity(resources)
-	for i := 0; i < resources.Len(); i++ {
-		if resources.Get(i).GetMeta().GetIdentity(resources).Equals(id) {
-			return i
+func (m replaceElement) GetTargetIndex(elems compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error) {
+	id := meta.GetIdentity(elems)
+	for i := 0; i < elems.Len(); i++ {
+		if elems.Get(i).GetMeta().GetIdentity(elems).Equals(id) {
+			return i, nil
 		}
 	}
-	return -1
+	return -1, fmt.Errorf("element %s not found", id)
 }
 
 func (m replaceElement) ApplyBlobModificationOption(opts *BlobModificationOptions) {

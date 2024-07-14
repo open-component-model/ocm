@@ -165,6 +165,10 @@ func NewSourceMeta(name string, typ string) *SourceMeta {
 	return compdesc.NewSourceMeta(name, typ)
 }
 
+func NewComponentReference(name, componentName, version string) *ComponentReference {
+	return compdesc.NewComponentReference(name, componentName, version, nil)
+}
+
 ///////////////////////////////////////////////////////
 
 func BlobAccessForAccessMethod(m AccessMethod) (blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView], error) {

@@ -65,7 +65,7 @@ func TargetIndex(idx int) internal.TargetIndex {
 
 const AppendElement = internal.TargetIndex(-1)
 
-var ReplaceElement = internal.ReplaceElement
+var UpdateElement = internal.UpdateElement
 
 func TargetIdentity(id v1.Identity) internal.TargetIdentity {
 	return internal.TargetIdentity(id)

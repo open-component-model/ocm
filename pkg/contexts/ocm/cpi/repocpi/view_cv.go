@@ -411,17 +411,9 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 
 		cd := c.bridge.GetDescriptor()
 
-		curidx := cd.GetResourceIndex(&res.ResourceMeta)
-		var idx int
-		if opts.TargetElement != nil {
-			idx = opts.TargetElement.GetTargetIndex(cd.Resources, &meta.ElementMeta)
-			if idx == -1 && curidx >= 0 {
-				if res.Version == cd.Resources[curidx].Version {
-					return fmt.Errorf("adding a new resource with same base identity requires different version")
-				}
-			}
-		} else {
-			idx = curidx
+		idx, err := c.getElementIndex("resource", cd.Resources, res, &opts.TargetOptions)
+		if err != nil {
+			return err
 		}
 		if idx >= 0 {
 			old = &cd.Resources[idx]
@@ -537,7 +529,7 @@ func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, opt
 		})
 }
 
-func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, optslist ...internal.TargetOption) error {
+func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, optlist ...internal.TargetOption) error {
 	if c.bridge.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -547,33 +539,18 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		Access:     acc,
 	}
 
-	opts := internal.NewTargetOptions(optslist...)
-
 	return c.Execute(func() error {
-		var old *compdesc.Source
-
 		if res.Version == "" {
 			res.Version = c.bridge.GetVersion()
 		}
 		cd := c.bridge.GetDescriptor()
 
-		curidx := cd.GetSourceIndex(&res.SourceMeta)
-		var idx int
-		if opts.TargetElement != nil {
-			idx = opts.TargetElement.GetTargetIndex(cd.Sources, &meta.ElementMeta)
-			if idx == -1 && curidx >= 0 {
-				if res.Version == cd.Sources[curidx].Version {
-					return fmt.Errorf("adding a new source with same base identity requires different version")
-				}
-			}
-		} else {
-			idx = curidx
-		}
-		if idx >= 0 {
-			old = &cd.Sources[idx]
+		idx, err := c.getElementIndex("source", cd.Sources, res, optlist...)
+		if err != nil {
+			return err
 		}
 
-		if old == nil {
+		if idx < 0 {
 			cd.Sources = append(cd.Sources, *res)
 		} else {
 			cd.Sources[idx] = *res
@@ -582,16 +559,53 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 	})
 }
 
-func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference) error {
+func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, optlist ...internal.TargetOption) error {
 	return c.Execute(func() error {
 		cd := c.bridge.GetDescriptor()
-		if idx := cd.GetComponentReferenceIndex(*ref); idx == -1 {
+
+		if ref.Version == "" {
+			return fmt.Errorf("version required for component version reference")
+		}
+		idx, err := c.getElementIndex("reference", cd.References, ref, optlist...)
+		if err != nil {
+			return err
+		}
+
+		if idx < 0 {
 			cd.References = append(cd.References, *ref)
 		} else {
 			cd.References[idx] = *ref
 		}
 		return c.bridge.Update(false)
 	})
+}
+
+func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.ElementAccessor, prov compdesc.ElementMetaProvider, optlist ...cpi.TargetOption) (int, error) {
+	opts := internal.NewTargetOptions(optlist...)
+	curidx := compdesc.ElementIndex(acc, prov)
+	meta := prov.GetMeta()
+	var idx int
+	if opts.TargetElement != nil {
+		var err error
+		idx, err = opts.TargetElement.GetTargetIndex(acc, meta)
+		if err != nil {
+			return idx, err
+		}
+		if idx == -1 && curidx >= 0 {
+			if meta.Version == acc.Get(curidx).GetMeta().Version {
+				return -1, fmt.Errorf("adding a new %s with same base identity requires different version", kind)
+			}
+		}
+		if idx >= acc.Len() {
+			return -1, fmt.Errorf("index %d out of range of %s list", idx, kind)
+		}
+		if idx < -1 {
+			return -1, fmt.Errorf("invalid index %d for %s list", idx, kind)
+		}
+	} else {
+		idx = curidx
+	}
+	return idx, nil
 }
 
 func (c *componentVersionAccessView) DiscardChanges() {
