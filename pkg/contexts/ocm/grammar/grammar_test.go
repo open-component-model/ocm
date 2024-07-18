@@ -1,19 +1,16 @@
 package grammar
 
 import (
+	"fmt"
 	"regexp"
-	"testing"
 
+	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/Masterminds/semver/v3"
 	gr "github.com/mandelsoft/goutils/regexutils"
 )
-
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "OCI Test Suite")
-}
 
 func CheckRef(ref string, parts ...string) {
 	CheckWithOffset(1, ref, AnchoredReferenceRegexp, parts...)
@@ -99,6 +96,23 @@ var _ = Describe("ref matching", func() {
 		It("matches complex semver with v prefix", func() {
 			Expect(VersionRegexp.MatchString("v0.2.3+2024.T06b")).To(BeTrue())
 		})
+
+		for _, pre := range []string{"", "alpha1", "alpha.1.2", "alpha-1"} {
+			for _, build := range []string{"", "2024", "2024.1.T2b", "2024.1-T2b"} {
+				suf := ""
+				if pre != "" {
+					suf += "-" + pre
+				}
+				if build != "" {
+					suf += "+" + build
+				}
+				It(fmt.Sprintf("handles semver %s", suf), func() {
+					v := "v0.2.3" + suf
+					Must(semver.NewVersion(v))
+					Expect(VersionRegexp.MatchString(v)).To(BeTrue())
+				})
+			}
+		}
 	})
 
 	Context("complete refs", func() {
