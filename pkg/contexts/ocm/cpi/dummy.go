@@ -122,13 +122,6 @@ func (d *DummyComponentVersionAccess) AccessMethod(spec AccessSpec) (AccessMetho
 	return spec.AccessMethod(d)
 }
 
-func (d *DummyComponentVersionAccess) GetInexpensiveContentVersionIdentity(spec AccessSpec) string {
-	if spec.IsLocal(d.Context) {
-		return ""
-	}
-	return spec.GetInexpensiveContentVersionIdentity(d)
-}
-
 func (d *DummyComponentVersionAccess) Update() error {
 	return errors.ErrNotSupported("update")
 }

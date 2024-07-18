@@ -7,7 +7,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -311,24 +310,4 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
 	}
 	return nil, errors.ErrNotSupported(errkind.KIND_ACCESSMETHOD, a.GetType(), "component archive")
-}
-
-func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
-	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
-		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
-		if err != nil {
-			return ""
-		}
-		m, err := newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c, cv)
-		if err != nil {
-			return ""
-		}
-		defer m.Close()
-		digest, err := blobaccess.Digest(m)
-		if err != nil {
-			return ""
-		}
-		return digest.String()
-	}
-	return ""
 }

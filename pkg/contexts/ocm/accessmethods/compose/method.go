@@ -91,10 +91,6 @@ func (a *AccessSpec) AccessMethod(cv accspeccpi.ComponentVersionAccess) (accspec
 	return cv.AccessMethod(a)
 }
 
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.ComponentVersionAccess) string {
-	return a.Id
-}
-
 type accessMethod struct {
 	access blobaccess.BlobAccess
 

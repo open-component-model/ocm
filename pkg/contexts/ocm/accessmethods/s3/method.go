@@ -100,10 +100,6 @@ func (a *AccessSpec) AccessMethod(c accspeccpi.ComponentVersionAccess) (accspecc
 	return accspeccpi.AccessMethodForImplementation(newMethod(c, a))
 }
 
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(c accspeccpi.ComponentVersionAccess) string {
-	return a.Version
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 type accessMethod struct {

@@ -12,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/virtual"
@@ -195,14 +194,6 @@ func (v *VersionAccess) IsReadOnly() bool {
 
 func (v *VersionAccess) SetReadOnly() {
 	v.readonly = true
-}
-
-func (v *VersionAccess) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {
-	switch a.GetKind() { //nolint:gocritic // to be extended
-	case localblob.Type:
-		return a.(*localblob.AccessSpec).LocalReference
-	}
-	return ""
 }
 
 var _ virtual.VersionAccess = (*VersionAccess)(nil)

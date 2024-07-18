@@ -67,14 +67,6 @@ func (a *AccessSpec) GetDigest() (string, bool) {
 	return "", false
 }
 
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv accspeccpi.ComponentVersionAccess) string {
-	d, ok := a.GetDigest()
-	if ok {
-		return d
-	}
-	return cv.GetInexpensiveContentVersionIdentity(a)
-}
-
 func (a *AccessSpec) GetReferenceHint(cv internal.ComponentVersionAccess) string {
 	return a.Reference
 }

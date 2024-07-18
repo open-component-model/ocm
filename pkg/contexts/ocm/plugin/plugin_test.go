@@ -15,7 +15,6 @@ import (
 	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
@@ -98,7 +97,6 @@ someattr: value
 
 	Context("inexpensive identity method", func() {
 		It("inexpensive identity method compatibility test", func() {
-			cv := &cpi.DummyComponentVersionAccess{Context: ctx}
 			p := registry.Get("test")
 			Expect(p).NotTo(BeNil())
 			Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(2))
@@ -110,11 +108,10 @@ someattr: value
 			s, err := ctx.AccessSpecForConfig([]byte(raw), nil)
 			Expect(err).To(Succeed())
 			spec := s.(*access.AccessSpec)
-			Expect(spec.GetInexpensiveContentVersionIdentity(cv)).To(Equal(""))
+			Expect(spec.GetVersion()).To(Equal("v1"))
 		})
 
 		It("check inexpensive identity method", func() {
-			cv := &cpi.DummyComponentVersionAccess{Context: ctx}
 			p := registry.Get("identity")
 			Expect(p).NotTo(BeNil())
 			Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(1))
@@ -126,7 +123,7 @@ someattr: value
 			s, err := ctx.AccessSpecForConfig([]byte(raw), nil)
 			Expect(err).To(Succeed())
 			spec := s.(*access.AccessSpec)
-			Expect(spec.GetInexpensiveContentVersionIdentity(cv)).To(Equal("testidentity"))
+			Expect(spec.GetVersion()).To(Equal("v1"))
 		})
 	})
 

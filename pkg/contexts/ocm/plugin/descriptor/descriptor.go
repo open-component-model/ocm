@@ -118,8 +118,7 @@ func (d UploaderDescriptor) GetConstraints() []UploaderKey {
 }
 
 type AccessMethodDescriptor struct {
-	ValueSetDefinition     `json:",inline"`
-	SupportContentIdentity bool `json:"supportContentIdentity,omitempty"`
+	ValueSetDefinition `json:",inline"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////

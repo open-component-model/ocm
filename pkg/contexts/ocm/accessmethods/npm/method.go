@@ -85,17 +85,6 @@ func (a *AccessSpec) AccessMethod(c accspeccpi.ComponentVersionAccess) (accspecc
 	return accspeccpi.AccessMethodForImplementation(newMethod(c, a))
 }
 
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.ComponentVersionAccess) string {
-	meta, err := a.GetPackageVersion(access.GetContext())
-	if err != nil {
-		return ""
-	}
-	if meta != nil {
-		return meta.Dist.Shasum
-	}
-	return ""
-}
-
 // PackageUrl returns the URL of the NPM package (Registry/Package).
 func (a *AccessSpec) PackageUrl() string {
 	return strings.TrimSuffix(a.Registry, "/") + path.Join("/", a.Package)

@@ -82,14 +82,6 @@ func (a *AccessSpec) AccessMethod(access accspeccpi.ComponentVersionAccess) (acc
 	return accspeccpi.AccessMethodForImplementation(&accessMethod{comp: access, spec: a}, nil)
 }
 
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(access accspeccpi.ComponentVersionAccess) string {
-	// returns an empty string
-	// the url might be usable, but if the content on the server at this url changes, this would not be caught
-	// otherwise, we could demand that the server return a specific header field (e.g. the hash of the content)
-	// if a corresponding optimization should be leveraged
-	return ""
-}
-
 ///////////////////
 
 func (a *AccessSpec) GetURL() string {

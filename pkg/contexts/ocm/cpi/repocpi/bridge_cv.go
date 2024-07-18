@@ -45,7 +45,6 @@ type ComponentVersionAccessImpl interface {
 	SetDescriptor(*compdesc.ComponentDescriptor) error
 
 	AccessMethod(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
-	GetInexpensiveContentVersionIdentity(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string
 
 	BlobContainer
 	io.Closer
@@ -209,10 +208,6 @@ func (b *componentVersionAccessBridge) AccessMethod(spec cpi.AccessSpec, cv refm
 		}
 	}
 	return meth, err
-}
-
-func (b *componentVersionAccessBridge) GetInexpensiveContentVersionIdentity(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
-	return b.impl.GetInexpensiveContentVersionIdentity(acc, cv)
 }
 
 func (b *componentVersionAccessBridge) GetDescriptor() *compdesc.ComponentDescriptor {

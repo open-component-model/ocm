@@ -2,7 +2,6 @@ package identity
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
@@ -71,20 +70,5 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	}
 
 	_, err = m.ValidateSpecification(p, spec)
-	if err != nil {
-		return err
-	}
-
-	idp, ok := m.(ppi.ContentVersionIdentityProvider)
-	if !ok {
-		fmt.Println("")
-		return nil
-	}
-
-	id, err := idp.GetInexpensiveContentVersionIdentity(p, spec, opts.Credentials)
-	if err != nil {
-		return err
-	}
-	fmt.Println(id)
 	return err
 }

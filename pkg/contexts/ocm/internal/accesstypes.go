@@ -28,7 +28,7 @@ type AccessSpec interface {
 	Describe(Context) string
 	IsLocal(Context) bool
 	GlobalAccessSpec(Context) AccessSpec
-	// AccessMethodImpl provides an access method implementation for
+	// AccessMethod provides an access method implementation for
 	// an access spec. This might be a repository local implementation
 	// or a global one. It might be implemented directly by the AccessSpec
 	// for global AccessMethods or forwarded to the ComponentVersion for
@@ -37,11 +37,6 @@ type AccessSpec interface {
 	// This forwarding is necessary because the concrete implementation of
 	// the currently used OCM Repository is not known to the AccessSpec.
 	AccessMethod(access ComponentVersionAccess) (AccessMethod, error)
-	// GetInexpensiveContentVersionIdentity implements a method that attempts to provide an inexpensive identity.
-	// Therefore, an identity that can be provided without requiring the entire object (e.g. calculating the digest from
-	// the bytes), which would defeat the purpose of caching.
-	// It follows the same contract as AccessMethodImpl.
-	GetInexpensiveContentVersionIdentity(access ComponentVersionAccess) string
 }
 
 type (
@@ -140,10 +135,6 @@ func (s *UnknownAccessSpec) AccessMethod(ComponentVersionAccess) (AccessMethod, 
 	return nil, errors.ErrUnknown(errkind.KIND_ACCESSMETHOD, s.GetType())
 }
 
-func (s *UnknownAccessSpec) GetInexpensiveContentVersionIdentity(ComponentVersionAccess) string {
-	return ""
-}
-
 func (s *UnknownAccessSpec) Describe(ctx Context) string {
 	return fmt.Sprintf("unknown access method type %q", s.GetType())
 }
@@ -226,17 +217,6 @@ func (s *GenericAccessSpec) AccessMethod(acc ComponentVersionAccess) (AccessMeth
 		return nil, errors.ErrUnknown(errkind.KIND_ACCESSMETHOD, s.GetType())
 	}
 	return spec.AccessMethod(acc)
-}
-
-func (s *GenericAccessSpec) GetInexpensiveContentVersionIdentity(acc ComponentVersionAccess) string {
-	spec, err := s.Evaluate(acc.GetContext())
-	if err != nil {
-		return ""
-	}
-	if _, ok := spec.(*GenericAccessSpec); ok {
-		return ""
-	}
-	return spec.GetInexpensiveContentVersionIdentity(acc)
 }
 
 func (s *GenericAccessSpec) IsLocal(ctx Context) bool {

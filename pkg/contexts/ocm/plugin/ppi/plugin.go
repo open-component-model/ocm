@@ -305,7 +305,6 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 			})
 		}
 	}
-	_, idp := m.(ContentVersionIdentityProvider)
 	vers := m.Version()
 	if vers == "" {
 		meth := descriptor.AccessMethodDescriptor{
@@ -316,7 +315,6 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 					Format:      m.Format(),
 				},
 			},
-			SupportContentIdentity: idp,
 		}
 		p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
 		p.accessScheme.RegisterByDecoder(m.Name(), m)
@@ -333,7 +331,6 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 			},
 			CLIOptions: optlist,
 		},
-		SupportContentIdentity: idp,
 	}
 	p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
 	p.accessScheme.RegisterByDecoder(m.Name()+"/"+vers, m)

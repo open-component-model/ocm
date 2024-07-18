@@ -7,7 +7,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	mavenblob "github.com/open-component-model/ocm/pkg/blobaccess/maven"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/maven/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/maven"
@@ -114,35 +113,6 @@ func (a *AccessSpec) AccessMethod(cv accspeccpi.ComponentVersionAccess) (accspec
 			mavenblob.WithCachingFileSystem(vfsattr.Get(octx)))
 	}
 	return accspeccpi.AccessMethodForImplementation(accspeccpi.NewDefaultMethodImpl(cv, a, "", a.MimeType(), factory), nil)
-}
-
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv accspeccpi.ComponentVersionAccess) string {
-	creds, err := identity.GetCredentials(cv.GetContext(), a.RepoUrl, a.GroupId)
-	if err != nil {
-		return ""
-	}
-	mvncreds := mavenblob.MapCredentials(creds)
-	fs := vfsattr.Get(cv.GetContext())
-	repo, err := maven.NewUrlRepository(a.RepoUrl, fs)
-	if err != nil {
-		return ""
-	}
-	files, err := repo.GavFiles(&a.Coordinates, mvncreds)
-	if err != nil {
-		return ""
-	}
-	files = a.Coordinates.FilterFileMap(files)
-	if len(files) != 1 {
-		return ""
-	}
-	if optionutils.AsValue(a.Extension) == "" {
-		return ""
-	}
-	for _, h := range files {
-		id, _ := a.Location(repo).GetHash(mvncreds, h)
-		return id
-	}
-	return ""
 }
 
 func (a *AccessSpec) BaseUrl() string {

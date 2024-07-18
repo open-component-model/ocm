@@ -10,7 +10,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/blobaccess/blobaccess"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -55,7 +54,6 @@ type ComponentVersionAccessBridge interface {
 	GetDescriptor() *compdesc.ComponentDescriptor
 
 	AccessMethod(cpi.AccessSpec, refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
-	GetInexpensiveContentVersionIdentity(cpi.AccessSpec, refmgmt.ExtendedAllocatable) string
 
 	// GetStorageContext creates a storage context for blobs
 	// that is used to feed blob handlers for specific blob storage methods.
@@ -204,34 +202,6 @@ func (c *componentVersionAccessView) accessMethod(spec cpi.AccessSpec) (meth cpi
 		return c.bridge.AccessMethod(spec, c.Allocatable())
 	default:
 		return spec.AccessMethod(c)
-	}
-}
-
-func (c *componentVersionAccessView) GetInexpensiveContentVersionIdentity(spec cpi.AccessSpec) string {
-	var err error
-
-	spec, err = c.GetContext().AccessSpecForSpec(spec)
-	if err != nil {
-		return ""
-	}
-
-	var id string
-	_ = c.Execute(func() error {
-		id = c.getInexpensiveContentVersionIdentity(spec)
-		return nil
-	})
-	return id
-}
-
-func (c *componentVersionAccessView) getInexpensiveContentVersionIdentity(spec cpi.AccessSpec) string {
-	switch {
-	case compose.Is(spec):
-		fallthrough
-	case !spec.IsLocal(c.GetContext()):
-		// fall back to original version
-		return spec.GetInexpensiveContentVersionIdentity(c)
-	default:
-		return c.bridge.GetInexpensiveContentVersionIdentity(spec, c.Allocatable())
 	}
 }
 
