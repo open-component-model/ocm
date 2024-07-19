@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -25,7 +24,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/get"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/identity"
 	accval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action/execute"
@@ -284,19 +282,6 @@ func (p *pluginImpl) ValidateUploadTarget(name string, spec []byte) (*ppi.Upload
 		return nil, errors.Wrapf(err, "plugin uploader %s/%s: cannot unmarshal upload target info", p.Name(), name)
 	}
 	return &info, nil
-}
-
-func (p *pluginImpl) Identity(creds, spec json.RawMessage) (string, error) {
-	args := []string{accessmethod.Name, identity.Name, string(spec)}
-	if creds != nil {
-		args = append(args, "--"+identity.OptCreds, string(creds))
-	}
-	result, err := p.Exec(nil, nil, args...)
-	if err != nil {
-		return "", err
-	}
-
-	return strings.Trim(string(result), "\n"), nil
 }
 
 func (p *pluginImpl) Get(w io.Writer, creds, spec json.RawMessage) error {

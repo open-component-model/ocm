@@ -95,38 +95,6 @@ someattr: value
 		}))
 	})
 
-	Context("inexpensive identity method", func() {
-		It("inexpensive identity method compatibility test", func() {
-			p := registry.Get("test")
-			Expect(p).NotTo(BeNil())
-			Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(2))
-			Expect(registration.RegisterExtensions(registry.GetContext())).To(Succeed())
-			t := ctx.AccessMethods().GetType("test")
-			Expect(t).NotTo(BeNil())
-
-			raw := `type: test`
-			s, err := ctx.AccessSpecForConfig([]byte(raw), nil)
-			Expect(err).To(Succeed())
-			spec := s.(*access.AccessSpec)
-			Expect(spec.GetVersion()).To(Equal("v1"))
-		})
-
-		It("check inexpensive identity method", func() {
-			p := registry.Get("identity")
-			Expect(p).NotTo(BeNil())
-			Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(1))
-			Expect(registration.RegisterExtensions(registry.GetContext())).To(Succeed())
-			t := ctx.AccessMethods().GetType("identity")
-			Expect(t).NotTo(BeNil())
-
-			raw := `type: identity`
-			s, err := ctx.AccessSpecForConfig([]byte(raw), nil)
-			Expect(err).To(Succeed())
-			spec := s.(*access.AccessSpec)
-			Expect(spec.GetVersion()).To(Equal("v1"))
-		})
-	})
-
 	Context("valuemergehandler", func() {
 		It("finds plugin", func() {
 			p := registry.Get("merge")
