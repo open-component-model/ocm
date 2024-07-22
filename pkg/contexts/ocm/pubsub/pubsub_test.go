@@ -8,17 +8,16 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub/types/compound"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 
 	"github.com/mandelsoft/goutils/sliceutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub/types/compound"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
