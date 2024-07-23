@@ -14,10 +14,12 @@ func New(ctx clictx.Context) *cobra.Command {
 		Short: "List of all supported publish/subscribe implementations",
 
 		Long: `
-OCM repositories can be configured to generate change events for
-publish/subscribe systems, if there is a persistence provider
-for the dedicated kind of OCM repository (for example OCI registry
-based OCM repositories)
+An OCM repository can be configured to propagate change events via a 
+publish/subscribe system, if there is a persistence provider for the dedicated
+repository type. If available any known publish/subscribe system can
+be configured with <CMD>ocm set pubsub</CMD> and shown with
+<CMD>ocm get pubsub</CMD>. Hereby, the pub/sub system 
+is described by a typed specification.
 
 ` + pubsub.PubSubUsage(attr.TypeScheme, attr.ProviderRegistry, true),
 	}

@@ -145,6 +145,8 @@ func (p *Provider) SetPubSubSpec(repo cpi.Repository, spec pubsub.PubSubSpec) er
 	}
 
 	blob := blobaccess.ForData(PubSubLayerMimeTye, data)
+	defer blob.Close()
+
 	layers := m.GetDescriptor().Layers
 	for i := 0; i < len(layers); i++ {
 		l := layers[i]

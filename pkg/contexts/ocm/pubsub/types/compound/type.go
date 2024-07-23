@@ -72,7 +72,7 @@ func (s *Spec) Unwrap(ctx cpi.Context) []pubsub.PubSubSpec {
 }
 
 func (s *Spec) Describe(_ cpi.Context) string {
-	return fmt.Sprintf("compound pub/sub specification with %d emtries", len(s.Specifications))
+	return fmt.Sprintf("compound pub/sub specification with %d entries", len(s.Specifications))
 }
 
 func (s *Spec) Effective() pubsub.PubSubSpec {

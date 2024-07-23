@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-	
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/listformat"
