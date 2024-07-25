@@ -97,7 +97,7 @@ func (h *Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sig
 				return nil, errors.Wrapf(err, "public key certificate")
 			}
 			media = MediaTypePEM
-			value = string(signutils.SignatureBytesToPem(Algorithm, sig, certs...))
+			value = string(signutils.SignatureBytesToPem(h.Algorithm(), sig, certs...))
 			iss = certs[0].Subject.String()
 		} else {
 			pubKey, _, err = GetPublicKey(pub)
@@ -113,7 +113,7 @@ func (h *Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sig
 	return &signing.Signature{
 		Value:     value,
 		MediaType: media,
-		Algorithm: Algorithm,
+		Algorithm: h.Algorithm(),
 		Issuer:    iss,
 	}, nil
 }
@@ -138,7 +138,7 @@ func (h *Handler) Verify(digest string, signature *signing.Signature, sctx signi
 		if err != nil {
 			return fmt.Errorf("unable to get signature from pem: %w", err)
 		}
-		if algo != "" && algo != Algorithm {
+		if algo != "" && algo != h.Algorithm() {
 			return errors.ErrInvalid(signutils.KIND_SIGN_ALGORITHM, algo)
 		}
 		signatureBytes = sig
