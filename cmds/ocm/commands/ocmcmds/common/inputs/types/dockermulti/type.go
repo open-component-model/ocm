@@ -14,7 +14,7 @@ func init() {
 const usage = `
 This input type describes the composition of a multi-platform OCI image.
 The various variants are taken from the local docker daemon. They should be 
-[built with the `buildx` command](https://github.com/open-component-model/ocm-website/blob/main/content/docs/tutorials/best-practices-with-ocm.md#building-multi-arch-images) for cross platform docker builds.
+built with the "buildx" command for cross platform docker builds (see https://ocm.software/docs/tutorials/best-practices/#building-multi-architecture-images).
 The denoted images, as well as the wrapping image index, are packed as OCI
 artifact set.
 They will contain an informational back link to the component version
