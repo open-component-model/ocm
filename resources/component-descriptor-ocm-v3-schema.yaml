@@ -86,21 +86,6 @@ $defs:
       type:
         type: 'string'
 
-  ociRepositoryContext:
-    allOf:
-      - $ref: '#/$defs/repositoryContext'
-      - required:
-          - 'baseUrl'
-        properties:
-          baseUrl:
-            type: 'string'
-          componentNameMapping:
-            type: 'string'
-            enum: ['urlPath', 'sha256-digest']
-          type:
-            type: 'string'
-            enum: ['ociRegistry', 'OCIRegistry']
-
   access:
     type: 'object'
     description: 'base type for accesses (for extensions)'
@@ -338,8 +323,7 @@ properties:
   repositoryContexts:
     type: 'array'
     items:
-      anyOf:
-        - $ref: '#/$defs/ociRepositoryContext' # currently, we only allow this one
+      $ref: '#/$defs/repositoryContext' # currently, we only allow this one
   spec:
     $ref: '#/$defs/spec'
   signatures:
