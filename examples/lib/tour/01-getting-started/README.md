@@ -164,32 +164,32 @@ differ, because the code always describes the latest version):
 
 ```
 resources of the latest version:
-  version:  0.11.0
+  version:  0.12.0
   provider: ocm.software
    1: name:           ocmcli
       extra identity: "architecture"="amd64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:28c39f8c1623d50398e916494582ebdeaf608dd8e27d112d01625bb903b95ecf[]
+      access:         Local blob sha256:4a3e2f2069f428e237ca7cd21d9f525ac527cde92f4ae0f797697727d5e059f9[]
    2: name:           ocmcli
       extra identity: "architecture"="arm64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:c9f1eb5ba391e0cfe1c84e34d8b7e9923b061e5917c12c73e21f6a4d300813d8[]
+      access:         Local blob sha256:b99a50553fdf100ec449dbfd3e822de8d5051e83070d37a3046703003ccba1db[]
    3: name:           ocmcli
       extra identity: "architecture"="arm64","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:8dafc347d7129d3ff3b4f54cc9d82d8852980dc38e778c96aa82b16d1ddb4288[]
+      access:         Local blob sha256:01f913684ca0b01ac0c93e5cee98e6d3a29e908b88761a0c869b39ae8971b538[]
    4: name:           ocmcli
       extra identity: "architecture"="amd64","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:611d693ec021a2c6001d515c3d896ac769beab39de4f859d9a7bc0bcdba10f3e[]
+      access:         Local blob sha256:ad5391320eb2662f84dbae676fb0963eb3925b0f76d966a71a89795bbac529a8[]
    5: name:           ocmcli
       extra identity: "architecture"="amd64","os"="windows"
       resource type:  executable
-      access:         Local blob sha256:884d76b98fe37c0fdb0a9d1f3707eb98e6bfc0385658ba4f6890b2de75fb331e[]
+      access:         Local blob sha256:71ed95abd178112489f32cddeea377d2703ad6213f54a3486741f48483cd4391[]
    6: name:           ocmcli-image
       extra identity: 
       resource type:  ociImage
-      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.11.0
+      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.12.0
 ```
 
 Resources have some metadata, like their identity and a resource type.
