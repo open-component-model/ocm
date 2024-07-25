@@ -1,4 +1,4 @@
-package add
+package addhdlrs
 
 import (
 	"github.com/mandelsoft/goutils/generics"
@@ -35,4 +35,12 @@ func (o *Options) ApplyTargetOption(opts *ocm.TargetOptions) {
 	if !o.Replace {
 		opts.TargetElement = ocm.AppendElement
 	}
+}
+
+func (o *Options) Help() string {
+	return `
+The <code>--replace</code> option allows users to specify whether adding an
+element with the same name and extra identity but different version as an 
+existing element append (false) or replace (true) the existing element.
+`
 }

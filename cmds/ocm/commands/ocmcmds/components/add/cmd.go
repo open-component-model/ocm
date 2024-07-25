@@ -21,7 +21,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
@@ -56,7 +55,7 @@ type Command struct {
 
 	Archive string
 
-	Options add.Options
+	Options addhdlrs.Options
 
 	Elements []addhdlrs.ElementSource
 }
@@ -130,6 +129,8 @@ the added one, will be added, also. Therefore, the <code>--lookup</code> is requ
 to specify an OCM repository to lookup the missing component versions. If 
 additionally the <code>-V</code> is given, the resources of those additional
 components will be added by value.
+
+` + o.Options.Help() + `
 
 The source, resource and reference list can be composed according to the commands
 <CMD>ocm add sources</CMD>, <CMD>ocm add resources</CMD>, <CMD>ocm add references</CMD>,
