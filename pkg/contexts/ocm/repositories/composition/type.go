@@ -22,6 +22,8 @@ type RepositorySpec struct {
 	Name string `json:"name"`
 }
 
+var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
+
 func NewRepositorySpec(name string) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedTypedObject: runtime.NewVersionedTypedObject(Type),

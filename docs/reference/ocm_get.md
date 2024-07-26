@@ -26,6 +26,7 @@ ocm get [<options>] <sub command> ...
 * [ocm get <b>config</b>](ocm_get_config.md)	 &mdash; Get evaluated config for actual command call
 * [ocm get <b>credentials</b>](ocm_get_credentials.md)	 &mdash; Get credentials for a dedicated consumer spec
 * [ocm get <b>plugins</b>](ocm_get_plugins.md)	 &mdash; get plugins
+* [ocm get <b>pubsub</b>](ocm_get_pubsub.md)	 &mdash; Get the pubsub spec for an ocm repository
 * [ocm get <b>references</b>](ocm_get_references.md)	 &mdash; get references of a component version
 * [ocm get <b>resources</b>](ocm_get_resources.md)	 &mdash; get resources of a component version
 * [ocm get <b>routingslips</b>](ocm_get_routingslips.md)	 &mdash; get routings slips for a component version

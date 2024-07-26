@@ -373,6 +373,7 @@ by a certificate delivered with the signature.
 * [ocm <b>hash</b>](ocm_hash.md)	 &mdash; Hash and normalization operations
 * [ocm <b>install</b>](ocm_install.md)	 &mdash; Install elements.
 * [ocm <b>list</b>](ocm_list.md)	 &mdash; List information about components
+* [ocm <b>set</b>](ocm_set.md)	 &mdash; Set information about OCM repositories
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components or hashes
 * [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artifacts or components
@@ -400,6 +401,7 @@ by a certificate delivered with the signature.
 * [ocm <b>ocm-accessmethods</b>](ocm_ocm-accessmethods.md)	 &mdash; List of all supported access methods
 * [ocm <b>ocm-downloadhandlers</b>](ocm_ocm-downloadhandlers.md)	 &mdash; List of all available download handlers
 * [ocm <b>ocm-labels</b>](ocm_ocm-labels.md)	 &mdash; Labels and Label Merging
+* [ocm <b>ocm-pubsub</b>](ocm_ocm-pubsub.md)	 &mdash; List of all supported publish/subscribe implementations
 * [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references
 * [ocm <b>ocm-uploadhandlers</b>](ocm_ocm-uploadhandlers.md)	 &mdash; List of all available upload handlers
 * [ocm <b>toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions

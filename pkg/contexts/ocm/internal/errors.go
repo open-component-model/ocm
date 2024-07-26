@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	KIND_REPOSITORY       = "ocm repository"
 	KIND_COMPONENT        = errkind.KIND_COMPONENT
 	KIND_COMPONENTVERSION = "component version"
 	KIND_RESOURCE         = "component resource"

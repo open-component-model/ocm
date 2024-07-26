@@ -185,6 +185,7 @@ func NewRawAccessSpecRef(data []byte, unmarshaler runtime.Unmarshaler) (*AccessS
 }
 
 const (
+	KIND_REPOSITORY       = internal.KIND_REPOSITORY
 	KIND_COMPONENTVERSION = internal.KIND_COMPONENTVERSION
 	KIND_RESOURCE         = internal.KIND_RESOURCE
 	KIND_SOURCE           = internal.KIND_SOURCE

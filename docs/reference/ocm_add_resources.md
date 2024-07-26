@@ -265,8 +265,9 @@ with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>docker</code>
 
-  The path must denote an image tag that can be found in the local
-  docker daemon. The denoted image is packed as OCI artifact set.
+  The path must denote an image tag (can reference a multi-arch image)
+  that can be found in the local docker daemon.
+  The denoted image is packed as OCI artifact set.
   The OCI image will contain an informational back link to the component version
   using the manifest annotation <code>software.ocm/component-version</code>.
 
@@ -288,8 +289,8 @@ with the field <code>type</code> in the <code>input</code> field:
 
   This input type describes the composition of a multi-platform OCI image.
   The various variants are taken from the local docker daemon. They should be
-  built with the buildx command for cross platform docker builds.
-  The denoted images, as well as the wrapping image index is packed as OCI
+  built with the "buildx" command for cross platform docker builds (see https://ocm.software/docs/tutorials/best-practices/#building-multi-architecture-images).
+  The denoted images, as well as the wrapping image index, are packed as OCI
   artifact set.
   They will contain an informational back link to the component version
   using the manifest annotation <code>software.ocm/component-version</code>.
