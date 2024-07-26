@@ -32,7 +32,6 @@ var _ = Describe("demoplugin", func() {
 		var plugins TempPluginDir
 
 		BeforeEach(func() {
-
 			env = NewBuilder(TestData())
 			plugins = Must(ConfigureTestPlugins(env, "testdata"))
 

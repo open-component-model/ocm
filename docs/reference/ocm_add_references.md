@@ -110,6 +110,12 @@ There are several templaters that can be selected by the <code>--templater</code
 
 
 
+
+The <code>--replace</code> option allows users to specify whether adding an
+element with the same name and extra identity but different version as an
+existing element append (false) or replace (true) the existing element.
+
+
 All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
 Additionally settings can be specified by a yaml file using the <code>--settings <file></code>

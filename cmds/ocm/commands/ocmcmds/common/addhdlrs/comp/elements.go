@@ -14,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/rscs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/srcs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -112,7 +111,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 
 	cd := cv.GetDescriptor()
 
-	opts := h.srchandler.GetOptions()[0].(*add.Options)
+	opts := h.srchandler.GetOptions()[0].(*addhdlrs.Options)
 	if !opts.Replace {
 		cd.Resources = nil
 		cd.Sources = nil

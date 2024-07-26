@@ -68,7 +68,6 @@ var _ = Describe("add resources", func() {
 			Expect(cv.SetResourceBlob(meta.WithVersion("v1").WithExtraIdentity("attr", "value"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil, ocm.UpdateElement)).To(
 				MatchError("unable to set resource: element \"attr\"=\"value\",\"name\"=\"test\" not found"))
-
 		})
 
 		It("adds duplicate resource with different version", func() {
@@ -141,7 +140,6 @@ var _ = Describe("add resources", func() {
 			Expect(cv.SetSourceBlob(meta.WithVersion("v1").WithExtraIdentity("attr", "value"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil, ocm.UpdateElement)).To(
 				MatchError("unable to set source: element \"attr\"=\"value\",\"name\"=\"test\" not found"))
-
 		})
 
 		It("adds duplicate source with different version", func() {

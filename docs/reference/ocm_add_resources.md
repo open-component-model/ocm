@@ -109,8 +109,8 @@ resources, resource, res, r
 ### Description
 
 
-Add resources specified in a resource file to a component version.
-So far only component archives are supported as target.
+Adds resources specified in a resource file to a component version.
+So far, only component archives are supported as target.
 
 This command accepts resource specification files describing the resources
 to add to a component version. Elements must follow the resource meta data
@@ -939,6 +939,12 @@ shown below.
     it is defaulted to false (so, per default, redirects are enabled).
 
   Options used to configure fields: <code>--body</code>, <code>--header</code>, <code>--mediaType</code>, <code>--noredirect</code>, <code>--url</code>, <code>--verb</code>
+
+
+
+The <code>--replace</code> option allows users to specify whether adding an
+element with the same name and extra identity but different version as an
+existing element append (false) or replace (true) the existing element.
 
 
 All yaml/json defined resources can be templated.
