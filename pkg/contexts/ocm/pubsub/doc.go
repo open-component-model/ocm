@@ -26,6 +26,5 @@
 // The default provider registry can be filled by init functions using the function
 // RegisterProvider.
 //
-// To configure dedicated contexts the attribute provided by For(ctx) can be modified
-// contained registry objects.
+// To configure dedicated contexts, the contained registry objects can be modified on the attribute provided by For(ctx).
 package pubsub
