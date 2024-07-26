@@ -19,7 +19,7 @@
 // to extract/provide a pubsub specification from/for a dedicated repository.
 // The task of the provider is to handle the persistence of the serialized data
 // of the specification at repository level. The provider just provides the
-// specification data, it does not know anything about the types and implementations.7
+// specification data, it does not know anything about the types and implementations.
 //
 // Providers are registered at an OCM context for a dedicated type of repository.
 // (the spec kind of the repository spec used to describe the repository).
