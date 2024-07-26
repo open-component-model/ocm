@@ -37,13 +37,18 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>key</code>: secret key use to access the credential server
 
 
-  - <code>Github</code>: GitHub credential matcher
+  - <code>Github</code>: Redis PubSub credential matcher
 
-    This matcher is a hostpath matcher.
+    This matcher is a hostpath matcher with additional attributes:
+
+    - *<code>channel</code>* (required if set in pattern): the channel name
+    - *<code>database</code>* the database number
+
 
     Credential consumers of the consumer type Github evaluate the following credential properties:
 
-      - <code>token</code>: GitHub personal access token
+      - <code>username</code>: Redis username
+      - <code>password</code>: Redis password
 
 
   - <code>HashiCorpVault</code>: HashiCorp Vault credential matcher

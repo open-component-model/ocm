@@ -24,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/pubsub"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/routingslips"
@@ -44,6 +45,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/hash"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/install"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/list"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/set"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/show"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
@@ -57,6 +59,7 @@ import (
 	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
 	topicocmdownloaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/downloadhandlers"
 	topicocmlabels "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/labels"
+	topicocmpubsub "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/pubsub"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
@@ -222,6 +225,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 
 	cmd.AddCommand(check.NewCommand(opts.Context))
 	cmd.AddCommand(get.NewCommand(opts.Context))
+	cmd.AddCommand(set.NewCommand(opts.Context))
 	cmd.AddCommand(list.NewCommand(opts.Context))
 	cmd.AddCommand(create.NewCommand(opts.Context))
 	cmd.AddCommand(add.NewCommand(opts.Context))
@@ -246,6 +250,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.HideCommand(plugins.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(action.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(routingslips.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(pubsub.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.OverviewCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.OverviewCommand(ocicmds.NewCommand(opts.Context)))
@@ -268,6 +273,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(topicocmuploaders.New(ctx))
 	cmd.AddCommand(topicocmdownloaders.New(ctx))
 	cmd.AddCommand(topicocmlabels.New(ctx))
+	cmd.AddCommand(topicocmpubsub.New(ctx))
 	cmd.AddCommand(attributes.New(ctx))
 	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
@@ -280,6 +286,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	help.AddCommand(topicocmuploaders.New(ctx))
 	help.AddCommand(topicocmdownloaders.New(ctx))
 	help.AddCommand(topicocmlabels.New(ctx))
+	help.AddCommand(topicocmpubsub.New(ctx))
 	help.AddCommand(attributes.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 

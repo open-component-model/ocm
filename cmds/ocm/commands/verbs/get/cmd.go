@@ -8,6 +8,7 @@ import (
 	artifacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/get"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	plugins "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/get"
+	pubsub "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/pubsub/get"
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/get"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/get"
 	routingslips "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/routingslips/get"
@@ -31,5 +32,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(plugins.NewCommand(ctx))
 	cmd.AddCommand(routingslips.NewCommand(ctx))
 	cmd.AddCommand(config.NewCommand(ctx))
+	cmd.AddCommand(pubsub.NewCommand(ctx))
 	return cmd
 }
