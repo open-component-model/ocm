@@ -37,8 +37,8 @@ type PubSubType descriptivetype.TypedObjectType[PubSubSpec]
 
 // PubSubSpec is the interface publish/subscribe specifications
 // must fulfill. The main task is to map the specification
-// to a concrete implementation of the  pub/sub adapter.
-// to forward events to the described system.
+// to a concrete implementation of the  pub/sub adapter
+// which forwards events to the described system.
 type PubSubSpec interface {
 	runtime.VersionedTypedObject
 
