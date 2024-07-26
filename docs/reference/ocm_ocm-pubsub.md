@@ -21,7 +21,7 @@ specification versions, and formats:
   The following versions are supported:
   - Version <code>v1</code>
 
-    It is describe by the following field:
+    It is described by the following field:
 
     - **<code>specifications</code>**  *list of pubsub specs*
 
