@@ -11,7 +11,7 @@ import (
 )
 
 // ProviderRegistry holds handlers able to extract
-// a Pub Sub specification for an OCM repository of a dedicated kind.
+// a PubSub specification for an OCM repository of a dedicated kind.
 type ProviderRegistry interface {
 	Register(repoKind string, prov Provider)
 	KnownProviders() map[string]Provider
