@@ -130,7 +130,7 @@ to specify an OCM repository to lookup the missing component versions. If
 additionally the <code>-V</code> is given, the resources of those additional
 components will be added by value.
 
-` + o.Options.Help() + `
+` + (&addhdlrs.Options{}).Description() + `
 
 The source, resource and reference list can be composed according to the commands
 <CMD>ocm add sources</CMD>, <CMD>ocm add resources</CMD>, <CMD>ocm add references</CMD>,

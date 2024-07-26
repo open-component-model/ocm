@@ -65,7 +65,9 @@ The description file might contain:
 
 ` + o.Adder.Description() + (&template.Options{}).Usage() +
 		inputs.Usage(inputs.DefaultInputTypeScheme) +
-		ocm.AccessUsage(o.OCMContext().AccessMethods(), true)
+		ocm.AccessUsage(o.OCMContext().AccessMethods(), true) + `
+
+` + (&addhdlrs.Options{}).Description()
 }
 
 func (o *Command) Run() error {

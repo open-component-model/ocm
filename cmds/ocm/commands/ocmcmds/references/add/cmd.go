@@ -50,7 +50,9 @@ The description file might contain:
 - a list of references under the key <code>references</code>
 - a list of yaml documents with a single reference or reference list
 
-` + o.Adder.Description() + (&template.Options{}).Usage(),
+` + o.Adder.Description() + (&template.Options{}).Usage() + `
+
+` + (&addhdlrs.Options{}).Description(),
 		Example: `
 Add a reference directly by options
 <pre>

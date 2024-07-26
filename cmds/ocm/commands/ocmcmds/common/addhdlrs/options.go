@@ -37,7 +37,7 @@ func (o *Options) ApplyTargetOption(opts *ocm.TargetOptions) {
 	}
 }
 
-func (o *Options) Help() string {
+func (o *Options) Description() string {
 	return `
 The <code>--replace</code> option allows users to specify whether adding an
 element with the same name and extra identity but different version as an 
