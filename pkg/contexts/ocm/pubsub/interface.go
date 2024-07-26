@@ -60,7 +60,7 @@ type PubSubMethod interface {
 // TypeScheme is the registry for specification types for
 // PubSub types. A PubSub type is finally able to
 // provide an implementation for notifying a dedicated
-// Pub Sub instance.
+// PubSub instance.
 type TypeScheme descriptivetype.TypeScheme[PubSubSpec, PubSubType]
 
 func NewTypeScheme(base ...TypeScheme) TypeScheme {
