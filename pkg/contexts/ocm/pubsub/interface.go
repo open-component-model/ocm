@@ -71,7 +71,7 @@ func NewStrictTypeScheme(base ...TypeScheme) runtime.VersionedTypeRegistry[PubSu
 	return descriptivetype.NewTypeScheme[PubSubSpec, PubSubType, TypeScheme]("PubSub type", nil, &UnknownPubSubSpec{}, false, base...)
 }
 
-// DefaultTypeScheme contains all globally known PubSub serializer.
+// DefaultTypeScheme contains all globally known PubSub serializers.
 var DefaultTypeScheme = NewTypeScheme()
 
 func RegisterType(atype PubSubType) {
