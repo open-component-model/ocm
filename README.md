@@ -49,7 +49,13 @@ The OCI and OCM support can be found in packages
 
 ## Installation
 
-Install the latest release via [Homebrew](https://brew.sh), [Nix](https://nixos.org), [Docker](https://www.docker.com/)/[Podman](https://podman.io/) or directly from [GitHub Releases](https://github.com/open-component-model/ocm/releases).
+Install the latest release from any of
+
+- [Homebrew](https://brew.sh)
+- [Nix](https://nixos.org)
+- [Docker](https://www.docker.com/)
+- [Podman](https://podman.io/)
+- [GitHub Releases](https://github.com/open-component-model/ocm/releases)
 
 ### Bash
 
