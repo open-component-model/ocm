@@ -53,6 +53,7 @@ Install the latest release from any of
 
 - [Homebrew](https://brew.sh)
 - [Nix](https://nixos.org)
+- [AUR](https://aur.archlinux.org/packages/ocm-cli)
 - [Docker](https://www.docker.com/)
 - [Podman](https://podman.io/)
 - [GitHub Releases](https://github.com/open-component-model/ocm/releases)
@@ -91,6 +92,20 @@ nix profile list | grep ocm
 # optionally, open a new shell and verify that cmd completion works
 ocm --help
 ```
+
+### Install from AUR (Arch Linux User Repository)
+
+git-url: https://aur.archlinux.org/ocm-cli.git
+package-url: https://aur.archlinux.org/packages/ocm-cli
+
+```
+# if not using a helper util
+git clone https://aur.archlinux.org/ocm-cli.git
+cd ocm-cli
+makepkg -i
+```
+
+[AUR Documentation](https://wiki.archlinux.org/title/Arch_User_Repository)
 
 ### Usage via Docker / Podman
 
