@@ -13,13 +13,13 @@ import (
 	"github.com/containerd/containerd/images"
 	"github.com/containerd/containerd/log"
 	"github.com/containerd/containerd/remotes"
-	remoteserrors "github.com/containerd/containerd/remotes/errors"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	remoteserrors "github.com/open-component-model/ocm/pkg/docker/errors"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 )
 
