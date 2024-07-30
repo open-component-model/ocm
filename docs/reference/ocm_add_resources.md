@@ -419,7 +419,9 @@ with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>ociArtifact</code>
 
-  The path must denote an OCI image reference.
+  This input type is used to import an OCI image from an OCI registry.
+  If it is a multi-arch image the set of platforms using the "platforms"
+  attribute. The path must denote an OCI image reference.
 
   This blob type specification supports the following fields:
   - **<code>path</code>** *string*
