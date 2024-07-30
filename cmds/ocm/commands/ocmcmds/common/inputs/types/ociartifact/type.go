@@ -24,7 +24,7 @@ The path must denote an OCI image reference.
 This blob type specification supports the following fields: 
 - **<code>path</code>** *string*
 
-  This REQUIRED property describes the OVI image reference of the image to
+  This REQUIRED property describes the OCI image reference of the image to
   import.
 
 - **<code>repository</code>** *string*
