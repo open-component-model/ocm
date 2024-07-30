@@ -7,6 +7,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -15,19 +16,30 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type ResourceSpecHandler struct{}
+type ResourceSpecHandler struct {
+	addhdlrs.ResourceSpecHandlerBase
+}
 
-var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
+var (
+	_ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
+	_ options.Options            = (*ResourceSpecHandler)(nil)
+)
 
-func (ResourceSpecHandler) Key() string {
+func New(opts ...options.Options) *ResourceSpecHandler {
+	return &ResourceSpecHandler{addhdlrs.NewBase(opts...)}
+}
+
+func (*ResourceSpecHandler) Key() string {
 	return "reference"
 }
 
-func (ResourceSpecHandler) RequireInputs() bool {
-	return false
+func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
+	return &ResourceSpecHandler{
+		h.ResourceSpecHandlerBase.WithCLIOptions(opts...),
+	}
 }
 
-func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
+func (*ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	var desc ResourceSpec
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)
 	if err != nil {
@@ -36,7 +48,7 @@ func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	return &desc, nil
 }
 
-func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
+func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
 	spec, ok := r.Spec().(*ResourceSpec)
 	if !ok {
 		return fmt.Errorf("element spec is not a valid resource spec, failed to assert type %T to ResourceSpec", r.Spec())
@@ -54,7 +66,7 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element,
 		},
 		ComponentName: spec.ComponentName,
 	}
-	return v.SetReference(meta)
+	return v.SetReference(meta, h.GetTargetOpts()...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

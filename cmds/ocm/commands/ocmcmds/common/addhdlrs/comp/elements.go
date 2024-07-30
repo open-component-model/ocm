@@ -31,6 +31,8 @@ const (
 
 type ResourceSpecHandler struct {
 	rschandler *rscs.ResourceSpecHandler
+	srchandler *srcs.ResourceSpecHandler
+	refhandler *refs.ResourceSpecHandler
 	version    string
 	schema     string
 }
@@ -41,11 +43,26 @@ var (
 )
 
 func New(v string, schema string, opts ...ocm.ModificationOption) *ResourceSpecHandler {
-	return &ResourceSpecHandler{rschandler: rscs.New(opts...), version: v, schema: schema}
+	return &ResourceSpecHandler{
+		rschandler: rscs.New(opts...),
+		srchandler: srcs.New(),
+		refhandler: refs.New(),
+		version:    v,
+		schema:     schema,
+	}
 }
 
 func (h *ResourceSpecHandler) AddFlags(fs *pflag.FlagSet) {
 	h.rschandler.AddFlags(fs)
+	h.srchandler.AddFlags(fs)
+	h.refhandler.AddFlags(fs)
+}
+
+func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
+	h.rschandler.WithCLIOptions(opts...)
+	h.srchandler.WithCLIOptions(opts...)
+	h.refhandler.WithCLIOptions(opts...)
+	return h
 }
 
 func (*ResourceSpecHandler) Key() string {
@@ -94,6 +111,13 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 
 	cd := cv.GetDescriptor()
 
+	opts := h.srchandler.GetOptions()[0].(*addhdlrs.Options)
+	if !opts.Replace {
+		cd.Resources = nil
+		cd.Sources = nil
+		cd.References = nil
+	}
+
 	schema := h.schema
 	if r.Meta.ConfiguredVersion != "" {
 		schema = r.Meta.ConfiguredVersion
@@ -111,7 +135,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 		cd.CreationTime = metav1.NewTimestampP()
 	}
 
-	err = handle(ctx, ictx, elem.Source(), cv, r.Sources, srcs.ResourceSpecHandler{})
+	err = handle(ctx, ictx, elem.Source(), cv, r.Sources, h.srchandler)
 	if err != nil {
 		return err
 	}
@@ -119,7 +143,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 	if err != nil {
 		return err
 	}
-	err = handle(ctx, ictx, elem.Source(), cv, r.References, refs.ResourceSpecHandler{})
+	err = handle(ctx, ictx, elem.Source(), cv, r.References, h.refhandler)
 	if err != nil {
 		return err
 	}

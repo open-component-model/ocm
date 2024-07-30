@@ -59,7 +59,7 @@ func CreateComponentVersion(ctx ocm.Context) (ocm.ComponentVersionAccess, error)
 		return nil, errors.Wrapf(err, "cannot create resource meta for podinfo-image")
 	}
 	image_res := ociartifactaccess.ResourceAccess(ctx, image_meta, PODINFO_IMAGE)
-	err = cv.SetResourceAccess(image_res)
+	err = cv.SetResourceByAccess(image_res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot add resource podinfo-image")
 	}
@@ -70,7 +70,7 @@ func CreateComponentVersion(ctx ocm.Context) (ocm.ComponentVersionAccess, error)
 		return nil, errors.Wrapf(err, "cannot create resource meta for helmchart")
 	}
 	helm_res := helmaccess.ResourceAccess(ctx, helm_meta, HELMCHART_NAME, HELMCHART_REPO)
-	err = cv.SetResourceAccess(helm_res)
+	err = cv.SetResourceByAccess(helm_res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot add resource helmchart")
 	}
@@ -82,7 +82,7 @@ func CreateComponentVersion(ctx ocm.Context) (ocm.ComponentVersionAccess, error)
 	}
 	script_res := fileblob.ResourceAccess(ctx, mime.MIME_YAML, script_meta, "resources/deployscript")
 
-	err = cv.SetResourceAccess(script_res)
+	err = cv.SetResourceByAccess(script_res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot add resource helmchart")
 	}

@@ -46,13 +46,16 @@ type Command struct {
 	Create  bool
 	Closure bool
 
-	Handler ctf.FormatHandler
-	Format  string
+	FormatHandler ctf.FormatHandler
+	Format        string
 
 	Version string
-	Envs    []string
+
+	Envs []string
 
 	Archive string
+
+	Options addhdlrs.Options
 
 	Elements []addhdlrs.ElementSource
 }
@@ -127,6 +130,8 @@ to specify an OCM repository to lookup the missing component versions. If
 additionally the <code>-V</code> is given, the resources of those additional
 components will be added by value.
 
+` + (&addhdlrs.Options{}).Description() + `
+
 The source, resource and reference list can be composed according to the commands
 <CMD>ocm add sources</CMD>, <CMD>ocm add resources</CMD>, <CMD>ocm add references</CMD>,
 respectively.
@@ -152,6 +157,7 @@ Various elements support to add arbirary information by using labels
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
+	o.Options.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.BoolVarP(&o.Create, "create", "c", false, "(re)create archive")
 	fs.BoolVarP(&o.Closure, "complete", "C", false, "include all referenced component version")
@@ -181,8 +187,8 @@ func (o *Command) Complete(args []string) error {
 	}
 
 	format := formatoption.From(o).Format
-	o.Handler = ctf.GetFormat(format)
-	if o.Handler == nil {
+	o.FormatHandler = ctf.GetFormat(format)
+	if o.FormatHandler == nil {
 		return accessio.ErrInvalidFileFormat(format.String())
 	}
 
@@ -205,7 +211,7 @@ func (o *Command) Run() error {
 
 	printer := common2.NewPrinter(o.Context.StdOut())
 	fs := o.Context.FileSystem()
-	h := comp.New(o.Version, schemaoption.From(o).Schema)
+	h := comp.New(o.Version, schemaoption.From(o).Schema).WithCLIOptions(&o.Options)
 	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, templateroption.From(o).Options, h, o.Elements)
 	if err != nil {
 		return err
@@ -235,7 +241,7 @@ func (o *Command) Run() error {
 	if o.Create {
 		openmode |= accessobj.ACC_CREATE
 	}
-	repo, err := ctf.Open(o.Context.OCMContext(), openmode, fp, mode, o.Handler, fs)
+	repo, err := ctf.Open(o.Context.OCMContext(), openmode, fp, mode, o.FormatHandler, fs)
 	if err != nil {
 		return err
 	}

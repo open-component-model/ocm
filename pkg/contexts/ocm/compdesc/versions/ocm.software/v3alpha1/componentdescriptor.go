@@ -90,8 +90,13 @@ type ElementMeta struct {
 }
 
 // GetName returns the name of the object.
-func (o ElementMeta) GetName() string {
+func (o *ElementMeta) GetName() string {
 	return o.Name
+}
+
+// GetMeta returns the element meta.
+func (o *ElementMeta) GetMeta() *ElementMeta {
+	return o
 }
 
 // SetName sets the name of the object.
@@ -100,7 +105,7 @@ func (o *ElementMeta) SetName(name string) {
 }
 
 // GetVersion returns the version of the object.
-func (o ElementMeta) GetVersion() string {
+func (o *ElementMeta) GetVersion() string {
 	return o.Version
 }
 
@@ -110,7 +115,7 @@ func (o *ElementMeta) SetVersion(version string) {
 }
 
 // GetLabels returns the label of the object.
-func (o ElementMeta) GetLabels() metav1.Labels {
+func (o *ElementMeta) GetLabels() metav1.Labels {
 	return o.Labels
 }
 
@@ -171,10 +176,6 @@ type Source struct {
 	SourceMeta `json:",inline"`
 
 	Access *runtime.UnstructuredTypedObject `json:"access"`
-}
-
-func (s *Source) GetMeta() *ElementMeta {
-	return &s.ElementMeta
 }
 
 // SourceMeta is the definition of the metadata of a source.
@@ -249,10 +250,6 @@ type Resource struct {
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
 }
 
-func (r *Resource) GetMeta() *ElementMeta {
-	return &r.ElementMeta
-}
-
 // GetType returns the type of the object.
 func (r Resource) GetType() string {
 	return r.Type
@@ -283,8 +280,4 @@ type Reference struct {
 	// Digest is the optional digest of the referenced component.
 	// +optional
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
-}
-
-func (r *Reference) GetMeta() *ElementMeta {
-	return &r.ElementMeta
 }

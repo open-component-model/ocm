@@ -221,25 +221,14 @@ func (cd *ComponentDescriptor) GetResourcesByName(name string, selectors ...Iden
 // GetResourceIndex returns the index of a given resource.
 // If the index is not found -1 is returned.
 func (cd *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
-	id := res.GetIdentity(cd.Resources)
-	for i, cur := range cd.Resources {
-		if cur.GetIdentity(cd.Resources).Equals(id) {
-			return i
-		}
-	}
-	return -1
+	return ElementIndex(cd.Resources, res)
 }
 
 // GetComponentReferenceIndex returns the index of a given component reference.
 // If the index is not found -1 is returned.
+// Deprecated: use GetReferenceIndex.
 func (cd *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference) int {
-	id := ref.GetIdentityDigest(cd.References)
-	for i, cur := range cd.References {
-		if bytes.Equal(cur.GetIdentityDigest(cd.References), id) {
-			return i
-		}
-	}
-	return -1
+	return cd.GetReferenceIndex(ref.GetMeta())
 }
 
 // GetSourceByIdentity returns source that match the given identity.
@@ -296,13 +285,13 @@ func (cd *ComponentDescriptor) GetSourcesByIdentitySelectors(selectors ...Identi
 // GetSourceIndex returns the index of a given source.
 // If the index is not found -1 is returned.
 func (cd *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
-	id := src.GetIdentityDigest(cd.Sources)
-	for i, cur := range cd.Sources {
-		if bytes.Equal(cur.GetIdentityDigest(cd.Sources), id) {
-			return i
-		}
-	}
-	return -1
+	return ElementIndex(cd.Sources, src)
+}
+
+// GetSourcesByName returns all sources with a name.
+func (cd *ComponentDescriptor) GetSourcesByName(name string, selectors ...IdentitySelector) (Sources, error) {
+	return cd.GetSourcesByIdentitySelectors(
+		sliceutils.CopyAppend[IdentitySelector](selectors, ByName(name))...)
 }
 
 // GetReferenceByIdentity returns reference that matches the given identity.
@@ -386,14 +375,8 @@ func (cd *ComponentDescriptor) GetReferencesBySelectors(selectors []IdentitySele
 
 // GetReferenceIndex returns the index of a given source.
 // If the index is not found -1 is returned.
-func (cd *ComponentDescriptor) GetReferenceIndex(src *ElementMeta) int {
-	id := src.GetIdentityDigest(cd.References)
-	for i, cur := range cd.References {
-		if bytes.Equal(cur.GetIdentityDigest(cd.References), id) {
-			return i
-		}
-	}
-	return -1
+func (cd *ComponentDescriptor) GetReferenceIndex(src ElementMetaProvider) int {
+	return ElementIndex(cd.References, src)
 }
 
 // GetSignatureIndex returns the index of the signature with the given name

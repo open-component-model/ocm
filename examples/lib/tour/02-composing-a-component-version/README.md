@@ -213,7 +213,7 @@ The above case could also be written as follows:
 ```go
 		res := textblob.ResourceAccess(cv.GetContext(), meta, yamldata,
 			textblob.WithMimeType(mime.MIME_YAML))
-		err = cv.SetResourceAccess(res)
+		err = cv.SetResourceByAccess(res)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")
 		}
@@ -222,6 +222,17 @@ The above case could also be written as follows:
 The resource access is an abstraction of external access via access
 methods or direct blob access objects and additionally
 contain all the required resource metadata.
+
+All kinds of `SetXXX` methods optionally accept options used to influence
+the target in the element list. It is possible to
+- enforce an append (`ocm.AppendElement`)
+- enforce a dedicated index (`ocm.TargetIndex(n)`)
+- enforce the replacement of a dedicated element identity (`ocm.TargetIdentity(...)`)
+- replace a dedicated element identity or append (`ocm.TargetIdentityOrAppend(...)`)
+- enforce a replacement (`ocm.UpdateElement`)
+
+By default, always a replacement is done if an appropriate element is
+found, otherwise it is appended.
 
 There are even more complex blob sources, for example
 for Helm charts stored in the file system, or even for images
@@ -245,7 +256,7 @@ before executing this example.
 			fmt.Sprintf("ocmcli-image:%s-linux-arm64", current_version),
 		),
 	)
-	err = cv.SetResourceAccess(res)
+	err = cv.SetResourceByAccess(res)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add ocmcli")
 	}

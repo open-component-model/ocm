@@ -173,6 +173,15 @@ var _ = Describe("Add resources", func() {
 		CheckTextResource(env, cd, "testdata")
 	})
 
+	It("adds duplicate text blob", func() {
+		Expect(env.Execute("add", "resources", "--file", ARCH, "/testdata/dupresources.yaml")).To(Succeed())
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(len(cd.Resources)).To(Equal(2))
+	})
+
 	It("add helm chart from repo", func() {
 		resp, err := http.Get("https://charts.helm.sh/stable")
 		if err == nil { // only if connected to internet
@@ -264,7 +273,7 @@ var _ = Describe("Add resources", func() {
 
 	It("re-adds external image", func() {
 		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(Succeed())
-		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(Succeed())
+		Expect(env.Execute("add", "resources", "-R", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(Succeed())
 
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
@@ -273,7 +282,7 @@ var _ = Describe("Add resources", func() {
 		Expect(len(cd.Resources)).To(Equal(1))
 	})
 
-	It("rejects duplicate hinte", func() {
+	It("rejects duplicate hints", func() {
 		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm.yaml")).To(Succeed())
 		ExpectError(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(MatchError("cannot add resource \"chart2\"(/testdata/helm2.yaml[1][1]): reference name (hint) \"test.de/x/mandelsoft/testchart:0.1.0\" with base media type application/vnd.oci.image.manifest.v1 already used for resource chart:v1"))
 	})
