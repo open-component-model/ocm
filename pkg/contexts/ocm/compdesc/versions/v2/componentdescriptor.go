@@ -139,6 +139,11 @@ func (o *ElementMeta) GetName() string {
 	return o.Name
 }
 
+// GetMeta returns the element meta.
+func (o *ElementMeta) GetMeta() *ElementMeta {
+	return o
+}
+
 // SetName sets the name of the object.
 func (o *ElementMeta) SetName(name string) {
 	o.Name = name
@@ -230,10 +235,6 @@ type Source struct {
 	Access *runtime.UnstructuredTypedObject `json:"access"`
 }
 
-func (s *Source) GetMeta() *ElementMeta {
-	return &s.ElementMeta
-}
-
 // SourceMeta is the definition of the meta data of a source.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
@@ -306,10 +307,6 @@ type Resource struct {
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
 }
 
-func (r *Resource) GetMeta() *ElementMeta {
-	return &r.ElementMeta
-}
-
 // GetType returns the type of the object.
 func (o Resource) GetType() string {
 	return o.Type
@@ -340,8 +337,4 @@ type ComponentReference struct {
 	// Digest is the optional digest of the referenced component.
 	// +optional
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
-}
-
-func (r *ComponentReference) GetMeta() *ElementMeta {
-	return &r.ElementMeta
 }

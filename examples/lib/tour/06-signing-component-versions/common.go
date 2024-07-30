@@ -142,7 +142,7 @@ data: some very important data required to understand this component
 		// The above case could be written as follows, also:
 		res := textblob.ResourceAccess(cv.GetContext(), meta, yamldata,
 			textblob.WithMimeType(mime.MIME_YAML))
-		err = cv.SetResourceAccess(res)
+		err = cv.SetResourceByAccess(res)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")
 		}
@@ -169,7 +169,7 @@ data: some very important data required to understand this component
 			fmt.Sprintf("ocmcli-image:%s-linux-arm64", current_version),
 		),
 	)
-	err = cv.SetResourceAccess(res)
+	err = cv.SetResourceByAccess(res)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add ocmcli")
 	}
