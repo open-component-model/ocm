@@ -34,7 +34,7 @@ type IdentityErrorSelectorImpl struct {
 	IdentitySelectorImpl
 }
 
-func NewAIdentityErrorSelectorImpl(s IdentitySelector, err error) *IdentityErrorSelectorImpl {
+func NewIdentityErrorSelectorImpl(s IdentitySelector, err error) *IdentityErrorSelectorImpl {
 	return &IdentityErrorSelectorImpl{NewErrorSelectorBase(err), IdentitySelectorImpl{s}}
 }
 
