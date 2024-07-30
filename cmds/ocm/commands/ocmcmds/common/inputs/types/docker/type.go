@@ -12,8 +12,7 @@ func init() {
 }
 
 const usage = `
-The path must denote an image tag (can reference a multi-arch image)
-that can be found in the local docker daemon.
+The path must denote an image tag that can be found in the local docker daemon.
 The denoted image is packed as OCI artifact set.
 The OCI image will contain an informational back link to the component version
 using the manifest annotation <code>` + annotations.COMPVERS_ANNOTATION + `</code>.
