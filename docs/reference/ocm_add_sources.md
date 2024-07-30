@@ -263,8 +263,7 @@ with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>docker</code>
 
-  The path must denote an image tag (can reference a multi-arch image)
-  that can be found in the local docker daemon.
+  The path must denote an image tag that can be found in the local docker daemon.
   The denoted image is packed as OCI artifact set.
   The OCI image will contain an informational back link to the component version
   using the manifest annotation <code>software.ocm/component-version</code>.
@@ -423,7 +422,7 @@ with the field <code>type</code> in the <code>input</code> field:
   This blob type specification supports the following fields:
   - **<code>path</code>** *string*
 
-    This REQUIRED property describes the OVI image reference of the image to
+    This REQUIRED property describes the OCI image reference of the image to
     import.
 
   - **<code>repository</code>** *string*
