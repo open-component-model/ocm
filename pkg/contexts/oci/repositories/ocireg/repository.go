@@ -7,8 +7,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes/docker/config"
+	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 
