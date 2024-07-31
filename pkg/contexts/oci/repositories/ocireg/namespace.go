@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/containerd/containerd/errdefs"
+	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 

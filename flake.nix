@@ -2,7 +2,6 @@
   description = "Nix flake for ocm";
 
   inputs = {
-    # NixPkgs (nixos-23.11)
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
   };
 
@@ -35,7 +34,7 @@
             state = if (self ? rev) then "clean" else "dirty";
 
             # This vendorHash represents a dervative of all go.mod dependancies and needs to be adjusted with every change
-            vendorHash = "sha256-WUS0ORqvGG4GfDq+C0wTOkeiZkcsRJvL12Dd8TmlNhE=";
+            vendorHash = "sha256-C0CD3DL8uBkgG6HPzRRGj9RtxBc43jcTDU118NR4Aqg=";
 
             src = ./.;
 
