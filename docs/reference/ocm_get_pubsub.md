@@ -24,7 +24,7 @@ pubsub, ps
 
 
 A repository may be able to store a publish/subscribe specification
-to propagate the creation or update of component version.
+to propagate the creation or update of component versions.
 If such an implementation is available and a specification is
 assigned to the repository, it is shown. The specification
 can be set with the [ocm set pubsub](ocm_set_pubsub.md).

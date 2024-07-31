@@ -9,6 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/accessors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 )
@@ -112,8 +113,8 @@ type ComponentSpec struct {
 }
 
 const (
-	SystemIdentityName    = "name"
-	SystemIdentityVersion = "version"
+	SystemIdentityName    = metav1.SystemIdentityName
+	SystemIdentityVersion = metav1.SystemIdentityVersion
 )
 
 type ElementMetaAccess interface {
@@ -247,6 +248,31 @@ func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 	return identity
 }
 
+// GetIdentityForContext returns the identity of the object.
+func (o *ElementMeta) GetIdentityForContext(accessor accessors.ElementListAccessor) metav1.Identity {
+	identity := o.ExtraIdentity.Copy()
+	if identity == nil {
+		identity = metav1.Identity{}
+	}
+	identity[SystemIdentityName] = o.Name
+	if accessor != nil {
+		found := false
+		l := accessor.Len()
+		for i := 0; i < l; i++ {
+			m := accessor.Get(i).GetMeta()
+			if m.GetName() == o.GetName() && m.GetExtraIdentity().Equals(o.ExtraIdentity) {
+				if found {
+					identity[SystemIdentityVersion] = o.Version
+
+					break
+				}
+				found = true
+			}
+		}
+	}
+	return identity
+}
+
 // GetRawIdentity returns the identity plus version.
 func (o *ElementMeta) GetRawIdentity() metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
@@ -304,43 +330,6 @@ func (o *ElementMeta) Equivalent(a *ElementMeta) equivalent.EqualState {
 	return state.Apply(o.Labels.Equivalent(a.Labels))
 }
 
-// NameAccessor describes a accessor for a named object.
-type NameAccessor interface {
-	// GetName returns the name of the object.
-	GetName() string
-	// SetName sets the name of the object.
-	SetName(name string)
-}
-
-// VersionAccessor describes a accessor for a versioned object.
-type VersionAccessor interface {
-	// GetVersion returns the version of the object.
-	GetVersion() string
-	// SetVersion sets the version of the object.
-	SetVersion(version string)
-}
-
-// LabelsAccessor describes a accessor for a labeled object.
-type LabelsAccessor interface {
-	// GetLabels returns the labels of the object.
-	GetLabels() metav1.Labels
-	// SetLabels sets the labels of the object.
-	SetLabels(labels []metav1.Label)
-}
-
-// ObjectMetaAccessor describes a accessor for named and versioned object.
-type ObjectMetaAccessor interface {
-	NameAccessor
-	VersionAccessor
-	LabelsAccessor
-}
-
-// ElementMetaAccessor provides generic access an elements meta information.
-type ElementMetaAccessor interface {
-	ElementMetaProvider
-	Equivalent(ElementMetaAccessor) equivalent.EqualState
-}
-
 func GetByIdentity(a ElementAccessor, id metav1.Identity) ElementMetaAccessor {
 	l := a.Len()
 	for i := 0; i < l; i++ {
@@ -363,46 +352,9 @@ func GetIndexByIdentity(a ElementAccessor, id metav1.Identity) int {
 	return -1
 }
 
-// ElementAccessor provides generic access to list of elements.
-type ElementAccessor interface {
-	Len() int
-	Get(i int) ElementMetaAccessor
-}
-
-type ElementMetaProvider interface {
-	GetMeta() *ElementMeta
-}
-
-// ElementArtifactAccessor provides access to generic artifact information of an element.
-type ElementArtifactAccessor interface {
-	ElementMetaAccessor
-	GetType() string
-	GetAccess() AccessSpec
-	SetAccess(a AccessSpec)
-}
-
-type ElementDigestAccessor interface {
-	GetDigest() *metav1.DigestSpec
-	SetDigest(*metav1.DigestSpec)
-}
-
-// ArtifactAccessor provides generic access to list of artifacts.
-// There are resources or sources.
-type ArtifactAccessor interface {
-	ElementAccessor
-	GetArtifact(i int) ElementArtifactAccessor
-}
-
 // ArtifactAccess provides access to a dedicated kind of artifact set
 // in the component descriptor (resources or sources).
 type ArtifactAccess func(cd *ComponentDescriptor) ArtifactAccessor
-
-// AccessSpec is an abstract specification of an access method
-// The outbound object is typicall a runtime.UnstructuredTypedObject.
-// Inbound any serializable AccessSpec implementation is possible.
-type AccessSpec interface {
-	runtime.VersionedTypedObject
-}
 
 // GenericAccessSpec returns a generic AccessSpec implementation for an unstructured object.
 // It can always be used instead of a dedicated access spec implementation. The core
@@ -411,11 +363,6 @@ func GenericAccessSpec(un *runtime.UnstructuredTypedObject) AccessSpec {
 	return &runtime.UnstructuredVersionedTypedObject{
 		*un.DeepCopy(),
 	}
-}
-
-// AccessProvider provides access to an access specification of elements.
-type AccessProvider interface {
-	GetAccess() AccessSpec
 }
 
 // Sources describes a set of source specifications.
@@ -650,6 +597,10 @@ func (r *Resource) GetDigest() *metav1.DigestSpec {
 
 func (r *Resource) SetDigest(d *metav1.DigestSpec) {
 	r.Digest = d
+}
+
+func (r *Resource) GetRelation() metav1.ResourceRelation {
+	return r.Relation
 }
 
 func (r *Resource) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
