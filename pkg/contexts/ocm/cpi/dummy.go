@@ -8,6 +8,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/refsel"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/rscsel"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/srcsel"
 )
 
 type DummyComponentVersionAccess struct {
@@ -67,6 +70,10 @@ func (d *DummyComponentVersionAccess) GetDescriptor() *compdesc.ComponentDescrip
 	return nil
 }
 
+func (d *DummyComponentVersionAccess) SelectResources(sel ...rscsel.Selector) ([]ResourceAccess, error) {
+	return nil, nil
+}
+
 func (d *DummyComponentVersionAccess) GetResources() []ResourceAccess {
 	return nil
 }
@@ -83,8 +90,13 @@ func (d *DummyComponentVersionAccess) GetResourceByIndex(i int) (ResourceAccess,
 	return nil, errors.ErrInvalid("resource index", strconv.Itoa(i))
 }
 
+// Deprecated: use GetResources.
 func (d *DummyComponentVersionAccess) GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error) {
 	return nil, errors.ErrInvalid("resource", name)
+}
+
+func (d *DummyComponentVersionAccess) SelectSources(sel ...srcsel.Selector) ([]SourceAccess, error) {
+	return nil, nil
 }
 
 func (d *DummyComponentVersionAccess) GetSources() []SourceAccess {
@@ -107,12 +119,25 @@ func (d *DummyComponentVersionAccess) GetReference(meta metav1.Identity) (Compon
 	return ComponentReference{}, errors.ErrNotFound("reference", meta.String())
 }
 
+func (d *DummyComponentVersionAccess) SelectReferences(sel ...refsel.Selector) ([]ComponentReference, error) {
+	return nil, nil
+}
+
+func (d *DummyComponentVersionAccess) GetReferences() []ComponentReference {
+	return nil
+}
+
 func (d *DummyComponentVersionAccess) GetReferenceIndex(metav1.Identity) int {
 	return -1
 }
 
 func (d *DummyComponentVersionAccess) GetReferenceByIndex(i int) (ComponentReference, error) {
 	return ComponentReference{}, errors.ErrInvalid("reference index", strconv.Itoa(i))
+}
+
+// Deprecated: use GetSources.
+func (d *DummyComponentVersionAccess) GetSourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]SourceAccess, error) {
+	return nil, errors.ErrInvalid("source", name)
 }
 
 func (d *DummyComponentVersionAccess) AccessMethod(spec AccessSpec) (AccessMethod, error) {
@@ -124,6 +149,10 @@ func (d *DummyComponentVersionAccess) AccessMethod(spec AccessSpec) (AccessMetho
 
 func (d *DummyComponentVersionAccess) Update() error {
 	return errors.ErrNotSupported("update")
+}
+
+func (d *DummyComponentVersionAccess) Execute(f func() error) error {
+	return f()
 }
 
 func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype, refName string, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error) {
@@ -142,23 +171,23 @@ func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compd
 	return errors.ErrNotSupported("resource modification")
 }
 
-func (d *DummyComponentVersionAccess) SetResourceAccess(art ResourceAccess, modopts ...BlobModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResourceByAccess(art ResourceAccess, modopts ...BlobModificationOption) error {
 	return errors.ErrNotSupported("resource modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error {
+func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...TargetOption) error {
 	return errors.ErrNotSupported("source modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.AccessSpec) error {
+func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.AccessSpec, opts ...TargetOption) error {
 	return errors.ErrNotSupported("source modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess) error {
+func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess, opts ...TargetOption) error {
 	return errors.ErrNotSupported()
 }
 
-func (d *DummyComponentVersionAccess) SetReference(ref *ComponentReference) error {
+func (d *DummyComponentVersionAccess) SetReference(ref *ComponentReference, opts ...TargetOption) error {
 	return errors.ErrNotSupported()
 }
 
@@ -173,22 +202,27 @@ func (d *DummyComponentVersionAccess) UseDirectAccess() bool {
 	return true
 }
 
+// Deprecated: use GetResources.
 func (d *DummyComponentVersionAccess) GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]internal.ResourceAccess, error) {
 	return nil, nil
 }
 
+// Deprecated: use GetResources.
 func (d *DummyComponentVersionAccess) GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]internal.ResourceAccess, error) {
 	return nil, nil
 }
 
+// Deprecated: use GetReferences.
 func (d *DummyComponentVersionAccess) GetReferencesByName(name string, selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
 	return nil, nil
 }
 
+// Deprecated: use GetReferences.
 func (d *DummyComponentVersionAccess) GetReferencesByIdentitySelectors(selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
 	return nil, nil
 }
 
+// Deprecated: use GetReferences.
 func (d *DummyComponentVersionAccess) GetReferencesByReferenceSelectors(selectors ...compdesc.ReferenceSelector) (compdesc.References, error) {
 	return nil, nil
 }

@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/runtimefinalizer"
@@ -257,12 +258,17 @@ func (b *componentVersionAccessBridge) update(final bool) error {
 		return nil
 	}
 
+	pub, err := pubsub.PubSubForRepo(b.Repository())
+	if err != nil {
+		return err
+	}
+
 	d := b.getDescriptor()
 
 	opts := &cpi.BlobUploadOptions{
 		UseNoDefaultIfNotSet: optionutils.PointerTo(true),
 	}
-	err := b.setupLocalBlobs("resource", b.composeAccess, d.Resources, true, opts)
+	err = b.setupLocalBlobs("resource", b.composeAccess, d.Resources, true, opts)
 	if err == nil {
 		err = b.setupLocalBlobs("source", b.composeAccess, d.Sources, true, opts)
 	}
@@ -275,6 +281,12 @@ func (b *componentVersionAccessBridge) update(final bool) error {
 		return err
 	}
 	err = b.blobcache.Clear()
+	if pub != nil {
+		err := pub.NotifyComponentVersion(common.VersionedElementKey(b))
+		if err != nil {
+			return err
+		}
+	}
 	return err
 }
 

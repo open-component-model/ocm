@@ -105,6 +105,10 @@ func (r *RepositoryImpl) OCIRepository() ocicpi.Repository {
 	return r.ocirepo
 }
 
+func (r *RepositoryImpl) Meta() ComponentRepositoryMeta {
+	return r.meta
+}
+
 func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {
 	return &RepositorySpec{
 		RepositorySpec:          r.ocirepo.GetSpecification(),

@@ -91,6 +91,15 @@ var _ = Describe("Add references", func() {
 		CheckReference(env, cd, "testdata")
 	})
 
+	It("adds duplicate references", func() {
+		Expect(env.Execute("add", "references", "--file", ARCH, "/testdata/dupreferences.yaml")).To(Succeed())
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(len(cd.References)).To(Equal(2))
+	})
+
 	Context("reference by options", func() {
 		It("adds simple ref", func() {
 			Expect(env.Execute("add", "references", "--file", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION)).To(Succeed())

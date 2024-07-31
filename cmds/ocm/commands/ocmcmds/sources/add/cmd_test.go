@@ -131,7 +131,16 @@ var _ = Describe("Add sources", func() {
 		CheckTextSource(env, cd, "testdata")
 	})
 
-	Context("resource by options", func() {
+	It("adds duplicate text blob", func() {
+		Expect(env.Execute("add", "sources", "--file", ARCH, "/testdata/dupsources.yaml")).To(Succeed())
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(len(cd.Sources)).To(Equal(2))
+	})
+
+	Context("source by options", func() {
 		It("adds simple text blob", func() {
 			meta := `
 name: testdata

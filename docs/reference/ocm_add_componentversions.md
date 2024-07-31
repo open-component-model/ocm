@@ -26,6 +26,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -h, --help                      help for componentversions
       --lookup stringArray        repository name or spec for closure lookup fallback
   -O, --output string             output file for dry-run
+  -R, --replace                   replace existing elements
   -S, --scheme string             schema version (default "v2")
   -s, --settings stringArray      settings file with variable settings (yaml)
       --templater string          templater to use (go, none, spiff, subst) (default "subst")
@@ -51,6 +52,12 @@ to specify an OCM repository to lookup the missing component versions. If
 additionally the <code>-V</code> is given, the resources of those additional
 components will be added by value.
 
+
+The <code>--replace</code> option allows users to specify whether adding an
+element with the same name and extra identity but different version as an
+existing element append (false) or replace (true) the existing element.
+
+
 The source, resource and reference list can be composed according to the commands
 [ocm add sources](ocm_add_sources.md), [ocm add resources](ocm_add_resources.md), [ocm add references](ocm_add_references.md),
 respectively.
@@ -70,7 +77,8 @@ Various elements support to add arbirary information by using labels
 
 
 The <code>--type</code> option accepts a file format for the
-target archive to use. The following formats are supported:
+target archive to use. It is only evaluated if the target
+archive does not exist yet. The following formats are supported:
 - directory
 - tar
 - tgz

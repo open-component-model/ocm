@@ -19,12 +19,14 @@ DEPRECATED: This type is deprecated, please use ` + TYPE + ` instead.
 `
 
 const usage = `
-The path must denote an OCI image reference.
+This input type is used to import an OCI image from an OCI registry.
+If it is a multi-arch image the set of platforms to be imported can be filtered using the "platforms"
+attribute. The path must denote an OCI image reference. 
 
 This blob type specification supports the following fields: 
 - **<code>path</code>** *string*
 
-  This REQUIRED property describes the OVI image reference of the image to
+  This REQUIRED property describes the OCI image reference of the image to
   import.
 
 - **<code>repository</code>** *string*

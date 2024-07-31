@@ -31,7 +31,7 @@ func NewRepository(ctxp cpi.ContextProvider, names ...string) cpi.Repository {
 			return repo
 		}
 	}
-	repo := virtual.NewRepository(ctx, NewAccess())
+	repo := virtual.NewRepository(ctx, NewAccess(name))
 	if repositories != nil {
 		repositories.SetRepository(name, repo)
 		repo, _ = repo.Dup()
@@ -43,6 +43,7 @@ type Index = virtual.Index[common.NameVersion]
 
 type Access struct {
 	lock     sync.Mutex
+	name     string
 	index    *Index
 	blobs    map[string]blobaccess.BlobAccess
 	readonly bool
@@ -50,11 +51,16 @@ type Access struct {
 
 var _ virtual.Access = (*Access)(nil)
 
-func NewAccess() *Access {
+func NewAccess(name string) *Access {
 	return &Access{
+		name:  name,
 		index: virtual.NewIndex[common.NameVersion](),
 		blobs: map[string]blobaccess.BlobAccess{},
 	}
+}
+
+func (a *Access) GetSpecification() cpi.RepositorySpec {
+	return NewRepositorySpec(a.name)
 }
 
 func (a *Access) IsReadOnly() bool {

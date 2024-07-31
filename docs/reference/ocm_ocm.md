@@ -25,6 +25,7 @@ ocm ocm [<options>] <sub command> ...
 * ocm ocm <b>componentarchive</b>	 &mdash; Commands acting on component archives
 * ocm ocm <b>componentversions</b>	 &mdash; Commands acting on components
 * ocm ocm <b>plugins</b>	 &mdash; Commands related to OCM plugins
+* ocm ocm <b>pubsub</b>	 &mdash; Commands acting on sub/sub specifications
 * ocm ocm <b>references</b>	 &mdash; Commands related to component references in component versions
 * ocm ocm <b>resource-configuration</b>	 &mdash; Commands acting on component resource specifications
 * ocm ocm <b>resources</b>	 &mdash; Commands acting on component resources

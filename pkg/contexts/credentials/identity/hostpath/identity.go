@@ -41,73 +41,78 @@ This matcher works on the following properties:
 
 var Matcher = IdentityMatcher("")
 
+func Match(identityType string, request, cur, id cpi.ConsumerIdentity) (match bool, better bool) {
+	if request[ID_TYPE] != "" && request[ID_TYPE] != id[ID_TYPE] {
+		return false, false
+	}
+
+	if identityType != "" && request[ID_TYPE] != "" && identityType != request[ID_TYPE] {
+		return false, false
+	}
+
+	if request[ID_HOSTNAME] != "" && id[ID_HOSTNAME] != "" && request[ID_HOSTNAME] != id[ID_HOSTNAME] {
+		return false, false
+	}
+
+	if request[ID_PORT] != "" {
+		if id[ID_PORT] != "" && id[ID_PORT] != request[ID_PORT] {
+			return false, false
+		}
+	}
+
+	if request[ID_SCHEME] != "" {
+		if id[ID_SCHEME] != "" && id[ID_SCHEME] != request[ID_SCHEME] {
+			return false, false
+		}
+	}
+
+	if request[ID_PATHPREFIX] != "" {
+		if id[ID_PATHPREFIX] != "" {
+			if len(id[ID_PATHPREFIX]) > len(request[ID_PATHPREFIX]) {
+				return false, false
+			}
+			pcomps := strings.Split(request[ID_PATHPREFIX], "/")
+			icomps := strings.Split(id[ID_PATHPREFIX], "/")
+			if len(icomps) > len(pcomps) {
+				return false, false
+			}
+			for i := range icomps {
+				if pcomps[i] != icomps[i] {
+					return false, false
+				}
+			}
+		}
+	} else {
+		if id[ID_PATHPREFIX] != "" {
+			return false, false
+		}
+	}
+
+	// ok now it basically matches, check against current match
+	if len(cur) == 0 {
+		return true, true
+	}
+
+	if cur[ID_HOSTNAME] == "" && id[ID_HOSTNAME] != "" {
+		return true, true
+	}
+	if cur[ID_PORT] == "" && (id[ID_PORT] != "" && request[ID_PORT] != "") {
+		return true, true
+	}
+	if cur[ID_SCHEME] == "" && (id[ID_SCHEME] != "" && request[ID_SCHEME] != "") {
+		return true, true
+	}
+
+	if len(cur[ID_PATHPREFIX]) < len(id[ID_PATHPREFIX]) {
+		return true, true
+	}
+	return true, false
+}
+
 func IdentityMatcher(identityType string) cpi.IdentityMatcher {
 	return func(request, cur, id cpi.ConsumerIdentity) bool {
-		if request[ID_TYPE] != "" && request[ID_TYPE] != id[ID_TYPE] {
-			return false
-		}
-
-		if identityType != "" && request[ID_TYPE] != "" && identityType != request[ID_TYPE] {
-			return false
-		}
-
-		if request[ID_HOSTNAME] != "" && id[ID_HOSTNAME] != "" && request[ID_HOSTNAME] != id[ID_HOSTNAME] {
-			return false
-		}
-
-		if request[ID_PORT] != "" {
-			if id[ID_PORT] != "" && id[ID_PORT] != request[ID_PORT] {
-				return false
-			}
-		}
-
-		if request[ID_SCHEME] != "" {
-			if id[ID_SCHEME] != "" && id[ID_SCHEME] != request[ID_SCHEME] {
-				return false
-			}
-		}
-
-		if request[ID_PATHPREFIX] != "" {
-			if id[ID_PATHPREFIX] != "" {
-				if len(id[ID_PATHPREFIX]) > len(request[ID_PATHPREFIX]) {
-					return false
-				}
-				pcomps := strings.Split(request[ID_PATHPREFIX], "/")
-				icomps := strings.Split(id[ID_PATHPREFIX], "/")
-				if len(icomps) > len(pcomps) {
-					return false
-				}
-				for i := range icomps {
-					if pcomps[i] != icomps[i] {
-						return false
-					}
-				}
-			}
-		} else {
-			if id[ID_PATHPREFIX] != "" {
-				return false
-			}
-		}
-
-		// ok now it basically matches, check against current match
-		if len(cur) == 0 {
-			return true
-		}
-
-		if cur[ID_HOSTNAME] == "" && id[ID_HOSTNAME] != "" {
-			return true
-		}
-		if cur[ID_PORT] == "" && (id[ID_PORT] != "" && request[ID_PORT] != "") {
-			return true
-		}
-		if cur[ID_SCHEME] == "" && (id[ID_SCHEME] != "" && request[ID_SCHEME] != "") {
-			return true
-		}
-
-		if len(cur[ID_PATHPREFIX]) < len(id[ID_PATHPREFIX]) {
-			return true
-		}
-		return false
+		_, better := Match(identityType, request, cur, id)
+		return better
 	}
 }
 
