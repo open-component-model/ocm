@@ -2,7 +2,6 @@
   description = "Nix flake for ocm";
 
   inputs = {
-    # NixPkgs (nixos-23.11)
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
   };
 
