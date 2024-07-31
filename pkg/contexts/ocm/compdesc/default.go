@@ -23,7 +23,7 @@ func DefaultComponent(component *ComponentDescriptor) *ComponentDescriptor {
 	if component.Metadata.ConfiguredVersion == "" {
 		component.Metadata.ConfiguredVersion = DefaultSchemeVersion
 	}
-	DefaultResources(component)
+	// DefaultResources(component)
 	return component
 }
 

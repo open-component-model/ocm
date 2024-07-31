@@ -40,6 +40,8 @@ var _ = Describe("repository", func() {
 		repo := me.NewRepository(ctx)
 		finalize.Close(repo, "source repo")
 
+		Expect(repo.GetSpecification().GetKind()).To(Equal(me.Type))
+
 		c := Must(repo.LookupComponent(COMPONENT))
 		finalize.Close(c, "src comp")
 

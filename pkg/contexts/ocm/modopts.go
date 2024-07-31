@@ -3,11 +3,16 @@ package ocm
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/hashattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
 type (
+	TargetElement = internal.TargetElement
+	TargetOption  = internal.TargetOption
+	TargetOptions = internal.TargetOptions
+
 	ModificationOption  = internal.ModificationOption
 	ModificationOptions = internal.ModificationOptions
 
@@ -52,6 +57,22 @@ func UseBlobHandlers(h BlobHandlerProvider) internal.BlobOptionImpl {
 
 func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 	return internal.NewModificationOptions(list...)
+}
+
+func TargetIndex(idx int) internal.TargetOptionImpl {
+	return internal.TargetIndex(-1)
+}
+
+const AppendElement = internal.TargetIndex(-1)
+
+var UpdateElement = internal.UpdateElement
+
+func TargetIdentity(id v1.Identity) internal.TargetOptionImpl {
+	return internal.TargetIdentity(id)
+}
+
+func TargetIdentityOrCreate(id v1.Identity) internal.TargetOptionImpl {
+	return internal.TargetIdentityOrAppend(id)
 }
 
 func ModifyResource(flag ...bool) internal.ModOptionImpl {

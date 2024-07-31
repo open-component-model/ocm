@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/refs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -25,7 +26,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.NewResourceAdderCommand(ctx, refs.ResourceSpecHandler{}, NewReferenceSpecificatonProvider()),
+			common.NewResourceAdderCommand(ctx, refs.New().WithCLIOptions(&addhdlrs.Options{}), NewReferenceSpecificatonProvider()),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -49,7 +50,9 @@ The description file might contain:
 - a list of references under the key <code>references</code>
 - a list of yaml documents with a single reference or reference list
 
-` + o.Adder.Description() + (&template.Options{}).Usage(),
+` + o.Adder.Description() + (&template.Options{}).Usage() + `
+
+` + (&addhdlrs.Options{}).Description(),
 		Example: `
 Add a reference directly by options
 <pre>

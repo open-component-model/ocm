@@ -20,6 +20,7 @@ sources, source, src, s
   -F, --file string                         target file/directory (default "component-archive")
   -h, --help                                help for sources
   -O, --output string                       output file for dry-run
+  -R, --replace                             replace existing elements
   -s, --settings stringArray                settings file with variable settings (yaml)
       --templater string                    templater to use (go, none, spiff, subst) (default "subst")
 ```
@@ -263,8 +264,8 @@ with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>docker</code>
 
-  The path must denote an image tag that can be found in the local
-  docker daemon. The denoted image is packed as OCI artifact set.
+  The path must denote an image tag that can be found in the local docker daemon.
+  The denoted image is packed as OCI artifact set.
   The OCI image will contain an informational back link to the component version
   using the manifest annotation <code>software.ocm/component-version</code>.
 
@@ -286,8 +287,8 @@ with the field <code>type</code> in the <code>input</code> field:
 
   This input type describes the composition of a multi-platform OCI image.
   The various variants are taken from the local docker daemon. They should be
-  built with the buildx command for cross platform docker builds.
-  The denoted images, as well as the wrapping image index is packed as OCI
+  built with the "buildx" command for cross platform docker builds (see https://ocm.software/docs/tutorials/best-practices/#building-multi-architecture-images).
+  The denoted images, as well as the wrapping image index, are packed as OCI
   artifact set.
   They will contain an informational back link to the component version
   using the manifest annotation <code>software.ocm/component-version</code>.
@@ -417,12 +418,14 @@ with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>ociArtifact</code>
 
-  The path must denote an OCI image reference.
+  This input type is used to import an OCI image from an OCI registry.
+  If it is a multi-arch image the set of platforms using the "platforms"
+  attribute. The path must denote an OCI image reference.
 
   This blob type specification supports the following fields:
   - **<code>path</code>** *string*
 
-    This REQUIRED property describes the OVI image reference of the image to
+    This REQUIRED property describes the OCI image reference of the image to
     import.
 
   - **<code>repository</code>** *string*
@@ -936,6 +939,12 @@ shown below.
     it is defaulted to false (so, per default, redirects are enabled).
 
   Options used to configure fields: <code>--body</code>, <code>--header</code>, <code>--mediaType</code>, <code>--noredirect</code>, <code>--url</code>, <code>--verb</code>
+
+
+
+The <code>--replace</code> option allows users to specify whether adding an
+element with the same name and extra identity but different version as an
+existing element append (false) or replace (true) the existing element.
 
 
 All yaml/json defined resources can be templated.

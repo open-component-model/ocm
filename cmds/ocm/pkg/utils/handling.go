@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/transformer"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 )
@@ -91,6 +92,22 @@ func HandleOutput(output output.Output, handler TypeHandler, specs ...ElemSpec) 
 				fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 			}
 		}
+	}
+	err := output.Close()
+	if err != nil {
+		return err
+	}
+	return output.Out()
+}
+
+func HandleOutputsFor[I, O any](name string, opts *output.Options, t transformer.Transformer[I, O], specs ...I) error {
+	if len(specs) == 0 {
+		return fmt.Errorf("%s required", name)
+	}
+	output := opts.Output
+
+	for _, s := range specs {
+		output.Add(t(s))
 	}
 	err := output.Close()
 	if err != nil {

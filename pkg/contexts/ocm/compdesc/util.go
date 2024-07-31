@@ -1,5 +1,9 @@
 package compdesc
 
+import (
+	"bytes"
+)
+
 type conversionError struct {
 	error
 }
@@ -29,4 +33,17 @@ func Validate(desc *ComponentDescriptor) error {
 	}
 	_, err = Decode(data)
 	return err
+}
+
+// ElementIndex determines the index of an element in the element list
+// for a given ElementMeta. If no element is found -1 is returned.
+func ElementIndex(acc ElementAccessor, metaprovider ElementMetaProvider) int {
+	meta := metaprovider.GetMeta()
+	id := meta.GetIdentityDigest(acc)
+	for i := 0; i < acc.Len(); i++ {
+		if bytes.Equal(acc.Get(i).GetMeta().GetIdentityDigest(acc), id) {
+			return i
+		}
+	}
+	return -1
 }

@@ -1,0 +1,16 @@
+---
+name: testdata
+version: 3.3.3
+type: plainText
+input:
+  type: utf8
+  mediaType: text/plain
+  text: version3
+---
+name: testdata
+version: 3.3.4
+type: plainText
+input:
+  type: utf8
+  mediaType: text/plain
+  text: version4
