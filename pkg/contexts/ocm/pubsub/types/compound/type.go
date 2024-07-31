@@ -19,9 +19,9 @@ const (
 
 func init() {
 	pubsub.RegisterType(pubsub.NewPubSubType[*Spec](Type,
-		pubsub.WithDesciption("a pub/sub system forwarding events to described sub-level systems.")))
+		pubsub.WithDesciption("A pub/sub system forwarding events to described sub-level systems.")))
 	pubsub.RegisterType(pubsub.NewPubSubType[*Spec](TypeV1,
-		pubsub.WithFormatSpec(`It is describe by the following field:
+		pubsub.WithFormatSpec(`It is described by the following field:
 
 - **<code>specifications</code>**  *list of pubsub specs*
 

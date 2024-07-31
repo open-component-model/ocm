@@ -8,6 +8,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/refsel"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/rscsel"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/srcsel"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 )
 
@@ -128,20 +131,37 @@ type ComponentVersionAccess interface {
 	GetProvider() *compdesc.Provider
 	SetProvider(provider *compdesc.Provider) error
 
-	GetResources() []ResourceAccess
 	GetResource(meta metav1.Identity) (ResourceAccess, error)
 	GetResourceIndex(meta metav1.Identity) int
 	GetResourceByIndex(i int) (ResourceAccess, error)
+	GetResources() []ResourceAccess
+	SelectResources(sel ...rscsel.Selector) ([]ResourceAccess, error)
+
+	//
+	// Deprecated: use GetResources with selector arguments.
+	//nolint: staticcheck // deprecated
 	GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
+
+	//
+	// Deprecated: use GetResources with selector arguments.
+	//nolint: staticcheck // deprecated
 	GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
+
+	//
+	// Deprecated: use GetResources with selector arguments.
+	//nolint: staticcheck // deprecated
 	GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error)
 	SetResource(*ResourceMeta, compdesc.AccessSpec, ...ModificationOption) error
 	SetResourceByAccess(art ResourceAccess, modopts ...BlobModificationOption) error
 
-	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)
 	GetSourceIndex(meta metav1.Identity) int
 	GetSourceByIndex(i int) (SourceAccess, error)
+	GetSources() []SourceAccess
+	SelectSources(sel ...srcsel.Selector) ([]SourceAccess, error)
+
+	// Deprecated: use GetResources with appropriate selectors.
+	//nolint: staticcheck // deprecated
 	GetSourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]SourceAccess, error)
 	// SetSource updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
@@ -153,8 +173,19 @@ type ComponentVersionAccess interface {
 	GetReference(meta metav1.Identity) (ComponentReference, error)
 	GetReferenceIndex(meta metav1.Identity) int
 	GetReferenceByIndex(i int) (ComponentReference, error)
+	GetReferences() []ComponentReference
+	SelectReferences(sel ...refsel.Selector) ([]ComponentReference, error)
+
+	// Deprecated: use GetReferences with appropriate selectors.
+	//nolint: staticcheck // deprecated
 	GetReferencesByName(name string, selectors ...compdesc.IdentitySelector) (compdesc.References, error)
+
+	// Deprecated: use GetReferences with appropriate selectors.
+	//nolint: staticcheck // deprecated
 	GetReferencesByIdentitySelectors(selectors ...compdesc.IdentitySelector) (compdesc.References, error)
+
+	// Deprecated: use GetReferences with appropriate selectors.
+	//nolint: staticcheck // deprecated
 	GetReferencesByReferenceSelectors(selectors ...compdesc.ReferenceSelector) (compdesc.References, error)
 	SetReference(ref *ComponentReference, opts ...TargetOption) error
 
@@ -188,6 +219,10 @@ type ComponentVersionAccess interface {
 
 	// Update adds the version with all changes to the component instance it has been created for.
 	Update() error
+
+	// Execute executes a function on a valid and locked component version reference.
+	// If it returns an error this error is forwarded.
+	Execute(func() error) error
 }
 
 // ComponentLister provides the optional repository list functionality of
