@@ -8,12 +8,12 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+
 	"github.com/open-component-model/ocm/pkg/filelock"
 )
 
 var _ = Describe("lock identity", func() {
 	It("identity", func() {
-
 		l1 := Must(filelock.MutexFor("testdata/lock"))
 		l2 := Must(filelock.MutexFor("testdata/../testdata/lock"))
 		Expect(l1).To(BeIdenticalTo(l2))
@@ -32,5 +32,4 @@ var _ = Describe("lock identity", func() {
 		Expect(c).NotTo(BeNil())
 		c.Close()
 	})
-
 })
