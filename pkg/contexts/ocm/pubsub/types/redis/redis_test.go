@@ -6,11 +6,11 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub/providers/ocireg"
@@ -20,16 +20,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 )
 
-const ARCH = "ctf"
-const COMP = "acme.org/component"
-const VERS = "v1"
+const (
+	ARCH = "ctf"
+	COMP = "acme.org/component"
+	VERS = "v1"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *Builder
 	var repo ocm.Repository
 
 	BeforeEach(func() {
-
 		env = NewBuilder()
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory)
 		attr := pubsub.For(env)
