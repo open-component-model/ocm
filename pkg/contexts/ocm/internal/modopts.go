@@ -1,8 +1,12 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/goutils/optionutils"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -86,6 +90,54 @@ func UseBlobHandlers(h BlobHandlerProvider) BlobOptionImpl {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// TargetElement described the index used to set the
+// resource or source for the SetXXX calls.
+// If -1 is returned an append is enforced.
+type TargetElement interface {
+	GetTargetIndex(resources compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error)
+}
+
+type TargetOptionImpl interface {
+	TargetOption
+	ModificationOption
+	BlobModificationOption
+}
+
+type TargetOptions struct {
+	TargetElement TargetElement
+}
+
+type TargetOption interface {
+	ApplyTargetOption(options *TargetOptions)
+}
+
+func (m *TargetOptions) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m *TargetOptions) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m *TargetOptions) ApplyTargetOption(opts *TargetOptions) {
+	optionutils.Transfer(&opts.TargetElement, m.TargetElement)
+}
+
+func (m *TargetOptions) ApplyTargetOptions(list ...TargetOption) *TargetOptions {
+	for _, o := range list {
+		if o != nil {
+			o.ApplyTargetOption(m)
+		}
+	}
+	return m
+}
+
+func NewTargetOptions(list ...TargetOption) *TargetOptions {
+	var m TargetOptions
+	m.ApplyTargetOptions(list...)
+	return &m
+}
+
 type ModificationOption interface {
 	ApplyModificationOption(opts *ModificationOptions)
 }
@@ -96,6 +148,8 @@ type ModOptionImpl interface {
 }
 
 type ModificationOptions struct {
+	TargetOptions
+
 	// ModifyResource disables the modification of signature releveant
 	// resource parts.
 	ModifyResource *bool
@@ -147,16 +201,13 @@ func (m *ModificationOptions) ApplyBlobModificationOption(opts *BlobModification
 }
 
 func (m *ModificationOptions) ApplyModificationOption(opts *ModificationOptions) {
-	optionutils.ApplyOption(m.ModifyResource, &opts.ModifyResource)
-	optionutils.ApplyOption(m.AcceptExistentDigests, &opts.AcceptExistentDigests)
-	optionutils.ApplyOption(m.SkipDigest, &opts.SkipDigest)
-	optionutils.ApplyOption(m.SkipVerify, &opts.SkipVerify)
-	if m.HasherProvider != nil {
-		opts.HasherProvider = m.HasherProvider
-	}
-	if m.DefaultHashAlgorithm != "" {
-		opts.DefaultHashAlgorithm = m.DefaultHashAlgorithm
-	}
+	m.TargetOptions.ApplyTargetOption(&opts.TargetOptions)
+	optionutils.Transfer(&opts.ModifyResource, m.ModifyResource)
+	optionutils.Transfer(&opts.AcceptExistentDigests, m.AcceptExistentDigests)
+	optionutils.Transfer(&opts.SkipDigest, m.SkipDigest)
+	optionutils.Transfer(&opts.SkipVerify, m.SkipVerify)
+	optionutils.Transfer(&opts.HasherProvider, m.HasherProvider)
+	optionutils.Transfer(&opts.DefaultHashAlgorithm, m.DefaultHashAlgorithm)
 }
 
 func (m *ModificationOptions) GetHasher(algo ...string) Hasher {
@@ -167,6 +218,104 @@ func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 	var m ModificationOptions
 	m.ApplyModificationOptions(list...)
 	return &m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type TargetIndex int
+
+func (m TargetIndex) GetTargetIndex(elems compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error) {
+	if int(m) >= elems.Len() {
+		return -1, nil
+	}
+	return int(m), nil
+}
+
+func (m TargetIndex) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m TargetIndex) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m TargetIndex) ApplyTargetOption(opts *TargetOptions) {
+	opts.TargetElement = m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type TargetIdentityOrAppend v1.Identity
+
+func (m TargetIdentityOrAppend) GetTargetIndex(elems compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error) {
+	idx, _ := TargetIdentity(m).GetTargetIndex(elems, meta)
+	return idx, nil
+}
+
+func (m TargetIdentityOrAppend) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m TargetIdentityOrAppend) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m TargetIdentityOrAppend) ApplyTargetOption(opts *TargetOptions) {
+	opts.TargetElement = m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type TargetIdentity v1.Identity
+
+func (m TargetIdentity) GetTargetIndex(elems compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error) {
+	for i := 0; i < elems.Len(); i++ {
+		r := elems.Get(i)
+		if r.GetMeta().GetIdentity(elems).Equals(v1.Identity(m)) {
+			return i, nil
+		}
+	}
+	return -1, fmt.Errorf("element %s not found", v1.Identity(m))
+}
+
+func (m TargetIdentity) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m TargetIdentity) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m TargetIdentity) ApplyTargetOption(opts *TargetOptions) {
+	opts.TargetElement = m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type replaceElement struct{}
+
+var UpdateElement = replaceElement{}
+
+func (m replaceElement) GetTargetIndex(elems compdesc.ElementAccessor, meta *compdesc.ElementMeta) (int, error) {
+	id := meta.GetIdentity(elems)
+	for i := 0; i < elems.Len(); i++ {
+		if elems.Get(i).GetMeta().GetIdentity(elems).Equals(id) {
+			return i, nil
+		}
+	}
+	return -1, fmt.Errorf("element %s not found", id)
+}
+
+func (m replaceElement) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m replaceElement) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetOptions)
+}
+
+func (m replaceElement) ApplyTargetOption(opts *TargetOptions) {
+	opts.TargetElement = m
 }
 
 ////////////////////////////////////////////////////////////////////////////////

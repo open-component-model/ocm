@@ -157,6 +157,11 @@ func (o *ElementMeta) GetName() string {
 	return o.Name
 }
 
+// GetMeta returns the element meta.
+func (r *ElementMeta) GetMeta() *ElementMeta {
+	return r
+}
+
 // GetExtraIdentity returns the extra identity of the object.
 func (o *ElementMeta) GetExtraIdentity() metav1.Identity {
 	if o.ExtraIdentity == nil {
@@ -204,6 +209,17 @@ func (o *ElementMeta) RemoveLabel(name string) bool {
 // SetExtraIdentity sets the identity of the object.
 func (o *ElementMeta) SetExtraIdentity(identity metav1.Identity) {
 	o.ExtraIdentity = identity
+}
+
+func (o *ElementMeta) AddExtraIdentity(identity metav1.Identity) {
+	if o.ExtraIdentity == nil {
+		o.ExtraIdentity = identity
+	} else {
+		o.ExtraIdentity = o.ExtraIdentity.Copy()
+		for k, v := range identity {
+			o.ExtraIdentity[k] = v
+		}
+	}
 }
 
 // GetIdentity returns the identity of the object.
@@ -321,7 +337,7 @@ type ObjectMetaAccessor interface {
 
 // ElementMetaAccessor provides generic access an elements meta information.
 type ElementMetaAccessor interface {
-	GetMeta() *ElementMeta
+	ElementMetaProvider
 	Equivalent(ElementMetaAccessor) equivalent.EqualState
 }
 
@@ -351,6 +367,10 @@ func GetIndexByIdentity(a ElementAccessor, id metav1.Identity) int {
 type ElementAccessor interface {
 	Len() int
 	Get(i int) ElementMetaAccessor
+}
+
+type ElementMetaProvider interface {
+	GetMeta() *ElementMeta
 }
 
 // ElementArtifactAccessor provides access to generic artifact information of an element.
@@ -442,10 +462,6 @@ type Source struct {
 	Access     AccessSpec `json:"access"`
 }
 
-func (s *Source) GetMeta() *ElementMeta {
-	return &s.ElementMeta
-}
-
 func (s *Source) GetAccess() AccessSpec {
 	return s.Access
 }
@@ -500,6 +516,24 @@ func (o *SourceMeta) Copy() *SourceMeta {
 		ElementMeta: *o.ElementMeta.Copy(),
 		Type:        o.Type,
 	}
+}
+
+func (o *SourceMeta) WithVersion(v string) *SourceMeta {
+	r := *o
+	r.Version = v
+	return &r
+}
+
+func (o *SourceMeta) WithExtraIdentity(extras ...string) *SourceMeta {
+	r := *o
+	r.AddExtraIdentity(NewExtraIdentity(extras...))
+	return &r
+}
+
+func (o *SourceMeta) WithLabel(l *Label) *SourceMeta {
+	r := *o
+	r.Labels.SetDef(l.Name, l)
+	return &r
 }
 
 func NewSourceMeta(name, typ string) *SourceMeta {
@@ -600,10 +634,6 @@ type Resource struct {
 	// Access describes the type specific method to
 	// access the defined resource.
 	Access AccessSpec `json:"access"`
-}
-
-func (r *Resource) GetMeta() *ElementMeta {
-	return &r.ElementMeta
 }
 
 func (r *Resource) GetAccess() AccessSpec {
@@ -709,6 +739,24 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 	return r
 }
 
+func (o *ResourceMeta) WithVersion(v string) *ResourceMeta {
+	r := *o
+	r.Version = v
+	return &r
+}
+
+func (o *ResourceMeta) WithExtraIdentity(extras ...string) *ResourceMeta {
+	r := *o
+	r.AddExtraIdentity(NewExtraIdentity(extras...))
+	return &r
+}
+
+func (o *ResourceMeta) WithLabel(l *Label) *ResourceMeta {
+	r := *o
+	r.Labels.SetDef(l.Name, l)
+	return &r
+}
+
 func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) *ResourceMeta {
 	return &ResourceMeta{
 		ElementMeta: ElementMeta{Name: name},
@@ -781,15 +829,25 @@ func (r ComponentReference) String() string {
 	return fmt.Sprintf("%s[%s:%s]", r.Name, r.ComponentName, r.Version)
 }
 
+// WithVersion returns a new reference with a dedicated version.
+func (o *ComponentReference) WithVersion(v string) *ComponentReference {
+	n := o.Copy()
+	n.Version = v
+	return n
+}
+
+// WithExtraIdentity returns a new reference with a dedicated version.
+func (o *ComponentReference) WithExtraIdentity(extras ...string) *ComponentReference {
+	n := o.Copy()
+	n.AddExtraIdentity(NewExtraIdentity(extras...))
+	return n
+}
+
 // Fresh returns a digest-free copy.
 func (o *ComponentReference) Fresh() *ComponentReference {
 	n := o.Copy()
 	n.Digest = nil
 	return n
-}
-
-func (r *ComponentReference) GetMeta() *ElementMeta {
-	return &r.ElementMeta
 }
 
 func (r *ComponentReference) GetDigest() *metav1.DigestSpec {

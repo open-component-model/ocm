@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/srcs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -27,7 +28,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.NewResourceAdderCommand(ctx, srcs.ResourceSpecHandler{}, common.NewContentResourceSpecificationProvider(ctx, "source", nil, "")),
+			common.NewResourceAdderCommand(ctx, srcs.New().WithCLIOptions(&addhdlrs.Options{}), common.NewContentResourceSpecificationProvider(ctx, "source", nil, "")),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -64,7 +65,9 @@ The description file might contain:
 
 ` + o.Adder.Description() + (&template.Options{}).Usage() +
 		inputs.Usage(inputs.DefaultInputTypeScheme) +
-		ocm.AccessUsage(o.OCMContext().AccessMethods(), true)
+		ocm.AccessUsage(o.OCMContext().AccessMethods(), true) + `
+
+` + (&addhdlrs.Options{}).Description()
 }
 
 func (o *Command) Run() error {
