@@ -44,7 +44,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Short: "Set the pubsub spec for an ocm repository",
 		Long: `
 A repository may be able to store a publish/subscribe specification
-to propagate the creation or update of component version.
+to propagate the creation or update of component versions.
 If such an implementation is available this command can be used
 to set the pub/sub specification for a repository.
 If no specification is given an existing specification
