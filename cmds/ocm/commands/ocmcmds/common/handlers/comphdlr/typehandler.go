@@ -157,6 +157,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 	if repo == nil {
 		evaluated, err := h.session.EvaluateComponentRef(h.octx.Context(), name)
 		if err != nil {
+			evaluated = nil
 			if h.resolver != nil {
 				comp, err := ocm.ParseComp(name)
 				if err != nil {

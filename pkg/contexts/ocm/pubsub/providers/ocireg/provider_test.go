@@ -82,9 +82,7 @@ type Spec struct {
 	Target string `json:"target"`
 }
 
-var (
-	_ pubsub.PubSubSpec = (*Spec)(nil)
-)
+var _ pubsub.PubSubSpec = (*Spec)(nil)
 
 func NewSpec(target string) *Spec {
 	return &Spec{runtime.NewVersionedObjectType(Type), target}
