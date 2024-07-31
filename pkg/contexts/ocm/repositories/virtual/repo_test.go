@@ -65,7 +65,7 @@ var _ = Describe("virtual repo", func() {
 			Expect(string(data)).To(Equal("my test data\n"))
 
 			a := Must(r.Access())
-			Expect(a.GetInexpensiveContentVersionIdentity(vers)).To(Equal("sha256:2fdeb101f225dad71efd2dadb92b5aa422169f1884eecb81abdd988d77b68466"))
+			Expect(a.GetVersion()).To(Equal("v1"))
 		})
 	})
 
@@ -121,7 +121,7 @@ var _ = Describe("virtual repo", func() {
 			Expect(string(data)).To(Equal("new test data"))
 
 			a = Must(r.Access())
-			Expect(a.GetInexpensiveContentVersionIdentity(vers)).To(Equal("sha256:" + dig))
+			Expect(a.GetVersion()).To(Equal("v1"))
 		},
 			Entry("with direct mode", false, localblob.Type),
 			Entry("with composition mode", true, compose.Type),

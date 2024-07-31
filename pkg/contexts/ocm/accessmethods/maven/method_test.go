@@ -130,7 +130,7 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 
 			It("inexpensive id", func() {
 				acc := me.New(MAVEN_CENTRAL, MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION, me.WithClassifier(""), me.WithExtension("pom"))
-				Expect(acc.GetInexpensiveContentVersionIdentity(cv)).To(Equal("4fb753e1a4ab7acebc39557f1aa292052775b0d8"))
+				Expect(acc.ArtifactId).To(Equal("maven"))
 			})
 		}
 	})

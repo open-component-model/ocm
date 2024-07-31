@@ -141,10 +141,6 @@ func (a *AccessSpec) AccessMethod(cv accspeccpi.ComponentVersionAccess) (accspec
 	return cv.AccessMethod(a)
 }
 
-func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv accspeccpi.ComponentVersionAccess) string {
-	return cv.GetInexpensiveContentVersionIdentity(a)
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 type AccessSpecV1 struct {

@@ -88,7 +88,6 @@ type: localBlob
 		defer Close(cv)
 		access := cv.GetDescriptor().Resources[0].Access
 		spec := Must(env.OCMContext().AccessSpecForSpec(access))
-		id := spec.GetInexpensiveContentVersionIdentity(cv)
-		Expect(id).To(Equal("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+		Expect(spec.GetVersion()).To(Equal("v1"))
 	})
 })

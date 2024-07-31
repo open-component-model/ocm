@@ -116,22 +116,6 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 	return nil, errors.ErrNotSupported(errkind.KIND_ACCESSMETHOD, a.GetType(), "virtual registry")
 }
 
-func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) string {
-	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
-	if err != nil {
-		return ""
-	}
-
-	switch a.GetKind() { // to be extended
-	case localfsblob.Type:
-		fallthrough
-	case localblob.Type:
-		return c.access.GetInexpensiveContentVersionIdentity(accessSpec)
-	}
-
-	return ""
-}
-
 func (c *ComponentVersionContainer) Update() error {
 	return c.access.Update()
 }

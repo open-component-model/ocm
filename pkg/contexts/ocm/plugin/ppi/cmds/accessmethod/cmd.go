@@ -6,7 +6,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/get"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
 )
 
@@ -22,7 +21,6 @@ described by an access method descriptor (<CMD>` + p.Name() + ` descriptor</CMD>
 
 	cmd.AddCommand(validate.New(p))
 	cmd.AddCommand(get.New(p))
-	cmd.AddCommand(identity.New(p))
 	cmd.AddCommand(compose.New(p))
 	return cmd
 }

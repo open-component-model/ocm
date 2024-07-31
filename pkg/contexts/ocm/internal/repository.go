@@ -211,12 +211,6 @@ type ComponentVersionAccess interface {
 	// not supported by the actual repository type.
 	AccessMethod(AccessSpec) (AccessMethod, error)
 
-	// GetInexpensiveContentVersionIdentity implements a method that attempts to provide an inexpensive identity for
-	// the specified artifact. Therefore, an identity that can be provided without requiring the entire object (e.g.
-	// calculating the digest from the bytes), which would defeat the purpose of caching.
-	// It follows the same contract as AccessMethodImpl.
-	GetInexpensiveContentVersionIdentity(spec AccessSpec) string
-
 	// Update adds the version with all changes to the component instance it has been created for.
 	Update() error
 

@@ -65,32 +65,6 @@ func (p *PluginHandler) AccessMethod(spec *AccessSpec, cv cpi.ComponentVersionAc
 	return accspeccpi.AccessMethodForImplementation(newMethod(p, spec, cv.GetContext(), info, creddata), nil)
 }
 
-func (p *PluginHandler) GetInexpensiveContentVersionIdentity(spec *AccessSpec, cv cpi.ComponentVersionAccess) string {
-	mspec := p.GetAccessMethodDescriptor(spec.GetKind(), spec.GetVersion())
-	if mspec == nil {
-		return "unknown type " + spec.GetType()
-	}
-
-	if !mspec.SupportContentIdentity {
-		return ""
-	}
-
-	creddata, err := p.getCredentialData(spec, cv)
-	if err != nil {
-		return ""
-	}
-
-	specdata, err := spec.GetRaw()
-	if err != nil {
-		return ""
-	}
-	id, err := p.plug.Identity(creddata, specdata)
-	if err != nil {
-		return ""
-	}
-	return id
-}
-
 func (p *PluginHandler) getCredentialData(spec *AccessSpec, cv cpi.ComponentVersionAccess) (json.RawMessage, error) {
 	info, err := p.Info(spec)
 	if err != nil {
