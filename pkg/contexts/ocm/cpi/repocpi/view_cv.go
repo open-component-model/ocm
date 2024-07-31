@@ -666,10 +666,7 @@ func (c *componentVersionAccessView) SelectResources(sel ...rscsel.Selector) ([]
 	if err != nil {
 		return nil, err
 	}
-	return c.GetResources(sel...), nil
-}
 
-func (c *componentVersionAccessView) GetResources(sel ...rscsel.Selector) []cpi.ResourceAccess {
 	list := compdesc.MapToSelectorElementList(c.GetDescriptor().Resources)
 	result := []cpi.ResourceAccess{}
 	for _, r := range c.GetDescriptor().Resources {
@@ -681,6 +678,14 @@ func (c *componentVersionAccessView) GetResources(sel ...rscsel.Selector) []cpi.
 				}
 			}
 		}
+		result = append(result, cpi.NewResourceAccess(c, r.Access, r.ResourceMeta))
+	}
+	return result, nil
+}
+
+func (c *componentVersionAccessView) GetResources() []cpi.ResourceAccess {
+	result := []cpi.ResourceAccess{}
+	for _, r := range c.GetDescriptor().Resources {
 		result = append(result, cpi.NewResourceAccess(c, r.Access, r.ResourceMeta))
 	}
 	return result
@@ -775,11 +780,8 @@ func (c *componentVersionAccessView) SelectSources(sel ...srcsel.Selector) ([]cp
 	if err != nil {
 		return nil, err
 	}
-	return c.GetSources(sel...), nil
-}
 
-func (c *componentVersionAccessView) GetSources(sel ...srcsel.Selector) []cpi.SourceAccess {
-	list := compdesc.MapToSelectorElementList(c.GetDescriptor().Resources)
+	list := compdesc.MapToSelectorElementList(c.GetDescriptor().Sources)
 	result := []cpi.SourceAccess{}
 	for _, r := range c.GetDescriptor().Sources {
 		if len(sel) > 0 {
@@ -792,6 +794,14 @@ func (c *componentVersionAccessView) GetSources(sel ...srcsel.Selector) []cpi.So
 		}
 		result = append(result, cpi.NewSourceAccess(c, r.Access, r.SourceMeta))
 	}
+	return result, nil
+}
+
+func (c *componentVersionAccessView) GetSources() []cpi.SourceAccess {
+	result := []cpi.SourceAccess{}
+	for _, r := range c.GetDescriptor().Sources {
+		result = append(result, cpi.NewSourceAccess(c, r.Access, r.SourceMeta))
+	}
 	return result
 }
 
@@ -800,11 +810,11 @@ func (c *componentVersionAccessView) SelectReferences(sel ...refsel.Selector) ([
 	if err != nil {
 		return nil, err
 	}
-	return c.GetReferences(sel...), nil
+	return c.GetDescriptor().SelectReferences(sel...)
 }
 
-func (c *componentVersionAccessView) GetReferences(sel ...refsel.Selector) []compdesc.ComponentReference {
-	return c.GetDescriptor().GetReferences(sel...)
+func (c *componentVersionAccessView) GetReferences() []compdesc.ComponentReference {
+	return c.GetDescriptor().GetReferences()
 }
 
 func (c *componentVersionAccessView) GetReference(id metav1.Identity) (cpi.ComponentReference, error) {

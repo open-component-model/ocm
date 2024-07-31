@@ -45,10 +45,7 @@ func (cd *ComponentDescriptor) SelectResources(sel ...rscsel.Selector) ([]Resour
 	if err != nil {
 		return nil, err
 	}
-	return cd.GetResources(sel...), nil
-}
 
-func (cd *ComponentDescriptor) GetResources(sel ...rscsel.Selector) []Resource {
 	list := MapToSelectorElementList(cd.Resources)
 	result := []Resource{}
 	for _, r := range cd.Resources {
@@ -60,6 +57,14 @@ func (cd *ComponentDescriptor) GetResources(sel ...rscsel.Selector) []Resource {
 				}
 			}
 		}
+		result = append(result, r)
+	}
+	return result, nil
+}
+
+func (cd *ComponentDescriptor) GetResources() []Resource {
+	result := []Resource{}
+	for _, r := range cd.Resources {
 		result = append(result, r)
 	}
 	return result
@@ -116,10 +121,7 @@ func (cd *ComponentDescriptor) SelectSources(sel ...srcsel.Selector) ([]Source, 
 	if err != nil {
 		return nil, err
 	}
-	return cd.GetSources(sel...), nil
-}
 
-func (cd *ComponentDescriptor) GetSources(sel ...srcsel.Selector) []Source {
 	list := MapToSelectorElementList(cd.Sources)
 	result := []Source{}
 	for _, r := range cd.Sources {
@@ -131,6 +133,14 @@ func (cd *ComponentDescriptor) GetSources(sel ...srcsel.Selector) []Source {
 				}
 			}
 		}
+		result = append(result, r)
+	}
+	return result, nil
+}
+
+func (cd *ComponentDescriptor) GetSources() []Source {
+	result := []Source{}
+	for _, r := range cd.Sources {
 		result = append(result, r)
 	}
 	return result
@@ -180,10 +190,7 @@ func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) ([]Compo
 	if err != nil {
 		return nil, err
 	}
-	return cd.GetReferences(sel...), nil
-}
 
-func (cd *ComponentDescriptor) GetReferences(sel ...refsel.Selector) []ComponentReference {
 	list := MapToSelectorElementList(cd.References)
 	result := []ComponentReference{}
 	for _, r := range cd.References {
@@ -195,6 +202,14 @@ func (cd *ComponentDescriptor) GetReferences(sel ...refsel.Selector) []Component
 				}
 			}
 		}
+		result = append(result, r)
+	}
+	return result, nil
+}
+
+func (cd *ComponentDescriptor) GetReferences() []ComponentReference {
+	result := []ComponentReference{}
+	for _, r := range cd.References {
 		result = append(result, r)
 	}
 	return result

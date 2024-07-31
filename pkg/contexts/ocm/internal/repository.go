@@ -134,7 +134,7 @@ type ComponentVersionAccess interface {
 	GetResource(meta metav1.Identity) (ResourceAccess, error)
 	GetResourceIndex(meta metav1.Identity) int
 	GetResourceByIndex(i int) (ResourceAccess, error)
-	GetResources(sel ...rscsel.Selector) []ResourceAccess
+	GetResources() []ResourceAccess
 	SelectResources(sel ...rscsel.Selector) ([]ResourceAccess, error)
 
 	//
@@ -157,7 +157,7 @@ type ComponentVersionAccess interface {
 	GetSource(meta metav1.Identity) (SourceAccess, error)
 	GetSourceIndex(meta metav1.Identity) int
 	GetSourceByIndex(i int) (SourceAccess, error)
-	GetSources(sel ...srcsel.Selector) []SourceAccess
+	GetSources() []SourceAccess
 	SelectSources(sel ...srcsel.Selector) ([]SourceAccess, error)
 
 	// Deprecated: use GetResources with appropriate selectors.
@@ -173,7 +173,7 @@ type ComponentVersionAccess interface {
 	GetReference(meta metav1.Identity) (ComponentReference, error)
 	GetReferenceIndex(meta metav1.Identity) int
 	GetReferenceByIndex(i int) (ComponentReference, error)
-	GetReferences(sel ...refsel.Selector) []ComponentReference
+	GetReferences() []ComponentReference
 	SelectReferences(sel ...refsel.Selector) ([]ComponentReference, error)
 
 	// Deprecated: use GetReferences with appropriate selectors.

@@ -74,7 +74,7 @@ func (d *DummyComponentVersionAccess) SelectResources(sel ...rscsel.Selector) ([
 	return nil, nil
 }
 
-func (d *DummyComponentVersionAccess) GetResources(sel ...rscsel.Selector) []ResourceAccess {
+func (d *DummyComponentVersionAccess) GetResources() []ResourceAccess {
 	return nil
 }
 
@@ -99,7 +99,7 @@ func (d *DummyComponentVersionAccess) SelectSources(sel ...srcsel.Selector) ([]S
 	return nil, nil
 }
 
-func (d *DummyComponentVersionAccess) GetSources(sel ...srcsel.Selector) []SourceAccess {
+func (d *DummyComponentVersionAccess) GetSources() []SourceAccess {
 	return nil
 }
 
@@ -123,7 +123,7 @@ func (d *DummyComponentVersionAccess) SelectReferences(sel ...refsel.Selector) (
 	return nil, nil
 }
 
-func (d *DummyComponentVersionAccess) GetReferences(sel ...refsel.Selector) []ComponentReference {
+func (d *DummyComponentVersionAccess) GetReferences() []ComponentReference {
 	return nil
 }
 
