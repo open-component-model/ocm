@@ -9,6 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/accessors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/semverutils"
 )
@@ -112,8 +113,8 @@ type ComponentSpec struct {
 }
 
 const (
-	SystemIdentityName    = "name"
-	SystemIdentityVersion = "version"
+	SystemIdentityName    = metav1.SystemIdentityName
+	SystemIdentityVersion = metav1.SystemIdentityVersion
 )
 
 type ElementMetaAccess interface {
@@ -155,6 +156,11 @@ type ElementMeta struct {
 // GetName returns the name of the object.
 func (o *ElementMeta) GetName() string {
 	return o.Name
+}
+
+// GetMeta returns the element meta.
+func (r *ElementMeta) GetMeta() *ElementMeta {
+	return r
 }
 
 // GetExtraIdentity returns the extra identity of the object.
@@ -206,6 +212,17 @@ func (o *ElementMeta) SetExtraIdentity(identity metav1.Identity) {
 	o.ExtraIdentity = identity
 }
 
+func (o *ElementMeta) AddExtraIdentity(identity metav1.Identity) {
+	if o.ExtraIdentity == nil {
+		o.ExtraIdentity = identity
+	} else {
+		o.ExtraIdentity = o.ExtraIdentity.Copy()
+		for k, v := range identity {
+			o.ExtraIdentity[k] = v
+		}
+	}
+}
+
 // GetIdentity returns the identity of the object.
 func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
@@ -219,6 +236,31 @@ func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 		for i := 0; i < l; i++ {
 			m := accessor.Get(i).GetMeta()
 			if m.Name == o.Name && m.ExtraIdentity.Equals(o.ExtraIdentity) {
+				if found {
+					identity[SystemIdentityVersion] = o.Version
+
+					break
+				}
+				found = true
+			}
+		}
+	}
+	return identity
+}
+
+// GetIdentityForContext returns the identity of the object.
+func (o *ElementMeta) GetIdentityForContext(accessor accessors.ElementListAccessor) metav1.Identity {
+	identity := o.ExtraIdentity.Copy()
+	if identity == nil {
+		identity = metav1.Identity{}
+	}
+	identity[SystemIdentityName] = o.Name
+	if accessor != nil {
+		found := false
+		l := accessor.Len()
+		for i := 0; i < l; i++ {
+			m := accessor.Get(i).GetMeta()
+			if m.GetName() == o.GetName() && m.GetExtraIdentity().Equals(o.ExtraIdentity) {
 				if found {
 					identity[SystemIdentityVersion] = o.Version
 
@@ -288,43 +330,6 @@ func (o *ElementMeta) Equivalent(a *ElementMeta) equivalent.EqualState {
 	return state.Apply(o.Labels.Equivalent(a.Labels))
 }
 
-// NameAccessor describes a accessor for a named object.
-type NameAccessor interface {
-	// GetName returns the name of the object.
-	GetName() string
-	// SetName sets the name of the object.
-	SetName(name string)
-}
-
-// VersionAccessor describes a accessor for a versioned object.
-type VersionAccessor interface {
-	// GetVersion returns the version of the object.
-	GetVersion() string
-	// SetVersion sets the version of the object.
-	SetVersion(version string)
-}
-
-// LabelsAccessor describes a accessor for a labeled object.
-type LabelsAccessor interface {
-	// GetLabels returns the labels of the object.
-	GetLabels() metav1.Labels
-	// SetLabels sets the labels of the object.
-	SetLabels(labels []metav1.Label)
-}
-
-// ObjectMetaAccessor describes a accessor for named and versioned object.
-type ObjectMetaAccessor interface {
-	NameAccessor
-	VersionAccessor
-	LabelsAccessor
-}
-
-// ElementMetaAccessor provides generic access an elements meta information.
-type ElementMetaAccessor interface {
-	GetMeta() *ElementMeta
-	Equivalent(ElementMetaAccessor) equivalent.EqualState
-}
-
 func GetByIdentity(a ElementAccessor, id metav1.Identity) ElementMetaAccessor {
 	l := a.Len()
 	for i := 0; i < l; i++ {
@@ -347,42 +352,9 @@ func GetIndexByIdentity(a ElementAccessor, id metav1.Identity) int {
 	return -1
 }
 
-// ElementAccessor provides generic access to list of elements.
-type ElementAccessor interface {
-	Len() int
-	Get(i int) ElementMetaAccessor
-}
-
-// ElementArtifactAccessor provides access to generic artifact information of an element.
-type ElementArtifactAccessor interface {
-	ElementMetaAccessor
-	GetType() string
-	GetAccess() AccessSpec
-	SetAccess(a AccessSpec)
-}
-
-type ElementDigestAccessor interface {
-	GetDigest() *metav1.DigestSpec
-	SetDigest(*metav1.DigestSpec)
-}
-
-// ArtifactAccessor provides generic access to list of artifacts.
-// There are resources or sources.
-type ArtifactAccessor interface {
-	ElementAccessor
-	GetArtifact(i int) ElementArtifactAccessor
-}
-
 // ArtifactAccess provides access to a dedicated kind of artifact set
 // in the component descriptor (resources or sources).
 type ArtifactAccess func(cd *ComponentDescriptor) ArtifactAccessor
-
-// AccessSpec is an abstract specification of an access method
-// The outbound object is typicall a runtime.UnstructuredTypedObject.
-// Inbound any serializable AccessSpec implementation is possible.
-type AccessSpec interface {
-	runtime.VersionedTypedObject
-}
 
 // GenericAccessSpec returns a generic AccessSpec implementation for an unstructured object.
 // It can always be used instead of a dedicated access spec implementation. The core
@@ -391,11 +363,6 @@ func GenericAccessSpec(un *runtime.UnstructuredTypedObject) AccessSpec {
 	return &runtime.UnstructuredVersionedTypedObject{
 		*un.DeepCopy(),
 	}
-}
-
-// AccessProvider provides access to an access specification of elements.
-type AccessProvider interface {
-	GetAccess() AccessSpec
 }
 
 // Sources describes a set of source specifications.
@@ -440,10 +407,6 @@ func (s Sources) Copy() Sources {
 type Source struct {
 	SourceMeta `json:",inline"`
 	Access     AccessSpec `json:"access"`
-}
-
-func (s *Source) GetMeta() *ElementMeta {
-	return &s.ElementMeta
 }
 
 func (s *Source) GetAccess() AccessSpec {
@@ -500,6 +463,24 @@ func (o *SourceMeta) Copy() *SourceMeta {
 		ElementMeta: *o.ElementMeta.Copy(),
 		Type:        o.Type,
 	}
+}
+
+func (o *SourceMeta) WithVersion(v string) *SourceMeta {
+	r := *o
+	r.Version = v
+	return &r
+}
+
+func (o *SourceMeta) WithExtraIdentity(extras ...string) *SourceMeta {
+	r := *o
+	r.AddExtraIdentity(NewExtraIdentity(extras...))
+	return &r
+}
+
+func (o *SourceMeta) WithLabel(l *Label) *SourceMeta {
+	r := *o
+	r.Labels.SetDef(l.Name, l)
+	return &r
 }
 
 func NewSourceMeta(name, typ string) *SourceMeta {
@@ -602,10 +583,6 @@ type Resource struct {
 	Access AccessSpec `json:"access"`
 }
 
-func (r *Resource) GetMeta() *ElementMeta {
-	return &r.ElementMeta
-}
-
 func (r *Resource) GetAccess() AccessSpec {
 	return r.Access
 }
@@ -620,6 +597,10 @@ func (r *Resource) GetDigest() *metav1.DigestSpec {
 
 func (r *Resource) SetDigest(d *metav1.DigestSpec) {
 	r.Digest = d
+}
+
+func (r *Resource) GetRelation() metav1.ResourceRelation {
+	return r.Relation
 }
 
 func (r *Resource) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
@@ -709,6 +690,24 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 	return r
 }
 
+func (o *ResourceMeta) WithVersion(v string) *ResourceMeta {
+	r := *o
+	r.Version = v
+	return &r
+}
+
+func (o *ResourceMeta) WithExtraIdentity(extras ...string) *ResourceMeta {
+	r := *o
+	r.AddExtraIdentity(NewExtraIdentity(extras...))
+	return &r
+}
+
+func (o *ResourceMeta) WithLabel(l *Label) *ResourceMeta {
+	r := *o
+	r.Labels.SetDef(l.Name, l)
+	return &r
+}
+
 func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) *ResourceMeta {
 	return &ResourceMeta{
 		ElementMeta: ElementMeta{Name: name},
@@ -781,15 +780,25 @@ func (r ComponentReference) String() string {
 	return fmt.Sprintf("%s[%s:%s]", r.Name, r.ComponentName, r.Version)
 }
 
+// WithVersion returns a new reference with a dedicated version.
+func (o *ComponentReference) WithVersion(v string) *ComponentReference {
+	n := o.Copy()
+	n.Version = v
+	return n
+}
+
+// WithExtraIdentity returns a new reference with a dedicated version.
+func (o *ComponentReference) WithExtraIdentity(extras ...string) *ComponentReference {
+	n := o.Copy()
+	n.AddExtraIdentity(NewExtraIdentity(extras...))
+	return n
+}
+
 // Fresh returns a digest-free copy.
 func (o *ComponentReference) Fresh() *ComponentReference {
 	n := o.Copy()
 	n.Digest = nil
 	return n
-}
-
-func (r *ComponentReference) GetMeta() *ElementMeta {
-	return &r.ElementMeta
 }
 
 func (r *ComponentReference) GetDigest() *metav1.DigestSpec {

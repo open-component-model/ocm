@@ -17,6 +17,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/accspeccpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/refsel"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/rscsel"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/selectors/srcsel"
 	"github.com/open-component-model/ocm/pkg/refmgmt"
 	"github.com/open-component-model/ocm/pkg/refmgmt/resource"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -291,7 +295,7 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *cpi.SourceMeta, ac
 	return errors.ErrUnknown(cpi.KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
 }
 
-func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, modopts ...internal.TargetOption) error {
 	cpi.Logger(c).Debug("adding source blob", "source", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
@@ -301,7 +305,7 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cp
 		return fmt.Errorf("unable to add blob: (component %s:%s source %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
-	if err := c.SetSource(meta, acc); err != nil {
+	if err := c.SetSource(meta, acc, modopts...); err != nil {
 		return fmt.Errorf("unable to set source: %w", err)
 	}
 
@@ -361,7 +365,7 @@ func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessVie
 	return setblob(meta, blob, hint, global)
 }
 
-func (c *componentVersionAccessView) SetResourceAccess(art cpi.ResourceAccess, modopts ...cpi.BlobModificationOption) error {
+func (c *componentVersionAccessView) SetResourceByAccess(art cpi.ResourceAccess, modopts ...cpi.BlobModificationOption) error {
 	return setAccess(c, "resource", art,
 		func(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
 			return c.SetResource(meta, acc, cpi.NewBlobModificationOptions(modopts...))
@@ -410,7 +414,11 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		}
 
 		cd := c.bridge.GetDescriptor()
-		idx := cd.GetResourceIndex(&res.ResourceMeta)
+
+		idx, err := c.getElementIndex("resource", cd.Resources, res, &opts.TargetOptions)
+		if err != nil {
+			return err
+		}
 		if idx >= 0 {
 			old = &cd.Resources[idx]
 		}
@@ -515,12 +523,17 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 	return hashAlgo, digester, value
 }
 
-func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess) error {
+func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, optslist ...internal.TargetOption) error {
 	return setAccess(c, "source", art,
-		c.SetSource, c.SetSourceBlob)
+		func(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
+			return c.SetSource(meta, acc, optslist...)
+		},
+		func(meta *cpi.SourceMeta, blob cpi.BlobAccess, hint string, global cpi.AccessSpec) error {
+			return c.SetSourceBlob(meta, blob, hint, global, optslist...)
+		})
 }
 
-func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
+func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, optlist ...internal.TargetOption) error {
 	if c.bridge.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -529,12 +542,19 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		SourceMeta: *meta.Copy(),
 		Access:     acc,
 	}
+
 	return c.Execute(func() error {
 		if res.Version == "" {
 			res.Version = c.bridge.GetVersion()
 		}
 		cd := c.bridge.GetDescriptor()
-		if idx := cd.GetSourceIndex(&res.SourceMeta); idx == -1 {
+
+		idx, err := c.getElementIndex("source", cd.Sources, res, optlist...)
+		if err != nil {
+			return err
+		}
+
+		if idx < 0 {
 			cd.Sources = append(cd.Sources, *res)
 		} else {
 			cd.Sources[idx] = *res
@@ -543,16 +563,53 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 	})
 }
 
-func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference) error {
+func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, optlist ...internal.TargetOption) error {
 	return c.Execute(func() error {
 		cd := c.bridge.GetDescriptor()
-		if idx := cd.GetComponentReferenceIndex(*ref); idx == -1 {
+
+		if ref.Version == "" {
+			return fmt.Errorf("version required for component version reference")
+		}
+		idx, err := c.getElementIndex("reference", cd.References, ref, optlist...)
+		if err != nil {
+			return err
+		}
+
+		if idx < 0 {
 			cd.References = append(cd.References, *ref)
 		} else {
 			cd.References[idx] = *ref
 		}
 		return c.bridge.Update(false)
 	})
+}
+
+func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.ElementAccessor, prov compdesc.ElementMetaProvider, optlist ...cpi.TargetOption) (int, error) {
+	opts := internal.NewTargetOptions(optlist...)
+	curidx := compdesc.ElementIndex(acc, prov)
+	meta := prov.GetMeta()
+	var idx int
+	if opts.TargetElement != nil {
+		var err error
+		idx, err = opts.TargetElement.GetTargetIndex(acc, meta)
+		if err != nil {
+			return idx, err
+		}
+		if idx == -1 && curidx >= 0 {
+			if meta.Version == acc.Get(curidx).GetMeta().Version {
+				return -1, fmt.Errorf("adding a new %s with same base identity requires different version", kind)
+			}
+		}
+		if idx >= acc.Len() {
+			return -1, fmt.Errorf("index %d out of range of %s list", idx, kind)
+		}
+		if idx < -1 {
+			return -1, fmt.Errorf("invalid index %d for %s list", idx, kind)
+		}
+	} else {
+		idx = curidx
+	}
+	return idx, nil
 }
 
 func (c *componentVersionAccessView) DiscardChanges() {
@@ -590,6 +647,7 @@ func (c *componentVersionAccessView) GetResourceByIndex(i int) (cpi.ResourceAcce
 	return cpi.NewResourceAccess(c, r.Access, r.ResourceMeta), nil
 }
 
+// Deprecated: use GetResources with appropriate selectors.
 func (c *componentVersionAccessView) GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]cpi.ResourceAccess, error) {
 	resources, err := c.GetDescriptor().GetResourcesByName(name, selectors...)
 	if err != nil {
@@ -603,6 +661,28 @@ func (c *componentVersionAccessView) GetResourcesByName(name string, selectors .
 	return result, nil
 }
 
+func (c *componentVersionAccessView) SelectResources(sel ...rscsel.Selector) ([]cpi.ResourceAccess, error) {
+	err := selectors.ValidateSelectors(sel...)
+	if err != nil {
+		return nil, err
+	}
+
+	list := compdesc.MapToSelectorElementList(c.GetDescriptor().Resources)
+	result := []cpi.ResourceAccess{}
+	for _, r := range c.GetDescriptor().Resources {
+		if len(sel) > 0 {
+			mr := compdesc.MapToSelectorResource(&r)
+			for _, s := range sel {
+				if !s.MatchResource(list, mr) {
+					continue
+				}
+			}
+		}
+		result = append(result, cpi.NewResourceAccess(c, r.Access, r.ResourceMeta))
+	}
+	return result, nil
+}
+
 func (c *componentVersionAccessView) GetResources() []cpi.ResourceAccess {
 	result := []cpi.ResourceAccess{}
 	for _, r := range c.GetDescriptor().Resources {
@@ -612,16 +692,22 @@ func (c *componentVersionAccessView) GetResources() []cpi.ResourceAccess {
 }
 
 // GetResourcesByIdentitySelectors returns resources that match the given identity selectors.
+//
+// Deprecated: use GetReferences.
 func (c *componentVersionAccessView) GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]cpi.ResourceAccess, error) {
 	return c.GetResourcesBySelectors(selectors, nil)
 }
 
 // GetResourcesByResourceSelectors returns resources that match the given resource selectors.
+//
+// Deprecated: use GetResources.
 func (c *componentVersionAccessView) GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]cpi.ResourceAccess, error) {
 	return c.GetResourcesBySelectors(nil, selectors)
 }
 
 // GetResourcesBySelectors returns resources that match the given selector.
+//
+// Deprecated: use GetResources.
 func (c *componentVersionAccessView) GetResourcesBySelectors(selectors []compdesc.IdentitySelector, resourceSelectors []compdesc.ResourceSelector) ([]cpi.ResourceAccess, error) {
 	resources := make([]cpi.ResourceAccess, 0)
 	rscs := c.GetDescriptor().Resources
@@ -675,6 +761,42 @@ func (c *componentVersionAccessView) GetSourceByIndex(i int) (cpi.SourceAccess, 
 	return cpi.NewSourceAccess(c, r.Access, r.SourceMeta), nil
 }
 
+// Deprecated: use GetSources with appropriate selectors.
+func (c *componentVersionAccessView) GetSourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]cpi.SourceAccess, error) {
+	sources, err := c.GetDescriptor().GetSourcesByName(name, selectors...)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []cpi.SourceAccess{}
+	for _, resource := range sources {
+		result = append(result, cpi.NewSourceAccess(c, resource.Access, resource.SourceMeta))
+	}
+	return result, nil
+}
+
+func (c *componentVersionAccessView) SelectSources(sel ...srcsel.Selector) ([]cpi.SourceAccess, error) {
+	err := selectors.ValidateSelectors(sel...)
+	if err != nil {
+		return nil, err
+	}
+
+	list := compdesc.MapToSelectorElementList(c.GetDescriptor().Sources)
+	result := []cpi.SourceAccess{}
+	for _, r := range c.GetDescriptor().Sources {
+		if len(sel) > 0 {
+			mr := compdesc.MapToSelectorSource(&r)
+			for _, s := range sel {
+				if !s.MatchSource(list, mr) {
+					continue
+				}
+			}
+		}
+		result = append(result, cpi.NewSourceAccess(c, r.Access, r.SourceMeta))
+	}
+	return result, nil
+}
+
 func (c *componentVersionAccessView) GetSources() []cpi.SourceAccess {
 	result := []cpi.SourceAccess{}
 	for _, r := range c.GetDescriptor().Sources {
@@ -683,8 +805,16 @@ func (c *componentVersionAccessView) GetSources() []cpi.SourceAccess {
 	return result
 }
 
-func (c *componentVersionAccessView) GetReferences() compdesc.References {
-	return c.GetDescriptor().References
+func (c *componentVersionAccessView) SelectReferences(sel ...refsel.Selector) ([]compdesc.ComponentReference, error) {
+	err := selectors.ValidateSelectors(sel...)
+	if err != nil {
+		return nil, err
+	}
+	return c.GetDescriptor().SelectReferences(sel...)
+}
+
+func (c *componentVersionAccessView) GetReferences() []compdesc.ComponentReference {
+	return c.GetDescriptor().GetReferences()
 }
 
 func (c *componentVersionAccessView) GetReference(id metav1.Identity) (cpi.ComponentReference, error) {
@@ -702,21 +832,28 @@ func (c *componentVersionAccessView) GetReferenceByIndex(i int) (cpi.ComponentRe
 	return c.GetDescriptor().References[i], nil
 }
 
+// Deprecated: use GetReferences.
 func (c *componentVersionAccessView) GetReferencesByName(name string, selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
 	return c.GetDescriptor().GetReferencesByName(name, selectors...)
 }
 
 // GetReferencesByIdentitySelectors returns references that match the given identity selectors.
+//
+// Deprecated: use GetReferences.
 func (c *componentVersionAccessView) GetReferencesByIdentitySelectors(selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
 	return c.GetReferencesBySelectors(selectors, nil)
 }
 
 // GetReferencesByReferenceSelectors returns references that match the given resource selectors.
+//
+// Deprecated: use GetReferences.
 func (c *componentVersionAccessView) GetReferencesByReferenceSelectors(selectors ...compdesc.ReferenceSelector) (compdesc.References, error) {
 	return c.GetReferencesBySelectors(nil, selectors)
 }
 
 // GetReferencesBySelectors returns references that match the given selector.
+//
+// Deprecated: use GetReferences.
 func (c *componentVersionAccessView) GetReferencesBySelectors(selectors []compdesc.IdentitySelector, referenceSelectors []compdesc.ReferenceSelector) (compdesc.References, error) {
 	references := make(compdesc.References, 0)
 	refs := c.GetDescriptor().References
