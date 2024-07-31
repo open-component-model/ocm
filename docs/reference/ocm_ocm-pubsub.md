@@ -16,12 +16,12 @@ specification versions, and formats:
 
 - PubSub type <code>compound</code>
 
-  A pub/sub system forwarding events to described sub-level systems.
+  a pub/sub system forwarding events to described sub-level systems.
 
   The following versions are supported:
   - Version <code>v1</code>
 
-    It is described by the following field:
+    It is describe by the following field:
 
     - **<code>specifications</code>**  *list of pubsub specs*
 

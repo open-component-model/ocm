@@ -21,8 +21,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const COMP = "acme.org/component"
-const VERS = "v1"
+const (
+	COMP = "acme.org/component"
+	VERS = "v1"
+)
 
 // Provider always provides out test pub sub specification
 type Provider struct {

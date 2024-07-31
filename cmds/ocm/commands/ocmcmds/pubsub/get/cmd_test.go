@@ -17,8 +17,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ARCH = "ctf"
-const ARCH2 = "ctf2"
+const (
+	ARCH  = "ctf"
+	ARCH2 = "ctf2"
+)
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
@@ -89,9 +91,7 @@ type Spec struct {
 	Target string `json:"target"`
 }
 
-var (
-	_ pubsub.PubSubSpec = (*Spec)(nil)
-)
+var _ pubsub.PubSubSpec = (*Spec)(nil)
 
 func NewSpec(target string) *Spec {
 	return &Spec{runtime.NewVersionedObjectType(Type), target}

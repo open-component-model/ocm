@@ -101,13 +101,16 @@ func (d *action) Out() error {
 	list := errors.ErrListf("downloading component versions")
 	dest := destoption.From(d.cmd)
 	format := formatoption.From(d.cmd)
-	if len(d.data) == 1 {
+	switch len(d.data) {
+	case 0:
+		out.Outf(d.cmd.Context, "no component versions found\n")
+	case 1:
 		f := dest.Destination
 		if f == "" {
 			f = DefaultFileName(d.data[0]) + format.Format.Suffix()
 		}
 		return d.Save(d.data[0], f)
-	} else {
+	default:
 		for _, e := range d.data {
 			f := DefaultFileName(e) + format.Format.Suffix()
 			err := d.Save(e, f)

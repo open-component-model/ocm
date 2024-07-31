@@ -9,11 +9,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub/providers/ocireg"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub/providers/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -93,9 +93,7 @@ type Spec struct {
 	Target string `json:"target"`
 }
 
-var (
-	_ pubsub.PubSubSpec = (*Spec)(nil)
-)
+var _ pubsub.PubSubSpec = (*Spec)(nil)
 
 func NewSpec(target string) *Spec {
 	return &Spec{runtime.NewVersionedObjectType(Type), target}

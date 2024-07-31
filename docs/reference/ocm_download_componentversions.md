@@ -74,7 +74,8 @@ OCI Repository types (using standard component repository to OCI mapping):
 
 
 The <code>--type</code> option accepts a file format for the
-target archive to use. The following formats are supported:
+target archive to use. It is only evaluated if the target
+archive does not exist yet. The following formats are supported:
 - directory
 - tar
 - tgz
