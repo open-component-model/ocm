@@ -40,7 +40,7 @@ This resource finally describes an executor image, which will be executed in a
 container with the installation source and (instance specific) user settings.
 The container is just executed, the framework make no assumption about the
 meaning/outcome of the execution. Therefore, any kind of actions can be described and
-issued this way, not on installation handling.
+issued this way, not only installation handling.
 
 The first matching resource of this type is selected. Optionally a set of
 identity attribute can be specified used to refine the match. This can be the
