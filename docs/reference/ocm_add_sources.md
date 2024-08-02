@@ -419,7 +419,7 @@ with the field <code>type</code> in the <code>input</code> field:
 - Input type <code>ociArtifact</code>
 
   This input type is used to import an OCI image from an OCI registry.
-  If it is a multi-arch image the set of platforms using the "platforms"
+  If it is a multi-arch image the set of platforms to be imported can be filtered using the "platforms"
   attribute. The path must denote an OCI image reference.
 
   This blob type specification supports the following fields:
