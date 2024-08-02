@@ -12,9 +12,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Make generate and deepcopy
-      run: |
-        make generate && make generate-deepcopy
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
@@ -26,6 +23,9 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
+    - name: Make generate and deepcopy
+      run: |
+        make -f hack/Makefile mdref && make -f hack/Makefile go-bindata && make generate && make generate-deepcopy
     - name: go mod tidy
       run: |
         go mod tidy
