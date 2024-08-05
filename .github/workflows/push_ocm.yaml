@@ -1,7 +1,7 @@
 name: publish as latest
 on:
   # publish on pushes to the main branch (image tagged as "latest")
-  # https://github.com/open-component-model/ocm/pkgs/container/ocm
+  # https://ocm.software/ocm/pkgs/container/ocm
   push:
     branches:
       - main

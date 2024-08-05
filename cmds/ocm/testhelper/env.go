@@ -6,16 +6,16 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/app"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/env"
-	"github.com/open-component-model/ocm/pkg/env/builder"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/config"
+	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/datacontext"
+	"ocm.software/ocm/api/helper/builder"
+	"ocm.software/ocm/api/helper/env"
+	"ocm.software/ocm/api/oci"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/utils/accessio"
+	"ocm.software/ocm/cmds/ocm/app"
 )
 
 type CLI struct {

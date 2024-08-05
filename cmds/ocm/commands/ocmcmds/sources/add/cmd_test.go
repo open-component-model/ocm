@@ -8,15 +8,15 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 
-	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
-	"github.com/open-component-model/ocm/pkg/mime"
+	"ocm.software/ocm/api/ocm/compdesc"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
+	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
+	"ocm.software/ocm/api/utils/blobaccess"
+	"ocm.software/ocm/api/utils/mime"
+	common "ocm.software/ocm/api/utils/misc"
 )
 
 const (

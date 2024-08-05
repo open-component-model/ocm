@@ -1,7 +1,7 @@
 package file
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
 const TYPE = "file"

@@ -3,8 +3,8 @@ package addhdlrs
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/cmds/ocm/common/options"
 )
 
 type ResourceSpecHandlerBase struct {

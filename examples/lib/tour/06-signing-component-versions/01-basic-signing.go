@@ -5,11 +5,11 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/composition"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
+	"ocm.software/ocm/api/ocm/tools/signing"
+	"ocm.software/ocm/api/tech/signing/handlers/rsa"
+	"ocm.software/ocm/examples/lib/helper"
 )
 
 func SigningComponentVersions(cfg *helper.Config) error {

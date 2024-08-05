@@ -24,7 +24,7 @@ the credentials directly for the lookup call:
   defer repo.Close()
 ```
 
-Credentials are given by an object of type [`credentials.Credentials`](../../pkg/contexts/credentials/interface.go).
+Credentials are given by an object of type [`credentials.Credentials`](../../api/credentials/interface.go).
 This is basically a set of string attributes. For OCM repositories based on OCI
 registries two attributes are used:
 - `credentials.ATTR_USERNAME` the username
@@ -120,7 +120,7 @@ consumer ids always feature the attribute `type`, describing the kind of
 context.
 
 For example, to describe the request for credentials for
-an [OCI registry](../../pkg/contexts/credentials/builtin/oci/identity/identity.go) and repository,
+an [OCI registry](../../api/credentials/builtin/oci/identity/identity.go) and repository,
 the type value is `oci.CONSUMER_TYPE`. Additionally, the following
 attributes are used to fully describe the usage context.
 

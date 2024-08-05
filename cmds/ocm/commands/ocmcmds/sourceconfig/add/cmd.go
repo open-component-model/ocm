@@ -3,16 +3,16 @@ package add
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	rscadd "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/srcs"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/utils/template"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm"
+	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/utils/template"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
+	rscadd "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/srcs"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
+	"ocm.software/ocm/cmds/ocm/commands/verbs"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 var (
@@ -40,7 +40,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add a source specification to a source config file",
 		Example: `
-$ ocm add source-config sources.yaml --name sources --type filesystem --access '{ "type": "gitHub", "repoUrl": "github.com/open-component-model/ocm", "commit": "xyz" }'
+$ ocm add source-config sources.yaml --name sources --type filesystem --access '{ "type": "gitHub", "repoUrl": "ocm.software/ocm", "commit": "xyz" }'
 `,
 	}
 }

@@ -7,18 +7,18 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	env2 "github.com/open-component-model/ocm/pkg/env"
-	"github.com/open-component-model/ocm/pkg/utils/tarutils"
+	env2 "ocm.software/ocm/api/helper/env"
+	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/utils/accessio"
+	"ocm.software/ocm/api/utils/tarutils"
 )
 
 const (

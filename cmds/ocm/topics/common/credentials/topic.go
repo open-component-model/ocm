@@ -3,9 +3,9 @@ package attributes
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/listformat"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/utils/listformat"
 )
 
 func New(ctx clictx.Context) *cobra.Command {

@@ -3,12 +3,12 @@ package create_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.software/v3alpha1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
+	"ocm.software/ocm/api/ocm/compdesc"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	compdescv3 "ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1"
+	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 )
 
 var _ = Describe("Test Environment", func() {

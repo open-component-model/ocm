@@ -98,7 +98,7 @@ linters-settings:
       - blank
       - dot
       - default
-      - prefix(github.com/open-component-model/ocm)
+      - prefix(ocm.software/ocm)
     custom-order: true
   funlen:
     lines: 110
@@ -129,7 +129,7 @@ issues:
   exclude-dirs:
     - "hack"
     # External code from containerd/containerd
-    - "pkg/docker"
+    - "api/tech/docker"
   exclude:
     - composites
   exclude-rules:

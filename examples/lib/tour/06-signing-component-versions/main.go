@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
+	"ocm.software/ocm/api/tech/signing/handlers/rsa"
+	"ocm.software/ocm/api/tech/signing/signutils"
+	"ocm.software/ocm/examples/lib/helper"
 )
 
 // CFG is the path to the file containing the credentials

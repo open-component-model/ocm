@@ -1,4 +1,4 @@
-module github.com/open-component-model/ocm
+module ocm.software/ocm
 
 go 1.22.5
 

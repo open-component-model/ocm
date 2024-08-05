@@ -15,7 +15,7 @@ which is the default.
 In this example we just use a memory based filesystem.
 
 ```go
-  import "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+  import "ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 
   octx := ocm.DefaultContext()
 

@@ -9,14 +9,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/out"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/oci"
+	"ocm.software/ocm/api/utils/out"
+	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocicmds/common"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/names"
+	"ocm.software/ocm/cmds/ocm/commands/verbs"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 var (

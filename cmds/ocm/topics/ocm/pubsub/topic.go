@@ -3,8 +3,8 @@ package topicocmpubsub
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm/extensions/pubsub"
 )
 
 func New(ctx clictx.Context) *cobra.Command {

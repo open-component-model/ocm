@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
+	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/wget"
-	"github.com/open-component-model/ocm/pkg/mime"
+	"ocm.software/ocm/api/utils/mime"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/wget"
 )
 
 var _ = Describe("Input Type", func() {

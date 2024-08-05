@@ -9,15 +9,15 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/cmds/demoplugin/common"
-	"github.com/open-component-model/ocm/cmds/demoplugin/config"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/credentials/builtin/oci/identity"
+	"ocm.software/ocm/api/credentials/cpi"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
+	"ocm.software/ocm/api/ocm/plugin/ppi"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
+	"ocm.software/ocm/api/utils/runtime"
+	"ocm.software/ocm/cmds/demoplugin/common"
+	"ocm.software/ocm/cmds/demoplugin/config"
 )
 
 const (

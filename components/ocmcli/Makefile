@@ -11,7 +11,7 @@ PLATFORMS = $(IMAGE_PLATFORMS) darwin/arm64 darwin/amd64 windows/amd64
 
 REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
-VERSION                                        = $(shell go run ../../pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
+VERSION                                        = $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
 PLATFORM_OS                                    := $(shell go env GOOS)
@@ -33,10 +33,10 @@ GEN = $(REPO_ROOT)/gen/$(shell basename $(realpath .))
 
 NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
- -X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
- -X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
- -X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
- -X github.com/open-component-model/ocm/pkg/version.buildDate=$(NOW)"
+ -X ocm.software/ocm/api/version.gitVersion=$(EFFECTIVE_VERSION) \
+ -X ocm.software/ocm/api/version.gitTreeState=$(GIT_TREE_STATE) \
+ -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
+ -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
 ALPINE_LATEST_VER=$(shell curl -s https://registry.hub.docker.com/v2/repositories/library/alpine/tags | jq '.results[1].name' | xargs)
 

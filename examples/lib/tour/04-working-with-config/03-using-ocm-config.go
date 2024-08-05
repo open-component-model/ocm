@@ -6,14 +6,14 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"sigs.k8s.io/yaml"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
-	configcfg "github.com/open-component-model/ocm/pkg/contexts/config/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	configcfg "ocm.software/ocm/api/config/extensions/config"
+	"ocm.software/ocm/api/credentials"
+	credcfg "ocm.software/ocm/api/credentials/config"
+	"ocm.software/ocm/api/credentials/extensions/repositories/dockerconfig"
+	"ocm.software/ocm/api/oci"
+	"ocm.software/ocm/api/ocm"
+	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/examples/lib/helper"
 )
 
 func HandleOCMConfig(cfg *helper.Config) error {

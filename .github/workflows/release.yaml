@@ -37,14 +37,14 @@ jobs:
       run: |
         echo "Release Job Arguments"
         if ${{ github.event.inputs.release_candidate }}; then
-          v="v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
+          v="v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
           if [ -n "${{ github.event.inputs.prerelease }}" ]; then
             echo "Candidate: $v"
           else 
             echo "Candidate: $v (taken from source)"
           fi
         else
-          v="v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)"
+          v="v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)"
           echo "Final Release: $v"
           if ${{ github.event.inputs.create_branch }}; then
             echo "with release branch creation"
@@ -55,13 +55,13 @@ jobs:
 
     - name: Set Base Version
       run: |
-        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
+        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
         echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
 
     - name: Set Pre-Release Version
       if: inputs.release_candidate == true
       run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
+        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
 
     - name: Set Version
@@ -164,13 +164,13 @@ jobs:
 
     - name: Set Base Version
       run: |
-        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
+        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
         echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
 
     - name: Set Pre-Release Version
       if: inputs.release_candidate == true
       run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
+        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
         echo "release name is $RELEASE_VERSION"
 
@@ -247,7 +247,7 @@ jobs:
       run: |
         n="releases/${{env.RELEASE_VERSION}}"
         git checkout -b "$n"
-        v="$(go run ./pkg/version/generate bump-patch)"
+        v="$(go run ./api/version/generate bump-patch)"
         echo "$v" > VERSION
         git add VERSION
         git commit -m "Prepare Development of v$v"
@@ -258,7 +258,7 @@ jobs:
       run: |
         set -e
         git checkout ${GITHUB_REF#refs/heads/}
-        v="$(go run ./pkg/version/generate bump-version)"
+        v="$(go run ./api/version/generate bump-version)"
         echo "$v" > VERSION
         git add VERSION
         git commit -m "Update version file to $v"

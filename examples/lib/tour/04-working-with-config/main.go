@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
+	"ocm.software/ocm/examples/lib/helper"
 )
 
 // CFG is the path to the file containing the credentials

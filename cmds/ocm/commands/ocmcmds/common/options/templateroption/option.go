@@ -1,9 +1,9 @@
 package templateroption
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/utils/template"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/utils/template"
+	"ocm.software/ocm/cmds/ocm/common/options"
 )
 
 func From(o options.OptionSetProvider) *Option {

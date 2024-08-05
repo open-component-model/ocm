@@ -1,7 +1,7 @@
 package testhelper
 
 import (
-	"github.com/open-component-model/ocm/pkg/env"
+	"ocm.software/ocm/api/helper/env"
 )
 
 var (

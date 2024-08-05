@@ -6,9 +6,9 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/credentials/builtin/oci/identity"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 type Config struct {

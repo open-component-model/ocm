@@ -7,9 +7,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm/plugin"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 type Command struct {

@@ -26,7 +26,7 @@ For working with [OCM repositories](../../docs/ocm/model.md#repositories) an app
 context, which can be used to retrieve OCM repositories, can be accessed with:
 
 ```go
-import "github.com/open-component-model/ocm/pkg/contexts/ocm"
+import "ocm.software/ocm/api/ocm"
 
 
 func MyFirstOCMApplication() {
@@ -49,9 +49,9 @@ provide access to hosted components and component versions.
 
 To access a repository, a [repository specification](../../docs/formats/repositories/README.md)
 is required. Every repository type extension supported by this library 
-uses its own package under `github.com/open-component-model/ocm/pkg/contexts/ocm/repositories`.
+uses its own package under `ocm.software/ocm/api/ocm/extensions/repositories`.
 To access an OCM repository based on an OCI registry the package
-`github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg`
+`ocm.software/ocm/api/ocm/extensions/repositories/ocireg`
 contains the appropriate language binding for the OCI registry mappings.
 
 Those packages typically have the method `NewRepositorySpec` to create

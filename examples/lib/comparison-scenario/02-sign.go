@@ -5,11 +5,11 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
+	"ocm.software/ocm/api/ocm/tools/signing"
+	"ocm.software/ocm/api/tech/signing/handlers/rsa"
+	"ocm.software/ocm/examples/lib/helper"
 )
 
 const SIGNATURE_NAME = "acme.org"

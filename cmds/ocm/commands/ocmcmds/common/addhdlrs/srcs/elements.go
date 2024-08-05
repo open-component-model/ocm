@@ -5,15 +5,15 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	compdescv2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/compdesc"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	compdescv2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	"ocm.software/ocm/api/utils/runtime"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
+	"ocm.software/ocm/cmds/ocm/common/options"
 )
 
 type ResourceSpecHandler struct {

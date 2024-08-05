@@ -3,9 +3,9 @@ package describe
 import (
 	"encoding/json"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	plugincommon "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
+	"ocm.software/ocm/api/ocm/plugin"
+	plugincommon "ocm.software/ocm/api/ocm/plugin/common"
+	common "ocm.software/ocm/api/utils/misc"
 )
 
 func DescribePlugin(p plugin.Plugin, out common.Printer) {

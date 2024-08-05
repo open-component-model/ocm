@@ -99,7 +99,7 @@ can be orchestrated by context builders.
 ## Package organization
 
 All functional areas supported by contexts can be found as sub packages of
-`github.com/open-component-model/ocm/pkg/contexts`.
+`ocm.software/ocm/pkg/contexts`.
 
 A context package directly contains the typical user API for the functional
 area. The most important interface is the interface `Context`. It acts as main
@@ -122,7 +122,7 @@ might be attached to any kind of contexts. They are inherited along a
 context  usage relation (for example ocm -> oci -> credentials -> config).
 
 If a context type supports multiple extension types there is typically
-a dedicated sub package for this type (for example `github.com/open-component-model/pkg/contexts/ocm/accessmethods`), which again
+a dedicated sub package for this type (for example `github.com/open-component-model/api/ocm/extensions/accessmethods`), which again
 contains the various implementation types in sub packages.
 
 ### The OCM context organization

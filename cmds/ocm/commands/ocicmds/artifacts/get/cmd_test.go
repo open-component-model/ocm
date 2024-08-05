@@ -6,12 +6,12 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artifacthdlr"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/mime"
+	"ocm.software/ocm/api/oci/artdesc"
+	"ocm.software/ocm/api/utils/accessio"
+	"ocm.software/ocm/api/utils/mime"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/common/handlers/artifacthdlr"
 )
 
 const (

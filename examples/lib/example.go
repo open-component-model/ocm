@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/compdesc"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
+	"ocm.software/ocm/api/utils"
 )
 
 const (

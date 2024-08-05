@@ -1,7 +1,7 @@
 package elemhdlr
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"ocm.software/ocm/cmds/ocm/common/processing"
 )
 
 func Compare(a, b interface{}) int {

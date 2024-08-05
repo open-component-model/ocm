@@ -31,7 +31,7 @@ a context object. Our example uses the default context
 provided by the library, which covers the complete
 type registration contained in the executable.
 
-It can be accessed by a function of the `pkg/contexts/ocm` package.
+It can be accessed by a function of the `api/ocm` package.
 
 ```go
 {{include}{../../01-getting-started/example.go}{default context}}
@@ -52,7 +52,7 @@ the repository and can be used to store the serialized
 form as part of other resources, for example
 Kubernetes resources or configuration settings.
 The available repository implementations can be found
-under `.../pkg/contexts/ocm/repositories`.
+under `.../api/ocm/extensions/repositories`.
 
 ```go
 {{include}{../../01-getting-started/example.go}{repository spec}}

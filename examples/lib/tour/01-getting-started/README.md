@@ -32,7 +32,7 @@ a context object. Our example uses the default context
 provided by the library, which covers the complete
 type registration contained in the executable.
 
-It can be accessed by a function of the `pkg/contexts/ocm` package.
+It can be accessed by a function of the `api/ocm` package.
 
 ```go
 	ctx := ocm.DefaultContext()
@@ -53,7 +53,7 @@ the repository and can be used to store the serialized
 form as part of other resources, for example
 Kubernetes resources or configuration settings.
 The available repository implementations can be found
-under `.../pkg/contexts/ocm/repositories`.
+under `.../api/ocm/extensions/repositories`.
 
 ```go
 	spec := ocireg.NewRepositorySpec("ghcr.io/open-component-model/ocm")
@@ -164,32 +164,32 @@ differ, because the code always describes the latest version):
 
 ```
 resources of the latest version:
-  version:  0.12.0
+  version:  0.13.0
   provider: ocm.software
    1: name:           ocmcli
       extra identity: "architecture"="amd64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:4a3e2f2069f428e237ca7cd21d9f525ac527cde92f4ae0f797697727d5e059f9[]
+      access:         Local blob sha256:c02de4aa8801ee0300edd31749efc7ef1cb63f082fed67861fddc6ca0ace4545[]
    2: name:           ocmcli
       extra identity: "architecture"="arm64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:b99a50553fdf100ec449dbfd3e822de8d5051e83070d37a3046703003ccba1db[]
+      access:         Local blob sha256:7ac5a31e21214b533a6764c41f94703d9704a639a8c0119e6ece3070ba0e8988[]
    3: name:           ocmcli
       extra identity: "architecture"="arm64","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:01f913684ca0b01ac0c93e5cee98e6d3a29e908b88761a0c869b39ae8971b538[]
+      access:         Local blob sha256:63d4604711c55532882c8625a6214186e654558abb1b28861604ad856916c921[]
    4: name:           ocmcli
       extra identity: "architecture"="amd64","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:ad5391320eb2662f84dbae676fb0963eb3925b0f76d966a71a89795bbac529a8[]
+      access:         Local blob sha256:09f676530a5c4782bc9d62df7c352ab0797970aa4851e1809b39b586a18eaf57[]
    5: name:           ocmcli
       extra identity: "architecture"="amd64","os"="windows"
       resource type:  executable
-      access:         Local blob sha256:71ed95abd178112489f32cddeea377d2703ad6213f54a3486741f48483cd4391[]
+      access:         Local blob sha256:ed5a761031862f09b0851613802b9856e7a57410e52aa7a71d24a8118d0d6867[]
    6: name:           ocmcli-image
       extra identity: 
       resource type:  ociImage
-      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.12.0
+      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.13.0
 ```
 
 Resources have some metadata, like their identity and a resource type.

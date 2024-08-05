@@ -6,15 +6,15 @@ import (
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/pubsub"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/extensions/pubsub"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
+	"ocm.software/ocm/cmds/ocm/commands/verbs"
+	"ocm.software/ocm/cmds/ocm/common/output"
+	"ocm.software/ocm/cmds/ocm/common/processing"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 var (

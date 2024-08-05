@@ -6,13 +6,13 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip/types/comment"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"ocm.software/ocm/api/ocm/extensions/labels/routingslip"
+	"ocm.software/ocm/api/ocm/extensions/labels/routingslip/types/comment"
+	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
+	"ocm.software/ocm/api/utils/accessio"
+	"ocm.software/ocm/api/utils/accessobj"
 )
 
 const (

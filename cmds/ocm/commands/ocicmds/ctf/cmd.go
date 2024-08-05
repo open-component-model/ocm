@@ -3,10 +3,10 @@ package ctf
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf/create"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/ctf/create"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/names"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 var Names = names.TransportArchive

@@ -1,9 +1,9 @@
 package utf8
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 )
 
 func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {

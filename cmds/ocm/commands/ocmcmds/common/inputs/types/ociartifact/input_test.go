@@ -7,21 +7,21 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	. "ocm.software/ocm/api/oci/testhelper"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
-	me "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"ocm.software/ocm/api/oci"
+	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
+	"ocm.software/ocm/api/utils/accessio"
+	"ocm.software/ocm/api/utils/accessobj"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	me "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 )
 
 const (

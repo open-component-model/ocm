@@ -9,9 +9,9 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/optutils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/env"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/helper/env"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/optutils"
 )
 
 var _ = Describe("registration options", func() {

@@ -7,12 +7,12 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/utils/tarutils"
+	"ocm.software/ocm/api/ocm"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/extensions/download"
+	"ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils/tarutils"
+	"ocm.software/ocm/examples/lib/helper"
 )
 
 func Download(cfg *helper.Config) error {

@@ -5,10 +5,10 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	"ocm.software/ocm/api/ocm"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/examples/lib/helper"
 )
 
 func GetDeployScript(cfg *helper.Config) error {

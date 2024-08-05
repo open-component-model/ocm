@@ -5,13 +5,13 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/labels/routingslip"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/extensions/labels/routingslip"
+	utils2 "ocm.software/ocm/api/utils"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
+	"ocm.software/ocm/cmds/ocm/common/output"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 type Object struct {

@@ -5,8 +5,8 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/localize"
+	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/ocmutils/localize"
 )
 
 type Config struct {

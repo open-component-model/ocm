@@ -9,7 +9,7 @@ builds:
       binary: ocm
       main: ./cmds/ocm/main.go
       ldflags:
-        - -s -w -X github.com/open-component-model/ocm/pkg/version.gitVersion={{.Version}} -X github.com/open-component-model/ocm/pkg/version.gitCommit={{.Commit}} -X github.com/open-component-model/ocm/pkg/version.buildDate={{.CommitDate}}
+        - -s -w -X ocm.software/ocm/api/version.gitVersion={{.Version}} -X ocm.software/ocm/api/version.gitCommit={{.Commit}} -X ocm.software/ocm/api/version.buildDate={{.CommitDate}}
       env:
         - CGO_ENABLED=0
     id: linux
