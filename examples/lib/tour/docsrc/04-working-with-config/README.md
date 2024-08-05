@@ -90,10 +90,10 @@ settings for the given object and calls the appropriate
 methods on this object (after a type cast).
 
 Here is the code snippet from the apply method of the credential
-config object ([.../pkg/contexts/credentials/config/type.go](../../../../pkg/contexts/credentials/config/type.go)):
+config object ([.../api/credentials/config/type.go](../../../../../api/credentials/config/type.go)):
 
 ```go
-{{include}{../../../../../pkg/contexts/credentials/config/type.go}{apply}}
+{{include}{../../../../../api/credentials/config/type.go}{apply}}
         ...
 ```
 
@@ -365,7 +365,7 @@ It just checks for a valid YAML document featuring a non-empty
 `type` field:
 
 ```go
-{{include}{../../../../../pkg/runtime/utils.go}{check}}
+{{include}{../../../../../api/utils/runtime/utils.go}{check}}
 ```
 
 The most important method to implement is `ApplyTo(_ cpi.Context, tgt interface{}) error`,

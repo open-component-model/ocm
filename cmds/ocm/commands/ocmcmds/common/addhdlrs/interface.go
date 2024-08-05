@@ -7,10 +7,10 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	clictx "ocm.software/ocm/api/cli"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
 // ResourceInput describe the source for the content of

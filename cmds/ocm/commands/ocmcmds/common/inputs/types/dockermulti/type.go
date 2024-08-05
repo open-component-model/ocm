@@ -1,8 +1,8 @@
 package dockermulti
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/annotations"
+	"ocm.software/ocm/api/oci/annotations"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
 const TYPE = "dockermulti"

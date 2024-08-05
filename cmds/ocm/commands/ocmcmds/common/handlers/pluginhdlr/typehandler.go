@@ -5,13 +5,13 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm/extensions/attrs/plugincacheattr"
+	"ocm.software/ocm/api/ocm/plugin"
+	"ocm.software/ocm/api/ocm/plugin/descriptor"
+	"ocm.software/ocm/api/ocm/plugin/plugins"
+	"ocm.software/ocm/cmds/ocm/common/output"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 func Elem(e interface{}) plugin.Plugin {

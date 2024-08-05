@@ -3,7 +3,7 @@ package group
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/subcmdplugin/cmds/demo"
+	"ocm.software/ocm/cmds/subcmdplugin/cmds/demo"
 )
 
 const Name = "group"

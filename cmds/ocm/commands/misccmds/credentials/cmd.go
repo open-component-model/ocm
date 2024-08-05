@@ -3,10 +3,10 @@ package credentials
 import (
 	"github.com/spf13/cobra"
 
-	credentials "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials/get"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	clictx "ocm.software/ocm/api/cli"
+	credentials "ocm.software/ocm/cmds/ocm/commands/misccmds/credentials/get"
+	"ocm.software/ocm/cmds/ocm/commands/misccmds/names"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 var Names = names.Credentials

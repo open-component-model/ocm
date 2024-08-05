@@ -7,14 +7,14 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"sigs.k8s.io/yaml"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
-	configcfg "github.com/open-component-model/ocm/pkg/contexts/config/config"
-	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	ociidentity "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"ocm.software/ocm/api/config/cpi"
+	configcfg "ocm.software/ocm/api/config/extensions/config"
+	"ocm.software/ocm/api/credentials"
+	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
+	"ocm.software/ocm/api/oci"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/utils/runtime"
+	"ocm.software/ocm/examples/lib/helper"
 )
 
 // TYPE is the name of our new configuration object type.

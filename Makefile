@@ -2,7 +2,7 @@ NAME                                           := ocm
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 GITHUBORG                                      ?= open-component-model
 OCMREPO                                        ?= ghcr.io/$(GITHUBORG)/ocm
-VERSION                                        := $(shell go run pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
+VERSION                                        := $(shell go run api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-parse HEAD)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
@@ -23,17 +23,17 @@ GOPATH                                         := $(shell go env GOPATH)
 
 NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
- -X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
- -X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
- -X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
- -X github.com/open-component-model/ocm/pkg/version.buildDate=$(NOW)"
+ -X ocm.software/ocm/api/version.gitVersion=$(EFFECTIVE_VERSION) \
+ -X ocm.software/ocm/api/version.gitTreeState=$(GIT_TREE_STATE) \
+ -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
+ -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
 COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
 
 .PHONY: build
 build: ${SOURCES}
 	mkdir -p bin
-	go build ./pkg/...
+	go build ./api/...
 	go build ./examples/...
 	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
 	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
@@ -55,7 +55,7 @@ install-requirements:
 .PHONY: prepare
 prepare: generate format generate-deepcopy build test check
 
-EFFECTIVE_DIRECTORIES := $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/cmds/ecrplugin/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/cmds/cliplugin/... $(REPO_ROOT)/examples/... $(REPO_ROOT)/cmds/subcmdplugin/... $(REPO_ROOT)/pkg/...
+EFFECTIVE_DIRECTORIES := $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/cmds/ecrplugin/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/cmds/cliplugin/... $(REPO_ROOT)/examples/... $(REPO_ROOT)/cmds/subcmdplugin/... $(REPO_ROOT)/api/...
 
 .PHONY: format
 format:
@@ -89,7 +89,7 @@ generate:
 
 .PHONY: generate-deepcopy
 generate-deepcopy: controller-gen
-	$(CONTROLLER_GEN) object paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
+	$(CONTROLLER_GEN) object paths=./api/ocm/compdesc/versions/... paths=./api/ocm/compdesc/meta/...
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.

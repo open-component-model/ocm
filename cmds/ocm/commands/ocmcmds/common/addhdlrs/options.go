@@ -4,7 +4,7 @@ import (
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"ocm.software/ocm/api/ocm"
 )
 
 type Options struct {

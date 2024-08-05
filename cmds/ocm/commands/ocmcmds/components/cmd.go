@@ -3,18 +3,18 @@ package components
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/add"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/check"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/hash"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/list"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/transfer"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/verify"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/add"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/check"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/download"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/get"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/hash"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/list"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/sign"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/transfer"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/verify"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 var Names = names.Components

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"ocm.software/ocm/api/credentials"
 )
 
 func obfuscate(creds credentials.Credentials) string {

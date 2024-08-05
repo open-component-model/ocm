@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: ocm
 Upstream-Contact: ospo@sap.com
-Source: https://github.com/open-component-model/ocm
+Source: https://ocm.software/ocm
 Disclaimer: The code in this project may include calls to APIs ("API Calls") of
  SAP or third-party products or services developed outside of this project
  ("External Products").
@@ -28,6 +28,6 @@ Files: **
 Copyright: 2024 SAP SE or an SAP affiliate company and Open Component Model contributors
 License: Apache-2.0
 
-Files: pkg/contexts/ocm/blobhandler/handlers/generic/npm/publish.go
+Files: api/ocm/extensions/blobhandler/handlers/generic/npm/publish.go
 Copyright: Copyright 2021 - cloverstd
 License: MIT

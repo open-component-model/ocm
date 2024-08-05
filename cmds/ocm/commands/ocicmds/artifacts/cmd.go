@@ -3,13 +3,13 @@ package artifacts
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/describe"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/download"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/get"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/transfer"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/artifacts/describe"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/artifacts/download"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/artifacts/get"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/artifacts/transfer"
+	"ocm.software/ocm/cmds/ocm/commands/ocicmds/names"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 var Names = names.Artifacts

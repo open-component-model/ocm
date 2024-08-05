@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 )
 
 func New(ctx clictx.Context) *cobra.Command {

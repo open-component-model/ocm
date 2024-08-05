@@ -7,7 +7,7 @@ PLATFORMS = linux/amd64 linux/arm64 darwin/amd64 darwin/arm64
 
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        = $(shell go run ../../pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
+VERSION                                        = $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
@@ -22,10 +22,10 @@ GEN = $(REPO_ROOT)/gen/$(NAME)
 
 NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
- -X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
- -X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
- -X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
- -X github.com/open-component-model/ocm/pkg/version.buildDate=$(NOW)"
+ -X ocm.software/ocm/api/version.gitVersion=$(EFFECTIVE_VERSION) \
+ -X ocm.software/ocm/api/version.gitTreeState=$(GIT_TREE_STATE) \
+ -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
+ -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
 
 .PHONY: build

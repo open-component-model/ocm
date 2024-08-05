@@ -3,11 +3,11 @@ package bootstrap
 import (
 	"github.com/spf13/cobra"
 
-	config "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/config/bootstrap"
-	_package "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/package/bootstrap"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	clictx "ocm.software/ocm/api/cli"
+	config "ocm.software/ocm/cmds/ocm/commands/toicmds/config/bootstrap"
+	_package "ocm.software/ocm/cmds/ocm/commands/toicmds/package/bootstrap"
+	"ocm.software/ocm/cmds/ocm/commands/verbs"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 // NewCommand creates a new command.

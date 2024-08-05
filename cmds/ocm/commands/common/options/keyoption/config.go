@@ -9,12 +9,12 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"ocm.software/ocm/api/datacontext"
+	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/tech/signing"
+	"ocm.software/ocm/api/tech/signing/signutils"
+	"ocm.software/ocm/api/utils"
 )
 
 type ConfigFragment struct {

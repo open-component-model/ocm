@@ -9,21 +9,21 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/blobaccess"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/dockermultiblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/elements/artifactblob/textblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/semverutils"
-	"github.com/open-component-model/ocm/pkg/signing/signutils"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/compdesc"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/elements"
+	"ocm.software/ocm/api/ocm/elements/artifactblob/dockermultiblob"
+	"ocm.software/ocm/api/ocm/elements/artifactblob/textblob"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
+	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/tech/signing/signutils"
+	"ocm.software/ocm/api/utils/blobaccess"
+	"ocm.software/ocm/api/utils/mime"
+	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/semverutils"
+	"ocm.software/ocm/examples/lib/helper"
 )
 
 // setupVersion configures a component version.
@@ -67,7 +67,7 @@ func setupVersion(cv ocm.ComponentVersionAccess) error {
 	// Here, we just use an image provided by the
 	// OCM ecosystem.
 	// Supported access types can be found under
-	// .../pkg/contexts/ocm/accessmethods.
+	// .../api/ocm/extensions/accessmethods.
 	acc := ociartifact.New("ghcr.io/open-component-model/ocm/ocm.software/toi/installers/helminstaller/helminstaller:0.4.0")
 
 	// Once we have both, the metadata and the content specification,

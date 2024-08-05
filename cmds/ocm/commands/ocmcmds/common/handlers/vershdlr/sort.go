@@ -3,8 +3,8 @@ package vershdlr
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/pkg/semverutils"
+	"ocm.software/ocm/api/utils/semverutils"
+	"ocm.software/ocm/cmds/ocm/common/processing"
 )
 
 func Compare(a, b interface{}) int {

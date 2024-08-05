@@ -3,11 +3,11 @@ package controller
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/install"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/uninstall"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/cmds/ocm/commands/controllercmds/install"
+	"ocm.software/ocm/cmds/ocm/commands/controllercmds/names"
+	"ocm.software/ocm/cmds/ocm/commands/controllercmds/uninstall"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 // NewCommand creates a new command.

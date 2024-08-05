@@ -3,10 +3,10 @@ package config
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/config/bootstrap"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/cmds/ocm/commands/toicmds/config/bootstrap"
+	"ocm.software/ocm/cmds/ocm/commands/toicmds/names"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 var Names = names.Configuration

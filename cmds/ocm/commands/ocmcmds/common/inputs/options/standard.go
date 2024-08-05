@@ -1,8 +1,8 @@
 package options
 
 import (
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 )
 
 var (

@@ -6,10 +6,10 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	ociid "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"ocm.software/ocm/api/credentials"
+	ociid "ocm.software/ocm/api/credentials/builtin/oci/identity"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 const CFGFILE = "examples/lib/config2/config.yaml"

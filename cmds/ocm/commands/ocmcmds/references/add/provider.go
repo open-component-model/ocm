@@ -3,9 +3,9 @@ package add
 import (
 	"encoding/json"
 
-	ocmcomm "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
+	ocmcomm "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 )
 
 type ReferenceResourceSpecificationProvider struct {

@@ -6,9 +6,9 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
+	cfgcpi "ocm.software/ocm/api/config/cpi"
+	"ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 const (

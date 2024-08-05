@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	// bind OCM configuration.
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/config"
+	_ "ocm.software/ocm/api/ocm/plugin/ppi/config"
 
 	"github.com/spf13/cobra"
 )

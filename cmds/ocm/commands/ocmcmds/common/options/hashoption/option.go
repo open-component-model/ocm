@@ -4,15 +4,15 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations/jsonv1"
-	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/open-component-model/ocm/pkg/listformat"
-	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/compdesc/normalizations/jsonv1"
+	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
+	ocmsign "ocm.software/ocm/api/ocm/tools/signing"
+	"ocm.software/ocm/api/tech/signing"
+	"ocm.software/ocm/api/tech/signing/hasher/sha256"
+	"ocm.software/ocm/api/utils/listformat"
+	"ocm.software/ocm/cmds/ocm/common/options"
 )
 
 func From(o options.OptionSetProvider) *Option {

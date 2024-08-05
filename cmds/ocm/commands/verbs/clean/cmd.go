@@ -3,10 +3,10 @@ package clean
 import (
 	"github.com/spf13/cobra"
 
-	cache "github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/clean"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	clictx "ocm.software/ocm/api/cli"
+	cache "ocm.software/ocm/cmds/ocm/commands/cachecmds/clean"
+	"ocm.software/ocm/cmds/ocm/commands/verbs"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 // NewCommand creates a new command.

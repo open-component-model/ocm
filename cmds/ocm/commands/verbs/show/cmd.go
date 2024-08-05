@@ -3,11 +3,11 @@ package show
 import (
 	"github.com/spf13/cobra"
 
-	tags "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/tags/show"
-	versions "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions/show"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	clictx "ocm.software/ocm/api/cli"
+	tags "ocm.software/ocm/cmds/ocm/commands/ocicmds/tags/show"
+	versions "ocm.software/ocm/cmds/ocm/commands/ocmcmds/versions/show"
+	"ocm.software/ocm/cmds/ocm/commands/verbs"
+	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
 // NewCommand creates a new command.

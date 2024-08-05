@@ -4,8 +4,8 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/check"
+	"ocm.software/ocm/api/ocm/ocmutils/check"
+	"ocm.software/ocm/cmds/ocm/common/options"
 )
 
 func From(o options.OptionSetProvider) *Option {

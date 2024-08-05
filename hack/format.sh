@@ -8,9 +8,9 @@ log() {
   echo " === ${msg}"
 }
 
-pkgprefix="github.com/open-component-model/ocm"
+pkgprefix="ocm.software/ocm"
 
-log "Format with gci" # gci write --custom-order --skip-generated -s standard -s blank -s dot -s default -s "Prefix(github.com/open-component-model/ocm)"
+log "Format with gci" # gci write --custom-order --skip-generated -s standard -s blank -s dot -s default -s "Prefix(ocm.software/ocm)"
 GCIFMT=( -s standard -s blank -s dot -s default -s="prefix(${pkgprefix})" --custom-order )
 gci diff --skip-generated "${GCIFMT[@]}" "${@%/...}" </dev/null \
   | awk '/^--- / { print $2 }' \

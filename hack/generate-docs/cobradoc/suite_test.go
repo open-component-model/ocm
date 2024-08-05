@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/hack/generate-docs/cobradoc"
+	"ocm.software/ocm/hack/generate-docs/cobradoc"
 )
 
 var _ = Describe("spaces", func() {
