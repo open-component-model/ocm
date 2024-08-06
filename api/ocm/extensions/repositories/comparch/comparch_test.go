@@ -49,6 +49,22 @@ var _ = Describe("Repository", func() {
 		// spec will not equal r as the filesystem cannot be serialized
 	})
 
+	It("validates component archive with resource stored as tar", func() {
+		// this is the typical use case
+		octx := ocm.DefaultContext()
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, TAR_COMPARCH))
+
+		MustBeSuccessful(spec.Validate(octx, nil))
+	})
+
+	It("validates component archive with resource stored as dir", func() {
+		// this is the typical use case
+		octx := ocm.DefaultContext()
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, DIR_COMPARCH))
+
+		MustBeSuccessful(spec.Validate(octx, nil))
+	})
+
 	It("component archive with resource stored as tar", func() {
 		// this is the typical use case
 		octx := ocm.DefaultContext()
@@ -87,7 +103,7 @@ var _ = Describe("Repository", func() {
 		Expect(bufferA).To(Equal(bufferB))
 	})
 
-	It("creates component archive", func() {
+	It("creates component archive directory", func() {
 		octx := ocm.DefaultContext()
 		memfs := memoryfs.New()
 
@@ -111,6 +127,50 @@ var _ = Describe("Repository", func() {
 		}))
 
 		MustBeSuccessful(finalize.Finalize())
+		Expect(vfs.DirExists(memfs, "test")).To(BeTrue())
+
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, "test", accessio.PathFileSystem(memfs)))
+		MustBeSuccessful(spec.Validate(octx, nil))
+
+		arch = Must(comparch.Open(octx, accessobj.ACC_WRITABLE, "test", 0o0700, accessio.PathFileSystem(memfs)))
+		finalize.Close(arch, "comparch)")
+
+		res = Must(arch.GetResourcesByName("blob"))
+		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
+			HashAlgorithm:          sha256.Algorithm,
+			NormalisationAlgorithm: blob.GenericBlobDigestV1,
+			Value:                  D_TESTDATA,
+		}))
+	})
+
+	It("creates component archive tgz", func() {
+		octx := ocm.DefaultContext()
+		memfs := memoryfs.New()
+
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
+		arch := Must(comparch.Create(octx, accessobj.ACC_WRITABLE, "test", 0o0700, accessio.FormatTGZ, accessio.PathFileSystem(memfs)))
+		finalize.Close(arch, "comparch)")
+
+		arch.SetName("acme.org/test")
+		arch.SetVersion("v1.0.1")
+
+		MustBeSuccessful(arch.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
+			blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
+
+		res := Must(arch.GetResourcesByName("blob"))
+		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
+			HashAlgorithm:          sha256.Algorithm,
+			NormalisationAlgorithm: blob.GenericBlobDigestV1,
+			Value:                  D_TESTDATA,
+		}))
+
+		MustBeSuccessful(finalize.Finalize())
+		Expect(vfs.FileExists(memfs, "test")).To(BeTrue())
+
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, "test", accessio.PathFileSystem(memfs)))
+		MustBeSuccessful(spec.Validate(octx, nil))
 
 		arch = Must(comparch.Open(octx, accessobj.ACC_WRITABLE, "test", 0o0700, accessio.PathFileSystem(memfs)))
 		finalize.Close(arch, "comparch)")

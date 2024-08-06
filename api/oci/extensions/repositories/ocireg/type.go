@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/containerd/containerd/reference"
 
@@ -12,6 +13,7 @@ import (
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
+	"ocm.software/ocm/api/utils/tcp"
 )
 
 const (
@@ -126,6 +128,18 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 		return nil, err
 	}
 	return NewRepository(ctx, a, info)
+}
+
+func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials) error {
+	info, err := a.getInfo(creds)
+	if err != nil {
+		return err
+	}
+	h, p, _ := info.HostInfo()
+	if p == "" {
+		p = "443"
+	}
+	return tcp.PingTCPServer(h+":"+p, time.Second)
 }
 
 func (a *RepositorySpec) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {

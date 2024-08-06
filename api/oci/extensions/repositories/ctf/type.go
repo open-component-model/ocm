@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -80,4 +81,11 @@ func (s *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return Open(ctx, a.AccessMode, a.FilePath, 0o700, &a.StandardOptions)
+}
+
+func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials) error {
+	opts := a.StandardOptions
+	opts.Default(vfsattr.Get(ctx))
+
+	return accessobj.ValidateDescriptor(accessObjectInfo, a.FilePath, opts.GetPathFileSystem())
 }

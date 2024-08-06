@@ -10,6 +10,7 @@ import (
 
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf/format"
+	"ocm.software/ocm/api/oci/extensions/repositories/ctf/index"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -26,6 +27,12 @@ var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
 	ElementDirectoryName:     BlobsDirectoryName,
 	ElementTypeName:          "blob",
 	DescriptorHandlerFactory: NewStateHandler,
+	DescriptorValidator:      validateDescriptor,
+}
+
+func validateDescriptor(data []byte) error {
+	_, err := index.Decode(data)
+	return err
 }
 
 type Object = Repository

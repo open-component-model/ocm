@@ -6,6 +6,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -45,14 +46,22 @@ type accessObjectInfo struct {
 
 var _ accessobj.AccessObjectInfo = (*accessObjectInfo)(nil)
 
+var baseInfo = accessobj.DefaultAccessObjectInfo{
+	ObjectTypeName:           "artifactset",
+	ElementDirectoryName:     BlobsDirectoryName,
+	ElementTypeName:          "blob",
+	DescriptorHandlerFactory: NewStateHandler,
+	DescriptorValidator:      validateDescriptor,
+}
+
+func validateDescriptor(data []byte) error {
+	_, err := artdesc.DecodeIndex(data)
+	return err
+}
+
 func NewAccessObjectInfo(fmts ...string) accessobj.AccessObjectInfo {
 	a := &accessObjectInfo{
-		accessobj.DefaultAccessObjectInfo{
-			ObjectTypeName:           "artifactset",
-			ElementDirectoryName:     BlobsDirectoryName,
-			ElementTypeName:          "blob",
-			DescriptorHandlerFactory: NewStateHandler,
-		},
+		baseInfo,
 	}
 	oci := IsOCIDefaultFormat()
 	if len(fmts) > 0 {
