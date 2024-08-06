@@ -7,10 +7,10 @@ import (
 )
 
 type ReferenceOption interface {
-	ApplyToReference(reference *compdesc.ComponentReference) error
+	ApplyToReference(reference *compdesc.Reference) error
 }
 
-func Reference(name, comp, vers string, opts ...ReferenceOption) (*compdesc.ComponentReference, error) {
+func Reference(name, comp, vers string, opts ...ReferenceOption) (*compdesc.Reference, error) {
 	m := compdesc.NewComponentReference(name, comp, vers, nil)
 	list := errors.ErrList()
 	for _, o := range opts {

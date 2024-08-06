@@ -589,14 +589,14 @@ func (s ReferenceSelectorFunc) MatchReference(obj ReferenceSelectionContext) (bo
 }
 
 type referenceSelectionContext struct {
-	*ComponentReference
+	*Reference
 	identity
 }
 
 // Deprecated: use package selectors and its sub packages.
 func NewReferenceSelectionContext(index int, refs References) ReferenceSelectionContext {
 	return &referenceSelectionContext{
-		ComponentReference: &refs[index],
+		Reference: &refs[index],
 		identity: identity{
 			accessor: refs,
 			index:    index,

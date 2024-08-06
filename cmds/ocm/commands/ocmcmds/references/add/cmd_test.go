@@ -20,7 +20,7 @@ const (
 	REF     = "github.com/mandelsoft/ref"
 )
 
-func CheckReference(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, add ...func(compdesc.ComponentReference)) {
+func CheckReference(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, add ...func(compdesc.Reference)) {
 	rs, _ := cd.GetReferencesByName(name)
 	if len(rs) != 1 {
 		Fail(fmt.Sprintf("%d reference(s) with name %s found", len(rs), name), 1)
@@ -64,7 +64,7 @@ var _ = Describe("Add references", func() {
 		Expect(err).To(Succeed())
 		Expect(len(cd.References)).To(Equal(1))
 
-		CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
+		CheckReference(env, cd, "testdata", func(r compdesc.Reference) {
 			Expect(r.ExtraIdentity).To(Equal(metav1.Identity{"purpose": "test", "label": "local"}))
 		})
 	})
@@ -127,7 +127,7 @@ labels:
 
 			labels := metav1.Labels{}
 			labels.Set("test", "value")
-			CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
+			CheckReference(env, cd, "testdata", func(r compdesc.Reference) {
 				ExpectWithOffset(2, r.GetLabels()).To(Equal(labels))
 			})
 		})
@@ -148,7 +148,7 @@ labels:
 
 			labels := metav1.Labels{}
 			labels.Set("test", "value")
-			CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
+			CheckReference(env, cd, "testdata", func(r compdesc.Reference) {
 				Expect(r.GetLabels()).To(Equal(labels))
 			})
 		})
@@ -163,7 +163,7 @@ labels:
 
 			labels := metav1.Labels{}
 			labels.Set("test", "value")
-			CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
+			CheckReference(env, cd, "testdata", func(r compdesc.Reference) {
 				Expect(r.ExtraIdentity).To(Equal(metav1.Identity{"purpose": "test", "label": "local"}))
 			})
 		})
@@ -179,7 +179,7 @@ labels:
 			labels := metav1.Labels{}
 			labels.Set("purpose", "test", metav1.WithSigning())
 			labels.Set("label", map[string]interface{}{"local": true}, metav1.WithVersion("v1"))
-			CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
+			CheckReference(env, cd, "testdata", func(r compdesc.Reference) {
 				Expect(r.GetLabels()).To(Equal(labels))
 			})
 		})

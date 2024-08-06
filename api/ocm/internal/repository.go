@@ -113,7 +113,7 @@ type (
 	SourceAccess = ArtifactAccess[SourceMeta]
 )
 
-type ComponentReference = compdesc.ComponentReference
+type ComponentReference = compdesc.Reference
 
 type ComponentVersionAccess interface {
 	resource.ResourceView[ComponentVersionAccess]

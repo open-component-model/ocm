@@ -91,8 +91,8 @@ func (v *DescriptorVersion) ConvertTo(obj compdesc.ComponentDescriptorVersion) (
 	return out, nil
 }
 
-func convertReferenceTo(in Reference) compdesc.ComponentReference {
-	return compdesc.ComponentReference{
+func convertReferenceTo(in Reference) compdesc.Reference {
+	return compdesc.Reference{
 		ElementMeta:   convertElementmetaTo(in.ElementMeta),
 		ComponentName: in.ComponentName,
 		Digest:        in.Digest.Copy(),
@@ -212,7 +212,7 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compd
 	return out, nil
 }
 
-func convertReferenceFrom(in compdesc.ComponentReference) Reference {
+func convertReferenceFrom(in compdesc.Reference) Reference {
 	return Reference{
 		ElementMeta:   convertElementmetaFrom(in.ElementMeta),
 		ComponentName: in.ComponentName,
@@ -220,7 +220,7 @@ func convertReferenceFrom(in compdesc.ComponentReference) Reference {
 	}
 }
 
-func convertReferencesFrom(in []compdesc.ComponentReference) []Reference {
+func convertReferencesFrom(in []compdesc.Reference) []Reference {
 	if in == nil {
 		return nil
 	}

@@ -70,7 +70,7 @@ var _ = Describe("Component Descripor Copy Test Suitet", func() {
 				},
 			}
 			cd.References = compdesc.References{
-				compdesc.ComponentReference{
+				compdesc.Reference{
 					ElementMeta:   compdesc.ElementMeta{},
 					ComponentName: "",
 					Digest:        nil,
