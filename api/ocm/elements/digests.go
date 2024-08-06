@@ -14,7 +14,7 @@ type ResourceReferenceOption interface {
 
 type digest metav1.DigestSpec
 
-func (o *digest) ApplyToReference(m *compdesc.ComponentReference) error {
+func (o *digest) ApplyToReference(m *compdesc.Reference) error {
 	if !(*metav1.DigestSpec)(o).IsNone() {
 		m.Digest = (*metav1.DigestSpec)(o).Copy()
 	}

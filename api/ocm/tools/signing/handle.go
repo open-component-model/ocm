@@ -392,7 +392,7 @@ func checkDigest(orig *metav1.DigestSpec, act *metav1.DigestSpec) bool {
 	return true
 }
 
-func refMsg(ref compdesc.ComponentReference, msg string, args ...interface{}) string {
+func refMsg(ref compdesc.Reference, msg string, args ...interface{}) string {
 	return fmt.Sprintf("%s %s", fmt.Sprintf(msg, args...), ref)
 }
 

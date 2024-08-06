@@ -281,7 +281,7 @@ var _ = Describe("helper", func() {
 	Context("reference selection", func() {
 		cd := &compdesc.ComponentDescriptor{}
 
-		r1v1 := compdesc.ComponentReference{
+		r1v1 := compdesc.Reference{
 			ElementMeta: compdesc.ElementMeta{
 				Name:    "r1",
 				Version: "v1",
@@ -296,14 +296,14 @@ var _ = Describe("helper", func() {
 			},
 			ComponentName: "c1",
 		}
-		r1v2 := compdesc.ComponentReference{
+		r1v2 := compdesc.Reference{
 			ElementMeta: compdesc.ElementMeta{
 				Name:    "r1",
 				Version: "v2",
 			},
 			ComponentName: "c1",
 		}
-		r2v1 := compdesc.ComponentReference{
+		r2v1 := compdesc.Reference{
 			ElementMeta: compdesc.ElementMeta{
 				Name:    "r2",
 				Version: "v1",
@@ -318,7 +318,7 @@ var _ = Describe("helper", func() {
 			},
 			ComponentName: "c2",
 		}
-		r3v2 := compdesc.ComponentReference{
+		r3v2 := compdesc.Reference{
 			ElementMeta: compdesc.ElementMeta{
 				Name:    "r3",
 				Version: "v2",
@@ -345,7 +345,7 @@ var _ = Describe("helper", func() {
 			ComponentName: "c3",
 		}
 
-		r4v3 := compdesc.ComponentReference{
+		r4v3 := compdesc.Reference{
 			ElementMeta: compdesc.ElementMeta{
 				Name:    "r4",
 				Version: "v3",
