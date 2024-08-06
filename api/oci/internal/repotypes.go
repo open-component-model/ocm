@@ -26,6 +26,8 @@ type RepositorySpec interface {
 	Name() string
 	UniformRepositorySpec() *UniformRepositorySpec
 	Repository(Context, credentials.Credentials) (Repository, error)
+
+	Validate(Context, credentials.Credentials) error
 }
 
 type (
@@ -95,6 +97,10 @@ func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Re
 	return nil, errors.ErrUnknown("repository type", r.GetType())
 }
 
+func (r *UnknownRepositorySpec) Validate(Context, credentials.Credentials) error {
+	return errors.ErrUnknown("repository type", r.GetType())
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type GenericRepositorySpec struct {
@@ -155,6 +161,14 @@ func (s *GenericRepositorySpec) Repository(ctx Context, creds credentials.Creden
 		return nil, err
 	}
 	return spec.Repository(ctx, creds)
+}
+
+func (s *GenericRepositorySpec) Validate(ctx Context, creds credentials.Credentials) error {
+	spec, err := s.Evaluate(ctx)
+	if err != nil {
+		return err
+	}
+	return spec.Validate(ctx, creds)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

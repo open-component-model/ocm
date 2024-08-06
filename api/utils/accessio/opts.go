@@ -7,6 +7,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/compression"
 )
 
@@ -32,13 +33,13 @@ type Options interface {
 	WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, error)
 
 	DefaultFormat(fmt FileFormat)
-	Default()
+	Default(fss ...vfs.FileSystem)
 
 	DefaultForPath(path string) error
 }
 
 type StandardOptions struct {
-	// FilePath is the path of the repository base in the filesystem
+	// FileFormat is the optional format.
 	FileFormat *FileFormat `json:"fileFormat,omitempty"`
 	// FileSystem is the virtual filesystem to evaluate the file path. Default is the OS filesytem
 	// or the filesystem defined as base filesystem for the context
@@ -122,9 +123,9 @@ func (o *StandardOptions) ApplyOption(options Options) error {
 
 var _osfs = osfs.New()
 
-func (o *StandardOptions) Default() {
+func (o *StandardOptions) Default(fss ...vfs.FileSystem) {
 	if o.PathFileSystem == nil {
-		o.PathFileSystem = _osfs
+		o.PathFileSystem = utils.FileSystem(fss...)
 	}
 }
 
