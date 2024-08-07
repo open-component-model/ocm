@@ -4,6 +4,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -78,11 +79,19 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	return NewRepository(ctx, a)
 }
 
-func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
+func (a *RepositorySpec) AsUniformSpec(ctx cpi.Context) cpi.UniformRepositorySpec {
 	opts, _ := NewOptions(&a.Options) // now unknown option possible (same Options type)
+	opts.Default(vfsattr.Get(ctx))
 	p, err := vfs.Canonical(opts.GetPathFileSystem(), a.FilePath, false)
 	if err != nil {
 		return cpi.UniformRepositorySpec{Type: a.GetKind(), Info: a.FilePath}
 	}
 	return cpi.UniformRepositorySpec{Type: a.GetKind(), Info: p}
+}
+
+func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
+	opts := a.Options
+	opts.Default(vfsattr.Get(ctx))
+
+	return accessobj.ValidateDescriptor(&baseInfo, a.FilePath, opts.GetPathFileSystem())
 }

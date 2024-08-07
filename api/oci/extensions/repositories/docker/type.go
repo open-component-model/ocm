@@ -1,6 +1,8 @@
 package docker
 
 import (
+	"context"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils"
@@ -45,4 +47,14 @@ func (a *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)
+}
+
+func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, usageContext ...credentials.UsageContext) error {
+	client, err := newDockerClient(a.DockerHost)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.Ping(context.Background())
+	return err
 }

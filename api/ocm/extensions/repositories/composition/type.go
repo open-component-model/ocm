@@ -39,4 +39,8 @@ func (r *RepositorySpec) Repository(ctx cpi.Context, credentials credentials.Cre
 	return NewRepository(ctx, r.Name), nil
 }
 
+func (a *RepositorySpec) Validate(ctx internal.Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
+	return nil
+}
+
 var _ cpi.RepositorySpec = (*RepositorySpec)(nil)

@@ -1,13 +1,17 @@
 package accessobj
 
 import (
+	"archive/tar"
 	"fmt"
+	"io"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
+	"ocm.software/ocm/api/utils/compression"
 )
 
 type DescriptorHandlerFactory func(fs vfs.FileSystem) StateHandler
@@ -26,6 +30,8 @@ type AccessObjectInfo interface {
 	SetupFileSystem(fs vfs.FileSystem, mode vfs.FileMode) error
 	SetupDescriptorState(fs vfs.FileSystem) StateHandler
 	SubPath(name string) string
+
+	ValidateDescriptor(data []byte) error
 }
 
 // DefaultAccessObjectInfo is a default implementation for AccessObjectInfo
@@ -38,6 +44,7 @@ type DefaultAccessObjectInfo struct {
 	ElementTypeName          string
 	DescriptorHandlerFactory DescriptorHandlerFactory
 	AdditionalFiles          []string
+	DescriptorValidator      func([]byte) error
 }
 
 var _ AccessObjectInfo = (*DefaultAccessObjectInfo)(nil)
@@ -79,6 +86,13 @@ func (i *DefaultAccessObjectInfo) SetupDescriptorState(fs vfs.FileSystem) StateH
 
 func (i *DefaultAccessObjectInfo) SubPath(name string) string {
 	return filepath.Join(i.ElementDirectoryName, name)
+}
+
+func (i *DefaultAccessObjectInfo) ValidateDescriptor(data []byte) error {
+	if i.DescriptorValidator != nil {
+		return i.DescriptorValidator(data)
+	}
+	return nil
 }
 
 // AccessObject provides a basic functionality for descriptor based access objects
@@ -197,4 +211,74 @@ func (a *AccessObject) Close() error {
 	}
 	a.fs = nil
 	return list.Result()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func ValidateDescriptor(info AccessObjectInfo, path string, fss ...vfs.FileSystem) error {
+	fs := utils.FileSystem(fss...)
+	_, err := vfs.Canonical(fs, path, true)
+	if err != nil {
+		return err
+	}
+	ok, err := vfs.Exists(fs, path)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.ErrNotFound(info.GetObjectTypeName(), path)
+	}
+
+	ok, err = vfs.IsDir(fs, path)
+	if err != nil {
+		return err
+	}
+	// check directory mode
+	if ok {
+		data, err := vfs.ReadFile(fs, filepath.Join(path, info.GetDescriptorFileName()))
+		if err != nil {
+			return err
+		}
+		return info.ValidateDescriptor(data)
+	}
+
+	// check file mode
+	ok, err = vfs.IsFile(fs, path)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.ErrInvalid(info.GetObjectTypeName(), path)
+	}
+
+	r, err := fs.Open(path)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	eff, _, err := compression.AutoDecompress(r)
+	if err != nil {
+		return err
+	}
+	defer eff.Close()
+
+	tr := tar.NewReader(eff)
+	for {
+		header, err := tr.Next()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return fmt.Errorf("no descriptor file (%s) found for %s", info.GetDescriptorFileName(), info.GetObjectTypeName())
+			}
+			return err
+		}
+
+		if header.Typeflag == tar.TypeReg && header.Name == info.GetDescriptorFileName() {
+			data, err := io.ReadAll(tr)
+			if err != nil {
+				return err
+			}
+			return info.ValidateDescriptor(data)
+		}
+	}
 }
