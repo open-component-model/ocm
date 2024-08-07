@@ -50,6 +50,6 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	return ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, func(datacontext.Context) interface{} { return NewRepository(ctx) }).(cpi.Repository), nil
 }
 
-func (a *RepositorySpec) Validate(cpi.Context, credentials.Credentials) error {
+func (a *RepositorySpec) Validate(cpi.Context, credentials.Credentials, ...credentials.UsageContext) error {
 	return nil
 }

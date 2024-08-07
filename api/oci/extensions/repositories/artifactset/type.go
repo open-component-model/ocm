@@ -89,7 +89,7 @@ func (a *RepositorySpec) AsUniformSpec(ctx cpi.Context) cpi.UniformRepositorySpe
 	return cpi.UniformRepositorySpec{Type: a.GetKind(), Info: p}
 }
 
-func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials) error {
+func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
 	opts := a.Options
 	opts.Default(vfsattr.Get(ctx))
 

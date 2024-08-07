@@ -29,7 +29,7 @@ type RepositorySpec interface {
 	AsUniformSpec(Context) *UniformRepositorySpec
 	Repository(Context, credentials.Credentials) (Repository, error)
 
-	Validate(Context, credentials.Credentials) error
+	Validate(Context, credentials.Credentials, ...credentials.UsageContext) error
 }
 
 type (
@@ -95,7 +95,7 @@ func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Re
 	return nil, errors.ErrUnknown("repository type", r.GetType())
 }
 
-func (r *UnknownRepositorySpec) Validate(ctx Context, creds credentials.Credentials) error {
+func (r *UnknownRepositorySpec) Validate(ctx Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
 	return errors.ErrUnknown("repository type", r.GetType())
 }
 
@@ -161,7 +161,7 @@ func (s *GenericRepositorySpec) Repository(ctx Context, creds credentials.Creden
 	return spec.Repository(ctx, creds)
 }
 
-func (s *GenericRepositorySpec) Validate(ctx Context, creds credentials.Credentials) error {
+func (s *GenericRepositorySpec) Validate(ctx Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
 	spec, err := s.Evaluate(ctx)
 	if err != nil {
 		return err

@@ -130,7 +130,7 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	return NewRepository(ctx, a, info)
 }
 
-func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials) error {
+func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
 	info, err := a.getInfo(creds)
 	if err != nil {
 		return err
