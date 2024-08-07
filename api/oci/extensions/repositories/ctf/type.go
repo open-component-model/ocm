@@ -83,7 +83,7 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	return Open(ctx, a.AccessMode, a.FilePath, 0o700, &a.StandardOptions)
 }
 
-func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials) error {
+func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
 	opts := a.StandardOptions
 	opts.Default(vfsattr.Get(ctx))
 

@@ -49,7 +49,7 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	return NewRepository(ctx, a)
 }
 
-func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials) error {
+func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, usageContext ...credentials.UsageContext) error {
 	client, err := newDockerClient(a.DockerHost)
 	if err != nil {
 		return err

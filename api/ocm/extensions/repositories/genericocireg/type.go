@@ -180,9 +180,8 @@ func (s *RepositorySpec) GetIdentityMatcher() string {
 	return credentials.GetProvidedIdentityMatcher(s.RepositorySpec)
 }
 
-func (s *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials) error {
-	return nil // TODO: oci spec validate
-	// return s.RepositorySpec.Validate(ctx.OCIContext(), creds)
+func (s *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, uctx ...credentials.UsageContext) error {
+	return s.RepositorySpec.Validate(ctx.OCIContext(), creds, uctx...)
 }
 
 func DefaultComponentRepositoryMeta(meta *ComponentRepositoryMeta) *ComponentRepositoryMeta {
