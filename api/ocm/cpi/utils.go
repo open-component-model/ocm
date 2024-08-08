@@ -3,7 +3,6 @@ package cpi
 import (
 	"io"
 
-	"ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/iotools"
 )
@@ -74,7 +73,7 @@ func ArtifactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
 }
 
 func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) string {
-	if h, ok := spec.(internal.HintProvider); ok {
+	if h, ok := spec.(HintProvider); ok {
 		return h.GetReferenceHint(cv)
 	}
 	return ""

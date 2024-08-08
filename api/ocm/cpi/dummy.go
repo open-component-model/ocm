@@ -7,7 +7,6 @@ import (
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/ocm/selectors/refsel"
 	"ocm.software/ocm/api/ocm/selectors/rscsel"
 	"ocm.software/ocm/api/ocm/selectors/srcsel"
@@ -50,7 +49,7 @@ func (d *DummyComponentVersionAccess) SetProvider(p *compdesc.Provider) error {
 	return errors.ErrNotSupported()
 }
 
-func (d *DummyComponentVersionAccess) AdjustSourceAccess(meta *internal.SourceMeta, acc compdesc.AccessSpec) error {
+func (d *DummyComponentVersionAccess) AdjustSourceAccess(meta *SourceMeta, acc compdesc.AccessSpec) error {
 	return errors.ErrNotSupported()
 }
 
@@ -163,7 +162,7 @@ func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob B
 	return errors.ErrNotSupported("adding blobs")
 }
 
-func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *internal.ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error {
+func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error {
 	return errors.ErrNotSupported("resource modification")
 }
 
@@ -203,12 +202,12 @@ func (d *DummyComponentVersionAccess) UseDirectAccess() bool {
 }
 
 // Deprecated: use GetResources.
-func (d *DummyComponentVersionAccess) GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]internal.ResourceAccess, error) {
+func (d *DummyComponentVersionAccess) GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error) {
 	return nil, nil
 }
 
 // Deprecated: use GetResources.
-func (d *DummyComponentVersionAccess) GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]internal.ResourceAccess, error) {
+func (d *DummyComponentVersionAccess) GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error) {
 	return nil, nil
 }
 

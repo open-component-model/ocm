@@ -26,6 +26,12 @@ type (
 	AddVersionOptions = internal.AddVersionOptions
 )
 
+func NewTargetOptions(list ...TargetOption) *TargetOptions {
+	var m TargetOptions
+	m.ApplyTargetOptions(list...)
+	return &m
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func NewAddVersionOptions(list ...AddVersionOption) *AddVersionOptions {

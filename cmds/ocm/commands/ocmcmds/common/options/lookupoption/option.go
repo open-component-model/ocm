@@ -91,10 +91,10 @@ func (o *Option) LookupComponentVersion(name string, vers string) (ocm.Component
 	return cv, err
 }
 
-func (o *Option) LookupRepositoriesForComponent(name string) []ocm.RepositoryProvider {
+func (o *Option) LookupComponentProviders(name string) []ocm.ResolvedComponentProvider {
 	if o != nil && o.Resolver != nil {
 		if c, ok := o.Resolver.(ocm.ComponentResolver); ok {
-			return c.LookupRepositoriesForComponent(name)
+			return c.LookupComponentProviders(name)
 		}
 	}
 	return nil
