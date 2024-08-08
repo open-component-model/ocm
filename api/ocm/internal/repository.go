@@ -24,40 +24,6 @@ type ReadOnlyFeature interface {
 	SetReadOnly()
 }
 
-// ComponentVersionResolver describes an object able
-// to map component version identities to a component version access,
-// the representtaion of the component version stored in a dedicated
-// OCM repository.
-// Such a resolver might optionally implement the ComponentResolver
-// interface to provide information about potential locations for
-// a particular component.
-type ComponentVersionResolver interface {
-	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
-}
-
-type RepositoryProvider interface {
-	Repository() (Repository, error)
-}
-
-// ComponentResolver is an optional interface for a ComponentVersionResolver,
-// which can offer information about potential repositories usable to lookup
-// versions for a dedicated component.
-type ComponentResolver interface {
-	LookupRepositoriesForComponent(name string) []RepositoryProvider
-}
-
-type repositoryProvider struct {
-	repo Repository
-}
-
-func (p *repositoryProvider) Repository() (Repository, error) {
-	return p.repo.Dup()
-}
-
-func RepositoryProviderForRepository(r Repository) RepositoryProvider {
-	return &repositoryProvider{r}
-}
-
 type RepositoryImpl interface {
 	GetContext() Context
 

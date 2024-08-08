@@ -133,7 +133,7 @@ func (h *TypeHandler) filterVersions(vers []string) ([]string, error) {
 	return vers, nil
 }
 
-func (h *TypeHandler) getVersions(repo ocm.Repository, component ocm.ComponentAccess, spec ocm.RefSpec) ([]output.Object, error) {
+func (h *TypeHandler) getVersions(repo ocm.Repository, component ocm.ResolvedComponentVersionProvider, spec ocm.RefSpec) ([]output.Object, error) {
 	var result []output.Object
 	if component == nil {
 		return h.all(repo)
@@ -195,15 +195,12 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 						if r, ok := h.resolver.(ocm.ComponentResolver); ok {
 							spec = evaluated.Ref
 							spec.Component = comp.Component
-							for _, p := range r.LookupRepositoriesForComponent(comp.Component) {
-								repo, err := p.Repository()
+							for _, p := range r.LookupComponentProviders(comp.Component) {
+								c, err := p.LookupComponent(name)
 								if err != nil {
 									continue
 								}
-								c, err := repo.LookupComponent(comp.Component)
-								if err != nil {
-									continue
-								}
+
 								list, err := h.getVersions(repo, c, spec)
 								if err != nil {
 									return nil, err
