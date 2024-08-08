@@ -24,10 +24,6 @@ type ReadOnlyFeature interface {
 	SetReadOnly()
 }
 
-type ComponentVersionResolver interface {
-	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
-}
-
 type RepositoryImpl interface {
 	GetContext() Context
 

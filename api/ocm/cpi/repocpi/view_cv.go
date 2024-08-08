@@ -160,7 +160,7 @@ func (c *componentVersionAccessView) Repository() cpi.Repository {
 	return c.bridge.Repository()
 }
 
-func (c *componentVersionAccessView) GetContext() internal.Context {
+func (c *componentVersionAccessView) GetContext() cpi.Context {
 	return c.bridge.GetContext()
 }
 
@@ -218,7 +218,7 @@ func (c *componentVersionAccessView) Update() error {
 	})
 }
 
-func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec, opts ...internal.BlobUploadOption) (cpi.AccessSpec, error) {
+func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec, opts ...cpi.BlobUploadOption) (cpi.AccessSpec, error) {
 	var spec cpi.AccessSpec
 	eff := cpi.NewBlobUploadOptions(opts...)
 	err := c.Execute(func() error {
@@ -230,7 +230,7 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	return spec, err
 }
 
-func (c *componentVersionAccessView) AdjustResourceAccess(meta *cpi.ResourceMeta, acc compdesc.AccessSpec, opts ...internal.ModificationOption) error {
+func (c *componentVersionAccessView) AdjustResourceAccess(meta *cpi.ResourceMeta, acc compdesc.AccessSpec, opts ...cpi.ModificationOption) error {
 	cd := c.GetDescriptor()
 	if idx := cd.GetResourceIndex(meta); idx >= 0 {
 		return c.SetResource(&cd.Resources[idx].ResourceMeta, acc, opts...)
@@ -239,7 +239,7 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *cpi.ResourceMeta
 }
 
 // SetResourceBlob adds a blob resource to the component version.
-func (c *componentVersionAccessView) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, opts ...internal.BlobModificationOption) error {
+func (c *componentVersionAccessView) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, opts ...cpi.BlobModificationOption) error {
 	cpi.Logger(c).Debug("adding resource blob", "resource", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
@@ -265,7 +265,7 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *cpi.SourceMeta, ac
 	return errors.ErrUnknown(cpi.KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
 }
 
-func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, modopts ...internal.TargetOption) error {
+func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, modopts ...cpi.TargetOption) error {
 	cpi.Logger(c).Debug("adding source blob", "source", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
@@ -282,7 +282,7 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cp
 	return nil
 }
 
-func setAccess[T any, A internal.ArtifactAccess[T]](c *componentVersionAccessView, kind string, art A,
+func setAccess[T any, A cpi.ArtifactAccess[T]](c *componentVersionAccessView, kind string, art A,
 	set func(*T, compdesc.AccessSpec) error,
 	setblob func(*T, cpi.BlobAccess, string, cpi.AccessSpec) error,
 ) error {
@@ -345,7 +345,7 @@ func (c *componentVersionAccessView) SetResourceByAccess(art cpi.ResourceAccess,
 		})
 }
 
-func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...cpi.ModificationOption) error {
+func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc compdesc.AccessSpec, modopts ...cpi.ModificationOption) error {
 	if c.bridge.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -356,7 +356,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 	}
 
 	ctx := c.bridge.GetContext()
-	opts := internal.NewModificationOptions(modopts...)
+	opts := cpi.NewModificationOptions(modopts...)
 	cpi.CompleteModificationOptions(ctx, opts)
 
 	spec, err := c.bridge.GetContext().AccessSpecForSpec(acc)
@@ -493,7 +493,7 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 	return hashAlgo, digester, value
 }
 
-func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, optslist ...internal.TargetOption) error {
+func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, optslist ...cpi.TargetOption) error {
 	return setAccess(c, "source", art,
 		func(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
 			return c.SetSource(meta, acc, optslist...)
@@ -503,7 +503,7 @@ func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, opt
 		})
 }
 
-func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, optlist ...internal.TargetOption) error {
+func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, optlist ...cpi.TargetOption) error {
 	if c.bridge.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -533,7 +533,7 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 	})
 }
 
-func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, optlist ...internal.TargetOption) error {
+func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, optlist ...cpi.TargetOption) error {
 	return c.Execute(func() error {
 		cd := c.bridge.GetDescriptor()
 
