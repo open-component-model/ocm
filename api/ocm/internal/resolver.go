@@ -124,6 +124,8 @@ type MatchingResolver struct {
 	rules    []*ResolverRule
 }
 
+var _ ComponentResolver = (*MatchingResolver)(nil)
+
 func NewMatchingResolver(ctx ContextProvider, rules ...*ResolverRule) *MatchingResolver {
 	return &MatchingResolver{
 		lock:  sync.Mutex{},
@@ -169,18 +171,11 @@ func (r *MatchingResolver) LookupComponentVersion(name string, version string) (
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	ctx := r.ctx.OCMContext()
 	for _, rule := range r.rules {
 		if rule.Match(name) {
-			repo, cached, err := r.cache.LookupRepository(ctx, rule.spec)
+			repo, err := r.resolveRepository(rule)
 			if err != nil {
 				return nil, err
-			}
-			if !cached {
-				// Even though the matching resolver is closed, there might be components or component versions, which
-				// contain a reference to the repository. Still, it shall be possible to close the matching resolver.
-				refmgmt.Lazy(repo)
-				r.finalize.Close(repo)
 			}
 			cv, err := repo.LookupComponentVersion(name, version)
 			if err == nil && cv != nil {
@@ -192,4 +187,47 @@ func (r *MatchingResolver) LookupComponentVersion(name string, version string) (
 		}
 	}
 	return nil, errors.ErrNotFound(KIND_COMPONENTVERSION, common.NewNameVersion(name, version).String())
+}
+
+func (r *MatchingResolver) LookupRepositoriesForComponent(name string) []RepositoryProvider {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	var result []RepositoryProvider
+	for _, rule := range r.rules {
+		if rule.Match(name) {
+			result = append(result, &cachedRepository{r, rule})
+		}
+	}
+	return result
+}
+
+func (r *MatchingResolver) resolveRepository(rule *ResolverRule) (Repository, error) {
+	repo, cached, err := r.cache.LookupRepository(r.ctx.OCMContext(), rule.spec)
+	if err != nil {
+		return nil, err
+	}
+	if !cached {
+		// Even though the matching resolver is closed, there might be components or component versions, which
+		// contain a reference to the repository. Still, it shall be possible to close the matching resolver.
+		refmgmt.Lazy(repo)
+		r.finalize.Close(repo)
+	}
+	return repo, nil
+}
+
+type cachedRepository struct {
+	resolver *MatchingResolver
+	rule     *ResolverRule
+}
+
+func (c *cachedRepository) Repository() (Repository, error) {
+	c.resolver.lock.Lock()
+	defer c.resolver.lock.Unlock()
+
+	repo, err := c.resolver.resolveRepository(c.rule)
+	if err != nil {
+		return nil, err
+	}
+	return repo.Dup()
 }

@@ -34,7 +34,10 @@ type CompoundResolver struct {
 	resolvers []ComponentVersionResolver
 }
 
-var _ ComponentVersionResolver = (*CompoundResolver)(nil)
+var (
+	_ ComponentVersionResolver = (*CompoundResolver)(nil)
+	_ ComponentResolver        = (*CompoundResolver)(nil)
+)
 
 func NewCompoundResolver(res ...ComponentVersionResolver) ComponentVersionResolver {
 	for i := 0; i < len(res); i++ {
@@ -65,6 +68,20 @@ func (c *CompoundResolver) LookupComponentVersion(name string, version string) (
 		}
 	}
 	return nil, errors.ErrNotFound(KIND_OCM_REFERENCE, common.NewNameVersion(name, version).String())
+}
+
+func (c *CompoundResolver) LookupRepositoriesForComponent(name string) []internal.RepositoryProvider {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+
+	var result []RepositoryProvider
+
+	for _, r := range c.resolvers {
+		if cr, ok := r.(ComponentResolver); ok {
+			result = append(result, cr.LookupRepositoriesForComponent(name)...)
+		}
+	}
+	return result
 }
 
 func (c *CompoundResolver) AddResolver(r ComponentVersionResolver) {
