@@ -36,9 +36,11 @@ type (
 	ContextProvider                  = internal.ContextProvider
 	LocalContextProvider             = internal.LocalContextProvider
 	ComponentVersionResolver         = internal.ComponentVersionResolver
+	ComponentResolver                = internal.ComponentResolver
 	Repository                       = internal.Repository
 	RepositorySpecHandlers           = internal.RepositorySpecHandlers
 	RepositorySpecHandler            = internal.RepositorySpecHandler
+	RepositoryProvider               = internal.RepositoryProvider
 	UniformRepositorySpec            = internal.UniformRepositorySpec
 	ComponentLister                  = internal.ComponentLister
 	ComponentAccess                  = internal.ComponentAccess

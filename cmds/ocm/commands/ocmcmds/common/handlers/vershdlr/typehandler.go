@@ -7,6 +7,8 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
+	"github.com/mandelsoft/goutils/sliceutils"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
@@ -26,6 +28,10 @@ type Object struct {
 	Repository ocm.Repository
 	Component  string
 	Version    string
+}
+
+func CompareObject(a, b output.Object) int {
+	return Compare(a, b)
 }
 
 type Manifest struct {
@@ -127,6 +133,35 @@ func (h *TypeHandler) filterVersions(vers []string) ([]string, error) {
 	return vers, nil
 }
 
+func (h *TypeHandler) getVersions(repo ocm.Repository, component ocm.ComponentAccess, spec ocm.RefSpec) ([]output.Object, error) {
+	var result []output.Object
+	if component == nil {
+		return h.all(repo)
+	} else {
+		versions, err := component.ListVersions()
+		if err != nil {
+			return nil, err
+		}
+		versions, err = h.filterVersions(versions)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, vers := range versions {
+			t := vers
+			s := spec
+			s.Version = &t
+			result = append(result, &Object{
+				Repository: repo,
+				Spec:       s,
+				Component:  component.GetName(),
+				Version:    vers,
+			})
+		}
+	}
+	return result, nil
+}
+
 func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]output.Object, error) {
 	var component ocm.ComponentAccess
 	var result []output.Object
@@ -156,6 +191,30 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 							evaluated.Repository = cv.Repository()
 							h.session.Closer(cv)
 						}
+					} else {
+						if r, ok := h.resolver.(ocm.ComponentResolver); ok {
+							spec = evaluated.Ref
+							spec.Component = comp.Component
+							for _, p := range r.LookupRepositoriesForComponent(comp.Component) {
+								repo, err := p.Repository()
+								if err != nil {
+									continue
+								}
+								c, err := repo.LookupComponent(comp.Component)
+								if err != nil {
+									continue
+								}
+								list, err := h.getVersions(repo, c, spec)
+								if err != nil {
+									return nil, err
+								}
+								result = sliceutils.AppendUniqueFunc(result, CompareObject, list...)
+							}
+							if len(result) > 0 {
+								return result, nil
+							}
+						}
+						evaluated.Ref.Component = comp.Component
 					}
 				}
 			}
@@ -209,30 +268,16 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 			Version:    vers,
 		})
 	} else {
-		if component == nil {
-			return h.all(repo)
-		} else {
-			versions, err := component.ListVersions()
-			if err != nil {
-				return nil, err
-			}
-			versions, err = h.filterVersions(versions)
-			if err != nil {
-				return nil, err
-			}
-
-			for _, vers := range versions {
-				t := vers
-				s := spec
-				s.Version = &t
-				result = append(result, &Object{
-					Repository: repo,
-					Spec:       s,
-					Component:  component.GetName(),
-					Version:    vers,
-				})
-			}
+		if repo == nil {
+			result = append(result, &Object{
+				Spec:       spec,
+				Repository: nil,
+				Component:  spec.Component,
+				Version:    optionutils.AsValue(spec.Version),
+			})
+			return result, nil
 		}
+		return h.getVersions(repo, component, spec)
 	}
 	return result, nil
 }
