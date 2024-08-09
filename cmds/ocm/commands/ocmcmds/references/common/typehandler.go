@@ -9,8 +9,8 @@ import (
 	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
-func Elem(e interface{}) *compdesc.ComponentReference {
-	return e.(*elemhdlr.Object).Element.(*compdesc.ComponentReference)
+func Elem(e interface{}) *compdesc.Reference {
+	return e.(*elemhdlr.Object).Element.(*compdesc.Reference)
 }
 
 var OptionsFor = elemhdlr.OptionsFor

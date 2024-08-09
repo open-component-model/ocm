@@ -49,13 +49,13 @@ func MapToSelectorSource(r *Source) accessors.SourceAccessor {
 ////////////////////////////////////////////////////////////////////////////////
 
 type refAcc struct {
-	*ComponentReference
+	*Reference
 }
 
 func (a refAcc) GetMeta() accessors.ElementMeta {
-	return a.ComponentReference.GetMeta()
+	return a.Reference.GetMeta()
 }
 
-func MapToSelectorReference(r *ComponentReference) accessors.ReferenceAccessor {
+func MapToSelectorReference(r *Reference) accessors.ReferenceAccessor {
 	return refAcc{r}
 }

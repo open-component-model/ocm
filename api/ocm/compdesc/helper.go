@@ -175,24 +175,24 @@ func (cd *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
 }
 
 // GetReferenceByIdentity returns reference that matches the given identity.
-func (cd *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (ComponentReference, error) {
+func (cd *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (Reference, error) {
 	dig := id.Digest()
 	for _, ref := range cd.References {
 		if bytes.Equal(ref.GetIdentityDigest(cd.Resources), dig) {
 			return ref, nil
 		}
 	}
-	return ComponentReference{}, errors.ErrNotFound(KIND_REFERENCE, id.String())
+	return Reference{}, errors.ErrNotFound(KIND_REFERENCE, id.String())
 }
 
-func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) ([]ComponentReference, error) {
+func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) ([]Reference, error) {
 	err := selectors.ValidateSelectors(sel...)
 	if err != nil {
 		return nil, err
 	}
 
 	list := MapToSelectorElementList(cd.References)
-	result := []ComponentReference{}
+	result := []Reference{}
 	for _, r := range cd.References {
 		if len(sel) > 0 {
 			mr := MapToSelectorReference(&r)
@@ -207,8 +207,8 @@ func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) ([]Compo
 	return result, nil
 }
 
-func (cd *ComponentDescriptor) GetReferences() []ComponentReference {
-	result := []ComponentReference{}
+func (cd *ComponentDescriptor) GetReferences() []Reference {
+	result := []Reference{}
 	for _, r := range cd.References {
 		result = append(result, r)
 	}

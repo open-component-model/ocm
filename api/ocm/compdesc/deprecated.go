@@ -200,8 +200,8 @@ func (cd *ComponentDescriptor) GetSourcesByName(name string, selectors ...Identi
 // GetComponentReferences returns all component references that matches the given selectors.
 //
 // Deprectated: use GetReferences with appropriate selectors.
-func (cd *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelector) ([]ComponentReference, error) {
-	refs := make([]ComponentReference, 0)
+func (cd *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelector) ([]Reference, error) {
+	refs := make([]Reference, 0)
 	for _, ref := range cd.References {
 		ok, err := selector.MatchSelectors(ref.GetIdentity(cd.References), selectors...)
 		if err != nil {
@@ -220,13 +220,13 @@ func (cd *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelec
 // GetComponentReferenceIndex returns the index of a given component reference.
 // If the index is not found -1 is returned.
 // Deprecated: use GetReferenceIndex.
-func (cd *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference) int {
+func (cd *ComponentDescriptor) GetComponentReferenceIndex(ref Reference) int {
 	return cd.GetReferenceIndex(ref.GetMeta())
 }
 
 // GetReferenceAccessByIdentity returns a pointer to the reference that matches the given identity.
 // Deprectated: use GetReferenceByIdentity.
-func (cd *ComponentDescriptor) GetReferenceAccessByIdentity(id v1.Identity) *ComponentReference {
+func (cd *ComponentDescriptor) GetReferenceAccessByIdentity(id v1.Identity) *Reference {
 	dig := id.Digest()
 	for i, ref := range cd.References {
 		if bytes.Equal(ref.GetIdentityDigest(cd.Resources), dig) {
@@ -270,7 +270,7 @@ func (cd *ComponentDescriptor) GetReferencesBySelectors(selectors []IdentitySele
 		if !ok {
 			continue
 		}
-		references = append(references, *selctx.ComponentReference)
+		references = append(references, *selctx.Reference)
 	}
 	if len(references) == 0 {
 		return references, NotFound

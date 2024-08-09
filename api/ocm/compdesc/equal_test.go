@@ -487,10 +487,10 @@ var _ = Describe("equivalence", func() {
 	})
 
 	Context("reference", func() {
-		var a, b *compdesc.ComponentReference
+		var a, b *compdesc.Reference
 
 		BeforeEach(func() {
-			a = &compdesc.ComponentReference{
+			a = &compdesc.Reference{
 				ElementMeta: compdesc.ElementMeta{
 					Name:    "r1",
 					Version: "v1",
@@ -536,7 +536,7 @@ var _ = Describe("equivalence", func() {
 
 		BeforeEach(func() {
 			a = compdesc.References{
-				compdesc.ComponentReference{
+				compdesc.Reference{
 					ElementMeta: compdesc.ElementMeta{
 						Name:    "s1",
 						Version: "v1",
@@ -544,7 +544,7 @@ var _ = Describe("equivalence", func() {
 					},
 					ComponentName: "c1",
 				},
-				compdesc.ComponentReference{
+				compdesc.Reference{
 					ElementMeta: compdesc.ElementMeta{
 						Name:    "s2",
 						Version: "v1",
@@ -583,7 +583,7 @@ var _ = Describe("equivalence", func() {
 		})
 
 		It("handles additional entry", func() {
-			b = append(b, compdesc.ComponentReference{
+			b = append(b, compdesc.Reference{
 				ElementMeta: compdesc.ElementMeta{
 					Name:          "s3",
 					ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
@@ -596,7 +596,7 @@ var _ = Describe("equivalence", func() {
 		})
 
 		It("handles additional entry without any other metadata", func() {
-			b = append(b, compdesc.ComponentReference{
+			b = append(b, compdesc.Reference{
 				ElementMeta: compdesc.ElementMeta{
 					Name:          "s3",
 					ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
@@ -608,7 +608,7 @@ var _ = Describe("equivalence", func() {
 		})
 
 		It("handles additional entry without any other metadata", func() {
-			b = append(b, compdesc.ComponentReference{
+			b = append(b, compdesc.Reference{
 				ElementMeta: compdesc.ElementMeta{
 					Name:          "s3",
 					ExtraIdentity: compdesc.NewExtraIdentity("platform", "linux"),
