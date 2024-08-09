@@ -30,6 +30,7 @@ type (
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
 	GenericRepositorySpec            = internal.GenericRepositorySpec
 	ArtifactAccess                   = internal.ArtifactAccess
+	Artifact                         = internal.Artifact
 	NamespaceLister                  = internal.NamespaceLister
 	NamespaceAccess                  = internal.NamespaceAccess
 	ManifestAccess                   = internal.ManifestAccess
