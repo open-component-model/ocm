@@ -1,0 +1,35 @@
+name: Markdown
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.md'
+
+jobs:
+  lint-markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Markdown Linting
+        uses: nosborn/github-action-markdown-cli@v3
+        with:
+          files: .
+          dot: true
+          config_file: .markdownlint.yml
+          ignore_path: .markdownignore
+  verify-links:
+    name: verify-links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Markdown verify links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: yes
+          use-verbose-mode: no
+          config-file: .markdown-link-check.json
