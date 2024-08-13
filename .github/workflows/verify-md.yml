@@ -13,6 +13,7 @@ on:
 jobs:
   lint-markdown:
     runs-on: ubuntu-latest
+    name: Lint
     steps:
       - uses: actions/checkout@v4
       - name: Markdown Linting
@@ -23,7 +24,7 @@ jobs:
           config_file: .markdownlint.yml
           ignore_path: .markdownignore
   verify-links:
-    name: verify-links
+    name: Verify links
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,3 +34,14 @@ jobs:
           use-quiet-mode: yes
           use-verbose-mode: no
           config-file: .markdown-link-check.json
+  spellcheck:
+    name: Spellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Spellcheck
+        uses: rojopolis/spellcheck-github-actions@v0
+        with:
+          task_name: Markdown
+          output_file: spellcheck-output.txt
+
