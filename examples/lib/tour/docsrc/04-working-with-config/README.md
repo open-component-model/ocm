@@ -179,7 +179,7 @@ configuration file for the OCM ecosystem, as will be shown in the next example.
 
 Although the configuration of an OCM context can
 be done by a sequence of explicit calls according to the mechanisms
-shown in the examples before, a simple convenience 
+shown in the examples before, a simple convenience
 library function is provided, which can be used to configure an OCM
 context and all related other contexts with a single call
 based on a central configuration file (`~/.ocmconfig`)
@@ -214,7 +214,7 @@ the central configuration.
 
 One such repository type is the Docker config type. It
 reads a `dockerconfig.json` file and feeds in the credentials.
-Because it is used for a dedicated purpose (credentials for 
+Because it is used for a dedicated purpose (credentials for
 OCI registries), it not only can feed the credentials, but
 also their mapping to consumer ids.
 
@@ -359,7 +359,7 @@ converted to a form storable in the configuration object.
 {{include}{../../04-working-with-config/04-write-config-type.go}{setters}}
 ```
 
-The utility function `runtime.CheckSpecification` can be used to 
+The utility function `runtime.CheckSpecification` can be used to
 check a byte sequence to be a valid specification.
 It just checks for a valid YAML document featuring a non-empty
 `type` field:
@@ -386,7 +386,7 @@ if the target is a credentials context
 it configures the credentials to be used for the
 described OCI repository similar to our [credential management example]({{using-cred-management}}).
 
-But we want to accept more types of target objects. Therefore, we 
+But we want to accept more types of target objects. Therefore, we
 introduce an own interface declaring the methods required for applying
 some configuration settings.
 
@@ -394,7 +394,7 @@ some configuration settings.
 {{include}{../../04-working-with-config/04-write-config-type.go}{config interface}}
 ```
 
-By checking the target object against this interface, we are able 
+By checking the target object against this interface, we are able
 to configure any kind of object, as long as it provides the necessary
 configuration methods.
 
@@ -405,7 +405,7 @@ about the new type. This is done by an `init()` function in our config package.
 
 Here, we call a registration function,
 which gets called with a dedicated type object for the new config type.
-A *type object* describes the config type, its type name, how 
+A *type object* describes the config type, its type name, how
 it is serialized and deserialized and some description.
 We use a standard type object, here, instead of implementing
 an own one. It is parameterized by the Go pointer type (`*ExampleConfigSpec`) for
@@ -428,7 +428,7 @@ A usual, we gain access to our required contexts.
 {{include}{../../04-working-with-config/04-write-config-type.go}{default context}}
 ```
 
-To setup our environment we create our new config based on the actual settings 
+To setup our environment we create our new config based on the actual settings
 and apply it to the config context.
 
 ```go
@@ -511,7 +511,7 @@ the config context it should use to configure itself.
 
 Therefore, our type contains an additional field `updater`.
 Its type `cpi.Updater` is a utility provided by the configuration
-management, which holds a reference to a configuration context 
+management, which holds a reference to a configuration context
 and is able to
 configure an object based on a managed configuration
 watermark. It remembers which config objects from the
@@ -571,7 +571,7 @@ to the config context.
 {{include}{../../04-working-with-config/05-write-config-consumer.go}{object}}
 ```
 
-If we ask now for a repository we will get the empty 
+If we ask now for a repository we will get the empty
 answer, because nothing is configured, yet.
 
 ```go

@@ -1,4 +1,5 @@
 # Basic Usage of OCM Repositories
+
 {{getting-started}}
 
 This [tour](example.go) illustrates the basic usage of the API to
@@ -16,6 +17,7 @@ version: 0.1.0
 ```
 
 {{getting-started-walkthrough}}
+
 ## Walkthrough
 
 The basic entry point for using the OCM library is always
@@ -130,7 +132,7 @@ and the resources described by the component version.
 This results in the following output (the shown version might
 differ, because the code always describes the latest version):
 
-```
+```go
 {{execute}{go}{run}{../../01-getting-started}{<extract>}{version}}
 ```
 
@@ -198,7 +200,7 @@ closing the reader, again
 {{include}{../../01-getting-started/example.go}{closing reader}}
 ```
 
-Now, we just read the content and copy it to the intended 
+Now, we just read the content and copy it to the intended
 output file (`/tmp/ocmcli`).
 
 ```go

@@ -33,7 +33,7 @@ targetRepository:
 ocmConfig: <config file>
 ```
 
-The actual version of the example just works with the file system 
+The actual version of the example just works with the file system
 target, because it is not possible to specify credentials for the
 target repository in this simple config file. But, if you specify an [OCM config file]({{ocm-config-file}}) you can
 add more predefined credential settings to make it possible to use
@@ -65,7 +65,7 @@ provided by the config management:
 
 The context acts as factory for various model types based on
 specification descriptor serialization formats in YAML or JSON.
-Access method specifications and repository specification are 
+Access method specifications and repository specification are
 examples for this feature.
 
 Now, we use the repository specification serialization format to

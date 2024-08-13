@@ -30,20 +30,20 @@ function such as:
 func (this *DLL) Append(d *DLL) {
     // Add defer handling crashes
     defer panics.HandleCrash() // defer call all handlers.
-	if d.next != nil || d.prev != nil {
-		panic("dll element already in use")
-	}
-	if this.lock != nil {
-		this.lock.Lock()
-		defer this.lock.Unlock()
-		d.lock = this.lock
-	}
-	d.next = this.next
-	d.prev = this
-	if this.next != nil {
-		this.next.prev = d
-	}
-	this.next = d
+    if d.next != nil || d.prev != nil {
+        panic("dll element already in use")
+    }
+    if this.lock != nil {
+        this.lock.Lock()
+        defer this.lock.Unlock()
+        d.lock = this.lock
+    }
+    d.next = this.next
+    d.prev = this
+    if this.next != nil {
+        this.next.prev = d
+    }
+    this.next = d
 }
 ```
 

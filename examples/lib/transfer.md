@@ -47,18 +47,18 @@ call. `Close` calls can then simply be added by `finalize.Close(x)`.
 
 ## Creating a temporary orchestration environment
 
-First, a temporary filesystem is created, which is then used to 
+First, a temporary filesystem is created, which is then used to
 create a CTF directory structure.
 
 ```go
-    // import "github.com/mandelsoft/vfs/pkg/memoryfs" 
-	
+    // import "github.com/mandelsoft/vfs/pkg/memoryfs"
+
   // create a temporary orchestration environment for a set of
   // component versions. We use a CTF here stored either
   // in a temporary filesystem folder or in memory.
   tmpfs, err := osfs.NewTempFileSystem()
   if err != nil {
-	  return err
+      return err
   }
   finalize.With(func() error { return vfs.Cleanup(tmpfs) })
 
@@ -68,7 +68,7 @@ create a CTF directory structure.
 
   repo, err := ctf.Open(octx, accessobj.ACC_CREATE, "ctf", 0o700, accessio.PathFileSystem(tmpfs), accessio.FormatDirectory)
   if err != nil {
-	  return errors.Wrapf(err, "cannot create CTF")
+      return errors.Wrapf(err, "cannot create CTF")
   }
   finalize.Close(repo)
 ```
@@ -79,10 +79,10 @@ Or, you can directly use a memory filesystem, if the size of the intended blobs 
 very limited.
 
 The resulting repository can be used like any other OCM repository implementation
-to orchestrate new component versions using the standard repository API of the 
+to orchestrate new component versions using the standard repository API of the
 OCM context.
 
-This can be done as shown in the [credential examples](creds.md). 
+This can be done as shown in the [credential examples](creds.md).
 
 The next step then is to transfer the orchestrated content to another OCM repository.
 The basic functionality provided by the library is the transport of a dedicated
@@ -90,17 +90,17 @@ component version (optionally by traversing all the component references).
 CTF objects support a Lister interface, which can be used to discover contained
 components.
 
-This can be easily combined to transfer the complete content. First, we have 
+This can be easily combined to transfer the complete content. First, we have
 get access to the intended target repository:
 
 ```go
   uni, err := ocm.ParseRepo(cfg.Repository)
   if err != nil {
-	  return errors.Wrapf(err, "invalid repo spec")
+      return errors.Wrapf(err, "invalid repo spec")
   }
   repoSpec, err := octx.MapUniformRepositorySpec(&uni)
   if err != nil {
-	  return errors.Wrapf(err, "invalid repo spec")
+      return errors.Wrapf(err, "invalid repo spec")
   }
 
   // if you know you have an OCI registry based OCM repository
@@ -112,7 +112,7 @@ get access to the intended target repository:
   // use credentials from config context (for example initialized by Configure above)
   target, err := octx.RepositoryForSpec(repoSpec)
   if err != nil {
-	  return err
+      return err
   }
   finalize.Close(target)
 ```
@@ -139,58 +139,58 @@ target repository (`transferHandler, err := standard.New(standard.Overwrite())`.
 ```go
   lister := repo.ComponentLister()
   if lister == nil {
-	  return fmt.Errorf("repo does not support lister")
+      return fmt.Errorf("repo does not support lister")
   }
   comps, err := lister.GetComponents("", true)
   if rerr != nil {
-	  return errors.Wrapf(err, "cannot list components")
+      return errors.Wrapf(err, "cannot list components")
   }
 
   printer := common.NewPrinter(os.Stdout)
   closure := transfer.TransportClosure{}
   transferHandler, err := standard.New(standard.Overwrite())
   if rerr != nil {
-	  return err
+      return err
   }
   for _, cname := range comps {
-	  loop := finalize.Nested()
+      loop := finalize.Nested()
 
-	  c, err := repo.LookupComponent(cname)
-	  if err != nil {
-		  return errors.Wrapf(err, "cannot get component %s", cname)
-	  }
-	  loop.Close(c)
+      c, err := repo.LookupComponent(cname)
+      if err != nil {
+          return errors.Wrapf(err, "cannot get component %s", cname)
+      }
+      loop.Close(c)
 
-	  vnames, err := c.ListVersions()
-	  if err != nil {
-		  return errors.Wrapf(err, " cannot list versions for component %s", cname)
-	  }
+      vnames, err := c.ListVersions()
+      if err != nil {
+          return errors.Wrapf(err, " cannot list versions for component %s", cname)
+      }
 
-	  for _, vname := range vnames {
-		  loop := loop.Nested()
+      for _, vname := range vnames {
+          loop := loop.Nested()
 
-		  cv, err := c.LookupVersion(vname)
-		  if err != nil {
-			  return errors.Wrapf(err, "cannot get version %s for component %s", vname, cname)
-		  }
-		  loop.Close(cv)
-			
-		  err = transfer.TransferVersion(printer, closure, cv, target, transferHandler)
-		  if err != nil {
-			  return errors.Wrapf(err, "cannot transfer version %s for component %s", vname, cname)
-		  }
-			
-		  if err := loop.Finalize(); err != nil {
-			  return err
-		  }
-	  }
-	  if err := loop.Finalize(); err != nil {
-		  return err
-	  }
+          cv, err := c.LookupVersion(vname)
+          if err != nil {
+              return errors.Wrapf(err, "cannot get version %s for component %s", vname, cname)
+          }
+          loop.Close(cv)
+            
+          err = transfer.TransferVersion(printer, closure, cv, target, transferHandler)
+          if err != nil {
+              return errors.Wrapf(err, "cannot transfer version %s for component %s", vname, cname)
+          }
+            
+          if err := loop.Finalize(); err != nil {
+              return err
+          }
+      }
+      if err := loop.Finalize(); err != nil {
+          return err
+      }
   }
 ```
 
-With ` closure := transfer.TransportClosure{}` a shared transport store is
+With `closure := transfer.TransportClosure{}` a shared transport store is
 created, which remembers already transported component versions. It is
 used for all calls of `TransferVersion` to avpid duplicate transfers.
 THis is especially relevant, if the transitive transfer option is set.
@@ -222,19 +222,18 @@ create a nested finalizer specifically used inside a loop step:
 
 ```go
   for ... {
-	  loop := finalize.Nested()
-	  ...
-	  loop.Close(c)
-	  ...
-	  if err := loop.Finalize(); err != nil {
-		  return err
-	  }
+      loop := finalize.Nested()
+      ...
+      loop.Close(c)
+      ...
+      if err := loop.Finalize(); err != nil {
+          return err
+      }
   }
 ```
 
 The nested finalizer can be finalized at the end of the loop,
 but it is also executed once the function is left for the `defer` of
-the root finalizer at the beginning of the function, if it is not yet 
+the root finalizer at the beginning of the function, if it is not yet
 executed. Once it has been explicitly called it is automatically removed
 from the next outer scope.
-

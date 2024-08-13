@@ -5,34 +5,34 @@ The `config` context provides a generic configuration feature for data contexts
 ```go
 
 type Context interface {
-	datacontext.Context
+    datacontext.Context
 
-	AttributesContext() datacontext.AttributesContext
+    AttributesContext() datacontext.AttributesContext
 
-	// Info provides the context for nested configuration evaluation
-	Info() string
-	// WithInfo provides the same context with additional nesting info
-	WithInfo(desc string) Context
+    // Info provides the context for nested configuration evaluation
+    Info() string
+    // WithInfo provides the same context with additional nesting info
+    WithInfo(desc string) Context
 
-	ConfigTypes() ConfigTypeScheme
+    ConfigTypes() ConfigTypeScheme
 
-	// GetConfigForData deserialize configuration objects for known
-	// configuration types.
-	GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
+    // GetConfigForData deserialize configuration objects for known
+    // configuration types.
+    GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
 
-	// ApplyData applies the config given by a byte stream to the config store
-	// If the config type is not known, a generic config is stored and returned.
-	// In this case an unknown error for kind KIND_CONFIGTYPE is returned.
-	ApplyData(data []byte, unmarshaler runtime.Unmarshaler, desc string) (Config, error)
-	// ApplyConfig applies the config to the config store
-	ApplyConfig(spec Config, desc string) error
+    // ApplyData applies the config given by a byte stream to the config store
+    // If the config type is not known, a generic config is stored and returned.
+    // In this case an unknown error for kind KIND_CONFIGTYPE is returned.
+    ApplyData(data []byte, unmarshaler runtime.Unmarshaler, desc string) (Config, error)
+    // ApplyConfig applies the config to the config store
+    ApplyConfig(spec Config, desc string) error
 
-	GetConfigForType(generation int64, typ string) (int64, []Config)
-	GetConfigForName(generation int64, name string) (int64, []Config)
-	GetConfig(generation int64, selector ConfigSelector) (int64, []Config)
+    GetConfigForType(generation int64, typ string) (int64, []Config)
+    GetConfigForName(generation int64, name string) (int64, []Config)
+    GetConfig(generation int64, selector ConfigSelector) (int64, []Config)
 
-	Generation() int64
-	ApplyTo(gen int64, target interface{}) (int64, error)
+    Generation() int64
+    ApplyTo(gen int64, target interface{}) (int64, error)
 }
 ```
 
@@ -45,9 +45,9 @@ A `Config` object must implement the `Config` interface:
 
 ```go
 type Config interface {
-	runtime.VersionedTypedObject
+    runtime.VersionedTypedObject
 
-	ApplyTo(Context, interface{}) error
+    ApplyTo(Context, interface{}) error
 }
 ```
 
@@ -77,14 +77,14 @@ It can be set by the context constructor:
 
 ```go
 func newContext(shared datacontext.AttributesContext, configctx config.Context, reposcheme RepositoryTypeScheme, logger logging.Context) Context {
-	c := &_context{
-		sharedattributes:     shared,
-		updater:              cfgcpi.NewUpdate(configctx),
-		knownRepositoryTypes: reposcheme,
-		...
-	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes(), logger)
-	return c
+    c := &_context{
+        sharedattributes:     shared,
+        updater:              cfgcpi.NewUpdate(configctx),
+        knownRepositoryTypes: reposcheme,
+        ...
+    }
+    c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes(), logger)
+    return c
 }
 ```
 
@@ -94,11 +94,11 @@ called by methods based on configuration settings:
 ```go
 
 func (c *_context) ConfigContext() config.Context {
-	return c.updater.GetContext()
+    return c.updater.GetContext()
 }
 
 func (c *_context) Update() error {
-	return c.updater.Update(c)
+    return c.updater.Update(c)
 }
 ```
 
@@ -114,9 +114,9 @@ It must implement the interface:
 
 ```go
 type Config interface {
-	runtime.VersionedTypedObject
+    runtime.VersionedTypedObject
 
-	ApplyTo(Context, interface{}) error
+    ApplyTo(Context, interface{}) error
 }
 ```
 
@@ -130,41 +130,41 @@ The following snipped shows a typical pattern, how to implement this.
 
 
 const (
-	MyConfigType   = "my.config" + common.TypeGroupSuffix
-	MyConfigTypeV1 = MyConfigType + runtime.VersionSeparator + "v1"
+    MyConfigType   = "my.config" + common.TypeGroupSuffix
+    MyConfigTypeV1 = MyConfigType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	config.RegisterConfigType(MyConfigType, config.NewConfigType(MyConfigType, &ConfigSpec{}))
-	config.RegisterConfigType(MyConfigTypeV1, config.NewConfigType(MyConfigTypeV1, &ConfigSpec{}))
+    config.RegisterConfigType(MyConfigType, config.NewConfigType(MyConfigType, &ConfigSpec{}))
+    config.RegisterConfigType(MyConfigTypeV1, config.NewConfigType(MyConfigTypeV1, &ConfigSpec{}))
 }
 
 // ConfigSpec describes a memory based repository interface.
 type ConfigSpec struct {
-	runtime.ObjectVersionedType `json:",inline"`
-	// Any configuration settings
-	...
+    runtime.ObjectVersionedType `json:",inline"`
+    // Any configuration settings
+    ...
 }
 
 // NewConfigSpec creates a new memory ConfigSpec
 func NewConfigSpec() *ConfigSpec {
-	return &ConfigSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(MyConfigType),
-	}
+    return &ConfigSpec{
+        ObjectVersionedType: runtime.NewVersionedObjectType(MyConfigType),
+    }
 }
 
 func (a *ConfigSpec) GetType() string {
-	return MyConfigType
+    return MyConfigType
 }
 
 func (a *ConfigSpec) ApplyTo(ctx config.Context, target interface{}) error {
-	// check if applicable for target object
-	t, ok := target.(cpi.Context)
-	if !ok {
-		return config.ErrNoContext(MyConfigType)
-	}
-	// do the needful
-	return false
+    // check if applicable for target object
+    t, ok := target.(cpi.Context)
+    if !ok {
+        return config.ErrNoContext(MyConfigType)
+    }
+    // do the needful
+    return false
 }
 ```
 
@@ -177,7 +177,6 @@ The configuration context provides an own configuration object for configuring
 the configuration context (in sub package
 `config`), that can be used to aggregate any kind of configuration object,
 that is serializable.
-
 
 ```go
 // Config describes a memory based repository interface.

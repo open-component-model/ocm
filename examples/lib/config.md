@@ -20,7 +20,7 @@ is called for a desired target. The object may decide to apply itself to this
 target or to bypass the target object.
 
 The configuration objects are typed and should be serializable. This
-enables the configuration context to use scheme objects, like the other 
+enables the configuration context to use scheme objects, like the other
 context types to reconstruct configurations from a byte stream/textual
 representation.
 
@@ -32,42 +32,42 @@ applies the contained configuration in the order of their appearance.
 
 ## Using the Configuration Context with explicit Configuration Objects
 
-A first example how to use configuration objects can be found 
+A first example how to use configuration objects can be found
 [here](config1/example.go).
 
 It just configures a configuration object provided by the credential
 context able to configure credential settings.
 
 ```go
-	cid := credentials.ConsumerIdentity{
-		ociid.ID_TYPE:       ociid.CONSUMER_TYPE,
-		ociid.ID_HOSTNAME:   "ghcr.io",
-		ociid.ID_PATHPREFIX: "mandelsoft",
-	}
+    cid := credentials.ConsumerIdentity{
+        ociid.ID_TYPE:       ociid.CONSUMER_TYPE,
+        ociid.ID_HOSTNAME:   "ghcr.io",
+        ociid.ID_PATHPREFIX: "mandelsoft",
+    }
 
-	// create a credential configuration object
-	// and configure it to provide some direct consumer credentials.
-	creds := ccfg.New()
-	creds.AddConsumer(
-		cid,
-		directcreds.NewRepositorySpec(cfg.GetCredentials().Properties()),
-	)
+    // create a credential configuration object
+    // and configure it to provide some direct consumer credentials.
+    creds := ccfg.New()
+    creds.AddConsumer(
+        cid,
+        directcreds.NewRepositorySpec(cfg.GetCredentials().Properties()),
+    )
 ```
 
-It just declares direct credentials for a dedicated consumer id (see the 
+It just declares direct credentials for a dedicated consumer id (see the
 [credentials example](creds.md)).
 
 The ocm context can be used to get access to the appropriate configuration
 context, which is used to apply the configuration object.
 
 ```go
-	octx := ocm.DefaultContext()
-	cctx := octx.ConfigContext()
+    octx := ocm.DefaultContext()
+    cctx := octx.ConfigContext()
 
-	err = cctx.ApplyConfig(creds, "explicit")
-	if err != nil {
-		return errors.Wrapf(err, "cannot apply config")
-	}
+    err = cctx.ApplyConfig(creds, "explicit")
+    if err != nil {
+        return errors.Wrapf(err, "cannot apply config")
+    }
 ```
 
 After the object has been applied, the result can be observed on the
@@ -77,18 +77,18 @@ be queried. In the example this is a credentials object valid for an
 OCI registry.
 
 ```go
-	credctx := octx.CredentialsContext()
+    credctx := octx.CredentialsContext()
 
-	found, err := credctx.GetCredentialsForConsumer(cid, ociid.IdentityMatcher)
-	if err != nil {
-		return errors.Wrapf(err, "cannot extract credentials")
-	}
-	got, err := found.Credentials(credctx)
-	if err != nil {
-		return errors.Wrapf(err, "cannot evaluate credentials")
-	}
+    found, err := credctx.GetCredentialsForConsumer(cid, ociid.IdentityMatcher)
+    if err != nil {
+        return errors.Wrapf(err, "cannot extract credentials")
+    }
+    got, err := found.Credentials(credctx)
+    if err != nil {
+        return errors.Wrapf(err, "cannot evaluate credentials")
+    }
 
-	fmt.Printf("found: %s\n", got)
+    fmt.Printf("found: %s\n", got)
 ```
 
 The first call provides a potentially dynamic credential source for the requested consumer. This object can then be used to dtermine actual credentials valid for an actual resource access. This indirection is introduced to support dynamic just-in-time credential generation processes.
@@ -97,8 +97,8 @@ The function `credentials.CredentialsForConsumer` can be used, instead, to direc
 
 ## Configurations in Configuration Files
 
-The previous example just demonstrates the basic flow, it might not be 
-very useful, because the consumer could directly be configured at the 
+The previous example just demonstrates the basic flow, it might not be
+very useful, because the consumer could directly be configured at the
 credential context.
 
 The complete mechanism becomes valuable, if some kind of generic
@@ -150,43 +150,43 @@ example).
 It can be applied as whole as shown in the following code snippet:
 
 ```go
-	data, err := ioutil.ReadFile(CFGFILE)
-	if err != nil {
-		return errors.Wrapf(err, "cannot read configuration file %s", CFGFILE)
-	}
+    data, err := ioutil.ReadFile(CFGFILE)
+    if err != nil {
+        return errors.Wrapf(err, "cannot read configuration file %s", CFGFILE)
+    }
 
-	octx := ocm.DefaultContext()
-	cctx := octx.ConfigContext()
+    octx := ocm.DefaultContext()
+    cctx := octx.ConfigContext()
 
-	_, err = cctx.ApplyData(data, runtime.DefaultYAMLEncoding, CFGFILE)
-	if err != nil {
-		return errors.Wrapf(err, "cannot apply config data")
-	}
+    _, err = cctx.ApplyData(data, runtime.DefaultYAMLEncoding, CFGFILE)
+    if err != nil {
+        return errors.Wrapf(err, "cannot apply config data")
+    }
 ```
 
 It uses the exactly same configuration mechanism shown in the previous
 example, so the query code looks all the same:
 
 ```go
-	cid := credentials.ConsumerIdentity{
-		ociid.ID_TYPE:       ociid.CONSUMER_TYPE,
-		ociid.ID_HOSTNAME:   "ghcr.io",
-		ociid.ID_PATHPREFIX: "mandelsoft",
-	}
+    cid := credentials.ConsumerIdentity{
+        ociid.ID_TYPE:       ociid.CONSUMER_TYPE,
+        ociid.ID_HOSTNAME:   "ghcr.io",
+        ociid.ID_PATHPREFIX: "mandelsoft",
+    }
 
-	// as before
-	credctx := octx.CredentialsContext()
+    // as before
+    credctx := octx.CredentialsContext()
 
-	found, err := credctx.GetCredentialsForConsumer(cid, ociid.IdentityMatcher)
-	if err != nil {
-		return errors.Wrapf(err, "cannot extract credentials")
-	}
-	got, err := found.Credentials(credctx)
-	if err != nil {
-		return errors.Wrapf(err, "cannot evaluate credentials")
-	}
+    found, err := credctx.GetCredentialsForConsumer(cid, ociid.IdentityMatcher)
+    if err != nil {
+        return errors.Wrapf(err, "cannot extract credentials")
+    }
+    got, err := found.Credentials(credctx)
+    if err != nil {
+        return errors.Wrapf(err, "cannot evaluate credentials")
+    }
 
-	fmt.Printf("found: %s\n", got)
+    fmt.Printf("found: %s\n", got)
 ```
 
 The complete example can be found [here](config2/example.go).
@@ -203,7 +203,7 @@ searched for a configuration file and applies it. If not found it looks for
 a docker config file and applies an appropriate setting (see example above).
 
 If the config data is already provided by some other means, it can be directly be
-applied with the function 
+applied with the function
 
     pkg.contexts.ocm.utils.ConfigureByData(ctx ocm.Context, data []byte, info string) error
 
@@ -217,7 +217,7 @@ a GO struct implementing the interface `credentials.cpi.Config`. The main method
 here is `ApplyTo(configctx Context, target interface{}) error`, which is used to apply
 the content to a dedicated target object. The method has to decide on its own
 whether it applies to the passed object (type) at all, or what part of its content
-is applied. 
+is applied.
 
 This way it is possible to provide configuration objects that configure multiple
 types of targets based on the same configuration information.
@@ -230,8 +230,8 @@ configuration objects, they are just ignored.
 The typical use-case is to configure contexts. To be able to get up-to-date
 with configuration settings applied after an object has been created (with
 some initial configuration), the methods of a target object depending on potential
-configuration, have to update the target configuration prior to their 
-execution. This is supported by an `Update` object, which related to a 
+configuration, have to update the target configuration prior to their
+execution. This is supported by an `Update` object, which related to a
 configuration context.
 
 A complete example covering the following two sections can be found
@@ -245,29 +245,29 @@ data, which is matter to some configuration.
 
 ```go
 type Target struct {
-	updater cpi.Updater
-	value   string
+    updater cpi.Updater
+    value   string
 }
 
 func NewTarget(ctx cpi.Context) *Target {
-	return &Target{
-		updater: cpi.NewUpdate(ctx),
-	}
+    return &Target{
+        updater: cpi.NewUpdate(ctx),
+    }
 }
 
 func (t *Target) SetValue(v string) {
-	t.value = v
+    t.value = v
 }
 
 func (t *Target) GetValue() string {
-	t.updater.Update(t)
-	return t.value
+    t.updater.Update(t)
+    return t.value
 }
 ```
 
 Whenever a method is called, which depends on potentially configurable
 information the `Update`method must be called on the updater instance.
-The configuration context keeps track of a sequence of applied configuration 
+The configuration context keeps track of a sequence of applied configuration
 objects. The updater objects stored the sequence number of the latest executed
 update. Calling the `Update` method just replays the configuration objects
 applied since the last update.
@@ -278,29 +278,29 @@ A configuration object then may look as follows:
 const TYPE = "mytype.config.mandelsoft.org"
 
 type Config struct {
-	runtime.ObjectVersionedType `json:",inline""`
-	Value                       string `json:"value"`
+    runtime.ObjectVersionedType `json:",inline""`
+    Value                       string `json:"value"`
 }
 
 func (c *Config) ApplyTo(context cpi.Context, i interface{}) error {
-	if i == nil {
-		return nil
-	}
-	t, ok := i.(*Target)
-	if !ok {
-		return cpi.ErrNoContext(TYPE)
-	}
-	t.SetValue(c.Value)
-	return nil
+    if i == nil {
+        return nil
+    }
+    t, ok := i.(*Target)
+    if !ok {
+        return cpi.ErrNoContext(TYPE)
+    }
+    t.SetValue(c.Value)
+    return nil
 }
 
 var _ cpi.Config = (*Config)(nil)
 
 func NewConfig(v string) *Config {
-	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(TYPE),
-		Value:               v,
-	}
+    return &Config{
+        ObjectVersionedType: runtime.NewVersionedObjectType(TYPE),
+        Value:               v,
+    }
 }
 ```
 
@@ -311,26 +311,26 @@ With this preparing work, an application using the configuration context
 to configure this new target object could look like this:
 
 ```go
-	ctx := config.DefaultContext()
+    ctx := config.DefaultContext()
 
-	target := NewTarget(ctx)
+    target := NewTarget(ctx)
 
-	err := ctx.ApplyConfig(NewConfig("hello world"), "explicit1")
-	if err != nil {
-		return errors.Wrapf(err, "cannot apply config 1")
-	}
+    err := ctx.ApplyConfig(NewConfig("hello world"), "explicit1")
+    if err != nil {
+        return errors.Wrapf(err, "cannot apply config 1")
+    }
 
-	fmt.Printf("value is %q\n", target.GetValue())
+    fmt.Printf("value is %q\n", target.GetValue())
 
-	err = ctx.ApplyConfig(NewConfig("hello universe"), "explicit2")
-	if err != nil {
-		return errors.Wrapf(err, "cannot apply config 2")
-	}
+    err = ctx.ApplyConfig(NewConfig("hello universe"), "explicit2")
+    if err != nil {
+        return errors.Wrapf(err, "cannot apply config 2")
+    }
 
-	fmt.Printf("value is %q\n", target.GetValue())
+    fmt.Printf("value is %q\n", target.GetValue())
 
-	newtarget := NewTarget(ctx)
-	fmt.Printf("value is %q\n", newtarget.GetValue())
+    newtarget := NewTarget(ctx)
+    fmt.Printf("value is %q\n", newtarget.GetValue())
 ```
 
 Once a connection of the target object to a configuration context is
@@ -338,7 +338,7 @@ established, it does not matter, whether the object is created before or
 after applying a configuration to the configuration context.
 Therefore, a configuration can be applied long before real targets are created.
 
-The configuration context does never refer to potential targets, therefore, 
+The configuration context does never refer to potential targets, therefore,
 the garbage collection of target objects is not blocked by the existence
 of a configuration context for those objects.
 
@@ -353,7 +353,7 @@ by an `init` function:
 
 ```go
 func init() {
-	cpi.RegisterConfigType(TYPE, cpi.NewConfigType(TYPE, &Config{}, "just provide a value for Target objects"))
+    cpi.RegisterConfigType(TYPE, cpi.NewConfigType(TYPE, &Config{}, "just provide a value for Target objects"))
 }
 ```
 
@@ -373,17 +373,17 @@ configurations:
 to configure a dedicated context as shown in the second example:
 
 ```go
-	data, err := ioutil.ReadFile(CFGFILE)
-	if err != nil {
-		return errors.Wrapf(err, "cannot read configuration file %s", CFGFILE)
-	}
-	
-	_, err = ctx.ApplyData(data, runtime.DefaultYAMLEncoding, CFGFILE)
-	if err != nil {
-		return errors.Wrapf(err, "cannot apply config data")
-	}
+    data, err := ioutil.ReadFile(CFGFILE)
+    if err != nil {
+        return errors.Wrapf(err, "cannot read configuration file %s", CFGFILE)
+    }
+    
+    _, err = ctx.ApplyData(data, runtime.DefaultYAMLEncoding, CFGFILE)
+    if err != nil {
+        return errors.Wrapf(err, "cannot apply config data")
+    }
 
-	fmt.Printf("value is %q\n", newtarget.GetValue())
+    fmt.Printf("value is %q\n", newtarget.GetValue())
 ```
 
 When composing a new configuration context with a context builder, it is

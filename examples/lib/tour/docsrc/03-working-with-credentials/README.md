@@ -181,7 +181,7 @@ The used functions above are just convenience wrappers
 around the core type ConsumerId, which might be provided
 for dedicated repository/consumer technologies.
 Everything can be done directly with the core interface
-and property name constants provided by the dedicted technologies. 
+and property name constants provided by the dedicted technologies.
 
 Once we have the id we can finally set the credentials for this
 id.
@@ -190,9 +190,9 @@ id.
 {{include}{../../03-working-with-credentials/02-basic-credential-management.go}{set credentials}}
 ```
 
-Now, the context is prepared to provide credentials 
+Now, the context is prepared to provide credentials
 for any usage of our OCI registry
-Let's test, whether it could provide credentials 
+Let's test, whether it could provide credentials
 for storing our component version.
 
 First, we get the repository object for our OCM repository.
@@ -277,7 +277,7 @@ the access method as credential consumer can access the blob.
 
 The OCM toolset embraces multiple storage
 backend technologies, for OCM metadata as well
-as for artifacts described by a component version. 
+as for artifacts described by a component version.
 All those technologies typically have their own
 way to configure credentials for command line
 tools or servers.
@@ -346,7 +346,7 @@ specification.
 We are not interested in the repository object, so we just ignore
 the result.
 
-So, if you have done the appropriate docker login for your 
+So, if you have done the appropriate docker login for your
 OCI registry, it should be possible now to get the credentials
 for the configured repository.
 

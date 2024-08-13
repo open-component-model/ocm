@@ -12,14 +12,14 @@ the credentials directly for the lookup call:
 ```go
   cfg, err := helper.ReadConfig(CFG)
   if err != nil {
-	  return err
+      return err
   }
   
   repoSpec := ocireg.NewRepositorySpec("ghcr.io/mandelsoft/ocm", nil)
 
   repo, err := octx.RepositoryForSpec(repoSpec, cfg.GetCredentials())
   if err != nil {
-	  return err
+      return err
   }
   defer repo.Close()
 ```
@@ -27,6 +27,7 @@ the credentials directly for the lookup call:
 Credentials are given by an object of type [`credentials.Credentials`](../../api/credentials/interface.go).
 This is basically a set of string attributes. For OCM repositories based on OCI
 registries two attributes are used:
+
 - `credentials.ATTR_USERNAME` the username
 - `credentials.ATTR_PASSWORD` the password
 
@@ -37,13 +38,13 @@ access object is requested for a component in this repository.
 ```go
   comp, err := repo.LookupComponent(cfg.Component)
   if err != nil {
-	  return errors.Wrapf(err, "cannot lookup component %s", cfg.Component)
+      return errors.Wrapf(err, "cannot lookup component %s", cfg.Component)
   }
   defer comp.Close()
 
   compvers, err := comp.NewVersion(cfg.Version, true)
   if err != nil {
-	  return errors.Wrapf(err, "cannot create new version %s", cfg.Version)
+      return errors.Wrapf(err, "cannot create new version %s", cfg.Version)
   }
   defer compvers.Close()
 ```
@@ -60,18 +61,18 @@ some text.
   compvers.GetDescriptor().Provider = metav1.Provider{Name: "mandelsoft"}
   
   err=compvers.SetResourceBlob(
-	  &compdesc.ResourceMeta{
-		  ElementMeta: compdesc.ElementMeta{
-			  Name: "test",
-		  }, 
-		  Type:     resourcetypes.BLOB, 
-		  Relation: metav1.LocalRelation,
-	  }, 
-	  accessio.BlobAccessForString(mime.MIME_TEXT, "testdata"), 
-	  "", nil,
+      &compdesc.ResourceMeta{
+          ElementMeta: compdesc.ElementMeta{
+              Name: "test",
+          }, 
+          Type:     resourcetypes.BLOB, 
+          Relation: metav1.LocalRelation,
+      }, 
+      accessio.BlobAccessForString(mime.MIME_TEXT, "testdata"), 
+      "", nil,
   )
   if err != nil {
-	  return errors.Wrapf(err, "cannot add resource")
+      return errors.Wrapf(err, "cannot add resource")
   }
 ```
 
@@ -80,7 +81,7 @@ the repository.
 
 ```go
   if err=comp.AddVersion(compvers); err != nil {
-	  return errors.Wrapf(err, "cannot add new version")
+      return errors.Wrapf(err, "cannot add new version")
   }
 ```
 
@@ -91,15 +92,15 @@ The complete example can be found [here](cred1/example.go).
 If only a single repository is used during the access of a component version,
 the direct provisioning of credentials might be sufficient.
 
-But even a read access might require credentials. A main task of a component 
+But even a read access might require credentials. A main task of a component
 version is to describe resource artifacts and provide access to the content of
 those artifacts. They may be located not only in the
-actually used component repository but in any other kind of repository, which is 
+actually used component repository but in any other kind of repository, which is
 supported by an access method.
 
 So, accessing content of artifacts, as described in the main example, might
-require access to any repository described by an access specification 
-used in a component version. 
+require access to any repository described by an access specification
+used in a component version.
 
 Therefore, it might be required to access credentials deep in the functionality
 of the library, depending on data found during the processing.
@@ -112,7 +113,7 @@ to describe access to credential stores (also called repositories in the context
 of this library).
 
 If some code requires access to dedicated credentials, it specifies the
-required kind of credentials by a consumer id object. Such an object 
+required kind of credentials by a consumer id object. Such an object
 encapsulates the intended usage context.
 
 A consumer id is basically a set of usage context specific string attributes. All
@@ -131,7 +132,7 @@ attributes are used to fully describe the usage context.
   (for OCI this is an OCI repository path)
 
 The credentials context now allows specifying credentials
-for subsets of such identity specifications. When requesting 
+for subsets of such identity specifications. When requesting
 credentials for a repository those specifications are
 checked with a type specific identity matcher to find credentials best
 matching the desired usage context. For example, for the OCI context, the
@@ -146,16 +147,16 @@ as follows:
   octx := ocm.DefaultContext()
   
   octx.CredentialsContext().SetCredentialsForConsumer(
-	  credentials.ConsumerIdentity{
-		  identity.ID_TYPE: identity.CONSUMER_TYPE, 
-		  identity.ID_HOSTNAME: "ghcr.io", 
-		  identity.ID_PATHPREFIX: "mandelsoft",
-	  }, 
-	  cfg.GetCredentials(), 
+      credentials.ConsumerIdentity{
+          identity.ID_TYPE: identity.CONSUMER_TYPE, 
+          identity.ID_HOSTNAME: "ghcr.io", 
+          identity.ID_PATHPREFIX: "mandelsoft",
+      }, 
+      cfg.GetCredentials(), 
   )
 ```
 
-The given pattern does not specify all the possible attributes, therefore, it 
+The given pattern does not specify all the possible attributes, therefore, it
 matches, for example, for all ports.
 
 After the credentials have been configured for the used credentials context,
@@ -167,12 +168,12 @@ as before.
 
   repo, err := octx.RepositoryForSpec(repoSpec)
   if err != nil {
-	  return err
+      return err
   }
   defer repo.Close()
 ```
 
-This mechanism explicitly works for the implicit credential requests when 
+This mechanism explicitly works for the implicit credential requests when
 requesting resource content stored in foreign repositories requiring
 authentication as well as for the initial repository lookups.
 
@@ -183,7 +184,7 @@ The complete example can be found [here](cred2/example.go).
 Instead of configuring credentials at the credentials context,
 it is possible to access standard credential stores, also.
 
-Similar to the OCM context, the credentials context is capable to manage 
+Similar to the OCM context, the credentials context is capable to manage
 the access to arbitrary credential stores, as ong as their type is supported by
 the actual program context. Again, there are types for the
 repository/store specification and instantiation methods to map a specification
@@ -208,7 +209,7 @@ file.
 
   _, err = octx.CredentialsContext().RepositoryForSpec(spec)
   if err != nil {
-	  return errors.Wrapf(err, "cannot access default docker config")
+      return errors.Wrapf(err, "cannot access default docker config")
   }
 ```
 
@@ -223,7 +224,7 @@ repository for the credentials context additionally configures all the possible
 consumer ids.
 
 For more general stores, which just store credentials without a formal
-type specific context, the mapping must be explicitly done as part of the 
+type specific context, the mapping must be explicitly done as part of the
 coding. This can be done by listing the found credentials by using
 a method on the credential repository object. The example above just ignores
 this result value, because it uses the auto-propagation mode.
