@@ -97,7 +97,14 @@ func (o *SignatureCommand) Run() (rerr error) {
 	if err != nil {
 		return err
 	}
-	return utils.HandleOutput(NewAction(o.spec.terms, o.Context.OCMContext(), common.NewPrinter(o.Context.StdOut()), sopts), handler, utils.StringElemSpecs(o.Refs...)...)
+	err = utils.HandleOutput(NewAction(o.spec.terms, o.Context.OCMContext(), common.NewPrinter(o.Context.StdOut()), sopts), handler, utils.StringElemSpecs(o.Refs...)...)
+	if err != nil {
+		return err
+	}
+	if sopts.VerifiedStore != nil {
+		return errors.Wrapf(sopts.VerifiedStore.Save(), "cannot save verified store %q", signoption.From(o).Verified.File)
+	}
+	return nil
 }
 
 /////////////////////////////////////////////////////////////////////////////

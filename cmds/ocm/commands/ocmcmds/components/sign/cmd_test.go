@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/oci/testhelper"
 	. "ocm.software/ocm/api/ocm/testhelper"
+	common "ocm.software/ocm/api/utils/misc"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -19,6 +20,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
+	"ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/utils/accessio"
@@ -53,6 +55,8 @@ const (
 	D_COMPONENTA = "01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d"
 	D_COMPONENTB = "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
 )
+
+const VERIFIED_FILE = "verified.yaml"
 
 var substitutions = Substitutions{
 	"test": D_COMPONENTA,
@@ -108,7 +112,7 @@ var _ = Describe("access method", func() {
 			Expect(r.Meta().Digest).To(Equal(DS_OCIMANIFEST2))
 		})
 
-		It("sign single component in component archive", func() {
+		It("signs single component in component archive", func() {
 			prepareEnv(env, ARCH, "")
 
 			buf := bytes.NewBuffer(nil)
@@ -135,7 +139,7 @@ successfully signed github.com/mandelsoft/test:v1 (digest SHA-256:${test})`,
 			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTA))
 		})
 
-		It("sign component archive", func() {
+		It("signs transport archive", func() {
 			prepareEnv(env, ARCH, ARCH)
 
 			buf := bytes.NewBuffer(nil)
@@ -165,7 +169,7 @@ successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
 			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTB))
 		})
 
-		It("sign component archive with --lookup option", func() {
+		It("signs transport archive with --lookup option", func() {
 			prepareEnv(env, ARCH2, ARCH)
 
 			buf := bytes.NewBuffer(nil)
@@ -356,7 +360,50 @@ successfully verified github.com/mandelsoft/test:v1 (digest SHA-256:5ed8bb27309c
 		Expect(len(certs)).To(Equal(3))
 		Expect(algo).To(Equal(rsa.Algorithm))
 	})
+
+	Context("verified store", func() {
+		BeforeEach(func() {
+			FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
+
+			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+				OCIManifest1(env.Builder)
+				OCIManifest2(env.Builder)
+			})
+		})
+
+		It("signs transport archive", func() {
+			prepareEnv(env, ARCH, ARCH)
+
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("sign", "components", "--verified", VERIFIED_FILE, "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
+
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
+  no digest found for "github.com/mandelsoft/test:v1"
+  applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref:v1]...
+    resource 0:  "name"="testdata": digest SHA-256:${r0}[genericBlobDigest/v1]
+    resource 1:  "name"="value": digest SHA-256:${r1}[ociArtifactDigest/v1]
+    resource 2:  "name"="ref": digest SHA-256:${r2}[ociArtifactDigest/v1]
+  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${test}[jsonNormalisation/v1]
+  resource 0:  "name"="otherdata": digest SHA-256:${rb0}[genericBlobDigest/v1]
+successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
+`, substitutions))
+
+			Expect(Must(env.FileExists(VERIFIED_FILE))).To(BeTrue())
+
+			store := Must(signing.NewVerifiedStore(VERIFIED_FILE, env.FileSystem()))
+
+			CheckStore(store, common.NewNameVersion(COMPONENTA, VERSION))
+			CheckStore(store, common.NewNameVersion(COMPONENTB, VERSION))
+		})
+	})
 })
+
+func CheckStore(store signing.VerifiedStore, ve common.VersionedElement) {
+	e := store.Get(ve)
+	ExpectWithOffset(1, e).NotTo(BeNil())
+	ExpectWithOffset(1, common.VersionedElementKey(e)).To(Equal(common.VersionedElementKey(ve)))
+}
 
 func prepareEnv(env *TestEnv, componentAArchive, componentBArchive string) {
 	env.OCMCommonTransport(componentAArchive, accessio.FormatDirectory, func() {

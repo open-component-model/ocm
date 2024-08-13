@@ -81,7 +81,7 @@ func (v *verifiedStore) Load() error {
 	var storage StorageDescriptor
 	f, err := v.fs.Open(v.file)
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
+		if !errors.Is(err, os.ErrNotExist) {
 			return err
 		}
 	} else {

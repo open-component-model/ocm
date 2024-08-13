@@ -1233,7 +1233,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 		})
 	})
 
-	FContext("verified store", func() {
+	Context("verified store", func() {
 		BeforeEach(func() {
 			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 				env.ComponentVersion(COMPONENTA, VERSION, func() {

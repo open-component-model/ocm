@@ -27,6 +27,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
+	common "ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -49,6 +50,32 @@ const (
 	PUBKEY  = "/tmp/pub"
 	PRIVKEY = "/tmp/priv"
 )
+
+const (
+	S_TESTDATA = "testdata"
+	D_TESTDATA = "810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"
+)
+
+const (
+	S_OTHERDATA = "otherdata"
+	D_OTHERDATA = "54b8007913ec5a907ca69001d59518acfd106f7b02f892eabf9cae3f8b2414b4"
+)
+
+const VERIFIED_FILE = "verified.yaml"
+
+const (
+	D_COMPONENTA = "01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d"
+	D_COMPONENTB = "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
+)
+
+var substitutions = Substitutions{
+	"test": D_COMPONENTA,
+	"r0":   D_TESTDATA,
+	"r1":   DS_OCIMANIFEST1.Value,
+	"r2":   DS_OCIMANIFEST2.Value,
+	"ref":  D_COMPONENTB,
+	"rb0":  D_OTHERDATA,
+}
 
 var _ = Describe("access method", func() {
 	var (
@@ -83,7 +110,7 @@ var _ = Describe("access method", func() {
 				env.Version(VERSION, func() {
 					env.Provider(PROVIDER)
 					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
+						env.BlobStringData(mime.MIME_TEXT, S_TESTDATA)
 					})
 					env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 						env.Access(
@@ -102,7 +129,7 @@ var _ = Describe("access method", func() {
 				env.Version(VERSION, func() {
 					env.Provider(PROVIDER)
 					env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "otherdata")
+						env.BlobStringData(mime.MIME_TEXT, S_OTHERDATA)
 					})
 					env.Reference("ref", COMPONENTA, VERSION)
 				})
@@ -114,21 +141,16 @@ var _ = Describe("access method", func() {
 		env.Cleanup()
 	})
 
-	It("sign component archive", func() {
-		buf := bytes.NewBuffer(nil)
-		digest := "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
-
+	Prepare := func() {
 		session := datacontext.NewSession()
 		defer session.Close()
 
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		archcloser := session.AddCloser(src)
+		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+		session.AddCloser(src)
 		resolver := resolvers.NewCompoundResolver(src)
 
-		cv, err := resolver.LookupComponentVersion(COMPONENTB, VERSION)
-		Expect(err).To(Succeed())
-		closer := session.AddCloser(cv)
+		cv := Must(resolver.LookupComponentVersion(COMPONENTB, VERSION))
+		session.AddCloser(cv)
 
 		opts := NewOptions(
 			Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
@@ -137,12 +159,19 @@ var _ = Describe("access method", func() {
 			Update(), VerifyDigests(),
 		)
 		Expect(opts.Complete(DefaultContext)).To(Succeed())
-		dig, err := Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		closer.Close()
-		archcloser.Close()
+
+		dig := Must(Apply(nil, nil, cv, opts))
 		log.Info("dig result", "dig", dig.String())
-		Expect(dig.Value).To(Equal(digest))
+		Expect(dig.Value).To(Equal(D_COMPONENTB))
+	}
+
+	It("verifies transport archive", func() {
+		buf := bytes.NewBuffer(nil)
+
+		Prepare()
+
+		session := datacontext.NewSession()
+		defer session.Close()
 
 		Expect(env.CatchOutput(buf).Execute("verify", "components", "-V", "-s", SIGNATURE, "-k", PUBKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
 
@@ -150,12 +179,47 @@ var _ = Describe("access method", func() {
 applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
   no digest found for "github.com/mandelsoft/test:v1"
   applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref:v1]...
-    resource 0:  "name"="testdata": digest SHA-256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
-    resource 1:  "name"="value": digest SHA-256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f[ociArtifactDigest/v1]
-    resource 2:  "name"="ref": digest SHA-256:c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7[ociArtifactDigest/v1]
-  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d[jsonNormalisation/v1]
-  resource 0:  "name"="otherdata": digest SHA-256:54b8007913ec5a907ca69001d59518acfd106f7b02f892eabf9cae3f8b2414b4[genericBlobDigest/v1]
-successfully verified github.com/mandelsoft/ref:v1 (digest SHA-256:` + digest + `)
-`))
+    resource 0:  "name"="testdata": digest SHA-256:${r0}[genericBlobDigest/v1]
+    resource 1:  "name"="value": digest SHA-256:${r1}[ociArtifactDigest/v1]
+    resource 2:  "name"="ref": digest SHA-256:${r2}[ociArtifactDigest/v1]
+  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${test}[jsonNormalisation/v1]
+  resource 0:  "name"="otherdata": digest SHA-256:${rb0}[genericBlobDigest/v1]
+successfully verified github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
+`, substitutions))
+	})
+
+	Context("verified store", func() {
+
+		It("signs transport archive", func() {
+			Prepare()
+
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("verify", "components", "--verified", VERIFIED_FILE, "-s", SIGNATURE, "-k", PUBKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
+
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
+  no digest found for "github.com/mandelsoft/test:v1"
+  applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref:v1]...
+    resource 0:  "name"="testdata": digest SHA-256:${r0}[genericBlobDigest/v1]
+    resource 1:  "name"="value": digest SHA-256:${r1}[ociArtifactDigest/v1]
+    resource 2:  "name"="ref": digest SHA-256:${r2}[ociArtifactDigest/v1]
+  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${test}[jsonNormalisation/v1]
+  resource 0:  "name"="otherdata": digest SHA-256:${rb0}[genericBlobDigest/v1]
+successfully verified github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
+`, substitutions))
+
+			Expect(Must(env.FileExists(VERIFIED_FILE))).To(BeTrue())
+
+			store := Must(NewVerifiedStore(VERIFIED_FILE, env.FileSystem()))
+
+			CheckStore(store, common.NewNameVersion(COMPONENTA, VERSION))
+			CheckStore(store, common.NewNameVersion(COMPONENTB, VERSION))
+		})
 	})
 })
+
+func CheckStore(store VerifiedStore, ve common.VersionedElement) {
+	e := store.Get(ve)
+	ExpectWithOffset(1, e).NotTo(BeNil())
+	ExpectWithOffset(1, common.VersionedElementKey(e)).To(Equal(common.VersionedElementKey(ve)))
+}

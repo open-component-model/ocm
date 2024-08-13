@@ -3,6 +3,7 @@ package download
 import (
 	"runtime"
 
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -18,6 +19,7 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/downloaderoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/storeoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/resources/common"
@@ -50,7 +52,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		versionconstraintsoption.New(),
 		repooption.New(),
 		downloaderoption.New(ctx.OCMContext()),
-		output.OutputOptions(output.NewOutputs(f), NewOptions(), closureoption.New("component reference"), lookupoption.New(), destoption.New()),
+		output.OutputOptions(output.NewOutputs(f), NewOptions(), closureoption.New("component reference"), lookupoption.New(), destoption.New(), storeoption.New("check-verified")),
 	)}, utils.Names(Names, names...)...)
 }
 
@@ -143,6 +145,12 @@ func (o *Command) Run() error {
 	opts := output.From(o)
 	if d.HasRegistrations() || o.Executable {
 		From(opts).UseHandlers = true
+	}
+
+	if storeoption.From(o).Store != nil {
+		if From(opts).UseHandlers {
+			return errors.Newf("verification fot supported together with download handlers")
+		}
 	}
 
 	hdlr, err := common.NewTypeHandler(o.Context.OCM(), opts, repooption.From(o).Repository, session, []string{o.Comp}, o.handlerOptions()...)

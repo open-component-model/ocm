@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/storeoption"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
@@ -52,7 +53,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
 		versionconstraintsoption.New(true).SetLatest(),
 		repooption.New(),
-		output.OutputOptions(output.NewOutputs(f), downloadcmd.NewOptions(true).SetUseHandlers(), destoption.New()),
+		output.OutputOptions(output.NewOutputs(f), downloadcmd.NewOptions(true).SetUseHandlers(), destoption.New(), storeoption.New("use-verified")),
 	)}, utils.Names(Names, names...)...)
 }
 

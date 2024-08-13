@@ -14,11 +14,11 @@ var (
 )
 
 func (g GenericComponentDescriptor) MarshalJSON() ([]byte, error) {
-	return Encode(generics.Pointer(ComponentDescriptor(g)))
+	return Encode(generics.Pointer(ComponentDescriptor(g)), DefaultJSONCodec)
 }
 
 func (g *GenericComponentDescriptor) UnmarshalJSON(bytes []byte) error {
-	cd, err := Decode(bytes)
+	cd, err := Decode(bytes, DefaultJSONCodec)
 	if err != nil {
 		return err
 	}

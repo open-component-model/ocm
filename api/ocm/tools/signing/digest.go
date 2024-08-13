@@ -1,13 +1,16 @@
 package signing
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/none"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
+	common "ocm.software/ocm/api/utils/misc"
 )
 
 // VerifyResourceDigest verify the digest of a resource taken from a component version.
@@ -17,11 +20,21 @@ import (
 // The function returns true if the verification has been executed. If an error occurs, or
 // the verification has been failed, an appropriate error occurs.
 // If the resource is not signature relevant (false,nil) is returned.
-func VerifyResourceDigest(cv ocm.ComponentVersionAccess, i int, bacc ocm.DataAccess) (bool, error) {
+func VerifyResourceDigest(cv ocm.ComponentVersionAccess, i int, bacc ocm.DataAccess, ostore ...VerifiedStore) (bool, error) {
 	octx := cv.GetContext()
 	cd := cv.GetDescriptor()
 	raw := &cd.Resources[i]
 
+	store := general.Optional(ostore...)
+	if store != nil {
+		vcd := store.Get(cv)
+		if vcd == nil {
+			return false, fmt.Errorf("component version %s not verified", common.VersionedElementKey(cv))
+		}
+		if !vcd.Resources[i].Digest.Equal(raw.Digest) {
+			return false, fmt.Errorf("component version %s corrupted", common.VersionedElementKey(cv))
+		}
+	}
 	acc, err := octx.AccessSpecForSpec(raw.Access)
 	if err != nil {
 		return false, errors.Wrapf(err, resMsg(raw, "", "failed getting access for resource"))

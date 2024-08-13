@@ -20,6 +20,7 @@ func NewOptions(silent ...bool) *Option {
 type Option struct {
 	SilentOption bool
 	UseHandlers  bool
+	Verify       bool
 }
 
 func (o *Option) SetUseHandlers(ok ...bool) *Option {
@@ -31,6 +32,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	if !o.SilentOption {
 		fs.BoolVarP(&o.UseHandlers, "download-handlers", "d", false, "use download handler if possible")
 	}
+	fs.BoolVarP(&o.Verify, "verify", "", false, "verify downloads")
 }
 
 func (o *Option) Usage() string {

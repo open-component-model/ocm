@@ -6,13 +6,14 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1"
 	v2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
-	common "ocm.software/ocm/api/utils/misc"
-
-	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/tools/signing"
+	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 var _ = Describe("Store", func() {
@@ -24,7 +25,7 @@ var _ = Describe("Store", func() {
 			store := Must(signing.NewVerifiedStore(file.Name()))
 			Expect(store).NotTo(BeNil())
 
-			cd1 := &compdesc.ComponentDescriptor{
+			cd1 := compdesc.DefaultComponent(&compdesc.ComponentDescriptor{
 				Metadata: compdesc.Metadata{
 					ConfiguredVersion: v3alpha1.SchemaVersion,
 				},
@@ -32,20 +33,26 @@ var _ = Describe("Store", func() {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:    COMPONENTA,
 						Version: VERSION,
+						Provider: metav1.Provider{
+							Name: "acme.org",
+						},
 					},
 				},
-			}
-			cd2 := &compdesc.ComponentDescriptor{
+			})
+			cd2 := compdesc.DefaultComponent(&compdesc.ComponentDescriptor{
 				Metadata: compdesc.Metadata{
 					ConfiguredVersion: v2.SchemaVersion,
 				},
 				ComponentSpec: compdesc.ComponentSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:    COMPONENTA,
+						Name:    COMPONENTB,
 						Version: VERSION,
+						Provider: metav1.Provider{
+							Name: "acme.org",
+						},
 					},
 				},
-			}
+			})
 
 			store.Add(cd1, "a")
 			store.Add(cd2, "b")
@@ -68,7 +75,8 @@ var _ = Describe("Store", func() {
 
 			data := Must(os.ReadFile(file.Name()))
 
-			Expect(data).To(YAMLEqual(desc))
+			exp := Must(runtime.DefaultYAMLEncoding.Marshal(desc))
+			Expect(data).To(YAMLEqual(exp))
 
 			store = Must(signing.NewVerifiedStore(file.Name()))
 
