@@ -28,19 +28,28 @@ var _ = Describe("Simple signing handlers", func() {
 		priv, pub = Must2(rsa.CreateKeyPair())
 	})
 
-	Context("", func() {
+	Context("standard", func() {
 		BeforeEach(func() {
 			cv = composition.NewComponentVersion(ctx, COMPONENTA, VERSION)
 			MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), blobaccess.ForString(mime.MIME_TEXT, "test data"), "", nil))
 		})
 
 		DescribeTable("rsa handlers", func(kind string) {
-			Must(signing.SignComponentVersion(cv, "signature", signing.PrivateKey("signature", priv)))
+			Must(signing.SignComponentVersion(cv, "signature", signing.PrivateKey("signature", priv), signing.SignerByAlgo(kind)))
 			Must(signing.VerifyComponentVersion(cv, "signature", signing.PublicKey("signature", pub)))
 		},
 			Entry("rsa", rsa.Algorithm),
 			Entry("rsapss", rsa_pss.Algorithm),
 		)
+
+		It("uses verified store", func() {
+			store := signing.NewLocalVerifiedStore()
+			Must(signing.SignComponentVersion(cv, "signature", signing.PrivateKey("signature", priv), signing.UseVerifiedStore(store)))
+
+			cd := store.Get(cv)
+			Expect(cd).NotTo(BeNil())
+			Expect(len(cd.Signatures)).To(Equal(1))
+		})
 	})
 
 	Context("non-unique resources", func() {

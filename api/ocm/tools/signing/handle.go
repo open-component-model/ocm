@@ -277,6 +277,8 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		if dig != nil {
 			spec = dig
 		}
+
+		addVerified(state, cd, opts, signatureNames...)
 	}
 	err := ctx.Propagate(spec)
 	if err != nil {
@@ -350,6 +352,7 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		} else {
 			cd.Signatures = append(cd.Signatures, signature)
 		}
+		addVerified(state, cd, opts, signatureNames...)
 	}
 	state.Closure[nv] = vi
 
@@ -716,4 +719,22 @@ func GetDigestMode(cd *compdesc.ComponentDescriptor, def ...string) string {
 		}
 	}
 	return general.Optional(def...)
+}
+
+func addVerified(state WalkingState, cd *compdesc.ComponentDescriptor, opts *Options, signatures ...string) {
+	if opts.VerifiedStore != nil {
+		_addVerified(state, common.VersionedElementKey(cd), cd, opts, signatures...)
+	}
+}
+
+func _addVerified(state WalkingState, ctx common.NameVersion, cd *compdesc.ComponentDescriptor, opts *Options, signatures ...string) {
+	opts.VerifiedStore.Add(cd, signatures...)
+	for _, ref := range cd.References {
+		nv := common.NewNameVersion(ref.ComponentName, ref.Version)
+		s := state.Get(nv)
+		rs := s.GetContext(ctx)
+		if rs != nil {
+			_addVerified(state, ctx, rs.Descriptor, opts)
+		}
+	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/pflag"
 
 	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/compdesc/normalizations/jsonv1"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
@@ -58,6 +59,11 @@ type Option struct {
 	Hash hashoption.Option
 
 	Keyless bool
+
+	// VerifiedFile is used to remember verify component versions.
+	VerifiedFile         string
+	RememberVerification bool
+	Store                ocmsign.VerifiedStore
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
@@ -75,6 +81,8 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	}
 	fs.BoolVarP(&o.Verify, "verify", "V", o.SignMode, "verify existing digests")
 	fs.BoolVar(&o.Keyless, "keyless", false, "use keyless signing")
+	fs.BoolVar(&o.RememberVerification, "remember", false, "enable verification store")
+	fs.StringVarP(&o.VerifiedFile, "verified", "", "~/.ocm/verified", "file used to remember verifications for downloads")
 }
 
 func (o *Option) Configure(ctx clictx.Context) error {
@@ -116,6 +124,12 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		return err
 	}
 
+	if o.Store == nil && o.RememberVerification {
+		o.Store, err = ocmsign.NewVerifiedStore(o.VerifiedFile, vfsattr.Get(ctx))
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -130,6 +144,10 @@ signature name specified with the option <code>--signature</code>.
 Alternatively a key can be specified as base64 encoded string if the argument
 start with the prefix <code>!</code> or as direct string with the prefix
 <code>=</code>.
+
+If the verification store is enabled signed and verified component version are
+stored. The digest information of those component versions can then be used
+to verify downloaded resources.
 `
 
 	if o.SignMode {
@@ -194,4 +212,6 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	}
 	opts.Update = o.Update
 	opts.Keyless = o.Keyless
+
+	opts.VerifiedStore = o.Store
 }
