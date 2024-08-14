@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm download artifacts [<options>]  {<artifact>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 artifacts, artifact, art, a
 ```
 
@@ -24,7 +24,6 @@ artifacts, artifact, art, a
 ```
 
 ### Description
-
 
 Download artifacts from an OCI registry. The result is stored in
 artifact set format, without the repository part
@@ -82,10 +81,9 @@ archive does not exist yet. The following formats are supported:
 
 The default format is <code>directory</code>.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm download](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

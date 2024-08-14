@@ -2,7 +2,6 @@
 
 ### Description
 
-
 A download handler can be used to process resources to be downloaded from
 on OCM repository. By default, the blobs provided from the access method
 (see [ocm ocm-accessmethods](ocm_ocm-accessmethods.md)) are used to store the resource content
@@ -115,10 +114,9 @@ The following handler names are possible:
 See [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md) for further details on using
 download handlers.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

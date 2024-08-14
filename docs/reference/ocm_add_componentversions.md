@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm add componentversions [<options>] [--version <version>] [<ctf archive>] {<component-constructor.yaml>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
@@ -36,7 +36,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 Add component versions specified by a constructor file to a Common Transport
 Archive. The archive might be either a directory prepared to host component version
@@ -212,7 +211,6 @@ The uploader name may be a path expression with the following possibilities:
 See [ocm ocm-uploadhandlers](ocm_ocm-uploadhandlers.md) for further details on using
 upload handlers.
 
-
 ### Examples
 
 
@@ -259,7 +257,7 @@ next to the description file.
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

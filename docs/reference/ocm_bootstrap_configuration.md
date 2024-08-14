@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm bootstrap configuration [<options>] {<component-reference>} {<resource id field>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 configuration, config, cfg
 ```
 
@@ -23,7 +23,6 @@ configuration, config, cfg
 ```
 
 ### Description
-
 
 If a TOI package provides information for configuration file templates/prototypes
 this command extracts this data and provides appropriate files in the filesystem.
@@ -95,7 +94,6 @@ it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-
 ### Examples
 
 ```
@@ -104,7 +102,7 @@ $ ocm toi bootstrap config ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm bootstrap](ocm_bootstrap.md)	 &mdash; bootstrap components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin accessmethod compose <name> <options json> <base spec json> [<options>]
 ```
 
@@ -13,7 +13,6 @@ plugin accessmethod compose <name> <options json> <base spec json> [<options>]
 ```
 
 ### Description
-
 
 The task of this command is to compose an access specification based on some
 explicitly given input options and preconfigured specifications.
@@ -74,10 +73,9 @@ The following predefined value types are supported:
   - <code>string=YAML</code>: string map with arbitrary values defined by dedicated assignments
   - <code>string=string</code>: string map defined by dedicated assignments
   - <code>string=string,string</code>: string map defined by dedicated assignment of comma separated strings
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin accessmethod](plugin_accessmethod.md)	 &mdash; access method operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin

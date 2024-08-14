@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin accessmethod validate <spec> [<options>]
 ```
 
@@ -13,7 +13,6 @@ plugin accessmethod validate <spec> [<options>]
 ```
 
 ### Description
-
 
 This command accepts an access specification as argument. It is used to
 validate the specification and to provide some metadata for the given
@@ -41,10 +40,9 @@ following fields:
   The consumer id used to determine optional credentials for the
   underlying repository. If specified, at least the <code>type</code> field must be set.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin accessmethod](plugin_accessmethod.md)	 &mdash; access method operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin

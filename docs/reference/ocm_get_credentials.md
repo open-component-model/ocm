@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm get credentials {<consumer property>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 credentials, creds, cred
 ```
 
@@ -21,7 +21,6 @@ credentials, creds, cred
 ```
 
 ### Description
-
 
 Try to resolve a given consumer specification against the configured credential
 settings and show the found credential attributes.
@@ -188,10 +187,9 @@ The used matcher is derived from the consumer attribute <code>type</code>.
 For all other consumer types a matcher matching all attributes will be used.
 The usage of a dedicated matcher can be enforced by the option <code>--matcher</code>.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

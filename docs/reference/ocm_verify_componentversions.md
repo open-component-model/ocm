@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm verify componentversions [<options>] {<component-reference>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
@@ -31,7 +31,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 Verify signature of specified component versions.
 
@@ -109,7 +108,6 @@ it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-
 ### Examples
 
 ```
@@ -118,7 +116,7 @@ $ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm verify](ocm_verify.md)	 &mdash; Verify component version signatures
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

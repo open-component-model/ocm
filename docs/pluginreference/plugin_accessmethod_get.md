@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin accessmethod get [<flags>] <access spec> [<options>]
 ```
 
@@ -16,13 +16,11 @@ plugin accessmethod get [<flags>] <access spec> [<options>]
 
 ### Description
 
-
 Evaluate the given access specification and return the described blob on
 *stdout*.
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin accessmethod](plugin_accessmethod.md)	 &mdash; access method operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin

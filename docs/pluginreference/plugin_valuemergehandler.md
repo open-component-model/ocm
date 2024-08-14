@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin valuemergehandler [<options>] <sub command> ...
 ```
 
@@ -13,12 +13,10 @@ plugin valuemergehandler [<options>] <sub command> ...
 ```
 
 ### Description
-
 This command group provides all commands used to implement an value merge handlers.
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 

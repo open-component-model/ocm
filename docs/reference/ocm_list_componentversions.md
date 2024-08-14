@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm list componentversions [<options>] {<component-reference>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
@@ -26,7 +26,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 List lists the version names of the specified objects, if only a component is specified
 all versions according to the given versuin constraints are listed.
@@ -109,7 +108,6 @@ The following modes are supported:
   - <code>json</code>
   - <code>yaml</code>
 
-
 ### Examples
 
 ```
@@ -119,7 +117,7 @@ $ ocm list componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm list](ocm_list.md)	 &mdash; List information about components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

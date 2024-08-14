@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm add sources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 sources, source, src, s
 ```
 
@@ -105,7 +105,6 @@ sources, source, src, s
 ```
 
 ### Description
-
 
 Add information about the sources, e.g. commits in a Github repository,
 that have been used to create the resources specified in a resource file to a component version.
@@ -987,7 +986,6 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
 
 
-
 ### Examples
 
 ```
@@ -996,7 +994,7 @@ $ ocm add sources --file path/to/cafile sources.yaml
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

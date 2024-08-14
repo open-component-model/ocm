@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm add source-configuration [<options>] <target> {<configfile> | <var>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 source-configuration, sourceconfig, srccfg, scfg
 ```
 
@@ -99,7 +99,6 @@ source-configuration, sourceconfig, srccfg, scfg
 ```
 
 ### Description
-
 
 Add a source specification to a source config file used by [ocm add sources](ocm_add_sources.md).
 
@@ -972,7 +971,6 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
 
 
-
 ### Examples
 
 ```
@@ -981,7 +979,7 @@ $ ocm add source-config sources.yaml --name sources --type filesystem --access '
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

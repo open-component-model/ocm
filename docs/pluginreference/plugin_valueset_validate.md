@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin valueset validate <spec> [<options>]
 ```
 
@@ -13,7 +13,6 @@ plugin valueset validate <spec> [<options>]
 ```
 
 ### Description
-
 
 This command accepts a value set as argument. It is used to
 validate the specification and to provide some metadata for the given
@@ -26,10 +25,9 @@ following fields:
 
   A short textual description of the described value set.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin valueset](plugin_valueset.md)	 &mdash; valueset operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin

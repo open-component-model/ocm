@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 ocm list [<options>] <sub command> ...
 ```
 
@@ -14,7 +14,7 @@ ocm list [<options>] <sub command> ...
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

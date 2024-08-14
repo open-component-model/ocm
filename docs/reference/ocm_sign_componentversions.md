@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm sign componentversions [<options>] {<component-reference>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
@@ -37,7 +37,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 Sign specified component versions.
 
@@ -134,7 +133,6 @@ it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-
 ### Examples
 
 ```
@@ -143,7 +141,7 @@ $ ocm sign componentversion --signature mandelsoft --private-key=mandelsoft.key 
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm sign](ocm_sign.md)	 &mdash; Sign components or hashes
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

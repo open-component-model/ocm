@@ -2,7 +2,6 @@
 
 ### Description
 
-
 TOI is a small toolset on top of the Open Component Model. It provides
 a possibility to run images taken from a component version with user
 configuration and feed them with the content of this component version.
@@ -400,7 +399,6 @@ Basically the output may contain any data, but is strongly recommended
 to use yaml or json files, only. This enables further formal processing
 by the TOI toolset.
 
-
 ### Examples
 
 ```
@@ -452,7 +450,7 @@ additionalResources:
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

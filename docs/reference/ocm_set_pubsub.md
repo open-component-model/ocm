@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm set pubsub {<ocm repository>} [<pub/sub specification>]
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 pubsub, ps
 ```
 
@@ -21,7 +21,6 @@ pubsub, ps
 
 ### Description
 
-
 A repository may be able to store a publish/subscribe specification
 to propagate the creation or update of component versions.
 If such an implementation is available this command can be used
@@ -33,10 +32,9 @@ can be queried with the [ocm get pubsub](ocm_get_pubsub.md).
 Types and specification formats are shown for the topic
 [ocm ocm-pubsub](ocm_ocm-pubsub.md).
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm set](ocm_set.md)	 &mdash; Set information about OCM repositories
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

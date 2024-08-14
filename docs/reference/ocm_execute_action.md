@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 ocm execute action [<options>] <action spec> {<cred>=<value>}
 ```
 
@@ -17,13 +17,11 @@ ocm execute action [<options>] <action spec> {<cred>=<value>}
 
 ### Description
 
-
 Execute an action extension for a given action specification. The specification
 show be a JSON or YAML argument.
 
 Additional properties settings can be used to describe a consumer id
 to retrieve credentials for.
-
 
 ### Examples
 
@@ -33,7 +31,7 @@ $ ocm execute action '{ "type": "oci.repository.prepare/v1", "hostname": "...", 
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm execute](ocm_execute.md)	 &mdash; Execute an element.
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

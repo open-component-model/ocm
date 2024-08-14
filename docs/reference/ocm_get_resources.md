@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm get resources [<options>]  <component> {<name> { <key>=<value> }}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 resources, resource, res, r
 ```
 
@@ -26,7 +26,6 @@ resources, resource, res, r
 ```
 
 ### Description
-
 
 Get resources of a component version. Resources are specified
 by identities. An identity consists of
@@ -107,10 +106,9 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

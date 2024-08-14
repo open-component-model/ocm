@@ -2,7 +2,6 @@
 
 ### Description
 
-
 In contrast to libraries intended for a dedicated technical environment,
 for example the handling of OCI images in OCI registries, the OCM
 ecosystem cannot provide a specialized credential management for a decicated
@@ -373,10 +372,9 @@ The following types are currently available:
       - <code>propagateConsumerIdentity</code>: *bool*(optional): enable consumer id propagation
 
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

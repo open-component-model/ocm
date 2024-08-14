@@ -2,7 +2,6 @@
 
 ### Description
 
-
 The command line client supports a special notation scheme for specifying
 references to OCM components and repositories. This allows for specifying
 references to any registry supported by the OCM toolset that can host OCM
@@ -63,7 +62,6 @@ file.
 
 The **type** may contain a file format qualifier separated by a <code>+</code>
 character. The following formats are supported: <code>directory</code>, <code>tar</code>, <code>tgz</code>
-
 ### Examples
 
 ```
@@ -92,7 +90,7 @@ http://localhost:8080/local-component-repository//ocm.software/ocmcli:0.7.0
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm create rsakeypair [<private key file> [<public key file>]] {<subject-attribute>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 rsakeypair, rsa
 ```
 
@@ -26,7 +26,6 @@ rsakeypair, rsa
 ```
 
 ### Description
-
 
 Create an RSA public key pair and save to files.
 
@@ -55,7 +54,6 @@ For signing the public key the following subject attributes are supported:
 - <code>C</code>, <code>country</code>, (multiple): Country
 
 	
-
 ### Examples
 
 ```
@@ -64,7 +62,7 @@ $ ocm create rsakeypair mandelsoft.priv mandelsoft.cert issuer=mandelsoft
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm create](ocm_create.md)	 &mdash; Create transport or component archive
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

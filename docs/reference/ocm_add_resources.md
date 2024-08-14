@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 resources, resource, res, r
 ```
 
@@ -107,7 +107,6 @@ resources, resource, res, r
 ```
 
 ### Description
-
 
 Adds resources specified in a resource file to a component version.
 So far, only component archives are supported as target.
@@ -989,7 +988,6 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
 
 
-
 ### Examples
 
 
@@ -1025,7 +1023,7 @@ $ ocm add resources &dash;&dash;file path/to/ca  resources.yaml VERSION=1.0.0
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

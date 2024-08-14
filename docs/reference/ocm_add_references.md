@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm add references [<options>] [<target>] {<referencefile> | <var>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 references, reference, refs
 ```
 
@@ -38,7 +38,6 @@ references, reference, refs
 ```
 
 ### Description
-
 
 Add aggregation information specified in a reference file to a component version.
 So far only component archives are supported as target.
@@ -156,7 +155,6 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
 
 
-
 ### Examples
 
 
@@ -188,7 +186,7 @@ $ ocm add references  path/to/ca  references.yaml VERSION=1.0.0
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

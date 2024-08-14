@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 ocm show tags [<options>] <component> {<version pattern>}
 ```
 
@@ -17,7 +17,6 @@ ocm show tags [<options>] <component> {<version pattern>}
 ```
 
 ### Description
-
 
 Match tags of an artifact against some patterns.
 
@@ -55,7 +54,6 @@ linked library can be used:
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 
-
 ### Examples
 
 ```
@@ -64,7 +62,7 @@ $ oci show tags ghcr.io/mandelsoft/kubelink
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm show](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

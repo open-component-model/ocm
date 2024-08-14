@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 ocm check [<options>] <sub command> ...
 ```
 
@@ -14,7 +14,7 @@ ocm check [<options>] <sub command> ...
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

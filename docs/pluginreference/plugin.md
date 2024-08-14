@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin <subcommand> <options> <args>
 ```
 
@@ -15,7 +15,6 @@ plugin <subcommand> <options> <args>
 ```
 
 ### Description
-
 
 The OCM library has several extension points, which can be used by a registration
 mechanism to add further variants, like repository types, backend technologies,
@@ -51,7 +50,6 @@ Errors have to be reported on *stderr* as JSON document with the fields:
 Any plugin, regardless of its functionality has to provide an [plugin info](plugin_info.md),
 which prints JSON document containing a plugin descriptor that describes the
 apabilities of the plugin.
-
 
 ### SEE ALSO
 

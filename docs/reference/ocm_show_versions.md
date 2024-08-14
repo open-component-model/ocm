@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm show versions [<options>] <component> {<version pattern>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 versions, vers, v
 ```
 
@@ -22,7 +22,6 @@ versions, vers, v
 ```
 
 ### Description
-
 
 Match versions of a component against some patterns.
 
@@ -69,7 +68,6 @@ OCI Repository types (using standard component repository to OCI mapping):
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 
-
 ### Examples
 
 ```
@@ -78,7 +76,7 @@ $ ocm show versions ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/playground
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm show](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

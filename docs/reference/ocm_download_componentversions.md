@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm download componentversions [<options>] {<components>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
@@ -22,7 +22,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 Download component versions from an OCM repository. The result is stored in
 component archives.
@@ -82,10 +81,9 @@ archive does not exist yet. The following formats are supported:
 
 The default format is <code>directory</code>.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm download](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

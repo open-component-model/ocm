@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm get componentversions [<options>] {<component-reference>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
@@ -27,7 +27,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 Get lists all component versions specified, if only a component is specified
 all versions are listed.
@@ -115,7 +114,6 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### Examples
 
 ```
@@ -125,7 +123,7 @@ $ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

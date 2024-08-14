@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin describe [<options>]
 ```
 
@@ -13,12 +13,10 @@ plugin describe [<options>]
 ```
 
 ### Description
-
 Display a detailed description of the capabilities of this OCM plugin.
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 

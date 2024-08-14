@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm get sources [<options>]  <component> {<name> { <key>=<value> }}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 sources, source, src, s
 ```
 
@@ -26,7 +26,6 @@ sources, source, src, s
 ```
 
 ### Description
-
 
 Get sources of a component version. Sources are specified
 by identities. An identity consists of
@@ -106,10 +105,9 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

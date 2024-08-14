@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin valuemergehandler execute <name> <spec> [<options>]
 ```
 
@@ -13,7 +13,6 @@ plugin valuemergehandler execute <name> <spec> [<options>]
 ```
 
 ### Description
-
 
 This command executes a value merge. The values are taken from *stdin* as JSON
 string. It has the following fields:
@@ -41,10 +40,9 @@ following fields:
 
   An error message.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin valuemergehandler](plugin_valuemergehandler.md)	 &mdash; value merge handler operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin

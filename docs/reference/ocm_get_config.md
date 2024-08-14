@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm get config <options>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 config, cfg
 ```
 
@@ -22,7 +22,6 @@ config, cfg
 
 ### Description
 
-
 Evaluate the command line arguments and all explicitly
 or implicitly used configuration files and provide
 a single configuration object.
@@ -35,10 +34,9 @@ The following modes are supported:
   - <code>json</code>
   - <code>yaml</code>
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

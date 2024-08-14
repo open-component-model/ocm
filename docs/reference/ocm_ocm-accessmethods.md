@@ -2,7 +2,6 @@
 
 ### Description
 
-
 Access methods are used to handle the access to the content of artifacts
 described in a component version. Therefore, an artifact entry contains
 an access specification describing the access attributes for the dedicated
@@ -390,10 +389,9 @@ shown below.
 
   Options used to configure fields: <code>--body</code>, <code>--header</code>, <code>--mediaType</code>, <code>--noredirect</code>, <code>--url</code>, <code>--verb</code>
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm credentials [<options>] <sub command> ...
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 credentials, creds, cred
 ```
 
@@ -20,7 +20,7 @@ credentials, creds, cred
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

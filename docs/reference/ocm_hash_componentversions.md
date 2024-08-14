@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm hash componentversions [<options>] {<component-reference>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
@@ -32,7 +32,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 Hash lists normalized forms for all component versions specified, if only a component is specified
 all versions are listed.
@@ -125,7 +124,6 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### Examples
 
 ```
@@ -135,7 +133,7 @@ $ ocm hash componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm hash](ocm_hash.md)	 &mdash; Hash and normalization operations
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

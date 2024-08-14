@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm transfer commontransportarchive [<options>] <ctf> <target>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 commontransportarchive, ctf
 ```
 
@@ -33,7 +33,6 @@ commontransportarchive, ctf
 ```
 
 ### Description
-
 
 Transfer content of a Common Transport Archive to the given target repository.
 
@@ -182,7 +181,6 @@ Only one of the fields <code>path</code> or <code>script</code> can be used.
 If no script option is given and the cli config defines a script <code>default</code>
 this one is used.
 
-
 ### Examples
 
 ```
@@ -191,7 +189,7 @@ $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

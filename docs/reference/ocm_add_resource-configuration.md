@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 resource-configuration, resourceconfig, rsccfg, rcfg
 ```
 
@@ -100,7 +100,6 @@ resource-configuration, resourceconfig, rsccfg, rcfg
 ```
 
 ### Description
-
 
 Add a resource specification to a resource config file used by [ocm add resources](ocm_add_resources.md).
 
@@ -972,7 +971,6 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
 
 
-
 ### Examples
 
 ```
@@ -981,7 +979,7 @@ $ ocm add resource-configuration resources.yaml --name myresource --type PlainTe
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm get plugins [<options>] {<plugin name>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 plugins, plugin, p
 ```
 
@@ -22,7 +22,6 @@ plugins, plugin, p
 
 ### Description
 
-
 Get lists information for all plugins specified, if no plugin is specified
 all registered ones are listed.
 
@@ -35,7 +34,6 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### Examples
 
 ```
@@ -45,7 +43,7 @@ $ ocm get plugins demo -o yaml
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

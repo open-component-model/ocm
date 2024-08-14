@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin action [<options>] <sub command> ...
 ```
 
@@ -13,12 +13,10 @@ plugin action [<options>] <sub command> ...
 ```
 
 ### Description
-
 This command group provides all commands used to implement an action.
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 

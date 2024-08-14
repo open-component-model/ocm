@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 ocm [<options>] <sub command> ...
 ```
 
@@ -28,7 +28,6 @@ ocm [<options>] <sub command> ...
 ```
 
 ### Description
-
 
 The Open Component Model command line client supports the work with OCM
 artifacts, like Component Archives, Common Transport Archive,
@@ -352,7 +351,6 @@ it is assumed to be a plain common name.
 With <code>--ca-cert</code> it is possible to define additional root
 certificates for signature verification, if public keys are provided
 by a certificate delivered with the signature.
-
 
 ### SEE ALSO
 

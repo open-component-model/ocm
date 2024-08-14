@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm transfer componentarchive [<options>]  <source> <target>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentarchive, comparch, ca
 ```
 
@@ -27,7 +27,6 @@ componentarchive, comparch, ca
 ```
 
 ### Description
-
 
 Transfer a component archive to some component repository. This might
 be a CTF Archive or a regular repository.
@@ -88,10 +87,9 @@ resources in the target repository.
 This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

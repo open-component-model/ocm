@@ -2,7 +2,6 @@
 
 ### Description
 
-
 The OCM library supports a set of attributes, which can be used to influence
 the behaviour of various functions. The CLI also supports setting of those
 attributes using the config file (see [ocm configfile](ocm_configfile.md)) or by
@@ -206,10 +205,9 @@ OCM library:
   - *<code>rekorURL</code>* *string*  default is https://rekor.sigstore.dev
   - *<code>OIDCIssuer</code>* *string*  default is https://oauth2.sigstore.dev/auth
   - *<code>OIDCClientID</code>* *string*  default is sigstore
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

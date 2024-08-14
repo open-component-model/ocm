@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm add routingslips [<options>] <component-version> <routing-slip> <type>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 routingslips, routingslip, rs
 ```
 
@@ -32,7 +32,6 @@ routingslips, routingslip, rs
 ```
 
 ### Description
-
 
 Add a routing slip entry for the specified routing slip name to the given
 component version. The name is typically a DNS domain name followed by some
@@ -114,7 +113,6 @@ it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-
 ### Examples
 
 ```
@@ -123,7 +121,7 @@ $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandels
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

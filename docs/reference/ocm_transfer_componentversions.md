@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm transfer componentversions [<options>] {<component-reference>} <target>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
@@ -38,7 +38,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 Transfer all component versions specified to the given target repository.
 If only a component (instead of a component version) is specified all versions
@@ -239,7 +238,6 @@ Only one of the fields <code>path</code> or <code>script</code> can be used.
 If no script option is given and the cli config defines a script <code>default</code>
 this one is used.
 
-
 ### Examples
 
 ```
@@ -249,7 +247,7 @@ $ ocm transfer components -t tgz --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin info [<options>]
 ```
 
@@ -14,7 +14,7 @@ plugin info [<options>]
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 

@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm download resources [<options>]  <component> {<name> { <key>=<value> }}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 resources, resource, res, r
 ```
 
@@ -29,7 +29,6 @@ resources, resource, res, r
 ```
 
 ### Description
-
 
 Download resources of a component version. Resources are specified
 by identities. An identity consists of
@@ -223,10 +222,9 @@ it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm download](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

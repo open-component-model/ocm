@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```
+```sh
 plugin download [<flags>] <name> <filepath> [<options>]
 ```
 
@@ -17,7 +17,6 @@ plugin download [<flags>] <name> <filepath> [<options>]
 
 ### Description
 
-
 This command accepts a target filepath as argument. It is used as base name
 to store the downloaded content. The blob content is provided on the
 *stdin*. The first argument specified the downloader to use for the operation.
@@ -26,10 +25,9 @@ The task of this command is to transform the content of the provided
 blob into a filesystem structure applicable to the type specific tools working
 with content of the given artifact type.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 

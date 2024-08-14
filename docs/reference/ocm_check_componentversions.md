@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm check componentversions [<options>] {<component-reference>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
@@ -25,7 +25,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 This command checks, whether component versions are completely contained
 in an OCM repository with all its dependent component references.
@@ -87,7 +86,6 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### Examples
 
 ```
@@ -97,7 +95,7 @@ $ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm check](ocm_check.md)	 &mdash; check components in OCM repository
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

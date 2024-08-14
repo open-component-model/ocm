@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm create componentarchive [<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentarchive, comparch, ca
 ```
 
@@ -24,7 +24,6 @@ componentarchive, comparch, ca
 ```
 
 ### Description
-
 
 Create a new component archive. This might be either a directory prepared
 to host component version content or a tar/tgz file (see option --type).
@@ -48,7 +47,6 @@ The following schema versions are supported for explicit conversions:
   - <code>ocm.software/v3alpha1</code>
   - <code>v2</code> (default)
 
-
 ### Examples
 
 ```
@@ -57,7 +55,7 @@ $ ocm create componentarchive --file myfirst --provider acme.org --provider emai
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm create](ocm_create.md)	 &mdash; Create transport or component archive
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

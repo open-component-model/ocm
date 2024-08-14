@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm version [<options>]
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 version, v
 ```
 
@@ -20,7 +20,7 @@ version, v
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

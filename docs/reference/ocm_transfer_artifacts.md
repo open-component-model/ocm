@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```sh
 ocm transfer artifacts [<options>] {<artifact-reference>} <target>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 artifacts, artifact, art, a
 ```
 
@@ -21,7 +21,6 @@ artifacts, artifact, art, a
 ```
 
 ### Description
-
 
 Transfer OCI artifacts from one registry to another one.
 Several transfer scenarios are supported:
@@ -74,7 +73,6 @@ linked library can be used:
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 
-
 ### Examples
 
 ```
@@ -86,7 +84,7 @@ $ ocm oci artifact transfer /tmp/ctf gcr.io/my-project
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

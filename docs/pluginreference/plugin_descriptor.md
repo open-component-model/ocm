@@ -2,7 +2,6 @@
 
 ### Description
 
-
 The plugin descriptor describes the capabilities of a plugin. It uses the
 following fields:
 
@@ -294,7 +293,6 @@ The descriptor for a label merge specification has the following fields:
   The configuration settings used for the algorithm. It may contain nested
   merge specifications.
 
-
 ### Examples
 
 ```
@@ -332,7 +330,7 @@ The descriptor for a label merge specification has the following fields:
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 
