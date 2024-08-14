@@ -100,7 +100,7 @@ OCM
 OCMBot
 OS
 parameterization
-Podinfo
+podinfo
 Podman
 predefine
 programmatically
