@@ -11,9 +11,9 @@ on:
       - '**/*.md'
 
 jobs:
-  lint-markdown:
+  markdown-lint:
     runs-on: ubuntu-latest
-    name: Lint
+    name: Lint Markdown
     steps:
       - uses: actions/checkout@v4
       - name: Markdown Linting
