@@ -1,10 +1,8 @@
-
 # Repository `CommonTransportFormat` - Filesystem-based Storage of OCI repositories
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: CommonTransportFormat/v1
 ```
 
@@ -31,14 +29,14 @@ The type specific specification fields are:
   - `directory`: stored as file hierarchy in a directory
   - `tar`: stored as file hierarchy in a TAR file
   - `tgz`: stored as file hierarchy in a GNU-zipped TAR file (tgz)
-  
+
 - **`accessMode`** (optional) *byte*
 
   Access mode used to access the content:
   - 0: write access
   - 1: read-only
   - 2: create id not existent, yet
-  
+
 ### Go Bindings
 
 The Go binding can be found [here](type.go)
