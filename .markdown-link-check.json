@@ -1,5 +1,5 @@
 { "replacementPatterns": [
-     { "pattern": "^/", "replacement": "/github/workspace/" }
+     { "pattern": "^/", "replacement": "{{BASEURL}}/" }
   ],
   "ignorePatterns": [
      { "pattern": "^http[s]*://localhost.*" }

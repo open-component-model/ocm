@@ -14,7 +14,7 @@ Provided blobs use the following media type:
 
 Depending on the repository appropriate docker legacy types might be used.
 
-The artifact content is provided in the [Artifact Set Format](../../../../../pkg/contexts/oci/repositories/ctf/formatspec.md#artifact-set-archive-format).
+The artifact content is provided in the [Artifact Set Format](/api/oci/extensions/repositories/ctf/formatspec.md#artifact-set-archive-format).
 The tag is provided as annotation.
 
 ### Description

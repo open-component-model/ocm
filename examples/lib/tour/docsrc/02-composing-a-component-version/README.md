@@ -7,8 +7,8 @@ create/compose component versions.
 
 It covers two basic scenarios:
 
-- [`basic`](01-basic-componentversion-creation.go) Create a component version stored in the file system
-- [`compose`](02-composition-version.go) Create a component version stored in memory using a non-persistent composition version.
+- [`basic`](/examples/lib/tour/02-composing-a-component-version/01-basic-componentversion-creation.go) Create a component version stored in the file system
+- [`compose`](/examples/lib/tour/02-composing-a-component-version/02-composition-version.go) Create a component version stored in memory using a non-persistent composition version.
 
 ## Running the example
 

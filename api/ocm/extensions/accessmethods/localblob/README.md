@@ -47,7 +47,7 @@ The type specific specification fields are:
   related to the original source.
 
   For example, if an OCI artifact originally referenced using the
-  access method [`ociArtifact`](../../../../../docs/formats/accessmethods/ociArtifact.md) is stored during
+  access method [`ociArtifact`](../ociartifact) is stored during
   some transport step as local artifact, the reference name can be set
   to its original repository name. An import step into an OCI based OCM
   repository may then decide to make this artifact available again as

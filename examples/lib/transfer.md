@@ -2,7 +2,7 @@
 
 OCM content can be directly crated in public OCM repositories as shown in other examples.
 But it is also possible to compose component versions in local or temporary filesystem
-structured according the [Common Transport Format](../../docs/formats/repositories/README.md).
+structured according the [Common Transport Format](https://github.com/open-component-model/ocm-spec/blob/main/doc/01-model/01-model.md#component-repositories).
 Afterward, they can be transferred/published to public OCM repositories.
 
 This example shows some cases how this can be achieved directly using the OCM library.
@@ -174,12 +174,12 @@ target repository (`transferHandler, err := standard.New(standard.Overwrite())`.
               return errors.Wrapf(err, "cannot get version %s for component %s", vname, cname)
           }
           loop.Close(cv)
-            
+
           err = transfer.TransferVersion(printer, closure, cv, target, transferHandler)
           if err != nil {
               return errors.Wrapf(err, "cannot transfer version %s for component %s", vname, cname)
           }
-            
+
           if err := loop.Finalize(); err != nil {
               return err
           }

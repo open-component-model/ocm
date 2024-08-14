@@ -14,7 +14,7 @@ Provided blobs use the following media type:
 
 Depending on the repository appropriate docker legacy types might be used.
 
-The artifact content is provided in the [Artifact Set Format](../../../../../pkg/contexts/oci/repositories/ctf/formatspec.md#artifact-set-archive-format).
+The artifact content is provided in the [Artifact Set Format](/api/oci/extensions/repositories/ctf/formatspec.md#artifact-set-archive-format).
 The tag is provided as annotation.
 
 ### Description
@@ -22,7 +22,7 @@ The tag is provided as annotation.
 This method implements the access of an OCI artifact stored in an OCI registry,
 which is used to host the OCM repository the component version is retrieved from.
 
-It works similar to the [`ociArtifact`](../../../../../pkg/contexts/ocm/accessmethods/ociartifact/README.md) access method,
+It works similar to the [`ociArtifact`](../ociartifact) access method,
 but the used reference does not contain the OCI registry host, which is
 taken from the OCI registry used to host the component version containing
 the access specification.

@@ -9,11 +9,11 @@ and configurable objects.
 
 It covers five basic scenarios:
 
-- [`basic`](01-basic-config-management.go) Basic configuration management illustrating the configuration of credentials.
-- [`generic`](02-handle-arbitrary-config.go) Handling of arbitrary configuration.
-- [`ocm`](03-using-ocm-config.go) Central configuration
-- [`provide`](04-write-config-type.go) Providing new config object types
-- [`consume`](05-write-config-consumer.go) Preparing objects to be configured by the config management
+- [`basic`](/examples/lib/tour/04-working-with-config/01-basic-config-management.go) Basic configuration management illustrating the configuration of credentials.
+- [`generic`](/examples/lib/tour/04-working-with-config/02-handle-arbitrary-config.go) Handling of arbitrary configuration.
+- [`ocm`](/examples/lib/tour/04-working-with-config/03-using-ocm-config.go) Central configuration
+- [`provide`](/examples/lib/tour/04-working-with-config/04-write-config-type.go) Providing new config object types
+- [`consume`](/examples/lib/tour/04-working-with-config/05-write-config-consumer.go) Preparing objects to be configured by the config management
 
 ## Running the example
 

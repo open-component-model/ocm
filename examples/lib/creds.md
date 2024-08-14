@@ -14,7 +14,7 @@ the credentials directly for the lookup call:
   if err != nil {
       return err
   }
-  
+
   repoSpec := ocireg.NewRepositorySpec("ghcr.io/mandelsoft/ocm", nil)
 
   repo, err := octx.RepositoryForSpec(repoSpec, cfg.GetCredentials())
@@ -54,21 +54,21 @@ not yet pushed to the repository.
 Using various interface methods, it is possible to configure
 the content for this new version. The example below just sets the provider
 information and adds a
-single [resource artifact](../../docs/ocm/model.md#resources) consisting of
+single [resource artifact](https://github.com/open-component-model/ocm-spec/blob/main/doc/01-model/02-elements-toplevel.md#resources) consisting of
 some text.
 
 ```go
   compvers.GetDescriptor().Provider = metav1.Provider{Name: "mandelsoft"}
-  
+
   err=compvers.SetResourceBlob(
       &compdesc.ResourceMeta{
           ElementMeta: compdesc.ElementMeta{
               Name: "test",
-          }, 
-          Type:     resourcetypes.BLOB, 
+          },
+          Type:     resourcetypes.BLOB,
           Relation: metav1.LocalRelation,
-      }, 
-      accessio.BlobAccessForString(mime.MIME_TEXT, "testdata"), 
+      },
+      accessio.BlobAccessForString(mime.MIME_TEXT, "testdata"),
       "", nil,
   )
   if err != nil {
@@ -145,14 +145,14 @@ as follows:
 
 ```go
   octx := ocm.DefaultContext()
-  
+
   octx.CredentialsContext().SetCredentialsForConsumer(
       credentials.ConsumerIdentity{
-          identity.ID_TYPE: identity.CONSUMER_TYPE, 
-          identity.ID_HOSTNAME: "ghcr.io", 
+          identity.ID_TYPE: identity.CONSUMER_TYPE,
+          identity.ID_HOSTNAME: "ghcr.io",
           identity.ID_PATHPREFIX: "mandelsoft",
-      }, 
-      cfg.GetCredentials(), 
+      },
+      cfg.GetCredentials(),
   )
 ```
 

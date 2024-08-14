@@ -7,8 +7,8 @@ sign and verify signatures.
 
 It covers two basic scenarios:
 
-- [`sign`](01-basic-signing.go) Create, Sign, Transport and Verify a component version.
-- [`context`](02-using-context-settings.go) Using context settings to configure signing and verification in target repo.
+- [`sign`](/examples/lib/tour/06-signing-component-versions/01-basic-signing.go) Create, Sign, Transport and Verify a component version.
+- [`context`](/examples/lib/tour/06-signing-component-versions/02-using-context-settings.go) Using context settings to configure signing and verification in target repo.
 
 ## Running the examples
 

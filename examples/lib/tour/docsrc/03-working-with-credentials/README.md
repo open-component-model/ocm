@@ -9,10 +9,10 @@ and credential consunmers in a technology-agnostic way.
 
 It covers four basic scenarios:
 
-- [`basic`](01-using-credentials.go) Writing to a repository with directly specified credentials.
-- [`context`](02-basic-credential-management.go) Using credentials via the credential management to publish a component version.
-- [`read`](02-basic-credential-management.go) Read the previously created component version using the credential management.
-- [`credrepo`](03-credential-repositories.go) Providing credentials via credential repositories.
+- [`basic`](/examples/lib/tour/03-working-with-credentials/01-using-credentials.go) Writing to a repository with directly specified credentials.
+- [`context`](/examples/lib/tour/03-working-with-credentials/02-basic-credential-management.go) Using credentials via the credential management to publish a component version.
+- [`read`](/examples/lib/tour/03-working-with-credentials/02-basic-credential-management.go) Read the previously created component version using the credential management.
+- [`credrepo`](/examples/lib/tour/03-working-with-credentials/03-credential-repositories.go) Providing credentials via credential repositories.
 
 ## Running the example
 
@@ -29,7 +29,7 @@ Set your favorite OCI registry and don't forget to add the repository prefix for
 
 ## Walkthrough
 
-### Writing to a repository with directly specified credentials.
+### Writing to a repository with directly specified credentials
 
 As usual, we start with getting access to an OCM context
 object.
@@ -49,7 +49,6 @@ It is just set of properties. To offer various credential sources
 there is an interface `credentials.Credentials` provided,
 whose implementations provide access to those properties.
 A simple property based implementation is `credentials.DirectCredentials.
-
 
 The most simple use case is to provide the credentials
 directly for the repository access creation.
