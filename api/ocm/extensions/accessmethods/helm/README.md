@@ -1,15 +1,16 @@
 
 # Access Method `helm` - Helm Repository Access
 
+## Synopsis
 
-### Synopsis
-```
+```yaml
 type: helm/v1
 ```
 
 Provided blobs use the following media type: attribute `application/vnd.cncf.helm.chart.content.v1.tar+gzip`
 
 ### Description
+
 This method implements the access of a Helm chart stored in a Helm chart repository.
 
 Supported specification version is `v1`
@@ -35,7 +36,6 @@ The type specific specification fields are:
 - **`keyring`** *string*
 
   An optional keyring used to verify the chart.
-
 
 ### Go Bindings
 

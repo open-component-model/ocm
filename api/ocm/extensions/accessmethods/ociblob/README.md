@@ -1,9 +1,9 @@
 
 # Access Method `ociBlob` - OCI Blob Access
 
+## Synopsis
 
-### Synopsis
-```
+```yaml
 type: ociBlob/v1
 ```
 
@@ -13,8 +13,6 @@ Provided blobs use the following media type: attribute `mediaType`
 This method implements the access of an OCI blob stored in an OCI repository.
 
 Supported specification version is `v1`
-
-
 
 ### Specification Versions
 
@@ -37,7 +35,6 @@ The type specific specification fields are:
 - **`size`** *integer*
 
   The size of the blob
-
 
 ### Go Bindings
 

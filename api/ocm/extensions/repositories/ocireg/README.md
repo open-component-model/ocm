@@ -1,10 +1,8 @@
-
 # Repository `OCIRegistry` and `ociRegistry` - OCI Registry based OCM Repositories
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: OCIRegistry/v1
 ```
 
@@ -14,8 +12,6 @@ The content of the OCM repository will be stored in an OCI registry using
 a dedicated OCI repository name prefix.
 
 Supported specification version is `v1`.
-
-
 
 ### Specification Versions
 
@@ -34,9 +30,8 @@ The type specific specification fields are:
   the OCI repository prefix used for the OCM repository.
 
 - **`componentNameMapping`** (optional) *string* (deprecated)
-  
-  the mapping algorithm used to map OCM component names to OCU repository names ( `urlPath` (default) or `sha256-digest`).
 
+  the mapping algorithm used to map OCM component names to OCU repository names ( `urlPath` (default) or `sha256-digest`).
 
 ### Go Bindings
 

@@ -1,8 +1,8 @@
 # `s3` - Blobs in a Simple Storage System (S3)
 
+## Synopsis
 
-### Synopsis
-```
+```yaml
 type: s3/v1
 ```
 
@@ -11,7 +11,6 @@ Provided blobs use the following media type: attribute `mediaType`
 ### Description
 
 This method implements the access of a blob stored in an S3 bucket.
-
 
 ### Specification Versions
 
@@ -32,5 +31,3 @@ The type specific specification fields are:
 - **`key`** *string*
 
   The key of the desired blob
-
-

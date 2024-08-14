@@ -1,10 +1,9 @@
 
 # Access Method `relativeOciReference` - OCI Artifact Access in OCI-registry-based OCM Repository
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: relativeOciReference/v1
 ```
 
@@ -30,10 +29,9 @@ the access specification.
 
 Supported specification version is `v1`
 
-
 ### Specification Versions
 
-This access method is a legacy access method formerly used to enable 
+This access method is a legacy access method formerly used to enable
 physical replication of OCI registry content together with referenced OCI artifacts.
 
 This should basically be done by a value transport of the component versions, because it

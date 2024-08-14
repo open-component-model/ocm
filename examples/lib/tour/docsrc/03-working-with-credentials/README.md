@@ -1,5 +1,6 @@
-{{credentials}}
 # Working with Credentials
+
+{{credentials}}
 
 This tour illustrates the basic handling of credentials
 using the OCM library. The library provides
@@ -7,6 +8,7 @@ an extensible framework to bring together credential providers
 and credential consunmers in a technology-agnostic way.
 
 It covers four basic scenarios:
+
 - [`basic`](01-using-credentials.go) Writing to a repository with directly specified credentials.
 - [`context`](02-basic-credential-management.go) Using credentials via the credential management to publish a component version.
 - [`read`](02-basic-credential-management.go) Read the previously created component version using the credential management.
@@ -89,6 +91,7 @@ just look up the actually added version to verify the result.
 The coding for `describeVersion` is similar to the one shown in the [first tour]({{describe-version}}).
 
 {{using-cred-management}}
+
 ### Using the Credential Management
 
 Passing credentials directly at the repository
@@ -114,7 +117,6 @@ As usual, we start with the default OCM context.
 
 It is now used to gain access to the appropriate
 credential context.
-
 
 ```go
 {{include}{../../03-working-with-credentials/02-basic-credential-management.go}{cred context}}
@@ -275,7 +277,7 @@ the access method as credential consumer can access the blob.
 
 ### Providing credentials via credential repositories
 
-The OCM toolset embraces multiple storage
+The OCM tool set embraces multiple storage
 backend technologies, for OCM metadata as well
 as for artifacts described by a component version.
 All those technologies typically have their own
@@ -296,7 +298,6 @@ credentials for dedicated OCI registries.
 
 We start again by providing access to the
 OCM context and the connected credential context.
-
 
 ```go
 {{include}{../../03-working-with-credentials/03-credential-repositories.go}{context}}

@@ -1,5 +1,6 @@
-{{transport}}
 # Transporting Component Versions
+
+{{transport}}
 
 This [tour](example.go) illustrates the basic support for
 transporting content from one environment into another.
@@ -114,7 +115,6 @@ be migrated to local blobs.
 
 Now, we check the result of our transport action in the target
 repository.
-
 
 ```go
 {{include}{../../05-transporting-component-versions/example.go}{verify-a}}

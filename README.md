@@ -7,7 +7,7 @@
 
 The Open Component Model (OCM) is an open standard to describe software bills of delivery (SBOD). OCM is a technology-agnostic and machine-readable format focused on the software artifacts that must be delivered for software products.
 
-Check out the [the main OCM project web page](https://ocm.software) to find out what OCM offers you for implementing a secure software supply chain. It is your central entry point to all kind of OCM related [docs and guides](https://ocm.software/docs/overview/about), the [OCM specification](https://ocm.software/docs/overview/specification/) and all project [github repositories](https://github.com/open-component-model). It also offers a [Getting Started](https://ocm.software/docs/getting-started/) to quickly make your hands dirty with OCM, its toolset and concepts :smiley:
+Check out the [the main OCM project web page](https://ocm.software) to find out what OCM offers you for implementing a secure software supply chain. It is your central entry point to all kind of OCM related [docs and guides](https://ocm.software/docs/overview/about), the [OCM specification](https://ocm.software/docs/overview/specification/) and all project [github repositories](https://github.com/open-component-model). It also offers a [Getting Started](https://ocm.software/docs/getting-started/) to quickly make your hands dirty with OCM, its tool set and concepts :smiley:
 
 ## OCM Specifications
 
@@ -98,7 +98,7 @@ ocm --help
 git-url: https://aur.archlinux.org/ocm-cli.git
 package-url: https://aur.archlinux.org/packages/ocm-cli
 
-```
+```sh
 # if not using a helper util
 git clone https://aur.archlinux.org/ocm-cli.git
 cd ocm-cli
@@ -142,7 +142,7 @@ podman build -t ocm --build-arg GO_VERSION=1.22 --build-arg ALPINE_VERSION=3.19 
 
 An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](https://ocm.software/ocm/blob/main/examples/make/Makefile).
 
-More comprehensive examples can be taken from the [`components`](https://ocm.software/ocm/tree/main/components) contained in this repository. [Here](components/helmdemo/README.md) a complete component build including a multi-arch image is done and finally packaged into a CTF archive which can be tranported into an OCI repository. See the readme files for details.
+More comprehensive examples can be taken from the [`components`](https://ocm.software/ocm/tree/main/components) contained in this repository. [Here](components/helmdemo/README.md) a complete component build including a multi-arch image is done and finally packaged into a CTF archive which can be transported into an OCI repository. See the readme files for details.
 
 ## Contributing
 

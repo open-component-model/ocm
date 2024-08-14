@@ -1,5 +1,6 @@
-{{config}}
 # Working with Configurations
+
+{{config}}
 
 This tour illustrates the basic configuration management
 included in the OCM library. The library provides
@@ -7,6 +8,7 @@ an extensible framework to bring together configuration settings
 and configurable objects.
 
 It covers five basic scenarios:
+
 - [`basic`](01-basic-config-management.go) Basic configuration management illustrating the configuration of credentials.
 - [`generic`](02-handle-arbitrary-config.go) Handling of arbitrary configuration.
 - [`ocm`](03-using-ocm-config.go) Central configuration
@@ -195,6 +197,7 @@ credentials, default repositories, signing keys and any
 other configuration specification.
 
 {{ocm-config-file}}
+
 #### Standard Configuration File
 
 Most important are here the credentials.
@@ -240,6 +243,7 @@ default initial OCM configuration file.
 ```
 
 The result should look similar to (but with reordered fields):
+
 ```yaml
 type: generic.config.ocm.software
 configurations:
@@ -296,6 +300,7 @@ config object will contain the read file content, which is hopefully a
 valid certificate.
 
 {{tour04-arbitrary}}
+
 ### Providing new config object types
 
 So far, we just used existing config types to configure existing objects.
@@ -489,6 +494,7 @@ for some kind of ad-hoc configuration.
 A complete scenario is shown in the next example.
 
 {{consume-config}}
+
 ### Preparing Objects to be Configured by the Config Management
 
 We already have our new acme.org config object type,

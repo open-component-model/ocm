@@ -1,10 +1,9 @@
 
 # Access Method `ociArtifact` and `ociRegistry` - OCI Artifact Access
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: ociArtifact/v1
 ```
 
@@ -23,8 +22,6 @@ The tag is provided as annotation.
 This method implements the access of an OCI artifact stored in an OCI registry.
 
 Supported specification version is `v1`
-
-
 
 ### Specification Versions
 

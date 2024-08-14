@@ -1,7 +1,8 @@
 # `npm` - NPM packages in a NPM registry (e.g. npmjs.com)
 
-### Synopsis
-```
+## Synopsis
+
+```yaml
 type: npm/v1
 ```
 

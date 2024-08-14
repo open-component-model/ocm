@@ -1,6 +1,6 @@
-{{compose-compvers}}
-
 # Composing a Component Version
+
+{{compose-compvers}}
 
 This tour illustrates the basic usage of the API to
 create/compose component versions.
