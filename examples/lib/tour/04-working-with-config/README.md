@@ -3,17 +3,20 @@
 <!-- from ../docsrc/04-working-with-config/README.md -->
 # Working with Configurations
 
+<a id="config"></a>
+
 This tour illustrates the basic configuration management
 included in the OCM library. The library provides
 an extensible framework to bring together configuration settings
 and configurable objects.
 
 It covers five basic scenarios:
-- [`basic`](01-basic-config-management.go) Basic configuration management illustrating the configuration of credentials.
-- [`generic`](02-handle-arbitrary-config.go) Handling of arbitrary configuration.
-- [`ocm`](03-using-ocm-config.go) Central configuration
-- [`provide`](04-write-config-type.go) Providing new config object types
-- [`consume`](05-write-config-consumer.go) Preparing objects to be configured by the config management
+
+- [`basic`](/examples/lib/tour/04-working-with-config/01-basic-config-management.go) Basic configuration management illustrating the configuration of credentials.
+- [`generic`](/examples/lib/tour/04-working-with-config/02-handle-arbitrary-config.go) Handling of arbitrary configuration.
+- [`ocm`](/examples/lib/tour/04-working-with-config/03-using-ocm-config.go) Central configuration
+- [`provide`](/examples/lib/tour/04-working-with-config/04-write-config-type.go) Providing new config object types
+- [`consume`](/examples/lib/tour/04-working-with-config/05-write-config-consumer.go) Preparing objects to be configured by the config management
 
 ## Running the example
 
@@ -260,7 +263,7 @@ configuration file for the OCM ecosystem, as will be shown in the next example.
 
 Although the configuration of an OCM context can
 be done by a sequence of explicit calls according to the mechanisms
-shown in the examples before, a simple convenience 
+shown in the examples before, a simple convenience
 library function is provided, which can be used to configure an OCM
 context and all related other contexts with a single call
 based on a central configuration file (`~/.ocmconfig`)
@@ -278,6 +281,8 @@ configuration specification (or any other serialized configuration object),
 enriched with specialized config specifications for
 credentials, default repositories, signing keys and any
 other configuration specification.
+
+<a id="ocm-config-file"></a>
 
 #### Standard Configuration File
 
@@ -298,7 +303,7 @@ the central configuration.
 
 One such repository type is the Docker config type. It
 reads a `dockerconfig.json` file and feeds in the credentials.
-Because it is used for a dedicated purpose (credentials for 
+Because it is used for a dedicated purpose (credentials for
 OCI registries), it not only can feed the credentials, but
 also their mapping to consumer ids.
 
@@ -342,6 +347,7 @@ default initial OCM configuration file.
 ```
 
 The result should look similar to (but with reordered fields):
+
 ```yaml
 type: generic.config.ocm.software
 configurations:
@@ -395,7 +401,7 @@ If you have provided your OCI credentials with
 #### Templating
 
 The configuration library function does not only read the
-ocm config file, it also applies [*spiff*](https://github.com/mandelsoft/spiff)
+ocm config file, it also applies [*spiff*](github.com/mandelsoft/spiff)
 processing to the provided YAML/JSON content. *Spiff* is an
 in-domain yaml-based templating engine. Therefore, you can use
 any spiff dynaml expression to define values or even complete
@@ -432,6 +438,8 @@ If this is used with the above library functions, the finally generated
 config object will contain the read file content, which is hopefully a
 valid certificate.
 
+<a id="tour04-arbitrary"></a>
+
 ### Providing new config object types
 
 So far, we just used existing config types to configure existing objects.
@@ -439,7 +447,7 @@ But the configuration management is highly extensible, and it is quite
 simple to provide new config types, which can be used to configure
 any new or existing object, which is prepared to consume configuration.
 
-The next [chapter](#preparing-objects-to-be-configured-by-the-config-management) will show how to prepare an
+The next [chapter](#consume-config) will show how to prepare an
 object to be automatically configurable by
 the configuration management. Here, we focus on the implementation of
 new config object types. Therefore, we want to configure the
@@ -531,7 +539,7 @@ func (c *ExampleConfigSpec) SetTargetRepositoryData(data []byte) error {
 
 ```
 
-The utility function `runtime.CheckSpecification` can be used to 
+The utility function `runtime.CheckSpecification` can be used to
 check a byte sequence to be a valid specification.
 It just checks for a valid YAML document featuring a non-empty
 `type` field:
@@ -601,9 +609,9 @@ may apply is settings or even parts of its setting to any kind of target object.
 Our configuration object supports two kinds of target objects:
 if the target is a credentials context
 it configures the credentials to be used for the
-described OCI repository similar to our [credential management example](../03-working-with-credentials/README.md#using-the-credential-management).
+described OCI repository similar to our [credential management example](../03-working-with-credentials/README.md#using-cred-management).
 
-But we want to accept more types of target objects. Therefore, we 
+But we want to accept more types of target objects. Therefore, we
 introduce an own interface declaring the methods required for applying
 some configuration settings.
 
@@ -616,7 +624,7 @@ type RepositoryTarget interface {
 
 ```
 
-By checking the target object against this interface, we are able 
+By checking the target object against this interface, we are able
 to configure any kind of object, as long as it provides the necessary
 configuration methods.
 
@@ -627,7 +635,7 @@ about the new type. This is done by an `init()` function in our config package.
 
 Here, we call a registration function,
 which gets called with a dedicated type object for the new config type.
-A *type object* describes the config type, its type name, how 
+A *type object* describes the config type, its type name, how
 it is serialized and deserialized and some description.
 We use a standard type object, here, instead of implementing
 an own one. It is parameterized by the Go pointer type (`*ExampleConfigSpec`) for
@@ -660,7 +668,7 @@ A usual, we gain access to our required contexts.
 	ctx := credctx.ConfigContext()
 ```
 
-To setup our environment we create our new config based on the actual settings 
+To setup our environment we create our new config based on the actual settings
 and apply it to the config context.
 
 ```go
@@ -767,6 +775,8 @@ used. Our simple repository target is just an example
 for some kind of ad-hoc configuration.
 A complete scenario is shown in the next example.
 
+<a id="consume-config"></a>
+
 ### Preparing Objects to be Configured by the Config Management
 
 We already have our new acme.org config object type,
@@ -789,7 +799,7 @@ the config context it should use to configure itself.
 
 Therefore, our type contains an additional field `updater`.
 Its type `cpi.Updater` is a utility provided by the configuration
-management, which holds a reference to a configuration context 
+management, which holds a reference to a configuration context
 and is able to
 configure an object based on a managed configuration
 watermark. It remembers which config objects from the
@@ -880,7 +890,7 @@ to the config context.
 	prov := NewRepositoryProvider(credctx)
 ```
 
-If we ask now for a repository we will get the empty 
+If we ask now for a repository we will get the empty
 answer, because nothing is configured, yet.
 
 ```go
