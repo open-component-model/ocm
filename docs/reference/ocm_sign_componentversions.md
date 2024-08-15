@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm sign componentversions [<options>] {<component-reference>}
 ```
 
@@ -145,4 +145,3 @@ $ ocm sign componentversion --signature mandelsoft --private-key=mandelsoft.key 
 
 * [ocm sign](ocm_sign.md)	 &mdash; Sign components or hashes
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm sign hash <private key file> <hash> [<issuer>]
 ```
 
@@ -19,7 +19,7 @@ ocm sign hash <private key file> <hash> [<issuer>]
 ### Description
 
 Print the signature for a dedicated digest value.
-	
+
 ### Examples
 
 ```
@@ -32,4 +32,3 @@ $ ocm sign hash key.priv SHA-256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6c
 
 * [ocm sign](ocm_sign.md)	 &mdash; Sign components or hashes
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm add routingslips [<options>] <component-version> <routing-slip> <type>
 ```
 
@@ -125,4 +125,3 @@ $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandels
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm get config <options>
 ```
 
@@ -40,4 +40,3 @@ The following modes are supported:
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

@@ -5,6 +5,7 @@ This folder contains an example how to deploy an application consistsing of mult
 The helm chart has multiple other charts as dependencies and has no templates. Its only purpose is to act as an anchor for deployment. The toi package is used to install the component with the helm-installer using the `ocm bootstrap` command.
 
 ## Helm Charts with dependencies
+
 Goal of this deployment is to install two different components having their own helm-charts: echoserver and pod-info. Both have their own component version and a helm-chart resource. The chart dependencies are declared in the `packagespec.yaml` as `subcharts`:
 
 ```yaml
@@ -85,8 +86,10 @@ components:
   - ...
 
 ```
-The `Chart.yaml` file used for the helm deployment is dynamically modified to add the `dependencies`  according to the helm documentation. There is no need to declare them manually (but it does not harm to do so). See [helm documentation]([https:/](https://helm.sh/docs/helm/helm_dependency/)) for details.
 
+The `Chart.yaml` file used for the helm deployment is dynamically modified to add the `dependencies` according to the helm documentation.
+There is no need to declare them manually (but it does not harm to do so).
+See [helm documentation](https://helm.sh/docs/helm/helm_dependency/) for details.
 
 ## Using transported images (image mapping)
 
@@ -111,6 +114,7 @@ executors:
         referencePath:
         - name: podinfo
 ```
+
 This configuration will set the tags in the generated helm values:
 
 ```yaml
@@ -133,6 +137,7 @@ The first image mapping instructs the helm-installer to replace the image tag wi
       name: echoserver
       version: "1.10"
 ```
+
 and then in echoserver:
 
 ```yaml
@@ -161,7 +166,7 @@ The same lookup mechanism is used for the reference named `podinfo` and the reso
 
 To test that the mapping works as expected you should check the pods after the deployment to contain the correct image URL.
 
-```shell
+```bash
 kubectl get pods
 NAME                                  READY   STATUS    RESTARTS   AGE
 myrelease-echoserver-6d6b8c4664-ghzpp   1/1     Running   0          3h8m
@@ -181,7 +186,7 @@ Check that the image is taken from your target OCI registry.
 
 For a successful image mapping ensure that all you image resources have a `globalAccess` and relation `external` in their component descriptor. Only with global access Kubernetes is able to pull an image. Ensure that your components are transferred with the `--copy-resources` flag.
 
-## Providing helm values for subcharts:
+## Providing helm values for subcharts
 
 Usually deployments will get a configuration specific for this target enviroment. In helm this is done with values specific for a helm release.
 When using the toi installer this works in the same way by providing the values with other parameters like name of the helm release and the target namespace in a <parameters.yaml> file:
@@ -199,10 +204,10 @@ echoserver:
   imagePullSecrets:
   - name: myoci-secret
 ```
+
 Values for subcharts are located under a parent tag identifying the sub-chart. See the [Helm Documentation](https://helm.sh/docs/chart_template_guide/subcharts_and_globals/) for details.
 
-
-# Building
+## Building
 
 You can use `make` to build this component. You will have to adjust the variables at the top of the [makefile](Makefile) to your environment (at least `OCMREPO`). By default, all artifacts are built in the `gen` folder of this project.
 
@@ -215,7 +220,7 @@ The main targets are:
 
 You can find more information [here](../../cmds/helminstaller/README.md).
 
-# Installation
+## Installation
 
 You can use the `ocm bootstrap` command to install this component with the [toi installer](../../docs/reference/ocm_toi-bootstrapping.md) on a Kubernetes cluster.
 
@@ -255,9 +260,8 @@ echoserver:
 
 You can then install the echoserver with the command (`OCMREPO` and `VERSION` need to be adjusted):
 
-```shell
+```bash
 OCMREPO=ghcr.io/open-component-model
 VERSION=v0.3.0
 ocm bootstrap component install -p params.yaml -c credentials.yaml $OCMREPO}//ocm.software/toi/demo/subcharts/subcharts:${VERSION}
 ```
-

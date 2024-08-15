@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm download [<options>] <sub command> ...
 ```
 
@@ -25,4 +25,3 @@ ocm download [<options>] <sub command> ...
 * [ocm download <b>cli</b>](ocm_download_cli.md)	 &mdash; download OCM CLI from an OCM repository
 * [ocm download <b>componentversions</b>](ocm_download_componentversions.md)	 &mdash; download ocm component versions
 * [ocm download <b>resources</b>](ocm_download_resources.md)	 &mdash; download resources of a component version
-

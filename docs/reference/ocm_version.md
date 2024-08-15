@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm version [<options>]
 ```
 
@@ -23,4 +23,3 @@ version, v
 #### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

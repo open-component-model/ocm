@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm set [<options>] <sub command> ...
 ```
 
@@ -22,4 +22,3 @@ ocm set [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm set <b>pubsub</b>](ocm_set_pubsub.md)	 &mdash; Set the pubsub spec for an ocm repository
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm toi [<options>] <sub command> ...
 ```
 
@@ -53,4 +53,3 @@ installation data by th generic command.
 
 * [<b>ocm toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 * [<b>ocm toi bootstrap package</b>](ocm_toi_bootstrap_package.md)	 &mdash; bootstrap component version
-

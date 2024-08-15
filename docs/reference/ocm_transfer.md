@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm transfer [<options>] <sub command> ...
 ```
 
@@ -25,4 +25,3 @@ ocm transfer [<options>] <sub command> ...
 * [ocm transfer <b>commontransportarchive</b>](ocm_transfer_commontransportarchive.md)	 &mdash; transfer transport archive
 * [ocm transfer <b>componentarchive</b>](ocm_transfer_componentarchive.md)	 &mdash; transfer component archive to some component repository
 * [ocm transfer <b>componentversions</b>](ocm_transfer_componentversions.md)	 &mdash; transfer component version
-

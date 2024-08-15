@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 plugin download [<flags>] <name> <filepath> [<options>]
 ```
 
@@ -30,4 +30,3 @@ with content of the given artifact type.
 #### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
-

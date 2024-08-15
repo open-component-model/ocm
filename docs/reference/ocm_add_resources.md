@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 ```
 
@@ -400,7 +400,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This REQUIRED property describes the groupId of a maven artifact.
 
   - **<code>artifactId</code>** *string*
-  	
+
     This REQUIRED property describes artifactId of a maven artifact.
 
   - **<code>version</code>** *string*
@@ -541,7 +541,7 @@ with the field <code>type</code> in the <code>input</code> field:
     media type is defaulted to application/octet-stream.
 
   - **<code>header</code>** *map[string][]string*
-  	
+
     This OPTIONAL property describes the http headers to be set in the http request to the server.
 
   - **<code>verb</code>** *string*
@@ -1033,4 +1033,3 @@ $ ocm add resources &dash;&dash;file path/to/ca  resources.yaml VERSION=1.0.0
 ##### Additional Links
 
 * [<b>ocm get credentials</b>](ocm_get_credentials.md)	 &mdash; Get credentials for a dedicated consumer spec
-

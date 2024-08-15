@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 plugin accessmethod [<options>] <sub command> ...
 ```
 
@@ -33,4 +33,3 @@ described by an access method descriptor ([plugin descriptor](plugin_descriptor.
 ##### Additional Links
 
 * [<b>plugin descriptor</b>](plugin_descriptor.md)	 &mdash; Plugin Descriptor Format Description
-

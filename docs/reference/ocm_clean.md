@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm clean [<options>] <sub command> ...
 ```
 
@@ -22,4 +22,3 @@ ocm clean [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm clean <b>cache</b>](ocm_clean_cache.md)	 &mdash; cleanup oci blob cache
-

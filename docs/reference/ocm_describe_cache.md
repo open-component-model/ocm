@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm describe cache [<options>]
 ```
 
@@ -15,7 +15,7 @@ ocm describe cache [<options>]
 ### Description
 
 Show details about the OCI blob cache (if given).
-	
+
 ### Examples
 
 ```
@@ -28,4 +28,3 @@ $ ocm cache info
 
 * [ocm describe](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

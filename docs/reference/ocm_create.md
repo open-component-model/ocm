@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm create [<options>] <sub command> ...
 ```
 
@@ -24,4 +24,3 @@ ocm create [<options>] <sub command> ...
 * [ocm create <b>componentarchive</b>](ocm_create_componentarchive.md)	 &mdash; create new component archive
 * [ocm create <b>rsakeypair</b>](ocm_create_rsakeypair.md)	 &mdash; create RSA public key pair
 * [ocm create <b>transportarchive</b>](ocm_create_transportarchive.md)	 &mdash; create new OCI/OCM transport  archive
-

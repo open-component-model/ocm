@@ -88,7 +88,7 @@ ingress:
 
 You can then install the echoserver with the command (`OCMREPO` and `VERSION` need to be adjusted):
 
-```shell
+```bash
 OCMREPO=ghcr.io/open-component-model
 VERSION=0.2.0
 ocm bootstrap component install -p params.yaml -c credentials.yaml ${OCMREPO}//ocm.software/toi/demo/helmdemo:${VERSION}

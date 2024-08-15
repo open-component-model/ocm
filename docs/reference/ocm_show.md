@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm show [<options>] <sub command> ...
 ```
 
@@ -23,4 +23,3 @@ ocm show [<options>] <sub command> ...
 
 * [ocm show <b>tags</b>](ocm_show_tags.md)	 &mdash; show dedicated tags of OCI artifacts
 * [ocm show <b>versions</b>](ocm_show_versions.md)	 &mdash; show dedicated versions (semver compliant)
-

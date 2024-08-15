@@ -60,13 +60,13 @@ Install the latest release from any of
 
 To install with `bash` for macOS or Linux execute the following command:
 
-```sh
+```bash
 curl -s https://ocm.software/install.sh | sudo bash
 ```
 
 ### Install using Homebrew
 
-```sh
+```bash
 # Homebrew (macOS and Linux)
 brew install open-component-model/tap/ocm
 ```
@@ -95,7 +95,7 @@ ocm --help
 
 package-url: https://aur.archlinux.org/packages/ocm-cli
 
-```sh
+```bash
 # if not using a helper util
 git clone https://aur.archlinux.org/ocm-cli.git
 cd ocm-cli
@@ -106,20 +106,20 @@ makepkg -i
 
 ### Usage via Docker / Podman
 
-```sh
+```bash
 podman run -t ghcr.io/open-component-model/ocm:latest --help
 ```
 
 #### Build and run it yourself
 
-```sh
+```bash
 podman build -t ocm .
 podman run --rm -t ocm --loglevel debug --help
 ```
 
 or interactively:
 
-```sh
+```bash
 podman run --rm -it ocm /bin/sh
 ```
 
@@ -131,7 +131,7 @@ You can pass in the following arguments to override the predefined defaults:
 
 Please check [hub.docker.com](https://hub.docker.com/_/golang/tags?page=1&name=alpine) for possible version combinations.
 
-```sh
+```bash
 podman build -t ocm --build-arg GO_VERSION=1.22 --build-arg ALPINE_VERSION=3.19 --build-arg GO_PROXY=https://proxy.golang.org .
 ```
 

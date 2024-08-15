@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm show versions [<options>] <component> {<version pattern>}
 ```
 
@@ -80,4 +80,3 @@ $ ocm show versions ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/playground
 
 * [ocm show](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm create rsakeypair [<private key file> [<public key file>]] {<subject-attribute>=<value>}
 ```
 
@@ -53,7 +53,7 @@ For signing the public key the following subject attributes are supported:
 - <code>S</code>, <code>province</code>, (multiple): Province
 - <code>C</code>, <code>country</code>, (multiple): Country
 
-	
+
 ### Examples
 
 ```
@@ -66,4 +66,3 @@ $ ocm create rsakeypair mandelsoft.priv mandelsoft.cert issuer=mandelsoft
 
 * [ocm create](ocm_create.md)	 &mdash; Create transport or component archive
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

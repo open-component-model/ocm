@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm controller [<options>] <sub command> ...
 ```
 
@@ -23,4 +23,3 @@ ocm controller [<options>] <sub command> ...
 
 * [ocm controller <b>install</b>](ocm_controller_install.md)	 &mdash; Install either a specific or latest version of the ocm-controller. Optionally install prerequisites required by the controller.
 * [ocm controller <b>uninstall</b>](ocm_controller_uninstall.md)	 &mdash; Uninstalls the ocm-controller and all of its dependencies
-

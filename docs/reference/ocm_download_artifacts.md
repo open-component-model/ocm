@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm download artifacts [<options>]  {<artifact>}
 ```
 
@@ -87,4 +87,3 @@ The default format is <code>directory</code>.
 
 * [ocm download](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

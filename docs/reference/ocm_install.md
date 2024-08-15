@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm install [<options>] <sub command> ...
 ```
 
@@ -22,4 +22,3 @@ ocm install [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm install <b>plugins</b>](ocm_install_plugins.md)	 &mdash; install or update an OCM plugin
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm describe [<options>] <sub command> ...
 ```
 
@@ -25,4 +25,3 @@ ocm describe [<options>] <sub command> ...
 * [ocm describe <b>cache</b>](ocm_describe_cache.md)	 &mdash; show OCI blob cache information
 * [ocm describe <b>package</b>](ocm_describe_package.md)	 &mdash; describe TOI package
 * [ocm describe <b>plugins</b>](ocm_describe_plugins.md)	 &mdash; get plugins
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm controller uninstall controller
 ```
 
@@ -30,4 +30,3 @@ ocm controller uninstall controller
 
 * [ocm controller](ocm_controller.md)	 &mdash; Commands acting on the ocm-controller
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm add [<options>] <sub command> ...
 ```
 
@@ -28,4 +28,3 @@ ocm add [<options>] <sub command> ...
 * [ocm add <b>routingslips</b>](ocm_add_routingslips.md)	 &mdash; add routing slip entry
 * [ocm add <b>source-configuration</b>](ocm_add_source-configuration.md)	 &mdash; add a source specification to a source config file
 * [ocm add <b>sources</b>](ocm_add_sources.md)	 &mdash; add source information to a component version
-

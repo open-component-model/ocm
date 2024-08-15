@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm transfer componentversions [<options>] {<component-reference>} <target>
 ```
 
@@ -257,4 +257,3 @@ $ ocm transfer components -t tgz --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ##### Additional Links
 
 * [<b>ocm ocm-uploadhandlers</b>](ocm_ocm-uploadhandlers.md)	 &mdash; List of all available upload handlers
-

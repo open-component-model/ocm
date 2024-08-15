@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm get artifacts [<options>] {<artifact-reference>}
 ```
 
@@ -27,7 +27,7 @@ artifacts, artifact, art, a
 
 Get lists all artifact versions specified, if only a repository is specified
 all tagged artifacts are listed.
-	
+
 
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
@@ -88,4 +88,3 @@ $ ocm get artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

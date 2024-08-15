@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm ocm [<options>] <sub command> ...
 ```
 

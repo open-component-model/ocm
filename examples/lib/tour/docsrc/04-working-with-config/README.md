@@ -92,7 +92,7 @@ settings for the given object and calls the appropriate
 methods on this object (after a type cast).
 
 Here is the code snippet from the apply method of the credential
-config object ([.../api/credentials/config/type.go](../../../../../api/credentials/config/type.go)):
+config object ([.../api/credentials/config/type.go](/api/credentials/config/type.go)):
 
 ```go
 {{include}{../../../../../api/credentials/config/type.go}{apply}}
@@ -278,7 +278,7 @@ If you have provided your OCI credentials with
 #### Templating
 
 The configuration library function does not only read the
-ocm config file, it also applies [*spiff*](github.com/mandelsoft/spiff)
+ocm config file, it also applies [*spiff*](https://github.com/mandelsoft/spiff)
 processing to the provided YAML/JSON content. *Spiff* is an
 in-domain yaml-based templating engine. Therefore, you can use
 any spiff dynaml expression to define values or even complete

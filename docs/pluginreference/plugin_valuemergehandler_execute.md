@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 plugin valuemergehandler execute <name> <spec> [<options>]
 ```
 
@@ -46,4 +46,3 @@ following fields:
 
 * [plugin valuemergehandler](plugin_valuemergehandler.md)	 &mdash; value merge handler operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin
-

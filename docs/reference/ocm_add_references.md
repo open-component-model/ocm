@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm add references [<options>] [<target>] {<referencefile> | <var>=<value>}
 ```
 
@@ -190,4 +190,3 @@ $ ocm add references  path/to/ca  references.yaml VERSION=1.0.0
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

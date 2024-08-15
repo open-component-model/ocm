@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 plugin valuemergehandler [<options>] <sub command> ...
 ```
 
@@ -24,4 +24,3 @@ This command group provides all commands used to implement an value merge handle
 ##### Sub Commands
 
 * [plugin valuemergehandler <b>execute</b>](plugin_valuemergehandler_execute.md)	 &mdash; execute a value merge
-

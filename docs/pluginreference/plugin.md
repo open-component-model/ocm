@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 plugin <subcommand> <options> <args>
 ```
 

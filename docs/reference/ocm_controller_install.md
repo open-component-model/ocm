@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm controller install controller {--version v0.0.1}
 ```
 
@@ -31,4 +31,3 @@ ocm controller install controller {--version v0.0.1}
 
 * [ocm controller](ocm_controller.md)	 &mdash; Commands acting on the ocm-controller
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 plugin valueset [<options>] <sub command> ...
 ```
 
@@ -32,4 +32,3 @@ described by a value set descriptor ([plugin descriptor](plugin_descriptor.md).
 ##### Additional Links
 
 * [<b>plugin descriptor</b>](plugin_descriptor.md)	 &mdash; Plugin Descriptor Format Description
-

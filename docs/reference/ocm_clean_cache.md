@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm clean cache [<options>]
 ```
 
@@ -17,7 +17,7 @@ ocm clean cache [<options>]
 ### Description
 
 Cleanup all blobs stored in oci blob cache (if given).
-	
+
 ### Examples
 
 ```
@@ -30,4 +30,3 @@ $ ocm clean cache
 
 * [ocm clean](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

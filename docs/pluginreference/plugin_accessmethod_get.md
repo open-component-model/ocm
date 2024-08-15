@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 plugin accessmethod get [<flags>] <access spec> [<options>]
 ```
 
@@ -24,4 +24,3 @@ Evaluate the given access specification and return the described blob on
 
 * [plugin accessmethod](plugin_accessmethod.md)	 &mdash; access method operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin
-

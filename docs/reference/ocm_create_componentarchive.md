@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm create componentarchive [<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}
 ```
 
@@ -59,4 +59,3 @@ $ ocm create componentarchive --file myfirst --provider acme.org --provider emai
 
 * [ocm create](ocm_create.md)	 &mdash; Create transport or component archive
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm describe plugins [<options>] {<plugin name>}
 ```
 
@@ -36,4 +36,3 @@ $ ocm describe plugins demo
 
 * [ocm describe](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm download cli [<options>]  [<component> {<name> { <key>=<value> }}]
 ```
 
@@ -95,4 +95,3 @@ option. Otherwise the resource as returned by the access method is stored.
 
 * [ocm download](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
-

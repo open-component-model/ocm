@@ -2,7 +2,7 @@
 
 ### Synopsis
 
-```sh
+```bash
 ocm credentials [<options>] <sub command> ...
 ```
 
@@ -28,4 +28,3 @@ credentials, creds, cred
 ##### Sub Commands
 
 * ocm credentials <b>get</b>	 &mdash; Get credentials for a dedicated consumer spec
-
