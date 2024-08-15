@@ -22,3 +22,4 @@ ocm hash [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm hash <b>componentversions</b>](ocm_hash_componentversions.md)	 &mdash; hash component version
+

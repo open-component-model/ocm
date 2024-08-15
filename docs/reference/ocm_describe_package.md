@@ -109,3 +109,4 @@ $ ocm toi describe package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 
 * [<b>ocm toi</b>](ocm_toi.md)	 &mdash; Dedicated command flavors for the TOI layer
 * [<b>ocm toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
+

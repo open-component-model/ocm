@@ -88,3 +88,4 @@ $ ocm oci artifact transfer /tmp/ctf gcr.io/my-project
 
 * [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+

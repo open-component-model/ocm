@@ -83,3 +83,4 @@ $ ocm describe artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 * [ocm describe](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+

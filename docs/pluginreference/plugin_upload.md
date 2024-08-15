@@ -27,3 +27,4 @@ described by an uploader descriptor.
 
 * [plugin upload <b>put</b>](plugin_upload_put.md)	 &mdash; upload blob to external repository
 * [plugin upload <b>validate</b>](plugin_upload_validate.md)	 &mdash; validate upload specification
+

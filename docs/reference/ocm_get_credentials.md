@@ -193,3 +193,4 @@ The usage of a dedicated matcher can be enforced by the option <code>--matcher</
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+

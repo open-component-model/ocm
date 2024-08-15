@@ -45,3 +45,4 @@ Types and specification formats are shown for the topic
 
 * [<b>ocm get pubsub</b>](ocm_get_pubsub.md)	 &mdash; Get the pubsub spec for an ocm repository
 * [<b>ocm ocm-pubsub</b>](ocm_ocm-pubsub.md)	 &mdash; List of all supported publish/subscribe implementations
+

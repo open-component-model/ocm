@@ -99,3 +99,4 @@ $ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 * [ocm check](ocm_check.md)	 &mdash; check components in OCM repository
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+

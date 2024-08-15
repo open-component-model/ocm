@@ -85,3 +85,4 @@ The following predefined value types are supported:
 ##### Additional Links
 
 * [<b>plugin descriptor</b>](plugin_descriptor.md)	 &mdash; Plugin Descriptor Format Description
+

@@ -28,3 +28,4 @@ credentials, creds, cred
 ##### Sub Commands
 
 * ocm credentials <b>get</b>	 &mdash; Get credentials for a dedicated consumer spec
+

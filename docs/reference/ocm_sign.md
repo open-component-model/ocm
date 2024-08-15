@@ -23,3 +23,4 @@ ocm sign [<options>] <sub command> ...
 
 * [ocm sign <b>componentversions</b>](ocm_sign_componentversions.md)	 &mdash; Sign component version
 * [ocm sign <b>hash</b>](ocm_sign_hash.md)	 &mdash; sign hash
+

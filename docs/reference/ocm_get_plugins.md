@@ -47,3 +47,4 @@ $ ocm get plugins demo -o yaml
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+

@@ -120,3 +120,4 @@ $ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key
 
 * [ocm verify](ocm_verify.md)	 &mdash; Verify component version signatures
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+

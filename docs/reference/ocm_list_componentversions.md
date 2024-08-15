@@ -121,3 +121,4 @@ $ ocm list componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 * [ocm list](ocm_list.md)	 &mdash; List information about components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+

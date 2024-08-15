@@ -22,3 +22,4 @@ ocm check [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm check <b>componentversions</b>](ocm_check_componentversions.md)	 &mdash; Check completeness of a component version in an OCM repository
+

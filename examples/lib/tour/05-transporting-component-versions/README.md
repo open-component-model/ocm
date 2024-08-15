@@ -5,7 +5,7 @@
 
 <a id="transport"></a>
 
-This [tour](example.go) illustrates the basic support for
+This [tour](/examples/lib/tour/05-transporting-component-versions/example.go) illustrates the basic support for
 transporting content from one environment into another.
 
 ## Running the example

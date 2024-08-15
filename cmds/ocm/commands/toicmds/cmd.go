@@ -27,7 +27,7 @@ version of the Open Component Model, which supports all the OCM features, like
 transportation.
 
 The framework consists of a generic bootstrap command
-(<CMD>ocm toi bootstrap package</CMD>) and an arbitrary set of image
+(<CMD>ocm bootstrap package</CMD>) and an arbitrary set of image
 based executors, that are executed in containers and fed with the required
 installation data by th generic command.
 `,

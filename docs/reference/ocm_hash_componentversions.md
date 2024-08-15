@@ -137,3 +137,4 @@ $ ocm hash componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 
 * [ocm hash](ocm_hash.md)	 &mdash; Hash and normalization operations
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+

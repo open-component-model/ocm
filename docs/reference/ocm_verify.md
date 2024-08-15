@@ -22,3 +22,4 @@ ocm verify [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm verify <b>componentversions</b>](ocm_verify_componentversions.md)	 &mdash; Verify signature of component version
+

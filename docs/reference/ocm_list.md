@@ -22,3 +22,4 @@ ocm list [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm list <b>componentversions</b>](ocm_list_componentversions.md)	 &mdash; list component version names
+
