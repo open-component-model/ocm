@@ -21,7 +21,7 @@ const (
 
 func init() {
 	pubsub.RegisterType(pubsub.NewPubSubType[*Spec](Type,
-		pubsub.WithDesciption("a redis pubsub sytsem.")))
+		pubsub.WithDesciption("a redis pubsub system.")))
 	pubsub.RegisterType(pubsub.NewPubSubType[*Spec](TypeV1,
 		pubsub.WithFormatSpec(`It is describe by the following field:
 
@@ -79,7 +79,7 @@ type Method struct {
 var _ pubsub.PubSubMethod = (*Method)(nil)
 
 func (m *Method) NotifyComponentVersion(version common.NameVersion) error {
-	// TODO: ipdate to credential provider interface
+	// TODO: update to credential provider interface
 	opts := &redis.Options{
 		Addr: m.spec.ServerAddr,
 		DB:   m.spec.Database,

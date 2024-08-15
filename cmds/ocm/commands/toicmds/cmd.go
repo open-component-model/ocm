@@ -18,7 +18,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
 		Short: "Dedicated command flavors for the TOI layer",
 		Long: `
-TOI is an abbreviation for (T)iny (O)CM (I)nstallation. It is a simple
+TOI is an abbreviation for Tiny OCM Installation. It is a simple
 application framework on top of the Open Component Model, that can
 be used to describe image based installation executors and installation
 packages (see topic <CMD>ocm toi-bootstrapping</CMD> in form of resources

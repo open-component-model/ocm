@@ -2,7 +2,7 @@
 
 ### Description
 
-TOI is a small toolset on top of the Open Component Model. It provides
+TOI is a small tool set on top of the Open Component Model. It provides
 a possibility to run images taken from a component version with user
 configuration and feed them with the content of this component version.
 It is some basic mechanism, which can be used to execute simple installation
@@ -199,7 +199,7 @@ defines additional identity attributes, the complete set must be specified.
 
 An optional <code>parameterMapping</code> in the executor section
 can be used to process the global package user-specified parameters
-to provide specifc values expected by the executor.
+to provide specific values expected by the executor.
 
 This is done by a _spiff_ template. Here special functions
 are provided to access specific content:
@@ -232,7 +232,7 @@ An executor is typically able to handle a complete class of installations.
 It describes a dedicated installation mechanism, but not a dedicated
 installation source. Although, there might be specialized images
 for dedicated installation sources, in general the idea is to provide
-more general executors, for example an helmexecutor, which is able to
+more general executors, for example an helm executor, which is able to
 handle any helm chart, not just a dedicated helm deployment.
 
 Because of this, there is a clear separation between an installation specific
@@ -244,7 +244,7 @@ The task of the package is to represent a dedicated deployment source. As such
 it has to provide information to tell the executor what to install, while
 the user configuration is used to describe the instance specific settings.
 
-Back to the example of a helminstaller executor, the executor config contained
+Back to the example of a helm installer executor, the executor config contained
 in the package resource describes the helm chart, which should be installed
 and the way how the user input is mapped to chart values. Here, also the
 localizations are described in an executor specific way.
@@ -397,7 +397,7 @@ files to logical outputs in the <code>outputs</code> section.
 
 Basically the output may contain any data, but is strongly recommended
 to use yaml or json files, only. This enables further formal processing
-by the TOI toolset.
+by the TOI tool set.
 
 ### Examples
 

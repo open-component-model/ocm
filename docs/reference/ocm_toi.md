@@ -14,7 +14,7 @@ ocm toi [<options>] <sub command> ...
 
 ### Description
 
-TOI is an abbreviation for (T)iny (O)CM (I)nstallation. It is a simple
+TOI is an abbreviation for Tiny OCM Installation. It is a simple
 application framework on top of the Open Component Model, that can
 be used to describe image based installation executors and installation
 packages (see topic [ocm toi-bootstrapping](ocm_toi-bootstrapping.md) in form of resources

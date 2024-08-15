@@ -2,10 +2,11 @@ accessmethod
 accessmethoddescriptor
 accessmethods
 actiondescriptor
-ad-hoc
+additionalresource
 addversion
 adr
 aggregative
+aml
 anchore
 api
 archlinux
@@ -25,6 +26,7 @@ boolean
 buildx
 cas
 cli
+cliconfig
 clis
 closable
 closeable
@@ -39,10 +41,12 @@ componentreferences
 componentversionaccess
 componentversionaccessimpl
 componentversions
+compvers
 config
 configfile
 configs
 consumerid
+crd
 creationtime
 credentialrequest
 credentialsspec
@@ -72,6 +76,8 @@ downloaderdescriptor
 downloaders
 downloadhandlers
 dry-run
+dup
+dups
 dynaml
 echoserver
 entrypoint
@@ -117,6 +123,7 @@ helmdemo
 helmexecutor
 helminstaller
 helmrepository
+hoc
 homebrew
 hostname
 hostpath
@@ -186,6 +193,7 @@ ocmbot
 ocmcli
 ocmconfig
 oncefunc
+oo
 oras
 os
 outputspecification
@@ -196,10 +204,12 @@ pflag
 podinfo
 podman
 pre
+preconfigure
 preconfigured
 predefine
 programmatically
 prs
+pss
 pubsub
 readme
 readonly
@@ -274,4 +284,6 @@ wget
 withocm
 xml
 yaml
+yitsushi
 yml
+yyyy

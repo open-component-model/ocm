@@ -63,7 +63,7 @@ The used credential management model is based on four elements:
   involved. For example, an assignment is done for an OCI registry with a dedicated
   server url and prefix for the repository path (type is OCIRegistry, host is
   ghcr.io, prefix path is open-component-model). The assigned credentials
-  should be applicable for sub repositories. Som the assignment use a more
+  should be applicable for sub repositories. So the assignment use a more
   general consumer id than the concrete credential request (for example for
   repository path <code>open-component-model/ocm/ocmcli</code>)
 
@@ -140,8 +140,8 @@ The following credential consumer types are used/supported:
 
       - <code>authmeth</code>: auth method
       - <code>token</code>: vault token
-      - <code>roleid</code>: applrole role id
-      - <code>secretid</code>: applrole secret id
+      - <code>roleid</code>: app-role role id
+      - <code>secretid</code>: app-role secret id
 
     The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
 
@@ -337,8 +337,8 @@ The following types are currently available:
 
     - <code>authmeth</code>: auth method
     - <code>token</code>: vault token
-    - <code>roleid</code>: applrole role id
-    - <code>secretid</code>: applrole secret id
+    - <code>roleid</code>: app-role role id
+    - <code>secretid</code>: app-role secret id
 
   The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
 

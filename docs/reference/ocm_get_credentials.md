@@ -66,8 +66,8 @@ Matchers exist for the following usage contexts or consumer types:
 
       - <code>authmeth</code>: auth method
       - <code>token</code>: vault token
-      - <code>roleid</code>: applrole role id
-      - <code>secretid</code>: applrole secret id
+      - <code>roleid</code>: app-role role id
+      - <code>secretid</code>: app-role secret id
 
     The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
 
