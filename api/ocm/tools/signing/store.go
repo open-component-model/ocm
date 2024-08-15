@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"golang.org/x/exp/maps"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -21,9 +22,12 @@ type VerifiedStore interface {
 	Add(cd *compdesc.ComponentDescriptor, signatures ...string)
 	Remove(n common.VersionedElement)
 	Get(n common.VersionedElement) *compdesc.ComponentDescriptor
+	GetEntry(n common.VersionedElement) *StorageEntry
 
 	GetResourceDigest(n common.VersionedElement, id metav1.Identity) *metav1.DigestSpec
 	GetResourceDigestByIndex(n common.VersionedElement, idx int) *metav1.DigestSpec
+
+	Entries() []common.NameVersion
 
 	Load() error
 	Save() error
@@ -118,6 +122,14 @@ func (v *verifiedStore) Save() error {
 	return nil
 }
 
+func (v *verifiedStore) Entries() []common.NameVersion {
+	v.lock.Lock()
+	defer v.lock.Unlock()
+
+	return sliceutils.Transform(maps.Values(v.storage.ComponentVersions),
+		func(cd *StorageEntry) common.NameVersion { return common.VersionedElementKey(cd.Descriptor) })
+}
+
 func (v *verifiedStore) Add(cd *compdesc.ComponentDescriptor, signatures ...string) {
 	v.lock.Lock()
 	defer v.lock.Unlock()
@@ -146,6 +158,13 @@ func (v *verifiedStore) Remove(n common.VersionedElement) {
 	defer v.lock.Unlock()
 
 	delete(v.storage.ComponentVersions, common.VersionedElementKey(n).String())
+}
+
+func (v *verifiedStore) GetEntry(n common.VersionedElement) *StorageEntry {
+	v.lock.Lock()
+	defer v.lock.Unlock()
+
+	return v.storage.ComponentVersions[common.VersionedElementKey(n).String()]
 }
 
 func (v *verifiedStore) Get(n common.VersionedElement) *compdesc.ComponentDescriptor {
