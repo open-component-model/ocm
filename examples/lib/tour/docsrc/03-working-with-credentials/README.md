@@ -276,7 +276,7 @@ the access method as credential consumer can access the blob.
 
 ### Providing credentials via credential repositories
 
-The OCM tool set embraces multiple storage
+The OCM toolset embraces multiple storage
 backend technologies, for OCM metadata as well
 as for artifacts described by a component version.
 All those technologies typically have their own

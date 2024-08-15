@@ -82,7 +82,7 @@ by registered blob handlers.
 
 #### Provided Blob Handlers
 
-The standard tool set uses the following registered blob handlers:
+The standard toolset uses the following registered blob handlers:
 
 - *Blob handler for importing oci artifact blobs into
 an OCM repository mapped to an OCI registry*

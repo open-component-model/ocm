@@ -2,7 +2,7 @@
 
 ### Description
 
-TOI is a small tool set on top of the Open Component Model. It provides
+TOI is a small toolset on top of the Open Component Model. It provides
 a possibility to run images taken from a component version with user
 configuration and feed them with the content of this component version.
 It is some basic mechanism, which can be used to execute simple installation
@@ -397,7 +397,7 @@ files to logical outputs in the <code>outputs</code> section.
 
 Basically the output may contain any data, but is strongly recommended
 to use yaml or json files, only. This enables further formal processing
-by the TOI tool set.
+by the TOI toolset.
 
 ### Examples
 
@@ -462,4 +462,3 @@ additionalResources:
 * [<b>ocm bootstrap package</b>](ocm_bootstrap_package.md)	 &mdash; bootstrap component version
 * [<b>ocm bootstrap config</b>](ocm_bootstrap_config.md)
 * [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
-

@@ -20,5 +20,5 @@ Flux can be used here.
 The template projects is managed with *make*.
 It can be used to create new versions (patch, minor, major)
 and to build a component version that can later be
-by the OCM tool set on the client side to import new
+by the OCM toolset on the client side to import new
 versions in a customer environment.

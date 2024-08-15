@@ -143,7 +143,7 @@ Besides the standard sub packages, there are extension packages for
 
 - `download`: Handlers understanding dedicated artifact and mime types
   capable to provide then as filesystem content consumable by their
-  native tool set, for example Helm charts.
+  native toolset, for example Helm charts.
 
 - `labels`: The handling of predefined label content.
 - `valuemergehandler`: Merge algorithms used to support the merge

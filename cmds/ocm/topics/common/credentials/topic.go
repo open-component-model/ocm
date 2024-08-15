@@ -103,7 +103,7 @@ The general process for a credential management then looks as follows.
   matching one based on the provided matching mechanism.
 - it then returns the mapped credentials from the references repository.
 
-The critical task for a user of the tool set is to define those assignments.
+The critical task for a user of the toolset is to define those assignments.
 This is basically a manual task, because the credentials stored in vault
 (for example) could be usable for any kind of system, which typically
 cannot be derived from the credential values.

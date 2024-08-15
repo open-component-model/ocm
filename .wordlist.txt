@@ -46,6 +46,7 @@ config
 configfile
 configs
 consumerid
+containerd
 crd
 creationtime
 credentialrequest
@@ -256,6 +257,7 @@ templaters
 templating
 tgz
 tls
+todo
 toi
 toiexecutor
 toolset
