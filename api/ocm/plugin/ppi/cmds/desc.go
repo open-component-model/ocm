@@ -35,6 +35,6 @@ Errors have to be reported on *stderr* as JSON document with the fields:
 
 Any plugin, regardless of its functionality has to provide an <CMD>` + name + ` info</CMD>,
 which prints JSON document containing a plugin descriptor that describes the 
-apabilities of the plugin.
+capabilities of the plugin.
 `
 }

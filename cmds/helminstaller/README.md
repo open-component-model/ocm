@@ -16,7 +16,7 @@ name `toiexecutor`.
 
 The executor configuration supports the following field:
 
-- `chart` *[ResourceReference](../../docs/reference/ocm_toi-bootstrapping.md#resourcereference)* (**required**) The resource containing the top level hemlm chart to work on.
+- `chart` *[ResourceReference](../../docs/reference/ocm_toi-bootstrapping.md#resourcereference)* (**required**) The resource containing the top level helmchart to work on.
 
 - `subCharts` *map[string]ResourceReference* (**optional**) A set of resources describing charts used as sub charts for the top level chart. The map key is the name of the folder created for the sub chart.
 
@@ -28,15 +28,15 @@ The executor configuration supports the following field:
 
 - `imageMapping` *[]ImageMapping* list of localization rules for images.
 
-- `values` **yaml* The default values used for installation. They will be overwritten by the given installation values (at top-level). 
+- `values` **yaml* The default values used for installation. They will be overwritten by the given installation values (at top-level).
 
 - `kubeConfigName` *string* (**optional** default: `target`) The credential name to lookup for the kubeconfig used to access the target Kubernetes cluster.
 
 ### Image Mappings
 
-Image meappings describe the injection of OCI image locations, names and versions 
+Image mappings describe the injection of OCI image locations, names and versions
 taken from the component version info dedicated properties of the installation
-values. The hemlm chart MUST take all image locations used in the templates
+values. The helmchart MUST take all image locations used in the templates
 from dedicated values. This is required to support the transport of
 component versions into local repositories environments, which should be used
 on the installation site.
@@ -53,7 +53,7 @@ At least the `image` attribute or the `tag` and `repositories` attributes must b
 
 ### Configuring Subcharts
 
-Subcharts are configured as usual with the values for the parent chart (see https://helm.sh/docs/chart_template_guide/subcharts_and_globals/).
+Subcharts are configured as usual with the values for the parent chart (see <https://helm.sh/docs/chart_template_guide/subcharts_and_globals/>).
 
 The key of the subchart is used as top-level values key to add settings for the subchart.
 Similar to the parent chart, images used by subcharts must be localized via [image mappings](#image-mappings), also. The subchart values must accept tag, repository and/or image value

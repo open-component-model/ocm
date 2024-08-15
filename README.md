@@ -75,7 +75,7 @@ brew install open-component-model/tap/ocm
 
 ```bash
 # Nix (macOS, Linux, and Windows)
-# ad hoc cmd execution
+# ad-hoc cmd execution
 nix run github:open-component-model/ocm -- --help
 nix run github:open-component-model/ocm#helminstaller -- --help
 

@@ -22,7 +22,7 @@ password:
 ```
 
 Any supported kind of target repository can be specified by using its
-specification type. An OCI regisztry target would look like this:
+specification type. An OCI registry target would look like this:
 
 ```yaml
 repository: ghcr.io/mandelsoft/ocm

@@ -50,7 +50,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Short: "list component version names",
 		Long: `
 List lists the version names of the specified objects, if only a component is specified
-all versions according to the given versuin constraints are listed.
+all versions according to the given version constraints are listed.
 `,
 		Example: `
 $ ocm list componentversion ghcr.io/mandelsoft/kubelink

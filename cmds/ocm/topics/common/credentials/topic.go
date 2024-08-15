@@ -25,7 +25,7 @@ func New(ctx clictx.Context) *cobra.Command {
 		Long: `
 In contrast to libraries intended for a dedicated technical environment,
 for example the handling of OCI images in OCI registries, the OCM
-ecosystem cannot provide a specialized credential management for a decicated
+ecosystem cannot provide a specialized credential management for a dedicated
 environment.
 
 Because of its extensibility working with component versions could
@@ -54,7 +54,7 @@ The used credential management model is based on four elements:
   access, which must be authorized.
 
   This is again achieved by a set of simple named attributes. There is only
-  one defined property, which must always be present, the <code>type</code> attibute.
+  one defined property, which must always be present, the <code>type</code> attribute.
   It denotes the type of the technical environment credentials are required for.
   For example, for accessing OCI or Git registries. Additionally, there may 
   be any number of arbitrary attributes used to describe the concrete
@@ -81,9 +81,9 @@ The used credential management model is based on four elements:
   The credential management must resolve credential requests against a set
   of credential assignments. This is not necessarily a complete attribute match
   for the involved consumer ids. There is typically some kind of matching 
-  involved. For example, an assigment is done for an OCI registry with a dedicated
+  involved. For example, an assignment is done for an OCI registry with a dedicated
   server url and prefix for the repository path (type is OCIRegistry, host is
-  ghcr.io, prefixpath is open-component-model). The assigned credentials
+  ghcr.io, prefix path is open-component-model). The assigned credentials
   should be applicable for sub repositories. Som the assignment use a more
   general consumer id than the concrete credential request (for example for
   repository path <code>open-component-model/ocm/ocmcli</code>)
@@ -103,7 +103,7 @@ The general process for a credential management then looks as follows.
   matching one based on the provided matching mechanism.
 - it then returns the mapped credentials from the references repository.
 
-The critical task for a user of the toolset is to define those assignments.
+The critical task for a user of the tool set is to define those assignments.
 This is basically a manual task, because the credentials stored in vault
 (for example) could be usable for any kind of system, which typically
 cannot be derived from the credential values.
@@ -124,12 +124,12 @@ The following credential consumer types are used/supported:
 ` + listformat.FormatListElements("", consumer) + `\
 Those consumer types provide their own matchers, which are often based
 on some standard generic matches. Those generic matchers and their
-behaviours are described in the following list:
+behaviors are described in the following list:
 ` + listformat.FormatListElements("", standard) + `
 
 ### Credential Providers
 
-Credential providers offer sets of named credentials from variuos sources,
+Credential providers offer sets of named credentials from various sources,
 which might be directly mapped to consumer identities (if supported
 by the provider type).
 

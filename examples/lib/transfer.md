@@ -192,7 +192,7 @@ target repository (`transferHandler, err := standard.New(standard.Overwrite())`.
 
 With `closure := transfer.TransportClosure{}` a shared transport store is
 created, which remembers already transported component versions. It is
-used for all calls of `TransferVersion` to avpid duplicate transfers.
+used for all calls of `TransferVersion` to avoid duplicate transfers.
 THis is especially relevant, if the transitive transfer option is set.
 In this example this all content of the CTF is transferred without the
 transitive option, so it is not necessarily required.

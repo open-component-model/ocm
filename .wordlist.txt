@@ -2,6 +2,7 @@ accessmethod
 accessmethoddescriptor
 accessmethods
 actiondescriptor
+ad-hoc
 addversion
 adr
 aggregative
@@ -54,6 +55,7 @@ cvs
 deepcopy
 defs
 dependabot
+deployscript
 deserializable
 deserialization
 deserialize
@@ -70,6 +72,7 @@ downloaderdescriptor
 downloaders
 downloadhandlers
 dry-run
+dynaml
 echoserver
 entrypoint
 executables
@@ -120,6 +123,7 @@ hostpath
 html
 http
 https
+iaas
 imagemapping
 inlined
 installable
@@ -192,6 +196,7 @@ pflag
 podinfo
 podman
 pre
+preconfigured
 predefine
 programmatically
 prs
@@ -269,3 +274,4 @@ wget
 withocm
 xml
 yaml
+yml

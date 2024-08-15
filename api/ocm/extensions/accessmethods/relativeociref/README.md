@@ -44,7 +44,7 @@ The type specific specification fields are:
 
 - **`reference`** *string*
 
-  OCI image/artifact reference following the OCI schemes to describe an arifact inside
+  OCI image/artifact reference following the OCI schemes to describe an artifact inside
   an OCI registry (OCI reference without the host part):
   - `<artifact>:<digest>@<tag>`
   - `<repo path>/<artifact>:<version>@<tag>`

@@ -103,7 +103,7 @@ target version.
 ### Using Context Settings to Configure Signing
 
 Instead of providing all signing relevant information directly with
-the signing or verification calls, it is possible to preconfigure
+the signing or verification calls, it is possible to pre-configure
 various information at the OCM context.
 
 As usual, we start with getting access to an OCM context

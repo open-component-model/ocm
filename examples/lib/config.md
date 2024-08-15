@@ -91,7 +91,7 @@ OCI registry.
     fmt.Printf("found: %s\n", got)
 ```
 
-The first call provides a potentially dynamic credential source for the requested consumer. This object can then be used to dtermine actual credentials valid for an actual resource access. This indirection is introduced to support dynamic just-in-time credential generation processes.
+The first call provides a potentially dynamic credential source for the requested consumer. This object can then be used to determine actual credentials valid for an actual resource access. This indirection is introduced to support dynamic just-in-time credential generation processes.
 
 The function `credentials.CredentialsForConsumer` can be used, instead, to directly get access to the credential properties with a single function call.
 
@@ -108,7 +108,7 @@ configuration file.
 
 Instead of providing dedicated mechanism to configure various target environments
 the configuration context provides a uniform generic mechanism to
-handle arbitrary coniguration settings for any target environment.
+handle arbitrary configuration settings for any target environment.
 
 The configuration context provides a runtime.Scheme object to
 register known configuration types, which offer a deserialization.
@@ -197,7 +197,7 @@ The OCM client tool supports reading configuration from a file `~/.ocmconfig`
 to configure the used OCM context.
 This functionality is offered by a library function, also. The function
 
-    pkg.contexts.ocm.utils.Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context, error)
+`pkg.contexts.ocm.utils.Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context, error)`
 
 searched for a configuration file and applies it. If not found it looks for
 a docker config file and applies an appropriate setting (see example above).
@@ -205,7 +205,7 @@ a docker config file and applies an appropriate setting (see example above).
 If the config data is already provided by some other means, it can be directly be
 applied with the function
 
-    pkg.contexts.ocm.utils.ConfigureByData(ctx ocm.Context, data []byte, info string) error
+`pkg.contexts.ocm.utils.ConfigureByData(ctx ocm.Context, data []byte, info string) error`
 
 Both functions process the YAML content with [spiff](https://github.com/mandelsoft/spiff),
 an in-domain templating engine, which allows generating parts of the configuration.
@@ -213,7 +213,7 @@ an in-domain templating engine, which allows generating parts of the configurati
 ## Configuration Objects
 
 It is very simple to provide own configuration types. It is just
-a GO struct implementing the interface `credentials.cpi.Config`. The main method
+a GO structure implementing the interface `credentials.cpi.Config`. The main method
 here is `ApplyTo(configctx Context, target interface{}) error`, which is used to apply
 the content to a dedicated target object. The method has to decide on its own
 whether it applies to the passed object (type) at all, or what part of its content
@@ -377,7 +377,7 @@ to configure a dedicated context as shown in the second example:
     if err != nil {
         return errors.Wrapf(err, "cannot read configuration file %s", CFGFILE)
     }
-    
+
     _, err = ctx.ApplyData(data, runtime.DefaultYAMLEncoding, CFGFILE)
     if err != nil {
         return errors.Wrapf(err, "cannot apply config data")

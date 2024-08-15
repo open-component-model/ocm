@@ -1,3 +1,4 @@
+# OCM Plugin framework
 
 The OCM Plugin framework now supports two features to
 extend the CLI with new (OCM related) commands:
@@ -10,7 +11,7 @@ plugin feature commands.
 
 Examples see coding in `cmds/cliplugin`
 
-#### Config Types
+## Config Types
 
 Config types are just registered at the Plugin Object;
 
@@ -40,9 +41,9 @@ func init() {
 }
 ```
 
-#### CLI Commands
+## CLI Commands
 
-CLI commands are provided by the registratuon interface `ppi.Command`. It
+CLI commands are provided by the registration interface `ppi.Command`. It
 provides some command metadata and a `cobra.Command` object.
 
 Commands are then registered at the plugin object with:
@@ -107,7 +108,7 @@ CLI code.
 The command can be a top-level command or attached to a dedicated verb (and optionally a realm like `ocm`or `oci`).
 For the cobra support this can be requested by the option `WithVerb(...)`.
 
-If the config framework is used just add the following anonymoud import
+If the config framework is used just add the following anonymous import
 for an automated configuration:
 
 ```go
@@ -129,7 +130,7 @@ func init() {
 
 It gets a config yaml according to the config objects used by the OCM library.
 
-#### Logging
+## Logging
 
 To get the logging configuration from the OCM CLI the plugin has be configured with
 
@@ -159,7 +160,7 @@ func init() {
 
 It gets a logging configuration yaml according to the logging config used by the OCM library (`github.com/mandelsoft/logging/config`).
 
-#### Using Plugin command extensions from the OCM library
+## Using Plugin command extensions from the OCM library
 
 The plugin command extensions can also be called without the OCM CLI directly from the OCM library.
 Therefore the plugin objects provided by the library can be used.

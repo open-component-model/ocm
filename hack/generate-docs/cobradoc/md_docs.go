@@ -25,12 +25,12 @@ func printOptionGroups(buf *bytes.Buffer, title string, flags *pflag.FlagSet) {
 			if g.Title != "" {
 				buf.WriteString("\n#### " + g.Title + "\n\n")
 			}
-			buf.WriteString("```\n")
+			buf.WriteString("```text\n")
 			buf.WriteString(g.Usages)
 			buf.WriteString("```\n\n")
 		}
 	} else {
-		buf.WriteString("```\n")
+		buf.WriteString("```text\n")
 		buf.WriteString(groups[0].Usages)
 		buf.WriteString("```\n\n")
 	}
@@ -98,7 +98,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 		if strings.Contains(cmd.Example, "<pre>") {
 			buf.WriteString(fmt.Sprintf("\n%s\n\n", SanitizePre(cmd.Example)))
 		} else {
-			buf.WriteString(fmt.Sprintf("```\n%s\n```\n\n", strings.TrimSpace(cmd.Example)))
+			buf.WriteString(fmt.Sprintf("```yaml\n%s\n```\n\n", strings.TrimSpace(cmd.Example)))
 		}
 	}
 

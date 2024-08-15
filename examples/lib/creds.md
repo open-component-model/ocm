@@ -185,11 +185,11 @@ Instead of configuring credentials at the credentials context,
 it is possible to access standard credential stores, also.
 
 Similar to the OCM context, the credentials context is capable to manage
-the access to arbitrary credential stores, as ong as their type is supported by
+the access to arbitrary credential stores, as long as their type is supported by
 the actual program context. Again, there are types for the
 repository/store specification and instantiation methods to map a specification
 to a repository object, which then allows accessing the named credentials found
-in this repository. The supported types can be dynamically registed by the
+in this repository. The supported types can be dynamically registered by the
 program context.
 
 Those repositories might require credentials, again. This is handled the same

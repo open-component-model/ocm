@@ -77,11 +77,11 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 
 const usage = `
 The config type <code>` + ConfigType + `</code> can be used to define a list
-of pre-configured download handler registrations (see <CMD>ocm ocm-downloadhandlers</CMD>):
+of preconfigured download handler registrations (see <CMD>ocm ocm-downloadhandlers</CMD>):
 
 <pre>
     type: ` + ConfigType + `
-    descrition: "my standard download handler configuration"
+    description: "my standard download handler configuration"
     handlers:
       - name: oci/artifact
         artifactType: ociImage

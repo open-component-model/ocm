@@ -1,6 +1,6 @@
 # Example: subcharts
 
-This folder contains an example how to deploy an application consistsing of multiple helm charts. It consists of a helm chart, a [toi package](../../docs/reference/ocm_toi-bootstrapping.md) and a reference to the [helm helminstaller](../helminstaller/README.md).
+This folder contains an example how to deploy an application consisting of multiple helm charts. It consists of a helm chart, a [toi package](../../docs/reference/ocm_toi-bootstrapping.md) and a reference to the [helm installer](../helminstaller/README.md).
 
 The helm chart has multiple other charts as dependencies and has no templates. Its only purpose is to act as an anchor for deployment. The toi package is used to install the component with the helm-installer using the `ocm bootstrap` command.
 
@@ -128,7 +128,7 @@ podinfo:
 
 The first image mapping instructs the helm-installer to replace the image tag with the value it finds in the component reference named `echoserver` in the resource named "echo-image".
 
-```
+```yaml
   component:
     ...
     componentReferences:
@@ -188,8 +188,8 @@ For a successful image mapping ensure that all you image resources have a `globa
 
 ## Providing helm values for subcharts
 
-Usually deployments will get a configuration specific for this target enviroment. In helm this is done with values specific for a helm release.
-When using the toi installer this works in the same way by providing the values with other parameters like name of the helm release and the target namespace in a <parameters.yaml> file:
+Usually deployments will get a configuration specific for this target environment. In helm this is done with values specific for a helm release.
+When using the toi installer this works in the same way by providing the values with other parameters like name of the helm release and the target namespace in a `parameters.yaml` file:
 
 ```yaml
 namespace: subcharts

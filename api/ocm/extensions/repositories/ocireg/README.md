@@ -31,7 +31,7 @@ The type specific specification fields are:
 
 - **`componentNameMapping`** (optional) *string* (deprecated)
 
-  the mapping algorithm used to map OCM component names to OCU repository names ( `urlPath` (default) or `sha256-digest`).
+  the mapping algorithm used to map OCM component names to OCI repository names ( `urlPath` (default) or `sha256-digest`).
 
 ### Go Bindings
 

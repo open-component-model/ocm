@@ -4,15 +4,15 @@ Package repocpi contains the implementation support
  for repository backends. It offers three methods
  to create component version, component and repository
  objects based on three simple implementation interfaces.
- 
+
  The basic provisioning model is layered:
 
- ![Implamentation Layers](ocmimpllayers.png)
+ ![Implementation Layers](ocmimpllayers.png)
 
-   - on layer 1 there is the *user facing API* defined
+- on layer 1 there is the *user facing API* defined
      in package [ocm.software/ocm/api/ocm].
 
-   - on layer 2 (this package) there is a backend agnostic
+- on layer 2 (this package) there is a backend agnostic
      implementation of standard functionality based on layer 3.
      This is divided into two parts
 
@@ -22,7 +22,7 @@ Package repocpi contains the implementation support
      for the views and as abstraction for the implementation objects
      providing *generic* implementations potentially based on
      the implementation functionality.
-     (see bridge design pattern https://refactoring.guru/design-patterns/bridge)
+     (see bridge design pattern <https://refactoring.guru/design-patterns/bridge>)
 
      b) the *bridge*  object as base for all dup views is used to implement some
      common functionality like the view management. The bridge object
@@ -30,16 +30,16 @@ Package repocpi contains the implementation support
      This bridge object then calls the final
      storage backend implementation interface.
 
-   - the storage backend implementations based on the implementation
+- the storage backend implementations based on the implementation
      interfaces provided by layer 2.
 
  The implementation interfaces and the functions to create API objects are:
 
-   - interface [ComponentVersionAccessImpl] is used to create an ocm.ComponentVersionAccess object
+- interface [ComponentVersionAccessImpl] is used to create an ocm.ComponentVersionAccess object
      using the function [NewComponentVersionAccess].
-   - interface [ComponentAccessImpl] is used to create an ocm.ComponentAccess object
+- interface [ComponentAccessImpl] is used to create an ocm.ComponentAccess object
      using the function [NewComponentAccess].
-   - interface [RepositoryImpl] is used to create an ocm.ComponentAccess object
+- interface [RepositoryImpl] is used to create an ocm.ComponentAccess object
      using the function [NewRepository].
 
  Component version implementations provide basic access to component versions
@@ -48,7 +48,8 @@ Package repocpi contains the implementation support
  to provide component objects. Their implementations are responsible to provide
  component version objects.
 
-## Simplified Respository Implementation Interface
+## Simplified Repository Implementation Interface
+
  Besides this basic implementation interfaces with separated objects for a
  repository, component and component version, there is support for a simplified
  implementation interface (`StorageBackendImpl`). This is a single interface
@@ -57,14 +58,14 @@ Package repocpi contains the implementation support
  a new kind of repository based on this single interface. The required
  objects for components and component versions are generically provided
  based on the methods provided by this interface.
- 
+
 ## Comparison of Implementation Models
 
 The simplified implementation model does not provide access to the
 implementation objects for components and component versions.
 Therefore, it is not possible to keep state for those elements.
 
-Storage Backend Implementations requiring such state, like the OCI 
+Storage Backend Implementations requiring such state, like the OCI
 implementation based on the OCI abstraction provided by the OCI
 context, therefore use dedicated implementations for repository,
 component and component version objects. This model provides
@@ -73,5 +74,3 @@ complete control over the lifecycle of those elements.
 If a storage backend implementation is stateless or just keeps
 state at the repository level, the simplified implementation model
 can be chosen.
-
-

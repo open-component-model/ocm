@@ -5,6 +5,7 @@ It bundles all settings and extensions point implementations for this area.
 
 Therefore, it provides a root object of the type `Context`. This context
 object then provides methods to
+
 - set configurations and to
 - get access to elements belonging to this area.
 
@@ -34,7 +35,7 @@ object, which provides access to elements hosted by this repository.
 The context itself manages all the specification and element types and
 acts as a central entry point to deserialize JSON/YAML based specification
 descriptors and to gain access to the described effective root elements.
-Those context extension points are managed by *Registries* used to 
+Those context extension points are managed by *Registries* used to
 configure implementations and specification types by globally
 unique names. These registration features are provided for every extension
 type and are accessible at the context object.
@@ -65,18 +66,18 @@ The following context types are provided:
 
 - `config`: configuration management of all parts of the OCM library.
    It provides a uniform but generic way to manage configuration and its
-   serialized form for all kinds of configuration cosumers by supporting
+   serialized form for all kinds of configuration consumers by supporting
    typed descriptors which, are mapped to objects capable to configure
    dedicated configuration targets.
 - `credentials`: credential management. It acts as factory to provide
    credentials for consumption targets in various environments (for example,
    GitHub, OCI registries, S3 repositories, etc). Those targets are described
-   by so-called *comsumer ids*, which are mapped to credentials by the credentials context.
+   by so-called *consumer ids*, which are mapped to credentials by the credentials context.
 
    It includes a *config* context.
 - `oci`: working with OCI registries.
    It acts as central access point to instantiate OCI registry view for
-   different backends hosting OCI images and OCU artifacts, like an
+   different backends hosting OCI images and OCM artifacts, like an
     OCI registry, a filesystem representation or a docker daemon.
 
    It includes a *credentials* context.
@@ -93,7 +94,7 @@ The following context types are provided:
 
 To just use the library without special configuration the complete standard
 settings will be available by accessing the default context for the area of
-question. Alternatively, context instances with specialized configurations 
+question. Alternatively, context instances with specialized configurations
 can be orchestrated by context builders.
 
 ## Package organization
@@ -135,7 +136,7 @@ an instance of the general context blueprint described above.
 Besides the standard sub packages, there are extension packages for
 
 - `blobhandler`: Handlers responsible to upload local blobs. By default,
-  local blobs are kept as local blobs when addedd to an OCM repository.
+  local blobs are kept as local blobs when added to an OCM repository.
   *Upload handlers* can be used to influence this behaviour and export
   the content of dedicated blobs again into local repositories according
   to their native technologies, for example OCI images, S3 blobs, etc.
@@ -152,7 +153,7 @@ The package `plugin` contains the plugin interface of the library,
 which can be used to provide various kinds of extension points in form of
 separate executables.
 The embedding of handlers provided by plugins can always be found
-in the package `plugin` below the dedicated extension point handler 
+in the package `plugin` below the dedicated extension point handler
 package.
 
 Additionally, there are more functional
@@ -182,7 +183,7 @@ orchestrate own context objects from scratch.
 
 The function `New()` creates a new context object inheriting the
 configuration of the default context. It accepts an optional mode
-argument used to control the behaviour of the context creation and 
+argument used to control the behaviour of the context creation and
 the handling of other used context types:
 
 - `MODE_SHARED` uses the default contexts for unset nested context types.
@@ -195,7 +196,8 @@ the handling of other used context types:
   default registrations.
 - `MODE_INITIAL` uses completely new contexts for unset nested context types
   and initial registrations.
-- 
+-
+
 Initial contexts do not contain any registrations for extension point
 implementations. They can/must be configured according to dedicated
 needs of their creator.
@@ -228,10 +230,8 @@ for the supported realms. The implementations/variants supported by this
 library will automatically be registered into default schemes used by
 the default contexts of all supported functional areas.
 
-A specification object can then be used by the context to provide 
+A specification object can then be used by the context to provide
 access to the described object, for example, a specification for
 an OCM repository can be used to gain access to the implementation object
 representing this repository instance. Those objects then provide methods
 to gain access to the repository content.
-
-

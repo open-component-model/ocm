@@ -28,7 +28,7 @@ func (a AttributeType) Name() string {
 
 func (a AttributeType) Description() string {
 	return `
-*cliconfigr* Configuration Object passed to command line pluging.
+*cliconfig* Configuration Object passed to command line plugin.
 `
 }
 
