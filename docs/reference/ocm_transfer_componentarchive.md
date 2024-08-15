@@ -14,7 +14,7 @@ componentarchive, comparch, ca
 
 ### Options
 
-```
+```text
   -L, --copy-local-resources   transfer referenced local resources by-value
   -V, --copy-resources         transfer referenced resources by-value
       --copy-sources           transfer referenced sources by-value
@@ -60,7 +60,7 @@ references.
 With the option <code>--no-update</code> existing versions in the target
 repository will not be touched at all. An additional specification of the
 option <code>--overwrite</code> is ignored. By default, updates of
-volative (non-signature-relevant) information is enabled, but the
+volatile (non-signature-relevant) information is enabled, but the
 modification of non-volatile data is prohibited unless the overwrite
 option is given.
 

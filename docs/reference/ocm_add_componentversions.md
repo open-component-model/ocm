@@ -14,7 +14,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ### Options
 
-```
+```text
       --addenv                    access environment for templating
   -C, --complete                  include all referenced component version
   -L, --copy-local-resources      transfer referenced local resources by-value
@@ -71,7 +71,7 @@ entry can be used to specify a dedicated serialization format to use for the
 component descriptor. If given it overrides the <code>--schema</code> option
 of the command. By default, v2 is used.
 
-Various elements support to add arbirary information by using labels
+Various elements support to add arbitrary information by using labels
 (see [ocm ocm-labels](ocm_ocm-labels.md)).
 
 

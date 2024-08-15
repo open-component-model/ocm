@@ -64,7 +64,7 @@ The **type** may contain a file format qualifier separated by a <code>+</code>
 character. The following formats are supported: <code>directory</code>, <code>tar</code>, <code>tgz</code>
 ### Examples
 
-```
+```yaml
 Complete Component Reference Specifications (including all optional arguments):
 
 +ctf+directory::./ocm/ctf//ocm.software/ocmcli:0.7.0

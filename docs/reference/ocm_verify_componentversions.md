@@ -14,7 +14,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ### Options
 
-```
+```text
       --ca-cert stringArray       additional root certificate authorities (for signing certificates)
   -c, --constraints constraints   version constraint
   -h, --help                      help for componentversions
@@ -110,7 +110,7 @@ references.
 
 ### Examples
 
-```
+```yaml
 $ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink
 ```
 

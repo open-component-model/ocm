@@ -14,7 +14,7 @@ references, reference, refs
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -h, --help                      help for references
       --latest                    restrict component versions to latest

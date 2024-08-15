@@ -41,7 +41,7 @@ The following *realms* are used by the command line tool:
 
 ### Examples
 
-```
+```yaml
 type: logging.config.ocm.software
     contextType: attributes.context.ocm.software
     settings:

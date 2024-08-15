@@ -8,7 +8,7 @@ ocm execute action [<options>] <action spec> {<cred>=<value>}
 
 ### Options
 
-```
+```text
   -h, --help             help for action
   -m, --matcher string   matcher type override
   -n, --name string      action name (overrides type in specification)
@@ -25,7 +25,7 @@ to retrieve credentials for.
 
 ### Examples
 
-```
+```yaml
 $ ocm execute action '{ "type": "oci.repository.prepare/v1", "hostname": "...", "repository": "..."}'
 ```
 

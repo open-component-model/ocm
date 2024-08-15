@@ -14,7 +14,7 @@ plugins, plugin, p
 
 ### Options
 
-```
+```text
   -h, --help               help for plugins
   -o, --output string      output mode (JSON, json, wide, yaml)
   -s, --sort stringArray   sort fields
@@ -36,7 +36,7 @@ The following modes are supported:
 
 ### Examples
 
-```
+```yaml
 $ ocm get plugins
 $ ocm get plugins demo -o yaml
 ```

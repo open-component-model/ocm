@@ -14,7 +14,7 @@ routingslips, routingslip, rs
 
 ### Options
 
-```
+```text
       --all-columns               show all table columns
   -c, --constraints constraints   version constraint
       --fail-on-error             fail on validation error

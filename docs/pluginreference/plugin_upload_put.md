@@ -8,7 +8,7 @@ plugin upload put [<flags>] <name> <repository specification> [<options>]
 
 ### Options
 
-```
+```text
   -a, --artifactType string         artifact type of input blob
   -C, --credential <name>=<value>   dedicated credential value (default [])
   -c, --credentials YAML            credentials

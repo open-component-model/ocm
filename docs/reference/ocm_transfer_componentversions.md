@@ -14,7 +14,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ### Options
 
-```
+```text
   -B, --bom-file string             file name to write the component version BOM
   -c, --constraints constraints     version constraint
   -L, --copy-local-resources        transfer referenced local resources by-value
@@ -128,7 +128,7 @@ versions are re-transported).
 With the option <code>--no-update</code> existing versions in the target
 repository will not be touched at all. An additional specification of the
 option <code>--overwrite</code> is ignored. By default, updates of
-volative (non-signature-relevant) information is enabled, but the
+volatile (non-signature-relevant) information is enabled, but the
 modification of non-volatile data is prohibited unless the overwrite
 option is given.
 
@@ -240,7 +240,7 @@ this one is used.
 
 ### Examples
 
-```
+```yaml
 $ ocm transfer components -t tgz ghcr.io/mandelsoft/kubelink ctf.tgz
 $ ocm transfer components -t tgz --repo OCIRegistry::ghcr.io mandelsoft/kubelink ctf.tgz
 ```

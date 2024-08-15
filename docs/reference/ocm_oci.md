@@ -8,7 +8,7 @@ ocm oci [<options>] <sub command> ...
 
 ### Options
 
-```
+```text
   -h, --help   help for oci
 ```
 

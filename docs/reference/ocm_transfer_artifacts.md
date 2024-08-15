@@ -14,7 +14,7 @@ artifacts, artifact, art, a
 
 ### Options
 
-```
+```text
   -h, --help          help for artifacts
       --repo string   repository name or spec
   -R, --repo-name     transfer repository name
@@ -75,7 +75,7 @@ linked library can be used:
 
 ### Examples
 
-```
+```yaml
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink:v1.0.0 gcr.io
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io/my-project

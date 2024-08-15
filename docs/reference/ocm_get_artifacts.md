@@ -14,7 +14,7 @@ artifacts, artifact, art, a
 
 ### Options
 
-```
+```text
   -a, --attached           show attached artifacts
   -h, --help               help for artifacts
   -o, --output string      output mode (JSON, json, tree, wide, yaml)
@@ -77,7 +77,7 @@ The following modes are supported:
 
 ### Examples
 
-```
+```yaml
 $ ocm get artifact ghcr.io/mandelsoft/kubelink
 $ ocm get artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```

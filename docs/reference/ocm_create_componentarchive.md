@@ -14,7 +14,7 @@ componentarchive, comparch, ca
 
 ### Options
 
-```
+```text
   -F, --file string            target file/directory (default "component-archive")
   -f, --force                  remove existing content
   -h, --help                   help for componentarchive
@@ -49,7 +49,7 @@ The following schema versions are supported for explicit conversions:
 
 ### Examples
 
-```
+```yaml
 $ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org acme.org/demo 1.0
 ```
 

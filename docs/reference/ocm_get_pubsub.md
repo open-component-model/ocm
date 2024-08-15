@@ -14,7 +14,7 @@ pubsub, ps
 
 ### Options
 
-```
+```text
   -h, --help               help for pubsub
   -o, --output string      output mode (JSON, json, yaml)
   -s, --sort stringArray   sort fields

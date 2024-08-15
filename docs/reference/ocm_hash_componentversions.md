@@ -14,7 +14,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ### Options
 
-```
+```text
       --actual                    use actual component descriptor
   -c, --constraints constraints   version constraint
   -H, --hash string               hash algorithm (default "SHA-256")
@@ -126,7 +126,7 @@ The following modes are supported:
 
 ### Examples
 
-```
+```yaml
 $ ocm hash componentversion ghcr.io/mandelsoft/kubelink
 $ ocm hash componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```

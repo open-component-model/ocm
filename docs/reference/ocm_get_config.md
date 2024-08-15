@@ -14,7 +14,7 @@ config, cfg
 
 ### Options
 
-```
+```text
   -h, --help             help for config
   -O, --outfile string   output file or directory
   -o, --output string    output mode (JSON, json, yaml)

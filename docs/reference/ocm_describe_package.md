@@ -14,7 +14,7 @@ package, pkg, componentversion, cv, component, comp, c
 
 ### Options
 
-```
+```text
   -h, --help                 help for package
       --lookup stringArray   repository name or spec for closure lookup fallback
       --repo string          repository name or spec
@@ -87,7 +87,7 @@ references.
 
 ### Examples
 
-```
+```yaml
 $ ocm toi describe package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 ```
 

@@ -14,7 +14,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ### Options
 
-```
+```text
   -h, --help             help for componentversions
   -O, --outfile string   output file or directory
       --repo string      repository name or spec

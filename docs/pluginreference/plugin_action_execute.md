@@ -8,7 +8,7 @@ plugin action execute <spec> [<options>]
 
 ### Options
 
-```
+```text
   -C, --credential <name>=<value>   dedicated credential value (default [])
   -c, --credentials YAML            credentials
   -h, --help                        help for execute

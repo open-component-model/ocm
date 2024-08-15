@@ -14,7 +14,7 @@ routingslips, routingslip, rs
 
 ### Options
 
-```
+```text
   -S, --algorithm string     signature handler (default "RSASSA-PKCS1-V1_5")
       --digest string        parent digest to use
   -h, --help                 help for routingslips
@@ -26,7 +26,7 @@ routingslips, routingslip, rs
 
 #### Entry Specification Options
 
-```
+```text
       --comment string       comment field value
       --entry YAML           routing slip entry specification (YAML)
 ```
@@ -115,7 +115,7 @@ references.
 
 ### Examples
 
-```
+```yaml
 $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandelsoft.org comment --entry "comment=some text"
 ```
 

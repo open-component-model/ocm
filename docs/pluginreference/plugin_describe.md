@@ -8,7 +8,7 @@ plugin describe [<options>]
 
 ### Options
 
-```
+```text
   -h, --help   help for describe
 ```
 

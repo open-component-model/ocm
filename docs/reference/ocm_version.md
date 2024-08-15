@@ -14,7 +14,7 @@ version, v
 
 ### Options
 
-```
+```text
   -h, --help   help for version
 ```
 

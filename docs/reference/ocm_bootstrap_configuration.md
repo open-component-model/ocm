@@ -14,7 +14,7 @@ configuration, config, cfg
 
 ### Options
 
-```
+```text
   -c, --credentials string   credentials file name (default "TOICredentials")
   -h, --help                 help for configuration
       --lookup stringArray   repository name or spec for closure lookup fallback
@@ -96,7 +96,7 @@ references.
 
 ### Examples
 
-```
+```yaml
 $ ocm toi bootstrap config ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 ```
 

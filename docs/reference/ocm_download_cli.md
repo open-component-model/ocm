@@ -14,7 +14,7 @@ cli, ocmcli, ocm-cli
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -h, --help                      help for cli
   -O, --outfile string            output file or directory

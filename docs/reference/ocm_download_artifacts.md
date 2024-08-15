@@ -14,7 +14,7 @@ artifacts, artifact, art, a
 
 ### Options
 
-```
+```text
       --dirtree          extract as effective filesystem content
   -h, --help             help for artifacts
       --layers ints      extract dedicated layers

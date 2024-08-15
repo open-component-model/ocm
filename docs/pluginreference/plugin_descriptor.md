@@ -44,7 +44,7 @@ following fields:
 
   The list of supported downloaders. Downloaders will be used by the
   CLI download command to provide downloaded artifacts in a filesystem format
-  applicable to the type specific tools, regatdless of the format it is stored
+  applicable to the type specific tools, regardless of the format it is stored
   as blob in a component version. Therefore, they can be registered for
   combination of artifact type and optional mime type (describing the actually
   used blob format).
@@ -242,7 +242,7 @@ The descriptor for an action has the following fields:
   A list of selectors, for which this action implementation is automatically
   be registered when the plugin is loaded. The selector syntax depends on
   the action type. (For example, the hostname (pattern) for the action
-  <code>oci.repository.prepare</code>). The selectors are eiker directly matched
+  <code>oci.repository.prepare</code>). The selectors are either directly matched
   with action requests or used as regular expression.
 
 - **<code>consumerType</code>** *string* (optional)
@@ -295,7 +295,7 @@ The descriptor for a label merge specification has the following fields:
 
 ### Examples
 
-```
+```yaml
 {
   "version": "v1",
   "pluginName": "test",

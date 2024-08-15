@@ -180,19 +180,19 @@ OCM library:
 
 - <code>github.com/mandelsoft/tempblobcache</code> [<code>blobcache</code>]: *string* Foldername for temporary blob cache
 
-  The temporary blob cache is used to accessing large blobs from remote sytems.
+  The temporary blob cache is used to accessing large blobs from remote systems.
   The are temporarily stored in the filesystem, instead of the memory, to avoid
   blowing up the memory consumption.
 
-- <code>ocm.software/cliconfig</code> [<code>cliconfig</code>]: *cliconfigr* Configuration Object passed to command line pluging.
+- <code>ocm.software/cliconfig</code> [<code>cliconfig</code>]: *cliconfig* Configuration Object passed to command line plugin.
 
 
 
 - <code>ocm.software/compositionmode</code> [<code>compositionmode</code>]: *bool* (default: false
 
   Composition mode decouples a component version provided by a repository
-  implemention from the backened persistence. Added local blobs will
-  and other changes witll not be forwarded to the backend repository until
+  implementation from the backend persistence. Added local blobs will
+  and other changes will not be forwarded to the backend repository until
   an AddVersion is called on the component.
   If composition mode is disabled blobs will directly be forwarded to
   the backend and descriptor updated will be persisted on AddVersion

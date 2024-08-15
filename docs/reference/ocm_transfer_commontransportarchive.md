@@ -14,7 +14,7 @@ commontransportarchive, ctf
 
 ### Options
 
-```
+```text
   -L, --copy-local-resources        transfer referenced local resources by-value
   -V, --copy-resources              transfer referenced resources by-value
       --copy-sources                transfer referenced sources by-value
@@ -43,7 +43,7 @@ With the option <code>--recursive</code> the complete reference tree of a compon
 With the option <code>--no-update</code> existing versions in the target
 repository will not be touched at all. An additional specification of the
 option <code>--overwrite</code> is ignored. By default, updates of
-volative (non-signature-relevant) information is enabled, but the
+volatile (non-signature-relevant) information is enabled, but the
 modification of non-volatile data is prohibited unless the overwrite
 option is given.
 
@@ -183,7 +183,7 @@ this one is used.
 
 ### Examples
 
-```
+```yaml
 $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 ```
 

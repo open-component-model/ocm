@@ -14,7 +14,7 @@ plugins, plugin, p
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -d, --describe                  describe plugin, only
   -f, --force                     overwrite existing plugin
@@ -76,7 +76,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 
 ### Examples
 
-```
+```yaml
 $ ocm install plugin ghcr.io/github.com/mandelsoft/cnudie//github.com/mandelsoft/ocmplugin:0.1.0-dev
 $ ocm install plugin -c 1.2.x ghcr.io/github.com/mandelsoft/cnudie//github.com/mandelsoft/ocmplugin
 $ ocm install plugin -u demo

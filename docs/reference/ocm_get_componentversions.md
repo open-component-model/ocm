@@ -14,7 +14,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -h, --help                      help for componentversions
       --latest                    restrict component versions to latest
@@ -116,7 +116,7 @@ The following modes are supported:
 
 ### Examples
 
-```
+```yaml
 $ ocm get componentversion ghcr.io/mandelsoft/kubelink
 $ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```

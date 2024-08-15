@@ -14,7 +14,7 @@ pubsub, ps
 
 ### Options
 
-```
+```text
   -d, --delete   delete pub/sub configuration
   -h, --help     help for pubsub
 ```

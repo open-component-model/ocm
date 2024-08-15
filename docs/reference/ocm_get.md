@@ -8,7 +8,7 @@ ocm get [<options>] <sub command> ...
 
 ### Options
 
-```
+```text
   -h, --help   help for get
 ```
 

@@ -8,7 +8,7 @@ ocm list [<options>] <sub command> ...
 
 ### Options
 
-```
+```text
   -h, --help   help for list
 ```
 

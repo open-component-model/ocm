@@ -14,7 +14,7 @@ credentials, creds, cred
 
 ### Options
 
-```
+```text
   -h, --help   help for credentials
 ```
 

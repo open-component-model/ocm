@@ -8,7 +8,7 @@ ocm clean cache [<options>]
 
 ### Options
 
-```
+```text
   -b, --before string   time since last usage
   -s, --dry-run         show size to be removed
   -h, --help            help for cache
@@ -20,7 +20,7 @@ Cleanup all blobs stored in oci blob cache (if given).
 	
 ### Examples
 
-```
+```yaml
 $ ocm clean cache
 ```
 

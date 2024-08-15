@@ -14,7 +14,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ### Options
 
-```
+```text
       --fail-on-error      fail on validation error
   -h, --help               help for componentversions
   -R, --local-resources    check also for describing resources with local access method, only
@@ -88,7 +88,7 @@ The following modes are supported:
 
 ### Examples
 
-```
+```yaml
 $ ocm check componentversion ghcr.io/mandelsoft/kubelink
 $ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```

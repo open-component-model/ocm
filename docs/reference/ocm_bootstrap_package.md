@@ -14,7 +14,7 @@ package, pkg, componentversion, cv, component, comp, c
 
 ### Options
 
-```
+```text
       --config stringToString   driver config (default [])
   -C, --create-env string       create local filesystem contract to call executor command locally
   -c, --credentials string      credentials file
@@ -177,7 +177,7 @@ references.
 
 ### Examples
 
-```
+```yaml
 $ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 ```
 

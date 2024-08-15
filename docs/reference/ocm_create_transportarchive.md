@@ -14,7 +14,7 @@ transportarchive, ctf
 
 ### Options
 
-```
+```text
   -f, --force         remove existing content
   -h, --help          help for transportarchive
   -t, --type string   archive format (directory, tar, tgz) (default "directory")

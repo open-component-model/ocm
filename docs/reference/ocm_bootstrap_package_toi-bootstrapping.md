@@ -401,7 +401,7 @@ by the TOI toolset.
 
 ### Examples
 
-```
+```yaml
 description: |
   This package is just an example.
 executors:

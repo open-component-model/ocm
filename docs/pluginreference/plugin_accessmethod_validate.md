@@ -8,7 +8,7 @@ plugin accessmethod validate <spec> [<options>]
 
 ### Options
 
-```
+```text
   -h, --help   help for validate
 ```
 

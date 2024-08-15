@@ -14,7 +14,7 @@ plugins, plugin, p
 
 ### Options
 
-```
+```text
   -h, --help   help for plugins
 ```
 
@@ -25,7 +25,7 @@ a plugin.
 
 ### Examples
 
-```
+```yaml
 $ ocm describe plugins
 $ ocm describe plugins demo
 ```

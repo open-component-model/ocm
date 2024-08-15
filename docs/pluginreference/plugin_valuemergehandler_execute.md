@@ -8,7 +8,7 @@ plugin valuemergehandler execute <name> <spec> [<options>]
 
 ### Options
 
-```
+```text
   -h, --help   help for execute
 ```
 

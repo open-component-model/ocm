@@ -8,7 +8,7 @@ ocm show tags [<options>] <component> {<version pattern>}
 
 ### Options
 
-```
+```text
   -h, --help          help for tags
   -l, --latest        show only latest tags
       --repo string   repository name or spec
@@ -56,7 +56,7 @@ linked library can be used:
 
 ### Examples
 
-```
+```yaml
 $ oci show tags ghcr.io/mandelsoft/kubelink
 ```
 

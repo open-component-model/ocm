@@ -8,7 +8,7 @@ plugin valueset compose <purpose> <name> <options json> <base spec json> [<optio
 
 ### Options
 
-```
+```text
   -h, --help   help for compose
 ```
 

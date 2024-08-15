@@ -8,7 +8,7 @@ ocm add [<options>] <sub command> ...
 
 ### Options
 
-```
+```text
   -h, --help   help for add
 ```
 

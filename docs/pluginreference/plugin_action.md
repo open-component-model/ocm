@@ -8,7 +8,7 @@ plugin action [<options>] <sub command> ...
 
 ### Options
 
-```
+```text
   -h, --help   help for action
 ```
 

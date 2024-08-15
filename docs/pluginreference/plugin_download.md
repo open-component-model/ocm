@@ -8,7 +8,7 @@ plugin download [<flags>] <name> <filepath> [<options>]
 
 ### Options
 
-```
+```text
   -a, --artifactType string   artifact type of input blob
   -c, --config string         registration config
   -h, --help                  help for download

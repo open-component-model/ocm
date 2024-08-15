@@ -8,7 +8,7 @@ ocm toi [<options>] <sub command> ...
 
 ### Options
 
-```
+```text
   -h, --help   help for toi
 ```
 
@@ -23,7 +23,7 @@ version of the Open Component Model, which supports all the OCM features, like
 transportation.
 
 The framework consists of a generic bootstrap command
-([ocm toi bootstrap package](ocm_toi_bootstrap_package.md)) and an arbitrary set of image
+([ocm bootstrap package](ocm_bootstrap_package.md)) and an arbitrary set of image
 based executors, that are executed in containers and fed with the required
 installation data by th generic command.
 
@@ -52,5 +52,5 @@ installation data by th generic command.
 ##### Additional Links
 
 * [<b>ocm toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
-* [<b>ocm toi bootstrap package</b>](ocm_toi_bootstrap_package.md)	 &mdash; bootstrap component version
+* [<b>ocm bootstrap package</b>](ocm_bootstrap_package.md)	 &mdash; bootstrap component version
 

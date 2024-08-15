@@ -14,7 +14,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -h, --help                      help for componentversions
       --latest                    restrict component versions to latest
@@ -28,7 +28,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ### Description
 
 List lists the version names of the specified objects, if only a component is specified
-all versions according to the given versuin constraints are listed.
+all versions according to the given version constraints are listed.
 
 
 If the option <code>--constraints</code> is given, and no version is specified
@@ -110,7 +110,7 @@ The following modes are supported:
 
 ### Examples
 
-```
+```yaml
 $ ocm list componentversion ghcr.io/mandelsoft/kubelink
 $ ocm list componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```

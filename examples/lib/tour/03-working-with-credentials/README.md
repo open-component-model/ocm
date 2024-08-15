@@ -8,7 +8,7 @@
 This tour illustrates the basic handling of credentials
 using the OCM library. The library provides
 an extensible framework to bring together credential providers
-and credential consunmers in a technology-agnostic way.
+and credential consumers in a technology-agnostic way.
 
 It covers four basic scenarios:
 
@@ -215,7 +215,7 @@ The used functions above are just convenience wrappers
 around the core type ConsumerId, which might be provided
 for dedicated repository/consumer technologies.
 Everything can be done directly with the core interface
-and property name constants provided by the dedicted technologies.
+and property name constants provided by the dedicated technologies.
 
 Once we have the id we can finally set the credentials for this
 id.
@@ -240,7 +240,7 @@ First, we get the repository object for our OCM repository.
 	defer repo.Close()
 ```
 
-Second, we determine the consumer id for our intended repository acccess.
+Second, we determine the consumer id for our intended repository access.
 A credential consumer may provide consumer id information
 for a dedicated sub user context.
 This is supported by the OCM repo implementation for OCI registries.
@@ -421,7 +421,7 @@ repository API provided by this library.
 
 The docker config is such a case, so we can instruct the
 repository to automatically propagate appropriate the consumer id
-mappings. This feature is typically enabled by a dedicated specfication
+mappings. This feature is typically enabled by a dedicated specification
 option.
 
 ```go

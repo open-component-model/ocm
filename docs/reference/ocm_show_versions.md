@@ -14,7 +14,7 @@ versions, vers, v
 
 ### Options
 
-```
+```text
   -h, --help          help for versions
   -l, --latest        show only latest version
       --repo string   repository name or spec
@@ -70,7 +70,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 
 ### Examples
 
-```
+```yaml
 $ ocm show versions ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/playground
 ```
 

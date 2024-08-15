@@ -8,7 +8,7 @@ ocm describe cache [<options>]
 
 ### Options
 
-```
+```text
   -h, --help   help for cache
 ```
 
@@ -18,7 +18,7 @@ Show details about the OCI blob cache (if given).
 	
 ### Examples
 
-```
+```yaml
 $ ocm cache info
 ```
 

@@ -8,7 +8,7 @@ plugin info [<options>]
 
 ### Options
 
-```
+```text
   -h, --help   help for info
 ```
 

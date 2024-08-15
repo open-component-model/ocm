@@ -14,7 +14,7 @@ resources, resource, res, r
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -h, --help                      help for resources
       --latest                    restrict component versions to latest

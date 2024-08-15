@@ -14,7 +14,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 
 ### Options
 
-```
+```text
   -S, --algorithm string          signature handler (default "RSASSA-PKCS1-V1_5")
       --ca-cert stringArray       additional root certificate authorities (for signing certificates)
   -c, --constraints constraints   version constraint
@@ -135,7 +135,7 @@ references.
 
 ### Examples
 
-```
+```yaml
 $ ocm sign componentversion --signature mandelsoft --private-key=mandelsoft.key ghcr.io/mandelsoft/kubelink
 ```
 

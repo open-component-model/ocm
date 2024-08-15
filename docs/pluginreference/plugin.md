@@ -8,7 +8,7 @@ plugin <subcommand> <options> <args>
 
 ### Options
 
-```
+```text
   -c, --config YAML       plugin configuration
   -h, --help              help for plugin
       --log-config YAML   ocm logging configuration
@@ -49,7 +49,7 @@ Errors have to be reported on *stderr* as JSON document with the fields:
 
 Any plugin, regardless of its functionality has to provide an [plugin info](plugin_info.md),
 which prints JSON document containing a plugin descriptor that describes the
-apabilities of the plugin.
+capabilities of the plugin.
 
 ### SEE ALSO
 

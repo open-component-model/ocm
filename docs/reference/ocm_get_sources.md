@@ -14,7 +14,7 @@ sources, source, src, s
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -h, --help                      help for sources
       --latest                    restrict component versions to latest

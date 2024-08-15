@@ -8,7 +8,7 @@ ocm controller [<options>] <sub command> ...
 
 ### Options
 
-```
+```text
   -h, --help   help for controller
 ```
 

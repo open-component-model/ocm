@@ -14,7 +14,7 @@ rsakeypair, rsa
 
 ### Options
 
-```
+```text
       --ca                     create certificate for a signing authority
       --ca-cert string         certificate authority to sign public key
       --ca-key string          private key for certificate authority
@@ -56,7 +56,7 @@ For signing the public key the following subject attributes are supported:
 	
 ### Examples
 
-```
+```yaml
 $ ocm create rsakeypair mandelsoft.priv mandelsoft.cert issuer=mandelsoft
 ```
 

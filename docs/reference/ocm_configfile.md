@@ -61,11 +61,11 @@ The following configuration types are supported:
   </pre>
 - <code>downloader.ocm.config.ocm.software</code>
   The config type <code>downloader.ocm.config.ocm.software</code> can be used to define a list
-  of pre-configured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):
+  of preconfigured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):
 
   <pre>
       type: downloader.ocm.config.ocm.software
-      descrition: "my standard download handler configuration"
+      description: "my standard download handler configuration"
       handlers:
         - name: oci/artifact
           artifactType: ociImage
@@ -312,11 +312,11 @@ The following configuration types are supported:
   </pre>
 - <code>uploader.ocm.config.ocm.software</code>
   The config type <code>uploader.ocm.config.ocm.software</code> can be used to define a list
-  of pre-configured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):
+  of preconfigured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):
 
   <pre>
       type: uploader.ocm.config.ocm.software
-      descrition: "my standard download handler configuration"
+      description: "my standard download handler configuration"
       handlers:
         - name: oci/artifact
           artifactType: ociImage
@@ -327,7 +327,7 @@ The following configuration types are supported:
 
 ### Examples
 
-```
+```yaml
 type: generic.config.ocm.software/v1
 configurations:
   - type: credentials.config.ocm.software

@@ -14,7 +14,7 @@ resource-configuration, resourceconfig, rsccfg, rcfg
 
 ### Options
 
-```
+```text
   -h, --help                                help for resource-configuration
   -s, --settings stringArray                settings file with variable settings (yaml)
 ```
@@ -22,7 +22,7 @@ resource-configuration, resourceconfig, rsccfg, rcfg
 
 #### Access Specification Options
 
-```
+```text
       --access YAML                         blob access specification (YAML)
       --accessHostname string               hostname used for access
       --accessPackage string                package or object name
@@ -53,7 +53,7 @@ resource-configuration, resourceconfig, rsccfg, rcfg
 
 #### Input Specification Options
 
-```
+```text
       --artifactId string                   maven artifact id
       --body string                         body of a http request
       --classifier string                   maven classifier
@@ -89,7 +89,7 @@ resource-configuration, resourceconfig, rsccfg, rcfg
 
 #### Resource Meta Data Options
 
-```
+```text
       --external                            flag non-local resource
       --extra <name>=<value>                resource extra identity (default [])
       --label <name>=<YAML>                 resource label (leading * indicates signature relevant, optional version separated by @)
@@ -111,8 +111,8 @@ options <code>--name</code> and <code>--version</code>. With the option <code>--
 it is possible to add extra identity attributes. Explicitly specified options
 override values specified by the <code>--resource</code> option.
 (Note: Go templates are not supported for YAML-based option values. Besides
-this restriction, the finally composed element description is still processd
-by the selected templater.)
+this restriction, the finally composed element description is still processed
+by the selected template engine.)
 
 The resource type can be specified with the option <code>--type</code>. Therefore, the
 minimal required meta data for elements can be completely specified by dedicated
@@ -471,7 +471,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes a list of spiff libraries to include in template
     processing.
 
-  The variable settigs from the command line are available as binding, also. They are provided under the node
+  The variable settings from the command line are available as binding, also. They are provided under the node
   <code>values</code>.
 
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputPath</code>, <code>--inputValues</code>, <code>--mediaType</code>
@@ -973,7 +973,7 @@ There are several templaters that can be selected by the <code>--templater</code
 
 ### Examples
 
-```
+```yaml
 $ ocm add resource-configuration resources.yaml --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
 ```
 

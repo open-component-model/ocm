@@ -8,7 +8,7 @@ plugin accessmethod compose <name> <options json> <base spec json> [<options>]
 
 ### Options
 
-```
+```text
   -h, --help   help for compose
 ```
 

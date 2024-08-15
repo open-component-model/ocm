@@ -8,7 +8,7 @@ ocm set [<options>] <sub command> ...
 
 ### Options
 
-```
+```text
   -h, --help   help for set
 ```
 
