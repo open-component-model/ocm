@@ -2,7 +2,7 @@
 
 This folder contains an example how to use the ocm CLI to build and upload a component version to an OCI registry. It refers to a public image and creates a component-descriptor with an appropriate access method. Additionally it embeds a helm chart for installation. Finally it adds a [toi package](../../docs/reference/ocm_toi-bootstrapping.md) specification and a reference to the [helminstaller](../helminstaller/README.md). This allows installing the component with the toi installer.
 
-# Building
+## Building
 
 You can use `make` to build this component. You will have to adjust the variables at the top of the [makefile](Makefile) to your environment (at least `OCMREPO`). By default, all artifacts are built in the `gen` folder of this project.
 
@@ -17,7 +17,7 @@ The main targets are:
 
 You can find more information [here](../../cmds/helminstaller/README.md).
 
-# Using transported images (image mapping)
+## Using transported images (image mapping)
 
 When transferring a component version between registries or from a local common transport archive to an OCI registry often images are included. When installing the applications all images in a deployment need to be adjusted so that their url points to the new location. The toi installer can perform this mapping and will dynamically adjust the helm values. This needs to be configured in the `packagespec.yaml` file. The `packagespec.yaml` inserts the content of another file `helmconfig.yaml` where the image mapping is defined.
 
@@ -31,7 +31,7 @@ imageMapping:
 
 This image mapping instructs the helm-installer to replace the tags
 
-```
+```yaml
 image:
   repository: <add reference to image from component version here>
   tag:        <add tag from component version here>
@@ -53,7 +53,7 @@ access:
 
 For a successful image mapping ensure that all you image resources have a globalAccess and relation external in their component descriptor. Only with global access Kubernetes is able to pull an image. Ensure that your components are transferred with the --copy-resources flag.
 
-# Installation
+## Installation
 
 You can use the `ocm bootstrap` command to install this component with the [toi installer](../../docs/reference/ocm_toi-bootstrapping.md) on a Kubernetes cluster.
 

@@ -1,2 +1,1 @@
-
-## Context Provider Interface for context configurations
+# Context Provider Interface for context configurations

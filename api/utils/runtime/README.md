@@ -1,24 +1,24 @@
 # Serialization and deserialization of formally typed objects
 
 This package provides support for the de-/serialization of objects into/from a JSON
-or YAML representation. 
+or YAML representation.
 
 Objects conforming to this model are called *typed objects*. They have a formal type,
 which determines the deserialization method. To be able to infer the type from the
 serialization format, it always contains a formal field `type`. So, the minimal
 external format of such an object would be (in JSON):
 
-```
+```json
 { "type": "my-special-object-type" }
 ```
 
 A dedicated realm of using typed objects is typically given by a common interface,
-the *realm interface*, which all implementations of objects in this realm must 
+the *realm interface*, which all implementations of objects in this realm must
 implement. For example, *Access Specifications* of the OCM all implement the
-`AccessSpec` interface. The various implementations of an access specification 
+`AccessSpec` interface. The various implementations of an access specification
 use dedicated objects to represent the property set for a dedicated kind
-of specification (for example ` localBlob` or `ociArtifact`), which are able to
-provide an access method implementation for the given property set. All those 
+of specification (for example `localBlob` or `ociArtifact`), which are able to
+provide an access method implementation for the given property set. All those
 specification types together build the access specification realm, with different
 specification types implemented as typed objects.
 
@@ -26,10 +26,11 @@ specification types implemented as typed objects.
 
 ### Simple typed objects
 
-Simple typed objects just feature an unstructured type name. Every type 
+Simple typed objects just feature an unstructured type name. Every type
 directly represents another flavor of the realm interface.
 
 #### Go Types
+
 *interface `TypedObject`* is the common interface for all kinds of typed objects. It
 provides access to the name of the type of the object.
 
@@ -37,7 +38,7 @@ provides access to the name of the type of the object.
 have to implement. It provides information about the type name and a decode (and
 encode)method to deserialize/serialize an external JSON/YAML representation of the
 object. Its task is to handle the deserialization of instances/objects based of the
-type name taken from the deserialization format. 
+type name taken from the deserialization format.
 
 This interface is parameterized with the Go interface type representing the realm
 interface. As a result the `Decode` method provides a correctly typed typed-object
@@ -78,19 +79,18 @@ which should all be handled by single *internal* version (Go type) in the rest o
 coding. This can be supported by a flavor of a typed object, the *versioned typed
 object*.
 
-A versioned type is described by a type name, which differentiates between 
+A versioned type is described by a type name, which differentiates between
 a common kind and a format version. Here, there is an *internal* program facing
 representation given by a Go struct, which can be serialized into different format
 versions described by a version string (for example `v1`). Version name and kind are
 separated by a slash (`/`). A type name without a version implies the version `v1`.
 
-#### Go Types 
+#### Go Types
 
 *interface `VersionedTypedObject`* is the common interface for all kinds of typed objects, which provides versioned type. If provides access to the type (like for
 plain `TypedObject`s, and its interpretation as a pair of kind and version).
 
 *interface `VersionedTypedObjectType`* is the common interface all type objects for VersionedTypedObjects have to implement.
-
 
 *type `ObjectVersionedTypedObject`* is the minimal implementation of a typed object
 implementing the `VersionedTypedObject` interface.
@@ -129,13 +129,13 @@ There are several methods to define type objects for versioned typed objects.
           ... other object properties
   }
   ```
-  
+
 - *Internal representation of a versioned typed object with multiple external representations.*
   Here, the internal as well as the external representations are described by dedicated
   Go struct types. The internal version is never serialized directly but converted
   first to a Go object describing the external representation described by the version
   content of the type field.
-  
+
   \
   Such a conversion can be done by the `MarshalJSON` method of the internal version.
   The internal versions MUST be able to serialize themselves, because they might be
@@ -150,7 +150,7 @@ There are several methods to define type objects for versioned typed objects.
   interface `T` (cannot be expressed by Go generics)) and `V` just the typed object
   interface. A correctly typed converter object must be provided, which converts
   between `I` and `V`)
-  
+
   \`
   For such types a dedicated base object representing the type part can be used to
   define the Go type for the internal version. `InternalVersionedTypedObject[T VersionedTypedObject]` keeps information about the type (kind and version) and
@@ -177,9 +177,9 @@ There are several methods to define type objects for versioned typed objects.
       return runtime.MarshalVersionedTypedObject(&a)
     }
   ```
+
   If the base object from above is not used the version scheme can be passed as
   additional argument.
-  
 
 Internally, the different versions are represented with objects implementing the
 `FormatVersion[T VersionedTypedObject]` interface, where `T` is the internal
@@ -211,7 +211,7 @@ scheme object, if the decoder does not implement the encoder interface.
 
 The interface type `TypeScheme[T TypedObject, R TypedObjectType[T]]` can be used for
 schemes only using type objects and no plain decoders.
-It can be achieved for a dedicated realm by the function ` NewTypeScheme[T TypedObject, R TypedObjectType[T]](base ...TypeScheme[T, R])`. Hereby, T is the
+It can be achieved for a dedicated realm by the function `NewTypeScheme[T TypedObject, R TypedObjectType[T]](base ...TypeScheme[T, R])`. Hereby, T is the
 realm interface and R a dedicated Go interface for a type object. It may require more
 methods than a plain `TypedObjectType`.
 

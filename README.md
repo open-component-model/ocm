@@ -93,7 +93,7 @@ ocm --help
 
 ### Install from AUR (Arch Linux User Repository)
 
-package-url: https://aur.archlinux.org/packages/ocm-cli
+package-url: [aur.archlinux.org/packages/ocm-cli](https://aur.archlinux.org/packages/ocm-cli)
 
 ```bash
 # if not using a helper util

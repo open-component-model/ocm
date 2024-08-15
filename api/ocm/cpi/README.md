@@ -1,2 +1,1 @@
-
-## Context Provider Interface for Component Repositories
+# Context Provider Interface for Component Repositories
