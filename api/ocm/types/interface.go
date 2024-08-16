@@ -11,7 +11,7 @@ type (
 	ComponentVersionResolver         = internal.ComponentVersionResolver
 	ComponentResolver                = internal.ComponentResolver
 	ResolvedComponentProvider        = internal.ResolvedComponentProvider
-	ResolvedomponentVersionProvider  = internal.ResolvedComponentVersionProvider
+	ResolvedComponentVersionProvider = internal.ResolvedComponentVersionProvider
 	Repository                       = internal.Repository
 	RepositorySpecHandlers           = internal.RepositorySpecHandlers
 	RepositorySpecHandler            = internal.RepositorySpecHandler
