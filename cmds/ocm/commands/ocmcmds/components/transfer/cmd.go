@@ -86,6 +86,7 @@ are transferred.
 $ ocm transfer components -t tgz ghcr.io/mandelsoft/kubelink ctf.tgz
 $ ocm transfer components -t tgz --repo OCIRegistry::ghcr.io mandelsoft/kubelink ctf.tgz
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

@@ -59,7 +59,8 @@ func (o *SignatureCommand) ForName(name string) *cobra.Command {
 		Long: `
 ` + o.spec.op + ` specified component versions.
 ` + o.spec.desc,
-		Example: o.spec.example,
+		Example:     o.spec.example,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

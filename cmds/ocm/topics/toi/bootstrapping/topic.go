@@ -59,6 +59,7 @@ additionalResources:
     resource:
       name: config-file
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "yaml"},
 		Long: `
 TOI is a small toolset on top of the Open Component Model. It provides
 a possibility to run images taken from a component version with user

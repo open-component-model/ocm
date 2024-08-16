@@ -98,7 +98,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 		if strings.Contains(cmd.Example, "<pre>") {
 			buf.WriteString(fmt.Sprintf("\n%s\n\n", SanitizePre(cmd.Example)))
 		} else {
-			buf.WriteString(fmt.Sprintf("```yaml\n%s\n```\n\n", strings.TrimSpace(cmd.Example)))
+			buf.WriteString(fmt.Sprintf("```%s\n%s\n```\n\n", ExampleCodeStyle(cmd), strings.TrimSpace(cmd.Example)))
 		}
 	}
 
@@ -264,6 +264,15 @@ func DocuCommandPath(cmd *cobra.Command) string {
 		}
 	}
 	return cmd.CommandPath()
+}
+
+func ExampleCodeStyle(cmd *cobra.Command) string {
+	if cmd.Annotations != nil {
+		if p, ok := cmd.Annotations["ExampleCodeStyle"]; ok {
+			return p
+		}
+	}
+	return "text"
 }
 
 func FormattedCommandPath(cmd *cobra.Command) string {

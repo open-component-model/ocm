@@ -21,13 +21,13 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 TOI is an abbreviation for Tiny OCM Installation. It is a simple
 application framework on top of the Open Component Model, that can
 be used to describe image based installation executors and installation
-packages (see topic <CMD>ocm toi-bootstrapping</CMD> in form of resources
+packages (see topic <CMD>ocm toi bootstrapping</CMD> in form of resources
 with a dedicated type. All involved resources are hereby taken from a component
 version of the Open Component Model, which supports all the OCM features, like
 transportation.
 
 The framework consists of a generic bootstrap command
-(<CMD>ocm bootstrap package</CMD>) and an arbitrary set of image
+(<CMD>ocm toi bootstrap componentversions</CMD>) and an arbitrary set of image
 based executors, that are executed in containers and fed with the required
 installation data by th generic command.
 `,

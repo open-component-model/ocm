@@ -8,8 +8,9 @@ import (
 
 func New() *cobra.Command {
 	return &cobra.Command{
-		Use:   "descriptor",
-		Short: "Plugin Descriptor Format Description",
+		Use:         "descriptor",
+		Short:       "Plugin Descriptor Format Description",
+		Annotations: map[string]string{"ExampleCodeStyle": "json"},
 		Example: `
 {
   "version": "v1",

@@ -42,6 +42,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Example: `
 $ ocm add sources --file path/to/cafile sources.yaml
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

@@ -56,6 +56,7 @@ all versions according to the given version constraints are listed.
 $ ocm list componentversion ghcr.io/mandelsoft/kubelink
 $ ocm list componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

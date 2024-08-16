@@ -64,6 +64,7 @@ $ ocm install plugin -c 1.2.x ghcr.io/github.com/mandelsoft/cnudie//github.com/m
 $ ocm install plugin -u demo
 $ ocm install plugin -r demo
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

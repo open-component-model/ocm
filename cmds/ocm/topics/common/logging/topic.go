@@ -25,6 +25,7 @@ func New(ctx clictx.Context) *cobra.Command {
       rules:
         - ...
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "yaml"},
 		Long: `
 Logging can be configured as part of the ocm config file (<CMD>ocm configfile</CMD>)
 or by command line options of the <CMD>ocm</CMD> command. Details about
