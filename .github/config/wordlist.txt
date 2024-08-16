@@ -271,7 +271,6 @@ uploader
 uploaderdescriptor
 uploaders
 uploadhandlers
-upoader
 url
 urls
 utf
