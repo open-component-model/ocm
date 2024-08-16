@@ -146,7 +146,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 				buf.WriteString("\n\n##### Sub Commands\n\n")
 				subheader = true
 			}
-			path := child.CommandPath()
+			path := DocuCommandPath(child)
 			cname := name + " " + "<b>" + child.Name() + "</b>"
 
 			if OverviewOnly(cmd) {
@@ -182,9 +182,9 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 				buf.WriteString("\n\n##### Additional Help Topics\n\n")
 				subheader = true
 			}
-			path := child.CommandPath()
+			path := DocuCommandPath(child)
 			shown_links = append(shown_links, path)
-			cname := name + " " + "<b>" + child.Name() + "</b>"
+			cname := FormattedCommandPath(child)
 			buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(path), child.Short))
 		}
 
@@ -255,6 +255,25 @@ func OverviewOnly(cmd *cobra.Command) bool {
 	}
 	_, ok := cmd.Annotations["overview"]
 	return ok
+}
+
+func DocuCommandPath(cmd *cobra.Command) string {
+	if cmd.Annotations != nil {
+		if p, ok := cmd.Annotations["commandPath"]; ok {
+			return p
+		}
+	}
+	return cmd.CommandPath()
+}
+
+func FormattedCommandPath(cmd *cobra.Command) string {
+	path := DocuCommandPath(cmd)
+
+	h := strings.Split(path, " ")
+	if h[len(h)-1] == cmd.Name() {
+		return strings.Join(h[:len(h)-1], " ") + " " + "<b>" + cmd.Name() + "</b>"
+	}
+	return path
 }
 
 // GenMarkdownTreeCustom is the same as GenMarkdownTree, but
