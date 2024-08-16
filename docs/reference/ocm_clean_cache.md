@@ -20,7 +20,7 @@ Cleanup all blobs stored in oci blob cache (if given).
 	
 ### Examples
 
-```yaml
+```bash
 $ ocm clean cache
 ```
 

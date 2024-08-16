@@ -973,7 +973,7 @@ There are several templaters that can be selected by the <code>--templater</code
 
 ### Examples
 
-```yaml
+```bash
 $ ocm add source-config sources.yaml --name sources --type filesystem --access '{ "type": "gitHub", "repoUrl": "ocm.software/ocm", "commit": "xyz" }'
 ```
 

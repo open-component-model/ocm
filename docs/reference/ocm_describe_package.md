@@ -87,7 +87,7 @@ references.
 
 ### Examples
 
-```yaml
+```bash
 $ ocm toi describe package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 ```
 

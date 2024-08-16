@@ -36,7 +36,7 @@ The following modes are supported:
 
 ### Examples
 
-```yaml
+```bash
 $ ocm get plugins
 $ ocm get plugins demo -o yaml
 ```

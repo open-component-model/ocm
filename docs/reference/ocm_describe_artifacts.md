@@ -72,7 +72,7 @@ The following modes are supported:
 
 ### Examples
 
-```yaml
+```bash
 $ ocm describe artifact ghcr.io/mandelsoft/kubelink
 $ ocm describe artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```

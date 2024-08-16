@@ -115,7 +115,7 @@ references.
 
 ### Examples
 
-```yaml
+```bash
 $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandelsoft.org comment --entry "comment=some text"
 ```
 

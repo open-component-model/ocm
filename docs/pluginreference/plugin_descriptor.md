@@ -295,7 +295,7 @@ The descriptor for a label merge specification has the following fields:
 
 ### Examples
 
-```yaml
+```json
 {
   "version": "v1",
   "pluginName": "test",

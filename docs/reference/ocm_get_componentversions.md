@@ -116,7 +116,7 @@ The following modes are supported:
 
 ### Examples
 
-```yaml
+```bash
 $ ocm get componentversion ghcr.io/mandelsoft/kubelink
 $ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```

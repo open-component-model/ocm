@@ -177,7 +177,7 @@ references.
 
 ### Examples
 
-```yaml
+```bash
 $ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 ```
 

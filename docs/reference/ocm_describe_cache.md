@@ -18,7 +18,7 @@ Show details about the OCI blob cache (if given).
 	
 ### Examples
 
-```yaml
+```bash
 $ ocm cache info
 ```
 

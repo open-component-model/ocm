@@ -183,7 +183,7 @@ this one is used.
 
 ### Examples
 
-```yaml
+```bash
 $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 ```
 

@@ -973,7 +973,7 @@ There are several templaters that can be selected by the <code>--templater</code
 
 ### Examples
 
-```yaml
+```bash
 $ ocm add resource-configuration resources.yaml --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
 ```
 

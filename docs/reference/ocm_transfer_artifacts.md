@@ -75,7 +75,7 @@ linked library can be used:
 
 ### Examples
 
-```yaml
+```bash
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink:v1.0.0 gcr.io
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io/my-project

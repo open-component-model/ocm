@@ -110,7 +110,7 @@ references.
 
 ### Examples
 
-```yaml
+```bash
 $ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink
 ```
 

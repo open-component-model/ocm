@@ -25,7 +25,7 @@ a plugin.
 
 ### Examples
 
-```yaml
+```bash
 $ ocm describe plugins
 $ ocm describe plugins demo
 ```

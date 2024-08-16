@@ -56,7 +56,7 @@ linked library can be used:
 
 ### Examples
 
-```yaml
+```bash
 $ oci show tags ghcr.io/mandelsoft/kubelink
 ```
 

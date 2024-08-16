@@ -988,7 +988,7 @@ There are several templaters that can be selected by the <code>--templater</code
 
 ### Examples
 
-```yaml
+```bash
 $ ocm add sources --file path/to/cafile sources.yaml
 ```
 

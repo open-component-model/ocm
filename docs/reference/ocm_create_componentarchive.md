@@ -49,7 +49,7 @@ The following schema versions are supported for explicit conversions:
 
 ### Examples
 
-```yaml
+```bash
 $ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org acme.org/demo 1.0
 ```
 

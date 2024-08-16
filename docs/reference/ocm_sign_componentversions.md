@@ -135,7 +135,7 @@ references.
 
 ### Examples
 
-```yaml
+```bash
 $ ocm sign componentversion --signature mandelsoft --private-key=mandelsoft.key ghcr.io/mandelsoft/kubelink
 ```
 

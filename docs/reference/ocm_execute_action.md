@@ -25,7 +25,7 @@ to retrieve credentials for.
 
 ### Examples
 
-```yaml
+```bash
 $ ocm execute action '{ "type": "oci.repository.prepare/v1", "hostname": "...", "repository": "..."}'
 ```
 
