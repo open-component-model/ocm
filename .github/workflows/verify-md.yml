@@ -21,8 +21,8 @@ jobs:
         with:
           files: .
           dot: true
-          config_file: .markdownlint.yml
-          ignore_path: .markdownignore
+          config_file: .github/config/markdownlint.yml
+          ignore_path: .github/config/markdownignore
   verify-links:
     name: Verify links
     runs-on: ubuntu-latest
@@ -33,7 +33,7 @@ jobs:
         with:
           use-quiet-mode: yes
           use-verbose-mode: no
-          config-file: .markdown-link-check.json
+          config-file: .github/config/markdown-link-check.json
   spellcheck:
     name: Spellcheck
     runs-on: ubuntu-latest
@@ -42,6 +42,6 @@ jobs:
       - name: Spellcheck
         uses: rojopolis/spellcheck-github-actions@v0
         with:
+          config_path: .github/config/spellcheck.yml
           task_name: Markdown
-          output_file: spellcheck-output.txt
 

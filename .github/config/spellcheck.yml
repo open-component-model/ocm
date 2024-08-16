@@ -6,7 +6,7 @@ matrix:
       mode: markdown
     dictionary:
       wordlists:
-        - .wordlist.txt
+        - .github/config/wordlist.txt
       encoding: utf-8
     pipeline:
       - pyspelling.filters.markdown:
