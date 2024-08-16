@@ -110,6 +110,14 @@ func OverviewCommand(cmd *cobra.Command) *cobra.Command {
 	return cmd
 }
 
+func DocuCommandPath(cmd *cobra.Command, path string) *cobra.Command {
+	if cmd.Annotations == nil {
+		cmd.Annotations = map[string]string{}
+	}
+	cmd.Annotations["commandPath"] = path + " " + cmd.Name()
+	return cmd
+}
+
 func MassageCommand(cmd *cobra.Command, names ...string) *cobra.Command {
 	cmd.Use = addCommand(names, cmd.Use)
 	if len(names) > 1 {

@@ -158,7 +158,7 @@ It has the following format:
   - **<code>configFile</code>**: an example template for a parameter file
   - **<code>credentialsFile</code>**: an example template for a credentials file
 
-  Those templates can be downloaded with <CMD>ocm bootstrap config</CMD>.
+  Those templates can be downloaded with <CMD>ocm bootstrap configuration</CMD>.
 
 #### *ExecutorSpecification*
 

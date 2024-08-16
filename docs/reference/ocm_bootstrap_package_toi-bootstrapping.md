@@ -100,7 +100,7 @@ It has the following format:
   - **<code>configFile</code>**: an example template for a parameter file
   - **<code>credentialsFile</code>**: an example template for a credentials file
 
-  Those templates can be downloaded with [ocm bootstrap config](ocm_bootstrap_config.md).
+  Those templates can be downloaded with [ocm bootstrap configuration](ocm_bootstrap_configuration.md).
 
 #### *ExecutorSpecification*
 
@@ -460,6 +460,6 @@ additionalResources:
 
 ##### Additional Links
 
-* [<b>ocm bootstrap config</b>](ocm_bootstrap_config.md)
+* [<b>ocm bootstrap configuration</b>](ocm_bootstrap_configuration.md)	 &mdash; bootstrap TOI configuration files
 * [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
 
