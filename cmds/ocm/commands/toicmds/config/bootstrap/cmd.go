@@ -80,7 +80,7 @@ If no credentials file name is provided (option -c) the file
 <code>` + DEFAULT_CREDENTIALS_FILE + `</code> is used. If no parameter file name is
 provided (option -p) the file <code>` + DEFAULT_PARAMETER_FILE + `</code> is used.
 
-For more details about those files see <CMD> ocm bootstrap package</CMD>.
+For more details about those files see <CMD>ocm bootstrap package</CMD>.
 `,
 		Example: `
 $ ocm toi bootstrap config ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev

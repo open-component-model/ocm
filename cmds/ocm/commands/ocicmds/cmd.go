@@ -20,6 +20,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(ctf.NewCommand(ctx))
 	cmd.AddCommand(tags.NewCommand(ctx))
 
-	cmd.AddCommand(topicocirefs.New(ctx))
+	cmd.AddCommand(utils.DocuCommandPath(topicocirefs.New(ctx), "ocm"))
 	return cmd
 }
