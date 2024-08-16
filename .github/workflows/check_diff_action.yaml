@@ -31,4 +31,11 @@ jobs:
         go mod tidy
     - name: Check for diff
       run: |
-        git diff --exit-code --shortstat
+        gitStatus="$(git status --porcelain)"
+
+        if [[ -z "${gitStatus}" ]]; then
+            exit 0
+        fi
+
+        echo "${gitStatus}"
+        exit 1
