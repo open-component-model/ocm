@@ -27,7 +27,7 @@ version of the Open Component Model, which supports all the OCM features, like
 transportation.
 
 The framework consists of a generic bootstrap command
-(<CMD>ocm toi bootstrap componentversions</CMD>) and an arbitrary set of image
+(<CMD>ocm toi bootstrap package</CMD>) and an arbitrary set of image
 based executors, that are executed in containers and fed with the required
 installation data by th generic command.
 `,
@@ -39,7 +39,7 @@ installation data by th generic command.
 	cmd.AddCommand(bootstrap.NewCommand(ctx))
 	cmd.AddCommand(describe.NewCommand(ctx))
 
-	cmd.AddCommand(topicocmrefs.New(ctx))
-	cmd.AddCommand(topicbootstrap.New(ctx, "bootstrapping"))
+	cmd.AddCommand(utils.DocuCommandPath(topicocmrefs.New(ctx), "ocm"))
+	cmd.AddCommand(utils.DocuCommandPath(topicbootstrap.New(ctx, "bootstrapping"), "ocm", "toi-bootstapping"))
 	return cmd
 }

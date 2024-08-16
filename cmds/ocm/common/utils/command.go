@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -110,11 +111,12 @@ func OverviewCommand(cmd *cobra.Command) *cobra.Command {
 	return cmd
 }
 
-func DocuCommandPath(cmd *cobra.Command, path string) *cobra.Command {
+func DocuCommandPath(cmd *cobra.Command, path string, optname ...string) *cobra.Command {
+	name := general.OptionalDefaulted(cmd.Name(), optname...)
 	if cmd.Annotations == nil {
 		cmd.Annotations = map[string]string{}
 	}
-	cmd.Annotations["commandPath"] = path + " " + cmd.Name()
+	cmd.Annotations["commandPath"] = path + " " + name
 	return cmd
 }
 
