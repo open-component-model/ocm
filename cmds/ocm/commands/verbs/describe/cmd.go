@@ -20,6 +20,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(plugins.NewCommand(ctx))
 	cmd.AddCommand(cache.NewCommand(ctx))
-	cmd.AddCommand(utils.DocuCommandPath(_package.NewCommand(ctx), "ocm"))
+	cmd.AddCommand(_package.NewCommand(ctx))
 	return cmd
 }
