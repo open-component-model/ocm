@@ -4,4 +4,7 @@ import (
 	"ocm.software/ocm/api/ocm/internal"
 )
 
-type Repository = internal.Repository
+type (
+	Context    = internal.Context
+	Repository = internal.Repository
+)

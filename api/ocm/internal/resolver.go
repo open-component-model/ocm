@@ -18,22 +18,139 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ResolverRule struct {
+// ComponentVersionResolver describes an object able
+// to map component version identities to a component version access,
+// the representtaion of the component version stored in a dedicated
+// OCM repository.
+// Such a resolver might optionally implement the ComponentResolver
+// interface to provide information about potential locations for
+// a particular component.
+type ComponentVersionResolver interface {
+	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
+}
+
+// ResolvedComponentProvider is an interface for an
+// object providing optional access to a repository
+// and a provider for component versions.
+// Direct operations and operations of provided objects
+// may fail, if an optional underlying object is already closed
+// Therefore, it does not need to be explicitly closed.
+//
+// Be careful: Objects of this plain type should only be held as long as the
+// providing object is valid and not closed.
+type ResolvedComponentProvider interface {
+	Repository() (Repository, error)
+	LookupComponent(name string) (ResolvedComponentVersionProvider, error)
+}
+
+// ResolvedComponentVersionProvider is an interface for an
+// object providing access component versions.
+// Operations may fail, if an underlying object is already closed.
+//
+// Be careful: Objects of this plain type should only be held as long as the
+// providing object is valid and not closed.
+type ResolvedComponentVersionProvider interface {
+	GetName() string
+	LookupVersion(version string) (ComponentVersionAccess, error)
+	ListVersions() ([]string, error)
+}
+
+// ComponentResolver is an optional interface for a ComponentVersionResolver,
+// which can offer information about potential providers usable to lookup
+// versions for a dedicated component.
+//
+// Be careful, provided objects may refer to closable objects
+// held by the interface provider. They should only be used as long
+// as the object behind the ComponentResolver is not closed.
+type ComponentResolver interface {
+	LookupComponentProviders(name string) []ResolvedComponentProvider
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type componentProvider struct {
+	repo Repository
+}
+
+func RepositoryProviderForRepository(r Repository) ResolvedComponentProvider {
+	return &componentProvider{r}
+}
+
+func (p *componentProvider) Repository() (Repository, error) {
+	return p.repo.Dup()
+}
+
+func (p *componentProvider) LookupComponent(name string) (ResolvedComponentVersionProvider, error) {
+	return &versionProvider{name, p}, nil
+}
+
+type versionProvider struct {
+	name string
+	repo *componentProvider
+}
+
+func (p *versionProvider) GetName() string {
+	return p.name
+}
+
+func (p *versionProvider) lookupComponent() (ComponentAccess, error) {
+	r, err := p.repo.Repository()
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+	return r.LookupComponent(p.name)
+}
+
+func (p *versionProvider) LookupVersion(version string) (ComponentVersionAccess, error) {
+	c, err := p.lookupComponent()
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+	return c.LookupVersion(version)
+}
+
+func (p *versionProvider) ListVersions() ([]string, error) {
+	c, err := p.lookupComponent()
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+	return c.ListVersions()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ResolverRule interface {
+	GetPrefix() string
+	GetPath() registrations.NamePath
+	GetSpecification() RepositorySpec
+	GetPriority() int
+
+	Match(name string) bool
+}
+
+type resolverRule struct {
 	prefix string
 	path   registrations.NamePath
 	spec   RepositorySpec
 	prio   int
 }
 
-func (r *ResolverRule) GetPrefix() string {
+func (r *resolverRule) GetPrefix() string {
 	return r.prefix
 }
 
-func (r *ResolverRule) GetSpecification() RepositorySpec {
+func (r *resolverRule) GetPath() registrations.NamePath {
+	return slices.Clone(r.path)
+}
+
+func (r *resolverRule) GetSpecification() RepositorySpec {
 	return r.spec
 }
 
-func (r *ResolverRule) GetPriority() int {
+func (r *resolverRule) GetPriority() int {
 	return r.prio
 }
 
@@ -87,9 +204,16 @@ func (c *RepositoryCache) LookupRepository(ctx Context, spec RepositorySpec) (Re
 	return repo, false, err
 }
 
-func NewResolverRule(prefix string, spec RepositorySpec, prio ...int) *ResolverRule {
+func CompareRule(r, o ResolverRule) int {
+	if d := r.GetPriority() - o.GetPriority(); d != 0 {
+		return d
+	}
+	return r.GetPath().Compare(o.GetPath())
+}
+
+func NewResolverRule(prefix string, spec RepositorySpec, prio ...int) ResolverRule {
 	p := registrations.NewNamePath(prefix)
-	return &ResolverRule{
+	return &resolverRule{
 		prefix: prefix,
 		path:   p,
 		spec:   spec,
@@ -97,14 +221,7 @@ func NewResolverRule(prefix string, spec RepositorySpec, prio ...int) *ResolverR
 	}
 }
 
-func (r *ResolverRule) Compare(o *ResolverRule) int {
-	if d := r.prio - o.prio; d != 0 {
-		return d
-	}
-	return r.path.Compare(o.path)
-}
-
-func (r *ResolverRule) Match(name string) bool {
+func (r *resolverRule) Match(name string) bool {
 	return r.prefix == "" || r.prefix == name || strings.HasPrefix(name, r.prefix+"/")
 }
 
@@ -121,8 +238,10 @@ type MatchingResolver struct {
 	ctx      ContextProvider
 	finalize finalizer.Finalizer
 	cache    *RepositoryCache
-	rules    []*ResolverRule
+	rules    []ResolverRule
 }
+
+var _ ComponentResolver = (*MatchingResolver)(nil)
 
 func NewMatchingResolver(ctx ContextProvider, rules ...*ResolverRule) *MatchingResolver {
 	return &MatchingResolver{
@@ -144,7 +263,7 @@ func (r *MatchingResolver) Finalize() error {
 	return r.finalize.Finalize()
 }
 
-func (r *MatchingResolver) GetRules() []*ResolverRule {
+func (r *MatchingResolver) GetRules() []ResolverRule {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	return slices.Clone(r.rules)
@@ -157,7 +276,7 @@ func (r *MatchingResolver) AddRule(prefix string, spec RepositorySpec, prio ...i
 	rule := NewResolverRule(prefix, spec, prio...)
 	found := len(r.rules)
 	for i, o := range r.rules {
-		if o.Compare(rule) < 0 {
+		if CompareRule(o, rule) < 0 {
 			found = i
 			break
 		}
@@ -169,18 +288,11 @@ func (r *MatchingResolver) LookupComponentVersion(name string, version string) (
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	ctx := r.ctx.OCMContext()
 	for _, rule := range r.rules {
 		if rule.Match(name) {
-			repo, cached, err := r.cache.LookupRepository(ctx, rule.spec)
+			repo, err := r.resolveRepository(rule)
 			if err != nil {
 				return nil, err
-			}
-			if !cached {
-				// Even though the matching resolver is closed, there might be components or component versions, which
-				// contain a reference to the repository. Still, it shall be possible to close the matching resolver.
-				refmgmt.Lazy(repo)
-				r.finalize.Close(repo)
 			}
 			cv, err := repo.LookupComponentVersion(name, version)
 			if err == nil && cv != nil {
@@ -192,4 +304,87 @@ func (r *MatchingResolver) LookupComponentVersion(name string, version string) (
 		}
 	}
 	return nil, errors.ErrNotFound(KIND_COMPONENTVERSION, common.NewNameVersion(name, version).String())
+}
+
+func (r *MatchingResolver) LookupComponentProviders(name string) []ResolvedComponentProvider {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	var result []ResolvedComponentProvider
+	for _, rule := range r.rules {
+		if rule.Match(name) {
+			result = append(result, &cachedRepository{r, rule})
+		}
+	}
+	return result
+}
+
+func (r *MatchingResolver) resolveRepository(rule ResolverRule) (Repository, error) {
+	repo, cached, err := r.cache.LookupRepository(r.ctx.OCMContext(), rule.GetSpecification())
+	if err != nil {
+		return nil, err
+	}
+	if !cached {
+		// Even though the matching resolver is closed, there might be components or component versions, which
+		// contain a reference to the repository. Still, it shall be possible to close the matching resolver.
+		refmgmt.Lazy(repo)
+		r.finalize.Close(repo)
+	}
+	return repo, nil
+}
+
+type cachedRepository struct {
+	resolver *MatchingResolver
+	rule     ResolverRule
+}
+
+func (c *cachedRepository) Repository() (Repository, error) {
+	c.resolver.lock.Lock()
+	defer c.resolver.lock.Unlock()
+
+	repo, err := c.resolver.resolveRepository(c.rule)
+	if err != nil {
+		return nil, err
+	}
+	return repo.Dup()
+}
+
+func (c *cachedRepository) LookupComponent(name string) (ResolvedComponentVersionProvider, error) {
+	return &cachedComponent{name, c}, nil
+}
+
+type cachedComponent struct {
+	name string
+	*cachedRepository
+}
+
+func (c *cachedComponent) GetName() string {
+	return c.name
+}
+
+func (c *cachedComponent) LookupVersion(version string) (ComponentVersionAccess, error) {
+	c.resolver.lock.Lock()
+	defer c.resolver.lock.Unlock()
+
+	repo, err := c.resolver.resolveRepository(c.rule)
+	if err != nil {
+		return nil, err
+	}
+	return repo.LookupComponentVersion(c.name, version)
+}
+
+func (c *cachedComponent) ListVersions() ([]string, error) {
+	c.resolver.lock.Lock()
+	defer c.resolver.lock.Unlock()
+
+	repo, err := c.resolver.resolveRepository(c.rule)
+	if err != nil {
+		return nil, err
+	}
+	ca, err := repo.LookupComponent(c.name)
+	if err != nil {
+		return nil, err
+	}
+	defer ca.Close()
+	return ca.ListVersions()
 }
