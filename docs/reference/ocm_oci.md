@@ -29,4 +29,4 @@ ocm oci [<options>] <sub command> ...
 
 ##### Additional Help Topics
 
-* [ocm oci <b>oci-references</b>](ocm_oci_oci-references.md)	 &mdash; notation for OCI references
+* [ocm <b>oci-references</b>](ocm_oci-references.md)	 &mdash; notation for OCI references
