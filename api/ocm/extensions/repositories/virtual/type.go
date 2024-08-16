@@ -3,7 +3,6 @@ package virtual
 import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -24,11 +23,11 @@ func NewRepositorySpec(acc Access) *RepositorySpec {
 	}
 }
 
-func (r RepositorySpec) AsUniformSpec(context internal.Context) *cpi.UniformRepositorySpec {
+func (r RepositorySpec) AsUniformSpec(context cpi.Context) *cpi.UniformRepositorySpec {
 	return nil
 }
 
-func (r *RepositorySpec) Repository(ctx cpi.Context, credentials credentials.Credentials) (internal.Repository, error) {
+func (r *RepositorySpec) Repository(ctx cpi.Context, credentials credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, r.Access), nil
 }
 
