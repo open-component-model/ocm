@@ -40,7 +40,7 @@ If no credentials file name is provided (option -c) the file
 <code>TOICredentials</code> is used. If no parameter file name is
 provided (option -p) the file <code>TOIParameters</code> is used.
 
-For more details about those files see [ ocm bootstrap package](_ocm_bootstrap_package.md).
+For more details about those files see [ocm bootstrap package](ocm_bootstrap_package.md).
 
 
 If the <code>--repo</code> option is specified, the given names are interpreted
@@ -119,5 +119,5 @@ $ ocm toi bootstrap config ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 ##### Additional Links
 
 * [<b>ocm toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
-* [<b> ocm bootstrap package</b>](_ocm_bootstrap_package.md)
+* [<b>ocm bootstrap package</b>](ocm_bootstrap_package.md)	 &mdash; bootstrap component version
 

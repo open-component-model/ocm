@@ -41,10 +41,10 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(routingslips.NewCommand(ctx))
 	cmd.AddCommand(pubsub.NewCommand(ctx))
 
-	cmd.AddCommand(topicocmrefs.New(ctx))
-	cmd.AddCommand(topicocmaccessmethods.New(ctx))
-	cmd.AddCommand(topicocmuploaders.New(ctx))
-	cmd.AddCommand(topicocmdownloaders.New(ctx))
+	cmd.AddCommand(utils.DocuCommandPath(topicocmrefs.New(ctx), "ocm"))
+	cmd.AddCommand(utils.DocuCommandPath(topicocmaccessmethods.New(ctx), "ocm"))
+	cmd.AddCommand(utils.DocuCommandPath(topicocmuploaders.New(ctx), "ocm"))
+	cmd.AddCommand(utils.DocuCommandPath(topicocmdownloaders.New(ctx), "ocm"))
 
 	return cmd
 }

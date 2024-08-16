@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +40,7 @@ func SubstituteCommandLinks(desc string, linkformat func(string) string) ([]stri
 			panic("missing </CMD> in:\n" + desc)
 		}
 		path := desc[link+5 : end]
-		links = append(links, path)
+		links = sliceutils.AppendUnique(links, path)
 		desc = desc[:link] + linkformat(path) + desc[end+6:]
 	}
 }
