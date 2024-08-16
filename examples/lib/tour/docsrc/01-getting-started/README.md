@@ -132,7 +132,7 @@ and the resources described by the component version.
 This results in the following output (the shown version might
 differ, because the code always describes the latest version):
 
-```go
+```text
 {{execute}{go}{run}{../../01-getting-started}{<extract>}{version}}
 ```
 
