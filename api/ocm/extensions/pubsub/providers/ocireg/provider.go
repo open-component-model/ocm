@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path"
 
+	errors2 "github.com/containerd/containerd/remotes/errors"
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/ocm/cpi"
@@ -44,7 +45,7 @@ func (p *Provider) GetPubSubSpec(repo repocpi.Repository) (pubsub.PubSubSpec, er
 
 	ocirepo := path.Join(gen.Meta().SubPath, componentmapping.ComponentDescriptorNamespace)
 	acc, err := gen.OCIRepository().LookupArtifact(ocirepo, META)
-	if errors.IsErrNotFound(err) || errors.IsErrUnknown(err) {
+	if errors.IsErrNotFound(err) || errors.IsErrUnknown(err) || errors.IsA(err, errors2.ErrUnexpectedStatus{}) {
 		return nil, nil
 	}
 	if err != nil {
