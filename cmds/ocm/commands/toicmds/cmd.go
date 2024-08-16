@@ -40,6 +40,6 @@ installation data by th generic command.
 	cmd.AddCommand(describe.NewCommand(ctx))
 
 	cmd.AddCommand(utils.DocuCommandPath(topicocmrefs.New(ctx), "ocm"))
-	cmd.AddCommand(utils.DocuCommandPath(topicbootstrap.New(ctx, "bootstrapping"), "ocm", "toi-bootstapping"))
+	cmd.AddCommand(utils.DocuCommandPath(topicbootstrap.New(ctx, "bootstrapping"), "ocm", "toi-bootstrapping"))
 	return cmd
 }
