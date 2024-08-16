@@ -61,7 +61,7 @@ Describe a TOI package provided by a resource of an OCM component version.
 
 The package resource must have the type <code>` + toi.TypeTOIPackage + `</code>.
 This is a simple YAML file resource describing the bootstrapping of a dedicated kind
-of software. See also the topic <CMD>ocm toi toi-bootstrapping</CMD>.
+of software. See also the topic <CMD>ocm toi-bootstrapping</CMD>.
 
 The first matching resource of this type is selected. Optionally a set of
 identity attribute can be specified used to refine the match. This can be the
