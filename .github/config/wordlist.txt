@@ -157,7 +157,7 @@ localizations
 logconfig
 logrus
 lookups
-macOS
+macos
 makefile
 makefiles
 mandelsoft
