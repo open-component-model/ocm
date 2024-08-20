@@ -64,6 +64,8 @@ Dedicated OCM repository types:
 
 OCI Repository types (using standard component repository to OCI mapping):
   - <code>CommonTransportFormat</code>: v1
+  - <code>Git</code>: v1
+  - <code>GitRepository</code>: v1
   - <code>OCIRegistry</code>: v1
   - <code>oci</code>: v1
   - <code>ociRegistry</code>

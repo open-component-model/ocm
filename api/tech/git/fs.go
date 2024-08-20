@@ -16,13 +16,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-type Base interface {
-	Base() vfs.FileSystem
-}
-type HasRoot interface {
-	Root() string
-}
-
 func VFSBillyFS(fsToWrap vfs.FileSystem) billy.Filesystem {
 	if fsToWrap == nil {
 		fsToWrap = vfs.New(memoryfs.New())
@@ -104,7 +97,7 @@ func (f *fs) vfsToBillyFileInfo(vf vfs.File) (billy.File, error) {
 		lock = fslock.New(fmt.Sprintf("%s.lock", vf.Name()))
 	} else {
 		hash := fnv.New32()
-		_, _ = hash.Write([]byte(vf.Name()))
+		_, _ = hash.Write([]byte(f.vfs.Name()))
 		temp, err := os.MkdirTemp("", fmt.Sprintf("git-vfs-locks-%x", hash.Sum32()))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create temp dir to allow mapping vfs to git (billy) filesystem; "+
@@ -138,6 +131,11 @@ func (f *fs) Open(filename string) (billy.File, error) {
 }
 
 func (f *fs) OpenFile(filename string, flag int, perm os.FileMode) (billy.File, error) {
+	if flag&os.O_CREATE != 0 {
+		if err := f.vfs.MkdirAll(filepath.Dir(filename), 0o755); err != nil {
+			return nil, err
+		}
+	}
 	vfsFile, err := f.vfs.OpenFile(filename, flag, perm)
 	if err != nil {
 		return nil, err
@@ -150,7 +148,7 @@ func (f *fs) Stat(filename string) (os.FileInfo, error) {
 	if errors.Is(err, syscall.ENOENT) {
 		return nil, os.ErrNotExist
 	}
-	return fi, nil
+	return fi, err
 }
 
 func (f *fs) Rename(oldpath, newpath string) error {
@@ -194,7 +192,7 @@ func (f *fs) Lstat(filename string) (os.FileInfo, error) {
 			return nil, os.ErrNotExist
 		}
 	}
-	return fi, nil
+	return fi, err
 }
 
 func (f *fs) Symlink(target, link string) error {

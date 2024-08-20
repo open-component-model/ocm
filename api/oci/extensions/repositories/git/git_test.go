@@ -7,8 +7,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/logging"
-	"github.com/mandelsoft/vfs/pkg/cwdfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
@@ -45,7 +45,7 @@ var _ = Describe("ctf management", func() {
 
 	BeforeEach(func() {
 		path := GinkgoT().TempDir()
-		tmp = Must(cwdfs.New(osfs.New(), path))
+		tmp = Must(projectionfs.New(osfs.New(), path))
 		tmpcache.Set(ctx, &tmpcache.Attribute{Path: ".", Filesystem: tmp})
 		vfsattr.Set(ctx, tmp)
 
@@ -54,7 +54,7 @@ var _ = Describe("ctf management", func() {
 		repoURL = "file://" + repoDir
 
 		Expect(tmp.Mkdir("workspace", 0o700)).To(Succeed())
-		workspace = Must(cwdfs.New(tmp, "workspace"))
+		workspace = Must(projectionfs.New(tmp, "workspace"))
 	})
 
 	BeforeEach(func() {
@@ -66,7 +66,13 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate git based ctf", func() {
-		repo := Must(rgit.Create(ctx, accessobj.ACC_CREATE, repoURL, accessio.RepresentationFileSystem(workspace)))
+		repo := Must(rgit.Create(ctx, accessobj.ACC_CREATE, repoURL, rgit.Options{
+			Author: &rgit.Author{
+				Name:  fmt.Sprintf("OCM Test Case: %s", GinkgoT().Name()),
+				Email: "dummy@ocm.software",
+			},
+			Options: Must(accessio.AccessOptions(nil, accessio.RepresentationFileSystem(workspace))),
+		}))
 		ns := Must(repo.LookupNamespace("test"))
 
 		testData := []byte("testdata")
@@ -85,7 +91,7 @@ var _ = Describe("ctf management", func() {
 			if expected := rgit.GenerateCommitMessageForArtifact(rgit.OperationAdd, aa); commit.Message == expected {
 				validAdd++
 			}
-			if expected := rgit.GenerateCommitMessageForArtifact(rgit.OperationSync, aa); commit.Message == expected {
+			if expected := rgit.GenerateCommitMessageForArtifact(rgit.OperationUpdate, aa); commit.Message == expected {
 				validSync++
 			}
 			messages = append(messages, commit.Message)

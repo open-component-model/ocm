@@ -41,7 +41,7 @@ func New(ctx cpi.Context, spec *RepositorySpec) (Repository, error) {
 	}
 
 	var err error
-	if i.client, err = git.NewClient(spec.URL, git.ClientOptions{}); err != nil {
+	if i.client, err = git.NewClient(spec.ToClientOptions()); err != nil {
 		return nil, err
 	}
 
