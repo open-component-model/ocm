@@ -1,4 +1,4 @@
-package git
+package git_test
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Github Test Suite")
+	RunSpecs(t, "Git Repository Test Suite")
 }

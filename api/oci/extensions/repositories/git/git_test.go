@@ -66,9 +66,7 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate git based ctf", func() {
-		repo := Must(rgit.Create(ctx, accessobj.ACC_CREATE, repoURL, 0o700,
-			accessio.RepresentationFileSystem(workspace),
-		))
+		repo := Must(rgit.Create(ctx, accessobj.ACC_CREATE, repoURL, accessio.RepresentationFileSystem(workspace)))
 		ns := Must(repo.LookupNamespace("test"))
 
 		testData := []byte("testdata")

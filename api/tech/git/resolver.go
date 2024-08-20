@@ -3,16 +3,16 @@ package git
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 
-	osfs2 "github.com/go-git/go-billy/v5/osfs"
+	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/cache"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/filesystem"
-	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -22,11 +22,10 @@ import (
 var worktreeBranch = plumbing.NewBranchReferenceName("ocm")
 
 type client struct {
-	vfs vfs.VFS
+	vfs vfs.FileSystem
 	*gurl
 
-	storage storage.Storer
-	auth    AuthMethod
+	auth AuthMethod
 }
 
 type Client interface {
@@ -37,31 +36,30 @@ type Client interface {
 	accessobj.Closer
 }
 
+type ClientOptions struct {
+}
+
 var _ Client = &client{}
 
-func NewClient(url string) (Client, error) {
+func NewClient(url string, _ ClientOptions) (Client, error) {
 	gitURL, err := decodeGitURL(url)
 	if err != nil {
 		return nil, err
 	}
 
 	return &client{
-		vfs:  vfs.New(memoryfs.New()),
+		vfs:  memoryfs.New(),
 		gurl: gitURL,
 	}, nil
 }
 
 func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
-	strg, err := getStorage(c.vfs)
-	if err != nil {
-		return nil, err
-	}
+	billy := VFSBillyFS(c.vfs)
 
-	wd, err := c.vfs.Getwd()
+	strg, err := getStorage(billy)
 	if err != nil {
 		return nil, err
 	}
-	billy := osfs2.New(wd, osfs2.WithBoundOS())
 
 	newRepo := false
 	repo, err := git.Open(strg, billy)
@@ -119,14 +117,14 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 	return repo, nil
 }
 
-func getStorage(base vfs.VFS) (storage.Storer, error) {
-	wd, err := base.Getwd()
+func getStorage(base billy.Filesystem) (storage.Storer, error) {
+	dotGit, err := base.Chroot(git.GitDirName)
 	if err != nil {
 		return nil, err
 	}
 
 	return filesystem.NewStorage(
-		osfs2.New(filepath.Join(wd, git.GitDirName), osfs2.WithBoundOS()),
+		dotGit,
 		cache.NewObjectLRUDefault(),
 	), nil
 }
@@ -203,9 +201,13 @@ func (c *client) Update(ctx context.Context, msg string, push bool) error {
 }
 
 func (c *client) Setup(system vfs.FileSystem) error {
-	c.vfs = vfs.New(system)
-	_, err := c.Repository(context.Background())
-	return err
+
+	c.vfs = system
+
+	if _, err := c.Repository(context.Background()); err != nil {
+		return fmt.Errorf("failed to setup repository %q: %w", c.url.String(), err)
+	}
+	return nil
 }
 
 func (c *client) Close(_ *accessobj.AccessObject) error {

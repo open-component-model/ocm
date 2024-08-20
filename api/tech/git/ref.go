@@ -7,8 +7,7 @@ import (
 	"regexp"
 
 	"github.com/go-git/go-git/v5/plumbing"
-
-	"ocm.software/ocm/api/utils"
+	giturls "github.com/whilp/git-urls"
 )
 
 const urlToRefSeparator = "@"
@@ -46,7 +45,7 @@ func decodeGitURL(rawRef string) (*gurl, error) {
 	matchedRef := matches[2]
 	path := matches[3]
 
-	parsedURL, err := utils.ParseURL(rawURL)
+	parsedURL, err := giturls.Parse(rawURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %w", err)
 	}
