@@ -1,7 +1,9 @@
 # How to work with the library
 
 The complete library is arranged around area specific [`Context` objects](contexts.md),
-which bundle all the settings and supported extension points of the *Open Component Model*.
+which bundle all the settings and supported
+[extensions](https://github.com/open-component-model/ocm-spec/blob/main/doc/01-model/07-extensions.md#extending-the-open-component-model)
+of the *Open Component Model*.
 Extension points are implemented by handlers that can be registered at dedicated
 context objects or at the default runtime environment.
 The context then provides all the methods required to access elements
