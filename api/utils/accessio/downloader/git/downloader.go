@@ -14,6 +14,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/memory"
+	techgit "ocm.software/ocm/api/tech/git"
 
 	"ocm.software/ocm/api/utils/accessio/downloader"
 )
@@ -39,10 +40,11 @@ type Downloader struct {
 
 var _ downloader.Downloader = (*Downloader)(nil)
 
-func NewDownloader(url string, ref string, path string) CloseableDownloader {
+func NewDownloader(url string, ref string, path string, auth techgit.AuthMethod) CloseableDownloader {
 	refName := plumbing.ReferenceName(ref)
 	return &Downloader{
 		cloneOpts: &git.CloneOptions{
+			Auth:          auth,
 			URL:           url,
 			RemoteName:    localRemoteName,
 			ReferenceName: refName,

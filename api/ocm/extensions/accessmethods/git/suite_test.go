@@ -85,6 +85,12 @@ var _ = Describe("Method", func() {
 		)
 	})
 
+	BeforeEach(func() {
+		var err error
+		expectedBlobContent, err = testData.ReadFile(filepath.Join("testdata", "repo", "file_in_repo"))
+		Expect(err).ToNot(HaveOccurred())
+	})
+
 	It("downloads artifacts", func() {
 		m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 		Expect(err).ToNot(HaveOccurred())

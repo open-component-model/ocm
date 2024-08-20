@@ -4,24 +4,9 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/oci/cpi"
-	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
-	"ocm.software/ocm/api/oci/extensions/repositories/ctf/format"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 )
-
-const (
-	ArtifactIndexFileName = format.ArtifactIndexFileName
-	BlobsDirectoryName    = format.BlobsDirectoryName
-)
-
-var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
-	DescriptorFileName:       ArtifactIndexFileName,
-	ObjectTypeName:           "repository",
-	ElementDirectoryName:     BlobsDirectoryName,
-	ElementTypeName:          "blob",
-	DescriptorHandlerFactory: ctf.NewStateHandler,
-}
 
 type Object = Repository
 
