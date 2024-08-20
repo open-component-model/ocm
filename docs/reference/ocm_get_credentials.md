@@ -117,7 +117,7 @@ Matchers exist for the following usage contexts or consumer types:
 
     Credential consumers of the consumer type OCIRegistry evaluate the following credential properties:
 
-      - <code>username</code>: the basic auth user name
+      - <code>username</code>: the basic auth username
       - <code>password</code>: the basic auth password
       - <code>identityToken</code>: the bearer token used for non-basic auth authorization
       - <code>certificateAuthority</code>: the certificate authority certificate used to verify certificates
