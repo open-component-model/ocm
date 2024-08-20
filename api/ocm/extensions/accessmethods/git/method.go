@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
-	"sync"
 
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/mandelsoft/goutils/errors"
+	giturls "github.com/whilp/git-urls"
+	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/credentials/builtin/git/identity"
+	techgit "ocm.software/ocm/api/tech/git"
 
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/internal"
@@ -85,33 +87,49 @@ func (a *AccessSpec) AccessMethod(c internal.ComponentVersionAccess) (internal.A
 	return accspeccpi.AccessMethodForImplementation(newMethod(c, a))
 }
 
-func newMethod(c internal.ComponentVersionAccess, a *AccessSpec) (accspeccpi.AccessMethodImpl, error) {
-	u, err := url.Parse(a.RepoURL)
+func newMethod(componentVersionAccess internal.ComponentVersionAccess, accessSpec *AccessSpec) (accspeccpi.AccessMethodImpl, error) {
+	u, err := giturls.Parse(accessSpec.RepoURL)
 	if err != nil {
-		return nil, errors.ErrInvalidWrap(err, "repository repoURL", a.RepoURL)
+		return nil, errors.ErrInvalidWrap(err, "repository repoURL", accessSpec.RepoURL)
 	}
-	if err := plumbing.ReferenceName(a.Ref).Validate(); err != nil {
-		return nil, errors.ErrInvalidWrap(err, "commit hash", a.Ref)
+	if err := plumbing.ReferenceName(accessSpec.Ref).Validate(); err != nil {
+		return nil, errors.ErrInvalidWrap(err, "commit hash", accessSpec.Ref)
+	}
+
+	creds, cid, err := getCreds(accessSpec.RepoURL, componentVersionAccess.GetContext().CredentialsContext())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get credentials for repository %s: %w", accessSpec.RepoURL, err)
+	}
+
+	auth, err := techgit.AuthFromCredentials(creds)
+	if err != nil && !errors.Is(err, techgit.ErrNoValidGitCredentials) {
+		return nil, fmt.Errorf("failed to get auth method for repository %s: %w", accessSpec.RepoURL, err)
+	}
+
+	gitDownloader := git.NewDownloader(u.String(), accessSpec.Ref, accessSpec.PathSpec, auth)
+	cachedGitBlobAccessor := accessobj.CachedBlobAccessForWriter(
+		componentVersionAccess.GetContext(),
+		mime.MIME_OCTET,
+		accessio.NewWriteAtWriter(gitDownloader.Download),
+	)
+	jointCloser := func() error {
+		return errors.Join(gitDownloader.Close(), cachedGitBlobAccessor.Close())
 	}
 
 	return &accessMethod{
-		repoURL:  u.String(),
-		compvers: c,
-		spec:     a,
-		ref:      a.Ref,
+		spec:   accessSpec,
+		access: cachedGitBlobAccessor,
+		close:  jointCloser,
+		cid:    cid,
 	}, nil
 }
 
 type accessMethod struct {
-	lock   sync.Mutex
+	spec   *AccessSpec
 	access blobaccess.BlobAccess
+	close  func() error
 
-	compvers accspeccpi.ComponentVersionAccess
-	spec     *AccessSpec
-
-	repoURL string
-	path    string
-	ref     string
+	cid credentials.ConsumerIdentity
 }
 
 var _ accspeccpi.AccessMethodImpl = &accessMethod{}
@@ -120,43 +138,22 @@ func (m *accessMethod) Close() error {
 	if m.access == nil {
 		return nil
 	}
-	return m.access.Close()
+
+	var err error
+	if m.close != nil {
+		err = m.close()
+	}
+	err = errors.Join(err, m.access.Close())
+
+	return err
 }
 
 func (m *accessMethod) Get() ([]byte, error) {
-	if err := m.setup(); err != nil {
-		return nil, err
-	}
 	return m.access.Get()
 }
 
 func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	if err := m.setup(); err != nil {
-		return nil, err
-	}
 	return m.access.Reader()
-}
-
-func (m *accessMethod) setup() error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-
-	if m.access != nil {
-		return nil
-	}
-
-	d := git.NewDownloader(m.repoURL, m.ref, m.path)
-	defer d.Close()
-
-	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(
-		m.compvers.GetContext(),
-		m.MimeType(),
-		accessio.NewWriteAtWriter(d.Download),
-	)
-
-	m.access = cacheBlobAccess
-
-	return nil
 }
 
 func (m *accessMethod) MimeType() string {
@@ -173,4 +170,24 @@ func (m *accessMethod) GetKind() string {
 
 func (m *accessMethod) AccessSpec() internal.AccessSpec {
 	return m.spec
+}
+
+func (m *accessMethod) GetConsumerId(_ ...credentials.UsageContext) credentials.ConsumerIdentity {
+	return m.cid
+}
+
+func (m *accessMethod) GetIdentityMatcher() string {
+	return identity.CONSUMER_TYPE
+}
+
+func getCreds(repoURL string, cctx credentials.Context) (credentials.Credentials, credentials.ConsumerIdentity, error) {
+	id, err := identity.GetConsumerId(repoURL)
+	if err != nil {
+		return nil, nil, err
+	}
+	creds, err := credentials.CredentialsForConsumer(cctx.CredentialsContext(), id, identity.IdentityMatcher)
+	if creds == nil || err != nil {
+		return nil, id, err
+	}
+	return creds, id, nil
 }

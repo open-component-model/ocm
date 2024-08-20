@@ -23,6 +23,10 @@ const refToPathSeparator = "#"
 // - path is the path to the file or directory to use as the source, if not specified, defaults to the root of the repository.
 var refRegexp = regexp.MustCompile(`^([^@#]+)(@[^#\n]+)?(#[^@\n]+)?`)
 
+// gurl represents a git URL reference.
+// It contains the URL of the git repository,
+// the reference to check out,
+// and the path to the file or directory to use as the source.
 type gurl struct {
 	url  *url.URL
 	ref  plumbing.ReferenceName

@@ -26,6 +26,7 @@ type client struct {
 	*gurl
 
 	storage storage.Storer
+	auth    AuthMethod
 }
 
 type Client interface {
@@ -66,6 +67,7 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 	repo, err := git.Open(strg, billy)
 	if errors.Is(err, git.ErrRepositoryNotExists) {
 		repo, err = git.CloneContext(ctx, strg, billy, &git.CloneOptions{
+			Auth:          c.auth,
 			URL:           c.url.String(),
 			RemoteName:    git.DefaultRemoteName,
 			ReferenceName: c.ref,
@@ -84,6 +86,7 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 	}
 	if newRepo {
 		if err := repo.FetchContext(ctx, &git.FetchOptions{
+			Auth:       c.auth,
 			RemoteName: git.DefaultRemoteName,
 			Depth:      0,
 			Tags:       git.AllTags,
@@ -154,6 +157,7 @@ func (c *client) Refresh(ctx context.Context) error {
 	}
 
 	if err := worktree.PullContext(ctx, &git.PullOptions{
+		Auth:       c.auth,
 		RemoteName: git.DefaultRemoteName,
 	}); err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) && !errors.Is(err, transport.ErrEmptyRemoteRepository) {
 		return err
@@ -204,6 +208,6 @@ func (c *client) Setup(system vfs.FileSystem) error {
 	return err
 }
 
-func (c *client) Close(object *accessobj.AccessObject) error {
+func (c *client) Close(_ *accessobj.AccessObject) error {
 	return c.Update(context.Background(), "OCM Repository Update", true)
 }

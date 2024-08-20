@@ -1,7 +1,6 @@
 package git_test
 
 import (
-	"embed"
 	"fmt"
 
 	"github.com/go-git/go-git/v5"
@@ -30,9 +29,6 @@ import (
 	"ocm.software/ocm/api/utils/mime"
 	"ocm.software/ocm/api/utils/refmgmt"
 )
-
-//go:embed testdata/repo
-var testData embed.FS
 
 var _ = Describe("ctf management", func() {
 	var remoteRepo *git.Repository
