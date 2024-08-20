@@ -2,7 +2,6 @@
 
 ### Description
 
-
 Labels are a set of arbitrary properties, which can be attached to elements
 of a component version:
 - a component version itself
@@ -171,10 +170,9 @@ The following algorithms are possible:
 The following label assignments are configured:
   - <code>label:routing-slips</code>: simpleMapMerge
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add componentversions](ocm_add_componentversions.md)	 &mdash; add component version(s) to a (new) transport archive
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version

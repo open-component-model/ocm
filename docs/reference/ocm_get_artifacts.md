@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm get artifacts [<options>] {<artifact-reference>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 artifacts, artifact, art, a
 ```
 
 ### Options
 
-```
+```text
   -a, --attached           show attached artifacts
   -h, --help               help for artifacts
   -o, --output string      output mode (JSON, json, tree, wide, yaml)
@@ -24,7 +24,6 @@ artifacts, artifact, art, a
 ```
 
 ### Description
-
 
 Get lists all artifact versions specified, if only a repository is specified
 all tagged artifacts are listed.
@@ -76,17 +75,16 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### Examples
 
-```
+```bash
 $ ocm get artifact ghcr.io/mandelsoft/kubelink
 $ ocm get artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

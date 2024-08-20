@@ -2,26 +2,25 @@
 
 ### Synopsis
 
-```
+```bash
 ocm get plugins [<options>] {<plugin name>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 plugins, plugin, p
 ```
 
 ### Options
 
-```
+```text
   -h, --help               help for plugins
   -o, --output string      output mode (JSON, json, wide, yaml)
   -s, --sort stringArray   sort fields
 ```
 
 ### Description
-
 
 Get lists information for all plugins specified, if no plugin is specified
 all registered ones are listed.
@@ -35,17 +34,16 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### Examples
 
-```
+```bash
 $ ocm get plugins
 $ ocm get plugins demo -o yaml
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

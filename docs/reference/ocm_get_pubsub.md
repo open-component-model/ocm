@@ -2,26 +2,25 @@
 
 ### Synopsis
 
-```
+```bash
 ocm get pubsub {<ocm repository>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 pubsub, ps
 ```
 
 ### Options
 
-```
+```text
   -h, --help               help for pubsub
   -o, --output string      output mode (JSON, json, yaml)
   -s, --sort stringArray   sort fields
 ```
 
 ### Description
-
 
 A repository may be able to store a publish/subscribe specification
 to propagate the creation or update of component versions.
@@ -37,10 +36,9 @@ The following modes are supported:
   - <code>json</code>
   - <code>yaml</code>
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

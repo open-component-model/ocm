@@ -1,12 +1,14 @@
-{{signing}}
 # Signing Component Versions
+
+{{signing}}
 
 This tour illustrates the basic functionality to
 sign and verify signatures.
 
 It covers two basic scenarios:
-- [`sign`](01-basic-signing.go) Create, Sign, Transport and Verify a component version.
-- [`context`](02-using-context-settings.go) Using context settings to configure signing and verification in target repo.
+
+- [`sign`](/examples/lib/tour/06-signing-component-versions/01-basic-signing.go) Create, Sign, Transport and Verify a component version.
+- [`context`](/examples/lib/tour/06-signing-component-versions/02-using-context-settings.go) Using context settings to configure signing and verification in target repo.
 
 ## Running the examples
 
@@ -37,6 +39,7 @@ As usual, we start with getting access to an OCM context
 ```go
 {{include}{../../06-signing-component-versions/01-basic-signing.go}{default context}}
 ```
+
 Then, we configure this context with optional ocm config defined in our config file.
 See [OCM config scenario in tour 04]({{ocm-config-file}}).
 
@@ -96,6 +99,7 @@ target version.
 ```
 
 {{signing-context}}
+
 ### Using Context Settings to Configure Signing
 
 Instead of providing all signing relevant information directly with
@@ -159,7 +163,7 @@ Now, we manually add the keys to our context.
 ```
 
 We are prepared now and can sign any component version without specifying further options
-in any repository for the signature name `acme.org`. 
+in any repository for the signature name `acme.org`.
 
 Therefore, we just get the component version from the prepared repository
 

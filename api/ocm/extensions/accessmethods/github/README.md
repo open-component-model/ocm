@@ -1,10 +1,9 @@
 
 # Access Method `gitHub` and `github` - Github Commit Access
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: gitHub/v1
 ```
 
@@ -18,8 +17,6 @@ This method implements the access of the content of a git commit stored in a
 GitHub repository.
 
 Supported specification version is `v1`
-
-
 
 ### Specification Versions
 
@@ -38,7 +35,6 @@ The type specific specification fields are:
 - **`commit`** *string*
 
   The sha/id of the git commit
-
 
 ### Go Bindings
 

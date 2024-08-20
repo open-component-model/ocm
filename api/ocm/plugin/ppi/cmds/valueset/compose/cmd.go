@@ -22,7 +22,7 @@ func New(p ppi.Plugin) *cobra.Command {
 		Use:   Name + " <purpose> <name> <options json> <base spec json>",
 		Short: "compose value set from options and base specification",
 		Long: `
-The task of this command is ued to compose and validate a value set based on
+The task of this command is used to compose and validate a value set based on
 some explicitly given input options and preconfigured specifications.
 
 The finally composed set has to be returned as JSON document

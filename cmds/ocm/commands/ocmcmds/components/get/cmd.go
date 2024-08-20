@@ -61,6 +61,7 @@ all versions are listed.
 $ ocm get componentversion ghcr.io/mandelsoft/kubelink
 $ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

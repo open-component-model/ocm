@@ -56,7 +56,7 @@ jobs:
         PRODUCT_TOKEN: ${{ secrets.MEND_SHC_PRODUCT_TOKEN }}
         WSS_URL: ${{ secrets.MEND_URL }}
         API_KEY: ${{ secrets.MEND_API_TOKEN }}
-        CONFIG_FILE: './.github/workflows/mend.config'
+        CONFIG_FILE: './.github/config/mend.config'
  
     - name: Generate Report
       env:

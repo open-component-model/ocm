@@ -25,12 +25,12 @@ func printOptionGroups(buf *bytes.Buffer, title string, flags *pflag.FlagSet) {
 			if g.Title != "" {
 				buf.WriteString("\n#### " + g.Title + "\n\n")
 			}
-			buf.WriteString("```\n")
+			buf.WriteString("```text\n")
 			buf.WriteString(g.Usages)
 			buf.WriteString("```\n\n")
 		}
 	} else {
-		buf.WriteString("```\n")
+		buf.WriteString("```text\n")
 		buf.WriteString(groups[0].Usages)
 		buf.WriteString("```\n\n")
 	}
@@ -68,11 +68,11 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 
 	if cmd.Runnable() || cmd.HasAvailableSubCommands() {
 		buf.WriteString("### Synopsis\n\n")
-		buf.WriteString(fmt.Sprintf("```\n%s\n```\n\n", UseLine(cmd)))
+		buf.WriteString(fmt.Sprintf("```bash\n%s\n```\n\n", UseLine(cmd)))
 		if len(cmd.Aliases) > 0 {
-			buf.WriteString("##### Aliases\n\n")
+			buf.WriteString("#### Aliases\n\n")
 			cmd.NameAndAliases()
-			buf.WriteString(fmt.Sprintf("```\n%s\n```\n\n", cmd.NameAndAliases()))
+			buf.WriteString(fmt.Sprintf("```text\n%s\n```\n\n", cmd.NameAndAliases()))
 		}
 	}
 
@@ -88,8 +88,8 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 
 		desc = strings.ReplaceAll(desc, "\\\n", "\n")
 		links, desc = cobrautils.SubstituteCommandLinks(cmd.Long, cobrautils.FormatLinkWithHandler(linkHandler))
-		buf.WriteString("### Description\n\n")
-		buf.WriteString(desc + "\n\n")
+		buf.WriteString("### Description\n")
+		buf.WriteString(desc + "\n")
 	}
 
 	if len(cmd.Example) > 0 {
@@ -98,7 +98,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 		if strings.Contains(cmd.Example, "<pre>") {
 			buf.WriteString(fmt.Sprintf("\n%s\n\n", SanitizePre(cmd.Example)))
 		} else {
-			buf.WriteString(fmt.Sprintf("```\n%s\n```\n\n", strings.TrimSpace(cmd.Example)))
+			buf.WriteString(fmt.Sprintf("```%s\n%s\n```\n\n", ExampleCodeStyle(cmd), strings.TrimSpace(cmd.Example)))
 		}
 	}
 
@@ -118,7 +118,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 		buf.WriteString("### SEE ALSO\n\n")
 		if cmd.HasParent() {
 			header = true
-			buf.WriteString("##### Parents\n\n")
+			buf.WriteString("#### Parents\n\n")
 			parent := cmd
 			for parent.HasParent() {
 				parent = parent.Parent()
@@ -264,6 +264,15 @@ func DocuCommandPath(cmd *cobra.Command) string {
 		}
 	}
 	return cmd.CommandPath()
+}
+
+func ExampleCodeStyle(cmd *cobra.Command) string {
+	if cmd.Annotations != nil {
+		if p, ok := cmd.Annotations["ExampleCodeStyle"]; ok {
+			return p
+		}
+	}
+	return "text"
 }
 
 func FormattedCommandPath(cmd *cobra.Command) string {

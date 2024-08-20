@@ -1,0 +1,44 @@
+name: Markdown
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.md'
+
+jobs:
+  markdown-lint:
+    runs-on: ubuntu-latest
+    name: Lint Markdown
+    steps:
+      - uses: actions/checkout@v4
+      - name: Markdown Linting
+        uses: nosborn/github-action-markdown-cli@v3
+        with:
+          files: .
+          dot: true
+          config_file: .github/config/markdownlint.yml
+          ignore_path: .github/config/markdownignore
+  verify-links:
+    name: Verify links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Markdown verify links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: yes
+          use-verbose-mode: no
+          config-file: .github/config/markdown-link-check.json
+  spellcheck:
+    name: Spellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Spellcheck
+        uses: rojopolis/spellcheck-github-actions@v0
+        with:
+          config_path: .github/config/spellcheck.yml
+          task_name: Markdown
+

@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm verify componentversions [<options>] {<component-reference>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Options
 
-```
+```text
       --ca-cert stringArray       additional root certificate authorities (for signing certificates)
   -c, --constraints constraints   version constraint
   -h, --help                      help for componentversions
@@ -31,7 +31,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
 ```
 
 ### Description
-
 
 Verify signature of specified component versions.
 
@@ -109,16 +108,15 @@ it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-
 ### Examples
 
-```
+```bash
 $ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm verify](ocm_verify.md)	 &mdash; Verify component version signatures
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

@@ -3,12 +3,15 @@
 <!-- from ../docsrc/06-signing-component-versions/README.md -->
 # Signing Component Versions
 
+<a id="signing"></a>
+
 This tour illustrates the basic functionality to
 sign and verify signatures.
 
 It covers two basic scenarios:
-- [`sign`](01-basic-signing.go) Create, Sign, Transport and Verify a component version.
-- [`context`](02-using-context-settings.go) Using context settings to configure signing and verification in target repo.
+
+- [`sign`](/examples/lib/tour/06-signing-component-versions/01-basic-signing.go) Create, Sign, Transport and Verify a component version.
+- [`context`](/examples/lib/tour/06-signing-component-versions/02-using-context-settings.go) Using context settings to configure signing and verification in target repo.
 
 ## Running the examples
 
@@ -39,8 +42,9 @@ As usual, we start with getting access to an OCM context
 ```go
 	ctx := ocm.DefaultContext()
 ```
+
 Then, we configure this context with optional ocm config defined in our config file.
-See [OCM config scenario in tour 04](../04-working-with-config/README.md#standard-configuration-file).
+See [OCM config scenario in tour 04](../04-working-with-config/README.md#ocm-config-file).
 
 ```go
 	err := ReadConfiguration(ctx, cfg)
@@ -84,7 +88,7 @@ There might be multiple signatures, therefore every signature
 has a name (here `acme.org`). Keys are always specified for
 a dedicated signature name. The signing process can be influenced by
 several options. Here, we just provide the private key to be used in an ad-hoc manner.
-[Later](#using-context-settings-to-configure-signing), we will see how everything can be preconfigured in a *signing context*.
+[Later](#signing-context), we will see how everything can be preconfigured in a *signing context*.
 
 ```go
 	_, err = signing.SignComponentVersion(cv, "acme.org", signing.PrivateKey("acme.org", privkey))
@@ -143,6 +147,8 @@ target version.
 	}
 ```
 
+<a id="signing-context"></a>
+
 ### Using Context Settings to Configure Signing
 
 Instead of providing all signing relevant information directly with
@@ -156,7 +162,7 @@ As usual, we start with getting access to an OCM context
 ```
 
 Then, we configure this context with optional ocm config defined in our config file.
-See [OCM config scenario in tour 04](../04-working-with-config/README.md#standard-configuration-file).
+See [OCM config scenario in tour 04](../04-working-with-config/README.md#ocm-config-file).
 
 ```go
 	err := ReadConfiguration(ctx, cfg)
@@ -216,7 +222,7 @@ Now, we manually add the keys to our context.
 ```
 
 We are prepared now and can sign any component version without specifying further options
-in any repository for the signature name `acme.org`. 
+in any repository for the signature name `acme.org`.
 
 Therefore, we just get the component version from the prepared repository
 
@@ -263,7 +269,7 @@ Manually adding keys to the signing attribute
 might simplify the call to possibly multiple signing/verification
 calls, but it does not help to provide keys via an external
 configuration (for example for using the OCM CLI).
-In [tour04](../04-working-with-config/README.md#providing-new-config-object-types)
+In [tour04](../04-working-with-config/README.md#tour04-arbitrary)
 we have seen how arbitrary configuration
 possibilities can be added. The signing attribute uses
 this mechanism to configure itself by providing an own

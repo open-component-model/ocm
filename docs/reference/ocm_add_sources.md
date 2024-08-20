@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm add sources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 sources, source, src, s
 ```
 
 ### Options
 
-```
+```text
       --addenv                              access environment for templating
       --dry-run                             evaluate and print source specifications
   -F, --file string                         target file/directory (default "component-archive")
@@ -28,7 +28,7 @@ sources, source, src, s
 
 #### Access Specification Options
 
-```
+```text
       --access YAML                         blob access specification (YAML)
       --accessHostname string               hostname used for access
       --accessPackage string                package or object name
@@ -59,7 +59,7 @@ sources, source, src, s
 
 #### Input Specification Options
 
-```
+```text
       --artifactId string                   maven artifact id
       --body string                         body of a http request
       --classifier string                   maven classifier
@@ -95,7 +95,7 @@ sources, source, src, s
 
 #### Source Meta Data Options
 
-```
+```text
       --extra <name>=<value>                source extra identity (default [])
       --label <name>=<YAML>                 source label (leading * indicates signature relevant, optional version separated by @)
       --name string                         source name
@@ -105,7 +105,6 @@ sources, source, src, s
 ```
 
 ### Description
-
 
 Add information about the sources, e.g. commits in a Github repository,
 that have been used to create the resources specified in a resource file to a component version.
@@ -132,8 +131,8 @@ options <code>--name</code> and <code>--version</code>. With the option <code>--
 it is possible to add extra identity attributes. Explicitly specified options
 override values specified by the <code>--source</code> option.
 (Note: Go templates are not supported for YAML-based option values. Besides
-this restriction, the finally composed element description is still processd
-by the selected templater.)
+this restriction, the finally composed element description is still processed
+by the selected template engine.)
 
 The source type can be specified with the option <code>--type</code>. Therefore, the
 minimal required meta data for elements can be completely specified by dedicated
@@ -481,7 +480,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes a list of spiff libraries to include in template
     processing.
 
-  The variable settigs from the command line are available as binding, also. They are provided under the node
+  The variable settings from the command line are available as binding, also. They are provided under the node
   <code>values</code>.
 
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputPath</code>, <code>--inputValues</code>, <code>--mediaType</code>
@@ -987,16 +986,15 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
 
 
-
 ### Examples
 
-```
+```bash
 $ ocm add sources --file path/to/cafile sources.yaml
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

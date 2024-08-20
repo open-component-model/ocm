@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm install [<options>] <sub command> ...
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for install
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

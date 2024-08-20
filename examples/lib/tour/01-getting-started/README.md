@@ -3,7 +3,9 @@
 <!-- from ../docsrc/01-getting-started/README.md -->
 # Basic Usage of OCM Repositories
 
-This [tour](example.go) illustrates the basic usage of the API to
+<a id="getting-started"></a>
+
+This [tour](/examples/lib/tour/01-getting-started/example.go) illustrates the basic usage of the API to
 access component versions in an OCM repository.
 
 ## Running the example
@@ -17,10 +19,12 @@ repository: ghcr.io/mandelsoft/ocm
 version: 0.1.0
 ```
 
+<a id="getting-started-walkthrough"></a>
+
 ## Walkthrough
 
 The basic entry point for using the OCM library is always
-an [OCM Context object](../../contexts.md). It bundles all
+an [OCM Context object](/examples/lib/contexts.md). It bundles all
 configuration settings and type registrations, like
 access methods, repository types, etc, and
 configuration settings, like credentials,
@@ -162,7 +166,7 @@ and the resources described by the component version.
 This results in the following output (the shown version might
 differ, because the code always describes the latest version):
 
-```
+```text
 resources of the latest version:
   version:  0.13.0
   provider: ocm.software
@@ -272,7 +276,7 @@ closing the reader, again
 	defer reader.Close()
 ```
 
-Now, we just read the content and copy it to the intended 
+Now, we just read the content and copy it to the intended
 output file (`/tmp/ocmcli`).
 
 ```go

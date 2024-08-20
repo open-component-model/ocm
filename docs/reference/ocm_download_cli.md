@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm download cli [<options>]  [<component> {<name> { <key>=<value> }}]
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 cli, ocmcli, ocm-cli
 ```
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -h, --help                      help for cli
   -O, --outfile string            output file or directory
@@ -23,7 +23,6 @@ cli, ocmcli, ocm-cli
 ```
 
 ### Description
-
 
 Download an OCM CLI executable. By default, the standard publishing component
 and repository is used. Optionally, another component or repo and even a resource
@@ -90,10 +89,9 @@ can be download directly as helm chart archive, even if stored as OCI artifact.
 This is handled by download handler. Their usage can be enabled with the <code>--download-handlers</code>
 option. Otherwise the resource as returned by the access method is stored.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm download](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

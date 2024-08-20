@@ -2,7 +2,6 @@
 
 ### Description
 
-
 An OCM repository can be configured to propagate change events via a
 publish/subscribe system, if there is a persistence provider for the dedicated
 repository type. If available any known publish/subscribe system can
@@ -31,7 +30,7 @@ specification versions, and formats:
 
 - PubSub type <code>redis</code>
 
-  a redis pubsub sytsem.
+  a redis pubsub system.
 
   The following versions are supported:
   - Version <code>v1</code>
@@ -50,10 +49,9 @@ specification versions, and formats:
 There are persistence providers for the following repository types:
   - <code>OCIRegistry</code>
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

@@ -2,23 +2,21 @@
 
 ### Synopsis
 
-```
+```bash
 plugin action [<options>] <sub command> ...
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for action
 ```
 
 ### Description
-
 This command group provides all commands used to implement an action.
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 

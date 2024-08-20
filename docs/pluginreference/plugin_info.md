@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 plugin info [<options>]
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for info
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 

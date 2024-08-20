@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm download resources [<options>]  <component> {<name> { <key>=<value> }}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 resources, resource, res, r
 ```
 
 ### Options
 
-```
+```text
   -c, --constraints constraints     version constraint
   -d, --download-handlers           use download handler if possible
       --downloader <name>=<value>   artifact downloader (<name>[:<artifact type>[:<media type>]]=<JSON target config) (default [])
@@ -29,7 +29,6 @@ resources, resource, res, r
 ```
 
 ### Description
-
 
 Download resources of a component version. Resources are specified
 by identities. An identity consists of
@@ -48,7 +47,7 @@ as follows:
 
 The resource files are named according to the resource identity in the
 component descriptor. If this identity is just the resource name, this name
-is ised. If additional identity attributes are required, this name is
+is used. If additional identity attributes are required, this name is
 append by a comma separated list of <code>&lt;name>=&lt;>value></code> pairs
 separated by a "-" from the plain name. This attribute list is alphabetical
 order:
@@ -223,10 +222,9 @@ it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm download](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

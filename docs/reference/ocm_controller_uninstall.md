@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```bash
 ocm controller uninstall controller
 ```
 
 ### Options
 
-```
+```text
   -u, --base-url string                       the base url to the ocm-controller's release page (default "https://ocm.software/ocm-controller/releases")
       --cert-manager-base-url string          the base url to the cert-manager's release page (default "https://github.com/cert-manager/cert-manager/releases")
       --cert-manager-release-api-url string   the base url to the cert-manager's API release page (default "https://api.github.com/repos/cert-manager/cert-manager/releases")
@@ -26,7 +26,7 @@ ocm controller uninstall controller
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm controller](ocm_controller.md)	 &mdash; Commands acting on the ocm-controller
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

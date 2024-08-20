@@ -2,26 +2,25 @@
 
 ### Synopsis
 
-```
+```bash
 ocm get credentials {<consumer property>=<value>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 credentials, creds, cred
 ```
 
 ### Options
 
-```
+```text
   -h, --help             help for credentials
   -m, --matcher string   matcher type override
   -s, --sloppy           sloppy matching of consumer type
 ```
 
 ### Description
-
 
 Try to resolve a given consumer specification against the configured credential
 settings and show the found credential attributes.
@@ -67,8 +66,8 @@ Matchers exist for the following usage contexts or consumer types:
 
       - <code>authmeth</code>: auth method
       - <code>token</code>: vault token
-      - <code>roleid</code>: applrole role id
-      - <code>secretid</code>: applrole secret id
+      - <code>roleid</code>: app-role role id
+      - <code>secretid</code>: app-role secret id
 
     The only supported auth methods, so far, are <code>token</code> and <code>approle</code>.
 
@@ -188,10 +187,9 @@ The used matcher is derived from the consumer attribute <code>type</code>.
 For all other consumer types a matcher matching all attributes will be used.
 The usage of a dedicated matcher can be enforced by the option <code>--matcher</code>.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

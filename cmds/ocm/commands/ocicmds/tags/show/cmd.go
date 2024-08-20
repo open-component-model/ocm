@@ -52,6 +52,7 @@ Match tags of an artifact against some patterns.
 		Example: `
 $ oci show tags ghcr.io/mandelsoft/kubelink
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

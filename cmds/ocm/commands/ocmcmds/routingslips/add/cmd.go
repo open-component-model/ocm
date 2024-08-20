@@ -72,6 +72,7 @@ entry for unknown types.
 		Example: `
 $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandelsoft.org comment --entry "comment=some text"
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 	// cmd.AddCommand(topicroutingslips.New(o.Context, "ocm-routingslips"))
 	return cmd

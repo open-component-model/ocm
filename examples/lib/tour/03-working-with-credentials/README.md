@@ -3,16 +3,19 @@
 <!-- from ../docsrc/03-working-with-credentials/README.md -->
 # Working with Credentials
 
+<a id="credentials"></a>
+
 This tour illustrates the basic handling of credentials
 using the OCM library. The library provides
 an extensible framework to bring together credential providers
-and credential consunmers in a technology-agnostic way.
+and credential consumers in a technology-agnostic way.
 
 It covers four basic scenarios:
-- [`basic`](01-using-credentials.go) Writing to a repository with directly specified credentials.
-- [`context`](02-basic-credential-management.go) Using credentials via the credential management to publish a component version.
-- [`read`](02-basic-credential-management.go) Read the previously created component version using the credential management.
-- [`credrepo`](03-credential-repositories.go) Providing credentials via credential repositories.
+
+- [`basic`](/examples/lib/tour/03-working-with-credentials/01-using-credentials.go) Writing to a repository with directly specified credentials.
+- [`context`](/examples/lib/tour/03-working-with-credentials/02-basic-credential-management.go) Using credentials via the credential management to publish a component version.
+- [`read`](/examples/lib/tour/03-working-with-credentials/02-basic-credential-management.go) Read the previously created component version using the credential management.
+- [`credrepo`](/examples/lib/tour/03-working-with-credentials/03-credential-repositories.go) Providing credentials via credential repositories.
 
 ## Running the example
 
@@ -29,7 +32,7 @@ Set your favorite OCI registry and don't forget to add the repository prefix for
 
 ## Walkthrough
 
-### Writing to a repository with directly specified credentials.
+### Writing to a repository with directly specified credentials
 
 As usual, we start with getting access to an OCM context
 object.
@@ -49,7 +52,6 @@ It is just set of properties. To offer various credential sources
 there is an interface `credentials.Credentials` provided,
 whose implementations provide access to those properties.
 A simple property based implementation is `credentials.DirectCredentials.
-
 
 The most simple use case is to provide the credentials
 directly for the repository access creation.
@@ -101,7 +103,7 @@ in `common.go` (It is shared by the other examples, also).
 	}
 ```
 
-In contrast to our [first tour](../01-getting-started/README.md#walkthrough)
+In contrast to our [first tour](../01-getting-started/README.md#getting-started-walkthrough)
 we cannot list components, here.
 OCI registries do not support component listers, therefore we
 just look up the actually added version to verify the result.
@@ -116,6 +118,8 @@ just look up the actually added version to verify the result.
 ```
 
 The coding for `describeVersion` is similar to the one shown in the [first tour](../01-getting-started/README.md#describe-version).
+
+<a id="using-cred-management"></a>
 
 ### Using the Credential Management
 
@@ -142,7 +146,6 @@ As usual, we start with the default OCM context.
 
 It is now used to gain access to the appropriate
 credential context.
-
 
 ```go
 	credctx := ctx.CredentialsContext()
@@ -212,7 +215,7 @@ The used functions above are just convenience wrappers
 around the core type ConsumerId, which might be provided
 for dedicated repository/consumer technologies.
 Everything can be done directly with the core interface
-and property name constants provided by the dedicted technologies. 
+and property name constants provided by the dedicated technologies.
 
 Once we have the id we can finally set the credentials for this
 id.
@@ -221,9 +224,9 @@ id.
 	credctx.SetCredentialsForConsumer(id, creds)
 ```
 
-Now, the context is prepared to provide credentials 
+Now, the context is prepared to provide credentials
 for any usage of our OCI registry
-Let's test, whether it could provide credentials 
+Let's test, whether it could provide credentials
 for storing our component version.
 
 First, we get the repository object for our OCM repository.
@@ -237,7 +240,7 @@ First, we get the repository object for our OCM repository.
 	defer repo.Close()
 ```
 
-Second, we determine the consumer id for our intended repository acccess.
+Second, we determine the consumer id for our intended repository access.
 A credential consumer may provide consumer id information
 for a dedicated sub user context.
 This is supported by the OCM repo implementation for OCI registries.
@@ -372,7 +375,7 @@ the access method as credential consumer can access the blob.
 
 The OCM toolset embraces multiple storage
 backend technologies, for OCM metadata as well
-as for artifacts described by a component version. 
+as for artifacts described by a component version.
 All those technologies typically have their own
 way to configure credentials for command line
 tools or servers.
@@ -391,7 +394,6 @@ credentials for dedicated OCI registries.
 
 We start again by providing access to the
 OCM context and the connected credential context.
-
 
 ```go
 	ctx := ocm.DefaultContext()
@@ -419,7 +421,7 @@ repository API provided by this library.
 
 The docker config is such a case, so we can instruct the
 repository to automatically propagate appropriate the consumer id
-mappings. This feature is typically enabled by a dedicated specfication
+mappings. This feature is typically enabled by a dedicated specification
 option.
 
 ```go
@@ -445,7 +447,7 @@ specification.
 We are not interested in the repository object, so we just ignore
 the result.
 
-So, if you have done the appropriate docker login for your 
+So, if you have done the appropriate docker login for your
 OCI registry, it should be possible now to get the credentials
 for the configured repository.
 

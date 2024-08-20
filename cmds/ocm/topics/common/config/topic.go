@@ -28,6 +28,7 @@ configurations:
 #         script:
 #           process: true
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "yaml"},
 		Long: `
 The command line client supports configuring by a given configuration file.
 If existent, by default, the file <code>$HOME/.ocmconfig</code> will be read.

@@ -69,6 +69,7 @@ $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io/my-project
 $ ocm oci artifact transfer /tmp/ctf gcr.io/my-project
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

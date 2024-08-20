@@ -2,20 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 plugin valueset compose <purpose> <name> <options json> <base spec json> [<options>]
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for compose
 ```
 
 ### Description
 
-
-The task of this command is ued to compose and validate a value set based on
+The task of this command is used to compose and validate a value set based on
 some explicitly given input options and preconfigured specifications.
 
 The finally composed set has to be returned as JSON document
@@ -74,10 +73,9 @@ The following predefined value types are supported:
   - <code>string=YAML</code>: string map with arbitrary values defined by dedicated assignments
   - <code>string=string</code>: string map defined by dedicated assignments
   - <code>string=string,string</code>: string map defined by dedicated assignment of comma separated strings
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin valueset](plugin_valueset.md)	 &mdash; valueset operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin

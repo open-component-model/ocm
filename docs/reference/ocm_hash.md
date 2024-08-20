@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm hash [<options>] <sub command> ...
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for hash
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

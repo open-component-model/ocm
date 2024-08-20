@@ -9,6 +9,7 @@ Copy the files under config into your environment and
 set the values according to your needs:
 
 - config.yml
+
   ```yaml
     username: mandelsoft
     password: ghp_xxxxxx
@@ -17,15 +18,16 @@ set the values according to your needs:
       type: OCIRegistry
       baseUrl: ghcr.io/mandelsoft/testtarget
   ```
-   
+
   Adapt your user and password for your preferred OCI registry.
   In the `targetRepository` you can specify any OCM repository spec.
-  To make the scanrios work with OCI image references it must be an OCI
+  To make the scenarios work with OCI image references it must be an OCI
   registry.
 
 - config-OO.yml
 
   This config uses an OCM config file, you additionally need the `ocmconfig.yaml` file.
+
   ```yaml
     repository: ghcr.io/mandelsoft/test
     ocmconfig: /home/mandelsoft/comparison/ocmconfig.yaml
@@ -38,13 +40,14 @@ set the values according to your needs:
     type: OCIRegistry
     baseUrl: ghcr.io/mandelsoft/testtarget
   ```
+
   The entry `ocmconfig` must point to your ocmconfig file path.
 
 - ocmconfig.yaml
 
-  It is configured to use your docker config for the access to 
+  It is configured to use your docker config for the access to
   OCI registries.
-  You just need to create an RSA key pair (for example with `ocm create rsakeypair`) and add the file paths to the approriate place in the config file.
+  You just need to create an RSA key pair (for example with `ocm create rsakeypair`) and add the file paths to the appropriate place in the config file.
 
 ## Execution
 
@@ -102,6 +105,7 @@ use the pre-created keys configured in the ocm config.
    component version. Print the values and list the chart files.
 
 Then there are aggregated scenarios:
+
 - `provider` (*requires `config-OO.yaml`*)
 
   It handles the complete provisioning side, from composition of
@@ -111,7 +115,7 @@ Then there are aggregated scenarios:
 
   It handles the complete scenario to import and verify the component
   version into the target environment. Additionally,  its prints
-  all the information from 6-8. It prepares the scene for the `locatize` scenario.
+  all the information from 6-8. It prepares the scene for the `localize` scenario.
 
 - `deploy` (*requires `config-OO.yaml`*)
 

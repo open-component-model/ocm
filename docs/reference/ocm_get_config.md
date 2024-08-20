@@ -2,26 +2,25 @@
 
 ### Synopsis
 
-```
+```bash
 ocm get config <options>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 config, cfg
 ```
 
 ### Options
 
-```
+```text
   -h, --help             help for config
   -O, --outfile string   output file or directory
   -o, --output string    output mode (JSON, json, yaml)
 ```
 
 ### Description
-
 
 Evaluate the command line arguments and all explicitly
 or implicitly used configuration files and provide
@@ -35,10 +34,9 @@ The following modes are supported:
   - <code>json</code>
   - <code>yaml</code>
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

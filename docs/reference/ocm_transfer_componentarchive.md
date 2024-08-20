@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm transfer componentarchive [<options>]  <source> <target>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 componentarchive, comparch, ca
 ```
 
 ### Options
 
-```
+```text
   -L, --copy-local-resources   transfer referenced local resources by-value
   -V, --copy-resources         transfer referenced resources by-value
       --copy-sources           transfer referenced sources by-value
@@ -27,7 +27,6 @@ componentarchive, comparch, ca
 ```
 
 ### Description
-
 
 Transfer a component archive to some component repository. This might
 be a CTF Archive or a regular repository.
@@ -61,7 +60,7 @@ references.
 With the option <code>--no-update</code> existing versions in the target
 repository will not be touched at all. An additional specification of the
 option <code>--overwrite</code> is ignored. By default, updates of
-volative (non-signature-relevant) information is enabled, but the
+volatile (non-signature-relevant) information is enabled, but the
 modification of non-volatile data is prohibited unless the overwrite
 option is given.
 
@@ -88,10 +87,9 @@ resources in the target repository.
 This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

@@ -70,6 +70,7 @@ Transfer content of a Common Transport Archive to the given target repository.
 		Example: `
 $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

@@ -2,7 +2,6 @@
 
 ### Description
 
-
 The command line client supports a special notation scheme for specifying
 references to instances of oci like registries. This allows for specifying
 references to any registry supported by the OCM toolset that can host OCI
@@ -109,10 +108,9 @@ file.
 
 The **type** may contain a file format qualifier separated by a <code>+</code>
 character. The following formats are supported: <code>directory</code>, <code>tar</code>, <code>tgz</code>
-
 ### Examples
 
-```
+```text
 +ctf+directory::./ocm/ctf//ocm.software/ocmcli/ocmcli-image:0.7.0@sha256:29c842be1ef1da67f6a1c07a3a3a8eb101bbcc4c80f174b87d147b341bca9625
 
 oci::{"baseUrl": "ghcr.io"}//open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.7.0@sha256:29c842be1ef1da67f6a1c07a3a3a8eb101bbcc4c80f174b87d147b341bca9625
@@ -132,7 +130,7 @@ tensorflow/tensorflow
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

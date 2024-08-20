@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm describe artifacts [<options>] {<artifact-reference>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 artifacts, artifact, art, a
 ```
 
 ### Options
 
-```
+```text
   -h, --help            help for artifacts
       --layerfiles      list layer files
   -o, --output string   output mode (JSON, json, yaml)
@@ -22,7 +22,6 @@ artifacts, artifact, art, a
 ```
 
 ### Description
-
 
 Describe lists all artifact versions specified, if only a repository is specified
 all tagged artifacts are listed.
@@ -71,17 +70,16 @@ The following modes are supported:
   - <code>json</code>
   - <code>yaml</code>
 
-
 ### Examples
 
-```
+```bash
 $ ocm describe artifact ghcr.io/mandelsoft/kubelink
 $ ocm describe artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm describe](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

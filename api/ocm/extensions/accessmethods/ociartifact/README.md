@@ -1,10 +1,9 @@
 
 # Access Method `ociArtifact` and `ociRegistry` - OCI Artifact Access
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: ociArtifact/v1
 ```
 
@@ -15,7 +14,7 @@ Provided blobs use the following media type:
 
 Depending on the repository appropriate docker legacy types might be used.
 
-The artifact content is provided in the [Artifact Set Format](../../../../../pkg/contexts/oci/repositories/ctf/formatspec.md#artifact-set-archive-format).
+The artifact content is provided in the [Artifact Set Format](/api/oci/extensions/repositories/ctf/formatspec.md#artifact-set-archive-format).
 The tag is provided as annotation.
 
 ### Description
@@ -23,8 +22,6 @@ The tag is provided as annotation.
 This method implements the access of an OCI artifact stored in an OCI registry.
 
 Supported specification version is `v1`
-
-
 
 ### Specification Versions
 

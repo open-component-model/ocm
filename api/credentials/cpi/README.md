@@ -1,2 +1,1 @@
-
-## Context Provider Interface for credential providers
+# Context Provider Interface for credential providers

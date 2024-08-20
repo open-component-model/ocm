@@ -62,6 +62,7 @@ in an OCM repository with all its dependent component references.
 $ ocm check componentversion ghcr.io/mandelsoft/kubelink
 $ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

@@ -1,10 +1,8 @@
+# Repository `OCIRegistry` and `ociRegistry` - OCI Registry
 
-# Repository `OCIRegistry` and `ociRegistry` - OCI Registry 
+## Synopsis
 
-
-### Synopsis
-
-```
+```yaml
 type: OCIRegistry/v1
 ```
 

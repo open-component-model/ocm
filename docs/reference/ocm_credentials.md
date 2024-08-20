@@ -2,25 +2,25 @@
 
 ### Synopsis
 
-```
+```bash
 ocm credentials [<options>] <sub command> ...
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 credentials, creds, cred
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for credentials
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

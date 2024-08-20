@@ -53,6 +53,7 @@ all registered ones are listed.
 $ ocm get plugins
 $ ocm get plugins demo -o yaml
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

@@ -49,6 +49,7 @@ Match versions of a component against some patterns.
 		Example: `
 $ ocm show versions ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/playground
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

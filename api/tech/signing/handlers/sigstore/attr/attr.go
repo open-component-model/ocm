@@ -14,6 +14,7 @@ const (
 )
 
 var defaultAttr = Attribute{
+	// https://github.com/tektoncd/chains/blob/main/docs/config.md#keyless-signing-with-fulcio
 	FulcioURL:    "https://v1.fulcio.sigstore.dev",
 	RekorURL:     "https://rekor.sigstore.dev",
 	OIDCIssuer:   "https://oauth2.sigstore.dev/auth",

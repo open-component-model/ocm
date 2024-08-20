@@ -33,8 +33,8 @@ func (a AttributeType) Description() string {
 	return `
 *bool* (default: ` + fmt.Sprintf("%t", UseCompositionMode) + `
 Composition mode decouples a component version provided by a repository
-implemention from the backened persistence. Added local blobs will
-and other changes witll not be forwarded to the backend repository until
+implementation from the backend persistence. Added local blobs will
+and other changes will not be forwarded to the backend repository until
 an AddVersion is called on the component.
 If composition mode is disabled blobs will directly be forwarded to
 the backend and descriptor updated will be persisted on AddVersion

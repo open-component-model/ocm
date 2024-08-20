@@ -77,7 +77,7 @@ var _ = Describe("component repository mapping", func() {
 		vfs.Cleanup(tempfs)
 	})
 
-	It("Don't Panik! When it's not a semver.org conform version. #756", func() {
+	It("Don't Panic! When it's not a semver.org conform version. #756", func() {
 		repo := Must(DefaultContext.RepositoryForSpec(spec))
 		comp := Must(repo.LookupComponent(COMPONENT))
 		cva, err := comp.NewVersion("v1.two.zeo-2")

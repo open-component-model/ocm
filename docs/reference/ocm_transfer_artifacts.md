@@ -2,26 +2,25 @@
 
 ### Synopsis
 
-```
+```bash
 ocm transfer artifacts [<options>] {<artifact-reference>} <target>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 artifacts, artifact, art, a
 ```
 
 ### Options
 
-```
+```text
   -h, --help          help for artifacts
       --repo string   repository name or spec
   -R, --repo-name     transfer repository name
 ```
 
 ### Description
-
 
 Transfer OCI artifacts from one registry to another one.
 Several transfer scenarios are supported:
@@ -74,10 +73,9 @@ linked library can be used:
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 
-
 ### Examples
 
-```
+```bash
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink:v1.0.0 gcr.io
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io
 $ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io/my-project
@@ -86,7 +84,7 @@ $ ocm oci artifact transfer /tmp/ctf gcr.io/my-project
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

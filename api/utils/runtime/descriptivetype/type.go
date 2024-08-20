@@ -8,8 +8,8 @@ import (
 	"ocm.software/ocm/api/utils/runtime"
 )
 
-// DescriptionExtender provides an additional descrition for a type object
-// which is appended to the format description in the schmeme descrition
+// DescriptionExtender provides an additional description for a type object
+// which is appended to the format description in the scheme description
 // for the type in question.
 type DescriptionExtender[T any] func(t T) string
 
