@@ -1,8 +1,6 @@
 package git
 
 import (
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils/accessio"
@@ -34,19 +32,16 @@ func IsKind(k string) bool {
 	return k == Type || k == ShortType
 }
 
-// RepositorySpec describes an CTF repository interface backed by a git repository.
+// RepositorySpec describes an CTF RepositoryImpl interface backed by a git RepositoryImpl.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	accessio.StandardOptions    `json:",inline"`
 
-	// URL is the url of the repository to resolve artifacts.
-	URL string `json:"baseUrl"`
+	// URL is the url of the RepositoryImpl to resolve artifacts.
+	URL string `json:"url"`
 
 	// AccessMode can be set to request readonly access or creation
 	AccessMode accessobj.AccessMode `json:"accessMode,omitempty"`
-
-	// FileMode is the file mode for the repository in the filesystem.
-	FileMode vfs.FileMode `json:"fileMode"`
 }
 
 var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
@@ -54,7 +49,7 @@ var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 var _ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
 
 // NewRepositorySpec creates a new RepositorySpec.
-func NewRepositorySpec(mode accessobj.AccessMode, url string, fileMode vfs.FileMode, opts ...accessio.Option) (*RepositorySpec, error) {
+func NewRepositorySpec(mode accessobj.AccessMode, url string, opts ...accessio.Option) (*RepositorySpec, error) {
 	o, err := accessio.AccessOptions(nil, opts...)
 	if err != nil {
 		return nil, err
@@ -63,7 +58,6 @@ func NewRepositorySpec(mode accessobj.AccessMode, url string, fileMode vfs.FileM
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		URL:                 url,
-		FileMode:            fileMode,
 		StandardOptions:     *o.(*accessio.StandardOptions),
 		AccessMode:          mode,
 	}, nil

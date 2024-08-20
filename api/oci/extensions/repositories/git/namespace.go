@@ -14,12 +14,12 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 
-func NewNamespace(repo *repository, name string) (cpi.NamespaceAccess, error) {
+func NewNamespace(repo *RepositoryImpl, name string) (cpi.NamespaceAccess, error) {
 	ctfNamespace, err := newNamespaceContainer(repo, name)
 	if err != nil {
 		return nil, err
 	}
-	return support.NewNamespaceAccess(name, ctfNamespace, repo, "Git repository Branch")
+	return support.NewNamespaceAccess(name, ctfNamespace, repo, "Git RepositoryImpl Branch")
 }
 
 type namespaceContainer struct {
@@ -31,7 +31,7 @@ type namespaceContainer struct {
 
 var _ support.NamespaceContainer = (*namespaceContainer)(nil)
 
-func newNamespaceContainer(repo *repository, name string) (support.NamespaceContainer, error) {
+func newNamespaceContainer(repo *RepositoryImpl, name string) (support.NamespaceContainer, error) {
 	ctfNamespace, err := repo.ctf.LookupNamespace(name)
 	if err != nil {
 		return nil, err

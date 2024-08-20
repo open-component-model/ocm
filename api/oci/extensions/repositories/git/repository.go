@@ -19,7 +19,7 @@ type Repository interface {
 	cpi.Repository
 }
 
-type repository struct {
+type RepositoryImpl struct {
 	cpi.RepositoryImplBase
 	logger logging.UnboundLogger
 	spec   *RepositorySpec
@@ -28,20 +28,20 @@ type repository struct {
 }
 
 var (
-	_ cpi.RepositoryImpl                   = (*repository)(nil)
-	_ credentials.ConsumerIdentityProvider = &repository{}
+	_ cpi.RepositoryImpl                   = (*RepositoryImpl)(nil)
+	_ credentials.ConsumerIdentityProvider = &RepositoryImpl{}
 )
 
 func New(ctx cpi.Context, spec *RepositorySpec) (Repository, error) {
 	urs := spec.UniformRepositorySpec()
-	i := &repository{
+	i := &RepositoryImpl{
 		RepositoryImplBase: cpi.NewRepositoryImplBase(ctx),
 		logger:             logging.DynamicLogger(ctx, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host)),
 		spec:               spec,
 	}
 
 	var err error
-	if i.client, err = git.NewClient(spec.URL); err != nil {
+	if i.client, err = git.NewClient(spec.URL, git.ClientOptions{}); err != nil {
 		return nil, err
 	}
 
@@ -54,50 +54,50 @@ func New(ctx cpi.Context, spec *RepositorySpec) (Repository, error) {
 	}
 	i.ctf = repo
 
-	return cpi.NewRepository(i), nil
+	return cpi.NewRepository(i, "git"), nil
 }
 
-func (r *repository) GetSpecification() cpi.RepositorySpec {
+func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {
 	return r.spec
 }
 
-func (r *repository) Close() error {
+func (r *RepositoryImpl) Close() error {
 	return r.ctf.Close()
 }
 
-func (r *repository) GetIdentityMatcher() string {
+func (r *RepositoryImpl) GetIdentityMatcher() string {
 	return identity.CONSUMER_TYPE
 }
 
-func (r *repository) NamespaceLister() cpi.NamespaceLister {
+func (r *RepositoryImpl) NamespaceLister() cpi.NamespaceLister {
 	return r.ctf.NamespaceLister()
 }
 
-func (r *repository) IsReadOnly() bool {
+func (r *RepositoryImpl) IsReadOnly() bool {
 	return false
 }
 
-func (r *repository) ExistsArtifact(name string, version string) (bool, error) {
+func (r *RepositoryImpl) ExistsArtifact(name string, version string) (bool, error) {
 	if err := r.client.Refresh(context.Background()); err != nil {
 		return false, err
 	}
 	return r.ctf.ExistsArtifact(name, version)
 }
 
-func (r *repository) LookupArtifact(name string, version string) (cpi.ArtifactAccess, error) {
+func (r *RepositoryImpl) LookupArtifact(name string, version string) (cpi.ArtifactAccess, error) {
 	if err := r.client.Refresh(context.Background()); err != nil {
 		return nil, err
 	}
 	return r.ctf.LookupArtifact(name, version)
 }
 
-func (r *repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
+func (r *RepositoryImpl) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
 	if err := r.client.Refresh(context.Background()); err != nil {
 		return nil, err
 	}
 	return NewNamespace(r, name)
 }
 
-func (r *repository) GetConsumerId(ctx ...cpicredentials.UsageContext) cpicredentials.ConsumerIdentity {
+func (r *RepositoryImpl) GetConsumerId(ctx ...cpicredentials.UsageContext) cpicredentials.ConsumerIdentity {
 	return nil
 }
