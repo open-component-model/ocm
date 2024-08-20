@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-git/v5"
@@ -22,10 +23,20 @@ import (
 var worktreeBranch = plumbing.NewBranchReferenceName("ocm")
 
 type client struct {
+	opts ClientOptions
+
+	// vfs tracks the current filesystem where the repo will be stored (at the root)
 	vfs vfs.FileSystem
+
+	// url is the git URL of the repository
 	*gurl
 
+	// auth is the authentication method to use when accessing the repository
 	auth AuthMethod
+
+	// repo is a reference to the git repository if it is already open
+	repo   *git.Repository
+	repoMu sync.Mutex
 }
 
 type Client interface {
@@ -37,12 +48,19 @@ type Client interface {
 }
 
 type ClientOptions struct {
+	URL string
+	Author
+}
+
+type Author struct {
+	Name  string
+	Email string
 }
 
 var _ Client = &client{}
 
-func NewClient(url string, _ ClientOptions) (Client, error) {
-	gitURL, err := decodeGitURL(url)
+func NewClient(opts ClientOptions) (Client, error) {
+	gitURL, err := decodeGitURL(opts.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -50,21 +68,28 @@ func NewClient(url string, _ ClientOptions) (Client, error) {
 	return &client{
 		vfs:  memoryfs.New(),
 		gurl: gitURL,
+		opts: opts,
 	}, nil
 }
 
 func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
-	billy := VFSBillyFS(c.vfs)
+	c.repoMu.Lock()
+	defer c.repoMu.Unlock()
+	if c.repo != nil {
+		return c.repo, nil
+	}
 
-	strg, err := getStorage(billy)
+	billyFS := VFSBillyFS(c.vfs)
+
+	strg, err := GetStorage(billyFS)
 	if err != nil {
 		return nil, err
 	}
 
 	newRepo := false
-	repo, err := git.Open(strg, billy)
+	repo, err := git.Open(strg, billyFS)
 	if errors.Is(err, git.ErrRepositoryNotExists) {
-		repo, err = git.CloneContext(ctx, strg, billy, &git.CloneOptions{
+		repo, err = git.CloneContext(ctx, strg, billyFS, &git.CloneOptions{
 			Auth:          c.auth,
 			URL:           c.url.String(),
 			RemoteName:    git.DefaultRemoteName,
@@ -76,7 +101,7 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 		newRepo = true
 	}
 	if errors.Is(err, transport.ErrEmptyRemoteRepository) {
-		return git.Open(strg, billy)
+		return git.Open(strg, billyFS)
 	}
 
 	if err != nil {
@@ -114,10 +139,16 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 		}
 	}
 
+	if err := c.opts.applyToRepo(repo); err != nil {
+		return nil, err
+	}
+
+	c.repo = repo
+
 	return repo, nil
 }
 
-func getStorage(base billy.Filesystem) (storage.Storer, error) {
+func GetStorage(base billy.Filesystem) (storage.Storer, error) {
 	dotGit, err := base.Chroot(git.GitDirName)
 	if err != nil {
 		return nil, err
@@ -175,13 +206,15 @@ func (c *client) Update(ctx context.Context, msg string, push bool) error {
 		return err
 	}
 
-	err = worktree.AddGlob("*")
-
-	if err != nil {
+	if err = worktree.AddGlob("*"); err != nil {
 		return err
 	}
 
 	_, err = worktree.Commit(msg, &git.CommitOptions{})
+
+	if errors.Is(err, git.ErrEmptyCommit) {
+		return nil
+	}
 
 	if err != nil {
 		return err
@@ -201,9 +234,7 @@ func (c *client) Update(ctx context.Context, msg string, push bool) error {
 }
 
 func (c *client) Setup(system vfs.FileSystem) error {
-
 	c.vfs = system
-
 	if _, err := c.Repository(context.Background()); err != nil {
 		return fmt.Errorf("failed to setup repository %q: %w", c.url.String(), err)
 	}
@@ -211,5 +242,25 @@ func (c *client) Setup(system vfs.FileSystem) error {
 }
 
 func (c *client) Close(_ *accessobj.AccessObject) error {
-	return c.Update(context.Background(), "OCM Repository Update", true)
+	if err := c.Update(context.Background(), "OCM Repository Update", true); err != nil {
+		return fmt.Errorf("failed to close repository %q: %w", c.url.String(), err)
+	}
+	return nil
+}
+
+func (o ClientOptions) applyToRepo(repo *git.Repository) error {
+	cfg, err := repo.Config()
+	if err != nil {
+		return err
+	}
+
+	if o.Author.Name != "" {
+		cfg.User.Name = o.Author.Name
+	}
+
+	if o.Author.Email != "" {
+		cfg.User.Email = o.Author.Email
+	}
+
+	return repo.SetConfig(cfg)
 }

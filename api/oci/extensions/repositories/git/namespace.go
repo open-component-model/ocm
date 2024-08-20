@@ -14,6 +14,8 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 
+const CommitPrefix = "update(ocm)"
+
 func NewNamespace(repo *RepositoryImpl, name string) (cpi.NamespaceAccess, error) {
 	ctfNamespace, err := newNamespaceContainer(repo, name)
 	if err != nil {
@@ -55,7 +57,7 @@ func (n *namespaceContainer) Close() error {
 	if err := n.ctf.Close(); err != nil {
 		return err
 	}
-	return n.client.Update(context.Background(), fmt.Sprintf("namespace update %q", n.name), true)
+	return n.client.Update(context.Background(), GenerateCommitMessageForNamespace(OperationUpdate, n.name), true)
 }
 
 func (n *namespaceContainer) ListTags() ([]string, error) {
@@ -139,33 +141,38 @@ func (n *namespaceContainer) NewArtifact(i support.NamespaceAccessImpl, art ...c
 type Operation string
 
 const (
-	OperationAdd  Operation = "add"
-	OperationMod  Operation = "mod"
-	OperationSync Operation = "sync"
+	OperationAdd    Operation = "add"
+	OperationMod    Operation = "mod"
+	OperationUpdate Operation = "update"
 )
 
 func GenerateCommitMessageForArtifact(operation Operation, artifact cpi.Artifact) string {
 	a := artifact.Artifact()
 
-	var msg string
+	var typ string
 	if artifact.IsManifest() {
-		msg = fmt.Sprintf("update(ocm): %s manifest %s (%s)", operation, a.Digest(), a.MimeType())
+		typ = "manifest"
 	} else if artifact.IsIndex() {
-		msg = fmt.Sprintf("update(ocm): %s index %s (%s)", operation, a.Digest(), a.MimeType())
+		typ = "index"
 	} else {
-		msg = fmt.Sprintf("update(ocm): %s artifact %s (%s)", operation, a.Digest(), a.MimeType())
+		typ = "artifact"
 	}
-	return msg
+
+	return fmt.Sprintf("%s: %s %s %s (%s)", CommitPrefix, operation, typ, a.Digest(), a.MimeType())
 }
 
 func GenerateCommitMessageForBlob(operation Operation, blob cpi.BlobAccess) string {
 	var msg string
 	if blob.DigestKnown() {
-		msg = fmt.Sprintf("update(ocm): %s blob %s of type %s", operation, blob.Digest(), blob.MimeType())
+		msg = fmt.Sprintf("%s: %s blob(%s) of type %s", CommitPrefix, operation, blob.Digest(), blob.MimeType())
 	} else {
-		msg = fmt.Sprintf("update(ocm): %s blob of type %s", operation, blob.MimeType())
+		msg = fmt.Sprintf("%s: %s blob of type %s", CommitPrefix, operation, blob.MimeType())
 	}
 	return msg
+}
+
+func GenerateCommitMessageForNamespace(operation Operation, namespace string) string {
+	return fmt.Sprintf("update(ocm): %s namespace %q", operation, namespace)
 }
 
 type artifactContainer struct {
@@ -179,7 +186,7 @@ func (a *artifactContainer) Close() error {
 	if err := a.ArtifactAccess.Close(); err != nil {
 		return err
 	}
-	return a.client.Update(context.Background(), GenerateCommitMessageForArtifact(OperationSync, a.ArtifactAccess), true)
+	return a.client.Update(context.Background(), GenerateCommitMessageForArtifact(OperationUpdate, a.ArtifactAccess), true)
 }
 
 func (a *artifactContainer) Dup() (cpi.ArtifactAccess, error) {
