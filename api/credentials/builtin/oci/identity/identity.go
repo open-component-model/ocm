@@ -6,7 +6,7 @@ import (
 	"ocm.software/ocm/api/utils/listformat"
 )
 
-// CONSUMER_TYPE is the OCT registry type.
+// CONSUMER_TYPE is the OCI registry type.
 const CONSUMER_TYPE = "OCIRegistry"
 
 // used identity properties.
@@ -28,7 +28,7 @@ const (
 
 func init() {
 	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
-		ATTR_USERNAME, "the basic auth user name",
+		ATTR_USERNAME, "the basic auth username",
 		ATTR_PASSWORD, "the basic auth password",
 		ATTR_IDENTITY_TOKEN, "the bearer token used for non-basic auth authorization",
 		ATTR_CERTIFICATE_AUTHORITY, "the certificate authority certificate used to verify certificates",
