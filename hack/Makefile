@@ -65,7 +65,7 @@ ifneq ($(OCI_REGISTRY), $(OCI_REGISTRY_VERSION))
 endif
 
 .PHONY: install-requirements
-install-requirements: $(deps) $(GOPATH)/bin/goimports mkbin mdref
+install-requirements: mkbin $(deps) $(GOPATH)/bin/goimports mdref
 
 .PHONY: mkbin
 mkbin:
