@@ -67,7 +67,6 @@ endif
 .PHONY: install-requirements
 install-requirements: mkbin $(deps) $(GOPATH)/bin/goimports mdref
 
-.PHONY: mkbin
 mkbin:
 	mkdir -p $(LOCALBIN)
 
