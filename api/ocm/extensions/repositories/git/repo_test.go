@@ -91,7 +91,7 @@ var _ = Describe("access method", func() {
 
 	BeforeEach(func() {
 		By("setting up local bare git repository to work against when pushing/updating")
-		billy := techgit.VFSBillyFS(remoteFS)
+		billy := Must(techgit.VFSBillyFS(remoteFS))
 		client.InstallProtocol("file", server.NewClient(server.NewFilesystemLoader(billy)))
 		remoteRepo = Must(newBareTestRepo(billy, REMOTE_REPO, gitgo.InitOptions{}))
 		// now that we have a bare repository, we can reference it via URL to access it like a remote repository

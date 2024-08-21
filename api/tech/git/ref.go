@@ -10,8 +10,10 @@ import (
 	giturls "github.com/whilp/git-urls"
 )
 
-const urlToRefSeparator = "@"
-const refToPathSeparator = "#"
+const (
+	urlToRefSeparator  = "@"
+	refToPathSeparator = "#"
+)
 
 // refRegexp is a regular expression that matches a git ref string.
 // The ref string is expected to be in the format of:
@@ -20,7 +22,13 @@ const refToPathSeparator = "#"
 // - url is the URL of the git repository
 // - ref is the git reference to checkout, if not specified, defaults to "HEAD"
 // - path is the path to the file or directory to use as the source, if not specified, defaults to the root of the repository.
-var refRegexp = regexp.MustCompile(`^([^@#]+)(@[^#\n]+)?(#[^@\n]+)?`)
+var refRegexp = regexp.MustCompile(
+	fmt.Sprintf(
+		`^([^%[1]s%[2]s]+)(%[1]s[^%[2]s\n]+)?(%[2]s[^%[1]s\n]+)?`,
+		urlToRefSeparator,
+		refToPathSeparator,
+	),
+)
 
 // gurl represents a git URL reference.
 // It contains the URL of the git repository,

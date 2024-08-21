@@ -16,18 +16,18 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-func VFSBillyFS(fsToWrap vfs.FileSystem) billy.Filesystem {
+func VFSBillyFS(fsToWrap vfs.FileSystem) (billy.Filesystem, error) {
 	if fsToWrap == nil {
 		fsToWrap = vfs.New(memoryfs.New())
 	}
 	fi, err := fsToWrap.Stat(".")
 	if err != nil || !fi.IsDir() {
-		panic(fmt.Errorf("invalid vfs: %v", err))
+		return nil, fmt.Errorf("invalid vfs for billy conversion: %w", err)
 	}
 
 	return &fs{
 		vfs: fsToWrap,
-	}
+	}, nil
 }
 
 type fs struct {

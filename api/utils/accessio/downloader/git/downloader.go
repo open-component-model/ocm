@@ -29,7 +29,6 @@ type CloseableDownloader interface {
 // Downloader simply uses the default HTTP client to download the contents of a URL.
 type Downloader struct {
 	cloneOpts *git.CloneOptions
-	grepOpts  *git.GrepOptions
 
 	matching *regexp.Regexp
 
@@ -52,7 +51,7 @@ func NewDownloader(url string, ref string, path string, auth techgit.AuthMethod)
 			Tags:          git.NoTags,
 			Depth:         0,
 		},
-		matching: regexp.MustCompile(fmt.Sprintf(`%s`, path)),
+		matching: regexp.MustCompile(path),
 		buf:      bytes.NewBuffer(make([]byte, 0, 4096)),
 		storage:  memory.NewStorage(),
 	}

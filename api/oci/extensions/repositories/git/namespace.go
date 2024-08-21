@@ -150,11 +150,12 @@ func GenerateCommitMessageForArtifact(operation Operation, artifact cpi.Artifact
 	a := artifact.Artifact()
 
 	var typ string
-	if artifact.IsManifest() {
+	switch {
+	case artifact.IsManifest():
 		typ = "manifest"
-	} else if artifact.IsIndex() {
+	case artifact.IsIndex():
 		typ = "index"
-	} else {
+	default:
 		typ = "artifact"
 	}
 
