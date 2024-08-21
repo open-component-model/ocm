@@ -1,10 +1,9 @@
 
 # Repository `GitRepository` - git based repository
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: GitRepository/v1
 ```
 
@@ -21,11 +20,13 @@ Supported specification version is `v1`.
 The type specific specification fields are:
 
 - **`url`** *string*
-    
-  URL of the git repository in the form of <url>@<ref>#<path> ^([^@#]+)(@[^#\n]+)?(#[^@\n]+)?
-  - url is the URL of the git repository
-  - ref is the git reference to checkout, if not specified, defaults to "HEAD"
-  - path is the path to the file or directory to use as the source, if not specified,defaults to the root of the repository.
+
+  URL of the git repository in any standard git URL format.
+  The schemes `http`, `https`, `git`, `ssh` and `file` are supported.
+
+- **`ref`** *string*
+
+  The git reference to use. This can be a branch, tag, or commit hash. The default is `HEAD`, pointing to the default branch of a repository in most implementations.
 
 ### Go Bindings
 

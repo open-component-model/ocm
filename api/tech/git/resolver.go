@@ -20,19 +20,13 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 )
 
-var worktreeBranch = plumbing.NewBranchReferenceName("ocm")
+var DefaultWorktreeBranch = plumbing.NewBranchReferenceName("ocm")
 
 type client struct {
 	opts ClientOptions
 
 	// vfs tracks the current filesystem where the repo will be stored (at the root)
 	vfs vfs.FileSystem
-
-	// url is the git URL of the repository
-	*gurl
-
-	// auth is the authentication method to use when accessing the repository
-	auth AuthMethod
 
 	// repo is a reference to the git repository if it is already open
 	repo   *git.Repository
@@ -49,7 +43,9 @@ type Client interface {
 
 type ClientOptions struct {
 	URL string
+	Ref string
 	Author
+	AuthMethod AuthMethod
 }
 
 type Author struct {
@@ -60,14 +56,18 @@ type Author struct {
 var _ Client = &client{}
 
 func NewClient(opts ClientOptions) (Client, error) {
-	gitURL, err := decodeGitURL(opts.URL)
-	if err != nil {
-		return nil, err
+	var pref plumbing.ReferenceName
+	if opts.Ref == "" {
+		pref = plumbing.HEAD
+	} else {
+		pref = plumbing.ReferenceName(opts.Ref)
+		if err := pref.Validate(); err != nil {
+			return nil, fmt.Errorf("invalid reference %q: %w", opts.Ref, err)
+		}
 	}
 
 	return &client{
 		vfs:  memoryfs.New(),
-		gurl: gitURL,
 		opts: opts,
 	}, nil
 }
@@ -93,10 +93,10 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 	repo, err := git.Open(strg, billyFS)
 	if errors.Is(err, git.ErrRepositoryNotExists) {
 		repo, err = git.CloneContext(ctx, strg, billyFS, &git.CloneOptions{
-			Auth:          c.auth,
-			URL:           c.url.String(),
+			Auth:          c.opts.AuthMethod,
+			URL:           c.opts.URL,
 			RemoteName:    git.DefaultRemoteName,
-			ReferenceName: c.ref,
+			ReferenceName: plumbing.ReferenceName(c.opts.Ref),
 			SingleBranch:  true,
 			Depth:         0,
 			Tags:          git.AllTags,
@@ -111,33 +111,7 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 		return nil, err
 	}
 	if newRepo {
-		if err := repo.FetchContext(ctx, &git.FetchOptions{
-			Auth:       c.auth,
-			RemoteName: git.DefaultRemoteName,
-			Depth:      0,
-			Tags:       git.AllTags,
-			Force:      false,
-		}); err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-			return nil, err
-		}
-		worktree, err := repo.Worktree()
-		if err != nil {
-			return nil, err
-		}
-
-		if err := worktree.Checkout(&git.CheckoutOptions{
-			Branch: worktreeBranch,
-			Create: true,
-			Keep:   true,
-		}); err != nil {
-			return nil, err
-		}
-
-		if err := worktree.AddGlob("*"); err != nil {
-			return nil, err
-		}
-
-		if _, err := worktree.Commit("OCM Repository Setup", &git.CommitOptions{}); err != nil && !errors.Is(err, git.ErrEmptyCommit) {
+		if err := c.newRepository(ctx, repo); err != nil {
 			return nil, err
 		}
 	}
@@ -149,6 +123,40 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 	c.repo = repo
 
 	return repo, nil
+}
+
+func (c *client) newRepository(ctx context.Context, repo *git.Repository) error {
+	if err := repo.FetchContext(ctx, &git.FetchOptions{
+		Auth:       c.opts.AuthMethod,
+		RemoteName: git.DefaultRemoteName,
+		Depth:      0,
+		Tags:       git.AllTags,
+		Force:      false,
+	}); err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return err
+	}
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+
+	if err := worktree.Checkout(&git.CheckoutOptions{
+		Branch: DefaultWorktreeBranch,
+		Create: true,
+		Keep:   true,
+	}); err != nil {
+		return err
+	}
+
+	if err := worktree.AddGlob("*"); err != nil {
+		return err
+	}
+
+	if _, err := worktree.Commit("OCM Repository Setup", &git.CommitOptions{}); err != nil && !errors.Is(err, git.ErrEmptyCommit) {
+		return err
+	}
+
+	return nil
 }
 
 func GetStorage(base billy.Filesystem) (storage.Storer, error) {
@@ -189,7 +197,7 @@ func (c *client) Refresh(ctx context.Context) error {
 	}
 
 	if err := worktree.PullContext(ctx, &git.PullOptions{
-		Auth:       c.auth,
+		Auth:       c.opts.AuthMethod,
 		RemoteName: git.DefaultRemoteName,
 	}); err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) && !errors.Is(err, transport.ErrEmptyRemoteRepository) {
 		return err
@@ -239,14 +247,14 @@ func (c *client) Update(ctx context.Context, msg string, push bool) error {
 func (c *client) Setup(system vfs.FileSystem) error {
 	c.vfs = system
 	if _, err := c.Repository(context.Background()); err != nil {
-		return fmt.Errorf("failed to setup repository %q: %w", c.url.String(), err)
+		return fmt.Errorf("failed to setup repository %q: %w", c.opts.URL, err)
 	}
 	return nil
 }
 
 func (c *client) Close(_ *accessobj.AccessObject) error {
 	if err := c.Update(context.Background(), "OCM Repository Update", true); err != nil {
-		return fmt.Errorf("failed to close repository %q: %w", c.url.String(), err)
+		return fmt.Errorf("failed to close repository %q: %w", c.opts.URL, err)
 	}
 	return nil
 }

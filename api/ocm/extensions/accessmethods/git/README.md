@@ -1,10 +1,9 @@
 
 # Access Method `git` - Git Commit Access
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: git/v1
 ```
 
@@ -36,7 +35,6 @@ The type specific specification fields are:
 - **`commit`** *string*
 
   The sha/id of the git commit
-
 
 ### Go Bindings
 

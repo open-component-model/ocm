@@ -2,18 +2,22 @@ package git_test
 
 import (
 	"embed"
-	_ "embed"
 	"fmt"
 	"io"
 	"os"
+	"time"
+
+	_ "embed"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/cwdfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 
 	"ocm.software/ocm/api/datacontext/attrs/tmpcache"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
@@ -61,7 +65,7 @@ var _ = Describe("Method", func() {
 			fileInRepo, err := os.OpenFile(
 				repoPath,
 				os.O_CREATE|os.O_RDWR|os.O_TRUNC,
-				0600,
+				0o600,
 			)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -75,7 +79,13 @@ var _ = Describe("Method", func() {
 		wt, err := repo.Worktree()
 		Expect(err).ToNot(HaveOccurred())
 		Expect(wt.AddGlob("*")).To(Succeed())
-		_, err = wt.Commit("OCM Test Commit", &git.CommitOptions{})
+		_, err = wt.Commit("OCM Test Commit", &git.CommitOptions{
+			Author: &object.Signature{
+				Name:  "OCM Test",
+				Email: "dummy@ocm.software",
+				When:  time.Now(),
+			},
+		})
 		Expect(err).ToNot(HaveOccurred())
 
 		accessSpec = me.New(
@@ -98,5 +108,4 @@ var _ = Describe("Method", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(content).To(Equal(expectedBlobContent))
 	})
-
 })

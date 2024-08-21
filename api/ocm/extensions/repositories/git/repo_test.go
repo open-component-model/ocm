@@ -7,6 +7,12 @@ import (
 	"path/filepath"
 	"regexp"
 
+	. "github.com/mandelsoft/goutils/finalizer"
+	. "github.com/mandelsoft/goutils/testutils"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	. "ocm.software/ocm/api/ocm/testhelper"
+
 	"github.com/go-git/go-billy/v5"
 	gitgo "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/cache"
@@ -14,16 +20,13 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/client"
 	"github.com/go-git/go-git/v5/plumbing/transport/server"
 	"github.com/go-git/go-git/v5/storage/filesystem"
-	. "github.com/mandelsoft/goutils/finalizer"
-	. "github.com/mandelsoft/goutils/testutils"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/cwdfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	"github.com/tonglil/buflogr"
+
 	"ocm.software/ocm/api/oci/artdesc"
 	gitrepo "ocm.software/ocm/api/oci/extensions/repositories/git"
 	"ocm.software/ocm/api/ocm"
@@ -33,7 +36,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/componentmapping"
 	"ocm.software/ocm/api/ocm/extensions/repositories/git"
-	. "ocm.software/ocm/api/ocm/testhelper"
 	techgit "ocm.software/ocm/api/tech/git"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess"
@@ -49,7 +51,6 @@ const (
 )
 
 var _ = Describe("access method", func() {
-
 	// remoteFS contains the remote repository on the filesystem
 	// pathFS contains the local PWD
 	// repFS contains the local representation of the repository, meaning the cloned repo to work on the Repository
@@ -72,7 +73,7 @@ var _ = Describe("access method", func() {
 		basePath := GinkgoT().TempDir()
 		baseFS := Must(cwdfs.New(osfs.New(), basePath))
 		for _, dir := range []string{"remote", "path", "rep"} {
-			Expect(os.Mkdir(filepath.Join(basePath, dir), 0777)).To(Succeed())
+			Expect(os.Mkdir(filepath.Join(basePath, dir), 0o777)).To(Succeed())
 		}
 		remoteFS = Must(projectionfs.New(baseFS, "remote"))
 		pathFS = Must(projectionfs.New(baseFS, "path"))

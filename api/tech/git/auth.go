@@ -3,12 +3,12 @@ package git
 import (
 	"errors"
 
-	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/git/identity"
-
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	gssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
+
+	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/credentials/builtin/git/identity"
 )
 
 var ErrNoValidGitCredentials = errors.New("no valid credentials found for git authentication")

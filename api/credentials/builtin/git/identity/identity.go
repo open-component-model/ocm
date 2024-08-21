@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	giturls "github.com/whilp/git-urls"
+
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/utils/listformat"
