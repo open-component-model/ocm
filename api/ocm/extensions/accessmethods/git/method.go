@@ -3,7 +3,6 @@ package git
 import (
 	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/mandelsoft/goutils/errors"
@@ -15,7 +14,6 @@ import (
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/utils/accessio"
-	"ocm.software/ocm/api/utils/accessio/downloader"
 	"ocm.software/ocm/api/utils/accessio/downloader/git"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -45,9 +43,6 @@ type AccessSpec struct {
 
 	// PathSpec is a path in the repository to download, can be a file or a regex matching multiple files
 	PathSpec string `json:"pathSpec"`
-
-	client     *http.Client
-	downloader downloader.Downloader
 }
 
 // AccessSpecOptions defines a set of options which can be applied to the access spec.

@@ -79,7 +79,10 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 		return c.repo, nil
 	}
 
-	billyFS := VFSBillyFS(c.vfs)
+	billyFS, err := VFSBillyFS(c.vfs)
+	if err != nil {
+		return nil, err
+	}
 
 	strg, err := GetStorage(billyFS)
 	if err != nil {
