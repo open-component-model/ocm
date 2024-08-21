@@ -169,3 +169,5 @@ Therefore the context attribute `clicfgattr.Get(ctx)` is used. It can be set via
 The logging configuration is extracted from the configured configuration object with target type `*logging.LoggingConfiguration`.
 
 If the code uses an OCM context configured with a `(ocm)utils.ConfigureXXX` function, the cli config attribute is set accordingly.
+
+
