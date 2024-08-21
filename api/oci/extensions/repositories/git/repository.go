@@ -2,6 +2,7 @@ package git
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -32,7 +33,7 @@ var (
 	_ credentials.ConsumerIdentityProvider = &RepositoryImpl{}
 )
 
-func New(ctx cpi.Context, spec *RepositorySpec) (Repository, error) {
+func New(ctx cpi.Context, spec *RepositorySpec, creds credentials.Credentials) (Repository, error) {
 	urs := spec.UniformRepositorySpec()
 	i := &RepositoryImpl{
 		RepositoryImplBase: cpi.NewRepositoryImplBase(ctx),
@@ -40,9 +41,19 @@ func New(ctx cpi.Context, spec *RepositorySpec) (Repository, error) {
 		spec:               spec,
 	}
 
+	opts := spec.ToClientOptions()
+
+	if creds != nil {
+		auth, err := git.AuthFromCredentials(creds)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create git authentication from given credentials: %w", err)
+		}
+		opts.AuthMethod = auth
+	}
+
 	var err error
-	if i.client, err = git.NewClient(spec.ToClientOptions()); err != nil {
-		return nil, err
+	if i.client, err = git.NewClient(opts); err != nil {
+		return nil, fmt.Errorf("failed to create new git client for interacting with the repository: %w", err)
 	}
 
 	repo, err := ctf.New(ctx, &ctf.RepositorySpec{
@@ -50,7 +61,7 @@ func New(ctx cpi.Context, spec *RepositorySpec) (Repository, error) {
 		AccessMode:      spec.AccessMode,
 	}, i.client, i.client, vfs.FileMode(0o770))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create new ctf repository within the git repository: %w", err)
 	}
 	i.ctf = repo
 

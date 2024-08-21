@@ -14,8 +14,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/memory"
-	techgit "ocm.software/ocm/api/tech/git"
 
+	techgit "ocm.software/ocm/api/tech/git"
 	"ocm.software/ocm/api/utils/accessio/downloader"
 )
 

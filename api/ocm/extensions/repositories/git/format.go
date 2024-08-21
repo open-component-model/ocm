@@ -1,10 +1,9 @@
 package git
 
 import (
-	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-
 	"ocm.software/ocm/api/oci/extensions/repositories/git"
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
 	"ocm.software/ocm/api/utils/accessobj"
 )

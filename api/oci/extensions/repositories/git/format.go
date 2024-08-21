@@ -12,7 +12,7 @@ func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, url string, opts Op
 	if err != nil {
 		return nil, err
 	}
-	return New(cpi.FromProvider(ctx), spec)
+	return New(cpi.FromProvider(ctx), spec, nil)
 }
 
 func Create(ctx cpi.ContextProvider, acc accessobj.AccessMode, url string, opts Options) (Repository, error) {
