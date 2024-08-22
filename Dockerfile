@@ -14,10 +14,10 @@ RUN --mount=type=cache,target=/root/.cache/go-build go mod download
 
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
-	export VERSION=$(go run pkg/version/generate/release_generate.go print-rc-version) && \
+	export VERSION=$(go run api/version/generate/release_generate.go print-rc-version) && \
     export NOW=$(date -u +%FT%T%z) && \
     go build -trimpath -ldflags \
-    "-s -w -X github.com/open-component-model/ocm/pkg/version.gitVersion=$VERSION -X github.com/open-component-model/ocm/pkg/version.buildDate=$NOW" \
+    "-s -w -X ocm.software/ocm/api/version.gitVersion=$VERSION -X ocm.software/ocm/api/version.buildDate=$NOW" \
     -o /bin/ocm ./cmds/ocm/main.go
 
 FROM alpine:${ALPINE_VERSION}
