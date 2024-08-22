@@ -141,10 +141,6 @@ An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/
 
 More comprehensive examples can be taken from the [`components`](components) contained in this repository. [Here](components/helmdemo/README.md) a complete component build including a multi-arch image is done and finally packaged into a CTF archive which can be transported into an OCI repository. See the readme files for details.
 
-## GPG Public Key
-
-The authenticity of released packages that have been uploaded to public repositories can be verified using our GPG public key. You can find the key in the file [OCM-RELEASES-PUBLIC.gpg](./OCM-RELEASES-PUBLIC.gpg) in this repository.
-
 ## Contributing
 
 Code contributions, feature requests, bug reports, and help requests are very welcome. Please refer to the [Contributing Guide in the Community repository](https://github.com/open-component-model/community/blob/main/CONTRIBUTING.md) for more information on how to contribute to OCM.

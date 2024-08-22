@@ -112,7 +112,6 @@ gomega
 goreleaser
 gosec
 goutils
-gpg
 groupid
 gzip
 handleoutput
