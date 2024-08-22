@@ -90,3 +90,21 @@ brews:
     description: "The OCM CLI makes it easy to create component versions and embed them in build processes."
     test: |
       system "#{bin}/ocm --version"
+nfpms:
+  - id: debian
+    package_name: ocm-cli
+    builds: [linux]
+    vendor: "Open Component Model"
+    homepage: "https://ocm.software/"
+    maintainer: "OCM Project <open-component-model@noreply.github.com>"
+    description: "The OCM CLI makes it easy to create component versions and embed them in build processes."
+    license: "Apache-2.0"
+    formats:
+      - deb
+      - archlinux
+    bindir: "/usr/bin"
+    deb:
+      signature:
+        # PGP secret key file path (can also be ASCII-armored).
+        # Signing key passphrases comes from $NFPM_PASSPHRASE.
+        key_file: "{{ .Env.GPG_KEY_PATH }}"
