@@ -63,7 +63,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          # supported platforms of https://hub.docker.com/_/golang/tags?page=1&name=1.22-alpine3.19
+          # supported platforms of https://hub.docker.com/_/golang/tags?page=1&name=1.23-alpine3.20
           # platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x
           push: true
           tags: |

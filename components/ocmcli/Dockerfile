@@ -1,6 +1,6 @@
 # This Dockerfile is used by `make` via the Makefile
 
-ARG ALPINE_VERSION
+ARG ALPINE_VERSION="3.20.2"
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION}
 
 # Create group and user
