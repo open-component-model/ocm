@@ -2,8 +2,6 @@ package genericocireg
 
 import (
 	"fmt"
-	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/utils/runtime"
 	"path"
 	"strings"
 
@@ -15,6 +13,7 @@ import (
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/compdesc"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/cpi/repocpi"
@@ -29,6 +28,7 @@ import (
 	"ocm.software/ocm/api/utils/errkind"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 // newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact acess is closed.
