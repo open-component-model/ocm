@@ -20,10 +20,16 @@ const BlobsDirectoryName = "blobs"
 
 var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
 	DescriptorFileName:       ComponentDescriptorFileName,
-	ObjectTypeName:           "artifactset",
+	ObjectTypeName:           "component archive",
 	ElementDirectoryName:     BlobsDirectoryName,
 	ElementTypeName:          "blob",
 	DescriptorHandlerFactory: NewStateHandler,
+	DescriptorValidator:      validateDescriptor,
+}
+
+func validateDescriptor(data []byte) error {
+	_, err := compdesc.Decode(data)
+	return err
 }
 
 type Object = ComponentArchive

@@ -26,8 +26,26 @@ type IntermediateRepositorySpecAspect = oci.IntermediateRepositorySpecAspect
 type RepositorySpec interface {
 	runtime.VersionedTypedObject
 
+	// AsUniformSpec transforms the specification object
+	// into a uniform repository spec as provided by
+	// the string based parsing for repository/component/version
+	// notations. The provided spec MUST be convertable again
+	// into a repository spec with the same meaning
+	// by registering an appropriate RepositorySpecHandler.
 	AsUniformSpec(Context) *UniformRepositorySpec
+
+	// Repository provides a repository implementation for the
+	// repository specification. This repository can then be used
+	// to access component versions in the technical OCM repository
+	// described by the repository specification.
 	Repository(Context, credentials.Credentials) (Repository, error)
+
+	// Validate can be used to execute a type specific validation for
+	// a repository specification. It should check the consistency of the
+	// specified spec fields as well as the connectivity to the repository
+	// as far as this is possible without a concrete component/version
+	// in mind.
+	Validate(Context, credentials.Credentials, ...credentials.UsageContext) error
 }
 
 type (
@@ -93,6 +111,10 @@ func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Re
 	return nil, errors.ErrUnknown("repository type", r.GetType())
 }
 
+func (r *UnknownRepositorySpec) Validate(ctx Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
+	return errors.ErrUnknown("repository type", r.GetType())
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type GenericRepositorySpec struct {
@@ -153,6 +175,14 @@ func (s *GenericRepositorySpec) Repository(ctx Context, creds credentials.Creden
 		return nil, err
 	}
 	return spec.Repository(ctx, creds)
+}
+
+func (s *GenericRepositorySpec) Validate(ctx Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
+	spec, err := s.Evaluate(ctx)
+	if err != nil {
+		return err
+	}
+	return spec.Validate(ctx, creds)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
