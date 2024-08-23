@@ -1,54 +1,54 @@
 package options
 
-// HintOption.
+// HintOption .
 var HintOption = RegisterOption(NewStringOptionType("hint", "(repository) hint for local artifacts"))
 
-// MediatypeOption.
+// MediatypeOption .
 var MediatypeOption = RegisterOption(NewStringOptionType("mediaType", "media type for artifact blob representation"))
 
-// SizeOption.
+// SizeOption .
 var SizeOption = RegisterOption(NewIntOptionType("size", "blob size"))
 
-// DigestOption.
+// DigestOption .
 var DigestOption = RegisterOption(NewStringOptionType("digest", "blob digest"))
 
-// ReferenceOption.
+// ReferenceOption .
 var ReferenceOption = RegisterOption(NewStringOptionType("reference", "reference name"))
 
-// PackageOption.
+// PackageOption .
 var PackageOption = RegisterOption(NewStringOptionType("accessPackage", "package or object name"))
 
-// ArtifactOption.
+// ArtifactOption .
 var ArtifactOption = RegisterOption(NewStringOptionType("artifactId", "maven artifact id"))
 
-// GroupOption.
+// GroupOption .
 var GroupOption = RegisterOption(NewStringOptionType("groupId", "maven group id"))
 
-// RepositoryOption.
+// RepositoryOption .
 var RepositoryOption = RegisterOption(NewStringOptionType("accessRepository", "repository URL"))
 
-// RegistryOption.
+// RegistryOption .
 var RegistryOption = RegisterOption(NewStringOptionType("accessRegistry", "registry base URL"))
 
-// HostnameOption.
+// HostnameOption .
 var HostnameOption = RegisterOption(NewStringOptionType("accessHostname", "hostname used for access"))
 
-// CommitOption.
+// CommitOption .
 var CommitOption = RegisterOption(NewStringOptionType("commit", "git commit id"))
 
-// GlobalAccessOption.
+// GlobalAccessOption .
 var GlobalAccessOption = RegisterOption(NewValueMapYAMLOptionType("globalAccess", "access specification for global access"))
 
-// RegionOption.
+// RegionOption .
 var RegionOption = RegisterOption(NewStringOptionType("region", "region name"))
 
-// BucketOption.
+// BucketOption .
 var BucketOption = RegisterOption(NewStringOptionType("bucket", "bucket name"))
 
-// VersionOption.
+// VersionOption .
 var VersionOption = RegisterOption(NewStringOptionType("accessVersion", "version for access specification"))
 
-// URLOption.
+// URLOption .
 var URLOption = RegisterOption(NewStringOptionType("url", "artifact or server url"))
 
 var HTTPHeaderOption = RegisterOption(NewStringSliceMapColonOptionType("header", "http headers"))
@@ -59,7 +59,7 @@ var HTTPBodyOption = RegisterOption(NewStringOptionType("body", "body of a http 
 
 var HTTPRedirectOption = RegisterOption(NewBoolOptionType("noredirect", "http redirect behavior"))
 
-// CommentOption.
+// CommentOption .
 var CommentOption = RegisterOption(NewStringOptionType("comment", "comment field value"))
 
 // ClassifierOption the optional classifier of a maven resource.
@@ -67,3 +67,12 @@ var ClassifierOption = RegisterOption(NewStringOptionType("classifier", "maven c
 
 // ExtensionOption the optional extension of a maven resource.
 var ExtensionOption = RegisterOption(NewStringOptionType("extension", "maven extension name"))
+
+// NPMRegistryOption sets the registry of the npm resource.
+var NPMRegistryOption = RegisterOption(NewStringOptionType("registry", "npm package registry"))
+
+// NPMPackageOption sets what package should be fetched from the npm registry.
+var NPMPackageOption = RegisterOption(NewStringOptionType("package", "npm package name"))
+
+// NPMVersionOption sets the version of the npm package.
+var NPMVersionOption = RegisterOption(NewStringOptionType("version", "npm package version"))
