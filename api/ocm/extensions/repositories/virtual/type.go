@@ -16,6 +16,8 @@ type RepositorySpec struct {
 	Access Access `json:"-"`
 }
 
+var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
+
 func NewRepositorySpec(acc Access) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedTypedObject: runtime.NewVersionedTypedObject(Type),
@@ -31,4 +33,6 @@ func (r *RepositorySpec) Repository(ctx cpi.Context, credentials credentials.Cre
 	return NewRepository(ctx, r.Access), nil
 }
 
-var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
+func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, context ...credentials.UsageContext) error {
+	return nil
+}
