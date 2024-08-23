@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/ocm"
@@ -97,12 +99,15 @@ func MergeLabels(log logging.Logger, ctx ocm.Context, s metav1.Labels, t *metav1
 }
 
 func MergeLabel(ctx ocm.Context, s metav1.Label, t *metav1.Label) error {
-	r := valuemergehandler.Value{t.Value}
+	if t.Value == nil && t.Access != nil {
+		return fmt.Errorf("merging with an access is not yet supported for label %s", t.Name)
+	}
+	r := valuemergehandler.Value{RawMessage: t.Value}
 	v := t.Version
 	if v == "" {
 		v = "v1"
 	}
-	mod, err := valuemergehandler.Merge(ctx, t.Merge, hpi.LabelHint(t.Name, v), runtime.RawValue{s.Value}, &r)
+	mod, err := valuemergehandler.Merge(ctx, t.Merge, hpi.LabelHint(t.Name, v), runtime.RawValue{RawMessage: s.Value}, &r)
 	if mod {
 		t.Value = r.RawMessage
 	}

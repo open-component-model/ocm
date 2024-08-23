@@ -44,7 +44,7 @@ func (cd *ComponentDescriptor) Equivalent(o *ComponentDescriptor) equivalent.Equ
 func EquivalentElems(a ElementAccessor, b ElementAccessor) equivalent.EqualState {
 	state := equivalent.StateEquivalent()
 
-	// Equivaluent of elements handles nil to provide state accoding to it
+	// Equivalent of elements handles nil to provide state according to its
 	// relevance for the signature.
 	for i := 0; i < a.Len(); i++ {
 		ea := a.Get(i)

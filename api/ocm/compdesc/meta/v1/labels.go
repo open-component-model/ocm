@@ -2,12 +2,14 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"regexp"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/opencontainers/go-digest"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-
+	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/api/utils/runtime"
@@ -17,6 +19,14 @@ const (
 	KIND_LABEL                 = "label"
 	KIND_VALUE_MERGE_ALGORITHM = "label merge algorithm"
 )
+
+// LabelAccessSpec is similar to Resource access spec. It allows blob access defined in a Label.
+// Note: The reason for this to be used instead of compdesc access or the internal access is
+// because all packages use metav1 package, so no matter where we would move that interface
+// we would run into a circular import that is not allowed.
+type LabelAccessSpec interface {
+	runtime.VersionedTypedObject
+}
 
 type MergeAlgorithmSpecification struct {
 	// Algorithm optionally described the Merge algorithm used to
@@ -54,7 +64,14 @@ type Label struct {
 	// Value is the json/yaml data of the label
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
-	Value json.RawMessage `json:"value"`
+	// +optional
+	Value json.RawMessage `json:"value,omitempty"`
+	// Value is the json/yaml data of the label
+	// +optional
+	Access LabelAccessSpec `json:"access,omitempty"`
+
+	// Digest
+	Digest digest.Digest `json:"digest,omitempty"`
 
 	// Version is the optional specification version of the attribute value
 	Version string `json:"version,omitempty"`
@@ -75,6 +92,32 @@ func (in *Label) DeepCopyInto(out *Label) {
 // GetValue returns the label value with the given name as parsed object.
 func (in *Label) GetValue(dest interface{}) error {
 	return json.Unmarshal(in.Value, dest)
+}
+
+// TODO: Make this work...
+func (in *Label) GetBlobValue(acc ocm.ComponentVersionAccess) ([]byte, error) {
+	ctx := acc.GetContext()
+	blobAccess, err := ctx.AccessSpecForSpec(in.Access)
+	if err != nil {
+		return nil, fmt.Errorf("failed to construct access spec for label %s: %w", in.Name, err)
+	}
+
+	// TODO: Q: are we supporting none local blobs?
+	if !blobAccess.IsLocal(ctx) {
+		return nil, fmt.Errorf("label blob %s is not local", in.Name)
+	}
+
+	method, err := blobAccess.AccessMethod(acc)
+	if err != nil {
+		return nil, fmt.Errorf("failed to construct access method for label %s: %w", in.Name, err)
+	}
+
+	blob, err := method.Get()
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve blob content for label %s: %w", in.Name, err)
+	}
+
+	return blob, nil
 }
 
 // SetValue sets the label value by marshalling the given object.
@@ -262,12 +305,19 @@ func (l Labels) Equivalent(o Labels) equivalent.EqualState {
 }
 
 // AsMap return an unmarshalled map representation.
-func (l *Labels) AsMap() map[string]interface{} {
+func (l *Labels) AsMap(acc ocm.ComponentVersionAccess) map[string]interface{} {
 	labels := map[string]interface{}{}
 	if l != nil {
 		for _, label := range *l {
 			var m interface{}
-			json.Unmarshal(label.Value, &m)
+			switch {
+			case label.Value != nil:
+				json.Unmarshal(label.Value, &m)
+			case label.Access != nil:
+				blob, _ := label.GetBlobValue(acc)
+				json.Unmarshal(blob, &m)
+			}
+
 			labels[label.Name] = m
 		}
 	}

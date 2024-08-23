@@ -174,7 +174,7 @@ func getCVAttrs(cv ocm.ComponentVersionAccess) map[string]interface{} {
 	}
 	json.Unmarshal(data, &provider)
 
-	labels := cv.GetDescriptor().Labels.AsMap()
+	labels := cv.GetDescriptor().Labels.AsMap(cv)
 
 	values := map[string]interface{}{}
 	values["name"] = cv.GetName()
