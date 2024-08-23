@@ -16,7 +16,6 @@ var _ = Describe("Input Type", func() {
 		env = NewInputTest(npm.TYPE)
 	})
 
-	// TODO: try out a file based NPM registry for testing.
 	It("simple fetch", func() {
 		env.Set(options.RegistryOption, "https://registry.npmjs.org")
 		env.Set(options.PackageOption, "yargs")
