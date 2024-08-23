@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm clean [<options>] <sub command> ...
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for clean
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

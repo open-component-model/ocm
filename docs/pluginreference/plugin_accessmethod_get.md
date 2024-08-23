@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```bash
 plugin accessmethod get [<flags>] <access spec> [<options>]
 ```
 
 ### Options
 
-```
+```text
   -C, --credential <name>=<value>   dedicated credential value (default [])
   -c, --credentials YAML            credentials
   -h, --help                        help for get
@@ -16,13 +16,11 @@ plugin accessmethod get [<flags>] <access spec> [<options>]
 
 ### Description
 
-
 Evaluate the given access specification and return the described blob on
 *stdout*.
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin accessmethod](plugin_accessmethod.md)	 &mdash; access method operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin

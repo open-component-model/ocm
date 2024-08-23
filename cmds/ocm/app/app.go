@@ -108,7 +108,7 @@ The following configuration sources are used:
 ` + defaultconfigregistry.Description() + `
 
 With the option <code>--cred</code> it is possible to specify arbitrary credentials
-for various environments on the command line. Nevertheless it is always preferrable
+for various environments on the command line. Nevertheless it is always preferable
 to use the cli config file.
 Every credential setting is related to a dedicated consumer and provides a set of
 credential attributes. All this can be specified by a sequence of <code>--cred</code>

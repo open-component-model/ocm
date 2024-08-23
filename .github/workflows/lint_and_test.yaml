@@ -39,8 +39,8 @@ jobs:
         run: |
           PATH=$PATH:$(go env GOPATH)/bin make build install-requirements test
 
-  lint:
-    name: Lint
+  go-lint:
+    name: Lint Golang
     runs-on: large_runner
     steps:
       - name: Checkout

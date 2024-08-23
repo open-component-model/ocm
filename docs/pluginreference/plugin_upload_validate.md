@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```bash
 plugin upload validate [<flags>] <name> <spec> [<options>]
 ```
 
 ### Options
 
-```
+```text
   -a, --artifactType string   artifact type of input blob
   -h, --help                  help for validate
   -m, --mediaType string      media type of input blob
@@ -16,9 +16,8 @@ plugin upload validate [<flags>] <name> <spec> [<options>]
 
 ### Description
 
-
 This command accepts a target specification as argument. It is used to
-validate the specification for the specified upoader and to provide some
+validate the specification for the specified uploader and to provide some
 metadata for the given specification.
 
 This metadata has to be provided as JSON document string on *stdout* and has the
@@ -30,10 +29,9 @@ following fields:
   underlying repository. If specified, at least the <code>type</code> field must
   be set.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin upload](plugin_upload.md)	 &mdash; upload specific operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin

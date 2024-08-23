@@ -1,7 +1,8 @@
 # Basic Usage of OCM Repositories
+
 {{getting-started}}
 
-This [tour](example.go) illustrates the basic usage of the API to
+This [tour](/examples/lib/tour/01-getting-started/example.go) illustrates the basic usage of the API to
 access component versions in an OCM repository.
 
 ## Running the example
@@ -16,10 +17,11 @@ version: 0.1.0
 ```
 
 {{getting-started-walkthrough}}
+
 ## Walkthrough
 
 The basic entry point for using the OCM library is always
-an [OCM Context object](../../contexts.md). It bundles all
+an [OCM Context object](/examples/lib/contexts.md). It bundles all
 configuration settings and type registrations, like
 access methods, repository types, etc, and
 configuration settings, like credentials,
@@ -130,7 +132,7 @@ and the resources described by the component version.
 This results in the following output (the shown version might
 differ, because the code always describes the latest version):
 
-```
+```text
 {{execute}{go}{run}{../../01-getting-started}{<extract>}{version}}
 ```
 
@@ -198,7 +200,7 @@ closing the reader, again
 {{include}{../../01-getting-started/example.go}{closing reader}}
 ```
 
-Now, we just read the content and copy it to the intended 
+Now, we just read the content and copy it to the intended
 output file (`/tmp/ocmcli`).
 
 ```go

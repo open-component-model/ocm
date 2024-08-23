@@ -1,7 +1,6 @@
-
 # *Common Transport Format*
 
-The *Common Transport Format* describes a file system structure that can be 
+The *Common Transport Format* describes a file system structure that can be
 used for the representation of [content](https://github.com/opencontainers/image-spec)
 of an OCI repository.
 
@@ -18,7 +17,7 @@ It is a directory containing
 - **`blobs`** *directory*
 
   The *blobs* directory contains the blobs described by the
-  _artifact index_ as a flat file list. These are layer blobs or artifact
+  *artifact index* as a flat file list. These are layer blobs or artifact
   blobs for the artifact descriptors. Every file has a filename according
   to its [digest](https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests).
   Hereby the algorithm separator character is replaced by a dot (".").
@@ -29,7 +28,6 @@ It is a directory containing
   The artifact index describes the OCI manifests (image manifests and index
   manifests), which refer to further non-manifest blobs.
   Files not referenced by the artifacts described by the index are ignored.
-  
 
 This format might be used in various technical forms: as structure of an
 operating system file system, a virtual file system or as content of
@@ -38,7 +36,7 @@ an archive file. The descriptor SHOULD be the first file if stored in an archive
 ## *Artifact Index*
 
 The *Artifact Index* is a JSON file describing the artifact content in
-a file system structure according to this specification. 
+a file system structure according to this specification.
 
 ### *Artifact Index* Property Descriptions
 
@@ -48,11 +46,10 @@ It contains the following properties.
 
   This REQUIRED property specifies the index schema version.
   For this version of the specification, this MUST be `1`. The value of this
-  field will not change. This field MAY be removed in a future version of the 
+  field will not change. This field MAY be removed in a future version of the
   specification.
 
 - **`index`** *[artifact](#artifact-property-descriptions)*
-
 
 ### *Artifact* Property Descriptions
 
@@ -62,13 +59,13 @@ The following fields contain the properties that constitute an *Artifact*:
 
 - **`repository`** *string*
 
-  This REQUIRED property is the _repository_ name of the targeted artifact described by the
+  This REQUIRED property is the *repository* name of the targeted artifact described by the
   *Common Transport Format*,  conforming to the requirements outlined in the
   [OCI Distribution Specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md).
 
 - **`digest`** *string*
 
-  This REQUIRED property is the _digest_ of the targeted artifact blob in the targeted
+  This REQUIRED property is the *digest* of the targeted artifact blob in the targeted
   artifact set, conforming to the requirements outlined in
   [Digests](https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests).
   Retrieved content SHOULD be verified against this digest when consumed via
@@ -76,13 +73,12 @@ The following fields contain the properties that constitute an *Artifact*:
 
 - **`tag`** *string*
 
-  This optional property is the _tag_ of the targeted artifact, conforming to 
+  This optional property is the *tag* of the targeted artifact, conforming to
   the requirements outlined in the
   [OCI Distribution Specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md).
 
   There might be multiple entries in the artifact list referring to the same artifact
   with different tags. But all used tags for a repository must be unique.
-  
 
 ## *Artifact Set Archive* Format
 
@@ -107,7 +103,7 @@ The file structure is a directory containing
 
   The *blobs* directory contains the blobs described by the artifact set descriptor
   as a flat file list. Every file has a filename according to its
-  [digest](https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests). 
+  [digest](https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests).
   Hereby the algorithm separator character is replaced by a dot (".").
   Every file SHOULD be referenced in the artifact descriptor by a
   [descriptor according the OCI Image Specification](https://github.com/opencontainers/image-spec/blob/main/descriptor.md).
@@ -128,7 +124,7 @@ set for any described artifact in the annotations attribute of the manifest
 list entries:
 
 - **`software.ocm/tags`**
-  
+
   This annotation can be used to describe a comma-separated list of tags.
   that should be added for this index entry, when imported into an OCI registry.
 
@@ -142,11 +138,11 @@ For the annotations of the index itself the following keys are defined:
 
   This annotation describes the digest of the main artifact of the set, if used
   as blob format for an artifact
-  
+
 This way the format can be used to attach elements according to various extension
 models for the OCI specification:
 
- - *[cosign](https://github.com/sigstore/cosign)*
+- *[cosign](https://github.com/sigstore/cosign)*
 
    For *cosign* additional signatures are represented as dedicated artifacts
    with special tags establishing the relation to the original artifact they
@@ -155,11 +151,11 @@ models for the OCI specification:
    This is supported by this format by providing a possibility to describe
    additional tags by an annotation in the index
 
- - [*ORAS*](https://github.com/oras-project/artifacts-spec)
+- [*ORAS*](https://github.com/oras-project/artifacts-spec)
 
-   Here a new third top-level manifest type is introduced, that can be 
+   Here a new third top-level manifest type is introduced, that can be
    stored via the manifest endpoint of the distribution spec. No additional
    tags are required, the relation to the annotated object is established
-   by a dedicated digest based field. Those artifacts can directly be 
+   by a dedicated digest based field. Those artifacts can directly be
    described by this format. But language bindings basically have to support
    this additional type.

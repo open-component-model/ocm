@@ -55,7 +55,7 @@ func UsingCredentialsRepositories(cfg *helper.Config) error {
 
 	// The docker config is such a case, so we can instruct the
 	// repository to automatically propagate appropriate the consumer id
-	// mappings. This feature is typically enabled by a dedicated specfication
+	// mappings. This feature is typically enabled by a dedicated specification
 	// option.
 
 	// --- begin propagation ---

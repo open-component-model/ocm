@@ -6,7 +6,7 @@ Format based directory or archive. Here, no credentials
 are required. The basic content handling is identical
 to the [OCI-based OCM example](creds.md).
 
-## Creating a CTF 
+## Creating a CTF
 
 A transport file can be created in a virtual filesystem.
 The simplest way is just to use the OS filesystem `osfs.New()`,

@@ -1,7 +1,8 @@
 # `mvn` - Maven artifacts (Java packages, jars) in a Maven (mvn) repository (e.g. mvnrepository.com)
 
-### Synopsis
-```
+## Synopsis
+
+```yaml
 type: mvn/v1
 ```
 
@@ -9,8 +10,8 @@ Provided blobs use the following media type: `application/x-tgz`
 
 ### Description
 
-This method implements the access of a resource hosted by a maven repository or a 
-complete resource set denoted by a GAV (GroupId, ArtifactId, Version). 
+This method implements the access of a resource hosted by a maven repository or a
+complete resource set denoted by a GAV (GroupId, ArtifactId, Version).
 
 ### Specification Versions
 
@@ -44,8 +45,8 @@ The type specific specification fields are:
 
   The optional extension of the Maven (mvn) artifact
 
-If classifier/extension is given a dedicated resource is described, 
-otherwise the complete resource set described by a GAV. 
+If classifier/extension is given a dedicated resource is described,
+otherwise the complete resource set described by a GAV.
 Only complete resource sets can be uploaded again to a Maven repository.
 
 #### Examples
@@ -86,7 +87,7 @@ resources:
     access:
       type: mvn
       repository: https://repo1.maven.org/maven2
-      groupId: com.sap.cloud.sdk      
+      groupId: com.sap.cloud.sdk
       artifactId: sdk-modules-bom
       version: 5.7.0
       classifier: ''

@@ -2,25 +2,23 @@
 
 ### Synopsis
 
-```
+```bash
 plugin upload [<options>] <sub command> ...
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for upload
 ```
 
 ### Description
 
-
 This command group provides all commands used to implement an uploader
 described by an uploader descriptor.
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 

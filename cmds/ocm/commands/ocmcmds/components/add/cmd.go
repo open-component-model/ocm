@@ -146,7 +146,7 @@ entry can be used to specify a dedicated serialization format to use for the
 component descriptor. If given it overrides the <code>--schema</code> option
 of the command. By default, v2 is used.
 
-Various elements support to add arbirary information by using labels
+Various elements support to add arbitrary information by using labels
 (see <CMD>ocm ocm-labels</CMD>).
 `,
 	}

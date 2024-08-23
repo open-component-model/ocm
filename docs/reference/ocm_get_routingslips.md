@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm get routingslips [<options>]  <component> {<name>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 routingslips, routingslip, rs
 ```
 
 ### Options
 
-```
+```text
       --all-columns               show all table columns
   -c, --constraints constraints   version constraint
       --fail-on-error             fail on validation error
@@ -28,7 +28,6 @@ routingslips, routingslip, rs
 ```
 
 ### Description
-
 
 Get all or the selected routing slips for a component version specification.
 
@@ -101,10 +100,9 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

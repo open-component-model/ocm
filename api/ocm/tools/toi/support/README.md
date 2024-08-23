@@ -1,4 +1,4 @@
-### Support for TOI Executors
+# Support for TOI Executors
 
 This package provides a generic command line tool support to provide
 TOI executor CLIs.
@@ -17,7 +17,7 @@ func(options *ExecutorOptions) error
 </pre>
 </center>
 
- which already reolves all those dependencies by providing an
+ which already resolves all those dependencies by providing an
  [ExecutorOptions](support.go#:~:text=type%20ExecutorOptions%20struct,%7D)
  object with the prepared contract data, including access to to
  the `ocm.ComponentVersionAccess` of the component version providing
@@ -38,12 +38,10 @@ func(options *ExecutorOptions) error
 
      func main() {
         ctx:=clictx.New()
-        // special configuration of the context. e.g. setting a virstual filesystem
+        // special configuration of the context. e.g. setting a virtual filesystem
         c := support.NewCLICommand(ctx.OCMContext(), "your executor name", yourpackage.ExecutorFunction)
         if err := c.Execute(); err != nil {
             os.Exit(1)
         }
      }
  </pre>
-
-

@@ -1,0 +1,6 @@
+default: true
+
+MD013: false #Line length - https://github.com/DavidAnson/markdownlint/blob/HEAD/doc/Rules.md#md013
+MD033: false #Inline HTML - https://github.com/DavidAnson/markdownlint/blob/HEAD/doc/Rules.md#md033
+MD024:
+  siblings_only: true #Multiple headers with the same content

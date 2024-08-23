@@ -3,7 +3,9 @@
 <!-- from ../docsrc/05-transporting-component-versions/README.md -->
 # Transporting Component Versions
 
-This [tour](example.go) illustrates the basic support for
+<a id="transport"></a>
+
+This [tour](/examples/lib/tour/05-transporting-component-versions/example.go) illustrates the basic support for
 transporting content from one environment into another.
 
 ## Running the example
@@ -23,7 +25,7 @@ password:
 ```
 
 Any supported kind of target repository can be specified by using its
-specification type. An OCI regisztry target would look like this:
+specification type. An OCI registry target would look like this:
 
 ```yaml
 repository: ghcr.io/mandelsoft/ocm
@@ -35,9 +37,9 @@ targetRepository:
 ocmConfig: <config file>
 ```
 
-The actual version of the example just works with the file system 
+The actual version of the example just works with the file system
 target, because it is not possible to specify credentials for the
-target repository in this simple config file. But, if you specify an [OCM config file](../04-working-with-config/README.md#standard-configuration-file) you can
+target repository in this simple config file. But, if you specify an [OCM config file](../04-working-with-config/README.md#ocm-config-file) you can
 add more predefined credential settings to make it possible to use
 target repositories requiring credentials. The credentials are
 automatically taken from the credentials context and don't need to be
@@ -52,7 +54,7 @@ As usual, we start with getting access to an OCM context
 ```
 
 Then we configure this context with optional ocm config defined in our config file.
-See [OCM config scenario in tour 04](../04-working-with-config/README.md#standard-configuration-file).
+See [OCM config scenario in tour 04](../04-working-with-config/README.md#ocm-config-file).
 
 ```go
 	err := ReadConfiguration(ctx, cfg)
@@ -81,7 +83,7 @@ func ReadConfiguration(ctx ocm.Context, cfg *helper.Config) error {
 
 The context acts as factory for various model types based on
 specification descriptor serialization formats in YAML or JSON.
-Access method specifications and repository specification are 
+Access method specifications and repository specification are
 examples for this feature.
 
 Now, we use the repository specification serialization format to
@@ -100,7 +102,7 @@ configuration file.
 For our source we just use the component version provided by the last
 examples in a remote repository.
 Therefore, we set up the credentials context, as
-shown in [tour 03](../03-working-with-credentials/README.md#using-the-credential-management).
+shown in [tour 03](../03-working-with-credentials/README.md#using-cred-management).
 
 ```go
 	id, err := oci.GetConsumerIdForRef(cfg.Repository)
@@ -154,7 +156,6 @@ be migrated to local blobs.
 
 Now, we check the result of our transport action in the target
 repository.
-
 
 ```go
 	tcv, err := target.LookupComponentVersion("acme.org/example03", "v0.1.0")

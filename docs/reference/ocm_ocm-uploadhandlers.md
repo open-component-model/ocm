@@ -2,7 +2,6 @@
 
 ### Description
 
-
 An upload handler is used to process resources using the access method
 <code>localBlob</code> transferred into an OCM
 repository. They may decide to store the content in some other
@@ -87,10 +86,9 @@ The following handler names are possible:
 See [ocm ocm-uploadhandlers](ocm_ocm-uploadhandlers.md) for further details on using
 upload handlers.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

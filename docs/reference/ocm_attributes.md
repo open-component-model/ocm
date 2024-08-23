@@ -2,7 +2,6 @@
 
 ### Description
 
-
 The OCM library supports a set of attributes, which can be used to influence
 the behaviour of various functions. The CLI also supports setting of those
 attributes using the config file (see [ocm configfile](ocm_configfile.md)) or by
@@ -181,19 +180,19 @@ OCM library:
 
 - <code>github.com/mandelsoft/tempblobcache</code> [<code>blobcache</code>]: *string* Foldername for temporary blob cache
 
-  The temporary blob cache is used to accessing large blobs from remote sytems.
+  The temporary blob cache is used to accessing large blobs from remote systems.
   The are temporarily stored in the filesystem, instead of the memory, to avoid
   blowing up the memory consumption.
 
-- <code>ocm.software/cliconfig</code> [<code>cliconfig</code>]: *cliconfigr* Configuration Object passed to command line pluging.
+- <code>ocm.software/cliconfig</code> [<code>cliconfig</code>]: *cliconfig* Configuration Object passed to command line plugin.
 
 
 
 - <code>ocm.software/compositionmode</code> [<code>compositionmode</code>]: *bool* (default: false
 
   Composition mode decouples a component version provided by a repository
-  implemention from the backened persistence. Added local blobs will
-  and other changes witll not be forwarded to the backend repository until
+  implementation from the backend persistence. Added local blobs will
+  and other changes will not be forwarded to the backend repository until
   an AddVersion is called on the component.
   If composition mode is disabled blobs will directly be forwarded to
   the backend and descriptor updated will be persisted on AddVersion
@@ -206,10 +205,9 @@ OCM library:
   - *<code>rekorURL</code>* *string*  default is https://rekor.sigstore.dev
   - *<code>OIDCIssuer</code>* *string*  default is https://oauth2.sigstore.dev/auth
   - *<code>OIDCClientID</code>* *string*  default is sigstore
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

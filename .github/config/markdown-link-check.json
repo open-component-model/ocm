@@ -1,0 +1,9 @@
+{ "replacementPatterns": [
+     { "pattern": "^/", "replacement": "{{BASEURL}}/" }
+  ],
+  "ignorePatterns": [
+     { "pattern": "^http[s]*://localhost.*" }
+    ,{ "pattern": "^https://.*\\.sigstore\\.dev.*" }
+    ,{ "pattern": "^{{.*}}$" }
+  ]
+}

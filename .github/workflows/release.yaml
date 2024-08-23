@@ -140,6 +140,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
+        check-latest: false
 
     - name: Setup Syft
       uses: anchore/sbom-action/download-syft@ab9d16d4b419c9d1a02df5213fa0ebe965ca5a57 # v0.17.1
@@ -151,16 +152,6 @@ jobs:
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
-
-    - name: Cache go-build and mod
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cache/go-build/
-          ~/go/pkg/mod/
-        key: go-${{ hashFiles('go.sum') }}
-        restore-keys: |
-          go-
 
     - name: Set Base Version
       run: |
@@ -224,6 +215,11 @@ jobs:
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
         git push origin ${{ env.RELEASE_VERSION }}
 
+    - name: Create GPG Token file from Secret
+      run: |
+        echo "${{ secrets.GPG_PRIVATE_KEY_FOR_SIGNING }}" > ocm-releases-key.gpg
+        echo "GPG_KEY_PATH=ocm-releases-key.gpg" >> $GITHUB_ENV
+
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v6
       with:
@@ -235,6 +231,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         HOMEBREW_TAP_GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
+        NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
     - name: Push OCM Components
       env:

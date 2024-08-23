@@ -54,6 +54,7 @@ Cleanup all blobs stored in oci blob cache (if given).
 		Example: `
 $ ocm clean cache
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

@@ -45,6 +45,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Example: `
 $ ocm add resource-configuration resources.yaml --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

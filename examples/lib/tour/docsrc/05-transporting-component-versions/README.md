@@ -1,7 +1,8 @@
-{{transport}}
 # Transporting Component Versions
 
-This [tour](example.go) illustrates the basic support for
+{{transport}}
+
+This [tour](/examples/lib/tour/05-transporting-component-versions/example.go) illustrates the basic support for
 transporting content from one environment into another.
 
 ## Running the example
@@ -21,7 +22,7 @@ password:
 ```
 
 Any supported kind of target repository can be specified by using its
-specification type. An OCI regisztry target would look like this:
+specification type. An OCI registry target would look like this:
 
 ```yaml
 repository: ghcr.io/mandelsoft/ocm
@@ -33,7 +34,7 @@ targetRepository:
 ocmConfig: <config file>
 ```
 
-The actual version of the example just works with the file system 
+The actual version of the example just works with the file system
 target, because it is not possible to specify credentials for the
 target repository in this simple config file. But, if you specify an [OCM config file]({{ocm-config-file}}) you can
 add more predefined credential settings to make it possible to use
@@ -65,7 +66,7 @@ provided by the config management:
 
 The context acts as factory for various model types based on
 specification descriptor serialization formats in YAML or JSON.
-Access method specifications and repository specification are 
+Access method specifications and repository specification are
 examples for this feature.
 
 Now, we use the repository specification serialization format to
@@ -114,7 +115,6 @@ be migrated to local blobs.
 
 Now, we check the result of our transport action in the target
 repository.
-
 
 ```go
 {{include}{../../05-transporting-component-versions/example.go}{verify-a}}

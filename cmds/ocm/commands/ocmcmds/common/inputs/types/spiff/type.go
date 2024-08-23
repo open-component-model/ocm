@@ -23,7 +23,7 @@ func usage() string {
   This OPTIONAL property describes a list of spiff libraries to include in template
   processing.
 
-The variable settigs from the command line are available as binding, also. They are provided under the node
+The variable settings from the command line are available as binding, also. They are provided under the node
 <code>values</code>.
 `
 }

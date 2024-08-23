@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm install plugins [<options>] <component version ref> [<name>] | <name>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 plugins, plugin, p
 ```
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -d, --describe                  describe plugin, only
   -f, --force                     overwrite existing plugin
@@ -24,7 +24,6 @@ plugins, plugin, p
 ```
 
 ### Description
-
 
 Download and install a plugin provided by an OCM component version.
 For the update mode only the plugin name is required.
@@ -75,10 +74,9 @@ OCI Repository types (using standard component repository to OCI mapping):
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 
-
 ### Examples
 
-```
+```bash
 $ ocm install plugin ghcr.io/github.com/mandelsoft/cnudie//github.com/mandelsoft/ocmplugin:0.1.0-dev
 $ ocm install plugin -c 1.2.x ghcr.io/github.com/mandelsoft/cnudie//github.com/mandelsoft/ocmplugin
 $ ocm install plugin -u demo
@@ -87,7 +85,7 @@ $ ocm install plugin -r demo
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm install](ocm_install.md)	 &mdash; Install elements.
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

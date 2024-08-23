@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm oci [<options>] <sub command> ...
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for oci
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

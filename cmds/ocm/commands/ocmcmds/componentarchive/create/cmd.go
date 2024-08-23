@@ -59,6 +59,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Example: `
 $ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org acme.org/demo 1.0
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 		Long: `
 Create a new component archive. This might be either a directory prepared
 to host component version content or a tar/tgz file (see option --type).

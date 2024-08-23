@@ -77,7 +77,7 @@ as follows:
 
 The resource files are named according to the resource identity in the
 component descriptor. If this identity is just the resource name, this name
-is ised. If additional identity attributes are required, this name is
+is used. If additional identity attributes are required, this name is
 append by a comma separated list of <code>&lt;name>=&lt;>value></code> pairs
 separated by a "-" from the plain name. This attribute list is alphabetical
 order:

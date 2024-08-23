@@ -30,7 +30,7 @@ func (a AttributeType) Name() string {
 func (a AttributeType) Description() string {
 	return `
 *string* Foldername for temporary blob cache
-The temporary blob cache is used to accessing large blobs from remote sytems.
+The temporary blob cache is used to accessing large blobs from remote systems.
 The are temporarily stored in the filesystem, instead of the memory, to avoid
 blowing up the memory consumption.
 `

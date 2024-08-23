@@ -2,31 +2,29 @@
 
 ### Synopsis
 
-```
+```bash
 ocm describe cache [<options>]
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for cache
 ```
 
 ### Description
 
-
 Show details about the OCI blob cache (if given).
 	
-
 ### Examples
 
-```
+```bash
 $ ocm cache info
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm describe](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

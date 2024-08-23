@@ -85,8 +85,9 @@ For more details about those files see <CMD>ocm bootstrap package</CMD>.
 		Example: `
 $ ocm toi bootstrap config ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
-	cmd.AddCommand(topicbootstrap.New(o.Context, "toi-bootstrapping"))
+	cmd.AddCommand(utils.DocuCommandPath(topicbootstrap.New(o.Context, "toi-bootstrapping"), "ocm"))
 	return cmd
 }
 

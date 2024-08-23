@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm get references [<options>]  <component> {<name> { <key>=<value> }}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 references, reference, refs
 ```
 
 ### Options
 
-```
+```text
   -c, --constraints constraints   version constraint
   -h, --help                      help for references
       --latest                    restrict component versions to latest
@@ -26,7 +26,6 @@ references, reference, refs
 ```
 
 ### Description
-
 
 Get references of a component version. References are specified
 by identities. An identity consists of
@@ -106,10 +105,9 @@ The following modes are supported:
   - <code>wide</code>
   - <code>yaml</code>
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

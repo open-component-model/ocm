@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm add routingslips [<options>] <component-version> <routing-slip> <type>
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 routingslips, routingslip, rs
 ```
 
 ### Options
 
-```
+```text
   -S, --algorithm string     signature handler (default "RSASSA-PKCS1-V1_5")
       --digest string        parent digest to use
   -h, --help                 help for routingslips
@@ -26,13 +26,12 @@ routingslips, routingslip, rs
 
 #### Entry Specification Options
 
-```
+```text
       --comment string       comment field value
       --entry YAML           routing slip entry specification (YAML)
 ```
 
 ### Description
-
 
 Add a routing slip entry for the specified routing slip name to the given
 component version. The name is typically a DNS domain name followed by some
@@ -114,16 +113,15 @@ it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-
 ### Examples
 
-```
+```bash
 $ ocm add routingslip ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev mandelsoft.org comment --entry "comment=some text"
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

@@ -39,6 +39,7 @@ Show details about the OCI blob cache (if given).
 		Example: `
 $ ocm cache info
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

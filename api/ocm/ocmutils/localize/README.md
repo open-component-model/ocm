@@ -5,7 +5,8 @@ yaml format definitions, (format.go) given by a Go structure.
 and functions usable for the modification of filesystem snapshots.
 
 It covers
-- OCM based localization descriptions used to describe image 
+
+- OCM based localization descriptions used to describe image
   location substitution and the
 - merging with configuration input.
 
@@ -15,7 +16,7 @@ an installation specific snapshot incorporating the local location
 of container images based on OCM component versions and installation specific
 configuration values.
 
-The description format describes two basic specifications that incorporate external 
+The description format describes two basic specifications that incorporate external
 information provided by a component version or some user config.
 
 - struct/format `Localization` describe a specification to
@@ -26,7 +27,7 @@ information provided by a component version or some user config.
 
   This specification is intended to be stored as part of a resource artifact in a
   component version which is then used to apply it. Thereby the contained relative
-  [resource reference](../../../../docs/ocm/model.md#resource-reference)
+  [resource reference](https://github.com/open-component-model/ocm-spec/blob/main/doc/05-guidelines/03-references.md)
   are evaluated against the component version containing the specification to resolve
   the final image location.
 
@@ -34,7 +35,7 @@ information provided by a component version or some user config.
   applying a dedicated config value taken from a configuration source
   to a filesytem snapshot.
 
-The function `Localize` and `Configure` accept a list of such 
+The function `Localize` and `Configure` accept a list of such
 specifications and map them into an environment agnostic set of
 `Substitution` specifications, which contain resolved data values, only.
 A third function `Substitute` takes those environment agnostic specifications
@@ -44,13 +45,13 @@ Finally, a compound specification `InstantiationRules` is provided,
 that combines all those descriptions with the specification of the snapshot
 resource and further helper parts, like json scheme validation for config files.
 
-Such a specification object can be applied by the function `Instantiate` 
+Such a specification object can be applied by the function `Instantiate`
 together with configuration values to
 a component version. As substitution result it returns a virtual filesystem
 with the snapshot according to the resolved substitutions. To get access to the
 template resource containing the filesystem snapshot to be instantiated, the
 configured downloaders (package `pkg/context/ocm/download`) is used.
-Therefore, this method can be used together with any own resource type as long as 
+Therefore, this method can be used together with any own resource type as long as
 an appropriate downloader is configured.
 
 Additionally, there is a set of more basic types and methods, which can be used

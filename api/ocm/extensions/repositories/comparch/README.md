@@ -1,10 +1,8 @@
-
 # Repository `ComponentArchive` - Filesystem based Storage of a Component Version
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: ComponentArchive/v1
 ```
 
@@ -32,7 +30,6 @@ The type specific specification fields are:
   - `directory`: stored as directory structure
   - `tar`: stored as directory structure in a tar file
   - `tgz`: stored as directory structure in a tar file compressed by GNU Zip
-
 
 ### Go Bindings
 

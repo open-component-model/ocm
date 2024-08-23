@@ -1,4 +1,4 @@
-Welcome to the OCM community!
+# Welcome to the OCM community
 
 We welcome many different types of contributions.
 

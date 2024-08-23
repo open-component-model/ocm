@@ -47,6 +47,7 @@ a plugin.
 $ ocm describe plugins
 $ ocm describe plugins demo
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

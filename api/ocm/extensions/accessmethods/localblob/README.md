@@ -1,9 +1,9 @@
 
 # Access Method `localBlob` - OCM Repository Local Blob Access
 
+## Synopsis
 
-### Synopsis
-```
+```yaml
 type: localBlob/v1
 ```
 
@@ -37,7 +37,7 @@ The type specific specification fields are:
 
 - **`mediaType`** *string*
 
-  The media type of the blob used to store the resource. It may add 
+  The media type of the blob used to store the resource. It may add
   format information like `+tar` or `+gzip`.
 
 - **`referenceName`** (optional) *string*
@@ -47,10 +47,10 @@ The type specific specification fields are:
   related to the original source.
 
   For example, if an OCI artifact originally referenced using the
-  access method [`ociArtifact`](../../../../../docs/formats/accessmethods/ociArtifact.md) is stored during
+  access method [`ociArtifact`](../ociartifact) is stored during
   some transport step as local artifact, the reference name can be set
   to its original repository name. An import step into an OCI based OCM
-  repository may then decide to make this artifact available again as 
+  repository may then decide to make this artifact available again as
   regular OCI artifact.
 
 - **`globalAccess`** (optional) *access method specification*
@@ -61,10 +61,9 @@ The type specific specification fields are:
 
   For example, an OCI artifact stored as local blob
   can be additionally stored as regular OCI artifact in an OCI registry.
-  
+
   This additional external access information can be added using
   a second external access method specification.
-
 
 ### Go Bindings
 
@@ -72,8 +71,8 @@ The go binding can be found [here](method.go)
 
 ### Storage Mapping
 
-Transporting component versions by value internalizes externally 
-referenced content (for example OCI image references). Those 
+Transporting component versions by value internalizes externally
+referenced content (for example OCI image references). Those
 resources will then be stored as local blobs using the media type provided by the
 original blob.
 
@@ -83,11 +82,12 @@ by registered blob handlers.
 
 #### Provided Blob Handlers
 
-The standard tool set uses the following registered blob handlers:
-- *Blob handler for importing oci artifact blobs into 
+The standard toolset uses the following registered blob handlers:
+
+- *Blob handler for importing oci artifact blobs into
 an OCM repository mapped to an OCI registry*
 
-  In this case the oci artifact  blobs will be expanded to a regular 
+  In this case the oci artifact  blobs will be expanded to a regular
   OCI artifact taking the optional `referenceName`into account.
 
 Additional blob handlers might be registered by local incarnations.

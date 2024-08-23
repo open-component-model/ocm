@@ -2,24 +2,22 @@
 
 ### Synopsis
 
-```
+```bash
 plugin valueset [<options>] <sub command> ...
 ```
 
 ### Options
 
-```
+```text
   -h, --help   help for valueset
 ```
 
 ### Description
-
 This command group provides all commands used to implement a value set
 described by a value set descriptor ([plugin descriptor](plugin_descriptor.md).
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin](plugin.md)	 &mdash; OCM Plugin
 

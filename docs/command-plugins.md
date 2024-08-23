@@ -1,6 +1,8 @@
+# OCM Plugin framework
 
 The OCM Plugin framework now supports two features to
 extend the CLI with new (OCM related) commands:
+
 - definition of configuration types (consumed by the plugin)
 - definition of CLI commands (for the OCM CLI)
 
@@ -9,24 +11,24 @@ plugin feature commands.
 
 Examples see coding in `cmds/cliplugin`
 
-#### Config Types
+## Config Types
 
 Config types are just registered at the Plugin Object;
 
-```
-	p := ppi.NewPlugin("cliplugin", version.Get().String())
+```go
+    p := ppi.NewPlugin("cliplugin", version.Get().String())
         ...
-	p.RegisterConfigType(configType)
+    p.RegisterConfigType(configType)
 ```
 
 The argument is just the config type as registered at the ocm library, for example:
 
-```
+```go
 const ConfigType = "rhabarber.config.acme.org"
 
 type Config struct {
-	runtime.ObjectVersionedType `json:",inline"`
-	...
+    runtime.ObjectVersionedType `json:",inline"`
+    ...
 }
 
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
@@ -34,14 +36,14 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 }
 
 func init() {
-	configType = cfgcpi.NewConfigType[*Config](ConfigType, usage)
-	cfgcpi.RegisterConfigType(configType)
+    configType = cfgcpi.NewConfigType[*Config](ConfigType, usage)
+    cfgcpi.RegisterConfigType(configType)
 }
 ```
 
-#### CLI Commands
+## CLI Commands
 
-CLI commands are provided by the registratuon interface `ppi.Command`. It
+CLI commands are provided by the registration interface `ppi.Command`. It
 provides some command metadata and a `cobra.Command` object.
 
 Commands are then registered at the plugin object with:
@@ -69,23 +71,22 @@ A sample code could look like this:
 
 with coding for the cobra command similar to
 
-```
-
+```go
 type command struct {
-	date string
+    date string
 }
 
 func NewCommand() *cobra.Command {
-	cmd := &command{}
-	c := &cobra.Command{
-		Use:   Name + " <options>",
-		Short: "determine whether we are in rhubarb season",
-		Long:  "The rhubarb season is between march and april.",
-		RunE:  cmd.Run,
-	}
+    cmd := &command{}
+    c := &cobra.Command{
+        Use:   Name + " <options>",
+        Short: "determine whether we are in rhubarb season",
+        Long:  "The rhubarb season is between march and april.",
+        RunE:  cmd.Run,
+    }
 
-	c.Flags().StringVarP(&cmd.date, "date", "d", "", "the date to ask for (MM/DD)")
-	return c
+    c.Flags().StringVarP(&cmd.date, "date", "d", "", "the date to ask for (MM/DD)")
+    return c
 }
 
 func (c *command) Run(cmd *cobra.Command, args []string) error {
@@ -94,6 +95,7 @@ func (c *command) Run(cmd *cobra.Command, args []string) error {
 ```
 
 If the code wants to use the config framework, for example to
+
 - use the OCM library again
 - access credentials
 - get configured with declared config types
@@ -106,13 +108,13 @@ CLI code.
 The command can be a top-level command or attached to a dedicated verb (and optionally a realm like `ocm`or `oci`).
 For the cobra support this can be requested by the option `WithVerb(...)`.
 
-If the config framework is used just add the following anonymoud import
+If the config framework is used just add the following anonymous import
 for an automated configuration:
 
-```
+```go
 import (
         // enable mandelsoft plugin logging configuration.
-	_ "ocm.software/ocm/pkg/contexts/ocm/plugin/ppi/config"
+    _ "ocm.software/ocm/pkg/contexts/ocm/plugin/ppi/config"
 )
 ```
 
@@ -120,44 +122,45 @@ The plugin code is then configured with the configuration of the OCM CLI and the
 can be used.
 If the configuration should be handled by explicit plugin code a handler can be registered with
 
-```
+```go
 func init() {
-	command.RegisterCommandConfigHandler(yourHandler)
+    command.RegisterCommandConfigHandler(yourHandler)
 }
 ```
 
 It gets a config yaml according to the config objects used by the OCM library.
 
-#### Logging
+## Logging
 
 To get the logging configuration from the OCM CLI the plugin has be configured with
 
-```
-	p.ForwardLogging()
+```go
+    p.ForwardLogging()
 ```
 
 If the standard mandelsoft logging from the OCM library is used the configuration can
 be implemented directly with an anonymous import of
 
-```
+```go
 import (
         // enable mandelsoft plugin logging configuration.
-	_ "ocm.software/ocm/pkg/contexts/ocm/plugin/ppi/logging"
+    _ "ocm.software/ocm/pkg/contexts/ocm/plugin/ppi/logging"
 )
 ```
+
 The plugin code is then configured with the logging configuration of the OCM CLI and the mandelsoft logging frame work
 can be used.
 If the logging configuration should be handled by explicit plugin code a handler can be registered with
 
-```
+```go
 func init() {
-	cmds.RegisterLoggingConfigHandler(yourHandler)
+    cmds.RegisterLoggingConfigHandler(yourHandler)
 }
 ```
 
 It gets a logging configuration yaml according to the logging config used by the OCM library (`github.com/mandelsoft/logging/config`).
 
-#### Using Plugin command extensions from the OCM library.
+## Using Plugin command extensions from the OCM library
 
 The plugin command extensions can also be called without the OCM CLI directly from the OCM library.
 Therefore the plugin objects provided by the library can be used.

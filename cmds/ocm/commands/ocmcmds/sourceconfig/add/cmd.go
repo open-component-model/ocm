@@ -42,6 +42,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Example: `
 $ ocm add source-config sources.yaml --name sources --type filesystem --access '{ "type": "gitHub", "repoUrl": "ocm.software/ocm", "commit": "xyz" }'
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

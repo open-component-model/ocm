@@ -2,19 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 ocm describe package [<options>] {<component-reference>} {<resource id field>}
 ```
 
-##### Aliases
+#### Aliases
 
-```
+```text
 package, pkg, componentversion, cv, component, comp, c
 ```
 
 ### Options
 
-```
+```text
   -h, --help                 help for package
       --lookup stringArray   repository name or spec for closure lookup fallback
       --repo string          repository name or spec
@@ -22,12 +22,11 @@ package, pkg, componentversion, cv, component, comp, c
 
 ### Description
 
-
 Describe a TOI package provided by a resource of an OCM component version.
 
 The package resource must have the type <code>toiPackage</code>.
 This is a simple YAML file resource describing the bootstrapping of a dedicated kind
-of software. See also the topic [ocm toi toi-bootstrapping](ocm_toi_toi-bootstrapping.md).
+of software. See also the topic [ocm toi-bootstrapping](ocm_toi-bootstrapping.md).
 
 The first matching resource of this type is selected. Optionally a set of
 identity attribute can be specified used to refine the match. This can be the
@@ -86,16 +85,15 @@ it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-
 ### Examples
 
-```
+```bash
 $ ocm toi describe package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm describe](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
@@ -109,5 +107,5 @@ $ ocm toi describe package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 
 ##### Additional Links
 
-* [<b>ocm toi toi-bootstrapping</b>](ocm_toi_toi-bootstrapping.md)
+* [<b>ocm toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 

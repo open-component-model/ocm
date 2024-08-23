@@ -1,3 +1,5 @@
+# Releases
+
 - **Release 0.4.7**
 
   just a new patch
@@ -16,7 +18,7 @@
 
 - **Release 0.4.3**
 
-  fix fetch xommand
+  fix fetch command
 
 - **Release 0.4.2**
 
@@ -83,7 +85,7 @@
 
   `Manual Action Required`
 
-   Introduction of iass support. Specify a iaas type.
+   Introduction of Infrastructure-as-a-Service (IaaS) support. Specify a iaas type.
 
 - **Release 0.1.9**
 
@@ -95,7 +97,7 @@
 
   `No upgrade action required`
 
-  Improve actions 
+  Improve actions
 
 - **Release 0.1.7**
 
@@ -142,4 +144,3 @@
 - **Release 0.1.0**
 
   A first release providing a config file that must be maintained for a landscape
-

@@ -71,6 +71,7 @@ Per version a detailed, potentially recursive description is printed.
 $ ocm describe artifact ghcr.io/mandelsoft/kubelink
 $ ocm describe artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 `,
+		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
 }
 

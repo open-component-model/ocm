@@ -2,13 +2,13 @@
 
 ### Synopsis
 
-```
+```bash
 ocm show tags [<options>] <component> {<version pattern>}
 ```
 
 ### Options
 
-```
+```text
   -h, --help          help for tags
   -l, --latest        show only latest tags
       --repo string   repository name or spec
@@ -17,7 +17,6 @@ ocm show tags [<options>] <component> {<version pattern>}
 ```
 
 ### Description
-
 
 Match tags of an artifact against some patterns.
 
@@ -55,16 +54,15 @@ linked library can be used:
   - <code>oci</code>: v1
   - <code>ociRegistry</code>
 
-
 ### Examples
 
-```
+```bash
 $ oci show tags ghcr.io/mandelsoft/kubelink
 ```
 
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [ocm show](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client

@@ -2,20 +2,19 @@
 
 ### Synopsis
 
-```
+```bash
 plugin action execute <spec> [<options>]
 ```
 
 ### Options
 
-```
+```text
   -C, --credential <name>=<value>   dedicated credential value (default [])
   -c, --credentials YAML            credentials
   -h, --help                        help for execute
 ```
 
 ### Description
-
 
 This command executes an action.
 
@@ -33,10 +32,9 @@ following fields:
 
 Additional fields depend on the kind of action.
 
-
 ### SEE ALSO
 
-##### Parents
+#### Parents
 
 * [plugin action](plugin_action.md)	 &mdash; action operations
 * [plugin](plugin.md)	 &mdash; OCM Plugin

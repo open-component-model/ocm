@@ -1,10 +1,8 @@
-
 # Repository `CommonTransportFormat` - Filesystem based OCM Repositories
 
+## Synopsis
 
-### Synopsis
-
-```
+```yaml
 type: CommonTransportFormat/v1
 ```
 
@@ -31,7 +29,6 @@ The type specific specification fields are:
   - `tar`: stored as directory structure in a tar file
   - `tgz`: stored as directory structure in a tar file compressed by GNU Zip.
 
-
 ### Go Bindings
 
-The Go binding can be found [here](../../../../../pkg/contexts/oci/repositories/ctf/type.go).
+The Go binding can be found [here](type.go).

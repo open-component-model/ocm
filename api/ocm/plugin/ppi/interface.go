@@ -167,7 +167,7 @@ type ValueSet interface {
 	Name() string
 	Version() string
 
-	// Purposes describes the purposes the set should be ued for.
+	// Purposes describes the purposes the set should be used for.
 	// So far, only the purpose PURPOSE_ROUTINGSLIP is defined.
 	Purposes() []string
 
