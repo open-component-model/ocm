@@ -36,7 +36,6 @@ var _ = Describe("Method", func() {
 
 	It("accesses artifact", func() {
 		acc := npm.New("file://"+NPMPATH, "yargs", "17.7.1")
-		// acc := npm.New("https://registry.npmjs.org", "yargs", "17.7.1")
 
 		m := Must(acc.AccessMethod(cv))
 		defer m.Close()

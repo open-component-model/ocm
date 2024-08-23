@@ -53,11 +53,14 @@ The following predefined option types can be used:
   - <code>hint</code>: [*string*] (repository) hint for local artifacts
   - <code>mediaType</code>: [*string*] media type for artifact blob representation
   - <code>noredirect</code>: [*bool*] http redirect behavior
+  - <code>package</code>: [*string*] npm package name
   - <code>reference</code>: [*string*] reference name
   - <code>region</code>: [*string*] region name
+  - <code>registry</code>: [*string*] npm package registry
   - <code>size</code>: [*int*] blob size
   - <code>url</code>: [*string*] artifact or server url
   - <code>verb</code>: [*string*] http request method
+  - <code>version</code>: [*string*] npm package version
 
 The following predefined value types are supported:
 

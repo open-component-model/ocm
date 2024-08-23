@@ -20,6 +20,10 @@ var (
 	ArtifactOption   = options.ArtifactOption
 	ClassifierOption = options.ClassifierOption
 	ExtensionOption  = options.ExtensionOption
+
+	RegistryOption       = options.NPMRegistryOption
+	PackageOption        = options.NPMPackageOption
+	PackageVersionOption = options.NPMVersionOption
 )
 
 // string options.
