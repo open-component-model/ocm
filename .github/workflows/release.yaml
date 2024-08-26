@@ -252,6 +252,16 @@ jobs:
           git push origin ${GITHUB_REF#refs/heads/}
           echo "Next branch version is $v"
 
+      - name: Delete Older Release Branches
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -e
+          git fetch --prune
+          for branch in $(git branch -r | grep 'origin/releases/' | grep -v 'origin/releases/${{ env.RELEASE_VERSION }}'); do
+            branch_name=$(echo $branch | sed 's|origin/||')
+            echo "Deleting branch $branch_name"
+          done
+
       - name: Publish Release Event
         if: inputs.release_candidate == false
         uses: peter-evans/repository-dispatch@v3
