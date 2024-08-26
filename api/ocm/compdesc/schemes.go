@@ -1,6 +1,7 @@
 package compdesc
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -149,9 +150,13 @@ func Encode(obj *ComponentDescriptor, opts ...EncodeOption) ([]byte, error) {
 	o := (&EncodeOptions{}).ApplyOptions(opts).DefaultFor(obj)
 	v, err := Convert(obj, o)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to encode object: %w", err)
 	}
-	return o.Codec.Encode(v)
+	encode, err := o.Codec.Encode(v)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode object: %w", err)
+	}
+	return encode, nil
 }
 
 // Convert converts a component descriptor into a dedicated scheme version.

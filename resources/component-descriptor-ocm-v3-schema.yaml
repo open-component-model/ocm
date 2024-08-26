@@ -37,10 +37,11 @@ $defs:
     type: 'object'
     required:
       - 'name'
-      - 'value'
     properties:
       name:
         type: string
+      access:
+        $ref: '#/$defs/access'
       value: {}
       version:
         pattern: '^v[0-9]+$'

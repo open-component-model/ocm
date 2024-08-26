@@ -70,6 +70,7 @@ type Label struct {
 	Access LabelAccessSpec `json:"access,omitempty"`
 
 	// Digest
+	// +optional
 	Digest digest.Digest `json:"digest,omitempty"`
 
 	// Version is the optional specification version of the attribute value
@@ -196,7 +197,7 @@ func (l *Labels) Set(name string, value interface{}, opts ...LabelOption) error 
 	return nil
 }
 
-// Set sets or modifies the label meta data.
+// SetOptions sets or modifies the label meta data.
 func (l *Labels) SetOptions(name string, opts ...LabelOption) error {
 	newLabel, err := NewLabel(name, nil, opts...)
 	if err != nil {
