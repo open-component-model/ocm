@@ -8,6 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/api/utils/runtime"
