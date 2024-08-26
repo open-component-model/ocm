@@ -143,7 +143,7 @@ jobs:
         check-latest: false
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@ab9d16d4b419c9d1a02df5213fa0ebe965ca5a57 # v0.17.1
+      uses: anchore/sbom-action/download-syft@61119d458adab75f756bc0b9e4bde25725f86a7a # v0.17.2
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.6.0
@@ -193,7 +193,7 @@ jobs:
         v="${{env.RELEASE_VERSION}}"
         f="docs/releasenotes/$v.md"
         if [ ! -f "$f" ]; then
-          echo "Release ${{ env.RELEASE_VERSION }}" > "$f"
+          echo "# Release ${{ env.RELEASE_VERSION }}" > "$f"
           echo "$RELEASE_NOTES" | tail -n +2 >> "$f"
           echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
           git add "$f"
