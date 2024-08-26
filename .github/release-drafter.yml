@@ -9,18 +9,22 @@ template: |
   $CHANGES
 exclude-labels:
   - 'kind/skip-release-notes'
+  - 'wontfix'
+  - 'triage/wont-fix'
+  - 'triage/invalid'
 categories:
   - title: '🚀 Features'
     labels:
+      - 'kind/enhancement'
       - 'feature'
       - 'enhancement'
   - title: '🐛 Bug Fixes'
     collapse-after: 5
     labels:
+      - 'kind/bug'
       - 'fix'
       - 'bugfix'
       - 'bug'
-      - 'kind/bug'
   - title: '🧰 Maintenance'
     collapse-after: 3
     labels:
