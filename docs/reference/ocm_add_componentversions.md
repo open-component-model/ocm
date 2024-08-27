@@ -264,11 +264,6 @@ next to the description file.
 
 
 
-##### Additional Help Topics
-
-* [ocm add componentversions <b>ocm-labels</b>](ocm_add_componentversions_ocm-labels.md)	 &mdash; Labels and Label Merging
-
-
 ##### Additional Links
 
 * [<b>ocm add sources</b>](ocm_add_sources.md)	 &mdash; add source information to a component version
