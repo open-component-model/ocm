@@ -100,11 +100,6 @@ $ ocm toi describe package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 
 
 
-##### Additional Help Topics
-
-* [ocm describe package <b>toi-bootstrapping</b>](ocm_describe_package_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
-
-
 ##### Additional Links
 
 * [<b>ocm toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
