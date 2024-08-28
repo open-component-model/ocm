@@ -1,7 +1,3 @@
----
-labels: kind/skip-release-notes
----
-
 <!-- markdownlint-disable MD041 -->
 #### What this PR does / why we need it
 
