@@ -1,0 +1,47 @@
+name: Publish Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: 'Version of the latest release (e.g. v0.42.0)'
+        required: false
+        default: ''
+  repository_dispatch:
+    types: [ocm-cli-release]
+
+jobs:
+  push-to-aur:
+    name: Update Arch Linux User Repository
+    runs-on: ubuntu-latest
+    steps:
+    - name: Ensure proper version
+      run: |
+        if [ -z "${{ github.event.client_payload.version }}" ]; then
+          if [ -z "${{ github.event.inputs.version }}" ]; then
+            echo "Version not provided"
+            exit 1
+          fi
+          echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+        fi
+        echo "RELEASE_VERSION=${{ github.event.client_payload.version }}" >> $GITHUB_ENV
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        name: aur
+        key: ${{ secrets.ARCHLINUX_SSH_PRIVATE_KEY }}
+        known_hosts: ${{ secrets.ARCHLINUX_SSH_KNOWN_HOSTS }}
+        config: ${{ secrets.ARCHLINUX_SSH_CONFIG}}
+    - name: Setup git config
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
+    - name: Git operations with SSH
+      run: |
+        git clone ssh://aur@aur.archlinux.org/ocm-cli.git
+        cd ocm-cli
+        ./upgrade ${{ env.RELEASE_VERSION }}
+        git add PKGBUILD .SRCINFO
+        git commit -m"Release ${{ env.RELEASE_VERSION }}"
+        #git push origin @:refs/heads/master
