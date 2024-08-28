@@ -292,7 +292,7 @@ shown below.
 - Access type <code>ocm</code>
 
   This method implements the access of any resource artifact stored in an OCM
-  repository. Only repository types suporting remote access should be used.
+  repository. Only repository types supporting remote access should be used.
 
   The following versions are supported:
   - Version <code>v1</code>
@@ -315,10 +315,10 @@ shown below.
 
     - **<code>resourceRef</code>** *relative resource ref*
 
-      The resource reference of the denoted respource relative to the
+      The resource reference of the denoted resource relative to the
       given component version.
 
-    It uses the consumer identity and credebtials for the intermediate repositories
+    It uses the consumer identity and credentials for the intermediate repositories
     and the final resource access.
 
   Options used to configure fields: <code>--accessComponent</code>, <code>--accessIdentityPath</code>, <code>--accessRepository</code>, <code>--accessVersion</code>

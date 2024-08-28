@@ -42,7 +42,7 @@ func repoMapper(in any) (any, error) {
 
 var usage = `
 This method implements the access of any resource artifact stored in an OCM
-repository. Only repository types suporting remote access should be used.
+repository. Only repository types supporting remote access should be used.
 `
 
 var formatV1 = `
@@ -64,8 +64,8 @@ The type specific specification fields are:
 
 - **<code>resourceRef</code>** *relative resource ref*
 
-  The resource reference of the denoted respource relative to the
+  The resource reference of the denoted resource relative to the
   given component version.
 
-It uses the consumer identity and credebtials for the intermediate repositories
+It uses the consumer identity and credentials for the intermediate repositories
 and the final resource access.`
