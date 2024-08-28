@@ -18,6 +18,17 @@ import (
 	"ocm.software/ocm/api/utils/runtime"
 )
 
+// VerifiedStore is an interface for some kind of
+// memory providing information about verified
+// component versions and the digests of the verified
+// artifacts. It is used to verify downloaded resource content,
+// without requiring to verify the complete component version, again.
+// If the component version has already been marked as being verified
+// only the digest of the downloaded content has be compared with the
+// digest already marked as verified in the context of its component version.
+//
+// A typical implementation is a file based store, which stored the serialized
+// component versions (see NewVerifiedStore).
 type VerifiedStore interface {
 	Add(cd *compdesc.ComponentDescriptor, signatures ...string)
 	Remove(n common.VersionedElement)
@@ -42,10 +53,12 @@ type verifiedStore struct {
 
 var _ VerifiedStore = (*verifiedStore)(nil)
 
+// NewLocalVerifiedStore creates a memory based VerifiedStore.
 func NewLocalVerifiedStore() VerifiedStore {
 	return &verifiedStore{storage: &StorageDescriptor{}}
 }
 
+// NewVerifiedStore loads or creates a new filesystem based VerifiedStore.
 func NewVerifiedStore(path string, fss ...vfs.FileSystem) (VerifiedStore, error) {
 	eff, err := utils.ResolvePath(path)
 	if err != nil {
