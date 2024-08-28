@@ -23,9 +23,11 @@ jobs:
             echo "Version not provided"
             exit 1
           fi
-          echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=$(echo ${{ github.event.inputs.version }} | tr -d ['v'])" >> $GITHUB_ENV
+        else
+          echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
         fi
-        echo "RELEASE_VERSION=${{ github.event.client_payload.version }}" >> $GITHUB_ENV
+        cat $GITHUB_ENV
     - name: Install SSH key
       uses: shimataro/ssh-key-action@v2
       with:
@@ -44,4 +46,4 @@ jobs:
         ./upgrade ${{ env.RELEASE_VERSION }}
         git add PKGBUILD .SRCINFO
         git commit -m"Release ${{ env.RELEASE_VERSION }}"
-        #git push origin @:refs/heads/master
+        git push origin @:refs/heads/master
