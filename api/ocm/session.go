@@ -2,6 +2,7 @@ package ocm
 
 import (
 	"fmt"
+	"ocm.software/ocm/api/utils/runtime"
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -30,6 +31,7 @@ type Session interface {
 
 	Finalize(Finalizer)
 	LookupRepository(Context, RepositorySpec) (Repository, error)
+	LookupRepositoryForConfig(octx Context, data []byte, unmarshaler ...runtime.Unmarshaler) (Repository, error)
 	LookupComponent(ComponentContainer, string) (ComponentAccess, error)
 	LookupComponentVersion(r ComponentVersionResolver, comp, vers string) (ComponentVersionAccess, error)
 	GetComponentVersion(ComponentVersionContainer, string) (ComponentVersionAccess, error)
@@ -85,6 +87,22 @@ func (s *session) Finalize(f Finalizer) {
 func (s *session) Close() error {
 	return s.Session.Close()
 	// TODO: cleanup cache
+}
+
+func (s *session) LookupRepositoryForConfig(octx Context, data []byte, unmarshaler ...runtime.Unmarshaler) (Repository, error) {
+	var u runtime.Unmarshaler
+	if len(unmarshaler) > 0 {
+		u = unmarshaler[0]
+	}
+	spec, err := octx.RepositorySpecForConfig(data, u)
+	if err != nil {
+		return nil, err
+	}
+	repo, err := s.LookupRepository(octx, spec)
+	if err != nil {
+		return nil, err
+	}
+	return repo, nil
 }
 
 func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
