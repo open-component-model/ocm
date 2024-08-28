@@ -15,95 +15,97 @@ resources, resource, res, r
 ### Options
 
 ```text
-      --addenv                              access environment for templating
-      --dry-run                             evaluate and print resource specifications
-  -F, --file string                         target file/directory (default "component-archive")
-  -h, --help                                help for resources
-  -O, --output string                       output file for dry-run
-  -R, --replace                             replace existing elements
-  -s, --settings stringArray                settings file with variable settings (yaml)
-      --skip-digest-generation              skip digest creation
-      --templater string                    templater to use (go, none, spiff, subst) (default "subst")
+      --addenv                                access environment for templating
+      --dry-run                               evaluate and print resource specifications
+  -F, --file string                           target file/directory (default "component-archive")
+  -h, --help                                  help for resources
+  -O, --output string                         output file for dry-run
+  -R, --replace                               replace existing elements
+  -s, --settings stringArray                  settings file with variable settings (yaml)
+      --skip-digest-generation                skip digest creation
+      --templater string                      templater to use (go, none, spiff, subst) (default "subst")
 ```
 
 
 #### Access Specification Options
 
 ```text
-      --access YAML                         blob access specification (YAML)
-      --accessHostname string               hostname used for access
-      --accessPackage string                package or object name
-      --accessRegistry string               registry base URL
-      --accessRepository string             repository URL
-      --accessType string                   type of blob access specification
-      --accessVersion string                version for access specification
-      --artifactId string                   maven artifact id
-      --body string                         body of a http request
-      --bucket string                       bucket name
-      --classifier string                   maven classifier
-      --commit string                       git commit id
-      --digest string                       blob digest
-      --extension string                    maven extension name
-      --globalAccess YAML                   access specification for global access
-      --groupId string                      maven group id
-      --header <name>:<value>,<value>,...   http headers (default {})
-      --hint string                         (repository) hint for local artifacts
-      --mediaType string                    media type for artifact blob representation
-      --noredirect                          http redirect behavior
-      --reference string                    reference name
-      --region string                       region name
-      --size int                            blob size
-      --url string                          artifact or server url
-      --verb string                         http request method
+      --access YAML                           blob access specification (YAML)
+      --accessComponent string                component for access specification
+      --accessHostname string                 hostname used for access
+      --accessIdentityPath {<name>=<value>}   identity path for access specification
+      --accessPackage string                  package or object name
+      --accessRegistry string                 registry base URL
+      --accessRepository string               repository URL
+      --accessType string                     type of blob access specification
+      --accessVersion string                  version for access specification
+      --artifactId string                     maven artifact id
+      --body string                           body of a http request
+      --bucket string                         bucket name
+      --classifier string                     maven classifier
+      --commit string                         git commit id
+      --digest string                         blob digest
+      --extension string                      maven extension name
+      --globalAccess YAML                     access specification for global access
+      --groupId string                        maven group id
+      --header <name>:<value>,<value>,...     http headers (default {})
+      --hint string                           (repository) hint for local artifacts
+      --mediaType string                      media type for artifact blob representation
+      --noredirect                            http redirect behavior
+      --reference string                      reference name
+      --region string                         region name
+      --size int                              blob size
+      --url string                            artifact or server url
+      --verb string                           http request method
 ```
 
 
 #### Input Specification Options
 
 ```text
-      --artifactId string                   maven artifact id
-      --body string                         body of a http request
-      --classifier string                   maven classifier
-      --extension string                    maven extension name
-      --groupId string                      maven group id
-      --header <name>:<value>,<value>,...   http headers (default {})
-      --hint string                         (repository) hint for local artifacts
-      --input YAML                          blob input specification (YAML)
-      --inputCompress                       compress option for input
-      --inputData !bytesBase64              data (string, !!string or !<base64>
-      --inputExcludes stringArray           excludes (path) for inputs
-      --inputFollowSymlinks                 follow symbolic links during archive creation for inputs
-      --inputFormattedJson YAML             JSON formatted text
-      --inputHelmRepository string          helm repository base URL
-      --inputIncludes stringArray           includes (path) for inputs
-      --inputJson YAML                      JSON formatted text
-      --inputLibraries stringArray          library path for inputs
-      --inputPath filepath                  path field for input
-      --inputPlatforms stringArray          input filter for image platforms ([os]/[architecture])
-      --inputPreserveDir                    preserve directory in archive for inputs
-      --inputText string                    utf8 text
-      --inputType string                    type of blob input specification
-      --inputValues YAML                    YAML based generic values for inputs
-      --inputVariants stringArray           (platform) variants for inputs
-      --inputVersion string                 version info for inputs
-      --inputYaml YAML                      YAML formatted text
-      --mediaType string                    media type for artifact blob representation
-      --noredirect                          http redirect behavior
-      --url string                          artifact or server url
-      --verb string                         http request method
+      --artifactId string                     maven artifact id
+      --body string                           body of a http request
+      --classifier string                     maven classifier
+      --extension string                      maven extension name
+      --groupId string                        maven group id
+      --header <name>:<value>,<value>,...     http headers (default {})
+      --hint string                           (repository) hint for local artifacts
+      --input YAML                            blob input specification (YAML)
+      --inputCompress                         compress option for input
+      --inputData !bytesBase64                data (string, !!string or !<base64>
+      --inputExcludes stringArray             excludes (path) for inputs
+      --inputFollowSymlinks                   follow symbolic links during archive creation for inputs
+      --inputFormattedJson YAML               JSON formatted text
+      --inputHelmRepository string            helm repository base URL
+      --inputIncludes stringArray             includes (path) for inputs
+      --inputJson YAML                        JSON formatted text
+      --inputLibraries stringArray            library path for inputs
+      --inputPath filepath                    path field for input
+      --inputPlatforms stringArray            input filter for image platforms ([os]/[architecture])
+      --inputPreserveDir                      preserve directory in archive for inputs
+      --inputText string                      utf8 text
+      --inputType string                      type of blob input specification
+      --inputValues YAML                      YAML based generic values for inputs
+      --inputVariants stringArray             (platform) variants for inputs
+      --inputVersion string                   version info for inputs
+      --inputYaml YAML                        YAML formatted text
+      --mediaType string                      media type for artifact blob representation
+      --noredirect                            http redirect behavior
+      --url string                            artifact or server url
+      --verb string                           http request method
 ```
 
 
 #### Resource Meta Data Options
 
 ```text
-      --external                            flag non-local resource
-      --extra <name>=<value>                resource extra identity (default [])
-      --label <name>=<YAML>                 resource label (leading * indicates signature relevant, optional version separated by @)
-      --name string                         resource name
-      --resource YAML                       resource meta data (yaml)
-      --type string                         resource type
-      --version string                      resource version
+      --external                              flag non-local resource
+      --extra <name>=<value>                  resource extra identity (default [])
+      --label <name>=<YAML>                   resource label (leading * indicates signature relevant, optional version separated by @)
+      --name string                           resource name
+      --resource YAML                         resource meta data (yaml)
+      --type string                           resource type
+      --version string                        resource version
 ```
 
 ### Description
@@ -840,6 +842,40 @@ shown below.
       The size of the blob
 
   Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
+
+- Access type <code>ocm</code>
+
+  This method implements the access of any resource artifact stored in an OCM
+  repository. Only repository types suporting remote access should be used.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The type specific specification fields are:
+
+    - **<code>ocmRepository</code>** *json*
+
+      The repository spec for the OCM repository
+
+    - **<code>component</code>** *string*
+
+      *(Optional)* The name of the component. The default is the
+      own component.
+
+    - **<code>version</code>** *string*
+
+      *(Optional)* The version of the component. The default is the
+      own component version.
+
+    - **<code>resourceRef</code>** *relative resource ref*
+
+      The resource reference of the denoted respource relative to the
+      given component version.
+
+    It uses the consumer identity and credebtials for the intermediate repositories
+    and the final resource access.
+
+  Options used to configure fields: <code>--accessComponent</code>, <code>--accessIdentityPath</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
 
 - Access type <code>s3</code>
 

@@ -409,14 +409,23 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 		if !compdesc.IsNoneAccessKind(res.Access.GetKind()) {
 			var calculatedDigest *cpi.DigestDescriptor
 			if (!opts.IsSkipVerify() && digest != "") || (!opts.IsSkipDigest() && digest == "") {
-				dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, opts.HasherProvider, meth, digester)
-				if err != nil {
-					return err
+
+				if p, ok := meth.(DigestProvider); ok {
+					dig, err := p.GetDigestSpec()
+					if dig != nil && err == nil {
+						calculatedDigest = dig
+					}
 				}
-				if len(dig) == 0 {
-					return fmt.Errorf("%s: no digester accepts resource", res.Name)
+				if calculatedDigest == nil {
+					dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, opts.HasherProvider, meth, digester)
+					if err != nil {
+						return err
+					}
+					if len(dig) == 0 {
+						return fmt.Errorf("%s: no digester accepts resource", res.Name)
+					}
+					calculatedDigest = &dig[0]
 				}
-				calculatedDigest = &dig[0]
 			}
 
 			if digest != "" && !opts.IsSkipVerify() {

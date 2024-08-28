@@ -69,6 +69,7 @@ type (
 	GenericRepositorySpec            = internal.GenericRepositorySpec
 	RepositoryType                   = internal.RepositoryType
 	ComponentReference               = internal.ComponentReference
+	DigestProvider                   = internal.DigestProvider
 )
 
 type ArtifactAccess[M any] internal.ArtifactAccess[M]
@@ -194,6 +195,8 @@ const (
 	KIND_RESOURCE         = internal.KIND_RESOURCE
 	KIND_SOURCE           = internal.KIND_SOURCE
 	KIND_REFERENCE        = internal.KIND_REFERENCE
+	KIND_REPOSITORYSPEC   = internal.KIND_REPOSITORYSPEC
+	KIND_OCM_REFERENCE    = internal.KIND_OCM_REFERENCE
 )
 
 func ErrComponentVersionNotFound(name, version string) error {

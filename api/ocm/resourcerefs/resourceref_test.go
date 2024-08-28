@@ -1,4 +1,4 @@
-package ocmutils_test
+package resourcerefs_test
 
 import (
 	"io"
@@ -7,9 +7,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 
-	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	ocm "ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	utils "ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
@@ -131,7 +132,7 @@ var _ = Describe("resolving local resource references", func() {
 		Close(dup)
 
 		ref := metav1.NewResourceRef(metav1.NewIdentity("topdata"))
-		_, _, err := utils.ResolveResourceReference(dup, ref, nil)
+		_, _, err := resourcerefs.ResolveResourceReference(dup, ref, nil)
 		MustFailWithMessage(err, "component version already closed: closed")
 	})
 })

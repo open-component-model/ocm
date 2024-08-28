@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/oci/testhelper"
+	"ocm.software/ocm/api/ocm/resolvers"
 	. "ocm.software/ocm/api/ocm/tools/signing"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
@@ -123,7 +124,7 @@ var _ = Describe("access method", func() {
 		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 		Expect(err).To(Succeed())
 		archcloser := session.AddCloser(src)
-		resolver := ocm.NewCompoundResolver(src)
+		resolver := resolvers.NewCompoundResolver(src)
 
 		cv, err := resolver.LookupComponentVersion(COMPONENTB, VERSION)
 		Expect(err).To(Succeed())

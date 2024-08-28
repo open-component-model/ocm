@@ -10,6 +10,7 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/utils/accessio"
 )
@@ -53,7 +54,7 @@ func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionA
 				return nil, nil, errors.Wrapf(err, "failed looking up in target")
 			}
 		}
-		compoundResolver := ocm.NewCompoundResolver(repo, h.opts.GetResolver())
+		compoundResolver := resolvers.NewCompoundResolver(repo, h.opts.GetResolver())
 		cv, err := compoundResolver.LookupComponentVersion(meta.GetComponentName(), meta.Version)
 		return cv, h, err
 	}

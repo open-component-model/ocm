@@ -12,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/hasher/sha256"
 	"ocm.software/ocm/api/tech/signing/signutils"
@@ -221,7 +222,7 @@ func Resolver(h ...ocm.ComponentVersionResolver) Option {
 }
 
 func (o *resolver) ApplySigningOption(opts *Options) {
-	opts.Resolver = ocm.NewCompoundResolver(append([]ocm.ComponentVersionResolver{opts.Resolver}, o.resolver...)...)
+	opts.Resolver = resolvers.NewCompoundResolver(append([]ocm.ComponentVersionResolver{opts.Resolver}, o.resolver...)...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

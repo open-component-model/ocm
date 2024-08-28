@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
+	"ocm.software/ocm/api/ocm/resolvers"
 	. "ocm.software/ocm/api/ocm/testhelper"
 
 	"github.com/mandelsoft/goutils/finalizer"
@@ -488,7 +489,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
 		Expect(err).To(Succeed())
 
-		resolver := ocm.NewCompoundResolver(src)
+		resolver := resolvers.NewCompoundResolver(src)
 
 		opts := ocmsign.NewOptions(
 			ocmsign.Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
@@ -513,7 +514,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		Expect(err).To(Succeed())
 		Expect(env.DirExists(OUT)).To(BeTrue())
 
-		resolver = ocm.NewCompoundResolver(tgt)
+		resolver = resolvers.NewCompoundResolver(tgt)
 
 		opts = ocmsign.NewOptions(
 			ocmsign.Resolver(resolver),

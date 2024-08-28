@@ -289,6 +289,40 @@ shown below.
 
   Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
 
+- Access type <code>ocm</code>
+
+  This method implements the access of any resource artifact stored in an OCM
+  repository. Only repository types suporting remote access should be used.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The type specific specification fields are:
+
+    - **<code>ocmRepository</code>** *json*
+
+      The repository spec for the OCM repository
+
+    - **<code>component</code>** *string*
+
+      *(Optional)* The name of the component. The default is the
+      own component.
+
+    - **<code>version</code>** *string*
+
+      *(Optional)* The version of the component. The default is the
+      own component version.
+
+    - **<code>resourceRef</code>** *relative resource ref*
+
+      The resource reference of the denoted respource relative to the
+      given component version.
+
+    It uses the consumer identity and credebtials for the intermediate repositories
+    and the final resource access.
+
+  Options used to configure fields: <code>--accessComponent</code>, <code>--accessIdentityPath</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+
 - Access type <code>s3</code>
 
   This method implements the access of a blob stored in an S3 bucket.

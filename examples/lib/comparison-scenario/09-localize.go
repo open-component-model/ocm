@@ -8,13 +8,14 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/chart"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	"sigs.k8s.io/yaml"
 
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/download"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/ocm/ocmutils/localize"
 	"ocm.software/ocm/api/tech/helm/loader"
 	"ocm.software/ocm/api/utils"
@@ -82,7 +83,7 @@ func EvaluateDeployDescriptor(cv ocm.ComponentVersionAccess, res ocm.ResourceAcc
 	}
 
 	// fourth, get the helm chart
-	cres, ccv, err := ocmutils.ResolveResourceReference(cv, desc.ChartResource, resolver)
+	cres, ccv, err := resourcerefs.ResolveResourceReference(cv, desc.ChartResource, resolver)
 	if err != nil {
 		return evalErr(err, "cannot resolve chart resource %s", desc.ChartResource)
 	}

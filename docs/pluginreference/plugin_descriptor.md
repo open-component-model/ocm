@@ -119,7 +119,9 @@ It uses the following fields:
 The following predefined option types can be used:
 
 
+  - <code>accessComponent</code>: [*string*] component for access specification
   - <code>accessHostname</code>: [*string*] hostname used for access
+  - <code>accessIdentityPath</code>: [*[]identity*] identity path for access specification
   - <code>accessPackage</code>: [*string*] package or object name
   - <code>accessRegistry</code>: [*string*] registry base URL
   - <code>accessRepository</code>: [*string*] repository URL
@@ -136,6 +138,7 @@ The following predefined option types can be used:
   - <code>groupId</code>: [*string*] maven group id
   - <code>header</code>: [*string:string,string*] http headers
   - <code>hint</code>: [*string*] (repository) hint for local artifacts
+  - <code>idpath</code>: [*[]string*] identity path (attr=value{,attr=value}
   - <code>mediaType</code>: [*string*] media type for artifact blob representation
   - <code>noredirect</code>: [*bool*] http redirect behavior
   - <code>package</code>: [*string*] npm package name
@@ -152,6 +155,7 @@ The following predefined value types are supported:
 
   - <code>YAML</code>: JSON or YAML document string
   - <code>[]byte</code>: byte value
+  - <code>[]identity</code>: identity path
   - <code>[]string</code>: list of string values
   - <code>bool</code>: boolean flag
   - <code>int</code>: integer value

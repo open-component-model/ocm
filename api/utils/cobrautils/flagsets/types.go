@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/pflag"
 
+	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
 	"ocm.software/ocm/api/utils/cobrautils/groups"
 )
@@ -550,4 +551,45 @@ func (o *StringSliceMapColonOption) AddFlags(fs *pflag.FlagSet) {
 
 func (o *StringSliceMapColonOption) Value() interface{} {
 	return o.value
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+type IdentityPathOptionType struct {
+	TypeOptionBase
+}
+
+func NewIdentityPathOptionType(name string, description string) ConfigOptionType {
+	return &IdentityPathOptionType{
+		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *IdentityPathOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *IdentityPathOptionType) Create() Option {
+	return &IdentityPathOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
+type IdentityPathOption struct {
+	OptionBase
+	value []map[string]string
+}
+
+var _ Option = (*IdentityPathOption)(nil)
+
+func (o *IdentityPathOption) AddFlags(fs *pflag.FlagSet) {
+	o.TweakFlag(flag.IdentityPathVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+}
+
+func (o *IdentityPathOption) Value() interface{} {
+	var result []v1.Identity
+	for _, v := range o.value {
+		result = append(result, v1.Identity(v))
+	}
+	return result
 }
