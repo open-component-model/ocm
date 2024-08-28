@@ -9,9 +9,9 @@ import (
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/modern-go/reflect2"
-	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
 	"ocm.software/ocm/api/ocm/compdesc"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets/flagsetscheme"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/refmgmt"
@@ -60,9 +60,9 @@ type GlobalAccessProvider interface {
 	GlobalAccessSpec(ctx Context) AccessSpec
 }
 
-// DigestProvider is an optional interface for an access method
+// DigestSpecProvider is an optional interface for an access method
 // to provide am Digest Specification.
-type DigestProvider interface {
+type DigestSpecProvider interface {
 	GetDigestSpec() (*metav1.DigestSpec, error)
 }
 

@@ -409,8 +409,7 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 		if !compdesc.IsNoneAccessKind(res.Access.GetKind()) {
 			var calculatedDigest *cpi.DigestDescriptor
 			if (!opts.IsSkipVerify() && digest != "") || (!opts.IsSkipDigest() && digest == "") {
-
-				if p, ok := meth.(DigestProvider); ok {
+				if p, ok := meth.(DigestSpecProvider); ok {
 					dig, err := p.GetDigestSpec()
 					if dig != nil && err == nil {
 						calculatedDigest = dig

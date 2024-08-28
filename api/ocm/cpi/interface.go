@@ -69,10 +69,12 @@ type (
 	GenericRepositorySpec            = internal.GenericRepositorySpec
 	RepositoryType                   = internal.RepositoryType
 	ComponentReference               = internal.ComponentReference
-	DigestProvider                   = internal.DigestProvider
+	DigestSpecProvider               = internal.DigestSpecProvider
 )
 
-type ArtifactAccess[M any] internal.ArtifactAccess[M]
+type ArtifactAccess[M any] interface {
+	internal.ArtifactAccess[M]
+}
 
 type (
 	BlobHandler                  = internal.BlobHandler

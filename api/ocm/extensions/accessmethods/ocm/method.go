@@ -7,6 +7,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
+
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
@@ -110,8 +111,8 @@ type accessMethod struct {
 }
 
 var (
-	_ accspeccpi.AccessMethodImpl = (*accessMethod)(nil)
-	_ accspeccpi.DigestProvider   = (*accessMethod)(nil)
+	_ accspeccpi.AccessMethodImpl   = (*accessMethod)(nil)
+	_ accspeccpi.DigestSpecProvider = (*accessMethod)(nil)
 )
 
 func (_ *accessMethod) IsLocal() bool {

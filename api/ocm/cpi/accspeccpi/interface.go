@@ -21,7 +21,7 @@ type (
 	CosumerIdentityProvider = credentials.ConsumerIdentityProvider
 
 	ComponentVersionAccess = internal.ComponentVersionAccess
-	DigestProvider         = internal.DigestProvider
+	DigestSpecProvider     = internal.DigestSpecProvider
 )
 
 var (

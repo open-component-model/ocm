@@ -74,7 +74,6 @@ var ClassifierOption = RegisterOption(NewStringOptionType("classifier", "maven c
 // ExtensionOption the optional extension of a maven resource.
 var ExtensionOption = RegisterOption(NewStringOptionType("extension", "maven extension name"))
 
-<<<<<<< HEAD
 // NPMRegistryOption sets the registry of the npm resource.
 var NPMRegistryOption = RegisterOption(NewStringOptionType("registry", "npm package registry"))
 
@@ -83,7 +82,6 @@ var NPMPackageOption = RegisterOption(NewStringOptionType("package", "npm packag
 
 // NPMVersionOption sets the version of the npm package.
 var NPMVersionOption = RegisterOption(NewStringOptionType("version", "npm package version"))
-=======
+
 // IdPathOption is a path of identity specs.
 var IdPathOption = RegisterOption(NewStringArrayOptionType("idpath", "identity path (attr=value{,attr=value}"))
->>>>>>> dcc1abd4e (access method ocm)
