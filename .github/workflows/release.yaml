@@ -5,19 +5,14 @@ on:
     inputs:
       release_candidate:
         type: boolean
-        description: "Release Candidate"
-        required: false
-        default: false
-      create_branch:
-        type: boolean
-        description: "Create Release Branch"
+        description: 'Release Candidate'
         required: false
         default: false
       prerelease:
         type: string
-        description: "Release Candidate Name"
+        description: 'Release Candidate Name'
         required: false
-        default: ""
+        default: ''
 
 jobs:
   check:
@@ -46,11 +41,6 @@ jobs:
         else
           v="v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)"
           echo "Final Release: $v"
-          if ${{ github.event.inputs.create_branch }}; then
-            echo "with release branch creation"
-          else
-            echo "without release branch creation"
-          fi
         fi
 
     - name: Set Base Version
@@ -79,7 +69,7 @@ jobs:
         fi
 
     - name: Check Branch
-      if: inputs.release_candidate == false && inputs.create_branch
+      if: inputs.release_candidate == false && github.ref == 'refs/heads/main'
       run: |
         set -e
         if git ls-remote --exit-code origin refs/heads/releases/${{ env.RELEASE_VERSION }} ; then
@@ -225,7 +215,7 @@ jobs:
       with:
         distribution: goreleaser
         version: 2.1.0
-        args: release --clean --timeout 60m --skip=validate --config=./.goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
+        args: release --clean --timeout 60m --skip=validate --config=.github/config/goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
       env:
         GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -240,7 +230,7 @@ jobs:
       run: make plain-push
 
     - name: Create Release Branch
-      if: inputs.release_candidate == false && inputs.create_branch
+      if: inputs.release_candidate == false && github.ref == 'refs/heads/main'
       run: |
         n="releases/${{env.RELEASE_VERSION}}"
         git checkout -b "$n"
@@ -261,6 +251,16 @@ jobs:
         git commit -m "Update version file to $v"
         git push origin ${GITHUB_REF#refs/heads/}
         echo "Next branch version is $v"
+
+    - name: Delete Older Release Branches
+      if: github.ref == 'refs/heads/main'
+      run: |
+        set -e
+        git fetch --prune
+        for branch in $(git branch -r | grep 'origin/releases/' | grep -v 'origin/releases/${{ env.RELEASE_VERSION }}'); do
+          branch_name=$(echo $branch | sed 's|origin/||')
+          echo "Deleting branch $branch_name"
+        done
 
     - name: Publish Release Event
       if: inputs.release_candidate == false
