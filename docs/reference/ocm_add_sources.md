@@ -32,7 +32,6 @@ sources, source, src, s
       --access YAML                         blob access specification (YAML)
       --accessComponent string              component for access specification
       --accessHostname string               hostname used for access
-      --accessPackage string                package or object name
       --accessRegistry string               registry base URL
       --accessRepository string             repository URL
       --accessType string                   type of blob access specification
@@ -51,6 +50,7 @@ sources, source, src, s
       --identityPath {<name>=<value>}       identity path for specification
       --mediaType string                    media type for artifact blob representation
       --noredirect                          http redirect behavior
+      --package string                      package or object name
       --reference string                    reference name
       --region string                       region name
       --size int                            blob size
@@ -85,6 +85,7 @@ sources, source, src, s
       --inputPath filepath                  path field for input
       --inputPlatforms stringArray          input filter for image platforms ([os]/[architecture])
       --inputPreserveDir                    preserve directory in archive for inputs
+      --inputRepository string              repository or registry for inputs
       --inputText string                    utf8 text
       --inputType string                    type of blob input specification
       --inputValues YAML                    YAML based generic values for inputs
@@ -93,6 +94,7 @@ sources, source, src, s
       --inputYaml YAML                      YAML formatted text
       --mediaType string                    media type for artifact blob representation
       --noredirect                          http redirect behavior
+      --package string                      package or object name
       --url string                          artifact or server url
       --verb string                         http request method
 ```
@@ -388,7 +390,7 @@ with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>maven</code>
 
-  The <code>repoUrl<code> is the url pointing either to the http endpoint of a maven
+  The <code>repoUrl</code> is the url pointing either to the http endpoint of a maven
   repository (e.g. https://repo.maven.apache.org/maven2/) or to a file system based
   maven repository (e.g. file://local/directory).
 
@@ -419,6 +421,28 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes the extension of a maven artifact.
 
   Options used to configure fields: <code>--artifactId</code>, <code>--classifier</code>, <code>--extension</code>, <code>--groupId</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--url</code>
+
+- Input type <code>npm</code>
+
+  The <code>registry</code> is the url pointing to the npm registry from which a resource is
+  downloaded.
+
+  This blob type specification supports the following fields:
+  - **<code>registry</code>** *string*
+
+    This REQUIRED property describes the url from which the resource is to be
+    downloaded.
+
+  - **<code>package</code>** *string*
+  	
+    This REQUIRED property describes the name of the package to download.
+
+  - **<code>version</code>** *string*
+
+    This is an OPTIONAL property describing the version of the package to download. If
+    not defined, latest will be used automatically.
+
+  Options used to configure fields: <code>--inputRepository</code>, <code>--inputVersion</code>, <code>--package</code>
 
 - Input type <code>ociArtifact</code>
 
@@ -704,7 +728,7 @@ shown below.
     It uses the consumer identity type HelmChartRepository with the fields
     for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
 
-  Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--package</code>
 
 - Access type <code>localBlob</code>
 
@@ -822,7 +846,7 @@ shown below.
 
       The version name of the NPM package
 
-  Options used to configure fields: <code>--accessPackage</code>, <code>--accessRegistry</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessRegistry</code>, <code>--accessVersion</code>, <code>--package</code>
 
 - Access type <code>ociArtifact</code>
 

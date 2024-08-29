@@ -125,7 +125,7 @@ shown below.
     It uses the consumer identity type HelmChartRepository with the fields
     for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
 
-  Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--package</code>
 
 - Access type <code>localBlob</code>
 
@@ -243,7 +243,7 @@ shown below.
 
       The version name of the NPM package
 
-  Options used to configure fields: <code>--accessPackage</code>, <code>--accessRegistry</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessRegistry</code>, <code>--accessVersion</code>, <code>--package</code>
 
 - Access type <code>ociArtifact</code>
 

@@ -11,7 +11,7 @@ func init() {
 }
 
 const usage = `
-The <code>repoUrl<code> is the url pointing either to the http endpoint of a maven
+The <code>repoUrl</code> is the url pointing either to the http endpoint of a maven
 repository (e.g. https://repo.maven.apache.org/maven2/) or to a file system based
 maven repository (e.g. file://local/directory).
 
