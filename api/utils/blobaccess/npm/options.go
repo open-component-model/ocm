@@ -56,21 +56,24 @@ func (o *Options) ApplyTo(opts *Options) {
 		return
 	}
 	if o.CredentialContext.Value != nil {
-		opts.CredentialContext.Value = o.CredentialContext.Value
+		opts.CredentialContext = o.CredentialContext
 	}
 	if o.LoggingContext.Value != nil {
-		opts.LoggingContext.Value = o.LoggingContext.Value
+		opts.LoggingContext = o.LoggingContext
 	}
 	if o.CachingFileSystem.Value != nil {
-		opts.CachingFileSystem.Value = o.CachingFileSystem.Value
+		opts.CachingFileSystem = o.CachingFileSystem
 	}
 	if o.Credentials.Value != nil {
-		opts.Credentials.Value = o.Credentials.Value
+		opts.Credentials = o.Credentials
+	}
+	if o.PathFileSystem.Value != nil {
+		opts.PathFileSystem = o.PathFileSystem
 	}
 }
 
 func option[S any, T any](v T) optionutils.Option[*Options] {
-	return stdopts.WithOption[S, *Options](v)
+	return optionutils.WithGenericOption[S, *Options](v)
 }
 
 func WithCredentialContext(ctx credentials.ContextProvider) Option {

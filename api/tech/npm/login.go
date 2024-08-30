@@ -123,10 +123,12 @@ func BasicAuth(req *http.Request, ctx cpi.ContextProvider, repoUrl string, pkgNa
 	return nil
 }
 
-func BasicAuthForeCreds(req *http.Request, creds cpi.Credentials) error {
-	username, password := creds.GetProperty(cpi.ATTR_USERNAME), creds.GetProperty(cpi.ATTR_PASSWORD)
-	if username != "" && password != "" {
-		req.SetBasicAuth(username, password)
+func BasicAuthForCreds(req *http.Request, creds cpi.Credentials) error {
+	if creds != nil {
+		username, password := creds.GetProperty(cpi.ATTR_USERNAME), creds.GetProperty(cpi.ATTR_PASSWORD)
+		if username != "" && password != "" {
+			req.SetBasicAuth(username, password)
+		}
 	}
 	return nil
 }

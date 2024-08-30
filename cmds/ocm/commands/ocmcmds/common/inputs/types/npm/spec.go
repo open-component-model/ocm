@@ -5,9 +5,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/npm"
 	"ocm.software/ocm/api/utils/blobaccess"
+	"ocm.software/ocm/api/utils/blobaccess/npm"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
@@ -54,13 +53,9 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
-	access := npm.New(s.Registry, s.Package, s.Version)
-	ver := &cpi.DummyComponentVersionAccess{ctx.OCMContext()}
-
-	blobAccess, err := access.AccessMethod(ver)
+	access, err := npm.BlobAccess(s.Registry, s.Package, s.Version, npm.WithDataContext(ctx.OCMContext()))
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to create access method for npm: %w", err)
 	}
-
-	return blobAccess.AsBlobAccess(), "", err
+	return access, "", err
 }

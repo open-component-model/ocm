@@ -152,7 +152,7 @@ func (a *PackageSpec) reader(tar ...string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = npm.BasicAuthForeCreds(req, creds)
+	err = npm.BasicAuthForCreds(req, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (a *PackageSpec) reader(tar ...string) (io.ReadCloser, error) {
 		if err != nil {
 			return nil, err
 		}
-		err = npm.BasicAuthForeCreds(req, creds)
+		err = npm.BasicAuthForCreds(req, creds)
 		if err != nil {
 			return nil, err
 		}
