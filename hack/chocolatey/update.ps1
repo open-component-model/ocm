@@ -11,10 +11,8 @@ $authors = $sortedContributors -join ", "
 $nuspecPath = Join-Path -Path $PSScriptRoot -ChildPath "ocm-cli.nuspec"
 $nuspecContent = Get-Content -Path $nuspecPath -Raw
 $updatedContent = $nuspecContent -replace '<authors>.*?</authors>', "<authors>$authors</authors>"
-Set-Content -Path $nuspecPath -Value $updatedContent
-Write-Output "Updated the <authors> tag in the nuspec file with the sorted list of contributors."
 
-# Fetch the latest release version and URLs for the Windows artifacts
+# Fetch the latest release version and asset URLs for Windows
 $url = "https://api.github.com/repos/$owner/$repo/releases/latest"
 $response = Invoke-RestMethod -Uri $url -Headers @{ "User-Agent" = "PowerShell" }
 $latestVersion = $response.tag_name -replace '^v', ''
@@ -22,26 +20,43 @@ Write-Output "The latest released ocm-cli version is $latestVersion"
 $assets = $response.assets
 $url = $assets | Where-Object { $_.name -match 'windows-386.zip' } | Select-Object -ExpandProperty browser_download_url
 $url64 = $assets | Where-Object { $_.name -match 'windows-amd64.zip' } | Select-Object -ExpandProperty browser_download_url
-# # SHA256 - Download the artifacts
-# $artifactPath = "windows-386.zip"
-# $artifactPath64 = "windows-amd64.zip"
-# Invoke-WebRequest -Uri $url -OutFile $artifactPath
-# Invoke-WebRequest -Uri $url64 -OutFile $artifactPath64
-# # SHA256 - Compute the checksums
-# $checksum = Get-FileHash -Path $artifactPath -Algorithm SHA256 | Select-Object -ExpandProperty Hash
-# $checksum64 = Get-FileHash -Path $artifactPath64 -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+$sha256url = $assets | Where-Object { $_.name -match 'windows-386.zip.sha256' } | Select-Object -ExpandProperty browser_download_url
+$sha256url64 = $assets | Where-Object { $_.name -match 'windows-amd64.zip.sha256' } | Select-Object -ExpandProperty browser_download_url
+$sha256 = [System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri $sha256url).Content)
+$sha256_64 = [System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri $sha256url64).Content)
+
+# Update the description and release notes in the nuspec file
+$description = Get-Content -Path 'docs\reference\ocm.md' -Raw
+# replace all xml problematic characters and html tags
+$description = $description -replace '&mdash;', '-' # TODO replace unknown entity &mdash; with - in *.go
+$description = $description -replace '&bsol;', '\'  # TODO replace unknown entity &bsol; with \ in *.go
+$description = $description -replace '</?code>', '´' # TODO replace inline code in *.go with ``
+$description = $description -replace '\s*<pre>', "```````n" # TODO replace code blocka in *.go with ```text
+$description = $description -replace '</pre>', "`n``````" # TODO replace code blocka in *.go with ```text
+$description = $description -replace '</?center>', '' # TODO remove center tags in *.go
+$description = $description -replace '</?b>', '' # TODO replace bold tags in *.go with **
+$description = $description -replace '<br\s*/?>', '' # TODO replace line breaks in *.go with \n
+$description = $description -replace '\]\(ocm_', '](https://github.com/open-component-model/ocm/blob/main/docs/reference/ocm_'
+# used in code blocks and examples
+$description = $description -replace '<', '&lt;'
+$description = $description -replace '>', '&gt;'
+# release notes do hopefully not contain xml tags
+$releaseNotes= Get-Content -Path "docs\releasenotes\v$latestVersion.md" -Raw
+$updatedContent = $updatedContent -replace '(?ms)<description>.*<\/description>', "<description>$description</description>"
+$updatedContent = $updatedContent -replace '(?ms)<releaseNotes>.*<\/releaseNotes>', "<releaseNotes>$releaseNotes</releaseNotes>"
+Set-Content -Path $nuspecPath -Value $updatedContent
+Write-Output "Updated the <authors> tag in the nuspec file with the sorted list of contributors."
 
 # Update the install script with the new URLs
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\chocolateyinstall.ps1"
 $scriptContent = Get-Content -Path $scriptPath -Raw
 $updatedContent = $scriptContent -replace '\$url\s*=\s*".*"', (-join('$url = "', $url, '"'))
 $updatedContent = $updatedContent -replace '\$url64\s*=\s*".*"', (-join('$url64 = "', $url64, '"'))
-# # SHA256
-# $updatedContent = $updatedContent -replace "\$checksum\s*=\s*['\"].*?['\"]", "\$checksum = '$checksum'"
-# $updatedContent = $updatedContent -replace "\$checksum64\s*=\s*['\"].*?['\"]", "\$checksum64 = '$checksum64'"
+$updatedContent = $updatedContent -replace "checksum\s*=\s*'.*'", "checksum = '$sha256'"
+$updatedContent = $updatedContent -replace "checksum64\s*=\s*'.*'", "checksum64 = '$sha256_64'"
 Set-Content -Path $scriptPath -Value $updatedContent
-Write-Output "Using $url"
-Write-Output "and $url64 as package sources."
+Write-Output "Using $url ($sha256)"
+Write-Output "and $url64 ($sha256_64) as package sources."
 
 # Copy the LICENSE file to the tools directory
 $licenseDest = Join-Path -Path $PSScriptRoot -ChildPath "tools\LICENSE.txt"
