@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/helper/env"
+
 	"ocm.software/ocm/api/utils/blobaccess/npm"
 	"ocm.software/ocm/api/utils/iotools"
 	"ocm.software/ocm/api/utils/mime"
@@ -26,7 +27,6 @@ var _ = Describe("Method", func() {
 	})
 
 	AfterEach(func() {
-
 		npm.NewPackageSpec("", "", "", npm.WithCredentialContext(nil))
 		env.Cleanup()
 	})
