@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
-
+	
+	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/npm"
-	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -41,12 +41,12 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	var allErrs field.ErrorList
 
 	if s.Registry == "" {
-		pathField := fldPath.Child("Registry")
+		pathField := fldPath.Child("registry")
 		allErrs = append(allErrs, field.Invalid(pathField, s.Registry, "no registry"))
 	}
 
 	if s.Package == "" {
-		pathField := fldPath.Child("Package")
+		pathField := fldPath.Child("package")
 		allErrs = append(allErrs, field.Invalid(pathField, s.Package, "no package"))
 	}
 
@@ -55,7 +55,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
 	access := npm.New(s.Registry, s.Package, s.Version)
-	ver := composition.NewComponentVersion(ctx, info.ComponentVersion.GetName(), info.ComponentVersion.GetVersion())
+	ver := &cpi.DummyComponentVersionAccess{ctx.OCMContext()}
 
 	blobAccess, err := access.AccessMethod(ver)
 	if err != nil {

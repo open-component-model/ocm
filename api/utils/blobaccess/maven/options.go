@@ -34,10 +34,10 @@ func (o *Options) Cache() *tmpcache.Attribute {
 	if o.CachingPath != "" {
 		return tmpcache.New(o.CachingPath, o.CachingFileSystem)
 	}
-	if o.CachingContext == nil {
-		return tmpcache.Get(o.CredentialContext)
+	if o.CachingContext != nil {
+		return tmpcache.Get(o.CachingContext)
 	}
-	return tmpcache.Get(o.CachingContext)
+	return tmpcache.Get(o.CredentialContext)
 }
 
 func (o *Options) GetCredentials(repo *maven.Repository, groupId string) (maven.Credentials, error) {
@@ -200,3 +200,18 @@ func WithOptionalExtension(e *string) Option {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+type _datacontext struct {
+	ctx datacontext.ContextProvider
+}
+
+func (o *_datacontext) ApplyTo(opts *Options) {
+	if c, ok := o.ctx.(credentials.ContextProvider); ok {
+		opts.CredentialContext = c.CredentialsContext()
+	}
+	opts.CachingContext = o.ctx.AttributesContext()
+}
+
+func WithDataContext(ctx datacontext.ContextProvider) Option {
+	return &_datacontext{ctx}
+}
