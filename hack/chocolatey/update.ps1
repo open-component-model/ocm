@@ -27,6 +27,11 @@ $sha256_64 = [System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri $sha
 
 # Update the description and release notes in the nuspec file
 $description = Get-Content -Path 'docs\reference\ocm.md' -Raw
+# description is too long, chocolatey has a limit of 4000 characters
+$startIndex = $description.IndexOf("### Description")
+$endIndex = $description.IndexOf("Every option value has the format") - $startIndex
+$description = $description.Substring($startIndex, $endIndex)
+$description = $description -replace '### Description', '### ocm - Open Component Model Command Line Client'
 # replace all xml problematic characters and html tags
 $description = $description -replace '&mdash;', '-' # TODO replace unknown entity &mdash; with - in *.go
 $description = $description -replace '&bsol;', '\'  # TODO replace unknown entity &bsol; with \ in *.go
@@ -39,11 +44,7 @@ $description = $description -replace '<br\s*/?>', '' # TODO replace line breaks 
 $description = $description -replace '\]\(ocm_', '](https://github.com/open-component-model/ocm/blob/main/docs/reference/ocm_'
 $description = $description -replace '<', '&lt;' # used in code blocks and examples
 $description = $description -replace '>', '&gt;' # used in code blocks and examples
-$index = $description.IndexOf("The following configuration sources are used:")
-if ($index -ne -1) { # description is too long, chocolatey has a limit of 4000 characters
-    $description = $description.Substring(0, $index)
-}
-$description += "`nContinue readin on [ocm.software / cli-reference](https://ocm.software/docs/cli-reference/)"
+$description += "`nContinue reading on [ocm.software / cli-reference](https://ocm.software/docs/cli-reference/)"
 # release notes do hopefully not contain xml tags
 $releaseNotes= Get-Content -Path "docs\releasenotes\v$latestVersion.md" -Raw
 $updatedContent = $updatedContent -replace '(?ms)<description>.*<\/description>', "<description>$description</description>"
