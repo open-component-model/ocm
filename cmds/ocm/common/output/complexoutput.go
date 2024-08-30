@@ -83,6 +83,6 @@ func (this *ComplexProcessingOutput) out(gap string, m map[string]interface{}) {
 	}
 	s, err := yaml.Marshal(rest)
 	if err == nil {
-		Outf(this.Context, utils.IndentLines(string(s), gap))
+		Out(this.Context, utils.IndentLines(string(s), gap))
 	}
 }

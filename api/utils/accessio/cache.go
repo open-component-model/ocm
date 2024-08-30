@@ -426,7 +426,7 @@ func (c *cached) cleanup() error {
 func (a *cached) GetBlobData(digest digest.Digest) (int64, blobaccess.DataAccess, error) {
 	err := a.Ref()
 	if err != nil {
-		return blobaccess.BLOB_UNKNOWN_SIZE, nil, err
+		return blobaccess.BLOB_UNKNOWN_SIZE, nil, fmt.Errorf("failed to get ref: %w", err)
 	}
 	defer a.Unref()
 

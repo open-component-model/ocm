@@ -25,8 +25,7 @@ jobs:
         with:
           go-version-file: '${{ github.workspace }}/go.mod'
       - name: Test
-        run: |
-          PATH=$PATH:$(go env GOPATH)/bin make build install-requirements test
+        run: make build install-requirements test
 
   go-lint:
     name: Lint Golang
@@ -41,11 +40,6 @@ jobs:
         with:
           go-version-file: '${{ github.workspace }}/go.mod'
       - name: Install goimports
-        run: |
-          go install golang.org/x/tools/cmd/goimports@latest
-      - name: Setup lint
-        run: |
-          make -f hack/Makefile golangci-lint
+        run: go install golang.org/x/tools/cmd/goimports@latest
       - name: Lint
-        run: |
-          PATH=$PATH:$(go env GOPATH)/bin make check
+        run: make check

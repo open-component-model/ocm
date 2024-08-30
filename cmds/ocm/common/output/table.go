@@ -9,8 +9,8 @@ import (
 
 func FormatTable(ctx Context, gap string, data [][]string) {
 	columns := []int{}
-	max := 0
-	maxtitle := 0
+	maxValue := 0
+	maxTitle := 0
 
 	formats := []string{}
 	if len(data) > 1 {
@@ -21,8 +21,8 @@ func FormatTable(ctx Context, gap string, data [][]string) {
 			} else {
 				formats = append(formats, "-")
 			}
-			if len(data[0][i]) > maxtitle {
-				maxtitle = len(data[0][i])
+			if len(data[0][i]) > maxTitle {
+				maxTitle = len(data[0][i])
 			}
 		}
 	}
@@ -35,13 +35,13 @@ func FormatTable(ctx Context, gap string, data [][]string) {
 			} else if columns[i] < l {
 				columns[i] = l
 			}
-			if l > max {
-				max = l
+			if l > maxValue {
+				maxValue = l
 			}
 		}
 	}
 
-	if len(columns) > 2 && max > 200 {
+	if len(columns) > 2 && maxValue > 200 {
 		first := []string{}
 		setSep := false
 		for i, row := range data {
@@ -50,7 +50,7 @@ func FormatTable(ctx Context, gap string, data [][]string) {
 			} else {
 				for c, col := range row {
 					if c < len(first) {
-						Outf(ctx, "%s%-*s: %s\n", gap, maxtitle, first[c], col)
+						Outf(ctx, "%s%-*s: %s\n", gap, maxTitle, first[c], col)
 					} else {
 						Outf(ctx, "%s%d: %s\n", gap, c, col)
 					}
