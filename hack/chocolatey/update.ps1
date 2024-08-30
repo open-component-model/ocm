@@ -37,9 +37,13 @@ $description = $description -replace '</?center>', '' # TODO remove center tags 
 $description = $description -replace '</?b>', '' # TODO replace bold tags in *.go with **
 $description = $description -replace '<br\s*/?>', '' # TODO replace line breaks in *.go with \n
 $description = $description -replace '\]\(ocm_', '](https://github.com/open-component-model/ocm/blob/main/docs/reference/ocm_'
-# used in code blocks and examples
-$description = $description -replace '<', '&lt;'
-$description = $description -replace '>', '&gt;'
+$description = $description -replace '<', '&lt;' # used in code blocks and examples
+$description = $description -replace '>', '&gt;' # used in code blocks and examples
+$index = $description.IndexOf("The following configuration sources are used:")
+if ($index -ne -1) { # description is too long, chocolatey has a limit of 4000 characters
+    $description = $description.Substring(0, $index)
+}
+$description += "`nContinue readin on [ocm.software / cli-reference](https://ocm.software/docs/cli-reference/)"
 # release notes do hopefully not contain xml tags
 $releaseNotes= Get-Content -Path "docs\releasenotes\v$latestVersion.md" -Raw
 $updatedContent = $updatedContent -replace '(?ms)<description>.*<\/description>', "<description>$description</description>"
