@@ -1,0 +1,56 @@
+# .goreleaser.yml
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - <<: &build_defaults
+      binary: ocm
+      main: ./cmds/ocm/main.go
+      ldflags:
+        - -s -w -X ocm.software/ocm/api/version.gitVersion={{.Version}} -X ocm.software/ocm/api/version.gitCommit={{.Commit}} -X ocm.software/ocm/api/version.buildDate={{.CommitDate}}
+      env:
+        - CGO_ENABLED=0
+    id: linux
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 7
+  - <<: *build_defaults
+    id: darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - <<: *build_defaults
+    id: windows
+    goos:
+      - windows
+
+archives:
+  - name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    id: nix
+    builds: [linux, darwin]
+    format: tar.gz
+    files:
+      - none*
+  - name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    id: windows
+    builds: [windows]
+    format: zip
+    files:
+      - none*
+
+nightly:
+  version_template: "0.0.0-nightly"
+  tag_name: nightly
+  publish_release: true
+  keep_single_release: true

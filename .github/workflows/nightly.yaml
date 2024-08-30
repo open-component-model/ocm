@@ -1,0 +1,57 @@
+name: nightly
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: 0 0 * * 4
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+
+  components:
+    name: Component CTF Builds
+    uses: ./.github/workflows/components.yaml
+    permissions:
+      contents: read
+      pull-requests: read
+
+  nightly:
+    name: Nightly Build
+    runs-on: large_runner
+    needs:
+    - components
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    steps:
+    - name: Self Hosted Runner Post Job Cleanup Action
+      uses: TooMuch4U/actions-clean@v2.2
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ steps.generate_token.outputs.token }}
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: '${{ github.workspace }}/go.mod'
+        check-latest: false
+    - name: Run GoReleaser --nightly
+      uses: goreleaser/goreleaser-action@v6
+      with:
+        distribution: goreleaser
+        version: 2.2.0
+        args: release --clean --nightly --timeout 60m --skip=validate --config=.github/config/nightly.yml
+      env:
+        GITHUBORG: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
