@@ -98,8 +98,8 @@ nfpms:
     homepage: "https://ocm.software/"
     maintainer: "OCM Project <open-component-model@noreply.github.com>"
     description: |
-      "The OCM CLI is used to create and maintain component versions.
-      It can be used to easily embed OCM related actions in CICD processes."
+      The OCM CLI is used to create and maintain component versions.
+      It can be used to easily embed OCM related actions in CICD processes.
     license: "Apache-2.0"
     formats:
       - deb
