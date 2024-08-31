@@ -321,7 +321,7 @@ shown below.
     It uses the consumer identity and credentials for the intermediate repositories
     and the final resource access.
 
-  Options used to configure fields: <code>--accessComponent</code>, <code>--accessIdentityPath</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessComponent</code>, <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--identityPath</code>
 
 - Access type <code>s3</code>
 

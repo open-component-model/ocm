@@ -80,7 +80,10 @@ func (s *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
-	return Open(ctx, a.AccessMode, a.FilePath, 0o700, &a.StandardOptions)
+	opts := a.StandardOptions
+	opts.Default(vfsattr.Get(ctx))
+
+	return Open(ctx, a.AccessMode, a.FilePath, 0o700, &opts)
 }
 
 func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, context ...credentials.UsageContext) error {

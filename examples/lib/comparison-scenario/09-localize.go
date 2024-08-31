@@ -8,7 +8,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/chart"
-	"ocm.software/ocm/api/ocm/resourcerefs"
 	"sigs.k8s.io/yaml"
 
 	"ocm.software/ocm/api/ocm"
@@ -17,6 +16,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/ocm/ocmutils/localize"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/tech/helm/loader"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"

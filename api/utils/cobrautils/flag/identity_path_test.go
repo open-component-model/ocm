@@ -1,9 +1,10 @@
 package flag
 
 import (
-	"github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/testutils"
 	"github.com/spf13/pflag"
 )
 
@@ -33,7 +34,6 @@ var _ = Describe("identity path", func() {
 
 		Expect(flags.Parse([]string{"--flag", value1, "--flag", value2})).To(Succeed())
 		Expect(flag).To(Equal([]map[string]string{{"name": "alice", "husband": "bob"}}))
-
 	})
 
 	It("handles multi path", func() {

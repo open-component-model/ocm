@@ -15,90 +15,93 @@ resource-configuration, resourceconfig, rsccfg, rcfg
 ### Options
 
 ```text
-  -h, --help                                  help for resource-configuration
-  -s, --settings stringArray                  settings file with variable settings (yaml)
+  -h, --help                                help for resource-configuration
+  -s, --settings stringArray                settings file with variable settings (yaml)
 ```
 
 
 #### Access Specification Options
 
 ```text
-      --access YAML                           blob access specification (YAML)
-      --accessComponent string                component for access specification
-      --accessHostname string                 hostname used for access
-      --accessIdentityPath {<name>=<value>}   identity path for access specification
-      --accessPackage string                  package or object name
-      --accessRegistry string                 registry base URL
-      --accessRepository string               repository URL
-      --accessType string                     type of blob access specification
-      --accessVersion string                  version for access specification
-      --artifactId string                     maven artifact id
-      --body string                           body of a http request
-      --bucket string                         bucket name
-      --classifier string                     maven classifier
-      --commit string                         git commit id
-      --digest string                         blob digest
-      --extension string                      maven extension name
-      --globalAccess YAML                     access specification for global access
-      --groupId string                        maven group id
-      --header <name>:<value>,<value>,...     http headers (default {})
-      --hint string                           (repository) hint for local artifacts
-      --mediaType string                      media type for artifact blob representation
-      --noredirect                            http redirect behavior
-      --reference string                      reference name
-      --region string                         region name
-      --size int                              blob size
-      --url string                            artifact or server url
-      --verb string                           http request method
+      --access YAML                         blob access specification (YAML)
+      --accessComponent string              component for access specification
+      --accessHostname string               hostname used for access
+      --accessPackage string                package or object name
+      --accessRegistry string               registry base URL
+      --accessRepository string             repository URL
+      --accessType string                   type of blob access specification
+      --accessVersion string                version for access specification
+      --artifactId string                   maven artifact id
+      --body string                         body of a http request
+      --bucket string                       bucket name
+      --classifier string                   maven classifier
+      --commit string                       git commit id
+      --digest string                       blob digest
+      --extension string                    maven extension name
+      --globalAccess YAML                   access specification for global access
+      --groupId string                      maven group id
+      --header <name>:<value>,<value>,...   http headers (default {})
+      --hint string                         (repository) hint for local artifacts
+      --identityPath {<name>=<value>}       identity path for specification
+      --mediaType string                    media type for artifact blob representation
+      --noredirect                          http redirect behavior
+      --reference string                    reference name
+      --region string                       region name
+      --size int                            blob size
+      --url string                          artifact or server url
+      --verb string                         http request method
 ```
 
 
 #### Input Specification Options
 
 ```text
-      --artifactId string                     maven artifact id
-      --body string                           body of a http request
-      --classifier string                     maven classifier
-      --extension string                      maven extension name
-      --groupId string                        maven group id
-      --header <name>:<value>,<value>,...     http headers (default {})
-      --hint string                           (repository) hint for local artifacts
-      --input YAML                            blob input specification (YAML)
-      --inputCompress                         compress option for input
-      --inputData !bytesBase64                data (string, !!string or !<base64>
-      --inputExcludes stringArray             excludes (path) for inputs
-      --inputFollowSymlinks                   follow symbolic links during archive creation for inputs
-      --inputFormattedJson YAML               JSON formatted text
-      --inputHelmRepository string            helm repository base URL
-      --inputIncludes stringArray             includes (path) for inputs
-      --inputJson YAML                        JSON formatted text
-      --inputLibraries stringArray            library path for inputs
-      --inputPath filepath                    path field for input
-      --inputPlatforms stringArray            input filter for image platforms ([os]/[architecture])
-      --inputPreserveDir                      preserve directory in archive for inputs
-      --inputText string                      utf8 text
-      --inputType string                      type of blob input specification
-      --inputValues YAML                      YAML based generic values for inputs
-      --inputVariants stringArray             (platform) variants for inputs
-      --inputVersion string                   version info for inputs
-      --inputYaml YAML                        YAML formatted text
-      --mediaType string                      media type for artifact blob representation
-      --noredirect                            http redirect behavior
-      --url string                            artifact or server url
-      --verb string                           http request method
+      --accessRepository string             repository URL
+      --artifactId string                   maven artifact id
+      --body string                         body of a http request
+      --classifier string                   maven classifier
+      --extension string                    maven extension name
+      --groupId string                      maven group id
+      --header <name>:<value>,<value>,...   http headers (default {})
+      --hint string                         (repository) hint for local artifacts
+      --identityPath {<name>=<value>}       identity path for specification
+      --input YAML                          blob input specification (YAML)
+      --inputComponent string               component name
+      --inputCompress                       compress option for input
+      --inputData !bytesBase64              data (string, !!string or !<base64>
+      --inputExcludes stringArray           excludes (path) for inputs
+      --inputFollowSymlinks                 follow symbolic links during archive creation for inputs
+      --inputFormattedJson YAML             JSON formatted text
+      --inputHelmRepository string          helm repository base URL
+      --inputIncludes stringArray           includes (path) for inputs
+      --inputJson YAML                      JSON formatted text
+      --inputLibraries stringArray          library path for inputs
+      --inputPath filepath                  path field for input
+      --inputPlatforms stringArray          input filter for image platforms ([os]/[architecture])
+      --inputPreserveDir                    preserve directory in archive for inputs
+      --inputText string                    utf8 text
+      --inputType string                    type of blob input specification
+      --inputValues YAML                    YAML based generic values for inputs
+      --inputVariants stringArray           (platform) variants for inputs
+      --inputVersion string                 version info for inputs
+      --inputYaml YAML                      YAML formatted text
+      --mediaType string                    media type for artifact blob representation
+      --noredirect                          http redirect behavior
+      --url string                          artifact or server url
+      --verb string                         http request method
 ```
 
 
 #### Resource Meta Data Options
 
 ```text
-      --external                              flag non-local resource
-      --extra <name>=<value>                  resource extra identity (default [])
-      --label <name>=<YAML>                   resource label (leading * indicates signature relevant, optional version separated by @)
-      --name string                           resource name
-      --resource YAML                         resource meta data (yaml)
-      --type string                           resource type
-      --version string                        resource version
+      --external                            flag non-local resource
+      --extra <name>=<value>                resource extra identity (default [])
+      --label <name>=<YAML>                 resource label (leading * indicates signature relevant, optional version separated by @)
+      --name string                         resource name
+      --resource YAML                       resource meta data (yaml)
+      --type string                         resource type
+      --version string                      resource version
 ```
 
 ### Description
@@ -439,6 +442,30 @@ with the field <code>type</code> in the <code>input</code> field:
   DEPRECATED: This type is deprecated, please use ociArtifact instead.
 
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputPlatforms</code>, <code>--mediaType</code>
+
+- Input type <code>ocm</code>
+
+  This input type allows to get a resource artifact from an OCM repository.
+
+  This blob type specification supports the following fields:
+  - **<code>ocmRepository</code>** *repository specification*
+
+    This REQUIRED property describes the OCM repository specification
+
+  - **<code>component</code>** *string*
+
+    This REQUIRED property describes the component na,e
+
+  - **<code>version</code>** *string*
+
+    This REQUIRED property describes the version of a maven artifact.
+
+  - **<code>resourceRef</code>** *relative resource reference*
+
+    This REQUIRED property describes the  resource reference for the desired
+    resource relative to the given component version .
+
+  Options used to configure fields: <code>--accessRepository</code>, <code>--identityPath</code>, <code>--inputComponent</code>, <code>--inputVersion</code>
 
 - Input type <code>spiff</code>
 
@@ -864,7 +891,7 @@ shown below.
     It uses the consumer identity and credentials for the intermediate repositories
     and the final resource access.
 
-  Options used to configure fields: <code>--accessComponent</code>, <code>--accessIdentityPath</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessComponent</code>, <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--identityPath</code>
 
 - Access type <code>s3</code>
 

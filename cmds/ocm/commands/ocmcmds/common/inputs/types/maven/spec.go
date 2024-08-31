@@ -63,7 +63,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	}
 	if s.Version == "" {
 		pathField := fldPath.Child("version")
-		allErrs = append(allErrs, field.Invalid(pathField, s.GroupId, "no group id"))
+		allErrs = append(allErrs, field.Invalid(pathField, s.GroupId, "no version"))
 	}
 
 	return allErrs

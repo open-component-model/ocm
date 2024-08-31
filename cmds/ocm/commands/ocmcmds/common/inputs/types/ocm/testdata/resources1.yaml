@@ -1,0 +1,12 @@
+name: myblob
+type: plainText
+input:
+  type: ocm
+  ocmRepository:
+    type: CommonTransportFormat
+    filePath: /ctf
+  component: acme.org/ref
+  version: v1
+  resourceRef:
+    resource:
+       name: res

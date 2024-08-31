@@ -52,7 +52,7 @@ var VersionOption = RegisterOption(NewStringOptionType("accessVersion", "version
 var ComponentOption = RegisterOption(NewStringOptionType("accessComponent", "component for access specification"))
 
 // IdentityPathOption.
-var IdentityPathOption = RegisterOption(NewIdentityPathOptionType("accessIdentityPath", "identity path for access specification"))
+var IdentityPathOption = RegisterOption(NewIdentityPathOptionType("identityPath", "identity path for specification"))
 
 // URLOption.
 var URLOption = RegisterOption(NewStringOptionType("url", "artifact or server url"))
