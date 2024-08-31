@@ -30,3 +30,9 @@ func BlobAccess(cvp ComponentVersionProvider, res ResourceProvider) (blob bpi.Bl
 	}
 	return r.BlobAccess()
 }
+
+func Provider(cvp ComponentVersionProvider, res ResourceProvider) bpi.BlobAccessProvider {
+	return bpi.BlobAccessProviderFunction(func() (bpi.BlobAccess, error) {
+		return BlobAccess(cvp, res)
+	})
+}
