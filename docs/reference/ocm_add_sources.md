@@ -32,8 +32,7 @@ sources, source, src, s
       --access YAML                         blob access specification (YAML)
       --accessComponent string              component for access specification
       --accessHostname string               hostname used for access
-      --accessRegistry string               registry base URL
-      --accessRepository string             repository URL
+      --accessRepository string             repository or registry URL
       --accessType string                   type of blob access specification
       --accessVersion string                version for access specification
       --artifactId string                   maven artifact id
@@ -62,7 +61,6 @@ sources, source, src, s
 #### Input Specification Options
 
 ```text
-      --accessRepository string             repository URL
       --artifactId string                   maven artifact id
       --body string                         body of a http request
       --classifier string                   maven classifier
@@ -498,7 +496,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This REQUIRED property describes the  resource reference for the desired
     resource relative to the given component version .
 
-  Options used to configure fields: <code>--accessRepository</code>, <code>--identityPath</code>, <code>--inputComponent</code>, <code>--inputVersion</code>
+  Options used to configure fields: <code>--identityPath</code>, <code>--inputComponent</code>, <code>--inputRepository</code>, <code>--inputVersion</code>
 
 - Input type <code>spiff</code>
 
@@ -846,7 +844,7 @@ shown below.
 
       The version name of the NPM package
 
-  Options used to configure fields: <code>--accessRegistry</code>, <code>--accessVersion</code>, <code>--package</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--package</code>
 
 - Access type <code>ociArtifact</code>
 

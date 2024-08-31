@@ -25,10 +25,7 @@ var ArtifactOption = RegisterOption(NewStringOptionType("artifactId", "maven art
 var GroupOption = RegisterOption(NewStringOptionType("groupId", "maven group id"))
 
 // RepositoryOption .
-var RepositoryOption = RegisterOption(NewStringOptionType("accessRepository", "repository URL"))
-
-// RegistryOption .
-var RegistryOption = RegisterOption(NewStringOptionType("accessRegistry", "registry base URL"))
+var RepositoryOption = RegisterOption(NewStringOptionType("accessRepository", "repository or registry URL"))
 
 // HostnameOption .
 var HostnameOption = RegisterOption(NewStringOptionType("accessHostname", "hostname used for access"))

@@ -100,7 +100,6 @@ linked library can be used:
 
 Dedicated OCM repository types:
   - <code>ComponentArchive</code>: v1
-  - <code>Composition</code>: v1
 
 OCI Repository types (using standard component repository to OCI mapping):
   - <code>CommonTransportFormat</code>: v1

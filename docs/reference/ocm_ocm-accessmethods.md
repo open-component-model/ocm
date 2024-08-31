@@ -243,7 +243,7 @@ shown below.
 
       The version name of the NPM package
 
-  Options used to configure fields: <code>--accessRegistry</code>, <code>--accessVersion</code>, <code>--package</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--package</code>
 
 - Access type <code>ociArtifact</code>
 
