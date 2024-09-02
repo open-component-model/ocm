@@ -21,4 +21,4 @@ Optionally, package paths can be added as additional arguments to the command li
 if package paths are not specified, the complete current working directory is migrated, 
 which might include `.git`, `.vscode` or any other subfolders you have there.
 
-If you want to run the script on `macOS`, make sure you are using it with `GNU sed`.
+If you want to run the script on `macOS`, make sure you are using it with GNU `sed`.
