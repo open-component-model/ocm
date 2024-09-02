@@ -25,6 +25,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/compositionmodeattr"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
+	"ocm.software/ocm/api/ocm/resolvers"
 	ocmsign "ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
@@ -488,7 +489,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
 		Expect(err).To(Succeed())
 
-		resolver := ocm.NewCompoundResolver(src)
+		resolver := resolvers.NewCompoundResolver(src)
 
 		opts := ocmsign.NewOptions(
 			ocmsign.Sign(signingattr.Get(env.OCMContext()).GetSigner(SIGN_ALGO), SIGNATURE),
@@ -513,7 +514,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		Expect(err).To(Succeed())
 		Expect(env.DirExists(OUT)).To(BeTrue())
 
-		resolver = ocm.NewCompoundResolver(tgt)
+		resolver = resolvers.NewCompoundResolver(tgt)
 
 		opts = ocmsign.NewOptions(
 			ocmsign.Resolver(resolver),

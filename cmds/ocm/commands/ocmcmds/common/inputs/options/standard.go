@@ -24,6 +24,8 @@ var (
 	RegistryOption       = options.NPMRegistryOption
 	PackageOption        = options.NPMPackageOption
 	PackageVersionOption = options.NPMVersionOption
+
+	IdentityPathOption = options.IdentityPathOption
 )
 
 // string options.
@@ -68,4 +70,7 @@ var (
 	FormattedJSONOption = flagsets.NewYAMLOptionType("inputFormattedJson", "JSON formatted text")
 )
 
-var ValuesOption = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based generic values for inputs")
+var (
+	ValuesOption    = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based generic values for inputs")
+	ComponentOption = flagsets.NewStringOptionType("inputComponent", "component name")
+)

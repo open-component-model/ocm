@@ -11,6 +11,7 @@ import (
 	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/npm"
 	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/ociblob"
+	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/ocm"
 	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/relativeociref"
 	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/s3"
 	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/wget"
