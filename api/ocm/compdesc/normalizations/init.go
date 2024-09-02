@@ -1,4 +1,4 @@
-package versions
+package normalizations
 
 import (
 	_ "ocm.software/ocm/api/ocm/compdesc/normalizations/jsonv1"

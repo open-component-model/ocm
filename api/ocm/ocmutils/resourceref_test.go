@@ -1,4 +1,4 @@
-package utils_test
+package ocmutils_test
 
 import (
 	"io"
