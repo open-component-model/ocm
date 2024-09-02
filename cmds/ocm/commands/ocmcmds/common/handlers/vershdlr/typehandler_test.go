@@ -15,13 +15,14 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 )
 
-const ARCH = "ctf"
-const COMP = "acme.org/comp1"
-const VERS1 = "1.0.0"
-const VERS2 = "2.0.0"
+const (
+	ARCH  = "ctf"
+	COMP  = "acme.org/comp1"
+	VERS1 = "1.0.0"
+	VERS2 = "2.0.0"
+)
 
 var _ = Describe("version handler", func() {
-
 	var env *TestEnv
 
 	BeforeEach(func() {
