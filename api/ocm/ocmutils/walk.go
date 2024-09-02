@@ -8,8 +8,8 @@ import (
 )
 
 // WalkingStep is used to process a component version during graph traversal.
-// If returned true, the traversal process follows local component references-
-// If an error is returned the traversal is aborted with this error,
+// If returned true, the traversal process follows local component references.
+// If an error is returned the traversal is aborted with this error.
 // Additionally, an info object of type T can be registered in the state for the
 // component version.
 type WalkingStep[T any] func(state common.WalkingState[T, ocm.ComponentVersionAccess]) (bool, error)
