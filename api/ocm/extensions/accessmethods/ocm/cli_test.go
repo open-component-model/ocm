@@ -64,9 +64,11 @@ var _ = Describe("OCM access CLI Test Environment", func() {
     componentNameMapping: urlPath
     subPath: open-component-model/ocm
   resourceRef:
-  - name: rsc1
-    other: value
-  - name: rsc2
+    resource:
+      name: rsc1
+      other: value
+    referencePath:
+    - name: rsc2
 `))
 		})
 	})
