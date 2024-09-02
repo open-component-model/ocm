@@ -11,6 +11,7 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/ocm"
@@ -112,6 +113,13 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 	dc, err := apply(*state, cv, opts, general.Optional(closecv...))
 	if err != nil {
 		return nil, err
+	}
+
+	if opts.Descriptors != nil {
+		c := state.WalkingState.Closure
+		opts.Descriptors.descs = append(opts.Descriptors.descs, maputils.TransformedValues(c, func(in *VersionInfo) compdesc.ComponentDescriptor {
+			return *in.digestingContexts[common.VersionedElementKey(cv)].Descriptor
+		})...)
 	}
 
 	return dc.Digest, nil

@@ -429,6 +429,29 @@ func (o *tsaOpt) ApplySigningOption(opts *Options) {
 	}
 }
 
+// //////////////////////////////////////////////////////////////////////////////
+type ComponentDescriptors struct {
+	descs []compdesc.ComponentDescriptor
+}
+
+func (o *ComponentDescriptors) GetDescriptors() []compdesc.ComponentDescriptor {
+	return o.descs
+}
+
+type compdescs struct {
+	descs *ComponentDescriptors
+}
+
+func ReturnVerifiedCompdescs(descs *ComponentDescriptors) Option {
+	return compdescs{descs: descs}
+}
+
+func (o compdescs) ApplySigningOption(opts *Options) {
+	if o.descs != nil {
+		opts.Descriptors = o.descs
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type Options struct {
@@ -453,6 +476,7 @@ type Options struct {
 	Keyless           bool
 	TSAUrl            string
 	UseTSA            bool
+	Descriptors       *ComponentDescriptors
 
 	effectiveRegistry signing.Registry
 }
@@ -521,6 +545,9 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	}
 	if o.UseTSA {
 		opts.UseTSA = o.UseTSA
+	}
+	if o.Descriptors != nil {
+		opts.Descriptors = o.Descriptors
 	}
 }
 
