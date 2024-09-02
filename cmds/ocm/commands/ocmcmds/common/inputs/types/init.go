@@ -1,4 +1,4 @@
-package handlers
+package types
 
 import (
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/binary"

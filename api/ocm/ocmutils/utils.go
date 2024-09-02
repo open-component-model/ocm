@@ -1,4 +1,4 @@
-package utils
+package ocmutils
 
 import (
 	"github.com/mandelsoft/goutils/errors"

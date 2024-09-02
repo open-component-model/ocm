@@ -1,4 +1,4 @@
-package scriptoption
+package config
 
 import (
 	cfgcpi "ocm.software/ocm/api/config/cpi"
