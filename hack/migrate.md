@@ -17,8 +17,8 @@ It is executed by using the same migration Bash script `migrate.sh` using the op
 
 `--script <migration script>` migrate a project using the OCM library.
 
-Optionally, package paths can be added as additional arguments to the command line. Note that by default, 
-if package paths are not specified, the complete current working directory is migrated, 
-which might include `.git`, `.vscode` or any other subfolders you have there.
+Optionally, package paths can be added as additional arguments to the command line. Note that by default,
+if package paths are not specified, the complete current working directory is migrated,
+which might include `.git`, `.vscode` or any other sub-folders you have there.
 
 If you want to run the script on `macOS`, make sure you are using it with GNU `sed`.
