@@ -2,7 +2,6 @@ package ocm
 
 import (
 	"fmt"
-	"ocm.software/ocm/api/utils/runtime"
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -10,6 +9,7 @@ import (
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/ocm/internal"
 	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 type ComponentContainer interface {
