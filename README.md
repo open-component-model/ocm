@@ -151,6 +151,11 @@ Code contributions, feature requests, bug reports, and help requests are very we
 
 OCM follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md).
 
+## Release Process
+
+The release process is automated through a [github action workflow](https://github.com/open-component-model/ocm/actions/workflows/release.yaml). 
+Please refer to the [Release Process Documentation](RELEASE_PROCESS.md) for more information.
+
 ## Licensing
 
 Copyright 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
