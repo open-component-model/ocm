@@ -1,4 +1,4 @@
-package common_test
+package misc_test
 
 import (
 	"testing"

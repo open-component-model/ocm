@@ -1,4 +1,4 @@
-package common
+package misc
 
 import (
 	"github.com/mandelsoft/logging"

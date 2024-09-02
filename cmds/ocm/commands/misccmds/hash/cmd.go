@@ -1,4 +1,4 @@
-package credentials
+package hash
 
 import (
 	"github.com/spf13/cobra"

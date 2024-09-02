@@ -1,4 +1,4 @@
-package resourcetypes
+package artifacttypes
 
 const (
 	KIND_ARTIFACT_TYPE = "artifact type"

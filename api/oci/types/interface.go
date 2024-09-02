@@ -1,4 +1,4 @@
-package cpi
+package types
 
 // This is the Context Provider Interface for credential providers
 
