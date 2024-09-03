@@ -12,7 +12,7 @@ permissions:
 jobs:
 
   nightly:
-    name: Nightly Build
+    name: ocm-cli Nightly Build
     runs-on: large_runner
     permissions:
       contents: write
