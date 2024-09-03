@@ -1,14 +1,17 @@
-package maven
+package npm
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/credentials/builtin/npm/identity"
+	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/datacontext/attrs/tmpcache"
-	"ocm.software/ocm/api/tech/maven"
+	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
+	"ocm.software/ocm/api/tech/npm"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/stdopts"
 )
@@ -17,34 +20,32 @@ type Option = optionutils.Option[*Options]
 
 type Options struct {
 	stdopts.StandardContexts
-
-	maven.FileCoordinates
+	stdopts.PathFileSystem
 }
 
 func (o *Options) Logger(keyValuePairs ...interface{}) logging.Logger {
-	return ocmlog.LogContext(o.LoggingContext.Value, o.CredentialContext.Value).Logger(maven.REALM).WithValues(keyValuePairs...)
+	return ocmlog.LogContext(o.LoggingContext.Value, o.CredentialContext.Value, o.CachingContext.Value).Logger(npm.REALM).WithValues(keyValuePairs...)
 }
 
-func (o *Options) Cache() *tmpcache.Attribute {
-	if o.CachingPath.Value != "" {
-		return tmpcache.New(o.CachingPath.Value, o.CachingFileSystem.Value)
+func (o *Options) FileSystem() vfs.FileSystem {
+	if o.PathFileSystem.Value != nil {
+		return o.PathFileSystem.Value
+	}
+	if o.CachingFileSystem.Value != nil {
+		return o.CachingFileSystem.Value
 	}
 	if o.CachingContext.Value != nil {
-		return tmpcache.Get(o.CachingContext.Value)
+		return vfsattr.Get(o.CachingContext.Value)
 	}
-	return tmpcache.Get(o.CredentialContext.Value)
+	return osfs.OsFs
 }
 
-func (o *Options) GetCredentials(repo *maven.Repository, groupId string) (maven.Credentials, error) {
-	if repo.IsFileSystem() {
-		return nil, nil
-	}
-
+func (o *Options) GetCredentials(repo string, pkg string) (cpi.Credentials, error) {
 	switch {
 	case o.Credentials.Value != nil:
-		return MapCredentials(o.Credentials.Value), nil
+		return o.Credentials.Value, nil
 	case o.CredentialContext.Value != nil:
-		return GetCredentials(o.CredentialContext.Value, repo, groupId)
+		return identity.GetCredentials(o.CredentialContext.Value, repo, pkg)
 	default:
 		return nil, nil
 	}
@@ -66,11 +67,8 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.Credentials.Value != nil {
 		opts.Credentials = o.Credentials
 	}
-	if o.Classifier != nil {
-		opts.Classifier = o.Classifier
-	}
-	if o.Extension != nil {
-		opts.Extension = o.Extension
+	if o.PathFileSystem.Value != nil {
+		opts.PathFileSystem = o.PathFileSystem
 	}
 }
 
@@ -102,57 +100,20 @@ func WithCredentials(c credentials.Credentials) Option {
 	return option[stdopts.CredentialsOptionBag](c)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-type ClassifierOptionBag interface {
-	SetClassifier(v string)
+func WithPathFileSystem(fs vfs.FileSystem) Option {
+	return option[stdopts.PathFileSystemOptionBag](fs)
 }
-
-func (o *Options) SetClassifier(v string) {
-	o.Classifier = &v
-}
-
-func WithClassifier(c string) Option {
-	return option[ClassifierOptionBag](c)
-}
-
-func WithOptionalClassifier(c *string) Option {
-	if c != nil {
-		return WithClassifier(*c)
-	}
-	return &optionutils.NoOption[*Options]{}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type ExtensionOptionBag interface {
-	SetExtension(v string)
-}
-
-func (o *Options) SetExtension(v string) {
-	o.Extension = &v
-}
-
-func WithExtension(e string) Option {
-	return option[ExtensionOptionBag](e)
-}
-
-func WithOptionalExtension(e *string) Option {
-	if e != nil {
-		return WithExtension(*e)
-	}
-	return &optionutils.NoOption[*Options]{}
-}
-
-////////////////////////////////////////////////////////////////////////////////
 
 func (o *Options) SetDataContext(ctx datacontext.Context) {
 	if c, ok := ctx.(credentials.ContextProvider); ok {
-		o.SetCredentialContext(c.CredentialsContext())
+		o.CredentialContext.Value = c.CredentialsContext()
 	}
-	o.SetCachingContext(ctx)
+	o.PathFileSystem.Value = vfsattr.Get(ctx.AttributesContext())
+	o.CachingContext.Value = ctx.AttributesContext()
 }
 
-func WithDataContext(ctx datacontext.ContextProvider) Option {
+var _ stdopts.DataContextOptionBag = (*Options)(nil)
+
+func WithDataContext(ctx datacontext.Context) Option {
 	return option[stdopts.DataContextOptionBag](ctx)
 }
