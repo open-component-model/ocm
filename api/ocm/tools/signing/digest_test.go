@@ -9,6 +9,7 @@ import (
 	. "ocm.software/ocm/api/helper/builder"
 
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"

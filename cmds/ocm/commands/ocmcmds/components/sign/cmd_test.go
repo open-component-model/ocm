@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/oci/testhelper"
 	. "ocm.software/ocm/api/ocm/testhelper"
-	common "ocm.software/ocm/api/utils/misc"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -26,6 +25,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
+	common "ocm.software/ocm/api/utils/misc"
 )
 
 const (

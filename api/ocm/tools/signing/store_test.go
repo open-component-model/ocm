@@ -62,11 +62,11 @@ var _ = Describe("Store", func() {
 
 			desc := signing.StorageDescriptor{
 				ComponentVersions: map[string]*signing.StorageEntry{
-					common.VersionedElementKey(cd1).String(): &signing.StorageEntry{
+					common.VersionedElementKey(cd1).String(): {
 						Signatures: []string{"a"},
 						Descriptor: (*compdesc.GenericComponentDescriptor)(cd1),
 					},
-					common.VersionedElementKey(cd2).String(): &signing.StorageEntry{
+					common.VersionedElementKey(cd2).String(): {
 						Signatures: []string{"b", "c"},
 						Descriptor: (*compdesc.GenericComponentDescriptor)(cd2),
 					},
@@ -85,7 +85,6 @@ var _ = Describe("Store", func() {
 
 			Expect(store.Get(cd2)).To(YAMLEqual(cd2))
 			Expect(store.Get(cd2).Equal(cd2)).To(BeTrue())
-
 		})
 	})
 })
