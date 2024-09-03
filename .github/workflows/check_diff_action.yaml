@@ -10,8 +10,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
@@ -25,10 +23,8 @@ jobs:
     - name: Check for diff
       run: |
         gitStatus="$(git status --porcelain)"
-
         if [[ -z "${gitStatus}" ]]; then
             exit 0
         fi
-
         echo "${gitStatus}"
         exit 1
