@@ -791,7 +791,7 @@ func (c *componentVersionAccessView) GetSources() []cpi.SourceAccess {
 	return result
 }
 
-func (c *componentVersionAccessView) SelectReferences(sel ...refsel.Selector) ([]compdesc.ComponentReference, error) {
+func (c *componentVersionAccessView) SelectReferences(sel ...refsel.Selector) ([]compdesc.Reference, error) {
 	err := selectors.ValidateSelectors(sel...)
 	if err != nil {
 		return nil, err
@@ -799,7 +799,7 @@ func (c *componentVersionAccessView) SelectReferences(sel ...refsel.Selector) ([
 	return c.GetDescriptor().SelectReferences(sel...)
 }
 
-func (c *componentVersionAccessView) GetReferences() []compdesc.ComponentReference {
+func (c *componentVersionAccessView) GetReferences() []compdesc.Reference {
 	return c.GetDescriptor().GetReferences()
 }
 
@@ -861,7 +861,7 @@ func (c *componentVersionAccessView) GetReferencesBySelectors(selectors []compde
 		if !ok {
 			continue
 		}
-		references = append(references, *selctx.ComponentReference)
+		references = append(references, *selctx.Reference)
 	}
 	if len(references) == 0 {
 		return references, compdesc.NotFound

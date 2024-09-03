@@ -14,6 +14,7 @@ import (
 	resources "ocm.software/ocm/cmds/ocm/commands/ocmcmds/resources/get"
 	routingslips "ocm.software/ocm/cmds/ocm/commands/ocmcmds/routingslips/get"
 	sources "ocm.software/ocm/cmds/ocm/commands/ocmcmds/sources/get"
+	verified "ocm.software/ocm/cmds/ocm/commands/ocmcmds/verified/get"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
 	"ocm.software/ocm/cmds/ocm/common/utils"
 )
@@ -33,5 +34,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(routingslips.NewCommand(ctx))
 	cmd.AddCommand(config.NewCommand(ctx))
 	cmd.AddCommand(pubsub.NewCommand(ctx))
+	cmd.AddCommand(verified.NewCommand(ctx))
 	return cmd
 }

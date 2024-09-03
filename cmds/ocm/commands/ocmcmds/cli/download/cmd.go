@@ -20,6 +20,7 @@ import (
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/storeoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/resources/common"
@@ -52,7 +53,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
 		versionconstraintsoption.New(true).SetLatest(),
 		repooption.New(),
-		output.OutputOptions(output.NewOutputs(f), downloadcmd.NewOptions(true).SetUseHandlers(), destoption.New()),
+		output.OutputOptions(output.NewOutputs(f), downloadcmd.NewOptions(true).SetUseHandlers(), destoption.New(), storeoption.New("use-verified")),
 	)}, utils.Names(Names, names...)...)
 }
 
