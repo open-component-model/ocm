@@ -95,11 +95,7 @@ func (s *session) LookupRepositoryForConfig(octx Context, data []byte, unmarshal
 	if err != nil {
 		return nil, err
 	}
-	repo, err := s.LookupRepository(octx, spec)
-	if err != nil {
-		return nil, err
-	}
-	return repo, nil
+	return s.LookupRepository(octx, spec)
 }
 
 func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
