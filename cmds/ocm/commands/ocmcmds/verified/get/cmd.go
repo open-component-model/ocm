@@ -41,7 +41,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] {<component / version}",
-		Short: "get verfied component versions",
+		Short: "get verified component versions",
 		Long: `
 Get lists remembered verified component versions.
 `,

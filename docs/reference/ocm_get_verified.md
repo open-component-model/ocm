@@ -1,4 +1,4 @@
-## ocm get verified &mdash; Get Verfied Component Versions
+## ocm get verified &mdash; Get Verified Component Versions
 
 ### Synopsis
 
