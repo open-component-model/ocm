@@ -39,7 +39,7 @@ var _ = Describe("OCM access CLI Test Environment", func() {
 
 			Expect("\n" + fs.FlagUsages()).To(Equal(`
       --accessComponent string          component for access specification
-      --accessRepository string         repository URL
+      --accessRepository string         repository or registry URL
       --accessVersion string            version for access specification
       --identityPath {<name>=<value>}   identity path for specification
 `))

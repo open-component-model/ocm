@@ -88,15 +88,17 @@ func Logger(messageContext ...logging.MessageContext) logging.Logger {
 	return logContext.Logger(messageContext...)
 }
 
-func LogContext(ctx logging.Context, provider logging.ContextProvider) logging.Context {
-	switch {
-	case ctx != nil:
+func LogContext(ctx logging.Context, provider ...logging.ContextProvider) logging.Context {
+	if ctx != nil {
 		return ctx
-	case provider != nil:
-		return provider.LoggingContext()
-	default:
-		return Context()
 	}
+
+	for _, p := range provider {
+		if p != nil {
+			return p.LoggingContext()
+		}
+	}
+	return Context()
 }
 
 // Configure applies configuration for the default log context
