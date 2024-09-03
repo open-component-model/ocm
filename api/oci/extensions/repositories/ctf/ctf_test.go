@@ -84,7 +84,7 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate filesystem ctf", func() {
-		r, err := spec.Repository(nil, nil)
+		r, err := spec.Repository(cpi.DefaultContext(), nil)
 		Expect(err).To(Succeed())
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
@@ -111,7 +111,7 @@ var _ = Describe("ctf management", func() {
 	It("instantiate tgz artifact", func() {
 		ctf.FormatTGZ.ApplyOption(&spec.StandardOptions)
 		spec.FilePath = "test.tgz"
-		r, err := spec.Repository(nil, nil)
+		r, err := spec.Repository(cpi.DefaultContext(), nil)
 		Expect(err).To(Succeed())
 
 		n, err := r.LookupNamespace("mandelsoft/test")
@@ -156,7 +156,7 @@ var _ = Describe("ctf management", func() {
 
 	Context("manifest", func() {
 		It("read from filesystem ctf", func() {
-			r, err := spec.Repository(nil, nil)
+			r, err := spec.Repository(cpi.DefaultContext(), nil)
 			Expect(err).To(Succeed())
 			Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 			n, err := r.LookupNamespace("mandelsoft/test")
@@ -165,7 +165,7 @@ var _ = Describe("ctf management", func() {
 			Expect(n.Close()).To(Succeed())
 			Expect(r.Close()).To(Succeed())
 
-			r, err = ctf.Open(nil, accessobj.ACC_READONLY, "test", 0, accessio.PathFileSystem(tempfs))
+			r, err = ctf.Open(cpi.DefaultContext(), accessobj.ACC_READONLY, "test", 0, accessio.PathFileSystem(tempfs))
 			Expect(err).To(Succeed())
 			defer r.Close()
 

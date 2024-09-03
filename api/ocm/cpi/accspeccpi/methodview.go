@@ -7,6 +7,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/credentials"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/refmgmt"
@@ -47,6 +48,9 @@ func BlobAccessForAccessSpec(spec AccessSpec, cv ComponentVersionAccess) (blobac
 }
 
 func accessMethodViewCreator(impl AccessMethodImpl, view *refmgmt.View[AccessMethod]) AccessMethod {
+	if _, ok := impl.(DigestSpecProvider); ok {
+		return &accessMethodViewWithDigest{accessMethodView{view, impl}}
+	}
 	return &accessMethodView{view, impl}
 }
 
@@ -55,10 +59,19 @@ type accessMethodView struct {
 	methodimpl AccessMethodImpl
 }
 
+type accessMethodViewWithDigest struct {
+	accessMethodView
+}
+
 var (
 	_ AccessMethodView                     = (*accessMethodView)(nil)
 	_ credentials.ConsumerIdentityProvider = (*accessMethodView)(nil)
+	_ DigestSpecProvider                   = (*accessMethodViewWithDigest)(nil)
 )
+
+func (a *accessMethodViewWithDigest) GetDigestSpec() (*metav1.DigestSpec, error) {
+	return a.methodimpl.(DigestSpecProvider).GetDigestSpec()
+}
 
 func (a *accessMethodView) Unwrap() interface{} {
 	return a.methodimpl

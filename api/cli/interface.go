@@ -1,4 +1,4 @@
-package clictx
+package cli
 
 import (
 	"ocm.software/ocm/api/cli/internal"

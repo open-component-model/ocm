@@ -5,6 +5,7 @@ import (
 )
 
 type (
-	Context    = internal.Context
-	Repository = internal.Repository
+	Context            = internal.Context
+	Repository         = internal.Repository
+	DigestSpecProvider = internal.DigestSpecProvider
 )

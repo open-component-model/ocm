@@ -8,6 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf/format"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf/index"
@@ -126,8 +127,12 @@ func OpenFromBlob(ctx cpi.ContextProvider, acc accessobj.AccessMode, blob blobac
 	return Open(ctx, acc&accessobj.ACC_READONLY, "", 0, o)
 }
 
-func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
-	o, create, err := accessobj.HandleAccessMode(acc, path, nil, opts...)
+func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode vfs.FileMode, olist ...accessio.Option) (*Object, error) {
+	opts, err := accessio.AccessOptions(&accessio.StandardOptions{PathFileSystem: vfsattr.Get(ctx.OCIContext())}, olist...)
+	if err != nil {
+		return nil, err
+	}
+	o, create, err := accessobj.HandleAccessMode(acc, path, opts)
 	if err != nil {
 		return nil, err
 	}

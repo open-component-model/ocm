@@ -25,6 +25,7 @@ const (
 	KIND_SOURCE             = internal.KIND_SOURCE
 	KIND_REFERENCE          = internal.KIND_REFERENCE
 	KIND_REPOSITORYSPEC     = internal.KIND_REPOSITORYSPEC
+	KIND_OCM_REFERENCE      = internal.KIND_OCM_REFERENCE
 )
 
 const CONTEXT_TYPE = internal.CONTEXT_TYPE

@@ -48,7 +48,13 @@ var BucketOption = RegisterOption(NewStringOptionType("bucket", "bucket name"))
 // VersionOption .
 var VersionOption = RegisterOption(NewStringOptionType("accessVersion", "version for access specification"))
 
-// URLOption .
+// ComponentOption.
+var ComponentOption = RegisterOption(NewStringOptionType("accessComponent", "component for access specification"))
+
+// IdentityPathOption.
+var IdentityPathOption = RegisterOption(NewIdentityPathOptionType("identityPath", "identity path for specification"))
+
+// URLOption.
 var URLOption = RegisterOption(NewStringOptionType("url", "artifact or server url"))
 
 var HTTPHeaderOption = RegisterOption(NewStringSliceMapColonOptionType("header", "http headers"))
@@ -76,3 +82,6 @@ var NPMPackageOption = RegisterOption(NewStringOptionType("package", "npm packag
 
 // NPMVersionOption sets the version of the npm package.
 var NPMVersionOption = RegisterOption(NewStringOptionType("version", "npm package version"))
+
+// IdPathOption is a path of identity specs.
+var IdPathOption = RegisterOption(NewStringArrayOptionType("idpath", "identity path (attr=value{,attr=value}"))

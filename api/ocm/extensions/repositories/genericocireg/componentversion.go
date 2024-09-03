@@ -13,6 +13,7 @@ import (
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/compdesc"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/cpi/repocpi"
@@ -27,6 +28,7 @@ import (
 	"ocm.software/ocm/api/utils/errkind"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 // newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact acess is closed.
@@ -147,6 +149,20 @@ func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescript
 	return c.Update()
 }
 
+type LayerAnnotations []ArtifactInfo
+
+type ArtifactInfo struct {
+	// Kind specifies whether the artifact is a source, resource or a label
+	Kind     string          `json:"kind"`
+	Identity metav1.Identity `json:"identity"`
+}
+
+const (
+	ARTKIND_RESOURCE = "resource"
+	ARTKIND_SOURCE   = "source"
+	OCM_ARTIFACT     = "ocm-artifact"
+)
+
 func (c *ComponentVersionContainer) Update() error {
 	logger := Logger(c.GetContext()).WithValues("cv", common.NewNameVersion(c.comp.name, c.version))
 	err := c.Check()
@@ -155,6 +171,8 @@ func (c *ComponentVersionContainer) Update() error {
 	}
 
 	if c.state.HasChanged() {
+		layerAnnotations := map[int]LayerAnnotations{}
+
 		logger.Debug("update component version")
 		desc := c.GetDescriptor()
 		layers := set.Set[int]{}
@@ -167,6 +185,10 @@ func (c *ComponentVersionContainer) Update() error {
 				return fmt.Errorf("failed resource layer evaluation: %w", err)
 			}
 			if l > 0 {
+				layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
+					Kind:     ARTKIND_RESOURCE,
+					Identity: r.GetIdentity(desc.Resources),
+				})
 				layers.Delete(l)
 			}
 			if s != r.Access {
@@ -179,6 +201,10 @@ func (c *ComponentVersionContainer) Update() error {
 				return fmt.Errorf("failed source layer evaluation: %w", err)
 			}
 			if l > 0 {
+				layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
+					Kind:     ARTKIND_SOURCE,
+					Identity: r.GetIdentity(desc.Sources),
+				})
 				layers.Delete(l)
 			}
 			if s != r.Access {
@@ -186,6 +212,17 @@ func (c *ComponentVersionContainer) Update() error {
 			}
 		}
 		m := c.manifest.GetDescriptor()
+
+		for layer, info := range layerAnnotations {
+			data, err := runtime.DefaultJSONEncoding.Marshal(info)
+			if err != nil {
+				return err
+			}
+			if m.Layers[layer].Annotations == nil {
+				m.Layers[layer].Annotations = map[string]string{}
+			}
+			m.Layers[layer].Annotations[OCM_ARTIFACT] = string(data)
+		}
 		i := len(m.Layers) - 1
 
 		for i > 0 {

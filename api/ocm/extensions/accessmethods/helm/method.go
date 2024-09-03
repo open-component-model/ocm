@@ -41,7 +41,7 @@ func New(chart string, repourl string) *AccessSpec {
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
-	// HelmRepository is the URL og the helm repository to load the chart from.
+	// HelmRepository is the URL of the helm repository to load the chart from.
 	HelmRepository string `json:"helmRepository"`
 
 	// HelmChart if the name of the helm chart and its version separated by a colon.

@@ -22,6 +22,7 @@ import (
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -123,7 +124,7 @@ var _ = Describe("access method", func() {
 		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 		Expect(err).To(Succeed())
 		archcloser := session.AddCloser(src)
-		resolver := ocm.NewCompoundResolver(src)
+		resolver := resolvers.NewCompoundResolver(src)
 
 		cv, err := resolver.LookupComponentVersion(COMPONENTB, VERSION)
 		Expect(err).To(Succeed())

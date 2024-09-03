@@ -10,6 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -53,7 +54,7 @@ func (m *ImageMapping) Evaluate(idx int, cv ocm.ComponentVersionAccess, resolver
 			name = fmt.Sprintf("%s %d", name, idx+1)
 		}
 	}
-	acc, rcv, err := utils.ResolveResourceReference(cv, m.ResourceReference, resolver)
+	acc, rcv, err := resourcerefs.ResolveResourceReference(cv, m.ResourceReference, resolver)
 	if err != nil {
 		return nil, errors.Wrapf(err, "mapping", fmt.Sprintf("%s (%s)", name, &m.ResourceReference))
 	}
