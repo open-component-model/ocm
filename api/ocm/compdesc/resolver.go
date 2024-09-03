@@ -92,5 +92,8 @@ func (c *CompoundResolver) LookupComponentVersion(name string, version string) (
 func (c *CompoundResolver) AddResolver(r ComponentVersionResolver) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	c.resolvers = append(c.resolvers, r)
+
+	if r != nil {
+		c.resolvers = append(c.resolvers, r)
+	}
 }
