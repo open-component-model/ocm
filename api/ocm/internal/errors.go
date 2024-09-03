@@ -17,6 +17,7 @@ const (
 	KIND_SOURCE           = "component source"
 	KIND_REFERENCE        = compdesc.KIND_REFERENCE
 	KIND_REPOSITORYSPEC   = "repository specification"
+	KIND_OCM_REFERENCE    = "ocm reference"
 )
 
 func ErrComponentVersionNotFound(name, version string) error {

@@ -1,4 +1,4 @@
-package testutils_test
+package resourcerefs_test
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Testutils")
+	RunSpecs(t, "OCM ResourceRefs Test Suite")
 }

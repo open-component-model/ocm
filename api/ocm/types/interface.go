@@ -1,4 +1,4 @@
-package context
+package types
 
 import (
 	"ocm.software/ocm/api/ocm/internal"

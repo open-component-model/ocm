@@ -16,7 +16,7 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/extensions/download"
-	utils2 "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
 	utils3 "ocm.software/ocm/api/utils"
@@ -161,7 +161,7 @@ func (a *action) Out() error {
 	rid := metav1.NewResourceRef(a.cmd.Id)
 	resolver := lookupoption.From(a.cmd)
 
-	ires, eff, err := utils2.MatchResourceReference(cv, toi.TypeTOIPackage, rid, resolver)
+	ires, eff, err := resourcerefs.MatchResourceReference(cv, toi.TypeTOIPackage, rid, resolver)
 	if err != nil {
 		return errors.Wrapf(err, "package resource in %s", nv)
 	}
@@ -243,7 +243,7 @@ func (a *action) handle(kind, path string, cv ocm.ComponentVersionAccess, spec *
 }
 
 func (a *action) download(kind, path string, cv ocm.ComponentVersionAccess, spec *metav1.ResourceReference, resolver ocm.ComponentVersionResolver) error {
-	res, _, err := utils2.MatchResourceReference(cv, toi.TypeYAML, *spec, resolver)
+	res, _, err := resourcerefs.MatchResourceReference(cv, toi.TypeYAML, *spec, resolver)
 	if err != nil {
 		return errors.Wrapf(err, "%s resource", kind)
 	}

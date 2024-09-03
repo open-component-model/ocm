@@ -1,4 +1,4 @@
-package handlers
+package types
 
 import (
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/binary"
@@ -9,6 +9,7 @@ import (
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/helm"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/maven"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
+	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ocm"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/spiff"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/utf8"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/wget"

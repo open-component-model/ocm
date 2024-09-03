@@ -1,4 +1,4 @@
-package github
+package s3access
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
