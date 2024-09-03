@@ -11,18 +11,9 @@ permissions:
 
 jobs:
 
-  components:
-    name: Component CTF Builds
-    uses: ./.github/workflows/components.yaml
-    permissions:
-      contents: read
-      pull-requests: read
-
   nightly:
     name: Nightly Build
     runs-on: large_runner
-    needs:
-    - components
     permissions:
       contents: write
       id-token: write
