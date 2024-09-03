@@ -82,7 +82,5 @@ jobs:
     - name: Update Chocolatey package
       run: |
         .\hack\chocolatey\update.ps1
-    - name: Push Chocolatey package
-      uses: crazy-max/ghaction-chocolatey@v3
-      with:
-        args: push ocm-cli.${{ env.RELEASE_VERSION }}.nupkg --source "'https://push.chocolatey.org/'" --api-key="${{ secrets.CHOCO_API_KEY }}"
+        choco push ocm-cli.${{ env.RELEASE_VERSION }}.nupkg --source "'https://push.chocolatey.org/'" --api-key="${{ secrets.CHOCO_API_KEY }}"
+
