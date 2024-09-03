@@ -189,7 +189,6 @@ successfully verified github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
 	})
 
 	Context("verified store", func() {
-
 		It("signs transport archive", func() {
 			Prepare()
 

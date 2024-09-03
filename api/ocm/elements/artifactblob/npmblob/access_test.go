@@ -5,13 +5,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
-	"ocm.software/ocm/api/tech/npm/npmtest"
 
 	"ocm.software/ocm/api/ocm/elements"
 	me "ocm.software/ocm/api/ocm/elements/artifactblob/npmblob"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
+	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/tech/npm/npmtest"
 )
 
 var _ = Describe("blobaccess for npm", func() {

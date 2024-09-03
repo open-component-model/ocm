@@ -7,6 +7,7 @@ import (
 	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
+	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
@@ -16,8 +17,6 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
-
-	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ocm"

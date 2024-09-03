@@ -15,7 +15,6 @@ import (
 )
 
 var _ = Describe("Method", func() {
-
 	It("PackageUrl()", func() {
 		packageUrl := "https://registry.npmjs.org/yargs"
 		acc := Must(npm.NewPackageSpec("https://registry.npmjs.org", "yargs", "17.7.1"))
