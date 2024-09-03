@@ -25,8 +25,8 @@ func (b Builder) WithContext(ctx context.Context) Builder {
 	return b
 }
 
-func (b Builder) WithAttributes(paranetAttr Attributes) Builder {
-	b.attributes = paranetAttr
+func (b Builder) WithAttributes(parentAttr Attributes) Builder {
+	b.attributes = parentAttr
 	return b
 }
 
@@ -59,5 +59,5 @@ func (b Builder) New(m ...BuilderMode) Context {
 		}
 	}
 
-	return newWithActions(mode, nil, b.actions)
+	return newWithActions(mode, b.attributes, b.actions)
 }

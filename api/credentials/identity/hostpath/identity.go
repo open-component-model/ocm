@@ -66,13 +66,17 @@ func Match(identityType string, request, cur, id cpi.ConsumerIdentity) (match bo
 		}
 	}
 
-	if request[ID_PATHPREFIX] != "" {
-		if id[ID_PATHPREFIX] != "" {
-			if len(id[ID_PATHPREFIX]) > len(request[ID_PATHPREFIX]) {
+	reqPP := PathPrefix(request)
+	curPP := PathPrefix(cur)
+	idPP := PathPrefix(id)
+
+	if reqPP != "" {
+		if idPP != "" {
+			if len(idPP) > len(reqPP) {
 				return false, false
 			}
-			pcomps := strings.Split(request[ID_PATHPREFIX], "/")
-			icomps := strings.Split(id[ID_PATHPREFIX], "/")
+			pcomps := strings.Split(reqPP, "/")
+			icomps := strings.Split(idPP, "/")
 			if len(icomps) > len(pcomps) {
 				return false, false
 			}
@@ -83,7 +87,7 @@ func Match(identityType string, request, cur, id cpi.ConsumerIdentity) (match bo
 			}
 		}
 	} else {
-		if id[ID_PATHPREFIX] != "" {
+		if idPP != "" {
 			return false, false
 		}
 	}
@@ -103,7 +107,7 @@ func Match(identityType string, request, cur, id cpi.ConsumerIdentity) (match bo
 		return true, true
 	}
 
-	if len(cur[ID_PATHPREFIX]) < len(id[ID_PATHPREFIX]) {
+	if len(curPP) < len(idPP) {
 		return true, true
 	}
 	return true, false
@@ -145,4 +149,11 @@ func GetConsumerIdentity(typ, _url string) cpi.ConsumerIdentity {
 		id[ID_PATHPREFIX] = path
 	}
 	return id
+}
+
+func PathPrefix(id cpi.ConsumerIdentity) string {
+	if id == nil {
+		return ""
+	}
+	return strings.TrimPrefix(id[ID_PATHPREFIX], "/")
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/ocm"
@@ -96,6 +97,11 @@ func (s *WalkingState) GetContext(nv common.NameVersion, ctxkey common.NameVersi
 	return vi.digestingContexts[ctxkey]
 }
 
+func DefaultWalkingState(octx ocm.ContextProvider) *WalkingState {
+	s := NewWalkingState(octx.OCMContext().LoggingContext().WithContext(REALM))
+	return &s
+}
+
 func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
 	if printer != nil {
 		opts = opts.Dup()
@@ -106,8 +112,7 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 		return nil, err
 	}
 	if state == nil {
-		s := NewWalkingState(cv.GetContext().LoggingContext().WithContext(REALM))
-		state = &s
+		state = DefaultWalkingState(cv.GetContext())
 	}
 	dc, err := apply(*state, cv, opts, general.Optional(closecv...))
 	if err != nil {
@@ -115,6 +120,14 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 	}
 
 	return dc.Digest, nil
+}
+
+func ListComponentDescriptors(state *WalkingState) []*compdesc.ComponentDescriptor {
+	c := state.WalkingState.Closure
+	nv := state.WalkingState.Context.Key
+	return maputils.TransformedValues(c, func(in *VersionInfo) *compdesc.ComponentDescriptor {
+		return in.digestingContexts[nv].Descriptor
+	})
 }
 
 func RequireReProcessing(vi *VersionInfo, ctx *DigestContext, opts *Options) bool {
