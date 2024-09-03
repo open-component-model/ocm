@@ -16,13 +16,6 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
-    - name: Restore Go cache
-      uses: actions/cache@v4
-      with:
-        path: /home/runner/work/_temp/_github_home/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
     - name: Make generate and deepcopy
       run: |
         make -f hack/Makefile mdref && make -f hack/Makefile go-bindata && make generate && make generate-deepcopy

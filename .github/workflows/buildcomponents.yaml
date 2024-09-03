@@ -9,13 +9,7 @@ on:
         default: false
 
 jobs:
-#  lint-and-test:
-#    uses: ./.github/workflows/lint_and_test.yaml
-#    permissions:
-#      contents: read
-#      pull-requests: read
   components:
-#    needs: lint-and-test
     name: Trigger component build
     runs-on: large_runner
     permissions:
@@ -36,16 +30,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: '${{ github.workspace }}/go.mod'
-
-      - name: Cache go-build and mod
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build/
-            ~/go/pkg/mod/
-          key: go-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            go-
 
       - name: Push OCM Components
         if: inputs.ocm_push == true

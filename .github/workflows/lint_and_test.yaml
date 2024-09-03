@@ -22,15 +22,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - name: Cache go-build and mod
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build/
-            ~/go/pkg/mod/
-          key: go-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            go-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -48,15 +39,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - name: Cache go-build and mod
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build/
-            ~/go/pkg/mod/
-          key: go-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            go-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -83,15 +65,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - name: Cache go-build and mod
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build/
-            ~/go/pkg/mod/
-          key: go-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            go-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
