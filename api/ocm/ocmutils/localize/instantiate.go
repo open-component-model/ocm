@@ -7,7 +7,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/download"
-	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	common "ocm.software/ocm/api/utils/misc"
 )
 
@@ -22,7 +22,7 @@ func Instantiate(rules *InstantiationRules, cv ocm.ComponentVersionAccess, resol
 		return errors.Wrapf(err, "applying instance configuration")
 	}
 
-	template, rcv, err := utils.ResolveResourceReference(cv, rules.Template, resolver)
+	template, rcv, err := resourcerefs.ResolveResourceReference(cv, rules.Template, resolver)
 	if err != nil {
 		return errors.Wrapf(err, "resolving template resource %s", rules.Template)
 	}

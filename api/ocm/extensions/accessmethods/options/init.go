@@ -12,6 +12,7 @@ const (
 	TYPE_STRING2STRINGSLICE     = "string=string,string"
 	TYPE_STRINGCOLONSTRINGSLICE = "string:string,string"
 	TYPE_BYTES                  = "[]byte"
+	TYPE_IDENTITYPATH           = "[]identity"
 )
 
 func init() {
@@ -26,6 +27,7 @@ func init() {
 	DefaultRegistry.RegisterValueType(TYPE_STRING2STRINGSLICE, NewStringSliceMapOptionType, "string map defined by dedicated assignment of comma separated strings")
 	DefaultRegistry.RegisterValueType(TYPE_STRINGCOLONSTRINGSLICE, NewStringSliceMapColonOptionType, "string map defined by dedicated assignment of comma separated strings")
 	DefaultRegistry.RegisterValueType(TYPE_BYTES, NewBytesOptionType, "byte value")
+	DefaultRegistry.RegisterValueType(TYPE_IDENTITYPATH, NewIdentityPathOptionType, "identity path")
 }
 
 func RegisterOption(o OptionType) OptionType {

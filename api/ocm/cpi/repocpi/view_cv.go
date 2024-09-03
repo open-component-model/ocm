@@ -401,14 +401,30 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 
 		// evaluate given digesting constraints and settings
 		hashAlgo, digester, digest := c.evaluateResourceDigest(res, old, *opts)
+		digestForwarded := false
+		if digest == "" {
+			if p, ok := meth.(DigestSpecProvider); ok {
+				dig, err := p.GetDigestSpec()
+				if dig != nil && err == nil {
+					// always prefer already known digest with its method
+					// if no concrete digest value is given by the caller
+					digest = dig.Value
+					hashAlgo = dig.HashAlgorithm
+					digester.HashAlgorithm = hashAlgo
+					digester.NormalizationAlgorithm = dig.NormalisationAlgorithm
+					digestForwarded = true
+				}
+			}
+		}
+
 		hasher := opts.GetHasher(hashAlgo)
-		if digester.HashAlgorithm == "" && hasher == nil {
+		if hasher == nil {
 			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, hashAlgo)
 		}
 
 		if !compdesc.IsNoneAccessKind(res.Access.GetKind()) {
 			var calculatedDigest *cpi.DigestDescriptor
-			if (!opts.IsSkipVerify() && digest != "") || (!opts.IsSkipDigest() && digest == "") {
+			if (!opts.IsSkipVerify() && !digestForwarded && digest != "") || (!opts.IsSkipDigest() && digest == "") {
 				dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, opts.HasherProvider, meth, digester)
 				if err != nil {
 					return err
@@ -417,11 +433,11 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 					return fmt.Errorf("%s: no digester accepts resource", res.Name)
 				}
 				calculatedDigest = &dig[0]
-			}
 
-			if digest != "" && !opts.IsSkipVerify() {
-				if digest != calculatedDigest.Value {
-					return fmt.Errorf("digest mismatch: %s != %s", calculatedDigest.Value, digest)
+				if digest != "" && !opts.IsSkipVerify() {
+					if digest != calculatedDigest.Value {
+						return fmt.Errorf("digest mismatch: %s != %s", calculatedDigest.Value, digest)
+					}
 				}
 			}
 

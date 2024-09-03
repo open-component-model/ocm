@@ -11,6 +11,7 @@ anchore
 api
 archlinux
 artifactid
+attr
 aur
 auth
 autoconfigure

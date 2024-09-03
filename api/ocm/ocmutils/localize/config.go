@@ -9,7 +9,7 @@ import (
 
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/spiff"
 )
@@ -38,7 +38,7 @@ func Configure(
 	stubs := spiff.Options{}
 	for i, lib := range libraries {
 		opt, err := func() (spiff.OptionFunction, error) {
-			res, eff, err := utils.ResolveResourceReference(cv, lib, resolver)
+			res, eff, err := resourcerefs.ResolveResourceReference(cv, lib, resolver)
 			if err != nil {
 				return nil, errors.ErrNotFound("library resource %s not found", lib.String())
 			}

@@ -59,19 +59,6 @@ The following handler names are possible:
     Alternatively, a single string value can be given representing an OCI repository
     reference.
 
-  - <code>ocm/mavenPackage</code>: uploading maven artifacts
-
-    The <code>ocm/mavenPackage</code> uploader is able to upload maven artifacts (whole GAV only!)
-    as artifact archive according to the maven artifact spec.
-    If registered the default mime type is: application/x-tgz
-
-    It accepts a plain string for the URL or a config with the following field:
-    'url': the URL of the maven repository.
-
-  - <code>plugin</code>: [downloaders provided by plugins]
-
-    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
-
   - <code>ocm/npmPackage</code>: uploading npm artifacts
 
     The <code>ocm/npmPackage</code> uploader is able to upload npm artifacts
@@ -80,6 +67,19 @@ The following handler names are possible:
 
     It accepts a plain string for the URL or a config with the following field:
     'url': the URL of the npm repository.
+
+  - <code>plugin</code>: [downloaders provided by plugins]
+
+    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
+
+  - <code>ocm/mavenPackage</code>: uploading maven artifacts
+
+    The <code>ocm/mavenPackage</code> uploader is able to upload maven artifacts (whole GAV only!)
+    as artifact archive according to the maven artifact spec.
+    If registered the default mime type is: application/x-tgz
+
+    It accepts a plain string for the URL or a config with the following field:
+    'url': the URL of the maven repository.
 
 
 

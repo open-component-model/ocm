@@ -15,6 +15,11 @@ import (
 	"ocm.software/ocm/api/utils/mime"
 )
 
+const (
+	COMPONENT = "acme.org/test"
+	VERSION   = "v1"
+)
+
 var _ = Describe("add resources", func() {
 	var ctx ocm.Context
 	var cv ocm.ComponentVersionAccess

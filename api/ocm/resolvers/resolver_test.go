@@ -1,4 +1,4 @@
-package ocm_test
+package resolvers_test
 
 import (
 	"fmt"
@@ -8,11 +8,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-	"ocm.software/ocm/api/ocm/internal"
 
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
+	"ocm.software/ocm/api/ocm/internal"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 )
@@ -96,13 +97,13 @@ var _ = Describe("resolver", func() {
 	})
 })
 
-func Check(r ocm.ResolverRule, prefix string, spec ocm.RepositorySpec, prio int) {
+func Check(r resolvers.ResolverRule, prefix string, spec ocm.RepositorySpec, prio int) {
 	ExpectWithOffset(1, r.GetPrefix()).To(Equal(prefix))
 	ExpectWithOffset(1, r.GetPriority()).To(Equal(prio))
 	ExpectWithOffset(1, r.GetSpecification()).To(BeIdenticalTo(spec))
 }
 
-func Print(rules []ocm.ResolverRule) {
+func Print(rules []resolvers.ResolverRule) {
 	list := []string{}
 	for _, r := range rules {
 		list = append(list, fmt.Sprintf("[%d]%s", r.GetPriority(), r.GetPrefix()))
