@@ -21,12 +21,10 @@ jobs:
       run: |
         if [ -n "${{ github.event.inputs.version }}" ]; then
           echo "RELEASE_VERSION=$(echo ${{ github.event.inputs.version }} | tr -d ['v'])" >> $GITHUB_ENV
-          cat $GITHUB_ENV
           exit 0
         fi
         if [ -n "${{ github.event.client_payload.version }}" ]; then
           echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
-          cat $GITHUB_ENV
           exit 0
         fi
         echo "Version not provided"
@@ -71,7 +69,6 @@ jobs:
           $repository_version = "$repository_version" -replace 'v'
           echo "RELEASE_VERSION=($repository_version -replace 'v')" | Out-File $env:GITHUB_ENV
         }
-        Get-Content $env:GITHUB_ENV
     - name: Generate token
       id: generate_token
       uses: tibdex/github-app-token@v2
