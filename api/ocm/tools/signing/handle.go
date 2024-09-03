@@ -97,6 +97,11 @@ func (s *WalkingState) GetContext(nv common.NameVersion, ctxkey common.NameVersi
 	return vi.digestingContexts[ctxkey]
 }
 
+func DefaultWalkingState(octx ocm.ContextProvider) *WalkingState {
+	s := NewWalkingState(octx.OCMContext().LoggingContext().WithContext(REALM))
+	return &s
+}
+
 func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
 	if printer != nil {
 		opts = opts.Dup()
@@ -107,22 +112,22 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 		return nil, err
 	}
 	if state == nil {
-		s := NewWalkingState(cv.GetContext().LoggingContext().WithContext(REALM))
-		state = &s
+		state = DefaultWalkingState(cv.GetContext())
 	}
 	dc, err := apply(*state, cv, opts, general.Optional(closecv...))
 	if err != nil {
 		return nil, err
 	}
 
-	if opts.Descriptors != nil {
-		c := state.WalkingState.Closure
-		opts.Descriptors.descs = append(opts.Descriptors.descs, maputils.TransformedValues(c, func(in *VersionInfo) compdesc.ComponentDescriptor {
-			return *in.digestingContexts[common.VersionedElementKey(cv)].Descriptor
-		})...)
-	}
-
 	return dc.Digest, nil
+}
+
+func ListComponentDescriptors(state *WalkingState) []*compdesc.ComponentDescriptor {
+	c := state.WalkingState.Closure
+	nv := state.WalkingState.Context.Key
+	return maputils.TransformedValues(c, func(in *VersionInfo) *compdesc.ComponentDescriptor {
+		return in.digestingContexts[nv].Descriptor
+	})
 }
 
 func RequireReProcessing(vi *VersionInfo, ctx *DigestContext, opts *Options) bool {

@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/ocm/internal"
@@ -90,11 +91,7 @@ func (s *session) Close() error {
 }
 
 func (s *session) LookupRepositoryForConfig(octx Context, data []byte, unmarshaler ...runtime.Unmarshaler) (Repository, error) {
-	var u runtime.Unmarshaler
-	if len(unmarshaler) > 0 {
-		u = unmarshaler[0]
-	}
-	spec, err := octx.RepositorySpecForConfig(data, u)
+	spec, err := octx.RepositorySpecForConfig(data, general.Optional(unmarshaler...))
 	if err != nil {
 		return nil, err
 	}
