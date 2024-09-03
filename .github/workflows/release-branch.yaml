@@ -1,0 +1,66 @@
+
+name: Release Branch Creation
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        description: "Tag name (if other than execution base)"
+        required: false
+        default: ""
+
+jobs:
+  check-and-create:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      repository-projects: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Create Release Branch
+      run: |
+        set -e
+        
+        tag="${{github.event.inputs.tag}}"
+        if [ -n "$tag" ]; then
+          if ! git ls-remote --tags --exit-code origin "$tag" >/dev/null; then
+            >&2 echo "tag $tag not found"
+            exit 1
+          fi
+          git fetch origin "$tag"
+          git checkout "$tag"
+        else 
+          if [ "${{ github.ref_type }}" != "tag" ]; then
+            >&2 echo "please run workflow on desired tag to create a release branch for or specify a tag as input"
+            exit 1
+          fi
+        
+          tag="${{ github.ref_name }}"
+        fi 
+        
+        if ! [[ "$tag" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          >&2 echo "no valid non-pre-release tag $tag"
+          exit 1
+        fi
+        if [ "$tag" == "${tag%.0}" ]; then
+          >&2 echo "please use a non-patch tag"
+          exit 1
+        fi
+        if git ls-remote --exit-code origin refs/heads/releases/$tag ; then
+          >&2 echo "branch releases/$tag already exists"
+          exit 1
+        fi
+        echo "creating release branch for $tag"
+        n="releases/$tag"
+        git checkout -b "$n"
+        v="$(go run ./api/version/generate bump-patch)"
+        echo "$v" > VERSION
+        git add VERSION
+        git commit -m "Prepare Development of v$v"
+        git push origin "$n"
