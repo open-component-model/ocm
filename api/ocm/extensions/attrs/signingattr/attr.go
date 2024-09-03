@@ -37,7 +37,7 @@ format:
 
 <pre>
 {
-  "publicKeys"": [
+  "publicKeys": [
      "&lt;provider>": {
        "data": ""&lt;base64>"
      }
@@ -47,6 +47,7 @@ format:
        "path": ""&lt;file path>"
      }
   ]
+}
 </pre>
 
 One of following data fields are possible:

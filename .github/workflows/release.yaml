@@ -35,7 +35,7 @@ jobs:
           v="v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
           if [ -n "${{ github.event.inputs.prerelease }}" ]; then
             echo "Candidate: $v"
-          else 
+          else
             echo "Candidate: $v (taken from source)"
           fi
         else
@@ -262,7 +262,7 @@ jobs:
           echo "Deleting branch $branch_name"
         done
 
-    - name: Publish Release Event
+    - name: Publish Release Event to Website
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v3
       with:
@@ -270,3 +270,12 @@ jobs:
         repository: open-component-model/ocm-website
         event-type: ocm-cli-release
         client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
+
+    - name: Publish Release Event for other package registries
+      if: inputs.release_candidate == false
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ steps.generate_token.outputs.token }}
+        repository: open-component-model/ocm
+        event-type: ocm-cli-release
+        client-payload: '{"version": "${{ env.RELEASE_VERSION }}"}'
