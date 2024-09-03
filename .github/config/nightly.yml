@@ -51,6 +51,6 @@ archives:
 
 nightly:
   version_template: "0.0.0-nightly"
-  tag_name: ocm-cli-nightly
+  tag_name: ocm-cli/nightly
   publish_release: true
   keep_single_release: true
