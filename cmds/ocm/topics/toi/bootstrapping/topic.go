@@ -61,8 +61,8 @@ additionalResources:
 `,
 		Annotations: map[string]string{"ExampleCodeStyle": "yaml"},
 		Long: `
-TOI is a small toolset on top of the Open Component Model. It provides
-a possibility to run images taken from a component version with user
+Tiny OCM Installer (TOI) is a small toolset on top of the Open Component Model.
+It provides a possibility to run images taken from a component version with user
 configuration and feed them with the content of this component version.
 It is some basic mechanism, which can be used to execute simple installation
 steps based on content described by the Open Component Model

@@ -1,4 +1,5 @@
 version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -32,6 +33,7 @@ builds:
     id: windows
     goos:
       - windows
+
 archives:
   - name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     id: nix
@@ -55,11 +57,13 @@ archives:
 source:
   enabled: true
   name_template: '{{ .ProjectName }}-{{ .Version }}-source_code'
+
 sboms:
   - id: source
     artifacts: source
     documents:
       - "{{ .ProjectName }}-{{ .Version }}-sbom.spdx.json"
+
 signs:
   - cmd: cosign
     env:
@@ -73,12 +77,14 @@ signs:
       - '--yes'
     artifacts: checksum
     output: true
+
 changelog:
   sort: asc
   filters:
     exclude:
       - '^docs:'
       - '^test:'
+
 brews:
   - name: ocm
     repository:
@@ -90,6 +96,7 @@ brews:
     description: "The OCM CLI makes it easy to create component versions and embed them in build processes."
     test: |
       system "#{bin}/ocm --version"
+
 nfpms:
   - id: debian
     package_name: ocm-cli
@@ -109,3 +116,9 @@ nfpms:
         # PGP secret key file path (can also be ASCII-armored).
         # Signing key passphrases comes from $NFPM_PASSPHRASE.
         key_file: "{{ .Env.GPG_KEY_PATH }}"
+
+checksum:
+  name_template: '{{ .ArtifactName }}.{{ .Algorithm }}'
+  algorithm: sha256
+  # If true, will create one checksum file for each artifact.
+  split: true

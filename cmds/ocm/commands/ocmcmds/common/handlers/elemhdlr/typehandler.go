@@ -21,6 +21,7 @@ type Object struct {
 	VersionId metav1.Identity
 
 	Spec    metav1.Identity
+	Index   int
 	Id      metav1.Identity
 	Node    *common.NameVersion
 	Element compdesc.ElementMetaAccessor
@@ -150,6 +151,7 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 					History:   c.History.Append(common.VersionedElementKey(c.ComponentVersion)),
 					Version:   c.ComponentVersion,
 					VersionId: c.Identity,
+					Index:     i,
 					Id:        e.GetMeta().GetIdentity(elemaccess),
 					Element:   e,
 				})
@@ -161,6 +163,7 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 				History:   c.History.Append(common.VersionedElementKey(c.ComponentVersion)),
 				Version:   c.ComponentVersion,
 				VersionId: c.Identity,
+				Index:     -1,
 				Id:        metav1.Identity{},
 				Element:   nil,
 			})
@@ -203,6 +206,7 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 				History:   c.History.Append(common.VersionedElementKey(c.ComponentVersion)),
 				Version:   c.ComponentVersion,
 				VersionId: c.Identity,
+				Index:     i,
 				Spec:      selector,
 				Id:        m.GetIdentity(elemaccess),
 				Element:   e,
@@ -214,6 +218,7 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 			History:   c.History.Append(common.VersionedElementKey(c.ComponentVersion)),
 			Version:   c.ComponentVersion,
 			VersionId: c.Identity,
+			Index:     -1,
 			Id:        metav1.Identity{},
 			Element:   nil,
 		})

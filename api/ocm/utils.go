@@ -95,7 +95,7 @@ func IsIntermediate(spec RepositorySpec) bool {
 	return false
 }
 
-func ComponentRefKey(ref *compdesc.ComponentReference) common.NameVersion {
+func ComponentRefKey(ref *compdesc.Reference) common.NameVersion {
 	return common.NewNameVersion(ref.GetComponentName(), ref.GetVersion())
 }
 

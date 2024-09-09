@@ -31,7 +31,6 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
 	"ocm.software/ocm/cmds/ocm/common/utils"
-	topicocmlabels "ocm.software/ocm/cmds/ocm/topics/ocm/labels"
 )
 
 var (
@@ -151,7 +150,6 @@ Various elements support to add arbitrary information by using labels
 `,
 	}
 
-	cmd.AddCommand(topicocmlabels.New(o.Context))
 	return cmd
 }
 

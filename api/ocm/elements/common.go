@@ -31,7 +31,7 @@ func (o commonOption) ApplyToSourceMeta(m *compdesc.SourceMeta) error {
 	return o.apply(&m.ElementMeta)
 }
 
-func (o commonOption) ApplyToReference(m *compdesc.ComponentReference) error {
+func (o commonOption) ApplyToReference(m *compdesc.Reference) error {
 	return o.apply(&m.ElementMeta)
 }
 

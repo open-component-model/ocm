@@ -120,7 +120,7 @@ Every option value has the format
     <pre>--cred [:]&lt;attr>=&lt;value></pre>
 </center>
 
-Consumer identity attributes are prefixed with the colon (:). A credential settings
+Consumer identity attributes are prefixed with the colon ':'. A credential settings
 always start with a sequence of at least one identity attributes, followed by a
 sequence of credential attributes.
 If a credential attribute is followed by an identity attribute a new credential setting
@@ -143,7 +143,7 @@ form
 </center>
 ` + logopts.Description + `
 The value can be a simple type or a JSON/YAML string for complex values
-(see <CMD>ocm attributes</CMD>. The following attributes are supported:
+(see <CMD>ocm attributes</CMD>). The following attributes are supported:
 ` + attributes.Attributes() + `
 
 For several options (like <code>-X</code>) it is possible to pass complex values

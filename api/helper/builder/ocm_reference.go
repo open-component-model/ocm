@@ -7,7 +7,7 @@ import (
 type ocmReference struct {
 	base
 
-	meta compdesc.ComponentReference
+	meta compdesc.Reference
 }
 
 const T_OCMREF = "reference"

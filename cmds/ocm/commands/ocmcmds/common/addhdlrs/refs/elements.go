@@ -57,7 +57,7 @@ func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Eleme
 	if vers == "" {
 		vers = v.GetVersion()
 	}
-	meta := &compdesc.ComponentReference{
+	meta := &compdesc.Reference{
 		ElementMeta: compdesc.ElementMeta{
 			Name:          spec.Name,
 			Version:       vers,

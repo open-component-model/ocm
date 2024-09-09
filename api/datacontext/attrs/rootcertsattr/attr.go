@@ -40,14 +40,15 @@ format:
 
 <pre>
 {
-  "rootCertificates"": [
+  "rootCertificates": [
      {
        "data": ""&lt;base64>"
      },
      {
        "path": ""&lt;file path>"
      }
-  ],
+  ]
+}
 </pre>
 
 One of following data fields are possible:

@@ -22,7 +22,7 @@ This blob type specification supports the following fields:
 
 - **<code>package</code>** *string*
 	
-  The is a REQUIRED property describing the name of the package to download.
+  This REQUIRED property describes the name of the package to download.
 
 - **<code>version</code>** *string*
 

@@ -16,4 +16,5 @@ var (
 	Action                 = []string{"action"}
 	RoutingSlips           = []string{"routingslips", "routingslip", "rs"}
 	PubSub                 = []string{"pubsub", "ps"}
+	Verified               = []string{"verified"}
 )
