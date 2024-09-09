@@ -121,9 +121,7 @@ The following predefined option types can be used:
 
   - <code>accessComponent</code>: [*string*] component for access specification
   - <code>accessHostname</code>: [*string*] hostname used for access
-  - <code>accessPackage</code>: [*string*] package or object name
-  - <code>accessRegistry</code>: [*string*] registry base URL
-  - <code>accessRepository</code>: [*string*] repository URL
+  - <code>accessRepository</code>: [*string*] repository or registry URL
   - <code>accessVersion</code>: [*string*] version for access specification
   - <code>artifactId</code>: [*string*] maven artifact id
   - <code>body</code>: [*string*] body of a http request

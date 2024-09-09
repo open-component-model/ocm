@@ -93,7 +93,7 @@ type TransferHandler interface {
 	OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error)
 
 	// TransferVersion decides on continuing with a component version (reference).
-	TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference, tgt ocm.Repository) (ocm.ComponentVersionAccess, TransferHandler, error)
+	TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.Reference, tgt ocm.Repository) (ocm.ComponentVersionAccess, TransferHandler, error)
 	// TransferResource decides on the value transport of a resource.
 	TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.ResourceAccess) (bool, error)
 	// TransferSource decides on the value transport of a source.

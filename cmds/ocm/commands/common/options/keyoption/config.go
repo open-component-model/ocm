@@ -28,7 +28,7 @@ type ConfigFragment struct {
 func (c *ConfigFragment) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&c.PublicKeys, "public-key", "k", nil, "public key setting")
 	fs.StringArrayVarP(&c.PrivateKeys, "private-key", "K", nil, "private key setting")
-	fs.StringArrayVarP(&c.Issuers, "issuer", "I", nil, "issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>")
+	fs.StringArrayVarP(&c.Issuers, "issuer", "I", nil, "issuer name or distinguished name (DN) (optionally for dedicated signature) ([<name>:=]<dn>)")
 	fs.StringArrayVarP(&c.RootCAs, "ca-cert", "", nil, "additional root certificate authorities (for signing certificates)")
 }
 

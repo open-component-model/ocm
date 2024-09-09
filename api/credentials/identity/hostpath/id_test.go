@@ -43,6 +43,15 @@ var _ = Describe("ctf management", func() {
 			Expect(IdentityMatcher(pat, nil, id)).To(BeTrue())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
 		})
+		It("path prefix with / prefix", func() {
+			id := credentials.ConsumerIdentity{
+				hostpath.ID_HOSTNAME:   "host",
+				hostpath.ID_PATHPREFIX: "/a/b",
+				hostpath.ID_PORT:       "4711",
+				hostpath.ID_SCHEME:     "scheme://",
+			}
+			Expect(IdentityMatcher(pat, nil, id)).To(BeTrue())
+		})
 		It("different prefix", func() {
 			id := credentials.ConsumerIdentity{
 				hostpath.ID_HOSTNAME:   "host",

@@ -11,6 +11,7 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/ocm"
@@ -96,6 +97,11 @@ func (s *WalkingState) GetContext(nv common.NameVersion, ctxkey common.NameVersi
 	return vi.digestingContexts[ctxkey]
 }
 
+func DefaultWalkingState(octx ocm.ContextProvider) *WalkingState {
+	s := NewWalkingState(octx.OCMContext().LoggingContext().WithContext(REALM))
+	return &s
+}
+
 func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
 	if printer != nil {
 		opts = opts.Dup()
@@ -106,8 +112,7 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 		return nil, err
 	}
 	if state == nil {
-		s := NewWalkingState(cv.GetContext().LoggingContext().WithContext(REALM))
-		state = &s
+		state = DefaultWalkingState(cv.GetContext())
 	}
 	dc, err := apply(*state, cv, opts, general.Optional(closecv...))
 	if err != nil {
@@ -115,6 +120,14 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 	}
 
 	return dc.Digest, nil
+}
+
+func ListComponentDescriptors(state *WalkingState) []*compdesc.ComponentDescriptor {
+	c := state.WalkingState.Closure
+	nv := state.WalkingState.Context.Key
+	return maputils.TransformedValues(c, func(in *VersionInfo) *compdesc.ComponentDescriptor {
+		return in.digestingContexts[nv].Descriptor
+	})
 }
 
 func RequireReProcessing(vi *VersionInfo, ctx *DigestContext, opts *Options) bool {
@@ -264,6 +277,8 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		if dig != nil {
 			spec = dig
 		}
+
+		addVerified(state, cd, opts, signatureNames...)
 	}
 	err := ctx.Propagate(spec)
 	if err != nil {
@@ -337,6 +352,7 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		} else {
 			cd.Signatures = append(cd.Signatures, signature)
 		}
+		addVerified(state, cd, opts, signatureNames...)
 	}
 	state.Closure[nv] = vi
 
@@ -379,7 +395,7 @@ func checkDigest(orig *metav1.DigestSpec, act *metav1.DigestSpec) bool {
 	return true
 }
 
-func refMsg(ref compdesc.ComponentReference, msg string, args ...interface{}) string {
+func refMsg(ref compdesc.Reference, msg string, args ...interface{}) string {
 	return fmt.Sprintf("%s %s", fmt.Sprintf(msg, args...), ref)
 }
 
@@ -703,4 +719,22 @@ func GetDigestMode(cd *compdesc.ComponentDescriptor, def ...string) string {
 		}
 	}
 	return general.Optional(def...)
+}
+
+func addVerified(state WalkingState, cd *compdesc.ComponentDescriptor, opts *Options, signatures ...string) {
+	if opts.VerifiedStore != nil {
+		_addVerified(state, common.VersionedElementKey(cd), cd, opts, signatures...)
+	}
+}
+
+func _addVerified(state WalkingState, ctx common.NameVersion, cd *compdesc.ComponentDescriptor, opts *Options, signatures ...string) {
+	opts.VerifiedStore.Add(cd, signatures...)
+	for _, ref := range cd.References {
+		nv := common.NewNameVersion(ref.ComponentName, ref.Version)
+		s := state.Get(nv)
+		rs := s.GetContext(ctx)
+		if rs != nil {
+			_addVerified(state, ctx, rs.Descriptor, opts)
+		}
+	}
 }

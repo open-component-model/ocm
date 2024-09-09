@@ -1232,7 +1232,67 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 				RootCertificates(ca), PKIXIssuer(*issuer))
 		})
 	})
+
+	Context("verified store", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.ComponentVersion(COMPONENTA, VERSION, func() {
+					env.Provider(PROVIDER)
+				})
+				env.ComponentVersion(COMPONENTB, VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Reference("refa", COMPONENTA, VERSION)
+				})
+				env.ComponentVersion(COMPONENTC, VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Reference("refb", COMPONENTB, VERSION)
+				})
+			})
+		})
+
+		It("rembers all indirectly signed component descriptors", func() {
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+			defer Close(src, "ctf")
+
+			resolver := ocm.NewCompoundResolver(src)
+
+			cv := Must(resolver.LookupComponentVersion(COMPONENTC, VERSION))
+			defer Close(cv, "cv")
+
+			store := NewLocalVerifiedStore()
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Resolver(resolver),
+				VerifyDigests(),
+				UseVerifiedStore(store),
+			)
+			MustBeSuccessful(opts.Complete(env))
+
+			pr, buf := common.NewBufferedPrinter()
+			Must(Apply(pr, nil, cv, opts))
+
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/ref2:v1"[github.com/mandelsoft/ref2:v1]...
+  no digest found for "github.com/mandelsoft/ref:v1"
+  applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref2:v1]...
+    no digest found for "github.com/mandelsoft/test:v1"
+    applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref2:v1]...
+    reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:5ed8bb27309c3c2fff43f3b0f3ebb56a5737ad6db4bc8ace73c5455cb86faf54[jsonNormalisation/v1]
+  reference 0:  github.com/mandelsoft/ref:v1: digest SHA-256:e85e324ff16bafe26db235567d9232319c36f48ce995aa3f4957e55002207277[jsonNormalisation/v1]
+`))
+
+			CheckStore(store, cv)
+			CheckStore(store, common.NewNameVersion(COMPONENTB, VERSION))
+			CheckStore(store, common.NewNameVersion(COMPONENTA, VERSION))
+		})
+	})
 })
+
+func CheckStore(store VerifiedStore, ve common.VersionedElement) {
+	e := store.Get(ve)
+	ExpectWithOffset(1, e).NotTo(BeNil())
+	ExpectWithOffset(1, common.VersionedElementKey(e)).To(Equal(common.VersionedElementKey(ve)))
+}
 
 func HashComponent(resolver ocm.ComponentVersionResolver, name string, digest string, other ...Option) string {
 	cv, err := resolver.LookupComponentVersion(name, VERSION)

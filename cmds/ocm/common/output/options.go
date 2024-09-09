@@ -39,6 +39,7 @@ type Options struct {
 	options.OptionSet
 
 	allColumns bool
+	sort       []string
 
 	Outputs          Outputs
 	OutputMode       string
@@ -56,6 +57,11 @@ func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
 		Outputs:   outputs,
 		OptionSet: opts,
 	}
+}
+
+func (o *Options) SortColumns(fields ...string) *Options {
+	o.Sort = fields
+	return o
 }
 
 func (o *Options) OptimizeColumns(n int) *Options {
@@ -117,7 +123,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	// are available or not
 	for _, out := range o.Outputs {
 		if _, ok := out(o).(SortFields); ok {
-			fs.StringArrayVarP(&o.Sort, "sort", "s", nil, "sort fields")
+			fs.StringArrayVarP(&o.sort, "sort", "s", nil, "sort fields")
 			break
 		}
 	}
@@ -146,25 +152,26 @@ func (o *Options) Configure(ctx clictx.Context) error {
 
 	var avail sliceutils.OrderedSlice[string]
 
-	var fields []string
-
 	if s, ok := o.Output.(SortFields); ok {
 		avail = s.GetSortFields()
 	}
-	for _, f := range o.Sort {
-		split := strings.Split(f, ",")
-		for _, s := range split {
-			s = strings.TrimSpace(s)
-			if s != "" {
-				if avail.Contains(s) {
-					fields = append(fields, s)
-				} else {
-					return errors.ErrInvalid("sort field", s)
+	if len(o.sort) > 0 {
+		var fields []string
+		for _, f := range o.sort {
+			split := strings.Split(f, ",")
+			for _, s := range split {
+				s = strings.TrimSpace(s)
+				if s != "" {
+					if avail.Contains(s) {
+						fields = append(fields, s)
+					} else {
+						return errors.ErrInvalid("sort field", s)
+					}
 				}
 			}
 		}
+		o.Sort = fields
 	}
-	o.Sort = fields
 	return nil
 }
 

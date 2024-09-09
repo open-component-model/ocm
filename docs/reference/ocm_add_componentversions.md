@@ -160,6 +160,28 @@ are configured for the operation. It has the following format
 </center>
 
 The uploader name may be a path expression with the following possibilities:
+  - <code>ocm/npmPackage</code>: uploading npm artifacts
+
+    The <code>ocm/npmPackage</code> uploader is able to upload npm artifacts
+    as artifact archive according to the npm package spec.
+    If registered the default mime type is: application/x-tgz
+
+    It accepts a plain string for the URL or a config with the following field:
+    'url': the URL of the npm repository.
+
+  - <code>ocm/mavenPackage</code>: uploading maven artifacts
+
+    The <code>ocm/mavenPackage</code> uploader is able to upload maven artifacts (whole GAV only!)
+    as artifact archive according to the maven artifact spec.
+    If registered the default mime type is: application/x-tgz
+
+    It accepts a plain string for the URL or a config with the following field:
+    'url': the URL of the maven repository.
+
+  - <code>plugin</code>: [downloaders provided by plugins]
+
+    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
+
   - <code>ocm/ociArtifacts</code>: downloading OCI artifacts
 
     The <code>ociArtifacts</code> downloader is able to download OCI artifacts
@@ -183,28 +205,6 @@ The uploader name may be a path expression with the following possibilities:
 
     Alternatively, a single string value can be given representing an OCI repository
     reference.
-
-  - <code>ocm/npmPackage</code>: uploading npm artifacts
-
-    The <code>ocm/npmPackage</code> uploader is able to upload npm artifacts
-    as artifact archive according to the npm package spec.
-    If registered the default mime type is: application/x-tgz
-
-    It accepts a plain string for the URL or a config with the following field:
-    'url': the URL of the npm repository.
-
-  - <code>plugin</code>: [downloaders provided by plugins]
-
-    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
-
-  - <code>ocm/mavenPackage</code>: uploading maven artifacts
-
-    The <code>ocm/mavenPackage</code> uploader is able to upload maven artifacts (whole GAV only!)
-    as artifact archive according to the maven artifact spec.
-    If registered the default mime type is: application/x-tgz
-
-    It accepts a plain string for the URL or a config with the following field:
-    'url': the URL of the maven repository.
 
 
 
@@ -262,11 +262,6 @@ next to the description file.
 * [ocm add](ocm_add.md)	 &mdash; Add elements to a component repository or component version
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
-
-
-##### Additional Help Topics
-
-* [ocm add componentversions <b>ocm-labels</b>](ocm_add_componentversions_ocm-labels.md)	 &mdash; Labels and Label Merging
 
 
 ##### Additional Links

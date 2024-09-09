@@ -31,7 +31,6 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
 	"ocm.software/ocm/cmds/ocm/common/output"
 	"ocm.software/ocm/cmds/ocm/common/utils"
-	topicbootstrap "ocm.software/ocm/cmds/ocm/topics/toi/bootstrapping"
 )
 
 const (
@@ -165,7 +164,6 @@ $ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 `,
 		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
-	cmd.AddCommand(topicbootstrap.New(o.Context, "toi-bootstrapping"))
 	return cmd
 }
 

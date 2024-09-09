@@ -28,7 +28,7 @@ func newComponentVersionAccess(comp *componentAccessImpl, version string, persis
 	return &repocpi.ComponentVersionAccessInfo{c, true, persistent}, nil
 }
 
-// //////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
 	bridge repocpi.ComponentVersionAccessBridge

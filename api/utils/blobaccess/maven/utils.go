@@ -13,7 +13,6 @@ import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/builtin/maven/identity"
 	"ocm.software/ocm/api/tech/maven"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -110,7 +109,7 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 	}
 
 	// pack all downloaded files into a tar.gz file
-	fs := utils.FileSystem(s.options.CachingFileSystem)
+	fs := s.options.GetCachingFileSystem()
 	tgz, err := vfs.TempFile(fs, "", "maven-"+s.coords.FileNamePrefix()+"-*.tar.gz")
 	if err != nil {
 		return nil, err

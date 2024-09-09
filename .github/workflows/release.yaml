@@ -5,14 +5,19 @@ on:
     inputs:
       release_candidate:
         type: boolean
-        description: 'Release Candidate'
+        description: "Release Candidate"
+        required: false
+        default: false
+      create_branch:
+        type: boolean
+        description: "Create Release Branch"
         required: false
         default: false
       prerelease:
         type: string
-        description: 'Release Candidate Name'
+        description: "Release Candidate Name"
         required: false
-        default: ''
+        default: ""
 
 jobs:
   check:
@@ -35,12 +40,17 @@ jobs:
           v="v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
           if [ -n "${{ github.event.inputs.prerelease }}" ]; then
             echo "Candidate: $v"
-          else 
+          else
             echo "Candidate: $v (taken from source)"
           fi
         else
           v="v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)"
           echo "Final Release: $v"
+          if ${{ github.event.inputs.create_branch }}; then
+            echo "with release branch creation"
+          else
+            echo "without release branch creation"
+          fi
         fi
 
     - name: Set Base Version
@@ -69,7 +79,7 @@ jobs:
         fi
 
     - name: Check Branch
-      if: inputs.release_candidate == false && github.ref == 'refs/heads/main'
+      if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
       run: |
         set -e
         if git ls-remote --exit-code origin refs/heads/releases/${{ env.RELEASE_VERSION }} ; then
@@ -96,6 +106,13 @@ jobs:
   components:
     name: Component CTF Builds
     uses: ./.github/workflows/components.yaml
+    needs: check
+    permissions:
+      contents: read
+      pull-requests: read
+  diff-check-manifests:
+    name: Check for diff after go mod tidy and generated targets
+    uses: ./.github/workflows/check_diff_action.yaml
     needs: check
     permissions:
       contents: read
@@ -230,7 +247,7 @@ jobs:
       run: make plain-push
 
     - name: Create Release Branch
-      if: inputs.release_candidate == false && github.ref == 'refs/heads/main'
+      if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
       run: |
         n="releases/${{env.RELEASE_VERSION}}"
         git checkout -b "$n"
@@ -252,16 +269,6 @@ jobs:
         git push origin ${GITHUB_REF#refs/heads/}
         echo "Next branch version is $v"
 
-    - name: Delete Older Release Branches
-      if: github.ref == 'refs/heads/main'
-      run: |
-        set -e
-        git fetch --prune
-        for branch in $(git branch -r | grep 'origin/releases/' | grep -v 'origin/releases/${{ env.RELEASE_VERSION }}'); do
-          branch_name=$(echo $branch | sed 's|origin/||')
-          echo "Deleting branch $branch_name"
-        done
-
     - name: Publish Release Event
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v3
@@ -270,3 +277,12 @@ jobs:
         repository: open-component-model/ocm-website
         event-type: ocm-cli-release
         client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
+
+    - name: Publish Release Event for other package registries
+      if: inputs.release_candidate == false
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ steps.generate_token.outputs.token }}
+        repository: open-component-model/ocm
+        event-type: ocm-cli-release
+        client-payload: '{"version": "${{ env.RELEASE_VERSION }}"}'

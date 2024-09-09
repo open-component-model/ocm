@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 
 	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"
@@ -431,6 +432,22 @@ func (o *tsaOpt) ApplySigningOption(opts *Options) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type verifyedstore struct {
+	store VerifiedStore
+}
+
+// UseVerifiedStore configures a store for providing verify component decariptors.
+// If no store is given, a local store is created.
+func UseVerifiedStore(s ...VerifiedStore) Option {
+	return &verifyedstore{general.OptionalDefaulted(NewLocalVerifiedStore(), s...)}
+}
+
+func (o *verifyedstore) ApplySigningOption(opts *Options) {
+	opts.VerifiedStore = o.store
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type Options struct {
 	Printer           common.Printer
 	Update            bool
@@ -455,6 +472,8 @@ type Options struct {
 	UseTSA            bool
 
 	effectiveRegistry signing.Registry
+
+	VerifiedStore VerifiedStore
 }
 
 var _ Option = (*Options)(nil)

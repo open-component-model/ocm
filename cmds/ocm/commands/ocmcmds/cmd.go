@@ -15,6 +15,7 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/routingslips"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/sourceconfig"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/sources"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/verified"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/versions"
 	"ocm.software/ocm/cmds/ocm/common/utils"
 	topicocmaccessmethods "ocm.software/ocm/cmds/ocm/topics/ocm/accessmethods"
@@ -40,6 +41,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(plugins.NewCommand(ctx))
 	cmd.AddCommand(routingslips.NewCommand(ctx))
 	cmd.AddCommand(pubsub.NewCommand(ctx))
+	cmd.AddCommand(verified.NewCommand(ctx))
 
 	cmd.AddCommand(utils.DocuCommandPath(topicocmrefs.New(ctx), "ocm"))
 	cmd.AddCommand(utils.DocuCommandPath(topicocmaccessmethods.New(ctx), "ocm"))

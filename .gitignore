@@ -26,3 +26,5 @@ dist/
 *.exe
 .secrets
 *.log
+*.nupkg
+**/chocolatey/tools/LICENSE.txt
