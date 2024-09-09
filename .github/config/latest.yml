@@ -36,21 +36,21 @@ builds:
       - windows
 
 archives:
-  - name_template: "{{ .Binary }}-nightly-{{ .Os }}-{{ .Arch }}"
+  - name_template: "{{ .Binary }}-latest-{{ .Os }}-{{ .Arch }}"
     id: nix
     builds: [linux, darwin]
     format: tar.gz
     files:
       - none*
-  - name_template: "{{ .Binary }}-nightly-{{ .Os }}-{{ .Arch }}"
+  - name_template: "{{ .Binary }}-latest-{{ .Os }}-{{ .Arch }}"
     id: windows
     builds: [windows]
     format: zip
     files:
       - none*
 
-nightly:
-  version_template: "0.0.0-nightly"
-  tag_name: ocm-cli/nightly
+latest:
+  version_template: "0.0.0-latest"
+  tag_name: ocm-cli/latest
   publish_release: true
   keep_single_release: true
