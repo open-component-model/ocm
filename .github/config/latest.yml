@@ -49,8 +49,11 @@ archives:
     files:
       - none*
 
-latest:
+snapshot:
   version_template: "0.0.0-latest"
-  tag_name: ocm-cli/latest
-  publish_release: true
-  keep_single_release: true
+
+checksum:
+  name_template: '{{ .ArtifactName }}.{{ .Algorithm }}'
+  algorithm: sha256
+  # If true, will create one checksum file for each artifact.
+  split: true
