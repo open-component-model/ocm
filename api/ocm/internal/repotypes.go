@@ -182,7 +182,7 @@ func (s *GenericRepositorySpec) Validate(ctx Context, creds credentials.Credenti
 	if err != nil {
 		return err
 	}
-	return spec.Validate(ctx, creds)
+	return spec.Validate(ctx, creds, context...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
