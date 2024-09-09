@@ -15,7 +15,6 @@ var (
 	HTTPBodyOption     = options.HTTPBodyOption
 	HTTPRedirectOption = options.HTTPRedirectOption
 
-	RepositoryOption = options.RepositoryOption
 	GroupOption      = options.GroupOption
 	ArtifactOption   = options.ArtifactOption
 	ClassifierOption = options.ClassifierOption
@@ -24,6 +23,8 @@ var (
 	RegistryOption       = options.NPMRegistryOption
 	PackageOption        = options.NPMPackageOption
 	PackageVersionOption = options.NPMVersionOption
+
+	IdentityPathOption = options.IdentityPathOption
 )
 
 // string options.
@@ -68,4 +69,10 @@ var (
 	FormattedJSONOption = flagsets.NewYAMLOptionType("inputFormattedJson", "JSON formatted text")
 )
 
-var ValuesOption = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based generic values for inputs")
+var (
+	ValuesOption    = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based generic values for inputs")
+	ComponentOption = flagsets.NewStringOptionType("inputComponent", "component name")
+)
+
+// RepositoryOption sets the repository or registry for an input.
+var RepositoryOption = flagsets.NewStringOptionType("inputRepository", "repository or registry for inputs")

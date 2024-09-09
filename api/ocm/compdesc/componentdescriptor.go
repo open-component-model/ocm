@@ -10,6 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors/accessors"
+	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/semverutils"
 )
@@ -18,7 +19,13 @@ const InternalSchemaVersion = "internal"
 
 var NotFound = errors.ErrNotFound()
 
-const KIND_REFERENCE = "component reference"
+const (
+	KIND_COMPONENT        = errkind.KIND_COMPONENT
+	KIND_COMPONENTVERSION = "component version"
+	KIND_RESOURCE         = "component resource"
+	KIND_SOURCE           = "component source"
+	KIND_REFERENCE        = "component reference"
+)
 
 const ComponentDescriptorFileName = "component-descriptor.yaml"
 
@@ -716,7 +723,7 @@ func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) 
 	}
 }
 
-type References []ComponentReference
+type References []Reference
 
 func (r References) Equivalent(o References) equivalent.EqualState {
 	return EquivalentElems(r, o)
@@ -753,10 +760,10 @@ func (r References) Copy() References {
 	return out
 }
 
-// ComponentReference describes the reference to another component in the registry.
+// Reference describes the reference to another component in the registry.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
-type ComponentReference struct {
+type Reference struct {
 	ElementMeta `json:",inline"`
 	// ComponentName describes the remote name of the referenced object
 	ComponentName string `json:"componentName"`
@@ -765,8 +772,11 @@ type ComponentReference struct {
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
 }
 
-func NewComponentReference(name, componentName, version string, extraIdentity metav1.Identity) *ComponentReference {
-	return &ComponentReference{
+// Deprecated: use Reference.
+type ComponentReference = Reference
+
+func NewComponentReference(name, componentName, version string, extraIdentity metav1.Identity) *Reference {
+	return &Reference{
 		ElementMeta: ElementMeta{
 			Name:          name,
 			Version:       version,
@@ -776,41 +786,41 @@ func NewComponentReference(name, componentName, version string, extraIdentity me
 	}
 }
 
-func (r ComponentReference) String() string {
+func (r Reference) String() string {
 	return fmt.Sprintf("%s[%s:%s]", r.Name, r.ComponentName, r.Version)
 }
 
 // WithVersion returns a new reference with a dedicated version.
-func (o *ComponentReference) WithVersion(v string) *ComponentReference {
+func (o *Reference) WithVersion(v string) *Reference {
 	n := o.Copy()
 	n.Version = v
 	return n
 }
 
 // WithExtraIdentity returns a new reference with a dedicated version.
-func (o *ComponentReference) WithExtraIdentity(extras ...string) *ComponentReference {
+func (o *Reference) WithExtraIdentity(extras ...string) *Reference {
 	n := o.Copy()
 	n.AddExtraIdentity(NewExtraIdentity(extras...))
 	return n
 }
 
 // Fresh returns a digest-free copy.
-func (o *ComponentReference) Fresh() *ComponentReference {
+func (o *Reference) Fresh() *Reference {
 	n := o.Copy()
 	n.Digest = nil
 	return n
 }
 
-func (r *ComponentReference) GetDigest() *metav1.DigestSpec {
+func (r *Reference) GetDigest() *metav1.DigestSpec {
 	return r.Digest
 }
 
-func (r *ComponentReference) SetDigest(d *metav1.DigestSpec) {
+func (r *Reference) SetDigest(d *metav1.DigestSpec) {
 	r.Digest = d
 }
 
-func (r *ComponentReference) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
-	if o, ok := e.(*ComponentReference); !ok {
+func (r *Reference) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
+	if o, ok := e.(*Reference); !ok {
 		state := equivalent.StateNotLocalHashEqual()
 		if r.Digest != nil {
 			state = state.Apply(equivalent.StateNotArtifactEqual(true))
@@ -831,12 +841,12 @@ func (r *ComponentReference) Equivalent(e ElementMetaAccessor) equivalent.EqualS
 	}
 }
 
-func (r *ComponentReference) GetComponentName() string {
+func (r *Reference) GetComponentName() string {
 	return r.ComponentName
 }
 
-func (r *ComponentReference) Copy() *ComponentReference {
-	return &ComponentReference{
+func (r *Reference) Copy() *Reference {
+	return &Reference{
 		ElementMeta:   *r.ElementMeta.Copy(),
 		ComponentName: r.ComponentName,
 		Digest:        r.Digest.Copy(),

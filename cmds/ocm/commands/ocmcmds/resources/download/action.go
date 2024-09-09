@@ -12,10 +12,13 @@ import (
 	"ocm.software/ocm/api/ocm"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/download"
+	"ocm.software/ocm/api/ocm/tools/signing"
+	"ocm.software/ocm/api/utils/blobaccess"
 	common2 "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/destoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/storeoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/resources/common"
 	"ocm.software/ocm/cmds/ocm/common/options"
 	"ocm.software/ocm/cmds/ocm/common/output"
@@ -94,11 +97,16 @@ func (d *Action) Save(o *elemhdlr.Object, f string) error {
 	printer := common2.NewPrinter(d.opts.Context.StdOut())
 	dest := destoption.From(d.opts)
 	local := From(d.opts)
+	verify := storeoption.From(d.opts)
 	pathIn := true
 	r := common.Elem(o)
 	if f == "" {
 		pathIn = false
 	}
+	if verify.Store != nil {
+		local.Verify = true
+	}
+
 	var tmp vfs.File
 	var err error
 	if f == "-" {
@@ -129,6 +137,24 @@ func (d *Action) Save(o *elemhdlr.Object, f string) error {
 		ok, eff, err = d.downloaders.Download(printer, racc, f, dest.PathFilesystem)
 	} else {
 		ok, eff, err = d.downloaders.DownloadAsBlob(printer, racc, f, dest.PathFilesystem)
+
+		if local.Verify {
+			var done bool
+			done, err = signing.VerifyResourceDigest(o.Version, o.Index, blobaccess.DataAccessForFile(dest.PathFilesystem, f), verify.Store)
+			if err != nil {
+				if done {
+					printer.Printf("%s: verification failed: %s\n", eff, err)
+				} else {
+					printer.Printf("%s: cannot verify: %s\n", eff, err)
+				}
+			} else {
+				if done {
+					printer.Printf("%s: resource content verified\n", eff)
+				} else {
+					printer.Printf("%s: no resource content verification possible\n", eff)
+				}
+			}
+		}
 	}
 	if err != nil {
 		return err

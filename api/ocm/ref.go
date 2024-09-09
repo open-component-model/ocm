@@ -5,99 +5,19 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/grammar"
 	common "ocm.software/ocm/api/utils/misc"
 )
 
-const (
-	KIND_OCM_REFERENCE = "ocm reference"
-)
-
 // ParseRepo parses a standard ocm repository reference into a internal representation.
 func ParseRepo(ref string) (UniformRepositorySpec, error) {
-	create := false
-	if strings.HasPrefix(ref, "+") {
-		create = true
-		ref = ref[1:]
-	}
-	if strings.HasPrefix(ref, ".") || strings.HasPrefix(ref, "/") {
-		return cpi.HandleRef(UniformRepositorySpec{
-			Info:            ref,
-			CreateIfMissing: create,
-		})
-	}
-	match := grammar.AnchoredRepositoryRegexp.FindSubmatch([]byte(ref))
-	if match != nil {
-		h := string(match[1])
-		t, _ := grammar.SplitTypeSpec(h)
-		return cpi.HandleRef(UniformRepositorySpec{
-			Type:            t,
-			TypeHint:        h,
-			Scheme:          string(match[2]),
-			Host:            string(match[3]),
-			SubPath:         string(match[4]),
-			CreateIfMissing: create,
-		})
-	}
-
-	match = grammar.AnchoredSchemedHostPortRepositoryRegexp.FindSubmatch([]byte(ref))
-	if match != nil {
-		h := string(match[1])
-		t, _ := grammar.SplitTypeSpec(h)
-		return cpi.HandleRef(UniformRepositorySpec{
-			Type:            t,
-			TypeHint:        h,
-			Scheme:          string(match[2]),
-			Host:            string(match[3]),
-			SubPath:         string(match[4]),
-			CreateIfMissing: create,
-		})
-	}
-
-	match = grammar.AnchoredHostWithPortRepositoryRegexp.FindSubmatch([]byte(ref))
-	if match != nil {
-		h := string(match[1])
-		t, _ := grammar.SplitTypeSpec(h)
-		return cpi.HandleRef(UniformRepositorySpec{
-			Type:            t,
-			TypeHint:        h,
-			Scheme:          string(match[2]),
-			Host:            string(match[3]),
-			SubPath:         string(match[4]),
-			CreateIfMissing: create,
-		})
-	}
-
-	match = grammar.AnchoredGenericRepositoryRegexp.FindSubmatch([]byte(ref))
-	if match == nil {
-		return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
-	}
-	h := string(match[1])
-	t, _ := grammar.SplitTypeSpec(h)
-	return cpi.HandleRef(UniformRepositorySpec{
-		Type:            t,
-		TypeHint:        h,
-		Info:            string(match[2]),
-		CreateIfMissing: create,
-	})
+	return cpi.ParseRepo(ref)
 }
 
 func ParseRepoToSpec(ctx Context, ref string, create ...bool) (RepositorySpec, error) {
-	uni, err := ParseRepo(ref)
-	if err != nil {
-		return nil, errors.ErrInvalidWrap(err, KIND_REPOSITORYSPEC, ref)
-	}
-	if !uni.CreateIfMissing {
-		uni.CreateIfMissing = general.Optional(create...)
-	}
-	repoSpec, err := ctx.MapUniformRepositorySpec(&uni)
-	if err != nil {
-		return nil, errors.ErrInvalidWrap(err, KIND_REPOSITORYSPEC, ref)
-	}
-	return repoSpec, nil
+	return cpi.ParseRepoToSpec(ctx, ref, create...)
 }
 
 // RefSpec is a go internal representation of a oci reference.

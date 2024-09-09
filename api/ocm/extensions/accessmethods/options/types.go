@@ -116,3 +116,10 @@ func NewBytesOptionType(name, desc string) OptionType {
 		valueType: TYPE_BYTES,
 	}
 }
+
+func NewIdentityPathOptionType(name, desc string) OptionType {
+	return &option{
+		base:      flagsets.NewIdentityPathOptionType(name, desc),
+		valueType: TYPE_IDENTITYPATH,
+	}
+}

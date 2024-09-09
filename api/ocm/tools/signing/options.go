@@ -6,12 +6,14 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 
 	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/hasher/sha256"
 	"ocm.software/ocm/api/tech/signing/signutils"
@@ -221,7 +223,7 @@ func Resolver(h ...ocm.ComponentVersionResolver) Option {
 }
 
 func (o *resolver) ApplySigningOption(opts *Options) {
-	opts.Resolver = ocm.NewCompoundResolver(append([]ocm.ComponentVersionResolver{opts.Resolver}, o.resolver...)...)
+	opts.Resolver = resolvers.NewCompoundResolver(append([]ocm.ComponentVersionResolver{opts.Resolver}, o.resolver...)...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -430,6 +432,22 @@ func (o *tsaOpt) ApplySigningOption(opts *Options) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type verifyedstore struct {
+	store VerifiedStore
+}
+
+// UseVerifiedStore configures a store for providing verify component decariptors.
+// If no store is given, a local store is created.
+func UseVerifiedStore(s ...VerifiedStore) Option {
+	return &verifyedstore{general.OptionalDefaulted(NewLocalVerifiedStore(), s...)}
+}
+
+func (o *verifyedstore) ApplySigningOption(opts *Options) {
+	opts.VerifiedStore = o.store
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type Options struct {
 	Printer           common.Printer
 	Update            bool
@@ -454,6 +472,8 @@ type Options struct {
 	UseTSA            bool
 
 	effectiveRegistry signing.Registry
+
+	VerifiedStore VerifiedStore
 }
 
 var _ Option = (*Options)(nil)

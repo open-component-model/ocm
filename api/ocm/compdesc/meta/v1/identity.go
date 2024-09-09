@@ -103,6 +103,22 @@ func (i Identity) Remove(name string) bool {
 	return false
 }
 
+// ExtraIdentity extracts the extra identity part of an identity.
+func (i Identity) ExtraIdentity() Identity {
+	if i == nil {
+		return nil
+	}
+	if _, ok := i[SystemIdentityName]; !ok {
+		return i
+	}
+	if len(i) == 1 {
+		return nil
+	}
+	r := i.Copy()
+	delete(r, SystemIdentityName)
+	return r
+}
+
 func (i Identity) String() string {
 	if i == nil {
 		return ""

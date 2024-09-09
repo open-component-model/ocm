@@ -31,7 +31,7 @@ func (a AttributeType) Name() string {
 
 func (a AttributeType) Description() string {
 	return `
-*bool* (default: ` + fmt.Sprintf("%t", UseCompositionMode) + `
+*bool* (default: ` + fmt.Sprintf("%t)", UseCompositionMode) + `
 Composition mode decouples a component version provided by a repository
 implementation from the backend persistence. Added local blobs will
 and other changes will not be forwarded to the backend repository until

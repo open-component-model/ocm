@@ -10,34 +10,29 @@ import (
 	"ocm.software/ocm/api/datacontext/attrs/tmpcache"
 	"ocm.software/ocm/api/tech/maven"
 	ocmlog "ocm.software/ocm/api/utils/logging"
+	"ocm.software/ocm/api/utils/stdopts"
 )
 
 type Option = optionutils.Option[*Options]
 
 type Options struct {
-	CredentialContext credentials.Context
-	LoggingContext    logging.Context
-	CachingContext    datacontext.Context
-	CachingFileSystem vfs.FileSystem
-	CachingPath       string
-	// Credentials allows to pass credentials and certificates for the http communication
-	Credentials credentials.Credentials
+	stdopts.StandardContexts
 
 	maven.FileCoordinates
 }
 
 func (o *Options) Logger(keyValuePairs ...interface{}) logging.Logger {
-	return ocmlog.LogContext(o.LoggingContext, o.CredentialContext).Logger(maven.REALM).WithValues(keyValuePairs...)
+	return ocmlog.LogContext(o.LoggingContext.Value, o.CredentialContext.Value).Logger(maven.REALM).WithValues(keyValuePairs...)
 }
 
 func (o *Options) Cache() *tmpcache.Attribute {
-	if o.CachingPath != "" {
-		return tmpcache.New(o.CachingPath, o.CachingFileSystem)
+	if o.CachingPath.Value != "" {
+		return tmpcache.New(o.CachingPath.Value, o.CachingFileSystem.Value)
 	}
-	if o.CachingContext == nil {
-		return tmpcache.Get(o.CredentialContext)
+	if o.CachingContext.Value != nil {
+		return tmpcache.Get(o.CachingContext.Value)
 	}
-	return tmpcache.Get(o.CachingContext)
+	return tmpcache.Get(o.CredentialContext.Value)
 }
 
 func (o *Options) GetCredentials(repo *maven.Repository, groupId string) (maven.Credentials, error) {
@@ -46,10 +41,10 @@ func (o *Options) GetCredentials(repo *maven.Repository, groupId string) (maven.
 	}
 
 	switch {
-	case o.Credentials != nil:
-		return MapCredentials(o.Credentials), nil
-	case o.CredentialContext != nil:
-		return GetCredentials(o.CredentialContext, repo, groupId)
+	case o.Credentials.Value != nil:
+		return MapCredentials(o.Credentials.Value), nil
+	case o.CredentialContext.Value != nil:
+		return GetCredentials(o.CredentialContext.Value, repo, groupId)
 	default:
 		return nil, nil
 	}
@@ -59,16 +54,16 @@ func (o *Options) ApplyTo(opts *Options) {
 	if opts == nil {
 		return
 	}
-	if o.CredentialContext != nil {
+	if o.CredentialContext.Value != nil {
 		opts.CredentialContext = o.CredentialContext
 	}
-	if o.LoggingContext != nil {
+	if o.LoggingContext.Value != nil {
 		opts.LoggingContext = o.LoggingContext
 	}
-	if o.CachingFileSystem != nil {
+	if o.CachingFileSystem.Value != nil {
 		opts.CachingFileSystem = o.CachingFileSystem
 	}
-	if o.Credentials != nil {
+	if o.Credentials.Value != nil {
 		opts.Credentials = o.Credentials
 	}
 	if o.Classifier != nil {
@@ -79,98 +74,46 @@ func (o *Options) ApplyTo(opts *Options) {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-type context struct {
-	credentials.Context
-}
-
-func (o context) ApplyTo(opts *Options) {
-	opts.CredentialContext = o
+func option[S any, T any](v T) optionutils.Option[*Options] {
+	return optionutils.WithGenericOption[S, *Options](v)
 }
 
 func WithCredentialContext(ctx credentials.ContextProvider) Option {
-	return context{ctx.CredentialsContext()}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type loggingContext struct {
-	logging.Context
-}
-
-func (o loggingContext) ApplyTo(opts *Options) {
-	opts.LoggingContext = o
+	return option[stdopts.CredentialContextOptionBag](ctx)
 }
 
 func WithLoggingContext(ctx logging.ContextProvider) Option {
-	return loggingContext{ctx.LoggingContext()}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type cachingContext struct {
-	datacontext.Context
-}
-
-func (o cachingContext) ApplyTo(opts *Options) {
-	opts.CachingContext = o
+	return option[stdopts.LoggingContextOptionBag](ctx)
 }
 
 func WithCachingContext(ctx datacontext.Context) Option {
-	return cachingContext{ctx}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type cachingFileSystem struct {
-	fs vfs.FileSystem
-}
-
-func (o *cachingFileSystem) ApplyTo(opts *Options) {
-	opts.CachingFileSystem = o.fs
+	return option[stdopts.CachingContextOptionBag](ctx)
 }
 
 func WithCachingFileSystem(fs vfs.FileSystem) Option {
-	return &cachingFileSystem{fs: fs}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type cachingPath string
-
-func (o cachingPath) ApplyTo(opts *Options) {
-	opts.CachingPath = string(o)
+	return option[stdopts.CachingFileSystemOptionBag](fs)
 }
 
 func WithCachingPath(p string) Option {
-	return cachingPath(p)
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-type creds struct {
-	credentials.Credentials
-}
-
-func (o creds) ApplyTo(opts *Options) {
-	opts.Credentials = o.Credentials
+	return option[stdopts.CachingPathOptionBag](p)
 }
 
 func WithCredentials(c credentials.Credentials) Option {
-	return creds{c}
+	return option[stdopts.CredentialsOptionBag](c)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type classifier string
+type ClassifierOptionBag interface {
+	SetClassifier(v string)
+}
 
-func (o classifier) ApplyTo(opts *Options) {
-	opts.Classifier = optionutils.PointerTo(string(o))
+func (o *Options) SetClassifier(v string) {
+	o.Classifier = &v
 }
 
 func WithClassifier(c string) Option {
-	return classifier(c)
+	return option[ClassifierOptionBag](c)
 }
 
 func WithOptionalClassifier(c *string) Option {
@@ -182,14 +125,16 @@ func WithOptionalClassifier(c *string) Option {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type extension string
+type ExtensionOptionBag interface {
+	SetExtension(v string)
+}
 
-func (o extension) ApplyTo(opts *Options) {
-	opts.Extension = optionutils.PointerTo(string(o))
+func (o *Options) SetExtension(v string) {
+	o.Extension = &v
 }
 
 func WithExtension(e string) Option {
-	return extension(e)
+	return option[ExtensionOptionBag](e)
 }
 
 func WithOptionalExtension(e *string) Option {
@@ -200,3 +145,14 @@ func WithOptionalExtension(e *string) Option {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+func (o *Options) SetDataContext(ctx datacontext.Context) {
+	if c, ok := ctx.(credentials.ContextProvider); ok {
+		o.SetCredentialContext(c.CredentialsContext())
+	}
+	o.SetCachingContext(ctx)
+}
+
+func WithDataContext(ctx datacontext.ContextProvider) Option {
+	return option[stdopts.DataContextOptionBag](ctx)
+}

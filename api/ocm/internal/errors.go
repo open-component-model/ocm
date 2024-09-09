@@ -10,13 +10,15 @@ import (
 )
 
 const (
-	KIND_REPOSITORY       = "ocm repository"
+	KIND_REPOSITORY     = "ocm repository"
+	KIND_REPOSITORYSPEC = "repository specification"
+
 	KIND_COMPONENT        = errkind.KIND_COMPONENT
-	KIND_COMPONENTVERSION = "component version"
-	KIND_RESOURCE         = "component resource"
-	KIND_SOURCE           = "component source"
+	KIND_COMPONENTVERSION = compdesc.KIND_COMPONENTVERSION
+	KIND_RESOURCE         = compdesc.KIND_RESOURCE
+	KIND_SOURCE           = compdesc.KIND_SOURCE
 	KIND_REFERENCE        = compdesc.KIND_REFERENCE
-	KIND_REPOSITORYSPEC   = "repository specification"
+	KIND_OCM_REFERENCE    = "ocm reference"
 )
 
 func ErrComponentVersionNotFound(name, version string) error {

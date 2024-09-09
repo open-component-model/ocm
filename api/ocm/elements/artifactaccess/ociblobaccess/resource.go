@@ -1,4 +1,4 @@
-package github
+package ociblobaccess
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"

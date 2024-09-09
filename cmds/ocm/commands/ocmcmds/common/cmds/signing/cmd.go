@@ -10,6 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/ocm/tools/signing"
 	common "ocm.software/ocm/api/utils/misc"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -96,7 +97,14 @@ func (o *SignatureCommand) Run() (rerr error) {
 	if err != nil {
 		return err
 	}
-	return utils.HandleOutput(NewAction(o.spec.terms, o.Context.OCMContext(), common.NewPrinter(o.Context.StdOut()), sopts), handler, utils.StringElemSpecs(o.Refs...)...)
+	err = utils.HandleOutput(NewAction(o.spec.terms, o.Context.OCMContext(), common.NewPrinter(o.Context.StdOut()), sopts), handler, utils.StringElemSpecs(o.Refs...)...)
+	if err != nil {
+		return err
+	}
+	if sopts.VerifiedStore != nil {
+		return errors.Wrapf(sopts.VerifiedStore.Save(), "cannot save verified store %q", signoption.From(o).Verified.File)
+	}
+	return nil
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -130,7 +138,7 @@ func NewAction(desc []string, ctx ocm.Context, p common.Printer, sopts *signing.
 
 func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.ComponentDescriptor, error) {
 	sopts := *a.sopts
-	sopts.Resolver = ocm.NewCompoundResolver(o.Repository, a.sopts.Resolver)
+	sopts.Resolver = resolvers.NewCompoundResolver(o.Repository, a.sopts.Resolver)
 	d, err := signing.Apply(a.printer, &a.state, o.ComponentVersion, &sopts)
 	var cd *compdesc.ComponentDescriptor
 	nv := common.VersionedElementKey(o.ComponentVersion)

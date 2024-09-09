@@ -16,7 +16,7 @@ var DigestOption = RegisterOption(NewStringOptionType("digest", "blob digest"))
 var ReferenceOption = RegisterOption(NewStringOptionType("reference", "reference name"))
 
 // PackageOption .
-var PackageOption = RegisterOption(NewStringOptionType("accessPackage", "package or object name"))
+var PackageOption = RegisterOption(NewStringOptionType("package", "package or object name"))
 
 // ArtifactOption .
 var ArtifactOption = RegisterOption(NewStringOptionType("artifactId", "maven artifact id"))
@@ -25,10 +25,7 @@ var ArtifactOption = RegisterOption(NewStringOptionType("artifactId", "maven art
 var GroupOption = RegisterOption(NewStringOptionType("groupId", "maven group id"))
 
 // RepositoryOption .
-var RepositoryOption = RegisterOption(NewStringOptionType("accessRepository", "repository URL"))
-
-// RegistryOption .
-var RegistryOption = RegisterOption(NewStringOptionType("accessRegistry", "registry base URL"))
+var RepositoryOption = RegisterOption(NewStringOptionType("accessRepository", "repository or registry URL"))
 
 // HostnameOption .
 var HostnameOption = RegisterOption(NewStringOptionType("accessHostname", "hostname used for access"))
@@ -48,7 +45,13 @@ var BucketOption = RegisterOption(NewStringOptionType("bucket", "bucket name"))
 // VersionOption .
 var VersionOption = RegisterOption(NewStringOptionType("accessVersion", "version for access specification"))
 
-// URLOption .
+// ComponentOption.
+var ComponentOption = RegisterOption(NewStringOptionType("accessComponent", "component for access specification"))
+
+// IdentityPathOption.
+var IdentityPathOption = RegisterOption(NewIdentityPathOptionType("identityPath", "identity path for specification"))
+
+// URLOption.
 var URLOption = RegisterOption(NewStringOptionType("url", "artifact or server url"))
 
 var HTTPHeaderOption = RegisterOption(NewStringSliceMapColonOptionType("header", "http headers"))
@@ -76,3 +79,6 @@ var NPMPackageOption = RegisterOption(NewStringOptionType("package", "npm packag
 
 // NPMVersionOption sets the version of the npm package.
 var NPMVersionOption = RegisterOption(NewStringOptionType("version", "npm package version"))
+
+// IdPathOption is a path of identity specs.
+var IdPathOption = RegisterOption(NewStringArrayOptionType("idpath", "identity path (attr=value{,attr=value}"))

@@ -26,6 +26,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/ocm/tools/signing/signingtest"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
@@ -137,7 +138,7 @@ var _ = Describe("access method", func() {
 
 			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 			archcloser := session.AddCloser(src)
-			resolver := ocm.NewCompoundResolver(src)
+			resolver := resolvers.NewCompoundResolver(src)
 
 			cv := Must(resolver.LookupComponentVersion(COMPONENTA, VERSION))
 			closer := session.AddCloser(cv)
@@ -226,7 +227,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 			Expect(err).To(Succeed())
 			archcloser := session.AddCloser(src)
-			resolver := ocm.NewCompoundResolver(src)
+			resolver := resolvers.NewCompoundResolver(src)
 
 			cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
 			Expect(err).To(Succeed())
@@ -305,7 +306,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 			Expect(err).To(Succeed())
 			archcloser := session.AddCloser(src)
-			resolver := ocm.NewCompoundResolver(src)
+			resolver := resolvers.NewCompoundResolver(src)
 
 			cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
 			Expect(err).To(Succeed())
@@ -356,7 +357,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 			Expect(err).To(Succeed())
 			archcloser := session.AddCloser(src)
-			resolver := ocm.NewCompoundResolver(src)
+			resolver := resolvers.NewCompoundResolver(src)
 
 			cv, err := resolver.LookupComponentVersion(COMPONENTB, VERSION)
 			Expect(err).To(Succeed())
@@ -435,7 +436,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
 			Expect(err).To(Succeed())
 			session.AddCloser(src)
-			resolver := ocm.NewCompoundResolver(src)
+			resolver := resolvers.NewCompoundResolver(src)
 
 			cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
 			Expect(err).To(Succeed())
@@ -593,7 +594,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 				Expect(err).To(Succeed())
 				arch.Close(src)
 
-				resolver := ocm.NewCompoundResolver(src)
+				resolver := resolvers.NewCompoundResolver(src)
 
 				log := HashComponent(resolver, COMPONENTD, D_COMPD, DigestMode(c.Mode()))
 
@@ -677,7 +678,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 				Expect(err).To(Succeed())
 				arch.Close(src)
 
-				resolver := ocm.NewCompoundResolver(src)
+				resolver := resolvers.NewCompoundResolver(src)
 
 				log := SignComponent(resolver, SIGNATURE, COMPONENTD, D_COMPD, DigestMode(c.Mode()))
 
@@ -755,7 +756,7 @@ applying to version "github.com/mandelsoft/top:v1"[github.com/mandelsoft/top:v1]
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 				arch.Close(src)
 
-				resolver := ocm.NewCompoundResolver(src)
+				resolver := resolvers.NewCompoundResolver(src)
 
 				log := SignComponent(resolver, SIGNATURE, COMPONENTB, subst["D_COMPB_X"], DigestMode(DIGESTMODE_TOP), HashByAlgo(sha512.Algorithm))
 				Expect(log).To(StringEqualTrimmedWithContext(`
@@ -847,7 +848,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 				arch.Close(src)
 
-				resolver := ocm.NewCompoundResolver(src)
+				resolver := resolvers.NewCompoundResolver(src)
 
 				fmt.Printf("SIGN D\n")
 				log := SignComponent(resolver, SIGNATURE, COMPONENTD, digestD, DigestMode(DIGESTMODE_TOP))
@@ -922,7 +923,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 				finalizer.Close(src)
 
-				resolver := ocm.NewCompoundResolver(src)
+				resolver := resolvers.NewCompoundResolver(src)
 
 				fmt.Printf("SIGN B\n")
 				_ = SignComponent(resolver, SIGNATURE, COMPONENTB, D_COMPB, DigestMode(DIGESTMODE_LOCAL))
@@ -944,7 +945,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 				finalizer.Close(src)
 
-				resolver := ocm.NewCompoundResolver(src)
+				resolver := resolvers.NewCompoundResolver(src)
 
 				fmt.Printf("RESIGN B\n")
 				_ = SignComponent(resolver, SIGNATURE, COMPONENTB, D_COMPB, DigestMode(DIGESTMODE_TOP), SignatureName(SIGNATURE2, true))
@@ -982,7 +983,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 				finalizer.Close(src)
 
-				resolver := ocm.NewCompoundResolver(src)
+				resolver := resolvers.NewCompoundResolver(src)
 
 				fmt.Printf("SIGN B\n")
 				_ = SignComponent(resolver, SIGNATURE, COMPONENTB, D_COMPB, DigestMode(DIGESTMODE_TOP), SignatureName(SIGNATURE2, true))
@@ -1004,7 +1005,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 				src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 				finalizer.Close(src)
 
-				resolver := ocm.NewCompoundResolver(src)
+				resolver := resolvers.NewCompoundResolver(src)
 
 				fmt.Printf("SIGN D\n")
 				_ = SignComponent(resolver, SIGNATURE, COMPONENTD, D_COMPD, Recursive(), DigestMode(DIGESTMODE_LOCAL))
@@ -1066,7 +1067,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 			defer Close(src, "ctf")
 
-			resolver := ocm.NewCompoundResolver(src)
+			resolver := resolvers.NewCompoundResolver(src)
 
 			cv := Must(resolver.LookupComponentVersion(COMPONENTC, VERSION))
 			defer cv.Close()
@@ -1123,7 +1124,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 
 		It("signs with certificate and default issuer", func() {
 			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
-			res := ocm.NewDedicatedResolver(cv)
+			res := resolvers.NewDedicatedResolver(cv)
 
 			buf := SignComponent(res, PROVIDER, COMPONENTA, digest, PrivateKey(PROVIDER, priv), PublicKey(PROVIDER, pemBytes), RootCertificates(ca))
 			Expect(buf).To(StringEqualTrimmedWithContext(`
@@ -1143,7 +1144,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 
 		It("signs with certificate and explicit CN issuer", func() {
 			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
-			res := ocm.NewDedicatedResolver(cv)
+			res := resolvers.NewDedicatedResolver(cv)
 
 			buf := SignComponent(res, SIGNATURE, COMPONENTA, digest, PrivateKey(SIGNATURE, priv), PublicKey(SIGNATURE, pemBytes), RootCertificates(ca), Issuer(PROVIDER))
 			Expect(buf).To(StringEqualTrimmedWithContext(`
@@ -1167,7 +1168,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 
 		It("signs with certificate and issuer", func() {
 			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
-			res := ocm.NewDedicatedResolver(cv)
+			res := resolvers.NewDedicatedResolver(cv)
 			issuer := &pkix.Name{
 				CommonName: PROVIDER,
 				Country:    []string{"DE"},
@@ -1198,7 +1199,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 
 		It("signs with certificate, issuer and tsa", func() {
 			digest := "9cf14695c864411cad03071a8766e6769bb00373bdd8c65887e4644cc285dc78"
-			res := ocm.NewDedicatedResolver(cv)
+			res := resolvers.NewDedicatedResolver(cv)
 			issuer := &pkix.Name{
 				CommonName: "mandelsoft",
 				Country:    []string{"DE"},
@@ -1231,7 +1232,67 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 				RootCertificates(ca), PKIXIssuer(*issuer))
 		})
 	})
+
+	Context("verified store", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.ComponentVersion(COMPONENTA, VERSION, func() {
+					env.Provider(PROVIDER)
+				})
+				env.ComponentVersion(COMPONENTB, VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Reference("refa", COMPONENTA, VERSION)
+				})
+				env.ComponentVersion(COMPONENTC, VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Reference("refb", COMPONENTB, VERSION)
+				})
+			})
+		})
+
+		It("rembers all indirectly signed component descriptors", func() {
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+			defer Close(src, "ctf")
+
+			resolver := ocm.NewCompoundResolver(src)
+
+			cv := Must(resolver.LookupComponentVersion(COMPONENTC, VERSION))
+			defer Close(cv, "cv")
+
+			store := NewLocalVerifiedStore()
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Resolver(resolver),
+				VerifyDigests(),
+				UseVerifiedStore(store),
+			)
+			MustBeSuccessful(opts.Complete(env))
+
+			pr, buf := common.NewBufferedPrinter()
+			Must(Apply(pr, nil, cv, opts))
+
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/ref2:v1"[github.com/mandelsoft/ref2:v1]...
+  no digest found for "github.com/mandelsoft/ref:v1"
+  applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref2:v1]...
+    no digest found for "github.com/mandelsoft/test:v1"
+    applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref2:v1]...
+    reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:5ed8bb27309c3c2fff43f3b0f3ebb56a5737ad6db4bc8ace73c5455cb86faf54[jsonNormalisation/v1]
+  reference 0:  github.com/mandelsoft/ref:v1: digest SHA-256:e85e324ff16bafe26db235567d9232319c36f48ce995aa3f4957e55002207277[jsonNormalisation/v1]
+`))
+
+			CheckStore(store, cv)
+			CheckStore(store, common.NewNameVersion(COMPONENTB, VERSION))
+			CheckStore(store, common.NewNameVersion(COMPONENTA, VERSION))
+		})
+	})
 })
+
+func CheckStore(store VerifiedStore, ve common.VersionedElement) {
+	e := store.Get(ve)
+	ExpectWithOffset(1, e).NotTo(BeNil())
+	ExpectWithOffset(1, common.VersionedElementKey(e)).To(Equal(common.VersionedElementKey(ve)))
+}
 
 func HashComponent(resolver ocm.ComponentVersionResolver, name string, digest string, other ...Option) string {
 	cv, err := resolver.LookupComponentVersion(name, VERSION)

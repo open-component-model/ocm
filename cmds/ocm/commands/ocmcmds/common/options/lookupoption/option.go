@@ -5,6 +5,7 @@ import (
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/cmds/ocm/common/options"
@@ -49,15 +50,15 @@ func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm.Session) error
 
 func (o *Option) getResolver(ctx clictx.OCM, session ocm.Session) (ocm.ComponentVersionResolver, error) {
 	if len(o.RepoSpecs) != 0 {
-		resolvers := []ocm.ComponentVersionResolver{}
+		resolver := []ocm.ComponentVersionResolver{}
 		for _, s := range o.RepoSpecs {
 			r, _, err := session.DetermineRepository(ctx.Context(), s)
 			if err != nil {
 				return nil, err
 			}
-			resolvers = append(resolvers, r)
+			resolver = append(resolver, r)
 		}
-		return ocm.NewCompoundResolver(append(resolvers, ctx.Context().GetResolver())...), nil
+		return resolvers.NewCompoundResolver(append(resolver, ctx.Context().GetResolver())...), nil
 	}
 	return ctx.Context().GetResolver(), nil
 }

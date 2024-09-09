@@ -19,6 +19,7 @@ import (
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/keyoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/hashoption"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/storeoption"
 	"ocm.software/ocm/cmds/ocm/common/options"
 )
 
@@ -58,10 +59,15 @@ type Option struct {
 	Hash hashoption.Option
 
 	Keyless bool
+
+	Verified storeoption.Option
 }
+
+const DEFAULT_VERIFIED_FILE = "~/.ocm/verified"
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	o.Option.AddFlags(fs)
+	o.Verified.AddFlags(fs)
 	fs.StringArrayVarP(&o.SignatureNames, "signature", "s", nil, "signature name")
 	if o.SignMode {
 		o.Hash.AddFlags(fs)
@@ -116,7 +122,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		return err
 	}
 
-	return nil
+	return o.Verified.Configure(ctx)
 }
 
 func (o *Option) Usage() string {
@@ -130,7 +136,7 @@ signature name specified with the option <code>--signature</code>.
 Alternatively a key can be specified as base64 encoded string if the argument
 start with the prefix <code>!</code> or as direct string with the prefix
 <code>=</code>.
-`
+` + o.Verified.Usage()
 
 	if o.SignMode {
 		s += `
@@ -194,4 +200,6 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	}
 	opts.Update = o.Update
 	opts.Keyless = o.Keyless
+
+	opts.VerifiedStore = o.Verified.Store
 }

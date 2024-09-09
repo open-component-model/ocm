@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
-	utils2 "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
 	utils3 "ocm.software/ocm/api/utils"
@@ -162,7 +162,7 @@ func (a *action) describe(cv ocm.ComponentVersionAccess) error {
 	rid := metav1.NewResourceRef(a.cmd.Id)
 	resolver := lookupoption.From(a.cmd)
 
-	ires, eff, err := utils2.MatchResourceReference(cv, toi.TypeTOIPackage, rid, resolver)
+	ires, eff, err := resourcerefs.MatchResourceReference(cv, toi.TypeTOIPackage, rid, resolver)
 	if err != nil {
 		return errors.Wrapf(err, "package resource in %s", nv)
 	}

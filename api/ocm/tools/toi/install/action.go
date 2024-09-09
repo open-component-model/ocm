@@ -22,6 +22,7 @@ import (
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
@@ -96,7 +97,7 @@ func DetermineExecutor(executor *toi.Executor, octx ocm.Context, cv ocm.Componen
 		if executor.ResourceRef == nil {
 			return nil, errors.Newf("executor resource reference required for toi package executor")
 		}
-		res, eff, err := utils.ResolveResourceReference(cv, *executor.ResourceRef, resolver)
+		res, eff, err := resourcerefs.ResolveResourceReference(cv, *executor.ResourceRef, resolver)
 		if err != nil {
 			return nil, errors.ErrNotFoundWrap(err, "executor resource", executor.ResourceRef.String())
 		}
@@ -121,7 +122,7 @@ func DetermineExecutor(executor *toi.Executor, octx ocm.Context, cv ocm.Componen
 					return nil, errors.Newf("executor image reference required for toi executor")
 				}
 				var eff2 ocm.ComponentVersionAccess
-				res, eff2, err = utils.ResolveResourceReference(eff, *espec.Spec.ImageRef, resolver)
+				res, eff2, err = resourcerefs.ResolveResourceReference(eff, *espec.Spec.ImageRef, resolver)
 				if err != nil {
 					return nil, errors.ErrNotFoundWrap(err, "executor resource", executor.ResourceRef.String())
 				}
@@ -240,7 +241,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 
 	stubs := spiff.Options{}
 	for i, lib := range libraries {
-		res, eff, err := utils.ResolveResourceReference(cv, lib, resolver)
+		res, eff, err := resourcerefs.ResolveResourceReference(cv, lib, resolver)
 		if err != nil {
 			return nil, errors.ErrNotFound("library resource %s not found", lib.String())
 		}

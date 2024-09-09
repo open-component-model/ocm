@@ -1,4 +1,4 @@
-package clictx
+package cli
 
 import (
 	"context"

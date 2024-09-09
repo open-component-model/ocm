@@ -204,7 +204,7 @@ var _ = Describe("basic merge operations for transport", func() {
 						},
 					},
 					References: compdesc.References{
-						compdesc.ComponentReference{
+						compdesc.Reference{
 							ElementMeta: compdesc.ElementMeta{
 								Name:    "ref1",
 								Version: "v1.0.0",

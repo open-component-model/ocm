@@ -60,7 +60,7 @@ func GetCredentials(ctx cpi.ContextProvider, repoUrl string, pkgName string) (st
 		return "", "", err
 	}
 	if credentials == nil {
-		return "", "", fmt.Errorf("no credentials found for %s. Couldn't access '%s'", repoUrl, pkgName)
+		return "", "", nil
 	}
 	return credentials.GetProperty(identity.ATTR_USERNAME), credentials.GetProperty(identity.ATTR_PASSWORD), nil
 }
@@ -119,6 +119,16 @@ func BasicAuth(req *http.Request, ctx cpi.ContextProvider, repoUrl string, pkgNa
 	}
 	if username != "" && password != "" {
 		req.SetBasicAuth(username, password)
+	}
+	return nil
+}
+
+func BasicAuthForCreds(req *http.Request, creds cpi.Credentials) error {
+	if creds != nil {
+		username, password := creds.GetProperty(cpi.ATTR_USERNAME), creds.GetProperty(cpi.ATTR_PASSWORD)
+		if username != "" && password != "" {
+			req.SetBasicAuth(username, password)
+		}
 	}
 	return nil
 }

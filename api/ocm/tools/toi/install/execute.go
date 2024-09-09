@@ -5,7 +5,7 @@ import (
 
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	common "ocm.software/ocm/api/utils/misc"
@@ -33,7 +33,7 @@ func Execute(p common.Printer, d Driver, name string, rid metav1.Identity, creds
 		}
 	}
 
-	ires, _, err := utils.MatchResourceReference(cv, toi.TypeTOIPackage, metav1.NewResourceRef(rid), nil)
+	ires, _, err := resourcerefs.MatchResourceReference(cv, toi.TypeTOIPackage, metav1.NewResourceRef(rid), nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "package resource in %s", common.VersionedElementKey(cv).String())
 	}

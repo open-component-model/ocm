@@ -10,6 +10,7 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/utils/accessio"
 )
@@ -46,14 +47,14 @@ func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.Compo
 	return h.opts.IsOverwrite(), nil
 }
 
-func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference, tgt ocm.Repository) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
+func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.Reference, tgt ocm.Repository) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
 	if src == nil || h.opts.IsRecursive() {
 		if h.opts.IsStopOnExistingVersion() && tgt != nil {
 			if found, err := tgt.ExistsComponentVersion(meta.ComponentName, meta.Version); found || err != nil {
 				return nil, nil, errors.Wrapf(err, "failed looking up in target")
 			}
 		}
-		compoundResolver := ocm.NewCompoundResolver(repo, h.opts.GetResolver())
+		compoundResolver := resolvers.NewCompoundResolver(repo, h.opts.GetResolver())
 		cv, err := compoundResolver.LookupComponentVersion(meta.GetComponentName(), meta.Version)
 		return cv, h, err
 	}

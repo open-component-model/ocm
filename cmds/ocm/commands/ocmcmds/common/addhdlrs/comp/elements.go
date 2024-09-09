@@ -159,7 +159,7 @@ func handle[T addhdlrs.ElementSpec](ctx clictx.Context, ictx inputs.Context, si 
 	return common.ProcessElements(ictx, cv, elems, h)
 }
 
-// //////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 type ResourceSpec struct {
 	// Meta enabled to specify information for the serialization

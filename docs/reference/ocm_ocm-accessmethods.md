@@ -125,7 +125,7 @@ shown below.
     It uses the consumer identity type HelmChartRepository with the fields
     for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
 
-  Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--package</code>
 
 - Access type <code>localBlob</code>
 
@@ -243,7 +243,7 @@ shown below.
 
       The version name of the NPM package
 
-  Options used to configure fields: <code>--accessPackage</code>, <code>--accessRegistry</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--package</code>
 
 - Access type <code>ociArtifact</code>
 
@@ -288,6 +288,40 @@ shown below.
       The size of the blob
 
   Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
+
+- Access type <code>ocm</code>
+
+  This method implements the access of any resource artifact stored in an OCM
+  repository. Only repository types supporting remote access should be used.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The type specific specification fields are:
+
+    - **<code>ocmRepository</code>** *json*
+
+      The repository spec for the OCM repository
+
+    - **<code>component</code>** *string*
+
+      *(Optional)* The name of the component. The default is the
+      own component.
+
+    - **<code>version</code>** *string*
+
+      *(Optional)* The version of the component. The default is the
+      own component version.
+
+    - **<code>resourceRef</code>** *relative resource ref*
+
+      The resource reference of the denoted resource relative to the
+      given component version.
+
+    It uses the consumer identity and credentials for the intermediate repositories
+    and the final resource access.
+
+  Options used to configure fields: <code>--accessComponent</code>, <code>--accessRepository</code>, <code>--accessVersion</code>, <code>--identityPath</code>
 
 - Access type <code>s3</code>
 

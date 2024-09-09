@@ -17,6 +17,7 @@ import (
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/download"
 	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/tools/toi/support"
 	"ocm.software/ocm/api/tech/helm/loader"
 	"ocm.software/ocm/api/utils/compression"
@@ -99,7 +100,7 @@ func (e *Execution) addSubCharts(finalize *Finalizer, subCharts map[string]v1.Re
 	e.outf("Loading %d sub charts into %s...\n", len(subCharts), charts)
 	for n, r := range subCharts {
 		e.outf("  Loading sub chart %q from resource %s@%s\n", n, r, common.VersionedElementKey(e.ComponentVersion))
-		acc, rcv := Must2f(R2(utils.ResolveResourceReference(e.ComponentVersion, r, nil)), "chart reference", r.String())
+		acc, rcv := Must2f(R2(resourcerefs.ResolveResourceReference(e.ComponentVersion, r, nil)), "chart reference", r.String())
 		loop.Close(rcv)
 
 		if acc.Meta().Type != resourcetypes.HELM_CHART {
@@ -158,7 +159,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 	values = Merge(Must1(cfg.GetValues()), values)
 
 	e.outf("Loading helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(e.ComponentVersion))
-	acc, rcv := Must2f(R2(utils.ResolveResourceReference(e.ComponentVersion, cfg.Chart, nil)), "chart reference", cfg.Chart.String())
+	acc, rcv := Must2f(R2(resourcerefs.ResolveResourceReference(e.ComponentVersion, cfg.Chart, nil)), "chart reference", cfg.Chart.String())
 	finalize.Close(rcv)
 
 	if acc.Meta().Type != resourcetypes.HELM_CHART {
@@ -189,7 +190,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 	e.outf("Localizing helm chart...\n")
 	e.Logger.Debug("Localizing helm chart")
 	for i, v := range cfg.ImageMapping {
-		acc, rcv := Must2f(R2(utils.ResolveResourceReference(e.ComponentVersion, v.ResourceReference, nil)), "mapping", fmt.Sprintf("%d (%s)", i+1, &v.ResourceReference))
+		acc, rcv := Must2f(R2(resourcerefs.ResolveResourceReference(e.ComponentVersion, v.ResourceReference, nil)), "mapping", fmt.Sprintf("%d (%s)", i+1, &v.ResourceReference))
 		rcv.Close()
 		ref := Must1f(R1(utils.GetOCIArtifactRef(e.Context, acc)), "mapping %d: cannot resolve resource %s to an OCI Reference", i+1, v)
 		ix := strings.Index(ref, ":")

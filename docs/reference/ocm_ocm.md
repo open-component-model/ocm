@@ -32,6 +32,7 @@ ocm ocm [<options>] <sub command> ...
 * ocm ocm <b>routingslips</b>	 &mdash; Commands working on routing slips
 * ocm ocm <b>source-configuration</b>	 &mdash; Commands acting on component source specifications
 * ocm ocm <b>sources</b>	 &mdash; Commands acting on component sources
+* ocm ocm <b>verified</b>	 &mdash; Commands acting on verified component versions
 * ocm ocm <b>versions</b>	 &mdash; Commands acting on component version names
 
 

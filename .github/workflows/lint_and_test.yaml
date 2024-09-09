@@ -19,18 +19,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-      - name: Cache go-build and mod
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build/
-            ~/go/pkg/mod/
-          key: go-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            go-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -45,18 +33,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-      - name: Cache go-build and mod
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build/
-            ~/go/pkg/mod/
-          key: go-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            go-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -70,35 +46,3 @@ jobs:
       - name: Lint
         run: |
           PATH=$PATH:$(go env GOPATH)/bin make check
-
-  generate:
-    name: DeepCopy verification
-    runs-on: large_runner
-    steps:
-      - name: Self Hosted Runner Post Job Cleanup Action
-        uses: TooMuch4U/actions-clean@v2.2
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-      - name: Cache go-build and mod
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build/
-            ~/go/pkg/mod/
-          key: go-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            go-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: '${{ github.workspace }}/go.mod'
-      - name: Generate DeepCopy
-        run: |
-          PATH=$PATH:$(go env GOPATH)/bin make generate-deepcopy
-      - name: Check for diff
-        run: |
-          git diff --exit-code --shortstat

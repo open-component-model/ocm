@@ -63,9 +63,13 @@ type Attribute struct {
 }
 
 func New(path string, fss ...vfs.FileSystem) *Attribute {
+	fs := utils.FileSystem(fss...)
+	if path == "" {
+		path = fs.FSTempDir()
+	}
 	return &Attribute{
 		Path:       path,
-		Filesystem: utils.FileSystem(fss...),
+		Filesystem: fs,
 	}
 }
 
@@ -96,7 +100,7 @@ func Get(ctx datacontext.Context) *Attribute {
 		}
 		return a
 	}
-	return &Attribute{fs.FSTempDir(), fs}
+	return New("", fs)
 }
 
 func Set(ctx datacontext.Context, a *Attribute) {
