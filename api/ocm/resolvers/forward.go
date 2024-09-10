@@ -13,7 +13,7 @@ type (
 	Repository                       = internal.Repository
 	ResolvedComponentVersionProvider = internal.ResolvedComponentVersionProvider
 	ResolvedComponentProvider        = internal.ResolvedComponentProvider
-	ResolvedRepositoryProvider       = internal.ResolvedComponentProvider
+	ResolverRule                     = internal.ResolverRule
 )
 
 const (
