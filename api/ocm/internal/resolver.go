@@ -243,12 +243,12 @@ type MatchingResolver struct {
 
 var _ ComponentResolver = (*MatchingResolver)(nil)
 
-func NewMatchingResolver(ctx ContextProvider, rules ...*ResolverRule) *MatchingResolver {
+func NewMatchingResolver(ctx ContextProvider, rules ...ResolverRule) *MatchingResolver {
 	return &MatchingResolver{
 		lock:  sync.Mutex{},
 		ctx:   ctx,
 		cache: NewRepositoryCache(),
-		rules: nil,
+		rules: slices.Clone(rules),
 	}
 }
 

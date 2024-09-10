@@ -21,3 +21,7 @@ const (
 	KIND_COMPONENT        = internal.KIND_COMPONENT
 	KIND_OCM_REFERENCE    = internal.KIND_OCM_REFERENCE
 )
+
+func NewResolverRule(prefix string, spec RepositorySpec, prio ...int) ResolverRule {
+	return internal.NewResolverRule(prefix, spec, prio...)
+}

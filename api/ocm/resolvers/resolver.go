@@ -144,8 +144,8 @@ type MatchingResolver interface {
 	Finalize() error
 }
 
-func NewMatchingResolver(ctx ContextProvider) MatchingResolver {
-	return internal.NewMatchingResolver(ctx.OCMContext())
+func NewMatchingResolver(ctx ContextProvider, rules ...ResolverRule) MatchingResolver {
+	return internal.NewMatchingResolver(ctx.OCMContext(), rules...)
 }
 
 type ResolverRule = internal.ResolverRule
