@@ -315,7 +315,7 @@ uploaded to the OCI registry as OCI artifact and the access method has be change
 to `ociArtifact`. It is not longer a local blob.
 
 ```go
-	res, err := cv.GetResourcesByName("ocmcli")
+	res, err := cv.SelectResources(selectors.Name("ocmcli"))
 	if err != nil {
 		return errors.Wrapf(err, "accessing ocmcli resource")
 	}
