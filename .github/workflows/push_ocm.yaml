@@ -91,12 +91,10 @@ jobs:
         token: ${{ steps.generate_token.outputs.token }}
     - name: Enable gh-CLI
       uses: actions4gh/setup-gh@v1.0.2
-      id: setup-gh
       with:
         token: ${{ steps.generate_token.outputs.token }}
     - name: delete release and move tag
       run: |
-        set -x
         if [ "$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/open-component-model/ocm/releases | grep -c 'ocm-cli/latest')" -ge 1 ]; then
           RELEASE_ID=$(gh api -X GET -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/open-component-model/ocm/releases/tags/ocm-cli/latest | jq -r .id)
           gh api -X DELETE -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/open-component-model/ocm/releases/$RELEASE_ID
@@ -107,18 +105,18 @@ jobs:
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
         check-latest: false
-    - name: Run GoReleaser build
+    - name: goreleaser release snapshot
       uses: goreleaser/goreleaser-action@v6
       with:
         distribution: goreleaser
         version: 2.2.0
-        args: release --clean --timeout 60m --snapshot --verbose --skip=validate --config=.github/config/latest.yml
+        args: release --clean --timeout 60m --snapshot --skip=validate --config=.github/config/latest.yml
       env:
         GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         GORELEASER_CURRENT_TAG: v0.0.0
         GORELEASER_PREVIOUS_TAG: v0.0.0
-    - name: remove some files
+    - name: remove some meta files
       run: |
         rm -rf dist/*.json dist/*.yaml
     - name: Create Release
