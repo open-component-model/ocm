@@ -64,7 +64,7 @@ var _ = Describe("resolver", func() {
 	})
 
 	It("orders resolver rules", func() {
-		m := ocm.NewMatchingResolver(ocm.DefaultContext()).(*internal.MatchingResolver)
+		m := resolvers.NewMatchingResolver(ocm.DefaultContext()).(*internal.MatchingResolver)
 
 		spec1 := ocireg.NewRepositorySpec("host1.org", nil)
 		spec2 := ocireg.NewRepositorySpec("host2.org", nil)
