@@ -8,8 +8,8 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/wget/identity"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	"ocm.software/ocm/api/tech/wget/identity"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/wget"
 	"ocm.software/ocm/api/utils/mime"

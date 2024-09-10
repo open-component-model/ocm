@@ -11,8 +11,8 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/maven/identity"
 	"ocm.software/ocm/api/tech/maven"
+	"ocm.software/ocm/api/tech/maven/identity"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"

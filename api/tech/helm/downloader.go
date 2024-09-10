@@ -15,10 +15,10 @@ import (
 	"helm.sh/helm/v3/pkg/repo"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/helm/identity"
 	"ocm.software/ocm/api/credentials/extensions/repositories/directcreds"
 	"ocm.software/ocm/api/oci"
 	ocihelm "ocm.software/ocm/api/ocm/extensions/download/handlers/helm"
+	"ocm.software/ocm/api/tech/helm/identity"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )

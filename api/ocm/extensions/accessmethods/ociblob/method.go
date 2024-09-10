@@ -9,10 +9,10 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/credentials"
-	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
 )

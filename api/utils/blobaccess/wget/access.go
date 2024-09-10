@@ -12,8 +12,8 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/wget/identity"
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/tech/wget/identity"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"

@@ -17,13 +17,13 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/github/identity"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/tmpcache"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/cpi"
 	me "ocm.software/ocm/api/ocm/extensions/accessmethods/github"
+	"ocm.software/ocm/api/tech/github/identity"
 )
 
 type mockDownloader struct {

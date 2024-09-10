@@ -5,9 +5,9 @@ import (
 
 	"helm.sh/helm/v3/pkg/registry"
 
-	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
+	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/listformat"
 	common "ocm.software/ocm/api/utils/misc"
 )

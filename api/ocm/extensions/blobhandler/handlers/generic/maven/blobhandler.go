@@ -7,11 +7,11 @@ import (
 	"github.com/mandelsoft/goutils/ioutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"ocm.software/ocm/api/credentials/builtin/maven/identity"
 	"ocm.software/ocm/api/ocm/cpi"
 	access "ocm.software/ocm/api/ocm/extensions/accessmethods/maven"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/tech/maven"
+	"ocm.software/ocm/api/tech/maven/identity"
 	mavenblob "ocm.software/ocm/api/utils/blobaccess/maven"
 	"ocm.software/ocm/api/utils/iotools"
 	"ocm.software/ocm/api/utils/logging"

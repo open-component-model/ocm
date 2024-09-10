@@ -1,8 +1,8 @@
 package npm
 
 import (
-	npm "ocm.software/ocm/api/credentials/builtin/npm/identity"
 	"ocm.software/ocm/api/credentials/cpi"
+	npm "ocm.software/ocm/api/tech/npm/identity"
 	"ocm.software/ocm/api/utils/logging"
 )
 

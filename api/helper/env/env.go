@@ -250,7 +250,7 @@ func ModifiableProjectTestData(source string, dest ...string) Option {
 	return projectTestData(true, source, dest...)
 }
 
-func projectTestDataForCaller(modifiable bool, dest ...string) Option {
+func projectTestDataForCaller(modifiable bool, source string, dest ...string) Option {
 	packagePath, err := pkgutils.GetPackageName(2)
 	if err != nil {
 		panic(err)
@@ -265,15 +265,15 @@ func projectTestDataForCaller(modifiable bool, dest ...string) Option {
 		panic("unable to find package name")
 	}
 
-	return projectTestData(modifiable, filepath.Join(path, "testdata"), dest...)
+	return projectTestData(modifiable, filepath.Join(path, source), dest...)
 }
 
-func ProjectTestDataForCaller(dest ...string) Option {
-	return projectTestDataForCaller(false, dest...)
+func ProjectTestDataForCaller(source string, dest ...string) Option {
+	return projectTestDataForCaller(false, source, dest...)
 }
 
-func ModifiableProjectTestDataForCaller(dest ...string) Option {
-	return projectTestDataForCaller(true, dest...)
+func ModifiableProjectTestDataForCaller(source string, dest ...string) Option {
+	return projectTestDataForCaller(true, source, dest...)
 }
 
 func (o tdOpt) OptionHandler() OptionHandler {

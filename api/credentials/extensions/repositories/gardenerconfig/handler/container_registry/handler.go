@@ -6,10 +6,10 @@ import (
 	"io"
 	"strings"
 
-	"ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/credentials/cpi"
 	gardenercfgcpi "ocm.software/ocm/api/credentials/extensions/repositories/gardenerconfig/cpi"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
+	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils"
 	common "ocm.software/ocm/api/utils/misc"
 )

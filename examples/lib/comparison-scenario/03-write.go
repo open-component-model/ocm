@@ -7,11 +7,11 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
+	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/examples/lib/helper"
 )
@@ -68,12 +68,12 @@ func RegisterCredentials(ctx ocm.Context, cfg *helper.Config) error {
 		return errors.Wrapf(err, "invalid consumer")
 	}
 	fmt.Printf("consumer id for repository %s: %s\n", cfg.Repository, id)
-	prefix := id[ociidentity.ID_PATHPREFIX]
+	prefix := id[identity.ID_PATHPREFIX]
 	i := strings.LastIndex(prefix, "/")
 	if i > 0 {
-		id[ociidentity.ID_PATHPREFIX] = prefix[:i]
+		id[identity.ID_PATHPREFIX] = prefix[:i]
 	}
-	creds := ociidentity.SimpleCredentials(cfg.Username, cfg.Password)
+	creds := identity.SimpleCredentials(cfg.Username, cfg.Password)
 	credctx.SetCredentialsForConsumer(id, creds)
 	return nil
 }

@@ -15,8 +15,8 @@ import (
 	"golang.org/x/oauth2"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/github/identity"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	"ocm.software/ocm/api/tech/github/identity"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessio/downloader"
 	hd "ocm.software/ocm/api/utils/accessio/downloader/http"

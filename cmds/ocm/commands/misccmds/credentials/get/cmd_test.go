@@ -9,8 +9,8 @@ import (
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/credentials/cpi"
+	"ocm.software/ocm/api/tech/oci/identity"
 )
 
 var _ = Describe("Test Environment", func() {

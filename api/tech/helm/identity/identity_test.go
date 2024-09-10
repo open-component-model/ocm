@@ -3,12 +3,12 @@ package identity_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/api/credentials/builtin/helm/identity"
+	. "ocm.software/ocm/api/tech/helm/identity"
 
 	"ocm.software/ocm/api/credentials"
-	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci"
+	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	common "ocm.software/ocm/api/utils/misc"
 )
 

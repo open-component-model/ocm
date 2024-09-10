@@ -5,9 +5,9 @@ import (
 )
 
 func TestData(dest ...string) env.Option {
-	return env.ProjectTestDataForCaller(dest...)
+	return env.ProjectTestDataForCaller("testdata", dest...)
 }
 
 func ModifiableTestData(dest ...string) env.Option {
-	return env.ModifiableProjectTestDataForCaller(dest...)
+	return env.ModifiableProjectTestDataForCaller("testdata", dest...)
 }

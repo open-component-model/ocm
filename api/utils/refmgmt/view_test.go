@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	refmgmt2 "ocm.software/ocm/api/utils/refmgmt"
+	"ocm.software/ocm/api/utils/refmgmt"
 )
 
 // Objectbase is the base interface for the
@@ -50,7 +50,7 @@ func (o *object) Close() error {
 	defer o.lock.Unlock()
 
 	if o.closed {
-		return refmgmt2.ErrClosed
+		return refmgmt.ErrClosed
 	}
 	o.closed = true
 	return nil
@@ -63,7 +63,7 @@ func (o *object) Close() error {
 // Execute function of the manager, to assure execution
 // on non-closed views, only.
 type view struct {
-	*refmgmt2.View[Object]
+	*refmgmt.View[Object]
 	obj ObjectBase
 }
 
@@ -79,7 +79,7 @@ func (v *view) Value() (string, error) {
 
 // creator is the view object creator based on
 // the base object and the view manager.
-func creator(obj ObjectBase, v *refmgmt2.View[Object]) Object {
+func creator(obj ObjectBase, v *refmgmt.View[Object]) Object {
 	return &view{v, obj}
 }
 
@@ -89,7 +89,7 @@ var _ = Describe("view management wrapper", func() {
 	It("wraps object", func() {
 		o := &object{value: "test"}
 
-		v := refmgmt2.WithView[ObjectBase, Object](o, creator)
+		v := refmgmt.WithView[ObjectBase, Object](o, creator)
 		Expect(v.Value()).To(Equal("test"))
 
 		d := Must(v.Dup())
@@ -97,11 +97,11 @@ var _ = Describe("view management wrapper", func() {
 
 		MustBeSuccessful(d.Close())
 		Expect(o.closed).To(BeFalse())
-		ExpectError(d.Value()).To(Equal(refmgmt2.ErrClosed))
+		ExpectError(d.Value()).To(Equal(refmgmt.ErrClosed))
 		Expect(v.Value()).To(Equal("test"))
 
 		MustBeSuccessful(v.Close())
 		Expect(o.closed).To(BeTrue())
-		ExpectError(v.Value()).To(Equal(refmgmt2.ErrClosed))
+		ExpectError(v.Value()).To(Equal(refmgmt.ErrClosed))
 	})
 })

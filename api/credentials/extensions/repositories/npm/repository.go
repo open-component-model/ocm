@@ -5,8 +5,8 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	npmCredentials "ocm.software/ocm/api/credentials/builtin/npm/identity"
 	"ocm.software/ocm/api/credentials/cpi"
+	npmCredentials "ocm.software/ocm/api/tech/npm/identity"
 	"ocm.software/ocm/api/utils"
 	common "ocm.software/ocm/api/utils/misc"
 )

@@ -7,11 +7,11 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/npm/identity"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/tech/npm"
+	"ocm.software/ocm/api/tech/npm/identity"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/stdopts"
 )

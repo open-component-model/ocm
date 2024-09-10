@@ -10,9 +10,9 @@ import (
 	"ocm.software/ocm/api/config/cpi"
 	configcfg "ocm.software/ocm/api/config/extensions/config"
 	"ocm.software/ocm/api/credentials"
-	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
+	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/examples/lib/helper"
 )

@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"ocm.software/ocm/api/credentials/builtin/npm/identity"
 	"ocm.software/ocm/api/credentials/cpi"
+	"ocm.software/ocm/api/tech/npm/identity"
 	"ocm.software/ocm/api/utils/logging"
 )
 
