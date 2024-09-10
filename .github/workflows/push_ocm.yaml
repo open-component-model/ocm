@@ -69,14 +69,14 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   ocm-cli-latest:
-    name: ocm-cli build latest
+    name: Build latest ocm-cli
     runs-on: large_runner
     permissions:
       contents: write
       id-token: write
       packages: write
     steps:
-    - name: Self Hosted Runner Post Job Cleanup Action
+    - name: Self hosted runner post job cleanup
       uses: TooMuch4U/actions-clean@v2.2
     - name: Generate token
       id: generate_token
@@ -89,19 +89,19 @@ jobs:
       with:
         fetch-depth: 0
         token: ${{ steps.generate_token.outputs.token }}
-    - name: Enable gh-CLI
+    - name: Enable github-cli
       uses: actions4gh/setup-gh@v1.0.2
       with:
         token: ${{ steps.generate_token.outputs.token }}
-    - name: delete release and move tag
+    - name: Move tag to latest commit
       run: |
         gh api -X PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/open-component-model/ocm/git/refs/tags/ocm-cli/latest -f "sha=${{ github.sha }}" -F "force=true"
-    - name: Setup Go
+    - name: Setup go
       uses: actions/setup-go@v5
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
         check-latest: false
-    - name: goreleaser release snapshot
+    - name: Goreleaser release snapshot
       uses: goreleaser/goreleaser-action@v6
       with:
         distribution: goreleaser
@@ -112,7 +112,7 @@ jobs:
         GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         GORELEASER_CURRENT_TAG: v0.0.0
         GORELEASER_PREVIOUS_TAG: v0.0.0
-    - name: Create or update Release
+    - name: Create or update release
       uses: ncipollo/release-action@v1
       with:
         name: latest ocm-cli
