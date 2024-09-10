@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/mandelsoft/goutils/errors"
+	"ocm.software/ocm/api/ocm/selectors"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci"
@@ -194,7 +195,7 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	// It is not longer a local blob.
 
 	// --- begin examine cli ---
-	res, err := cv.GetResourcesByName("ocmcli")
+	res, err := cv.SelectResources(selectors.Name("ocmcli"))
 	if err != nil {
 		return errors.Wrapf(err, "accessing ocmcli resource")
 	}

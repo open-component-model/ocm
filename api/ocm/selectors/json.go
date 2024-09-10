@@ -1,4 +1,4 @@
-package selector
+package selectors
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/xeipuuv/gojsonschema"
+	"ocm.software/ocm/api/ocm/selectors/accessors"
 )
 
 // Interface defines a selector interface that
@@ -222,4 +223,15 @@ func (j JSONSchemaSelector) Match(obj map[string]string) (bool, error) {
 		return false, err
 	}
 	return res.Valid(), nil
+}
+
+// TODO 1: this might not work.
+// TODO 2: what about accessor2?
+func (j JSONSchemaSelector) MatchResource(accessor accessors.ElementListAccessor, accessor2 accessors.ResourceAccessor) bool {
+	documentLoader := gojsonschema.NewGoLoader(accessor)
+	res, err := j.Scheme.Validate(documentLoader)
+	if err != nil {
+		return false
+	}
+	return res.Valid()
 }

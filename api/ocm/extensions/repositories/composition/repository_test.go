@@ -4,6 +4,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/ocm/selectors"
 
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
@@ -14,7 +15,7 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	me "ocm.software/ocm/api/ocm/extensions/repositories/composition"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -59,7 +60,7 @@ var _ = Describe("repository", func() {
 
 		cv = Must(c.LookupVersion(VERSION))
 		finalize.Close(cv, "query")
-		rs := Must(cv.GetResourcesByName("test"))
+		rs := Must(cv.SelectResources(selectors.Name("test")))
 		Expect(len(rs)).To(Equal(1))
 		data := Must(ocmutils.GetResourceData(rs[0]))
 		Expect(string(data)).To(Equal("testdata"))
