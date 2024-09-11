@@ -276,7 +276,7 @@ func mergeProviderLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.Com
 func resourceLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
 	rid := metav1.NewIdentity("testdata")
 	ra := Must(cv.GetResource(rid))
-	tr := NotNil(merged.GetResourceAccessByIdentity(rid))
+	tr := NotNil(merged.GetResourceByIdentity(rid))
 
 	ra.Meta().SetLabel(LABEL_VOL, "changed-resource-volatile")
 	tr.SetLabel(LABEL_VOL, "changed-resource-volatile")
@@ -284,13 +284,13 @@ func resourceLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.Componen
 
 func mergeResourceLabel(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.ComponentDescriptor) {
 	rid := metav1.NewIdentity("testdata")
-	tr := NotNil(merged.GetResourceAccessByIdentity(rid))
+	tr := NotNil(merged.GetResourceByIdentity(rid))
 
-	ra := NotNil(cv.GetDescriptor().GetResourceAccessByIdentity(rid))
+	ra := NotNil(cv.GetDescriptor().GetResourceByIdentity(rid))
 	ra.SetLabel(LABEL_VOL_NEW, "new-resource-volatile")
 	tr.SetLabel(LABEL_VOL_NEW, "new-resource-volatile")
 
-	ra = NotNil(tcv.GetDescriptor().GetResourceAccessByIdentity(rid))
+	ra = NotNil(tcv.GetDescriptor().GetResourceByIdentity(rid))
 	ra.SetLabel(LABEL_VOL_LOCAL, "local-resource-volatile")
 	tr.SetLabel(LABEL_VOL_LOCAL, "local-resource-volatile")
 }

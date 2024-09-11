@@ -4,6 +4,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/ocm/selectors"
 	. "ocm.software/ocm/api/ocm/testhelper"
 
 	"ocm.software/ocm/api/datacontext"
@@ -38,7 +39,7 @@ var _ = Describe("add resources", func() {
 			meta := ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation)
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
 				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
-			Expect(Must(cv.GetResourcesByName("test"))[0].Meta().Digest).To(Equal(DS_TESTDATA))
+			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_TESTDATA))
 		})
 
 		It("replaces resource", func() {
@@ -48,7 +49,7 @@ var _ = Describe("add resources", func() {
 
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil))
-			Expect(Must(cv.GetResourcesByName("test"))[0].Meta().Digest).To(Equal(DS_OTHERDATA))
+			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_OTHERDATA))
 		})
 
 		It("replaces resource (enforced)", func() {
@@ -58,11 +59,11 @@ var _ = Describe("add resources", func() {
 
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil, ocm.UpdateElement))
-			Expect(Must(cv.GetResourcesByName("test"))[0].Meta().Digest).To(Equal(DS_OTHERDATA))
+			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_OTHERDATA))
 
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v2"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil, ocm.UpdateElement))
-			Expect(Must(cv.GetResourcesByName("test"))[0].Meta().Digest).To(Equal(DS_OTHERDATA))
+			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_OTHERDATA))
 		})
 
 		It("fails replace non-existent resource)", func() {
@@ -81,9 +82,9 @@ var _ = Describe("add resources", func() {
 				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v2"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil, ocm.AppendElement))
-			Expect(len(Must(cv.GetResourcesByName("test")))).To(Equal(2))
-			Expect(Must(cv.GetResourcesByName("test"))[0].Meta().Digest).To(Equal(DS_TESTDATA))
-			Expect(Must(cv.GetResourcesByName("test"))[1].Meta().Digest).To(Equal(DS_OTHERDATA))
+			Expect(len(Must(cv.SelectResources(selectors.Name("test"))))).To(Equal(2))
+			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_TESTDATA))
+			Expect(Must(cv.SelectResources(selectors.Name("test")))[1].Meta().Digest).To(Equal(DS_OTHERDATA))
 		})
 
 		It("rejects duplicate resource with same version", func() {
@@ -120,7 +121,7 @@ var _ = Describe("add resources", func() {
 
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil))
-			Expect(len(Must(cv.GetSourcesByName("test")))).To(Equal(1))
+			Expect(len(Must(cv.SelectSources(selectors.Name("test"))))).To(Equal(1))
 		})
 
 		It("replaces source (enforced)", func() {
@@ -130,11 +131,11 @@ var _ = Describe("add resources", func() {
 
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil, ocm.UpdateElement))
-			Expect(len(Must(cv.GetSourcesByName("test")))).To(Equal(1))
+			Expect(len(Must(cv.SelectSources(selectors.Name("test"))))).To(Equal(1))
 
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v2"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil, ocm.UpdateElement))
-			Expect(len(Must(cv.GetSourcesByName("test")))).To(Equal(1))
+			Expect(len(Must(cv.SelectSources(selectors.Name("test"))))).To(Equal(1))
 		})
 
 		It("fails replace non-existent source)", func() {
@@ -153,7 +154,7 @@ var _ = Describe("add resources", func() {
 				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v2"),
 				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), "", nil, ocm.AppendElement))
-			Expect(len(Must(cv.GetSourcesByName("test")))).To(Equal(2))
+			Expect(len(Must(cv.SelectSources(selectors.Name("test"))))).To(Equal(2))
 		})
 
 		It("rejects duplicate source with same version", func() {
@@ -187,7 +188,7 @@ var _ = Describe("add resources", func() {
 			MustBeSuccessful(cv.SetReference(ref))
 
 			MustBeSuccessful(cv.SetReference(ref.WithVersion("v1")))
-			Expect(len(Must(cv.GetReferencesByName("test")))).To(Equal(1))
+			Expect(len(Must(cv.SelectReferences(selectors.Name("test"))))).To(Equal(1))
 		})
 
 		It("replaces source (enforced)", func() {
@@ -195,7 +196,7 @@ var _ = Describe("add resources", func() {
 			MustBeSuccessful(cv.SetReference(ref))
 
 			MustBeSuccessful(cv.SetReference(ref.WithVersion("v2")))
-			Expect(len(Must(cv.GetReferencesByName("test")))).To(Equal(1))
+			Expect(len(Must(cv.SelectReferences(selectors.Name("test"))))).To(Equal(1))
 		})
 
 		It("fails replace non-existent source)", func() {
@@ -210,7 +211,7 @@ var _ = Describe("add resources", func() {
 			ref := ocm.NewComponentReference("test", COMPONENT+"/sub", "v1")
 			MustBeSuccessful(cv.SetReference(ref))
 			MustBeSuccessful(cv.SetReference(ref.WithVersion("v2"), ocm.AppendElement))
-			Expect(len(Must(cv.GetReferencesByName("test")))).To(Equal(2))
+			Expect(len(Must(cv.SelectReferences(selectors.Name("test"))))).To(Equal(2))
 		})
 
 		It("rejects duplicate reference with same version", func() {
