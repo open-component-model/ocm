@@ -6,7 +6,6 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/ocm/selectors"
 	. "ocm.software/ocm/api/ocm/testhelper"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -74,7 +73,7 @@ var _ = Describe("Repository", func() {
 		defer Close(repo, "repo")
 		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
 		defer Close(cv, "compvers")
-		res := Must(cv.SelectResources(selectors.Name(RESOURCE_NAME)))
+		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
 		acc := Must(res[0].AccessMethod())
 		defer Close(acc, "method")
 		bytesA := Must(acc.Get())
@@ -90,7 +89,7 @@ var _ = Describe("Repository", func() {
 		defer Close(repo)
 		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
 		defer Close(cv)
-		res := Must(cv.SelectResources(selectors.Name(RESOURCE_NAME)))
+		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
 		acc := Must(res[0].AccessMethod())
 		defer Close(acc)
 		data := Must(acc.Reader())
@@ -120,7 +119,7 @@ var _ = Describe("Repository", func() {
 		MustBeSuccessful(arch.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
 			blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
 
-		res := Must(arch.SelectResources(selectors.Name("blob")))
+		res := Must(arch.GetResourcesByName("blob"))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
 			HashAlgorithm:          sha256.Algorithm,
 			NormalisationAlgorithm: blob.GenericBlobDigestV1,
@@ -136,7 +135,7 @@ var _ = Describe("Repository", func() {
 		arch = Must(comparch.Open(octx, accessobj.ACC_WRITABLE, "test", 0o0700, accessio.PathFileSystem(memfs)))
 		finalize.Close(arch, "comparch)")
 
-		res = Must(arch.SelectResources(selectors.Name("blob")))
+		res = Must(arch.GetResourcesByName("blob"))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
 			HashAlgorithm:          sha256.Algorithm,
 			NormalisationAlgorithm: blob.GenericBlobDigestV1,
@@ -160,7 +159,7 @@ var _ = Describe("Repository", func() {
 		MustBeSuccessful(arch.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
 			blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
 
-		res := Must(arch.SelectResources(selectors.Name("blob")))
+		res := Must(arch.GetResourcesByName("blob"))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
 			HashAlgorithm:          sha256.Algorithm,
 			NormalisationAlgorithm: blob.GenericBlobDigestV1,
@@ -176,7 +175,7 @@ var _ = Describe("Repository", func() {
 		arch = Must(comparch.Open(octx, accessobj.ACC_WRITABLE, "test", 0o0700, accessio.PathFileSystem(memfs)))
 		finalize.Close(arch, "comparch)")
 
-		res = Must(arch.SelectResources(selectors.Name("blob")))
+		res = Must(arch.GetResourcesByName("blob"))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
 			HashAlgorithm:          sha256.Algorithm,
 			NormalisationAlgorithm: blob.GenericBlobDigestV1,
@@ -191,7 +190,7 @@ var _ = Describe("Repository", func() {
 		defer Close(repo)
 		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
 		defer Close(cv)
-		res := Must(cv.SelectResources(selectors.Name("blob")))
+		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
 		acc := Must(res[0].AccessMethod())
 		defer Close(acc)
 	})
@@ -246,7 +245,7 @@ var _ = Describe("Repository", func() {
 		arch := Must(comparch.Open(octx, accessobj.ACC_READONLY, TAR_COMPARCH, 0o0700, accessio.PathFileSystem(env)))
 		finalize.Close(arch, "comparch)")
 
-		res := Must(arch.SelectResources(selectors.Name("blob")))
+		res := Must(arch.GetResourcesByName("blob"))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
 			HashAlgorithm:          sha256.Algorithm,
 			NormalisationAlgorithm: blob.GenericBlobDigestV1,
@@ -280,7 +279,7 @@ var _ = Describe("Repository", func() {
 		arch := Must(comparch.Open(octx, accessobj.ACC_READONLY, TAR_COMPARCH, 0o0700, accessio.PathFileSystem(env)))
 		finalize.Close(arch, "comparch)")
 
-		res := Must(arch.SelectResources(selectors.Name("blob")))
+		res := Must(arch.GetResourcesByName("blob"))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
 			HashAlgorithm:          sha256.Algorithm,
 			NormalisationAlgorithm: blob.GenericBlobDigestV1,

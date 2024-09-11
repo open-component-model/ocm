@@ -2,6 +2,7 @@ package compdesc
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
 
@@ -11,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/selectors/rscsel"
 	"ocm.software/ocm/api/ocm/selectors/srcsel"
 	"ocm.software/ocm/api/utils/runtime"
+	"ocm.software/ocm/api/utils/selector"
 )
 
 // GetEffectiveRepositoryContext returns the currently active repository context.
@@ -88,6 +90,24 @@ func (cd *ComponentDescriptor) GetResourceIndexByIdentity(id v1.Identity) int {
 		}
 	}
 	return -1
+}
+
+// GetResourceByJSONScheme returns resources that match the given selectors.
+func (cd *ComponentDescriptor) GetResourceByJSONScheme(src interface{}) (Resources, error) {
+	sel, err := selector.NewJSONSchemaSelectorFromGoStruct(src)
+	if err != nil {
+		return nil, err
+	}
+	return cd.GetResourcesByIdentitySelectors(sel)
+}
+
+// GetResourceByDefaultSelector returns resources that match the given selectors.
+func (cd *ComponentDescriptor) GetResourceByDefaultSelector(sel interface{}) (Resources, error) {
+	identitySelector, err := selector.ParseDefaultSelector(sel)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse selector: %w", err)
+	}
+	return cd.GetResourcesByIdentitySelectors(identitySelector)
 }
 
 // GetResourceIndex returns the index of a given resource.

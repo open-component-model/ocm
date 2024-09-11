@@ -89,6 +89,11 @@ func (d *DummyComponentVersionAccess) GetResourceByIndex(i int) (ResourceAccess,
 	return nil, errors.ErrInvalid("resource index", strconv.Itoa(i))
 }
 
+// Deprecated: use GetResources.
+func (d *DummyComponentVersionAccess) GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error) {
+	return nil, errors.ErrInvalid("resource", name)
+}
+
 func (d *DummyComponentVersionAccess) SelectSources(sel ...srcsel.Selector) ([]SourceAccess, error) {
 	return nil, nil
 }
@@ -127,6 +132,11 @@ func (d *DummyComponentVersionAccess) GetReferenceIndex(metav1.Identity) int {
 
 func (d *DummyComponentVersionAccess) GetReferenceByIndex(i int) (ComponentReference, error) {
 	return ComponentReference{}, errors.ErrInvalid("reference index", strconv.Itoa(i))
+}
+
+// Deprecated: use GetSources.
+func (d *DummyComponentVersionAccess) GetSourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]SourceAccess, error) {
+	return nil, errors.ErrInvalid("source", name)
 }
 
 func (d *DummyComponentVersionAccess) AccessMethod(spec AccessSpec) (AccessMethod, error) {
@@ -189,4 +199,29 @@ func (d *DummyComponentVersionAccess) IsPersistent() bool {
 
 func (d *DummyComponentVersionAccess) UseDirectAccess() bool {
 	return true
+}
+
+// Deprecated: use GetResources.
+func (d *DummyComponentVersionAccess) GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error) {
+	return nil, nil
+}
+
+// Deprecated: use GetResources.
+func (d *DummyComponentVersionAccess) GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error) {
+	return nil, nil
+}
+
+// Deprecated: use GetReferences.
+func (d *DummyComponentVersionAccess) GetReferencesByName(name string, selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
+	return nil, nil
+}
+
+// Deprecated: use GetReferences.
+func (d *DummyComponentVersionAccess) GetReferencesByIdentitySelectors(selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
+	return nil, nil
+}
+
+// Deprecated: use GetReferences.
+func (d *DummyComponentVersionAccess) GetReferencesByReferenceSelectors(selectors ...compdesc.ReferenceSelector) (compdesc.References, error) {
+	return nil, nil
 }
