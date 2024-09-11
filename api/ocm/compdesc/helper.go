@@ -88,15 +88,6 @@ func (cd *ComponentDescriptor) GetResourceIndexByIdentity(id v1.Identity) int {
 	return -1
 }
 
-// GetResourceByJSONScheme returns resources that match the given selectors.
-func (cd *ComponentDescriptor) GetResourceByJSONScheme(src interface{}) (Resources, error) {
-	sel, err := selectors.NewJSONSchemaSelectorFromGoStruct(src)
-	if err != nil {
-		return nil, err
-	}
-	return cd.SelectResources(sel)
-}
-
 // GetResourceIndex returns the index of a given resource.
 // If the index is not found -1 is returned.
 func (cd *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
