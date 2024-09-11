@@ -256,7 +256,7 @@ func (o *ElementMeta) GetIdentity(accessor ElementListAccessor) metav1.Identity 
 	return identity
 }
 
-// GetRawIdentity returns the identity plus version.
+// GetRawIdentity returns the identity plus version, if set.
 func (o *ElementMeta) GetRawIdentity() metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
 	if identity == nil {

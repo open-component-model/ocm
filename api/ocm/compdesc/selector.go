@@ -10,9 +10,9 @@ type elemList struct {
 	ElementListAccessor
 }
 
-func (e *elemList) Get(i int) accessors.ElementMetaAccessor {
+func (e *elemList) Get(i int) accessors.Element {
 	elem := e.ElementListAccessor.Get(i)
-	return generics.Cast[accessors.ElementMetaAccessor](elem)
+	return generics.Cast[accessors.Element](elem)
 }
 
 func MapToSelectorElementList(accessor ElementListAccessor) accessors.ElementListAccessor {

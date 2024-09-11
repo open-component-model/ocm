@@ -37,8 +37,8 @@ var (
 )
 
 type Manifest struct {
-	History common.History               `json:"context"`
-	Element compdesc.ElementMetaAccessor `json:"element"`
+	History common.History   `json:"context"`
+	Element compdesc.Element `json:"element"`
 }
 
 func (o *Object) AsManifest() interface{} {

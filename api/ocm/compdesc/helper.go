@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"golang.org/x/exp/slices"
 
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors"
@@ -64,11 +65,7 @@ outer:
 }
 
 func (cd *ComponentDescriptor) GetResources() Resources {
-	result := Resources{}
-	for _, r := range cd.Resources {
-		result = append(result, r)
-	}
-	return result
+	return slices.Clone(cd.Resources)
 }
 
 // GetResourceByIdentity returns resource that matches the given identity.
@@ -141,11 +138,7 @@ outer:
 }
 
 func (cd *ComponentDescriptor) GetSources() Sources {
-	result := Sources{}
-	for _, r := range cd.Sources {
-		result = append(result, r)
-	}
-	return result
+	return slices.Clone(cd.Sources)
 }
 
 // GetSourceByIdentity returns source that match the given identity.
@@ -211,11 +204,7 @@ outer:
 }
 
 func (cd *ComponentDescriptor) GetReferences() References {
-	result := References{}
-	for _, r := range cd.References {
-		result = append(result, r)
-	}
-	return result
+	return slices.Clone(cd.References)
 }
 
 // GetReferenceIndexByIdentity returns the index of the reference that matches the given identity.

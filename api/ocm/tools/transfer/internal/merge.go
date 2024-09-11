@@ -49,9 +49,11 @@ func MergeElements(log logging.Logger, ctx ocm.Context, s compdesc.ElementListAc
 		id := es.GetMeta().GetIdentity(s)
 		et := compdesc.GetByIdentity(t, id)
 		if et != nil {
-			if err := MergeLabels(log, ctx, es.GetMeta().Labels, &et.GetMeta().Labels); err != nil {
+			labels := et.GetMeta().GetLabels()
+			if err := MergeLabels(log, ctx, es.GetMeta().GetLabels(), &labels); err != nil {
 				return err
 			}
+			et.GetMeta().SetLabels(labels)
 
 			// keep access for same digest
 			if aes, ok := es.(compdesc.ElementArtifactAccessor); ok {
