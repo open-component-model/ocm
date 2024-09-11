@@ -40,20 +40,21 @@ func (cd *ComponentDescriptor) AddRepositoryContext(repoCtx runtime.TypedObject)
 	return nil
 }
 
-func (cd *ComponentDescriptor) SelectResources(sel ...rscsel.Selector) ([]Resource, error) {
+func (cd *ComponentDescriptor) SelectResources(sel ...rscsel.Selector) (Resources, error) {
 	err := selectors.ValidateSelectors(sel...)
 	if err != nil {
 		return nil, err
 	}
 
 	list := MapToSelectorElementList(cd.Resources)
-	result := []Resource{}
+	result := Resources{}
+outer:
 	for _, r := range cd.Resources {
 		if len(sel) > 0 {
 			mr := MapToSelectorResource(&r)
 			for _, s := range sel {
 				if !s.MatchResource(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}
@@ -62,8 +63,8 @@ func (cd *ComponentDescriptor) SelectResources(sel ...rscsel.Selector) ([]Resour
 	return result, nil
 }
 
-func (cd *ComponentDescriptor) GetResources() []Resource {
-	result := []Resource{}
+func (cd *ComponentDescriptor) GetResources() Resources {
+	result := Resources{}
 	for _, r := range cd.Resources {
 		result = append(result, r)
 	}
@@ -116,20 +117,21 @@ func (cd *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
 	return ElementIndex(cd.Resources, res)
 }
 
-func (cd *ComponentDescriptor) SelectSources(sel ...srcsel.Selector) ([]Source, error) {
+func (cd *ComponentDescriptor) SelectSources(sel ...srcsel.Selector) (Sources, error) {
 	err := selectors.ValidateSelectors(sel...)
 	if err != nil {
 		return nil, err
 	}
 
 	list := MapToSelectorElementList(cd.Sources)
-	result := []Source{}
+	result := Sources{}
+outer:
 	for _, r := range cd.Sources {
 		if len(sel) > 0 {
 			mr := MapToSelectorSource(&r)
 			for _, s := range sel {
 				if !s.MatchSource(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}
@@ -138,8 +140,8 @@ func (cd *ComponentDescriptor) SelectSources(sel ...srcsel.Selector) ([]Source, 
 	return result, nil
 }
 
-func (cd *ComponentDescriptor) GetSources() []Source {
-	result := []Source{}
+func (cd *ComponentDescriptor) GetSources() Sources {
+	result := Sources{}
 	for _, r := range cd.Sources {
 		result = append(result, r)
 	}
@@ -185,20 +187,21 @@ func (cd *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (Reference
 	return Reference{}, errors.ErrNotFound(KIND_REFERENCE, id.String())
 }
 
-func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) ([]Reference, error) {
+func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) (References, error) {
 	err := selectors.ValidateSelectors(sel...)
 	if err != nil {
 		return nil, err
 	}
 
 	list := MapToSelectorElementList(cd.References)
-	result := []Reference{}
+	result := References{}
+outer:
 	for _, r := range cd.References {
 		if len(sel) > 0 {
 			mr := MapToSelectorReference(&r)
 			for _, s := range sel {
 				if !s.MatchReference(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}
@@ -207,8 +210,8 @@ func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) ([]Refer
 	return result, nil
 }
 
-func (cd *ComponentDescriptor) GetReferences() []Reference {
-	result := []Reference{}
+func (cd *ComponentDescriptor) GetReferences() References {
+	result := References{}
 	for _, r := range cd.References {
 		result = append(result, r)
 	}

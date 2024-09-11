@@ -90,10 +90,10 @@ type TypeHandler struct {
 	kind       string
 	forceEmpty bool
 	filter     ElementFilter
-	elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor
+	elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementListAccessor
 }
 
-func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor, hopts ...Option) (utils.TypeHandler, error) {
+func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementListAccessor, hopts ...Option) (utils.TypeHandler, error) {
 	components, err := comphdlr.Evaluate(octx, session, repobase, compspecs, oopts, MapToCompHandlerOptions(hopts...)...)
 	if err != nil {
 		return nil, err

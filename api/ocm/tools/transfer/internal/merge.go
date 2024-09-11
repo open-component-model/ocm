@@ -43,7 +43,7 @@ func PrepareDescriptor(log logging.Logger, ctx ocm.Context, s *compdesc.Componen
 	return n, nil
 }
 
-func MergeElements(log logging.Logger, ctx ocm.Context, s compdesc.ElementAccessor, t compdesc.ElementAccessor) error {
+func MergeElements(log logging.Logger, ctx ocm.Context, s compdesc.ElementListAccessor, t compdesc.ElementListAccessor) error {
 	for i := 0; i < s.Len(); i++ {
 		es := s.Get(i)
 		id := es.GetMeta().GetIdentity(s)

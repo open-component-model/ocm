@@ -7,14 +7,15 @@ import (
 )
 
 type elemList struct {
-	ElementAccessor
+	ElementListAccessor
 }
 
 func (e *elemList) Get(i int) accessors.ElementMetaAccessor {
-	return generics.Cast[accessors.ElementMetaAccessor](e.ElementAccessor.Get(i))
+	elem := e.ElementListAccessor.Get(i)
+	return generics.Cast[accessors.ElementMetaAccessor](elem)
 }
 
-func MapToSelectorElementList(accessor ElementAccessor) accessors.ElementListAccessor {
+func MapToSelectorElementList(accessor ElementListAccessor) accessors.ElementListAccessor {
 	return &elemList{accessor}
 }
 

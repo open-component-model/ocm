@@ -128,7 +128,7 @@ func (a *Options) handle(cache Cache, cv ocm.ComponentVersionAccess, h common.Hi
 	return result, list.Result()
 }
 
-func (a *Options) checkArtifacts(ctx ocm.Context, accessor compdesc.ElementAccessor) ([]metav1.Identity, error) {
+func (a *Options) checkArtifacts(ctx ocm.Context, accessor compdesc.ElementListAccessor) ([]metav1.Identity, error) {
 	var result []metav1.Identity
 
 	list := errors.ErrorList{}

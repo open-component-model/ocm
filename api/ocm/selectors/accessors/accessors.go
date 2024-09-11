@@ -1,6 +1,7 @@
 package accessors
 
 import (
+	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -18,11 +19,13 @@ type ElementMeta interface {
 	GetExtraIdentity() v1.Identity
 	GetLabels() v1.Labels
 	GetIdentityForContext(accessor ElementListAccessor) v1.Identity
+	GetIdentityDigest(accessor ElementListAccessor) []byte
 }
 
 // ElementMetaAccessor provides generic access an elements meta information.
 type ElementMetaAccessor interface {
 	GetMeta() ElementMeta
+	Equivalent(ElementMetaAccessor) equivalent.EqualState
 }
 
 // AccessSpec is the minimal interface  for access spec attributes.

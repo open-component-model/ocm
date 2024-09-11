@@ -89,6 +89,57 @@ func Identity(identity v1.Identity) *IdentitySelectorImpl {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type extraid struct {
+	v1.Identity
+}
+
+func (i *extraid) MatchIdentity(identity v1.Identity) bool {
+	identity = identity.ExtraIdentity()
+
+	if len(i.Identity) != len(identity) {
+		return false
+	}
+	for n, v := range i.Identity {
+		if identity[n] != v {
+			return false
+		}
+	}
+	return true
+}
+
+func ExtraIdentityByKeyPairs(extra ...string) *IdentitySelectorImpl {
+	return &IdentitySelectorImpl{&extraid{v1.NewExtraIdentity(extra...)}}
+}
+
+func ExtraIdentity(identity v1.Identity) *IdentitySelectorImpl {
+	return &IdentitySelectorImpl{&extraid{identity}}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type partialid struct {
+	v1.Identity
+}
+
+func (i *partialid) MatchIdentity(identity v1.Identity) bool {
+	for n, v := range i.Identity {
+		if identity[n] != v {
+			return false
+		}
+	}
+	return true
+}
+
+func PartialIdentityByKeyPairs(extra ...string) *IdentitySelectorImpl {
+	return &IdentitySelectorImpl{&partialid{v1.NewExtraIdentity(extra...)}}
+}
+
+func PartialIdentity(identity v1.Identity) *IdentitySelectorImpl {
+	return &IdentitySelectorImpl{&partialid{identity}}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type num int
 
 func (i num) MatchIdentity(identity v1.Identity) bool {

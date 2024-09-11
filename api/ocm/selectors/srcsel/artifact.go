@@ -10,6 +10,10 @@ func ArtifactType(n string) Selector {
 	return selectors.ArtifactType(n)
 }
 
+func SourceType(n string) Selector {
+	return selectors.ArtifactType(n)
+}
+
 func AccessKind(n string) Selector {
 	return selectors.AccessKind(n)
 }

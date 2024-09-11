@@ -41,7 +41,7 @@ func (cd *ComponentDescriptor) Equivalent(o *ComponentDescriptor) equivalent.Equ
 	)
 }
 
-func EquivalentElems(a ElementAccessor, b ElementAccessor) equivalent.EqualState {
+func EquivalentElems(a ElementListAccessor, b ElementListAccessor) equivalent.EqualState {
 	state := equivalent.StateEquivalent()
 
 	// Equivaluent of elements handles nil to provide state accoding to it
@@ -49,7 +49,7 @@ func EquivalentElems(a ElementAccessor, b ElementAccessor) equivalent.EqualState
 	for i := 0; i < a.Len(); i++ {
 		ea := a.Get(i)
 
-		ib := GetIndexByIdentity(b, ea.GetMeta().GetIdentity(a))
+		ib := GetIndexByIdentity(b, ea.GetMeta().GetIdentityForContext(a))
 		if ib != i {
 			state = state.NotLocalHashEqual()
 		}
@@ -62,7 +62,7 @@ func EquivalentElems(a ElementAccessor, b ElementAccessor) equivalent.EqualState
 	}
 	for i := 0; i < b.Len(); i++ {
 		eb := b.Get(i)
-		if ea := GetByIdentity(a, eb.GetMeta().GetIdentity(b)); ea == nil {
+		if ea := GetByIdentity(a, eb.GetMeta().GetIdentityForContext(b)); ea == nil {
 			state = state.Apply(eb.Equivalent(ea))
 		}
 	}

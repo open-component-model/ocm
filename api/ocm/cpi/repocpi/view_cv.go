@@ -570,7 +570,7 @@ func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, o
 	})
 }
 
-func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.ElementAccessor, prov compdesc.ElementMetaProvider, optlist ...cpi.TargetOption) (int, error) {
+func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.ElementListAccessor, prov compdesc.ElementMetaProvider, optlist ...cpi.TargetOption) (int, error) {
 	opts := internal.NewTargetOptions(optlist...)
 	curidx := compdesc.ElementIndex(acc, prov)
 	meta := prov.GetMeta()

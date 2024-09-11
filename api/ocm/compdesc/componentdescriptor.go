@@ -127,7 +127,7 @@ const (
 type ElementMetaAccess interface {
 	GetName() string
 	GetVersion() string
-	GetIdentity(accessor ElementAccessor) metav1.Identity
+	GetIdentity(accessor ElementListAccessor) metav1.Identity
 	GetLabels() metav1.Labels
 }
 
@@ -166,7 +166,7 @@ func (o *ElementMeta) GetName() string {
 }
 
 // GetMeta returns the element meta.
-func (r *ElementMeta) GetMeta() *ElementMeta {
+func (r *ElementMeta) GetMeta() accessors.ElementMeta {
 	return r
 }
 
@@ -231,7 +231,7 @@ func (o *ElementMeta) AddExtraIdentity(identity metav1.Identity) {
 }
 
 // GetIdentity returns the identity of the object.
-func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
+func (o *ElementMeta) GetIdentity(accessor ElementListAccessor) metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
 	if identity == nil {
 		identity = metav1.Identity{}
@@ -242,7 +242,7 @@ func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 		l := accessor.Len()
 		for i := 0; i < l; i++ {
 			m := accessor.Get(i).GetMeta()
-			if m.Name == o.Name && m.ExtraIdentity.Equals(o.ExtraIdentity) {
+			if m.GetName() == o.Name && m.GetExtraIdentity().Equals(o.ExtraIdentity) {
 				if found {
 					identity[SystemIdentityVersion] = o.Version
 
@@ -306,7 +306,7 @@ func (o *ElementMeta) GetMatchBaseIdentity() metav1.Identity {
 }
 
 // GetIdentityDigest returns the digest of the object's identity.
-func (o *ElementMeta) GetIdentityDigest(accessor ElementAccessor) []byte {
+func (o *ElementMeta) GetIdentityDigest(accessor ElementListAccessor) []byte {
 	return o.GetIdentity(accessor).Digest()
 }
 
@@ -337,22 +337,22 @@ func (o *ElementMeta) Equivalent(a *ElementMeta) equivalent.EqualState {
 	return state.Apply(o.Labels.Equivalent(a.Labels))
 }
 
-func GetByIdentity(a ElementAccessor, id metav1.Identity) ElementMetaAccessor {
+func GetByIdentity(a ElementListAccessor, id metav1.Identity) ElementMetaAccessor {
 	l := a.Len()
 	for i := 0; i < l; i++ {
 		e := a.Get(i)
-		if e.GetMeta().GetIdentity(a).Equals(id) {
+		if e.GetMeta().GetIdentityForContext(a).Equals(id) {
 			return e
 		}
 	}
 	return nil
 }
 
-func GetIndexByIdentity(a ElementAccessor, id metav1.Identity) int {
+func GetIndexByIdentity(a ElementListAccessor, id metav1.Identity) int {
 	l := a.Len()
 	for i := 0; i < l; i++ {
 		e := a.Get(i)
-		if e.GetMeta().GetIdentity(a).Equals(id) {
+		if e.GetMeta().GetIdentityForContext(a).Equals(id) {
 			return i
 		}
 	}
@@ -375,7 +375,7 @@ func GenericAccessSpec(un *runtime.UnstructuredTypedObject) AccessSpec {
 // Sources describes a set of source specifications.
 type Sources []Source
 
-var _ ElementAccessor = Sources{}
+var _ ElementListAccessor = Sources{}
 
 func SourceArtifacts(cd *ComponentDescriptor) ArtifactAccessor {
 	return cd.Sources
@@ -538,7 +538,7 @@ func (r SourceRefs) Copy() SourceRefs {
 // Resources describes a set of resource specifications.
 type Resources []Resource
 
-var _ ElementAccessor = Resources{}
+var _ ElementListAccessor = Resources{}
 
 func ResourceArtifacts(cd *ComponentDescriptor) ArtifactAccessor {
 	return cd.Resources
