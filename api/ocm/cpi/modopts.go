@@ -97,6 +97,13 @@ func SkipVerify(flag ...bool) internal.ModOptionImpl {
 	return internal.SkipVerify(flag...)
 }
 
+// SkipDigest disables digest creation if enabled.
+//
+// Deprecated: for legacy code, only.
+func SkipDigest(flag ...bool) internal.ModOptionImpl {
+	return internal.SkipDigest(flag...)
+}
+
 ///////////////////////////////////////////////////////
 
 func CompleteModificationOptions(ctx ContextProvider, m *ModificationOptions) {

@@ -23,6 +23,7 @@ import (
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/refmgmt/resource"
+	"ocm.software/ocm/api/utils/selector"
 )
 
 // View objects are the user facing generic implementations of the context interfaces.
@@ -632,6 +633,20 @@ func (c *componentVersionAccessView) GetResourceByIndex(i int) (cpi.ResourceAcce
 	return cpi.NewResourceAccess(c, r.Access, r.ResourceMeta), nil
 }
 
+// Deprecated: use GetResources with appropriate selectors.
+func (c *componentVersionAccessView) GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]cpi.ResourceAccess, error) {
+	resources, err := c.GetDescriptor().GetResourcesByName(name, selectors...)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []cpi.ResourceAccess{}
+	for _, resource := range resources {
+		result = append(result, cpi.NewResourceAccess(c, resource.Access, resource.ResourceMeta))
+	}
+	return result, nil
+}
+
 func (c *componentVersionAccessView) SelectResources(sel ...rscsel.Selector) ([]cpi.ResourceAccess, error) {
 	err := selectors.ValidateSelectors(sel...)
 	if err != nil {
@@ -662,6 +677,56 @@ func (c *componentVersionAccessView) GetResources() []cpi.ResourceAccess {
 	return result
 }
 
+// GetResourcesByIdentitySelectors returns resources that match the given identity selectors.
+//
+// Deprecated: use GetReferences.
+func (c *componentVersionAccessView) GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]cpi.ResourceAccess, error) {
+	return c.GetResourcesBySelectors(selectors, nil)
+}
+
+// GetResourcesByResourceSelectors returns resources that match the given resource selectors.
+//
+// Deprecated: use GetResources.
+func (c *componentVersionAccessView) GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]cpi.ResourceAccess, error) {
+	return c.GetResourcesBySelectors(nil, selectors)
+}
+
+// GetResourcesBySelectors returns resources that match the given selector.
+//
+// Deprecated: use GetResources.
+func (c *componentVersionAccessView) GetResourcesBySelectors(selectors []compdesc.IdentitySelector, resourceSelectors []compdesc.ResourceSelector) ([]cpi.ResourceAccess, error) {
+	resources := make([]cpi.ResourceAccess, 0)
+	rscs := c.GetDescriptor().Resources
+	for i := range rscs {
+		selctx := compdesc.NewResourceSelectionContext(i, rscs)
+		if len(selectors) > 0 {
+			ok, err := selector.MatchSelectors(selctx.Identity(), selectors...)
+			if err != nil {
+				return nil, fmt.Errorf("unable to match selector for resource %s: %w", selctx.Name, err)
+			}
+			if !ok {
+				continue
+			}
+		}
+		ok, err := compdesc.MatchResourceByResourceSelector(selctx, resourceSelectors...)
+		if err != nil {
+			return nil, fmt.Errorf("unable to match selector for resource %s: %w", selctx.Name, err)
+		}
+		if !ok {
+			continue
+		}
+		r, err := c.GetResourceByIndex(i)
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, r)
+	}
+	if len(resources) == 0 {
+		return resources, compdesc.NotFound
+	}
+	return resources, nil
+}
+
 func (c *componentVersionAccessView) GetSource(id metav1.Identity) (cpi.SourceAccess, error) {
 	r, err := c.GetDescriptor().GetSourceByIdentity(id)
 	if err != nil {
@@ -680,6 +745,20 @@ func (c *componentVersionAccessView) GetSourceByIndex(i int) (cpi.SourceAccess, 
 	}
 	r := c.GetDescriptor().Sources[i]
 	return cpi.NewSourceAccess(c, r.Access, r.SourceMeta), nil
+}
+
+// Deprecated: use GetSources with appropriate selectors.
+func (c *componentVersionAccessView) GetSourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]cpi.SourceAccess, error) {
+	sources, err := c.GetDescriptor().GetSourcesByName(name, selectors...)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []cpi.SourceAccess{}
+	for _, resource := range sources {
+		result = append(result, cpi.NewSourceAccess(c, resource.Access, resource.SourceMeta))
+	}
+	return result, nil
 }
 
 func (c *componentVersionAccessView) SelectSources(sel ...srcsel.Selector) ([]cpi.SourceAccess, error) {
@@ -737,4 +816,55 @@ func (c *componentVersionAccessView) GetReferenceByIndex(i int) (cpi.ComponentRe
 		return cpi.ComponentReference{}, errors.ErrInvalid("reference index", strconv.Itoa(i))
 	}
 	return c.GetDescriptor().References[i], nil
+}
+
+// Deprecated: use GetReferences.
+func (c *componentVersionAccessView) GetReferencesByName(name string, selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
+	return c.GetDescriptor().GetReferencesByName(name, selectors...)
+}
+
+// GetReferencesByIdentitySelectors returns references that match the given identity selectors.
+//
+// Deprecated: use GetReferences.
+func (c *componentVersionAccessView) GetReferencesByIdentitySelectors(selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
+	return c.GetReferencesBySelectors(selectors, nil)
+}
+
+// GetReferencesByReferenceSelectors returns references that match the given resource selectors.
+//
+// Deprecated: use GetReferences.
+func (c *componentVersionAccessView) GetReferencesByReferenceSelectors(selectors ...compdesc.ReferenceSelector) (compdesc.References, error) {
+	return c.GetReferencesBySelectors(nil, selectors)
+}
+
+// GetReferencesBySelectors returns references that match the given selector.
+//
+// Deprecated: use GetReferences.
+func (c *componentVersionAccessView) GetReferencesBySelectors(selectors []compdesc.IdentitySelector, referenceSelectors []compdesc.ReferenceSelector) (compdesc.References, error) {
+	references := make(compdesc.References, 0)
+	refs := c.GetDescriptor().References
+	for i := range refs {
+		selctx := compdesc.NewReferenceSelectionContext(i, refs)
+		if len(selectors) > 0 {
+			ok, err := selector.MatchSelectors(selctx.Identity(), selectors...)
+			if err != nil {
+				return nil, fmt.Errorf("unable to match selector for resource %s: %w", selctx.Name, err)
+			}
+			if !ok {
+				continue
+			}
+		}
+		ok, err := compdesc.MatchReferencesByReferenceSelector(selctx, referenceSelectors...)
+		if err != nil {
+			return nil, fmt.Errorf("unable to match selector for resource %s: %w", selctx.Name, err)
+		}
+		if !ok {
+			continue
+		}
+		references = append(references, *selctx.Reference)
+	}
+	if len(references) == 0 {
+		return references, compdesc.NotFound
+	}
+	return references, nil
 }

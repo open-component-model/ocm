@@ -1254,7 +1254,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 			defer Close(src, "ctf")
 
-			resolver := resolvers.NewCompoundResolver(src)
+			resolver := ocm.NewCompoundResolver(src)
 
 			cv := Must(resolver.LookupComponentVersion(COMPONENTC, VERSION))
 			defer Close(cv, "cv")
