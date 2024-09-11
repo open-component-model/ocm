@@ -14,6 +14,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/marstr/guid"
 	"github.com/opencontainers/go-digest"
+	"ocm.software/ocm/api/utils"
 
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/file"
@@ -75,7 +76,7 @@ const ACCESS_SUFFIX = ".acc"
 
 func NewDefaultBlobCache(fss ...vfs.FileSystem) (BlobCache, error) {
 	var err error
-	fs := DefaultedFileSystem(nil, fss...)
+	fs := utils.DefaultedFileSystem(nil, fss...)
 	if fs == nil {
 		fs, err = osfs.NewTempFileSystem()
 		if err != nil {
@@ -90,7 +91,7 @@ func NewDefaultBlobCache(fss ...vfs.FileSystem) (BlobCache, error) {
 }
 
 func NewStaticBlobCache(path string, fss ...vfs.FileSystem) (BlobCache, error) {
-	fs := FileSystem(fss...)
+	fs := utils.FileSystem(fss...)
 	err := fs.MkdirAll(path, 0o700)
 	if err != nil {
 		return nil, err
