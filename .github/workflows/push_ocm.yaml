@@ -5,15 +5,20 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**/*.go'
+      - '**/*.mod'
+      - '**/*.sum'
+      - 'resources/**'
 
 jobs:
+
   docker_publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write
       packages: write
-
     steps:
       - name: Generate token
         id: generate_token
@@ -21,43 +26,35 @@ jobs:
         with:
           app_id: ${{ secrets.OCMBOT_APP_ID }}
           private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
           token: ${{ steps.generate_token.outputs.token }}
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
       - name: Docker Login
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: |            
             ghcr.io/${{ github.repository }}
-
       - name: Go Build Cache for Docker
         uses: actions/cache@v4
         with:
           path: go-build-cache
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
-
       - name: inject go-build-cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3
         with:
           cache-source: go-build-cache
-
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -70,3 +67,65 @@ jobs:
             ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest
             ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  ocm-cli-latest:
+    name: Build latest ocm-cli
+    runs-on: large_runner
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    steps:
+    - name: Self hosted runner post job cleanup
+      uses: TooMuch4U/actions-clean@v2.2
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ steps.generate_token.outputs.token }}
+    - name: Enable github-cli
+      uses: actions4gh/setup-gh@v1.0.2
+      with:
+        token: ${{ steps.generate_token.outputs.token }}
+    - name: Move tag to latest commit
+      run: |
+        gh api -X PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/open-component-model/ocm/git/refs/tags/ocm-cli/latest -f "sha=${{ github.sha }}" -F "force=true"
+    - name: Setup go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: '${{ github.workspace }}/go.mod'
+        check-latest: false
+    - name: Goreleaser release snapshot
+      uses: goreleaser/goreleaser-action@v6
+      with:
+        distribution: goreleaser
+        version: 2.2.0
+        args: release --clean --timeout 60m --snapshot --skip=validate --config=.github/config/latest.yml
+      env:
+        GITHUBORG: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        GORELEASER_CURRENT_TAG: v0.0.0
+        GORELEASER_PREVIOUS_TAG: v0.0.0
+    - name: Create or update release
+      uses: ncipollo/release-action@v1
+      with:
+        name: latest ocm-cli
+        tag: ocm-cli/latest
+        artifacts: "dist/*.tar.gz, dist/*.zip, dist/*.sha256"
+        token: ${{ steps.generate_token.outputs.token }}
+        allowUpdates: true
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
+        prerelease: true
+        draft: false
+        removeArtifacts: true
+        replacesArtifacts: true
+        skipIfReleaseExists: false
+        body: |
+          holds always the latest ocm-cli binaries
