@@ -319,10 +319,11 @@ func (c *_context) SetAlias(name string, spec RepositorySpec) {
 
 func (c *_context) GetResolver() ComponentVersionResolver {
 	c.Update()
-	if len(c.resolver.rules) == 0 {
-		return nil
+
+	if c.resolver.HasRules() {
+		return c.resolver
 	}
-	return c.resolver
+	return nil
 }
 
 func (c *_context) AddResolverRule(prefix string, spec RepositorySpec, prio ...int) {

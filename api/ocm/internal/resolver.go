@@ -263,6 +263,12 @@ func (r *MatchingResolver) Finalize() error {
 	return r.finalize.Finalize()
 }
 
+func (r *MatchingResolver) HasRules() bool {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return len(r.rules) != 0
+}
+
 func (r *MatchingResolver) GetRules() []ResolverRule {
 	r.lock.Lock()
 	defer r.lock.Unlock()
