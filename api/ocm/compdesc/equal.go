@@ -49,7 +49,7 @@ func EquivalentElems(a ElementListAccessor, b ElementListAccessor) equivalent.Eq
 	for i := 0; i < a.Len(); i++ {
 		ea := a.Get(i)
 
-		ib := GetIndexByIdentity(b, ea.GetMeta().GetIdentityForContext(a))
+		ib := GetIndexByIdentity(b, ea.GetMeta().GetIdentity(a))
 		if ib != i {
 			state = state.NotLocalHashEqual()
 		}
@@ -62,7 +62,7 @@ func EquivalentElems(a ElementListAccessor, b ElementListAccessor) equivalent.Eq
 	}
 	for i := 0; i < b.Len(); i++ {
 		eb := b.Get(i)
-		if ea := GetByIdentity(a, eb.GetMeta().GetIdentityForContext(b)); ea == nil {
+		if ea := GetByIdentity(a, eb.GetMeta().GetIdentity(b)); ea == nil {
 			state = state.Apply(eb.Equivalent(ea))
 		}
 	}

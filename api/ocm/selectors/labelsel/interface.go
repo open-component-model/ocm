@@ -23,11 +23,11 @@ func init() {
 
 type Selector = selectors.LabelSelector
 
-func Select(labels v1.Labels, sel ...Selector) ([]v1.Label, error) {
+func Select(labels v1.Labels, sel ...Selector) (v1.Labels, error) {
 	return selectors.SelectLabels(labels, sel...)
 }
 
-func Get(labels v1.Labels, sel ...Selector) []v1.Label {
+func Get(labels v1.Labels, sel ...Selector) v1.Labels {
 	return selectors.GetLabels(labels, sel...)
 }
 

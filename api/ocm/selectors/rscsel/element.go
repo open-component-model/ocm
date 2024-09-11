@@ -8,8 +8,8 @@ import (
 
 // Identity selectors
 
-func IdentityByKeyPairs(extras ...string) Selector {
-	return selectors.IdentityByKeyPairs(extras...)
+func IdentityByKeyPairs(name string, extras ...string) Selector {
+	return selectors.IdentityByKeyPairs(name, extras...)
 }
 
 func Identity(id v1.Identity) Selector {
@@ -28,8 +28,8 @@ func Partialdentity(id v1.Identity) Selector {
 	return selectors.PartialIdentity(id)
 }
 
-func PartialIdentityByKeyPairs(extra ...string) Selector {
-	return selectors.PartialIdentityByKeyPairs(extra...)
+func PartialIdentityByKeyPairs(attrs ...string) Selector {
+	return selectors.PartialIdentityByKeyPairs(attrs...)
 }
 
 func Name(n string) Selector {

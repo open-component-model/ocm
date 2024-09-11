@@ -141,9 +141,9 @@ var _ = Describe("helper", func() {
 				res := Must(cd.SelectResources(rscsel.Version("v1")))
 				Expect(res).To(Equal(compdesc.Resources{r1v1, r2v1}))
 			})
-			FIt("selects by version", func() {
+			It("selects by version", func() {
 				res := Must(cd.SelectResources(rscsel.PartialIdentityByKeyPairs("version", "v1")))
-				Expect(res).To(Equal(compdesc.Resources{r1v1, r2v1})) // no r2v1: version nor part of identity
+				Expect(res).To(Equal(compdesc.Resources{r1v1})) // no r2v1: version not part of identity
 			})
 		})
 
@@ -187,19 +187,18 @@ var _ = Describe("helper", func() {
 			})
 
 			It("selects with extra identity", func() {
-				res := Must(cd.SelectResources(rscsel.ExtraIdentityByKeyPairs("extra", "value")))
-				Expect(res).To(Equal(compdesc.Resources{r4v3}))
-				res = Must(cd.SelectResources(rscsel.ExtraIdentityByKeyPairs("extra", "value")))
+				res := Must(cd.SelectResources(rscsel.ExtraIdentityByKeyPairs("extra", "value", "other", "othervalue")))
 				Expect(res).To(Equal(compdesc.Resources{r4v3}))
 			})
+
 			It("selects none with wrong extra identity value", func() {
-				_, err := cd.SelectResources(rscsel.ExtraIdentityByKeyPairs("extra", "other"))
-				Expect(err).To(MatchError(compdesc.NotFound))
+				res := Must(cd.SelectResources(rscsel.ExtraIdentityByKeyPairs("extra", "other")))
+				Expect(res).To(BeEmpty())
 			})
 
 			It("selects none with wrong extra identity key", func() {
-				_, err := cd.SelectResources(rscsel.ExtraIdentityByKeyPairs("extra2", "value"))
-				Expect(err).To(MatchError(compdesc.NotFound))
+				res := Must(cd.SelectResources(rscsel.ExtraIdentityByKeyPairs("extra2", "value")))
+				Expect(res).To(BeEmpty())
 			})
 
 			It("selects by or", func() {
@@ -221,22 +220,25 @@ var _ = Describe("helper", func() {
 				res := Must(cd.SelectResources(rscsel.IdentityByKeyPairs("r4", "extra", "value", "other", "othervalue")))
 				Expect(res).To(Equal(compdesc.Resources{r4v3}))
 			})
+
 			It("selects none by identity selector with missing attribute", func() {
-				_, err := cd.SelectResources(rscsel.IdentityByKeyPairs("r4", "extra", "value"))
-				Expect(err).To(MatchError(compdesc.NotFound))
+				res := Must(cd.SelectResources(rscsel.IdentityByKeyPairs("r4", "extra", "value")))
+				Expect(res).To(BeEmpty())
 			})
 
 			It("selects by partial identity selector", func() {
-				res := Must(cd.SelectResources(rscsel.PartialIdentityByKeyPairs("r4", "extra", "value", "other", "othervalue")))
+				res := Must(cd.SelectResources(rscsel.PartialIdentityByKeyPairs("name", "r4", "extra", "value", "other", "othervalue")))
 				Expect(res).To(Equal(compdesc.Resources{r4v3}))
 			})
+
 			It("selects by partial identity selector with partial attributes", func() {
-				res := Must(cd.SelectResources(rscsel.PartialIdentityByKeyPairs("r4", "extra", "value")))
+				res := Must(cd.SelectResources(rscsel.PartialIdentityByKeyPairs("extra", "value")))
 				Expect(res).To(Equal(compdesc.Resources{r4v3}))
 			})
+
 			It("selects none by partial identity selector with missing attribute", func() {
-				_, err := cd.SelectResources(rscsel.IdentityByKeyPairs("r4", "extra", "value", "dummy", "dummy"))
-				Expect(err).To(MatchError(compdesc.NotFound))
+				res := Must(cd.SelectResources(rscsel.IdentityByKeyPairs("r4", "extra", "value", "dummy", "dummy")))
+				Expect(res).To(BeEmpty())
 			})
 		})
 
@@ -245,10 +247,12 @@ var _ = Describe("helper", func() {
 				res := Must(labelsel.Select(r3v2.Labels, labelsel.Name("l1")))
 				Expect(res).To(Equal(v1.Labels{r3v2.Labels[0]}))
 			})
+
 			It("selects signed labels", func() {
 				res := Must(labelsel.Select(r3v2.Labels, labelsel.Signed()))
 				Expect(res).To(Equal(v1.Labels{r3v2.Labels[1]}))
 			})
+
 			It("selects no signed labels", func() {
 				res := Must(labelsel.Select(r1v2.Labels, labelsel.Signed()))
 				Expect(res).To(Equal(v1.Labels{}))
@@ -363,9 +367,15 @@ var _ = Describe("helper", func() {
 				res := Must(cd.SelectReferences(refsel.Name("r1")))
 				Expect(res).To(Equal(compdesc.References{r1v1, r1v2}))
 			})
+
 			It("selects by version", func() {
 				res := Must(cd.SelectReferences(refsel.Version("v1")))
-				Expect(res).To(Equal(compdesc.References{r1v1})) // no r2v1: version nor part of identity
+				Expect(res).To(Equal(compdesc.References{r1v1, r2v1}))
+			})
+
+			It("selects by version", func() {
+				res := Must(cd.SelectReferences(refsel.ExtraIdentityByKeyPairs("version", "v1")))
+				Expect(res).To(Equal(compdesc.References{r1v1})) // no r2v1: version not part of identity
 			})
 		})
 
@@ -409,17 +419,18 @@ var _ = Describe("helper", func() {
 			})
 
 			It("selects with extra identity", func() {
-				res := Must(cd.SelectReferences(refsel.ExtraIdentityByKeyPairs("extra", "value")))
+				res := Must(cd.SelectReferences(refsel.ExtraIdentityByKeyPairs("extra", "value", "other", "othervalue")))
 				Expect(res).To(Equal(compdesc.References{r4v3}))
 			})
+
 			It("selects none with wrong extra identity value", func() {
-				_, err := cd.SelectReferences(refsel.ExtraIdentityByKeyPairs("extra", "other"))
-				Expect(err).To(MatchError(compdesc.NotFound))
+				res := Must(cd.SelectReferences(refsel.ExtraIdentityByKeyPairs("extra", "other")))
+				Expect(res).To(BeEmpty())
 			})
 
 			It("selects none with wrong extra identity key", func() {
-				_, err := cd.SelectReferences(refsel.ExtraIdentityByKeyPairs("extra2", "value"))
-				Expect(err).To(MatchError(compdesc.NotFound))
+				res := Must(cd.SelectReferences(refsel.ExtraIdentityByKeyPairs("extra2", "value")))
+				Expect(res).To(BeEmpty())
 			})
 
 			It("selects by or", func() {
@@ -442,21 +453,21 @@ var _ = Describe("helper", func() {
 				Expect(res).To(Equal(compdesc.References{r4v3}))
 			})
 			It("selects none by identity selector with missing attribute", func() {
-				_, err := cd.SelectReferences(refsel.IdentityByKeyPairs("r4", "extra", "value"))
-				Expect(err).To(MatchError(compdesc.NotFound))
+				res := Must(cd.SelectReferences(refsel.IdentityByKeyPairs("r4", "extra", "value")))
+				Expect(res).To(BeEmpty())
 			})
 
 			It("selects by partial identity selector", func() {
-				res := Must(cd.SelectReferences(refsel.PartialIdentityByKeyPairs("r4", "extra", "value", "other", "othervalue")))
+				res := Must(cd.SelectReferences(refsel.PartialIdentityByKeyPairs("name", "r4", "extra", "value", "other", "othervalue")))
 				Expect(res).To(Equal(compdesc.References{r4v3}))
 			})
 			It("selects by partial identity selector with partial attributes", func() {
-				res := Must(cd.SelectReferences(refsel.PartialIdentityByKeyPairs("r4", "extra", "value")))
+				res := Must(cd.SelectReferences(refsel.PartialIdentityByKeyPairs("name", "r4", "extra", "value")))
 				Expect(res).To(Equal(compdesc.References{r4v3}))
 			})
 			It("selects none by partial identity selector with missing attribute", func() {
-				_, err := cd.SelectReferences(refsel.IdentityByKeyPairs("r4", "extra", "value", "dummy", "dummy"))
-				Expect(err).To(MatchError(compdesc.NotFound))
+				res := Must(cd.SelectReferences(refsel.IdentityByKeyPairs("r4", "extra", "value", "dummy", "dummy")))
+				Expect(res).To(BeEmpty())
 			})
 		})
 	})

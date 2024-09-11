@@ -18,8 +18,10 @@ type ElementMeta interface {
 	GetVersion() string
 	GetExtraIdentity() v1.Identity
 	GetLabels() v1.Labels
-	GetIdentityForContext(accessor ElementListAccessor) v1.Identity
+	GetIdentity(accessor ElementListAccessor) v1.Identity
 	GetIdentityDigest(accessor ElementListAccessor) []byte
+
+	GetMeta() ElementMeta // ElementMeta is again a Meta provider
 }
 
 // ElementMetaAccessor provides generic access an elements meta information.

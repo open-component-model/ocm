@@ -17,6 +17,7 @@ import (
 
 const InternalSchemaVersion = "internal"
 
+// Deprecated: as result of the new select function an empty list is returned instead of an error.
 var NotFound = errors.ErrNotFound()
 
 const (
@@ -255,31 +256,6 @@ func (o *ElementMeta) GetIdentity(accessor ElementListAccessor) metav1.Identity 
 	return identity
 }
 
-// GetIdentityForContext returns the identity of the object.
-func (o *ElementMeta) GetIdentityForContext(accessor accessors.ElementListAccessor) metav1.Identity {
-	identity := o.ExtraIdentity.Copy()
-	if identity == nil {
-		identity = metav1.Identity{}
-	}
-	identity[SystemIdentityName] = o.Name
-	if accessor != nil {
-		found := false
-		l := accessor.Len()
-		for i := 0; i < l; i++ {
-			m := accessor.Get(i).GetMeta()
-			if m.GetName() == o.GetName() && m.GetExtraIdentity().Equals(o.ExtraIdentity) {
-				if found {
-					identity[SystemIdentityVersion] = o.Version
-
-					break
-				}
-				found = true
-			}
-		}
-	}
-	return identity
-}
-
 // GetRawIdentity returns the identity plus version.
 func (o *ElementMeta) GetRawIdentity() metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
@@ -341,7 +317,7 @@ func GetByIdentity(a ElementListAccessor, id metav1.Identity) ElementMetaAccesso
 	l := a.Len()
 	for i := 0; i < l; i++ {
 		e := a.Get(i)
-		if e.GetMeta().GetIdentityForContext(a).Equals(id) {
+		if e.GetMeta().GetIdentity(a).Equals(id) {
 			return e
 		}
 	}
@@ -352,7 +328,7 @@ func GetIndexByIdentity(a ElementListAccessor, id metav1.Identity) int {
 	l := a.Len()
 	for i := 0; i < l; i++ {
 		e := a.Get(i)
-		if e.GetMeta().GetIdentityForContext(a).Equals(id) {
+		if e.GetMeta().GetIdentity(a).Equals(id) {
 			return i
 		}
 	}

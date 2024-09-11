@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/selectors/accessors"
 	"ocm.software/ocm/api/utils"
 )
 
@@ -94,7 +94,7 @@ func UseBlobHandlers(h BlobHandlerProvider) BlobOptionImpl {
 // resource or source for the SetXXX calls.
 // If -1 is returned an append is enforced.
 type TargetElement interface {
-	GetTargetIndex(resources compdesc.ElementListAccessor, meta *compdesc.ElementMeta) (int, error)
+	GetTargetIndex(resources compdesc.ElementListAccessor, meta accessors.ElementMeta) (int, error)
 }
 
 type TargetOptionImpl interface {
@@ -224,7 +224,7 @@ func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 
 type TargetIndex int
 
-func (m TargetIndex) GetTargetIndex(elems compdesc.ElementListAccessor, meta *compdesc.ElementMeta) (int, error) {
+func (m TargetIndex) GetTargetIndex(elems compdesc.ElementListAccessor, meta accessors.ElementMeta) (int, error) {
 	if int(m) >= elems.Len() {
 		return -1, nil
 	}
@@ -247,7 +247,7 @@ func (m TargetIndex) ApplyTargetOption(opts *TargetOptions) {
 
 type TargetIdentityOrAppend v1.Identity
 
-func (m TargetIdentityOrAppend) GetTargetIndex(elems compdesc.ElementListAccessor, meta *compdesc.ElementMeta) (int, error) {
+func (m TargetIdentityOrAppend) GetTargetIndex(elems compdesc.ElementListAccessor, meta accessors.ElementMeta) (int, error) {
 	idx, _ := TargetIdentity(m).GetTargetIndex(elems, meta)
 	return idx, nil
 }
@@ -268,10 +268,10 @@ func (m TargetIdentityOrAppend) ApplyTargetOption(opts *TargetOptions) {
 
 type TargetIdentity v1.Identity
 
-func (m TargetIdentity) GetTargetIndex(elems compdesc.ElementListAccessor, meta *compdesc.ElementMeta) (int, error) {
+func (m TargetIdentity) GetTargetIndex(elems compdesc.ElementListAccessor, meta accessors.ElementMeta) (int, error) {
 	for i := 0; i < elems.Len(); i++ {
 		r := elems.Get(i)
-		if r.GetMeta().GetIdentityForContext(elems).Equals(v1.Identity(m)) {
+		if r.GetMeta().GetIdentity(elems).Equals(v1.Identity(m)) {
 			return i, nil
 		}
 	}
@@ -296,10 +296,10 @@ type replaceElement struct{}
 
 var UpdateElement = replaceElement{}
 
-func (m replaceElement) GetTargetIndex(elems compdesc.ElementListAccessor, meta *compdesc.ElementMeta) (int, error) {
+func (m replaceElement) GetTargetIndex(elems compdesc.ElementListAccessor, meta accessors.ElementMeta) (int, error) {
 	id := meta.GetIdentity(elems)
 	for i := 0; i < elems.Len(); i++ {
-		if elems.Get(i).GetMeta().GetIdentityForContext(elems).Equals(id) {
+		if elems.Get(i).GetMeta().GetIdentity(elems).Equals(id) {
 			return i, nil
 		}
 	}

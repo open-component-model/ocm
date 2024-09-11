@@ -221,7 +221,7 @@ func (cd *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelec
 // If the index is not found -1 is returned.
 // Deprecated: use GetReferenceIndex.
 func (cd *ComponentDescriptor) GetComponentReferenceIndex(ref Reference) int {
-	return cd.GetReferenceIndex(ref.GetMeta())
+	return cd.GetReferenceIndex(&ref)
 }
 
 // GetReferenceAccessByIdentity returns a pointer to the reference that matches the given identity.

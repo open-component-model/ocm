@@ -582,7 +582,7 @@ func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.E
 			return idx, err
 		}
 		if idx == -1 && curidx >= 0 {
-			if meta.Version == acc.Get(curidx).GetMeta().Version {
+			if meta.GetVersion() == acc.Get(curidx).GetMeta().GetVersion() {
 				return -1, fmt.Errorf("adding a new %s with same base identity requires different version", kind)
 			}
 		}
