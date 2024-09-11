@@ -10,9 +10,9 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
+	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/demoplugin/accessmethods"
 	"ocm.software/ocm/cmds/demoplugin/common"

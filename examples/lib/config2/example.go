@@ -7,8 +7,8 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/credentials"
-	ociid "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/ocm"
+	ociid "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/runtime"
 )
 

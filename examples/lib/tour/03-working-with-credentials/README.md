@@ -196,7 +196,7 @@ provide an explicit mapping for our use case.
 First, we create our credentials object as before.
 
 ```go
-	creds := ociidentity.SimpleCredentials(cfg.Username, cfg.Password)
+	creds := identity.SimpleCredentials(cfg.Username, cfg.Password)
 ```
 
 Then we determine the consumer id for our use case.
@@ -266,7 +266,7 @@ The returned interface then offers access to the credential properties.
 via various methods.
 
 ```go
-	creds, err = credentials.CredentialsForConsumer(credctx, id, ociidentity.IdentityMatcher)
+	creds, err = credentials.CredentialsForConsumer(credctx, id, identity.IdentityMatcher)
 	if err != nil {
 		return errors.Wrapf(err, "no credentials")
 	}

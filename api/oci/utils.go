@@ -3,10 +3,10 @@ package oci
 import (
 	"fmt"
 
-	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/grammar"
+	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/runtime"
 )
 

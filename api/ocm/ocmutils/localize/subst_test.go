@@ -8,7 +8,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/helper/builder"
-	env2 "ocm.software/ocm/api/helper/env"
+	envhelper "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/ocm/ocmutils/localize"
 )
 
@@ -19,7 +19,7 @@ var _ = Describe("value substitution in filesystem", func() {
 	)
 
 	BeforeEach(func() {
-		env = builder.NewBuilder(env2.ModifiableTestData())
+		env = builder.NewBuilder(envhelper.ModifiableTestData())
 		fs, err := projectionfs.New(env.FileSystem(), "testdata")
 		Expect(err).To(Succeed())
 		payloadfs = fs

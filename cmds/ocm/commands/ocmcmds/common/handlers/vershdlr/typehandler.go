@@ -205,7 +205,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 								if err != nil {
 									return nil, err
 								}
-								result = sliceutils.AppendUniqueFunc(result, CompareObject, list...)
+								result = sliceutils.AppendUnique(result, list...)
 							}
 							if len(result) > 0 {
 								return result, nil

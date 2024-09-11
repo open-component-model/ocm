@@ -1,7 +1,7 @@
 package helm
 
 import (
-	"ocm.software/ocm/api/credentials/builtin/helm/identity"
+	"ocm.software/ocm/api/tech/helm/identity"
 	common "ocm.software/ocm/api/utils/misc"
 )
 

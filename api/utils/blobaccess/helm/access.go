@@ -7,9 +7,9 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"ocm.software/ocm/api/credentials/builtin/helm/identity"
 	ocihelm "ocm.software/ocm/api/oci/ociutils/helm"
 	"ocm.software/ocm/api/tech/helm"
+	"ocm.software/ocm/api/tech/helm/identity"
 	"ocm.software/ocm/api/tech/helm/loader"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"

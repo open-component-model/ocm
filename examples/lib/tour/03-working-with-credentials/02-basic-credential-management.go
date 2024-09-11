@@ -8,10 +8,10 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/credentials"
-	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
+	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/examples/lib/helper"
 )
 
@@ -83,7 +83,7 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 
 	// first, we create our credentials object as before.
 	// --- begin new credentials ---
-	creds := ociidentity.SimpleCredentials(cfg.Username, cfg.Password)
+	creds := identity.SimpleCredentials(cfg.Username, cfg.Password)
 	// --- end new credentials ---
 
 	// Then we determine the consumer id for our use case.
@@ -149,7 +149,7 @@ func UsingCredentialsB(cfg *helper.Config, create bool) error {
 	// via various methods.
 
 	// --- begin get credentials ---
-	creds, err = credentials.CredentialsForConsumer(credctx, id, ociidentity.IdentityMatcher)
+	creds, err = credentials.CredentialsForConsumer(credctx, id, identity.IdentityMatcher)
 	if err != nil {
 		return errors.Wrapf(err, "no credentials")
 	}

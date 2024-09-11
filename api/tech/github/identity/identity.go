@@ -12,14 +12,14 @@ import (
 
 const CONSUMER_TYPE = "Github"
 
-// identity properties
+// identity properties.
 const (
 	ID_HOSTNAME   = hostpath.ID_HOSTNAME
 	ID_PORT       = hostpath.ID_PORT
 	ID_PATHPREFIX = hostpath.ID_PATHPREFIX
 )
 
-// credential properties
+// credential properties.
 const (
 	ATTR_TOKEN = cpi.ATTR_TOKEN
 )

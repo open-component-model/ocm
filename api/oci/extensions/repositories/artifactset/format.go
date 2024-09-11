@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	mime2 "ocm.software/ocm/api/utils/mime"
+	"ocm.software/ocm/api/utils/mime"
 )
 
 const (
@@ -211,7 +211,7 @@ func OpenFromBlob(acc accessobj.AccessMode, blob blobaccess.BlobAccess, opts ...
 	return OpenFromDataAccess(acc, blob.MimeType(), blob, opts...)
 }
 
-func OpenFromDataAccess(acc accessobj.AccessMode, mime string, data blobaccess.DataAccess, opts ...accessio.Option) (*Object, error) {
+func OpenFromDataAccess(acc accessobj.AccessMode, mediatype string, data blobaccess.DataAccess, opts ...accessio.Option) (*Object, error) {
 	o, err := accessio.AccessOptions(nil, opts...)
 	if err != nil {
 		return nil, err
@@ -227,7 +227,7 @@ func OpenFromDataAccess(acc accessobj.AccessMode, mime string, data blobaccess.D
 	o.SetReader(reader)
 	fmt := accessio.FormatTar
 
-	if mime2.IsGZip(mime) {
+	if mime.IsGZip(mediatype) {
 		fmt = accessio.FormatTGZ
 	}
 	o.SetFileFormat(fmt)

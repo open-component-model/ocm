@@ -5,7 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/oci/identity"
+	"ocm.software/ocm/api/tech/oci/identity"
 )
 
 var _ = Describe("ctf management", func() {

@@ -13,7 +13,7 @@ type (
 	Repository                       = internal.Repository
 	ResolvedComponentVersionProvider = internal.ResolvedComponentVersionProvider
 	ResolvedComponentProvider        = internal.ResolvedComponentProvider
-	ResolvedRepositoryProvider       = internal.ResolvedComponentProvider
+	ResolverRule                     = internal.ResolverRule
 )
 
 const (
@@ -21,3 +21,7 @@ const (
 	KIND_COMPONENT        = internal.KIND_COMPONENT
 	KIND_OCM_REFERENCE    = internal.KIND_OCM_REFERENCE
 )
+
+func NewResolverRule(prefix string, spec RepositorySpec, prio ...int) ResolverRule {
+	return internal.NewResolverRule(prefix, spec, prio...)
+}

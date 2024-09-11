@@ -15,7 +15,7 @@ import (
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm"
-	logging2 "ocm.software/ocm/api/utils/cobrautils/logopts/logging"
+	loggingopt "ocm.software/ocm/api/utils/cobrautils/logopts/logging"
 )
 
 var _ = Describe("log file", func() {
@@ -44,12 +44,12 @@ var _ = Describe("log file", func() {
 
 		MustBeSuccessful(opts.Configure(ctx, lctx))
 
-		Expect(logging2.GetLogFileFor(opts.LogFileName, fs)).NotTo(BeNil())
+		Expect(loggingopt.GetLogFileFor(opts.LogFileName, fs)).NotTo(BeNil())
 		lctx = nil
 		for i := 1; i < 100; i++ {
 			time.Sleep(1 * time.Millisecond)
 			runtime.GC()
 		}
-		Expect(logging2.GetLogFileFor(opts.LogFileName, fs)).To(BeNil())
+		Expect(loggingopt.GetLogFileFor(opts.LogFileName, fs)).To(BeNil())
 	})
 })

@@ -3,9 +3,9 @@ package oci_repository_prepare
 import (
 	"path"
 
-	"ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/datacontext/action/api"
+	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"

@@ -8,7 +8,7 @@ import (
 	"ocm.software/ocm/api/datacontext/action"
 	"ocm.software/ocm/api/ocm/plugin/common"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
-	common2 "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const NAME = "describe"
@@ -21,7 +21,7 @@ func New(p ppi.Plugin) *cobra.Command {
 		Args:  cobra.MaximumNArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			d := p.Descriptor()
-			common.DescribePluginDescriptor(action.DefaultRegistry(), &d, common2.NewPrinter(os.Stdout))
+			common.DescribePluginDescriptor(action.DefaultRegistry(), &d, misc.NewPrinter(os.Stdout))
 			return nil
 		},
 	}

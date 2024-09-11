@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"ocm.software/ocm/api/ocm"
-	logging2 "ocm.software/ocm/api/utils/cobrautils/logopts/logging"
+	loggingopt "ocm.software/ocm/api/utils/cobrautils/logopts/logging"
 )
 
 var Description = `
@@ -37,7 +37,7 @@ an <code>@</code>, the logging configuration is taken from a file.
 
 type EvaluatedOptions struct {
 	LogForward *config.Config
-	LogFile    *logging2.LogFile
+	LogFile    *loggingopt.LogFile
 }
 
 func (o *EvaluatedOptions) Close() error {

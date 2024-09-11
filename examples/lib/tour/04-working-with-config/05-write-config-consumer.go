@@ -8,8 +8,8 @@ import (
 
 	"ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials"
-	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/oci"
+	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/examples/lib/helper"
 )
 

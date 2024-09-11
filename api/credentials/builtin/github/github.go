@@ -3,8 +3,8 @@ package github
 import (
 	"os"
 
-	"ocm.software/ocm/api/credentials/builtin/github/identity"
 	"ocm.software/ocm/api/credentials/cpi"
+	"ocm.software/ocm/api/tech/github/identity"
 	common "ocm.software/ocm/api/utils/misc"
 )
 

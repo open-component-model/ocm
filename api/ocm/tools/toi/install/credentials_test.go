@@ -7,11 +7,11 @@ import (
 
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/credentials/extensions/repositories/directcreds"
 	"ocm.software/ocm/api/credentials/extensions/repositories/memory"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
+	"ocm.software/ocm/api/tech/oci/identity"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )

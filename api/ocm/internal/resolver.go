@@ -94,7 +94,7 @@ func (p *versionProvider) GetName() string {
 }
 
 func (p *versionProvider) lookupComponent() (ComponentAccess, error) {
-	r, err := p.repo.Repository()
+	r, err := refmgmt.ToLazy(p.repo.Repository())
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (p *versionProvider) lookupComponent() (ComponentAccess, error) {
 }
 
 func (p *versionProvider) LookupVersion(version string) (ComponentVersionAccess, error) {
-	c, err := p.lookupComponent()
+	c, err := refmgmt.ToLazy(p.lookupComponent())
 	if err != nil {
 		return nil, err
 	}
@@ -243,12 +243,12 @@ type MatchingResolver struct {
 
 var _ ComponentResolver = (*MatchingResolver)(nil)
 
-func NewMatchingResolver(ctx ContextProvider, rules ...*ResolverRule) *MatchingResolver {
+func NewMatchingResolver(ctx ContextProvider, rules ...ResolverRule) *MatchingResolver {
 	return &MatchingResolver{
 		lock:  sync.Mutex{},
 		ctx:   ctx,
 		cache: NewRepositoryCache(),
-		rules: nil,
+		rules: slices.Clone(rules),
 	}
 }
 
@@ -261,6 +261,12 @@ func (r *MatchingResolver) Finalize() error {
 	defer r.lock.Unlock()
 	defer r.cache.Reset()
 	return r.finalize.Finalize()
+}
+
+func (r *MatchingResolver) HasRules() bool {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return len(r.rules) != 0
 }
 
 func (r *MatchingResolver) GetRules() []ResolverRule {

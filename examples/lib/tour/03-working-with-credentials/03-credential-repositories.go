@@ -6,10 +6,10 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/credentials"
-	ociidentity "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/credentials/extensions/repositories/dockerconfig"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
+	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/examples/lib/helper"
 )
 

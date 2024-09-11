@@ -9,8 +9,8 @@ import (
 	"github.com/containerd/containerd/reference"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/oci/cpi"
+	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/tcp"

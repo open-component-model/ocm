@@ -20,9 +20,9 @@ import (
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/blobhandler"
-	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/plugin"
+	blobplugin "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/plugin"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	plugin2 "ocm.software/ocm/api/ocm/plugin"
+	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/config"
 	"ocm.software/ocm/api/ocm/plugin/plugins"
 	"ocm.software/ocm/api/ocm/plugin/registration"
@@ -130,14 +130,14 @@ var _ = Describe("setup plugin cache", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv, "source version")
 
-		_, _, err := plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}"))
+		_, _, err := blobplugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}"))
 		fmt.Printf("error %q\n", err)
 		MustFailWithMessage(err, "plugin uploader test/testuploader: error processing plugin command upload: path missing in repository spec")
 		repospec := Must(json.Marshal(repoSpec))
-		name, keys, err := plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", repospec)
+		name, keys, err := blobplugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", repospec)
 		MustBeSuccessful(err)
 		Expect(name).To(Equal("testuploader"))
-		Expect(keys).To(Equal(plugin2.UploaderKeySet{}.Add(plugin2.UploaderKey{}.SetArtifact(RSCTYPE, ""))))
+		Expect(keys).To(Equal(plugin.UploaderKeySet{}.Add(plugin.UploaderKey{}.SetArtifact(RSCTYPE, ""))))
 
 		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target repo")

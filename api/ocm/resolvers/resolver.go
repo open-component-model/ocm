@@ -118,7 +118,7 @@ func (c *CompoundResolver) LookupComponentProviders(name string) []ResolvedCompo
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	var result []ResolvedRepositoryProvider
+	var result []ResolvedComponentProvider
 
 	for _, r := range c.resolvers {
 		if cr, ok := r.(ComponentResolver); ok {
@@ -144,8 +144,6 @@ type MatchingResolver interface {
 	Finalize() error
 }
 
-func NewMatchingResolver(ctx ContextProvider) MatchingResolver {
-	return internal.NewMatchingResolver(ctx.OCMContext())
+func NewMatchingResolver(ctx ContextProvider, rules ...ResolverRule) MatchingResolver {
+	return internal.NewMatchingResolver(ctx.OCMContext(), rules...)
 }
-
-type ResolverRule = internal.ResolverRule

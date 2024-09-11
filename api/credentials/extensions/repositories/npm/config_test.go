@@ -6,8 +6,8 @@ import (
 	. "github.com/onsi/gomega"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/npm/identity"
 	"ocm.software/ocm/api/credentials/extensions/repositories/npm"
+	"ocm.software/ocm/api/tech/npm/identity"
 	common "ocm.software/ocm/api/utils/misc"
 )
 

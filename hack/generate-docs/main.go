@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"ocm.software/ocm/cmds/ocm/app"
-	"ocm.software/ocm/hack/generate-docs/cobradoc"
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm/extensions/attrs/plugindirattr"
+	"ocm.software/ocm/cmds/ocm/app"
+	"ocm.software/ocm/hack/generate-docs/cobradoc"
 )
 
 func main() {

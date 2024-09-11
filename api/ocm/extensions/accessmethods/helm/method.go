@@ -9,9 +9,9 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/helm/identity"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/tech/helm"
+	"ocm.software/ocm/api/tech/helm/identity"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"

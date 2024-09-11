@@ -8,7 +8,7 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/wget/identity"
+	"ocm.software/ocm/api/tech/wget/identity"
 	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 )

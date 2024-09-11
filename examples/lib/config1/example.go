@@ -6,10 +6,10 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/credentials"
-	ociid "ocm.software/ocm/api/credentials/builtin/oci/identity"
 	ccfg "ocm.software/ocm/api/credentials/config"
 	"ocm.software/ocm/api/credentials/extensions/repositories/directcreds"
 	"ocm.software/ocm/api/ocm"
+	ociid "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/examples/lib/helper"
 )
 

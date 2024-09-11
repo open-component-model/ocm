@@ -13,12 +13,12 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/oci/identity"
 	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/tech/docker"
 	"ocm.software/ocm/api/tech/docker/resolve"
+	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/refmgmt"

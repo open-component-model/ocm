@@ -110,18 +110,13 @@ The following credential consumer types are used/supported:
       - <code>key</code>: secret key use to access the credential server
 
 
-  - <code>Github</code>: Redis PubSub credential matcher
+  - <code>Github</code>: GitHub credential matcher
 
-    This matcher is a hostpath matcher with additional attributes:
-
-    - *<code>channel</code>* (required if set in pattern): the channel name
-    - *<code>database</code>* the database number
-
+    This matcher is a hostpath matcher.
 
     Credential consumers of the consumer type Github evaluate the following credential properties:
 
-      - <code>username</code>: Redis username
-      - <code>password</code>: Redis password
+      - <code>token</code>: GitHub personal access token
 
 
   - <code>HashiCorpVault</code>: HashiCorp Vault credential matcher
