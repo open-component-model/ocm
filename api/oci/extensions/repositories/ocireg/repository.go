@@ -18,7 +18,7 @@ import (
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/tech/docker"
 	"ocm.software/ocm/api/tech/docker/resolve"
-	identity2 "ocm.software/ocm/api/tech/oci/identity"
+	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/refmgmt"
@@ -88,13 +88,13 @@ func (r *RepositoryImpl) Close() error {
 
 func (r *RepositoryImpl) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
 	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
-		return identity2.GetConsumerId(r.info.Locator, c.String())
+		return identity.GetConsumerId(r.info.Locator, c.String())
 	}
-	return identity2.GetConsumerId(r.info.Locator, "")
+	return identity.GetConsumerId(r.info.Locator, "")
 }
 
 func (r *RepositoryImpl) GetIdentityMatcher() string {
-	return identity2.CONSUMER_TYPE
+	return identity.CONSUMER_TYPE
 }
 
 func (r *RepositoryImpl) NamespaceLister() cpi.NamespaceLister {
@@ -109,7 +109,7 @@ func (r *RepositoryImpl) getCreds(comp string) (credentials.Credentials, error) 
 	if r.info.Creds != nil {
 		return r.info.Creds, nil
 	}
-	return identity2.GetCredentials(r.GetContext(), r.info.Locator, comp)
+	return identity.GetCredentials(r.GetContext(), r.info.Locator, comp)
 }
 
 func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {

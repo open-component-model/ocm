@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 
-	utils2 "ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -130,7 +130,7 @@ func (o *Options) Execute(data string) (string, error) {
 
 func ReadYAMLSettings(fs vfs.FileSystem, path string) (Values, error) {
 	result := Values{}
-	data, err := utils2.ReadFile(path, fs)
+	data, err := utils.ReadFile(path, fs)
 	if err != nil {
 		return nil, err
 	}

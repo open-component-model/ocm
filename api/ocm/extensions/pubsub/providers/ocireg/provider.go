@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"path"
 
-	errors2 "github.com/containerd/containerd/remotes/errors"
+	containererr "github.com/containerd/containerd/remotes/errors"
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/repocpi"
 	"ocm.software/ocm/api/ocm/extensions/pubsub"
-	compound2 "ocm.software/ocm/api/ocm/extensions/pubsub/types/compound"
+	"ocm.software/ocm/api/ocm/extensions/pubsub/types/compound"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/componentmapping"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
@@ -45,7 +45,7 @@ func (p *Provider) GetPubSubSpec(repo repocpi.Repository) (pubsub.PubSubSpec, er
 
 	ocirepo := path.Join(gen.Meta().SubPath, componentmapping.ComponentDescriptorNamespace)
 	acc, err := gen.OCIRepository().LookupArtifact(ocirepo, META)
-	if errors.IsErrNotFound(err) || errors.IsErrUnknown(err) || errors.IsA(err, errors2.ErrUnexpectedStatus{}) {
+	if errors.IsErrNotFound(err) || errors.IsErrUnknown(err) || errors.IsA(err, containererr.ErrUnexpectedStatus{}) {
 		return nil, nil
 	}
 	if err != nil {
@@ -59,7 +59,7 @@ func (p *Provider) GetPubSubSpec(repo repocpi.Repository) (pubsub.PubSubSpec, er
 	if m.GetDescriptor().Config.MediaType != ConfigMimeType {
 		return nil, fmt.Errorf("meta data artifact has unexpected mime type %q", m.GetDescriptor().Config.MediaType)
 	}
-	compound, _ := compound2.New()
+	compound, _ := compound.New()
 	for _, l := range m.GetDescriptor().Layers {
 		if l.MediaType == PubSubLayerMimeTye {
 			var ps pubsub.GenericPubSubSpec

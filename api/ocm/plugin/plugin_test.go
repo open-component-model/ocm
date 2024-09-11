@@ -21,7 +21,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/registration"
 	"ocm.software/ocm/api/ocm/valuemergehandler"
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/defaultmerge"
-	common2 "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var _ = Describe("setup plugin cache", func() {
@@ -138,7 +138,7 @@ someattr: value
 		It("described plugin", func() {
 			p := registry.Get("merge")
 			Expect(p).NotTo(BeNil())
-			pr, buf := common2.NewBufferedPrinter()
+			pr, buf := misc.NewBufferedPrinter()
 			common.DescribePluginDescriptor(nil, p.GetDescriptor(), pr)
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 Plugin Name:      merge

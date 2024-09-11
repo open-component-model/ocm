@@ -12,7 +12,7 @@ import (
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"ocm.software/ocm/api/helper/builder"
-	env2 "ocm.software/ocm/api/helper/env"
+	envhelper "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -39,7 +39,7 @@ var _ = Describe("artifact management", func() {
 	cfg := Must(json.Marshal(ociv1.ImageConfig{}))
 
 	BeforeEach(func() {
-		env = builder.NewBuilder(env2.TestData())
+		env = builder.NewBuilder(envhelper.TestData())
 	})
 
 	AfterEach(func() {

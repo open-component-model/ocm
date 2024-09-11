@@ -22,7 +22,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/ocm/extraid"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
-	utils2 "ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/filelock"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
@@ -327,9 +327,9 @@ func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAcc
 				return errors.Wrapf(err, "cannot open plugin executable %s", file.Name())
 			}
 			_, err = io.Copy(dst, src)
-			utils2.IgnoreError(src.Close())
-			utils2.IgnoreError(os.Remove(file.Name()))
-			utils2.IgnoreError(SetPluginSourceInfo(dir, cv, found.Meta().Name, desc.PluginName))
+			utils.IgnoreError(src.Close())
+			utils.IgnoreError(os.Remove(file.Name()))
+			utils.IgnoreError(SetPluginSourceInfo(dir, cv, found.Meta().Name, desc.PluginName))
 			if err != nil {
 				return errors.Wrapf(err, "cannot copy plugin file %s", target)
 			}

@@ -21,12 +21,12 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	utils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
-	utils2 "ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess"
@@ -135,7 +135,7 @@ func DetermineExecutor(executor *toi.Executor, octx ocm.Context, cv ocm.Componen
 		if res.Meta().Type != resourcetypes.OCI_IMAGE {
 			return nil, errors.ErrInvalid("executor resource type", res.Meta().Type)
 		}
-		ref, err := utils.GetOCIArtifactRef(octx, res)
+		ref, err := ocmutils.GetOCIArtifactRef(octx, res)
 		if err != nil {
 			return nil, errors.Wrapf(err, "image ref for executor resource %s not found", executor.ResourceRef.String())
 		}
@@ -349,7 +349,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	if econfig == nil {
 		p.Printf("no executor config found\n")
 	} else {
-		p.Printf("using executor config:\n%s\n", utils2.IndentLines(string(econfig), "  "))
+		p.Printf("using executor config:\n%s\n", utils.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
 	credreqs, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
@@ -388,7 +388,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	}
 	{
 		data, _ := yaml.Marshal(ccfg)
-		p.Printf("using ocm config:\n%s\n", utils2.IndentLines(string(data), "  "))
+		p.Printf("using ocm config:\n%s\n", utils.IndentLines(string(data), "  "))
 	}
 
 	// prepare user config
@@ -399,7 +399,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	if params == nil {
 		p.Printf("no parameter config found\n")
 	} else {
-		p.Printf("using package parameters:\n:%s\n", utils2.IndentLines(string(params), "  "))
+		p.Printf("using package parameters:\n:%s\n", utils.IndentLines(string(params), "  "))
 	}
 
 	if executor.ParameterMapping != nil {
@@ -411,7 +411,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 
 		if err == nil {
 			if !bytes.Equal(orig, params) {
-				p.Printf("using executor parameters:\n%s\n", utils2.IndentLines(string(params), "  "))
+				p.Printf("using executor parameters:\n%s\n", utils.IndentLines(string(params), "  "))
 			}
 		}
 	}

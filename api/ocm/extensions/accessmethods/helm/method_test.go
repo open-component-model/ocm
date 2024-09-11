@@ -12,8 +12,8 @@ import (
 	"helm.sh/helm/v3/pkg/chart/loader"
 
 	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/helm"
-	helm2 "ocm.software/ocm/api/tech/helm"
+	me "ocm.software/ocm/api/ocm/extensions/accessmethods/helm"
+	"ocm.software/ocm/api/tech/helm"
 )
 
 var _ = Describe("Method", func() {
@@ -32,10 +32,10 @@ var _ = Describe("Method", func() {
 		if err == nil { // only if connected to internet
 			resp.Body.Close()
 			fmt.Fprintf(GinkgoWriter, "helm executed\n")
-			spec := helm.New("cockroachdb:3.0.8", "https://charts.helm.sh/stable")
+			spec := me.New("cockroachdb:3.0.8", "https://charts.helm.sh/stable")
 
 			m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()}))
-			Expect(m.MimeType()).To(Equal(helm2.ChartMediaType))
+			Expect(m.MimeType()).To(Equal(helm.ChartMediaType))
 			defer Close(m)
 			blob := Must(m.Reader())
 			defer Close(blob)

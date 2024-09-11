@@ -10,7 +10,7 @@ import (
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/cpi"
-	identity2 "ocm.software/ocm/api/tech/oci/identity"
+	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/tcp"
@@ -148,11 +148,11 @@ func (a *RepositorySpec) GetConsumerId(uctx ...credentials.UsageContext) credent
 		return nil
 	}
 	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
-		return identity2.GetConsumerId(info.Locator, c.String())
+		return identity.GetConsumerId(info.Locator, c.String())
 	}
-	return identity2.GetConsumerId(info.Locator, "")
+	return identity.GetConsumerId(info.Locator, "")
 }
 
 func (a *RepositorySpec) GetIdentityMatcher() string {
-	return identity2.CONSUMER_TYPE
+	return identity.CONSUMER_TYPE
 }
