@@ -38,7 +38,7 @@ var _ = Describe("add resources", func() {
 			meta := ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation)
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
 				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
-			Expect(Must(cv.GetResourcesByName("test"))[0].Meta().Digest).NotTo(Equal(DS_TESTDATA))
+			Expect(Must(cv.GetResourcesByName("test"))[0].Meta().Digest).To(Equal(DS_TESTDATA))
 		})
 
 		It("replaces resource", func() {

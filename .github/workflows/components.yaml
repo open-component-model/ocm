@@ -1,11 +1,7 @@
 name: component CTFs
 
-on: 
-  pull_request_target:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+on:
+  pull_request:
   workflow_call:
 
 permissions:
@@ -79,7 +75,7 @@ jobs:
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@v2.2
-        
+
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Go
