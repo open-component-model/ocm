@@ -655,12 +655,13 @@ func (c *componentVersionAccessView) SelectResources(sel ...rscsel.Selector) ([]
 
 	list := compdesc.MapToSelectorElementList(c.GetDescriptor().Resources)
 	result := []cpi.ResourceAccess{}
+outer:
 	for _, r := range c.GetDescriptor().Resources {
 		if len(sel) > 0 {
 			mr := compdesc.MapToSelectorResource(&r)
 			for _, s := range sel {
 				if !s.MatchResource(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}
@@ -769,12 +770,13 @@ func (c *componentVersionAccessView) SelectSources(sel ...srcsel.Selector) ([]cp
 
 	list := compdesc.MapToSelectorElementList(c.GetDescriptor().Sources)
 	result := []cpi.SourceAccess{}
+outer:
 	for _, r := range c.GetDescriptor().Sources {
 		if len(sel) > 0 {
 			mr := compdesc.MapToSelectorSource(&r)
 			for _, s := range sel {
 				if !s.MatchSource(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}
