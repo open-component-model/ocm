@@ -49,7 +49,7 @@ func WithTypes(types []string) elemhdlr.Option {
 ////////////////////////////////////////////////////////////////////////////////
 
 func NewTypeHandler(octx clictx.OCM, opts *output.Options, repo ocm.Repository, session ocm.Session, compspecs []string, hopts ...elemhdlr.Option) (utils.TypeHandler, error) {
-	return elemhdlr.NewTypeHandler(octx, opts, repo, session, ocm.KIND_RESOURCE, compspecs, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
+	return elemhdlr.NewTypeHandler(octx, opts, repo, session, ocm.KIND_RESOURCE, compspecs, func(access ocm.ComponentVersionAccess) compdesc.ElementListAccessor {
 		return access.GetDescriptor().Resources
 	}, hopts...)
 }

@@ -85,7 +85,7 @@ func checkHint(v ocm.ComponentVersionAccess, typ string, elem addhdlrs.Element, 
 		}
 		if mime.BaseType(local.MediaType) == mime.BaseType(olocal.MediaType) {
 			return fmt.Errorf("reference name (hint) %q with base media type %s already used for %s %s:%s",
-				local.ReferenceName, mime.BaseType(local.MediaType), typ, a.GetMeta().Name, a.GetMeta().Version)
+				local.ReferenceName, mime.BaseType(local.MediaType), typ, a.GetMeta().GetName(), a.GetMeta().GetVersion())
 		}
 	}
 	return nil

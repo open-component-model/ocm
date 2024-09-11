@@ -8,12 +8,28 @@ import (
 
 // Identity selectors
 
-func IdentityByKeyPairs(extras ...string) Selector {
-	return selectors.IdentityByKeyPairs(extras...)
+func IdentityByKeyPairs(name string, extras ...string) Selector {
+	return selectors.IdentityByKeyPairs(name, extras...)
 }
 
 func Identity(id v1.Identity) Selector {
 	return selectors.Identity(id)
+}
+
+func ExtraIdentity(id v1.Identity) Selector {
+	return selectors.ExtraIdentity(id)
+}
+
+func ExtraIdentityByKeyPairs(extra ...string) Selector {
+	return selectors.ExtraIdentityByKeyPairs(extra...)
+}
+
+func Partialdentity(id v1.Identity) Selector {
+	return selectors.PartialIdentity(id)
+}
+
+func PartialIdentityByKeyPairs(attrs ...string) Selector {
+	return selectors.PartialIdentityByKeyPairs(attrs...)
 }
 
 func Name(n string) Selector {
@@ -32,4 +48,12 @@ func Label(sel ...selectors.LabelSelector) Selector {
 
 func LabelName(n string) Selector {
 	return labelsel.Name(n)
+}
+
+func LabelVersion(n string) Selector {
+	return labelsel.Version(n)
+}
+
+func LabelValue(v interface{}) Selector {
+	return labelsel.Value(v)
 }

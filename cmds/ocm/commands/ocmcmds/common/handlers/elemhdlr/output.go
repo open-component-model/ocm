@@ -17,7 +17,7 @@ func MapMetaOutput(e interface{}) []string {
 	m := p.Element.GetMeta()
 	id := p.Id.Copy()
 	id.Remove(metav1.SystemIdentityName)
-	return []string{m.Name, m.Version, id.String()}
+	return []string{m.GetName(), m.GetVersion(), id.String()}
 }
 
 func MapNodeOutput(e interface{}) []string {

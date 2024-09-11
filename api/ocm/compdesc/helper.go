@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"golang.org/x/exp/slices"
 
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors"
@@ -40,20 +41,21 @@ func (cd *ComponentDescriptor) AddRepositoryContext(repoCtx runtime.TypedObject)
 	return nil
 }
 
-func (cd *ComponentDescriptor) SelectResources(sel ...rscsel.Selector) ([]Resource, error) {
+func (cd *ComponentDescriptor) SelectResources(sel ...rscsel.Selector) (Resources, error) {
 	err := selectors.ValidateSelectors(sel...)
 	if err != nil {
 		return nil, err
 	}
 
 	list := MapToSelectorElementList(cd.Resources)
-	result := []Resource{}
+	result := Resources{}
+outer:
 	for _, r := range cd.Resources {
 		if len(sel) > 0 {
 			mr := MapToSelectorResource(&r)
 			for _, s := range sel {
 				if !s.MatchResource(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}
@@ -62,12 +64,8 @@ func (cd *ComponentDescriptor) SelectResources(sel ...rscsel.Selector) ([]Resour
 	return result, nil
 }
 
-func (cd *ComponentDescriptor) GetResources() []Resource {
-	result := []Resource{}
-	for _, r := range cd.Resources {
-		result = append(result, r)
-	}
-	return result
+func (cd *ComponentDescriptor) GetResources() Resources {
+	return slices.Clone(cd.Resources)
 }
 
 // GetResourceByIdentity returns resource that matches the given identity.
@@ -116,20 +114,21 @@ func (cd *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
 	return ElementIndex(cd.Resources, res)
 }
 
-func (cd *ComponentDescriptor) SelectSources(sel ...srcsel.Selector) ([]Source, error) {
+func (cd *ComponentDescriptor) SelectSources(sel ...srcsel.Selector) (Sources, error) {
 	err := selectors.ValidateSelectors(sel...)
 	if err != nil {
 		return nil, err
 	}
 
 	list := MapToSelectorElementList(cd.Sources)
-	result := []Source{}
+	result := Sources{}
+outer:
 	for _, r := range cd.Sources {
 		if len(sel) > 0 {
 			mr := MapToSelectorSource(&r)
 			for _, s := range sel {
 				if !s.MatchSource(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}
@@ -138,12 +137,8 @@ func (cd *ComponentDescriptor) SelectSources(sel ...srcsel.Selector) ([]Source, 
 	return result, nil
 }
 
-func (cd *ComponentDescriptor) GetSources() []Source {
-	result := []Source{}
-	for _, r := range cd.Sources {
-		result = append(result, r)
-	}
-	return result
+func (cd *ComponentDescriptor) GetSources() Sources {
+	return slices.Clone(cd.Sources)
 }
 
 // GetSourceByIdentity returns source that match the given identity.
@@ -185,20 +180,21 @@ func (cd *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (Reference
 	return Reference{}, errors.ErrNotFound(KIND_REFERENCE, id.String())
 }
 
-func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) ([]Reference, error) {
+func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) (References, error) {
 	err := selectors.ValidateSelectors(sel...)
 	if err != nil {
 		return nil, err
 	}
 
 	list := MapToSelectorElementList(cd.References)
-	result := []Reference{}
+	result := References{}
+outer:
 	for _, r := range cd.References {
 		if len(sel) > 0 {
 			mr := MapToSelectorReference(&r)
 			for _, s := range sel {
 				if !s.MatchReference(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}
@@ -207,12 +203,8 @@ func (cd *ComponentDescriptor) SelectReferences(sel ...refsel.Selector) ([]Refer
 	return result, nil
 }
 
-func (cd *ComponentDescriptor) GetReferences() []Reference {
-	result := []Reference{}
-	for _, r := range cd.References {
-		result = append(result, r)
-	}
-	return result
+func (cd *ComponentDescriptor) GetReferences() References {
+	return slices.Clone(cd.References)
 }
 
 // GetReferenceIndexByIdentity returns the index of the reference that matches the given identity.

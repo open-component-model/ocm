@@ -8,10 +8,10 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/chart"
+	"ocm.software/ocm/api/ocm/selectors/rscsel"
 	"sigs.k8s.io/yaml"
 
 	"ocm.software/ocm/api/ocm"
-	"ocm.software/ocm/api/ocm/compdesc"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/ocm/ocmutils"
@@ -126,7 +126,7 @@ func Localize(cfg *helper.Config, config template.Values, release, namespace str
 	}
 	defer cv.Close()
 
-	res, err := cv.GetResourcesByResourceSelectors(compdesc.ByResourceType(DEPLOY_SCRIPT_TYPE))
+	res, err := cv.SelectResources(rscsel.ArtifactType(DEPLOY_SCRIPT_TYPE))
 	if err != nil {
 		return errors.Wrapf(err, "no deploy descriptor found")
 	}

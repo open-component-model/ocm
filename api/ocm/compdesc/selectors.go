@@ -8,6 +8,7 @@ import (
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extraid"
+	"ocm.software/ocm/api/ocm/selectors/accessors"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/selector"
 )
@@ -171,7 +172,7 @@ func (b *withExtraId) Match(obj map[string]string) (bool, error) {
 }
 
 func (b *withExtraId) MatchElement(obj ElementSelectionContext) (bool, error) {
-	return b.Match(obj.ExtraIdentity)
+	return b.Match(obj.GetExtraIdentity())
 }
 
 func (b *withExtraId) MatchResource(obj ResourceSelectionContext) (bool, error) {
@@ -409,7 +410,7 @@ type byLabel struct {
 var _ LabelBasedSelector = (*byLabel)(nil)
 
 func (b *byLabel) MatchElement(obj ElementSelectionContext) (bool, error) {
-	return b.MatchLabels(obj.Labels)
+	return b.MatchLabels(obj.GetLabels())
 }
 
 func (b *byLabel) MatchResource(obj ResourceSelectionContext) (bool, error) {
@@ -552,7 +553,7 @@ func MatchReferencesByReferenceSelector(obj ReferenceSelectionContext, resourceS
 ////////////////////////////////////////////////////////////////////////////////
 
 type elementSelectionContext struct {
-	*ElementMeta
+	accessors.ElementMeta
 	identity
 }
 
@@ -560,7 +561,7 @@ type elementSelectionContext struct {
 type ElementSelectionContext = *elementSelectionContext
 
 // Deprecated: not supported anymore.
-func NewElementSelectionContext(index int, elems ElementAccessor) ElementSelectionContext {
+func NewElementSelectionContext(index int, elems ElementListAccessor) ElementSelectionContext {
 	return &elementSelectionContext{
 		ElementMeta: elems.Get(index).GetMeta(),
 		identity: identity{
@@ -672,7 +673,7 @@ func ByComponent(name string) ReferenceSelector {
 
 type identity struct {
 	identity v1.Identity
-	accessor ElementAccessor
+	accessor ElementListAccessor
 	index    int
 }
 

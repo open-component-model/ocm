@@ -41,7 +41,7 @@ func (cd *ComponentDescriptor) Equivalent(o *ComponentDescriptor) equivalent.Equ
 	)
 }
 
-func EquivalentElems(a ElementAccessor, b ElementAccessor) equivalent.EqualState {
+func EquivalentElems(a ElementListAccessor, b ElementListAccessor) equivalent.EqualState {
 	state := equivalent.StateEquivalent()
 
 	// Equivaluent of elements handles nil to provide state accoding to it

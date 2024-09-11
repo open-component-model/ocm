@@ -570,7 +570,7 @@ func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, o
 	})
 }
 
-func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.ElementAccessor, prov compdesc.ElementMetaProvider, optlist ...cpi.TargetOption) (int, error) {
+func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.ElementListAccessor, prov compdesc.ElementMetaProvider, optlist ...cpi.TargetOption) (int, error) {
 	opts := internal.NewTargetOptions(optlist...)
 	curidx := compdesc.ElementIndex(acc, prov)
 	meta := prov.GetMeta()
@@ -582,7 +582,7 @@ func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.E
 			return idx, err
 		}
 		if idx == -1 && curidx >= 0 {
-			if meta.Version == acc.Get(curidx).GetMeta().Version {
+			if meta.GetVersion() == acc.Get(curidx).GetMeta().GetVersion() {
 				return -1, fmt.Errorf("adding a new %s with same base identity requires different version", kind)
 			}
 		}
@@ -655,12 +655,13 @@ func (c *componentVersionAccessView) SelectResources(sel ...rscsel.Selector) ([]
 
 	list := compdesc.MapToSelectorElementList(c.GetDescriptor().Resources)
 	result := []cpi.ResourceAccess{}
+outer:
 	for _, r := range c.GetDescriptor().Resources {
 		if len(sel) > 0 {
 			mr := compdesc.MapToSelectorResource(&r)
 			for _, s := range sel {
 				if !s.MatchResource(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}
@@ -769,12 +770,13 @@ func (c *componentVersionAccessView) SelectSources(sel ...srcsel.Selector) ([]cp
 
 	list := compdesc.MapToSelectorElementList(c.GetDescriptor().Sources)
 	result := []cpi.SourceAccess{}
+outer:
 	for _, r := range c.GetDescriptor().Sources {
 		if len(sel) > 0 {
 			mr := compdesc.MapToSelectorSource(&r)
 			for _, s := range sel {
 				if !s.MatchSource(list, mr) {
-					continue
+					continue outer
 				}
 			}
 		}

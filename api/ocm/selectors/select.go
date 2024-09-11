@@ -129,11 +129,12 @@ func validateSelectors[T any](list *errors.ErrorList, sel ...T) error {
 
 func _select[S, E any](list accessors.ElementListAccessor, m func(S, E) bool, sel ...S) []E {
 	var result []E
+outer:
 	for i := 0; i < list.Len(); i++ {
 		e := list.Get(i).(E)
 		for _, s := range sel {
 			if !m(s, e) {
-				continue
+				continue outer
 			}
 		}
 		result = append(result, e)

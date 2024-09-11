@@ -18,15 +18,15 @@ type IdentitySelectorImpl struct {
 }
 
 func (i *IdentitySelectorImpl) MatchResource(list accessors.ElementListAccessor, a accessors.ResourceAccessor) bool {
-	return i.MatchIdentity(a.GetMeta().GetIdentityForContext(list))
+	return i.MatchIdentity(a.GetMeta().GetIdentity(list))
 }
 
 func (i *IdentitySelectorImpl) MatchSource(list accessors.ElementListAccessor, a accessors.SourceAccessor) bool {
-	return i.MatchIdentity(a.GetMeta().GetIdentityForContext(list))
+	return i.MatchIdentity(a.GetMeta().GetIdentity(list))
 }
 
 func (i *IdentitySelectorImpl) MatchReference(list accessors.ElementListAccessor, a accessors.ReferenceAccessor) bool {
-	return i.MatchIdentity(a.GetMeta().GetIdentityForContext(list))
+	return i.MatchIdentity(a.GetMeta().GetIdentity(list))
 }
 
 type IdentityErrorSelectorImpl struct {
@@ -79,12 +79,63 @@ func (i *id) MatchIdentity(identity v1.Identity) bool {
 	return true
 }
 
-func IdentityByKeyPairs(extra ...string) *IdentitySelectorImpl {
-	return &IdentitySelectorImpl{&id{v1.NewExtraIdentity(extra...)}}
+func IdentityByKeyPairs(name string, extra ...string) *IdentitySelectorImpl {
+	return &IdentitySelectorImpl{&id{v1.NewIdentity(name, extra...)}}
 }
 
 func Identity(identity v1.Identity) *IdentitySelectorImpl {
 	return &IdentitySelectorImpl{&id{identity}}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type extraid struct {
+	v1.Identity
+}
+
+func (i *extraid) MatchIdentity(identity v1.Identity) bool {
+	identity = identity.ExtraIdentity()
+
+	if len(i.Identity) != len(identity) {
+		return false
+	}
+	for n, v := range i.Identity {
+		if identity[n] != v {
+			return false
+		}
+	}
+	return true
+}
+
+func ExtraIdentityByKeyPairs(extra ...string) *IdentitySelectorImpl {
+	return &IdentitySelectorImpl{&extraid{v1.NewExtraIdentity(extra...)}}
+}
+
+func ExtraIdentity(identity v1.Identity) *IdentitySelectorImpl {
+	return &IdentitySelectorImpl{&extraid{identity}}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type partialid struct {
+	v1.Identity
+}
+
+func (i *partialid) MatchIdentity(identity v1.Identity) bool {
+	for n, v := range i.Identity {
+		if identity[n] != v {
+			return false
+		}
+	}
+	return true
+}
+
+func PartialIdentityByKeyPairs(attrs ...string) *IdentitySelectorImpl {
+	return &IdentitySelectorImpl{&partialid{v1.NewExtraIdentity(attrs...)}}
+}
+
+func PartialIdentity(identity v1.Identity) *IdentitySelectorImpl {
+	return &IdentitySelectorImpl{&partialid{identity}}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

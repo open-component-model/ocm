@@ -13,12 +13,13 @@ func SelectLabels(labels v1.Labels, sel ...LabelSelector) ([]v1.Label, error) {
 	return GetLabels(labels, sel...), nil
 }
 
-func GetLabels(labels v1.Labels, sel ...LabelSelector) []v1.Label {
-	var result []v1.Label
+func GetLabels(labels v1.Labels, sel ...LabelSelector) v1.Labels {
+	result := v1.Labels{}
+outer:
 	for _, l := range labels {
 		for _, s := range sel {
 			if !s.MatchLabel(&l) {
-				continue
+				continue outer
 			}
 		}
 		result = append(result, l)

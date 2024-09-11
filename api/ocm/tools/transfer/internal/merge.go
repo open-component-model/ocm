@@ -43,15 +43,17 @@ func PrepareDescriptor(log logging.Logger, ctx ocm.Context, s *compdesc.Componen
 	return n, nil
 }
 
-func MergeElements(log logging.Logger, ctx ocm.Context, s compdesc.ElementAccessor, t compdesc.ElementAccessor) error {
+func MergeElements(log logging.Logger, ctx ocm.Context, s compdesc.ElementListAccessor, t compdesc.ElementListAccessor) error {
 	for i := 0; i < s.Len(); i++ {
 		es := s.Get(i)
 		id := es.GetMeta().GetIdentity(s)
 		et := compdesc.GetByIdentity(t, id)
 		if et != nil {
-			if err := MergeLabels(log, ctx, es.GetMeta().Labels, &et.GetMeta().Labels); err != nil {
+			labels := et.GetMeta().GetLabels()
+			if err := MergeLabels(log, ctx, es.GetMeta().GetLabels(), &labels); err != nil {
 				return err
 			}
+			et.GetMeta().SetLabels(labels)
 
 			// keep access for same digest
 			if aes, ok := es.(compdesc.ElementArtifactAccessor); ok {

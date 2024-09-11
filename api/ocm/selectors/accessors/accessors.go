@@ -1,6 +1,7 @@
 package accessors
 
 import (
+	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -8,7 +9,7 @@ import (
 // ElementListAccessor provides generic access to list of elements.
 type ElementListAccessor interface {
 	Len() int
-	Get(i int) ElementMetaAccessor
+	Get(i int) Element
 }
 
 // ElementMeta describes the access to common element meta data attributes.
@@ -17,12 +18,28 @@ type ElementMeta interface {
 	GetVersion() string
 	GetExtraIdentity() v1.Identity
 	GetLabels() v1.Labels
-	GetIdentityForContext(accessor ElementListAccessor) v1.Identity
+	GetIdentity(accessor ElementListAccessor) v1.Identity
+	GetIdentityDigest(accessor ElementListAccessor) []byte
+
+	GetRawIdentity() v1.Identity
+	GetMatchBaseIdentity() v1.Identity
+
+	GetMeta() ElementMeta // ElementMeta is again a Meta provider
+
+	SetLabels(labels []v1.Label)
 }
 
-// ElementMetaAccessor provides generic access an elements meta information.
-type ElementMetaAccessor interface {
+// ElementMetaProvider just provides access to element meta data
+// of an element.
+type ElementMetaProvider interface {
 	GetMeta() ElementMeta
+}
+
+// Element represents a generic element with meta information.
+// It also allows to check for equivalence of elements of the same kind.
+type Element interface {
+	ElementMetaProvider
+	Equivalent(Element) equivalent.EqualState
 }
 
 // AccessSpec is the minimal interface  for access spec attributes.
@@ -32,7 +49,7 @@ type AccessSpec interface {
 
 // ArtifactAccessor provides access to generic artifact information of an element.
 type ArtifactAccessor interface {
-	ElementMetaAccessor
+	Element
 	GetType() string
 	GetAccess() AccessSpec
 }
@@ -51,6 +68,6 @@ type SourceAccessor interface {
 
 // ReferenceAccessor provides access to source attribute.
 type ReferenceAccessor interface {
-	ElementMetaAccessor
+	Element
 	GetComponentName() string
 }

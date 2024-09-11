@@ -1,7 +1,6 @@
 package compdesc
 
 import (
-	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors/accessors"
 )
@@ -38,19 +37,16 @@ type ObjectMetaAccessor interface {
 }
 
 // ElementMetaAccessor provides generic access an elements meta information.
-type ElementMetaAccessor interface {
-	ElementMetaProvider
-	Equivalent(ElementMetaAccessor) equivalent.EqualState
-}
+// Deprecated: use Element.
+type ElementMetaAccessor = accessors.Element
 
-// ElementAccessor provides generic access to list of elements.
-type ElementAccessor interface {
-	Len() int
-	Get(i int) ElementMetaAccessor
-}
+type Element = accessors.Element
+
+// ElementListAccessor provides generic access to list of elements.
+type ElementListAccessor = accessors.ElementListAccessor
 
 type ElementMetaProvider interface {
-	GetMeta() *ElementMeta
+	GetMeta() accessors.ElementMeta
 }
 
 // ElementArtifactAccessor provides access to generic artifact information of an element.
@@ -69,7 +65,7 @@ type ElementDigestAccessor interface {
 // ArtifactAccessor provides generic access to list of artifacts.
 // There are resources or sources.
 type ArtifactAccessor interface {
-	ElementAccessor
+	ElementListAccessor
 	GetArtifact(i int) ElementArtifactAccessor
 }
 

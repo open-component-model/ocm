@@ -37,7 +37,7 @@ func Validate(desc *ComponentDescriptor) error {
 
 // ElementIndex determines the index of an element in the element list
 // for a given ElementMeta. If no element is found -1 is returned.
-func ElementIndex(acc ElementAccessor, metaprovider ElementMetaProvider) int {
+func ElementIndex(acc ElementListAccessor, metaprovider ElementMetaProvider) int {
 	meta := metaprovider.GetMeta()
 	id := meta.GetIdentityDigest(acc)
 	for i := 0; i < acc.Len(); i++ {
