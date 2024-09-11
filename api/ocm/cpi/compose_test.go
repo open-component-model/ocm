@@ -5,7 +5,6 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/ocm/selectors"
 	. "ocm.software/ocm/api/ocm/testhelper"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
@@ -64,7 +63,7 @@ var _ = Describe("access method", func() {
 		cv = Must(a.LookupComponentVersion(COMPONENT, VERSION))
 		final.Close(cv)
 
-		Expect(Must(cv.SelectResources(selectors.Name("text1")))[0].Meta().Digest).To(Equal(DS_TESTDATA))
+		Expect(Must(cv.GetResourcesByName("text1"))[0].Meta().Digest).To(Equal(DS_TESTDATA))
 	},
 		Entry("direct", false),
 		Entry("compose", true),
@@ -105,7 +104,7 @@ var _ = Describe("access method", func() {
 		cv = Must(a2.LookupComponentVersion(COMPONENT, VERSION))
 		final.Close(cv)
 
-		Expect(Must(cv.SelectResources(selectors.Name("text1")))[0].Meta().Digest).To(Equal(DS_TESTDATA))
+		Expect(Must(cv.GetResourcesByName("text1"))[0].Meta().Digest).To(Equal(DS_TESTDATA))
 	},
 		Entry("direct", false),
 		Entry("compose", true),

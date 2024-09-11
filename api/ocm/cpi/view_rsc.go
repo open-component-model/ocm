@@ -35,6 +35,9 @@ var (
 	_ ComponentVersionProvider = (*ComponentVersionBasedAccessProvider)(nil)
 )
 
+// Deprecated: use ComponentVersionBasedAccessProvider.
+type BaseAccess = ComponentVersionBasedAccessProvider
+
 func NewBaseAccess(cv ComponentVersionAccess, acc compdesc.AccessSpec) *ComponentVersionBasedAccessProvider {
 	return &ComponentVersionBasedAccessProvider{vers: cv, access: acc}
 }

@@ -1,11 +1,7 @@
 name: lint-and-test
 
 on:
-  pull_request_target:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  pull_request:
   workflow_call:
 
 permissions:
@@ -17,6 +13,8 @@ jobs:
     name: Run tests
     runs-on: large_runner
     steps:
+      - name: Self Hosted Runner Post Job Cleanup Action
+        uses: TooMuch4U/actions-clean@v2.2
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Go
@@ -31,6 +29,8 @@ jobs:
     name: Lint Golang
     runs-on: large_runner
     steps:
+      - name: Self Hosted Runner Post Job Cleanup Action
+        uses: TooMuch4U/actions-clean@v2.2
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Go

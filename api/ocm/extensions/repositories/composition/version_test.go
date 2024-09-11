@@ -4,7 +4,6 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/ocm/selectors"
 
 	"github.com/mandelsoft/goutils/finalizer"
 
@@ -12,7 +11,7 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	me "ocm.software/ocm/api/ocm/extensions/repositories/composition"
-	"ocm.software/ocm/api/ocm/ocmutils"
+	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 	"ocm.software/ocm/api/utils/mime"
@@ -50,7 +49,7 @@ var _ = Describe("version", func() {
 		cv = Must(c.LookupVersion(VERSION))
 		Expect(refmgmt.ReferenceCount(cv)).To(Equal(1))
 		nested.Close(cv, "query")
-		rs := Must(cv.SelectResources(selectors.Name("test")))
+		rs := Must(cv.GetResourcesByName("test"))
 		Expect(len(rs)).To(Equal(1))
 		data := Must(ocmutils.GetResourceData(rs[0]))
 		Expect(string(data)).To(Equal("testdata"))
@@ -66,7 +65,7 @@ var _ = Describe("version", func() {
 		// check result
 		cv = Must(repo2.LookupComponentVersion(COMPONENT, VERSION))
 		finalize.Close(cv, "query")
-		rs = Must(cv.SelectResources(selectors.Name("test")))
+		rs = Must(cv.GetResourcesByName("test"))
 		Expect(len(rs)).To(Equal(1))
 		data = Must(ocmutils.GetResourceData(rs[0]))
 		Expect(string(data)).To(Equal("testdata"))
