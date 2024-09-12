@@ -9,7 +9,7 @@ ocm controller install controller {--version v0.0.1}
 ### Options
 
 ```text
-  -u, --base-url string                       the base url to the ocm-controller's release page (default "https://ocm.software/ocm-controller/releases")
+  -u, --base-url string                       the base url to the ocm-controller's release page (default "https://github.com/open-component-model/ocm-controller/releases")
       --cert-manager-base-url string          the base url to the cert-manager's release page (default "https://github.com/cert-manager/cert-manager/releases")
       --cert-manager-release-api-url string   the base url to the cert-manager's API release page (default "https://api.github.com/repos/cert-manager/cert-manager/releases")
       --cert-manager-version string           version for cert-manager (default "v1.13.2")
