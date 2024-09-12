@@ -12,10 +12,10 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/utils/accessio"
@@ -168,7 +168,7 @@ var _ = Describe("Test Environment", func() {
 			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 			defer Close(src, "repo")
 
-			resolver := ocm.NewCompoundResolver(src)
+			resolver := resolvers.NewCompoundResolver(src)
 			cv := Must(resolver.LookupComponentVersion(COMP, VERSION))
 			defer Close(cv, "cv")
 

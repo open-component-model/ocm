@@ -133,20 +133,6 @@ type ComponentVersionAccess interface {
 	GetResources() []ResourceAccess
 	SelectResources(sel ...rscsel.Selector) ([]ResourceAccess, error)
 
-	//
-	// Deprecated: use GetResources with selector arguments.
-	//nolint: staticcheck // deprecated
-	GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
-
-	//
-	// Deprecated: use GetResources with selector arguments.
-	//nolint: staticcheck // deprecated
-	GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
-
-	//
-	// Deprecated: use GetResources with selector arguments.
-	//nolint: staticcheck // deprecated
-	GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error)
 	SetResource(*ResourceMeta, compdesc.AccessSpec, ...ModificationOption) error
 	SetResourceByAccess(art ResourceAccess, modopts ...BlobModificationOption) error
 
@@ -156,9 +142,6 @@ type ComponentVersionAccess interface {
 	GetSources() []SourceAccess
 	SelectSources(sel ...srcsel.Selector) ([]SourceAccess, error)
 
-	// Deprecated: use GetResources with appropriate selectors.
-	//nolint: staticcheck // deprecated
-	GetSourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]SourceAccess, error)
 	// SetSource updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
 	SetSource(*SourceMeta, compdesc.AccessSpec, ...TargetOption) error
@@ -172,17 +155,6 @@ type ComponentVersionAccess interface {
 	GetReferences() []ComponentReference
 	SelectReferences(sel ...refsel.Selector) ([]ComponentReference, error)
 
-	// Deprecated: use GetReferences with appropriate selectors.
-	//nolint: staticcheck // deprecated
-	GetReferencesByName(name string, selectors ...compdesc.IdentitySelector) (compdesc.References, error)
-
-	// Deprecated: use GetReferences with appropriate selectors.
-	//nolint: staticcheck // deprecated
-	GetReferencesByIdentitySelectors(selectors ...compdesc.IdentitySelector) (compdesc.References, error)
-
-	// Deprecated: use GetReferences with appropriate selectors.
-	//nolint: staticcheck // deprecated
-	GetReferencesByReferenceSelectors(selectors ...compdesc.ReferenceSelector) (compdesc.References, error)
 	SetReference(ref *ComponentReference, opts ...TargetOption) error
 
 	// AddBlob adds a local blob and returns an appropriate local access spec.

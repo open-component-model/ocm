@@ -748,9 +748,6 @@ type Reference struct {
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
 }
 
-// Deprecated: use Reference.
-type ComponentReference = Reference
-
 func NewComponentReference(name, componentName, version string, extraIdentity metav1.Identity) *Reference {
 	return &Reference{
 		ElementMeta: ElementMeta{
