@@ -191,7 +191,7 @@ var _ = Describe("Repository", func() {
 		defer Close(repo)
 		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
 		defer Close(cv)
-		res := Must(cv.SelectResources(selectors.Name("blob")))
+		res := Must(cv.SelectResources(selectors.Name(RESOURCE_NAME)))
 		acc := Must(res[0].AccessMethod())
 		defer Close(acc)
 	})
