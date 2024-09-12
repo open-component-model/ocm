@@ -124,7 +124,7 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 
 func ListComponentDescriptors(cv ocm.ComponentVersionAccess, state *WalkingState) []*compdesc.ComponentDescriptor {
 	if cv == nil || state == nil {
-		return nil
+		return []*compdesc.ComponentDescriptor{}
 	}
 	c := state.WalkingState.Closure
 	nv := common.VersionedElementKey(cv)
