@@ -122,9 +122,12 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 	return dc.Digest, nil
 }
 
-func ListComponentDescriptors(state *WalkingState) []*compdesc.ComponentDescriptor {
+func ListComponentDescriptors(cv ocm.ComponentVersionAccess, state *WalkingState) []*compdesc.ComponentDescriptor {
+	if cv == nil || state == nil {
+		return nil
+	}
 	c := state.WalkingState.Closure
-	nv := state.WalkingState.Context.Key
+	nv := common.VersionedElementKey(cv)
 	return maputils.TransformedValues(c, func(in *VersionInfo) *compdesc.ComponentDescriptor {
 		return in.digestingContexts[nv].Descriptor
 	})
