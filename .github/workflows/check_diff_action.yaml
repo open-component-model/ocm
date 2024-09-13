@@ -2,6 +2,7 @@ name: Check for diff after go mod tidy and generated targets
 
 on:
   pull_request: {}
+  workflow_call:
 
 jobs:
   diff-check-manifests:
