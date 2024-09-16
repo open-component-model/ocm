@@ -1,6 +1,7 @@
 accessmethod
 accessmethoddescriptor
 accessmethods
+accessor
 actiondescriptor
 additionalresource
 addversion
