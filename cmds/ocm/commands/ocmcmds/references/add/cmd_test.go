@@ -5,7 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/ocm/selectors/refsel"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/mandelsoft/goutils/testutils"
@@ -13,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
+	"ocm.software/ocm/api/ocm/selectors/refsel"
 )
 
 const (

@@ -4,7 +4,6 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/ocm/selectors"
 
 	"github.com/mandelsoft/goutils/finalizer"
 
@@ -13,6 +12,7 @@ import (
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	me "ocm.software/ocm/api/ocm/extensions/repositories/composition"
 	"ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/selectors"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 	"ocm.software/ocm/api/utils/mime"

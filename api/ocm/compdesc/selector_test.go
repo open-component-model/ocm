@@ -4,13 +4,13 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/ocm/selectors/labelsel"
-	"ocm.software/ocm/api/ocm/selectors/refsel"
-	"ocm.software/ocm/api/ocm/selectors/rscsel"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
+	"ocm.software/ocm/api/ocm/selectors/labelsel"
+	"ocm.software/ocm/api/ocm/selectors/refsel"
+	"ocm.software/ocm/api/ocm/selectors/rscsel"
 )
 
 var _ = Describe("helper", func() {
