@@ -48,9 +48,9 @@ modification of non-volatile data is prohibited unless the overwrite
 option is given.
 
 
-It the option <code>--overwrite</code> is given, component versions in the
+If the option <code>--overwrite</code> is given, component versions in the
 target repository will be overwritten, if they already exist, but with different digest.
-It the option <code>--enforce</code> is given, component versions in the
+If the option <code>--enforce</code> is given, component versions in the
 target repository will be transported as if they were not present on the target side,
 regardless of their state (this is independent on their actual state, even identical
 versions are re-transported).
@@ -76,26 +76,26 @@ archive does not exist yet. The following formats are supported:
 The default format is <code>directory</code>.
 
 
-It the option <code>--copy-resources</code> is given, all referential
+If the option <code>--copy-resources</code> is given, all referential
 resources will potentially be localized, mapped to component version local
-resources in the target repository. It the option <code>--copy-local-resources</code>
+resources in the target repository. If the option <code>--copy-local-resources</code>
 is given, instead, only resources with the relation <code>local</code> will be
 transferred. This behaviour can be further influenced by specifying a transfer
 script with the <code>script</code> option family.
 
 
-It the option <code>--copy-sources</code> is given, all referential
+If the option <code>--copy-sources</code> is given, all referential
 sources will potentially be localized, mapped to component version local
 resources in the target repository.
 This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.
 
 
-It the option <code>--omit-access-types</code> is given, by-value transfer
+If the option <code>--omit-access-types</code> is given, by-value transfer
 is omitted completely for the given resource types.
 
 
-It the option <code>--stop-on-existing</code> is given together with the <code>--recursive</code>
+If the option <code>--stop-on-existing</code> is given together with the <code>--recursive</code>
 option, the recursion is stopped for component versions already existing in the
 target repository. This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.
