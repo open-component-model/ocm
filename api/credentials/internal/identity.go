@@ -94,7 +94,7 @@ func orMatcher(list []IdentityMatcher) IdentityMatcher {
 type ConsumerIdentity map[string]string
 
 func (c *ConsumerIdentity) UnmarshalJSON(data []byte) error {
-	m := map[string]interface{}{}
+	var m map[string]interface{}
 	err := runtime.DefaultJSONEncoding.Unmarshal(data, &m)
 	if err != nil {
 		return err
