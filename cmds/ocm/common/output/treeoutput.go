@@ -1,6 +1,8 @@
 package output
 
 import (
+	"github.com/mandelsoft/goutils/generics"
+
 	"ocm.software/ocm/cmds/ocm/common/data"
 	"ocm.software/ocm/cmds/ocm/common/processing"
 	"ocm.software/ocm/cmds/ocm/common/tree"
@@ -22,9 +24,16 @@ func (f TreeNodeTitleFunc) ApplyTreeOutputOption(o *TreeOutputOptions) {
 	o.nodeTitle = f
 }
 
+type TreeSymbol string
+
+func (s TreeSymbol) ApplyTreeOutputOption(o *TreeOutputOptions) {
+	o.symbol = generics.Pointer(string(s))
+}
+
 type TreeOutputOptions struct {
 	nodeMapping TreeNodeMappingFunc
 	nodeTitle   TreeNodeTitleFunc
+	symbol      *string
 }
 
 func (o TreeOutputOptions) ApplyTreeOutputOption(opts *TreeOutputOptions) {
@@ -60,18 +69,25 @@ func (o TreeOutputOptions) NodeTitle(obj *tree.TreeObject) string {
 func TreeOutput(t *TableOutput, header string, o ...TreeOutputOption) *TableOutput {
 	opts := *t.Options
 	opts.FixedColums = 1
+	topts := TreeOutputOptions{}.Apply(o...)
 	return &TableOutput{
 		Headers: Fields(header, t.Headers),
 		Options: &opts,
-		Chain:   processing.Append(t.Chain, processing.Transform(treeTransform)),
-		Mapping: treeMapping(len(t.Headers), t.Mapping, TreeOutputOptions{}.Apply(o...)),
+		Chain:   processing.Append(t.Chain, processing.Transform(transformer{topts.symbol}.treeTransform)),
+		Mapping: treeMapping(len(t.Headers), t.Mapping, topts),
 	}
 }
 
-func treeTransform(s data.Iterable) data.Iterable {
+type transformer struct {
+	symbol *string
+}
+
+func (t transformer) treeTransform(s data.Iterable) data.Iterable {
 	Print(data.Slice(s), "tree transform")
-	result := tree.MapToTree(tree.ObjectSlice(s), nil)
-	return result
+	if t.symbol == nil {
+		return tree.MapToTree(tree.ObjectSlice(s), nil)
+	}
+	return tree.MapToTree(tree.ObjectSlice(s), nil, *t.symbol)
 }
 
 func treeMapping(n int, m processing.MappingFunction, opts TreeOutputOptions) processing.MappingFunction {

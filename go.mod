@@ -42,10 +42,10 @@ require (
 	github.com/klauspost/compress v1.17.9
 	github.com/klauspost/pgzip v1.2.6
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
-	github.com/mandelsoft/goutils v0.0.0-20240910114310-fc2a9de4c494
+	github.com/mandelsoft/goutils v0.0.0-20240915132328-95975bffaef0
 	github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a
 	github.com/mandelsoft/spiff v1.7.0-beta-5
-	github.com/mandelsoft/vfs v0.4.3
+	github.com/mandelsoft/vfs v0.4.4-0.20240915223828-8bc9369139c8
 	github.com/marstr/guid v1.1.0
 	github.com/mikefarah/yq/v4 v4.44.3
 	github.com/mitchellh/copystructure v1.2.0
@@ -205,7 +205,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/gomodule/redigo v1.8.9 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/certificate-transparency-go v1.2.1 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
@@ -237,7 +236,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jedisct1/go-minisign v0.0.0-20230811132847-661be99b8267 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
-	github.com/jinzhu/gorm v1.9.16 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jmoiron/sqlx v1.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect

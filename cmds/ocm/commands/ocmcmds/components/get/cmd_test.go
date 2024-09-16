@@ -22,6 +22,8 @@ const (
 	COMP      = "test.de/x"
 	COMP2     = "test.de/y"
 	COMP3     = "test.de/z"
+	COMP4     = "test.de/c"
+	COMP5     = "test.de/d"
 	PROVIDER  = "mandelsoft"
 )
 
@@ -235,4 +237,80 @@ spec:
 `, compdescv3.SchemaVersion)))
 		})
 	})
+	Context("ctf", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMP, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Reference("yy", COMP2, VERSION)
+					})
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Reference("zz", COMP3, VERSION)
+					})
+				})
+
+				env.Component(COMP2, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Reference("aa", COMP4, VERSION)
+					})
+				})
+
+				env.Component(COMP3, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Reference("cc", COMP4, VERSION)
+					})
+				})
+
+				env.Component(COMP4, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Reference("dd", COMP5, VERSION)
+					})
+				})
+
+				env.Component(COMP5, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+					})
+				})
+			})
+		})
+
+		// TODO: avoid duplicate entries in output
+		It("lists closure", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-r", "--repo", ARCH, COMP)).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+REFERENCEPATH                            COMPONENT VERSION PROVIDER   IDENTITY
+                                         test.de/x v1      mandelsoft 
+test.de/x:v1                             test.de/y v1      mandelsoft "name"="yy"
+test.de/x:v1->test.de/y:v1               test.de/c v1      mandelsoft "name"="aa"
+test.de/x:v1->test.de/y:v1->test.de/c:v1 test.de/d v1      mandelsoft "name"="dd"
+test.de/x:v1                             test.de/z v1      mandelsoft "name"="zz"
+test.de/x:v1->test.de/z:v1               test.de/c v1      mandelsoft "name"="cc"
+test.de/x:v1->test.de/z:v1->test.de/c:v1 test.de/d v1      mandelsoft "name"="dd"
+`))
+		})
+		It("lists closure as tree ", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-otree", "-r", "--repo", ARCH, COMP)).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+NESTING     COMPONENT VERSION PROVIDER   IDENTITY
+└─ ⊗        test.de/x v1      mandelsoft 
+   ├─ ⊗     test.de/y v1      mandelsoft "name"="yy"
+   │  └─ ⊗  test.de/c v1      mandelsoft "name"="aa"
+   │     └─ test.de/d v1      mandelsoft "name"="dd"
+   └─ ⊗     test.de/z v1      mandelsoft "name"="zz"
+      └─ ⊗  test.de/c v1      mandelsoft "name"="cc"
+         └─ test.de/d v1      mandelsoft "name"="dd"
+`))
+		})
+	})
+
 })

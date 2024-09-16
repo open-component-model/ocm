@@ -81,13 +81,16 @@ func Check(t tree.TreeObjects, result string) {
 
 	for i, l := range lines {
 		if i >= min {
+			fmt.Println(t)
 			Fail(fmt.Sprintf("additional %d lines expected (%s...)", len(lines)-min, l), 1)
 		}
 		if l != t[i].String() {
+			fmt.Println(t)
 			Fail(fmt.Sprintf("mismatch of line %d:\nfound:    %s\nexpected: %s\n", i+1, t[i].String(), l), 1)
 		}
 	}
 	if min < len(t) {
+		fmt.Println(t)
 		Fail(fmt.Sprintf("additional %d lines found in output (%s...)", len(t)-min, t[min]), 1)
 	}
 }
@@ -123,6 +126,26 @@ var _ = Describe("tree", func() {
    └─ a
 `)
 	})
+
+	It("composes simple tree with nested elements", func() {
+		data := []tree.Object{
+			E("a"),
+			E("b"),
+			E("a", "b"),
+			E("a", "c"),
+		}
+
+		t := tree.MapToTree(data, nil)
+		Check(t, `
+├─ a
+├─ b
+├─ b
+│  └─ a
+└─ c
+   └─ a
+`)
+	})
+
 	It("composes simple node tree with nested elements", func() {
 		data := []tree.Object{
 			N("a"),
