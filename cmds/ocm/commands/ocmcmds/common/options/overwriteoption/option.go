@@ -38,9 +38,9 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Option) Usage() string {
 	s := `
-It the option <code>--overwrite</code> is given, component versions in the
+If the option <code>--overwrite</code> is given, component versions in the
 target repository will be overwritten, if they already exist, but with different digest.
-It the option <code>--enforce</code> is given, component versions in the
+If the option <code>--enforce</code> is given, component versions in the
 target repository will be transported as if they were not present on the target side,
 regardless of their state (this is independent on their actual state, even identical 
 versions are re-transported).
