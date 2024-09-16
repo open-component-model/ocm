@@ -16,7 +16,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.61.2
 	github.com/cloudflare/cfssl v1.6.5
 	github.com/containerd/containerd v1.7.22
-	github.com/containerd/errdefs v0.2.0
+	github.com/containerd/errdefs v0.1.0
 	github.com/containerd/log v0.1.0
 	github.com/containers/image/v5 v5.32.2
 	github.com/cyberphone/json-canonicalization v0.0.0-20231217050601-ba74d44ecf5f
