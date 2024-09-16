@@ -8,6 +8,8 @@ import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
+
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 func init() {
@@ -90,6 +92,26 @@ func orMatcher(list []IdentityMatcher) IdentityMatcher {
 
 // ConsumerIdentity describes the identity of a credential consumer.
 type ConsumerIdentity map[string]string
+
+func (c *ConsumerIdentity) UnmarshalJSON(data []byte) error {
+	m := map[string]interface{}{}
+	err := runtime.DefaultJSONEncoding.Unmarshal(data, &m)
+	if err != nil {
+		return err
+	}
+
+	*c = make(map[string]string, len(m))
+	for k, v := range m {
+		switch v.(type) {
+		case map[string]interface{}:
+			return fmt.Errorf("cannot unmarshal complex type into consumer identity")
+		case []interface{}:
+			return fmt.Errorf("cannot unmarshal complex type into consumer identity")
+		}
+		(*c)[k] = fmt.Sprintf("%v", v)
+	}
+	return nil
+}
 
 func NewConsumerIdentity(typ string, attrs ...string) ConsumerIdentity {
 	r := map[string]string{}
