@@ -31,7 +31,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Option) Usage() string {
 	s := `
-It the option <code>--omit-access-types</code> is given, by-value transfer
+If the option <code>--omit-access-types</code> is given, by-value transfer
 is omitted completely for the given resource types.
 `
 	return s

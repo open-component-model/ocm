@@ -33,7 +33,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Option) Usage() string {
 	s := `
-It the option <code>--stop-on-existing</code> is given together with the <code>--recursive</code>
+If the option <code>--stop-on-existing</code> is given together with the <code>--recursive</code>
 option, the recursion is stopped for component versions already existing in the 
 target repository. This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.

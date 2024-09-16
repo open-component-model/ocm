@@ -143,9 +143,9 @@ this option must always be specified to be able to follow component
 references.
 
 
-It the option <code>--copy-resources</code> is given, all referential
+If the option <code>--copy-resources</code> is given, all referential
 resources will potentially be localized, mapped to component version local
-resources in the target repository. It the option <code>--copy-local-resources</code>
+resources in the target repository. If the option <code>--copy-local-resources</code>
 is given, instead, only resources with the relation <code>local</code> will be
 transferred. This behaviour can be further influenced by specifying a transfer
 script with the <code>script</code> option family.

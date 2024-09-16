@@ -33,7 +33,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Option) Usage() string {
 	s := `
-It the option <code>--copy-sources</code> is given, all referential 
+If the option <code>--copy-sources</code> is given, all referential 
 sources will potentially be localized, mapped to component version local
 resources in the target repository.
 This behaviour can be further influenced by specifying a transfer script

@@ -31,7 +31,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Option) Usage() string {
 	s := `
-It the option <code>--keep-global-access</code> is given, all localized referential 
+If the option <code>--keep-global-access</code> is given, all localized referential 
 resources will preserve their original global access information.
 This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.
