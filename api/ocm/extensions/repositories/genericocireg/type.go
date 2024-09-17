@@ -123,7 +123,8 @@ func (a *RepositorySpec) IsIntermediate() bool {
 // TODO: host etc is missing
 
 func (a *RepositorySpec) AsUniformSpec(cpi.Context) *cpi.UniformRepositorySpec {
-	return &cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.SubPath}
+	spec := a.RepositorySpec.UniformRepositorySpec()
+	return &cpi.UniformRepositorySpec{Type: a.GetKind(), Scheme: spec.Scheme, Host: spec.Host, Info: spec.Info, TypeHint: spec.TypeHint, SubPath: a.SubPath}
 }
 
 func (u *RepositorySpec) UnmarshalJSON(data []byte) error {

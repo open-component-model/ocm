@@ -321,12 +321,13 @@ func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAcc
 			if err != nil {
 				return errors.Wrapf(err, "cannot create plugin file %s", target)
 			}
-			defer dst.Close()
 			src, err := fs.OpenFile(file.Name(), vfs.O_RDONLY, 0)
 			if err != nil {
+				dst.Close()
 				return errors.Wrapf(err, "cannot open plugin executable %s", file.Name())
 			}
 			_, err = io.Copy(dst, src)
+			dst.Close()
 			utils.IgnoreError(src.Close())
 			utils.IgnoreError(os.Remove(file.Name()))
 			utils.IgnoreError(SetPluginSourceInfo(dir, cv, found.Meta().Name, desc.PluginName))

@@ -41,6 +41,14 @@ var (
 	_ data.Iterable      = TreeObjects{}
 )
 
+func (o TreeObjects) String() string {
+	s := ""
+	for _, e := range o {
+		s += e.String() + "\n"
+	}
+	return s
+}
+
 func (o TreeObjects) Len() int {
 	return len(o)
 }
