@@ -15,6 +15,10 @@ type ConsumerProvider struct {
 	cfg *configfile.ConfigFile
 }
 
+func NewConsumerProvider(cfg *configfile.ConfigFile) *ConsumerProvider {
+	return &ConsumerProvider{cfg}
+}
+
 var _ cpi.ConsumerProvider = (*ConsumerProvider)(nil)
 
 func (p *ConsumerProvider) Unregister(id cpi.ProviderIdentity) {
