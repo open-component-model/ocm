@@ -107,11 +107,11 @@ func getWide(opts *output.Options) output.Output {
 }
 
 func getTree(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, mapGetRegularOutput), "COMPONENT", elemhdlr.NodeMapping(2), output.TreeNodeTitleFunc(elemhdlr.NodeTitle)).New()
+	return output.TreeOutput(TableOutput(opts, mapGetRegularOutput), "COMPONENT", elemhdlr.NodeMapping(2), output.TreeSynthesizedTitleFunc(elemhdlr.NodeTitle)).New()
 }
 
 func getTreewide(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, mapGetTreewideOutput, "ACCESS"), "COMPONENT", elemhdlr.NodeMapping(3), output.TreeNodeTitleFunc(elemhdlr.NodeTitle)).New()
+	return output.TreeOutput(TableOutput(opts, mapGetTreewideOutput, "ACCESS"), "COMPONENT", elemhdlr.NodeMapping(3), output.TreeSynthesizedTitleFunc(elemhdlr.NodeTitle)).New()
 }
 
 func mapGetRegularOutput(e interface{}) interface{} {
