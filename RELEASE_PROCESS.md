@@ -23,7 +23,6 @@ When creating a minor release, it is possible to optionally created a patch bran
 name `releases/<release-name>` is created. This branch is prepared with a commit which adjusts the patch level in the
 [`VERSION`](./VERSION) file to 1 (e.g. for release `0.1.0`, the patch branch is prepared with `0.1.1`).
 
-
 ## Creating a Release
 
 A release is created for a branch - typically, the main branch or a patch branch - by executing the GitHub action
@@ -33,6 +32,7 @@ branch or to create a pre-release by specifying a pre-release name.
 ## Preparing a Patch Release
 
 There are 2 possibilities to create and release patches.
+
 1) If during the creation of a minor release the option to create patch branch has been selected, there is already a
 patch branch `releases/<minor-release>` which can be used to prepare commits to be released.
 2) If no patch branch has been created in advance for any existing minor release, a patch branch can be created using
