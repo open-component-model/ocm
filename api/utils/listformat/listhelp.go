@@ -11,13 +11,13 @@ import (
 
 type StringElementDescriptionList []string
 
-func (l StringElementDescriptionList) Size() int                { return len(l) / 2 }
+func (l StringElementDescriptionList) Len() int                 { return len(l) / 2 }
 func (l StringElementDescriptionList) Key(i int) string         { return l[2*i] }
 func (l StringElementDescriptionList) Description(i int) string { return l[2*i+1] }
 
 type StringElementList []string
 
-func (l StringElementList) Size() int                { return len(l) }
+func (l StringElementList) Len() int                 { return len(l) }
 func (l StringElementList) Key(i int) string         { return l[i] }
 func (l StringElementList) Description(i int) string { return "" }
 
@@ -31,7 +31,7 @@ type maplist[K ~string, E any] struct {
 	m    map[K]E
 }
 
-func (l *maplist[K, E]) Size() int                { return len(l.keys) }
+func (l *maplist[K, E]) Len() int                 { return len(l.keys) }
 func (l *maplist[K, E]) Key(i int) string         { return string(l.keys[i]) }
 func (l *maplist[K, E]) Description(i int) string { return l.desc(l.m[l.keys[i]]) }
 
@@ -66,14 +66,14 @@ func StringDescription[E any](e E) string {
 }
 
 type ListElements interface {
-	Size() int
+	Len() int
 	Key(i int) string
 	Description(i int) string
 }
 
 func FormatListElements(def string, elems ListElements) string {
 	names := ""
-	size := elems.Size()
+	size := elems.Len()
 
 	for i := 0; i < size; i++ {
 		key := elems.Key(i)

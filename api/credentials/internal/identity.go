@@ -220,7 +220,7 @@ func (i *IdentityMatcherInfo) IsConsumerType() bool {
 
 type IdentityMatcherInfos []IdentityMatcherInfo
 
-func (l IdentityMatcherInfos) Size() int        { return len(l) }
+func (l IdentityMatcherInfos) Len() int         { return len(l) }
 func (l IdentityMatcherInfos) Key(i int) string { return l[i].Type }
 func (l IdentityMatcherInfos) Description(i int) string {
 	if l[i].CredentialAttributes == "" {
