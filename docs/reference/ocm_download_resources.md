@@ -120,51 +120,6 @@ are configured for the operation. It has the following format
 </center>
 
 The downloader name may be a path expression with the following possibilities:
-  - <code>ocm/dirtree</code>: downloading directory tree-like resources
-
-    The <code>dirtree</code> downloader is able to download directory-tree like
-    resources as directory structure (default) or archive.
-    The following artifact media types are supported:
-      - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
-      - <code>application/x-tgz</code>
-      - <code>application/x-tar+gzip</code>
-      - <code>application/x-tar</code>
-
-    By default, it is registered for the following resource types:
-      - <code>directoryTree</code>
-      - <code>filesystem</code>
-
-    It accepts a config with the following fields:
-      - <code>asArchive</code>: flag to request an archive download
-      - <code>ociConfigTypes</code>: a list of accepted OCI config archive mime types
-        defaulted by <code>application/vnd.oci.image.config.v1+json</code>.
-
-  - <code>oci/artifact</code>: uploading an OCI artifact to an OCI registry
-
-    The <code>artifact</code> downloader is able to transfer OCI artifact-like resources
-    into an OCI registry given by the combination of the download target and the
-    registration config.
-
-    If no config is given, the target must be an OCI reference with a potentially
-    omitted repository. The repo part is derived from the reference hint provided
-    by the resource's access specification.
-
-    If the config is given, the target is used as repository name prefixed with an
-    optional repository prefix given by the configuration.
-
-    The following artifact media types are supported:
-      - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
-      - <code>application/vnd.oci.image.index.v1+tar+gzip</code>
-
-    It accepts a config with the following fields:
-      - <code>namespacePrefix</code>: a namespace prefix used for the uploaded artifacts
-      - <code>ociRef</code>: an OCI repository reference
-      - <code>repository</code>: an OCI repository specification for the target OCI registry
-
-  - <code>plugin</code>: [downloaders provided by plugins]
-
-    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
-
   - <code>landscaper/blueprint</code>: uploading an OCI artifact to an OCI registry
 
     The <code>artifact</code> downloader is able to transfer OCI artifact-like resources
@@ -199,6 +154,51 @@ The downloader name may be a path expression with the following possibilities:
 
     This handler is by default registered for the following artifact types:
     landscaper.gardener.cloud/blueprint,blueprint
+
+  - <code>oci/artifact</code>: uploading an OCI artifact to an OCI registry
+
+    The <code>artifact</code> downloader is able to transfer OCI artifact-like resources
+    into an OCI registry given by the combination of the download target and the
+    registration config.
+
+    If no config is given, the target must be an OCI reference with a potentially
+    omitted repository. The repo part is derived from the reference hint provided
+    by the resource's access specification.
+
+    If the config is given, the target is used as repository name prefixed with an
+    optional repository prefix given by the configuration.
+
+    The following artifact media types are supported:
+      - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
+      - <code>application/vnd.oci.image.index.v1+tar+gzip</code>
+
+    It accepts a config with the following fields:
+      - <code>namespacePrefix</code>: a namespace prefix used for the uploaded artifacts
+      - <code>ociRef</code>: an OCI repository reference
+      - <code>repository</code>: an OCI repository specification for the target OCI registry
+
+  - <code>ocm/dirtree</code>: downloading directory tree-like resources
+
+    The <code>dirtree</code> downloader is able to download directory-tree like
+    resources as directory structure (default) or archive.
+    The following artifact media types are supported:
+      - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
+      - <code>application/x-tgz</code>
+      - <code>application/x-tar+gzip</code>
+      - <code>application/x-tar</code>
+
+    By default, it is registered for the following resource types:
+      - <code>directoryTree</code>
+      - <code>filesystem</code>
+
+    It accepts a config with the following fields:
+      - <code>asArchive</code>: flag to request an archive download
+      - <code>ociConfigTypes</code>: a list of accepted OCI config archive mime types
+        defaulted by <code>application/vnd.oci.image.config.v1+json</code>.
+
+  - <code>plugin</code>: [downloaders provided by plugins]
+
+    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
 
 
 
