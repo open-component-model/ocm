@@ -219,6 +219,7 @@ readme
 readonly
 refcount
 relativeocireference
+releasenotes
 releaser
 repo
 repocpi
