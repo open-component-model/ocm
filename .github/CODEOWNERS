@@ -1,0 +1,15 @@
+# Default owners for everything in the repo.
+# Unless a later match takes precedence, the Maintainers team
+# will be requested for review when someone opens a pull request.
+*       @open-component-model/Maintainers
+
+# Owners for specific directories
+#/docs/  @<org>/<team>
+#/src/   @<org>/<team>
+
+# Owners for specific file types
+#*.md    @<org>/<team>
+#*.go    @<org>/<team>
+
+# Individual users as owners, e.g. a lead maintainer for a specific component:
+# /src/critical-component/   @lead-maintainer-username
