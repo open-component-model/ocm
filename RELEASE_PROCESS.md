@@ -74,9 +74,8 @@ There are 2 possibilities to create and release patches.
    > manually specify the intended tag in the input field of the action.
 
 On the patch branch (like on the main branch), new commits can be added using
-pull requests. Once a patch should be
-released, the release action is executed on the patch branch (theoretically, for
-patches, pre-releases are also
+pull requests. Once a patch should be released, the release action is executed
+on the patch branch (theoretically, for patches, pre-releases are also
 possible).
 
 ## What is part of a release?
