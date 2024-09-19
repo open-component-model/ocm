@@ -60,9 +60,8 @@ branch or to create a pre-release by specifying a pre-release name.
 There are 2 possibilities to create and release patches.
 
 1) If during the creation of a minor release the option to create patch branch
-   has been selected, there is already a
-   patch branch `releases/<minor-release>` which can be used to prepare commits
-   to be released.
+   has been selected, there is already a patch branch `releases/<minor-release>`
+   which can be used to prepare commits to be released.
 2) If no patch branch has been created in advance for any existing minor
    release, a patch branch can be created using the GitHub action
    `release-branch`. Therefore, you have to select the tag of the intended
