@@ -18,10 +18,16 @@ func (f TreeNodeMappingFunc) ApplyTreeOutputOption(o *TreeOutputOptions) {
 	o.nodeMapping = f
 }
 
-type TreeNodeTitleFunc func(*tree.TreeObject) string
+type TreeSynthesizedTitleFunc func(*tree.TreeObject) string
 
-func (f TreeNodeTitleFunc) ApplyTreeOutputOption(o *TreeOutputOptions) {
-	o.nodeTitle = f
+func (f TreeSynthesizedTitleFunc) ApplyTreeOutputOption(o *TreeOutputOptions) {
+	o.syntTitle = f
+}
+
+type TreeElemTitleFunc func(*tree.TreeObject) string
+
+func (f TreeElemTitleFunc) ApplyTreeOutputOption(o *TreeOutputOptions) {
+	o.elemTitle = f
 }
 
 type TreeSymbol string
@@ -32,7 +38,8 @@ func (s TreeSymbol) ApplyTreeOutputOption(o *TreeOutputOptions) {
 
 type TreeOutputOptions struct {
 	nodeMapping TreeNodeMappingFunc
-	nodeTitle   TreeNodeTitleFunc
+	syntTitle   TreeSynthesizedTitleFunc
+	elemTitle   TreeElemTitleFunc
 	symbol      *string
 }
 
@@ -40,8 +47,8 @@ func (o TreeOutputOptions) ApplyTreeOutputOption(opts *TreeOutputOptions) {
 	if o.nodeMapping != nil {
 		opts.nodeMapping = o.nodeMapping
 	}
-	if o.nodeTitle != nil {
-		opts.nodeTitle = o.nodeTitle
+	if o.syntTitle != nil {
+		opts.syntTitle = o.syntTitle
 	}
 }
 
@@ -60,10 +67,17 @@ func (o TreeOutputOptions) NodeMapping(n int, obj *tree.TreeObject) interface{} 
 }
 
 func (o TreeOutputOptions) NodeTitle(obj *tree.TreeObject) string {
-	if o.nodeTitle == nil {
+	if o.syntTitle == nil {
 		return obj.Node.String()
 	}
-	return o.nodeTitle(obj)
+	return o.syntTitle(obj)
+}
+
+func (o TreeOutputOptions) ElemTitle(obj *tree.TreeObject) string {
+	if o.elemTitle == nil {
+		return ""
+	}
+	return " " + o.elemTitle(obj)
 }
 
 func TreeOutput(t *TableOutput, header string, o ...TreeOutputOption) *TableOutput {
@@ -94,7 +108,7 @@ func treeMapping(n int, m processing.MappingFunction, opts TreeOutputOptions) pr
 	return func(e interface{}) interface{} {
 		o := e.(*tree.TreeObject)
 		if o.Object != nil {
-			return Fields(o.Graph, m(o.Object))
+			return Fields(o.Graph+opts.ElemTitle(o), m(o.Object))
 		}
 		return Fields(o.Graph+" "+opts.NodeTitle(o), opts.NodeMapping(n, o)) // create empty table line
 	}

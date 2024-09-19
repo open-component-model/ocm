@@ -1,6 +1,8 @@
 package downloaderoption
 
 import (
+	"sort"
+
 	_ "ocm.software/ocm/api/ocm/extensions/download/handlers"
 
 	"ocm.software/ocm/api/ocm"
@@ -39,6 +41,7 @@ func (o *Option) Register(ctx ocm.ContextProvider) error {
 
 func Usage(ctx ocm.Context) string {
 	list := download.For(ctx).GetHandlers(ctx)
+	sort.Sort(list)
 	return listformat.FormatListElements("", list) + `
 
 See <CMD>ocm ocm-downloadhandlers</CMD> for further details on using
