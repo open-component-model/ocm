@@ -89,5 +89,5 @@ exposing the OCM CTF and the ocm-cli executables for various platforms. These
 executables are build using the go releaser plugin. Furthermore, packages for
 various package managers (e.g. brew, debian or chocolatey) are created and
 uploaded to the respective package repositories. All currently supported
-installation methods are
-described [here](https://github.com/open-component-model/ocm?tab=readme-ov-file#installation)
+installation methods are described
+[here](https://github.com/open-component-model/ocm?tab=readme-ov-file#installation).
