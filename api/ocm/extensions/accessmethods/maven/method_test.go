@@ -7,6 +7,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "ocm.software/ocm/api/helper/builder"
 
 	"ocm.software/ocm/api/ocm"
@@ -26,6 +27,7 @@ const (
 	MAVEN_GROUP_ID        = "maven"
 	MAVEN_ARTIFACT_ID     = "maven"
 	MAVEN_VERSION         = "1.1"
+	MAVEN_HINT            = "hint"
 )
 
 var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
@@ -42,7 +44,7 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 	})
 
 	It("accesses local artifact", func() {
-		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
+		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", "")
 		m := Must(acc.AccessMethod(cv))
 		defer Close(m)
 		Expect(m.MimeType()).To(Equal(mime.MIME_TGZ))
@@ -60,12 +62,12 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 		Expect(dr.Digest().String()).To(Equal("SHA-256:" + maventest.ARTIFACT_DIGEST))
 	})
 	It("test empty repoUrl", func() {
-		acc := me.New("", "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
+		acc := me.New("", "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", "")
 		ExpectError(acc.AccessMethod(cv)).ToNot(BeNil())
 	})
 
 	It("accesses local artifact with empty classifier and with extension", func() {
-		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithClassifier(""), me.WithExtension("pom"))
+		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", "", me.WithClassifier(""), me.WithExtension("pom"))
 		m := Must(acc.AccessMethod(cv))
 		defer Close(m)
 		Expect(m.MimeType()).To(Equal(mime.MIME_XML))
@@ -86,7 +88,7 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 	})
 
 	It("accesses local artifact with extension", func() {
-		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", me.WithExtension("pom"))
+		acc := me.New("file://"+MAVEN_PATH, "com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0", "", me.WithExtension("pom"))
 		m := Must(acc.AccessMethod(cv))
 		defer Close(m)
 		Expect(m.MimeType()).To(Equal(mime.MIME_TGZ))
@@ -101,12 +103,12 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 	})
 
 	It("Describe", func() {
-		acc := me.New("file://"+FAILPATH, "test", "repository", "42", me.WithExtension("pom"))
+		acc := me.New("file://"+FAILPATH, "test", "repository", "42", "", me.WithExtension("pom"))
 		Expect(acc.Describe(nil)).To(Equal("Maven package 'test:repository:42::pom' in repository 'file:///testdata/.m2/fail' path 'test/repository/42/repository-42.pom'"))
 	})
 
 	It("detects digests mismatch", func() {
-		acc := me.New("file://"+FAILPATH, "test", "repository", "42", me.WithExtension("pom"))
+		acc := me.New("file://"+FAILPATH, "test", "repository", "42", "", me.WithExtension("pom"))
 		m := Must(acc.AccessMethod(cv))
 		defer Close(m)
 		_, err := m.Reader()
@@ -116,7 +118,7 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 	Context("me http repository", func() {
 		if PingTCPServer(MAVEN_CENTRAL_ADDRESS, time.Second) == nil {
 			It("blobaccess for gav", func() {
-				acc := me.New(MAVEN_CENTRAL, MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION)
+				acc := me.New(MAVEN_CENTRAL, MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION, MAVEN_HINT)
 				m := Must(acc.AccessMethod(cv))
 				defer Close(m)
 				files := Must(tarutils.ListArchiveContentFromReader(Must(m.Reader())))
@@ -129,7 +131,7 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 			})
 
 			It("inexpensive id", func() {
-				acc := me.New(MAVEN_CENTRAL, MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION, me.WithClassifier(""), me.WithExtension("pom"))
+				acc := me.New(MAVEN_CENTRAL, MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION, MAVEN_HINT, me.WithClassifier(""), me.WithExtension("pom"))
 				Expect(acc.ArtifactId).To(Equal("maven"))
 			})
 		}
