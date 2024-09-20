@@ -178,7 +178,7 @@ func (a *ArtifactAccessImpl) GetBlob(digest digest.Digest) (cpi.BlobAccess, erro
 	if d != nil {
 		size, data, err := a.container.GetBlobData(digest)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get blob data for artifact access: %w", err)
+			return nil, fmt.Errorf("failed to get blob data for artifact access with digest %s: %w", digest.String(), err)
 		}
 		err = AdjustSize(d, size)
 		if err != nil {

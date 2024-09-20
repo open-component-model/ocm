@@ -48,8 +48,8 @@
 
             CGO_ENABLED = 0;
 
-            subPackages = [ 
-              "cmds/ocm" 
+            subPackages = [
+              "cmds/ocm"
               "cmds/helminstaller"
               "cmds/demoplugin"
               "cmds/ecrplugin"
@@ -76,15 +76,15 @@
             };
           };
         });
-      
+
       # Add dependencies that are only needed for development
       devShells = forAllSystems (system:
-        let 
+        let
           pkgs = nixpkgsFor.${system};
         in
         {
           default = pkgs.mkShell {
-            buildInputs = with pkgs; [ 
+            buildInputs = with pkgs; [
               go_1_22   # golang 1.22
               gopls     # go language server
               gotools   # go imports
@@ -117,7 +117,7 @@
           program = self.packages.${system}.${pname} + "/bin/ecrplugin";
         };
       });
-      
+
       legacyPackages = forAllSystems (system: rec {
         nixpkgs = nixpkgsFor.${system};
       });

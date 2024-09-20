@@ -3,7 +3,7 @@ package signutils
 import (
 	"bytes"
 	"crypto"
-	"crypto/dsa"
+	"crypto/dsa" //nolint: staticcheck // yes
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"crypto/x509"
