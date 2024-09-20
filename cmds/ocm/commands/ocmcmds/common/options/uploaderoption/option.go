@@ -1,6 +1,8 @@
 package uploaderoption
 
 import (
+	"sort"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/blobhandler"
 	"ocm.software/ocm/api/utils/listformat"
@@ -37,6 +39,7 @@ func (o *Option) Register(ctx ocm.ContextProvider) error {
 
 func Usage(ctx ocm.Context) string {
 	list := blobhandler.For(ctx).GetHandlers(ctx)
+	sort.Sort(list)
 	return listformat.FormatListElements("", list) + `
 
 See <CMD>ocm ocm-uploadhandlers</CMD> for further details on using

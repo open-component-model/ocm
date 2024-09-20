@@ -1,6 +1,7 @@
 package registrations
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/mandelsoft/goutils/general"
@@ -10,10 +11,21 @@ import (
 
 type HandlerInfos []HandlerInfo
 
-var _ listformat.ListElements = HandlerInfos(nil)
+var (
+	_ listformat.ListElements = HandlerInfos(nil)
+	_ sort.Interface          = HandlerInfos(nil)
+)
 
-func (h HandlerInfos) Size() int {
+func (h HandlerInfos) Len() int {
 	return len(h)
+}
+
+func (h HandlerInfos) Less(i, j int) bool {
+	return strings.Compare(h[i].Name, h[j].Name) < 0
+}
+
+func (h HandlerInfos) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
 }
 
 func (h HandlerInfos) Key(i int) string {
