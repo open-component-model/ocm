@@ -41,6 +41,10 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 	}, nil
 }
 
+func (h *Handler) GetScript() []byte {
+	return h.opts.GetScript()
+}
+
 // TODO: handle update and overwrite per script
 
 func (h *Handler) UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {

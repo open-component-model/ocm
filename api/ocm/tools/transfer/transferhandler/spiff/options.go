@@ -4,7 +4,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/api/utils"
@@ -119,6 +118,14 @@ func ScriptByFile(path string, fss ...vfs.FileSystem) transferhandler.TransferOp
 		source: path,
 		script: func() ([]byte, error) { return vfs.ReadFile(utils.FileSystem(fss...), path) },
 	}
+}
+
+func (o *Options) SetConfig(bytes []byte) {
+	o.script = bytes
+}
+
+func (o *Options) GetConfig() []byte {
+	return o.script
 }
 
 ///////////////////////////////////////////////////////////////////////////////

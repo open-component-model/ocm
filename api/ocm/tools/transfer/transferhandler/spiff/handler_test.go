@@ -3,13 +3,17 @@ package spiff_test
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
+	"github.com/mandelsoft/goutils/generics"
+	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/datacontext"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
-
-	"github.com/mandelsoft/goutils/testutils"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -18,7 +22,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/spiff"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
@@ -197,7 +201,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(err).To(Succeed())
 			fmt.Printf("%s\n", string(data))
 			hash := HashManifest2(artifactset.DefaultArtifactSetDescriptorFileName)
-			Expect(string(data)).To(testutils.StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			Expect(string(data)).To(StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 			Expect(err).To(Succeed())
@@ -295,4 +299,15 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(err).To(Succeed())
 		})
 	})
+
+	Context("registrations", func() {
+		ctx := ocm.New(datacontext.MODE_EXTENDED)
+
+		FIt("finds plugin handler by name and config", func() {
+			h := Must(transferhandler.For(ctx).ByName(ctx, "ocm/spiff", transferhandler.WithConfig([]byte(script1))))
+			Expect(reflect.TypeOf(h)).To(Equal(generics.TypeOf[*spiff.Handler]()))
+			Expect(string(h.(*spiff.Handler).GetScript())).To(Equal(script1))
+		})
+	})
+
 })
