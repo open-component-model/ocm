@@ -16,6 +16,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/internal"
 	. "ocm.software/ocm/api/ocm/plugin/testutils"
+	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/utils/blobaccess"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
@@ -58,7 +59,7 @@ var _ = Describe("Plugin Handler Test Environment", func() {
 			Expect(p.Error()).To(Equal(""))
 		})
 
-		FIt("answers question", func() {
+		It("answers question", func() {
 			config := Must(os.ReadFile("testdata/config"))
 			f := Must(transfer.NewTransferHandler(plugin.Plugin(PLUGIN), plugin.TransferHandler(HANDLER), plugin.TransferHandlerConfig(config)))
 
@@ -76,7 +77,15 @@ var _ = Describe("Plugin Handler Test Environment", func() {
 			b = Must(f.TransferResource(cv, ociartifact.New("gcr.io/open-component-model/test:v1"), ra))
 			Expect(b).To(BeFalse())
 		})
+
+		Context("registrations", func() {
+			It("finds plugin handler by name", func() {
+				h := Must(transferhandler.For(env).ByName(env, "plugin/transferplugin/demo"))
+				Expect(reflect.TypeOf(h)).To(Equal(generics.TypeOf[*plugin.Handler]()))
+			})
+		})
 	})
+
 })
 
 ////////////////////////////////////////////////////////////////////////////////

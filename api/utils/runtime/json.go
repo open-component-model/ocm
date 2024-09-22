@@ -11,6 +11,8 @@ func ToJSON(in interface{}) (json.RawMessage, error) {
 
 	var raw interface{}
 	switch c := in.(type) {
+	case json.RawMessage:
+		return c, nil
 	case []byte:
 		err := DefaultYAMLEncoding.Unmarshal(c, &raw)
 		if err != nil {
