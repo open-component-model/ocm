@@ -11,10 +11,11 @@ type (
 
 	AccessType = internal.AccessType
 
-	AccessMethodImpl = internal.AccessMethodImpl
-	AccessMethod     = internal.AccessMethod
-	AccessSpec       = internal.AccessSpec
-	AccessSpecRef    = internal.AccessSpecRef
+	AccessMethodImpl      = internal.AccessMethodImpl
+	AccessMethod          = internal.AccessMethod
+	UniformAccessSpecInfo = internal.UniformAccessSpecInfo
+	AccessSpec            = internal.AccessSpec
+	AccessSpecRef         = internal.AccessSpecRef
 
 	HintProvider            = internal.HintProvider
 	GlobalAccessProvider    = internal.GlobalAccessProvider

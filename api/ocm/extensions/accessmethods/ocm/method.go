@@ -77,6 +77,21 @@ func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("OCM resource %s%s", a.ResourceRef.String(), comp)
 }
 
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	ref := a.OCMRepository.AsUniformSpec(ctx)
+	if ref == nil {
+		return &accspeccpi.UniformAccessSpecInfo{Kind: Type}
+	}
+	host, port := ref.HostPort()
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Host: host,
+		Port: port,
+		Path: ref.SubPath,
+		Info: ref.Info,
+	}
+}
+
 func (a *AccessSpec) IsLocal(ctx accspeccpi.Context) bool {
 	return false
 }

@@ -115,6 +115,13 @@ func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("Local blob %s[%s]", a.LocalReference, a.ReferenceName)
 }
 
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Info: a.LocalReference,
+	}
+}
+
 func (a *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return true
 }

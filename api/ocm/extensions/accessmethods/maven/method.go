@@ -2,6 +2,7 @@ package maven
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/mandelsoft/goutils/optionutils"
 
@@ -76,6 +77,20 @@ func NewForCoordinates(repository string, coords *maven.Coordinates, opts ...Opt
 
 func (a *AccessSpec) Describe(_ accspeccpi.Context) string {
 	return fmt.Sprintf("Maven package '%s' in repository '%s' path '%s'", a.Coordinates.String(), a.RepoUrl, a.Coordinates.FilePath())
+}
+
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	u, err := url.Parse(a.RepoUrl)
+	if err != nil {
+		u = &url.URL{}
+	}
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Host: u.Hostname(),
+		Port: u.Port(),
+		Path: u.Path,
+		Info: a.Coordinates.String(),
+	}
 }
 
 func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {

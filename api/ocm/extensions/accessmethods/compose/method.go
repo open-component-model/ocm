@@ -68,6 +68,12 @@ func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("Composition blob %s", a.Id)
 }
 
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+	}
+}
+
 func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return true
 }
