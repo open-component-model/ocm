@@ -232,6 +232,14 @@ func (p *pluginImpl) GetUploaderDescriptor(name string) *descriptor.UploaderDesc
 	return p.descriptor.Uploaders.Get(name)
 }
 
+func (p *pluginImpl) GetTransferHandler(name string) *descriptor.TransferHandlerDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	return p.descriptor.TransferHandlers.Get(name)
+}
+
 func (p *pluginImpl) Message() string {
 	if p.IsValid() {
 		return p.descriptor.Short
