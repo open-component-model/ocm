@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/ocm"
@@ -15,8 +16,10 @@ import (
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
+	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -96,7 +99,7 @@ func (h *Handler) transferOptions() (*plugin.TransferOptions, error) {
 	return &plugin.TransferOptions{
 		Recursive:         h.opts.GetRecursive(),
 		ResourcesByValue:  h.opts.GetResourcesByValue(),
-		LoalByValue:       h.opts.GetLocalResourcesByValue(),
+		LocalByValue:      h.opts.GetLocalResourcesByValue(),
 		SourcesByValue:    h.opts.GetSourcesByValue(),
 		KeepGlobalAccess:  h.opts.GetKeepGlobalAccess(),
 		StopOnExisting:    h.opts.GetStopOnExistingVersion(),
@@ -262,7 +265,7 @@ func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionA
 	if err != nil {
 		return nil, nil, err
 	}
-	if h.desc.GetQuestion(plugin.Q_TRANSFER_VERSION) == nil {
+	if h.desc.GetQuestion(plugin.Q_TRANSFER_VERSION) == nil || src == nil {
 		return h.Handler.TransferVersion(repo, src, meta, tgt)
 	}
 
@@ -304,7 +307,51 @@ func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionA
 	}
 
 	// TODO: evaluate transfer handler and repo
-	_ = r
+
+	if h.opts.IsStopOnExistingVersion() && tgt != nil {
+		if found, err := tgt.ExistsComponentVersion(meta.ComponentName, meta.Version); found || err != nil {
+			return nil, nil, errors.Wrapf(err, "failed looking up in target")
+		}
+	}
+
+	if !r.Decision {
+		return nil, nil, nil
+	}
+
+	if r.Resolution != nil {
+		// calculate transfer context for referenced component.
+		var opts sliceutils.Slice[transferhandler.TransferOption]
+
+		handler := transferhandler.TransferHandler(h)
+		if r.Resolution.TransferOptions != nil {
+			opts = transferOptions(r.Resolution.TransferOptions)
+			handler, err = New(opts...)
+			if err != nil {
+				return nil, nil, errors.Wrapf(err, "option mismatch for plugin handler")
+			}
+		} else {
+			opts.Add(h.opts)
+		}
+
+		if r.Resolution.TransferHandler != "" {
+			// override handler
+			handler, err = transferhandler.For(src.GetContext()).ByName(src.GetContext(), r.Resolution.TransferHandler, opts...)
+			if err != nil {
+				return nil, nil, errors.Wrapf(err, "invalid transfer handler %q", r.Resolution.TransferHandler)
+			}
+		}
+
+		if r.Resolution.RepositorySpec != nil {
+			repo, err = refmgmt.ToLazy(src.GetContext().RepositoryForSpec(r.Resolution.RepositorySpec))
+			if err != nil {
+				return nil, nil, err
+			}
+			defer repo.Close()
+		}
+		compoundResolver := resolvers.NewCompoundResolver(repo, h.opts.GetResolver())
+		cv, err := compoundResolver.LookupComponentVersion(meta.GetComponentName(), meta.Version)
+		return cv, handler, err
+	}
 	return h.Handler.TransferVersion(repo, src, meta, tgt)
 }
 
@@ -328,4 +375,34 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 		return h.Handler.TransferSource(src, a, r)
 	}
 	return h.askArtifactQuestion(ppi.Q_TRANSFER_SOURCE, src, a, &r.Meta().ElementMeta)
+}
+
+func transferOptions(o *plugin.TransferOptions) []transferhandler.TransferOption {
+	var opts sliceutils.Slice[transferhandler.TransferOption]
+	apply(&opts, o.KeepGlobalAccess, standard.KeepGlobalAccess)
+	apply(&opts, o.ResourcesByValue, standard.ResourcesByValue)
+	apply(&opts, o.SourcesByValue, standard.SourcesByValue)
+	apply(&opts, o.EnforceTransport, standard.EnforceTransport)
+	apply(&opts, o.LocalByValue, standard.LocalResourcesByValue)
+	apply(&opts, o.Overwrite, standard.Overwrite)
+	apply(&opts, o.Recursive, standard.Recursive)
+	apply(&opts, o.StopOnExisting, standard.StopOnExistingVersion)
+	apply(&opts, o.SkipUpdate, standard.SkipUpdate)
+
+	if o.OmitAccessTypes != nil {
+		opts.Add(standard.OmitAccessTypes(o.OmitAccessTypes...))
+	}
+	if o.OmitArtifactTypes != nil {
+		opts.Add(standard.OmitAccessTypes(o.OmitArtifactTypes...))
+	}
+	if o.Special != nil {
+		opts.Add(transferhandler.WithConfig(*o.Special))
+	}
+	return opts
+}
+
+func apply[T any, O any](opts *sliceutils.Slice[O], o *T, c func(...T) O) {
+	if o != nil {
+		opts.Add(c(*o))
+	}
 }
