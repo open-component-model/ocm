@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/transferhandler"
 
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/accessmethod"
@@ -19,6 +18,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/info"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/mergehandler"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/topics/descriptor"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/transferhandler"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/valueset"
 	"ocm.software/ocm/api/utils/cobrautils"

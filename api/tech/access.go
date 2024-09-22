@@ -7,10 +7,10 @@ package tech
 // independently of the particular technical access specification
 // to figure aut some general information in a formal way about the access.
 type UniformAccessSpecInfo struct {
-	Kind string
-	Host string
-	Port string
-	Path string
+	Kind string `json:"kind"`
+	Host string `json:"host,omitempty"`
+	Port string `json:"port,omitempty"`
+	Path string `json:"path,omitempty"`
 
-	Info string
+	Info string `json:"info,omitempty"`
 }
