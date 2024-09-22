@@ -40,6 +40,10 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 	}, nil
 }
 
+func (h *Handler) GetConfig() []byte {
+	return h.opts.GetConfig()
+}
+
 func (h *Handler) ResolvePlugin(ctx ocm.ContextProvider) (plugin.Plugin, error) {
 	h.lock.Lock()
 	defer h.lock.Unlock()

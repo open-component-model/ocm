@@ -1,7 +1,10 @@
 package plugin
 
 import (
+	"encoding/json"
+
 	"github.com/mandelsoft/goutils/errors"
+	"ocm.software/ocm/api/utils/runtime"
 
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
@@ -20,6 +23,7 @@ type Options struct {
 
 var (
 	_ transferhandler.TransferOption = (*Options)(nil)
+	_ transferhandler.ConfigOption   = (*Options)(nil)
 
 	_ PluginNameOption            = (*Options)(nil)
 	_ TransferHandlerOption       = (*Options)(nil)
@@ -77,6 +81,19 @@ func (o *Options) SetTransferHandlerConfig(cfg interface{}) {
 
 func (o *Options) GetTransferHandlerConfig() interface{} {
 	return o.config
+}
+
+func (o *Options) SetConfig(bytes []byte) {
+	c, err := runtime.ToJSON(bytes)
+	if err != nil {
+		c, _ = json.Marshal(string(bytes))
+	}
+	o.config = json.RawMessage(c)
+}
+
+func (o *Options) GetConfig() []byte {
+	c, _ := runtime.ToJSON(o.config)
+	return c
 }
 
 ///////////////////////////////////////////////////////////////////////////////
