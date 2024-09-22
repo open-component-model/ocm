@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"reflect"
 
+	errors2 "github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slices"
 
@@ -12,6 +14,8 @@ import (
 )
 
 type decoder runtime.TypedObjectDecoder[runtime.TypedObject]
+
+const KIND_QUESTION = "question"
 
 type AccessMethodBase struct {
 	decoder
@@ -112,6 +116,74 @@ func (b *nameDescription) Name() string {
 func (b *nameDescription) Description() string {
 	return b.desc
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type transferHandler struct {
+	name        string
+	description string
+	questions   []DecisionHandler
+}
+
+func NewTransferHandler(name, desc string) *transferHandler {
+	return &transferHandler{
+		name:        name,
+		description: desc,
+		questions:   nil,
+	}
+}
+
+func (t *transferHandler) GetName() string {
+	return t.name
+}
+
+func (t *transferHandler) GetDescription() string {
+	return t.description
+}
+
+func (t *transferHandler) GetQuestions() []DecisionHandler {
+	return t.questions
+}
+
+func (t *transferHandler) RegisterDecision(h DecisionHandler) error {
+	if TransferHandlerQuestions[h.GetQuestion()] == nil {
+		return errors2.ErrInvalid(KIND_QUESTION, h.GetQuestion())
+	}
+	for _, e := range t.questions {
+		if e.GetQuestion() == h.GetQuestion() {
+			return errors2.ErrAlreadyExists(KIND_QUESTION, e.GetQuestion())
+		}
+	}
+	t.questions = append(t.questions, h)
+	return nil
+}
+
+type DecisionHandlerBase struct {
+	question string
+	labels   *[]string
+}
+
+func (d *DecisionHandlerBase) GetQuestion() string {
+	return d.question
+}
+
+func (d *DecisionHandlerBase) GetLabels() *[]string {
+	return d.labels
+}
+
+func NewDecisionHandlerBase(q string, labels ...string) DecisionHandlerBase {
+	return DecisionHandlerBase{q, generics.Pointer(slices.Clone(labels))}
+}
+
+type testDH struct {
+	DecisionHandlerBase
+}
+
+func (d *testDH) DecideOn(p Plugin, question interface{}) (bool, error) {
+	panic("just a type test")
+}
+
+var _ DecisionHandler = (*testDH)(nil)
 
 ////////////////////////////////////////////////////////////////////////////////
 

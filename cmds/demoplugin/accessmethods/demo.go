@@ -8,6 +8,7 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/errors"
+	"ocm.software/ocm/api/tech"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/cpi"
@@ -87,6 +88,11 @@ func (a *AccessMethod) ValidateSpecification(p ppi.Plugin, spec ppi.AccessSpec) 
 	}
 	info.Short = "temp file " + my.Path
 	info.Hint = "temp file " + my.Path
+	// optional information for extended access spec interface
+	info.Info = &tech.UniformAccessSpecInfo{
+		Kind: my.GetKind(),
+		Info: my.Path,
+	}
 	return &info, nil
 }
 

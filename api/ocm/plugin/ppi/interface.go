@@ -28,6 +28,10 @@ type (
 	AccessSpecInfo       = internal.AccessSpecInfo
 	ValueSetInfo         = internal.ValueSetInfo
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
+
+	SourceComponentVersion  = internal.SourceComponentVersion
+	TargetRepositorySpec    = internal.TargetRepositorySpec
+	StandardTransferOptions = internal.TransferOptions
 )
 
 var REALM = descriptor.REALM
@@ -71,6 +75,10 @@ type Plugin interface {
 	RegisterCommand(c Command) error
 	GetCommand(name string) Command
 	Commands() []Command
+
+	RegisterTransferHandler(h TransferHandler) error
+	GetTransferHandler(name string) TransferHandler
+	TransferHandlers() []TransferHandler
 
 	RegisterConfigType(c cpi.ConfigType) error
 	GetConfigType(name string) *descriptor.ConfigTypeDescriptor
@@ -211,3 +219,27 @@ type Command interface {
 
 	Command() *cobra.Command
 }
+
+type TransferHandler interface {
+	GetName() string
+	GetDescription() string
+	GetQuestions() []DecisionHandler
+}
+
+type DecisionHandler interface {
+	GetQuestion() string
+	GetLabels() *[]string
+
+	DecideOn(p Plugin, question interface{}) (bool, error)
+}
+
+type (
+	TransferOptions            = internal.TransferOptions
+	Artifact                   = internal.Artifact
+	AccessInfo                 = internal.UniformAccessSpecInfo
+	ComponentVersionQuestion   = internal.ComponentVersionQuestion
+	ComponentReferenceQuestion = internal.ComponentReferenceQuestion
+	ArtifactQuestion           = internal.ArtifactQuestion
+	Resolution                 = internal.Resolution
+	DecisionRequestResult      = internal.DecisionRequestResult
+)

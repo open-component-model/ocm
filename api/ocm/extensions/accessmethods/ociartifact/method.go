@@ -75,6 +75,17 @@ func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("OCI artifact %s", a.ImageReference)
 }
 
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	ref, _ := oci.ParseRef(a.ImageReference)
+	host, port := ref.HostPort()
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Host: host,
+		Port: port,
+		Info: ref.Version(),
+	}
+}
+
 func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return false
 }

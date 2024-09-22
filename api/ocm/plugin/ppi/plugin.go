@@ -46,6 +46,8 @@ type plugin struct {
 	valuesets map[string]map[string]ValueSet
 	setScheme map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
+	transferhandlers map[string]TransferHandler
+
 	clicmds map[string]Command
 
 	configParser func(message json.RawMessage) (interface{}, error)
@@ -69,6 +71,8 @@ func NewPlugin(name string, version string) Plugin {
 		actions:       map[string]Action{},
 		mergehandlers: map[string]ValueMergeHandler{},
 		mergespecs:    map[string]*descriptor.LabelMergeSpecification{},
+
+		transferhandlers: map[string]TransferHandler{},
 
 		valuesets: map[string]map[string]ValueSet{},
 		setScheme: map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]{},
@@ -593,6 +597,36 @@ func (p *plugin) RegisterCommand(c Command) error {
 
 func (p *plugin) Commands() []Command {
 	return maputils.OrderedValues(p.clicmds)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (p *plugin) GetTransferHandler(name string) TransferHandler {
+	return p.transferhandlers[name]
+}
+
+func (p *plugin) RegisterTransferHandler(h TransferHandler) error {
+	if p.GetTransferHandler(h.GetName()) != nil {
+		return errors.ErrAlreadyExists("transfer handler", h.GetName())
+	}
+	d := descriptor.TransferHandlerDescriptor{
+		Name:        h.GetName(),
+		Description: h.GetDescription(),
+	}
+	for _, q := range h.GetQuestions() {
+		qd := descriptor.QuestionDescriptor{
+			Question: q.GetQuestion(),
+			Labels:   q.GetLabels(),
+		}
+		d.Questions = append(d.Questions, qd)
+	}
+	p.descriptor.TransferHandlers = append(p.descriptor.TransferHandlers, d)
+	p.transferhandlers[h.GetName()] = h
+	return nil
+}
+
+func (p *plugin) TransferHandlers() []TransferHandler {
+	return maputils.OrderedValues(p.transferhandlers)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

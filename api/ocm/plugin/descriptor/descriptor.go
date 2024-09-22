@@ -24,6 +24,7 @@ type Descriptor struct {
 	LabelMergeSpecifications List[LabelMergeSpecification]     `json:"labelMergeSpecifications,omitempty"`
 	ValueSets                List[ValueSetDescriptor]          `json:"valuesets,omitempty"`
 	Commands                 List[CommandDescriptor]           `json:"commands,omitempty"`
+	TransferHandlers         List[TransferHandlerDescriptor]   `json:"transferHandlers,omitempty"`
 	ConfigTypes              List[ConfigTypeDescriptor]        `json:"configTypes,omitempty"`
 }
 
@@ -231,6 +232,32 @@ func (a CommandDescriptor) GetName() string {
 
 func (a CommandDescriptor) GetDescription() string {
 	return a.Description
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type TransferHandlerDescriptor struct {
+	Name        string               `json:"name"`
+	Description string               `json:"description,omitempty"`
+	Questions   []QuestionDescriptor `json:"questions,omitempty"`
+}
+
+func (d TransferHandlerDescriptor) GetName() string {
+	return d.Name
+}
+
+func (d TransferHandlerDescriptor) GetQuestion(name string) *QuestionDescriptor {
+	for _, q := range d.Questions {
+		if q.Question == name {
+			return &q
+		}
+	}
+	return nil
+}
+
+type QuestionDescriptor struct {
+	Question string    `json:"question"`
+	Labels   *[]string `json:"labels,omitempty"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
