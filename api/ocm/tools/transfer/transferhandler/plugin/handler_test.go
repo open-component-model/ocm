@@ -83,6 +83,13 @@ var _ = Describe("Plugin Handler Test Environment", func() {
 				h := Must(transferhandler.For(env).ByName(env, "plugin/transferplugin/demo"))
 				Expect(reflect.TypeOf(h)).To(Equal(generics.TypeOf[*plugin.Handler]()))
 			})
+
+			It("finds plugin handler by name and config", func() {
+				config := Must(os.ReadFile("testdata/config"))
+				h := Must(transferhandler.For(env).ByName(env, "plugin/transferplugin/demo", transferhandler.WithConfig(config)))
+				Expect(reflect.TypeOf(h)).To(Equal(generics.TypeOf[*plugin.Handler]()))
+				Expect(h.(*plugin.Handler).GetConfig()).To(YAMLEqual(config))
+			})
 		})
 	})
 
