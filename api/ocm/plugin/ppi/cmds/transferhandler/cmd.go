@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 )
 
@@ -99,11 +100,13 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 			if err != nil {
 				result.Error = err.Error()
 			}
-			data, _ = json.Marshal(result)
+			data, err = json.Marshal(result)
+			if err != nil {
+				return err
+			}
 			cmd.Printf("%s\n", string(data))
 			return nil
 		}
 	}
 	return fmt.Errorf("question %q not configured for transfer handler %q", opts.Question, opts.Handler)
-
 }

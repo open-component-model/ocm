@@ -6,6 +6,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/exp/slices"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"

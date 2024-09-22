@@ -27,9 +27,7 @@ type Option struct {
 	Config  []byte
 }
 
-var (
-	_ options.OptionWithCLIContextCompleter = (*Option)(nil)
-)
+var _ options.OptionWithCLIContextCompleter = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.setting, "transferHandler", "T", "", "transfer handler (<name>[=<config>)")

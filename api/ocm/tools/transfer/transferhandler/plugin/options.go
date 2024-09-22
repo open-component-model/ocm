@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
-	"ocm.software/ocm/api/utils/runtime"
 
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 func init() {
@@ -86,9 +86,9 @@ func (o *Options) GetTransferHandlerConfig() interface{} {
 func (o *Options) SetConfig(bytes []byte) {
 	c, err := runtime.ToJSON(bytes)
 	if err != nil {
-		c, _ = json.Marshal(string(bytes))
+		c, _ = json.Marshal(string(bytes)) //nolint:errchkjson // yes
 	}
-	o.config = json.RawMessage(c)
+	o.config = c
 }
 
 func (o *Options) GetConfig() []byte {
