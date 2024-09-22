@@ -3,6 +3,7 @@ package wget
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"sync"
 
 	"github.com/mandelsoft/goutils/optionutils"
@@ -68,6 +69,19 @@ var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
 func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("Files from %s", a.URL)
+}
+
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	u, err := url.Parse(a.URL)
+	if err != nil {
+		u = &url.URL{}
+	}
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Host: u.Hostname(),
+		Port: u.Port(),
+		Path: u.Path,
+	}
 }
 
 func (a *AccessSpec) IsLocal(ctx accspeccpi.Context) bool {

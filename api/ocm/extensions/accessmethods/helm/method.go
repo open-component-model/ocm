@@ -3,6 +3,7 @@ package helm
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"strings"
 	"sync"
 
@@ -61,6 +62,20 @@ var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
 func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("Helm chart %s:%s in repository %s", a.GetChartName(), a.GetVersion(), a.HelmRepository)
+}
+
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	u, err := url.Parse(a.HelmRepository)
+	if err != nil {
+		u = &url.URL{}
+	}
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Host: u.Hostname(),
+		Port: u.Port(),
+		Path: u.Path,
+		Info: a.HelmChart,
+	}
 }
 
 func (a *AccessSpec) IsLocal(ctx accspeccpi.Context) bool {

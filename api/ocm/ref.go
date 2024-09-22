@@ -145,14 +145,6 @@ func (r *RefSpec) Name() string {
 	return fmt.Sprintf("%s/%s//%s", r.Host, r.SubPath, r.Component)
 }
 
-func (r *RefSpec) HostPort() (string, string) {
-	i := strings.Index(r.Host, ":")
-	if i < 0 {
-		return r.Host, ""
-	}
-	return r.Host[:i], r.Host[i+1:]
-}
-
 func (r *RefSpec) Reference() string {
 	t := r.Type
 	if t != "" {

@@ -9,4 +9,6 @@ type AccessSpecInfo struct {
 	MediaType  string                       `json:"mediaType"`
 	Hint       string                       `json:"hint"`
 	ConsumerId credentials.ConsumerIdentity `json:"consumerId"`
+
+	Info *UniformAccessSpecInfo `json:"info,omitempty"`
 }

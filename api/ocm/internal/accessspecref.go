@@ -79,6 +79,16 @@ func (a *AccessSpecRef) Describe(ctx Context) string {
 	return "invalid access specification"
 }
 
+func (a *AccessSpecRef) Info(ctx Context) *UniformAccessSpecInfo {
+	a.assure(ctx)
+	if a.evaluated != nil {
+		return a.evaluated.Info(ctx)
+	}
+	return &UniformAccessSpecInfo{
+		Kind: a.GetKind(),
+	}
+}
+
 func (a *AccessSpecRef) GetType() string {
 	if a.evaluated != nil {
 		return a.evaluated.GetType()

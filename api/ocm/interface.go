@@ -48,6 +48,7 @@ type (
 	ComponentLister                  = internal.ComponentLister
 	ComponentAccess                  = internal.ComponentAccess
 	ComponentVersionAccess           = internal.ComponentVersionAccess
+	UniformAccessSpecInfo            = internal.UniformAccessSpecInfo
 	AccessSpec                       = internal.AccessSpec
 	GenericAccessSpec                = internal.GenericAccessSpec
 	HintProvider                     = internal.HintProvider

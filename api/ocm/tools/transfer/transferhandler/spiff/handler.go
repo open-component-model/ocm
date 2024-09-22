@@ -50,7 +50,7 @@ func (h *Handler) UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.Componen
 	if h.opts.GetScript() == nil {
 		return false, nil
 	}
-	binding := h.getBinding(src, nil, nil, nil, nil)
+	binding := h.getBinding(src, nil, nil, nil, tgt.Repository())
 	return h.EvalBool("update", binding, "process")
 }
 
@@ -61,7 +61,7 @@ func (h *Handler) EnforceTransport(src ocm.ComponentVersionAccess, tgt ocm.Compo
 	if h.opts.GetScript() == nil {
 		return false, nil
 	}
-	binding := h.getBinding(src, nil, nil, nil, nil)
+	binding := h.getBinding(src, nil, nil, nil, tgt.Repository())
 	return h.EvalBool("enforceTransport", binding, "process")
 }
 
@@ -72,7 +72,7 @@ func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.Compo
 	if h.opts.GetScript() == nil {
 		return false, nil
 	}
-	binding := h.getBinding(src, nil, nil, nil, nil)
+	binding := h.getBinding(src, nil, nil, nil, tgt.Repository())
 	return h.EvalBool("overwrite", binding, "process")
 }
 

@@ -36,6 +36,10 @@ func (s *AccessSpec) Describe(ctx cpi.Context) string {
 	return s.handler.Describe(s, ctx)
 }
 
+func (s *AccessSpec) Info(ctx cpi.Context) *cpi.UniformAccessSpecInfo {
+	return s.handler.Info(s, ctx)
+}
+
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }
