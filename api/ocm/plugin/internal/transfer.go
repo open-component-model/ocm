@@ -33,7 +33,7 @@ type TargetRepositorySpec = ocm.GenericRepositorySpec
 type TransferOptions struct {
 	Recursive         *bool            `json:"recursive,omitempty"`
 	ResourcesByValue  *bool            `json:"resourcesByValue,omitempty"`
-	LoalByValue       *bool            `json:"localByValue,omitempty"`
+	LocalByValue      *bool            `json:"localByValue,omitempty"`
 	SourcesByValue    *bool            `json:"sourcesByValue,omitempty"`
 	KeepGlobalAccess  *bool            `json:"keepGlobalAccess,omitempty"`
 	StopOnExisting    *bool            `json:"stopOnExisting,omitempty"`
@@ -52,8 +52,8 @@ type Resolution struct {
 	RepositorySpec *ocm.GenericRepositorySpec `json:"repository,omitempty"`
 	// TransferHandler is the handler identity according to the transfer handler
 	// name scheme.
-	TransferHandler *string          `json:"transferHandler,omitempty"`
-	HandlerOptions  *json.RawMessage `json:"handlerOptions,omitempty"`
+	TransferHandler string           `json:"transferHandler,omitempty"`
+	TransferOptions *TransferOptions `json:"transferOptions,omitempty"`
 }
 
 type DecisionRequestResult struct {
