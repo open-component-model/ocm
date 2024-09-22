@@ -21,7 +21,7 @@ const (
 type UniformAccessSpecInfo = tech.UniformAccessSpecInfo
 
 type SourceComponentVersion struct {
-	Name       string                    `json:"repository"`
+	Name       string                    `json:"component"`
 	Version    string                    `json:"version"`
 	Provider   metav1.Provider           `json:"provider,omitempty"`
 	Repository ocm.GenericRepositorySpec `json:"repository"`
@@ -50,7 +50,7 @@ type TransferOptions struct {
 // the source repository to use to look up the reference.
 type Resolution struct {
 	RepositorySpec *ocm.GenericRepositorySpec `json:"repository,omitempty"`
-	// TransferHandler is the handler identity acording to the transfer handler
+	// TransferHandler is the handler identity according to the transfer handler
 	// name scheme.
 	TransferHandler *string          `json:"transferHandler,omitempty"`
 	HandlerOptions  *json.RawMessage `json:"handlerOptions,omitempty"`

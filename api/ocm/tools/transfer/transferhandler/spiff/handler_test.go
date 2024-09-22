@@ -303,7 +303,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 	Context("registrations", func() {
 		ctx := ocm.New(datacontext.MODE_EXTENDED)
 
-		FIt("finds plugin handler by name and config", func() {
+		It("finds plugin handler by name and config", func() {
 			h := Must(transferhandler.For(ctx).ByName(ctx, "ocm/spiff", transferhandler.WithConfig([]byte(script1))))
 			Expect(reflect.TypeOf(h)).To(Equal(generics.TypeOf[*spiff.Handler]()))
 			Expect(string(h.(*spiff.Handler).GetScript())).To(Equal(script1))

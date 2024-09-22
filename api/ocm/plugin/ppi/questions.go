@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/goutils/generics"
+
 	"ocm.software/ocm/api/ocm/plugin/internal"
 )
 
