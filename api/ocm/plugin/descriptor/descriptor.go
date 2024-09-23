@@ -59,6 +59,9 @@ func (d *Descriptor) Capabilities() []string {
 	if len(d.ConfigTypes) > 0 {
 		caps = append(caps, "Config Types")
 	}
+	if len(d.TransferHandlers) > 0 {
+		caps = append(caps, "Transfer Handlers")
+	}
 	return caps
 }
 
@@ -256,8 +259,9 @@ func (d TransferHandlerDescriptor) GetQuestion(name string) *QuestionDescriptor 
 }
 
 type QuestionDescriptor struct {
-	Question string    `json:"question"`
-	Labels   *[]string `json:"labels,omitempty"`
+	Question    string    `json:"question"`
+	Description string    `json:"description,omitempty"`
+	Labels      *[]string `json:"labels,omitempty"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////

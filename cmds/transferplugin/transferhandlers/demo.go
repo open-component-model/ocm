@@ -3,6 +3,7 @@ package transferhandlers
 import (
 	"slices"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/optionutils"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/cmds/transferplugin/config"
@@ -14,8 +15,10 @@ const (
 
 func New() ppi.TransferHandler {
 	h := ppi.NewTransferHandler(NAME, "enable value transport for dedicated external repositories")
-	h.RegisterDecision(NewDecision(ppi.Q_TRANSFER_RESOURCE, func(options *ppi.TransferOptions) bool { return optionutils.AsBool(options.ResourcesByValue) }))
-	h.RegisterDecision(NewDecision(ppi.Q_TRANSFER_SOURCE, func(options *ppi.TransferOptions) bool { return optionutils.AsBool(options.SourcesByValue) }))
+	h.RegisterDecision(NewDecision(ppi.Q_TRANSFER_RESOURCE, func(options *ppi.TransferOptions) bool { return optionutils.AsBool(options.ResourcesByValue) },
+		`value transport only for dedicated access types and service hosts`))
+	h.RegisterDecision(NewDecision(ppi.Q_TRANSFER_SOURCE, func(options *ppi.TransferOptions) bool { return optionutils.AsBool(options.SourcesByValue) },
+		`value transport only for dedicated access types and service hosts`))
 	return h
 }
 
@@ -26,9 +29,9 @@ type DecisionHandler struct {
 
 var _ ppi.DecisionHandler = (*DecisionHandler)(nil)
 
-func NewDecision(typ string, optfunc func(opts *ppi.TransferOptions) bool) ppi.DecisionHandler {
+func NewDecision(typ string, optfunc func(opts *ppi.TransferOptions) bool, desc ...string) ppi.DecisionHandler {
 	return &DecisionHandler{
-		DecisionHandlerBase: ppi.NewDecisionHandlerBase(typ),
+		DecisionHandlerBase: ppi.NewDecisionHandlerBase(typ, general.Optional(desc...)),
 		optfunc:             optfunc,
 	}
 }
