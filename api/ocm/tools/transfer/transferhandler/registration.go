@@ -128,6 +128,6 @@ func asHandlerRegistrationRegistry(r Registry) registrations.HandlerRegistration
 func Usage(ctx ocm.Context) string {
 	list := For(ctx).AsHandlerRegistrationRegistry().GetHandlers(NewTarget(ctx))
 	sort.Sort(list)
-	return `The following transfer hander names are supported:
+	return `The following transfer handler names are supported:
 ` + listformat.FormatListElements("", list)
 }
