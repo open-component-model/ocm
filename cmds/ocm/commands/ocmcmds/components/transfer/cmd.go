@@ -14,7 +14,6 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
-	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/spiff"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -30,11 +29,11 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/skipupdateoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/transferhandleroption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
-	"ocm.software/ocm/cmds/ocm/common/options"
 	"ocm.software/ocm/cmds/ocm/common/output"
 	"ocm.software/ocm/cmds/ocm/common/utils"
 )
@@ -69,6 +68,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		stoponexistingoption.New(),
 		uploaderoption.New(ctx.OCMContext()),
 		scriptoption.New(),
+		transferhandleroption.New(),
 	)}, utils.Names(Names, names...)...)
 }
 
@@ -102,7 +102,8 @@ func (o *Command) Complete(args []string) error {
 		return fmt.Errorf("a repository or at least one argument that defines the reference is required")
 	}
 	o.TargetName = args[len(args)-1]
-	return nil
+
+	return ValidateHandler(o)
 }
 
 func (o *Command) Run() error {
@@ -129,13 +130,7 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	transferopts := &spiff.Options{}
-	transferhandler.From(o.ConfigContext(), transferopts)
-	transferhandler.ApplyOptions(transferopts, append(options.FindOptions[transferhandler.TransferOption](o),
-		spiff.Script(scriptoption.From(o).ScriptData),
-		spiff.ScriptFilesystem(o.FileSystem()),
-	)...)
-	thdlr, err := spiff.New(transferopts)
+	thdlr, err := DetermineTransferHandler(o.Context, o)
 	if err != nil {
 		return err
 	}

@@ -3,11 +3,14 @@ package transfer_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/oci/testhelper"
+	"ocm.software/ocm/api/ocm/extensions/attrs/plugincacheattr"
+	. "ocm.software/ocm/api/ocm/plugin/testutils"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/spf13/cobra"
@@ -22,7 +25,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	ctfocm "ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	handlercfg "ocm.software/ocm/api/ocm/tools/transfer/transferhandler/config"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
@@ -40,6 +43,11 @@ const (
 	OUT        = "/tmp/res"
 	OCIPATH    = "/tmp/oci"
 	OCIHOST    = "alias"
+)
+
+const (
+	PLUGIN  = "transferplugin"
+	HANDLER = "demo"
 )
 
 func CheckComponentInArchive(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
@@ -94,7 +102,7 @@ var _ = Describe("Test Environment", func() {
 
 	_ = ldesc
 	BeforeEach(func() {
-		env = NewTestEnv()
+		env = NewTestEnv(TestData())
 
 		FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
 
@@ -114,7 +122,6 @@ var _ = Describe("Test Environment", func() {
 						env.Access(
 							ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 						)
-						env.Label("transportByValue", true)
 					})
 					env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 						env.Access(
@@ -146,6 +153,23 @@ var _ = Describe("Test Environment", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--copy-resources", ARCH, ARCH, OUT)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0 testdata[plainText]...
+...resource 1 value[ociImage](ocm/value:v2.0)...
+...resource 2 ref[ociImage](ocm/ref:v2.0)...
+...adding component version...
+1 versions transferred
+`))
+
+		Expect(env.DirExists(OUT)).To(BeTrue())
+		CheckComponentInArchive(env, ldesc, OUT)
+	})
+
+	It("transfers ctf with named handler", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--copy-resources", "--transfer-handler", "ocm/standard", ARCH, ARCH, OUT)).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+using transfer handler ocm/standard
 transferring version "github.com/mandelsoft/test:v1"...
 ...resource 0 testdata[plainText]...
 ...resource 1 value[ociImage](ocm/value:v2.0)...
@@ -303,4 +327,61 @@ transferring version "github.com/mandelsoft/test:v1"...
 		Expect(env.FileExists(OUT)).To(BeTrue())
 		CheckComponentInArchive(env, ldesc, OUT)
 	})
+
+	Context("plugin execution", func() {
+		var plugins TempPluginDir
+
+		BeforeEach(func() {
+			plugins = Must(ConfigureTestPlugins(env, "testdata/plugins"))
+		})
+
+		AfterEach(func() {
+			plugins.Cleanup()
+		})
+
+		It("loads plugin", func() {
+			registry := plugincacheattr.Get(env)
+			//	Expect(registration.RegisterExtensions(env)).To(Succeed())
+			p := registry.Get(PLUGIN)
+			Expect(p).NotTo(BeNil())
+			Expect(p.Error()).To(Equal(""))
+		})
+
+		It("transfers with copy", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("transfer", "components",
+				"--transfer-handler",
+				fmt.Sprintf("plugin/%s/%s=@testdata/config", PLUGIN, HANDLER),
+				ARCH, ARCH, OUT)).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+using transfer handler plugin/transferplugin/demo
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0 testdata[plainText]...
+...resource 1 value[ociImage](ocm/value:v2.0)...
+...resource 2 ref[ociImage](ocm/ref:v2.0)...
+...adding component version...
+1 versions transferred
+`))
+			Expect(env.DirExists(OUT)).To(BeTrue())
+			CheckComponentInArchive(env, ldesc, OUT)
+		})
+
+		It("transfers without copy", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("transfer", "components",
+				"--transfer-handler",
+				fmt.Sprintf("plugin/%s/%s=@testdata/config2", PLUGIN, HANDLER),
+				ARCH, ARCH, OUT)).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+using transfer handler plugin/transferplugin/demo
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0 testdata[plainText]...
+...adding component version...
+1 versions transferred
+`))
+			Expect(env.DirExists(OUT)).To(BeTrue())
+		})
+
+	})
+
 })

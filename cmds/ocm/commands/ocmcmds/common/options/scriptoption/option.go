@@ -109,5 +109,8 @@ func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error
 	} else if o.ScriptFile != "" {
 		err = spiff.ScriptByFile(o.ScriptFile, o.FileSystem).ApplyTransferOption(opts)
 	}
+	if err == nil && o.FileSystem != nil && (o.ScriptData != nil || o.ScriptFile != "") {
+		err = spiff.ScriptFilesystem(o.FileSystem).ApplyTransferOption(opts)
+	}
 	return err
 }
