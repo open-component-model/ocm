@@ -43,7 +43,7 @@ func (r *RegistrationHandler) ByName(ctx ocm.Context, handler string, opts ...tr
 
 func CreateTransferHandler(ctx ocm.Context, pname, name string, opts ...transferhandler.TransferOption) (transferhandler.TransferHandler, error) {
 	options := &Options{}
-	err := transferhandler.ApplyOptions(options, append(slices.Clone(opts), TransferHandler(name), Plugin(pname))...)
+	err := transferhandler.ApplyOptions(options, append(slices.Clone(opts), Plugin(pname))...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +64,21 @@ func CreateTransferHandler(ctx ocm.Context, pname, name string, opts ...transfer
 	if p == nil {
 		return nil, errors.ErrUnknown(plugin.KIND_PLUGIN, pname)
 	}
+	if name == "" {
+		names := p.GetTransferHandlerNames()
+		if len(names) == 0 {
+			return nil, fmt.Errorf("plugin %q does not provide transfer handlers", pname)
+		}
+		if len(names) != 1 {
+			return nil, fmt.Errorf("plugin %q provides more than one transfer handler", pname)
+		}
+		name = names[0]
+	}
 	d := p.GetTransferHandler(name)
 	if d == nil {
 		return nil, errors.ErrNotFound(plugin.KIND_TRANSFERHANDLER, name, pname)
 	}
+	TransferHandler(name).ApplyTransferOption(options)
 
 	return &Handler{
 		Handler: *standard.NewDefaultHandler(&options.Options),

@@ -615,8 +615,9 @@ func (p *plugin) RegisterTransferHandler(h TransferHandler) error {
 	}
 	for _, q := range h.GetQuestions() {
 		qd := descriptor.QuestionDescriptor{
-			Question: q.GetQuestion(),
-			Labels:   q.GetLabels(),
+			Question:    q.GetQuestion(),
+			Description: q.GetDescription(),
+			Labels:      q.GetLabels(),
 		}
 		d.Questions = append(d.Questions, qd)
 	}

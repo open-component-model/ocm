@@ -228,6 +228,7 @@ type TransferHandler interface {
 
 type DecisionHandler interface {
 	GetQuestion() string
+	GetDescription() string
 	GetLabels() *[]string
 
 	DecideOn(p Plugin, question interface{}) (bool, error)

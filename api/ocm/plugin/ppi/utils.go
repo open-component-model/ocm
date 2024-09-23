@@ -159,20 +159,25 @@ func (t *transferHandler) RegisterDecision(h DecisionHandler) error {
 }
 
 type DecisionHandlerBase struct {
-	question string
-	labels   *[]string
+	question    string
+	description string
+	labels      *[]string
 }
 
 func (d *DecisionHandlerBase) GetQuestion() string {
 	return d.question
 }
 
+func (d *DecisionHandlerBase) GetDescription() string {
+	return d.description
+}
+
 func (d *DecisionHandlerBase) GetLabels() *[]string {
 	return d.labels
 }
 
-func NewDecisionHandlerBase(q string, labels ...string) DecisionHandlerBase {
-	return DecisionHandlerBase{q, generics.Pointer(slices.Clone(labels))}
+func NewDecisionHandlerBase(q, desc string, labels ...string) DecisionHandlerBase {
+	return DecisionHandlerBase{q, desc, generics.Pointer(slices.Clone(labels))}
 }
 
 type testDH struct {

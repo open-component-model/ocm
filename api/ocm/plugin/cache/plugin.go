@@ -240,6 +240,14 @@ func (p *pluginImpl) GetTransferHandler(name string) *descriptor.TransferHandler
 	return p.descriptor.TransferHandlers.Get(name)
 }
 
+func (p *pluginImpl) GetTransferHandlerNames() []string {
+	if !p.IsValid() {
+		return nil
+	}
+
+	return p.descriptor.TransferHandlers.GetNames()
+}
+
 func (p *pluginImpl) Message() string {
 	if p.IsValid() {
 		return p.descriptor.Short

@@ -366,6 +366,25 @@ transferring version "github.com/mandelsoft/test:v1"...
 			CheckComponentInArchive(env, ldesc, OUT)
 		})
 
+		It("transfers with copy with implicitly detected handler", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("transfer", "components",
+				"--transfer-handler",
+				fmt.Sprintf("plugin/%s=@testdata/config", PLUGIN),
+				ARCH, ARCH, OUT)).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+using transfer handler plugin/transferplugin
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0 testdata[plainText]...
+...resource 1 value[ociImage](ocm/value:v2.0)...
+...resource 2 ref[ociImage](ocm/ref:v2.0)...
+...adding component version...
+1 versions transferred
+`))
+			Expect(env.DirExists(OUT)).To(BeTrue())
+			CheckComponentInArchive(env, ldesc, OUT)
+		})
+
 		It("transfers without copy", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("transfer", "components",
