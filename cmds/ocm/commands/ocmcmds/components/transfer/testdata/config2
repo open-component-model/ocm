@@ -1,0 +1,4 @@
+transferRepositories:
+  types:
+    ociArtifact:
+    - ghcr.io
