@@ -80,6 +80,11 @@ func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descrip
 		out.Printf("Config Types for CLI Command Extensions:\n")
 		DescribeConfigTypes(d, out)
 	}
+	if len(d.TransferHandlers) > 0 {
+		out.Printf("\n")
+		out.Printf("Transfer Handlers:\n")
+		DescribeTransferHandlers(d, out)
+	}
 }
 
 type MethodInfo struct {
@@ -512,6 +517,66 @@ func DescribeConfigTypes(d *descriptor.Descriptor, out common.Printer) {
 			v := m.Versions[vn]
 			if v.Format != "" {
 				out.Printf("%s\n", v.Format)
+			}
+		}
+	}
+}
+
+type TransferHandlerInfo struct {
+	Name        string
+	Description string
+	Questions   map[string]descriptor.QuestionDescriptor
+}
+
+func GetTransferHandlerInfo(types []descriptor.TransferHandlerDescriptor) map[string]*TransferHandlerInfo {
+	found := map[string]*TransferHandlerInfo{}
+	for _, m := range types {
+		i := found[m.Name]
+		if i == nil {
+			i := &TransferHandlerInfo{
+				Name:        m.Name,
+				Description: m.Description,
+				Questions:   map[string]descriptor.QuestionDescriptor{},
+			}
+			for _, q := range m.Questions {
+				i.Questions[q.Question] = q
+			}
+			found[m.Name] = i
+		}
+	}
+	return found
+}
+
+func DescribeTransferHandlers(d *descriptor.Descriptor, out common.Printer) {
+	types := GetTransferHandlerInfo(d.TransferHandlers)
+	for _, n := range utils.StringMapKeys(types) {
+		out.Printf("- Name: %s\n", n)
+		m := types[n]
+		if m.Description != "" {
+			out.Printf("%s\n", utils.IndentLines(m.Description, "    "))
+		}
+		out := out.AddGap("  ")
+		out.Printf("Questions:\n")
+		for _, qn := range utils.StringMapKeys(m.Questions) {
+			out.Printf("- Name: %s\n", qn)
+			q := m.Questions[qn]
+			if q.Description != "" {
+				out.Printf("%s\n", utils.IndentLines(q.Description, "    "))
+			}
+			out := out.AddGap("  ")
+			if q.Labels == nil {
+				out.Printf("consumes all labels\n")
+			} else {
+				if len(*q.Labels) == 0 {
+					out.Printf("consumes no labels\n")
+				} else {
+					labels := slices.Clone(*q.Labels)
+					sort.Strings(labels)
+					out.Printf("Labels:\n")
+					for _, l := range labels {
+						out.Printf("- %s\n", l)
+					}
+				}
 			}
 		}
 	}

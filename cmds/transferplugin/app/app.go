@@ -8,7 +8,7 @@ import (
 	"ocm.software/ocm/cmds/transferplugin/transferhandlers"
 )
 
-func Run(args []string, opts ...cmds.Option) error {
+func New() (ppi.Plugin, error) {
 	p := ppi.NewPlugin("transferplugin", version.Get().String())
 
 	p.SetShort("demo transfer handler plugin")
@@ -16,6 +16,14 @@ func Run(args []string, opts ...cmds.Option) error {
 	p.SetConfigParser(config.GetConfig)
 
 	err := p.RegisterTransferHandler(transferhandlers.New())
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func Run(args []string, opts ...cmds.Option) error {
+	p, err := New()
 	if err != nil {
 		return err
 	}
