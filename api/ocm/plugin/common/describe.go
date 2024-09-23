@@ -558,7 +558,11 @@ func DescribeTransferHandlers(d *descriptor.Descriptor, out common.Printer) {
 		out := out.AddGap("  ")
 		out.Printf("Questions:\n")
 		for _, qn := range utils.StringMapKeys(m.Questions) {
-			out.Printf("- Name: %s\n", qn)
+			desc := TransferHandlerQuestions[qn]
+			if desc == "" {
+				desc = "invalid question"
+			}
+			out.Printf("- Name: %s (%s)\n", qn, desc)
 			q := m.Questions[qn]
 			if q.Description != "" {
 				out.Printf("%s\n", utils.IndentLines(q.Description, "    "))

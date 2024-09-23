@@ -33,6 +33,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
       --script string               config name of transfer handler script
   -s, --scriptFile string           filename of transfer handler script
   -E, --stop-on-existing            stop on existing component version in target repository
+  -T, --transfer-handler string     transfer handler (<name>[=<config>)
   -t, --type string                 archive format (directory, tar, tgz) (default "directory")
       --uploader <name>=<value>     repository uploader (<name>[:<artifact type>[:<media type>]]=<JSON target config) (default [])
 ```
@@ -237,6 +238,25 @@ Only one of the fields <code>path</code> or <code>script</code> can be used.
 
 If no script option is given and the cli config defines a script <code>default</code>
 this one is used.
+
+
+It is possible to use dedicated transfer handlers, either built-in ones or
+plugin based handlers. The option <code>--transferHandler</code> can be used to specify
+this handler using the hierarchical handler notation scheme.
+The following transfer handler names are supported:
+  - <code>ocm/spiff</code>: spiff transfer handler
+
+    The <code>spiff</code> transfer handler works on the standard transfer options
+    extended by dynamic programming based on spiff++.
+
+  - <code>ocm/standard</code>: standard transfer handler
+
+    The <code>standard</code> transfer handler works on the standard transfer options.
+
+  - <code>plugin</code>: [transfer handlers provided by plugins]
+
+    sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>
+
 
 ### Examples
 

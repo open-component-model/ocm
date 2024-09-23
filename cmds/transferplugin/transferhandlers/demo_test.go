@@ -77,10 +77,10 @@ decision: true
   - Name: demo
       enable value transport for dedicated external repositories
     Questions:
-    - Name: transferresource
+    - Name: transferresource (value transport for resources)
         value transport only for dedicated access types and service hosts
       consumes no labels
-    - Name: transfersource
+    - Name: transfersource (value transport for sources)
         value transport only for dedicated access types and service hosts
       consumes no labels
 
