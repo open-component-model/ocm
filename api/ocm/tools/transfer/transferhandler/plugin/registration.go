@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
 
@@ -42,7 +43,7 @@ func (r *RegistrationHandler) ByName(ctx ocm.Context, handler string, opts ...tr
 
 func CreateTransferHandler(ctx ocm.Context, pname, name string, opts ...transferhandler.TransferOption) (transferhandler.TransferHandler, error) {
 	options := &Options{}
-	err := transferhandler.ApplyOptions(options, opts...)
+	err := transferhandler.ApplyOptions(options, append(slices.Clone(opts), TransferHandler(name), Plugin(pname))...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,11 +66,11 @@ func CreateTransferHandler(ctx ocm.Context, pname, name string, opts ...transfer
 	}
 	d := p.GetTransferHandler(name)
 	if d == nil {
-		return nil, errors.ErrNotFound(plugin.KIND_TRANSFERHANDLER, name)
+		return nil, errors.ErrNotFound(plugin.KIND_TRANSFERHANDLER, name, pname)
 	}
 
 	return &Handler{
-		Handler: standard.Handler{},
+		Handler: *standard.NewDefaultHandler(&options.Options),
 		opts:    options,
 		plugin:  p,
 		desc:    d,

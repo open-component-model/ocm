@@ -7,6 +7,7 @@ import (
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
+	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/common/options"
 )
@@ -27,10 +28,13 @@ type Option struct {
 	Config  []byte
 }
 
-var _ options.OptionWithCLIContextCompleter = (*Option)(nil)
+var (
+	_ options.OptionWithCLIContextCompleter = (*Option)(nil)
+	_ transferhandler.TransferOption        = (*Option)(nil)
+)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.setting, "transferHandler", "T", "", "transfer handler (<name>[=<config>)")
+	fs.StringVarP(&o.setting, "transfer-handler", "T", "", "transfer handler (<name>[=<config>)")
 }
 
 func (o *Option) Configure(ctx clictx.Context) error {
@@ -74,4 +78,12 @@ If no script option is given and the cli config defines a script <code>default</
 this one is used.
 `
 	return s
+}
+
+func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
+	var err error
+	if len(o.Config) != 0 {
+		err = transferhandler.WithConfig(o.Config).ApplyTransferOption(opts)
+	}
+	return err
 }
