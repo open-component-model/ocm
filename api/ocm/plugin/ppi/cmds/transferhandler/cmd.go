@@ -26,25 +26,29 @@ of component versions, their resources and sources.
 This command is only used for actions for which the transfer handler descriptor
 enables the particular question.
 
-The question arguments are passed as jdon structure on *stdin*, 
+The question arguments are passed as JSON structure on *stdin*, 
 the result has to be returned as JSON document
 on *stdout*.
 
 There are several questions a handler can answer:
+- <code>transferversion</code>: This action answers the question, whether
+  a component version shall be transported at all and how it should be
+  transported. The argument is a <code>ComponentVersionQuestion</code>
+  and the result decision is extended by an optional transport context
+  consisting, of a new transport handler description and transport options.
 - <code>enforcetransport</code>: This action answers the question, whether
   a component version shall be transported as if it is not yet present
-  in the target repository. The argument is a ComponentVersionQuestion.
+  in the target repository. The argument is a <code>ComponentVersionQuestion</code>.
+- <code>updateversion</code>: Update non-signature relevant information.
+  The argument is a <code>ComponentVersionQuestion</code>.
+- <code>overwriteversion</code>: Override signature-relevant information.
+  The argument is a <code>ComponentVersionQuestion</code>.
+- <code>transferresource</code>: Transport resource as value. The argument
+  is an <code>ArtifactQuestion</code>.
+- <code>transfersource</code>: Transport source as value. The argument
+  is an <code>ArtifactQuestion</code>.
 
-There are several types of questions:
-- <code>ComponentVersionQuestion</code>: this type of question refers to
-  a complete component version. The given argument has the following fields:
-  - <code>source</code>: 
-  	- <code>component</code> the component name.
-    - <code>version</code> the component version name.
-    - <code>provider</code> the provider struct from the component descriptor
-      restricted to the label entries selected by the transfer handler descriptor.
-    - <code>labels</code>the labels of the component version restricted to the
-      label entries selected by the transfer handler descriptor.
+For detailed types see <code>ocm.software/ocm/api/ocm/plugin/ppi/questions.go</code>.
 `,
 		Args: cobra.ExactArgs(2),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {

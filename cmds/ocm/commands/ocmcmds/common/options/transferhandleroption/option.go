@@ -7,6 +7,7 @@ import (
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
+	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/common/options"
@@ -57,26 +58,10 @@ func (o *Option) Configure(ctx clictx.Context) error {
 
 func (o *Option) Usage() string {
 	s := `
-It is possible to use a dedicated transfer handlers,
-either buil-in one or plugin based handlers.
-The option <code>--transferHandler</code> can be used to specify this script
-by a file name. With <code>--script</code> it can be taken from the 
-CLI config using an entry of the following format:
-
-<pre>
-type: scripts.ocm.config.ocm.software
-scripts:
-  &lt;name>: 
-    path: &lt;filepath> 
-    script:
-      &lt;scriptdata>
-</pre>
-
-Only one of the fields <code>path</code> or <code>script</code> can be used.
-
-If no script option is given and the cli config defines a script <code>default</code>
-this one is used.
-`
+It is possible to use dedicated transfer handlers, either built-in ones or
+plugin based handlers. The option <code>--transferHandler</code> can be used to specify
+this handler using the hierarchical handler notation scheme.
+` + transferhandler.Usage(ocm.DefaultContext())
 	return s
 }
 
