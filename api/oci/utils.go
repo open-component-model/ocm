@@ -19,6 +19,10 @@ func AsTags(tag string) []string {
 }
 
 func StandardOCIRef(host, repository, version string) string {
+	return fmt.Sprintf("%s%s%s", host, grammar.RepositorySeparator, RelativeOCIRef(repository, version))
+}
+
+func RelativeOCIRef(repository, version string) string {
 	sep := grammar.TagSeparator
 	i := strings.Index(version, grammar.DigestSeparator)
 	if i > 1 {
@@ -30,7 +34,7 @@ func StandardOCIRef(host, repository, version string) string {
 			sep = ""
 		}
 	}
-	return fmt.Sprintf("%s%s%s%s%s", host, grammar.RepositorySeparator, repository, sep, version)
+	return fmt.Sprintf("%s%s%s", repository, sep, version)
 }
 
 func IsIntermediate(spec RepositorySpec) bool {
