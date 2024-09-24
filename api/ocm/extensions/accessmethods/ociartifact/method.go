@@ -78,11 +78,19 @@ func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
 	ref, _ := oci.ParseRef(a.ImageReference)
 	host, port := ref.HostPort()
+
+	r := ref.Repository
+	if ref.Tag != nil {
+		r += ":" + *ref.Tag
+	}
+	if ref.Digest != nil {
+		r += "@" + ref.Digest.String()
+	}
 	return &accspeccpi.UniformAccessSpecInfo{
 		Kind: Type,
 		Host: host,
 		Port: port,
-		Info: ref.Version(),
+		Info: r,
 	}
 }
 
