@@ -6,7 +6,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
-	"oras.land/oras-go/v2/content"
 	"oras.land/oras-go/v2/errdef"
 	"oras.land/oras-go/v2/registry"
 
@@ -49,36 +48,6 @@ func (n *NamespaceContainer) Close() error {
 
 func (n *NamespaceContainer) SetImplementation(impl support.NamespaceAccessImpl) {
 	n.impl = impl
-}
-
-func (n *NamespaceContainer) getPusher(vers string) (content.Pusher, error) {
-	err := n.assureCreated()
-	if err != nil {
-		return nil, err
-	}
-
-	ref := n.repo.GetRef(n.impl.GetNamespace(), vers)
-	n.repo.GetContext().Logger().Trace("get pusher", "ref", ref)
-	pusher := n.ociRepo
-	if ok, _ := artdesc.IsDigest(vers); !ok {
-		var err error
-
-		pusher, err = n.repo.getResolver(ref, n.impl.GetNamespace())
-		if err != nil {
-			return nil, fmt.Errorf("unable get resolver: %w", err)
-		}
-	}
-
-	return pusher, nil
-}
-
-func (n *NamespaceContainer) push(vers string, blob cpi.BlobAccess) error {
-	p, err := n.getPusher(vers)
-	if err != nil {
-		return fmt.Errorf("unable to get pusher: %w", err)
-	}
-	n.repo.GetContext().Logger().Trace("pushing", "version", vers)
-	return push(dummyContext, p, blob)
 }
 
 func (n *NamespaceContainer) IsReadOnly() bool {
@@ -195,15 +164,31 @@ func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) 
 
 	n.repo.GetContext().Logger().Debug("adding artifact", "digest", blob.Digest(), "mimetype", blob.MimeType())
 
+	if err := n.assureCreated(); err != nil {
+		return nil, err
+	}
+
 	if len(tags) > 0 {
 		for _, tag := range tags {
-			if err := n.push(tag, blob); err != nil {
-				return nil, err
+			if err := n.pushTag(blob, tag); err != nil {
+				return nil, fmt.Errorf("failed to push tag %s: %w", tag, err)
 			}
 		}
 	}
 
 	return blob, err
+}
+
+func (n *NamespaceContainer) pushTag(blob blobaccess.BlobAccess, tag string) error {
+	reader, err := blob.Reader()
+	if err != nil {
+		return err
+	}
+	expectedDescriptor := *artdesc.DefaultBlobDescriptor(blob)
+	if err := n.ociRepo.PushReference(context.Background(), expectedDescriptor, reader, tag); err != nil {
+		return fmt.Errorf("unable to push: %w", err)
+	}
+	return nil
 }
 
 func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
@@ -218,10 +203,14 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 		return fmt.Errorf("error creating new data access: %w", err)
 	}
 
+	if err := n.assureCreated(); err != nil {
+		return err
+	}
+
 	blob := blobaccess.ForDataAccess(desc.Digest, desc.Size, desc.MediaType, acc)
 	for _, tag := range tags {
-		if err := n.push(tag, blob); err != nil {
-			return fmt.Errorf("unable to push: %w", err)
+		if err := n.pushTag(blob, tag); err != nil {
+			return fmt.Errorf("failed to push tag %s: %w", tag, err)
 		}
 	}
 
