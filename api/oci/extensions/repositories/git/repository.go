@@ -8,11 +8,11 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/oci/identity"
 	cpicredentials "ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/tech/git"
+	"ocm.software/ocm/api/tech/oci/identity"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 )
 
