@@ -14,7 +14,7 @@ func DataAccess(repo *maven.Repository, groupId, artifactId, version string, opt
 func BlobAccess(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) (bpi.BlobAccess, error) {
 	eff := optionutils.EvalOptions(opts...)
 	s := &spec{
-		coords:  maven.NewCoordinates(groupId, artifactId, version, maven.WithOptionalClassifier(eff.Classifier), maven.WithOptionalExtension(eff.Extension)),
+		coords:  maven.NewCoordinates(groupId, artifactId, version, maven.WithOptionalClassifier(eff.Classifier), maven.WithOptionalExtension(eff.Extension), maven.WithOptionalMediaType(eff.MediaType)),
 		repo:    repo,
 		options: eff,
 	}
@@ -22,7 +22,7 @@ func BlobAccess(repo *maven.Repository, groupId, artifactId, version string, opt
 }
 
 func BlobAccessForCoords(repo *maven.Repository, coords *maven.Coordinates, opts ...Option) (bpi.BlobAccess, error) {
-	return BlobAccess(repo, coords.GroupId, coords.ArtifactId, coords.Version, optionutils.WithDefaults(opts, WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension))...)
+	return BlobAccess(repo, coords.GroupId, coords.ArtifactId, coords.Version, optionutils.WithDefaults(opts, WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension), WithOptionalMediaType(coords.MediaType))...)
 }
 
 func Provider(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) bpi.BlobAccessProvider {
@@ -33,5 +33,5 @@ func Provider(repo *maven.Repository, groupId, artifactId, version string, opts 
 }
 
 func ProviderCoords(repo *maven.Repository, coords *maven.Coordinates, opts ...Option) bpi.BlobAccessProvider {
-	return Provider(repo, coords.GroupId, coords.ArtifactId, coords.Version, optionutils.WithDefaults(opts, WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension))...)
+	return Provider(repo, coords.GroupId, coords.ArtifactId, coords.Version, optionutils.WithDefaults(opts, WithOptionalClassifier(coords.Classifier), WithOptionalExtension(coords.Extension), WithOptionalMediaType(coords.MediaType))...)
 }

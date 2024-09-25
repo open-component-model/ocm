@@ -32,9 +32,6 @@ type AccessSpec struct {
 	RepoUrl string `json:"repoUrl"`
 
 	maven.Coordinates `json:",inline"`
-
-	// GAV:CE
-	Hint string `json:"hint,omitempty"`
 }
 
 // Option defines the interface function "ApplyTo()".
@@ -57,24 +54,22 @@ func WithOptionalExtension(e *string) Option {
 var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
 // New creates a new Maven repository access spec version v1.
-func New(repository, groupId, artifactId, version, hint string, opts ...Option) *AccessSpec {
+func New(repository, groupId, artifactId, version string, opts ...Option) *AccessSpec {
 	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		RepoUrl:             repository,
 		Coordinates:         *maven.NewCoordinates(groupId, artifactId, version, opts...),
-		Hint:                hint,
 	}
 	return accessSpec
 }
 
 // NewForCoordinates creates a new Maven repository access spec version v1.
-func NewForCoordinates(repository, hint string, coords *maven.Coordinates, opts ...Option) *AccessSpec {
+func NewForCoordinates(repository string, coords *maven.Coordinates, opts ...Option) *AccessSpec {
 	optionutils.ApplyOptions(coords, opts...)
 	accessSpec := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		RepoUrl:             repository,
 		Coordinates:         *coords,
-		Hint:                hint,
 	}
 	return accessSpec
 }
@@ -96,9 +91,7 @@ func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) strin
 	if a.IsPackage() {
 		return a.GAV()
 	}
-
-	// if not a package, return the hint
-	return a.Hint
+	return ""
 }
 
 func (_ *AccessSpec) GetType() string {

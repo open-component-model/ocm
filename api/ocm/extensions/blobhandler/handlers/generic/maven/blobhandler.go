@@ -138,19 +138,19 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	if err != nil {
 		return nil, err
 	}
-	return access.New(url, coords.GroupId, coords.ArtifactId, coords.Version, hint), nil
+	return access.New(url, coords.GroupId, coords.ArtifactId, coords.Version), nil
 }
 
 // PomGav defines gav information in a POM file.
 type PomGav struct {
-	GroupID    string `xml:"groupId"`
+	GroupId    string `xml:"groupId"`
 	ArtifactId string `xml:"artifactId"`
 	Version    string `xml:"version"`
 }
 
 // GAV returns the GAV coordinates of the Maven Coordinates.
 func (c *PomGav) GAV() string {
-	return c.GroupID + ":" + c.ArtifactId + ":" + c.Version
+	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version
 }
 
 func verifyGavInformation(fs vfs.FileSystem, coords *maven.Coordinates, files []string, log mlog.Logger) error {

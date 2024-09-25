@@ -6,6 +6,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "ocm.software/ocm/api/helper/builder"
 
 	"ocm.software/ocm/api/tech/maven"
@@ -101,6 +102,17 @@ var _ = Describe("blobaccess for maven", func() {
 			b := Must(me.BlobAccessForCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
 			defer Close(b, "blobaccess")
 			Expect(string(Must(b.Get()))).To(Equal(`{"some": "test content"}`))
+		})
+
+		It("blobaccess for a single file with media type", func() {
+			c := "application/custom-type"
+			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0",
+				maven.WithClassifier("random-content"), maven.WithExtension("json"), maven.WithMediaType(c))
+
+			b := Must(me.BlobAccessForCoords(repo, coords, me.WithCachingFileSystem(env.FileSystem())))
+			defer Close(b, "blobaccess")
+			Expect(string(Must(b.Get()))).To(Equal(`{"some": "test content"}`))
+			Expect(b.MimeType()).To(Equal(c))
 		})
 	})
 
