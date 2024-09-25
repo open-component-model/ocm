@@ -72,6 +72,9 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.Extension != nil {
 		opts.Extension = o.Extension
 	}
+	if o.MediaType != nil {
+		opts.MediaType = o.MediaType
+	}
 }
 
 func option[S any, T any](v T) optionutils.Option[*Options] {
@@ -119,6 +122,27 @@ func WithClassifier(c string) Option {
 func WithOptionalClassifier(c *string) Option {
 	if c != nil {
 		return WithClassifier(*c)
+	}
+	return &optionutils.NoOption[*Options]{}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type MediaTypeOptionBag interface {
+	SetMediaType(v string)
+}
+
+func (o *Options) SetMediaType(v string) {
+	o.MediaType = &v
+}
+
+func WithMediaType(c string) Option {
+	return option[MediaTypeOptionBag](c)
+}
+
+func WithOptionalMediaType(c *string) Option {
+	if c != nil {
+		return WithMediaType(*c)
 	}
 	return &optionutils.NoOption[*Options]{}
 }
