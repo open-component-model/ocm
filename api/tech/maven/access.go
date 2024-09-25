@@ -255,7 +255,17 @@ func gavOnlineFiles(repo *Repository, coords *Coordinates, creds Credentials) (m
 	log := Log.WithValues("RepoUrl", repo.String(), "GAV", coords.GavPath())
 	log.Debug("gavOnlineFiles")
 
-	reader, err := coords.GavLocation(repo).GetReader(creds)
+	tweakUrlAndUserAgent := func(loc *Location, req *http.Request) {
+		if loc != nil && !strings.HasSuffix(loc.url, "/") {
+			loc.url += "/"
+		}
+		if req != nil {
+			req.Header.Set("User-Agent", "Mozilla")
+		}
+	}
+
+	loc := coords.GavLocation(repo)
+	reader, err := loc.GetReader(creds, tweakUrlAndUserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -275,6 +285,7 @@ func gavOnlineFiles(repo *Repository, coords *Coordinates, creds Credentials) (m
 		if node.Type == html.ElementNode && node.Data == "a" {
 			for _, attribute := range node.Attr {
 				if attribute.Key == "href" {
+					attribute.Val = strings.TrimPrefix(attribute.Val, loc.String()) // make the href relative
 					// check if the href starts with artifactId-version
 					if strings.HasPrefix(attribute.Val, prefix) {
 						fileList = append(fileList, attribute.Val)
@@ -364,11 +375,14 @@ func (l *Location) GetHash(creds Credentials, hash crypto.Hash) (string, error) 
 	return string(b), nil
 }
 
-func (l *Location) GetReader(creds Credentials) (io.ReadCloser, error) {
+func (l *Location) GetReader(creds Credentials, tweakIndexOf ...func(loc *Location, req *http.Request)) (io.ReadCloser, error) {
 	if l.path != "" {
 		return l.fs.OpenFile(l.path, vfs.O_RDONLY, 0o600)
 	}
 
+	if tweakIndexOf != nil {
+		tweakIndexOf[0](l, nil) // tweak the URL if necessary
+	}
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, l.url, nil)
 	if err != nil {
 		return nil, err
@@ -378,6 +392,9 @@ func (l *Location) GetReader(creds Credentials) (io.ReadCloser, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+	if tweakIndexOf != nil {
+		tweakIndexOf[0](nil, req) // tweak the request if necessary
 	}
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(req)

@@ -16,7 +16,6 @@ import (
 
 const (
 	MAVEN_PATH            = "/testdata/.m2/repository"
-	FAIL_PATH             = "/testdata/.m2/fail"
 	MAVEN_CENTRAL_ADDRESS = "repo.maven.apache.org:443"
 	MAVEN_CENTRAL         = "https://repo.maven.apache.org/maven2/"
 	MAVEN_GROUP_ID        = "maven"
