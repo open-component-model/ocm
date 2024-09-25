@@ -36,6 +36,19 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>key</code>: secret key use to access the credential server
 
 
+  - <code>Git</code>: Git credential matcher
+
+    It matches the <code>Git</code> consumer type and additionally acts like
+    the <code>hostpath</code> type.
+
+    Credential consumers of the consumer type Git evaluate the following credential properties:
+
+      - <code>username</code>: the basic auth user name
+      - <code>password</code>: the basic auth password
+      - <code>token</code>: HTTP token authentication
+      - <code>privateKey</code>: Private Key authentication certificate
+
+
   - <code>Github</code>: GitHub credential matcher
 
     This matcher is a hostpath matcher.
