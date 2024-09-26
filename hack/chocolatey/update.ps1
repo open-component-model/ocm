@@ -18,10 +18,10 @@ $response = Invoke-RestMethod -Uri $url -Headers @{ "User-Agent" = "PowerShell" 
 $latestVersion = $response.tag_name -replace '^v', ''
 Write-Output "The latest released ocm-cli version is $latestVersion"
 $assets = $response.assets
-$url = $assets | Where-Object { $_.name -match 'windows-386.zip' } | Select-Object -ExpandProperty browser_download_url
-$url64 = $assets | Where-Object { $_.name -match 'windows-amd64.zip' } | Select-Object -ExpandProperty browser_download_url
-$sha256url = $assets | Where-Object { $_.name -match 'windows-386.zip.sha256' } | Select-Object -ExpandProperty browser_download_url
-$sha256url64 = $assets | Where-Object { $_.name -match 'windows-amd64.zip.sha256' } | Select-Object -ExpandProperty browser_download_url
+$url = $assets | Where-Object { $_.name -match 'windows-386.zip$' } | Select-Object -ExpandProperty browser_download_url
+$url64 = $assets | Where-Object { $_.name -match 'windows-amd64.zip$' } | Select-Object -ExpandProperty browser_download_url
+$sha256url = $assets | Where-Object { $_.name -match 'windows-386.zip.sha256$' } | Select-Object -ExpandProperty browser_download_url
+$sha256url64 = $assets | Where-Object { $_.name -match 'windows-amd64.zip.sha256$' } | Select-Object -ExpandProperty browser_download_url
 $sha256 = [System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri $sha256url).Content)
 $sha256_64 = [System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri $sha256url64).Content)
 
