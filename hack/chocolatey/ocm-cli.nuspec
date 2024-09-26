@@ -13,7 +13,7 @@ This is a nuspec. It mostly adheres to https://docs.nuget.org/create/Nuspec-Refe
   <metadata>
     <id>ocm-cli</id>
     <version>$version$</version>
-    <packageSourceUrl>https://github.com/open-component-model/ocm/releases/latest</packageSourceUrl>
+    <packageSourceUrl>https://github.com/open-component-model/ocm/tree/main/hack/chocolatey</packageSourceUrl>
     <!-- owners is a poor name for maintainers of the package. It sticks around by this name for compatibility reasons. It basically means you. -->
     <owners>SAP SE</owners>
     <!-- This section is about the software itself -->
