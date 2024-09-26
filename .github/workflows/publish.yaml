@@ -36,14 +36,12 @@ jobs:
         key: ${{ secrets.ARCHLINUX_SSH_PRIVATE_KEY }}
         known_hosts: ${{ secrets.ARCHLINUX_KNOWN_HOSTS }}
         config: ${{ secrets.ARCHLINUX_SSH_CONFIG}}
-    - name: Setup git config
-      run: |
-        git config user.name "GitHub Actions Bot"
-        git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
     - name: Git operations with SSH
       run: |
         git clone ssh://aur@aur.archlinux.org/ocm-cli.git
         cd ocm-cli
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
         ./upgrade ${{ env.RELEASE_VERSION }}
         git add PKGBUILD .SRCINFO
         git commit -m "Release ${{ env.RELEASE_VERSION }}"
