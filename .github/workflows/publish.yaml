@@ -34,7 +34,7 @@ jobs:
       with:
         name: aur
         key: ${{ secrets.ARCHLINUX_SSH_PRIVATE_KEY }}
-        known_hosts: ${{ secrets.ARCHLINUX_SSH_KNOWN_HOSTS }}
+        known_hosts: ${{ secrets.ARCHLINUX_KNOWN_HOSTS }}
         config: ${{ secrets.ARCHLINUX_SSH_CONFIG}}
     - name: Setup git config
       run: |
