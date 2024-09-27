@@ -27,6 +27,7 @@ bool
 boolean
 buildx
 cas
+chocolateyinstall
 cli
 cliconfig
 clis
@@ -187,6 +188,7 @@ npm
 npmjs
 npmrc
 npmregistry
+nuspec
 oauth
 oci
 ociartifact
