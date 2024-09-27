@@ -82,3 +82,43 @@ jobs:
         .\hack\chocolatey\update.ps1
         choco push ocm-cli.${{ env.RELEASE_VERSION }}.nupkg --source "'https://push.chocolatey.org/'" --api-key="${{ secrets.CHOCO_API_KEY }}"
 
+  push-to-winget:
+    name: Update Winget
+    runs-on: windows-latest
+    steps:
+    - name: Ensure proper version
+      run: |
+        $workflow_version = "${{ github.event.inputs.version }}"
+        $repository_version = "${{ github.event.client_payload.version }}"
+        if (-not ([string]::IsNullOrEmpty($workflow_version))) {
+          $workflow_version = "$workflow_version" -replace 'v'
+          echo "RELEASE_VERSION=$workflow_version" | Out-File $env:GITHUB_ENV
+          exit 0
+        }
+        if (-not ([string]::IsNullOrEmpty($repository_version))) {
+          $repository_version = "$repository_version" -replace 'v'
+          echo "RELEASE_VERSION=($repository_version -replace 'v')" | Out-File $env:GITHUB_ENV
+          exit 0
+        }
+        Write-Host "Version not provided"
+        exit 1
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ steps.generate_token.outputs.token }}
+    - name: Update Winget package
+      run: |
+        cd hack\winget
+        wingetcreate update --submit --token ${{ steps.generate_token.outputs.token }} --urls `
+          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-386.zip `
+          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-amd64.zip `
+          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
+          --version ${{ env.RELEASE_VERSION }} `
+          --release-notes-url https://github.com/open-component-model/ocm/blob/main/docs/releasenotes/v${{ env.RELEASE_VERSION }}.md `
+          Open-Component-Model.ocm-cli
