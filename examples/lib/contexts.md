@@ -82,7 +82,7 @@ The following context types are provided:
 
    It includes a *credentials* context.
 
-- **`ocm`**: working withOCM repositories.
+- **`ocm`**: working with OCM repositories.
    This is the central context type providing access to the elements
    of the open component model.
 

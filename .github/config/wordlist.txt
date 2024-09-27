@@ -288,7 +288,7 @@ valueset
 versionedtypedobjects
 walkthrough
 wget
-withocm
+winget
 xml
 yaml
 yitsushi
