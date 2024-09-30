@@ -49,7 +49,7 @@ $description += "`nContinue reading on [ocm.software / cli-reference](https://oc
 $releaseNotes = Get-Content -Path "docs\releasenotes\v$latestVersion.md" -Raw
 $releaseNotes = $releaseNotes -replace '\(#(\d+)\)', '([$1](https://github.com/open-component-model/ocm/pull/$1))'
 $releaseNotes = $releaseNotes -replace '<summary>.*</summary>', ''
-$releaseNotes = $releaseNotes -replace '</?details>', '' 
+$releaseNotes = $releaseNotes -replace '</?details>', ''
 $updatedContent = $updatedContent -replace '(?ms)<description>.*<\/description>', "<description>$description</description>"
 $updatedContent = $updatedContent -replace '(?ms)<releaseNotes>.*<\/releaseNotes>', "<releaseNotes>$releaseNotes</releaseNotes>"
 Set-Content -Path $nuspecPath -Value $updatedContent

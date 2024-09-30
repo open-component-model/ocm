@@ -6,7 +6,6 @@ $url64 = "run: update.ps1"
 $packageArgs = @{
   packageName   = $env:ChocolateyPackageName
   unzipLocation = $toolsDir
-  fileType      = 'exe'
   url           = $url
   url64bit      = $url64
   softwareName  = 'ocm-cli*'
