@@ -46,7 +46,7 @@ type LimitedBuffer struct {
 }
 
 func (b *LimitedBuffer) Exceeded() bool {
-	return b.LimitedWriter.N > b.max
+	return b.LimitedWriter.N < 0
 }
 
 func (b *LimitedBuffer) Bytes() []byte {
