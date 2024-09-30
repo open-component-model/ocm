@@ -9,11 +9,11 @@ require (
 	github.com/InfiniteLoopSpace/go_S-MIME v0.0.0-20181221134359-3f58f9a4b2b6
 	github.com/Masterminds/semver/v3 v3.3.0
 	github.com/aws/aws-sdk-go-v2 v1.31.0
-	github.com/aws/aws-sdk-go-v2/config v1.27.36
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.34
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.22
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.35.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.0
+	github.com/aws/aws-sdk-go-v2/config v1.27.39
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.37
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.25
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.35.3
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.3
 	github.com/cloudflare/cfssl v1.6.5
 	github.com/containerd/containerd v1.7.22
 	github.com/containerd/errdefs v0.1.0
@@ -39,7 +39,7 @@ require (
 	github.com/hashicorp/vault-client-go v0.4.3
 	github.com/imdario/mergo v0.3.16
 	github.com/juju/fslock v0.0.0-20160525022230-4d5c94c67b4b
-	github.com/klauspost/compress v1.17.9
+	github.com/klauspost/compress v1.17.10
 	github.com/klauspost/pgzip v1.2.6
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
 	github.com/mandelsoft/goutils v0.0.0-20240915132328-95975bffaef0
@@ -49,7 +49,7 @@ require (
 	github.com/marstr/guid v1.1.0
 	github.com/mikefarah/yq/v4 v4.44.3
 	github.com/mitchellh/copystructure v1.2.0
-	github.com/mittwald/go-helm-client v0.12.13
+	github.com/mittwald/go-helm-client v0.12.14
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
@@ -136,9 +136,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.20 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.20 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.18 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.23.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.27.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.31.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.23.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.27.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.31.3 // indirect
 	github.com/aws/smithy-go v1.21.0 // indirect
 	github.com/awslabs/amazon-ecr-credential-helper/ecr-login v0.0.0-20231024185945-8841054dbdb8 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
