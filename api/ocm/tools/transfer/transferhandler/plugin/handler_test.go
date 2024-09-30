@@ -1,3 +1,5 @@
+//go:build unix
+
 package plugin_test
 
 import (
