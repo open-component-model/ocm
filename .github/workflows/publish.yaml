@@ -112,6 +112,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         token: ${{ steps.generate_token.outputs.token }}
+    - name: Install wingetcreate
+      run: choco install wingetcreate
     - name: Update Winget package
       run: |
         cd hack\winget
