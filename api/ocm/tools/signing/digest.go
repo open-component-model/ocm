@@ -62,7 +62,7 @@ func VerifyResourceDigest(cv ocm.ComponentVersionAccess, i int, bacc ocm.DataAcc
 			if vcd.Resources[i].Digest.Equal(raw.Digest) {
 				return true, nil
 			}
-			return false, fmt.Errorf("component version %s corrupted", common.VersionedElementKey(cv))
+			return true, fmt.Errorf("component version %s corrupted", common.VersionedElementKey(cv))
 		}
 	}
 
