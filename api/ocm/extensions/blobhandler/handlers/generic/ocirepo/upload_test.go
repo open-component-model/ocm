@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
+	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/ocirepo"
 
 	"ocm.software/ocm/api/oci"
 	ctfoci "ocm.software/ocm/api/oci/extensions/repositories/ctf"
@@ -175,7 +176,7 @@ var _ = Describe("upload", func() {
 
 		// prepare upload to target OCI repo
 		attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
-		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "ocm/ociArtifacts", attr))
+		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, ocirepo.BlobHandlerName, attr))
 
 		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, copy, nil))
 
@@ -219,7 +220,7 @@ var _ = Describe("upload", func() {
 		// prepare upload to target OCI repo
 		// attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
 		attr := TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy"
-		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "ocm/ociArtifacts", attr))
+		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, ocirepo.BlobHandlerName, attr))
 
 		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, copy, nil))
 
