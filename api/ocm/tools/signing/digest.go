@@ -13,6 +13,18 @@ import (
 	common "ocm.software/ocm/api/utils/misc"
 )
 
+// VerifyResourceDigestByResourceAccess verifies the digest of a resource passed by ResourceAccess.
+func VerifyResourceDigestByResourceAccess(cv ocm.ComponentVersionAccess, rAcc ocm.ResourceAccess, bacc ocm.DataAccess, ostore ...VerifiedStore) (bool, error) {
+	cd := cv.GetDescriptor()
+
+	index := cd.GetResourceIndex(rAcc.Meta())
+	if index < 0 {
+		return false, errors.ErrNotFound("resource")
+	}
+
+	return VerifyResourceDigest(cv, index, bacc, ostore...)
+}
+
 // VerifyResourceDigest verify the digest of a resource taken from a component version.
 // The data of the resources (typically after fetching the content) is given by a ocm.DataAccess.
 // The digest info is table from the resource described by a component version, which has
@@ -25,16 +37,7 @@ func VerifyResourceDigest(cv ocm.ComponentVersionAccess, i int, bacc ocm.DataAcc
 	cd := cv.GetDescriptor()
 	raw := &cd.Resources[i]
 
-	store := general.Optional(ostore...)
-	if store != nil {
-		vcd := store.Get(cv)
-		if vcd == nil {
-			return false, fmt.Errorf("component version %s not verified", common.VersionedElementKey(cv))
-		}
-		if !vcd.Resources[i].Digest.Equal(raw.Digest) {
-			return false, fmt.Errorf("component version %s corrupted", common.VersionedElementKey(cv))
-		}
-	}
+	// Check if the resource is signature relevant
 	acc, err := octx.AccessSpecForSpec(raw.Access)
 	if err != nil {
 		return false, errors.Wrapf(err, resMsg(raw, "", "failed getting access for resource"))
@@ -49,6 +52,18 @@ func VerifyResourceDigest(cv ocm.ComponentVersionAccess, i int, bacc ocm.DataAcc
 	// special digest notation indicates to not digest the content
 	if raw.Digest.IsExcluded() {
 		return false, nil
+	}
+
+	// Check if the resource has already been verified
+	store := general.Optional(ostore...)
+	if store != nil {
+		vcd := store.Get(cv)
+		if vcd != nil {
+			if vcd.Resources[i].Digest.Equal(raw.Digest) {
+				return true, nil
+			}
+			return false, fmt.Errorf("component version %s corrupted", common.VersionedElementKey(cv))
+		}
 	}
 
 	meth, err := acc.AccessMethod(cv)
