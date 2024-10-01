@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/ocm/extensions/download/handlers/ocirepo"
 
 	"github.com/mandelsoft/goutils/errors"
 
@@ -82,8 +84,8 @@ of preconfigured download handler registrations (see <CMD>ocm ocm-downloadhandle
     type: ` + ConfigType + `
     description: "my standard download handler configuration"
     handlers:
-      - name: oci/artifact
-        artifactType: ociImage
+      - name: ` + ocirepo.PATH + `
+        artifactType: ` + artifacttypes.OCI_IMAGE + `
         mimeType:
         config: ...
       ...
