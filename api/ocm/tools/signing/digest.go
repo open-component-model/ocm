@@ -58,11 +58,11 @@ func VerifyResourceDigest(cv ocm.ComponentVersionAccess, i int, bacc ocm.DataAcc
 	store := general.Optional(ostore...)
 	if store != nil {
 		vcd := store.Get(cv)
-		if vcd != nil {
-			if vcd.Resources[i].Digest.Equal(raw.Digest) {
-				return true, nil
-			}
-			return true, fmt.Errorf("component version %s corrupted", common.VersionedElementKey(cv))
+		if vcd == nil {
+			return false, fmt.Errorf("component version %s not verified", common.VersionedElementKey(cv))
+		}
+		if !vcd.Resources[i].Digest.Equal(raw.Digest) {
+			return false, fmt.Errorf("component version %s corrupted", common.VersionedElementKey(cv))
 		}
 	}
 
