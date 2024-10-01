@@ -18,7 +18,7 @@ import (
 	"ocm.software/ocm/api/datacontext/attrs/clicfgattr"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/plugin/cache"
-	"ocm.software/ocm/api/ocm/plugin/internal"
+	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/accessmethod"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/accessmethod/compose"
@@ -30,6 +30,10 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/download"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/mergehandler"
 	merge "ocm.software/ocm/api/ocm/plugin/ppi/cmds/mergehandler/execute"
+	signingcmd "ocm.software/ocm/api/ocm/plugin/ppi/cmds/signing"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/signing/consumer"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/signing/sign"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/signing/verify"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/transferhandler"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload/put"
@@ -38,6 +42,7 @@ import (
 	vscompose "ocm.software/ocm/api/ocm/plugin/ppi/cmds/valueset/compose"
 	vsval "ocm.software/ocm/api/ocm/plugin/ppi/cmds/valueset/validate"
 	"ocm.software/ocm/api/ocm/valuemergehandler"
+	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/cobrautils/logopts/logging"
 	"ocm.software/ocm/api/utils/runtime"
@@ -456,7 +461,7 @@ func (p *pluginImpl) AskTransferQuestion(name string, question string, args inte
 	if err != nil {
 		return nil, err
 	}
-	var r internal.DecisionRequestResult
+	var r DecisionRequestResult
 	err = json.Unmarshal(result, &r)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot unmarshal composition result")
@@ -466,4 +471,87 @@ func (p *pluginImpl) AskTransferQuestion(name string, question string, args inte
 		return &r, nil
 	}
 	return &r, errors.New(r.Error)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (p *pluginImpl) GetSigningConsumer(name string, sctx signing.SigningContext) (credentials.ConsumerIdentity, error) {
+	sh := p.GetDescriptor().SigningHandlers.Get(name)
+	if sh == nil {
+		return nil, errors.ErrUnknown(descriptor.KIND_SIGNING_HANDLER, name)
+	}
+	if !sh.Credentials {
+		return nil, nil
+	}
+
+	ser := ppi.SigningContext{
+		HashAlgo:   sctx.GetHash(),
+		PrivateKey: sctx.GetPrivateKey(),
+		PublicKey:  sctx.GetPublicKey(),
+		Issuer:     sctx.GetIssuer(),
+	}
+	indata, err := json.Marshal(ser)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot marshal signing context")
+	}
+
+	result, err := p.Exec(bytes.NewReader(indata), nil, signingcmd.Name, consumer.Name, name)
+	if err != nil {
+		return nil, err
+	}
+	var r credentials.ConsumerIdentity
+	err = json.Unmarshal(result, &r)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot unmarshal signing result")
+	}
+
+	return r, nil
+}
+
+func (p *pluginImpl) Sign(name string, digest string, creds credentials.DirectCredentials, sctx signing.SigningContext) (*signing.Signature, error) {
+	ser := ppi.SigningContext{
+		HashAlgo:   sctx.GetHash(),
+		PrivateKey: sctx.GetPrivateKey(),
+		PublicKey:  sctx.GetPublicKey(),
+		Issuer:     sctx.GetIssuer(),
+
+		Credentials: creds,
+	}
+	indata, err := json.Marshal(ser)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot marshal signing context")
+	}
+
+	result, err := p.Exec(bytes.NewReader(indata), nil, signingcmd.Name, sign.Name, name, digest)
+	if err != nil {
+		return nil, err
+	}
+	var r SignatureSpec
+	err = json.Unmarshal(result, &r)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot unmarshal signing result")
+	}
+
+	return r.ConvertToSigning(), nil
+}
+
+func (p *pluginImpl) Verify(name string, digest string, signature *signing.Signature, sctx signing.SigningContext) error {
+	ser := ppi.SigningContext{
+		HashAlgo:   sctx.GetHash(),
+		PrivateKey: sctx.GetPrivateKey(),
+		PublicKey:  sctx.GetPublicKey(),
+		Issuer:     sctx.GetIssuer(),
+	}
+	indata, err := json.Marshal(ser)
+	if err != nil {
+		return errors.Wrapf(err, "cannot marshal signing context")
+	}
+
+	sig := SignatureSpecFor(signature)
+	sigdata, err := json.Marshal(sig)
+	if err != nil {
+		return errors.Wrapf(err, "cannot marshal signature")
+	}
+	_, err = p.Exec(bytes.NewReader(indata), nil, signingcmd.Name, verify.Name, name, digest, string(sigdata))
+	return err
 }

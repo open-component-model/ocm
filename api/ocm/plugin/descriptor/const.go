@@ -13,6 +13,8 @@ const (
 	KIND_ACCESSMETHOD    = errkind.KIND_ACCESSMETHOD
 	KIND_ACTION          = action.KIND_ACTION
 	KIND_TRANSFERHANDLER = "transferhandler"
+	KIND_QUESTION        = "question"
+	KIND_SIGNING_HANDLER = "signing handler"
 	KIND_VALUESET        = "value set"
 	KIND_PURPOSE         = "purposet"
 )
