@@ -17,6 +17,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/download"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/info"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/mergehandler"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/signing"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/topics/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/transferhandler"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload"
@@ -69,6 +70,7 @@ func NewPluginCommand(p ppi.Plugin, opts ...Option) *PluginCommand {
 	cmd.AddCommand(valueset.New(p))
 	cmd.AddCommand(command.New(p))
 	cmd.AddCommand(transferhandler.New(p))
+	cmd.AddCommand(signing.New(p))
 
 	cmd.InitDefaultHelpCmd()
 	help := cobrautils.GetHelpCommand(cmd)

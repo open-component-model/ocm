@@ -25,6 +25,7 @@ type Descriptor struct {
 	ValueSets                List[ValueSetDescriptor]          `json:"valuesets,omitempty"`
 	Commands                 List[CommandDescriptor]           `json:"commands,omitempty"`
 	TransferHandlers         List[TransferHandlerDescriptor]   `json:"transferHandlers,omitempty"`
+	SigningHandlers          List[SigningHandlerDescriptor]    `json:"signingHandlers,omitempty"`
 	ConfigTypes              List[ConfigTypeDescriptor]        `json:"configTypes,omitempty"`
 }
 
@@ -61,6 +62,9 @@ func (d *Descriptor) Capabilities() []string {
 	}
 	if len(d.TransferHandlers) > 0 {
 		caps = append(caps, "Transfer Handlers")
+	}
+	if len(d.SigningHandlers) > 0 {
+		caps = append(caps, "Signing Handlers")
 	}
 	return caps
 }
@@ -269,6 +273,20 @@ type QuestionDescriptor struct {
 	// are transferred, if an empty list is specified no
 	// labels are transferred to the plugin command.
 	Labels *[]string `json:"labels,omitempty"`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type SigningHandlerDescriptor struct {
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Credentials bool   `json:"credentials,omitempty"`
+	Signer      bool   `json:"signer,omitempty"`
+	Verifier    bool   `json:"verifier,omitempty"`
+}
+
+func (d SigningHandlerDescriptor) GetName() string {
+	return d.Name
 }
 
 ////////////////////////////////////////////////////////////////////////////////

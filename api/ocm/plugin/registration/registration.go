@@ -11,6 +11,7 @@ import (
 	pluginaccess "ocm.software/ocm/api/ocm/extensions/accessmethods/plugin"
 	pluginaction "ocm.software/ocm/api/ocm/extensions/actionhandler/plugin"
 	"ocm.software/ocm/api/ocm/extensions/attrs/plugincacheattr"
+	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	pluginupload "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/plugin"
 	"ocm.software/ocm/api/ocm/extensions/download"
 	plugindownload "ocm.software/ocm/api/ocm/extensions/download/handlers/plugin"
@@ -20,6 +21,7 @@ import (
 	"ocm.software/ocm/api/ocm/valuemergehandler"
 	pluginmerge "ocm.software/ocm/api/ocm/valuemergehandler/handlers/plugin"
 	"ocm.software/ocm/api/ocm/valuemergehandler/hpi"
+	sigplugin "ocm.software/ocm/api/tech/signing/handlers/plugin"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -149,6 +151,17 @@ func RegisterExtensions(ctxp ocm.ContextProvider) error {
 			t := plugin.New(name, s.Description)
 			registry.Register(t)
 		}
+
+		signers := signingattr.Get(ctx).HandlerRegistry()
+		for _, s := range p.GetDescriptor().SigningHandlers {
+			if s.Signer {
+				signers.RegisterSigner(s.Name, sigplugin.NewSigner(p, s.Name))
+			}
+			if s.Verifier {
+				signers.RegisterVerifier(s.Name, sigplugin.NewVerifier(p, s.Name))
+			}
+		}
 	}
+
 	return nil
 }

@@ -3,6 +3,7 @@ package plugin
 import (
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/internal"
+	"ocm.software/ocm/api/tech/signing"
 )
 
 const (
@@ -31,7 +32,13 @@ type (
 
 	AccessSpecInfo       = internal.AccessSpecInfo
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
+
+	SignatureSpec = internal.SignatureSpec
 )
+
+func SignatureSpecFor(sig *signing.Signature) *SignatureSpec {
+	return internal.SignatureSpecFor(sig)
+}
 
 //
 // Transfer handler types and constants
