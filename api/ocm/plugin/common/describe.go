@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/set"
 	"golang.org/x/exp/slices"
 
@@ -84,6 +86,11 @@ func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descrip
 		out.Printf("\n")
 		out.Printf("Transfer Handlers:\n")
 		DescribeTransferHandlers(d, out)
+	}
+	if len(d.SigningHandlers) > 0 {
+		out.Printf("\n")
+		out.Printf("Signing Handlers:\n")
+		DescribeSigningHandlers(d, out)
 	}
 }
 
@@ -584,6 +591,38 @@ func DescribeTransferHandlers(d *descriptor.Descriptor, out common.Printer) {
 			}
 		}
 	}
+}
+
+func GetSigningInfo(types []descriptor.SigningHandlerDescriptor) map[string]*descriptor.SigningHandlerDescriptor {
+	found := map[string]*descriptor.SigningHandlerDescriptor{}
+	for _, m := range types {
+		i := found[m.Name]
+		if i == nil {
+			found[m.Name] = generics.Pointer(m)
+		}
+	}
+	return found
+}
+
+func DescribeSigningHandlers(d *descriptor.Descriptor, out common.Printer) {
+	handlers := GetSigningInfo(d.SigningHandlers)
+	for _, n := range maputils.OrderedKeys(handlers) {
+		out.Printf("- Name:        %s\n", n)
+		m := handlers[n]
+		if m.Description != "" {
+			out.Printf("%s\n", utils.IndentLines(m.Description, "    "))
+		}
+		out := out.AddGap("  ")
+		out.Printf("Credentials: %T\n", m.Credentials)
+		out.Printf("Signer:      %T\n", m.Signer)
+		out.Printf("Verifier:    %T\n", m.Verifier)
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func GetName[T descriptor.Named](n T) string {
+	return n.GetName()
 }
 
 type Describable interface {
