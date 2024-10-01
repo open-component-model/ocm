@@ -2,15 +2,15 @@ package config
 
 import (
 	"fmt"
-	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
-	"ocm.software/ocm/api/ocm/extensions/download/handlers/ocirepo"
 
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/config"
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/download"
+	"ocm.software/ocm/api/ocm/extensions/download/handlers/ocirepo"
 	"ocm.software/ocm/api/utils/runtime"
 )
 

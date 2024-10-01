@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
-	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/ocirepo"
 
 	"ocm.software/ocm/api/oci"
 	ctfoci "ocm.software/ocm/api/oci/extensions/repositories/ctf"
@@ -17,6 +16,7 @@ import (
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/extensions/blobhandler"
+	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/ocirepo"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	ctfocm "ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/tools/transfer"
