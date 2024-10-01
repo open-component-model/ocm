@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/ocirepo"
 
 	"github.com/mandelsoft/goutils/errors"
 
@@ -9,7 +11,6 @@ import (
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/blobhandler"
-	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/ocirepo"
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -78,16 +79,16 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 
 const usage = `
 The config type <code>` + ConfigType + `</code> can be used to define a list
-of preconfigured download handler registrations (see <CMD>ocm ocm-downloadhandlers</CMD>):
+of preconfigured upload handler registrations (see <CMD>ocm ocm-uploadhandlers</CMD>):
 
 <pre>
     type: ` + ConfigType + `
-    description: "my standard download handler configuration"
+    description: "my standard upload handler configuration"
     handlers:
       - name: ` + ocirepo.BlobHandlerName + `
-        artifactType: ociImage
-        mimeType:
-        config: ...
+        artifactType: ` + artifacttypes.OCI_ARTIFACT + `
+        config:
+          ociRef: https://ghcr.io/open-component-model/...
       ...
 </pre>
 `
