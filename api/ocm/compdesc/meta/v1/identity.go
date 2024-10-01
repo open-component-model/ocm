@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -51,7 +53,9 @@ func (i Identity) Digest() []byte {
 		logging.Logger().LogError(err, "corrupted digest")
 	}
 
-	return data
+	hash := sha256.Sum256(data)
+
+	return []byte(hex.EncodeToString(hash[:]))
 }
 
 // Equals compares two identities.
