@@ -12,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/internal"
+	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -32,7 +33,13 @@ type (
 	SourceComponentVersion  = internal.SourceComponentVersion
 	TargetRepositorySpec    = internal.TargetRepositorySpec
 	StandardTransferOptions = internal.TransferOptions
+
+	SignatureSpec = internal.SignatureSpec
 )
+
+func SignatureSpecFor(sig *signing.Signature) *SignatureSpec {
+	return internal.SignatureSpecFor(sig)
+}
 
 var REALM = descriptor.REALM
 
@@ -79,6 +86,10 @@ type Plugin interface {
 	RegisterTransferHandler(h TransferHandler) error
 	GetTransferHandler(name string) TransferHandler
 	TransferHandlers() []TransferHandler
+
+	RegisterSigningHandler(h SigningHandler) error
+	GetSigningHandler(name string) SigningHandler
+	SigningHandlers() []SigningHandler
 
 	RegisterConfigType(c cpi.ConfigType) error
 	GetConfigType(name string) *descriptor.ConfigTypeDescriptor
@@ -265,4 +276,16 @@ type (
 	ArtifactQuestionArguments           = internal.ArtifactQuestionArguments
 	Resolution                          = internal.Resolution
 	DecisionRequestResult               = internal.DecisionRequestResult
+	SigningContext                      = internal.SigningContext
 )
+
+type ConsumerProvider func(sctx signing.SigningContext) credentials.ConsumerIdentity
+
+type SigningHandler interface {
+	GetName() string
+	GetDescription() string
+	GetSigner() signing.Signer
+	GetVerifier() signing.Verifier
+
+	GetConsumerProvider() ConsumerProvider
+}

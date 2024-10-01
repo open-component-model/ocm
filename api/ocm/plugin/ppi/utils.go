@@ -9,12 +9,12 @@ import (
 	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
+	"ocm.software/ocm/api/ocm/plugin/descriptor"
+	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
 type decoder runtime.TypedObjectDecoder[runtime.TypedObject]
-
-const KIND_QUESTION = "question"
 
 type AccessMethodBase struct {
 	decoder
@@ -146,11 +146,11 @@ func (t *transferHandler) GetQuestions() []DecisionHandler {
 
 func (t *transferHandler) RegisterDecision(h DecisionHandler) error {
 	if TransferHandlerQuestions[h.GetQuestion()] == nil {
-		return errors.ErrInvalid(KIND_QUESTION, h.GetQuestion())
+		return errors.ErrInvalid(descriptor.KIND_QUESTION, h.GetQuestion())
 	}
 	for _, e := range t.questions {
 		if e.GetQuestion() == h.GetQuestion() {
-			return errors.ErrAlreadyExists(KIND_QUESTION, e.GetQuestion())
+			return errors.ErrAlreadyExists(descriptor.KIND_QUESTION, e.GetQuestion())
 		}
 	}
 	t.questions = append(t.questions, h)
@@ -252,6 +252,54 @@ func NewOverwriteVersionDecision(desc string, h ComponentReferenceQuestionFunc, 
 
 func NewUpdateVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
 	return NewDecisionHandler(Q_UPDATE_VERSION, desc, ForComponentReferenceQuestion(h))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type signingHandler struct {
+	name        string
+	description string
+	consumer    ConsumerProvider
+	signer      signing.Signer
+	verifier    signing.Verifier
+}
+
+func NewSigningHandler(name, desc string, signer signing.Signer) *signingHandler {
+	return &signingHandler{
+		name:        name,
+		description: desc,
+		signer:      signer,
+	}
+}
+
+func (s *signingHandler) WithVerifier(verifier signing.Verifier) *signingHandler {
+	s.verifier = verifier
+	return s
+}
+
+func (s *signingHandler) WithCredentials(p ConsumerProvider) *signingHandler {
+	s.consumer = p
+	return s
+}
+
+func (t *signingHandler) GetName() string {
+	return t.name
+}
+
+func (t *signingHandler) GetDescription() string {
+	return t.description
+}
+
+func (t *signingHandler) GetSigner() signing.Signer {
+	return t.signer
+}
+
+func (t *signingHandler) GetVerifier() signing.Verifier {
+	return t.verifier
+}
+
+func (t *signingHandler) GetConsumerProvider() ConsumerProvider {
+	return t.consumer
 }
 
 ////////////////////////////////////////////////////////////////////////////////

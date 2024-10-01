@@ -48,6 +48,8 @@ type plugin struct {
 
 	transferhandlers map[string]TransferHandler
 
+	signinghandlers map[string]SigningHandler
+
 	clicmds map[string]Command
 
 	configParser func(message json.RawMessage) (interface{}, error)
@@ -73,6 +75,7 @@ func NewPlugin(name string, version string) Plugin {
 		mergespecs:    map[string]*descriptor.LabelMergeSpecification{},
 
 		transferhandlers: map[string]TransferHandler{},
+		signinghandlers:  map[string]SigningHandler{},
 
 		valuesets: map[string]map[string]ValueSet{},
 		setScheme: map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]{},
@@ -628,6 +631,33 @@ func (p *plugin) RegisterTransferHandler(h TransferHandler) error {
 
 func (p *plugin) TransferHandlers() []TransferHandler {
 	return maputils.OrderedValues(p.transferhandlers)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (p *plugin) GetSigningHandler(name string) SigningHandler {
+	return p.signinghandlers[name]
+}
+
+func (p *plugin) RegisterSigningHandler(h SigningHandler) error {
+	if p.GetSigningHandler(h.GetName()) != nil {
+		return errors.ErrAlreadyExists("signing handler", h.GetName())
+	}
+	d := descriptor.SigningHandlerDescriptor{
+		Name:        h.GetName(),
+		Description: h.GetDescription(),
+		Credentials: h.GetConsumerProvider() != nil,
+		Signer:      h.GetSigner() != nil,
+		Verifier:    h.GetVerifier() != nil,
+	}
+
+	p.signinghandlers[h.GetName()] = h
+	p.descriptor.SigningHandlers = append(p.descriptor.SigningHandlers, d)
+	return nil
+}
+
+func (p *plugin) SigningHandlers() []SigningHandler {
+	return maputils.OrderedValues(p.signinghandlers)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
