@@ -34,10 +34,10 @@ the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
 }
 
 const (
-	ID_HOSTNAME = hostpath.ID_HOSTNAME
-	ID_PATH     = "path"
-	ID_PORT     = hostpath.ID_PORT
-	ID_SCHEME   = hostpath.ID_SCHEME
+	ID_HOSTNAME   = hostpath.ID_HOSTNAME
+	ID_PATHPREFIX = hostpath.ID_PATHPREFIX
+	ID_PORT       = hostpath.ID_PORT
+	ID_SCHEME     = hostpath.ID_SCHEME
 )
 
 const (
@@ -96,7 +96,7 @@ func GetConsumerId(repoURL string) (cpi.ConsumerIdentity, error) {
 	}
 
 	if path != "" {
-		id[ID_PATH] = path
+		id[ID_PATHPREFIX] = path
 	}
 
 	id[ID_SCHEME] = scheme
@@ -117,10 +117,10 @@ func BasicAuthCredentials(username, password string) cpi.Credentials {
 	}
 }
 
-func PublicKeyCredentials(username, publicKey string) cpi.Credentials {
+func PrivateKeyCredentials(username, privateKey string) cpi.Credentials {
 	return cpi.DirectCredentials{
 		ATTR_USERNAME:    username,
-		ATTR_PRIVATE_KEY: publicKey,
+		ATTR_PRIVATE_KEY: privateKey,
 	}
 }
 

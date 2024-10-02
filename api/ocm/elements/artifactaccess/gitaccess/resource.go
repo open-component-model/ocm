@@ -1,4 +1,4 @@
-package githubaccess
+package gitaccess
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"

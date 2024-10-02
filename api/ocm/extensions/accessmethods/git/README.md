@@ -14,7 +14,7 @@ The artifact content is provided as gnu-zipped tar archive
 ### Description
 
 This method implements the access of the content of a git commit stored in a
-GitHub repository.
+git repository.
 
 Supported specification version is `v1`
 
