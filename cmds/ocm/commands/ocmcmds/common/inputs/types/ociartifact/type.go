@@ -6,18 +6,12 @@ import (
 )
 
 const (
-	TYPE        = artifacttypes.OCI_ARTIFACT
-	LEGACY_TYPE = artifacttypes.OCI_IMAGE
+	TYPE = artifacttypes.OCI_ARTIFACT
 )
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
-	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(LEGACY_TYPE, &Spec{}, legacy_usage, ConfigHandler()))
 }
-
-const legacy_usage = `
-DEPRECATED: This type is deprecated, please use ` + TYPE + ` instead.
-`
 
 const usage = `
 This input type is used to import an OCI image from an OCI registry.

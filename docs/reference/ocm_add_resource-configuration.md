@@ -459,12 +459,6 @@ with the field <code>type</code> in the <code>input</code> field:
 
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputPlatforms</code>, <code>--mediaType</code>
 
-- Input type <code>ociImage</code>
-
-  DEPRECATED: This type is deprecated, please use ociArtifact instead.
-
-  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputPlatforms</code>, <code>--mediaType</code>
-
 - Input type <code>ocm</code>
 
   This input type allows to get a resource artifact from an OCM repository.
