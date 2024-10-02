@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/containerd/containerd/remotes"
@@ -38,7 +39,8 @@ func NewDataAccess(repo registry.Repository, digest digest.Digest, delayed bool)
 	var reader io.ReadCloser
 	desc, err := repo.Resolve(dummyContext, digest.String())
 	if err != nil {
-		if errors.Is(err, errdef.ErrNotFound) {
+		// docker registry sometimes returns an Internal Server Error instead of NOT FOUND!
+		if errors.Is(err, errdef.ErrNotFound) || strings.Contains(err.Error(), "Internal Server Error") {
 			desc, err = repo.Blobs().Resolve(dummyContext, digest.String())
 			if err != nil {
 				return nil, err
