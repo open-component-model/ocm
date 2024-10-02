@@ -1,9 +1,10 @@
 package identity_test
 
 import (
+	"github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/api/credentials/builtin/git/identity"
+	. "ocm.software/ocm/api/tech/git/identity"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext"
@@ -16,8 +17,7 @@ var _ = Describe("consumer id handling", func() {
 
 	Context("id determination", func() {
 		It("handles https repos", func() {
-			id, err := GetConsumerId(repo)
-			Expect(err).ToNot(HaveOccurred())
+			id := testutils.Must(GetConsumerId(repo))
 			Expect(id).To(Equal(credentials.NewConsumerIdentity(CONSUMER_TYPE,
 				"port", "443",
 				"hostname", "github.com",
@@ -26,8 +26,7 @@ var _ = Describe("consumer id handling", func() {
 		})
 
 		It("handles http repos", func() {
-			id, err := GetConsumerId("http://github.com/torvalds/linux.git")
-			Expect(err).ToNot(HaveOccurred())
+			id := testutils.Must(GetConsumerId("http://github.com/torvalds/linux.git"))
 			Expect(id).To(Equal(credentials.NewConsumerIdentity(CONSUMER_TYPE,
 				"port", "80",
 				"hostname", "github.com",
@@ -36,8 +35,7 @@ var _ = Describe("consumer id handling", func() {
 		})
 
 		It("handles ssh standard format repos", func() {
-			id, err := GetConsumerId("ssh://github.com/torvalds/linux.git")
-			Expect(err).ToNot(HaveOccurred())
+			id := testutils.Must(GetConsumerId("ssh://github.com/torvalds/linux.git"))
 			Expect(id).To(Equal(credentials.NewConsumerIdentity(CONSUMER_TYPE,
 				"port", "22",
 				"hostname", "github.com",
@@ -46,8 +44,7 @@ var _ = Describe("consumer id handling", func() {
 		})
 
 		It("handles ssh git @ format repos", func() {
-			id, err := GetConsumerId("git@github.com:torvalds/linux.git")
-			Expect(err).ToNot(HaveOccurred())
+			id := testutils.Must(GetConsumerId("git@github.com:torvalds/linux.git"))
 			Expect(id).To(Equal(credentials.NewConsumerIdentity(CONSUMER_TYPE,
 				"port", "22",
 				"hostname", "github.com",
@@ -56,8 +53,7 @@ var _ = Describe("consumer id handling", func() {
 		})
 
 		It("handles git format repos", func() {
-			id, err := GetConsumerId("git://github.com/torvalds/linux.git")
-			Expect(err).ToNot(HaveOccurred())
+			id := testutils.Must(GetConsumerId("git://github.com/torvalds/linux.git"))
 			Expect(id).To(Equal(credentials.NewConsumerIdentity(CONSUMER_TYPE,
 				"port", "9418",
 				"hostname", "github.com",
@@ -66,12 +62,11 @@ var _ = Describe("consumer id handling", func() {
 		})
 
 		It("handles file format repos", func() {
-			id, err := GetConsumerId("file:///path/to/linux/repo")
-			Expect(err).ToNot(HaveOccurred())
+			id := testutils.Must(GetConsumerId("file:///path/to/linux/repo"))
 			Expect(id).To(Equal(credentials.NewConsumerIdentity(CONSUMER_TYPE,
 				"scheme", "file",
 				"hostname", "localhost",
-				"path", "/path/to/linux/repo",
+				"pathprefix", "/path/to/linux/repo",
 			)))
 		})
 	})
@@ -87,8 +82,7 @@ var _ = Describe("consumer id handling", func() {
 
 		It("Basic Auth", func() {
 			user, pass := "linus", "torvalds"
-			id, err := GetConsumerId(repo)
-			Expect(err).ToNot(HaveOccurred())
+			id := testutils.Must(GetConsumerId(repo))
 			credctx.SetCredentialsForConsumer(id,
 				credentials.CredentialsFromList(
 					ATTR_USERNAME, user,
@@ -96,8 +90,7 @@ var _ = Describe("consumer id handling", func() {
 				),
 			)
 
-			creds, err := GetCredentials(ctx, repo)
-			Expect(err).ToNot(HaveOccurred())
+			creds := testutils.Must(GetCredentials(ctx, repo))
 			Expect(creds).To(BeEquivalentTo(common.Properties{
 				ATTR_USERNAME: user,
 				ATTR_PASSWORD: pass,
@@ -106,16 +99,14 @@ var _ = Describe("consumer id handling", func() {
 
 		It("Token Auth", func() {
 			token := "mytoken"
-			id, err := GetConsumerId(repo)
-			Expect(err).ToNot(HaveOccurred())
+			id := testutils.Must(GetConsumerId(repo))
 			credctx.SetCredentialsForConsumer(id,
 				credentials.CredentialsFromList(
 					ATTR_TOKEN, token,
 				),
 			)
 
-			creds, err := GetCredentials(ctx, repo)
-			Expect(err).ToNot(HaveOccurred())
+			creds := testutils.Must(GetCredentials(ctx, repo))
 			Expect(creds).To(BeEquivalentTo(common.Properties{
 				ATTR_TOKEN: token,
 			}))
@@ -123,8 +114,7 @@ var _ = Describe("consumer id handling", func() {
 
 		It("Public Key Auth", func() {
 			user, key := "linus", "path/to/my/id_rsa"
-			id, err := GetConsumerId(repo)
-			Expect(err).ToNot(HaveOccurred())
+			id := testutils.Must(GetConsumerId(repo))
 			credctx.SetCredentialsForConsumer(id,
 				credentials.CredentialsFromList(
 					ATTR_USERNAME, user,
@@ -132,8 +122,7 @@ var _ = Describe("consumer id handling", func() {
 				),
 			)
 
-			creds, err := GetCredentials(ctx, repo)
-			Expect(err).ToNot(HaveOccurred())
+			creds := testutils.Must(GetCredentials(ctx, repo))
 			Expect(creds).To(BeEquivalentTo(common.Properties{
 				ATTR_USERNAME:    user,
 				ATTR_PRIVATE_KEY: key,

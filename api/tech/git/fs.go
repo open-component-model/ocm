@@ -26,42 +26,22 @@ func VFSBillyFS(fsToWrap vfs.FileSystem) (billy.Filesystem, error) {
 	}
 
 	return &fs{
-		vfs: fsToWrap,
+		FileSystem: fsToWrap,
 	}, nil
 }
 
 type fs struct {
-	vfs vfs.FileSystem
+	vfs.FileSystem
 }
+
+var _ billy.Filesystem = &fs{}
 
 type file struct {
-	lock    *fslock.Lock
-	vfsFile vfs.File
+	lock *fslock.Lock
+	vfs.File
 }
 
-func (f *file) Name() string {
-	return f.vfsFile.Name()
-}
-
-func (f *file) Write(p []byte) (n int, err error) {
-	return f.vfsFile.Write(p)
-}
-
-func (f *file) Read(p []byte) (n int, err error) {
-	return f.vfsFile.Read(p)
-}
-
-func (f *file) ReadAt(p []byte, off int64) (n int, err error) {
-	return f.vfsFile.ReadAt(p, off)
-}
-
-func (f *file) Seek(offset int64, whence int) (int64, error) {
-	return f.vfsFile.Seek(offset, whence)
-}
-
-func (f *file) Close() error {
-	return f.vfsFile.Close()
-}
+var _ billy.File = &file{}
 
 func (f *file) Lock() error {
 	return f.lock.Lock()
@@ -71,14 +51,10 @@ func (f *file) Unlock() error {
 	return f.lock.Unlock()
 }
 
-func (f *file) Truncate(size int64) error {
-	return f.vfsFile.Truncate(size)
-}
-
 var _ billy.File = &file{}
 
 func (f *fs) Create(filename string) (billy.File, error) {
-	vfsFile, err := f.vfs.Create(filename)
+	vfsFile, err := f.FileSystem.Create(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -93,17 +69,17 @@ func (f *fs) Create(filename string) (billy.File, error) {
 // juju vfs only operates on syscalls directly and without interface abstraction its not easy to get the root.
 func (f *fs) vfsToBillyFileInfo(vf vfs.File) (billy.File, error) {
 	var lock *fslock.Lock
-	if f.vfs == osfs.OsFs {
+	if f.FileSystem == osfs.OsFs {
 		lock = fslock.New(fmt.Sprintf("%s.lock", vf.Name()))
 	} else {
 		hash := fnv.New32()
-		_, _ = hash.Write([]byte(f.vfs.Name()))
+		_, _ = hash.Write([]byte(f.FileSystem.Name()))
 		temp, err := os.MkdirTemp("", fmt.Sprintf("git-vfs-locks-%x", hash.Sum32()))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create temp dir to allow mapping vfs to git (billy) filesystem; "+
 				"this temporary directory is mandatory because a virtual filesystem cannot be used to accurately depict os syslocks: %w", err)
 		}
-		_, components := vfs.Components(f.vfs, vf.Name())
+		_, components := vfs.Components(f.FileSystem, vf.Name())
 		lockPath := filepath.Join(
 			temp,
 			filepath.Join(components[:len(components)-1]...),
@@ -117,13 +93,13 @@ func (f *fs) vfsToBillyFileInfo(vf vfs.File) (billy.File, error) {
 	}
 
 	return &file{
-		vfsFile: vf,
-		lock:    lock,
+		File: vf,
+		lock: lock,
 	}, nil
 }
 
 func (f *fs) Open(filename string) (billy.File, error) {
-	vfsFile, err := f.vfs.Open(filename)
+	vfsFile, err := f.FileSystem.Open(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -132,11 +108,11 @@ func (f *fs) Open(filename string) (billy.File, error) {
 
 func (f *fs) OpenFile(filename string, flag int, perm os.FileMode) (billy.File, error) {
 	if flag&os.O_CREATE != 0 {
-		if err := f.vfs.MkdirAll(filepath.Dir(filename), 0o755); err != nil {
+		if err := f.FileSystem.MkdirAll(filepath.Dir(filename), 0o755); err != nil {
 			return nil, err
 		}
 	}
-	vfsFile, err := f.vfs.OpenFile(filename, flag, perm)
+	vfsFile, err := f.FileSystem.OpenFile(filename, flag, perm)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +120,7 @@ func (f *fs) OpenFile(filename string, flag int, perm os.FileMode) (billy.File, 
 }
 
 func (f *fs) Stat(filename string) (os.FileInfo, error) {
-	fi, err := f.vfs.Stat(filename)
+	fi, err := f.FileSystem.Stat(filename)
 	if errors.Is(err, syscall.ENOENT) {
 		return nil, os.ErrNotExist
 	}
@@ -154,15 +130,11 @@ func (f *fs) Stat(filename string) (os.FileInfo, error) {
 func (f *fs) Rename(oldpath, newpath string) error {
 	dir := filepath.Dir(newpath)
 	if dir != "." {
-		if err := f.vfs.MkdirAll(dir, 0o755); err != nil {
+		if err := f.FileSystem.MkdirAll(dir, 0o755); err != nil {
 			return err
 		}
 	}
-	return f.vfs.Rename(oldpath, newpath)
-}
-
-func (f *fs) Remove(filename string) error {
-	return f.vfs.Remove(filename)
+	return f.FileSystem.Rename(oldpath, newpath)
 }
 
 func (f *fs) Join(elem ...string) string {
@@ -170,7 +142,7 @@ func (f *fs) Join(elem ...string) string {
 }
 
 func (f *fs) TempFile(dir, prefix string) (billy.File, error) {
-	vfsFile, err := vfs.TempFile(f.vfs, dir, prefix)
+	vfsFile, err := vfs.TempFile(f.FileSystem, dir, prefix)
 	if err != nil {
 		return nil, err
 	}
@@ -178,15 +150,11 @@ func (f *fs) TempFile(dir, prefix string) (billy.File, error) {
 }
 
 func (f *fs) ReadDir(path string) ([]os.FileInfo, error) {
-	return vfs.ReadDir(f.vfs, path)
-}
-
-func (f *fs) MkdirAll(filename string, perm os.FileMode) error {
-	return f.vfs.MkdirAll(filename, perm)
+	return vfs.ReadDir(f.FileSystem, path)
 }
 
 func (f *fs) Lstat(filename string) (os.FileInfo, error) {
-	fi, err := f.vfs.Lstat(filename)
+	fi, err := f.FileSystem.Lstat(filename)
 	if err != nil {
 		if errors.Is(err, syscall.ENOENT) {
 			return nil, os.ErrNotExist
@@ -195,21 +163,13 @@ func (f *fs) Lstat(filename string) (os.FileInfo, error) {
 	return fi, err
 }
 
-func (f *fs) Symlink(target, link string) error {
-	return f.vfs.Symlink(target, link)
-}
-
-func (f *fs) Readlink(link string) (string, error) {
-	return f.vfs.Readlink(link)
-}
-
 func (f *fs) Chroot(path string) (billy.Filesystem, error) {
-	fi, err := f.vfs.Stat(path)
+	fi, err := f.FileSystem.Stat(path)
 	if os.IsNotExist(err) {
-		if err = f.vfs.MkdirAll(path, 0o755); err != nil {
+		if err = f.FileSystem.MkdirAll(path, 0o755); err != nil {
 			return nil, err
 		}
-		fi, err = f.vfs.Stat(path)
+		fi, err = f.FileSystem.Stat(path)
 	}
 
 	if err != nil {
@@ -218,21 +178,21 @@ func (f *fs) Chroot(path string) (billy.Filesystem, error) {
 		return nil, fmt.Errorf("path %s is not a directory", path)
 	}
 
-	chfs, err := projectionfs.New(f.vfs, path)
+	chfs, err := projectionfs.New(f.FileSystem, path)
 	if err != nil {
 		return nil, err
 	}
 
 	return &fs{
-		vfs: chfs,
+		FileSystem: chfs,
 	}, nil
 }
 
 func (f *fs) Root() string {
-	if root := projectionfs.Root(f.vfs); root != "" {
+	if root := projectionfs.Root(f.FileSystem); root != "" {
 		return root
 	}
-	if canonicalRoot, err := vfs.Canonical(f.vfs, "/", true); err == nil {
+	if canonicalRoot, err := vfs.Canonical(f.FileSystem, "/", true); err == nil {
 		return canonicalRoot
 	}
 	return "/"

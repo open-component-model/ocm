@@ -3,13 +3,13 @@ package git
 import (
 	"fmt"
 	"io"
+	"ocm.software/ocm/api/tech/git/identity"
 
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/mandelsoft/goutils/errors"
 	giturls "github.com/whilp/git-urls"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/builtin/git/identity"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/internal"
 	techgit "ocm.software/ocm/api/tech/git"
