@@ -34,7 +34,8 @@ ifeq ("v$(JQ)","v0.0")
 endif
 
 GOLANGCILINT_VERSION := "v1.59.1"
-GOLANGCILINTV := $(shell (golangci-lint --version 2>/dev/null || echo 0.0.0) | sed 's/.*v\([0-9\.]*\) .*/\1/')
+# under MAC the version v1.59.1, on linux the v is omitted
+GOLANGCILINTV := $(shell (golangci-lint --version 2>/dev/null || echo 0.0.0) | sed 's/.*version v\{0,1\}\([0-9\.]*\) .*/\1/')
 ifneq ("v$(GOLANGCILINTV)",$(GOLANGCILINT_VERSION))
   deps += golangci-lint
 endif
@@ -80,9 +81,11 @@ gofumpt:
 
 .PHONY: golangci-lint
 golangci-lint:
+ifneq ("v$(GOLANGCILINTV)",$(GOLANGCILINT_VERSION))
 	@# no recommended by website
 	@# go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCILINT_VERSION)
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin $(GOLANGCILINT_VERSION)
+endif
 
 .PHONY: golangci-lint-version
 golangci-lint-version:
