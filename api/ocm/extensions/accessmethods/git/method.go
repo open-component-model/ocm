@@ -3,7 +3,6 @@ package git
 import (
 	"fmt"
 	"io"
-	"ocm.software/ocm/api/tech/git/identity"
 
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/mandelsoft/goutils/errors"
@@ -13,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/internal"
 	techgit "ocm.software/ocm/api/tech/git"
+	"ocm.software/ocm/api/tech/git/identity"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessio/downloader/git"
 	"ocm.software/ocm/api/utils/accessobj"
