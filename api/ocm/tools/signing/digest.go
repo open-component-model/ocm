@@ -27,8 +27,16 @@ func VerifyResourceDigestByResourceAccess(cv ocm.ComponentVersionAccess, rAcc oc
 
 // VerifyResourceDigest verify the digest of a resource taken from a component version.
 // The data of the resources (typically after fetching the content) is given by a ocm.DataAccess.
-// The digest info is table from the resource described by a component version, which has
-// been used to retrieve the data.
+// The digest info for verification is taken from the resource described by a component version,
+// which has been used to retrieve the data. The component version itself is not verified.
+//
+// If a VerifiedStore is given, the found resource digest must match the content
+// described by the store (which should describe verified component version descriptors),
+// otherwise the verification is rejected. If the store does not contain the verified component version,
+// verification is rejected, because no verified resource digest can be determined.
+// So, if no store is give, the given component version is assumed to be already verified.
+// Only the digest of the downloaded resource is verified.
+//
 // The function returns true if the verification has been executed. If an error occurs, or
 // the verification has been failed, an appropriate error occurs.
 // If the resource is not signature relevant (false,nil) is returned.
