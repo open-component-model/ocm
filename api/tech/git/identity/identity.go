@@ -76,7 +76,6 @@ func GetConsumerId(repoURL string) (cpi.ConsumerIdentity, error) {
 			host = "localhost"
 			path = u.Path
 		}
-
 	}
 
 	if idx := strings.Index(host, ":"); idx > 0 {
