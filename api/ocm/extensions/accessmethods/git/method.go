@@ -2,21 +2,18 @@ package git
 
 import (
 	"fmt"
-	"io"
 
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/mandelsoft/goutils/errors"
 	giturls "github.com/whilp/git-urls"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/internal"
-	techgit "ocm.software/ocm/api/tech/git"
 	"ocm.software/ocm/api/tech/git/identity"
-	"ocm.software/ocm/api/utils/accessio"
-	"ocm.software/ocm/api/utils/accessio/downloader/git"
-	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
+	gitblob "ocm.software/ocm/api/utils/blobaccess/git"
 	"ocm.software/ocm/api/utils/mime"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -78,101 +75,43 @@ func (*AccessSpec) GetType() string {
 	return Type
 }
 
-func (a *AccessSpec) AccessMethod(c internal.ComponentVersionAccess) (internal.AccessMethod, error) {
-	return accspeccpi.AccessMethodForImplementation(newMethod(c, a))
-}
-
-func newMethod(componentVersionAccess internal.ComponentVersionAccess, accessSpec *AccessSpec) (accspeccpi.AccessMethodImpl, error) {
-	u, err := giturls.Parse(accessSpec.RepoURL)
+func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal.AccessMethod, error) {
+	_, err := giturls.Parse(a.RepoURL)
 	if err != nil {
-		return nil, errors.ErrInvalidWrap(err, "repository repoURL", accessSpec.RepoURL)
+		return nil, errors.ErrInvalidWrap(err, "repository repoURL", a.RepoURL)
 	}
-	if err := plumbing.ReferenceName(accessSpec.Ref).Validate(); err != nil {
-		return nil, errors.ErrInvalidWrap(err, "commit hash", accessSpec.Ref)
+	if err := plumbing.ReferenceName(a.Ref).Validate(); err != nil {
+		return nil, errors.ErrInvalidWrap(err, "commit hash", a.Ref)
 	}
-
-	creds, cid, err := getCreds(accessSpec.RepoURL, componentVersionAccess.GetContext().CredentialsContext())
+	creds, _, err := getCreds(a.RepoURL, cva.GetContext().CredentialsContext())
 	if err != nil {
-		return nil, fmt.Errorf("failed to get credentials for repository %s: %w", accessSpec.RepoURL, err)
+		return nil, fmt.Errorf("failed to get credentials for repository %s: %w", a.RepoURL, err)
 	}
 
-	auth, err := techgit.AuthFromCredentials(creds)
-	if err != nil && !errors.Is(err, techgit.ErrNoValidGitCredentials) {
-		return nil, fmt.Errorf("failed to get auth method for repository %s: %w", accessSpec.RepoURL, err)
+	octx := cva.GetContext()
+
+	opts := []gitblob.Option{
+		gitblob.WithLoggingContext(octx),
+		gitblob.WithCredentialContext(octx),
+		gitblob.WithURL(a.RepoURL),
+		gitblob.WithRef(a.Ref),
+		gitblob.WithCachingFileSystem(vfsattr.Get(octx)),
+	}
+	if creds != nil {
+		opts = append(opts, gitblob.WithCredentials(creds))
 	}
 
-	gitDownloader := git.NewDownloader(u.String(), accessSpec.Ref, accessSpec.PathSpec, auth)
-	cachedGitBlobAccessor := accessobj.CachedBlobAccessForWriter(
-		componentVersionAccess.GetContext(),
-		mime.MIME_OCTET,
-		accessio.NewWriteAtWriter(gitDownloader.Download),
-	)
-	jointCloser := func() error {
-		return errors.Join(gitDownloader.Close(), cachedGitBlobAccessor.Close())
+	factory := func() (blobaccess.BlobAccess, error) {
+		return gitblob.BlobAccess(opts...)
 	}
 
-	return &accessMethod{
-		spec:   accessSpec,
-		access: cachedGitBlobAccessor,
-		close:  jointCloser,
-		cid:    cid,
-	}, nil
-}
-
-type accessMethod struct {
-	spec   *AccessSpec
-	access blobaccess.BlobAccess
-	close  func() error
-
-	cid credentials.ConsumerIdentity
-}
-
-var _ accspeccpi.AccessMethodImpl = &accessMethod{}
-
-func (m *accessMethod) Close() error {
-	if m.access == nil {
-		return nil
-	}
-
-	var err error
-	if m.close != nil {
-		err = m.close()
-	}
-	err = errors.Join(err, m.access.Close())
-
-	return err
-}
-
-func (m *accessMethod) Get() ([]byte, error) {
-	return m.access.Get()
-}
-
-func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	return m.access.Reader()
-}
-
-func (m *accessMethod) MimeType() string {
-	return mime.MIME_OCTET
-}
-
-func (*accessMethod) IsLocal() bool {
-	return false
-}
-
-func (m *accessMethod) GetKind() string {
-	return Type
-}
-
-func (m *accessMethod) AccessSpec() internal.AccessSpec {
-	return m.spec
-}
-
-func (m *accessMethod) GetConsumerId(_ ...credentials.UsageContext) credentials.ConsumerIdentity {
-	return m.cid
-}
-
-func (m *accessMethod) GetIdentityMatcher() string {
-	return identity.CONSUMER_TYPE
+	return accspeccpi.AccessMethodForImplementation(accspeccpi.NewDefaultMethodImpl(
+		cva,
+		a,
+		"",
+		mime.MIME_TGZ,
+		factory,
+	), nil)
 }
 
 func getCreds(repoURL string, cctx credentials.Context) (credentials.Credentials, credentials.ConsumerIdentity, error) {

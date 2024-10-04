@@ -100,6 +100,9 @@ func (f *fs) vfsToBillyFileInfo(vf vfs.File) (billy.File, error) {
 
 func (f *fs) Open(filename string) (billy.File, error) {
 	vfsFile, err := f.FileSystem.Open(filename)
+	if errors.Is(err, syscall.ENOENT) {
+		return nil, os.ErrNotExist
+	}
 	if err != nil {
 		return nil, err
 	}
