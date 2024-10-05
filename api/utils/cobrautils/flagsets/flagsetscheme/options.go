@@ -7,11 +7,27 @@ import (
 	"ocm.software/ocm/api/utils/runtime/descriptivetype"
 )
 
+// OptionTargetWrapper is used as target for option functions, it provides
+// setters for fields, which should not be modifiable for a final type object.
+type OptionTargetWrapper[T any] struct {
+	target T
+	info   *typeInfoImpl
+}
+
+func NewOptionTargetWrapper[T any](target T, info *typeInfoImpl) *OptionTargetWrapper[T] {
+	return &OptionTargetWrapper[T]{
+		target: target,
+		info:   info,
+	}
+}
+
+func (t OptionTargetWrapper[E]) SetConfigHandler(value flagsets.ConfigOptionTypeSetHandler) {
+	t.info.handler = value
+}
+
 ////////////////////////////////////////////////////////////////////////////////
-// Access Type Options
 
 type OptionTarget interface {
-	descriptivetype.OptionTarget
 	SetConfigHandler(flagsets.ConfigOptionTypeSetHandler)
 }
 

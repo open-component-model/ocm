@@ -25,15 +25,15 @@ func RegisterRepositoryTypeVersions(s RepositoryTypeVersionScheme) {
 ////////////////////////////////////////////////////////////////////////////////
 
 func NewRepositoryType[I RepositorySpec](name string, opts ...RepositoryOption) RepositoryType {
-	return descriptivetype.NewTypedObjectTypeObject(runtime.NewVersionedTypedObjectType[RepositorySpec, I](name), opts...)
+	return descriptivetype.NewVersionedTypedObjectTypeObject(runtime.NewVersionedTypedObjectType[RepositorySpec, I](name), opts...)
 }
 
 func NewRepositoryTypeByConverter[I RepositorySpec, V runtime.TypedObject](name string, converter runtime.Converter[I, V], opts ...RepositoryOption) RepositoryType {
-	return descriptivetype.NewTypedObjectTypeObject(runtime.NewVersionedTypedObjectTypeByConverter[RepositorySpec, I](name, converter), opts...)
+	return descriptivetype.NewVersionedTypedObjectTypeObject(runtime.NewVersionedTypedObjectTypeByConverter[RepositorySpec, I](name, converter), opts...)
 }
 
 func NewRepositoryTypeByFormatVersion(name string, fmt runtime.FormatVersion[RepositorySpec], opts ...RepositoryOption) RepositoryType {
-	return descriptivetype.NewTypedObjectTypeObject(runtime.NewVersionedTypedObjectTypeByFormatVersion[RepositorySpec](name, fmt), opts...)
+	return descriptivetype.NewVersionedTypedObjectTypeObject(runtime.NewVersionedTypedObjectTypeByFormatVersion[RepositorySpec](name, fmt), opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
