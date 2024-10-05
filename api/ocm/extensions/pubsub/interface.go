@@ -9,7 +9,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/modern-go/reflect2"
 
 	"ocm.software/ocm/api/ocm/cpi"
@@ -33,7 +32,7 @@ func WithDesciption(desc string) Option {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type PubSubType descriptivetype.TypedObjectType[PubSubSpec]
+type PubSubType descriptivetype.VersionedTypedObjectType[PubSubSpec]
 
 // PubSubSpec is the interface publish/subscribe specifications
 // must fulfill. The main task is to map the specification
@@ -61,14 +60,14 @@ type PubSubMethod interface {
 // PubSub types. A PubSub type is finally able to
 // provide an implementation for notifying a dedicated
 // PubSub instance.
-type TypeScheme descriptivetype.TypeScheme[PubSubSpec, PubSubType]
+type TypeScheme descriptivetype.VersionedTypeScheme[PubSubSpec, PubSubType]
 
 func NewTypeScheme(base ...TypeScheme) TypeScheme {
-	return descriptivetype.NewTypeScheme[PubSubSpec, PubSubType, TypeScheme]("PubSub type", nil, &UnknownPubSubSpec{}, false, base...)
+	return descriptivetype.NewVersionedTypeScheme[PubSubSpec, PubSubType, TypeScheme]("PubSub type", nil, &UnknownPubSubSpec{}, false, base...)
 }
 
 func NewStrictTypeScheme(base ...TypeScheme) runtime.VersionedTypeRegistry[PubSubSpec, PubSubType] {
-	return descriptivetype.NewTypeScheme[PubSubSpec, PubSubType, TypeScheme]("PubSub type", nil, &UnknownPubSubSpec{}, false, base...)
+	return descriptivetype.NewVersionedTypeScheme[PubSubSpec, PubSubType, TypeScheme]("PubSub type", nil, &UnknownPubSubSpec{}, false, base...)
 }
 
 // DefaultTypeScheme contains all globally known PubSub serializers.
@@ -83,10 +82,7 @@ func CreatePubSubSpec(t runtime.TypedObject) (PubSubSpec, error) {
 }
 
 func NewPubSubType[I PubSubSpec](name string, opts ...Option) PubSubType {
-	t := descriptivetype.NewTypedObjectTypeObject[PubSubSpec](runtime.NewVersionedTypedObjectType[PubSubSpec, I](name))
-	ta := descriptivetype.NewTypeObjectTarget[PubSubSpec](t)
-	optionutils.ApplyOptions[descriptivetype.OptionTarget](ta, opts...)
-	return t
+	return descriptivetype.NewVersionedTypedObjectTypeObject[PubSubSpec](runtime.NewVersionedTypedObjectType[PubSubSpec, I](name), opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

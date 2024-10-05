@@ -692,6 +692,14 @@ github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3 h1:oo9nIgnyiBg
 github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3/go.mod h1:LxhqC7khDoRENwooP6f/vWvia9ivj6TqLYrR39zqkN0=
 github.com/mandelsoft/goutils v0.0.0-20240915132328-95975bffaef0 h1:MtIgCrVzBP5tPsHqVQRsNfg8+VDHNHGJmmKkozzmQEM=
 github.com/mandelsoft/goutils v0.0.0-20240915132328-95975bffaef0/go.mod h1:9TJgkwSY43RWHiIAAz7fL8SEIHf0L13Pk4w8fDIt+i4=
+github.com/mandelsoft/goutils v0.0.0-20241005155849-6530e92129ee h1:5epG5NI2so3P7CdX9DVQGt7rlE1Kg3BLJSkV4D8ieuk=
+github.com/mandelsoft/goutils v0.0.0-20241005155849-6530e92129ee/go.mod h1:9TJgkwSY43RWHiIAAz7fL8SEIHf0L13Pk4w8fDIt+i4=
+github.com/mandelsoft/goutils v0.0.0-20241005164827-f2c7b9a1b5ca h1:eQ8kAZKheAMmW0MJB6qkRA01/qrSzl3b/OXNIPTr0u4=
+github.com/mandelsoft/goutils v0.0.0-20241005164827-f2c7b9a1b5ca/go.mod h1:9TJgkwSY43RWHiIAAz7fL8SEIHf0L13Pk4w8fDIt+i4=
+github.com/mandelsoft/goutils v0.0.0-20241005170700-c456f4d85e4e h1:UWyhuMQcMJq28B73bMj60COG83Sdf7lrPbRGxTJ0B3s=
+github.com/mandelsoft/goutils v0.0.0-20241005170700-c456f4d85e4e/go.mod h1:9TJgkwSY43RWHiIAAz7fL8SEIHf0L13Pk4w8fDIt+i4=
+github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc h1:706IHCvAg6DjmG4cQ24CRNpvNVJ8+KQkcGEdQiLyJbU=
+github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc/go.mod h1:9TJgkwSY43RWHiIAAz7fL8SEIHf0L13Pk4w8fDIt+i4=
 github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a h1:MAvh0gbP2uwKmf7wWCkYCzrYa6vPjBvYeGhoUlVHwtI=
 github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
 github.com/mandelsoft/spiff v1.7.0-beta-5 h1:3kC10nTviDQhL8diSxp7i4IC2iSiDg6KPbH1CAq7Lfw=
