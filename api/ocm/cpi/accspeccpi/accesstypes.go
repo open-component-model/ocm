@@ -32,13 +32,13 @@ func MustNewAccessSpecMultiFormatVersion(kind string, formats AccessSpecFormatVe
 }
 
 func NewAccessSpecType[I AccessSpec](name string, opts ...AccessSpecTypeOption) AccessType {
-	return flagsetscheme.NewTypedObjectTypeObject[AccessSpec](runtime.NewVersionedTypedObjectType[AccessSpec, I](name), opts...)
+	return flagsetscheme.NewVersionedTypedObjectTypeObject[AccessSpec](runtime.NewVersionedTypedObjectType[AccessSpec, I](name), opts...)
 }
 
 func NewAccessSpecTypeByConverter[I AccessSpec, V runtime.VersionedTypedObject](name string, converter runtime.Converter[I, V], opts ...AccessSpecTypeOption) AccessType {
-	return flagsetscheme.NewTypedObjectTypeObject[AccessSpec](runtime.NewVersionedTypedObjectTypeByConverter[AccessSpec, I, V](name, converter), opts...)
+	return flagsetscheme.NewVersionedTypedObjectTypeObject[AccessSpec](runtime.NewVersionedTypedObjectTypeByConverter[AccessSpec, I, V](name, converter), opts...)
 }
 
 func NewAccessSpecTypeByFormatVersion(name string, fmt runtime.FormatVersion[AccessSpec], opts ...AccessSpecTypeOption) AccessType {
-	return flagsetscheme.NewTypedObjectTypeObject[AccessSpec](runtime.NewVersionedTypedObjectTypeByFormatVersion[AccessSpec](name, fmt), opts...)
+	return flagsetscheme.NewVersionedTypedObjectTypeObject[AccessSpec](runtime.NewVersionedTypedObjectTypeByFormatVersion[AccessSpec](name, fmt), opts...)
 }

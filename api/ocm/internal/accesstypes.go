@@ -106,14 +106,14 @@ type AccessMethod interface {
 	AsBlobAccess() BlobAccess
 }
 
-type AccessTypeScheme flagsetscheme.TypeScheme[AccessSpec, AccessType]
+type AccessTypeScheme flagsetscheme.VersionedTypeScheme[AccessSpec, AccessType]
 
 func NewAccessTypeScheme(base ...AccessTypeScheme) AccessTypeScheme {
-	return flagsetscheme.NewTypeScheme[AccessSpec, AccessType, AccessTypeScheme]("Access type", "access", "accessType", "blob access specification", "Access Specification Options", &UnknownAccessSpec{}, true, base...)
+	return flagsetscheme.NewVersionedTypeScheme[AccessSpec, AccessType, AccessTypeScheme]("Access type", "access", "accessType", "blob access specification", "Access Specification Options", &UnknownAccessSpec{}, true, base...)
 }
 
 func NewStrictAccessTypeScheme(base ...AccessTypeScheme) runtime.VersionedTypeRegistry[AccessSpec, AccessType] {
-	return flagsetscheme.NewTypeScheme[AccessSpec, AccessType, AccessTypeScheme]("Access type", "access", "accessType", "blob access specification", "Access Specification Options", nil, false, base...)
+	return flagsetscheme.NewVersionedTypeScheme[AccessSpec, AccessType, AccessTypeScheme]("Access type", "access", "accessType", "blob access specification", "Access Specification Options", nil, false, base...)
 }
 
 // DefaultAccessTypeScheme contains all globally known access serializer.

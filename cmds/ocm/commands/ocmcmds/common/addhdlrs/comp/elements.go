@@ -111,11 +111,13 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 
 	cd := cv.GetDescriptor()
 
-	opts := h.srchandler.GetOptions()[0].(*addhdlrs.Options)
-	if !opts.Replace {
-		cd.Resources = nil
-		cd.Sources = nil
-		cd.References = nil
+	if len(h.srchandler.GetOptions()) > 0 {
+		opts, ok := h.srchandler.GetOptions()[0].(*addhdlrs.Options)
+		if ok && !opts.Replace {
+			cd.Resources = nil
+			cd.Sources = nil
+			cd.References = nil
+		}
 	}
 
 	schema := h.schema

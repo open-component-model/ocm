@@ -41,18 +41,18 @@ type (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type EntryTypeScheme = flagsetscheme.ExtendedTypeScheme[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider]
+type EntryTypeScheme = flagsetscheme.ExtendedProviderTypeScheme[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider]
 
-func unwrapTypeScheme(s EntryTypeScheme) flagsetscheme.TypeScheme[Entry, EntryType] {
+func unwrapTypeScheme(s EntryTypeScheme) flagsetscheme.VersionedTypeScheme[Entry, EntryType] {
 	return s.Unwrap()
 }
 
 func NewEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
-	return flagsetscheme.NewTypeSchemeWrapper[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider](flagsetscheme.NewTypeScheme[Entry, EntryType, flagsetscheme.TypeScheme[Entry, EntryType]]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", &UnknownEntry{}, true, sliceutils.Transform(base, unwrapTypeScheme)...))
+	return flagsetscheme.NewVersionedTypeSchemeWrapper[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider](flagsetscheme.NewVersionedTypeScheme[Entry, EntryType, flagsetscheme.VersionedTypeScheme[Entry, EntryType]]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", &UnknownEntry{}, true, sliceutils.Transform(base, unwrapTypeScheme)...))
 }
 
 func NewStrictEntryTypeScheme(base ...EntryTypeScheme) EntryTypeScheme {
-	return flagsetscheme.NewTypeSchemeWrapper[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider](flagsetscheme.NewTypeScheme[Entry, EntryType, flagsetscheme.TypeScheme[Entry, EntryType]]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", nil, false, sliceutils.Transform(base, unwrapTypeScheme)...))
+	return flagsetscheme.NewVersionedTypeSchemeWrapper[Entry, EntryType, flagsets.ExplicitlyTypedConfigTypeOptionSetConfigProvider](flagsetscheme.NewVersionedTypeScheme[Entry, EntryType, flagsetscheme.VersionedTypeScheme[Entry, EntryType]]("Entry type", "entry", "", "routing slip entry specification", "Entry Specification Options", nil, false, sliceutils.Transform(base, unwrapTypeScheme)...))
 }
 
 func CreateEntry(t runtime.TypedObject) (Entry, error) {
