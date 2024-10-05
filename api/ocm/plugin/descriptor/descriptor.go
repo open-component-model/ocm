@@ -17,6 +17,7 @@ type Descriptor struct {
 	ForwardLogging bool   `json:"forwardLogging"`
 
 	Actions                  []ActionDescriptor                `json:"actions,omitempty"`
+	Inputs                   []InputTypeDescriptor             `json:"inputs,omitempty"`
 	AccessMethods            []AccessMethodDescriptor          `json:"accessMethods,omitempty"`
 	Uploaders                List[UploaderDescriptor]          `json:"uploaders,omitempty"`
 	Downloaders              List[DownloaderDescriptor]        `json:"downloaders,omitempty"`
@@ -125,7 +126,15 @@ func (d UploaderDescriptor) GetConstraints() []UploaderKey {
 	return d.Constraints
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type AccessMethodDescriptor struct {
+	ValueSetDefinition `json:",inline"`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type InputTypeDescriptor struct {
 	ValueSetDefinition `json:",inline"`
 }
 
