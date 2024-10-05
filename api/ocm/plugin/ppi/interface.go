@@ -27,6 +27,7 @@ type (
 
 	ActionSpecInfo       = internal.ActionSpecInfo
 	AccessSpecInfo       = internal.AccessSpecInfo
+	InputSpecInfo        = internal.InputSpecInfo
 	ValueSetInfo         = internal.ValueSetInfo
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
 
@@ -68,6 +69,10 @@ type Plugin interface {
 	DecodeAccessSpecification(data []byte) (AccessSpec, error)
 	GetAccessMethod(name string, version string) AccessMethod
 
+	RegisterInputType(m InputType) error
+	DecodeInputSpecification(data []byte) (InputSpec, error)
+	GetInputType(name string) InputType
+
 	RegisterAction(a Action) error
 	DecodeAction(data []byte) (ActionSpec, error)
 	GetAction(name string) Action
@@ -99,6 +104,31 @@ type Plugin interface {
 	GetConfig() (interface{}, error)
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+type InputType interface {
+	runtime.TypedObjectDecoder[InputSpec]
+
+	Name() string
+
+	// Options provides the list of CLI options supported to compose the access
+	// specification.
+	Options() []options.OptionType
+
+	// Description provides a general description for the access mehod kind.
+	Description() string
+	// Format describes the attributes of the dedicated version.
+	Format() string
+
+	ValidateSpecification(p Plugin, spec InputSpec) (info *InputSpecInfo, err error)
+	Reader(p Plugin, spec InputSpec, creds credentials.Credentials) (io.ReadCloser, error)
+	ComposeSpecification(p Plugin, opts Config, config Config) error
+}
+
+type InputSpec = runtime.TypedObject
+
+////////////////////////////////////////////////////////////////////////////////
+
 type AccessMethod interface {
 	runtime.TypedObjectDecoder[AccessSpec]
 
@@ -123,6 +153,8 @@ type AccessSpec = runtime.TypedObject
 
 type AccessSpecProvider func() AccessSpec
 
+////////////////////////////////////////////////////////////////////////////////
+
 type UploadFormats runtime.KnownTypes[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
 type Uploader interface {
@@ -137,6 +169,8 @@ type Uploader interface {
 
 type UploadTargetSpec = runtime.TypedObject
 
+////////////////////////////////////////////////////////////////////////////////
+
 type DownloadResultProvider func() (string, error)
 
 type Downloader interface {
@@ -146,6 +180,8 @@ type Downloader interface {
 
 	Writer(p Plugin, arttype, mediatype string, filepath string, config []byte) (io.WriteCloser, DownloadResultProvider, error)
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type ActionSpec = action.ActionSpec
 
@@ -159,6 +195,8 @@ type Action interface {
 
 	Execute(p Plugin, spec ActionSpec, creds credentials.DirectCredentials) (result ActionResult, err error)
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type Value = runtime.RawValue
 
@@ -203,6 +241,8 @@ type ValueSet interface {
 	ComposeSpecification(p Plugin, opts Config, config Config) error
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 // Command is the interface for a CLI command provided by a plugin.
 type Command interface {
 	// Name of command used in the plugin.
@@ -230,6 +270,8 @@ type Command interface {
 
 	Command() *cobra.Command
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 // TransferHandler is the support interface
 // for implementing a transfer handler for the plugin support
@@ -276,10 +318,14 @@ type (
 	ArtifactQuestion           = internal.ArtifactQuestion
 	Resolution                 = internal.Resolution
 	DecisionRequestResult      = internal.DecisionRequestResult
-	SigningContext             = internal.SigningContext
 )
 
-type ConsumerProvider func(sctx signing.SigningContext) credentials.ConsumerIdentity
+////////////////////////////////////////////////////////////////////////////////
+
+type (
+	SigningContext   = internal.SigningContext
+	ConsumerProvider func(sctx signing.SigningContext) credentials.ConsumerIdentity
+)
 
 type SigningHandler interface {
 	GetName() string
