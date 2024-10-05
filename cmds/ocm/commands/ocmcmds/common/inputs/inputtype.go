@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	ocmlog "ocm.software/ocm/api/utils/logging"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/datacontext"
@@ -157,51 +158,45 @@ func (t *DefaultInputType) ApplyConfig(opts flagsets.ConfigOptions, config flags
 type InputTypeScheme interface {
 	runtime.Scheme[InputSpec, InputType]
 
-	ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
-	flagsets.ConfigProvider
+	CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
 
 	GetInputType(name string) InputType
 	Register(atype InputType)
 
-	GetInputSpecFor(opts flagsets.ConfigOptions) (InputSpec, error)
+	GetInputSpecFor(flagsets.Config) (InputSpec, error)
 	DecodeInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (InputSpec, error)
 	CreateInputSpec(obj runtime.TypedObject) (InputSpec, error)
 }
 
 type inputTypeScheme struct {
 	runtime.Scheme[InputSpec, InputType]
-	optionTypes flagsets.ConfigTypeOptionSetConfigProvider
 }
 
-func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder[InputSpec]) InputTypeScheme {
-	scheme := runtime.MustNewDefaultScheme[InputSpec, InputType](&UnknownInputSpec{}, false, defaultRepoDecoder)
+func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder[InputSpec], base ...InputTypeScheme) InputTypeScheme {
+	var b runtime.Scheme[InputSpec, InputType] = utils.Optional(base...)
+
+	scheme := runtime.MustNewDefaultScheme[InputSpec, InputType](&UnknownInputSpec{}, false, defaultRepoDecoder, b)
+	return &inputTypeScheme{scheme}
+}
+
+func (t *inputTypeScheme) CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
 	prov := flagsets.NewTypedConfigProvider("input", "blob input specification", "inputType")
 	prov.AddGroups("Input Specification Options")
-	return &inputTypeScheme{scheme, prov}
-}
-
-func (t *inputTypeScheme) ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
-	return t.optionTypes
-}
-
-func (t *inputTypeScheme) CreateOptions() flagsets.ConfigOptions {
-	return t.optionTypes.CreateOptions()
-}
-
-func (t *inputTypeScheme) GetInputSpecFor(opts flagsets.ConfigOptions) (InputSpec, error) {
-	cfg, err := t.GetConfigFor(opts)
-	if err != nil {
-		return nil, err
+	for _, p := range t.KnownTypes() {
+		err := prov.AddTypeSet(p.ConfigOptionTypeSetHandler())
+		if err != nil {
+			ocmlog.Logger(REALM).LogError(err, "cannot compose type CLI options", "type", p.GetType())
+		}
 	}
+	return prov
+}
+
+func (t *inputTypeScheme) GetInputSpecFor(cfg flagsets.Config) (InputSpec, error) {
 	data, err := json.Marshal(cfg)
 	if err != nil {
 		return nil, err
 	}
 	return t.DecodeInputSpec(data, runtime.DefaultJSONEncoding)
-}
-
-func (t *inputTypeScheme) GetConfigFor(opts flagsets.ConfigOptions) (flagsets.Config, error) {
-	return t.optionTypes.GetConfigFor(opts)
 }
 
 func (t *inputTypeScheme) GetInputType(name string) InputType {
@@ -217,7 +212,6 @@ func (t *inputTypeScheme) Register(rtype InputType) {
 		return
 	}
 	t.RegisterByDecoder(rtype.GetType(), rtype)
-	t.optionTypes.AddTypeSet(rtype.ConfigOptionTypeSetHandler())
 }
 
 func (t *inputTypeScheme) DecodeInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (InputSpec, error) {
