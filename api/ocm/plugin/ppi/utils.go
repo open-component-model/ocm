@@ -16,28 +16,52 @@ import (
 
 type decoder runtime.TypedObjectDecoder[runtime.TypedObject]
 
-type AccessMethodBase struct {
+type blobProviderBase struct {
 	decoder
 	nameDescription
 
-	version string
-	format  string
+	format string
 }
 
-func MustNewAccessMethodBase(name, version string, proto AccessSpec, desc string, format string) AccessMethodBase {
+func MustNewBlobProviderBase(name string, proto AccessSpec, desc string, format string) blobProviderBase {
 	decoder, err := runtime.NewDirectDecoder(proto)
 	if err != nil {
 		panic(err)
 	}
 
-	return AccessMethodBase{
+	return blobProviderBase{
 		decoder: decoder,
 		nameDescription: nameDescription{
 			name: name,
 			desc: desc,
 		},
-		version: version,
-		format:  format,
+		format: format,
+	}
+}
+
+func (b *AccessMethodBase) BlobProviderBase() string {
+	return b.format
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type InputTypeBase = blobProviderBase
+
+func MustNewAInputTypeBase(name string, proto InputSpec, desc string, format string) InputTypeBase {
+	return MustNewBlobProviderBase(name, proto, desc, format)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type AccessMethodBase struct {
+	blobProviderBase
+	version string
+}
+
+func MustNewAccessMethodBase(name, version string, proto AccessSpec, desc string, format string) AccessMethodBase {
+	return AccessMethodBase{
+		blobProviderBase: MustNewBlobProviderBase(name, proto, desc, format),
+		version:          version,
 	}
 }
 

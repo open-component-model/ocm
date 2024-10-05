@@ -10,7 +10,6 @@ import (
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/slices"
-
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/datacontext/action"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -39,6 +38,9 @@ type plugin struct {
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
+	inputs      map[string]InputType
+	inputScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
+
 	actions       map[string]Action
 	mergehandlers map[string]ValueMergeHandler
 	mergespecs    map[string]*descriptor.LabelMergeSpecification
@@ -59,7 +61,9 @@ func NewPlugin(name string, version string) Plugin {
 	return &plugin{
 		name:    name,
 		version: version,
+
 		methods: map[string]AccessMethod{},
+		inputs:  map[string]InputType{},
 
 		downloaders:  map[string]Downloader{},
 		downmappings: registry.NewRegistry[Downloader, DownloaderKey](),
@@ -67,6 +71,7 @@ func NewPlugin(name string, version string) Plugin {
 		uploaders:  map[string]Uploader{},
 		upmappings: registry.NewRegistry[Uploader, UploaderKey](),
 
+		inputScheme:    runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		accessScheme:   runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		uploaderScheme: runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 
@@ -285,21 +290,13 @@ func (p *plugin) DecodeUploadTargetSpecification(data []byte) (UploadTargetSpec,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
-	if p.GetAccessMethod(m.Name(), m.Version()) != nil {
-		n := m.Name()
-		if m.Version() != "" {
-			n += runtime.VersionSeparator + m.Version()
-		}
-		return errors.ErrAlreadyExists(errkind.KIND_ACCESSMETHOD, n)
-	}
-
+func cliOpts(optTypes []options.OptionType) ([]CLIOption, error) {
 	var optlist []CLIOption
-	for _, o := range m.Options() {
+	for _, o := range optTypes {
 		known := options.DefaultRegistry.GetOptionType(o.GetName())
 		if known != nil {
 			if o.ValueType() != known.ValueType() {
-				return fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
+				return nil, fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
 			}
 			optlist = append(optlist, CLIOption{
 				Name: o.GetName(),
@@ -312,6 +309,60 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 			})
 		}
 	}
+	return optlist, nil
+}
+
+func (p *plugin) RegisterInputType(m InputType) error {
+	if p.GetInputType(m.Name()) != nil {
+		n := m.Name()
+		return errors.ErrAlreadyExists(descriptor.KIND_INPUTTYPE, n)
+	}
+
+	optlist, err := cliOpts(m.Options())
+	if err != nil {
+		return err
+	}
+
+	inp := descriptor.InputTypeDescriptor{
+		ValueSetDefinition: descriptor.ValueSetDefinition{
+			ValueTypeDefinition: descriptor.ValueTypeDefinition{
+				Name:        m.Name(),
+				Description: m.Description(),
+				Format:      m.Format(),
+			},
+			CLIOptions: optlist,
+		},
+	}
+	p.descriptor.Inputs = append(p.descriptor.Inputs, inp)
+	p.accessScheme.RegisterByDecoder(m.Name(), m)
+	p.inputs[m.Name()] = m
+	return nil
+}
+
+func (p *plugin) DecodeInputSpecification(data []byte) (InputSpec, error) {
+	return p.inputScheme.Decode(data, nil)
+}
+
+func (p *plugin) GetInputType(name string) InputType {
+	return p.inputs[name]
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
+	if p.GetAccessMethod(m.Name(), m.Version()) != nil {
+		n := m.Name()
+		if m.Version() != "" {
+			n += runtime.VersionSeparator + m.Version()
+		}
+		return errors.ErrAlreadyExists(errkind.KIND_ACCESSMETHOD, n)
+	}
+
+	optlist, err := cliOpts(m.Options())
+	if err != nil {
+		return err
+	}
+
 	vers := m.Version()
 	if vers == "" {
 		meth := descriptor.AccessMethodDescriptor{
@@ -328,6 +379,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		p.methods[m.Name()] = m
 		vers = "v1"
 	}
+
 	meth := descriptor.AccessMethodDescriptor{
 		ValueSetDefinition: descriptor.ValueSetDefinition{
 			ValueTypeDefinition: descriptor.ValueTypeDefinition{

@@ -16,6 +16,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/describe"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/download"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/info"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/input"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/mergehandler"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/signing"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/topics/descriptor"
@@ -65,6 +66,7 @@ func NewPluginCommand(p ppi.Plugin, opts ...Option) *PluginCommand {
 	cmd.AddCommand(action.New(p))
 	cmd.AddCommand(mergehandler.New(p))
 	cmd.AddCommand(accessmethod.New(p))
+	cmd.AddCommand(input.New(p))
 	cmd.AddCommand(upload.New(p))
 	cmd.AddCommand(download.New(p))
 	cmd.AddCommand(valueset.New(p))

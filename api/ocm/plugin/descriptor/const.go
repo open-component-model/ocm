@@ -10,6 +10,7 @@ const (
 	KIND_PLUGIN          = "plugin"
 	KIND_DOWNLOADER      = "downloader"
 	KIND_UPLOADER        = "uploader"
+	KIND_INPUTTYPE       = "input type"
 	KIND_ACCESSMETHOD    = errkind.KIND_ACCESSMETHOD
 	KIND_ACTION          = action.KIND_ACTION
 	KIND_TRANSFERHANDLER = "transferhandler"
