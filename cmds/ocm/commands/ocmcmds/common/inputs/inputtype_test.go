@@ -5,7 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"ocm.software/ocm/api/utils/mime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/file"

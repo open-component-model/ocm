@@ -120,23 +120,24 @@ var _ = Describe("Test Environment", func() {
 	Context("inputs", func() {
 		BeforeEach(func() {
 			flags = &pflag.FlagSet{}
-			opts = inputs.DefaultInputTypeScheme.CreateOptions()
+			opts = inputs.DefaultInputTypeScheme.CreateConfigTypeSetConfigProvider().CreateOptions()
 			opts.AddFlags(flags)
 			cfg = flagsets.Config{}
 		})
 
 		It("input type", func() {
 			fmt.Printf("input option names: %+v\n", opts.Names())
+			prov := inputs.DefaultInputTypeScheme.CreateConfigTypeSetConfigProvider()
 			MustBeSuccessful(flagsets.ParseOptionsFor(flags,
-				flagsets.OptionSpec(inputs.DefaultInputTypeScheme.ConfigTypeSetConfigProvider().GetTypeOptionType(), me.TYPE),
+				flagsets.OptionSpec(prov.GetTypeOptionType(), me.TYPE),
 				flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
 				flagsets.OptionSpec(options.PlatformsOption, "linux/amd64"),
 				flagsets.OptionSpec(options.PlatformsOption, "/arm64"),
 			))
-			cfg := Must(inputs.DefaultInputTypeScheme.GetConfigFor(opts))
+			cfg := Must(prov.GetConfigFor(opts))
 			fmt.Printf("selected input options: %+v\n", cfg)
 
-			spec := Must(inputs.DefaultInputTypeScheme.GetInputSpecFor(opts))
+			spec := Must(inputs.DefaultInputTypeScheme.GetInputSpecFor(cfg))
 			Expect(spec).To(Equal(me.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64", "/arm64")))
 		})
 	})
