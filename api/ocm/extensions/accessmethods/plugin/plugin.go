@@ -132,7 +132,7 @@ func (p *PluginHandler) GetMimeType(spec *AccessSpec) string {
 	if err != nil {
 		return ""
 	}
-	return info.Short
+	return info.MediaType
 }
 
 func (p *PluginHandler) GetReferenceHint(spec *AccessSpec, cv cpi.ComponentVersionAccess) string {

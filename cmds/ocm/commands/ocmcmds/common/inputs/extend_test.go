@@ -6,6 +6,8 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/datacontext"
 
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -21,45 +23,99 @@ import (
 
 var _ = Describe("Input Type Extension Test Environment", func() {
 	var (
-		scheme = inputs.NewInputTypeScheme(nil, inputs.DefaultInputTypeScheme)
+		scheme inputs.InputTypeScheme
 		itype  = inputs.NewInputType(TYPE, &Spec{}, "", ConfigHandler())
 		flags  *pflag.FlagSet
 		opts   flagsets.ConfigOptions
 	)
 
-	BeforeEach(func() {
-		scheme.Register(itype)
-		flags = &pflag.FlagSet{}
-		opts = scheme.CreateConfigTypeSetConfigProvider().CreateOptions()
-		opts.AddFlags(flags)
+	Context("registry", func() {
+		BeforeEach(func() {
+			scheme = inputs.NewInputTypeScheme(nil, inputs.DefaultInputTypeScheme)
+			scheme.Register(itype)
+			flags = &pflag.FlagSet{}
+			opts = scheme.CreateConfigTypeSetConfigProvider().CreateOptions()
+			opts.AddFlags(flags)
+		})
+
+		It("is not in base", func() {
+			scheme = inputs.DefaultInputTypeScheme
+			Expect(scheme.GetInputType(TYPE)).To(BeNil())
+		})
+
+		It("derives base input type", func() {
+			prov := scheme.CreateConfigTypeSetConfigProvider()
+			MustBeSuccessful(flagsets.ParseOptionsFor(flags,
+				flagsets.OptionSpec(prov.GetTypeOptionType(), ociartifact.TYPE),
+				flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
+				flagsets.OptionSpec(options.PlatformsOption, "linux/amd64"),
+				flagsets.OptionSpec(options.PlatformsOption, "/arm64"),
+			))
+			cfg := Must(prov.GetConfigFor(opts))
+			fmt.Printf("selected input options: %+v\n", cfg)
+
+			spec := Must(scheme.GetInputSpecFor(cfg))
+			Expect(spec).To(Equal(ociartifact.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64", "/arm64")))
+		})
+
+		It("uses extended input type", func() {
+			prov := scheme.CreateConfigTypeSetConfigProvider()
+			MustBeSuccessful(flagsets.ParseOptionsFor(flags,
+				flagsets.OptionSpec(prov.GetTypeOptionType(), TYPE),
+				flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
+			))
+			cfg := Must(prov.GetConfigFor(opts))
+			fmt.Printf("selected input options: %+v\n", cfg)
+
+			spec := Must(scheme.GetInputSpecFor(cfg))
+			Expect(spec).To(Equal(New("ghcr.io/open-component-model/image:v1.0")))
+		})
 	})
 
-	It("derives base input type", func() {
-		prov := scheme.CreateConfigTypeSetConfigProvider()
-		MustBeSuccessful(flagsets.ParseOptionsFor(flags,
-			flagsets.OptionSpec(prov.GetTypeOptionType(), ociartifact.TYPE),
-			flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
-			flagsets.OptionSpec(options.PlatformsOption, "linux/amd64"),
-			flagsets.OptionSpec(options.PlatformsOption, "/arm64"),
-		))
-		cfg := Must(prov.GetConfigFor(opts))
-		fmt.Printf("selected input options: %+v\n", cfg)
+	Context("cli context", func() {
+		var ctx clictx.Context
 
-		spec := Must(scheme.GetInputSpecFor(cfg))
-		Expect(spec).To(Equal(ociartifact.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64", "/arm64")))
-	})
+		BeforeEach(func() {
+			ctx = clictx.New(datacontext.MODE_EXTENDED)
+			scheme = inputs.For(ctx)
+			scheme.Register(itype)
+			flags = &pflag.FlagSet{}
+			opts = scheme.CreateConfigTypeSetConfigProvider().CreateOptions()
+			opts.AddFlags(flags)
+		})
 
-	It("uses extended input type", func() {
-		prov := scheme.CreateConfigTypeSetConfigProvider()
-		MustBeSuccessful(flagsets.ParseOptionsFor(flags,
-			flagsets.OptionSpec(prov.GetTypeOptionType(), TYPE),
-			flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
-		))
-		cfg := Must(prov.GetConfigFor(opts))
-		fmt.Printf("selected input options: %+v\n", cfg)
+		It("is not in base", func() {
+			scheme = inputs.For(clictx.DefaultContext())
+			Expect(scheme.GetInputType(TYPE)).To(BeNil())
+		})
 
-		spec := Must(scheme.GetInputSpecFor(cfg))
-		Expect(spec).To(Equal(New("ghcr.io/open-component-model/image:v1.0")))
+		It("derives base input type", func() {
+			prov := scheme.CreateConfigTypeSetConfigProvider()
+			MustBeSuccessful(flagsets.ParseOptionsFor(flags,
+				flagsets.OptionSpec(prov.GetTypeOptionType(), ociartifact.TYPE),
+				flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
+				flagsets.OptionSpec(options.PlatformsOption, "linux/amd64"),
+				flagsets.OptionSpec(options.PlatformsOption, "/arm64"),
+			))
+			cfg := Must(prov.GetConfigFor(opts))
+			fmt.Printf("selected input options: %+v\n", cfg)
+
+			spec := Must(scheme.GetInputSpecFor(cfg))
+			Expect(spec).To(Equal(ociartifact.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64", "/arm64")))
+		})
+
+		It("uses extended input type", func() {
+			prov := scheme.CreateConfigTypeSetConfigProvider()
+			MustBeSuccessful(flagsets.ParseOptionsFor(flags,
+				flagsets.OptionSpec(prov.GetTypeOptionType(), TYPE),
+				flagsets.OptionSpec(options.PathOption, "ghcr.io/open-component-model/image:v1.0"),
+			))
+			cfg := Must(prov.GetConfigFor(opts))
+			fmt.Printf("selected input options: %+v\n", cfg)
+
+			spec := Must(scheme.GetInputSpecFor(cfg))
+			Expect(spec).To(Equal(New("ghcr.io/open-component-model/image:v1.0")))
+		})
 	})
 })
 

@@ -131,6 +131,30 @@ func (p *pluginImpl) GetLabelMergeSpecification(name, version string) *descripto
 	return fallback
 }
 
+func (p *pluginImpl) GetInputTypeDescriptor(name, version string) *descriptor.InputTypeDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	var fallback descriptor.InputTypeDescriptor
+	fallbackFound := false
+	for _, i := range p.descriptor.Inputs {
+		if i.Name == name {
+			if i.Version == version {
+				return &i
+			}
+			if i.Version == "" || i.Version == "v1" {
+				fallback = i
+				fallbackFound = true
+			}
+		}
+	}
+	if fallbackFound && (version == "" || version == "v1") {
+		return &fallback
+	}
+	return nil
+}
+
 func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *descriptor.AccessMethodDescriptor {
 	if !p.IsValid() {
 		return nil

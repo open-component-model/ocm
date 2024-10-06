@@ -215,6 +215,33 @@ func NewDefaultScheme[T TypedObject, R TypedObjectDecoder[T]](protoUnstr Unstruc
 	}, nil
 }
 
+type Copyable[T any] interface {
+	Copy() T
+}
+
+// CopyScheme copies a Copyable scheme.
+// This is not a method on Scheme, because it would be propagated by embedding
+// a scheme to get the traditional methods, but would return an internal
+// implementation detail.
+func CopyScheme[T TypedObject, R TypedObjectDecoder[T]](s Scheme[T, R]) Scheme[T, R] {
+	if c, ok := s.(Copyable[Scheme[T, R]]); ok {
+		return c.Copy()
+	}
+	return nil
+}
+
+func (d *defaultScheme[T, R]) Copy() Scheme[T, R] {
+	scheme := &defaultScheme[T, R]{
+		instance:       d.instance,
+		unstructured:   d.unstructured,
+		defaultdecoder: d.defaultdecoder,
+		acceptUnknown:  d.acceptUnknown,
+		types:          KnownTypes[T, R]{},
+	}
+	scheme.AddKnownTypes(d)
+	return scheme
+}
+
 func (d *defaultScheme[T, R]) BaseScheme() Scheme[T, R] {
 	return d.base
 }
