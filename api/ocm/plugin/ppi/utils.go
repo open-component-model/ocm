@@ -45,10 +45,16 @@ func (b *AccessMethodBase) BlobProviderBase() string {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type InputTypeBase = blobProviderBase
+type InputTypeBase struct {
+	blobProviderBase
+}
 
-func MustNewAInputTypeBase(name string, proto InputSpec, desc string, format string) InputTypeBase {
-	return MustNewBlobProviderBase(name, proto, desc, format)
+func MustNewInputTypeBase(name string, proto InputSpec, desc string, format string) InputTypeBase {
+	return InputTypeBase{MustNewBlobProviderBase(name, proto, desc, format)}
+}
+
+func (b *InputTypeBase) Format() string {
+	return b.format
 }
 
 ////////////////////////////////////////////////////////////////////////////////

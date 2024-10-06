@@ -10,6 +10,7 @@ import (
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/slices"
+
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/datacontext/action"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -334,7 +335,7 @@ func (p *plugin) RegisterInputType(m InputType) error {
 		},
 	}
 	p.descriptor.Inputs = append(p.descriptor.Inputs, inp)
-	p.accessScheme.RegisterByDecoder(m.Name(), m)
+	p.inputScheme.RegisterByDecoder(m.Name(), m)
 	p.inputs[m.Name()] = m
 	return nil
 }
