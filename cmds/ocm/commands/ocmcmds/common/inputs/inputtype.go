@@ -9,13 +9,13 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	ocmlog "ocm.software/ocm/api/utils/logging"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
+	ocmlog "ocm.software/ocm/api/utils/logging"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -158,6 +158,8 @@ func (t *DefaultInputType) ApplyConfig(opts flagsets.ConfigOptions, config flags
 type InputTypeScheme interface {
 	runtime.Scheme[InputSpec, InputType]
 
+	Copy() InputTypeScheme
+
 	CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
 
 	GetInputType(name string) InputType
@@ -176,6 +178,11 @@ func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder[InputSpec]
 	var b runtime.Scheme[InputSpec, InputType] = utils.Optional(base...)
 
 	scheme := runtime.MustNewDefaultScheme[InputSpec, InputType](&UnknownInputSpec{}, false, defaultRepoDecoder, b)
+	return &inputTypeScheme{scheme}
+}
+
+func (t *inputTypeScheme) Copy() InputTypeScheme {
+	scheme := runtime.CopyScheme(t.Scheme)
 	return &inputTypeScheme{scheme}
 }
 

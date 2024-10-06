@@ -10,7 +10,7 @@ const (
 	KIND_PLUGIN          = descriptor.KIND_PLUGIN
 	KIND_UPLOADER        = descriptor.KIND_UPLOADER
 	KIND_ACCESSMETHOD    = descriptor.KIND_ACCESSMETHOD
-	KIND_INPUTTYÜE       = descriptor.KIND_INPUTTYPE
+	KIND_INPUTTYPE       = descriptor.KIND_INPUTTYPE
 	KIND_ACTION          = descriptor.KIND_ACTION
 	KIND_TRANSFERHANDLER = descriptor.KIND_TRANSFERHANDLER
 )
