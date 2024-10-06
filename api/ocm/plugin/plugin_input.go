@@ -7,7 +7,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/ocm/plugin/ppi"
-	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/accessmethod"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/input"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/input/compose"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/input/get"
@@ -62,7 +61,7 @@ func (p *pluginImpl) ComposeInputSpec(name string, opts flagsets.ConfigOptions, 
 }
 
 func (p *pluginImpl) GetInputBlob(w io.Writer, creds, spec json.RawMessage) error {
-	args := []string{accessmethod.Name, get.Name, string(spec)}
+	args := []string{input.Name, get.Name, string(spec)}
 	if creds != nil {
 		args = append(args, "--"+get.OptCreds, string(creds))
 	}

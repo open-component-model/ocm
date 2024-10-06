@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/pflag"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
-	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -82,14 +82,14 @@ type Result struct {
 }
 
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
-	spec, err := p.DecodeAccessSpecification(opts.Specification)
+	spec, err := p.DecodeInputSpecification(opts.Specification)
 	if err != nil {
-		return errors.Wrapf(err, "access specification")
+		return errors.Wrapf(err, "input specification")
 	}
 
-	m := p.GetAccessMethod(runtime.KindVersion(spec.GetType()))
+	m := p.GetInputType(spec.GetType())
 	if m == nil {
-		return errors.ErrUnknown(errkind.KIND_ACCESSMETHOD, spec.GetType())
+		return errors.ErrUnknown(descriptor.KIND_INPUTTYPE, spec.GetType())
 	}
 	info, err := m.ValidateSpecification(p, spec)
 	if err != nil {
