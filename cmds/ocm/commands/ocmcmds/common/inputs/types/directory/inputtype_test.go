@@ -21,7 +21,7 @@ var _ = Describe("Input Type", func() {
 	It("simple decode", func() {
 		env.Set(options.PathOption, "mypath")
 		env.Set(options.CompressOption, "true")
-		env.Set(options.MediaTypeOption, "media")
+		env.Set(options.MediatypeOption, "media")
 		env.Set(options.PreserveDirOption, "false")
 		env.Set(options.FollowSymlinksOption, "true")
 		env.Set(options.IncludeOption, "x")

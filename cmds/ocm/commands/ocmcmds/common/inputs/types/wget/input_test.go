@@ -21,7 +21,7 @@ var _ = Describe("Input Type", func() {
 
 	It("simple decode", func() {
 		env.Set(options.URLOption, "https://example.com/test")
-		env.Set(options.MediaTypeOption, mime.MIME_TEXT)
+		env.Set(options.MediatypeOption, mime.MIME_TEXT)
 		env.Set(options.HTTPHeaderOption, "Host: developer.mozilla.org")
 		env.Set(options.HTTPHeaderOption, "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0")
 		env.Set(options.HTTPHeaderOption, "Accept: text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8")

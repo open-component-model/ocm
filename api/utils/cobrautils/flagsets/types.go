@@ -1,7 +1,7 @@
 package flagsets
 
 import (
-	"reflect"
+	"fmt"
 
 	"github.com/spf13/pflag"
 
@@ -10,9 +10,41 @@ import (
 	"ocm.software/ocm/api/utils/cobrautils/groups"
 )
 
+const (
+	TYPE_STRING                 = "string"
+	TYPE_STRINGARRAY            = "[]string"
+	TYPE_STRING2STRING          = "string=string"
+	TYPE_INT                    = "int"
+	TYPE_BOOL                   = "bool"
+	TYPE_YAML                   = "YAML"
+	TYPE_STRINGMAPYAML          = "map[string]YAML"
+	TYPE_STRING2YAML            = "string=YAML"
+	TYPE_STRING2STRINGSLICE     = "string=string,string"
+	TYPE_STRINGCOLONSTRINGSLICE = "string:string,string"
+	TYPE_BYTES                  = "[]byte"
+	TYPE_IDENTITYPATH           = "[]identity"
+)
+
+func SetBaseTypes(r ConfigOptionTypeRegistry) ConfigOptionTypeRegistry {
+	r.RegisterValueType(TYPE_STRING, NewStringOptionType, "string value")
+	r.RegisterValueType(TYPE_STRINGARRAY, NewStringArrayOptionType, "list of string values")
+	r.RegisterValueType(TYPE_STRING2STRING, NewStringMapOptionType, "string map defined by dedicated assignments")
+	r.RegisterValueType(TYPE_INT, NewIntOptionType, "integer value")
+	r.RegisterValueType(TYPE_BOOL, NewBoolOptionType, "boolean flag")
+	r.RegisterValueType(TYPE_YAML, NewYAMLOptionType, "JSON or YAML document string")
+	r.RegisterValueType(TYPE_STRINGMAPYAML, NewValueMapYAMLOptionType, "JSON or YAML map")
+	r.RegisterValueType(TYPE_STRING2YAML, NewValueMapOptionType, "string map with arbitrary values defined by dedicated assignments")
+	r.RegisterValueType(TYPE_STRING2STRINGSLICE, NewStringSliceMapOptionType, "string map defined by dedicated assignment of comma separated strings")
+	r.RegisterValueType(TYPE_STRINGCOLONSTRINGSLICE, NewStringSliceMapColonOptionType, "string map defined by dedicated assignment of comma separated strings")
+	r.RegisterValueType(TYPE_BYTES, NewBytesOptionType, "byte value")
+	r.RegisterValueType(TYPE_IDENTITYPATH, NewIdentityPathOptionType, "identity path")
+	return r
+}
+
 type TypeOptionBase struct {
 	name        string
 	description string
+	valueType   string
 }
 
 func (b *TypeOptionBase) GetName() string {
@@ -20,7 +52,21 @@ func (b *TypeOptionBase) GetName() string {
 }
 
 func (b *TypeOptionBase) GetDescription() string {
+	return fmt.Sprintf("[*%s*] %s", b.ValueType(), b.description)
+}
+
+func (b *TypeOptionBase) GetDescriptionText() string {
 	return b.description
+}
+
+func (o *TypeOptionBase) ValueType() string {
+	return o.valueType
+}
+
+func (o *TypeOptionBase) Equal(t ConfigOptionType) bool {
+	return o.name == t.GetName() &&
+		o.description == t.GetDescriptionText() &&
+		o.valueType == t.ValueType()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,7 +90,7 @@ func (b *OptionBase) GetName() string {
 }
 
 func (b *OptionBase) Description() string {
-	return b.otyp.GetDescription()
+	return b.otyp.GetDescriptionText()
 }
 
 func (b *OptionBase) Changed() bool {
@@ -80,12 +126,8 @@ type StringOptionType struct {
 
 func NewStringOptionType(name string, description string) ConfigOptionType {
 	return &StringOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_STRING},
 	}
-}
-
-func (s *StringOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *StringOptionType) Create() Option {
@@ -102,7 +144,7 @@ type StringOption struct {
 var _ Option = (*StringOption)(nil)
 
 func (o *StringOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.StringVarPF(fs, &o.value, o.otyp.GetName(), "", "", o.otyp.GetDescription()))
+	o.TweakFlag(flag.StringVarPF(fs, &o.value, o.otyp.GetName(), "", "", o.otyp.GetDescriptionText()))
 }
 
 func (o *StringOption) Value() interface{} {
@@ -117,12 +159,8 @@ type StringArrayOptionType struct {
 
 func NewStringArrayOptionType(name string, description string) ConfigOptionType {
 	return &StringArrayOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_STRINGARRAY},
 	}
-}
-
-func (s *StringArrayOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *StringArrayOptionType) Create() Option {
@@ -139,84 +177,10 @@ type StringArrayOption struct {
 var _ Option = (*StringArrayOption)(nil)
 
 func (o *StringArrayOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.StringArrayVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.StringArrayVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescriptionText()))
 }
 
 func (o *StringArrayOption) Value() interface{} {
-	return o.value
-}
-
-// PathOptionType //////////////////////////////////////////////////////////////////////////////
-
-type PathOptionType struct {
-	TypeOptionBase
-}
-
-func NewPathOptionType(name string, description string) ConfigOptionType {
-	return &PathOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
-	}
-}
-
-func (s *PathOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *PathOptionType) Create() Option {
-	return &PathOption{
-		OptionBase: NewOptionBase(s),
-	}
-}
-
-type PathOption struct {
-	OptionBase
-	value string
-}
-
-var _ Option = (*PathOption)(nil)
-
-func (o *PathOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.PathVarPF(fs, &o.value, o.otyp.GetName(), "", "", o.otyp.GetDescription()))
-}
-
-func (o *PathOption) Value() interface{} {
-	return o.value
-}
-
-// PathArrayOptionType //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-type PathArrayOptionType struct {
-	TypeOptionBase
-}
-
-func NewPathArrayOptionType(name string, description string) ConfigOptionType {
-	return &PathArrayOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
-	}
-}
-
-func (s *PathArrayOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *PathArrayOptionType) Create() Option {
-	return &PathArrayOption{
-		OptionBase: NewOptionBase(s),
-	}
-}
-
-type PathArrayOption struct {
-	OptionBase
-	value []string
-}
-
-var _ Option = (*PathArrayOption)(nil)
-
-func (o *PathArrayOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.PathArrayVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
-}
-
-func (o *PathArrayOption) Value() interface{} {
 	return o.value
 }
 
@@ -228,12 +192,8 @@ type BoolOptionType struct {
 
 func NewBoolOptionType(name string, description string) ConfigOptionType {
 	return &BoolOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_BOOL},
 	}
-}
-
-func (s *BoolOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *BoolOptionType) Create() Option {
@@ -250,7 +210,7 @@ type BoolOption struct {
 var _ Option = (*BoolOption)(nil)
 
 func (o *BoolOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.BoolVarPF(fs, &o.value, o.otyp.GetName(), "", false, o.otyp.GetDescription()))
+	o.TweakFlag(flag.BoolVarPF(fs, &o.value, o.otyp.GetName(), "", false, o.otyp.GetDescriptionText()))
 }
 
 func (o *BoolOption) Value() interface{} {
@@ -265,12 +225,8 @@ type IntOptionType struct {
 
 func NewIntOptionType(name string, description string) ConfigOptionType {
 	return &IntOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_INT},
 	}
-}
-
-func (s *IntOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *IntOptionType) Create() Option {
@@ -287,7 +243,7 @@ type IntOption struct {
 var _ Option = (*IntOption)(nil)
 
 func (o *IntOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.IntVarPF(fs, &o.value, o.otyp.GetName(), "", 0, o.otyp.GetDescription()))
+	o.TweakFlag(flag.IntVarPF(fs, &o.value, o.otyp.GetName(), "", 0, o.otyp.GetDescriptionText()))
 }
 
 func (o *IntOption) Value() interface{} {
@@ -302,12 +258,8 @@ type YAMLOptionType struct {
 
 func NewYAMLOptionType(name string, description string) ConfigOptionType {
 	return &YAMLOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_YAML},
 	}
-}
-
-func (s *YAMLOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *YAMLOptionType) Create() Option {
@@ -324,7 +276,7 @@ type YAMLOption struct {
 var _ Option = (*YAMLOption)(nil)
 
 func (o *YAMLOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.YAMLVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.YAMLVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescriptionText()))
 }
 
 func (o *YAMLOption) Value() interface{} {
@@ -339,12 +291,8 @@ type ValueMapYAMLOptionType struct {
 
 func NewValueMapYAMLOptionType(name string, description string) ConfigOptionType {
 	return &ValueMapYAMLOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_STRINGMAPYAML},
 	}
-}
-
-func (s *ValueMapYAMLOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *ValueMapYAMLOptionType) Create() Option {
@@ -361,7 +309,7 @@ type ValueMapYAMLOption struct {
 var _ Option = (*ValueMapYAMLOption)(nil)
 
 func (o *ValueMapYAMLOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.YAMLVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.YAMLVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescriptionText()))
 }
 
 func (o *ValueMapYAMLOption) Value() interface{} {
@@ -376,12 +324,8 @@ type ValueMapOptionType struct {
 
 func NewValueMapOptionType(name string, description string) ConfigOptionType {
 	return &ValueMapOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_STRING2YAML},
 	}
-}
-
-func (s *ValueMapOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *ValueMapOptionType) Create() Option {
@@ -398,7 +342,7 @@ type ValueMapOption struct {
 var _ Option = (*ValueMapOption)(nil)
 
 func (o *ValueMapOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.StringToValueVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.StringToValueVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescriptionText()))
 }
 
 func (o *ValueMapOption) Value() interface{} {
@@ -413,12 +357,8 @@ type StringMapOptionType struct {
 
 func NewStringMapOptionType(name string, description string) ConfigOptionType {
 	return &StringMapOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_STRING2STRING},
 	}
-}
-
-func (s *StringMapOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *StringMapOptionType) Create() Option {
@@ -435,7 +375,7 @@ type StringMapOption struct {
 var _ Option = (*StringMapOption)(nil)
 
 func (o *StringMapOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.StringToStringVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.StringToStringVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescriptionText()))
 }
 
 func (o *StringMapOption) Value() interface{} {
@@ -450,12 +390,8 @@ type BytesOptionType struct {
 
 func NewBytesOptionType(name string, description string) ConfigOptionType {
 	return &BytesOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_BYTES},
 	}
-}
-
-func (s *BytesOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *BytesOptionType) Create() Option {
@@ -472,7 +408,7 @@ type BytesOption struct {
 var _ Option = (*BytesOption)(nil)
 
 func (o *BytesOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.BytesBase64VarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.BytesBase64VarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescriptionText()))
 }
 
 func (o *BytesOption) Value() interface{} {
@@ -487,12 +423,8 @@ type StringSliceMapOptionType struct {
 
 func NewStringSliceMapOptionType(name string, description string) ConfigOptionType {
 	return &StringSliceMapOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_STRING2STRINGSLICE},
 	}
-}
-
-func (s *StringSliceMapOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *StringSliceMapOptionType) Create() Option {
@@ -509,7 +441,7 @@ type StringSliceMapOption struct {
 var _ Option = (*StringSliceMapOption)(nil)
 
 func (o *StringSliceMapOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.StringToStringSliceVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.StringToStringSliceVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescriptionText()))
 }
 
 func (o *StringSliceMapOption) Value() interface{} {
@@ -524,12 +456,8 @@ type StringSliceMapColonOptionType struct {
 
 func NewStringSliceMapColonOptionType(name string, description string) ConfigOptionType {
 	return &StringSliceMapColonOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_STRINGCOLONSTRINGSLICE},
 	}
-}
-
-func (s *StringSliceMapColonOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *StringSliceMapColonOptionType) Create() Option {
@@ -546,7 +474,7 @@ type StringSliceMapColonOption struct {
 var _ Option = (*StringSliceMapColonOption)(nil)
 
 func (o *StringSliceMapColonOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.StringColonStringSliceVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.StringColonStringSliceVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescriptionText()))
 }
 
 func (o *StringSliceMapColonOption) Value() interface{} {
@@ -561,12 +489,8 @@ type IdentityPathOptionType struct {
 
 func NewIdentityPathOptionType(name string, description string) ConfigOptionType {
 	return &IdentityPathOptionType{
-		TypeOptionBase: TypeOptionBase{name, description},
+		TypeOptionBase: TypeOptionBase{name, description, TYPE_IDENTITYPATH},
 	}
-}
-
-func (s *IdentityPathOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
 }
 
 func (s *IdentityPathOptionType) Create() Option {
@@ -583,7 +507,7 @@ type IdentityPathOption struct {
 var _ Option = (*IdentityPathOption)(nil)
 
 func (o *IdentityPathOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.IdentityPathVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.IdentityPathVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescriptionText()))
 }
 
 func (o *IdentityPathOption) Value() interface{} {

@@ -48,7 +48,7 @@ following fields:
   The consumer id used to determine optional credentials for the
   underlying repository. If specified, at least the <code>type</code> field must be set.
 `,
-		Args: cobra.ExactArgs(1),
+		Args: cobra.RangeArgs(1, 2),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},
@@ -62,13 +62,21 @@ following fields:
 
 type Options struct {
 	Specification json.RawMessage
+	Dir           string
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Options) Complete(args []string) error {
-	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[0]), &o.Specification); err != nil {
+	creds := 0
+	if len(args) > 1 {
+		o.Dir = args[creds]
+		creds++
+	} else {
+		o.Dir = "."
+	}
+	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[creds]), &o.Specification); err != nil {
 		return errors.Wrapf(err, "invalid access specification")
 	}
 	return nil
@@ -91,7 +99,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if m == nil {
 		return errors.ErrUnknown(descriptor.KIND_INPUTTYPE, spec.GetType())
 	}
-	info, err := m.ValidateSpecification(p, spec)
+	info, err := m.ValidateSpecification(p, opts.Dir, spec)
 	if err != nil {
 		return err
 	}

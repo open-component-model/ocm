@@ -18,8 +18,10 @@ import (
 	"ocm.software/ocm/api/ocm/ocmutils/registry"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/utils/cobrautils"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/runtime"
+	inpoptions "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 )
 
 type plugin struct {
@@ -291,10 +293,10 @@ func (p *plugin) DecodeUploadTargetSpecification(data []byte) (UploadTargetSpec,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func cliOpts(optTypes []options.OptionType) ([]CLIOption, error) {
+func cliOpts(reg flagsets.ConfigOptionTypeRegistry, optTypes []flagsets.ConfigOptionType) ([]CLIOption, error) {
 	var optlist []CLIOption
 	for _, o := range optTypes {
-		known := options.DefaultRegistry.GetOptionType(o.GetName())
+		known := reg.GetOptionType(o.GetName())
 		if known != nil {
 			if o.ValueType() != known.ValueType() {
 				return nil, fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
@@ -306,7 +308,7 @@ func cliOpts(optTypes []options.OptionType) ([]CLIOption, error) {
 			optlist = append(optlist, CLIOption{
 				Name:        o.GetName(),
 				Type:        o.ValueType(),
-				Description: o.GetDescriptionText(),
+				Description: o.GetDescription(),
 			})
 		}
 	}
@@ -319,7 +321,7 @@ func (p *plugin) RegisterInputType(m InputType) error {
 		return errors.ErrAlreadyExists(descriptor.KIND_INPUTTYPE, n)
 	}
 
-	optlist, err := cliOpts(m.Options())
+	optlist, err := cliOpts(inpoptions.DefaultRegistry, m.Options())
 	if err != nil {
 		return err
 	}
@@ -359,7 +361,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		return errors.ErrAlreadyExists(errkind.KIND_ACCESSMETHOD, n)
 	}
 
-	optlist, err := cliOpts(m.Options())
+	optlist, err := cliOpts(options.DefaultRegistry, m.Options())
 	if err != nil {
 		return err
 	}
@@ -515,24 +517,11 @@ func (p *plugin) RegisterValueSet(s ValueSet) error {
 		}
 	}
 
-	var optlist []CLIOption
-	for _, o := range s.Options() {
-		known := options.DefaultRegistry.GetOptionType(o.GetName())
-		if known != nil {
-			if o.ValueType() != known.ValueType() {
-				return fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
-			}
-			optlist = append(optlist, CLIOption{
-				Name: o.GetName(),
-			})
-		} else {
-			optlist = append(optlist, CLIOption{
-				Name:        o.GetName(),
-				Type:        o.ValueType(),
-				Description: o.GetDescriptionText(),
-			})
-		}
+	optlist, err := cliOpts(options.DefaultRegistry, s.Options())
+	if err != nil {
+		return err
 	}
+
 	vers := s.Version()
 	if vers == "" {
 		set := descriptor.ValueSetDescriptor{

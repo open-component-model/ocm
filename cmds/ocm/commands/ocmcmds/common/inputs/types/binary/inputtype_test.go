@@ -18,7 +18,7 @@ var _ = Describe("Input Type", func() {
 
 	It("simple string decode", func() {
 		env.Set(options.CompressOption, "true")
-		env.Set(options.MediaTypeOption, "media")
+		env.Set(options.MediatypeOption, "media")
 		env.Set(options.DataOption, "!stringdata")
 		env.Check(&Spec{
 			Data:        runtime.Binary("stringdata"),
@@ -28,7 +28,7 @@ var _ = Describe("Input Type", func() {
 
 	It("binary decode", func() {
 		env.Set(options.CompressOption, "true")
-		env.Set(options.MediaTypeOption, "media")
+		env.Set(options.MediatypeOption, "media")
 		env.Set(options.DataOption, "IXN0cmluZ2RhdGE=")
 		env.Check(&Spec{
 			Data:        runtime.Binary("!stringdata"),
