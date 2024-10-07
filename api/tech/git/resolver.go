@@ -164,14 +164,6 @@ func (c *client) newRepository(ctx context.Context, repo *git.Repository) error 
 		return err
 	}
 
-	if err := worktree.AddGlob("*"); err != nil {
-		return err
-	}
-
-	if _, err := worktree.Commit("OCM Repository Setup", &git.CommitOptions{}); err != nil && !errors.Is(err, git.ErrEmptyCommit) {
-		return err
-	}
-
 	return nil
 }
 
