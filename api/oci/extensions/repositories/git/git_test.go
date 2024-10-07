@@ -23,7 +23,6 @@ import (
 	"ocm.software/ocm/api/oci/cpi"
 	rgit "ocm.software/ocm/api/oci/extensions/repositories/git"
 	"ocm.software/ocm/api/utils/accessio"
-	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/mime"
@@ -66,7 +65,7 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate git based ctf", func() {
-		repo := Must(rgit.Create(ctx, accessobj.ACC_CREATE, repoURL, rgit.Options{
+		repo := Must(rgit.Create(ctx, repoURL, rgit.Options{
 			Author: &rgit.Author{
 				Name:  fmt.Sprintf("OCM Test Case: %s", GinkgoT().Name()),
 				Email: "dummy@ocm.software",
