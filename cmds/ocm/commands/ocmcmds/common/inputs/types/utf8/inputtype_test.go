@@ -22,7 +22,7 @@ var _ = Describe("Input Type", func() {
 
 		It("simple string decode", func() {
 			env.Set(options.CompressOption, "true")
-			env.Set(options.MediaTypeOption, "media")
+			env.Set(options.MediatypeOption, "media")
 			env.Set(options.TextOption, "stringdata")
 			env.Check(&Spec{
 				Text:        "stringdata",
@@ -32,7 +32,7 @@ var _ = Describe("Input Type", func() {
 
 		It("simple json decode", func() {
 			env.Set(options.CompressOption, "true")
-			env.Set(options.MediaTypeOption, "media")
+			env.Set(options.MediatypeOption, "media")
 			env.Set(options.JSONOption, `field: value`)
 			env.Check(&Spec{
 				Json:        []byte(`{"field":"value"}`),
@@ -42,7 +42,7 @@ var _ = Describe("Input Type", func() {
 
 		It("simple formatted json decode", func() {
 			env.Set(options.CompressOption, "true")
-			env.Set(options.MediaTypeOption, "media")
+			env.Set(options.MediatypeOption, "media")
 			env.Set(options.FormattedJSONOption, `field: value`)
 			env.Check(&Spec{
 				FormattedJson: []byte(`{"field":"value"}`),
@@ -52,7 +52,7 @@ var _ = Describe("Input Type", func() {
 
 		It("simple yaml decode", func() {
 			env.Set(options.CompressOption, "true")
-			env.Set(options.MediaTypeOption, "media")
+			env.Set(options.MediatypeOption, "media")
 			env.Set(options.YAMLOption, `field: value`)
 			env.Check(&Spec{
 				Yaml:        []byte(`{"field":"value"}`),

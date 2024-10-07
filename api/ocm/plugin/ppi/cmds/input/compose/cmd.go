@@ -7,10 +7,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/utils/runtime"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 )
 
 const Name = "compose"

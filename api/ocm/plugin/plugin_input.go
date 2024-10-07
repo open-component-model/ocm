@@ -60,8 +60,8 @@ func (p *pluginImpl) ComposeInputSpec(name string, opts flagsets.ConfigOptions, 
 	return nil
 }
 
-func (p *pluginImpl) GetInputBlob(w io.Writer, creds, spec json.RawMessage) error {
-	args := []string{input.Name, get.Name, string(spec)}
+func (p *pluginImpl) GetInputBlob(w io.Writer, dir string, creds, spec json.RawMessage) error {
+	args := []string{input.Name, get.Name, dir, string(spec)}
 	if creds != nil {
 		args = append(args, "--"+get.OptCreds, string(creds))
 	}
