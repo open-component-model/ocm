@@ -17,12 +17,16 @@ type BlobAccessWriter struct {
 	getter func(writer io.Writer, creds json.RawMessage, spec json.RawMessage) error
 }
 
-func NewAccessDataWriter(p Plugin, creds, accspec json.RawMessage) *BlobAccessWriter {
-	return &BlobAccessWriter{creds, accspec, p.Get}
+func NewAccessDataWriter(p Plugin, creds, spec json.RawMessage) *BlobAccessWriter {
+	return &BlobAccessWriter{creds, spec, p.Get}
 }
 
-func NewInputDataWriter(p Plugin, creds, accspec json.RawMessage) *BlobAccessWriter {
-	return &BlobAccessWriter{creds, accspec, p.GetInputBlob}
+func NewInputDataWriter(p Plugin, dir string, creds, spec json.RawMessage) *BlobAccessWriter {
+	return &BlobAccessWriter{
+		creds:  creds,
+		spec:   spec,
+		getter: func(w io.Writer, creds, spec json.RawMessage) error { return p.GetInputBlob(w, dir, creds, spec) },
+	}
 }
 
 func (d *BlobAccessWriter) WriteTo(w accessio.Writer) (int64, digest.Digest, error) {

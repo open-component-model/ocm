@@ -123,7 +123,7 @@ mediaType: plain/text
 			opts.AddFlags(fs)
 
 			Expect("\n" + fs.FlagUsages()).To(Equal(`
-      --inputPath string   path in temp file
+      --inputPath string   path field for input
       --mediaType string   media type for artifact blob representation
 `))
 

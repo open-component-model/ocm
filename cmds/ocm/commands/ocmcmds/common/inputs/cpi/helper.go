@@ -109,12 +109,12 @@ func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc blobaccess.DataAccess,
 }
 
 func AddProcessSpecOptionTypes(set flagsets.ConfigOptionTypeSetHandler) {
-	set.AddOptionType(options.MediaTypeOption)
+	set.AddOptionType(options.MediatypeOption)
 	set.AddOptionType(options.CompressOption)
 }
 
 func AddProcessSpecConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	flagsets.AddFieldByOptionP(opts, options.MediaTypeOption, config, "mediaType")
+	flagsets.AddFieldByOptionP(opts, options.MediatypeOption, config, "mediaType")
 	flagsets.AddFieldByOptionP(opts, options.CompressOption, config, "compress")
 	return nil
 }

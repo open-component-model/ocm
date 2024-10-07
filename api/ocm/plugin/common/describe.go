@@ -14,6 +14,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
 )
@@ -103,7 +104,7 @@ type MethodInfo struct {
 type MethodVersion struct {
 	Name    string
 	Format  string
-	Options map[string]options.OptionType
+	Options map[string]flagsets.ConfigOptionType
 }
 
 func GetAccessMethodInfo(methods []descriptor.AccessMethodDescriptor) map[string]*MethodInfo {
@@ -129,7 +130,7 @@ func GetAccessMethodInfo(methods []descriptor.AccessMethodDescriptor) map[string
 		if v == nil {
 			v = &MethodVersion{
 				Name:    vers,
-				Options: map[string]options.OptionType{},
+				Options: map[string]flagsets.ConfigOptionType{},
 			}
 			i.Versions[vers] = v
 		}
@@ -328,7 +329,7 @@ type ValueSetInfo struct {
 type ValueSetVersion struct {
 	Name    string
 	Format  string
-	Options map[string]options.OptionType
+	Options map[string]flagsets.ConfigOptionType
 }
 
 func GetValueSetInfo(valuesets []descriptor.ValueSetDescriptor) map[string]*ValueSetInfo {
@@ -357,7 +358,7 @@ func GetValueSetInfo(valuesets []descriptor.ValueSetDescriptor) map[string]*Valu
 		if v == nil {
 			v = &ValueSetVersion{
 				Name:    vers,
-				Options: map[string]options.OptionType{},
+				Options: map[string]flagsets.ConfigOptionType{},
 			}
 			i.Versions[vers] = v
 		}

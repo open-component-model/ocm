@@ -38,7 +38,11 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	if err != nil {
 		return nil, "", err
 	}
-	return acc.GetBlob()
+	dir, err := inputs.GetBaseDir(ctx.FileSystem(), info.InputFilePath)
+	if err != nil {
+		dir = "."
+	}
+	return acc.GetBlob(dir)
 }
 
 func (s *Spec) GetInputVersion(ctx inputs.Context) string {
@@ -77,12 +81,12 @@ func (m *access) MimeType() string {
 	return m.info.MediaType
 }
 
-func (m *access) GetBlob() (blobaccess.BlobAccess, string, error) {
+func (m *access) GetBlob(dir string) (blobaccess.BlobAccess, string, error) {
 	spec, err := json.Marshal(m.spec)
 	if err != nil {
-		return nil, "", errors.Wrapf(err, "cannot marshal access spec")
+		return nil, "", errors.Wrapf(err, "cannot marshal input spec")
 	}
-	return accessobj.CachedBlobAccessForWriter(m.ctx, m.MimeType(), plugin.NewInputDataWriter(m.handler.plug, m.creds, spec)), m.info.Hint, nil
+	return accessobj.CachedBlobAccessForWriter(m.ctx, m.MimeType(), plugin.NewInputDataWriter(m.handler.plug, dir, m.creds, spec)), m.info.Hint, nil
 }
 
 func (m *access) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {

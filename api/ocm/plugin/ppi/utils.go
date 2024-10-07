@@ -9,9 +9,9 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slices"
 
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/tech/signing"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -310,7 +310,7 @@ func (c Config) GetValue(name string) (interface{}, bool) {
 	return v, ok
 }
 
-func (c Config) ConvertFor(list ...options.OptionType) error {
+func (c Config) ConvertFor(list ...flagsets.ConfigOptionType) error {
 	for _, o := range list {
 		if v, ok := c[o.GetName()]; ok {
 			t := reflect.TypeOf(o.Create().Value())
