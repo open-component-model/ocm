@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/tech/git"
-	"ocm.software/ocm/api/tech/oci/identity"
+	"ocm.software/ocm/api/tech/git/identity"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 )
 
@@ -42,6 +42,12 @@ func New(ctx cpi.Context, spec *RepositorySpec, creds credentials.Credentials) (
 	}
 
 	opts := spec.ToClientOptions()
+
+	if creds == nil {
+		// if no credentials are provided, try to get them from the context,
+		// if the credential is not provided, the client will try to use unauthenticated access, so allow error
+		creds, _ = identity.GetCredentials(ctx, spec.URL)
+	}
 
 	if creds != nil {
 		auth, err := git.AuthFromCredentials(creds)

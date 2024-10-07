@@ -128,5 +128,5 @@ func GetCredentials(ctx cpi.ContextProvider, repoURL string) (cpi.Credentials, e
 	if err != nil {
 		return nil, err
 	}
-	return cpi.CredentialsForConsumer(ctx.CredentialsContext(), id, identityMatcher)
+	return cpi.CredentialsForConsumer(ctx.CredentialsContext(), id, IdentityMatcher)
 }
