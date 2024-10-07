@@ -29,9 +29,7 @@ type RepositoryImpl struct {
 	client git.Client
 }
 
-var (
-	_ cpi.Repository = (*RepositoryImpl)(nil)
-)
+var _ cpi.Repository = (*RepositoryImpl)(nil)
 
 func New(ctx cpi.Context, spec *RepositorySpec, creds credentials.Credentials) (Repository, error) {
 	urs := spec.UniformRepositorySpec()
@@ -116,7 +114,7 @@ func (r *RepositoryImpl) LookupNamespace(name string) (cpi.NamespaceAccess, erro
 	return NewNamespace(r, name)
 }
 
-// small helper to wrap accessio.Closer to allow calling an arbitrary closing logic
+// small helper to wrap accessio.Closer to allow calling an arbitrary closing logic.
 type repoCloseUpdater struct {
 	close func() error
 }
