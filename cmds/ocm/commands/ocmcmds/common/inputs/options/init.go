@@ -6,7 +6,7 @@ import (
 
 var DefaultRegistry = flagsets.SetBaseTypes(flagsets.NewConfigOptionTypeRegistry())
 
-func RegisterOption(o OptionType) OptionType {
+func RegisterOption(o flagsets.ConfigOptionType) flagsets.ConfigOptionType {
 	DefaultRegistry.RegisterOptionType(o)
 	return o
 }

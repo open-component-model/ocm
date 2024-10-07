@@ -27,12 +27,12 @@ func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
 
 	cmd := &cobra.Command{
-		Use:   Name + " [<flags>] <access spec>",
+		Use:   Name + " [<flags>] [<dir>] <access spec>",
 		Short: "get blob",
 		Long: `
 Evaluate the given input specification and return the described blob on
 *stdout*.`,
-		Args: cobra.ExactArgs(1),
+		Args: cobra.RangeArgs(1, 2),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},
@@ -47,6 +47,7 @@ Evaluate the given input specification and return the described blob on
 type Options struct {
 	Credentials   credentials.DirectCredentials
 	Specification json.RawMessage
+	Dir           string
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
@@ -55,7 +56,14 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Options) Complete(args []string) error {
-	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[0]), &o.Specification); err != nil {
+	creds := 0
+	if len(args) > 1 {
+		o.Dir = args[creds]
+		creds++
+	} else {
+		o.Dir = "."
+	}
+	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[creds]), &o.Specification); err != nil {
 		return errors.Wrapf(err, "invalid repository specification")
 	}
 
@@ -73,11 +81,11 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if m == nil {
 		return errors.ErrUnknown(descriptor.KIND_INPUTTYPE, spec.GetType())
 	}
-	_, err = m.ValidateSpecification(p, spec)
+	_, err = m.ValidateSpecification(p, opts.Dir, spec)
 	if err != nil {
 		return err
 	}
-	r, err := m.Reader(p, spec, opts.Credentials)
+	r, err := m.Reader(p, opts.Dir, spec, opts.Credentials)
 	if err != nil {
 		return err
 	}

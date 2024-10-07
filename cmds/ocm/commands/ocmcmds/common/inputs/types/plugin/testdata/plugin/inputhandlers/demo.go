@@ -11,12 +11,12 @@ import (
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/cpi"
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/demoplugin/common"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 )
 
 const (
@@ -35,8 +35,6 @@ type InputType struct {
 	ppi.InputTypeBase
 }
 
-var PathOption = options.NewStringOptionType("inputPath", "path in temp file")
-
 var _ ppi.InputType = (*InputType)(nil)
 
 func New() ppi.InputType {
@@ -45,10 +43,10 @@ func New() ppi.InputType {
 	}
 }
 
-func (a *InputType) Options() []options.OptionType {
-	return []options.OptionType{
+func (a *InputType) Options() []flagsets.ConfigOptionType {
+	return []flagsets.ConfigOptionType{
 		options.MediatypeOption,
-		PathOption,
+		options.PathOption,
 	}
 }
 
@@ -64,7 +62,7 @@ func (a *InputType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtim
 	return &spec, nil
 }
 
-func (a *InputType) ValidateSpecification(p ppi.Plugin, spec ppi.InputSpec) (*ppi.InputSpecInfo, error) {
+func (a *InputType) ValidateSpecification(p ppi.Plugin, dir string, spec ppi.InputSpec) (*ppi.InputSpecInfo, error) {
 	var info ppi.InputSpecInfo
 
 	my := spec.(*InputSpec)
@@ -92,12 +90,12 @@ func (a *InputType) ValidateSpecification(p ppi.Plugin, spec ppi.InputSpec) (*pp
 
 func (a *InputType) ComposeSpecification(p ppi.Plugin, opts ppi.Config, config ppi.Config) error {
 	list := errors.ErrListf("configuring options")
-	list.Add(flagsets.AddFieldByOptionP(opts, PathOption, config, "path"))
+	list.Add(flagsets.AddFieldByOptionP(opts, options.PathOption, config, "path"))
 	list.Add(flagsets.AddFieldByOptionP(opts, options.MediatypeOption, config, "mediaType"))
 	return list.Result()
 }
 
-func (a *InputType) Reader(p ppi.Plugin, spec ppi.InputSpec, creds credentials.Credentials) (io.ReadCloser, error) {
+func (a *InputType) Reader(p ppi.Plugin, dir string, spec ppi.InputSpec, creds credentials.Credentials) (io.ReadCloser, error) {
 	my := spec.(*InputSpec)
 
 	root := os.TempDir()

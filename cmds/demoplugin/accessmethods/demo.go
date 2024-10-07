@@ -37,7 +37,7 @@ type AccessMethod struct {
 	ppi.AccessMethodBase
 }
 
-var PathOption = options.NewStringOptionType("accessPath", "path in temp repository")
+var PathOption = flagsets.NewStringOptionType("accessPath", "path in temp repository")
 
 var _ ppi.AccessMethod = (*AccessMethod)(nil)
 
@@ -47,8 +47,8 @@ func New() ppi.AccessMethod {
 	}
 }
 
-func (a *AccessMethod) Options() []options.OptionType {
-	return []options.OptionType{
+func (a *AccessMethod) Options() []flagsets.ConfigOptionType {
+	return []flagsets.ConfigOptionType{
 		options.MediatypeOption,
 		PathOption,
 	}

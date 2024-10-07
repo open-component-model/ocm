@@ -9,10 +9,10 @@ import (
 	"ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext/action"
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/internal"
 	"ocm.software/ocm/api/tech/signing"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -113,15 +113,15 @@ type InputType interface {
 
 	// Options provides the list of CLI options supported to compose the access
 	// specification.
-	Options() []options.OptionType
+	Options() []flagsets.ConfigOptionType
 
 	// Description provides a general description for the access mehod kind.
 	Description() string
 	// Format describes the attributes of the dedicated version.
 	Format() string
 
-	ValidateSpecification(p Plugin, spec InputSpec) (info *InputSpecInfo, err error)
-	Reader(p Plugin, spec InputSpec, creds credentials.Credentials) (io.ReadCloser, error)
+	ValidateSpecification(p Plugin, dir string, spec InputSpec) (info *InputSpecInfo, err error)
+	Reader(p Plugin, dir string, spec InputSpec, creds credentials.Credentials) (io.ReadCloser, error)
 	ComposeSpecification(p Plugin, opts Config, config Config) error
 }
 
@@ -137,7 +137,7 @@ type AccessMethod interface {
 
 	// Options provides the list of CLI options supported to compose the access
 	// specification.
-	Options() []options.OptionType
+	Options() []flagsets.ConfigOptionType
 
 	// Description provides a general description for the access mehod kind.
 	Description() string
@@ -230,7 +230,7 @@ type ValueSet interface {
 
 	// Options provides the list of CLI options supported to compose the access
 	// specification.
-	Options() []options.OptionType
+	Options() []flagsets.ConfigOptionType
 
 	// Description provides a general description for the access mehod kind.
 	Description() string
