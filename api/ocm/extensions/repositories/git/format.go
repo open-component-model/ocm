@@ -24,8 +24,8 @@ func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, url string, opts Op
 	return genericocireg.NewRepository(cpi.FromProvider(ctx), nil, r), nil
 }
 
-func Create(ctx cpi.ContextProvider, acc accessobj.AccessMode, url string, opts Options) (cpi.Repository, error) {
-	r, err := git.Create(cpi.FromProvider(ctx), acc, url, opts)
+func Create(ctx cpi.ContextProvider, url string, opts Options) (cpi.Repository, error) {
+	r, err := git.Create(cpi.FromProvider(ctx), url, opts)
 	if err != nil {
 		return nil, err
 	}

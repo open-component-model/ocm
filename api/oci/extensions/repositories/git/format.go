@@ -17,5 +17,5 @@ func Open(ctxp cpi.ContextProvider, acc accessobj.AccessMode, url string, opts O
 }
 
 func Create(ctx cpi.ContextProvider, url string, opts Options) (Repository, error) {
-	return Open(ctx, accessobj.ACC_CREATE, url, opts)
+	return Open(ctx, accessobj.ACC_CREATE|accessobj.ACC_WRITABLE, url, opts)
 }

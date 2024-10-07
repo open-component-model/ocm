@@ -16,8 +16,6 @@ import (
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
-	"ocm.software/ocm/api/utils/accessobj"
 )
 
 var DefaultWorktreeBranch = plumbing.NewBranchReferenceName("ocm")
@@ -33,12 +31,30 @@ type client struct {
 	repoMu sync.Mutex
 }
 
+// Client is a heavy abstraction over the go git Client that opinionates the remote as git.DefaultRemoteName
+// as well as access to it via high level functions that are usually required for operation within OCM CTFs that are stored
+// within Git. It is not general-purpose.
 type Client interface {
+	// Repository returns the git repository for the client initialized in the Filesystem given to Setup.
+	// If Setup is not called before Repository, it will an in-memory filesystem.
+	// Repository will attempt to initially clone the repository if it does not exist.
+	// If the repository is already open or cloned in the filesystem, it will attempt to open & return the existing repository.
+	// If the remote repository does not exist, a new repository will be created with a dummy commit and the remote
+	// configured to the given URL. At that point it is up to the remote to accept an initial push to the repository or not with the
+	// given AuthMethod.
 	Repository(ctx context.Context) (*git.Repository, error)
+
+	// Refresh will attempt to fetch & pull the latest changes from the remote repository.
+	// In case there are no changes, it will do a no-op after having realized that no changes are in the remote.
 	Refresh(ctx context.Context) error
+
+	// Update will stage all changes in the repository, commit them with the given message and push them to the remote repository.
 	Update(ctx context.Context, msg string, push bool) error
-	accessobj.Setup
-	accessobj.Closer
+
+	// Setup will override the current filesystem with the given filesystem. This will be the filesystem where the repository will be stored.
+	// There can be only one filesystem per client.
+	// If the filesystem contains a repository already, it can be consumed by a subsequent call to Repository.
+	Setup(vfs.FileSystem) error
 }
 
 type ClientOptions struct {
@@ -248,13 +264,6 @@ func (c *client) Setup(system vfs.FileSystem) error {
 	c.vfs = system
 	if _, err := c.Repository(context.Background()); err != nil {
 		return fmt.Errorf("failed to setup repository %q: %w", c.opts.URL, err)
-	}
-	return nil
-}
-
-func (c *client) Close(_ *accessobj.AccessObject) error {
-	if err := c.Update(context.Background(), "OCM Repository Update", true); err != nil {
-		return fmt.Errorf("failed to close repository %q: %w", c.opts.URL, err)
 	}
 	return nil
 }

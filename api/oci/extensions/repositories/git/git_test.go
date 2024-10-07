@@ -84,14 +84,10 @@ var _ = Describe("ctf management", func() {
 
 		commits := Must(remoteRepo.CommitObjects())
 		validAdd := 0
-		validSync := 0
 		var messages []string
 		Expect(commits.ForEach(func(commit *object.Commit) error {
-			if expected := rgit.GenerateCommitMessageForArtifact(rgit.OperationAdd, aa); commit.Message == expected {
+			if expected := rgit.GenerateCommitMessage(); commit.Message == expected {
 				validAdd++
-			}
-			if expected := rgit.GenerateCommitMessageForArtifact(rgit.OperationUpdate, aa); commit.Message == expected {
-				validSync++
 			}
 			messages = append(messages, commit.Message)
 			return nil
@@ -100,14 +96,7 @@ var _ = Describe("ctf management", func() {
 		Expect(validAdd).To(Equal(1),
 			fmt.Sprintf(
 				"expected exactly one commit with message %q, got %d commits with messages:\n%v",
-				rgit.GenerateCommitMessageForArtifact(rgit.OperationAdd, aa),
-				validAdd,
-				messages,
-			))
-		Expect(validSync).To(Equal(1),
-			fmt.Sprintf(
-				"expected exactly one commit with message %q, got %d commits with messages:\n%v",
-				rgit.GenerateCommitMessageForArtifact(rgit.OperationAdd, aa),
+				rgit.GenerateCommitMessage(),
 				validAdd,
 				messages,
 			))

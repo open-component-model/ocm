@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 
 	. "github.com/mandelsoft/goutils/finalizer"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "ocm.software/ocm/api/ocm/testhelper"
 
 	"github.com/go-git/go-billy/v5"
@@ -27,14 +27,12 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/tonglil/buflogr"
 
-	"ocm.software/ocm/api/oci/artdesc"
 	gitrepo "ocm.software/ocm/api/oci/extensions/repositories/git"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
-	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/componentmapping"
 	"ocm.software/ocm/api/ocm/extensions/repositories/git"
 	techgit "ocm.software/ocm/api/tech/git"
 	"ocm.software/ocm/api/utils/accessio"
@@ -113,7 +111,7 @@ var _ = Describe("access method", func() {
 		final := Finalizer{}
 		defer Defer(final.Finalize)
 
-		a := Must(git.Create(ctx, git.ACC_WRITABLE|git.ACC_CREATE, repoURL, opts))
+		a := Must(git.Create(ctx, repoURL, opts))
 		final.Close(a, "repository")
 		c := Must(a.LookupComponent(COMPONENT))
 		final.Close(c, "component")
@@ -124,31 +122,9 @@ var _ = Describe("access method", func() {
 		MustBeSuccessful(c.AddVersion(cv))
 		MustBeSuccessful(final.Finalize())
 
-		componentCommitExpectation := gitrepo.GenerateCommitMessageForNamespace(gitrepo.OperationUpdate, fmt.Sprintf("component-descriptors/%s", COMPONENT))
-		descriptorCommitExpectation := regexp.MustCompile(fmt.Sprintf("%s: %s blob.* of type %s",
-			regexp.QuoteMeta(gitrepo.CommitPrefix),
-			gitrepo.OperationAdd,
-			regexp.QuoteMeta(componentmapping.ComponentDescriptorTarMimeType)),
-		)
-		descriptorConfigCommitExpectation := regexp.MustCompile(fmt.Sprintf("%s: %s blob.* of type %s",
-			regexp.QuoteMeta(gitrepo.CommitPrefix),
-			gitrepo.OperationAdd,
-			regexp.QuoteMeta(componentmapping.ComponentDescriptorConfigMimeType)),
-		)
-		manifestAddCommitExpectation := regexp.MustCompile(fmt.Sprintf("%s: %s artifact .* %s",
-			regexp.QuoteMeta(gitrepo.CommitPrefix),
-			gitrepo.OperationAdd,
-			regexp.QuoteMeta(fmt.Sprintf("(%s)", artdesc.MediaTypeImageManifest))),
-		)
-		manifestUpdateCommitExpectation := regexp.MustCompile(fmt.Sprintf("%s: %s manifest .* %s",
-			regexp.QuoteMeta(gitrepo.CommitPrefix),
-			gitrepo.OperationUpdate,
-			regexp.QuoteMeta(fmt.Sprintf("(%s)", artdesc.MediaTypeImageManifest))),
-		)
+		componentCommitExpectation := gitrepo.GenerateCommitMessage()
 
 		componentUpdate := 0
-		descriptorCommits := 0
-		manifestUpdateCommits := 0
 		commits := Must(remoteRepo.CommitObjects())
 		Expect(commits.ForEach(func(commit *object.Commit) error {
 			Expect(commit.Author.Name).To(Equal(opts.Author.Name))
@@ -156,16 +132,10 @@ var _ = Describe("access method", func() {
 
 			if commit.Message == componentCommitExpectation {
 				componentUpdate++
-			} else if descriptorCommitExpectation.MatchString(commit.Message) || descriptorConfigCommitExpectation.MatchString(commit.Message) {
-				descriptorCommits++
-			} else if manifestUpdateCommitExpectation.MatchString(commit.Message) || manifestAddCommitExpectation.MatchString(commit.Message) {
-				manifestUpdateCommits++
 			}
 			return nil
 		})).To(Succeed())
 		Expect(componentUpdate).To(Equal(1))
-		Expect(descriptorCommits).To(Equal(2))
-		Expect(manifestUpdateCommits).To(Equal(2))
 
 		refmgmt.AllocLog.Trace("opening ctf")
 		a = Must(git.Open(ctx, git.ACC_READONLY, repoURL, opts))
@@ -188,7 +158,7 @@ var _ = Describe("access method", func() {
 		final := Finalizer{}
 		defer Defer(final.Finalize)
 
-		a := Must(git.Create(ctx, git.ACC_WRITABLE|git.ACC_CREATE, repoURL, opts))
+		a := Must(git.Create(ctx, repoURL, opts))
 		final.Close(a, "repository")
 		c := Must(a.LookupComponent(COMPONENT))
 		final.Close(c, "component")
@@ -215,7 +185,7 @@ var _ = Describe("access method", func() {
 		final := Finalizer{}
 		defer Defer(final.Finalize)
 
-		a := Must(git.Create(ctx, git.ACC_WRITABLE|git.ACC_CREATE, repoURL, opts))
+		a := Must(git.Create(ctx, repoURL, opts))
 		final.Close(a)
 		c := Must(a.LookupComponent(COMPONENT))
 		final.Close(c)
@@ -252,7 +222,7 @@ var _ = Describe("access method", func() {
 		final := Finalizer{}
 		defer Defer(final.Finalize)
 
-		a := Must(git.Create(ctx, git.ACC_WRITABLE|git.ACC_CREATE, repoURL, opts))
+		a := Must(git.Create(ctx, repoURL, opts))
 		final.Close(a)
 		c := Must(a.LookupComponent(COMPONENT))
 		final.Close(c)
@@ -274,7 +244,7 @@ var _ = Describe("access method", func() {
 		final := Finalizer{}
 		defer Defer(final.Finalize)
 
-		a := Must(git.Create(ctx, git.ACC_WRITABLE|git.ACC_CREATE, repoURL, opts))
+		a := Must(git.Create(ctx, repoURL, opts))
 		final.Close(a)
 		c := Must(a.LookupComponent(COMPONENT))
 		final.Close(c)
