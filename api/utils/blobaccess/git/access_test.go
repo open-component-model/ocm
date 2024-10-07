@@ -13,8 +13,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/cwdfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -37,7 +37,7 @@ var _ = Describe("git Blob Access", func() {
 	ctx = ocm.New()
 
 	BeforeEach(func() {
-		tempVFS, err := cwdfs.New(osfs.New(), GinkgoT().TempDir())
+		tempVFS, err := projectionfs.New(osfs.New(), GinkgoT().TempDir())
 		Expect(err).ToNot(HaveOccurred())
 		tmpcache.Set(ctx, &tmpcache.Attribute{Path: ".", Filesystem: tempVFS})
 		vfsattr.Set(ctx, tempVFS)
@@ -93,9 +93,8 @@ var _ = Describe("git Blob Access", func() {
 		It("blobaccess for simple repository", func() {
 			b := Must(gitblob.BlobAccess(
 				gitblob.WithURL(url),
-				gitblob.WithCachingContext(ctx),
 				gitblob.WithLoggingContext(ctx),
-				gitblob.WithCachingPath(GinkgoT().TempDir()),
+				gitblob.WithCachingContext(ctx),
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
@@ -105,9 +104,10 @@ var _ = Describe("git Blob Access", func() {
 	})
 
 	Context("git http repository", func() {
+		host := "github.com:443"
+		reachable := PingTCPServer(host, time.Second) == nil
 		BeforeEach(func() {
-			host := "github.com:443"
-			if PingTCPServer(host, time.Second) != nil {
+			if !reachable {
 				Skip(fmt.Sprintf("no connection to %s, skipping test connection to remote", url))
 			}
 			// This repo is a public repo owned by the Github Kraken Bot, so its as good of a public available
@@ -115,12 +115,22 @@ var _ = Describe("git Blob Access", func() {
 			url = fmt.Sprintf("https://%s/octocat/Hello-World.git", host)
 		})
 
+		It("hello world from github without explicit branch", func() {
+			b := Must(gitblob.BlobAccess(
+				gitblob.WithURL(url),
+				gitblob.WithLoggingContext(ctx),
+				gitblob.WithCachingContext(ctx),
+			))
+			defer Close(b)
+			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
+			Expect(files).To(ConsistOf("README"))
+		})
+
 		It("hello world from github with master branch", func() {
 			b := Must(gitblob.BlobAccess(
 				gitblob.WithURL(url),
-				gitblob.WithCachingContext(ctx),
 				gitblob.WithLoggingContext(ctx),
-				gitblob.WithCachingPath(GinkgoT().TempDir()),
+				gitblob.WithCachingContext(ctx),
 				gitblob.WithRef(plumbing.Master.String()),
 			))
 			defer Close(b)
@@ -131,9 +141,8 @@ var _ = Describe("git Blob Access", func() {
 		It("hello world from github with custom ref", func() {
 			b := Must(gitblob.BlobAccess(
 				gitblob.WithURL(url),
-				gitblob.WithCachingContext(ctx),
 				gitblob.WithLoggingContext(ctx),
-				gitblob.WithCachingPath(GinkgoT().TempDir()),
+				gitblob.WithCachingContext(ctx),
 				gitblob.WithRef("refs/heads/test"),
 			))
 			defer Close(b)

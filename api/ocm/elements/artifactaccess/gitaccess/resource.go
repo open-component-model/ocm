@@ -11,7 +11,7 @@ import (
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 )
 
-const TYPE = resourcetypes.BLOB
+const TYPE = resourcetypes.DIRECTORY_TREE
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, opts ...Option) cpi.ArtifactAccess[M] {
 	eff := optionutils.EvalOptions(opts...)

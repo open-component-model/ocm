@@ -7,7 +7,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/optionutils"
-	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
@@ -29,13 +29,8 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	}
 	log := options.Logger("RepoUrl", options.URL)
 
-	if options.AuthMethod == nil && options.Credentials.Value != nil {
-		authMethod, err := git.AuthFromCredentials(options.Credentials.Value)
-		if err != nil && !errors.Is(err, git.ErrNoValidGitCredentials) {
-			return nil, err
-		} else {
-			options.AuthMethod = authMethod
-		}
+	if err := options.ConfigureAuthMethod(); err != nil {
+		return nil, err
 	}
 
 	c, err := git.NewClient(options.ClientOptions)
@@ -43,16 +38,27 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 		return nil, err
 	}
 
-	tmpfs, err := osfs.NewTempFileSystem()
+	tmpFS, cleanup, err := options.CachingFilesystem()
+	if err != nil {
+		return nil, err
+	} else if cleanup != nil {
+		finalize.With(cleanup)
+	}
+
+	// store the repo in a temporary filesystem subfolder, so the tgz can go in the root without issues.
+	if err := tmpFS.MkdirAll("repository", 0700); err != nil {
+		return nil, err
+	}
+	repositoryFS, err := projectionfs.New(tmpFS, "repository")
 	if err != nil {
 		return nil, err
 	}
 	finalize.With(func() error {
-		return vfs.Cleanup(tmpfs)
+		return tmpFS.RemoveAll("repository")
 	})
 
 	// redirect the client to the temporary filesystem for storage of the repo, otherwise it would use memory
-	if err := c.Setup(tmpfs); err != nil {
+	if err := c.Setup(repositoryFS); err != nil {
 		return nil, err
 	}
 
@@ -62,12 +68,12 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	}
 
 	// remove the .git directory as it shouldn't be part of the tarball
-	if err := tmpfs.RemoveAll(gogit.GitDirName); err != nil {
+	if err := repositoryFS.RemoveAll(gogit.GitDirName); err != nil {
 		return nil, err
 	}
 
 	// pack all downloaded files into a tar.gz file
-	fs := options.GetCachingFileSystem()
+	fs := tmpFS
 	tgz, err := vfs.TempFile(fs, "", "git-*.tar.gz")
 	if err != nil {
 		return nil, err
@@ -76,7 +82,7 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	dw := iotools.NewDigestWriterWith(digest.SHA256, tgz)
 	finalize.Close(dw)
 
-	if err := tarutils.TgzFs(tmpfs, dw); err != nil {
+	if err := tarutils.TgzFs(repositoryFS, dw); err != nil {
 		return nil, err
 	}
 
