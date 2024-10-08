@@ -382,4 +382,67 @@ var _ = Describe("oci artifact transfer", func() {
 			Expect(string(data)).To(Equal(OCILAYER))
 		})
 	})
+
+	Context("with wrong tag + digest", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMPONENT, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "testdata")
+						})
+						env.Resource("artifact", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+							env.Access(
+								ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, "dummy"+"@sha256:"+D_OCIMANIFEST1)),
+							)
+						})
+					})
+				})
+			})
+		})
+
+		It("it should copy a resource by value and export the OCI image", func() {
+			env.OCMContext().BlobHandlers().Register(ocirepo.NewArtifactHandler(FakeOCIRegBaseFunction),
+				cpi.ForRepo(oci.CONTEXT_TYPE, ocictf.Type), cpi.ForMimeType(artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest)))
+
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
+			cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+			tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
+			defer tgt.Close()
+
+			opts := &standard.Options{}
+			opts.SetResourcesByValue(true)
+			handler := standard.NewDefaultHandler(opts)
+
+			MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, tgt, handler))
+			Expect(env.DirExists(OUT)).To(BeTrue())
+
+			list := Must(tgt.ComponentLister().GetComponents("", true))
+			Expect(list).To(Equal([]string{COMPONENT}))
+			comp := Must(tgt.LookupComponentVersion(COMPONENT, VERSION))
+			Expect(len(comp.GetDescriptor().Resources)).To(Equal(2))
+			data := Must(json.Marshal(comp.GetDescriptor().Resources[1].Access))
+
+			fmt.Printf("%s\n", string(data))
+			// provide the fake name tag in target repo
+			Expect(string(data)).To(StringEqualWithContext(`{"imageReference":"baseurl.io/ocm/value:dummy@sha256:` + D_OCIMANIFEST1 + `","type":"ociArtifact"}`))
+
+			ocirepo := genericocireg.GetOCIRepository(tgt)
+
+			Expect(Must(ocirepo.ExistsArtifact(OCINAMESPACE, "dummy"))).To(BeTrue())
+			Expect(Must(ocirepo.ExistsArtifact(OCINAMESPACE, "@sha256:"+D_OCIMANIFEST1))).To(BeTrue())
+
+			art := Must(ocirepo.LookupArtifact(OCINAMESPACE, "dummy"))
+			defer Close(art, "artifact")
+
+			man := MustBeNonNil(art.ManifestAccess())
+			Expect(len(man.GetDescriptor().Layers)).To(Equal(1))
+			Expect(man.GetDescriptor().Layers[0].Digest).To(Equal(ldesc.Digest))
+
+			blob := Must(man.GetBlob(ldesc.Digest))
+			data = Must(blob.Get())
+			Expect(string(data)).To(Equal(OCILAYER))
+		})
+	})
 })
