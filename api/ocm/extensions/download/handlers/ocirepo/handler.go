@@ -64,20 +64,15 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	}
 
 	// get rid of digest
-	i := strings.LastIndex(namespace, ":")
+	i := strings.LastIndex(namespace, "@")
+	if i >= 0 {
+		namespace = namespace[:i] // remove digest
+	}
+
+	i = strings.LastIndex(namespace, ":")
 	if i > 0 {
 		tag = namespace[i:]
 		tag = tag[1:] // remove colon
-		namespace = namespace[:i]
-
-		i = strings.LastIndex(tag, "@")
-		if i > 0 {
-			tag = tag[:i]
-		}
-	}
-
-	i = strings.LastIndex(namespace, "@")
-	if i > 0 {
 		namespace = namespace[:i]
 	}
 

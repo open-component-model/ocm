@@ -146,7 +146,7 @@ var _ = Describe("upload", func() {
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		val := Must(ctx.AccessSpecForSpec(acc))
 		// TODO: the result is invalid for ctf: better handling for ctf refs
-		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0"))
+		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
 
 		attr.Close()
 		target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
@@ -188,7 +188,7 @@ var _ = Describe("upload", func() {
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		val := Must(ctx.AccessSpecForSpec(acc))
 		// TODO: the result is invalid for ctf: better handling for ctf refs
-		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0"))
+		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
 
 		// attr.Close()
 		env.OCMContext().Finalize()
@@ -232,7 +232,7 @@ var _ = Describe("upload", func() {
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		val := Must(ctx.AccessSpecForSpec(acc))
 		// TODO: the result is invalid for ctf: better handling for ctf refs
-		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0"))
+		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
 
 		// attr.Close()
 		env.OCMContext().Finalize()
