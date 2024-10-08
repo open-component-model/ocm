@@ -46,9 +46,10 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	}
 
 	// store the repo in a temporary filesystem subfolder, so the tgz can go in the root without issues.
-	if err := tmpFS.MkdirAll("repository", 0700); err != nil {
+	if err := tmpFS.MkdirAll("repository", 0o700); err != nil {
 		return nil, err
 	}
+
 	repositoryFS, err := projectionfs.New(tmpFS, "repository")
 	if err != nil {
 		return nil, err

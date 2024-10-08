@@ -80,11 +80,16 @@ func (o *Options) ConfigureAuthMethod() error {
 		}
 	}
 
-	if o.CredentialContext.Value != nil {
-		creds, err := identity.GetCredentials(o.CredentialContext.Value, o.URL)
-		if err != nil {
-			return err
-		}
+	if o.CredentialContext.Value == nil {
+		return nil
+	}
+
+	creds, err := identity.GetCredentials(o.CredentialContext.Value, o.URL)
+	if err != nil {
+		return err
+	}
+
+	if creds != nil {
 		if o.ClientOptions.AuthMethod, err = git.AuthFromCredentials(creds); err != nil {
 			return err
 		}
