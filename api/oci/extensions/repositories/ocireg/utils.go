@@ -36,10 +36,13 @@ var _ cpi.DataAccess = (*dataAccess)(nil)
 
 func NewDataAccess(repo registry.Repository, digest digest.Digest, delayed bool) (*dataAccess, error) {
 	var reader io.ReadCloser
-	desc, err := repo.Resolve(dummyContext, digest.String())
+	// First, we try to resolve a blob if a blob was already provided, this will work.
+	desc, err := repo.Blobs().Resolve(dummyContext, digest.String())
 	if err != nil {
 		if errors.Is(err, errdef.ErrNotFound) {
-			desc, err = repo.Blobs().Resolve(dummyContext, digest.String())
+			// If the provided digest was that of a manifest, the second try will find
+			// the manifest, because the first one didn't find the blob.
+			desc, err = repo.Resolve(dummyContext, digest.String())
 			if err != nil {
 				return nil, err
 			}

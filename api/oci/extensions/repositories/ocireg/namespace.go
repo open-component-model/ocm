@@ -54,10 +54,6 @@ func (n *NamespaceContainer) IsReadOnly() bool {
 	return n.repo.IsReadOnly()
 }
 
-func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	return nil
-}
-
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	n.repo.GetContext().Logger().Debug("getting blob", "digest", digest)
 
