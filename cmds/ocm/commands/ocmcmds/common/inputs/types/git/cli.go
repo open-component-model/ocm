@@ -1,4 +1,4 @@
-package docker
+package git
 
 import (
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"

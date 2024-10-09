@@ -88,6 +88,7 @@ var _ = Describe("Method", func() {
 		accessSpec = me.New(
 			fmt.Sprintf("file://%s", repoDir),
 			string(plumbing.Master),
+			"",
 			".",
 		)
 

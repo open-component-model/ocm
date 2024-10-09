@@ -38,6 +38,9 @@ type AccessSpec struct {
 	// Ref defines the hash of the commit
 	Ref string `json:"ref"`
 
+	// Commit defines the hash of the commit in string format to checkout from the Ref
+	Commit string `json:"commit"`
+
 	// PathSpec is a path in the repository to download, can be a file or a regex matching multiple files
 	PathSpec string `json:"pathSpec"`
 }
@@ -46,11 +49,12 @@ type AccessSpec struct {
 type AccessSpecOptions func(s *AccessSpec)
 
 // New creates a new git registry access spec version v1.
-func New(url, ref string, pathSpec string, opts ...AccessSpecOptions) *AccessSpec {
+func New(url, ref, commit, pathSpec string, opts ...AccessSpecOptions) *AccessSpec {
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		RepoURL:             url,
 		Ref:                 ref,
+		Commit:              commit,
 		PathSpec:            pathSpec,
 	}
 	for _, o := range opts {
@@ -95,6 +99,7 @@ func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal
 		gitblob.WithCredentialContext(octx),
 		gitblob.WithURL(a.RepoURL),
 		gitblob.WithRef(a.Ref),
+		gitblob.WithCommit(a.Commit),
 		gitblob.WithCachingFileSystem(vfsattr.Get(octx)),
 	}
 	if creds != nil {

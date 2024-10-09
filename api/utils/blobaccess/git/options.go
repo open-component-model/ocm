@@ -65,6 +65,9 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.Ref != "" {
 		opts.Ref = o.Ref
 	}
+	if o.Commit != "" {
+		opts.Commit = o.Commit
+	}
 }
 
 func (o *Options) ConfigureAuthMethod() error {
@@ -177,4 +180,18 @@ func (o *Options) SetRef(v string) {
 
 func WithRef(ref string) Option {
 	return option[RefOptionBag](ref)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type CommitOptionBag interface {
+	SetCommit(v string)
+}
+
+func (o *Options) SetCommit(v string) {
+	o.Commit = v
+}
+
+func WithCommit(ref string) Option {
+	return option[CommitOptionBag](ref)
 }

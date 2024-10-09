@@ -58,9 +58,20 @@ type Client interface {
 }
 
 type ClientOptions struct {
+	// URL is the URL of the git repository to clone or open.
 	URL string
+	// Ref is the reference to the repository to clone or open.
+	// If empty, it will default to plumbing.HEAD of the remote repository.
+	// If the remote does not exist, it will attempt to push to the remote with DefaultWorktreeBranch on Client.Update.
+	// To point to a remote branch, use refs/heads/<branch>.
+	// To point to a tag, use refs/tags/<tag>.
 	Ref string
+	// Commit is the commit hash to checkout after cloning the repository.
+	// If empty, it will default to the plumbing.HEAD of the Ref.
+	Commit string
+	// Author is the author to use for commits. If empty, it will default to the git config of the user running the process.
 	Author
+	// AuthMethod is the authentication method to use for the repository.
 	AuthMethod AuthMethod
 }
 
@@ -156,7 +167,13 @@ func (c *client) newRepository(ctx context.Context, repo *git.Repository) error 
 		return err
 	}
 
+	var hash plumbing.Hash
+	if c.opts.Commit != "" {
+		hash = plumbing.NewHash(c.opts.Commit)
+	}
+
 	if err := worktree.Checkout(&git.CheckoutOptions{
+		Hash:   hash,
 		Branch: DefaultWorktreeBranch,
 		Create: true,
 		Keep:   true,
