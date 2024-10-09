@@ -68,9 +68,14 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 		return nil, err
 	}
 
-	// remove the .git directory as it shouldn't be part of the tarball
-	if err := repositoryFS.RemoveAll(gogit.GitDirName); err != nil {
-		return nil, err
+	filteredRepositoryFS := &filteredVFS{
+		FileSystem: repositoryFS,
+		filter: func(s string) bool {
+			if s == gogit.GitDirName {
+				return false
+			}
+			return true
+		},
 	}
 
 	// pack all downloaded files into a tar.gz file
@@ -83,7 +88,7 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	dw := iotools.NewDigestWriterWith(digest.SHA256, tgz)
 	finalize.Close(dw)
 
-	if err := tarutils.TgzFs(repositoryFS, dw); err != nil {
+	if err := tarutils.TgzFs(filteredRepositoryFS, dw); err != nil {
 		return nil, err
 	}
 
@@ -96,4 +101,37 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 		file.WithDigest(dw.Digest()),
 		file.WithSize(dw.Size()),
 	), nil
+}
+
+type filteredVFS struct {
+	vfs.FileSystem
+	filter func(string) bool
+}
+
+func (f *filteredVFS) Open(name string) (vfs.File, error) {
+	if !f.filter(name) {
+		return nil, vfs.SkipDir
+	}
+	return f.FileSystem.Open(name)
+}
+
+func (f *filteredVFS) OpenFile(name string, flags int, perm vfs.FileMode) (vfs.File, error) {
+	if !f.filter(name) {
+		return nil, vfs.SkipDir
+	}
+	return f.FileSystem.OpenFile(name, flags, perm)
+}
+
+func (f *filteredVFS) Stat(name string) (vfs.FileInfo, error) {
+	if !f.filter(name) {
+		return nil, vfs.SkipDir
+	}
+	return f.FileSystem.Stat(name)
+}
+
+func (f *filteredVFS) Lstat(name string) (vfs.FileInfo, error) {
+	if !f.filter(name) {
+		return nil, vfs.SkipDir
+	}
+	return f.FileSystem.Lstat(name)
 }

@@ -1,4 +1,4 @@
-package docker
+package git
 
 import (
 	"github.com/go-git/go-git/v5/plumbing"
@@ -18,13 +18,17 @@ type Spec struct {
 	Repository string `json:"repository"`
 
 	// Ref is the Git Ref to check out.
-	// If not set, the default HEAD (remotes/origin/HEAD) of the remote is used.
+	// If empty, the default HEAD (remotes/origin/HEAD) of the remote is used.
 	Ref string `json:"ref,omitempty"`
+
+	// Commit is the Git Commit to check out.
+	// If empty, the default HEAD of the Ref is used.
+	Commit string `json:"commit,omitempty"`
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)
 
-func New(repository string) *Spec {
+func New(repository, ref, commit string) *Spec {
 	return &Spec{
 		InputSpecBase: inputs.InputSpecBase{
 			ObjectVersionedType: runtime.ObjectVersionedType{
@@ -32,6 +36,8 @@ func New(repository string) *Spec {
 			},
 		},
 		Repository: repository,
+		Ref:        ref,
+		Commit:     commit,
 	}
 }
 
@@ -47,7 +53,7 @@ func (s *Spec) Validate(fldPath *field.Path, _ inputs.Context, _ string) field.E
 	}
 
 	if ref := fldPath.Child("ref"); s.Ref != "" {
-		if plumbing.ReferenceName(s.Ref).Validate() != nil {
+		if err := plumbing.ReferenceName(s.Ref).Validate(); err != nil {
 			allErrs = append(allErrs, field.Invalid(ref, s.Ref, "invalid ref"))
 		}
 	}
@@ -56,13 +62,10 @@ func (s *Spec) Validate(fldPath *field.Path, _ inputs.Context, _ string) field.E
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
-	if _, err := giturls.Parse(s.Repository); err != nil {
-		return nil, "", err
-	}
-
 	blob, err := git.BlobAccess(
 		git.WithURL(s.Repository),
 		git.WithRef(s.Ref),
+		git.WithCommit(s.Commit),
 		git.WithCredentialContext(ctx),
 		git.WithLoggingContext(ctx),
 		git.WithCachingContext(ctx),

@@ -10,6 +10,7 @@ type Options struct {
 	URL      string
 	Ref      string
 	PathSpec string
+	Commit   string
 }
 
 var _ Option = (*Options)(nil)
@@ -55,4 +56,14 @@ func (h pathSpec) ApplyTo(opts *Options) {
 
 func WithPathSpec(h string) Option {
 	return pathSpec(h)
+}
+
+type commitSpec string
+
+func (h commitSpec) ApplyTo(opts *Options) {
+	opts.Commit = string(h)
+}
+
+func WithCommit(c string) Option {
+	return commitSpec(c)
 }
