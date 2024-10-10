@@ -16,6 +16,7 @@ import (
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/extensions/blobhandler"
+	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/ocirepo"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	ctfocm "ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/tools/transfer"
@@ -175,7 +176,7 @@ var _ = Describe("upload", func() {
 
 		// prepare upload to target OCI repo
 		attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
-		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "ocm/ociArtifacts", attr))
+		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, ocirepo.BlobHandlerName, attr))
 
 		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, copy, nil))
 
@@ -219,7 +220,7 @@ var _ = Describe("upload", func() {
 		// prepare upload to target OCI repo
 		// attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
 		attr := TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy"
-		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "ocm/ociArtifacts", attr))
+		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, ocirepo.BlobHandlerName, attr))
 
 		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, copy, nil))
 
