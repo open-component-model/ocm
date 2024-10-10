@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -162,7 +163,7 @@ func DetermineElementForData(ctx clictx.Context, ictx inputs.Context, si SourceI
 		if err != nil {
 			return nil, err
 		}
-		if err = Validate(input, ictx, si.Origin()); err != nil {
+		if err = Validate(input, ictx, general.OptionalDefaulted(si.Origin(), input.SourceFile)); err != nil {
 			return nil, err
 		}
 	}
