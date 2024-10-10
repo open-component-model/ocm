@@ -82,7 +82,7 @@ someattr: value
 		Expect(err).To(Succeed())
 		spec := s.(*access.AccessSpec)
 		h := spec.Handler()
-		info, err := h.Info(spec)
+		info, err := h.GetAccessSpecInfo(spec)
 		Expect(err).To(Succeed())
 		Expect(info).To(Equal(&plugin.AccessSpecInfo{
 			Short:     "a test",
