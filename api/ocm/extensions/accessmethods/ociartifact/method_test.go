@@ -31,20 +31,82 @@ var _ = Describe("Method", func() {
 		env.Cleanup()
 	})
 
-	It("accesses artifact", func() {
-		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-			OCIManifest1(env)
+	Context("tag only", func() {
+		It("accesses artifact", func() {
+			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+				OCIManifest1(env)
+			})
+
+			FakeOCIRepo(env, OCIPATH, OCIHOST)
+
+			spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION))
+
+			m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()})
+			Expect(err).To(Succeed())
+
+			// no credentials required for CTF as fake OCI registry.
+			Expect(credentials.GetProvidedConsumerId(m)).To(BeNil())
+			Expect(accspeccpi.GetAccessMethodImplementation(m).(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:" + D_OCIMANIFEST1))
 		})
 
-		FakeOCIRepo(env, OCIPATH, OCIHOST)
+		It("provides artifact hint", func() {
+			spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION))
 
-		spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION))
-
-		m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()})
-		Expect(err).To(Succeed())
-
-		// no credentials required for CTF as fake OCI registry.
-		Expect(credentials.GetProvidedConsumerId(m)).To(BeNil())
-		Expect(accspeccpi.GetAccessMethodImplementation(m).(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"))
+			hint := spec.GetReferenceHint(&cpi.DummyComponentVersionAccess{env.OCMContext()})
+			Expect(hint).To(Equal("ocm/value:v2.0"))
+		})
 	})
+
+	Context("tag + digest", func() {
+		It("accesses artifact", func() {
+			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+				OCIManifest1(env)
+			})
+
+			FakeOCIRepo(env, OCIPATH, OCIHOST)
+
+			spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION+"@sha256:"+D_OCIMANIFEST1))
+
+			m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()})
+			Expect(err).To(Succeed())
+
+			// no credentials required for CTF as fake OCI registry.
+			Expect(credentials.GetProvidedConsumerId(m)).To(BeNil())
+			Expect(accspeccpi.GetAccessMethodImplementation(m).(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:" + D_OCIMANIFEST1))
+		})
+
+		It("provides artifact hint", func() {
+			spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION+"@sha256:"+D_OCIMANIFEST1))
+
+			hint := spec.GetReferenceHint(&cpi.DummyComponentVersionAccess{env.OCMContext()})
+			Expect(hint).To(Equal("ocm/value:v2.0"))
+		})
+	})
+
+	Context("digest", func() {
+		It("accesses artifact", func() {
+			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+				OCIManifest1(env)
+			})
+
+			FakeOCIRepo(env, OCIPATH, OCIHOST)
+
+			spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, "@sha256:"+D_OCIMANIFEST1))
+
+			m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()})
+			Expect(err).To(Succeed())
+
+			// no credentials required for CTF as fake OCI registry.
+			Expect(credentials.GetProvidedConsumerId(m)).To(BeNil())
+			Expect(accspeccpi.GetAccessMethodImplementation(m).(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:" + D_OCIMANIFEST1))
+		})
+
+		It("provides artifact hint", func() {
+			spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, "@sha256:"+D_OCIMANIFEST1))
+
+			hint := spec.GetReferenceHint(&cpi.DummyComponentVersionAccess{env.OCMContext()})
+			Expect(hint).To(Equal("ocm/value"))
+		})
+	})
+
 })

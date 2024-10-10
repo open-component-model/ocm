@@ -330,7 +330,8 @@ func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType, ref
 	}
 	if prov != nil {
 		storagectx := b.GetStorageContext()
-		h := prov.LookupHandler(storagectx, artType, blob.MimeType())
+		mime := blob.MimeType()
+		h := prov.LookupHandler(storagectx, artType, mime)
 		if h != nil {
 			acc, err := h.StoreBlob(blob, artType, refName, nil, storagectx)
 			if err != nil {
