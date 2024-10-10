@@ -140,7 +140,6 @@ func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.Compo
 	sopts := *a.sopts
 	sopts.Resolver = resolvers.NewCompoundResolver(o.Repository, a.sopts.Resolver)
 
-	a.state.Get(common.VersionedElementKey(o.ComponentVersion))
 	d, err := signing.Apply(a.printer, &a.state, o.ComponentVersion, &sopts)
 	var cd *compdesc.ComponentDescriptor
 	nv := common.VersionedElementKey(o.ComponentVersion)
