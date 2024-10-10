@@ -17,9 +17,14 @@ import (
 // a content based element (sources or resources).
 // It is either an input or access specification.
 type ResourceInput struct {
-	Access *cpi.GenericAccessSpec `json:"access"`
+	SourceFile string                 `json:"sourceFile,omitempty"`
+	Access     *cpi.GenericAccessSpec `json:"access"`
 	// Input  *inputs.BlobInput                `json:"input,omitempty"`
 	Input *inputs.GenericInputSpec `json:"input,omitempty"`
+}
+
+func (r *ResourceInput) SetSourceFile(s string) {
+	r.SourceFile = s
 }
 
 // ElementSpecHandler is the interface for a handler

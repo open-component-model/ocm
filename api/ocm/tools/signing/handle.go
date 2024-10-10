@@ -156,6 +156,13 @@ func apply(state WalkingState, cv ocm.ComponentVersionAccess, opts *Options, clo
 			return vi.digestingContexts[state.Context.CtxKey], err
 		}
 	}
+	if vi != nil {
+		// check for already calculated
+		dc := vi.GetContext(nv)
+		if dc != nil {
+			return dc, nil
+		}
+	}
 	return _apply(state, nv, cv, vi, opts)
 }
 
