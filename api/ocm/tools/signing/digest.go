@@ -107,6 +107,8 @@ type redirectedAccessMethod struct {
 	acc ocm.DataAccess
 }
 
+var _ accspeccpi.AccessMethodView = (*redirectedAccessMethod)(nil)
+
 func NewRedirectedAccessMethod(m ocm.AccessMethod, bacc ocm.DataAccess) ocm.AccessMethod {
 	return &redirectedAccessMethod{m, bacc}
 }
