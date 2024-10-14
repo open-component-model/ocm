@@ -1,7 +1,8 @@
 module ocm.software/ocm
 
-go 1.22.5
-toolchain go1.22.8
+go 1.22.7
+
+toolchain go1.23.2
 
 replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 
