@@ -195,4 +195,4 @@ jobs:
 
           [Detailed Logs: mend-scan-> Generate Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           [Mend UI](https://sap.whitesourcesoftware.com/Wss/WSS.html#!login)
-        comment_tag: tag_mend_scan
+        comment-tag: tag_mend_scan
