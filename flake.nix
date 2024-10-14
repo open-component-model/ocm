@@ -2,7 +2,8 @@
   description = "Nix flake for ocm";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; # doesn
   };
 
   outputs = { self, nixpkgs, ... }:
