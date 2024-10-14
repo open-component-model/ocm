@@ -180,16 +180,6 @@ func NewDecisionHandlerBase(q, desc string, labels ...string) DecisionHandlerBas
 	return DecisionHandlerBase{q, desc, generics.Pointer(slices.Clone(labels))}
 }
 
-type testDH struct {
-	DecisionHandlerBase
-}
-
-func (d *testDH) DecideOn(p Plugin, question interface{}) (bool, error) {
-	panic("just a type test")
-}
-
-var _ DecisionHandler = (*testDH)(nil)
-
 ////////////////////////////////////////////////////////////////////////////////
 
 // Config is a generic structured config stored in a string map.
