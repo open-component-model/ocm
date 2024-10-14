@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	Register("none", func(_ vfs.FileSystem) Templater { return NewSubst() }, `do not do any substitution.
+	Register("none", func(_ vfs.FileSystem, _ TemplaterOptions) Templater { return NewSubst() }, `do not do any substitution.
 `)
 }
 
