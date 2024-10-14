@@ -5,10 +5,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
   };
 
-  elections = callPackage package.nix {
-    buildGoModule = buildGoModule.override { go = go_1_23; };
-  };
-
   outputs = { self, nixpkgs, ... }:
     let
       pname = "ocm";
@@ -24,6 +20,10 @@
 
     in
     {
+      elections = ${pname} package.nix {
+        buildGoModule = buildGoModule.override { go = go_1_23; };
+      };
+
       # Provide some binary packages for selected system types.
       packages = forAllSystems (system:
         let
