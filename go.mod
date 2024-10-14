@@ -43,8 +43,8 @@ require (
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
 	github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc
 	github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a
-	github.com/mandelsoft/spiff v1.7.0-beta-5
-	github.com/mandelsoft/vfs v0.4.4-0.20240915223828-8bc9369139c8
+	github.com/mandelsoft/spiff v1.7.0-beta-6
+	github.com/mandelsoft/vfs v0.4.4
 	github.com/marstr/guid v1.1.0
 	github.com/mikefarah/yq/v4 v4.44.3
 	github.com/mitchellh/copystructure v1.2.0
