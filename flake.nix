@@ -20,10 +20,6 @@
 
     in
     {
-      elections = pname package.nix {
-        buildGoModule = buildGoModule.override { go = go_1_23; };
-      };
-
       # Provide some binary packages for selected system types.
       packages = forAllSystems (system:
         let
@@ -31,6 +27,10 @@
           inherit (pkgs) stdenv lib ;
         in
         {
+          elections = pname pkgs.nix {
+            buildGoModule = buildGoModule.override { go = go_1_23; };
+          };
+
           ${pname} = pkgs.buildGoModule rec {
             inherit pname self;
             version = lib.fileContents ./VERSION;
