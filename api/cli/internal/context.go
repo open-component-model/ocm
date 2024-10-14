@@ -7,6 +7,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/config"
@@ -37,6 +38,12 @@ type OCM interface {
 
 type FileSystem struct {
 	vfs.FileSystem
+}
+
+var _ osfs.OsFsCheck = (*FileSystem)(nil)
+
+func (f *FileSystem) IsOsFileSystem() bool {
+	return osfs.IsOsFileSystem(f.FileSystem)
 }
 
 func (f *FileSystem) ApplyOption(options accessio.Options) error {
