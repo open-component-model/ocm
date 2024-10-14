@@ -20,7 +20,7 @@
 
     in
     {
-      elections = ${pname} package.nix {
+      elections = package.nix {
         buildGoModule = buildGoModule.override { go = go_1_23; };
       };
 
