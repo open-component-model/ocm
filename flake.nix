@@ -35,10 +35,14 @@
 
             # This vendorHash represents a dervative of all go.mod dependancies and needs to be adjusted with every change
 <<<<<<< HEAD
+<<<<<<< HEAD
             vendorHash = "sha256-WJcVwyChwtI6wZuQTvQ0e3enhkj2ThOUpmg8jpOIrek=";
 =======
             vendorHash = "sha256-NmUhe8lQsK8+g6GOUw4m2j5+B+VIx6OzXfSY+zGUM9Q=";
 >>>>>>> 45c1b362 (auto update vendor hash)
+=======
+            vendorHash = "sha256-p5Edm9XqifVFq7KbSPj16p+OvpQl+n+5rEdkdo79OTo=";
+>>>>>>> 3e2990ca (auto update vendor hash)
 
             src = ./.;
 
