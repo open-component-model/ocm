@@ -27,11 +27,7 @@
           inherit (pkgs) stdenv lib ;
         in
         {
-          elections = pname pkgs.nix {
-            buildGoModule = buildGoModule.override { go = go_1_23; };
-          };
-
-          ${pname} = pkgs.buildGoModule rec {
+          ${pname} = pkgs.buildGo123Module rec {
             inherit pname self;
             version = lib.fileContents ./VERSION;
             gitCommit = if (self ? rev) then self.rev else self.dirtyRev;
