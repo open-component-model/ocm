@@ -27,7 +27,7 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-    - name: Checkout Code  
+    - name: Checkout Code
       uses: actions/checkout@v4
 
     - name: Set up Java 17
@@ -45,11 +45,11 @@ jobs:
       uses: dcarbone/install-jq-action@v2.1.0
       with:
         version: '1.7'
-        
+
     - name: Download Mend Universal Agent
       run: curl https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar -o ./wss-unified-agent.jar
 
-    - name: Run Mend Scan 
+    - name: Run Mend Scan
       run: java -jar ./wss-unified-agent.jar -c $CONFIG_FILE -wss.url $WSS_URL -apiKey $API_KEY -userKey $USER_KEY -productToken $PRODUCT_TOKEN
       env:
         USER_KEY: ${{ secrets.MEND_USER_KEY }}
@@ -57,7 +57,7 @@ jobs:
         WSS_URL: ${{ secrets.MEND_URL }}
         API_KEY: ${{ secrets.MEND_API_TOKEN }}
         CONFIG_FILE: './.github/config/mend.config'
- 
+
     - name: Generate Report
       env:
         USER_KEY: ${{ secrets.MEND_API_USER_KEY }}
@@ -74,36 +74,36 @@ jobs:
         }
         EOF
         )
-        
+
         login_token=$(curl -X POST 'https://api-sap.whitesourcesoftware.com/api/v2.0/login' \
         --header 'Content-Type: application/json' --silent \
         --data "${data}" | jq -r .retVal.jwtToken )
-        
+
         security_vulnerability=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/alerts/security?search=status%3Aequals%3AACTIVE%3Bscore%3Abetween%3A6%2C10%3B" \
         --header 'Content-Type: application/json' --silent \
         --header "Authorization: Bearer ${login_token}")
-        
+
         major_updates_pending=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/alerts/legal?search=status%3Aequals%3AACTIVE%3BavailableVersionType%3Aequals%3AMAJOR" \
         --header 'Content-Type: application/json' --silent \
         --header "Authorization: Bearer ${login_token}" )
-        
+
         requires_review=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/libraries/licenses?search=license%3Aequals%3ARequires%20Review" \
         --header 'Content-Type: application/json' --silent \
         --header "Authorization: Bearer ${login_token}")
-        
+
         high_license_risk=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/libraries/licenses?pageSize=1000" \
         --header 'Content-Type: application/json' --silent \
         --header "Authorization: Bearer ${login_token}")
-        
+
         security_vulnerability_no=$(echo "${security_vulnerability}" | jq .additionalData.totalItems )
         major_updates_pending_no=$(echo "${major_updates_pending}" | jq -r .additionalData.totalItems )
         requires_review_no=$(echo "${requires_review}" |jq -r .additionalData.totalItems )
         high_license_risk_no=$(echo "${high_license_risk}" | jq -r '.retVal[].riskScore.riskScore | select( . != null ) > 52 | select(.==true)'| wc -l )
-        
+
         function print {
           printf "############################################\n$1\n############################################\nMend Scan Tool: https://sap.whitesourcesoftware.com/Wss/WSS.html#!login \n"
         }
-        
+
         function restricted_license {
           declare -a sap_restricted_licenses=("LGPL" "GPL" "Affero%20GPL" "MPL" "CDDL" "EPL")
           ret_val=""
@@ -112,10 +112,10 @@ jobs:
             api_resp=$(curl -X GET "https://api-sap.whitesourcesoftware.com/api/v2.0/projects/${PROJECT_TOKEN}/libraries/licenses?search=license%3Aequals%3A${sap_restricted_licenses[$key]}" \
               --header 'Content-Type: application/json' --silent \
               --header "Authorization: Bearer ${login_token}")
-        
+
             api_resp_no=$(echo "${api_resp}" | jq .additionalData.totalItems )
             issue_count=$((issue_count+api_resp_no))
-        
+
             if [[ $api_resp_no -gt 0 ]]
             then
               val=$(echo "${api_resp}" | jq -r .retVal[] )
@@ -125,62 +125,62 @@ jobs:
           export VIOLATIONS_VERBOSE="${ret_val}"
           export VIOLATIONS="${issue_count}"
         }
-        
+
         print "HIGH/CRITICAL SECURITY VULNERABILITIES: ${security_vulnerability_no}"
         if [[ $security_vulnerability_no -gt 0 ]]
         then
           echo "${security_vulnerability}" | jq -r .retVal[]
         fi
-        
+
         print "MAJOR UPDATES AVAILABLE: ${major_updates_pending_no}"
         if [[ $major_updates_pending_no -gt 0 ]]
         then
           echo "${major_updates_pending}" | jq -r .retVal[]
         fi
-        
+
         print "LICENSE REQUIRES REVIEW: ${requires_review_no}" "Visit the Mend UI and add correct license"
         if [[ $requires_review_no -gt 0 ]]
         then
           echo "${requires_review}" | jq -r .retVal[]
         fi
-        
+
         print "HIGH RISK LICENSES: ${high_license_risk_no}"
         if [[ high_license_risk_no -gt 0 ]]
         then
           echo "Visit the Mend UI and check High Risk Licenses. Understand Risk Score: https://docs.mend.io/bundle/sca_user_guide/page/understanding_risk_score_attribution_and_license_analysis.html"
         fi
-        
+
         restricted_license
-        
+
         print "RESTRICTIED LICENSE FOR ON-PREMISE DELIVERY: ${VIOLATIONS}"
         if [[ $VIOLATIONS -gt 0 ]]
         then
           echo "${VIOLATIONS_VERBOSE}" | jq .
         fi
-        
-        echo "security_vulnerability_no=$security_vulnerability_no" >> $GITHUB_OUTPUT 
+
+        echo "security_vulnerability_no=$security_vulnerability_no" >> $GITHUB_OUTPUT
         echo "major_updates_pending_no=$major_updates_pending_no" >> $GITHUB_OUTPUT
         echo "requires_review_no=$requires_review_no" >> $GITHUB_OUTPUT
         echo "high_license_risk_no=$high_license_risk_no" >> $GITHUB_OUTPUT
         echo "violations=$VIOLATIONS" >> $GITHUB_OUTPUT
-        
+
         if [[ $security_vulnerability_no -gt 0 ]] || [[ $major_updates_pending_no -gt 0 ]] || [[ $requires_review_no -gt 0 ]] || [[ high_license_risk_no -gt 0 ]] || [[ violations -gt 0 ]]
         then
           echo "status=x" >> $GITHUB_OUTPUT
-        else 
+        else
           echo "status=white_check_mark" >> $GITHUB_OUTPUT
         fi
-        
+
     - name: Check if PR exists
       uses: 8BitJonny/gh-get-current-pr@3.0.0
       id: pr_exists
       with:
         filterOutClosed: true
         sha: ${{ github.event.pull_request.head.sha }}
-        
+
     - name: Comment Mend Status on PR
       if: ${{ github.event_name != 'schedule' && steps.pr_exists.outputs.pr_found == 'true' }}
-      uses: thollander/actions-comment-pull-request@v2.5.0
+      uses: thollander/actions-comment-pull-request@v3.0.0
       with:
         message: |
           ## Mend Scan Summary: :${{ steps.report.outputs.status }}:
@@ -192,7 +192,7 @@ jobs:
           | LICENSE REQUIRES REVIEW                      | ${{ steps.report.outputs.requires_review_no }}        |
           | HIGH RISK LICENSES                           | ${{ steps.report.outputs.high_license_risk_no }}      |
           | RESTRICTIED LICENSE FOR ON-PREMISE DELIVERY  | ${{ steps.report.outputs.VIOLATIONS }}                |
-          
+
           [Detailed Logs: mend-scan-> Generate Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           [Mend UI](https://sap.whitesourcesoftware.com/Wss/WSS.html#!login)
-        comment_tag: tag_mend_scan
+        comment-tag: tag_mend_scan
