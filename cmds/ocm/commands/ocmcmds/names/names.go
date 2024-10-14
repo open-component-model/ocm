@@ -18,3 +18,15 @@ var (
 	PubSub                 = []string{"pubsub", "ps"}
 	Verified               = []string{"verified"}
 )
+
+var Aliases = map[string][]string{}
+
+func init() {
+	add(Components, Resources, Sources)
+}
+
+func add(aliases ...[]string) {
+	for _, a := range aliases {
+		Aliases[a[0]] = a
+	}
+}

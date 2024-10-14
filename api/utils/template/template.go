@@ -30,6 +30,7 @@ type Options struct {
 	UseEnv    bool
 	Templater Templater
 	Vars      Values
+	Options   map[string]interface{}
 }
 
 func (o *Options) DefaultMode() string {
