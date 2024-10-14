@@ -8,6 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/none"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	common "ocm.software/ocm/api/utils/misc"
@@ -106,8 +107,19 @@ type redirectedAccessMethod struct {
 	acc ocm.DataAccess
 }
 
+var _ accspeccpi.AccessMethodView = (*redirectedAccessMethod)(nil)
+
 func NewRedirectedAccessMethod(m ocm.AccessMethod, bacc ocm.DataAccess) ocm.AccessMethod {
 	return &redirectedAccessMethod{m, bacc}
+}
+
+func (m *redirectedAccessMethod) Unwrap() interface{} {
+	v, ok := m.AccessMethod.(accspeccpi.AccessMethodView)
+	if !ok {
+		return nil
+	}
+
+	return v.Unwrap()
 }
 
 func (m *redirectedAccessMethod) Close() error {
