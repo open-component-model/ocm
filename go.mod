@@ -2,7 +2,7 @@ module ocm.software/ocm
 
 go 1.22.5
 
-toolchain go1.22.5
+toolchain go1.23.2
 
 replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 
@@ -58,7 +58,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.6.1
-	github.com/sigstore/cosign/v2 v2.4.1
+	github.com/sigstore/cosign/v2 v2.4.0
 	github.com/sigstore/rekor v1.3.6
 	github.com/sigstore/sigstore v1.8.9
 	github.com/sirupsen/logrus v1.9.3
