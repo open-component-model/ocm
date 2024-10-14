@@ -26,7 +26,7 @@ func RelativeOCIRef(repository, version string) string {
 	sep := grammar.TagSeparator
 	i := strings.Index(version, grammar.DigestSeparator)
 	if i > 1 {
-		return fmt.Sprintf("%s%s%s%s%s", host, grammar.RepositorySeparator, repository, sep, version)
+		return fmt.Sprintf("%s%s%s", repository, sep, version)
 	}
 	if ok, _ := artdesc.IsDigest(version); ok {
 		sep = grammar.DigestSeparator
