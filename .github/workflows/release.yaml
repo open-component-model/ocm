@@ -104,13 +104,13 @@ jobs:
   #   permissions:
   #     contents: read
   #     pull-requests: read
-  components:
-    name: Component CTF Builds
-    uses: ./.github/workflows/components.yaml
-    needs: check
-    permissions:
-      contents: read
-      pull-requests: read
+  # components:
+  #   name: Component CTF Builds
+  #   uses: ./.github/workflows/components.yaml
+  #   needs: check
+  #   permissions:
+  #     contents: read
+  #     pull-requests: read
   # diff-check-manifests:
   #   name: Check for diff after go mod tidy and generated targets
   #   uses: ./.github/workflows/check_diff_action.yaml
@@ -245,7 +245,7 @@ jobs:
       env:
         GITHUBORG: ${{ github.repository_owner }}/test-repo
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: make plain-push
+      run: make CTF_TYPE=directory ctf && make plain-push
 
     # - name: Create Release Branch
     #   if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
