@@ -13,14 +13,8 @@ jobs:
       pull-requests: write # for TimonVS/pr-labeler-action to add labels in PR
     runs-on: ubuntu-latest
     steps:
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.OCMBOT_APP_ID }}
-          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
       - name: Label PR based on branch name
         uses: TimonVS/pr-labeler-action@v5
         with:
-          repo-token: ${{ steps.generate_token.outputs.token }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/config/pr-labeler.yml
