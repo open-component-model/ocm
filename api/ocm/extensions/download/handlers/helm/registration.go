@@ -23,7 +23,7 @@ func init() {
 
 var supportedMimeTypes = []string{
 	artifactset.MediaType(artdesc.MediaTypeImageManifest),
-	artifactset.MediaType(helmregistry.ChartLayerMediaType),
+	helmregistry.ChartLayerMediaType,
 }
 
 type RegistrationHandler struct{}
