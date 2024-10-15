@@ -1,0 +1,10 @@
+feature:
+- head-branch: 'feature/*'
+fix:
+- head-branch: 'fix/*'
+chore:
+- head-branch: 'chore/*'
+dependencies:
+- any:
+  - head-branch: 'dependencies/*'
+  - head-branch: 'dependabot/*'
