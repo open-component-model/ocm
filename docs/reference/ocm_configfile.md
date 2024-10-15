@@ -67,7 +67,7 @@ The following configuration types are supported:
       type: downloader.ocm.config.ocm.software
       description: "my standard download handler configuration"
       handlers:
-        - name: oci/artifact
+        - name: ocm/ociArtifacts
           artifactType: ociImage
           mimeType:
           config: ...

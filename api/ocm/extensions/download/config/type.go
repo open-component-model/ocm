@@ -84,7 +84,7 @@ of preconfigured download handler registrations (see <CMD>ocm ocm-downloadhandle
     type: ` + ConfigType + `
     description: "my standard download handler configuration"
     handlers:
-      - name: ` + ocirepo.PATH + `
+      - name: ` + ocirepo.HandlerName + `
         artifactType: ` + artifacttypes.OCI_IMAGE + `
         mimeType:
         config: ...
