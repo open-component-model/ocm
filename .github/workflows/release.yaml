@@ -104,13 +104,13 @@ jobs:
   #   permissions:
   #     contents: read
   #     pull-requests: read
-  # components:
-  #   name: Component CTF Builds
-  #   uses: ./.github/workflows/components.yaml
-  #   needs: check
-  #   permissions:
-  #     contents: read
-  #     pull-requests: read
+  components:
+    name: Component CTF Builds
+    uses: ./.github/workflows/components.yaml
+    needs: check
+    permissions:
+      contents: read
+      pull-requests: read
   # diff-check-manifests:
   #   name: Check for diff after go mod tidy and generated targets
   #   uses: ./.github/workflows/check_diff_action.yaml
