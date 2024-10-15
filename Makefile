@@ -163,7 +163,7 @@ $(GEN)/.push.$(NAME): $(GEN)/ctf
 	@touch $@
 
 .PHONY: plain-push
-plain-push: $(GEN)
+plain-push:
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 
 .PHONY: plain-ctf
