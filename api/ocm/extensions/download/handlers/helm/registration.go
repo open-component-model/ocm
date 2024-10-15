@@ -2,10 +2,10 @@ package helm
 
 import (
 	"fmt"
-	helmregistry "helm.sh/helm/v3/pkg/registry"
 
 	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/exp/slices"
+	helmregistry "helm.sh/helm/v3/pkg/registry"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"

@@ -1,25 +1,26 @@
 package helm_test
 
 import (
-	"github.com/mandelsoft/filepath/pkg/filepath"
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
+
+	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	envhelper "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
+	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/ocm/extensions/download/handlers/helm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/selectors"
+	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/tarutils"
-
-	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
-	"ocm.software/ocm/api/utils/accessio"
 )
 
 const (
