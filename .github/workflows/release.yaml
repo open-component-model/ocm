@@ -34,39 +34,39 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Job Settings
-      run: |
-        echo "Release Job Arguments"
-        if ${{ github.event.inputs.release_candidate }}; then
-          v="v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
-          if [ -n "${{ github.event.inputs.prerelease }}" ]; then
-            echo "Candidate: $v"
-          else
-            echo "Candidate: $v (taken from source)"
-          fi
-        else
-          v="v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)"
-          echo "Final Release: $v"
-          if ${{ github.event.inputs.create_branch }}; then
-            echo "with release branch creation"
-          else
-            echo "without release branch creation"
-          fi
-        fi
+    # - name: Job Settings
+    #   run: |
+    #     echo "Release Job Arguments"
+    #     if ${{ github.event.inputs.release_candidate }}; then
+    #       v="v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
+    #       if [ -n "${{ github.event.inputs.prerelease }}" ]; then
+    #         echo "Candidate: $v"
+    #       else
+    #         echo "Candidate: $v (taken from source)"
+    #       fi
+    #     else
+    #       v="v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)"
+    #       echo "Final Release: $v"
+    #       if ${{ github.event.inputs.create_branch }}; then
+    #         echo "with release branch creation"
+    #       else
+    #         echo "without release branch creation"
+    #       fi
+    #     fi
 
     - name: Set Base Version
       run: |
         BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
         echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
 
-    - name: Set Pre-Release Version
-      if: inputs.release_candidate == true
-      run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+    # - name: Set Pre-Release Version
+    #   if: inputs.release_candidate == true
+    #   run: |
+    #     RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
+    #     echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
 
     - name: Set Version
-      if: inputs.release_candidate == false
+      # if: inputs.release_candidate == false
       run: |
         RELEASE_VERSION=${{env.BASE_VERSION}}
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
@@ -79,14 +79,14 @@ jobs:
           exit 1
         fi
 
-    - name: Check Branch
-      if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
-      run: |
-        set -e
-        if git ls-remote --exit-code origin refs/heads/releases/${{ env.RELEASE_VERSION }} ; then
-          >&2 echo "branch releases/${{ env.RELEASE_VERSION }} already exists"
-          exit 1
-        fi
+    # - name: Check Branch
+    #   if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
+    #   run: |
+    #     set -e
+    #     if git ls-remote --exit-code origin refs/heads/releases/${{ env.RELEASE_VERSION }} ; then
+    #       >&2 echo "branch releases/${{ env.RELEASE_VERSION }} already exists"
+    #       exit 1
+    #     fi
 
     # - name: Get Draft Release Notes
     #   id: release-notes
@@ -166,15 +166,15 @@ jobs:
         BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
         echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
 
-    - name: Set Pre-Release Version
-      if: inputs.release_candidate == true
-      run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-        echo "release name is $RELEASE_VERSION"
+    # - name: Set Pre-Release Version
+    #   if: inputs.release_candidate == true
+    #   run: |
+    #     RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
+    #     echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+    #     echo "release name is $RELEASE_VERSION"
 
     - name: Set Version
-      if: inputs.release_candidate == false
+      # if: inputs.release_candidate == false
       run: |
         RELEASE_VERSION=${{env.BASE_VERSION}}
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
