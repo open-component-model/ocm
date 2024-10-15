@@ -102,3 +102,12 @@ func NewAsyncProcessingSource(log logging.Context, f func() data.Iterable, pool 
 	})
 	return p
 }
+
+func MappingSequence(mapper ...MappingFunction) MappingFunction {
+	return func(e interface{}) interface{} {
+		for _, m := range mapper {
+			e = m(e)
+		}
+		return e
+	}
+}

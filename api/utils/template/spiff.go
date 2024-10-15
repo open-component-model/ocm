@@ -9,6 +9,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
+const SPIFF_MODE = "mode"
+
 func init() {
 	Register("spiff", NewSpiff, `[spiff templating](https://github.com/mandelsoft/spiff).
 It supports complex values. the settings are accessible using the binding <code>values</code>.
@@ -23,9 +25,16 @@ type Spiff struct {
 	spiff spiffing.Spiff
 }
 
-func NewSpiff(fs vfs.FileSystem) Templater {
+func NewSpiff(fs vfs.FileSystem, opts TemplaterOptions) Templater {
+	s := spiffing.New().WithFileSystem(fs).WithFeatures(features.CONTROL, features.INTERPOLATION)
+
+	m := opts.Get(SPIFF_MODE)
+
+	if mode, ok := m.(int); ok {
+		s = s.WithMode(mode)
+	}
 	return &Spiff{
-		spiffing.New().WithFileSystem(fs).WithFeatures(features.CONTROL, features.INTERPOLATION),
+		s,
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
@@ -479,7 +480,7 @@ func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems [
 				info := inputs.InputResourceInfo{
 					ComponentVersion: common.VersionedElementKey(cv),
 					ElementName:      elem.Spec().GetName(),
-					InputFilePath:    elem.Source().Origin(),
+					InputFilePath:    general.OptionalDefaulted(elem.Source().Origin(), elem.Input().SourceFile),
 				}
 				blob, hint, berr := elem.Input().Input.GetBlob(ictx, info)
 				if berr != nil {

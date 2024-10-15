@@ -102,8 +102,8 @@ func TableOutput(opts *output.Options, h *action, mapping processing.MappingFunc
 	def := &output.TableOutput{
 		Headers: output.Fields("COMPONENT", "VERSION", "HASH", wide),
 		Options: opts,
-		Chain:   comphdlr.Sort.Map(h.digester),
-		Mapping: mapping,
+		Chain:   comphdlr.Sort,
+		Mapping: processing.MappingSequence(h.digester, mapping),
 	}
 	return closureoption.TableOutput(def, comphdlr.ClosureExplode)
 }

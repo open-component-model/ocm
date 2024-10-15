@@ -2,6 +2,7 @@ package oci
 
 import (
 	"fmt"
+	"strings"
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -19,8 +20,15 @@ func AsTags(tag string) []string {
 
 func StandardOCIRef(host, repository, version string) string {
 	sep := grammar.TagSeparator
+	i := strings.Index(version, grammar.DigestSeparator)
+	if i > 1 {
+		return fmt.Sprintf("%s%s%s%s%s", host, grammar.RepositorySeparator, repository, sep, version)
+	}
 	if ok, _ := artdesc.IsDigest(version); ok {
 		sep = grammar.DigestSeparator
+		if strings.HasPrefix(version, sep) {
+			sep = ""
+		}
 	}
 	return fmt.Sprintf("%s%s%s%s%s", host, grammar.RepositorySeparator, repository, sep, version)
 }

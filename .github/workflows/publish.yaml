@@ -40,8 +40,8 @@ jobs:
       run: |
         git clone ssh://aur@aur.archlinux.org/ocm-cli.git
         cd ocm-cli
-        git config user.name "GitHub Actions Bot"
-        git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
+        git config user.name "ocm.software"
+        git config user.email "ocm@sap.com"
         ./upgrade ${{ env.RELEASE_VERSION }}
         git add PKGBUILD .SRCINFO
         git commit -m "Release ${{ env.RELEASE_VERSION }}"
@@ -112,6 +112,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         token: ${{ steps.generate_token.outputs.token }}
+    - name: Install wingetcreate
+      run: choco install wingetcreate
     - name: Update Winget package
       run: |
         cd hack\winget
@@ -120,5 +122,4 @@ jobs:
           https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-amd64.zip `
           https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
           --version ${{ env.RELEASE_VERSION }} `
-          --release-notes-url https://github.com/open-component-model/ocm/blob/main/docs/releasenotes/v${{ env.RELEASE_VERSION }}.md `
           Open-Component-Model.ocm-cli
