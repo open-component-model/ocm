@@ -119,7 +119,7 @@ jobs:
       pull-requests: read
 
   release:
-    needs:
+#    needs:
 #     - lint-and-test
 #     - components
     name: Release Build
