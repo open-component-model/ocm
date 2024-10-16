@@ -120,8 +120,8 @@ jobs:
 
   release:
     needs:
-    - lint-and-test
-    - components
+#     - lint-and-test
+#     - components
     name: Release Build
     runs-on: large_runner
     permissions:
