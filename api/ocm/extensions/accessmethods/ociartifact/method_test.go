@@ -108,5 +108,4 @@ var _ = Describe("Method", func() {
 			Expect(hint).To(Equal("ocm/value"))
 		})
 	})
-
 })

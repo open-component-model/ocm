@@ -120,6 +120,21 @@ are configured for the operation. It has the following format
 </center>
 
 The downloader name may be a path expression with the following possibilities:
+  - <code>helm/artifact</code>: download helm chart
+    resources
+
+    The <code>helm</code> downloader is able to download helm chart resources as
+    helm chart packages. Thus, the downloader may perform transformations.
+    For example, if the helm chart is currently stored as an oci artifact, the
+    downloader performs the necessary extraction to provide the helm chart package
+    from within that oci artifact.
+
+    The following artifact media types are supported:
+      - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
+      - <code>application/vnd.cncf.helm.chart.content.v1.tar+gzip</code>
+
+    It accepts no config.
+
   - <code>landscaper/blueprint</code>: uploading an OCI artifact to an OCI registry
 
     The <code>artifact</code> downloader is able to transfer OCI artifact-like resources
@@ -155,11 +170,12 @@ The downloader name may be a path expression with the following possibilities:
     This handler is by default registered for the following artifact types:
     landscaper.gardener.cloud/blueprint,blueprint
 
-  - <code>oci/artifact</code>: uploading an OCI artifact to an OCI registry
+  - <code>oci/artifact</code>: downloading an OCI artifact
+    and optionally re-uploading to an OCI registry
 
-    The <code>artifact</code> downloader is able to transfer OCI artifact-like resources
-    into an OCI registry given by the combination of the download target and the
-    registration config.
+    The <code>artifact</code> download resources stored as oci artifact.
+    Furthermore, it allows to specify another OCI registry as download destination,
+    thereby, providing a kind of transfer functionality.
 
     If no config is given, the target must be an OCI reference with a potentially
     omitted repository. The repo part is derived from the reference hint provided
