@@ -67,10 +67,11 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 }
 
 func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
-	return registrations.NewLeafHandlerInfo("uploading an OCI artifact to an OCI registry", `
-The <code>artifact</code> downloader is able to transfer OCI artifact-like resources
-into an OCI registry given by the combination of the download target and the
-registration config.
+	return registrations.NewLeafHandlerInfo(`downloading an OCI artifact 
+and optionally re-uploading to an OCI registry`, `
+The <code>artifact</code> download resources stored as oci artifact.
+Furthermore, it allows to specify another OCI registry as download destination,
+thereby, providing a kind of transfer functionality. 
 
 If no config is given, the target must be an OCI reference with a potentially
 omitted repository. The repo part is derived from the reference hint provided
