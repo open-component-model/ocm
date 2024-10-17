@@ -47,7 +47,7 @@ type StorageBackendImpl interface {
 	// version related methods.
 
 	GetDescriptor(key common.NameVersion) (*compdesc.ComponentDescriptor, error)
-	SetDescriptor(key common.NameVersion, descriptor *compdesc.ComponentDescriptor) error
+	SetDescriptor(key common.NameVersion, descriptor *compdesc.ComponentDescriptor) (bool, error)
 	AccessMethod(key common.NameVersion, acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
 	GetStorageContext(key common.NameVersion) cpi.StorageContext
 	GetBlob(key common.NameVersion, name string) (cpi.DataAccess, error)
@@ -268,13 +268,13 @@ func (s *storageBackendComponentVersion) GetDescriptor() *compdesc.ComponentDesc
 	return d
 }
 
-func (s *storageBackendComponentVersion) SetDescriptor(descriptor *compdesc.ComponentDescriptor) error {
-	err := s.comp.repo.impl.SetDescriptor(s.name, descriptor)
+func (s *storageBackendComponentVersion) SetDescriptor(descriptor *compdesc.ComponentDescriptor) (bool, error) {
+	b, err := s.comp.repo.impl.SetDescriptor(s.name, descriptor)
 	if err != nil {
-		return err
+		return b, err
 	}
 	s.descriptor = descriptor
-	return nil
+	return b, nil
 }
 
 func (s *storageBackendComponentVersion) AccessMethod(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error) {
