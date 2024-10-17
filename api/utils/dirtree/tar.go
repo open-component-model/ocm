@@ -7,7 +7,6 @@ import (
 	"path"
 
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 func NewTarDirNode(ctx Context, tr *tar.Reader) (*DirNode, error) {
@@ -42,7 +41,7 @@ func NewTarDirNode(ctx Context, tr *tar.Reader) (*DirNode, error) {
 				return nil, fmt.Errorf("file %s: %w", header.Name, err)
 			}
 		case tar.TypeReg:
-			_, err := createFile(d, header.Name, vfs.FileMode(header.Mode), header.Size, tr)
+			_, err := createFile(d, header, tr)
 			if err != nil {
 				return nil, fmt.Errorf("file %s: %w", header.Name, err)
 			}
