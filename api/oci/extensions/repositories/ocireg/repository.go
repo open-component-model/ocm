@@ -165,7 +165,10 @@ func (r *RepositoryImpl) getResolver(ref string, comp string) (registry.Reposito
 		client.Transport = retry.NewTransport(&http.Transport{
 			TLSClientConfig: conf,
 		})
+	} else {
+		client = http.DefaultClient
 	}
+
 	repo.Client = &auth.Client{
 		Client:     client,
 		Cache:      auth.NewCache(),
