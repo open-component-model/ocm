@@ -79,7 +79,26 @@ The following handler names are possible:
     This handler is by default registered for the following artifact types:
     landscaper.gardener.cloud/blueprint,blueprint
 
-  - <code>oci/artifact</code>: downloading an OCI artifact
+  - <code>ocm/dirtree</code>: downloading directory tree-like resources
+
+    The <code>dirtree</code> downloader is able to download directory-tree like
+    resources as directory structure (default) or archive.
+    The following artifact media types are supported:
+      - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
+      - <code>application/x-tgz</code>
+      - <code>application/x-tar+gzip</code>
+      - <code>application/x-tar</code>
+
+    By default, it is registered for the following resource types:
+      - <code>directoryTree</code>
+      - <code>filesystem</code>
+
+    It accepts a config with the following fields:
+      - <code>asArchive</code>: flag to request an archive download
+      - <code>ociConfigTypes</code>: a list of accepted OCI config archive mime types
+        defaulted by <code>application/vnd.oci.image.config.v1+json</code>.
+
+  - <code>ocm/ociArtifacts</code>: downloading an OCI artifact
     and optionally re-uploading to an OCI registry
 
     The <code>artifact</code> download resources stored as oci artifact.
@@ -101,25 +120,6 @@ The following handler names are possible:
       - <code>namespacePrefix</code>: a namespace prefix used for the uploaded artifacts
       - <code>ociRef</code>: an OCI repository reference
       - <code>repository</code>: an OCI repository specification for the target OCI registry
-
-  - <code>ocm/dirtree</code>: downloading directory tree-like resources
-
-    The <code>dirtree</code> downloader is able to download directory-tree like
-    resources as directory structure (default) or archive.
-    The following artifact media types are supported:
-      - <code>application/vnd.oci.image.manifest.v1+tar+gzip</code>
-      - <code>application/x-tgz</code>
-      - <code>application/x-tar+gzip</code>
-      - <code>application/x-tar</code>
-
-    By default, it is registered for the following resource types:
-      - <code>directoryTree</code>
-      - <code>filesystem</code>
-
-    It accepts a config with the following fields:
-      - <code>asArchive</code>: flag to request an archive download
-      - <code>ociConfigTypes</code>: a list of accepted OCI config archive mime types
-        defaulted by <code>application/vnd.oci.image.config.v1+json</code>.
 
   - <code>plugin</code>: [downloaders provided by plugins]
 

@@ -116,7 +116,7 @@ var _ = Describe("upload", func() {
 		})
 
 		It("uploads local oci artifact blob using named handler", func() {
-			download.RegisterHandlerByName(env, ocirepo.PATH, nil, download.ForArtifactType(resourcetypes.OCI_IMAGE))
+			download.RegisterHandlerByName(env, ocirepo.HandlerName, nil, download.ForArtifactType(resourcetypes.OCI_IMAGE))
 
 			src := Must(ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, CTF, 0, accessio.PathFileSystem(env)))
 			defer Close(src, "source ctf")
@@ -142,7 +142,7 @@ var _ = Describe("upload", func() {
 			cfg := ociuploadattr.Attribute{
 				Ref: TARGETHOST + ".alias" + grammar.RepositorySeparator + "upload",
 			}
-			download.RegisterHandlerByName(env, ocirepo.PATH, cfg, download.ForArtifactType(resourcetypes.OCI_IMAGE))
+			download.RegisterHandlerByName(env, ocirepo.HandlerName, cfg, download.ForArtifactType(resourcetypes.OCI_IMAGE))
 
 			src := Must(ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, CTF, 0, accessio.PathFileSystem(env)))
 			defer Close(src, "source ctf")
