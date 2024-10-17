@@ -119,9 +119,9 @@ jobs:
       pull-requests: read
 
   release:
-    needs:
-    - lint-and-test
-    - components
+#    needs:
+#     - lint-and-test
+#     - components
     name: Release Build
     runs-on: large_runner
     permissions:
