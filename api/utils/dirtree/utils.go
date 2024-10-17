@@ -1,24 +1,29 @@
 package dirtree
 
 import (
+	"archive/tar"
 	"fmt"
 	"io"
+	"math"
 	"path"
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-func createFile(d *DirNode, p string, mode vfs.FileMode, size int64, r io.Reader) (*FileNode, error) {
-	dir := path.Dir(p)
-	name := path.Base(path.Clean(p))
+func createFile(d *DirNode, header *tar.Header, r io.Reader) (*FileNode, error) {
+	dir := path.Dir(header.Name)
+	name := path.Base(path.Clean(header.Name))
 	d, err := lookupDir(d, dir, true)
 	if err != nil {
 		return nil, err
 	}
-	n, err := NewFileNode(d.ctx, mode, size, r)
+	if header.Mode < 0 || header.Mode > math.MaxUint32 {
+		return nil, fmt.Errorf("file %s: mode %d out of range for uint32", header.Name, header.Mode)
+	}
+	n, err := NewFileNode(d.ctx, vfs.FileMode(header.Mode), header.Size, r) //nolint:gosec // disable G115
 	if err == nil {
-		d.AddNode(name, n)
+		err = d.AddNode(name, n)
 	}
 	return n, err
 }
