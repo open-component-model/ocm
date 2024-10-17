@@ -141,7 +141,7 @@ func (r *RepositoryImpl) getResolver(ref string, comp string) (registry.Reposito
 		authCreds.Password = pass
 	}
 
-	client := retry.DefaultClient
+	client := http.DefaultClient
 	if r.info.Scheme == "https" {
 		// set up TLS
 		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
@@ -169,7 +169,6 @@ func (r *RepositoryImpl) getResolver(ref string, comp string) (registry.Reposito
 			}),
 		}
 	} else {
-		client = http.DefaultClient
 		repo.PlainHTTP = true
 	}
 
