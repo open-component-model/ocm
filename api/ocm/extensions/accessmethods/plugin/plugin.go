@@ -33,7 +33,7 @@ func NewPluginHandler(p plugin.Plugin) *PluginHandler {
 	return &PluginHandler{plug: p}
 }
 
-func (p *PluginHandler) Info(spec *AccessSpec) (*ppi.AccessSpecInfo, error) {
+func (p *PluginHandler) GetAccessSpecInfo(spec *AccessSpec) (*ppi.AccessSpecInfo, error) {
 	if p.info != nil || p.err != nil {
 		raw, err := spec.UnstructuredVersionedTypedObject.GetRaw()
 		if err != nil {
@@ -58,7 +58,7 @@ func (p *PluginHandler) AccessMethod(spec *AccessSpec, cv cpi.ComponentVersionAc
 		return nil, err
 	}
 
-	info, err := p.Info(spec)
+	info, err := p.GetAccessSpecInfo(spec)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (p *PluginHandler) AccessMethod(spec *AccessSpec, cv cpi.ComponentVersionAc
 }
 
 func (p *PluginHandler) getCredentialData(spec *AccessSpec, cv cpi.ComponentVersionAccess) (json.RawMessage, error) {
-	info, err := p.Info(spec)
+	info, err := p.GetAccessSpecInfo(spec)
 	if err != nil {
 		return nil, err
 	}
@@ -94,11 +94,33 @@ func (p *PluginHandler) Describe(spec *AccessSpec, ctx cpi.Context) string {
 	if mspec == nil {
 		return "unknown type " + spec.GetType()
 	}
-	info, err := p.Info(spec)
+	info, err := p.GetAccessSpecInfo(spec)
 	if err != nil {
 		return err.Error()
 	}
 	return info.Short
+}
+
+func (p *PluginHandler) Info(spec *AccessSpec, ctx cpi.Context) *cpi.UniformAccessSpecInfo {
+	mspec := p.GetAccessMethodDescriptor(spec.GetKind(), spec.GetVersion())
+	if mspec == nil {
+		return &cpi.UniformAccessSpecInfo{
+			Kind: spec.GetKind(),
+		}
+	}
+	info, err := p.GetAccessSpecInfo(spec)
+	if err != nil || info.Info == nil {
+		return &cpi.UniformAccessSpecInfo{
+			Kind: spec.GetKind(),
+		}
+	}
+	return &cpi.UniformAccessSpecInfo{
+		Kind: spec.GetKind(),
+		Host: info.Info.Host,
+		Port: info.Info.Port,
+		Path: info.Info.Path,
+		Info: info.Info.Info,
+	}
 }
 
 func (p *PluginHandler) GetMimeType(spec *AccessSpec) string {
@@ -106,7 +128,7 @@ func (p *PluginHandler) GetMimeType(spec *AccessSpec) string {
 	if mspec == nil {
 		return "unknown type " + spec.GetType()
 	}
-	info, err := p.Info(spec)
+	info, err := p.GetAccessSpecInfo(spec)
 	if err != nil {
 		return ""
 	}
@@ -118,7 +140,7 @@ func (p *PluginHandler) GetReferenceHint(spec *AccessSpec, cv cpi.ComponentVersi
 	if mspec == nil {
 		return "unknown type " + spec.GetType()
 	}
-	info, err := p.Info(spec)
+	info, err := p.GetAccessSpecInfo(spec)
 	if err != nil {
 		return ""
 	}

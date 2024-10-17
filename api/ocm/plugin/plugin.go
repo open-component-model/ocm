@@ -18,6 +18,7 @@ import (
 	"ocm.software/ocm/api/datacontext/attrs/clicfgattr"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/plugin/cache"
+	"ocm.software/ocm/api/ocm/plugin/internal"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/accessmethod"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/accessmethod/compose"
@@ -29,6 +30,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/download"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/mergehandler"
 	merge "ocm.software/ocm/api/ocm/plugin/ppi/cmds/mergehandler/execute"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/transferhandler"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload/put"
 	uplval "ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload/validate"
@@ -442,4 +444,26 @@ func (p *pluginImpl) Command(name string, reader io.Reader, writer io.Writer, cm
 
 	_, err := p.Exec(reader, writer, args...)
 	return err
+}
+
+func (p *pluginImpl) AskTransferQuestion(name string, question string, args interface{}) (*DecisionRequestResult, error) {
+	argdata, err := json.Marshal(args)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot marshal option values")
+	}
+
+	result, err := p.Exec(bytes.NewReader(argdata), nil, transferhandler.Name, name, question)
+	if err != nil {
+		return nil, err
+	}
+	var r internal.DecisionRequestResult
+	err = json.Unmarshal(result, &r)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot unmarshal composition result")
+	}
+
+	if r.Error == "" {
+		return &r, nil
+	}
+	return &r, errors.New(r.Error)
 }
