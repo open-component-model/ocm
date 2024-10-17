@@ -170,7 +170,6 @@ The downloader name may be a path expression with the following possibilities:
     This handler is by default registered for the following artifact types:
     landscaper.gardener.cloud/blueprint,blueprint
 
-<<<<<<< HEAD
   - <code>ocm/dirtree</code>: downloading directory tree-like resources
 
     The <code>dirtree</code> downloader is able to download directory-tree like
@@ -190,11 +189,8 @@ The downloader name may be a path expression with the following possibilities:
       - <code>ociConfigTypes</code>: a list of accepted OCI config archive mime types
         defaulted by <code>application/vnd.oci.image.config.v1+json</code>.
 
-  - <code>ocm/ociArtifacts</code>: uploading an OCI artifact to an OCI registry
-=======
-  - <code>oci/artifact</code>: downloading an OCI artifact
+  - <code>ocm/ociArtifacts</code>: downloading an OCI artifact
     and optionally re-uploading to an OCI registry
->>>>>>> main
 
     The <code>artifact</code> download resources stored as oci artifact.
     Furthermore, it allows to specify another OCI registry as download destination,
