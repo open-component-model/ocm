@@ -143,7 +143,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 	return nil, errors.ErrNotSupported(errkind.KIND_ACCESSMETHOD, a.GetType(), "oci registry")
 }
 
-func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) error {
+func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) (bool, error) {
 	cur := c.GetDescriptor()
 	*cur = *cd
 	return c.Update()
@@ -163,11 +163,11 @@ const (
 	OCM_ARTIFACT     = "ocm-artifact"
 )
 
-func (c *ComponentVersionContainer) Update() error {
+func (c *ComponentVersionContainer) Update() (bool, error) {
 	logger := Logger(c.GetContext()).WithValues("cv", common.NewNameVersion(c.comp.name, c.version))
 	err := c.Check()
 	if err != nil {
-		return fmt.Errorf("check failed: %w", err)
+		return false, fmt.Errorf("check failed: %w", err)
 	}
 
 	if c.state.HasChanged() {
@@ -182,7 +182,7 @@ func (c *ComponentVersionContainer) Update() error {
 		for i, r := range desc.Resources {
 			s, l, err := c.evalLayer(r.Access)
 			if err != nil {
-				return fmt.Errorf("failed resource layer evaluation: %w", err)
+				return false, fmt.Errorf("failed resource layer evaluation: %w", err)
 			}
 			if l > 0 {
 				layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
@@ -198,7 +198,7 @@ func (c *ComponentVersionContainer) Update() error {
 		for i, r := range desc.Sources {
 			s, l, err := c.evalLayer(r.Access)
 			if err != nil {
-				return fmt.Errorf("failed source layer evaluation: %w", err)
+				return false, fmt.Errorf("failed source layer evaluation: %w", err)
 			}
 			if l > 0 {
 				layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
@@ -216,7 +216,7 @@ func (c *ComponentVersionContainer) Update() error {
 		for layer, info := range layerAnnotations {
 			data, err := runtime.DefaultJSONEncoding.Marshal(info)
 			if err != nil {
-				return err
+				return false, err
 			}
 			if m.Layers[layer].Annotations == nil {
 				m.Layers[layer].Annotations = map[string]string{}
@@ -233,20 +233,21 @@ func (c *ComponentVersionContainer) Update() error {
 			i--
 		}
 		if _, err := c.state.Update(); err != nil {
-			return fmt.Errorf("failed to update state: %w", err)
+			return false, fmt.Errorf("failed to update state: %w", err)
 		}
 
 		logger.Debug("add oci artifact")
 		tag, err := toTag(c.version)
 		if err != nil {
-			return err
+			return false, err
 		}
 		if _, err := c.comp.namespace.AddArtifact(c.manifest, tag); err != nil {
-			return fmt.Errorf("unable to add artifact: %w", err)
+			return false, fmt.Errorf("unable to add artifact: %w", err)
 		}
+		return true, nil
 	}
 
-	return nil
+	return false, nil
 }
 
 func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.AccessSpec, int, error) {

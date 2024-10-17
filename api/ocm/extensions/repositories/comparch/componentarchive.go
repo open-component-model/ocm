@@ -122,7 +122,8 @@ func (c *componentArchiveContainer) GetParentBridge() repocpi.ComponentAccessBri
 
 func (c *componentArchiveContainer) Close() error {
 	var list errors.ErrorList
-	return list.Add(c.Update(), c.fsacc.Close()).Result()
+	_, err := c.Update()
+	return list.Add(err, c.fsacc.Close()).Result()
 }
 
 func (c *componentArchiveContainer) GetContext() cpi.Context {
@@ -141,13 +142,13 @@ func (c *componentArchiveContainer) SetReadOnly() {
 	c.fsacc.SetReadOnly()
 }
 
-func (c *componentArchiveContainer) Update() error {
+func (c *componentArchiveContainer) Update() (bool, error) {
 	return c.fsacc.Update()
 }
 
-func (c *componentArchiveContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) error {
+func (c *componentArchiveContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) (bool, error) {
 	if c.fsacc.IsReadOnly() {
-		return accessobj.ErrReadOnly
+		return true, accessobj.ErrReadOnly
 	}
 	cur := c.fsacc.GetState().GetState().(*compdesc.ComponentDescriptor)
 	*cur = *cd.Copy()

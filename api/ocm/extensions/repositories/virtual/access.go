@@ -9,7 +9,7 @@ type VersionAccess interface {
 	GetDescriptor() *compdesc.ComponentDescriptor
 	GetBlob(name string) (cpi.DataAccess, error)
 	AddBlob(blob cpi.BlobAccess) (string, error)
-	Update() error
+	Update() (bool, error)
 	Close() error
 
 	IsReadOnly() bool
