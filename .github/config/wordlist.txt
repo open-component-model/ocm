@@ -35,6 +35,7 @@ closable
 closeable
 cmds
 cncf
+codeowners
 codeql
 commontransportarchive
 componentaccess
@@ -142,6 +143,7 @@ installable
 instantiation
 io
 ioutils
+ipcei
 iterable
 json
 jsonschema
@@ -201,12 +203,14 @@ ocmconfig
 oncefunc
 oo
 oras
+oras
 os
 outputspecification
-PackageIdentifier
-PackageName
+overwritable
+packageidentifier
+packagename
 packagespec
-PackageVersion
+packageversion
 parameterization
 pendingdeprecationwarning
 pflag
@@ -245,7 +249,7 @@ semver
 sequent
 serializable
 sha
-ShortDescription
+shortdescription
 signingserver
 sigstore
 simplemapmerge
@@ -274,6 +278,7 @@ toolset
 transportarchive
 typehandler
 typename
+unmarshaller
 unmodifiable
 untrusted
 updatevendorhash
@@ -293,6 +298,7 @@ versionedtypedobjects
 walkthrough
 wget
 winget
+wingetcreate
 xml
 yaml
 yitsushi
