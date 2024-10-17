@@ -101,7 +101,7 @@ func (r *RepositoryImpl) Write(path string, mode vfs.FileMode, opts ...accessio.
 	return r.base.Write(path, mode, opts...)
 }
 
-func (r *RepositoryImpl) Update() error {
+func (r *RepositoryImpl) Update() (bool, error) {
 	return r.base.Update()
 }
 

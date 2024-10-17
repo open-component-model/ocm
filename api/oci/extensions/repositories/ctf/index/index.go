@@ -63,10 +63,42 @@ func (r *RepositoryIndex) AddArtifactInfo(n *ArtifactMeta) {
 }
 
 func (r *RepositoryIndex) addArtifactInfo(m ArtifactMeta) {
-	repos := r.byRepository[m.Repository]
-	if len(repos) == 0 {
-		repos = map[string]*ArtifactMeta{}
-		r.byRepository[m.Repository] = repos
+	versions := r.byRepository[m.Repository]
+	if len(versions) == 0 {
+		versions = map[string]*ArtifactMeta{}
+		r.byRepository[m.Repository] = versions
+	}
+
+	if m.Tag != "" {
+		// remove old tag settings for digest
+		old := versions[m.Tag]
+		if old != nil {
+			if old.Digest == m.Digest {
+				return
+			}
+			old.Tag = ""
+			delete(versions, m.Tag)
+			// make digest entry anonymous again, if there is no other tagged
+			// entry for this digest
+			oldlist := r.byDigest[old.Digest]
+			index := -1
+			for i, e := range oldlist {
+				if e == old {
+					index = i
+					break
+				}
+			}
+			for _, e := range oldlist {
+				if m.Repository != e.Repository {
+					continue
+				}
+				if e != old {
+					// there is still a tagged entry, so remove the anonymous one
+					r.byDigest[old.Digest] = append(oldlist[:index], oldlist[index+1:]...)
+					break
+				}
+			}
+		}
 	}
 
 	list := r.byDigest[m.Digest]
@@ -74,23 +106,25 @@ func (r *RepositoryIndex) addArtifactInfo(m ArtifactMeta) {
 		list = []*ArtifactMeta{&m}
 	} else {
 		for _, e := range list {
-			if m.Repository == e.Repository && m.Digest == e.Digest {
-				if e.Tag == "" || e.Tag == m.Tag {
-					e.Tag = m.Tag
-					if e.Tag != "" {
-						repos[m.Tag] = e
-					}
-					return
+			if m.Repository != e.Repository {
+				continue
+			}
+			if e.Tag == "" {
+				// reuse anonymous entry
+				e.Tag = m.Tag
+				if e.Tag != "" {
+					versions[e.Tag] = e
 				}
+				return
 			}
 		}
 		list = append(list, &m)
 	}
 	r.byDigest[m.Digest] = list
 
-	repos["@"+m.Digest.String()] = &m
+	versions["@"+m.Digest.String()] = &m
 	if m.Tag != "" {
-		repos[m.Tag] = &m
+		versions[m.Tag] = &m
 	}
 }
 
