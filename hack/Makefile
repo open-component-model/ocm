@@ -33,7 +33,7 @@ ifeq ("v$(JQ)","v0.0")
 	deps += $(detected_OS)_jq
 endif
 
-GOLANGCILINT_VERSION := "v1.59.1"
+GOLANGCILINT_VERSION := "v1.61.0"
 # under MAC the version v1.59.1, on linux the v is omitted
 GOLANGCILINTV := $(shell (golangci-lint --version 2>/dev/null || echo 0.0.0) | sed 's/.*version v\{0,1\}\([0-9\.]*\) .*/\1/')
 ifneq ("v$(GOLANGCILINTV)",$(GOLANGCILINT_VERSION))
