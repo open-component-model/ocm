@@ -46,6 +46,7 @@ func (p *Provider) GetPubSubSpec(repo repocpi.Repository) (pubsub.PubSubSpec, er
 	ocirepo := path.Join(gen.Meta().SubPath, componentmapping.ComponentDescriptorNamespace)
 	acc, err := gen.OCIRepository().LookupArtifact(ocirepo, META)
 
+	// Dirty workaround until fix is ready for https://github.com/open-component-model/ocm/issues/872
 	errCode := errcode.Error{}
 	if errors.As(err, &errCode) {
 		if errCode.Code == errcode.ErrorCodeDenied {
