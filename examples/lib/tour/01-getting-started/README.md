@@ -173,7 +173,6 @@ resources of the latest version:
    1: name:           ocmcli
       extra identity: "architecture"="amd64","os"="linux"
       resource type:  executable
-<<<<<<< HEAD
       access:         Local blob sha256:8477c859ef75d752db78d996db361093153fe63420175cb8eadc2b8fa321ad9d[]
    2: name:           ocmcli
       extra identity: "architecture"="arm64","os"="linux"
@@ -195,29 +194,6 @@ resources of the latest version:
       extra identity: 
       resource type:  ociImage
       access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.16.0@sha256:3e1f4ffdb18f07d17ff949bd82d2193283947aabfd5aab562576b8df59d653d2
-=======
-      access:         Local blob sha256:5d61cfee114a34e2acb25a0026e35a263bccc1df5fb711216c182aa6ad26d50c[]
-   2: name:           ocmcli
-      extra identity: "architecture"="arm64","os"="linux"
-      resource type:  executable
-      access:         Local blob sha256:a80cd46e671438736ea6f64e81e4bb2a4e2a8b20464f6670291885a61edd4188[]
-   3: name:           ocmcli
-      extra identity: "architecture"="arm64","os"="darwin"
-      resource type:  executable
-      access:         Local blob sha256:30bcdf85c8f49c9c3322c14c2c376665fae0f90b418da5f112063a1b29e55a79[]
-   4: name:           ocmcli
-      extra identity: "architecture"="amd64","os"="darwin"
-      resource type:  executable
-      access:         Local blob sha256:e8252eb2812f9726833bb3081a20f9f0c0ca437fc2730bb95b189abf6734c6ba[]
-   5: name:           ocmcli
-      extra identity: "architecture"="amd64","os"="windows"
-      resource type:  executable
-      access:         Local blob sha256:095ab06a373a7f2822fcd3d8928be725a486e16a16fe35eed9f2b23d110c904f[]
-   6: name:           ocmcli-image
-      extra identity: 
-      resource type:  ociImage
-      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.16.0@sha256:1c9a6e8453d01e93ad1d939b3c6c17d6c038beaefacbbd9d24ee81b20853397c
->>>>>>> 3759b601 (run generate)
 ```
 
 Resources have some metadata, like their identity and a resource type.

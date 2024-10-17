@@ -180,10 +180,27 @@ func (n *NamespaceContainer) pushTag(blob blobaccess.BlobAccess, tag string) err
 	if err != nil {
 		return err
 	}
+
 	expectedDescriptor := *artdesc.DefaultBlobDescriptor(blob)
-	if err := n.ociRepo.PushReference(context.Background(), expectedDescriptor, reader, tag); err != nil {
-		return fmt.Errorf("unable to push: %w", err)
+	ok, err := n.ociRepo.Exists(context.Background(), expectedDescriptor)
+	if err != nil {
+		return fmt.Errorf("failed to check if blob exists: %w", err)
 	}
+
+	// If the descriptor exists, we are adding the blob to the descriptor as is.
+	if ok {
+		if err := n.ociRepo.Blobs().Push(context.Background(), expectedDescriptor, reader); err != nil {
+			return fmt.Errorf("unable to push: %w", err)
+		}
+
+		return nil
+	}
+
+	// The blob doesn't exist so we push the entire reference to the right tag.
+	if err := n.ociRepo.PushReference(context.Background(), expectedDescriptor, reader, tag); err != nil {
+		return fmt.Errorf("failed to push reference: %w", err)
+	}
+
 	return nil
 }
 
