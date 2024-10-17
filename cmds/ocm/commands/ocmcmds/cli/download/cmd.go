@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -116,11 +117,11 @@ func (o *Command) handlerOptions() []elemhdlr.Option {
 	return []elemhdlr.Option{common.WithTypes([]string{o.ResourceType})}
 }
 
-func (o *Command) Run() error {
+func (o *Command) Run() (err error) {
 	session := ocm.NewSession(nil)
-	defer session.Close()
+	defer errors.PropagateError(&err, session.Close)
 
-	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
+	err = o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
 	}

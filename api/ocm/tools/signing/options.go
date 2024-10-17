@@ -612,9 +612,9 @@ func (o *Options) Complete(ctx interface{}) error {
 		if priv == nil && !o.Keyless {
 			return errors.ErrNotFound(compdesc.KIND_PRIVATE_KEY, o.SignatureNames[0])
 		}
-		if o.DigestMode == "" {
-			o.DigestMode = DIGESTMODE_LOCAL
-		}
+	}
+	if o.DigestMode == "" {
+		o.DigestMode = DIGESTMODE_LOCAL
 	}
 	if !o.Keyless {
 		if o.Signer != nil && !o.VerifySignature {

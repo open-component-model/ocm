@@ -1,6 +1,7 @@
 package get
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/spf13/cobra"
 
@@ -59,11 +60,11 @@ func (o *Command) Complete(args []string) error {
 	return err
 }
 
-func (o *Command) Run() error {
+func (o *Command) Run() (err error) {
 	session := ocm.NewSession(nil)
-	defer session.Close()
+	defer errors.PropagateError(&err, session.Close)
 
-	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
+	err = o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
 	}

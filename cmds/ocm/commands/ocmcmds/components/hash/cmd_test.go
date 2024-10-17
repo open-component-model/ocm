@@ -2,10 +2,12 @@ package hash_test
 
 import (
 	"bytes"
+	"fmt"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -117,6 +119,46 @@ NORMALIZED FORM: {"component":{"componentReferences":[],"name":"test.de/x","prov
 		})
 
 		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("hash", "components", "-r", ARCH+"//test.de/x:v1")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+REFERENCEPATH COMPONENT VERSION HASH                                                             IDENTITY
+              test.de/x v1      b74cee6c6b8215f470efd0e3c49618bb98610fc80de36a2e121d0550650b9cdc 
+test.de/x:v1  test.de/y v1      e60c791a20091abcf8d35742a134b3a99ce811d874fd721870b28ea90ef5ad2a "name"="ref"
+`))
+	})
+
+	It("hash component recursively", func() {
+		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+			env.ComponentVersion(COMP2, VERSION, func() {
+				env.Provider(PROVIDER)
+			})
+			env.ComponentVersion(COMP, VERSION, func() {
+				env.Provider(PROVIDER)
+				env.Reference("ref", COMP2, VERSION)
+			})
+		})
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("hash", "components", "-r", "--repo", ARCH, "test.de/x:v1")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+REFERENCEPATH COMPONENT VERSION HASH                                                             IDENTITY
+              test.de/x v1      b74cee6c6b8215f470efd0e3c49618bb98610fc80de36a2e121d0550650b9cdc 
+test.de/x:v1  test.de/y v1      e60c791a20091abcf8d35742a134b3a99ce811d874fd721870b28ea90ef5ad2a "name"="ref"
+`))
+	})
+
+	It("hash components recursively", func() {
+		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+			env.ComponentVersion(COMP2, VERSION, func() {
+				env.Provider(PROVIDER)
+			})
+			env.ComponentVersion(COMP, VERSION, func() {
+				env.Provider(PROVIDER)
+				env.Reference("ref", COMP2, VERSION)
+			})
+		})
+
+		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("hash", "components", "-r", ARCH)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 REFERENCEPATH COMPONENT VERSION HASH                                                             IDENTITY
@@ -124,5 +166,43 @@ REFERENCEPATH COMPONENT VERSION HASH                                            
 test.de/x:v1  test.de/y v1      e60c791a20091abcf8d35742a134b3a99ce811d874fd721870b28ea90ef5ad2a "name"="ref"
               test.de/y v1      e60c791a20091abcf8d35742a134b3a99ce811d874fd721870b28ea90ef5ad2a
 `))
+	})
+
+	It("hash component recursively and updates hashes", func() {
+		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+			env.ComponentVersion(COMP2, VERSION, func() {
+				env.Provider(PROVIDER)
+			})
+			env.ComponentVersion(COMP, VERSION, func() {
+				env.Provider(PROVIDER)
+				env.Reference("ref", COMP2, VERSION)
+			})
+		})
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("hash", "components", "-r", "--repo", ARCH, "-U", "test.de/x:v1")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+REFERENCEPATH COMPONENT VERSION HASH                                                             IDENTITY
+              test.de/x v1      b74cee6c6b8215f470efd0e3c49618bb98610fc80de36a2e121d0550650b9cdc 
+test.de/x:v1  test.de/y v1      e60c791a20091abcf8d35742a134b3a99ce811d874fd721870b28ea90ef5ad2a "name"="ref"
+`))
+
+		repo := Must(ctf.Open(env, ctf.ACC_READONLY, ARCH, 0, env))
+		defer Close(repo, "repo")
+
+		cvy := Must(repo.LookupComponentVersion(COMP2, VERSION))
+		defer Close(cvy, "cvy")
+		data := Must(compdesc.Encode(cvy.GetDescriptor()))
+		fmt.Printf("%s:\n%s\n", COMP2, string(data))
+
+		cv := Must(repo.LookupComponentVersion(COMP, VERSION))
+		defer Close(cv, "cv")
+
+		data = Must(compdesc.Encode(cv.GetDescriptor()))
+		fmt.Printf("%s:\n%s\n", COMP, string(data))
+		ref := Must(cv.GetReferenceByIndex(0))
+		d := ref.GetDigest()
+		Expect(d).NotTo(BeNil())
+		Expect(d.Value).To(Equal("e60c791a20091abcf8d35742a134b3a99ce811d874fd721870b28ea90ef5ad2a"))
 	})
 })
