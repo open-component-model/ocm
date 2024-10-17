@@ -141,7 +141,7 @@ func (r *RepositoryImpl) getResolver(ref string, comp string) (registry.Reposito
 		authCreds.Password = pass
 	}
 
-	client := retry.DefaultClient
+	client := http.DefaultClient
 	if r.info.Scheme == "https" {
 		// set up TLS
 		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
@@ -162,10 +162,16 @@ func (r *RepositoryImpl) getResolver(ref string, comp string) (registry.Reposito
 				return rootCAs
 			}(),
 		}
-		client.Transport = &http.Transport{
-			TLSClientConfig: conf,
+
+		client = &http.Client{
+			Transport: retry.NewTransport(&http.Transport{
+				TLSClientConfig: conf,
+			}),
 		}
+	} else {
+		repo.PlainHTTP = true
 	}
+
 	repo.Client = &auth.Client{
 		Client:     client,
 		Cache:      auth.NewCache(),
