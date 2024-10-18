@@ -189,12 +189,12 @@ func (a *AccessObject) Write(path string, mode vfs.FileMode, opts ...accessio.Op
 	return f.Write(a, path, o, mode)
 }
 
-func (a *AccessObject) Update() error {
-	if _, err := a.updateDescriptor(); err != nil {
-		return fmt.Errorf("unable to update descriptor: %w", err)
+func (a *AccessObject) Update() (bool, error) {
+	if b, err := a.updateDescriptor(); err != nil {
+		return b, fmt.Errorf("unable to update descriptor: %w", err)
+	} else {
+		return b, nil
 	}
-
-	return nil
 }
 
 func (a *AccessObject) Close() error {
@@ -202,7 +202,8 @@ func (a *AccessObject) Close() error {
 		return accessio.ErrClosed
 	}
 	list := errors.ErrListf("cannot close %s", a.info.GetObjectTypeName())
-	list.Add(a.Update())
+	_, err := a.Update()
+	list.Add(err)
 	if a.closer != nil {
 		list.Add(a.closer.Close(a))
 	}
