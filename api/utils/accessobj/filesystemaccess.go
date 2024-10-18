@@ -48,7 +48,7 @@ func (a *FileSystemBlobAccess) Write(path string, mode vfs.FileMode, opts ...acc
 	return a.base.Write(path, mode, opts...)
 }
 
-func (a *FileSystemBlobAccess) Update() error {
+func (a *FileSystemBlobAccess) Update() (bool, error) {
 	return a.base.Update()
 }
 
