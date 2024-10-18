@@ -158,9 +158,10 @@ type ArtifactInfo struct {
 }
 
 const (
-	ARTKIND_RESOURCE = "resource"
-	ARTKIND_SOURCE   = "source"
-	OCM_ARTIFACT     = "ocm-artifact"
+	OCM_COMPONENTVERSION = "software.ocm.componentversion"
+	OCM_ARTIFACT         = "software.ocm.artifact"
+	ARTKIND_RESOURCE     = "resource"
+	ARTKIND_SOURCE       = "source"
 )
 
 func (c *ComponentVersionContainer) Update() (bool, error) {
@@ -212,6 +213,11 @@ func (c *ComponentVersionContainer) Update() (bool, error) {
 			}
 		}
 		m := c.manifest.GetDescriptor()
+
+		if m.Annotations == nil {
+			m.Annotations = map[string]string{}
+		}
+		m.Annotations[OCM_COMPONENTVERSION] = common.VersionedElementKey(c.bridge).String()
 
 		for layer, info := range layerAnnotations {
 			data, err := runtime.DefaultJSONEncoding.Marshal(info)
