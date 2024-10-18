@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/pflag"
 
 	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/cmds/ocm/common/options"
@@ -50,6 +51,7 @@ type Options struct {
 	FixedColums      int
 	Context          clictx.Context // this context could be ocm context.
 	Logging          logging.Context
+	Session          ocm.Session
 }
 
 func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
@@ -61,6 +63,11 @@ func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
 
 func (o *Options) SortColumns(fields ...string) *Options {
 	o.Sort = fields
+	return o
+}
+
+func (o *Options) WithSession(s ocm.Session) *Options {
+	o.Session = s
 	return o
 }
 

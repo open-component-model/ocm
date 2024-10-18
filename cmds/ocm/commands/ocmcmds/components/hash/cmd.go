@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
@@ -73,11 +74,11 @@ func (o *Command) Complete(args []string) error {
 	return nil
 }
 
-func (o *Command) Run() error {
+func (o *Command) Run() (err error) {
 	session := ocm.NewSession(nil)
-	defer session.Close()
+	defer errors.PropagateError(&err, session.Close)
 
-	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
+	err = o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
 	}
@@ -88,7 +89,7 @@ func (o *Command) Run() error {
 	}
 
 	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository, comphdlr.OptionsFor(o))
-	return utils.HandleArgs(output.From(o), handler, o.Refs...)
+	return utils.HandleArgs(output.From(o).WithSession(session), handler, o.Refs...)
 }
 
 /////////////////////////////////////////////////////////////////////////////
