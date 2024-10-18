@@ -63,6 +63,8 @@ var _ = Describe("Transfer handler", func() {
 		Expect(v.GetDescriptor()).To(YAMLEqual(`
   mediaType: application/vnd.oci.image.manifest.v1+json
   schemaVersion: 2
+  annotations:
+    software.ocm.componentversion: github.com/mandelsoft/ocm:v1
   config:
     digest: sha256:edf034a303e8cc7e5a05c522bb5fc74a09a00ed3aca390ffafba1020c97470cc
     mediaType: application/vnd.ocm.software.component.config.v1+json
@@ -72,12 +74,12 @@ var _ = Describe("Transfer handler", func() {
     mediaType: application/vnd.ocm.software.component-descriptor.v2+yaml+tar
     size: 3584
   - annotations:
-      ocm-artifact: '[{"kind":"resource","identity":{"name":"test1"}},{"kind":"resource","identity":{"name":"test2"}}]'
+      software.ocm.artifact: '[{"kind":"resource","identity":{"name":"test1"}},{"kind":"resource","identity":{"name":"test2"}}]'
     digest: sha256:2e99758548972a8e8822ad47fa1017ff72f06f3ff6a016851f45c398732bc50c
     mediaType: text/plain
     size: 14
   - annotations:
-      ocm-artifact: '[{"kind":"resource","identity":{"name":"test3"}},{"kind":"source","identity":{"name":"test4"}}]'
+      software.ocm.artifact: '[{"kind":"resource","identity":{"name":"test3"}},{"kind":"source","identity":{"name":"test4"}}]'
     digest: sha256:f69bff44070ba35d7169196ba0095425979d96346a31486b507b4a3f77bd356d
     mediaType: text/plain
     size: 20
