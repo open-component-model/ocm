@@ -13,10 +13,10 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
-	return traverse(common.History{}, e.(*Object), opts.Context, lookupoption.From(opts))
+	return traverse(common.History{}, e.(*Object), opts.Context, opts.Session, lookupoption.From(opts))
 }
 
-func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.ComponentVersionResolver) []interface{} {
+func traverse(hist common.History, o *Object, octx out.Context, sess ocm.Session, lookup ocm.ComponentVersionResolver) []interface{} {
 	key := common.VersionedElementKey(o.ComponentVersion)
 	if err := hist.Add(ocm.KIND_COMPONENTVERSION, key); err != nil {
 		return nil
@@ -69,7 +69,10 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.Compo
 		if nested == nil {
 			result = append(result, obj)
 		} else {
-			result = append(result, traverse(hist, obj, octx, lookup)...)
+			if sess != nil {
+				sess.AddCloser(nested)
+			}
+			result = append(result, traverse(hist, obj, octx, sess, lookup)...)
 		}
 	}
 	return result
