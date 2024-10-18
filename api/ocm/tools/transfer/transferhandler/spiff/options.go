@@ -121,6 +121,14 @@ func ScriptByFile(path string, fss ...vfs.FileSystem) transferhandler.TransferOp
 	}
 }
 
+func (o *Options) SetConfig(bytes []byte) {
+	o.script = bytes
+}
+
+func (o *Options) GetConfig() []byte {
+	return o.script
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 type ScriptFilesystemOption interface {
