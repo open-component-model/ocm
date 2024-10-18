@@ -23,7 +23,15 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Create Release Branch
+      env:
+        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         set -e
         git config --global user.name github-actions
