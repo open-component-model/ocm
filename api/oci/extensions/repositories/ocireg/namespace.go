@@ -180,10 +180,24 @@ func (n *NamespaceContainer) pushTag(blob blobaccess.BlobAccess, tag string) err
 	if err != nil {
 		return err
 	}
+
 	expectedDescriptor := *artdesc.DefaultBlobDescriptor(blob)
+	// If the descriptor exists, we are adding the blob to the descriptor as is.
 	if err := n.ociRepo.PushReference(context.Background(), expectedDescriptor, reader, tag); err != nil {
-		return fmt.Errorf("unable to push: %w", err)
+		// If the manifest is unknown to the registry, which can occur with Docker,
+		// we might be able to push the entire blob instead of a reference.
+		// We can't assert the error because docker returns Manifest Unknown,
+		// while ghcr.io or quay work with PushReference out of the box.
+		// Meanwhile, we need to get the reader again, because PushReference exhausted it.
+		reader, err = blob.Reader()
+		if err != nil {
+			return err
+		}
+
+		// If any other error arises, pushing the blob would also fail.
+		return n.ociRepo.Blobs().Push(context.Background(), expectedDescriptor, reader)
 	}
+
 	return nil
 }
 

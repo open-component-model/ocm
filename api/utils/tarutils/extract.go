@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"fmt"
 	"io"
+	"math"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -87,9 +88,14 @@ func ExtractTarToFsWithInfo(fs vfs.FileSystem, in io.Reader) (fcnt int64, bcnt i
 			return fcnt, bcnt, err
 		}
 
+		if header.Mode < 0 || header.Mode > math.MaxUint32 {
+			return fcnt, bcnt, fmt.Errorf("file %s: mode %d out of range for uint32", header.Name, header.Mode)
+		}
+		fileMode := vfs.FileMode(header.Mode) //nolint:gosec // disable G115
+
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := fs.MkdirAll(header.Name, vfs.FileMode(header.Mode)); err != nil {
+			if err := fs.MkdirAll(header.Name, fileMode); err != nil {
 				return fcnt, bcnt, fmt.Errorf("unable to create directory %s: %w", header.Name, err)
 			}
 		case tar.TypeSymlink, tar.TypeLink:
@@ -107,7 +113,7 @@ func ExtractTarToFsWithInfo(fs vfs.FileSystem, in io.Reader) (fcnt int64, bcnt i
 			if err := fs.MkdirAll(dir, 0o766); err != nil {
 				return fcnt, bcnt, fmt.Errorf("unable to create directory %s: %w", dir, err)
 			}
-			file, err := fs.OpenFile(header.Name, vfs.O_WRONLY|vfs.O_CREATE|vfs.O_TRUNC, vfs.FileMode(header.Mode))
+			file, err := fs.OpenFile(header.Name, vfs.O_WRONLY|vfs.O_CREATE|vfs.O_TRUNC, fileMode)
 			if err != nil {
 				return fcnt, bcnt, fmt.Errorf("unable to open file %s: %w", header.Name, err)
 			}
@@ -116,7 +122,7 @@ func ExtractTarToFsWithInfo(fs vfs.FileSystem, in io.Reader) (fcnt int64, bcnt i
 			// archive can be an image layer and that can even reach the gigabyte range.
 			// For now, we acknowledge the risk.
 			//
-			// We checked other softwares and tried to figure out how they manage this,
+			// We checked other software and tried to figure out how they manage this,
 			// but it's handled the same way.
 			if _, err := io.Copy(file, tr); err != nil {
 				return fcnt, bcnt, fmt.Errorf("unable to copy tar file to filesystem: %w", err)
