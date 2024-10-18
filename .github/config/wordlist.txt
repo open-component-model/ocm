@@ -186,6 +186,7 @@ newcomponentaccess
 newcomponentversionaccess
 newrepository
 newrepositoryspec
+nixos
 npm
 npmjs
 npmrc
