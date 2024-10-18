@@ -8,7 +8,9 @@ import (
 	"ocm.software/ocm/api/config"
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/download"
+	"ocm.software/ocm/api/ocm/extensions/download/handlers/ocirepo"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -82,8 +84,8 @@ of preconfigured download handler registrations (see <CMD>ocm ocm-downloadhandle
     type: ` + ConfigType + `
     description: "my standard download handler configuration"
     handlers:
-      - name: oci/artifact
-        artifactType: ociImage
+      - name: ` + ocirepo.HandlerName + `
+        artifactType: ` + artifacttypes.OCI_IMAGE + `
         mimeType:
         config: ...
       ...

@@ -10,15 +10,16 @@ import (
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
+	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/ocirepo"
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/api/utils/registrations"
 )
 
-const PATH = "oci/artifact"
+const HandlerName = ocirepo.BlobHandlerName
 
 func init() {
-	download.RegisterHandlerRegistrationHandler(PATH, &RegistrationHandler{})
+	download.RegisterHandlerRegistrationHandler(HandlerName, &RegistrationHandler{})
 }
 
 var supportedMimeTypes = []string{
