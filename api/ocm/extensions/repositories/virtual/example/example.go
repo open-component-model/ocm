@@ -202,7 +202,7 @@ func (v *VersionAccess) Update() (bool, error) {
 	i := v.access.index.Get(v.comp, v.vers)
 	if !reflect.DeepEqual(v.desc, i.CD()) {
 		if v.IsReadOnly() {
-			return true, accessio.ErrReadOnly
+			return false, accessio.ErrReadOnly
 		}
 		data, err := compdesc.Encode(v.desc)
 		if err != nil {

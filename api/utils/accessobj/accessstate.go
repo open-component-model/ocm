@@ -276,7 +276,7 @@ func (s *state) Update() (bool, error) {
 	}
 
 	if s.IsReadOnly() {
-		return true, ErrReadOnly
+		return false, ErrReadOnly
 	}
 	data, err := s.handler.Encode(s.current)
 	if err != nil {

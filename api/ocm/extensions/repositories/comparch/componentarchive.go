@@ -148,7 +148,7 @@ func (c *componentArchiveContainer) Update() (bool, error) {
 
 func (c *componentArchiveContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) (bool, error) {
 	if c.fsacc.IsReadOnly() {
-		return true, accessobj.ErrReadOnly
+		return false, accessobj.ErrReadOnly
 	}
 	cur := c.fsacc.GetState().GetState().(*compdesc.ComponentDescriptor)
 	*cur = *cd.Copy()
