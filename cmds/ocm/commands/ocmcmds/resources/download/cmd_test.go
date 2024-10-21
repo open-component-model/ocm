@@ -144,7 +144,6 @@ var _ = Describe("Test Environment", func() {
 		Expect(err).To(Succeed())
 
 		BeforeEach(func() {
-			env = NewTestEnv()
 			data, err := rsa.KeyData(pub)
 			Expect(err).To(Succeed())
 			Expect(vfs.WriteFile(env.FileSystem(), PUBKEY, data, os.ModePerm)).To(Succeed())
