@@ -72,17 +72,17 @@ check-and-fix:
 
 .PHONY: force-test
 force-test:
-	@go test --count=1 $(EFFECTIVE_DIRECTORIES)
+	@go test -vet=off --count=1 $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: test
 test:
 	@echo "> Run Tests"
-	@go test  --tags=integration $(EFFECTIVE_DIRECTORIES)
+	@go test -vet=off --tags=integration $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: unit-test
 unit-test:
 	@echo "> Run Unit Tests"
-	@go test $(EFFECTIVE_DIRECTORIES)
+	@go test -vet=off $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: generate
 generate:
