@@ -12,13 +12,30 @@ PODINFO_VERSION = 6.3.5
 PODINFO_CHART_VERSION = 6.3.5
 
 REPO_ROOT                                     := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
+GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 VERSION                                        = $(shell go run $(REPO_ROOT)/api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 HELMINSTVERSION                               ?= $(VERSION)
 
 CREDS ?=
-OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+# Define the path to the binary
+OCM_BIN = $(REPO_ROOT)/bin/ocm
+
+# Rule to build the binary if it doesn't exist or if the source code has changed
+$(OCM_BIN): $(REPO_ROOT)/cmds/ocm/main.go
+	mkdir -p $(REPO_ROOT)/bin
+	go build -ldflags $(BUILD_FLAGS) -o $(OCM_BIN) $(REPO_ROOT)/cmds/ocm
+
+# Use the binary for the OCM command
+OCM = $(OCM_BIN) $(CREDS)
+
+NOW         := $(shell date -u +%FT%T%z)
+BUILD_FLAGS := "-s -w \
+ -X ocm.software/ocm/api/version.gitVersion=$(EFFECTIVE_VERSION) \
+ -X ocm.software/ocm/api/version.gitTreeState=$(GIT_TREE_STATE) \
+ -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
+ -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
 GEN = $(REPO_ROOT)/gen/subchartsdemo
 
