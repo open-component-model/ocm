@@ -29,6 +29,7 @@ import (
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/runtime"
+	"ocm.software/ocm/api/version"
 )
 
 // newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact acess is closed.
@@ -159,6 +160,7 @@ type ArtifactInfo struct {
 
 const (
 	OCM_COMPONENTVERSION = "software.ocm.componentversion"
+	OCM_CREATOR          = "software.ocm.creator"
 	OCM_ARTIFACT         = "software.ocm.artifact"
 	ARTKIND_RESOURCE     = "resource"
 	ARTKIND_SOURCE       = "source"
@@ -218,6 +220,7 @@ func (c *ComponentVersionContainer) Update() (bool, error) {
 			m.Annotations = map[string]string{}
 		}
 		m.Annotations[OCM_COMPONENTVERSION] = common.VersionedElementKey(c.bridge).String()
+		m.Annotations[OCM_CREATOR] = "OCM Go Library " + version.Current()
 
 		for layer, info := range layerAnnotations {
 			data, err := runtime.DefaultJSONEncoding.Marshal(info)
