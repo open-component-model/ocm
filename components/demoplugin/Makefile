@@ -51,7 +51,7 @@ $(GEN)/build: $(CMDSRCS) $(OCMSRCS)
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/ca.done
+$(GEN)/ctf: $(GEN)/ca.done $(OCM_BIN)
 	@rm -rf "$(GEN)/ctf"
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch "$(GEN)/ctf"
@@ -63,7 +63,7 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca.done
 
-$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS)
+$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS) $(OCM_BIN)
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add resources --templater=spiff --file $(GEN)/ca NAME="$(NAME)" VERSION="$(VERSION)" COMMIT="$(COMMIT)" GEN="$(GEN)" PLATFORMS="$(PLATFORMS)" resources.yaml
 	@touch $(GEN)/ca.done
@@ -71,17 +71,17 @@ $(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS)
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 
-$(GEN)/push.$(NAME): $(GEN)/ctf
+$(GEN)/push.$(NAME): $(GEN)/ctf $(OCM_BIN)
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: plain-push
-plain-push: $(GEN)
+plain-push: $(GEN) $(OCM_BIN)
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: transport
-transport:
+transport: $(OCM_BIN)
 ifneq ($(TARGETREPO),)
 	$(OCM) transfer component -Vc  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
 endif

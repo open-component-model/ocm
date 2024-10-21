@@ -48,7 +48,7 @@ ctf: $(GEN)/ctf
 version:
 	@echo $(VERSION)
 
-$(GEN)/ctf: $(GEN)/.exists component-constructor.yaml $(ECHOCHARTSRCS) packagespec.yaml podinfo/podinfo-$(PODINFO_CHART_VERSION).tgz
+$(GEN)/ctf: $(GEN)/.exists component-constructor.yaml $(ECHOCHARTSRCS) packagespec.yaml podinfo/podinfo-$(PODINFO_CHART_VERSION).tgz $(OCM_BIN)
 	@rm -rf $(GEN)/ctf
 	$(OCM) add componentversions --create VERSION="$(VERSION)" COMMIT="$(COMMIT)" COMPONENT_PREFIX=$(COMPONENT_PREFIX) PROVIDER=$(PROVIDER) PODINFO_VERSION=$(PODINFO_VERSION) PODINFO_CHART_VERSION=$(PODINFO_CHART_VERSION) HELMINSTCOMP=$(HELMINSTCOMP) HELMINSTVERSION=$(HELMINSTVERSION) ECHO_VERSION=$(ECHO_VERSION) ECHO_CHART_VERSION=$(ECHO_CHART_VERSION) --file $(GEN)/ctf component-constructor.yaml
 	@touch $(GEN)/ctf
@@ -56,12 +56,12 @@ $(GEN)/ctf: $(GEN)/.exists component-constructor.yaml $(ECHOCHARTSRCS) packagesp
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 
-$(GEN)/push.$(NAME): $(GEN)/ctf
+$(GEN)/push.$(NAME): $(GEN)/ctf $(OCM_BIN)
 	$(OCM) -X keeplocalblob=true transfer ctf --copy-resources -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: plain-push
-plain-push: $(GEN)
+plain-push: $(GEN) $(OCM_BIN)
 	$(OCM) -X keeplocalblob=true transfer ctf --copy-resources -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
