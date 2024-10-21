@@ -267,13 +267,13 @@ func (c *ComponentVersionContainer) SetReadOnly() {
 	c.comp.repo.arch.SetReadOnly()
 }
 
-func (c *ComponentVersionContainer) Update() error {
+func (c *ComponentVersionContainer) Update() (bool, error) {
 	desc := c.comp.repo.arch.GetDescriptor()
 	*desc = *c.descriptor.Copy()
 	return c.comp.repo.arch.container.Update()
 }
 
-func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) error {
+func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) (bool, error) {
 	*c.descriptor = *cd
 	return c.Update()
 }

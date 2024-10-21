@@ -237,7 +237,7 @@ func (a *namespaceContainer) Write(path string, mode vfs.FileMode, opts ...acces
 	return a.base.Write(path, mode, opts...)
 }
 
-func (a *namespaceContainer) Update() error {
+func (a *namespaceContainer) Update() (bool, error) {
 	return a.base.Update()
 }
 

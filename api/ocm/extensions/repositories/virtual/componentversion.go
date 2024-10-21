@@ -116,11 +116,11 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 	return nil, errors.ErrNotSupported(errkind.KIND_ACCESSMETHOD, a.GetType(), "virtual registry")
 }
 
-func (c *ComponentVersionContainer) Update() error {
+func (c *ComponentVersionContainer) Update() (bool, error) {
 	return c.access.Update()
 }
 
-func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) error {
+func (c *ComponentVersionContainer) SetDescriptor(cd *compdesc.ComponentDescriptor) (bool, error) {
 	cur := c.access.GetDescriptor()
 	*cur = *cd
 	return c.access.Update()
