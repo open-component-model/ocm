@@ -45,10 +45,11 @@ build: $(GEN)/build
 
 $(GEN)/build: $(GEN)/.exists $(CMDSRCS) $(OCMSRCS)
 	@for i in $(PLATFORMS); do \
-    tag=$$(echo $$i | sed -e s:/:-:g); \
-    echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(CMD); \
-    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(CMD) & \
-    done
+		tag=$$(echo $$i | sed -e s:/:-:g); \
+		echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(CMD); \
+		GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(CMD) & \
+	done; \
+	wait
 	@touch $(GEN)/build
 
 .PHONY: image

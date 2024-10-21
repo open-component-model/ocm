@@ -36,7 +36,8 @@ $(GEN)/build: $(CMDSRCS) $(OCMSRCS)
     tag=$$(echo $$i | sed -e s:/:-:g); \
     echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(NAME); \
     GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(NAME) & \
-    done
+    done; \
+	wait
 	@touch $(GEN)/build
 
 
