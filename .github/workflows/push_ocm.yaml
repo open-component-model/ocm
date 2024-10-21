@@ -108,8 +108,8 @@ jobs:
         echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
         echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
-    # This step will only reuse the go mod and build cache from main made during the Build/Test step,
-    # see lint_and_test.yaml => "Run tests" Job
+    # This step will only reuse the go mod and build cache from main made during the Build,
+    # see push_ocm.yaml => "ocm-cli-latest" Job
     # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
     # This is because we have huge storage requirements for our cache because of the mass of dependencies
     - name: Restore / Reuse Cache from central build
@@ -123,7 +123,7 @@ jobs:
         restore-keys: |
           ${{ env.cache_name }}-${{ runner.os }}-go-
       env:
-        cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
+        cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
 
     - name: Goreleaser release snapshot
       uses: goreleaser/goreleaser-action@v6
@@ -153,3 +153,20 @@ jobs:
         skipIfReleaseExists: false
         body: |
           holds always the latest ocm-cli binaries
+
+    # This step will only reuse the go mod and build cache from main made during the Build,
+    # see push_ocm.yaml => "ocm-cli-latest" Job
+    # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+    # This is because we have huge storage requirements for our cache because of the mass of dependencies
+    - name: Save Cache of Build (only on main)
+      id: cache-golang-save
+      if: github.ref == 'refs/heads/main' # Only run on main, never in PR
+      uses: actions/cache/save@v4 # Only Restore, not build another cache (too big)
+      with:
+        path: |
+          ${{ env.go_cache }}
+          ${{ env.go_modcache }}
+        key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
+        upload-chunk-size: 256000000 # default of 32MB is not really optimal for our large cache, choose 256MB instead
+      env:
+        cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step

@@ -76,8 +76,8 @@ jobs:
         echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
         echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
-      # This step will only reuse the go mod and build cache from main made during the Build/Test step,
-      # see lint_and_test.yaml => "Run tests" Job
+      # This step will only reuse the go mod and build cache from main made during the Build,
+      # see push_ocm.yaml => "ocm-cli-latest" Job
       # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
       # This is because we have huge storage requirements for our cache because of the mass of dependencies
     - name: Restore / Reuse Cache from central build
@@ -92,7 +92,7 @@ jobs:
         restore-keys: |
           ${{ env.cache_name }}-${{ runner.os }}-go-
       env:
-        cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
+        cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
 
       # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
