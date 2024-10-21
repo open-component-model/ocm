@@ -27,26 +27,44 @@ BUILD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.gitTreeState=$(GIT_TREE_STATE) \
  -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
  -X ocm.software/ocm/api/version.buildDate=$(NOW)"
+CGO_ENABLED := 0
 
 COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
 
-.PHONY: build
-build: ${SOURCES}
+.PHONY: build bin
+build: bin bin/ocm bin/helminstaller bin/demo bin/cliplugin bin/ecrplugin
+
+bin:
 	mkdir -p bin
+
+bin/ocm: bin ${SOURCES}
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
+
+bin/helminstaller: bin ${SOURCES}
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
+
+bin/demo: bin ${SOURCES}
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/demo ./cmds/demoplugin
+
+bin/cliplugin: bin ${SOURCES}
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/cliplugin ./cmds/cliplugin
+
+bin/ecrplugin: bin ${SOURCES}
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
+
+api: ${SOURCES}
 	go build ./api/...
+
+examples: ${SOURCES}
 	go build ./examples/...
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/demo ./cmds/demoplugin
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/cliplugin ./cmds/cliplugin
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
 
 
 build-platforms: $(GEN)/.exists $(SOURCES)
 	@for i in $(PLATFORMS); do \
     echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i); \
-    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build ./cmds/ocm ./cmds/helminstaller ./cmds/ecrplugin; \
-    done
+    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=$(CGO_ENABLED) go build ./cmds/ocm ./cmds/helminstaller ./cmds/ecrplugin & \
+    done; \
+	wait
 
 .PHONY: install-requirements
 install-requirements:

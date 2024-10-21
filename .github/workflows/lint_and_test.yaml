@@ -48,8 +48,10 @@ jobs:
         env:
           cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
+      - name: Build
+        run: make build -j
       - name: Test
-        run: make build install-requirements test
+        run: make install-requirements test
 
       # This step will only reuse the go mod and build cache from main made during the Build/Test step,
       # see lint_and_test.yaml => "Run tests" Job
