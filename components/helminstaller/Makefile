@@ -13,6 +13,8 @@ COMMIT                                         := $(shell git rev-parse --verify
 EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 PLATFORM                                       := $(shell go env GOOS)/$(shell go env GOARCH)
+CACHE_DIR									  := $(shell go env GOCACHE)
+MOD_CACHE_DIR								  := $(shell go env GOMODCACHE)
 
 CREDS ?=
 # Define the path to the binary
@@ -86,8 +88,12 @@ build: $(GEN)/image.$(NAME)$(FLAGSUF)
 $(GEN)/image.$(NAME): $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
 	docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM) --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
+          --build-arg CACHE_DIR=$(CACHE_DIR) \
+          --build-arg MOD_CACHE_DIR=$(MOD_CACHE_DIR) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
-          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE)
+          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE) \
+          --cache-from type=local,src=$(CACHE_DIR) \
+          --cache-from type=local,src=$(MOD_CACHE_DIR); \
 	@touch $(GEN)/image.$(NAME)
 
 push-image:
@@ -103,8 +109,12 @@ $(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
         echo building platform $$i; \
 	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
+          --build-arg CACHE_DIR=$(CACHE_DIR) \
+          --build-arg MOD_CACHE_DIR=$(MOD_CACHE_DIR) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
-          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE); \
+          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE) \
+          --cache-from type=local,src=$(CACHE_DIR) \
+          --cache-from type=local,src=$(MOD_CACHE_DIR); \
 	done
 	@touch $(GEN)/image.$(NAME).multi
 
