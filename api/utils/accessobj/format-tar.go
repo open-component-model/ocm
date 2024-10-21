@@ -82,7 +82,7 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 	}
 
 	// write descriptor
-	err := obj.Update()
+	_, err := obj.Update()
 	if err != nil {
 		return fmt.Errorf("unable to update access object: %w", err)
 	}

@@ -102,14 +102,10 @@ func (a *Access) GetComponentVersion(comp, version string) (virtual.VersionAcces
 	i := a.index.Get(comp, version)
 	if i == nil {
 		cd = compdesc.New(comp, version)
-		err := a.index.Add(cd, common.VersionedElementKey(cd))
-		if err != nil {
-			return nil, err
-		}
 	} else {
 		cd = i.CD()
 	}
-	return &VersionAccess{a, cd.GetName(), cd.GetVersion(), a.IsReadOnly(), cd.Copy()}, nil
+	return &VersionAccess{a, cd.GetName(), cd.GetVersion(), a.IsReadOnly(), cd.Copy(), false}, nil
 }
 
 func (a *Access) GetBlob(name string) (blobaccess.BlobAccess, error) {
@@ -156,6 +152,7 @@ type VersionAccess struct {
 	vers     string
 	readonly bool
 	desc     *compdesc.ComponentDescriptor
+	new      bool
 }
 
 func (v *VersionAccess) GetDescriptor() *compdesc.ComponentDescriptor {
@@ -173,25 +170,35 @@ func (v *VersionAccess) AddBlob(blob cpi.BlobAccess) (string, error) {
 	return v.access.AddBlob(blob)
 }
 
-func (v *VersionAccess) Update() error {
+func (v *VersionAccess) Update() (bool, error) {
 	v.access.lock.Lock()
 	defer v.access.lock.Unlock()
 
 	if v.readonly {
-		return accessio.ErrReadOnly
+		return false, accessio.ErrReadOnly
 	}
 	if v.desc.GetName() != v.comp || v.desc.GetVersion() != v.vers {
-		return errors.ErrInvalid(cpi.KIND_COMPONENTVERSION, common.VersionedElementKey(v.desc).String())
+		return false, errors.ErrInvalid(cpi.KIND_COMPONENTVERSION, common.VersionedElementKey(v.desc).String())
 	}
 	i := v.access.index.Get(v.comp, v.vers)
 	if !reflect.DeepEqual(v.desc, i.CD()) {
-		v.access.index.Set(v.desc, i.Info())
+		if v.new {
+			err := v.access.index.Add(v.desc, i.Info())
+			if err != nil {
+				return false, err
+			}
+			v.new = false
+		} else {
+			v.access.index.Set(v.desc, i.Info())
+		}
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
 func (v *VersionAccess) Close() error {
-	return v.Update()
+	_, err := v.Update()
+	return err
 }
 
 func (v *VersionAccess) IsReadOnly() bool {
