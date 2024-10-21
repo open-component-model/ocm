@@ -37,7 +37,7 @@ jobs:
         restore-keys: |
           ${{ env.cache_name }}-${{ runner.os }}-go-
       env:
-        cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
+        cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
     - name: Make generate and deepcopy
       run: |
