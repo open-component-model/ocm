@@ -5,13 +5,14 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
+	"ocm.software/ocm/api/version"
 )
 
 const (
@@ -63,6 +64,9 @@ var _ = Describe("Transfer handler", func() {
 		Expect(v.GetDescriptor()).To(YAMLEqual(`
   mediaType: application/vnd.oci.image.manifest.v1+json
   schemaVersion: 2
+  annotations:
+    ` + genericocireg.OCM_COMPONENTVERSION + `: github.com/mandelsoft/ocm:v1
+    ` + genericocireg.OCM_CREATOR + `: OCM Go Library ` + version.Current() + `
   config:
     digest: sha256:edf034a303e8cc7e5a05c522bb5fc74a09a00ed3aca390ffafba1020c97470cc
     mediaType: application/vnd.ocm.software.component.config.v1+json
@@ -72,12 +76,12 @@ var _ = Describe("Transfer handler", func() {
     mediaType: application/vnd.ocm.software.component-descriptor.v2+yaml+tar
     size: 3584
   - annotations:
-      ocm-artifact: '[{"kind":"resource","identity":{"name":"test1"}},{"kind":"resource","identity":{"name":"test2"}}]'
+      ` + genericocireg.OCM_ARTIFACT + `: '[{"kind":"resource","identity":{"name":"test1"}},{"kind":"resource","identity":{"name":"test2"}}]'
     digest: sha256:2e99758548972a8e8822ad47fa1017ff72f06f3ff6a016851f45c398732bc50c
     mediaType: text/plain
     size: 14
   - annotations:
-      ocm-artifact: '[{"kind":"resource","identity":{"name":"test3"}},{"kind":"source","identity":{"name":"test4"}}]'
+      ` + genericocireg.OCM_ARTIFACT + `: '[{"kind":"resource","identity":{"name":"test3"}},{"kind":"source","identity":{"name":"test4"}}]'
     digest: sha256:f69bff44070ba35d7169196ba0095425979d96346a31486b507b4a3f77bd356d
     mediaType: text/plain
     size: 20
