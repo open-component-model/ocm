@@ -28,9 +28,13 @@ jobs:
         run: |
           echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
+      # This step will only reuse the go mod and build cache from main made during the Build/Test step,
+      # see lint_and_test.yaml => "Run tests" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Restore / Reuse Cache from central build
+        id: cache-golang-restore
+        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
         with:
           path: |
             ${{ env.go_cache }}
@@ -39,7 +43,7 @@ jobs:
           restore-keys: |
             ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
-          cache_name: cli-go-cache
+          cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
       - name: CTF
         run: |
@@ -62,9 +66,14 @@ jobs:
         run: |
           echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
+
+      # This step will only reuse the go mod and build cache from main made during the Build/Test step,
+      # see lint_and_test.yaml => "Run tests" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Restore / Reuse Cache from central build
+        id: cache-golang-restore
+        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
         with:
           path: |
             ${{ env.go_cache }}
@@ -73,7 +82,7 @@ jobs:
           restore-keys: |
             ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
-          cache_name: helminstaller-go-cache
+          cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
       - name: CTF
         run: |
@@ -96,9 +105,14 @@ jobs:
         run: |
           echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
+
+      # This step will only reuse the go mod and build cache from main made during the Build/Test step,
+      # see lint_and_test.yaml => "Run tests" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Restore / Reuse Cache from central build
+        id: cache-golang-restore
+        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
         with:
           path: |
             ${{ env.go_cache }}
@@ -107,7 +121,7 @@ jobs:
           restore-keys: |
             ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
-          cache_name: helmdemo-go-cache
+          cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
       - name: CTF
         run: |
@@ -130,9 +144,14 @@ jobs:
         run: |
           echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
+
+      # This step will only reuse the go mod and build cache from main made during the Build/Test step,
+      # see lint_and_test.yaml => "Run tests" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Restore / Reuse Cache from central build
+        id: cache-golang-restore
+        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
         with:
           path: |
             ${{ env.go_cache }}
@@ -141,7 +160,7 @@ jobs:
           restore-keys: |
             ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
-          cache_name: helm-subchart-go-cache
+          cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
       - name: CTF
         run: |
@@ -167,9 +186,14 @@ jobs:
         run: |
           echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
+
+      # This step will only reuse the go mod and build cache from main made during the Build/Test step,
+      # see lint_and_test.yaml => "Run tests" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Restore / Reuse Cache from central build
+        id: cache-golang-restore
+        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
         with:
           path: |
             ${{ env.go_cache }}
@@ -178,7 +202,7 @@ jobs:
           restore-keys: |
             ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
-          cache_name: ecr-plugin-go-cache
+          cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
       - name: CTF
         run: |

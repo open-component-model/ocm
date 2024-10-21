@@ -36,14 +36,12 @@ jobs:
           echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
       - name: Set up cache
         # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             ${{ env.go_cache }}
             ${{ env.go_modcache }}
-          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
-          restore-keys: |
-            ${{ env.cache_name }}-${{ runner.os }}-go-
+          key: ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
           cache_name: buildcomponents-go-cache
 

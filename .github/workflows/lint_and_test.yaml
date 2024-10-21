@@ -30,9 +30,14 @@ jobs:
         run: |
           echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
+
+      # This step will only reuse the go mod and build cache from main made during the Build/Test step,
+      # see lint_and_test.yaml => "Run tests" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Restore / Reuse Cache from central build
+        id: cache-golang-restore
+        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
         with:
           path: |
             ${{ env.go_cache }}
@@ -41,10 +46,27 @@ jobs:
           restore-keys: |
             ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
-          cache_name: run-tests-go-cache
+          cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
       - name: Test
         run: make build install-requirements test
+
+      # This step will only reuse the go mod and build cache from main made during the Build/Test step,
+      # see lint_and_test.yaml => "Run tests" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Save Cache of Build (only on main)
+        id: cache-golang-save
+        if: github.ref == 'refs/heads/main' # Only run on main, never in PR
+        uses: actions/cache/save@v4 # Only Restore, not build another cache (too big)
+        with:
+          path: |
+            ${{ env.go_cache }}
+            ${{ env.go_modcache }}
+          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
+          upload-chunk-size: 256000000 # default of 32MB is not really optimal for our large cache, choose 256MB instead
+        env:
+          cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
   go-lint:
     name: Lint Golang
@@ -64,9 +86,14 @@ jobs:
         run: |
           echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
+
+      # This step will only reuse the go mod and build cache from main made during the Build/Test step,
+      # see lint_and_test.yaml => "Run tests" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Restore / Reuse Cache from central build
+        id: cache-golang-restore
+        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
         with:
           path: |
             ${{ env.go_cache }}
@@ -75,7 +102,7 @@ jobs:
           restore-keys: |
             ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
-          cache_name: golint-go-cache
+          cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
 
       - name: Install goimports
         run: go install golang.org/x/tools/cmd/goimports@latest
