@@ -282,8 +282,9 @@ jobs:
         git checkout ${GITHUB_REF#refs/heads/}
         v="$(go run ./api/version/generate bump-version)"
         echo "$v" > VERSION
-        git add VERSION
-        git commit -m "Update version file to $v"
+        make generate
+        git add --all
+        git commit -m "Update version to $v"
         git push origin ${GITHUB_REF#refs/heads/}
         echo "Next branch version is $v"
 
