@@ -34,21 +34,8 @@
             gitCommit = if (self ? rev) then self.rev else self.dirtyRev;
             state = if (self ? rev) then "clean" else "dirty";
 
-<<<<<<< HEAD
-            # This vendorHash represents a dervative of all go.mod dependancies and needs to be adjusted with every change
-<<<<<<< HEAD
-<<<<<<< HEAD
-            vendorHash = "sha256-WJcVwyChwtI6wZuQTvQ0e3enhkj2ThOUpmg8jpOIrek=";
-=======
-            vendorHash = "sha256-NmUhe8lQsK8+g6GOUw4m2j5+B+VIx6OzXfSY+zGUM9Q=";
->>>>>>> 45c1b362 (auto update vendor hash)
-=======
-            vendorHash = "sha256-p5Edm9XqifVFq7KbSPj16p+OvpQl+n+5rEdkdo79OTo=";
->>>>>>> 3e2990ca (auto update vendor hash)
-=======
             # This vendorHash represents a derivative of all go.mod dependencies and needs to be adjusted with every change
             vendorHash = "sha256-pfnq3+5xmybYvevMrWOP2UmMnN1lApTcq/oaq91Yrs0=";
->>>>>>> dd2e6baf (chore(deps): bump the go group across 1 directory with 11 updates - recreaion of #956 (#959))
 
             src = ./.;
 
@@ -62,8 +49,8 @@
 
             CGO_ENABLED = 0;
 
-            subPackages = [ 
-              "cmds/ocm" 
+            subPackages = [
+              "cmds/ocm"
               "cmds/helminstaller"
               "cmds/demoplugin"
               "cmds/ecrplugin"
@@ -90,21 +77,16 @@
             };
           };
         });
-      
+
       # Add dependencies that are only needed for development
       devShells = forAllSystems (system:
-        let 
+        let
           pkgs = nixpkgsFor.${system};
         in
         {
           default = pkgs.mkShell {
-<<<<<<< HEAD
-            buildInputs = with pkgs; [ 
-              go_1_22   # golang 1.22
-=======
             buildInputs = with pkgs; [
               go_1_23   # golang 1.23
->>>>>>> dd2e6baf (chore(deps): bump the go group across 1 directory with 11 updates - recreaion of #956 (#959))
               gopls     # go language server
               gotools   # go imports
               go-tools  # static checks
@@ -136,7 +118,7 @@
           program = self.packages.${system}.${pname} + "/bin/ecrplugin";
         };
       });
-      
+
       legacyPackages = forAllSystems (system: rec {
         nixpkgs = nixpkgsFor.${system};
       });
