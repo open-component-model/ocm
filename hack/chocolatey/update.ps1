@@ -46,7 +46,7 @@ $description = $description -replace '<', '&lt;' # used in code blocks and examp
 $description = $description -replace '>', '&gt;' # used in code blocks and examples
 $description += "`nContinue reading on [ocm.software / cli-reference](https://ocm.software/docs/cli-reference/)"
 # release notes do hopefully not contain xml tags
-$releaseNotes = Get-Content -Path "docs\releasenotes\v$latestVersion.md" -Raw
+$releaseNotes = $response.body
 $releaseNotes = $releaseNotes -replace '\(#(\d+)\)', '([$1](https://github.com/open-component-model/ocm/pull/$1))'
 $releaseNotes = $releaseNotes -replace '<summary>.*</summary>', ''
 $releaseNotes = $releaseNotes -replace '</?details>', ''
