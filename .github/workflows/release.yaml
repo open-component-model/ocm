@@ -6,18 +6,18 @@ on:
       release_candidate:
         type: boolean
         description: "Release Candidate"
-        required: false
-        default: false
+        required: true
+        default: true
       create_branch:
         type: boolean
-        description: "Create Release Branch"
-        required: false
+        description: "Create Release Branch (on failure or if already existing, set to false to ensure a successful run)"
+        required: true
         default: false
       prerelease:
         type: string
-        description: "Release Candidate Name"
-        required: false
-        default: ""
+        description: "Release Candidate Name, adjust after every succinct release candidate (e.g. to rc.2, rc.3...)"
+        required: true
+        default: "rc.1"
 
 jobs:
   check:
