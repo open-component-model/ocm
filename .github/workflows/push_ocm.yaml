@@ -160,7 +160,6 @@ jobs:
     # This is because we have huge storage requirements for our cache because of the mass of dependencies
     - name: Save Cache of Build (only on main)
       id: cache-golang-save
-      if: github.ref == 'refs/heads/main' # Only run on main, never in PR
       uses: actions/cache/save@v4 # Only Restore, not build another cache (too big)
       with:
         path: |
