@@ -1,0 +1,23 @@
+name: 'Mark stale issues and PRs'
+on:
+  schedule:
+    - cron: '7 1 * * *'
+  workflow_dispatch:
+    inputs:
+
+permissions:
+  contents: write # only for delete-branch option
+  issues: write
+  pull-requests: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          stale-issue-message: 'This issue was marked as stale because it has not had recent activity.'
+          stale-issue-label: 'lifecycle/stale'
+          stale-pr-message: 'This pull request was marked as stale because it has not had recent activity.'
+          stale-pr-label: 'lifecycle/stale'
+          days-before-close: '-1' # never close issues
+          days-before-stale: '90'
