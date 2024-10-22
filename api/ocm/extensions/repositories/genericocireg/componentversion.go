@@ -275,10 +275,10 @@ func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.A
 	if d != nil {
 		// find layer
 		layers := c.manifest.GetDescriptor().Layers
-		max := len(layers) - 1
+		maxLen := len(layers) - 1
 		for i := range layers {
 			l := layers[len(layers)-1-i]
-			if i < max && l.Digest == d.Digest && (d.Digest == "" || d.Digest == l.Digest) {
+			if i < maxLen && l.Digest == d.Digest && (d.Digest == "" || d.Digest == l.Digest) {
 				return s, len(layers) - 1 - i, nil
 			}
 		}

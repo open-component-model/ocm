@@ -562,7 +562,7 @@ func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) (
 		}
 		nested, err := opts.Resolver.LookupComponentVersion(reference.GetComponentName(), reference.GetVersion())
 		if err != nil {
-			return errors.Wrapf(err, refMsg(reference, "failed resolving component reference"))
+			return errors.Wrap(err, refMsg(reference, "failed resolving component reference"))
 		}
 		loop.Close(nested)
 
@@ -570,20 +570,20 @@ func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) (
 			digestOpts := opts.Nested()
 			nctx, err = apply(state, nested, digestOpts, false)
 			if err != nil {
-				return errors.Wrapf(err, refMsg(reference, "failed applying to component reference"))
+				return errors.Wrap(err, refMsg(reference, "failed applying to component reference"))
 			}
 		} else {
 			state.Logger.Debug("accepting digest from context", "reference", reference)
 			opts.Printer.Printf("  accepting digest from context for %s", reference)
 			if err != nil {
-				return errors.Wrapf(err, refMsg(reference, "failed applying to component reference"))
+				return errors.Wrap(err, refMsg(reference, "failed applying to component reference"))
 			}
 		}
 		if reference.Digest != nil {
 			if ctx.IsRoot() {
 				if DigesterType(reference.Digest) == DigesterType(nctx.Digest) {
 					if nctx.Digest != nil && !reflect.DeepEqual(reference.Digest, nctx.Digest) {
-						return errors.Newf(refMsg(reference, "calculated reference digest (%+v) mismatches existing digest (%+v) for", nctx.Digest, reference.Digest))
+						return errors.New(refMsg(reference, "calculated reference digest (%+v) mismatches existing digest (%+v) for", nctx.Digest, reference.Digest))
 					}
 				}
 			}
@@ -591,7 +591,7 @@ func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) (
 			if pre != nil {
 				if DigesterType(pre.Digest) == DigesterType(nctx.Digest) {
 					if nctx.Digest != nil && !reflect.DeepEqual(pre.Digest, nctx.Digest) {
-						return errors.Newf(refMsg(reference, "calculated reference digest (%+v) mismatches existing digest (%+v) for", nctx.Digest, reference.Digest))
+						return errors.New(refMsg(reference, "calculated reference digest (%+v) mismatches existing digest (%+v) for", nctx.Digest, reference.Digest))
 					}
 				}
 			}
@@ -674,14 +674,14 @@ func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 			return errors.Wrapf(err, resMsg(raw, acc.Describe(octx), "failed determining digest for resource"))
 		}
 		if len(digest) == 0 {
-			return errors.Newf(resMsg(raw, acc.Describe(octx), "no digester accepts resource"))
+			return errors.New(resMsg(raw, acc.Describe(octx), "no digester accepts resource"))
 		}
 		if !checkDigest(rdigest, &digest[0]) {
-			return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", &digest[0], rdigest))
+			return errors.New(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", &digest[0], rdigest))
 		}
 		if NormalizedDigesterType(raw.Digest) == NormalizedDigesterType(&digest[0]) {
 			if !checkDigest(raw.Digest, &digest[0]) {
-				return errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", &digest[0], raw.Digest))
+				return errors.New(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", &digest[0], raw.Digest))
 			}
 		}
 		cd.Resources[i].Digest = &digest[0]

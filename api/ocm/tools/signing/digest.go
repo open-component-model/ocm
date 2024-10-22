@@ -91,13 +91,13 @@ func VerifyResourceDigest(cv ocm.ComponentVersionAccess, i int, bacc ocm.DataAcc
 	hasher := registry.GetHasher(dtype.HashAlgorithm)
 	digest, err := octx.BlobDigesters().DetermineDigests(raw.Type, hasher, registry, meth, req...)
 	if err != nil {
-		return false, errors.Wrapf(err, resMsg(raw, acc.Describe(octx), "failed determining digest for resource"))
+		return false, errors.Wrap(err, resMsg(raw, acc.Describe(octx), "failed determining digest for resource"))
 	}
 	if len(digest) == 0 {
-		return false, errors.Newf(resMsg(raw, acc.Describe(octx), "no digester accepts resource"))
+		return false, errors.New(resMsg(raw, acc.Describe(octx), "no digester accepts resource"))
 	}
 	if !checkDigest(rdigest, &digest[0]) {
-		return true, errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", &digest[0], rdigest))
+		return true, errors.New(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", &digest[0], rdigest))
 	}
 	return true, nil
 }

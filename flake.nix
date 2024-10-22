@@ -85,13 +85,8 @@
         in
         {
           default = pkgs.mkShell {
-<<<<<<< HEAD
             buildInputs = with pkgs; [
               go_1_23   # golang 1.23
-=======
-            buildInputs = with pkgs; [
-              go_1_22   # golang 1.22
->>>>>>> parent of 3cfa2287 (feat: replace docker with oras (#904))
               gopls     # go language server
               gotools   # go imports
               go-tools  # static checks
