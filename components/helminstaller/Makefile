@@ -91,9 +91,7 @@ $(GEN)/image.$(NAME): $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
           --build-arg CACHE_DIR=$(CACHE_DIR) \
           --build-arg MOD_CACHE_DIR=$(MOD_CACHE_DIR) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
-          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE) \
-          --cache-from type=local,src=$(CACHE_DIR) \
-          --cache-from type=local,src=$(MOD_CACHE_DIR); \
+          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE); \
 	@touch $(GEN)/image.$(NAME)
 
 push-image:
@@ -112,9 +110,7 @@ $(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
           --build-arg CACHE_DIR=$(CACHE_DIR) \
           --build-arg MOD_CACHE_DIR=$(MOD_CACHE_DIR) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
-          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE) \
-          --cache-from type=local,src=$(CACHE_DIR) \
-          --cache-from type=local,src=$(MOD_CACHE_DIR); \
+          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE); \
 	done
 	@touch $(GEN)/image.$(NAME).multi
 
