@@ -282,6 +282,7 @@ jobs:
         git checkout ${GITHUB_REF#refs/heads/}
         v="$(go run ./api/version/generate bump-version)"
         echo "$v" > VERSION
+        # Trigger a bump of any potential files that depend on a new version
         make generate
         git add --all
         git commit -m "Update version to $v"
