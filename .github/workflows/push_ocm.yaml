@@ -154,13 +154,10 @@ jobs:
         body: |
           holds always the latest ocm-cli binaries
 
-    # This step will only reuse the go mod and build cache from main made during the Build,
-    # see push_ocm.yaml => "ocm-cli-latest" Job
-    # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
-    # This is because we have huge storage requirements for our cache because of the mass of dependencies
+    # This step is actually responsible for populating our build cache for the next runs in PRs or on main.
     - name: Save Cache of Build (only on main)
       id: cache-golang-save
-      uses: actions/cache/save@v4 # Only Restore, not build another cache (too big)
+      uses: actions/cache/save@v4 # Only save build cache once
       with:
         path: |
           ${{ env.go_cache }}

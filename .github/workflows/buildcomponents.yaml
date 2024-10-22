@@ -43,7 +43,7 @@ jobs:
             ${{ env.go_modcache }}
           key: ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
-          cache_name: buildcomponents-go-cache
+          cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
 
       - name: Push OCM Components
         if: inputs.ocm_push == true
