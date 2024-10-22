@@ -31,7 +31,7 @@ func (i IndexArray) After(o IndexArray) bool {
 	return len(i) > len(o)
 }
 
-func (i IndexArray) Next(maxIndex, sub int) IndexArray {
+func (i IndexArray) Next(max, sub int) IndexArray {
 	l := len(i)
 	n := i.Copy()
 
@@ -39,7 +39,7 @@ func (i IndexArray) Next(maxIndex, sub int) IndexArray {
 		return append(n, 0)
 	}
 	n[l-1]++
-	if maxIndex > 0 && n[l-1] >= maxIndex {
+	if max > 0 && n[l-1] >= max {
 		n[l-2]++
 		return n[:l-1]
 	}
@@ -52,9 +52,9 @@ func (i IndexArray) Copy() IndexArray {
 	return n
 }
 
-func (i IndexArray) Validate(maxIndex int) {
-	if maxIndex >= 0 && i[len(i)-1] >= maxIndex {
-		panic(fmt.Sprintf("index %d >= max %d", i[len(i)-1], maxIndex))
+func (i IndexArray) Validate(max int) {
+	if max >= 0 && i[len(i)-1] >= max {
+		panic(fmt.Sprintf("index %d >= max %d", i[len(i)-1], max))
 	}
 }
 
@@ -73,7 +73,7 @@ func NewEntry(i Index, v interface{}, opts ...interface{}) ProcessingEntry {
 	// Which is fine if the user understands that it can happen.
 	defer panics.HandlePanic()
 
-	maxOptions := -1
+	max := -1
 	sub := 0
 	valid := true
 	for _, o := range opts {
@@ -83,19 +83,19 @@ func NewEntry(i Index, v interface{}, opts ...interface{}) ProcessingEntry {
 		case SubEntries:
 			sub = int(t)
 		case int:
-			maxOptions = t
+			max = t
 		default:
 			panic(fmt.Errorf("invalid entry option %T", o))
 		}
 	}
-	if len(i) > 1 && maxOptions < 0 {
-		panic(fmt.Errorf("invalid max option %d", maxOptions))
+	if len(i) > 1 && max < 0 {
+		panic(fmt.Errorf("invalid max option %d", max))
 	}
 	return ProcessingEntry{
 		Index:    i,
 		Valid:    valid,
 		Value:    v,
-		MaxIndex: maxOptions,
+		MaxIndex: max,
 		MaxSub:   sub,
 	}
 }

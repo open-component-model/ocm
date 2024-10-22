@@ -62,9 +62,8 @@ format:
 	@$(REPO_ROOT)/hack/format.sh $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: check
-check: ## Run golangci-lint.
-	make -f hack/Makefile golangci-lint
-	golangci-lint run --timeout 10m --config .github/config/golangci.yaml $(EFFECTIVE_DIRECTORIES)
+check:
+	@$(REPO_ROOT)/hack/check.sh --golangci-lint-config=./.golangci.yaml $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: check-and-fix
 check-and-fix:

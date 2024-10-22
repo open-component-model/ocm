@@ -10,7 +10,7 @@ else
 	detected_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown')
 endif
 
-deps :=
+deps := 
 # TODO exact versions to compare
 gSED := $(shell (sed --version 2>/dev/null || echo 0.0) | head -n 1 | sed 's/.*(GNU sed) \([0-9\.]*\).*/\1/')
 ifeq ("v$(gSED)","v0.0")

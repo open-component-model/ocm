@@ -73,7 +73,7 @@ func (a *artBlobCache) Unref() error {
 func (a *artBlobCache) GetBlobData(digest digest.Digest) (int64, blobaccess.DataAccess, error) {
 	blob, err := a.access.GetBlob(digest)
 	if err != nil {
-		return -1, nil, fmt.Errorf("error getting blob for docker repo %s: %w", digest, err)
+		return -1, nil, err
 	}
 	return blob.Size(), blob, err
 }

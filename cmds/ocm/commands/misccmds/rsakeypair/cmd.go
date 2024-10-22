@@ -155,7 +155,7 @@ func (o *Command) Complete(args []string) error {
 		o.RootCertPool = rootcertsattr.Get(o.Context).GetRootCertPool(true)
 	}
 
-	if len(o.attrs) > 0 {
+	if o.attrs != nil && len(o.attrs) > 0 {
 		var subject pkix.Name
 		for k, v := range o.attrs {
 			switch strings.ToLower(k) {

@@ -132,7 +132,7 @@ func NewAction(desc []string, ctx ocm.Context, p common.Printer, sopts *signing.
 		state:        signing.NewWalkingState(ctx.LoggingContext().WithContext(signing.REALM)),
 		baseresolver: sopts.Resolver,
 		sopts:        sopts,
-		errlist:      errors.ErrList(desc[1]),
+		errlist:      errors.ErrListf(desc[1]),
 	}
 }
 

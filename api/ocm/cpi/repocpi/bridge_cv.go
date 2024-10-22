@@ -326,6 +326,8 @@ func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType, ref
 	} else {
 		if !optionutils.AsValue(opts.UseNoDefaultIfNotSet) {
 			prov = internal.BlobHandlerProviderForRegistry(ctx.BlobHandlers())
+		} else { //nolint: staticcheck // yes
+			// use no blob uploader
 		}
 	}
 	if prov != nil {

@@ -109,25 +109,25 @@ func GuessConsumerType(ctxp ContextProvider, spec string) string {
 			}
 		}
 		if fix == "" {
-			minVal := -1
+			min := -1
 			for _, i := range matchers.List() {
 				idx := strings.Index(i.Type, ".")
 				if idx > 0 {
 					d := levenshtein.DistanceForStrings([]rune(lspec), []rune(strings.ToLower(i.Type[:idx])), levenshtein.DefaultOptions)
-					if d < 5 && fix == "" || minVal > d {
+					if d < 5 && fix == "" || min > d {
 						fix = i.Type
-						minVal = d
+						min = d
 					}
 				}
 			}
 		}
 		if fix == "" {
-			minVal := -1
+			min := -1
 			for _, i := range matchers.List() {
 				d := levenshtein.DistanceForStrings([]rune(lspec), []rune(strings.ToLower(i.Type)), levenshtein.DefaultOptions)
-				if d < 5 && fix == "" || minVal > d {
+				if d < 5 && fix == "" || min > d {
 					fix = i.Type
-					minVal = d
+					min = d
 				}
 			}
 		}
