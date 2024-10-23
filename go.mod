@@ -367,3 +367,5 @@ require (
 	sigs.k8s.io/release-utils v0.8.5 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 )
+
+retract [v0.16.0, v0.16.9] // Retract all from v0.16 due to https://github.com/open-component-model/ocm-project/issues/293
