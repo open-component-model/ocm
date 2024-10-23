@@ -18,11 +18,8 @@ $response = Invoke-RestMethod -Uri $url -Headers @{ "User-Agent" = "PowerShell" 
 $latestVersion = $response.tag_name -replace '^v', ''
 Write-Output "The latest released ocm-cli version is $latestVersion"
 $assets = $response.assets
-$url = $assets | Where-Object { $_.name -match 'windows-386.zip$' } | Select-Object -ExpandProperty browser_download_url
 $url64 = $assets | Where-Object { $_.name -match 'windows-amd64.zip$' } | Select-Object -ExpandProperty browser_download_url
-$sha256url = $assets | Where-Object { $_.name -match 'windows-386.zip.sha256$' } | Select-Object -ExpandProperty browser_download_url
 $sha256url64 = $assets | Where-Object { $_.name -match 'windows-amd64.zip.sha256$' } | Select-Object -ExpandProperty browser_download_url
-$sha256 = [System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri $sha256url).Content)
 $sha256_64 = [System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri $sha256url64).Content)
 
 # Update the description and release notes in the nuspec file
@@ -46,7 +43,7 @@ $description = $description -replace '<', '&lt;' # used in code blocks and examp
 $description = $description -replace '>', '&gt;' # used in code blocks and examples
 $description += "`nContinue reading on [ocm.software / cli-reference](https://ocm.software/docs/cli-reference/)"
 # release notes do hopefully not contain xml tags
-$releaseNotes = Get-Content -Path "docs\releasenotes\v$latestVersion.md" -Raw
+$releaseNotes = $response.body
 $releaseNotes = $releaseNotes -replace '\(#(\d+)\)', '([$1](https://github.com/open-component-model/ocm/pull/$1))'
 $releaseNotes = $releaseNotes -replace '<summary>.*</summary>', ''
 $releaseNotes = $releaseNotes -replace '</?details>', ''
@@ -58,13 +55,10 @@ Write-Output "Updated the <authors> tag in the nuspec file with the sorted list 
 # Update the install script with the new URLs
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\chocolateyinstall.ps1"
 $scriptContent = Get-Content -Path $scriptPath -Raw
-$updatedContent = $scriptContent -replace '\$url\s*=\s*".*"', (-join('$url = "', $url, '"'))
-$updatedContent = $updatedContent -replace '\$url64\s*=\s*".*"', (-join('$url64 = "', $url64, '"'))
-$updatedContent = $updatedContent -replace "checksum\s*=\s*'.*'", "checksum = '$sha256'"
+$updatedContent = $scriptContent -replace '\$url64\s*=\s*".*"', (-join('$url64 = "', $url64, '"'))
 $updatedContent = $updatedContent -replace "checksum64\s*=\s*'.*'", "checksum64 = '$sha256_64'"
 Set-Content -Path $scriptPath -Value $updatedContent
-Write-Output "Using $url ($sha256)"
-Write-Output "and $url64 ($sha256_64) as package sources."
+Write-Output "Using $url64 ($sha256_64) as package sources."
 
 # Copy the LICENSE file to the tools directory
 $licenseDest = Join-Path -Path $PSScriptRoot -ChildPath "tools\LICENSE.txt"
