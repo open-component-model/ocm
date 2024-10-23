@@ -1,7 +1,7 @@
 # This publish step takes care of some (but not all ;) ) of the package registries
 # that we think might be useful for people to consume.
 #
-# Other package registries might also be pushed in the goreleaser step (see publish-latest.yaml) and are configured
+# Other package registries might also be pushed in the goreleaser step (see release.yaml) and are configured
 # within .github/config/goreleaser.yaml.
 #
 # TODO: Unify
