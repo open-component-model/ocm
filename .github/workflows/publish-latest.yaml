@@ -10,6 +10,7 @@ on:
       - '**/*.mod'
       - '**/*.sum'
       - 'resources/**'
+      - '.github/config/latest.yml'
 
 jobs:
 
