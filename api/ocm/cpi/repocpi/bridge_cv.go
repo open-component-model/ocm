@@ -43,7 +43,7 @@ type ComponentVersionAccessImpl interface {
 	SetReadOnly()
 
 	GetDescriptor() *compdesc.ComponentDescriptor
-	SetDescriptor(*compdesc.ComponentDescriptor) error
+	SetDescriptor(*compdesc.ComponentDescriptor) (bool, error)
 
 	AccessMethod(acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
 
@@ -258,17 +258,12 @@ func (b *componentVersionAccessBridge) update(final bool) error {
 		return nil
 	}
 
-	pub, err := pubsub.PubSubForRepo(b.Repository())
-	if err != nil {
-		return err
-	}
-
 	d := b.getDescriptor()
 
 	opts := &cpi.BlobUploadOptions{
 		UseNoDefaultIfNotSet: optionutils.PointerTo(true),
 	}
-	err = b.setupLocalBlobs("resource", b.composeAccess, d.Resources, true, opts)
+	err := b.setupLocalBlobs("resource", b.composeAccess, d.Resources, true, opts)
 	if err == nil {
 		err = b.setupLocalBlobs("source", b.composeAccess, d.Sources, true, opts)
 	}
@@ -276,15 +271,22 @@ func (b *componentVersionAccessBridge) update(final bool) error {
 		return err
 	}
 
-	err = b.impl.SetDescriptor(b.descriptor.Copy())
+	updated, err := b.impl.SetDescriptor(b.descriptor.Copy())
 	if err != nil {
 		return err
 	}
 	err = b.blobcache.Clear()
-	if pub != nil {
-		err := pub.NotifyComponentVersion(common.VersionedElementKey(b))
+
+	if updated {
+		pub, err := pubsub.PubSubForRepo(b.Repository())
 		if err != nil {
 			return err
+		}
+		if pub != nil {
+			err := pub.NotifyComponentVersion(common.VersionedElementKey(b))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return err

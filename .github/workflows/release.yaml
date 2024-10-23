@@ -6,18 +6,18 @@ on:
       release_candidate:
         type: boolean
         description: "Release Candidate"
-        required: false
-        default: false
+        required: true
+        default: true
       create_branch:
         type: boolean
-        description: "Create Release Branch"
-        required: false
+        description: "Create Release Branch (on failure or if already existing, set to false to ensure a successful run)"
+        required: true
         default: false
       prerelease:
         type: string
-        description: "Release Candidate Name"
-        required: false
-        default: ""
+        description: "Release Candidate Name, adjust after every succinct release candidate (e.g. to rc.2, rc.3...)"
+        required: true
+        default: "rc.1"
 
 jobs:
   check:
@@ -168,7 +168,7 @@ jobs:
         cache_name: release-go-cache
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@f5e124a5e5e1d497a692818ae907d3c45829d033 # v0.17.3
+      uses: anchore/sbom-action/download-syft@8d0a6505bf28ced3e85154d13dc6af83299e13f1 # v0.17.4
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.7.0
