@@ -85,7 +85,17 @@ func (a AccessSpec) MarshalJSON() ([]byte, error) {
 }
 
 func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
+	if a.Version != "" {
+		return fmt.Sprintf("S3 key %s(%s) in bucket %s", a.Key, a.Version, a.Bucket)
+	}
 	return fmt.Sprintf("S3 key %s in bucket %s", a.Key, a.Bucket)
+}
+
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Info: a.Bucket + "/" + a.Key,
+	}
 }
 
 func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {

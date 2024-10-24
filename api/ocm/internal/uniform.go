@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -45,6 +46,14 @@ func (r *UniformRepositorySpec) CredHost() string {
 		return dockerHubLegacyDomain
 	}
 	return r.Host
+}
+
+func (u *UniformRepositorySpec) HostPort() (string, string) {
+	i := strings.Index(u.Host, ":")
+	if i < 0 {
+		return u.Host, ""
+	}
+	return u.Host[:i], u.Host[i+1:]
 }
 
 func (u *UniformRepositorySpec) String() string {
