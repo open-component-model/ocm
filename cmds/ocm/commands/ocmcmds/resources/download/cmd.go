@@ -127,11 +127,11 @@ func (o *Command) handlerOptions() []elemhdlr.Option {
 	return hopts
 }
 
-func (o *Command) Run() error {
+func (o *Command) Run() (err error) {
 	session := ocm.NewSession(nil)
-	defer session.Close()
+	defer errors.PropagateError(&err, session.Close)
 
-	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
+	err = o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
 	}

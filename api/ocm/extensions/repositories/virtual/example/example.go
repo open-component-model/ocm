@@ -192,30 +192,35 @@ func (v *VersionAccess) AddBlob(blob cpi.BlobAccess) (string, error) {
 	return d.Encoded(), nil
 }
 
-func (v *VersionAccess) Update() error {
+func (v *VersionAccess) Update() (bool, error) {
 	v.access.lock.Lock()
 	defer v.access.lock.Unlock()
 
 	if v.desc.GetName() != v.comp || v.desc.GetVersion() != v.vers {
-		return errors.ErrInvalid(cpi.KIND_COMPONENTVERSION, common.VersionedElementKey(v.desc).String())
+		return false, errors.ErrInvalid(cpi.KIND_COMPONENTVERSION, common.VersionedElementKey(v.desc).String())
 	}
 	i := v.access.index.Get(v.comp, v.vers)
 	if !reflect.DeepEqual(v.desc, i.CD()) {
 		if v.IsReadOnly() {
-			return accessio.ErrReadOnly
+			return false, accessio.ErrReadOnly
 		}
 		data, err := compdesc.Encode(v.desc)
 		if err != nil {
-			return err
+			return false, err
 		}
 		v.access.index.Set(v.desc, i.Info())
-		return vfs.WriteFile(v.access.fs, i.Info(), data, 0o600)
+		err = vfs.WriteFile(v.access.fs, i.Info(), data, 0o600)
+		if err != nil {
+			return false, err
+		}
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
 func (v *VersionAccess) Close() error {
-	return v.Update()
+	_, err := v.Update()
+	return err
 }
 
 func (v *VersionAccess) IsReadOnly() bool {

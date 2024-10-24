@@ -98,7 +98,7 @@ func fetchObjects(ctx context.Context, octx clictx.Context, releaseURL, baseURL,
 			return nil, fmt.Errorf("✗ failed to read %s file at location: %w", filename, err)
 		}
 
-		out.Outf(octx, string(content))
+		out.Out(octx, string(content))
 
 		return nil, nil
 	}

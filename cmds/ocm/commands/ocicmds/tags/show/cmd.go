@@ -107,7 +107,7 @@ func (o *Command) Run() error {
 			return err
 		}
 		if cr.IsVersion() {
-			art, err = session.GetArtifact(ns, cr.Reference())
+			art, err = session.GetArtifact(ns, cr.Version())
 			if err != nil {
 				return err
 			}

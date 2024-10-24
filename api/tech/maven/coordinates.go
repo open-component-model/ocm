@@ -44,11 +44,26 @@ func (o WithExtension) ApplyTo(c *Coordinates) {
 	c.Extension = optionutils.PointerTo(string(o))
 }
 
+type WithMediaType string
+
+func WithOptionalMediaType(mt *string) CoordinateOption {
+	if mt != nil {
+		return WithMediaType(*mt)
+	}
+	return &optionutils.NoOption[*Coordinates]{}
+}
+
+func (o WithMediaType) ApplyTo(c *Coordinates) {
+	c.MediaType = optionutils.PointerTo(string(o))
+}
+
 type FileCoordinates struct {
 	// Classifier of the Maven artifact.
 	Classifier *string `json:"classifier,omitempty"`
 	// Extension of the Maven artifact.
 	Extension *string `json:"extension,omitempty"`
+	// MediaType of the files.
+	MediaType *string `json:"mediaType,omitempty"`
 }
 
 // IsPackage returns true if the complete GAV content is addressed.
@@ -70,6 +85,10 @@ func (c *FileCoordinates) IsFileSet() bool {
 // Default is application/x-tgz.
 func (c *FileCoordinates) MimeType() string {
 	if c.Extension != nil && c.Classifier != nil {
+		if c.MediaType != nil {
+			return *c.MediaType
+		}
+
 		m := mime.TypeByExtension("." + optionutils.AsValue(c.Extension))
 		if m != "" {
 			return m

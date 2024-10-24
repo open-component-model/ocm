@@ -17,9 +17,22 @@ import (
 // a content based element (sources or resources).
 // It is either an input or access specification.
 type ResourceInput struct {
-	Access *cpi.GenericAccessSpec `json:"access"`
+	// SourceFile described the original source (file) the input
+	// is taken from. By default, this is not set since it is taken from the
+	// file information of the processed constructor resource.
+	// If an input aggregated in a constructor resource is provided
+	// by some other source, this field can be set.
+	// The source information is finally used by the input implementations
+	// to evaluate relative path specifications in the input specification.
+	// This should always relate to the original source.
+	SourceFile string                 `json:"sourceFile,omitempty"`
+	Access     *cpi.GenericAccessSpec `json:"access"`
 	// Input  *inputs.BlobInput                `json:"input,omitempty"`
 	Input *inputs.GenericInputSpec `json:"input,omitempty"`
+}
+
+func (r *ResourceInput) SetSourceFile(s string) {
+	r.SourceFile = s
 }
 
 // ElementSpecHandler is the interface for a handler

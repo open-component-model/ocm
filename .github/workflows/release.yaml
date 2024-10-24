@@ -6,18 +6,18 @@ on:
       release_candidate:
         type: boolean
         description: "Release Candidate"
-        required: false
-        default: false
+        required: true
+        default: true
       create_branch:
         type: boolean
-        description: "Create Release Branch"
-        required: false
+        description: "Create Release Branch (on failure or if already existing, set to false to ensure a successful run)"
+        required: true
         default: false
       prerelease:
         type: string
-        description: "Release Candidate Name"
-        required: false
-        default: ""
+        description: "Release Candidate Name, adjust after every succinct release candidate (e.g. to rc.2, rc.3...)"
+        required: true
+        default: "rc.1"
 
 jobs:
   check:
@@ -119,9 +119,9 @@ jobs:
       pull-requests: read
 
   release:
-    needs:
-    - lint-and-test
-    - components
+#    needs:
+#     - lint-and-test
+#     - components
     name: Release Build
     runs-on: large_runner
     permissions:
@@ -148,12 +148,30 @@ jobs:
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
         check-latest: false
+        cache: false
+
+    - name: Get go environment for use with cache
+      run: |
+        echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
+        echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
+    - name: Set up cache
+      # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.go_cache }}
+          ${{ env.go_modcache }}
+        key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
+        restore-keys: |
+          ${{ env.cache_name }}-${{ runner.os }}-go-
+      env:
+        cache_name: release-go-cache
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@61119d458adab75f756bc0b9e4bde25725f86a7a # v0.17.2
+      uses: anchore/sbom-action/download-syft@8d0a6505bf28ced3e85154d13dc6af83299e13f1 # v0.17.4
 
     - name: Setup Cosign
-      uses: sigstore/cosign-installer@v3.6.0
+      uses: sigstore/cosign-installer@v3.7.0
 
     - name: Setup git config
       run: |
@@ -264,8 +282,10 @@ jobs:
         git checkout ${GITHUB_REF#refs/heads/}
         v="$(go run ./api/version/generate bump-version)"
         echo "$v" > VERSION
-        git add VERSION
-        git commit -m "Update version file to $v"
+        # Trigger a bump of any potential files that depend on a new version
+        make generate
+        git add --all
+        git commit -m "Update version to $v"
         git push origin ${GITHUB_REF#refs/heads/}
         echo "Next branch version is $v"
 
@@ -278,6 +298,8 @@ jobs:
         event-type: ocm-cli-release
         client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
 
+    # now distribute the release event so that other jobs can listen for this
+    # and use the event to publish our release to other package registries
     - name: Publish Release Event for other package registries
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v3

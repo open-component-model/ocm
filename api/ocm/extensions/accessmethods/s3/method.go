@@ -40,7 +40,7 @@ func init() {
 
 	anon := accspeccpi.MustNewAccessSpecMultiFormatVersion(Type, formats)
 	Must(versions.Register(accspeccpi.NewAccessSpecTypeByFormatVersion(Type, anon, accspeccpi.WithDescription(usage), accspeccpi.WithConfigHandler(ConfigHandler()))))
-	Must(versions.Register(accspeccpi.NewAccessSpecTypeByFormatVersion(LegacyType, anon, accspeccpi.WithDescription(usage))))
+	Must(versions.Register(accspeccpi.NewAccessSpecTypeByFormatVersion(LegacyType, anon)))
 	accspeccpi.RegisterAccessTypeVersions(versions)
 }
 

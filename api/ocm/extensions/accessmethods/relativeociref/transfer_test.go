@@ -144,6 +144,6 @@ var _ = Describe("Transfer handler", func() {
 
 		fmt.Printf("%s\n", string(data))
 		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0","type":"ociArtifact"},"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`, hash)))
+		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:`+D_OCIMANIFEST1+`","type":"ociArtifact"},"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`, hash)))
 	})
 })

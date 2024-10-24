@@ -32,6 +32,7 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/plugins"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/pubsub"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/references"
@@ -309,11 +310,17 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 					v = verbs.NewCommand(ctx, c.Verb, "additional plugin based commands")
 					cmd.AddCommand(v)
 				}
+				types := []string{objtype}
+				if len(names.Aliases[objtype]) != 0 {
+					types = names.Aliases[objtype]
+				}
+
 				s := cobrautils.Find(v, objtype)
 				if s != nil {
 					out.Errf(opts.Context, "duplicate cli command %q of plugin %q for verb %q", objtype, p.Name(), c.Verb)
 				} else {
-					v.AddCommand(plugin.NewCommand(ctx, p, c.Name, objtype))
+					cmd := plugin.NewCommand(ctx, p, c.Name, types...)
+					v.AddCommand(cmd)
 				}
 
 				if c.Realm != "" {

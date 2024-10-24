@@ -1,8 +1,6 @@
 package spiff
 
 import (
-	"fmt"
-
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/spiff/spiffing"
@@ -98,7 +96,7 @@ func StubData(name string, data []byte) OptionFunction {
 func TemplateData(name string, data []byte) OptionFunction {
 	return func(r *Request) error {
 		if len(data) == 0 {
-			return fmt.Errorf("no template data for " + name)
+			return errors.New("no template data for " + name)
 		}
 		r.Template = spiffing.NewSourceData(name, data)
 		return nil

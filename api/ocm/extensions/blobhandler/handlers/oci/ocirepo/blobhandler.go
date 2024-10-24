@@ -148,7 +148,6 @@ func (b *artifactHandler) CheckBlob(blob cpi.BlobAccess, artType, hint string, g
 	defer finalizer.Finalize()
 
 	var namespace oci.NamespaceAccess
-	var version string
 	var name string
 	var tag string
 
@@ -162,15 +161,14 @@ func (b *artifactHandler) CheckBlob(blob cpi.BlobAccess, artType, hint string, g
 		prefix := cpi.RepositoryPrefix(ctx.TargetComponentRepository().GetSpecification())
 		i := strings.LastIndex(hint, "@")
 		if i >= 0 {
-			hint = hint[:i] // remove digest
-		}
-		i = strings.LastIndex(hint, ":")
-		if i > 0 {
-			version = hint[i:]
-			tag = version[1:] // remove colon
-			name = hint[:i]
+			name = hint[:i] // remove digest
 		} else {
 			name = hint
+		}
+		i = strings.LastIndex(name, ":")
+		if i > 0 {
+			tag = name[i+1:]
+			name = name[:i]
 		}
 
 		hash := mapocirepoattr.Get(ctx.GetContext())
@@ -263,15 +261,15 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		prefix := cpi.RepositoryPrefix(ctx.TargetComponentRepository().GetSpecification())
 		i := strings.LastIndex(hint, "@")
 		if i >= 0 {
-			hint = hint[:i] // remove digest
-		}
-		i = strings.LastIndex(hint, ":")
-		if i > 0 {
 			version = hint[i:]
-			tag = version[1:] // remove colon
-			name = hint[:i]
+			name = hint[:i] // remove digest
 		} else {
 			name = hint
+		}
+		i = strings.LastIndex(name, ":")
+		if i > 0 {
+			tag = name[i+1:]
+			name = name[:i]
 		}
 
 		hash := mapocirepoattr.Get(ctx.GetContext())
@@ -320,6 +318,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	if version == "" {
 		version = "@" + digest.String()
+	} else {
+		if version != "@"+digest.String() {
+			return nil, fmt.Errorf("corrupted digest: hint requests %q, but found %q", version[1:], digest.String())
+		}
 	}
 
 	err = transfer.TransferArtifact(art, namespace, oci.AsTags(tag)...)
@@ -335,7 +337,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if scheme != "" {
 		scheme += "://"
 	}
-	ref := scheme + path.Join(base, namespace.GetNamespace()) + version
+	if tag != "" {
+		tag = ":" + tag
+	}
+	ref := scheme + path.Join(base, namespace.GetNamespace()) + tag + version
 	return ociartifact.New(ref), nil
 }
 

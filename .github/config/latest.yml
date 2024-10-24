@@ -1,10 +1,6 @@
-# .goreleaser.yml
-
+# this file only takes care of the latest builds (equivalent to nightlies based on the main branch),
+# for the official (real) release, check goreleaser.yaml
 version: 2
-
-before:
-  hooks:
-    - go mod tidy
 
 builds:
   - <<: &build_defaults
@@ -34,6 +30,9 @@ builds:
     id: windows
     goos:
       - windows
+    goarch:
+      - amd64
+      - arm64
 
 archives:
   - name_template: "{{ .Binary }}-latest-{{ .Os }}-{{ .Arch }}"

@@ -263,11 +263,11 @@ type ArtSpec struct {
 }
 
 func (r *ArtSpec) Version() string {
-	if r.Tag != nil {
-		return *r.Tag
-	}
 	if r.Digest != nil {
 		return "@" + string(*r.Digest)
+	}
+	if r.Tag != nil {
+		return *r.Tag
 	}
 	return "latest"
 }
@@ -284,14 +284,11 @@ func (r *ArtSpec) IsTagged() bool {
 	return r.Tag != nil
 }
 
-func (r *ArtSpec) Reference() string {
+func (r *ArtSpec) GetTag() string {
 	if r.Tag != nil {
 		return *r.Tag
 	}
-	if r.Digest != nil {
-		return "@" + string(*r.Digest)
-	}
-	return "latest"
+	return ""
 }
 
 func (r *ArtSpec) String() string {

@@ -1,26 +1,19 @@
 name: PR Labeler
 on:
-  pull_request:
-    types: [opened]
-
-permissions:
-  contents: read
+- pull_request_target
 
 jobs:
   pr-labeler:
     permissions:
-      contents: read # for TimonVS/pr-labeler-action to read config file
-      pull-requests: write # for TimonVS/pr-labeler-action to add labels in PR
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v2
+      - uses: actions/checkout@v4
         with:
-          app_id: ${{ secrets.OCMBOT_APP_ID }}
-          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+          sparse-checkout: |
+            .github/config/labeler.yml
       - name: Label PR based on branch name
-        uses: TimonVS/pr-labeler-action@v5
+        uses: actions/labeler@v5
         with:
-          repo-token: ${{ steps.generate_token.outputs.token }}
-          configuration-path: .github/config/pr-labeler.yml
+          configuration-path: .github/config/labeler.yml

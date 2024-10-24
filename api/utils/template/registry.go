@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/utils"
@@ -13,11 +14,21 @@ import (
 
 const KIND_TEMPLATER = "templater"
 
-type TemplaterFactory func(system vfs.FileSystem) Templater
+type (
+	TemplaterOptions map[string]interface{}
+	TemplaterFactory func(system vfs.FileSystem, options TemplaterOptions) Templater
+)
+
+func (t TemplaterOptions) Get(name string) interface{} {
+	if t == nil {
+		return nil
+	}
+	return t[name]
+}
 
 type Registry interface {
 	Register(name string, fac TemplaterFactory, desc string)
-	Create(name string, fs vfs.FileSystem) (Templater, error)
+	Create(name string, fs vfs.FileSystem, options ...TemplaterOptions) (Templater, error)
 	Describe(name string) (string, error)
 	KnownTypeNames() []string
 }
@@ -48,7 +59,7 @@ func (r *registry) Register(name string, fac TemplaterFactory, desc string) {
 	}
 }
 
-func (r *registry) Create(name string, fs vfs.FileSystem) (Templater, error) {
+func (r *registry) Create(name string, fs vfs.FileSystem, options ...TemplaterOptions) (Templater, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
@@ -56,7 +67,7 @@ func (r *registry) Create(name string, fs vfs.FileSystem) (Templater, error) {
 	if !ok {
 		return nil, errors.ErrNotSupported(KIND_TEMPLATER, name)
 	}
-	return t.templater(fs), nil
+	return t.templater(fs, general.Optional(options...)), nil
 }
 
 func (r *registry) Describe(name string) (string, error) {

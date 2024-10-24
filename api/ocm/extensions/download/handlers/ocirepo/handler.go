@@ -55,7 +55,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 
 	var repo oci.Repository
 
-	var version string = "latest"
+	var tag string
 
 	aspec := m.AccessSpec()
 	namespace := racc.ReferenceHint()
@@ -63,10 +63,16 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		namespace = l.ReferenceName
 	}
 
-	i := strings.LastIndex(namespace, ":")
+	// get rid of digest
+	i := strings.LastIndex(namespace, "@")
+	if i >= 0 {
+		namespace = namespace[:i] // remove digest
+	}
+
+	i = strings.LastIndex(namespace, ":")
 	if i > 0 {
-		version = namespace[i:]
-		version = version[1:] // remove colon
+		tag = namespace[i:]
+		tag = tag[1:] // remove colon
 		namespace = namespace[:i]
 	}
 
@@ -113,23 +119,23 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	}
 	log.Debug("using artifact spec", "spec", artspec.String())
 	if artspec.Digest != nil {
-		return true, "", fmt.Errorf("digest no possible for target")
+		return true, "", fmt.Errorf("digest not possible for target")
 	}
 
 	if artspec.Repository != "" {
 		namespace = artspec.Repository
 	}
-	if artspec.Reference() != "" {
-		version = artspec.Reference()
+	if artspec.IsTagged() {
+		tag = *artspec.Tag
 	}
 
 	if prefix != "" && namespace != "" {
 		namespace = prefix + grammar.RepositorySeparator + namespace
 	}
-	if version == "" || version == "latest" {
-		version = racc.Meta().GetVersion()
+	if tag == "" || tag == "latest" {
+		tag = racc.Meta().GetVersion()
 	}
-	log.Debug("using final target", "namespace", namespace, "version", version)
+	log.Debug("using final target", "namespace", namespace, "tag", tag)
 	if namespace == "" {
 		return true, "", fmt.Errorf("no OCI namespace")
 	}
@@ -178,13 +184,13 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		log.Debug("using direct transfer mode")
 	}
 
-	p.Printf("uploading resource %s to %s[%s:%s]...\n", racc.Meta().GetName(), repo.GetSpecification().UniformRepositorySpec(), namespace, version)
-	err = transfer.TransferArtifact(art, ns, oci.AsTags(version)...)
+	p.Printf("uploading resource %s to %s[%s:%s]...\n", racc.Meta().GetName(), repo.GetSpecification().UniformRepositorySpec(), namespace, tag)
+	err = transfer.TransferArtifact(art, ns, oci.AsTags(tag)...)
 	if err != nil {
 		return true, "", errors.Wrapf(err, "transfer artifact")
 	}
 
 	result.Repository = namespace
-	result.Tag = &version
+	result.Tag = &tag
 	return true, result.String(), nil
 }

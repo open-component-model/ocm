@@ -13,13 +13,13 @@ This is a nuspec. It mostly adheres to https://docs.nuget.org/create/Nuspec-Refe
   <metadata>
     <id>ocm-cli</id>
     <version>$version$</version>
-    <packageSourceUrl>https://github.com/open-component-model/ocm/releases/latest</packageSourceUrl>
+    <packageSourceUrl>https://github.com/open-component-model/ocm/tree/main/hack/chocolatey</packageSourceUrl>
     <!-- owners is a poor name for maintainers of the package. It sticks around by this name for compatibility reasons. It basically means you. -->
     <owners>SAP SE</owners>
     <!-- This section is about the software itself -->
     <title>Open Component Model Command Line Interface (ocm-cli)</title>
     <!-- https://github.com/open-component-model/ocm/graphs/contributors -->
-    <authors>ccwienk, dee0sap, fabianburth, frewilhelm, hilmarf, ikhandamirov, jensh007, jmickey, jschicktanz, mandelsoft, MartinWeindel, maximilianbraun, maximiliantech, morri-son, morrison-sap, nikimanoledaki, phoban01, robertwol, Shegox, shivenduverma-sap, Skarlso, souleb, vasu1124, yitsushi</authors>
+    <authors>ccwienk, dee0sap, fabianburth, frewilhelm, hilmarf, ikhandamirov, jakobmoellerdev, jensh007, jmickey, jschicktanz, mandelsoft, MartinWeindel, maximilianbraun, maximiliantech, morri-son, morrison-sap, nikimanoledaki, phoban01, robertwol, Shegox, shivenduverma-sap, Skarlso, souleb, vasu1124, yitsushi</authors>
     <!-- projectUrl is required for the community feed -->
     <projectUrl>https://ocm.software/</projectUrl>
     <!-- There are a number of CDN Services that can be used for hosting the Icon for a package. More information can be found here: https://docs.chocolatey.org/en-us/create/create-packages#package-icon-guidelines -->

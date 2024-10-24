@@ -18,3 +18,32 @@ var (
 	PubSub                 = []string{"pubsub", "ps"}
 	Verified               = []string{"verified"}
 )
+
+var Aliases = map[string][]string{}
+
+func init() {
+	add(
+		ComponentArchive,
+		CommonTransportArchive,
+		Components,
+		CLI,
+		Configuration,
+		ResourceConfig,
+		SourceConfig,
+		Resources,
+		Sources,
+		References,
+		Versions,
+		Plugins,
+		Action,
+		RoutingSlips,
+		PubSub,
+		Verified,
+	)
+}
+
+func add(aliases ...[]string) {
+	for _, a := range aliases {
+		Aliases[a[0]] = a
+	}
+}

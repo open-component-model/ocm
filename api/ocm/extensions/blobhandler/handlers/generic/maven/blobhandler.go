@@ -2,9 +2,15 @@ package maven
 
 import (
 	"crypto"
+	"encoding/xml"
+	"fmt"
+	"io"
+	"strings"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/ioutils"
+	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/ocm/cpi"
@@ -85,6 +91,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	if err != nil {
 		return nil, err
 	}
+
+	if err := verifyGavInformation(tempFs, coords, files, log); err != nil {
+		return nil, err
+	}
+
 	for _, file := range files {
 		loop := finalize.Nested()
 		log.Debug("uploading", "file", file)
@@ -128,4 +139,54 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 		return nil, err
 	}
 	return access.New(url, coords.GroupId, coords.ArtifactId, coords.Version), nil
+}
+
+// PomGav defines gav information in a POM file.
+type PomGav struct {
+	GroupId    string `xml:"groupId"`
+	ArtifactId string `xml:"artifactId"`
+	Version    string `xml:"version"`
+}
+
+// GAV returns the GAV coordinates of the Maven Coordinates.
+func (c *PomGav) GAV() string {
+	return c.GroupId + ":" + c.ArtifactId + ":" + c.Version
+}
+
+func verifyGavInformation(fs vfs.FileSystem, coords *maven.Coordinates, files []string, log mlog.Logger) error {
+	var found string
+	for _, file := range files {
+		if strings.ToLower(filepath.Ext(file)) == ".pom" {
+			found = file
+			break
+		}
+	}
+
+	if found == "" {
+		log.Warn("no POM found to verify GAV information")
+
+		return nil
+	}
+
+	file, err := fs.Open(found)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return fmt.Errorf("failed to read pom file: %w", err)
+	}
+
+	pomGav := &PomGav{}
+	if err := xml.Unmarshal(content, pomGav); err != nil {
+		return fmt.Errorf("failed to marshal pom content: %w", err)
+	}
+
+	if pomGav.GAV() != coords.GAV() {
+		return fmt.Errorf("%s did not match pom content %s", coords.GAV(), pomGav.GAV())
+	}
+
+	return nil
 }

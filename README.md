@@ -47,14 +47,16 @@ The OCI and OCM support can be found in packages
 
 ## Installation
 
-Install the latest release from any of
+Install the latest release with
 
-- [Homebrew](https://brew.sh)
-- [Nix](https://nixos.org)
-- [AUR](https://aur.archlinux.org/packages/ocm-cli)
-- [Docker](https://www.docker.com/)
-- [Podman](https://podman.io/)
-- [GitHub Releases](https://github.com/open-component-model/ocm/releases)
+- [Bash](#bash)
+- [Homebrew](#homebrew)
+- [NixOS](#nixos)
+- [AUR](#aur)
+- [Container](#container)
+- [Chocolatey](#chocolatey)
+- [Winget](#winget)
+- [GitHub Releases](https://github.com/open-component-model/ocm/releases/latest)
 
 ### Bash
 
@@ -64,14 +66,18 @@ To install with `bash` for macOS or Linux execute the following command:
 curl -s https://ocm.software/install.sh | sudo bash
 ```
 
-### Install using Homebrew
+### Homebrew
+
+Install using [Homebrew](https://brew.sh)
 
 ```bash
 # Homebrew (macOS and Linux)
 brew install open-component-model/tap/ocm
 ```
 
-### Install using Nix (with [Flakes](https://nixos.wiki/wiki/Flakes))
+### NixOS
+
+Install using [Nix](https://nixos.org) (with [Flakes](https://nixos.wiki/wiki/Flakes))
 
 ```bash
 # Nix (macOS, Linux, and Windows)
@@ -91,7 +97,9 @@ nix profile list | grep ocm
 ocm --help
 ```
 
-### Install from AUR (Arch Linux User Repository)
+### AUR
+
+Install from [AUR (Arch Linux User Repository)](https://archlinux.org/)
 
 package-url: [aur.archlinux.org/packages/ocm-cli](https://aur.archlinux.org/packages/ocm-cli)
 
@@ -104,7 +112,13 @@ makepkg -i
 
 [AUR Documentation](https://wiki.archlinux.org/title/Arch_User_Repository)
 
-### Usage via Docker / Podman
+### Container
+
+Usage via [Docker](https://www.docker.com/) / [Podman](https://podman.io/)
+
+```bash
+docker run -t ghcr.io/open-component-model/ocm:latest --help
+```
 
 ```bash
 podman run -t ghcr.io/open-component-model/ocm:latest --help
@@ -134,6 +148,22 @@ Please check [hub.docker.com](https://hub.docker.com/_/golang/tags?page=1&name=a
 ```bash
 podman build -t ocm --build-arg GO_VERSION=1.23 --build-arg ALPINE_VERSION=3.20 --build-arg GO_PROXY=https://proxy.golang.org .
 ```
+
+### Chocolatey
+
+```powershell
+choco install ocm-cli
+```
+
+see: [chocolatey community package: ocm-cli](https://community.chocolatey.org/packages/ocm-cli)
+
+### Winget
+
+```powershell
+winget install ocm-cli
+```
+
+see: [microsoft/winget-packages: Open-Component-Model](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/Open-Component-Model)
 
 ## Examples
 

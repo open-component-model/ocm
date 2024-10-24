@@ -3,7 +3,7 @@
 ## Synopsis
 
 ```yaml
-type: mvn/v1
+type: maven/v1
 ```
 
 Provided blobs use the following media type: `application/x-tgz`
@@ -21,7 +21,7 @@ Supported specification version is `v1`
 
 The type specific specification fields are:
 
-- **`repository`** *string*
+- **`repoUrl`** *string*
 
   Base URL of the Maven (mvn) repository
 

@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	Register("go", func(_ vfs.FileSystem) Templater { return NewGo() }, `go templating supports complex values.
+	Register("go", func(_ vfs.FileSystem, _ TemplaterOptions) Templater { return NewGo() }, `go templating supports complex values.
 <pre>
   key:
     subkey: "abc {{.MY_VAL}}"

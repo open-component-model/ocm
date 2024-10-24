@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -212,7 +213,7 @@ func (m *ModificationOptions) ApplyModificationOption(opts *ModificationOptions)
 }
 
 func (m *ModificationOptions) GetHasher(algo ...string) Hasher {
-	return m.HasherProvider.GetHasher(utils.OptionalDefaulted(m.DefaultHashAlgorithm, algo...))
+	return m.HasherProvider.GetHasher(general.OptionalDefaulted(m.DefaultHashAlgorithm, algo...))
 }
 
 func NewModificationOptions(list ...ModificationOption) *ModificationOptions {

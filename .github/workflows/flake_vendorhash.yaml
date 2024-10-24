@@ -6,10 +6,6 @@ on:
     paths:
     - go.mod
     - go.sum
-  pull_request:
-    paths:
-    - go.mod
-    - go.sum
 
 jobs:
   updateVendorHash:
@@ -26,11 +22,6 @@ jobs:
           private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ steps.generate_token.outputs.token }}
-      - name: Enable gh-CLI
-        uses: actions4gh/setup-gh@v1.0.2
-        id: setup-gh
         with:
           token: ${{ steps.generate_token.outputs.token }}
       - name: Install Nix
@@ -57,15 +48,14 @@ jobs:
           ${diff}
           \`\`\`
           EOF
-      - name: Create Commit
-        if: ${{ steps.diff.outputs.exists }}
-        # https://docs.github.com/de/rest/repos/contents?apiVersion=2022-11-28#create-or-update-file-contents
-        run: |
-          FILE=flake.nix
-          BRANCH=${{ github.head_ref }}          
-          echo "{\"message\":\"auto update vendor hash\",\"content\":\"$(base64 -w0 ${FILE})\",\"sha\":\"$(git rev-parse :${FILE})\"" > input.json
-          if [[ -n "$BRANCH" ]]; then
-            echo ",\"branch\":\"${{ github.head_ref }}\"" >> input.json
-          fi
-          echo "}" >> input.json
-          gh api -X PUT https://api.github.com/repos/${{ github.repository }}/contents/${FILE} --input input.json
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          title: "chore: update 'flake.nix'"
+          commit-message: "[github-actions] auto update vendor hash"
+          branch: nix/flake
+          delete-branch: true
+          sign-commits: true
+          body: |
+            Update OCM CLI vendor hash (see: .github/workflows/flake_vendorhash.yaml)

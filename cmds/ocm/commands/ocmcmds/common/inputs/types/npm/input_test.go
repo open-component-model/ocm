@@ -51,6 +51,10 @@ var _ = Describe("Input Type", func() {
 			Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "--provider", "mandelsoft", "--file", ARCH)).To(Succeed())
 		})
 
+		AfterEach(func() {
+			env.Cleanup()
+		})
+
 		It("add npm from npm registry described by cli options", func() {
 			meta := `
 name: testdata

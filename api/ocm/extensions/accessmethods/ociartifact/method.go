@@ -155,6 +155,9 @@ var (
 )
 
 func NewMethod(ctx accspeccpi.ContextProvider, a accspeccpi.AccessSpec, ref string, repo ...oci.Repository) (accspeccpi.AccessMethod, error) {
+	if ref == "" {
+		return nil, errors.ErrInvalid(ocmcpi.KIND_OCM_REFERENCE, "<empty>")
+	}
 	m := &accessMethod{
 		spec:      a,
 		reference: ref,

@@ -39,7 +39,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/componentmapping"
 	ocmreg "ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	ocmtesthelper "ocm.software/ocm/api/ocm/testhelper"
 	"ocm.software/ocm/api/tech/signing/hasher/sha256"
 	"ocm.software/ocm/api/utils/accessio"
@@ -270,7 +270,7 @@ var _ = Describe("component repository mapping", func() {
 		Expect(acc).NotTo(BeNil())
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		o = acc.(*ociartifact.AccessSpec)
-		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact2:v1"))
+		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact2:v1@sha256:" + testhelper.DIGEST_MANIFEST))
 
 		MustBeSuccessful(nested.Finalize())
 

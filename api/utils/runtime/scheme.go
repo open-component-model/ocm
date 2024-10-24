@@ -54,7 +54,7 @@ func MustNewDirectDecoder[T TypedObject](proto T) *DirectDecoder[T] {
 
 func NewDirectDecoder[T TypedObject](proto T) (*DirectDecoder[T], error) {
 	t := MustProtoType(proto)
-	if !reflect.PtrTo(t).Implements(typeTypedObject) {
+	if !reflect.PointerTo(t).Implements(typeTypedObject) {
 		return nil, errors.Newf("object interface %T: must implement TypedObject", proto)
 	}
 	if t.Kind() != reflect.Struct {
@@ -197,10 +197,10 @@ func NewDefaultScheme[T TypedObject, R TypedObjectDecoder[T]](protoUnstr Unstruc
 		if err != nil {
 			return nil, errors.Wrapf(err, "unstructured prototype %T", protoUnstr)
 		}
-		if !reflect.PtrTo(ut).Implements(it) {
+		if !reflect.PointerTo(ut).Implements(it) {
 			return nil, fmt.Errorf("unstructured type %T must implement %T to be acceptale as unknown result", protoUnstr, &protoIfce)
 		}
-		if !reflect.PtrTo(ut).Implements(typeUnknown) {
+		if !reflect.PointerTo(ut).Implements(typeUnknown) {
 			return nil, fmt.Errorf("unstructured type %T must implement Unknown to be acceptable as unknown result", protoUnstr)
 		}
 	}

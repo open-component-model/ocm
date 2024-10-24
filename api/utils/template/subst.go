@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	Register("subst", func(_ vfs.FileSystem) Templater { return NewSubst() }, `simple value substitution with the <code>drone/envsubst</code> templater.
+	Register("subst", func(_ vfs.FileSystem, _ TemplaterOptions) Templater { return NewSubst() }, `simple value substitution with the <code>drone/envsubst</code> templater.
 It supports string values, only. Complex settings will be json encoded.
 <pre>
   key:

@@ -30,6 +30,7 @@ type Options struct {
 	UseEnv    bool
 	Templater Templater
 	Vars      Values
+	Options   map[string]interface{}
 }
 
 func (o *Options) DefaultMode() string {
@@ -63,7 +64,7 @@ func (o *Options) Complete(fs vfs.FileSystem) error {
 			}
 		}
 	}
-	o.Templater, err = DefaultRegistry().Create(o.Mode, fs)
+	o.Templater, err = DefaultRegistry().Create(o.Mode, fs, o.Options)
 	if err != nil {
 		return err
 	}

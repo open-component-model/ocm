@@ -28,6 +28,7 @@ type optionwrapper struct {
 func (o *optionwrapper) ApplyTo(opts *Coordinates) {
 	maven.WithOptionalExtension(o.options.Extension).ApplyTo(opts)
 	maven.WithOptionalClassifier(o.options.Classifier).ApplyTo(opts)
+	maven.WithOptionalMediaType(o.options.MediaType).ApplyTo(opts)
 }
 
 func NewCoordinates(groupId, artifactId, version string, opts ...Option) *Coordinates {

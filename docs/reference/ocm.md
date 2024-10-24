@@ -167,8 +167,6 @@ The value can be a simple type or a JSON/YAML string for complex values
 
   - The mapping only occurs in transfer commands and only when transferring to OCI registries (e.g.
     when transferring to a CTF archive this option will be ignored).
-  - The mapping only happens for local resources. When external image references are transferred (with
-    option --copy-resources) the mapping will be ignored.
   - The mapping in mode <code>prefixMapping</code> requires a full prefix of the composed final name.
     Partial matches are not supported. The host name of the target will be skipped.
   - The artifact name of the component-descriptor is not mapped.

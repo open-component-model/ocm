@@ -338,6 +338,29 @@ with the field <code>type</code> in the <code>input</code> field:
 
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
+- Input type <code>git</code>
+
+  The repository type allows accessing an arbitrary git repository
+  using the manifest annotation <code>software.ocm/component-version</code>.
+  The ref can be used to further specify the branch or tag to checkout, otherwise the remote HEAD is used.
+
+  This blob type specification supports the following fields:
+  - **<code>repository</code>** *string*
+
+    This REQUIRED property describes the URL of the git repository to access. All git URL formats are supported.
+
+  - **<code>ref</code>** *string*
+
+    This OPTIONAL property can be used to specify the remote branch or tag to checkout (commonly called ref).
+    If not set, the default HEAD (remotes/origin/HEAD) of the remote is used.
+
+  - **<code>commit</code>** *string*
+
+    This OPTIONAL property can be used to specify the commit hash to checkout.
+    If not set, the default HEAD of the ref is used.
+
+  Options used to configure fields: <code>--inputRepository</code>, <code>--inputVersion</code>
+
 - Input type <code>helm</code>
 
   The path must denote an helm chart archive or directory
@@ -617,60 +640,6 @@ Typically there is special support for the CLI artifact add commands.
 The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.
-
-- Access type <code>S3</code>
-
-  This method implements the access of a blob stored in an S3 bucket.
-
-  The following versions are supported:
-  - Version <code>v1</code>
-
-    The type specific specification fields are:
-
-    - **<code>region</code>** (optional) *string*
-
-      OCI repository reference (this artifact name used to store the blob).
-
-    - **<code>bucket</code>** *string*
-
-      The name of the S3 bucket containing the blob
-
-    - **<code>key</code>** *string*
-
-      The key of the desired blob
-
-    - **<code>version</code>** (optional) *string*
-
-      The key of the desired blob
-
-    - **<code>mediaType</code>** (optional) *string*
-
-      The media type of the content
-
-  - Version <code>v2</code>
-
-    The type specific specification fields are:
-
-    - **<code>region</code>** (optional) *string*
-
-      OCI repository reference (this artifact name used to store the blob).
-
-    - **<code>bucketName</code>** *string*
-
-      The name of the S3 bucket containing the blob
-
-    - **<code>objectKey</code>** *string*
-
-      The key of the desired blob
-
-    - **<code>version</code>** (optional) *string*
-
-      The key of the desired blob
-
-    - **<code>mediaType</code>** (optional) *string*
-
-      The media type of the content
-
 
 - Access type <code>git</code>
 

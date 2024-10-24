@@ -27,7 +27,18 @@ const TYPE = resourcetypes.HELM_CHART
 type Handler struct{}
 
 func init() {
-	registry.Register(&Handler{}, registry.ForArtifactType(TYPE))
+	registry.Register(New(), registry.ForArtifactType(TYPE))
+}
+
+func New() *Handler {
+	return &Handler{}
+}
+
+func AssureArchiveSuffix(name string) string {
+	if !strings.HasSuffix(name, ".tgz") && !strings.HasSuffix(name, ".tar.gz") {
+		name += ".tgz"
+	}
+	return name
 }
 
 func (h Handler) fromArchive(p common.Printer, meth cpi.AccessMethod, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
@@ -36,10 +47,8 @@ func (h Handler) fromArchive(p common.Printer, meth cpi.AccessMethod, path strin
 		return false, "", nil
 	}
 
-	chart := path
-	if !strings.HasSuffix(chart, ".tgz") {
-		chart += ".tgz"
-	}
+	chart := AssureArchiveSuffix(path)
+
 	err = write(p, meth, chart, fs)
 	if err != nil {
 		return true, "", err
@@ -103,15 +112,14 @@ func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.File
 	if len(m.GetDescriptor().Layers) < 1 {
 		return "", "", errors.Newf("no layers found")
 	}
-	chart = path
-	if !strings.HasSuffix(chart, ".tgz") {
-		chart += ".tgz"
-	}
+
 	blob, err := m.GetBlob(m.GetDescriptor().Layers[0].Digest)
 	if err != nil {
 		return "", "", err
 	}
 	finalize.Close(blob)
+
+	chart = AssureArchiveSuffix(path)
 	err = write(p, blob, chart, fs)
 	if err != nil {
 		return "", "", err

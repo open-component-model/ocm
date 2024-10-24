@@ -85,7 +85,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 
 		acc := Must(res.Access())
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
-		Expect(acc.Describe(env.OCMContext())).To(Equal("OCI artifact " + BASEURL + "/" + OCINAMESPACE + ":" + OCIVERSION))
+		Expect(acc.Describe(env.OCMContext())).To(Equal("OCI artifact " + BASEURL + "/" + OCINAMESPACE + ":" + OCIVERSION + "@sha256:" + D_OCIMANIFEST1))
 	})
 
 	It("transfers ctf without upload", func() {

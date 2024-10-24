@@ -2,6 +2,7 @@ package ocirepo
 
 import (
 	"encoding/json"
+	"fmt"
 	"path"
 	"strings"
 
@@ -86,15 +87,21 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if hint == "" {
 		name = path.Join(prefix, ctx.TargetComponentName())
 	} else {
-		i := strings.LastIndex(hint, ":")
+		i := strings.LastIndex(hint, "@")
 		if i > 0 {
 			version = hint[i:]
-			name = path.Join(prefix, hint[:i])
-			tag = version[1:] // remove colon
+			name = hint[:i]
 		} else {
 			name = hint
 		}
+		i = strings.LastIndex(name, ":")
+		if i > 0 {
+			tag = name[i+1:]
+			name = name[:i]
+		}
+		name = path.Join(prefix, name)
 	}
+
 	namespace, err = repo.LookupNamespace(name)
 	if err != nil {
 		return nil, errors.Wrapf(err, "lookup namespace %s in target repository %s", name, attr.Ref)
@@ -109,6 +116,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	digest := set.GetMain()
 	if version == "" {
 		version = "@" + digest.String()
+	} else {
+		if version != "@"+digest.String() {
+			return nil, fmt.Errorf("corrupted digest: hint requests %q, but found %q", version[1:], digest.String())
+		}
 	}
 	art, err := set.GetArtifact(digest.String())
 	if err != nil {
@@ -120,7 +131,9 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if err != nil {
 		return nil, err
 	}
-
-	ref := base.ComposeRef(namespace.GetNamespace() + version)
+	if tag != "" {
+		tag = ":" + tag
+	}
+	ref := base.ComposeRef(namespace.GetNamespace() + tag + version)
 	return ociartifact.New(ref), nil
 }

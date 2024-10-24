@@ -68,12 +68,12 @@ outer:
 	return nil, nil, errors.ErrNotFound(KIND_RESOURCE, ref.Resource.String())
 }
 
-func ResolveResourceReference(cv *ComponentDescriptor, ref metav1.ResourceReference, resolver ComponentVersionResolver) (*Resource, *ComponentDescriptor, error) {
+func ResolveResourceReference(cd *ComponentDescriptor, ref metav1.ResourceReference, resolver ComponentVersionResolver) (*Resource, *ComponentDescriptor, error) {
 	if len(ref.Resource) == 0 || len(ref.Resource["name"]) == 0 {
 		return nil, nil, errors.Newf("at least resource name must be specified for resource reference")
 	}
 
-	eff, err := ResolveReferencePath(cv, ref.ReferencePath, resolver)
+	eff, err := ResolveReferencePath(cd, ref.ReferencePath, resolver)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -55,6 +55,12 @@ branch - by executing the GitHub action `release`. Therefore, you have to
 specify the branch to release, and you can optionally indicate to create a patch
 branch or to create a pre-release by specifying a pre-release name.
 
+By default one should always create a draft release first (as a Release Candidate),
+open it up for testing (by communicating the new release candidate as available to stakeholders),
+and after a grace period, promote the draft release to a full release. It is usually worth to always create
+a release branch, since it is a good practice to have a stable branch for each release that can be separated from main
+and tested and cherry-picked on separately.
+
 ## Preparing a Patch Release
 
 There are 2 possibilities to create and release patches.
