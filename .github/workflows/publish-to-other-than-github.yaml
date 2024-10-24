@@ -1,4 +1,11 @@
-name: Publish Release
+# This publish step takes care of some (but not all ;) ) of the package registries
+# that we think might be useful for people to consume.
+#
+# Other package registries might also be pushed in the goreleaser step (see release.yaml) and are configured
+# within .github/config/goreleaser.yaml.
+#
+# TODO: Unify
+name: Publish Release to other package registries than Github
 
 on:
   workflow_dispatch:
@@ -118,7 +125,6 @@ jobs:
       run: |
         cd hack\winget
         wingetcreate update --submit --token ${{ steps.generate_token.outputs.token }} --urls `
-          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-386.zip `
           https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-amd64.zip `
           https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
           --version ${{ env.RELEASE_VERSION }} `

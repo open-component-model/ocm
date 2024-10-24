@@ -1,0 +1,15 @@
+name: 'Mark stale issues and PRs'
+on:
+  schedule:
+    - cron: '7 1 * * *'
+  workflow_dispatch:
+    inputs:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+jobs:
+  stale:  # call reusable workflow from central '.github' repo
+    uses: open-component-model/.github/.github/workflows/stale.yml@main
+    secrets: inherit

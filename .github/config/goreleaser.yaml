@@ -1,3 +1,5 @@
+# goreleaser.yaml (this config) is responsible for our official releases.
+# However, latest builds (equivalent to nightlies based on the main branch), uses latest.yml
 version: 2
 
 before:
@@ -33,6 +35,9 @@ builds:
     id: windows
     goos:
       - windows
+    goarch:
+      - amd64
+      - arm64
 
 archives:
   - name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
