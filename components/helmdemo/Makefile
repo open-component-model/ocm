@@ -13,16 +13,32 @@ EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 HELMINSTVERSION                               ?= $(VERSION)
 
 CREDS ?=
-OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+# Define the path to the binary
+OCM_BIN = $(REPO_ROOT)/bin/ocm
+
+# Rule to build the binary if it doesn't exist or if the source code has changed
+$(OCM_BIN): $(REPO_ROOT)/cmds/ocm/main.go
+	mkdir -p $(REPO_ROOT)/bin
+	go build -ldflags $(BUILD_FLAGS) -o $(OCM_BIN) $(REPO_ROOT)/cmds/ocm
+
+# Use the binary for the OCM command
+OCM = $(OCM_BIN) $(CREDS)
 
 GEN := $(REPO_ROOT)/gen/$(NAME)
+
+NOW         := $(shell date -u +%FT%T%z)
+BUILD_FLAGS := "-s -w \
+ -X ocm.software/ocm/api/version.gitVersion=$(EFFECTIVE_VERSION) \
+ -X ocm.software/ocm/api/version.gitTreeState=$(GIT_TREE_STATE) \
+ -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
+ -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
 CHARTSRCS=$(shell find echoserver -type f)
 
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/ca
+$(GEN)/ctf: $(GEN)/ca $(OCM_BIN)
 	@rm -rf $(GEN)/ctf
 	$(OCM) -X keeplocalblob=true transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
@@ -34,7 +50,7 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml examples/* helmconfig.yaml
+$(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml examples/* helmconfig.yaml $(OCM_BIN)
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" sources.yaml
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" resources.yaml
@@ -42,23 +58,23 @@ $(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRC
 	@touch $(GEN)/ca
 
 .PHONY: eval-resources
-eval-resources:
+eval-resources: $(OCM_BIN)
 	$(OCM) add resources --dry-run VERSION="$(VERSION)" COMMIT="$(COMMIT)" resources.yaml -O "$(GEN)/resources.yaml"
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 
-$(GEN)/push.$(NAME): $(GEN)/ctf
+$(GEN)/push.$(NAME): $(GEN)/ctf $(OCM_BIN)
 	$(OCM) -X keeplocalblob=true transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: plain-push
-plain-push: $(GEN)
+plain-push: $(GEN) $(OCM_BIN)
 	$(OCM) -X keeplocalblob=true transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: transport
-transport:
+transport: $(OCM_BIN)
 ifneq ($(TARGETREPO),)
 	$(OCM) -X keeplocalblob=true transfer component -Vc  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
 endif
@@ -76,11 +92,11 @@ info:
 	@echo "version for helminstaller:  $(HELMINSTVERSION)"
 
 .PHONY: describe
-describe: $(GEN)/ctf
+describe: $(GEN)/ctf $(OCM_BIN)
 	$(OCM) get resources --lookup $(OCMREPO) -r -o treewide $(GEN)/ctf
 
 .PHONY: descriptor
-descriptor: $(GEN)/ctf
+descriptor: $(GEN)/ctf $(OCM_BIN)
 	$(OCM) get component -S v3alpha1 -o yaml $(GEN)/ctf
 
 .PHONY: clean

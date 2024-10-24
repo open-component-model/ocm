@@ -27,7 +27,8 @@ jobs:
     #   - https://gh.io/supported-runners-and-hardware-resources
     #   - https://gh.io/using-larger-runners (GitHub.com only)
     # Consider using larger runners or machines with greater resources for possible analysis time improvements.
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    # - ADDENDUM: We moved this to a larger runner for faster analysis
+    runs-on: large_runner
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
     permissions:
       # required for all workflows
@@ -45,7 +46,7 @@ jobs:
       matrix:
         include:
         - language: go
-          build-mode: autobuild
+          build-mode: manual
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -61,7 +62,39 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Initializes the CodeQL tools for scanning.
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      if: matrix.build-mode == 'manual'
+      with:
+        go-version-file: '${{ github.workspace }}/go.mod'
+        cache: false
+
+    - name: Get go environment for use with cache
+      if: matrix.build-mode == 'manual'
+      run: |
+        echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
+        echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      # This step will only reuse the go mod and build cache from main made during the Build,
+      # see push_ocm.yaml => "ocm-cli-latest" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+    - name: Restore / Reuse Cache from central build
+      if: matrix.build-mode == 'manual'
+      id: cache-golang-restore
+      uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
+      with:
+        path: |
+          ${{ env.go_cache }}
+          ${{ env.go_modcache }}
+        key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
+        restore-keys: |
+          ${{ env.cache_name }}-${{ runner.os }}-go-
+      env:
+        cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
+
+      # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
@@ -74,20 +107,9 @@ jobs:
         # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
 
-    # If the analyze step fails for one of the languages you are analyzing with
-    # "We were unable to automatically build your code", modify the matrix above
-    # to set the build mode to "manual" for that language. Then modify this step
-    # to build your code.
-    # ℹ️ Command-line programs to run using the OS shell.
-    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-    - if: matrix.build-mode == 'manual'
-      run: |
-        echo 'If you are using a "manual" build mode for one or more of the' \
-          'languages you are analyzing, replace this with the commands to build' \
-          'your code, for example:'
-        echo '  make bootstrap'
-        echo '  make release'
-        exit 1
+    - name: Build
+      if: matrix.build-mode == 'manual'
+      run: make build -j
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

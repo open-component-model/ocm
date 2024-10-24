@@ -8,8 +8,8 @@ COPY api api
 COPY cmds cmds
 COPY hack/generate-docs hack/generate-docs
 #COPY go/api api
-RUN --mount=type=cache,target=/root/.cache/go-build go get -d ./...
-RUN --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+RUN go get -d ./...
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
         go build -o /main -ldflags "-s -w \
 	-X ocm.software/ocm/api/version.gitVersion=$EFFECTIVE_VERSION \
 	-X ocm.software/ocm/api/version.gitTreeState=$GIT_TREE_STATE \

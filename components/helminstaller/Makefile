@@ -13,11 +13,29 @@ COMMIT                                         := $(shell git rev-parse --verify
 EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 PLATFORM                                       := $(shell go env GOOS)/$(shell go env GOARCH)
+CACHE_DIR									  := $(shell go env GOCACHE)
+MOD_CACHE_DIR								  := $(shell go env GOMODCACHE)
 
 CREDS ?=
-OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+# Define the path to the binary
+OCM_BIN = $(REPO_ROOT)/bin/ocm
+
+# Rule to build the binary if it doesn't exist or if the source code has changed
+$(OCM_BIN): $(REPO_ROOT)/cmds/ocm/main.go
+	mkdir -p $(REPO_ROOT)/bin
+	go build -ldflags $(BUILD_FLAGS) -o $(OCM_BIN) $(REPO_ROOT)/cmds/ocm
+
+# Use the binary for the OCM command
+OCM = $(OCM_BIN) $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
+
+NOW         := $(shell date -u +%FT%T%z)
+BUILD_FLAGS := "-s -w \
+ -X ocm.software/ocm/api/version.gitVersion=$(EFFECTIVE_VERSION) \
+ -X ocm.software/ocm/api/version.gitTreeState=$(GIT_TREE_STATE) \
+ -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
+ -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
@@ -31,13 +49,13 @@ endif
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/ca
+$(GEN)/ctf: $(GEN)/ca $(OCM_BIN)
 	@rm -rf "$(GEN)/ctf"
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
 .PHONY: plain-ctf
-plain-ctf:
+plain-ctf: $(OCM_BIN)
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
@@ -48,20 +66,20 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) resources.yaml executorspec.yaml
+$(GEN)/ca: $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) resources.yaml executorspec.yaml $(OCM_BIN)
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add resources --templater spiff $(GEN)/ca $(ATTRIBUTES)  resources.yaml
 	@touch $(GEN)/ca
 
 
 .PHONY: plain-ca
-plain-ca: $(GEN)/.exists
+plain-ca: $(GEN)/.exists $(OCM_BIN)
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider  $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add resources --templater spiff $(GEN)/ca $(ATTRIBUTES) resources.yaml
 	@touch $(GEN)/ca
 
 .PHONY: eval-resources
-eval-resources:
+eval-resources: $(OCM_BIN)
 	$(OCM) add resources --dry-run --templater spiff $(ATTRIBUTES) resources.yaml
 
 .PHONY: build
@@ -70,8 +88,10 @@ build: $(GEN)/image.$(NAME)$(FLAGSUF)
 $(GEN)/image.$(NAME): $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
 	docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM) --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
+          --build-arg CACHE_DIR=$(CACHE_DIR) \
+          --build-arg MOD_CACHE_DIR=$(MOD_CACHE_DIR) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
-          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE)
+          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE); \
 	@touch $(GEN)/image.$(NAME)
 
 push-image:
@@ -87,6 +107,8 @@ $(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
         echo building platform $$i; \
 	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
+          --build-arg CACHE_DIR=$(CACHE_DIR) \
+          --build-arg MOD_CACHE_DIR=$(MOD_CACHE_DIR) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
           --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE); \
 	done
@@ -95,17 +117,17 @@ $(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 
-$(GEN)/push.$(NAME): $(GEN)/ctf
+$(GEN)/push.$(NAME): $(GEN)/ctf $(OCM_BIN)
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: plain-push
-plain-push: $(GEN)/.exists
+plain-push: $(GEN)/.exists $(OCM_BIN)
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: transport
-transport:
+transport: $(OCM_BIN)
 ifneq ($(TARGETREPO),)
 	$(OCM) transfer component -Vr  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
 endif
