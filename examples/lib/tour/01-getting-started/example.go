@@ -100,10 +100,10 @@ func GettingStarted() error {
 	fmt.Printf("versions for component ocm.software/ocmcli: %s\n", strings.Join(versions, ", "))
 	// --- end semver ---
 
-	// Now, we have a look at a version.
+	// Now, we have a look at the latest version. it is
+	// the last one in the list.
 	// --- begin lookup version ---
-	// versions[len(versions)-1] is the latest version
-	cv, err := c.LookupVersion("0.15.0")
+	cv, err := c.LookupVersion(versions[len(versions)-1])
 	if err != nil {
 		return errors.Wrapf(err, "cannot get latest version")
 	}

@@ -128,8 +128,7 @@ Now, we have a look at the latest version. It is
 the last one in the list.
 
 ```go
-	// versions[len(versions)-1] is the latest version
-	cv, err := c.LookupVersion("0.15.0")
+	cv, err := c.LookupVersion(versions[len(versions)-1])
 	if err != nil {
 		return errors.Wrapf(err, "cannot get latest version")
 	}
@@ -169,32 +168,32 @@ differ, because the code always describes the latest version):
 
 ```text
 resources of the latest version:
-  version:  0.15.0
+  version:  0.16.2
   provider: ocm.software
    1: name:           ocmcli
       extra identity: "architecture"="amd64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:e337369669efecc54ed115e1f7425ec104064daabed5646a00a9d850b76fbf53[]
+      access:         Local blob sha256:b199a1e6558af64898cf0af5245907a12ff3ce152926e30a1a446c8aa6f85fec[]
    2: name:           ocmcli
       extra identity: "architecture"="arm64","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:507457eeafe998febe157e9868c04b87fbaa6021c7e3327003ba9caeda7ac7fe[]
+      access:         Local blob sha256:b942839e4e86286ad702a9bfbdc30100c970e6ed1d6e45de3a06b67998f746bf[]
    3: name:           ocmcli
       extra identity: "architecture"="arm64","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:05fbbdca90316b267cedf67849fc5d0fa9076f72272b01f77434b2ffc079c1a1[]
+      access:         Local blob sha256:827662585090c8fe0ffb0e3380b2219a0f1ef65d1e320767b2bdf5723bf0ac31[]
    4: name:           ocmcli
       extra identity: "architecture"="amd64","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:d15c720b33fd70da728dd0264e855b0d3ea3e4a7b129a5f97b5ca8584c6038d0[]
+      access:         Local blob sha256:c33865145684d2bf45fd50a80dd5435f3bf3f7153058126589e8a92f369205a4[]
    5: name:           ocmcli
       extra identity: "architecture"="amd64","os"="windows"
       resource type:  executable
-      access:         Local blob sha256:11aa1f6dcbac554dc3c5830812ad5e6044d715126d1b34c6986c6b530cb2c783[]
+      access:         Local blob sha256:97057f0822fb137b872c94f81c24618a3df25ea14bd956fea85464c6e8465661[]
    6: name:           ocmcli-image
       extra identity: 
       resource type:  ociImage
-      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.15.0
+      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.16.2@sha256:491c08697c6a0be0f0a2d468377eff4deb271b68169a8cf8eb992c553da32df8
 ```
 
 Resources have some metadata, like their identity and a resource type.
