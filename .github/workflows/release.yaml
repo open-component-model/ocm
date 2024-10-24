@@ -287,8 +287,10 @@ jobs:
         git checkout ${GITHUB_REF#refs/heads/}
         v="$(go run ./api/version/generate bump-version)"
         echo "$v" > VERSION
-        git add VERSION
-        git commit -m "Update version file to $v"
+        # Trigger a bump of any potential files that depend on a new version
+        make generate
+        git add --all
+        git commit -m "Update version to $v"
         git push origin ${GITHUB_REF#refs/heads/}
         echo "Next branch version is $v"
 
@@ -301,6 +303,8 @@ jobs:
         event-type: ocm-cli-release
         client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
 
+    # now distribute the release event so that other jobs can listen for this
+    # and use the event to publish our release to other package registries
     - name: Publish Release Event for other package registries
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v3
