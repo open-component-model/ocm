@@ -20,7 +20,7 @@ the release action execution.
 
 The content of a branch can be released by the GitHub `release` action. The name
 of the release is based on the content of the file [`VERSION`](./VERSION) which
-is updated automatically said `release` action. During development, the
+is updated automatically by the `release` action. During development, the
 content of this file is the complete release name of the release currently under
 development and the suffix `-dev` (e.g. `0.1.0-dev`). The content of this file
 is used for generating the version information compiled into the ocm
@@ -91,8 +91,8 @@ created (through `make ctf`), containing all the provided component versions
 described by the actual git snapshot. This archive is then published to
 ghcr.io/open-component-model/ocm. Additionally, a GitHub release is created,
 exposing the OCM CTF and the ocm-cli executables for various platforms. These
-executables are build using the go releaser plugin. Furthermore, packages for
-various package managers (e.g. brew, debian or chocolatey) are created and
+executables are built using the goreleaser plugin. Furthermore, packages for
+various package managers (e.g. Homebrew, Debian or Chocolatey) are created and
 uploaded to the respective package repositories. All currently supported
 installation methods are described
 [here](https://github.com/open-component-model/ocm?tab=readme-ov-file#installation).
