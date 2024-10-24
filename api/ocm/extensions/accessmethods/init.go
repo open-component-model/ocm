@@ -1,6 +1,7 @@
 package accessmethods
 
 import (
+	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/git"
 	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/helm"
 	_ "ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"

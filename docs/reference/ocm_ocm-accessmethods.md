@@ -15,6 +15,30 @@ The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.
 
+- Access type <code>git</code>
+
+  This method implements the access of the content of a git commit stored in a
+  Git repository.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The type specific specification fields are:
+
+    - **<code>repoUrl</code>**  *string*
+
+      Repository URL with or without scheme.
+
+    - **<code>ref</code>** (optional) *string*
+
+      Original ref used to get the commit from
+
+    - **<code>commit</code>** *string*
+
+      The sha/id of the git commit
+
+  Options used to configure fields: <code>--accessRepository</code>, <code>--commit</code>, <code>--reference</code>
+
 - Access type <code>gitHub</code>
 
   This method implements the access of the content of a git commit stored in a
