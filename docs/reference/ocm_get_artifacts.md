@@ -58,8 +58,6 @@ linked library can be used:
   - <code>CommonTransportFormat</code>: v1
   - <code>DockerDaemon</code>: v1
   - <code>Empty</code>: v1
-  - <code>Git</code>: v1
-  - <code>GitRepository</code>: v1
   - <code>OCIRegistry</code>: v1
   - <code>oci</code>: v1
   - <code>ociRegistry</code>

@@ -71,10 +71,7 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	filteredRepositoryFS := &filteredVFS{
 		FileSystem: repositoryFS,
 		filter: func(s string) bool {
-			if s == gogit.GitDirName {
-				return false
-			}
-			return true
+			return s != gogit.GitDirName
 		},
 	}
 
