@@ -6,18 +6,10 @@ on:
     inputs:
 
 permissions:
-  contents: write # only for delete-branch option
+  contents: read
   issues: write
   pull-requests: write
 jobs:
-  stale:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/stale@v9
-        with:
-          stale-issue-message: 'This issue was marked as stale because it has not had recent activity.'
-          stale-issue-label: 'lifecycle/stale'
-          stale-pr-message: 'This pull request was marked as stale because it has not had recent activity.'
-          stale-pr-label: 'lifecycle/stale'
-          days-before-close: '-1' # never close issues
-          days-before-stale: '90'
+  stale:  # call reusable workflow from central '.github' repo
+    uses: open-component-model/.github/.github/workflows/stale.yml@main
+    secrets: inherit

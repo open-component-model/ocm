@@ -298,6 +298,8 @@ jobs:
         event-type: ocm-cli-release
         client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
 
+    # now distribute the release event so that other jobs can listen for this
+    # and use the event to publish our release to other package registries
     - name: Publish Release Event for other package registries
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v3
