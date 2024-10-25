@@ -59,7 +59,7 @@ VAULT := $(shell ($(LOCALBIN)/vault --version 2>/dev/null || echo 0.0) | sed 's/
 ifneq ($(VAULT), $(VAULT_VERSION))
 	deps += vault
 endif
-OCI_REGISTRY_VERSION := 3.0.0-alpha.1
+OCI_REGISTRY_VERSION := 3.0.0-beta.1
 OCI_REGISTRY := $(shell (registry --version 2>/dev/null || echo 0.0) | sed 's/.* v\([0-9a-z\.\-]*\).*/\1/')
 ifneq ($(OCI_REGISTRY), $(OCI_REGISTRY_VERSION))
 	deps += oci-registry
