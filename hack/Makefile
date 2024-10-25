@@ -109,6 +109,7 @@ oci-registry:
 	@if [ "$(OCI_REGISTRY)" != "$(OCI_REGISTRY_VERSION)" ]; then \
 		go install -v github.com/distribution/distribution/v3/cmd/registry@v3.0.0-alpha.1; \
 	fi
+	go install -v github.com/distribution/distribution/v3/cmd/registry@v$(OCI_REGISTRY_VERSION)
 
 $(GOPATH)/bin/goimports:
 	go install -v golang.org/x/tools/cmd/goimports@latest
