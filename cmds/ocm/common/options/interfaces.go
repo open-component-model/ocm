@@ -10,16 +10,24 @@ import (
 	"ocm.software/ocm/api/utils/out"
 )
 
+// OptionsProcessor is handler used to process all
+// option found in a set of options.
 type OptionsProcessor func(Options) error
 
+// SimpleOptionCompleter describes the interface for an option object
+// requirung completion without any further information.
 type SimpleOptionCompleter interface {
 	Complete() error
 }
 
+// OptionWithOutputContextCompleter describes the interface for an option object
+// requirung completion with an output context.
 type OptionWithOutputContextCompleter interface {
 	Complete(ctx out.Context) error
 }
 
+// OptionWithCLIContextCompleter describes the interface for an option object
+// requirung completion with a CLI context.
 type OptionWithCLIContextCompleter interface {
 	Configure(ctx clictx.Context) error
 }
@@ -144,6 +152,8 @@ func (s OptionSet) Get(proto interface{}) bool {
 	return false
 }
 
+// ProcessOnOptions processes all options found in the option set
+// woth a given OptionsProcessor.
 func (s OptionSet) ProcessOnOptions(f OptionsProcessor) error {
 	for _, n := range s {
 		var err error
