@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"path"
 
+	containererr "github.com/containerd/containerd/remotes/errors"
 	"github.com/mandelsoft/goutils/errors"
-	"oras.land/oras-go/v2/registry/remote/errcode"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/repocpi"
@@ -45,18 +45,10 @@ func (p *Provider) GetPubSubSpec(repo repocpi.Repository) (pubsub.PubSubSpec, er
 
 	ocirepo := path.Join(gen.Meta().SubPath, componentmapping.ComponentDescriptorNamespace)
 	acc, err := gen.OCIRepository().LookupArtifact(ocirepo, META)
-
-	// Dirty workaround until fix is ready for https://github.com/open-component-model/ocm/issues/872
-	errCode := errcode.Error{}
-	if errors.As(err, &errCode) {
-		if errCode.Code == errcode.ErrorCodeDenied {
-			return nil, nil
-		}
-	}
-
-	if errors.IsErrNotFound(err) || errors.IsErrUnknown(err) {
+	if errors.IsErrNotFound(err) || errors.IsErrUnknown(err) || errors.IsA(err, containererr.ErrUnexpectedStatus{}) {
 		return nil, nil
 	}
+
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot access meta data manifest version")
 	}

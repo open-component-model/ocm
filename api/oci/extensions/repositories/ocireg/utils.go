@@ -2,21 +2,19 @@ package ocireg
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"sync"
 
 	"github.com/containerd/containerd/remotes"
+	"github.com/containerd/errdefs"
 	"github.com/containerd/log"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
-	"oras.land/oras-go/v2/content"
-	"oras.land/oras-go/v2/errdef"
-	"oras.land/oras-go/v2/registry"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
+	"ocm.software/ocm/api/tech/docker/resolve"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/logging"
@@ -26,40 +24,32 @@ import (
 
 type dataAccess struct {
 	accessio.NopCloser
-	lock   sync.Mutex
-	repo   registry.Repository
-	desc   artdesc.Descriptor
-	reader io.ReadCloser
+	lock    sync.Mutex
+	fetcher remotes.Fetcher
+	desc    artdesc.Descriptor
+	reader  io.ReadCloser
 }
 
 var _ cpi.DataAccess = (*dataAccess)(nil)
 
-func NewDataAccess(repo registry.Repository, digest digest.Digest, delayed bool) (*dataAccess, error) {
+func NewDataAccess(fetcher remotes.Fetcher, digest digest.Digest, mimeType string, delayed bool) (*dataAccess, error) {
 	var reader io.ReadCloser
-	// First, we try to resolve a blob if a blob was already provided, this will work.
-	desc, err := repo.Blobs().Resolve(dummyContext, digest.String())
-	if err != nil {
-		if errors.Is(err, errdef.ErrNotFound) {
-			// If the provided digest was that of a manifest, the second try will find
-			// the manifest, because the first one didn't find the blob.
-			desc, err = repo.Resolve(dummyContext, digest.String())
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			return nil, fmt.Errorf("failed to resolve descriptor with digest %s: %w", digest.String(), err)
-		}
+	var err error
+	desc := artdesc.Descriptor{
+		MediaType: mimeType,
+		Digest:    digest,
+		Size:      blobaccess.BLOB_UNKNOWN_SIZE,
 	}
 	if !delayed {
-		reader, err = repo.Fetch(dummyContext, desc)
+		reader, err = fetcher.Fetch(dummyContext, desc)
 		if err != nil {
-			return nil, fmt.Errorf("failed to fetch descriptor: %w", err)
+			return nil, err
 		}
 	}
 	return &dataAccess{
-		repo:   repo,
-		desc:   desc,
-		reader: reader,
+		fetcher: fetcher,
+		desc:    desc,
+		reader:  reader,
 	}, nil
 }
 
@@ -75,7 +65,7 @@ func (d *dataAccess) Reader() (io.ReadCloser, error) {
 	if reader != nil {
 		return reader, nil
 	}
-	return d.repo.Fetch(dummyContext, d.desc)
+	return d.fetcher.Fetch(dummyContext, d.desc)
 }
 
 func readAll(reader io.ReadCloser, err error) ([]byte, error) {
@@ -91,32 +81,28 @@ func readAll(reader io.ReadCloser, err error) ([]byte, error) {
 	return data, nil
 }
 
-func push(ctx context.Context, p content.Pusher, blob blobaccess.BlobAccess) error {
+func push(ctx context.Context, p resolve.Pusher, blob blobaccess.BlobAccess) error {
 	desc := *artdesc.DefaultBlobDescriptor(blob)
 	return pushData(ctx, p, desc, blob)
 }
 
-func pushData(ctx context.Context, p content.Pusher, desc artdesc.Descriptor, data blobaccess.DataAccess) error {
+func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, data blobaccess.DataAccess) error {
 	key := remotes.MakeRefKey(ctx, desc)
 	if desc.Size == 0 {
 		desc.Size = -1
 	}
 
 	logging.Logger().Debug("*** push blob", "mediatype", desc.MediaType, "digest", desc.Digest, "key", key)
-	reader, err := data.Reader()
+	req, err := p.Push(ctx, desc, data)
 	if err != nil {
-		return err
-	}
-
-	if err := p.Push(ctx, desc, reader); err != nil {
-		if errors.Is(err, errdef.ErrAlreadyExists) {
+		if errdefs.IsAlreadyExists(err) {
 			logging.Logger().Debug("blob already exists", "mediatype", desc.MediaType, "digest", desc.Digest)
 
 			return nil
 		}
 		return fmt.Errorf("failed to push: %w", err)
 	}
-	return nil
+	return req.Commit(ctx, desc.Size, desc.Digest)
 }
 
 var dummyContext = nologger()
