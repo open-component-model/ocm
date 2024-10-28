@@ -52,22 +52,30 @@ type Resolution struct {
 	RepositorySpec *ocm.GenericRepositorySpec `json:"repository,omitempty"`
 	// TransferHandler is the handler identity according to the transfer handler
 	// name scheme.
-	TransferHandler string           `json:"transferHandler,omitempty"`
+	TransferHandler string `json:"transferHandler,omitempty"`
+	// TransferOptions may describe modified options used for sub-sequent
+	// transfers.
 	TransferOptions *TransferOptions `json:"transferOptions,omitempty"`
 }
 
+// DecisionRequestResult is the structure of the answer
+// the plugin has to return for a question.
 type DecisionRequestResult struct {
 	Error      string      `json:"error,omitempty"`
 	Decision   bool        `json:"decision"`
 	Resolution *Resolution `json:"resolution,omitempty"`
 }
 
+// ComponentVersionQuestion describes the question arguments
+// given for a component version related question.
 type ComponentVersionQuestion struct {
 	Source  SourceComponentVersion `json:"source"`
 	Target  TargetRepositorySpec   `json:"target"`
 	Options TransferOptions        `json:"options"`
 }
 
+// ComponentReferenceQuestion  describes the question arguments
+// given for a component version reference related question.
 type ComponentReferenceQuestion struct {
 	Source SourceComponentVersion `json:"source"`
 	Target TargetRepositorySpec   `json:"target"`
@@ -84,6 +92,8 @@ type Artifact struct {
 	AccessInfo UniformAccessSpecInfo `json:"accessInfo"`
 }
 
+// ArtifactQuestion  describes the question arguments
+// given for an artifact related question.
 type ArtifactQuestion struct {
 	Source   SourceComponentVersion `json:"source"`
 	Artifact Artifact               `json:"artifact"`

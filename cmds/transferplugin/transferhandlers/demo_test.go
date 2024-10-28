@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/mandelsoft/goutils/sliceutils"
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	v2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
@@ -23,7 +25,7 @@ import (
 )
 
 var _ = Describe("Test Environment", func() {
-	It("", func() {
+	It("runs a demo question", func() {
 		var stdout bytes.Buffer
 		var stderr bytes.Buffer
 
