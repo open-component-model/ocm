@@ -55,7 +55,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 			return &value, nil
 		}
 		if value.Ref == "" {
-			return nil, errors.ErrInvalidWrap(errors.Newf("missing repository or ref"), oci.KIND_OCI_REFERENCE, string(data))
+			return nil, errors.ErrInvalidWrap(errors.Newf("missing repository or ociRef"), oci.KIND_OCI_REFERENCE, string(data))
 		}
 		data = []byte(value.Ref)
 	}
