@@ -158,6 +158,10 @@ func (t *transferHandler) RegisterDecision(h DecisionHandler) error {
 	return nil
 }
 
+// DecisionHandlerBase provides access to the
+// non-functional attributes of a DecisionHandler.
+// It can be created with NewDecisionHandlerBase and
+// embedded into the final DecisionHandler implementation.
 type DecisionHandlerBase struct {
 	question    string
 	description string
