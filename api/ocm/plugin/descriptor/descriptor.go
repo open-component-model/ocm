@@ -259,9 +259,16 @@ func (d TransferHandlerDescriptor) GetQuestion(name string) *QuestionDescriptor 
 }
 
 type QuestionDescriptor struct {
-	Question    string    `json:"question"`
-	Description string    `json:"description,omitempty"`
-	Labels      *[]string `json:"labels,omitempty"`
+	// Question is the name of the question the plugin can answer.
+	// Possible types and their meaning is described by the
+	// variable common.TransferHandlerQuestions.
+	Question    string `json:"question"`
+	Description string `json:"description,omitempty"`
+	// Labels described the list of labels passed to the
+	// plugin if they exist. If not specified all labels
+	// are transferred, if an empty list is specified no
+	// labels are transferred to the plugin command.
+	Labels *[]string `json:"labels,omitempty"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
