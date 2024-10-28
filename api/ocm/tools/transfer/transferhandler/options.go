@@ -6,6 +6,13 @@ import (
 
 //////////////////////////////////////////////////////////////////////////////
 
+// ConfigOption describes generic non-standard options.
+// Specialized option set implementation map such generic
+//
+//	config to their specialized settings. The format depends
+//
+// on the option target. For example, for spiff it is a spiff
+// script.
 type ConfigOption interface {
 	SetConfig([]byte)
 	GetConfig() []byte

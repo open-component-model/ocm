@@ -36,7 +36,7 @@ func NewDecision(typ string, optfunc func(opts *ppi.TransferOptions) bool, desc 
 	}
 }
 
-func (d DecisionHandler) DecideOn(p ppi.Plugin, question interface{}) (bool, error) {
+func (d DecisionHandler) DecideOn(p ppi.Plugin, question ppi.Question) (bool, error) {
 	q := question.(*ppi.ArtifactQuestion)
 
 	var cfg *config.Config

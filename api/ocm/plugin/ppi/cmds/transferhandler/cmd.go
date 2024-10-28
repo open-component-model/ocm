@@ -63,9 +63,10 @@ For detailed types see <code>ocm.software/ocm/api/ocm/plugin/ppi/questions.go</c
 }
 
 type Options struct {
-	Handler   string
-	Question  string
-	Arguments interface{}
+	// Handler is the handler name as provided by the plugin.
+	Handler string
+	// Question cis the name of the question
+	Question string
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {

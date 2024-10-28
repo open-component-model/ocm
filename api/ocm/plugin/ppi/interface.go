@@ -252,13 +252,14 @@ type DecisionHandler interface {
 	// ArtifactQuestion, ComponentVersionQuestion and ComponentReferenceQuestion.
 	// TransferHandlerQuestions maps the question name to the used
 	// argument type.
-	DecideOn(p Plugin, question interface{}) (bool, error)
+	DecideOn(p Plugin, question Question) (bool, error)
 }
 
 type (
 	TransferOptions            = internal.TransferOptions
 	Artifact                   = internal.Artifact
 	AccessInfo                 = internal.UniformAccessSpecInfo
+	Question                   = internal.Question
 	ComponentVersionQuestion   = internal.ComponentVersionQuestion
 	ComponentReferenceQuestion = internal.ComponentReferenceQuestion
 	ArtifactQuestion           = internal.ArtifactQuestion

@@ -53,6 +53,7 @@ type (
 
 	Artifact                   = internal.Artifact
 	AccessInfo                 = internal.UniformAccessSpecInfo
+	Question                   = internal.Question
 	ComponentVersionQuestion   = internal.ComponentVersionQuestion
 	ComponentReferenceQuestion = internal.ComponentReferenceQuestion
 	ArtifactQuestion           = internal.ArtifactQuestion
