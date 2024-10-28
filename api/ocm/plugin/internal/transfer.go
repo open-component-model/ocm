@@ -2,6 +2,9 @@ package internal
 
 import (
 	"encoding/json"
+	"reflect"
+
+	"github.com/mandelsoft/goutils/generics"
 
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	v2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
@@ -18,6 +21,15 @@ const (
 	Q_TRANSFER_SOURCE   = "transfersource"
 )
 
+var TransferHandlerQuestions = map[string]reflect.Type{
+	Q_UPDATE_VERSION:    generics.TypeOf[ComponentVersionQuestion](),
+	Q_ENFORCE_TRANSPORT: generics.TypeOf[ComponentVersionQuestion](),
+	Q_OVERWRITE_VERSION: generics.TypeOf[ComponentVersionQuestion](),
+	Q_TRANSFER_VERSION:  generics.TypeOf[ComponentReferenceQuestion](),
+	Q_TRANSFER_RESOURCE: generics.TypeOf[ArtifactQuestion](),
+	Q_TRANSFER_SOURCE:   generics.TypeOf[ArtifactQuestion](),
+}
+
 type UniformAccessSpecInfo = tech.UniformAccessSpecInfo
 
 type SourceComponentVersion struct {
@@ -30,6 +42,11 @@ type SourceComponentVersion struct {
 
 type TargetRepositorySpec = ocm.GenericRepositorySpec
 
+// TransferOptions are the standard transfer options from
+// the standard transfer handler.
+// Like other transfer handler types it is possible to define
+// more options. Those non-standard options are passed
+// via a json.RawMessage in the field special.
 type TransferOptions struct {
 	Recursive         *bool            `json:"recursive,omitempty"`
 	ResourcesByValue  *bool            `json:"resourcesByValue,omitempty"`
@@ -65,6 +82,16 @@ type DecisionRequestResult struct {
 	Decision   bool        `json:"decision"`
 	Resolution *Resolution `json:"resolution,omitempty"`
 }
+
+// Question is the interface for the question attributes
+// differing for the various questions types.
+// There are three basic attribute sets:
+//   - ComponentVersionQuestion
+//   - ComponentReferenceQuestion
+//   - ArtifactQuestion
+//
+// For type assignments see TransferHandlerQuestions.
+type Question interface{}
 
 // ComponentVersionQuestion describes the question arguments
 // given for a component version related question.
