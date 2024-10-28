@@ -247,7 +247,7 @@ type DecisionHandler interface {
 	GetLabels() *[]string
 
 	// DecideOn implements the calculation of the answer to
-	// the question.The given question contains the arguments for
+	// the question. The given question contains the arguments for
 	// the questions. There are three kinds of arguments:
 	// ArtifactQuestion, ComponentVersionQuestion and ComponentReferenceQuestion.
 	// TransferHandlerQuestions maps the question name to the used
