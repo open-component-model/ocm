@@ -186,6 +186,44 @@ func NewDecisionHandlerBase(q, desc string, labels ...string) DecisionHandlerBas
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func ComponentVersionQuestionFunv(f func(p Plugin, question *ComponentVersionQuestion) (bool, error)) func(p Plugin, question Question) (bool, error) {
+	return func(p Plugin, question Question) (bool, error) {
+		return f(p, question.(*ComponentVersionQuestion))
+	}
+}
+
+func ComponentReferenceQuestionFunc(f func(p Plugin, question *ComponentReferenceQuestion) (bool, error)) func(p Plugin, question Question) (bool, error) {
+	return func(p Plugin, question Question) (bool, error) {
+		return f(p, question.(*ComponentReferenceQuestion))
+	}
+}
+
+func ArtifactQuestionFunc(f func(p Plugin, question *ArtifactQuestion) (bool, error)) func(p Plugin, question Question) (bool, error) {
+	return func(p Plugin, question Question) (bool, error) {
+		return f(p, question.(*ArtifactQuestion))
+	}
+}
+
+type defaultDecisionHandler struct {
+	DecisionHandlerBase
+	handler func(p Plugin, question Question) (bool, error)
+}
+
+// NewDecisionHandler provides a default decision handler based on its standard
+// fields and a handler function.
+func NewDecisionHandler(q, desc string, h func(p Plugin, question Question) (bool, error), labels ...string) DecisionHandler {
+	return &defaultDecisionHandler{
+		DecisionHandlerBase: NewDecisionHandlerBase(q, desc, labels...),
+		handler:             h,
+	}
+}
+
+func (d *defaultDecisionHandler) DecideOn(p Plugin, question Question) (bool, error) {
+	return d.handler(p, question)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Config is a generic structured config stored in a string map.
 type Config map[string]interface{}
 
