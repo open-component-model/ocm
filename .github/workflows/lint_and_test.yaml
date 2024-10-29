@@ -56,11 +56,6 @@ jobs:
       - name: Test
         run: make install-requirements test
 
-      # This step will only reuse the go mod and build cache from main made during the Build,
-      # see lint_and_test.yaml => "test" Job
-      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
-      # This is because we have huge storage requirements for our cache because of the mass of dependencies
-      #
       # NOTE: This is different from our regular build cache (which contains all archs and is built in a different job)
       # This is because it requires caching of test dependencies, which are compiled only for linux-amd64 for test runs in CI.
       - name: Save Cache of Build (only on main)
