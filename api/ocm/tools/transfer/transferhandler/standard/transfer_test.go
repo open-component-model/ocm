@@ -280,6 +280,9 @@ func CheckBlob(r ocm.ResourceAccess, dig string, size int) {
 	set := Must(artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob))
 	defer Close(set, "set")
 
+	// data := Must(json.Marshal(set.GetIndex()))
+	// fmt.Printf("%s\n", string(data))
+
 	digest := set.GetMain()
 	ExpectWithOffset(1, digest.Hex()).To(Equal(dig))
 
