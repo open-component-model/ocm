@@ -92,10 +92,11 @@ check-and-fix:
 force-test:
 	@go test -vet=off --count=1 $(EFFECTIVE_DIRECTORIES)
 
+TESTFLAGS = -vet=off --tags=integration
 .PHONY: test
 test:
 	@echo "> Run Tests"
-	@go test -vet=off --tags=integration $(EFFECTIVE_DIRECTORIES)
+	go test $(TESTFLAGS) $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: unit-test
 unit-test:

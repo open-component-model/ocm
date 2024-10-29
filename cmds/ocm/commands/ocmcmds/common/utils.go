@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
@@ -66,20 +67,29 @@ func MapArgsToIdentityPattern(args ...string) (metav1.Identity, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// OptionWithSessionCompleter describes the interface for option objects requiring
+// a completion with a session.
 type OptionWithSessionCompleter interface {
 	CompleteWithSession(ctx clictx.OCM, session ocm.Session) error
 }
 
-func CompleteOptionsWithSession(ctx clictx.Context, session ocm.Session) options.OptionsProcessor {
+// CompleteOptionsWithSession provides an options.OptionsProcessor completing
+// options by passing a session object using the OptionWithSessionCompleter interface.
+// If an optional argument true is given, it also tries the other standard completion
+// methods possible for an options object.
+func CompleteOptionsWithSession(ctx clictx.Context, session ocm.Session, all ...bool) options.OptionsProcessor {
+	otherCompleters := general.Optional(all...)
 	return func(opt options.Options) error {
 		if c, ok := opt.(OptionWithSessionCompleter); ok {
 			return c.CompleteWithSession(ctx.OCM(), session)
 		}
-		if c, ok := opt.(options.OptionWithCLIContextCompleter); ok {
-			return c.Configure(ctx)
-		}
-		if c, ok := opt.(options.SimpleOptionCompleter); ok {
-			return c.Complete()
+		if otherCompleters {
+			if c, ok := opt.(options.OptionWithCLIContextCompleter); ok {
+				return c.Configure(ctx)
+			}
+			if c, ok := opt.(options.SimpleOptionCompleter); ok {
+				return c.Complete()
+			}
 		}
 		return nil
 	}

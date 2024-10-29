@@ -59,7 +59,7 @@ VAULT := $(shell ($(LOCALBIN)/vault --version 2>/dev/null || echo 0.0) | sed 's/
 ifneq ($(VAULT), $(VAULT_VERSION))
 	deps += vault
 endif
-OCI_REGISTRY_VERSION := 3.0.0-alpha.1
+OCI_REGISTRY_VERSION := 3.0.0-beta.1
 OCI_REGISTRY := $(shell (registry --version 2>/dev/null || echo 0.0) | sed 's/.* v\([0-9a-z\.\-]*\).*/\1/')
 ifneq ($(OCI_REGISTRY), $(OCI_REGISTRY_VERSION))
 	deps += oci-registry
@@ -97,18 +97,18 @@ go-bindata:
 
 .PHONY: vault
 vault:
-	@if [ "$(VAULT)" != "$(VAULT_VERSION)" ]; then \
+ifneq ($(VAULT), $(VAULT_VERSION))
 		curl -o $(LOCALBIN)/vault.zip https://releases.hashicorp.com/vault/$(VAULT_VERSION)/vault_$(VAULT_VERSION)_$(OS_ARCH).zip; \
 		unzip -o $(LOCALBIN)/vault.zip -d $(LOCALBIN); \
 		rm $(LOCALBIN)/vault.zip; \
-		chmod a+x $(LOCALBIN)/vault;\
-	fi
+		chmod a+x $(LOCALBIN)/vault;
+endif
 
 .PHONY: oci-registry
 oci-registry:
-	@if [ "$(OCI_REGISTRY)" != "$(OCI_REGISTRY_VERSION)" ]; then \
-		go install -v github.com/distribution/distribution/v3/cmd/registry@v3.0.0-alpha.1; \
-	fi
+ifeq (,$(findstring $(OCI_REGISTRY_VERSION), $(OCI_REGISTRY)))
+	go install -v github.com/distribution/distribution/v3/cmd/registry@v$(OCI_REGISTRY_VERSION)
+endif
 
 $(GOPATH)/bin/goimports:
 	go install -v golang.org/x/tools/cmd/goimports@latest
