@@ -69,7 +69,7 @@ jobs:
         }
         if (-not ([string]::IsNullOrEmpty($repository_version))) {
           $repository_version = "$repository_version" -replace 'v'
-          echo "RELEASE_VERSION=($repository_version -replace 'v')" | Out-File $env:GITHUB_ENV
+          echo "RELEASE_VERSION=$repository_version" | Out-File $env:GITHUB_ENV
           exit 0
         }
         Write-Host "Version not provided"
