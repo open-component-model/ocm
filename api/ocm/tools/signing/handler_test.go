@@ -58,18 +58,28 @@ var _ = Describe("Simple signing handlers", func() {
 
 			meta := ocm.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation)
 			meta.Version = "v1"
-			meta.ExtraIdentity = map[string]string{}
 			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "test data"), "", nil))
+			meta.ExtraIdentity = map[string]string{}
 			meta.Version = "v2"
 			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "other test data"), "", nil, ocm.TargetIndex(-1)))
 		})
 
-		It("signs without modification", func() {
+		It("signs without modification (compatibility)", func() {
 			Must(signing.SignComponentVersion(cv, "signature", signing.PrivateKey("signature", priv)))
 			cd := cv.GetDescriptor()
+			cd.Resources[0].ExtraIdentity = v1.Identity{}
+			cd.Resources[1].ExtraIdentity = v1.Identity{}
 			Expect(len(cd.Resources)).To(Equal(2))
 			Expect(len(cd.Resources[0].ExtraIdentity)).To(Equal(0))
 			Expect(len(cd.Resources[1].ExtraIdentity)).To(Equal(0))
+		})
+
+		It("signs defaulted", func() {
+			Must(signing.SignComponentVersion(cv, "signature", signing.PrivateKey("signature", priv)))
+			cd := cv.GetDescriptor()
+			Expect(len(cd.Resources)).To(Equal(2))
+			Expect(len(cd.Resources[0].ExtraIdentity)).To(Equal(1))
+			Expect(len(cd.Resources[1].ExtraIdentity)).To(Equal(1))
 		})
 	})
 })

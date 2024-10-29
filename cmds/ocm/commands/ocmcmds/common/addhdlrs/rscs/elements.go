@@ -63,7 +63,7 @@ func (*ResourceSpecHandler) RequireInputs() bool {
 	return true
 }
 
-func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
+func (*ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	var desc ResourceSpec
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)
 	if err != nil {
@@ -72,7 +72,7 @@ func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	return &desc, nil
 }
 
-func (h ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
+func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
 	spec, ok := r.Spec().(*ResourceSpec)
 	if !ok {
 		return fmt.Errorf("element spec is not a valid resource spec, failed to assert type %T to ResourceSpec", r.Spec())
@@ -108,6 +108,11 @@ func (h ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Elemen
 	if ocm.IsIntermediate(v.Repository().GetSpecification()) {
 		opts = append(opts, ocm.ModifyResource())
 	}
+	/*
+		if ocm.IsIntermediate(v.Repository().GetSpecification()) {
+			opts = append(opts, ocm.ModifyResource())
+		}
+	*/
 	return v.SetResource(meta, acc, opts...)
 }
 

@@ -238,18 +238,21 @@ func (o *ElementMeta) GetIdentity(accessor ElementListAccessor) metav1.Identity 
 		identity = metav1.Identity{}
 	}
 	identity[SystemIdentityName] = o.Name
-	if accessor != nil {
+	if identity.Get(SystemIdentityVersion) == "" && accessor != nil {
 		found := false
 		l := accessor.Len()
 		for i := 0; i < l; i++ {
 			m := accessor.Get(i).GetMeta()
-			if m.GetName() == o.Name && m.GetExtraIdentity().Equals(o.ExtraIdentity) {
-				if found {
-					identity[SystemIdentityVersion] = o.Version
-
-					break
+			if m.GetName() == o.Name {
+				mid := m.GetExtraIdentity()
+				mid.Remove(SystemIdentityVersion)
+				if mid.Equals(o.ExtraIdentity) {
+					if found {
+						identity[SystemIdentityVersion] = o.Version
+						break
+					}
+					found = true
 				}
-				found = true
 			}
 		}
 	}
