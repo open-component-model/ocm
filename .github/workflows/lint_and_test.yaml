@@ -66,7 +66,7 @@ jobs:
       - name: Save Cache of Build (only on main)
         id: cache-golang-save
         if: github.ref == 'refs/heads/main' # Only run on main, never in PR
-        uses: actions/cache/save@v4 # Only Restore, not build another cache (too big)
+        uses: actions/cache/save@v4 # Only saves cache build-test (linux-amd64)
         with:
           path: |
             ${{ env.go_cache }}
