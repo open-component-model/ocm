@@ -119,9 +119,10 @@ jobs:
       pull-requests: read
 
   release:
-#    needs:
-#     - lint-and-test
-#     - components
+    needs:
+    # run check before actual release to make sure we succeed
+    # they will be skipped from the needs check
+    - check
     name: Release Build
     runs-on: large_runner
     permissions:
