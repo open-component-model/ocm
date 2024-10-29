@@ -119,9 +119,10 @@ jobs:
       pull-requests: read
 
   release:
-#    needs:
-#     - lint-and-test
-#     - components
+    needs:
+    # run check before actual release to make sure we succeed
+    # they will be skipped from the needs check
+    - check
     name: Release Build
     runs-on: large_runner
     permissions:
@@ -283,7 +284,7 @@ jobs:
         v="$(go run ./api/version/generate bump-version)"
         echo "$v" > VERSION
         # Trigger a bump of any potential files that depend on a new version
-        make generate
+        make -f hack/Makefile mdref && make -f hack/Makefile go-bindata && make generate
         git add --all
         git commit -m "Update version to $v"
         git push origin ${GITHUB_REF#refs/heads/}
