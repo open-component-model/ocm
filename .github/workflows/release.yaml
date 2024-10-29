@@ -259,6 +259,10 @@ jobs:
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
         NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
+    - name: Remove GPG Token file
+      run: |
+        rm ocm-releases-key.gpg
+
     - name: Push OCM Components
       env:
         GITHUBORG: ${{ github.repository_owner }}
