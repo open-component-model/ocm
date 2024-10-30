@@ -310,6 +310,6 @@ jobs:
       uses: peter-evans/repository-dispatch@v3
       with:
         token: ${{ steps.generate_token.outputs.token }}
-        repository: open-component-model/ocm
-        event-type: ocm-cli-release
-        client-payload: '{"version": "${{ env.RELEASE_VERSION }}"}'
+        repository: ${{ github.repository_owner }}/ocm
+        event-type: publish-ocm-cli
+        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true}'
