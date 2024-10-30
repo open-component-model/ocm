@@ -20,7 +20,6 @@ sources, source, src, s
   -F, --file string                         target file/directory (default "component-archive")
   -h, --help                                help for sources
   -O, --output string                       output file for dry-run
-  -P, --preserve-signature                  preserve existing signatures
   -R, --replace                             replace existing elements
   -s, --settings stringArray                settings file with variable settings (yaml)
       --templater string                    templater to use (go, none, spiff, subst) (default "subst")

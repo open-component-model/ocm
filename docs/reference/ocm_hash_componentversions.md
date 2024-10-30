@@ -22,7 +22,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
       --latest                    restrict component versions to latest
       --lookup stringArray        repository name or spec for closure lookup fallback
   -N, --normalization string      normalization algorithm (default "jsonNormalisation/v1")
-  -O, --outfile string            Output file for normalized component descriptor (default "-")
+  -O, --outfile string            Output file for normalized component descriptor (default "norm.ncd")
   -o, --output string             output mode (JSON, json, norm, wide, yaml)
   -r, --recursive                 follow component reference nesting
       --repo string               repository name or spec
