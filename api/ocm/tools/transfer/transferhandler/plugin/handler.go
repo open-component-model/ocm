@@ -182,7 +182,7 @@ func (h *Handler) askComponentVersionQuestion(question string, src ocm.Component
 		return false, err
 	}
 
-	args := plugin.ComponentVersionQuestion{
+	args := plugin.ComponentVersionQuestionArguments{
 		Source:  *s,
 		Target:  *t,
 		Options: *o,
@@ -214,7 +214,7 @@ func (h *Handler) askArtifactQuestion(question string, src ocm.ComponentVersionA
 		return false, err
 	}
 
-	args := plugin.ArtifactQuestion{
+	args := plugin.ArtifactQuestionArguments{
 		Source:   *s,
 		Artifact: *a,
 		Options:  *o,
@@ -289,7 +289,7 @@ func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionA
 		return nil, nil, err
 	}
 
-	args := plugin.ComponentReferenceQuestion{
+	args := plugin.ComponentReferenceQuestionArguments{
 		Source: *s,
 		Target: *t,
 		ElementMeta: v2.ElementMeta{

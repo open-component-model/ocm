@@ -32,7 +32,7 @@ This command is only used, if for a value set descriptor configuration
 no direct composition rules are configured (<CMD>` + p.Name() + ` descriptor</CMD>).
 
 The purpose describes the purpose the values set is used for:
-- <code>routingslip</code>a value used for a routing slip entry.
+- <code>routingslip</code> a value used for a routing slip entry.
 
 If possible, predefined standard options should be used. In such a case only the
 <code>name</code> field should be defined for an option. If required, new options can be

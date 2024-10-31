@@ -22,12 +22,12 @@ const (
 )
 
 var TransferHandlerQuestions = map[string]reflect.Type{
-	Q_UPDATE_VERSION:    generics.TypeOf[ComponentVersionQuestion](),
-	Q_ENFORCE_TRANSPORT: generics.TypeOf[ComponentVersionQuestion](),
-	Q_OVERWRITE_VERSION: generics.TypeOf[ComponentVersionQuestion](),
-	Q_TRANSFER_VERSION:  generics.TypeOf[ComponentReferenceQuestion](),
-	Q_TRANSFER_RESOURCE: generics.TypeOf[ArtifactQuestion](),
-	Q_TRANSFER_SOURCE:   generics.TypeOf[ArtifactQuestion](),
+	Q_UPDATE_VERSION:    generics.TypeOf[ComponentVersionQuestionArguments](),
+	Q_ENFORCE_TRANSPORT: generics.TypeOf[ComponentVersionQuestionArguments](),
+	Q_OVERWRITE_VERSION: generics.TypeOf[ComponentVersionQuestionArguments](),
+	Q_TRANSFER_VERSION:  generics.TypeOf[ComponentReferenceQuestionArguments](),
+	Q_TRANSFER_RESOURCE: generics.TypeOf[ArtifactQuestionArguments](),
+	Q_TRANSFER_SOURCE:   generics.TypeOf[ArtifactQuestionArguments](),
 }
 
 type UniformAccessSpecInfo = tech.UniformAccessSpecInfo
@@ -83,27 +83,35 @@ type DecisionRequestResult struct {
 	Resolution *Resolution `json:"resolution,omitempty"`
 }
 
-// Question is the interface for the question attributes
+// QuestionArguments is the interface for the question attributes
 // differing for the various questions types.
 // There are three basic attribute sets:
-//   - ComponentVersionQuestion
-//   - ComponentReferenceQuestion
-//   - ArtifactQuestion
+//   - ComponentVersionQuestionArguments
+//   - ComponentReferenceQuestionArguments
+//   - ArtifactQuestionArguments
 //
 // For type assignments see TransferHandlerQuestions.
-type Question interface{}
+type QuestionArguments interface {
+	QuestionArgumentsType() string
+}
 
-// ComponentVersionQuestion describes the question arguments
+// ComponentVersionQuestionArguments describes the question arguments
 // given for a component version related question.
-type ComponentVersionQuestion struct {
+type ComponentVersionQuestionArguments struct {
 	Source  SourceComponentVersion `json:"source"`
 	Target  TargetRepositorySpec   `json:"target"`
 	Options TransferOptions        `json:"options"`
 }
 
-// ComponentReferenceQuestion  describes the question arguments
+var _ QuestionArguments = (*ComponentVersionQuestionArguments)(nil)
+
+func (a *ComponentVersionQuestionArguments) QuestionArgumentsType() string {
+	return "ComponentVersionQuestionArguments"
+}
+
+// ComponentReferenceQuestionArguments  describes the question arguments
 // given for a component version reference related question.
-type ComponentReferenceQuestion struct {
+type ComponentReferenceQuestionArguments struct {
 	Source SourceComponentVersion `json:"source"`
 	Target TargetRepositorySpec   `json:"target"`
 
@@ -113,16 +121,28 @@ type ComponentReferenceQuestion struct {
 	Options TransferOptions `json:"options"`
 }
 
+var _ QuestionArguments = (*ComponentReferenceQuestionArguments)(nil)
+
+func (a *ComponentReferenceQuestionArguments) QuestionArgumentsType() string {
+	return "ComponentReferenceQuestionArguments"
+}
+
 type Artifact struct {
 	Meta       v2.ElementMeta        `json:"metadata"`
 	Access     ocm.GenericAccessSpec `json:"access"`
 	AccessInfo UniformAccessSpecInfo `json:"accessInfo"`
 }
 
-// ArtifactQuestion  describes the question arguments
+// ArtifactQuestionArguments  describes the question arguments
 // given for an artifact related question.
-type ArtifactQuestion struct {
+type ArtifactQuestionArguments struct {
 	Source   SourceComponentVersion `json:"source"`
 	Artifact Artifact               `json:"artifact"`
 	Options  TransferOptions        `json:"options"`
+}
+
+var _ QuestionArguments = (*ArtifactQuestionArguments)(nil)
+
+func (a *ArtifactQuestionArguments) QuestionArgumentsType() string {
+	return "ArtifactQuestionArguments"
 }
