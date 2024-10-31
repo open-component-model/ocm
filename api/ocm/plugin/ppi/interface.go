@@ -247,22 +247,22 @@ type DecisionHandler interface {
 	GetLabels() *[]string
 
 	// DecideOn implements the calculation of the answer to
-	// the question.The given question contains the arguments for
+	// the question. The given question contains the arguments for
 	// the questions. There are three kinds of arguments:
-	// ArtifactQuestion, ComponentVersionQuestion and ComponentReferenceQuestion.
+	// ArtifactQuestionArguments, ComponentVersionQuestionArguments and ComponentReferenceQuestionArguments.
 	// TransferHandlerQuestions maps the question name to the used
 	// argument type.
-	DecideOn(p Plugin, question Question) (bool, error)
+	DecideOn(p Plugin, question QuestionArguments) (bool, error)
 }
 
 type (
-	TransferOptions            = internal.TransferOptions
-	Artifact                   = internal.Artifact
-	AccessInfo                 = internal.UniformAccessSpecInfo
-	Question                   = internal.Question
-	ComponentVersionQuestion   = internal.ComponentVersionQuestion
-	ComponentReferenceQuestion = internal.ComponentReferenceQuestion
-	ArtifactQuestion           = internal.ArtifactQuestion
-	Resolution                 = internal.Resolution
-	DecisionRequestResult      = internal.DecisionRequestResult
+	TransferOptions                     = internal.TransferOptions
+	Artifact                            = internal.Artifact
+	AccessInfo                          = internal.UniformAccessSpecInfo
+	QuestionArguments                   = internal.QuestionArguments
+	ComponentVersionQuestionArguments   = internal.ComponentVersionQuestionArguments
+	ComponentReferenceQuestionArguments = internal.ComponentReferenceQuestionArguments
+	ArtifactQuestionArguments           = internal.ArtifactQuestionArguments
+	Resolution                          = internal.Resolution
+	DecisionRequestResult               = internal.DecisionRequestResult
 )

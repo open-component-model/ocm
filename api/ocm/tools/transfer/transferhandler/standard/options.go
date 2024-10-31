@@ -52,10 +52,6 @@ var (
 
 type TransferOptionsCreator = transferhandler.SpecializedOptionsCreator[*Options, Options]
 
-func (o *Options) NewOptions() transferhandler.TransferHandlerOptions {
-	return &Options{}
-}
-
 func (o *Options) NewTransferHandler() (transferhandler.TransferHandler, error) {
 	return New(o)
 }

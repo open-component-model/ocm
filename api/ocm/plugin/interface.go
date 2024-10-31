@@ -51,12 +51,12 @@ type (
 	TargetRepositorySpec   = internal.TargetRepositorySpec
 	TransferOptions        = internal.TransferOptions
 
-	Artifact                   = internal.Artifact
-	AccessInfo                 = internal.UniformAccessSpecInfo
-	Question                   = internal.Question
-	ComponentVersionQuestion   = internal.ComponentVersionQuestion
-	ComponentReferenceQuestion = internal.ComponentReferenceQuestion
-	ArtifactQuestion           = internal.ArtifactQuestion
-	Resolution                 = internal.Resolution
-	DecisionRequestResult      = internal.DecisionRequestResult
+	Artifact                            = internal.Artifact
+	AccessInfo                          = internal.UniformAccessSpecInfo
+	QuestionArguments                   = internal.QuestionArguments
+	ComponentVersionQuestionArguments   = internal.ComponentVersionQuestionArguments
+	ComponentReferenceQuestionArguments = internal.ComponentReferenceQuestionArguments
+	ArtifactQuestionArguments           = internal.ArtifactQuestionArguments
+	Resolution                          = internal.Resolution
+	DecisionRequestResult               = internal.DecisionRequestResult
 )

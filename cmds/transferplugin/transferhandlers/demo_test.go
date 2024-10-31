@@ -31,7 +31,7 @@ var _ = Describe("Test Environment", func() {
 
 		config := Must(vfs.ReadFile(osfs.OsFs, "testdata/config"))
 
-		question := &ppi.ArtifactQuestion{
+		question := &ppi.ArtifactQuestionArguments{
 			Source: ppi.SourceComponentVersion{
 				Name:       "",
 				Version:    "",

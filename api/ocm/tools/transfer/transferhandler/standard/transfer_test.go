@@ -142,7 +142,7 @@ var _ = Describe("value transport with relative ocireg", func() {
 
 		} else {
 			Expect(info.Host).To(Equal(OCIHOST2 + ".alias"))
-			Expect(info.Info).To(Equal("ocm/value:v2.0"))
+			Expect(info.Info).To(Equal("ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
 		}
 
 		CheckBlob(r, dig, size)
@@ -173,7 +173,7 @@ var _ = Describe("value transport with relative ocireg", func() {
 			Expect(info.Info).To(Equal("sha256:" + H_OCIARCHMANIFEST1))
 
 		} else {
-			Expect(info.Info).To(Equal("ocm/value:v2.0"))
+			Expect(info.Info).To(Equal("ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
 		}
 
 		MustBeSuccessful(ctcv.Close())
