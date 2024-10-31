@@ -78,7 +78,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.ReadFile(OUT)).To(Equal([]byte("testdata")))
 	})
 
-	FIt("registers download handler without config", func() {
+	It("registers download handler without config", func() {
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.Component(COMP, func() {
 				env.Version(VERSION, func() {
