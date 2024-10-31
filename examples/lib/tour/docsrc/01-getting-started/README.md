@@ -216,3 +216,75 @@ sets the `X` flag for the written file.
 ```go
 {{include}{../../01-getting-started/example.go}{download}}
 ```
+
+## Resource Management
+
+Many objects provided by the library offer some kind of resource management. In the example above, this is an
+OCM repository, the OCM component, component version and the access method.
+
+Those objects may use external resources, like temporary file system content or caches. To get rid of those resources again, they offer a `Close` method.
+
+To achieve the possibility to pass those objects around in non-functional call contexts they feature some kind of resource management. It allows to handle
+the life cycle of the resource in a completely local manner. To do so, a second method `Dup` is offered, which provides an independent reference to the original resources, which can be closed separately.
+The possible externally held resource are released with the close of the last reference.
+
+This offers a simple contract to handle resources in functions or object methods:
+
+1. a function creating such an object is responsible for the life cycle of its reference
+  
+    - if the object is returned, this responsibility is passed to its caller
+
+      ```go
+      func f() (Object, error) {
+          o, err:= Create()
+          if err != nil {
+              return nil, err
+          }
+          o.DoSomeThing()
+          DoSomeThingOther(o)
+          return o, nil
+      }
+      ```
+
+    - otherwise, it must be closed at the end of the function (or if it is not used anymore)
+
+      ```go
+      func f() error {
+          o, err:= Create()
+          if err != nil {
+              return err
+          }
+          defer o.Close()
+          o.DoSomeThing()
+          DoSomeThingOther(o)
+      }
+      ```
+
+    The object may be passed to any called function without bothering what this function does with this reference.
+
+2. a function receiving such an object from a function as result it inherits   the responsibility to close it again (see case 1)
+
+3. a function receiving such an object as an argument can freely use  it and a pass it around.
+
+    ```go
+    func f(o Object) {
+        o.DoSomeThing()
+        DoSomeThingOther(o)
+    }
+    ```
+
+    If it decides to store the reference in some state, it must use an own reference for this, obtained by a call to `Dup`. After obtaining an own reference the used storage context is responsible to close it again. It should never close the obtained reference, because the caller is responsible for this.
+
+    ```go
+    func (r *State) f(o Object) (err error) {
+        r.obj, err = o.Dup()
+        return err
+    }
+   
+    func (r *State) Close() error {
+        if r.obj == nil {
+            return nil
+        }
+        return r.obj.Close()
+    }
+    ```
