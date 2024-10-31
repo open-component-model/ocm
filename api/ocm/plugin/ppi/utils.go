@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"reflect"
 
-	errors2 "github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/generics"
-	"github.com/pkg/errors"
 	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
@@ -147,11 +146,11 @@ func (t *transferHandler) GetQuestions() []DecisionHandler {
 
 func (t *transferHandler) RegisterDecision(h DecisionHandler) error {
 	if TransferHandlerQuestions[h.GetQuestion()] == nil {
-		return errors2.ErrInvalid(KIND_QUESTION, h.GetQuestion())
+		return errors.ErrInvalid(KIND_QUESTION, h.GetQuestion())
 	}
 	for _, e := range t.questions {
 		if e.GetQuestion() == h.GetQuestion() {
-			return errors2.ErrAlreadyExists(KIND_QUESTION, e.GetQuestion())
+			return errors.ErrAlreadyExists(KIND_QUESTION, e.GetQuestion())
 		}
 	}
 	t.questions = append(t.questions, h)
