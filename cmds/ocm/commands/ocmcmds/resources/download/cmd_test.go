@@ -78,6 +78,28 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.ReadFile(OUT)).To(Equal([]byte("testdata")))
 	})
 
+	It("registers download handler without config", func() {
+		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+			env.Component(COMP, func() {
+				env.Version(VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+						env.BlobStringData(mime.MIME_TEXT, "testdata")
+					})
+				})
+			})
+		})
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("download", "resources", "--downloader", "helm/artifact:helm/v1", "-O", OUT, ARCH)).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
+			`
+/tmp/res: 8 byte(s) written
+`))
+		Expect(env.FileExists(OUT)).To(BeTrue())
+		Expect(env.ReadFile(OUT)).To(Equal([]byte("testdata")))
+	})
+
 	Context("with closure", func() {
 		BeforeEach(func() {
 			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {

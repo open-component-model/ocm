@@ -18,7 +18,7 @@ type Registration struct {
 	Name         string
 	ArtifactType string
 	MediaType    string
-	Config       json.RawMessage
+	Config       interface{}
 }
 
 func NewRegistrationOption(name, short, desc, usage string) RegistrationOption {
@@ -64,7 +64,7 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 			}
 		}
 
-		var data json.RawMessage
+		var data interface{}
 		var raw []byte
 		var err error
 		if strings.HasPrefix(v, "@") {
@@ -73,7 +73,9 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 				return errors.Wrapf(err, "cannot read %s config from %q", o.name, v[1:])
 			}
 		} else {
-			raw = []byte(v)
+			if v != "" {
+				raw = []byte(v)
+			}
 		}
 
 		if len(raw) > 0 {

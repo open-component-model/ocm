@@ -66,10 +66,12 @@ The following configuration types are supported:
   <pre>
       type: downloader.ocm.config.ocm.software
       description: "my standard download handler configuration"
-      handlers:
+      registrations:
         - name: oci/artifact
           artifactType: ociImage
-          mimeType:
+          mimeType: ...
+          description: ...
+          priority: ...
           config: ...
         ...
   </pre>
@@ -317,7 +319,7 @@ The following configuration types are supported:
   <pre>
       type: uploader.ocm.config.ocm.software
       description: "my standard upload handler configuration"
-      handlers:
+      registrations:
         - name: oci/artifact
           artifactType: ociImage
           config:
