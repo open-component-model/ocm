@@ -8,6 +8,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/oci/grammar"
+	"ocm.software/ocm/api/oci/ociutils"
 )
 
 // to find a suitable secret for images on Docker Hub, we need its two domains to do matching.
@@ -224,6 +225,10 @@ func (r RefSpec) DeepCopy() RefSpec {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func ParseVersion(vers string) (ArtVersion, error) {
+	return ociutils.ParseVersion(vers)
+}
+
 func ParseArt(art string) (ArtSpec, error) {
 	match := grammar.AnchoredArtifactVersionRegexp.FindSubmatch([]byte(art))
 
@@ -247,19 +252,21 @@ func ParseArt(art string) (ArtSpec, error) {
 	}
 	return ArtSpec{
 		Repository: string(match[1]),
-		Tag:        tag,
-		Digest:     dig,
+		ArtVersion: ArtVersion{
+			Tag:    tag,
+			Digest: dig,
+		},
 	}, nil
 }
+
+type ArtVersion = ociutils.ArtVersion
 
 // ArtSpec is a go internal representation of a oci reference.
 type ArtSpec struct {
 	// Repository is the part of a reference without its hostname
 	Repository string `json:"repository"`
-	// +optional
-	Tag *string `json:"tag,omitempty"`
-	// +optional
-	Digest *digest.Digest `json:"digest,omitempty"`
+	// artifact version
+	ArtVersion `json:",inline"`
 }
 
 func (r *ArtSpec) Version() string {
@@ -274,21 +281,6 @@ func (r *ArtSpec) Version() string {
 
 func (r *ArtSpec) IsRegistry() bool {
 	return r.Repository == ""
-}
-
-func (r *ArtSpec) IsVersion() bool {
-	return r.Tag != nil || r.Digest != nil
-}
-
-func (r *ArtSpec) IsTagged() bool {
-	return r.Tag != nil
-}
-
-func (r *ArtSpec) GetTag() string {
-	if r.Tag != nil {
-		return *r.Tag
-	}
-	return ""
 }
 
 func (r *ArtSpec) String() string {

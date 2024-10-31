@@ -26,9 +26,9 @@ var _ = Describe("art parsing", func() {
 	It("succeeds", func() {
 		CheckArt("ubuntu", &oci.ArtSpec{Repository: "ubuntu"})
 		CheckArt("ubuntu/test", &oci.ArtSpec{Repository: "ubuntu/test"})
-		CheckArt("ubuntu/test@"+digest.String(), &oci.ArtSpec{Repository: "ubuntu/test", Digest: &digest})
-		CheckArt("ubuntu/test:"+tag, &oci.ArtSpec{Repository: "ubuntu/test", Tag: &tag})
-		CheckArt("ubuntu/test:"+tag+"@"+digest.String(), &oci.ArtSpec{Repository: "ubuntu/test", Digest: &digest, Tag: &tag})
+		CheckArt("ubuntu/test@"+digest.String(), &oci.ArtSpec{Repository: "ubuntu/test", ArtVersion: oci.ArtVersion{Digest: &digest}})
+		CheckArt("ubuntu/test:"+tag, &oci.ArtSpec{Repository: "ubuntu/test", ArtVersion: oci.ArtVersion{Tag: &tag}})
+		CheckArt("ubuntu/test:"+tag+"@"+digest.String(), &oci.ArtSpec{Repository: "ubuntu/test", ArtVersion: oci.ArtVersion{Digest: &digest, Tag: &tag}})
 	})
 
 	It("fails", func() {
