@@ -82,7 +82,7 @@ of preconfigured upload handler registrations (see <CMD>ocm ocm-uploadhandlers</
 <pre>
     type: ` + ConfigType + `
     description: "my standard upload handler configuration"
-    handlers:
+    registrations:
       - name: oci/artifact
         artifactType: ociImage
         config:

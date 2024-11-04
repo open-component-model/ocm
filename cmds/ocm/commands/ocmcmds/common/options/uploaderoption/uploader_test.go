@@ -1,8 +1,6 @@
 package uploaderoption
 
 import (
-	"encoding/json"
-
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -33,7 +31,7 @@ var _ = Describe("uploader option", func() {
 			Name:         "plugin/name",
 			ArtifactType: "art",
 			MediaType:    "media",
-			Config:       json.RawMessage(`{"name":"Name"}`),
+			Config:       []byte(`{"name":"Name"}`),
 		}}))
 	})
 
@@ -45,7 +43,7 @@ var _ = Describe("uploader option", func() {
 			Name:         "plugin/name",
 			ArtifactType: "art",
 			MediaType:    "",
-			Config:       json.RawMessage(`{"name":"Name"}`),
+			Config:       []byte(`{"name":"Name"}`),
 		}}))
 	})
 
@@ -57,7 +55,7 @@ var _ = Describe("uploader option", func() {
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
-			Config:       json.RawMessage(`{"name":"Name"}`),
+			Config:       []byte(`{"name":"Name"}`),
 		}}))
 	})
 
@@ -69,7 +67,7 @@ var _ = Describe("uploader option", func() {
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
-			Config:       json.RawMessage(`{"name":"Name"}`),
+			Config:       []byte(`{"name":"Name"}`),
 		}}))
 	})
 
@@ -81,7 +79,7 @@ var _ = Describe("uploader option", func() {
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
-			Config:       json.RawMessage(`"Name"`),
+			Config:       []byte(`"Name"`),
 		}}))
 	})
 
