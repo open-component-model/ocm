@@ -15,7 +15,16 @@ CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
 CREDS ?=
-OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+# Define the path to the binary
+OCM_BIN = $(REPO_ROOT)/bin/ocm
+
+# Rule to build the binary if it doesn't exist or if the source code has changed
+$(OCM_BIN): $(REPO_ROOT)/cmds/ocm/main.go
+	mkdir -p $(REPO_ROOT)/bin
+	go build -ldflags $(BUILD_FLAGS) -o $(OCM_BIN) $(REPO_ROOT)/cmds/ocm
+
+# Use the binary for the OCM command
+OCM = $(OCM_BIN) $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
 
@@ -34,15 +43,15 @@ $(GEN)/build: $(CMDSRCS) $(OCMSRCS)
 	@for i in $(PLATFORMS); do \
     tag=$$(echo $$i | sed -e s:/:-:g); \
     echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(NAME); \
-    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(NAME); \
-    done
+    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(NAME) & \
+    done; \
+	wait
 	@touch $(GEN)/build
-
 
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/ca.done
+$(GEN)/ctf: $(GEN)/ca.done $(OCM_BIN)
 	@rm -rf "$(GEN)/ctf"
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch "$(GEN)/ctf"
@@ -54,7 +63,7 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca.done
 
-$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS)
+$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS) $(OCM_BIN)
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add resources --templater=spiff --file $(GEN)/ca NAME="$(NAME)" VERSION="$(VERSION)" COMMIT="$(COMMIT)" GEN="$(GEN)" PLATFORMS="$(PLATFORMS)" resources.yaml
 	@touch $(GEN)/ca.done
@@ -62,17 +71,17 @@ $(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS)
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 
-$(GEN)/push.$(NAME): $(GEN)/ctf
+$(GEN)/push.$(NAME): $(GEN)/ctf $(OCM_BIN)
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: plain-push
-plain-push: $(GEN)
+plain-push: $(GEN) $(OCM_BIN)
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: transport
-transport:
+transport: $(OCM_BIN)
 ifneq ($(TARGETREPO),)
 	$(OCM) transfer component -Vc  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
 endif
