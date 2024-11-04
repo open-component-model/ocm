@@ -16,7 +16,6 @@ func ParseVersion(vers string) (ArtVersion, error) {
 			return ArtVersion{}, err
 		}
 		return ArtVersion{
-			Tag:    nil,
 			Digest: &dig,
 		}, nil
 	}
@@ -48,35 +47,44 @@ type ArtVersion struct {
 }
 
 func (v *ArtVersion) VersionSpec() string {
-	vers := ""
 	if v != nil {
-		if v.Tag != nil {
-			vers = *v.Tag
-		}
-		if v.Digest != nil {
-			vers += "@" + string(*v.Digest)
-		}
-		if vers == "" {
-			return "latest"
-		}
+		return ""
+	}
+
+	vers := ""
+	if v.Tag != nil {
+		vers = *v.Tag
+	}
+
+	if v.Digest != nil {
+		vers += "@" + string(*v.Digest)
+	}
+	if vers == "" {
+		return "latest"
 	}
 	return vers
 }
 
+// IsVersion returns true, if the objet ref is given
+// and describes a dedicated version, either by tag or digest.
 func (v *ArtVersion) IsVersion() bool {
+	if v == nil {
+		return false
+	}
 	return v.Tag != nil || v.Digest != nil
 }
 
 func (v *ArtVersion) IsTagged() bool {
-	return v.Tag != nil
+	return v != nil && v.Tag != nil
 }
 
 func (v *ArtVersion) IsDigested() bool {
-	return v.Digest != nil
+	return v != nil && v.Digest != nil
 }
 
 func (v *ArtVersion) GetTag() string {
-	if v.Tag != nil {
+	if v != nil &&
+		v.Tag != nil {
 		return *v.Tag
 	}
 	return ""
