@@ -105,7 +105,7 @@ info:
 
 .PHONY: describe
 describe: $(GEN)/ctf $(OCM_BIN)
-	$(OCM) get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
+	$(OCM) get resources --lookup $(OCMREPO) -r -o treewide $(GEN)/ctf
 
 .PHONY: descriptor
 descriptor: $(GEN)/ctf $(OCM_BIN)

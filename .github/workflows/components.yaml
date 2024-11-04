@@ -19,8 +19,7 @@ jobs:
     name: "Build"
     strategy:
       matrix:
-        component: [ocmcli]
-#        component: [ocmcli, helminstaller, helmdemo, subchartsdemo, ecrplugin]
+        component: [ocmcli, helminstaller, helmdemo, subchartsdemo, ecrplugin]
     runs-on: large_runner
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
@@ -70,8 +69,7 @@ jobs:
     runs-on: large_runner
     needs: build
     env:
-      components: ocmcli
-#      components: ocmcli helminstaller helmdemo subchartsdemo ecrplugin
+      components: ocmcli helminstaller helmdemo subchartsdemo ecrplugin
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@v2.2
@@ -109,7 +107,7 @@ jobs:
           path: gen/downloaded-ctfs
       - name: Move CTFs into correct directory for aggregation
         run: |
-          IFS=" " read -a COMPONENTS <<< ${{ env.components }}
+          IFS=" " read -a COMPONENTS <<< "${{ env.components }}"
           for i in "${COMPONENTS[@]}"; do
             mkdir -p ${{ github.workspace }}/gen/${i}
             mv ${{ github.workspace }}/gen/downloaded-ctfs/ctf-component-${i} ${{ github.workspace }}/gen/${i}/ctf
@@ -117,7 +115,7 @@ jobs:
           done
       - name: Create aggregated CTF
         run: |
-          PATH=$PATH:$(go env GOPATH)/bin CTF_TYPE=${{ env.CTF_TYPE }} COMPONENTS=${{ env.components }} make plain-ctf
+          PATH=$PATH:$(go env GOPATH)/bin CTF_TYPE=${{ env.CTF_TYPE }} COMPONENTS="${{ env.components }}" make plain-ctf
       - name: Upload aggregated CTF
         # only update on main
         if: github.ref == 'refs/heads/main'
@@ -125,7 +123,7 @@ jobs:
         with:
           if-no-files-found: error
           overwrite: true
-          retention-days: 1
+          retention-days: 90
           name: ctf-aggregated
           path: gen/ctf
       - name: Delete old CTFs that lead up to aggregation

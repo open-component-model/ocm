@@ -77,12 +77,12 @@ info:
 	@echo "CREDS:    $(CREDS)"
 
 .PHONY: describe
-describe: $(GEN)/ctf
-	ocm get resources --lookup $(OCMREPO) -o treewide $(GEN)/ctf
+describe: $(GEN)/ctf $(OCM_BIN)
+	$(OCM) get resources --lookup $(OCMREPO) -r -o treewide $(GEN)/ctf
 
 .PHONY: descriptor
-descriptor: $(GEN)/ctf
-	ocm get component -S v3alpha1 -o yaml $(GEN)/ctf
+descriptor: $(GEN)/ctf $(OCM_BIN)
+	$(OCM) get component -S v3alpha1 -o yaml $(GEN)/ctf
 
 .PHONY: clean
 clean:
