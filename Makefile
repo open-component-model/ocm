@@ -13,7 +13,7 @@ CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 PLATFORMS = windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64
 
 CREDS    ?=
-OCM      := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+OCM := bin/ocm $(CREDS)
 CTF_TYPE ?= directory
 
 GEN := $(REPO_ROOT)/gen
@@ -165,7 +165,7 @@ $(GEN)/.comps: $(GEN)/.exists
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/.exists $(GEN)/.comps
+$(GEN)/ctf: $(GEN)/.exists $(GEN)/.comps bin/ocm
 	@rm -rf "$(GEN)"/ctf
 	@for i in $(COMPONENTS); do \
       echo "transfering component $$i..."; \
@@ -177,16 +177,16 @@ $(GEN)/ctf: $(GEN)/.exists $(GEN)/.comps
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/.push.$(NAME)
 
-$(GEN)/.push.$(NAME): $(GEN)/ctf
+$(GEN)/.push.$(NAME): $(GEN)/ctf bin/ocm
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $@
 
 .PHONY: plain-push
-plain-push: $(GEN)
+plain-push: $(GEN) bin/ocm
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 
 .PHONY: plain-ctf
-plain-ctf: $(GEN)
+plain-ctf: $(GEN) bin/ocm
 	@rm -rf "$(GEN)"/ctf
 	@for i in $(COMPONENTS); do \
        echo "transfering component $$i..."; \
