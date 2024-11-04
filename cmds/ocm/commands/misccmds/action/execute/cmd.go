@@ -11,6 +11,7 @@ import (
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext/action"
+	"ocm.software/ocm/api/datacontext/action/api"
 	utils2 "ocm.software/ocm/api/utils"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
@@ -54,11 +55,13 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 		Long: `
 Execute an action extension for a given action specification. The specification
-show be a JSON or YAML argument.
+should be a JSON or YAML argument.
 
 Additional properties settings can be used to describe a consumer id
 to retrieve credentials for.
-`,
+
+The following actions are supported:
+` + api.Usage(api.DefaultRegistry()),
 		Example: `
 $ ocm execute action '{ "type": "oci.repository.prepare/v1", "hostname": "...", "repository": "..."}'
 `,
