@@ -119,9 +119,10 @@ jobs:
       pull-requests: read
 
   release:
-#    needs:
-#     - lint-and-test
-#     - components
+    needs:
+    # run check before actual release to make sure we succeed
+    # they will be skipped from the needs check
+    - check
     name: Release Build
     runs-on: large_runner
     permissions:
@@ -173,7 +174,7 @@ jobs:
         cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@1ca97d9028b51809cf6d3c934c3e160716e1b605 # v0.17.5
+      uses: anchore/sbom-action/download-syft@251a468eed47e5082b105c3ba6ee500c0e65a764 # v0.17.6
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.7.0
@@ -263,6 +264,10 @@ jobs:
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
         NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
+    - name: Remove GPG Token file
+      run: |
+        rm ocm-releases-key.gpg
+
     - name: Push OCM Components
       env:
         GITHUBORG: ${{ github.repository_owner }}
@@ -288,7 +293,7 @@ jobs:
         v="$(go run ./api/version/generate bump-version)"
         echo "$v" > VERSION
         # Trigger a bump of any potential files that depend on a new version
-        make generate
+        make -f hack/Makefile mdref && make -f hack/Makefile go-bindata && make generate
         git add --all
         git commit -m "Update version to $v"
         git push origin ${GITHUB_REF#refs/heads/}
