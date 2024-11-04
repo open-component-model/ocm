@@ -8,6 +8,7 @@ OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 MULTI     ?= true
 IMAGE_PLATFORMS ?= linux/amd64 linux/arm64
 PLATFORMS = $(IMAGE_PLATFORMS) darwin/arm64 darwin/amd64 windows/amd64
+CTF_TYPE ?= directory
 
 REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
@@ -18,9 +19,7 @@ PLATFORM_OS                                    := $(shell go env GOOS)
 PLATFORM_ARCH                                  := $(shell go env GOARCH)
 
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
-OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
-
-ATTRIBUTES = VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" IMAGE_PLATFORMS="$(IMAGE_PLATFORMS)" GEN="$(GEN)" MULTI=$(MULTI)
+OCMSRCS=$(shell find $(REPO_ROOT)/api -type f) $(REPO_ROOT)/go.*
 
 ifeq ($(MULTI),true)
 FLAGSUF     = .multi
@@ -38,7 +37,10 @@ $(OCM_BIN): $(REPO_ROOT)/cmds/ocm/main.go
 # Use the binary for the OCM command
 OCM = $(OCM_BIN) $(CREDS)
 
-GEN = $(REPO_ROOT)/gen/$(shell basename $(realpath .))
+GEN = $(REPO_ROOT)/gen/$(NAME)
+
+ $(GEN):
+	@mkdir -p $(GEN)
 
 NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
@@ -52,7 +54,7 @@ ALPINE_LATEST_VER=$(shell curl -s https://registry.hub.docker.com/v2/repositorie
 .PHONY: build
 build: $(GEN)/build
 
-$(GEN)/build: $(GEN)/.exists $(CMDSRCS) $(OCMSRCS)
+$(GEN)/build: $(GEN) $(GEN)/.exists $(CMDSRCS) $(OCMSRCS)
 	@for i in $(PLATFORMS); do \
 		tag=$$(echo $$i | sed -e s:/:-:g); \
 		echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(CMD); \
@@ -99,23 +101,29 @@ $(GEN)/image.multi: Dockerfile $(GEN)/build
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/ca.done $(OCM_BIN)
+$(GEN)/ctf: $(OCM_BIN) $(GEN)/.exists $(GEN)/build $(GEN)/image$(FLAGSUF) component-constructor.yaml $(CHARTSRCS) Makefile
 	@rm -rf "$(GEN)/ctf"
-	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
-	touch $(GEN)/ctf
+	$(OCM) add componentversions \
+		--create \
+		--file $(GEN)/ctf \
+		--type $(CTF_TYPE) \
+		--templater=spiff \
+		COMPONENT="$(COMPONENT)" \
+		NAME="$(NAME)" \
+		VERSION="$(VERSION)" \
+		PROVIDER="$(PROVIDER)" \
+		COMMIT="$(COMMIT)" \
+		GEN="$(GEN)" \
+		PLATFORMS="$(PLATFORMS)" \
+		IMAGE_PLATFORMS="$(IMAGE_PLATFORMS)" \
+		MULTI=$(MULTI) \
+		IMAGE="$(IMAGE):$(VERSION)" \
+		component-constructor.yaml
+	touch "$(GEN)/ctf"
 
 .PHONY: version
 version:
 	@echo $(VERSION)
-
-.PHONY: ca
-ca: $(GEN)/ca.done
-
-$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build $(GEN)/image$(FLAGSUF) resources.yaml $(CHARTSRCS) Makefile $(OCM_BIN)
-	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add resources --templater=spiff --file $(GEN)/ca $(ATTRIBUTES) resources.yaml
-	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" sources.yaml
-	@touch $(GEN)/ca.done
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
@@ -147,12 +155,12 @@ info:
 	@echo "GIT_TREE: $(GIT_TREE_STATE)"
 
 .PHONY: describe
-describe: $(GEN)/ctf
-	ocm get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
+describe: $(GEN)/ctf $(OCM_BIN)
+	$(OCM) get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
 
 .PHONY: descriptor
-descriptor: $(GEN)/ctf
-	ocm get component -S v3alpha1 -o yaml $(GEN)/ctf
+descriptor: $(GEN)/ctf $(OCM_BIN)
+	$(OCM) get component -S v3alpha1 -o yaml $(GEN)/ctf
 
 .PHONY: clean
 clean:

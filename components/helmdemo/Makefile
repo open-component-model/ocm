@@ -3,6 +3,7 @@ PROVIDER    ?= ocm.software
 GITHUBORG   ?= open-component-model
 COMPONENT    = $(PROVIDER)/toi/demo/$(NAME)
 OCMREPO     ?= ghcr.io/$(GITHUBORG)/ocm
+CTF_TYPE ?= directory
 
 HELMINSTCOMP = $(PROVIDER)/toi/installers/helminstaller
 
@@ -26,6 +27,9 @@ OCM = $(OCM_BIN) $(CREDS)
 
 GEN := $(REPO_ROOT)/gen/$(NAME)
 
+$(GEN):
+	@mkdir -p $(GEN)
+
 NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.gitVersion=$(EFFECTIVE_VERSION) \
@@ -38,28 +42,27 @@ CHARTSRCS=$(shell find echoserver -type f)
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/ca $(OCM_BIN)
+$(GEN)/ctf: $(OCM_BIN) $(GEN)/.exists $(CHARTSRCS) $(GEN) component-constructor.yaml packagespec.yaml examples/* helmconfig.yaml
 	@rm -rf $(GEN)/ctf
-	$(OCM) -X keeplocalblob=true transfer ca $(GEN)/ca $(GEN)/ctf
+	$(OCM) add componentversions \
+		--create \
+		--file $(GEN)/ctf \
+		--type $(CTF_TYPE) \
+		--templater=spiff \
+		COMPONENT="$(COMPONENT)" \
+		NAME="$(NAME)" \
+		VERSION="$(VERSION)" \
+		PROVIDER="$(PROVIDER)" \
+		COMMIT="$(COMMIT)" \
+		GEN="$(GEN)" \
+		HELMINSTCOMP=$(HELMINSTCOMP) \
+		HELMINSTVERSION=$(HELMINSTVERSION) \
+		component-constructor.yaml
 	touch $(GEN)/ctf
 
 .PHONY: version
 version:
 	@echo $(VERSION)
-
-.PHONY: ca
-ca: $(GEN)/ca
-
-$(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml examples/* helmconfig.yaml $(OCM_BIN)
-	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" sources.yaml
-	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" resources.yaml
-	$(OCM) add references  $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" HELMINSTCOMP=$(HELMINSTCOMP) HELMINSTVERSION=$(HELMINSTVERSION) references.yaml
-	@touch $(GEN)/ca
-
-.PHONY: eval-resources
-eval-resources: $(OCM_BIN)
-	$(OCM) add resources --dry-run VERSION="$(VERSION)" COMMIT="$(COMMIT)" resources.yaml -O "$(GEN)/resources.yaml"
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
@@ -74,7 +77,7 @@ plain-push: $(GEN) $(OCM_BIN)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: transport
-transport: $(OCM_BIN)
+transport:
 ifneq ($(TARGETREPO),)
 	$(OCM) -X keeplocalblob=true transfer component -Vc  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
 endif

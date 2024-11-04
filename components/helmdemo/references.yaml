@@ -1,4 +1,0 @@
----
-name: installer
-componentName: ${HELMINSTCOMP}
-version: ${HELMINSTVERSION}
