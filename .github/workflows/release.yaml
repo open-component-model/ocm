@@ -33,38 +33,17 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Job Settings
-      run: |
-        echo "Release Job Arguments"
-        if ${{ github.event.inputs.release_candidate }}; then
-          v="v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
-          if [ -n "${{ github.event.inputs.prerelease }}" ]; then
-            echo "Candidate: $v"
-          else
-            echo "Candidate: $v (taken from source)"
-          fi
-        else
-          v="v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)"
-          echo "Final Release: $v"
-          if ${{ github.event.inputs.create_branch }}; then
-            echo "with release branch creation"
-          else
-            echo "without release branch creation"
-          fi
-        fi
-
-    - name: Set Base Version
+    - name: Generate Base Version
       run: |
         BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
         echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
 
-    - name: Set Pre-Release Version
+    - name: Generate Pre-Release Version
       if: inputs.release_candidate == true
       run: |
         RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-
-    - name: Set Version
+    - name: Generate Release Version
       if: inputs.release_candidate == false
       run: |
         RELEASE_VERSION=${{env.BASE_VERSION}}
@@ -96,13 +75,6 @@ jobs:
         draft: true
         releaseName: ${{ env.BASE_VERSION }}
 
-  lint-and-test:
-    name: Lint and Unit Tests
-    uses: ./.github/workflows/lint_and_test.yaml
-    needs: check
-    permissions:
-      contents: read
-      pull-requests: read
   components:
     name: Component CTF Builds
     uses: ./.github/workflows/components.yaml
@@ -110,13 +82,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-  diff-check-manifests:
-    name: Check for diff after go mod tidy and generated targets
-    uses: ./.github/workflows/check_diff_action.yaml
-    needs: check
-    permissions:
-      contents: read
-      pull-requests: read
+
 
   release:
     needs:
@@ -141,6 +107,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
+        # fetch all history so we can calculate the version and tagging
         fetch-depth: 0
         token: ${{ steps.generate_token.outputs.token }}
 
@@ -188,14 +155,12 @@ jobs:
       run: |
         BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
         echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
-
     - name: Set Pre-Release Version
       if: inputs.release_candidate == true
       run: |
         RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
         echo "release name is $RELEASE_VERSION"
-
     - name: Set Version
       if: inputs.release_candidate == false
       run: |

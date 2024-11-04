@@ -4,6 +4,7 @@ GITHUBORG  ?= open-component-model
 COMPONENT = $(PROVIDER)/plugins/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 PLATFORMS = linux/amd64 linux/arm64
+CTF_TYPE ?= directory
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        = $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
@@ -12,7 +13,7 @@ EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
-OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
+OCMSRCS=$(shell find $(REPO_ROOT)/api -type f) $(REPO_ROOT)/go.*
 
 CREDS ?=
 # Define the path to the binary
@@ -28,6 +29,9 @@ OCM = $(OCM_BIN) $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
 
+ $(GEN):
+	@mkdir -p $(GEN)
+
 NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.gitVersion=$(EFFECTIVE_VERSION) \
@@ -35,11 +39,10 @@ BUILD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
  -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
-
 .PHONY: build
 build: $(GEN)/build
 
-$(GEN)/build: $(CMDSRCS) $(OCMSRCS)
+$(GEN)/build: $(GEN) $(CMDSRCS) $(OCMSRCS)
 	@for i in $(PLATFORMS); do \
     tag=$$(echo $$i | sed -e s:/:-:g); \
     echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(NAME); \
@@ -51,22 +54,26 @@ $(GEN)/build: $(CMDSRCS) $(OCMSRCS)
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/ca.done $(OCM_BIN)
+$(GEN)/ctf: $(OCM_BIN) $(GEN)/.exists $(GEN)/build component-constructor.yaml $(CHARTSRCS)
 	@rm -rf "$(GEN)/ctf"
-	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
+	$(OCM) add componentversions \
+		--create \
+		--file $(GEN)/ctf \
+		--type $(CTF_TYPE) \
+		--templater=spiff \
+		COMPONENT="$(COMPONENT)" \
+		NAME="$(NAME)" \
+		VERSION="$(VERSION)" \
+		PROVIDER="$(PROVIDER)" \
+		COMMIT="$(COMMIT)" \
+		GEN="$(GEN)" \
+		PLATFORMS="$(PLATFORMS)" \
+		component-constructor.yaml
 	touch "$(GEN)/ctf"
 
 .PHONY: version
 version:
 	@echo $(VERSION)
-
-.PHONY: ca
-ca: $(GEN)/ca.done
-
-$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS) $(OCM_BIN)
-	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add resources --templater=spiff --file $(GEN)/ca NAME="$(NAME)" VERSION="$(VERSION)" COMMIT="$(COMMIT)" GEN="$(GEN)" PLATFORMS="$(PLATFORMS)" resources.yaml
-	@touch $(GEN)/ca.done
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
@@ -97,12 +104,12 @@ info:
 	@echo "COMMIT;   $(COMMIT)"
 
 .PHONY: describe
-describe: $(GEN)/ctf
-	ocm get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
+describe: $(GEN)/ctf $(OCM_BIN)
+	$(OCM) get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
 
 .PHONY: descriptor
-descriptor: $(GEN)/ctf
-	ocm get component -S v3alpha1 -o yaml $(GEN)/ctf
+descriptor: $(GEN)/ctf $(OCM_BIN)
+	$(OCM) get component -S v3alpha1 -o yaml $(GEN)/ctf
 
 .PHONY: clean
 clean:

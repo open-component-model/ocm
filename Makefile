@@ -14,7 +14,7 @@ PLATFORMS = windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64
 
 CREDS    ?=
 OCM      := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
-CTF_TYPE ?= tgz
+CTF_TYPE ?= directory
 
 GEN := $(REPO_ROOT)/gen
 
@@ -37,25 +37,25 @@ build: bin bin/ocm bin/helminstaller bin/demo bin/cliplugin bin/ecrplugin
 bin:
 	mkdir -p bin
 
-bin/ocm: bin ${SOURCES}
+bin/ocm: bin $(SOURCES)
 	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
 
-bin/helminstaller: bin ${SOURCES}
+bin/helminstaller: bin $(SOURCES)
 	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
 
-bin/demo: bin ${SOURCES}
+bin/demo: bin $(SOURCES)
 	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/demo ./cmds/demoplugin
 
-bin/cliplugin: bin ${SOURCES}
+bin/cliplugin: bin $(SOURCES)
 	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/cliplugin ./cmds/cliplugin
 
-bin/ecrplugin: bin ${SOURCES}
+bin/ecrplugin: bin $(SOURCES)
 	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
 
-api: ${SOURCES}
+api: $(SOURCES)
 	go build ./api/...
 
-examples: ${SOURCES}
+examples: $(SOURCES)
 	go build ./examples/...
 
 
