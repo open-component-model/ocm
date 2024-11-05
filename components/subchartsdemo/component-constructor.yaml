@@ -7,7 +7,7 @@ components:
   version: ${VERSION}
   provider:
     name: ${PROVIDER}
-  componentReferences:
+  references:
   - name: echoserver
     componentName:  ${COMPONENT_PREFIX}/echoserver
     version: "${ECHO_VERSION}"

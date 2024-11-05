@@ -5,7 +5,7 @@ components:
       name: (( values.PROVIDER))
     # use all platforms and create a resource for each
 # ADD back once https://github.com/open-component-model/ocm/issues/1041 is fixed
-    componentReferences:
+    references:
       - name: installer
         componentName: (( values.HELMINSTCOMP ))
         version: (( values.HELMINSTVERSION ))
