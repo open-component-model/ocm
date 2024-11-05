@@ -8,12 +8,7 @@ on:
         description: "Release Candidate"
         required: true
         default: true
-      create_branch:
-        type: boolean
-        description: "Create Release Branch (on failure or if already existing, set to false to ensure a successful run)"
-        required: true
-        default: false
-      prerelease:
+      release_candidate_name:
         type: string
         description: "Release Candidate Name, adjust after every succinct release candidate (e.g. to rc.2, rc.3...)"
         required: true
@@ -27,6 +22,10 @@ jobs:
       contents: write
       id-token: write
       repository-projects: read
+    outputs:
+      base-version: ${{ steps.set-base-version.outputs.BASE_VERSION }}
+      release-version: ${{ steps.set-version.outputs.RELEASE_VERSION }}
+      release-note-body: ${{ steps.release-notes.outputs.body }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -34,20 +33,24 @@ jobs:
         fetch-depth: 0
 
     - name: Generate Base Version
+      id: set-base-version
       run: |
         BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
         echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
+        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
 
-    - name: Generate Pre-Release Version
+    - name: Set Version for Release Candidate
       if: inputs.release_candidate == true
       run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
+        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.release_candidate_name }})
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-    - name: Generate Release Version
+        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+    - name: Set Version
       if: inputs.release_candidate == false
       run: |
         RELEASE_VERSION=${{env.BASE_VERSION}}
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_OUTPUT
 
     - name: Check Tag
       run: |
@@ -57,14 +60,13 @@ jobs:
           exit 1
         fi
 
-    - name: Check Branch
-      if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
+    - name: Check if Running on Release Branch
       run: |
-        set -e
-        if git ls-remote --exit-code origin refs/heads/releases/${{ env.RELEASE_VERSION }} ; then
-          >&2 echo "branch releases/${{ env.RELEASE_VERSION }} already exists"
-          exit 1
+        if [[ ${{ github.ref }} != *"releases/"* ]]; then
+            echo "The branch ${{ github.ref }} is not a valid release branch and cannot be used for a release"
+            exit 1
         fi
+        echo "Branch ${{ github.ref }} is a valid release branch"
 
     - name: Get Draft Release Notes
       id: release-notes
@@ -91,6 +93,9 @@ jobs:
     - check
     name: Release Build
     runs-on: large_runner
+    env:
+      BASE_VERSION: ${{ needs.check.outputs.base-version }}
+      RELEASE_VERSION: ${{ needs.check.outputs.release-version }}
     permissions:
       contents: write
       id-token: write
@@ -117,7 +122,6 @@ jobs:
         go-version-file: '${{ github.workspace }}/go.mod'
         check-latest: false
         cache: false
-
     - name: Get go environment for use with cache
       run: |
         echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
@@ -151,35 +155,10 @@ jobs:
         git config user.name "GitHub Actions Bot"
         git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
 
-    - name: Set Base Version
-      run: |
-        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
-        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
-    - name: Set Pre-Release Version
-      if: inputs.release_candidate == true
-      run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-        echo "release name is $RELEASE_VERSION"
-    - name: Set Version
-      if: inputs.release_candidate == false
-      run: |
-        RELEASE_VERSION=${{env.BASE_VERSION}}
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-        echo "release name is $RELEASE_VERSION"
-
-    - name: Get Draft Release Notes
-      id: release-notes
-      uses: cardinalby/git-get-release-action@v1
+    # This step is
+    - name: Update Release Notes File or reuse existing one
       env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        draft: true
-        releaseName: ${{ env.BASE_VERSION }}
-
-    - name: Update Release Notes File
-      env:
-        RELEASE_NOTES: ${{ steps.release-notes.outputs.body }}
+        RELEASE_NOTES: ${{ needs.check.outputs.release-note-body }}
         GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }}; then
@@ -199,18 +178,30 @@ jobs:
           echo "Using release notes file $f from code base"
         fi
 
-    - name: Create and Push Release
+    - name: Create and Push Release into Tag
       env:
         GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         # git checkout --detach HEAD
         echo -n "${RELEASE_VERSION#v}" > VERSION
-        git add VERSION
+        make -f hack/Makefile mdref && make -f hack/Makefile go-bindata && make generate
+        
         git commit -m "Release $RELEASE_VERSION"
+        git add --all
+        
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
         git push origin ${{ env.RELEASE_VERSION }}
 
+    # TODO From This point on we are technically not generating a release anymore,
+    # but rather distributing the release to various package registries.
+    # However, because we are using goreleaser in a non optimal way,
+    # we are also rebuilding the binaries here instead of passing them from the
+    # already built CTF.
+    #
+    # Additionally the goreleaser is not a pure build since it also signs and pushes artifacts.
+    # Ideally, we would like to only pass the already built artifacts here from the CTF
+    # contained within the release tag in the future.
     - name: Create GPG Token file from Secret
       run: |
         echo "${{ secrets.GPG_PRIVATE_KEY_FOR_SIGNING }}" > ocm-releases-key.gpg
@@ -233,37 +224,14 @@ jobs:
       run: |
         rm ocm-releases-key.gpg
 
+    # Distribute our Packages via our CTF into the OCM Repository
     - name: Push OCM Components
       env:
         GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: make plain-push
 
-    - name: Create Release Branch
-      if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
-      run: |
-        n="releases/${{env.RELEASE_VERSION}}"
-        git checkout -b "$n"
-        v="$(go run ./api/version/generate bump-patch)"
-        echo "$v" > VERSION
-        git add VERSION
-        git commit -m "Prepare Development of v$v"
-        git push origin "$n"
-
-    - name: Bump Version File
-      if: inputs.release_candidate == false
-      run: |
-        set -e
-        git checkout ${GITHUB_REF#refs/heads/}
-        v="$(go run ./api/version/generate bump-version)"
-        echo "$v" > VERSION
-        # Trigger a bump of any potential files that depend on a new version
-        make -f hack/Makefile mdref && make -f hack/Makefile go-bindata && make generate
-        git add --all
-        git commit -m "Update version to $v"
-        git push origin ${GITHUB_REF#refs/heads/}
-        echo "Next branch version is $v"
-
+    # Notify of the Release in the website Repository
     - name: Publish Release Event
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v3
