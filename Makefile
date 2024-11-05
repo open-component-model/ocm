@@ -174,6 +174,14 @@ $(GEN)/ctf: $(GEN)/.exists $(GEN)/.comps bin/ocm
 	done
 	@touch $@
 
+.PHONY: describe
+describe: $(GEN)/ctf bin/ocm
+	$(OCM) get resources --lookup $(OCMREPO) -r -o treewide $(GEN)/ctf
+
+.PHONY: descriptor
+descriptor: $(GEN)/ctf bin/ocm
+	$(OCM) get component -S v3alpha1 -o yaml $(GEN)/ctf
+
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/.push.$(NAME)
 

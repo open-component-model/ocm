@@ -1,4 +1,4 @@
-name: component CTFs
+name: Components
 
 on:
   pull_request:
@@ -13,13 +13,27 @@ permissions:
 
 env:
   CTF_TYPE: directory
+  components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin"]'
 
 jobs:
+  define-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.componentMatrix.outputs.matrix }}
+    steps:
+      - id: componentMatrix
+        name: Set Components to be used for Build
+        run: |
+          echo "matrix=$input" >> $GITHUB_OUTPUT
+        env:
+          input: ${{ env.components }}
+
   build:
     name: "Build"
+    needs: define-matrix
     strategy:
       matrix:
-        component: [ocmcli, helminstaller, helmdemo, subchartsdemo, ecrplugin]
+        component: ${{fromJSON(needs.define-matrix.outputs.components)}}
     runs-on: large_runner
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
@@ -65,11 +79,11 @@ jobs:
           path: gen/${{ matrix.component }}/ctf
 
   aggregate:
-    name: "Aggregate Build Artifacts"
+    name: "Aggregate"
     runs-on: large_runner
-    needs: build
+    needs: [build, define-matrix]
     env:
-      components: ocmcli helminstaller helmdemo subchartsdemo ecrplugin
+      components: ${{ join(fromJSON(needs.define-matrix.outputs.components), ' ') }}
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@v2.2
@@ -115,15 +129,18 @@ jobs:
           done
       - name: Create aggregated CTF
         run: |
-          PATH=$PATH:$(go env GOPATH)/bin CTF_TYPE=${{ env.CTF_TYPE }} COMPONENTS="${{ env.components }}" make plain-ctf
+          PATH=$PATH:$(go env GOPATH)/bin \
+          CTF_TYPE=${{ env.CTF_TYPE }} \
+          COMPONENTS="${{ env.components }}" \
+          make plain-ctf descriptor describe
       - name: Upload aggregated CTF
-        # only update on main
-        if: github.ref == 'refs/heads/main'
+        # only upload the artifact if we are not on a PR
+        if: needs.pr-check.outputs.number != 'null'
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
           overwrite: true
-          retention-days: 90
+          retention-days: 60
           name: ctf-aggregated
           path: gen/ctf
       - name: Delete old CTFs that lead up to aggregation
