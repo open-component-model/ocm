@@ -14,7 +14,7 @@ PLATFORMS = windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64
 
 CREDS    ?=
 OCM      := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
-CTF_TYPE ?= tgz
+CTF_TYPE ?= directory
 
 GEN := $(REPO_ROOT)/gen
 
@@ -27,26 +27,44 @@ BUILD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.gitTreeState=$(GIT_TREE_STATE) \
  -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
  -X ocm.software/ocm/api/version.buildDate=$(NOW)"
+CGO_ENABLED := 0
 
 COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
 
-.PHONY: build
-build: ${SOURCES}
+.PHONY: build bin
+build: bin bin/ocm bin/helminstaller bin/demo bin/cliplugin bin/ecrplugin
+
+bin:
 	mkdir -p bin
+
+bin/ocm: bin $(SOURCES)
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
+
+bin/helminstaller: bin $(SOURCES)
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
+
+bin/demo: bin $(SOURCES)
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/demo ./cmds/demoplugin
+
+bin/cliplugin: bin $(SOURCES)
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/cliplugin ./cmds/cliplugin
+
+bin/ecrplugin: bin $(SOURCES)
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags $(BUILD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
+
+api: $(SOURCES)
 	go build ./api/...
+
+examples: $(SOURCES)
 	go build ./examples/...
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/demo ./cmds/demoplugin
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/cliplugin ./cmds/cliplugin
-	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
 
 
 build-platforms: $(GEN)/.exists $(SOURCES)
 	@for i in $(PLATFORMS); do \
     echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i); \
-    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build ./cmds/ocm ./cmds/helminstaller ./cmds/ecrplugin; \
-    done
+    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=$(CGO_ENABLED) go build ./cmds/ocm ./cmds/helminstaller ./cmds/ecrplugin & \
+    done; \
+	wait
 
 .PHONY: install-requirements
 install-requirements:
@@ -72,18 +90,18 @@ check-and-fix:
 
 .PHONY: force-test
 force-test:
-	@go test --count=1 $(EFFECTIVE_DIRECTORIES)
+	@go test -vet=off --count=1 $(EFFECTIVE_DIRECTORIES)
 
-TESTFLAGS = --tags=integration
+TESTFLAGS = -vet=off --tags=integration
 .PHONY: test
 test:
 	@echo "> Run Tests"
-	go test  $(TESTFLAGS) $(EFFECTIVE_DIRECTORIES)
+	go test $(TESTFLAGS) $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: unit-test
 unit-test:
 	@echo "> Run Unit Tests"
-	@go test $(EFFECTIVE_DIRECTORIES)
+	@go test -vet=off $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: generate
 generate:
