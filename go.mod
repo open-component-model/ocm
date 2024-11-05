@@ -369,3 +369,10 @@ require (
 )
 
 retract [v0.16.0, v0.16.9] // Retract all from v0.16 due to https://github.com/open-component-model/ocm-project/issues/293
+
+// crypto/tls: Client Hello is always sent in 2 TCP frames if GODEBUG=tlskyber=1 (default) which causes
+// issues with various enterprise network gateways such as Palo Alto Networks. We have been reported issues
+// such as https://github.com/open-component-model/ocm/issues/1027 and do not want to pin our crypto/tls version.
+// As such we have decided to globally override tlskyber=0
+// For more info, see https://github.com/golang/go/issues/70047
+godebug tlskyber=0
