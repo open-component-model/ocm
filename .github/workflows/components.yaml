@@ -132,7 +132,7 @@ jobs:
           PATH=$PATH:$(go env GOPATH)/bin \
           CTF_TYPE=${{ env.CTF_TYPE }} \
           COMPONENTS="${{ env.components }}" \
-          make plain-ctf descriptor describe
+          make plain-ctf
       - name: Upload aggregated CTF
         # only upload the artifact if we are not on a PR
         if: needs.pr-check.outputs.number != 'null'
