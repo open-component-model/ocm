@@ -29,7 +29,7 @@ commontransportarchive, ctf
   -s, --scriptFile string           filename of transfer handler script
   -E, --stop-on-existing            stop on existing component version in target repository
   -t, --type string                 archive format (directory, tar, tgz) (default "directory")
-      --uploader <name>=<value>     repository uploader (<name>[:<artifact type>[:<media type>[:<prio>]]]=<JSON target config>) (default [])
+      --uploader <name>=<value>     repository uploader (<name>[:<artifact type>[:<media type>[:<priority>]]]=<JSON target config>) (default [])
 ```
 
 ### Description

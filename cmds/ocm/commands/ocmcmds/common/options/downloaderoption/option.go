@@ -31,7 +31,7 @@ type Option struct {
 func (o *Option) Register(ctx ocm.ContextProvider) error {
 	for _, s := range o.Registrations {
 		err := download.RegisterHandlerByName(ctx.OCMContext(), s.Name, s.Config,
-			download.ForArtifactType(s.ArtifactType), download.ForMimeType(s.MediaType), download.WithPrio(s.GetPriority(download.DEFAULT_BLOBHANDLER_PRIO*2)))
+			download.ForArtifactType(s.ArtifactType), download.ForMimeType(s.MediaType), download.WithPrio(s.GetPriority(download.DEFAULT_BLOBHANDLER_PRIO*3)))
 		if err != nil {
 			return err
 		}

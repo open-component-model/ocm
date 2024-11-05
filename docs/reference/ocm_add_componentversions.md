@@ -31,7 +31,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -s, --settings stringArray      settings file with variable settings (yaml)
       --templater string          templater to use (go, none, spiff, subst) (default "subst")
   -t, --type string               archive format (directory, tar, tgz) (default "directory")
-      --uploader <name>=<value>   repository uploader (<name>[:<artifact type>[:<media type>[:<prio>]]]=<JSON target config>) (default [])
+      --uploader <name>=<value>   repository uploader (<name>[:<artifact type>[:<media type>[:<priority>]]]=<JSON target config>) (default [])
   -v, --version string            default version for components
 ```
 

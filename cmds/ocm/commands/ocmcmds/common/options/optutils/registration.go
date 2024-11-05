@@ -44,7 +44,7 @@ type RegistrationOption struct {
 	Registrations []*Registration
 }
 
-const RegistrationFormat = "<name>[:<artifact type>[:<media type>[:<prio>]]]=<JSON target config>"
+const RegistrationFormat = "<name>[:<artifact type>[:<media type>[:<priority>]]]=<JSON target config>"
 
 func (o *RegistrationOption) AddFlags(fs *pflag.FlagSet) {
 	flag.StringToStringVarP(fs, &o.spec, o.name, o.short, nil, fmt.Sprintf("%s (%s)", o.desc, RegistrationFormat))
