@@ -29,7 +29,7 @@ type Option struct {
 func (o *Option) Register(ctx ocm.ContextProvider) error {
 	for _, s := range o.Registrations {
 		err := blobhandler.RegisterHandlerByName(ctx.OCMContext(), s.Name, s.Config,
-			blobhandler.ForArtifactType(s.ArtifactType), blobhandler.ForMimeType(s.MediaType))
+			blobhandler.ForArtifactType(s.ArtifactType), blobhandler.ForMimeType(s.MediaType), blobhandler.WithPrio(s.GetPriority(blobhandler.DEFAULT_BLOBHANDLER_PRIO*3)))
 		if err != nil {
 			return err
 		}
