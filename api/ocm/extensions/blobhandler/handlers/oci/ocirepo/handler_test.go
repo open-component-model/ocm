@@ -125,7 +125,7 @@ var _ = Describe("oci artifact transfer", func() {
 			data := Must(json.Marshal(comp.GetDescriptor().Resources[1].Access))
 
 			fmt.Printf("%s\n", string(data))
-			Expect(string(data)).To(StringEqualWithContext(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:` + D_OCIMANIFEST1 + `","type":"ociArtifact"},"localReference":"sha256:b0692bcec00e0a875b6b280f3209d6776f3eca128adcb7e81e82fd32127c0c62","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`))
+			Expect(string(data)).To(StringEqualWithContext(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:` + D_OCIMANIFEST1 + `","type":"ociArtifact"},"localReference":"sha256:` + H_OCIARCHMANIFEST1 + `","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`))
 			ocirepo := genericocireg.GetOCIRepository(tgt)
 			Expect(ocirepo).NotTo(BeNil())
 

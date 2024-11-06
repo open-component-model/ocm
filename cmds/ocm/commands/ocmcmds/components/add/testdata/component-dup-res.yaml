@@ -33,7 +33,7 @@ resources:
       type: binary
       data: IXN0cmluZ2RhdGE=
 
-componentReferences:
+references:
   - name: ref
     version: v1
     componentName: github.com/mandelsoft/test2

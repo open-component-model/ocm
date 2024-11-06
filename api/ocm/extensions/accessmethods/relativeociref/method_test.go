@@ -68,7 +68,7 @@ var _ = Describe("Method", func() {
 			return m.Close()
 		})
 		data := Must(m.Get())
-		Expect(len(data)).To(Equal(628))
+		Expect(len(data)).To(Equal(630))
 		Expect(accspeccpi.GetAccessMethodImplementation(m).(blobaccess.DigestSource).Digest().String()).To(Equal("sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"))
 		Expect(utils.GetOCIArtifactRef(env, res)).To(Equal("ocm/value:v2.0"))
 	})
