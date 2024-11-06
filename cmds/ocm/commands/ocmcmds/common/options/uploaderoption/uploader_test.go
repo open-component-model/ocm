@@ -84,7 +84,7 @@ var _ = Describe("uploader option", func() {
 	})
 
 	It("fails", func() {
-		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:::=Name`}))
-		MustFailWithMessage(opt.Configure(ctx), "invalid uploader registration plugin/name::: must be of "+optutils.RegistrationFormat)
+		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:::0:=Name`}))
+		MustFailWithMessage(opt.Configure(ctx), "invalid uploader registration plugin/name:::0: (invalid priority) must be of "+optutils.RegistrationFormat)
 	})
 })

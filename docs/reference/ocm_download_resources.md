@@ -18,7 +18,7 @@ resources, resource, res, r
       --check-verified              enable verification store
   -c, --constraints constraints     version constraint
   -d, --download-handlers           use download handler if possible
-      --downloader <name>=<value>   artifact downloader (<name>[:<artifact type>[:<media type>]]=<JSON target config) (default [])
+      --downloader <name>=<value>   artifact downloader (<name>[:<artifact type>[:<media type>[:<priority>]]]=<JSON target config>) (default [])
   -x, --executable                  download executable for local platform
   -h, --help                        help for resources
       --latest                      restrict component versions to latest

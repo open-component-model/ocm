@@ -105,6 +105,6 @@ var _ = Describe("registration options", func() {
 
 	It("fails", func() {
 		MustBeSuccessful(flags.Parse([]string{`--test`, `plugin/name:::=Name`}))
-		MustFailWithMessage(opt.Configure(ctx), "invalid test registration plugin/name::: must be of "+optutils.RegistrationFormat)
+		MustFailWithMessage(opt.Configure(ctx), "invalid test registration plugin/name::: (invalid priority) must be of "+optutils.RegistrationFormat)
 	})
 })

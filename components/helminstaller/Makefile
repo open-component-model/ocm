@@ -6,6 +6,7 @@ COMPONENT := $(PROVIDER)/toi/installers/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 MULTI     ?= true
 PLATFORMS ?= linux/amd64 linux/arm64
+CTF_TYPE ?= directory
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        := $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
@@ -30,6 +31,9 @@ OCM = $(OCM_BIN) $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
 
+$(GEN):
+	@mkdir -p $(GEN)
+
 NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.gitVersion=$(EFFECTIVE_VERSION) \
@@ -40,8 +44,6 @@ BUILD_FLAGS := "-s -w \
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
-ATTRIBUTES = VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI)
-
 ifeq ($(MULTI),true)
 FLAGSUF     = .multi
 endif
@@ -49,38 +51,28 @@ endif
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/ca $(OCM_BIN)
+$(GEN)/ctf: $(OCM_BIN) $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) component-constructor.yaml executorspec.yaml
 	@rm -rf "$(GEN)/ctf"
-	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
-	touch $(GEN)/ctf
-
-.PHONY: plain-ctf
-plain-ctf: $(OCM_BIN)
-	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
-	touch $(GEN)/ctf
+	$(OCM) add componentversions \
+		--create \
+		--file $(GEN)/ctf \
+		--type $(CTF_TYPE) \
+		--templater=spiff \
+		COMPONENT="$(COMPONENT)" \
+		NAME="$(NAME)" \
+		VERSION="$(VERSION)" \
+		PROVIDER="$(PROVIDER)" \
+		COMMIT="$(COMMIT)" \
+		GEN="$(GEN)" \
+		PLATFORMS="$(PLATFORMS)" \
+		MULTI="$(MULTI)" \
+		IMAGE="$(IMAGE):$(VERSION)" \
+		component-constructor.yaml
+	touch "$(GEN)/ctf"
 
 .PHONY: version
 version:
 	@echo $(VERSION)
-
-.PHONY: ca
-ca: $(GEN)/ca
-
-$(GEN)/ca: $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) resources.yaml executorspec.yaml $(OCM_BIN)
-	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add resources --templater spiff $(GEN)/ca $(ATTRIBUTES)  resources.yaml
-	@touch $(GEN)/ca
-
-
-.PHONY: plain-ca
-plain-ca: $(GEN)/.exists $(OCM_BIN)
-	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider  $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add resources --templater spiff $(GEN)/ca $(ATTRIBUTES) resources.yaml
-	@touch $(GEN)/ca
-
-.PHONY: eval-resources
-eval-resources: $(OCM_BIN)
-	$(OCM) add resources --dry-run --templater spiff $(ATTRIBUTES) resources.yaml
 
 .PHONY: build
 build: $(GEN)/image.$(NAME)$(FLAGSUF)
@@ -145,12 +137,12 @@ info:
 	@echo "PATFORM:     $(PLATFORM)"
 
 .PHONY: describe
-describe: $(GEN)/ctf
-	ocm get resources --lookup $(OCMREPO) -r -o treewide $(GEN)/ctf
+describe: $(OCM_BIN) $(GEN)/ctf
+	$(OCM) get resources --lookup $(OCMREPO) -r -o treewide $(GEN)/ctf
 
 .PHONY: descriptor
-descriptor: $(GEN)/ctf
-	ocm get component -S v3alpha1 -o yaml $(GEN)/ctf
+descriptor: $(OCM_BIN) $(GEN)/ctf
+	$(OCM) get component -S v3alpha1 -o yaml $(GEN)/ctf
 
 .PHONY: setup
 setup:
