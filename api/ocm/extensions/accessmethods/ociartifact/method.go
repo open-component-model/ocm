@@ -247,7 +247,7 @@ func (m *accessMethod) eval(relto oci.Repository) error {
 		}
 		ref = oci.RefSpec{
 			UniformRepositorySpec: *repo.GetSpecification().UniformRepositorySpec(),
-			ArtSpec:               art,
+			ArtSpec:               *art,
 		}
 		m.repo = repo
 	}

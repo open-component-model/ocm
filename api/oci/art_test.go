@@ -15,7 +15,7 @@ func CheckArt(ref string, exp *oci.ArtSpec) {
 		Expect(err).To(HaveOccurred())
 	} else {
 		Expect(err).To(Succeed())
-		Expect(spec).To(Equal(*exp))
+		Expect(spec).To(Equal(exp))
 	}
 }
 

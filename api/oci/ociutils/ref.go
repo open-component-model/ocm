@@ -9,13 +9,13 @@ import (
 
 // ParseVersion parses the version part of an OCI reference consisting
 // of an optional tag and/or digest.
-func ParseVersion(vers string) (ArtVersion, error) {
+func ParseVersion(vers string) (*ArtVersion, error) {
 	if strings.HasPrefix(vers, "@") {
 		dig, err := digest.Parse(vers[1:])
 		if err != nil {
-			return ArtVersion{}, err
+			return nil, err
 		}
-		return ArtVersion{
+		return &ArtVersion{
 			Digest: &dig,
 		}, nil
 	}
@@ -24,14 +24,14 @@ func ParseVersion(vers string) (ArtVersion, error) {
 	if i > 0 {
 		dig, err := digest.Parse(vers[i+1:])
 		if err != nil {
-			return ArtVersion{}, err
+			return nil, err
 		}
-		return ArtVersion{
+		return &ArtVersion{
 			Tag:    generics.Pointer(vers[:i]),
 			Digest: &dig,
 		}, nil
 	}
-	return ArtVersion{
+	return &ArtVersion{
 		Tag: &vers,
 	}, nil
 }
@@ -39,6 +39,9 @@ func ParseVersion(vers string) (ArtVersion, error) {
 // ArtVersion is the version part of an OCI reference consisting of an
 // optional tag and/or digest. Both parts may be nil, if a reference
 // does not include a version part.
+// Such objects are sub objects of (oci.)ArtSpec, which has be moved
+// to separate package to avoid package cycles. The methods are
+// derived from ArtSpec.
 type ArtVersion struct {
 	// +optional
 	Tag *string `json:"tag,omitempty"`
@@ -65,8 +68,11 @@ func (v *ArtVersion) VersionSpec() string {
 	return vers
 }
 
-// IsVersion returns true, if the objet ref is given
+// IsVersion returns true, if the object ref is given
 // and describes a dedicated version, either by tag or digest.
+// As part of the ArtSpec type in oci, it might describe
+// no version part. THis method indicates, whether a version part
+// is present.
 func (v *ArtVersion) IsVersion() bool {
 	if v == nil {
 		return false

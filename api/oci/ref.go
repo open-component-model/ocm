@@ -225,15 +225,18 @@ func (r RefSpec) DeepCopy() RefSpec {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func ParseVersion(vers string) (ArtVersion, error) {
+// ParseVersion parses an OCI version part of an OCI reference.
+// It has to be placed in a utils package to avoid package cycles
+// for particular users.
+func ParseVersion(vers string) (*ArtVersion, error) {
 	return ociutils.ParseVersion(vers)
 }
 
-func ParseArt(art string) (ArtSpec, error) {
+func ParseArt(art string) (*ArtSpec, error) {
 	match := grammar.AnchoredArtifactVersionRegexp.FindSubmatch([]byte(art))
 
 	if match == nil {
-		return ArtSpec{}, errors.ErrInvalid(KIND_ARETEFACT_REFERENCE, art)
+		return nil, errors.ErrInvalid(KIND_ARETEFACT_REFERENCE, art)
 	}
 	var tag *string
 	var dig *digest.Digest
@@ -246,11 +249,11 @@ func ParseArt(art string) (ArtSpec, error) {
 		t := string(match[3])
 		d, err := digest.Parse(t)
 		if err != nil {
-			return ArtSpec{}, errors.ErrInvalidWrap(err, KIND_ARETEFACT_REFERENCE, art)
+			return nil, errors.ErrInvalidWrap(err, KIND_ARETEFACT_REFERENCE, art)
 		}
 		dig = &d
 	}
-	return ArtSpec{
+	return &ArtSpec{
 		Repository: string(match[1]),
 		ArtVersion: ArtVersion{
 			Tag:    tag,
@@ -284,6 +287,9 @@ func (r *ArtSpec) IsRegistry() bool {
 }
 
 func (r *ArtSpec) String() string {
+	if r == nil {
+		return ""
+	}
 	s := r.Repository
 	if r.Tag != nil {
 		s += fmt.Sprintf(":%s", *r.Tag)
