@@ -127,12 +127,33 @@ jobs:
             mv ${{ github.workspace }}/gen/downloaded-ctfs/ctf-component-${i} ${{ github.workspace }}/gen/${i}/ctf
             ls -R ${{ github.workspace }}/gen/${i}
           done
+      - name: Extract OCM Binary from CTF to avoid OCM Inception
+        id: extract-ocm
+        run: |
+          ocm_binary=$(bash ./hack/get_bare_resource_from_ctf.sh \
+            "ocm.software/ocmcli" \
+            "" \
+            "ocmcli" \
+            $(go env GOARCH) \
+            $(go env GOOS) \
+            "application/octet-stream" \
+            ${{ github.workspace }}/gen/ocmcli/ctf)
+          
+          new_loc=${{ github.workspace }}/bin/ocm
+          mkdir -p $(dirname $new_loc)
+          ln -s $ocm_binary $new_loc
+          chmod +x $new_loc
+          echo "OCM binary linked to $new_loc"
+          echo "binary=$new_loc" >> $GITHUB_OUTPUT
       - name: Create aggregated CTF
         run: |
-          PATH=$PATH:$(go env GOPATH)/bin \
-          CTF_TYPE=${{ env.CTF_TYPE }} \
-          COMPONENTS="${{ env.components }}" \
-          make plain-ctf
+          for i in ${{ env.components }}; do
+            echo "transfering component $i..."
+            ${{ steps.extract-ocm.outputs.binary }} transfer cv \
+              --type ${{ env.CTF_TYPE }} -V \
+                ${{ github.workspace }}/gen/$i/ctf \
+                ${{ github.workspace }}/gen/ctf
+          done
       - name: Upload aggregated CTF
         # only upload the artifact if we are not on a PR
         if: needs.pr-check.outputs.number != 'null'
