@@ -9,18 +9,6 @@ labels:
   - name: purpose
     value: test
 
-sources:
-  - name: source
-    type: DirectoryTree
-    input:
-      type: binary
-      data: IXN0cmluZ2RhdGE=
-  - name: source
-    type: DirectoryTree
-    input:
-      type: binary
-      data: IXN0cmluZ2RhdGE=
-
 resources:
   - name: text
     type: PlainText
@@ -40,7 +28,7 @@ resources:
       type: binary
       data: IXN0cmluZ2RhdGE=
 
-references:
+componentReferences:
   - name: ref
     version: v1
     componentName: github.com/mandelsoft/test2
