@@ -16,3 +16,4 @@ of extension points of the library.
 - [Working with Configuration](04-working-with-config/README.md#config)
 - [Transporting Component Versions](05-transporting-component-versions/README.md#transport)
 - [Signing Component Versions](06-signing-component-versions/README.md#signing)
+- [Resource Management](07-resource-management/README.md#resmgmt)
