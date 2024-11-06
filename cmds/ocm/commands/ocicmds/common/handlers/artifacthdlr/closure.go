@@ -52,7 +52,7 @@ func traverse(hist common.History, o *Object, octx out.Context) []output.Object 
 					UniformRepositorySpec: o.Spec.UniformRepositorySpec,
 					ArtSpec: oci.ArtSpec{
 						Repository: o.Spec.Repository,
-						Digest:     &ref.Digest,
+						ArtVersion: oci.ArtVersion{Digest: &ref.Digest},
 					},
 				},
 				Namespace: o.Namespace,
