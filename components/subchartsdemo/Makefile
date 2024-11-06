@@ -15,7 +15,7 @@ REPO_ROOT                                     := $(shell dirname $(realpath $(la
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 VERSION                                        = $(shell go run $(REPO_ROOT)/api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
-EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
+EFFECTIVE_VERSION                             ?= $(VERSION)-$(COMMIT)
 HELMINSTVERSION                               ?= $(VERSION)
 
 CREDS ?=

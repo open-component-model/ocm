@@ -10,7 +10,7 @@ HELMINSTCOMP = $(PROVIDER)/toi/installers/helminstaller
 REPO_ROOT                                     := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        = $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
-EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
+EFFECTIVE_VERSION                             ?= $(VERSION)-$(COMMIT)
 HELMINSTVERSION                               ?= $(VERSION)
 
 CREDS ?=

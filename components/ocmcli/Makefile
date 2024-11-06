@@ -7,14 +7,14 @@ COMPONENT = $(PROVIDER)/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 MULTI     ?= true
 IMAGE_PLATFORMS ?= linux/amd64 linux/arm64
-PLATFORMS = $(IMAGE_PLATFORMS) darwin/arm64 darwin/amd64 windows/amd64
+PLATFORMS ?= $(IMAGE_PLATFORMS) darwin/arm64 darwin/amd64 windows/amd64
 CTF_TYPE ?= directory
 
 REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 VERSION                                        = $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
-EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
+EFFECTIVE_VERSION                              ?= $(VERSION)+$(COMMIT)
 PLATFORM_OS                                    := $(shell go env GOOS)
 PLATFORM_ARCH                                  := $(shell go env GOARCH)
 
