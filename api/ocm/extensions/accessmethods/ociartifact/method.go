@@ -227,7 +227,7 @@ func (m *accessMethod) eval(relto oci.Repository) error {
 		ocictx := m.ctx.OCIContext()
 		spec := ocictx.GetAlias(ref.Host)
 		if spec == nil {
-			spec = ocireg.NewRepositorySpec(ref.Host)
+			spec = ocireg.NewRepositorySpec(ref.RepositoryRef())
 		}
 		repo, err := ocictx.RepositoryForSpec(spec)
 		if err != nil {
