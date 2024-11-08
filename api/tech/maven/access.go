@@ -19,7 +19,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"golang.org/x/exp/maps"
 	"golang.org/x/net/html"
-
+	"ocm.software/ocm/api/tech/ocmHttp"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/iotools"
 	"ocm.software/ocm/api/utils/tarutils"
@@ -171,7 +171,7 @@ func (r *Repository) Upload(coords *Coordinates, reader ioutils.DupReadCloser, c
 	}
 
 	// Execute the request
-	client := &http.Client{}
+	client := ocmHttp.NewHttpClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -396,7 +396,7 @@ func (l *Location) GetReader(creds Credentials, tweakIndexOf ...func(loc *Locati
 	if tweakIndexOf != nil {
 		tweakIndexOf[0](nil, req) // tweak the request if necessary
 	}
-	httpClient := &http.Client{}
+	httpClient := ocmHttp.NewHttpClient()
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err

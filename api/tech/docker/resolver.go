@@ -20,8 +20,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context/ctxhttp"
-
 	"ocm.software/ocm/api/tech/docker/resolve"
+	"ocm.software/ocm/api/tech/ocmHttp"
 	"ocm.software/ocm/api/utils/accessio"
 )
 
@@ -540,7 +540,7 @@ func (r *request) do(ctx context.Context) (*http.Response, error) {
 		return nil, errors.Wrap(err, "failed to authorize")
 	}
 
-	client := &http.Client{}
+	client := ocmHttp.NewHttpClient()
 	if r.host.Client != nil {
 		*client = *r.host.Client
 	}

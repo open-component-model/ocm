@@ -7,23 +7,21 @@ import (
 	"net/http"
 	"os"
 
-	_ "ocm.software/ocm/api/datacontext/config"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/tmpcache"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
+	_ "ocm.software/ocm/api/datacontext/config"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/cpi"
 	me "ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/tech/github/identity"
+	"ocm.software/ocm/api/tech/ocmHttp"
 )
 
 type mockDownloader struct {
@@ -48,9 +46,9 @@ func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 
 // NewTestClient returns *http.Client with Transport replaced to avoid making real calls
 func NewTestClient(fn RoundTripFunc) *http.Client {
-	return &http.Client{
-		Transport: fn,
-	}
+	client := ocmHttp.NewHttpClient()
+	client.Transport = fn
+	return client
 }
 
 var _ = Describe("Method", func() {

@@ -14,9 +14,9 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
+	"ocm.software/ocm/api/tech/ocmHttp"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/signutils"
 )
@@ -113,15 +113,15 @@ func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo 
 		}
 	}
 
-	client := http.Client{
-		Transport: &http.Transport{
+	client := ocmHttp.NewHttpClient()
+	/*	Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				MinVersion:   tls.VersionTLS13,
-				RootCAs:      caCertPool,
-				Certificates: clientCerts,
+				// FIXME RootCAs:      caCertPool,
+				// FIXME Certificates: clientCerts,
 			},
 		},
-	}
+	}*/
 
 	res, err := client.Do(req)
 	if err != nil {

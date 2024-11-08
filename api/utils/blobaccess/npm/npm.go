@@ -13,8 +13,8 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/tech/npm"
+	"ocm.software/ocm/api/tech/ocmHttp"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -156,7 +156,7 @@ func (a *PackageSpec) reader(tar ...string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &http.Client{}
+	c := ocmHttp.NewHttpClient()
 	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
