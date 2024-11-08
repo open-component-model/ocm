@@ -87,6 +87,6 @@ $ ocm install plugin -r demo
 
 #### Parents
 
-* [ocm install](ocm_install.md)	 &mdash; Install elements.
+* [ocm install](ocm_install.md)	 &mdash; Install new OCM CLI components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
