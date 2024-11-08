@@ -143,7 +143,15 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 	if err != nil {
 		return err
 	}
+
+	if len(r.References) > 0 && len(r.OldReferences) > 0 {
+		return fmt.Errorf("only field references or componentReferences (deprecated) is possible")
+	}
 	err = handle(ctx, ictx, elem.Source(), cv, r.References, h.refhandler)
+	if err != nil {
+		return err
+	}
+	err = handle(ctx, ictx, elem.Source(), cv, r.OldReferences, h.refhandler)
 	if err != nil {
 		return err
 	}
@@ -169,7 +177,10 @@ type ResourceSpec struct {
 	// Sources defines sources that produced the component
 	Sources []*srcs.ResourceSpec `json:"sources"`
 	// References references component dependencies that can be resolved in the current context.
-	References []*refs.ResourceSpec `json:"componentReferences"`
+	References []*refs.ResourceSpec `json:"references"`
+	// OldReferences references component dependencies that can be resolved in the current context.
+	// Deprecated: use field References.
+	OldReferences []*refs.ResourceSpec `json:"componentReferences"`
 	// Resources defines all resources that are created by the component and by a third party.
 	Resources []*rscs.ResourceSpec `json:"resources"`
 }
