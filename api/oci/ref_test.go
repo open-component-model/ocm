@@ -3,11 +3,11 @@ package oci_test
 import (
 	"strings"
 
-	"github.com/mandelsoft/goutils/generics"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/goutils/generics"
 	godigest "github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/oci"
@@ -255,8 +255,10 @@ var _ = Describe("ref parsing", func() {
 												},
 												ArtSpec: oci.ArtSpec{
 													Repository: r,
-													ArtVersion: oci.ArtVersion{Tag: Pointer([]byte(uv)),
-														Digest: Dig([]byte(ud))},
+													ArtVersion: oci.ArtVersion{
+														Tag:    Pointer([]byte(uv)),
+														Digest: Dig([]byte(ud)),
+													},
 												},
 											})
 										})
@@ -293,8 +295,10 @@ var _ = Describe("ref parsing", func() {
 												},
 												ArtSpec: oci.ArtSpec{
 													Repository: r,
-													ArtVersion: oci.ArtVersion{Tag: Pointer([]byte(uv)),
-														Digest: Dig([]byte(ud))},
+													ArtVersion: oci.ArtVersion{
+														Tag:    Pointer([]byte(uv)),
+														Digest: Dig([]byte(ud)),
+													},
 												},
 											})
 										})
@@ -343,8 +347,10 @@ var _ = Describe("ref parsing", func() {
 										},
 										ArtSpec: oci.ArtSpec{
 											Repository: r,
-											ArtVersion: oci.ArtVersion{Tag: Pointer([]byte(uv)),
-												Digest: Dig([]byte(ud))},
+											ArtVersion: oci.ArtVersion{
+												Tag:    Pointer([]byte(uv)),
+												Digest: Dig([]byte(ud)),
+											},
 										},
 									})
 								})
@@ -382,8 +388,10 @@ var _ = Describe("ref parsing", func() {
 							},
 							ArtSpec: oci.ArtSpec{
 								Repository: "library/" + r,
-								ArtVersion: oci.ArtVersion{Tag: Pointer([]byte(uv)),
-									Digest: Dig([]byte(ud))},
+								ArtVersion: oci.ArtVersion{
+									Tag:    Pointer([]byte(uv)),
+									Digest: Dig([]byte(ud)),
+								},
 							},
 						})
 					})
@@ -418,8 +426,10 @@ var _ = Describe("ref parsing", func() {
 							},
 							ArtSpec: oci.ArtSpec{
 								Repository: r,
-								ArtVersion: oci.ArtVersion{Tag: Pointer([]byte(uv)),
-									Digest: Dig([]byte(ud))},
+								ArtVersion: oci.ArtVersion{
+									Tag:    Pointer([]byte(uv)),
+									Digest: Dig([]byte(ud)),
+								},
 							},
 						})
 					})
@@ -596,8 +606,10 @@ var _ = Describe("ref parsing", func() {
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "repo/repo",
-				ArtVersion: oci.ArtVersion{Tag: &tag,
-					Digest: &digest},
+				ArtVersion: oci.ArtVersion{
+					Tag:    &tag,
+					Digest: &digest,
+				},
 			},
 		})
 		CheckRef("http://127.0.0.1:443/repo/repo:v1@"+digest.String(), &oci.RefSpec{
@@ -609,8 +621,10 @@ var _ = Describe("ref parsing", func() {
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "repo/repo",
-				ArtVersion: oci.ArtVersion{Tag: &tag,
-					Digest: &digest},
+				ArtVersion: oci.ArtVersion{
+					Tag:    &tag,
+					Digest: &digest,
+				},
 			},
 		})
 		CheckRef("directory::a/b", &oci.RefSpec{
