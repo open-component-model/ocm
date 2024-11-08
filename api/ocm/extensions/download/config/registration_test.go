@@ -6,17 +6,16 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/download"
+	me "ocm.software/ocm/api/ocm/extensions/download/config"
 	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/tech/helm"
-
-	me "ocm.software/ocm/api/ocm/extensions/download/config"
 )
 
 var _ = Describe("Download Handler regigistration", func() {
 	It("register by ocm config", func() {
-
 		ctx := ocm.New()
 
 		cfg := me.New()
