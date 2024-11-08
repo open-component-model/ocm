@@ -155,8 +155,9 @@ jobs:
                 ${{ github.workspace }}/gen/ctf
           done
       - name: Upload aggregated CTF
-        # only upload the artifact if we are not on a PR
-        if: needs.pr-check.outputs.number != 'null'
+        # TODO This is currently permanently disabled,
+        # until we integrate it with the release build, in which it would be reused
+        if: false
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
