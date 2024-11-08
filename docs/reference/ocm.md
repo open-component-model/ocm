@@ -369,7 +369,7 @@ by a certificate delivered with the signature.
 * [ocm <b>execute</b>](ocm_execute.md)	 &mdash; Execute an element.
 * [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm <b>hash</b>](ocm_hash.md)	 &mdash; Hash and normalization operations
-* [ocm <b>install</b>](ocm_install.md)	 &mdash; Install elements.
+* [ocm <b>install</b>](ocm_install.md)	 &mdash; Install new OCM CLI components
 * [ocm <b>list</b>](ocm_list.md)	 &mdash; List information about components
 * [ocm <b>set</b>](ocm_set.md)	 &mdash; Set information about OCM repositories
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
