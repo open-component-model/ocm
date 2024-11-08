@@ -12,7 +12,7 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Install elements.",
+		Short: "Install new OCM CLI components ",
 	}, verbs.Install)
 	cmd.AddCommand(plugins.NewCommand(ctx))
 	return cmd
