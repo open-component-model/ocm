@@ -13,6 +13,10 @@ jobs:
   release-version:
     name: Release Version
     uses: ./.github/workflows/release-version.yaml
+    with:
+      # the draft release notes do not need to be done by release candidate
+      # instead we can continously maintain them throughout the candidates
+      release_candidate: false
     permissions:
       contents: read
       repository-projects: read
