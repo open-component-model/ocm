@@ -21,6 +21,7 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/rscs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/srcs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"ocm.software/ocm/cmds/ocm/common/options"
 	"ocm.software/ocm/cmds/ocm/common/utils"
 )
@@ -34,7 +35,7 @@ type ResourceSpecHandler struct {
 	srchandler *srcs.ResourceSpecHandler
 	refhandler *refs.ResourceSpecHandler
 	version    string
-	schema     string
+	schema     *schemaoption.Option
 }
 
 var (
@@ -42,13 +43,12 @@ var (
 	_ options.Options            = (*ResourceSpecHandler)(nil)
 )
 
-func New(v string, schema string, opts ...ocm.ModificationOption) *ResourceSpecHandler {
+func New(opts ...ocm.ModificationOption) *ResourceSpecHandler {
 	return &ResourceSpecHandler{
 		rschandler: rscs.New(opts...),
 		srchandler: srcs.New(),
 		refhandler: refs.New(),
-		version:    v,
-		schema:     schema,
+		schema:     schemaoption.New(compdesc.DefaultSchemeVersion),
 	}
 }
 
@@ -56,6 +56,7 @@ func (h *ResourceSpecHandler) AddFlags(fs *pflag.FlagSet) {
 	h.rschandler.AddFlags(fs)
 	h.srchandler.AddFlags(fs)
 	h.refhandler.AddFlags(fs)
+	fs.StringVarP(&h.version, "version", "v", "", "default version for components")
 }
 
 func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
@@ -118,7 +119,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 		cd.References = nil
 	}
 
-	schema := h.schema
+	schema := h.schema.Schema
 	if r.Meta.ConfiguredVersion != "" {
 		schema = r.Meta.ConfiguredVersion
 	}
