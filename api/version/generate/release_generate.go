@@ -84,6 +84,8 @@ func main() {
 	switch cmd {
 	case "print-semver":
 		fmt.Print(nonpre)
+	case "print-major-minor":
+		fmt.Printf("%d.%d", nonpre.Major(), nonpre.Minor())
 	case "print-version":
 		fmt.Print(v)
 	case "print-rc-version":
