@@ -11,7 +11,6 @@ import (
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
-	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/api/utils/accessio"
@@ -25,7 +24,6 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
-	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -48,23 +46,21 @@ type Command struct {
 	FormatHandler ctf.FormatHandler
 	Format        string
 
-	Version string
+	Handler *comp.ResourceSpecHandler
 
 	Envs []string
 
 	Archive string
-
-	Options addhdlrs.Options
 
 	Elements []addhdlrs.ElementSource
 }
 
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{
+		Handler: comp.New().WithCLIOptions(&addhdlrs.Options{}),
 		BaseCommand: utils.NewBaseCommand(ctx,
 			formatoption.New(ctf.GetFormats()...),
 			fileoption.New("transport-archive"),
-			schemaoption.New(compdesc.DefaultSchemeVersion),
 			templateroption.New(""),
 			dryrunoption.New("evaluate and print component specifications", true),
 			lookupoption.New(),
@@ -155,12 +151,11 @@ Various elements support to add arbitrary information by using labels
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
-	o.Options.AddFlags(fs)
+	o.Handler.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.BoolVarP(&o.Create, "create", "c", false, "(re)create archive")
 	fs.BoolVarP(&o.Closure, "complete", "C", false, "include all referenced component version")
 	fs.StringArrayVarP(&o.Envs, "settings", "s", nil, "settings file with variable settings (yaml)")
-	fs.StringVarP(&o.Version, "version", "v", "", "default version for components")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -209,8 +204,7 @@ func (o *Command) Run() error {
 
 	printer := common2.NewPrinter(o.Context.StdOut())
 	fs := o.Context.FileSystem()
-	h := comp.New(o.Version, schemaoption.From(o).Schema).WithCLIOptions(&o.Options)
-	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, templateroption.From(o).Options, h, o.Elements)
+	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, templateroption.From(o).Options, o.Handler, o.Elements)
 	if err != nil {
 		return err
 	}
@@ -250,7 +244,7 @@ func (o *Command) Run() error {
 	}
 
 	if err == nil {
-		err = comp.ProcessComponents(o.Context, ictx, repo, general.Conditional(o.Closure, lookupoption.From(o).Resolver, nil), thdlr, h, elems)
+		err = comp.ProcessComponents(o.Context, ictx, repo, general.Conditional(o.Closure, lookupoption.From(o).Resolver, nil), thdlr, o.Handler, elems)
 		cerr := repo.Close()
 		if err == nil {
 			err = cerr
