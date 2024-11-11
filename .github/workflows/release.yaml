@@ -26,13 +26,14 @@ jobs:
       repository-projects: read
   check:
     name: Check Release Preconditions
-    runs-on: large_runner
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       repository-projects: read
     needs: release-version
     env:
-      RELEASE_VERSION: ${{ steps.release-version.outputs.version }}
+      RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
+      RELEASE_VERSION_NO_SUFFIX: ${{ needs.release-version.outputs.version_no_suffix }}
       REF: ${{ github.ref }}
     outputs:
       draft-release-notes: ${{ steps.release-notes.outputs.body }}
@@ -62,7 +63,10 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         draft: true
-        releaseName: ${{ env.RELEASE_VERSION }}
+        # here we do not use the full release version, like v0.18.0-rc.1,
+        # but only the base version, like 0.18.0
+        # That is because potentially every release candidate should be based on the same release notes.
+        releaseName: ${{ env.RELEASE_VERSION_NO_SUFFIX }}
 
   components:
     name: Component CTF Builds
@@ -86,7 +90,7 @@ jobs:
       id-token: write
       packages: write
     env:
-      RELEASE_VERSION: ${{ steps.release-version.outputs.version }}
+      RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
       RELEASE_NOTES: ${{ needs.check.outputs.draft-release-notes }}
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action

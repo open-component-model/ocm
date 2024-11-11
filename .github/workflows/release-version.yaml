@@ -9,20 +9,23 @@ on:
       release_candidate:
         type: boolean
         description: "Release Candidate"
-        required: true
+        required: false
         default: true
       release_candidate_name:
         type: string
         description: "Release Candidate Name, adjust after every succinct release candidate (e.g. to rc.2, rc.3...)"
-        required: true
+        required: false
         default: "rc.1"
     outputs:
       version:
-        description: "The release version to use"
+        description: "The release version to use, e.g. v0.18.0"
         value: ${{ jobs.get-release-version.outputs.release-version }}
       version_no_prefix:
-        description: "The release version to use without the 'v' prefix"
+        description: "The release version to use without the 'v' prefix, e.g. v0.18.0 => 0.18.0"
         value: ${{ jobs.get-release-version.outputs.release-version-no-prefix }}
+      version_no_suffix:
+        description: "The base version to use, without any suffix, e.g. v0.18.0-rc.1 => v0.18.0"
+        value: ${{ jobs.get-release-version.outputs.base-version }}
 
 jobs:
   get-release-version:
