@@ -89,31 +89,6 @@ jobs:
         uses: TooMuch4U/actions-clean@v2.2
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: '${{ github.workspace }}/go.mod'
-          cache: false
-      - name: Get go environment for use with cache
-        run: |
-          echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      # This step will only reuse the go mod and build cache from main made during the Build,
-      # see push_ocm.yaml => "ocm-cli-latest" Job
-      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
-      # This is because we have huge storage requirements for our cache because of the mass of dependencies
-      - name: Restore / Reuse Cache from central build
-        id: cache-golang-restore
-        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
-        with:
-          path: |
-            ${{ env.go_cache }}
-            ${{ env.go_modcache }}
-          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
-          restore-keys: |
-            ${{ env.cache_name }}-${{ runner.os }}-go-
-        env:
-          cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
       - name: Download CTFs
         uses: actions/download-artifact@v4
         with:
@@ -127,15 +102,37 @@ jobs:
             mv ${{ github.workspace }}/gen/downloaded-ctfs/ctf-component-${i} ${{ github.workspace }}/gen/${i}/ctf
             ls -R ${{ github.workspace }}/gen/${i}
           done
+      - name: Extract OCM Binary from CTF to avoid OCM Inception
+        id: extract-ocm
+        run: |
+          ocm_binary=$(bash ./hack/get_bare_resource_from_ctf.sh \
+            "ocm.software/ocmcli" \
+            "" \
+            "ocmcli" \
+            $(go env GOARCH) \
+            $(go env GOOS) \
+            "application/octet-stream" \
+            ${{ github.workspace }}/gen/ocmcli/ctf)
+          
+          new_loc=${{ github.workspace }}/bin/ocm
+          mkdir -p $(dirname $new_loc)
+          ln -s $ocm_binary $new_loc
+          chmod +x $new_loc
+          echo "OCM binary linked to $new_loc"
+          echo "binary=$new_loc" >> $GITHUB_OUTPUT
       - name: Create aggregated CTF
         run: |
-          PATH=$PATH:$(go env GOPATH)/bin \
-          CTF_TYPE=${{ env.CTF_TYPE }} \
-          COMPONENTS="${{ env.components }}" \
-          make plain-ctf
+          for i in ${{ env.components }}; do
+            echo "transfering component $i..."
+            ${{ steps.extract-ocm.outputs.binary }} transfer cv \
+              --type ${{ env.CTF_TYPE }} -V \
+                ${{ github.workspace }}/gen/$i/ctf \
+                ${{ github.workspace }}/gen/ctf
+          done
       - name: Upload aggregated CTF
-        # only upload the artifact if we are not on a PR
-        if: needs.pr-check.outputs.number != 'null'
+        # TODO This is currently permanently disabled,
+        # until we integrate it with the release build, in which it would be reused
+        if: false
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
