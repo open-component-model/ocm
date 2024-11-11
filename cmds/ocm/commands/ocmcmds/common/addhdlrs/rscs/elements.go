@@ -48,7 +48,7 @@ func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceS
 }
 
 func (h *ResourceSpecHandler) getModOpts() []ocm.ModificationOption {
-	opts := options.FindOptions[ocm.ModificationOption](h.GetOptions())
+	opts := options.FindOptions[ocm.ModificationOption](h.AsOptionSet())
 	if h.opts != nil {
 		opts = append(opts, h.opts)
 	}
@@ -102,6 +102,9 @@ func (h ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Elemen
 		SourceRefs: compdescv2.ConvertSourcerefsTo(spec.SourceRefs),
 	}
 	opts := h.getModOpts()
+	if spec.SkipDigestGeneration {
+		opts = append(opts, ocm.SkipDigest()) //nolint:staticcheck // skip digest still used for tests
+	}
 	if ocm.IsIntermediate(v.Repository().GetSpecification()) {
 		opts = append(opts, ocm.ModifyResource())
 	}
@@ -126,6 +129,11 @@ type ResourceSpec struct {
 	SourceRefs []compdescv2.SourceRef `json:"srcRefs"`
 
 	addhdlrs.ResourceInput `json:",inline"`
+
+	// additional process related options
+
+	// SkipDigestGeneration omits the digest generation.
+	SkipDigestGeneration bool `json:"skipDigestGeneration,omitempty"`
 }
 
 var _ addhdlrs.ElementSpec = (*ResourceSpec)(nil)

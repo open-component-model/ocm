@@ -1,7 +1,6 @@
 package addhdlrs
 
 import (
-	"github.com/mandelsoft/goutils/generics"
 	"github.com/spf13/pflag"
 
 	"ocm.software/ocm/api/ocm"
@@ -16,7 +15,7 @@ var _ ocm.ModificationOption = (*Options)(nil)
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	f := fs.Lookup("replace")
 	if f != nil {
-		if bp := generics.Cast[*bool](f.Value); bp != nil {
+		if f.Value.Type() == "bool" {
 			return
 		}
 	}
