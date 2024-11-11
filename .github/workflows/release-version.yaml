@@ -1,4 +1,7 @@
-name: Release Version
+# This workflow can be used to resolve the combination of the inputs candidate and candidate name
+# to a release version. The release version is then used in the subsequent steps of the release workflow.
+# The release version base is fetched from the VERSION file in the repository root.
+name: Derive Release Version from VERSION file
 
 on:
   workflow_call:

@@ -20,56 +20,32 @@ on:
         default: "rc.1"
 
 jobs:
+  release-version:
+    name: Release Version
+    uses: ./.github/workflows/release-version.yaml
+    with:
+      release_candidate: ${{ inputs.release_candidate }}
+      release_candidate_name: ${{ inputs.release_candidate_name }}
+    permissions:
+      contents: read
+      repository-projects: read
   check:
     name: Check Release Preconditions
     runs-on: large_runner
     permissions:
-      contents: write
-      id-token: write
+      contents: read
       repository-projects: read
+    needs: release-version
+    env:
+      RELEASE_VERSION: ${{ steps.release-version.outputs.version }}
+      REF: ${{ github.ref }}
+    outputs:
+      draft-release-notes: ${{ steps.release-notes.outputs.body }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-
-    - name: Job Settings
-      run: |
-        echo "Release Job Arguments"
-        if ${{ github.event.inputs.release_candidate }}; then
-          v="v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
-          if [ -n "${{ github.event.inputs.prerelease }}" ]; then
-            echo "Candidate: $v"
-          else
-            echo "Candidate: $v (taken from source)"
-          fi
-        else
-          v="v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)"
-          echo "Final Release: $v"
-          if ${{ github.event.inputs.create_branch }}; then
-            echo "with release branch creation"
-          else
-            echo "without release branch creation"
-          fi
-        fi
-
-    - name: Set Base Version
-      run: |
-        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
-        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
-
-    - name: Set Pre-Release Version
-      if: inputs.release_candidate == true
-      run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-
-    - name: Set Version
-      if: inputs.release_candidate == false
-      run: |
-        RELEASE_VERSION=${{env.BASE_VERSION}}
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-
     - name: Check Tag
       run: |
         set -e
@@ -77,24 +53,21 @@ jobs:
           >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
           exit 1
         fi
-
-    - name: Check Branch
-      if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
+    - name: Check if release is running on release branch
       run: |
-        set -e
-        if git ls-remote --exit-code origin refs/heads/releases/${{ env.RELEASE_VERSION }} ; then
-          >&2 echo "branch releases/${{ env.RELEASE_VERSION }} already exists"
-          exit 1
+        if [[ ${{ env.REF }} != *"releases/"* ]]; then
+            echo "The branch ${{ env.REF }} is not a valid release branch and cannot be used for a release"
+            exit 1
         fi
-
-    - name: Get Draft Release Notes
+        echo "Branch ${{ env.REF }} is a valid release branch"
+    - name: Ensure existing Draft Release Notes exist
       id: release-notes
       uses: cardinalby/git-get-release-action@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         draft: true
-        releaseName: ${{ env.BASE_VERSION }}
+        releaseName: ${{ env.RELEASE_VERSION }}
 
   lint-and-test:
     name: Lint and Unit Tests
@@ -123,12 +96,16 @@ jobs:
     # run check before actual release to make sure we succeed
     # they will be skipped from the needs check
     - check
+    - release-version
     name: Release Build
     runs-on: large_runner
     permissions:
       contents: write
       id-token: write
       packages: write
+    env:
+      RELEASE_VERSION: ${{ steps.release-version.outputs.version }}
+      RELEASE_NOTES: ${{ needs.check.outputs.draft-release-notes }}
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action
       uses: TooMuch4U/actions-clean@v2.2
@@ -144,30 +121,6 @@ jobs:
         fetch-depth: 0
         token: ${{ steps.generate_token.outputs.token }}
 
-    - name: Setup Go
-      uses: actions/setup-go@v5
-      with:
-        go-version-file: '${{ github.workspace }}/go.mod'
-        check-latest: false
-        cache: false
-
-    - name: Get go environment for use with cache
-      run: |
-        echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
-        echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-    - name: Set up cache
-      # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-      uses: actions/cache@v4
-      with:
-        path: |
-          ${{ env.go_cache }}
-          ${{ env.go_modcache }}
-        key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
-        restore-keys: |
-          ${{ env.cache_name }}-${{ runner.os }}-go-
-      env:
-        cache_name: release-go-cache
-
     - name: Setup Syft
       uses: anchore/sbom-action/download-syft@1ca97d9028b51809cf6d3c934c3e160716e1b605 # v0.17.5
 
@@ -179,37 +132,8 @@ jobs:
         git config user.name "GitHub Actions Bot"
         git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
 
-    - name: Set Base Version
-      run: |
-        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
-        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
-
-    - name: Set Pre-Release Version
-      if: inputs.release_candidate == true
-      run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-        echo "release name is $RELEASE_VERSION"
-
-    - name: Set Version
-      if: inputs.release_candidate == false
-      run: |
-        RELEASE_VERSION=${{env.BASE_VERSION}}
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-        echo "release name is $RELEASE_VERSION"
-
-    - name: Get Draft Release Notes
-      id: release-notes
-      uses: cardinalby/git-get-release-action@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        draft: true
-        releaseName: ${{ env.BASE_VERSION }}
-
     - name: Update Release Notes File
       env:
-        RELEASE_NOTES: ${{ steps.release-notes.outputs.body }}
         GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }}; then
@@ -255,7 +179,6 @@ jobs:
       env:
         GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        HOMEBREW_TAP_GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
         NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
@@ -268,17 +191,6 @@ jobs:
         GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: make plain-push
-
-    - name: Create Release Branch
-      if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
-      run: |
-        n="releases/${{env.RELEASE_VERSION}}"
-        git checkout -b "$n"
-        v="$(go run ./api/version/generate bump-patch)"
-        echo "$v" > VERSION
-        git add VERSION
-        git commit -m "Prepare Development of v$v"
-        git push origin "$n"
 
     - name: Bump Version File
       if: inputs.release_candidate == false
