@@ -105,12 +105,9 @@ func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Eleme
 	if spec.SkipDigestGeneration {
 		opts = append(opts, ocm.SkipDigest()) //nolint:staticcheck // skip digest still used for tests
 	}
-	if ocm.IsIntermediate(v.Repository().GetSpecification()) {
-		opts = append(opts, ocm.ModifyResource())
-	}
 	/*
 		if ocm.IsIntermediate(v.Repository().GetSpecification()) {
-			opts = append(opts, ocm.ModifyResource())
+			opts = append(opts, ocm.ModifyElement())
 		}
 	*/
 	return v.SetResource(meta, acc, opts...)

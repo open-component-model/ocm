@@ -23,19 +23,19 @@ var (
 )
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	f := fs.Lookup("replace")
+	o.addBoolFlag(fs, &o.Replace, "replace", "R", false, "replace existing elements")
+	o.addBoolFlag(fs, &o.PreserveSignature, "preserve-signature", "P", false, "preserve existing signatures")
+}
+
+func (o *Options) addBoolFlag(fs *pflag.FlagSet, p *bool, long string, short string, def bool, usage string) {
+	f := fs.Lookup(long)
 	if f != nil {
-		if f.Value.Type() == "bool" {
-			return
-		}
-		if f == nil {
-			fs.BoolVarP(&o.Replace, "replace", "R", false, "replace existing elements")
+		if f.Value.Type() != "bool" {
+			f = nil
 		}
 	}
-
-	f = fs.Lookup("preserve-signature")
 	if f == nil {
-		fs.BoolVarP(&o.PreserveSignature, "preserve-signature", "P", false, "preserve existing signatures")
+		fs.BoolVarP(p, long, short, def, usage)
 	}
 }
 
