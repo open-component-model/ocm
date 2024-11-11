@@ -236,6 +236,7 @@ repocpi
 repositoryimpl
 repositoryspec
 resendbuffer
+resmgmt
 resolvers
 resourcereference
 routings

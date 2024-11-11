@@ -16,7 +16,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/defaultmerge"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -88,6 +88,12 @@ var _ = Describe("Test Environment", func() {
 
 	It("creates ctf and adds component", func() {
 		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "testdata/component-constructor.yaml")).To(Succeed())
+		Expect(env.DirExists(ARCH)).To(BeTrue())
+		CheckComponent(env, nil)
+	})
+
+	It("creates ctf and adds component (deprecated)", func() {
+		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "testdata/component-constructor-old.yaml")).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
 		CheckComponent(env, nil)
 	})

@@ -11,6 +11,7 @@ import (
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
+	"ocm.software/ocm/api/oci/ociutils"
 	"ocm.software/ocm/api/oci/tools/transfer"
 	"ocm.software/ocm/api/oci/tools/transfer/filters"
 	"ocm.software/ocm/api/utils/accessio"
@@ -92,14 +93,19 @@ func SynthesizeArtifactBlobForArtifact(art cpi.ArtifactAccess, ref string, filte
 		return nil, err
 	}
 
+	vers, err := ociutils.ParseVersion(ref)
+	if err != nil {
+		return nil, err
+	}
+
 	return SythesizeArtifactSet(func(set *ArtifactSet) (string, error) {
 		dig, err := transfer.TransferArtifactWithFilter(art, set, filters.And(filter...))
 		if err != nil {
 			return "", fmt.Errorf("failed to transfer artifact: %w", err)
 		}
 
-		if ok, _ := artdesc.IsDigest(ref); !ok {
-			err = set.AddTags(*dig, ref)
+		if ok := vers.IsTagged(); ok {
+			err = set.AddTags(*dig, vers.GetTag())
 			if err != nil {
 				return "", fmt.Errorf("failed to add tag: %w", err)
 			}

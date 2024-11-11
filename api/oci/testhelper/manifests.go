@@ -64,7 +64,8 @@ func OCIArtifactResource1(env *builder.Builder, name string, host string, funcs 
 
 const (
 	D_OCIMANIFEST1     = "0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"
-	H_OCIARCHMANIFEST1 = "b0692bcec00e0a875b6b280f3209d6776f3eca128adcb7e81e82fd32127c0c62"
+	H_OCIARCHMANIFEST1 = "818fb6a69a5f55e8b3dbc921a61fdd000b9445a745b587ba753a811b02426326"
+	// H_OCIARCHMANIFEST1 = "b0692bcec00e0a875b6b280f3209d6776f3eca128adcb7e81e82fd32127c0c62".
 )
 
 var DS_OCIMANIFEST1 = &metav1.DigestSpec{
@@ -123,7 +124,8 @@ func OCIManifest2For(env *builder.Builder, ns, tag string, nested ...func()) (*a
 
 const (
 	D_OCIMANIFEST2     = "c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7"
-	H_OCIARCHMANIFEST2 = "cb85cd58b10e36343971691abbfe40200cb645c6e95f0bdabd111a30cf794708"
+	H_OCIARCHMANIFEST2 = "2aaf6f8857dcbfa04a72fb98dd53f649b46e5d81aa4fb17330df74b0ffc30839"
+	// H_OCIARCHMANIFEST2 = "cb85cd58b10e36343971691abbfe40200cb645c6e95f0bdabd111a30cf794708".
 )
 
 func HashManifest2(fmt string) string {
