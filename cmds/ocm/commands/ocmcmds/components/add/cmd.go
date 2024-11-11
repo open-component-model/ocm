@@ -56,9 +56,11 @@ type Command struct {
 }
 
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
+	hdlr := comp.New().WithCLIOptions(&addhdlrs.Options{})
 	return utils.SetupCommand(&Command{
-		Handler: comp.New().WithCLIOptions(&addhdlrs.Options{}),
+		Handler: hdlr,
 		BaseCommand: utils.NewBaseCommand(ctx,
+			hdlr,
 			formatoption.New(ctf.GetFormats()...),
 			fileoption.New("transport-archive"),
 			templateroption.New(""),
@@ -151,7 +153,6 @@ Various elements support to add arbitrary information by using labels
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
-	o.Handler.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.BoolVarP(&o.Create, "create", "c", false, "(re)create archive")
 	fs.BoolVarP(&o.Closure, "complete", "C", false, "include all referenced component version")

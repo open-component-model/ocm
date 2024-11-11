@@ -27,6 +27,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
       --lookup stringArray        repository name or spec for closure lookup fallback
   -O, --output string             output file for dry-run
   -R, --replace                   replace existing elements
+  -S, --scheme string             schema version (default "v2")
   -s, --settings stringArray      settings file with variable settings (yaml)
       --skip-digest-generation    skip digest creation
       --templater string          templater to use (go, none, spiff, subst) (default "subst")

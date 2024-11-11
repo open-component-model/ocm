@@ -48,7 +48,7 @@ func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceS
 }
 
 func (h *ResourceSpecHandler) getModOpts() []ocm.ModificationOption {
-	opts := options.FindOptions[ocm.ModificationOption](h.GetOptions())
+	opts := options.FindOptions[ocm.ModificationOption](h.AsOptionSet())
 	if h.opts != nil {
 		opts = append(opts, h.opts)
 	}
@@ -103,7 +103,7 @@ func (h ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Elemen
 	}
 	opts := h.getModOpts()
 	if spec.SkipDigestGeneration {
-		opts = append(opts, ocm.SkipDigest()) //nolint:staticcheck // skip digest still used for tests)
+		opts = append(opts, ocm.SkipDigest()) //nolint:staticcheck // skip digest still used for tests
 	}
 	if ocm.IsIntermediate(v.Repository().GetSpecification()) {
 		opts = append(opts, ocm.ModifyResource())
