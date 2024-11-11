@@ -8,12 +8,7 @@ on:
         description: "Release Candidate"
         required: true
         default: true
-      create_branch:
-        type: boolean
-        description: "Create Release Branch (on failure or if already existing, set to false to ensure a successful run)"
-        required: true
-        default: false
-      prerelease:
+      release_candidate_name:
         type: string
         description: "Release Candidate Name, adjust after every succinct release candidate (e.g. to rc.2, rc.3...)"
         required: true
