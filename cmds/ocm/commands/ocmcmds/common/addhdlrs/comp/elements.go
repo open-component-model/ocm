@@ -52,11 +52,16 @@ func New(opts ...ocm.ModificationOption) *ResourceSpecHandler {
 	}
 }
 
+func (h *ResourceSpecHandler) AsOptionSet() options.OptionSet {
+	return options.OptionSet{h.rschandler.AsOptionSet(), h.srchandler.AsOptionSet(), h.refhandler.AsOptionSet(), h.schema}
+}
+
 func (h *ResourceSpecHandler) AddFlags(fs *pflag.FlagSet) {
 	h.rschandler.AddFlags(fs)
 	h.srchandler.AddFlags(fs)
 	h.refhandler.AddFlags(fs)
 	fs.StringVarP(&h.version, "version", "v", "", "default version for components")
+	h.schema.AddFlags(fs)
 }
 
 func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceSpecHandler {
@@ -112,7 +117,7 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 
 	cd := cv.GetDescriptor()
 
-	opts := h.srchandler.GetOptions()[0].(*addhdlrs.Options)
+	opts := h.srchandler.AsOptionSet()[0].(*addhdlrs.Options)
 	if !opts.Replace {
 		cd.Resources = nil
 		cd.Sources = nil
