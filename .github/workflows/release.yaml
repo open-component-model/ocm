@@ -36,7 +36,7 @@ jobs:
       RELEASE_VERSION_NO_SUFFIX: ${{ needs.release-version.outputs.version_no_suffix }}
       REF: ${{ github.ref }}
     outputs:
-      draft-release-notes: ${{ steps.release-notes.outputs.body }}
+      draft-release-notes: ${{ steps.release-notes.outputs.json }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -56,18 +56,28 @@ jobs:
             exit 1
         fi
         echo "Branch ${{ env.REF }} is a valid release branch"
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Ensure existing Draft Release Notes exist
       id: release-notes
-      uses: cardinalby/git-get-release-action@cf4593dd18e51a1ecfbfb1c68abac9910a8b1e0c
+      shell: bash
       env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        draft: true
-        # here we do not use the full release version, like v0.18.0-rc.1,
-        # but only the base version, like 0.18.0
-        # That is because potentially every release candidate should be based on the same release notes.
-        releaseName: ${{ env.RELEASE_VERSION_NO_SUFFIX }}
-
+        GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+      run: |
+        RELEASE_JSON=$( \
+          gh api /repos/open-component-model/ocm-cicd-playground/releases \
+          -q '.[] | select(.name == "${{ env.RELEASE_VERSION_NO_SUFFIX }}" and .draft == true)' \
+        )
+        echo "json=${RELEASE_JSON}" >> $GITHUB_OUTPUT
+        # if no draft release notes are found, we cannot continue
+        if [ -z "${RELEASE_JSON}" ]; then
+          echo "No draft release notes found for ${{ env.RELEASE_VERSION_NO_SUFFIX }}"
+          exit 1
+        fi
   components:
     name: Component CTF Builds
     uses: ./.github/workflows/components.yaml
@@ -91,7 +101,7 @@ jobs:
       packages: write
     env:
       RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
-      RELEASE_NOTES: ${{ needs.check.outputs.draft-release-notes }}
+      RELEASE_NOTES: ${{ fromJSON(needs.check.outputs.draft-release-notes).body }}
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action
       uses: TooMuch4U/actions-clean@v2.2
