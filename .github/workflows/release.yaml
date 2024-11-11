@@ -283,3 +283,32 @@ jobs:
         repository: ${{ github.repository_owner }}/ocm
         event-type: publish-ocm-cli
         client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true}'
+
+    - name: Publish Release Message to Slack
+      id: slack
+      uses: slackapi/slack-github-action@v1.27.0
+      with:
+        # Slack channel id, channel name, or user id to post message.
+        # See also: https://api.slack.com/methods/chat.postMessage#channels
+        # You can pass in multiple channels to post to by providing a comma-delimited list of channel IDs.
+        # Test-channel-id: 'C057KU48M7Y'
+        # SAP Engineering Channel: 'C03B338HG3H'
+        channel-id: |
+          C057KU48M7Y
+        payload: |
+          {
+            "text" : "Open Component Model just got released with version `${{ env.RELEASE_VERSION }}`",
+            "blocks": [
+              {
+                "type": "section",
+                "text":
+                  {
+                    "type": "mrkdwn",
+                    "text": "A new version of the Open Component Model :ocm: was released: <${{ env.RELEASE_URL}}/tag/${{ env.RELEASE_VERSION }}|${{ env.RELEASE_VERSION }}>"
+                  }
+              }
+            ]
+          }
+      env:
+        RELEASE_URL: https://github.com/open-component-model/ocm/releases
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
