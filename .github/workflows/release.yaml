@@ -141,7 +141,7 @@ jobs:
         cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@251a468eed47e5082b105c3ba6ee500c0e65a764 # v0.17.6
+      uses: anchore/sbom-action/download-syft@fc46e51fd3cb168ffb36c6d1915723c47db58abb # v0.17.7
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.7.0
