@@ -13,3 +13,4 @@ of extension points of the library.
 - [Working with Configuration]({{config}})
 - [Transporting Component Versions]({{transport}})
 - [Signing Component Versions]({{signing}})
+- [Resource Management]({{resmgmt}})

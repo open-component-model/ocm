@@ -1,6 +1,7 @@
 package add_test
 
 import (
+	"github.com/mandelsoft/goutils/general"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -16,7 +17,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/defaultmerge"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -35,7 +36,7 @@ const (
 	OUT        = "/tmp/res"
 )
 
-func CheckComponent(env *TestEnv, handler func(ocm.Repository)) {
+func CheckComponent(env *TestEnv, handler func(ocm.Repository), tests ...func(cv ocm.ComponentVersionAccess)) {
 	repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
 	defer Close(repo)
 	cv := Must(repo.LookupComponentVersion("ocm.software/demo/test", "1.0.0"))
@@ -73,6 +74,10 @@ func CheckComponent(env *TestEnv, handler func(ocm.Repository)) {
 	if handler != nil {
 		handler(repo)
 	}
+
+	for _, t := range tests {
+		t(cv)
+	}
 }
 
 var _ = Describe("Test Environment", func() {
@@ -92,10 +97,27 @@ var _ = Describe("Test Environment", func() {
 		CheckComponent(env, nil)
 	})
 
+	It("creates ctf and adds component (deprecated)", func() {
+		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "testdata/component-constructor-old.yaml")).To(Succeed())
+		Expect(env.DirExists(ARCH)).To(BeTrue())
+		CheckComponent(env, nil)
+	})
+
 	It("creates ctf and adds components", func() {
 		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/component-constructor.yaml")).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
 		CheckComponent(env, nil)
+	})
+
+	It("creates ctf and adds components without digests", func() {
+		Expect(env.Execute("add", "c", "--skip-digest-generation", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/component-constructor.yaml")).To(Succeed())
+		Expect(env.DirExists(ARCH)).To(BeTrue())
+		CheckComponent(env, nil, noDigest("data"), noDigest("text"))
+	})
+	It("creates ctf and adds components without digest for one resource", func() {
+		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/component-constructor-skip.yaml")).To(Succeed())
+		Expect(env.DirExists(ARCH)).To(BeTrue())
+		CheckComponent(env, nil, noDigest("data", false), noDigest("text"))
 	})
 
 	Context("failures", func() {
@@ -170,3 +192,15 @@ var _ = Describe("Test Environment", func() {
 		})
 	})
 })
+
+func noDigest(name string, skips ...bool) func(cv ocm.ComponentVersionAccess) {
+	skip := general.OptionalDefaultedBool(true, skips...)
+	return func(cv ocm.ComponentVersionAccess) {
+		r := MustWithOffset(1, Calling(cv.GetResource(metav1.Identity{"name": name})))
+		if skip {
+			ExpectWithOffset(1, r.Meta().Digest).To(BeNil())
+		} else {
+			ExpectWithOffset(1, r.Meta().Digest).NotTo(BeNil())
+		}
+	}
+}

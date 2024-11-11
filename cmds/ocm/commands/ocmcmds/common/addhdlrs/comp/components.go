@@ -1,6 +1,8 @@
 package comp
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/set"
@@ -21,9 +23,13 @@ func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Reposit
 
 	for _, elem := range elems {
 		if r, ok := elem.Spec().(*ResourceSpec); ok {
+			if len(r.References) > 0 && len(r.OldReferences) > 0 {
+				return fmt.Errorf("only field references or componentReferences (deprecated) is possible")
+			}
 			list.Add(addhdlrs.ValidateElementSpecIdentities("resource", elem.Source().String(), sliceutils.Convert[addhdlrs.ElementSpec](r.Resources)))
 			list.Add(addhdlrs.ValidateElementSpecIdentities("source", elem.Source().String(), sliceutils.Convert[addhdlrs.ElementSpec](r.Sources)))
 			list.Add(addhdlrs.ValidateElementSpecIdentities("reference", elem.Source().String(), sliceutils.Convert[addhdlrs.ElementSpec](r.References)))
+			list.Add(addhdlrs.ValidateElementSpecIdentities("reference", elem.Source().String(), sliceutils.Convert[addhdlrs.ElementSpec](r.OldReferences)))
 		}
 	}
 	if err := list.Result(); err != nil {

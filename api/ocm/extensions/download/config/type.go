@@ -63,7 +63,13 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	}
 	reg := download.For(t)
 	for _, h := range a.Registrations {
-		accepted, err := reg.RegisterByName(h.Name, t, h.Config, &h.HandlerOptions)
+		opts := h.HandlerOptions
+		if opts.Priority == 0 {
+			// config objects have higher prio than builtin defaults
+			// CLI options get even higher prio.
+			opts.Priority = download.DEFAULT_BLOBHANDLER_PRIO * 2
+		}
+		accepted, err := reg.RegisterByName(h.Name, t, h.Config, &opts)
 		if err != nil {
 			return errors.Wrapf(err, "registering download handler %q[%s]", h.Name, h.Description)
 		}
@@ -74,17 +80,20 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	return nil
 }
 
-const usage = `
+var usage = `
 The config type <code>` + ConfigType + `</code> can be used to define a list
-of preconfigured download handler registrations (see <CMD>ocm ocm-downloadhandlers</CMD>):
+of preconfigured download handler registrations (see <CMD>ocm ocm-downloadhandlers</CMD>),
+the default priority is ` + fmt.Sprintf("%d", download.DEFAULT_BLOBHANDLER_PRIO*2) + `:
 
 <pre>
     type: ` + ConfigType + `
     description: "my standard download handler configuration"
-    handlers:
+    registrations:
       - name: oci/artifact
         artifactType: ociImage
-        mimeType:
+        mimeType: ...
+        description: ...
+        priority: ...
         config: ...
       ...
 </pre>

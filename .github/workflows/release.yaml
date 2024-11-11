@@ -69,13 +69,6 @@ jobs:
         draft: true
         releaseName: ${{ env.RELEASE_VERSION }}
 
-  lint-and-test:
-    name: Lint and Unit Tests
-    uses: ./.github/workflows/lint_and_test.yaml
-    needs: check
-    permissions:
-      contents: read
-      pull-requests: read
   components:
     name: Component CTF Builds
     uses: ./.github/workflows/components.yaml
@@ -83,13 +76,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-  diff-check-manifests:
-    name: Check for diff after go mod tidy and generated targets
-    uses: ./.github/workflows/check_diff_action.yaml
-    needs: check
-    permissions:
-      contents: read
-      pull-requests: read
+
 
   release:
     needs:
@@ -118,11 +105,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
+        # fetch all history so we can calculate the version and tagging
         fetch-depth: 0
         token: ${{ steps.generate_token.outputs.token }}
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@1ca97d9028b51809cf6d3c934c3e160716e1b605 # v0.17.5
+      uses: anchore/sbom-action/download-syft@fc46e51fd3cb168ffb36c6d1915723c47db58abb # v0.17.7
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.7.0
@@ -222,6 +210,6 @@ jobs:
       uses: peter-evans/repository-dispatch@v3
       with:
         token: ${{ steps.generate_token.outputs.token }}
-        repository: open-component-model/ocm
-        event-type: ocm-cli-release
-        client-payload: '{"version": "${{ env.RELEASE_VERSION }}"}'
+        repository: ${{ github.repository_owner }}/ocm
+        event-type: publish-ocm-cli
+        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true}'

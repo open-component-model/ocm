@@ -70,4 +70,19 @@ port:
 		cid := internal.ConsumerIdentity{}
 		Expect(yaml.Unmarshal([]byte(data), &cid)).NotTo(Succeed())
 	})
+	It("with nil", func() {
+		data := `
+scheme: http
+hostname: 127.0.0.1
+port:
+`
+		id := internal.ConsumerIdentity{
+			"scheme":   "http",
+			"hostname": "127.0.0.1",
+			"port":     "",
+		}
+		cid := internal.ConsumerIdentity{}
+		Expect(yaml.Unmarshal([]byte(data), &cid)).To(Succeed())
+		Expect(cid).To(Equal(id))
+	})
 })

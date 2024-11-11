@@ -64,7 +64,13 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	}
 	reg := blobhandler.For(t)
 	for _, h := range a.Registrations {
-		accepted, err := reg.RegisterByName(h.Name, t, h.Config, &h.HandlerOptions)
+		opts := h.HandlerOptions
+		if opts.Priority == 0 {
+			// config objects have higher prio than builtin defaults
+			// CLI options get even higher prio.
+			opts.Priority = blobhandler.DEFAULT_BLOBHANDLER_PRIO * 2
+		}
+		accepted, err := reg.RegisterByName(h.Name, t, h.Config, &opts)
 		if err != nil {
 			return errors.Wrapf(err, "registering upload handler %q[%s]", h.Name, h.Description)
 		}
@@ -75,14 +81,15 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	return nil
 }
 
-const usage = `
+var usage = `
 The config type <code>` + ConfigType + `</code> can be used to define a list
-of preconfigured upload handler registrations (see <CMD>ocm ocm-uploadhandlers</CMD>):
+of preconfigured upload handler registrations (see <CMD>ocm ocm-uploadhandlers</CMD>),
+the default priority is ` + fmt.Sprintf("%d", download.DEFAULT_BLOBHANDLER_PRIO*2) + `:
 
 <pre>
     type: ` + ConfigType + `
     description: "my standard upload handler configuration"
-    handlers:
+    registrations:
       - name: oci/artifact
         artifactType: ociImage
         config:

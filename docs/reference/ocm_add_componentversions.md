@@ -29,9 +29,10 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -R, --replace                   replace existing elements
   -S, --scheme string             schema version (default "v2")
   -s, --settings stringArray      settings file with variable settings (yaml)
+      --skip-digest-generation    skip digest creation
       --templater string          templater to use (go, none, spiff, subst) (default "subst")
   -t, --type string               archive format (directory, tar, tgz) (default "directory")
-      --uploader <name>=<value>   repository uploader (<name>[:<artifact type>[:<media type>]]=<JSON target config) (default [])
+      --uploader <name>=<value>   repository uploader (<name>[:<artifact type>[:<media type>[:<priority>]]]=<JSON target config>) (default [])
   -v, --version string            default version for components
 ```
 
@@ -83,13 +84,6 @@ archive does not exist yet. The following formats are supported:
 - tgz
 
 The default format is <code>directory</code>.
-
-
-If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.
-
-The following schema versions are supported for explicit conversions:
-  - <code>ocm.software/v3alpha1</code>
-  - <code>v2</code> (default)
 
 
 All yaml/json defined resources can be templated.
