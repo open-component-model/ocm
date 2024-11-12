@@ -159,7 +159,7 @@ jobs:
           done
       - name: Upload aggregated CTF
         # only upload the artifact if we are not on a PR
-        if: inputs.upload-ctf == 'true'
+        if: inputs.upload-ctf
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
