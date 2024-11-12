@@ -1,75 +1,136 @@
-
-name: Release Branch Creation
+# This creates a new release branch from the main branch.
+# It serves as the cutoff point for the next minor release.
+# From this point onward only bug fixes and critical changes will be accepted onto the release
+# branch as backports from main. At the same time, the main branch will be open for new features
+# and changes for the next minor release.
+name: Release Branch Cutoff
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        type: string
-        description: "Tag name (if other than execution base)"
-        required: false
-        default: ""
+
+permissions:
+  # Necessary to write the branch
+  contents: write
 
 jobs:
-  check-and-create:
+  cutoff-preconditions:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      repository-projects: read
+    outputs:
+      minor: ${{ steps.get-minor.outputs.minor }}
+      branch: ${{ steps.verify-branch.outputs.branch }}
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.OCMBOT_APP_ID }}
+          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.generate_token.outputs.token }}
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: '${{ github.workspace }}/go.mod'
+          cache: false
+      - name: Get Minor
+        id: get-minor
+        run: |
+          set -e
+          minor="$(go run ./api/version/generate print-major-minor)"
+          echo "minor=$minor" >> $GITHUB_OUTPUT
+          echo "Current Major-Minor Version: $minor"
+      - name: Verify Branch does not exist
+        id: verify-branch
+        run: |
+          set -e
+          minor="v${{ steps.get-minor.outputs.minor }}"
+          branch="releases/$minor"
+          if git ls-remote --exit-code origin refs/heads/$branch ; then
+            >&2 echo "branch $branch already exists, aborting"
+            exit 1
+          fi
+          echo "branch $branch does not exist"
+          echo "branch=$branch" >> $GITHUB_OUTPUT
+
+  create-branch:
+    runs-on: ubuntu-latest
+    needs: cutoff-preconditions
     permissions:
       contents: write
       id-token: write
       repository-projects: read
     steps:
-    - name: Generate token
-      id: generate_token
-      uses: tibdex/github-app-token@v2
-      with:
-        app_id: ${{ secrets.OCMBOT_APP_ID }}
-        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ steps.generate_token.outputs.token }}
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.OCMBOT_APP_ID }}
+          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.generate_token.outputs.token }}
 
-    - name: Create Release Branch
-      run: |
-        set -e
-        git config --global user.name github-actions
-        git config --global user.email '${GITHUB_ACTOR}@users.noreply.github.com'
+      - name: Create Release Branch
+        run: |
+          set -e
+          branch=${{ needs.cutoff-preconditions.outputs.branch }}
+          git checkout -b "$branch"
+          git push origin $branch
 
-        tag="${{github.event.inputs.tag}}"
-        if [ -n "$tag" ]; then
-          if ! git ls-remote --tags --exit-code origin "$tag" >/dev/null; then
-            >&2 echo "tag $tag not found"
-            exit 1
-          fi
-          git fetch origin "$tag"
-          git checkout "$tag"
-        else 
-          if [ "${{ github.ref_type }}" != "tag" ]; then
-            >&2 echo "please run workflow on desired tag to create a release branch for or specify a tag as input"
-            exit 1
-          fi
-        
-          tag="${{ github.ref_name }}"
-        fi 
-        
-        if ! [[ "$tag" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          >&2 echo "no valid non-pre-release tag $tag"
-          exit 1
-        fi
-        if [ "$tag" == "${tag%.0}" ]; then
-          >&2 echo "please use a non-patch tag"
-          exit 1
-        fi
-        if git ls-remote --exit-code origin refs/heads/releases/$tag ; then
-          >&2 echo "branch releases/$tag already exists"
-          exit 1
-        fi
-        echo "creating release branch for $tag"
-        n="releases/$tag"
-        git checkout -b "$n"
-        v="$(go run ./api/version/generate bump-patch)"
-        echo "$v" > VERSION
-        git add VERSION
-        git commit -m "Prepare Development of v$v"
-        git push origin "$n"
+  bump-main-pr:
+    runs-on: ubuntu-latest
+    needs: [create-branch, cutoff-preconditions] # wait for the release branch to be created, then create a version bump
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.OCMBOT_APP_ID }}
+          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ steps.generate_token.outputs.token }}
+      - name: Version Bump
+        id: version-bump
+        run: |
+          set -e
+          
+          echo "determining next version"
+          version=$(go run ./api/version/generate bump-version)
+          
+          echo "bumping main branch to $version"
+          echo $version > VERSION
+
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "version after bump: $version"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          title: "chore: bump VERSION to ${{ steps.version-bump.outputs.version }}"
+          commit-message: "[github-actions] Bump to ${{ steps.version-bump.outputs.version }} after branch cutoff"
+          branch: "chore/bump-main/v${{ steps.version-bump.outputs.version }}"
+          delete-branch: true
+          sign-commits: true
+          add-paths: |
+            VERSION
+          body: |
+            Update OCM Version to ${{ steps.version-bump.outputs.version }} 
+            
+            After the release branch cutoff into ${{ needs.cutoff-preconditions.outputs.branch }},
+            this bumps the OCM version so that future development continues on the next minor release.
+          
