@@ -69,7 +69,7 @@ jobs:
         GH_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         RELEASE_JSON=$( \
-          gh api /repos/open-component-model/ocm-cicd-playground/releases \
+          gh api /repos/${{ github.repository }}/releases \
           -q '.[] | select(.name == "${{ env.RELEASE_VERSION_NO_SUFFIX }}" and .draft == true)' \
         )
         echo "json=${RELEASE_JSON}" >> $GITHUB_OUTPUT
