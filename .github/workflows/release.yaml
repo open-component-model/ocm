@@ -221,13 +221,13 @@ jobs:
         if [ ! -f "$f" ]; then
           echo "# Release ${{ env.RELEASE_VERSION }}" > "$f"
           echo "$RELEASE_NOTES" | tail -n +2 >> "$f"
-          echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
           git add "$f"
           git commit -m "ReleaseNotes for $RELEASE_VERSION"
           git push origin ${GITHUB_REF#refs/heads/}
         else
           echo "Using release notes file $f from code base"
         fi
+        echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
 
     - name: Create and Push Release
       env:
