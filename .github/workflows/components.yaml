@@ -32,6 +32,7 @@ env:
   CTF_TYPE: directory
   components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin"]'
   PLATFORMS: 'linux/amd64'
+  IMAGE_PLATFORMS: 'linux/amd64'
 #  PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
 
 jobs:
@@ -93,6 +94,7 @@ jobs:
           CTF_TYPE=${{ env.CTF_TYPE }} \
           EFFECTIVE_VERSION=${{ inputs.effective-version }} \
           PLATFORMS=${{ env.PLATFORMS }} \
+          IMAGE_PLATFORMS=${{ env.IMAGE_PLATFORMS }} \
           make ctf descriptor describe
       - name: Upload CTF
         uses: actions/upload-artifact@v4
