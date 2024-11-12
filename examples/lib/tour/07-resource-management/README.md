@@ -270,28 +270,28 @@ function before finishing.
 The final output of this example looks like:
 
 ```yaml
-versions for component ocm.software/ocmcli: 0.1.0-alpha.2, 0.1.0-dev, 0.3.0-dev, 0.3.0-rc.2, 0.3.0-rc.3, 0.3.0, 0.4.0-dev, 0.4.0, 0.4.1, 0.4.2, 0.4.3, 0.5.0, 0.6.0, 0.7.0, 0.8.0, 0.9.0, 0.10.0, 0.11.0, 0.12.0, 0.12.1, 0.13.0, 0.14.0, 0.15.0, 0.16.0, 0.16.1, 0.16.2, 0.17.0-rc.1, 0.17.0, 0.18.0-rc.1
+versions for component ocm.software/ocmcli: 0.1.0-alpha.2, 0.1.0-dev, 0.3.0-dev, 0.3.0-rc.2, 0.3.0-rc.3, 0.3.0, 0.4.0-dev, 0.4.0, 0.4.1, 0.4.2, 0.4.3, 0.5.0, 0.6.0, 0.7.0, 0.8.0, 0.9.0, 0.10.0, 0.11.0, 0.12.0, 0.12.1, 0.13.0, 0.14.0, 0.15.0, 0.16.0, 0.16.1, 0.16.2, 0.17.0-rc.1, 0.17.0, 0.18.0-rc.1, 0.18.0-rc.2
 looking up resources of the latest version:
-  version:  0.18.0-rc.1
+  version:  0.17.0
   provider: ocm.software
 *** resources:
    1: extra identity: "architecture"="amd64","name"="ocmcli","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:74fdf71c5467cacd1cb09d15d6ad4944d60cc8efa1d704a91c337e54dcd03fbc[]
+      access:         Local blob sha256:03a45dcde67ba565fe806cb5db67da3387f772f7c50af711a0edd6f802570c04[]
    2: extra identity: "architecture"="arm64","name"="ocmcli","os"="linux"
       resource type:  executable
-      access:         Local blob sha256:d0022850cce685d48ca589b3b59913ecbc3572f7f5082bca5c086a4bf2b47c5a[]
+      access:         Local blob sha256:5a622634ae43cf03eac91079389d83266891d1f9b2d8a3884cef6fe639180324[]
    3: extra identity: "architecture"="arm64","name"="ocmcli","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:1161fc38d0fe78ba3be97783f8676a46afa2baf57c199f937798f791cc4961d3[]
+      access:         Local blob sha256:1482fe5b764e3a86cf96704d7a839ad7e53dcbfd4f5fce5405abffb1962153dd[]
    4: extra identity: "architecture"="amd64","name"="ocmcli","os"="darwin"
       resource type:  executable
-      access:         Local blob sha256:33074ce5cc079ea4fc1dbcc7bd54c27cc93f0e188d9ad8c56ba642c4ba6744af[]
+      access:         Local blob sha256:805f181aff48511eea12c699ed1bbcee8bdc4c5168924e81058aff8715946875[]
    5: extra identity: "architecture"="amd64","name"="ocmcli","os"="windows"
       resource type:  executable
-      access:         Local blob sha256:2fbac39d7772ae1cf209aca5bb5efdbb6b91e83aede9464c52304c3ccebb4f67[]
+      access:         Local blob sha256:20839c68bf0c4cf99444d78ebb93f53358fa9e95fe806f186220bd21d520efa7[]
    6: extra identity: "name"="ocmcli-image"
       resource type:  ociImage
-      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.18.0-rc.1@sha256:3ba3e8c075f7f91e851ec3ce53da2347fe464b3ac33c6d65cf89a459193bb5cb
+      access:         OCI artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.17.0@sha256:16fb52a1cb11c867bd058f4124dea53fbab94229842cc14b52653c2e80b1cede
 
 ```

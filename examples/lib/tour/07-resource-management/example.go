@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 
 	"ocm.software/ocm/api/ocm"
@@ -211,7 +212,9 @@ func GatherResources(ctx ocm.Context, factory ResourceFactory) ([]Resource, erro
 	// Now, we have a look at the latest version. it is
 	// the last one in the list.
 	// --- begin lookup version ---
-	cv, err := c.LookupVersion(versions[len(versions)-1])
+	// to retrieve the latest version use
+	// cv, err := c.LookupVersion(versions[len(versions)-1])
+	cv, err := c.LookupVersion("0.17.0")
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get latest version")
 	}
