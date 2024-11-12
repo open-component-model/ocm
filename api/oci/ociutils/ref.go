@@ -31,6 +31,9 @@ func ParseVersion(vers string) (*ArtVersion, error) {
 			Digest: &dig,
 		}, nil
 	}
+	if vers == "" {
+		return &ArtVersion{}, nil
+	}
 	return &ArtVersion{
 		Tag: &vers,
 	}, nil
@@ -50,7 +53,7 @@ type ArtVersion struct {
 }
 
 func (v *ArtVersion) VersionSpec() string {
-	if v != nil {
+	if v == nil {
 		return ""
 	}
 
@@ -93,4 +96,21 @@ func (v *ArtVersion) GetTag() string {
 		return *v.Tag
 	}
 	return ""
+}
+
+func (v *ArtVersion) GetDigest() digest.Digest {
+	if v != nil && v.Digest != nil {
+		return *v.Digest
+	}
+	return ""
+}
+
+func (r *ArtVersion) Version() string {
+	if r.Digest != nil {
+		return "@" + string(*r.Digest)
+	}
+	if r.Tag != nil {
+		return *r.Tag
+	}
+	return "latest"
 }

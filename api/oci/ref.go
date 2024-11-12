@@ -272,16 +272,6 @@ type ArtSpec struct {
 	ArtVersion `json:",inline"`
 }
 
-func (r *ArtSpec) Version() string {
-	if r.Digest != nil {
-		return "@" + string(*r.Digest)
-	}
-	if r.Tag != nil {
-		return *r.Tag
-	}
-	return "latest"
-}
-
 func (r *ArtSpec) IsRegistry() bool {
 	return r.Repository == ""
 }
