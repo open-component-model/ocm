@@ -31,9 +31,8 @@ env:
   REF: ${{ inputs.ref == '' && github.ref || inputs.ref }}
   CTF_TYPE: directory
   components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin"]'
-  PLATFORMS: 'linux/amd64'
-  IMAGE_PLATFORMS: 'linux/amd64'
-#  PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
+  IMAGE_PLATFORMS: 'linux/amd64 linux/arm64'
+  PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
 
 jobs:
   define-matrix:
