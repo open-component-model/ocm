@@ -89,8 +89,7 @@ func (v *ArtVersion) IsDigested() bool {
 }
 
 func (v *ArtVersion) GetTag() string {
-	if v != nil &&
-		v.Tag != nil {
+	if v != nil && v.Tag != nil {
 		return *v.Tag
 	}
 	return ""

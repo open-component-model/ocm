@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -100,32 +101,36 @@ type TargetElement interface {
 }
 
 type TargetOptionImpl interface {
-	TargetOption
+	TargetElementOption
 	ModificationOption
 	BlobModificationOption
 }
 
-type TargetOptions struct {
+type TargetElementOptions struct {
 	TargetElement TargetElement
 }
 
-type TargetOption interface {
-	ApplyTargetOption(options *TargetOptions)
+type TargetElementOption interface {
+	ApplyTargetOption(options *TargetElementOptions)
 }
 
-func (m *TargetOptions) ApplyBlobModificationOption(opts *BlobModificationOptions) {
-	m.ApplyTargetOption(&opts.TargetOptions)
+func (m *TargetElementOptions) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
 }
 
-func (m *TargetOptions) ApplyModificationOption(opts *ModificationOptions) {
-	m.ApplyTargetOption(&opts.TargetOptions)
+func (m *TargetElementOptions) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
 }
 
-func (m *TargetOptions) ApplyTargetOption(opts *TargetOptions) {
+func (m *TargetElementOptions) ApplyElementModificationOption(opts *ElementModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
+}
+
+func (m *TargetElementOptions) ApplyTargetOption(opts *TargetElementOptions) {
 	optionutils.Transfer(&opts.TargetElement, m.TargetElement)
 }
 
-func (m *TargetOptions) ApplyTargetOptions(list ...TargetOption) *TargetOptions {
+func (m *TargetElementOptions) ApplyTargetOptions(list ...TargetElementOption) *TargetElementOptions {
 	for _, o := range list {
 		if o != nil {
 			o.ApplyTargetOption(m)
@@ -134,9 +139,52 @@ func (m *TargetOptions) ApplyTargetOptions(list ...TargetOption) *TargetOptions 
 	return m
 }
 
-func NewTargetOptions(list ...TargetOption) *TargetOptions {
-	var m TargetOptions
+func NewTargetElementOptions(list ...TargetElementOption) *TargetElementOptions {
+	var m TargetElementOptions
 	m.ApplyTargetOptions(list...)
+	return &m
+}
+
+type ElementModificationOption interface {
+	ApplyElementModificationOption(opts *ElementModificationOptions)
+}
+
+type ElementModificationOptions struct {
+	TargetElementOptions
+
+	// ModifyElement disables the modification of signature relevant
+	// resource parts.
+	ModifyElement *bool
+}
+
+func (m *ElementModificationOptions) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyElementModificationOption(&opts.ElementModificationOptions)
+}
+
+func (m *ElementModificationOptions) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyElementModificationOption(&opts.ElementModificationOptions)
+}
+
+func (m *ElementModificationOptions) ApplyElementModificationOption(opts *ElementModificationOptions) {
+	optionutils.Transfer(&opts.ModifyElement, m.ModifyElement)
+}
+
+func (m *ElementModificationOptions) ApplyElementModificationOptions(list ...ElementModificationOption) *ElementModificationOptions {
+	for _, o := range list {
+		if o != nil {
+			o.ApplyElementModificationOption(m)
+		}
+	}
+	return m
+}
+
+func (m *ElementModificationOptions) IsModifyElement(def ...bool) bool {
+	return utils.AsBool(m.ModifyElement, def...)
+}
+
+func NewElementModificationOptions(list ...ElementModificationOption) *ElementModificationOptions {
+	var m ElementModificationOptions
+	m.ApplyElementModificationOptions(list...)
 	return &m
 }
 
@@ -149,12 +197,14 @@ type ModOptionImpl interface {
 	BlobModificationOption
 }
 
-type ModificationOptions struct {
-	TargetOptions
+type ElemModOptionImpl interface {
+	ElementModificationOption
+	ModificationOption
+	BlobModificationOption
+}
 
-	// ModifyResource disables the modification of signature releveant
-	// resource parts.
-	ModifyResource *bool
+type ModificationOptions struct {
+	ElementModificationOptions
 
 	// AcceptExistentDigests don't validate/recalculate the content digest
 	// of resources.
@@ -171,10 +221,6 @@ type ModificationOptions struct {
 
 	// SkipDigest disabled digest creation (for legacy code, only!)
 	SkipDigest *bool
-}
-
-func (m *ModificationOptions) IsModifyResource() bool {
-	return utils.AsBool(m.ModifyResource)
 }
 
 func (m *ModificationOptions) IsAcceptExistentDigests() bool {
@@ -203,8 +249,8 @@ func (m *ModificationOptions) ApplyBlobModificationOption(opts *BlobModification
 }
 
 func (m *ModificationOptions) ApplyModificationOption(opts *ModificationOptions) {
-	m.TargetOptions.ApplyTargetOption(&opts.TargetOptions)
-	optionutils.Transfer(&opts.ModifyResource, m.ModifyResource)
+	m.TargetElementOptions.ApplyTargetOption(&opts.TargetElementOptions)
+	optionutils.Transfer(&opts.ModifyElement, m.ModifyElement)
 	optionutils.Transfer(&opts.AcceptExistentDigests, m.AcceptExistentDigests)
 	optionutils.Transfer(&opts.SkipDigest, m.SkipDigest)
 	optionutils.Transfer(&opts.SkipVerify, m.SkipVerify)
@@ -238,10 +284,17 @@ func (m TargetIndex) ApplyBlobModificationOption(opts *BlobModificationOptions) 
 }
 
 func (m TargetIndex) ApplyModificationOption(opts *ModificationOptions) {
-	m.ApplyTargetOption(&opts.TargetOptions)
+	m.ApplyTargetOption(&opts.TargetElementOptions)
 }
 
-func (m TargetIndex) ApplyTargetOption(opts *TargetOptions) {
+func (m TargetIndex) ApplyElementModificationOption(opts *ElementModificationOptions) {
+	if m < 0 {
+		opts.ModifyElement = generics.Pointer(true)
+	}
+	m.ApplyTargetOption(&opts.TargetElementOptions)
+}
+
+func (m TargetIndex) ApplyTargetOption(opts *TargetElementOptions) {
 	opts.TargetElement = m
 }
 
@@ -259,10 +312,14 @@ func (m TargetIdentityOrAppend) ApplyBlobModificationOption(opts *BlobModificati
 }
 
 func (m TargetIdentityOrAppend) ApplyModificationOption(opts *ModificationOptions) {
-	m.ApplyTargetOption(&opts.TargetOptions)
+	m.ApplyTargetOption(&opts.TargetElementOptions)
 }
 
-func (m TargetIdentityOrAppend) ApplyTargetOption(opts *TargetOptions) {
+func (m TargetIdentityOrAppend) ApplyElementModificationOption(opts *ElementModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
+}
+
+func (m TargetIdentityOrAppend) ApplyTargetOption(opts *TargetElementOptions) {
 	opts.TargetElement = m
 }
 
@@ -285,10 +342,14 @@ func (m TargetIdentity) ApplyBlobModificationOption(opts *BlobModificationOption
 }
 
 func (m TargetIdentity) ApplyModificationOption(opts *ModificationOptions) {
-	m.ApplyTargetOption(&opts.TargetOptions)
+	m.ApplyTargetOption(&opts.TargetElementOptions)
 }
 
-func (m TargetIdentity) ApplyTargetOption(opts *TargetOptions) {
+func (m TargetIdentity) ApplyElementModificationOption(opts *ElementModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
+}
+
+func (m TargetIdentity) ApplyTargetOption(opts *TargetElementOptions) {
 	opts.TargetElement = m
 }
 
@@ -313,27 +374,39 @@ func (m replaceElement) ApplyBlobModificationOption(opts *BlobModificationOption
 }
 
 func (m replaceElement) ApplyModificationOption(opts *ModificationOptions) {
-	m.ApplyTargetOption(&opts.TargetOptions)
+	m.ApplyTargetOption(&opts.TargetElementOptions)
 }
 
-func (m replaceElement) ApplyTargetOption(opts *TargetOptions) {
+func (m replaceElement) ApplyElementModificationOption(opts *ElementModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
+}
+
+func (m replaceElement) ApplyTargetOption(opts *TargetElementOptions) {
 	opts.TargetElement = m
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type modifyresource bool
+type modifyelement bool
 
-func (m modifyresource) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+func (m modifyelement) ApplyBlobModificationOption(opts *BlobModificationOptions) {
 	m.ApplyModificationOption(&opts.ModificationOptions)
 }
 
-func (m modifyresource) ApplyModificationOption(opts *ModificationOptions) {
-	opts.ModifyResource = utils.BoolP(m)
+func (m modifyelement) ApplyModificationOption(opts *ModificationOptions) {
+	opts.ModifyElement = utils.BoolP(m)
+}
+
+func (m modifyelement) ApplyElementModificationOption(opts *ElementModificationOptions) {
+	opts.ModifyElement = utils.BoolP(m)
 }
 
 func ModifyResource(flag ...bool) ModOptionImpl {
-	return modifyresource(utils.OptionalDefaultedBool(true, flag...))
+	return modifyelement(utils.OptionalDefaultedBool(true, flag...))
+}
+
+func ModifyElement(flag ...bool) ElemModOptionImpl {
+	return modifyelement(utils.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
