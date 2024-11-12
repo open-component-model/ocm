@@ -11,21 +11,60 @@ import (
 
 var _ = Describe("Ref Test Environment", func() {
 	dig := "sha256:" + testhelper.H_OCIARCHMANIFEST1
-	DescribeTable("parsing", func(src, yaml, vspec string, isvers bool, vers string, istag bool, tag string, isdig bool, dig string) {
+
+	type expect struct {
+		yaml        string
+		versionSpec string
+		isVersion   bool
+		version     string
+		isTag       bool
+		tag         string
+		isDigested  bool
+		digest      string
+	}
+
+	DescribeTable("parsing", func(src string, e expect) {
 		v := Must(ociutils.ParseVersion(src))
 		Expect(v).NotTo(BeNil())
-		Expect(v).To(YAMLEqual(yaml))
-		Expect(v.VersionSpec()).To(Equal(vspec))
-		Expect(v.IsVersion()).To(Equal(isvers))
-		Expect(v.Version()).To(Equal(vers))
-		Expect(v.IsTagged()).To(Equal(istag))
-		Expect(v.GetTag()).To(Equal(tag))
-		Expect(v.IsDigested()).To(Equal(isdig))
-		Expect(v.GetDigest()).To(Equal(digest.Digest(dig)))
+		Expect(v).To(YAMLEqual(e.yaml))
+		Expect(v.VersionSpec()).To(Equal(e.versionSpec))
+		Expect(v.IsVersion()).To(Equal(e.isVersion))
+		Expect(v.Version()).To(Equal(e.version))
+		Expect(v.IsTagged()).To(Equal(e.isTag))
+		Expect(v.GetTag()).To(Equal(e.tag))
+		Expect(v.IsDigested()).To(Equal(e.isDigested))
+		Expect(v.GetDigest()).To(Equal(digest.Digest(e.digest)))
 	},
-		Entry("empty", "", "{}", "latest", false, "latest", false, "", false, ""),
-		Entry("tag", "tag", "{\"tag\":\"tag\"}", "tag", true, "tag", true, "tag", false, ""),
-		Entry("digest", "@"+dig, "{\"digest\":\""+dig+"\"}", "@"+dig, true, "@"+dig, false, "", true, dig),
-		Entry("tag@digest", "tag@"+dig, "{\"tag\":\"tag\",\"digest\":\""+dig+"\"}", "tag@"+dig, true, "@"+dig, true, "tag", true, dig),
+		Entry("empty", "", expect{
+			yaml:        "{}",
+			versionSpec: "latest",
+			version:     "latest",
+		}),
+		Entry("tag", "tag", expect{
+			yaml:        "{\"tag\":\"tag\"}",
+			versionSpec: "tag",
+			isVersion:   true,
+			version:     "tag",
+			isTag:       true,
+			tag:         "tag",
+		}),
+		Entry("digest", "@"+dig, expect{
+			yaml:        "{\"digest\":\"" + dig + "\"}",
+			versionSpec: "@" + dig,
+			isVersion:   true,
+			version:     "@" + dig,
+			isDigested:  true,
+			digest:      dig,
+		}),
+		Entry("tag@digest", "tag@"+dig, expect{
+			yaml:        "{\"tag\":\"tag\",\"digest\":\"" + dig + "\"}",
+			versionSpec: "tag@" + dig,
+			isVersion:   true,
+			version:     "@" + dig,
+			isTag:       true,
+			tag:         "tag",
+			isDigested:  true,
+			digest:      dig,
+		}),
 	)
 })
