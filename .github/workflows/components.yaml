@@ -89,17 +89,14 @@ jobs:
       - name: CTF
         run: |
           cd components/${{ matrix.component }}
-          ARGS="PATH=$PATH:$(go env GOPATH)/bin CTF_TYPE=${{ env.CTF_TYPE }}"
-          if [ -n "${{ inputs.effective-version }}" ]; then
-            ARGS="$ARGS EFFECTIVE_VERSION=${{ inputs.effective-version }}"
-          fi
-          if [ -n "${{ env.PLATFORMS }}" ]; then
-            ARGS="$ARGS PLATFORMS=${{ env.PLATFORMS }}"
-          fi
-          if [ -n "${{ env.IMAGE_PLATFORMS }}" ]; then
-            ARGS="$ARGS IMAGE_PLATFORMS=${{ env.IMAGE_PLATFORMS }}"
-          fi
-          $ARGS make ctf descriptor describe
+          
+          PATH=$PATH:$(go env GOPATH)/bin \
+          CTF_TYPE=${{ env.CTF_TYPE }} \
+          EFFECTIVE_VERSION=${{ inputs.effective-version }} \
+          PLATFORMS="${{ env.PLATFORMS }}" \
+          IMAGE_PLATFORMS="${{ env.IMAGE_PLATFORMS }}" \
+          make \
+            ctf descriptor describe
       - name: Upload CTF
         uses: actions/upload-artifact@v4
         with:

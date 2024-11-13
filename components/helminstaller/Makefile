@@ -11,7 +11,11 @@ CTF_TYPE ?= directory
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        := $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
-EFFECTIVE_VERSION                              ?= $(VERSION)-$(COMMIT)
+# if EFFECTIVE_VERSION is not set, set it to VERSION-COMMIT
+# this is not the same as '?=' because it will also set the value if EFFECTIVE_VERSION is set to an empty string
+ifeq ($(EFFECTIVE_VERSION),)
+EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
+endif
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 PLATFORM                                       := $(shell go env GOOS)/$(shell go env GOARCH)
 CACHE_DIR									  := $(shell go env GOCACHE)
