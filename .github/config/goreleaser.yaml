@@ -90,18 +90,6 @@ changelog:
       - '^docs:'
       - '^test:'
 
-brews:
-  - name: ocm
-    repository:
-      owner: open-component-model
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    directory: Formula
-    homepage: "https://ocm.software/"
-    description: "The OCM CLI makes it easy to create component versions and embed them in build processes."
-    test: |
-      system "#{bin}/ocm --version"
-
 nfpms:
   - id: debian
     package_name: ocm-cli

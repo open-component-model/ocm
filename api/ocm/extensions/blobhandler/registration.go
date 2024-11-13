@@ -4,7 +4,10 @@ import (
 	"fmt"
 
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/internal"
 )
+
+const DEFAULT_BLOBHANDLER_PRIO = internal.DEFAULT_BLOBHANDLER_PRIO
 
 func RegisterHandlerByName(ctx cpi.ContextProvider, name string, config HandlerConfig, opts ...HandlerOption) error {
 	o, err := For(ctx).RegisterByName(name, ctx.OCMContext(), config, opts...)

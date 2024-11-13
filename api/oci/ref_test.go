@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/goutils/generics"
 	godigest "github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/oci"
@@ -143,8 +144,7 @@ var _ = Describe("ref parsing", func() {
 											},
 											ArtSpec: oci.ArtSpec{
 												Repository: r,
-												Tag:        Pointer([]byte(uv)),
-												Digest:     Dig([]byte(ud)),
+												ArtVersion: oci.ArtVersion{Tag: Pointer([]byte(uv)), Digest: Dig([]byte(ud))},
 											},
 										})
 									})
@@ -192,8 +192,10 @@ var _ = Describe("ref parsing", func() {
 													},
 													ArtSpec: oci.ArtSpec{
 														Repository: r,
-														Tag:        Pointer([]byte(uv)),
-														Digest:     Dig([]byte(ud)),
+														ArtVersion: oci.ArtVersion{
+															Tag:    Pointer([]byte(uv)),
+															Digest: Dig([]byte(ud)),
+														},
 													},
 												})
 											})
@@ -253,8 +255,10 @@ var _ = Describe("ref parsing", func() {
 												},
 												ArtSpec: oci.ArtSpec{
 													Repository: r,
-													Tag:        Pointer([]byte(uv)),
-													Digest:     Dig([]byte(ud)),
+													ArtVersion: oci.ArtVersion{
+														Tag:    Pointer([]byte(uv)),
+														Digest: Dig([]byte(ud)),
+													},
 												},
 											})
 										})
@@ -291,8 +295,10 @@ var _ = Describe("ref parsing", func() {
 												},
 												ArtSpec: oci.ArtSpec{
 													Repository: r,
-													Tag:        Pointer([]byte(uv)),
-													Digest:     Dig([]byte(ud)),
+													ArtVersion: oci.ArtVersion{
+														Tag:    Pointer([]byte(uv)),
+														Digest: Dig([]byte(ud)),
+													},
 												},
 											})
 										})
@@ -341,8 +347,10 @@ var _ = Describe("ref parsing", func() {
 										},
 										ArtSpec: oci.ArtSpec{
 											Repository: r,
-											Tag:        Pointer([]byte(uv)),
-											Digest:     Dig([]byte(ud)),
+											ArtVersion: oci.ArtVersion{
+												Tag:    Pointer([]byte(uv)),
+												Digest: Dig([]byte(ud)),
+											},
 										},
 									})
 								})
@@ -380,8 +388,10 @@ var _ = Describe("ref parsing", func() {
 							},
 							ArtSpec: oci.ArtSpec{
 								Repository: "library/" + r,
-								Tag:        Pointer([]byte(uv)),
-								Digest:     Dig([]byte(ud)),
+								ArtVersion: oci.ArtVersion{
+									Tag:    Pointer([]byte(uv)),
+									Digest: Dig([]byte(ud)),
+								},
 							},
 						})
 					})
@@ -416,8 +426,10 @@ var _ = Describe("ref parsing", func() {
 							},
 							ArtSpec: oci.ArtSpec{
 								Repository: r,
-								Tag:        Pointer([]byte(uv)),
-								Digest:     Dig([]byte(ud)),
+								ArtVersion: oci.ArtVersion{
+									Tag:    Pointer([]byte(uv)),
+									Digest: Dig([]byte(ud)),
+								},
 							},
 						})
 					})
@@ -565,20 +577,20 @@ var _ = Describe("ref parsing", func() {
 	})
 	It("succeeds", func() {
 		CheckRef("ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu"}})
-		CheckRef("ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu", Tag: &tag}})
+		CheckRef("ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu", ArtVersion: oci.ArtVersion{Tag: &tag}}})
 		CheckRef("test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu"}})
 		CheckRef("test_test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test_test/ubuntu"}})
 		CheckRef("test__test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test__test/ubuntu"}})
 		CheckRef("test-test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test-test/ubuntu"}})
 		CheckRef("test--test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test--test/ubuntu"}})
 		CheckRef("test-----test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test-----test/ubuntu"}})
-		CheckRef("test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", Tag: &tag}})
+		CheckRef("test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", ArtVersion: oci.ArtVersion{Tag: &tag}}})
 		CheckRef("ghcr.io/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu"}})
 		CheckRef("ghcr.io/test", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test"}})
 		CheckRef("ghcr.io:8080/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: oci.UniformRepositorySpec{Host: "ghcr.io:8080"}, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu"}})
-		CheckRef("ghcr.io/test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", Tag: &tag}})
-		CheckRef("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", Digest: &digest}})
-		CheckRef("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", Tag: &tag, Digest: &digest}})
+		CheckRef("ghcr.io/test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", ArtVersion: oci.ArtVersion{Tag: &tag}}})
+		CheckRef("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", ArtVersion: oci.ArtVersion{Digest: &digest}}})
+		CheckRef("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", ArtVersion: oci.ArtVersion{Tag: &tag, Digest: &digest}}})
 		CheckRef("test___test/ubuntu", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
 				Info: "test___test/ubuntu",
@@ -594,8 +606,10 @@ var _ = Describe("ref parsing", func() {
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "repo/repo",
-				Tag:        &tag,
-				Digest:     &digest,
+				ArtVersion: oci.ArtVersion{
+					Tag:    &tag,
+					Digest: &digest,
+				},
 			},
 		})
 		CheckRef("http://127.0.0.1:443/repo/repo:v1@"+digest.String(), &oci.RefSpec{
@@ -607,8 +621,10 @@ var _ = Describe("ref parsing", func() {
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "repo/repo",
-				Tag:        &tag,
-				Digest:     &digest,
+				ArtVersion: oci.ArtVersion{
+					Tag:    &tag,
+					Digest: &digest,
+				},
 			},
 		})
 		CheckRef("directory::a/b", &oci.RefSpec{
@@ -695,7 +711,7 @@ var _ = Describe("ref parsing", func() {
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "mandelsoft/test",
-				Tag:        &tag,
+				ArtVersion: oci.ArtVersion{Tag: &tag},
 			},
 		})
 		CheckRef("/tmp/ctf", &oci.RefSpec{
@@ -722,7 +738,7 @@ var _ = Describe("ref parsing", func() {
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "repo",
-				Tag:        &tag,
+				ArtVersion: oci.ArtVersion{Tag: &tag},
 			},
 		})
 		ref := Must(oci.ParseRef("OCIRegistry::{\"type\":\"OCIRegistry\", \"baseUrl\": \"test.com\"}//repo:1.0.0"))
@@ -745,7 +761,7 @@ var _ = Describe("ref parsing", func() {
 			},
 			ArtSpec: oci.ArtSpec{
 				Repository: "repo",
-				Tag:        &tag,
+				ArtVersion: oci.ArtVersion{Tag: &tag},
 			},
 		})
 		ref := Must(oci.ParseRef("oci::{\"type\":\"OCIRegistry\", \"baseUrl\": \"test.com\"}//repo:1.0.0"))
@@ -825,5 +841,34 @@ var _ = Describe("ref parsing", func() {
 		ref := Must(oci.ParseRepo("ctf+directory::./file/path"))
 		spec := Must(ctx.MapUniformRepositorySpec(&ref))
 		Expect(spec).To(Equal(Must(ctf.NewRepositorySpec(accessobj.ACC_WRITABLE, "./file/path"))))
+	})
+
+	Context("version", func() {
+		It("parses tag", func() {
+			v := Must(oci.ParseVersion("tag"))
+
+			Expect(v).To(Equal(&oci.ArtVersion{
+				Tag:    generics.Pointer("tag"),
+				Digest: nil,
+			}))
+		})
+
+		It("parses digest", func() {
+			v := Must(oci.ParseVersion("@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"))
+
+			Expect(v).To(Equal(&oci.ArtVersion{
+				Tag:    nil,
+				Digest: generics.Pointer(godigest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")),
+			}))
+		})
+
+		It("parses tag+digest", func() {
+			v := Must(oci.ParseVersion("tag@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"))
+
+			Expect(v).To(Equal(&oci.ArtVersion{
+				Tag:    generics.Pointer("tag"),
+				Digest: generics.Pointer(godigest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")),
+			}))
+		})
 	})
 })
