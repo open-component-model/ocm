@@ -2,6 +2,9 @@
 # However, latest builds (equivalent to nightlies based on the main branch), uses latest.yml
 version: 2
 
+release:
+  prerelease: auto
+
 before:
   hooks:
     - go mod tidy
