@@ -5,7 +5,7 @@ IMAGE     := $(NAME)
 COMPONENT := $(PROVIDER)/toi/installers/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 MULTI     ?= true
-PLATFORMS ?= linux/amd64 linux/arm64
+IMAGE_PLATFORMS ?= linux/amd64 linux/arm64
 CTF_TYPE ?= directory
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
@@ -68,7 +68,7 @@ $(GEN)/ctf: $(OCM_BIN) $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) component-c
 		PROVIDER="$(PROVIDER)" \
 		COMMIT="$(COMMIT)" \
 		GEN="$(GEN)" \
-		PLATFORMS="$(PLATFORMS)" \
+		IMAGE_PLATFORMS="$(IMAGE_PLATFORMS)" \
 		MULTI="$(MULTI)" \
 		IMAGE="$(IMAGE):$(VERSION)" \
 		component-constructor.yaml
@@ -98,7 +98,7 @@ push-image:
 multi: $(GEN)/image.$(NAME).multi
 
 $(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
-	for i in $(PLATFORMS); do \
+	for i in $(IMAGE_PLATFORMS); do \
 	tag=$$(echo $$i | sed -e s:/:-:g); \
         echo building platform $$i; \
 	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
