@@ -88,49 +88,15 @@ jobs:
           git checkout -b "$branch"
           git push origin $branch
 
+  # Make sure main contains the next minor after cutoff
   bump-main-pr:
-    runs-on: ubuntu-latest
-    needs: [create-branch, cutoff-preconditions] # wait for the release branch to be created, then create a version bump
-    steps:
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.OCMBOT_APP_ID }}
-          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ steps.generate_token.outputs.token }}
-      - name: Version Bump
-        id: version-bump
-        run: |
-          set -e
-          
-          echo "determining next version"
-          version=$(go run ./api/version/generate bump-version)
-          
-          echo "bumping main branch to $version"
-          echo $version > VERSION
-
-          echo "version=$version" >> $GITHUB_OUTPUT
-          echo "version after bump: $version"
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ steps.generate_token.outputs.token }}
-          title: "chore: bump VERSION to ${{ steps.version-bump.outputs.version }}"
-          commit-message: "[github-actions] Bump to ${{ steps.version-bump.outputs.version }} after branch cutoff"
-          branch: "chore/bump-main/v${{ steps.version-bump.outputs.version }}"
-          delete-branch: true
-          sign-commits: true
-          add-paths: |
-            VERSION
-          body: |
-            Update OCM Version to ${{ steps.version-bump.outputs.version }} 
-            
-            After the release branch cutoff into ${{ needs.cutoff-preconditions.outputs.branch }},
-            this bumps the OCM version so that future development continues on the next minor release.
-          
+    uses: ./.github/workflows/release-branch-bump.yaml
+    needs: create-branch
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    with:
+      bump-type: minor
+      ref: ${{ github.ref }}

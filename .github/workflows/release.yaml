@@ -194,7 +194,7 @@ jobs:
       run: |
         set -e
         git checkout ${GITHUB_REF#refs/heads/}
-        v="$(go run ./api/version/generate bump-version)"
+        v="$(go run ./api/version/generate bump-minor)"
         echo "$v" > VERSION
         # Trigger a bump of any potential files that depend on a new version
         make -f hack/Makefile mdref && make -f hack/Makefile go-bindata && make generate
@@ -222,3 +222,17 @@ jobs:
         repository: ${{ github.repository_owner }}/ocm
         event-type: publish-ocm-cli
         client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true}'
+
+  # make sure that the branch contains the next valid patch
+  bump-release-branch-pr:
+    if: inputs.release_candidate == false
+    uses: ./.github/workflows/release-branch-bump.yaml
+    needs: release
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    with:
+      bump-type: patch
+      ref: ${{ github.ref }}
