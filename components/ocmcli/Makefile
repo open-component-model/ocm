@@ -49,8 +49,6 @@ BUILD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
  -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
-ALPINE_LATEST_VER=$(shell curl -s https://registry.hub.docker.com/v2/repositories/library/alpine/tags | jq '.results[1].name' | xargs)
-
 .PHONY: build
 build: $(GEN)/build
 
@@ -72,13 +70,11 @@ $(GEN)/image: $(GEN)/.exists Dockerfile $(GEN)/build
 		echo; echo "Building linux instead of darwin as there's no native Docker platform for darwin"; echo; \
 		docker buildx build -t $(IMAGE):$(VERSION) --platform linux/$(PLATFORM_ARCH) --file Dockerfile $(REPO_ROOT) \
 			--build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
-			--build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
 			--build-arg SUFFIX=$$(echo linux/$(PLATFORM_ARCH) | sed -e s:/:-:g); \
 	else \
 		echo; echo "Building for $(PLATFORM_OS)/$(ARCH)"; echo; \
 		docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM_OS)/$(PLATFORM_ARCH) --file Dockerfile $(REPO_ROOT) \
 			--build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
-			--build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
 			--build-arg SUFFIX=$$(echo $(PLATFORM_OS)/$(PLATFORM_ARCH) | sed -e s:/:-:g); \
 	fi
 	@touch $(GEN)/image
@@ -87,13 +83,11 @@ $(GEN)/image: $(GEN)/.exists Dockerfile $(GEN)/build
 image.multi: $(GEN)/image.multi
 
 $(GEN)/image.multi: Dockerfile $(GEN)/build
-	echo "Building with Alpine version: ${ALPINE_LATEST_VER}"
 	for i in $(IMAGE_PLATFORMS); do \
 	tag=$$(echo $$i | sed -e s:/:-:g); \
         echo building platform $$i; \
 	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
           --build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
-		  --build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
           --build-arg SUFFIX=$$tag; \
 	done
 	@touch $(GEN)/image.multi
