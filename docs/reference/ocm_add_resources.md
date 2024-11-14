@@ -20,6 +20,7 @@ resources, resource, res, r
   -F, --file string                         target file/directory (default "component-archive")
   -h, --help                                help for resources
   -O, --output string                       output file for dry-run
+  -P, --preserve-signature                  preserve existing signatures
   -R, --replace                             replace existing elements
   -s, --settings stringArray                settings file with variable settings (yaml)
       --skip-digest-generation              skip digest creation
@@ -976,7 +977,10 @@ shown below.
 
 The <code>--replace</code> option allows users to specify whether adding an
 element with the same name and extra identity but different version as an
-existing element append (false) or replace (true) the existing element.
+existing element, append (false) or replace (true) the existing element.
+
+The <code>--preserve-signature</code> option prohibits changes of signature
+relevant elements.
 
 
 All yaml/json defined resources can be templated.

@@ -1,7 +1,0 @@
-name: source
-type: filesytem
-access:
-  type: github
-  repoUrl: github.com/open-component-model/ocm
-  commit: ${COMMIT}
-version: ${VERSION}

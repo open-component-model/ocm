@@ -1286,6 +1286,159 @@ applying to version "github.com/mandelsoft/ref2:v1"[github.com/mandelsoft/ref2:v
 			CheckStore(store, common.NewNameVersion(COMPONENTA, VERSION))
 		})
 	})
+
+	Context("handle extra identity", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.ComponentVersion(COMPONENTA, VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Resource("test", "v1", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation, func() {
+						env.BlobStringData(mime.MIME_TEXT, "test data")
+					})
+					env.Resource("test", "v2", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation, func() {
+						env.BlobStringData(mime.MIME_TEXT, "extended test data")
+						env.ModificationOptions(ocm.AppendElement)
+						env.ExtraIdentities()
+					})
+				})
+			})
+		})
+
+		It("signs version with non-unique resource names", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
+
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+			archcloser := session.AddCloser(src)
+
+			cv := Must(src.LookupComponentVersion(COMPONENTA, VERSION))
+			closer := session.AddCloser(cv)
+
+			cd := cv.GetDescriptor()
+
+			Expect(cd.Resources[0].GetIdentity(cv.GetDescriptor().Resources)).To(YAMLEqual(`
+name: test
+version: v1
+`))
+			Expect(cd.Resources[0].ExtraIdentity).To(YAMLEqual(`
+version: v1
+`))
+			Expect(cd.Resources[1].GetIdentity(cv.GetDescriptor().Resources)).To(YAMLEqual(`
+name: test
+version: v2
+`))
+			Expect(cd.Resources[1].ExtraIdentity).To(YAMLEqual(`
+version: v2
+`))
+			data := Must(compdesc.Encode(cd, compdesc.DefaultYAMLCodec))
+			Expect(string(data)).To(YAMLEqual(`
+  component:
+    componentReferences: []
+    name: github.com/mandelsoft/test
+    provider: mandelsoft
+    repositoryContexts: []
+    resources:
+    - access:
+        localReference: sha256:916f0027a575074ce72a331777c3478d6513f786a591bd892da1a577bf2335f9
+        mediaType: text/plain
+        type: localBlob
+      digest:
+        hashAlgorithm: SHA-256
+        normalisationAlgorithm: genericBlobDigest/v1
+        value: 916f0027a575074ce72a331777c3478d6513f786a591bd892da1a577bf2335f9
+      name: test
+      relation: external
+      type: plainText
+      version: v1
+      extraIdentity:
+        version: v1
+    - access:
+        localReference: sha256:920ce99fb13b43ca0408caee6e61f6335ea5156d79aa98e733e1ed2393e0f649
+        mediaType: text/plain
+        type: localBlob
+      digest:
+        hashAlgorithm: SHA-256
+        normalisationAlgorithm: genericBlobDigest/v1
+        value: 920ce99fb13b43ca0408caee6e61f6335ea5156d79aa98e733e1ed2393e0f649
+      name: test
+      relation: external
+      type: plainText
+      version: v2
+      extraIdentity:
+        version: v2
+    sources: []
+    version: v1
+  meta:
+    schemaVersion: v2
+`))
+
+			digest := "70c1b7f5e2260a283e24788c81ea7f8f6e9a70a8544dbf62d6f3a27285f6b633"
+
+			pr, buf := common.NewBufferedPrinter()
+			// key taken from signing attr
+			dig := Must(SignComponentVersion(cv, SIGNATURE, SignerByAlgo(SIGN_ALGO), Printer(pr)))
+			Expect(closer.Close()).To(Succeed())
+			Expect(archcloser.Close()).To(Succeed())
+			Expect(dig.Value).To(StringEqualWithContext(digest))
+
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
+  resource 0:  "name"="test","version"="v1": digest SHA-256:916f0027a575074ce72a331777c3478d6513f786a591bd892da1a577bf2335f9[genericBlobDigest/v1]
+  resource 1:  "name"="test","version"="v2": digest SHA-256:920ce99fb13b43ca0408caee6e61f6335ea5156d79aa98e733e1ed2393e0f649[genericBlobDigest/v1]
+`))
+
+			src = Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
+			session.AddCloser(src)
+			cv = Must(src.LookupComponentVersion(COMPONENTA, VERSION))
+			session.AddCloser(cv)
+
+			cd = cv.GetDescriptor().Copy()
+			Expect(len(cd.Signatures)).To(Equal(1))
+			cd.Signatures = nil // for comparison
+			data = Must(compdesc.Encode(cd, compdesc.DefaultYAMLCodec))
+
+			Expect(string(data)).To(YAMLEqual(`
+  component:
+    componentReferences: []
+    name: github.com/mandelsoft/test
+    provider: mandelsoft
+    repositoryContexts: []
+    resources:
+    - access:
+        localReference: sha256:916f0027a575074ce72a331777c3478d6513f786a591bd892da1a577bf2335f9
+        mediaType: text/plain
+        type: localBlob
+      digest:
+        hashAlgorithm: SHA-256
+        normalisationAlgorithm: genericBlobDigest/v1
+        value: 916f0027a575074ce72a331777c3478d6513f786a591bd892da1a577bf2335f9
+      name: test
+      relation: external
+      type: plainText
+      version: v1
+      extraIdentity:
+        version: v1
+    - access:
+        localReference: sha256:920ce99fb13b43ca0408caee6e61f6335ea5156d79aa98e733e1ed2393e0f649
+        mediaType: text/plain
+        type: localBlob
+      digest:
+        hashAlgorithm: SHA-256
+        normalisationAlgorithm: genericBlobDigest/v1
+        value: 920ce99fb13b43ca0408caee6e61f6335ea5156d79aa98e733e1ed2393e0f649
+      name: test
+      relation: external
+      type: plainText
+      version: v2
+      extraIdentity:
+        version: v2
+    sources: []
+    version: v1
+  meta:
+    schemaVersion: v2
+`))
+		})
+	})
 })
 
 func CheckStore(store VerifiedStore, ve common.VersionedElement) {
