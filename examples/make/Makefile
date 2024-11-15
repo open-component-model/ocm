@@ -3,7 +3,7 @@ OCI_REPO := ghcr.io/mandelsoft/cnudie
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION                                        = $(shell cat $(REPO_ROOT)/VERSION)
-COMMIT                                         = $(shell git rev-parse HEAD)
+COMMIT                                         = $(shell git rev-parse --verify HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 
 .PHONY: ctf
