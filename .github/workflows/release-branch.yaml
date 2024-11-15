@@ -90,7 +90,7 @@ jobs:
 
   # Make sure main contains the next minor after cutoff
   bump-main-pr:
-    uses: ./.github/workflows/release-branch-bump.yaml
+    uses: ./.github/workflows/release-bump-version.yaml
     needs: create-branch
     permissions:
       contents: write
