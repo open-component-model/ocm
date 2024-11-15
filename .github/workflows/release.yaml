@@ -135,7 +135,6 @@ jobs:
         path: gen/downloaded-ctfs
     - name: Move CTF into correct directory to be recognized by the release process
       run: |
-        mkdir -p ${{ github.workspace }}/gen
         mv \
             ${{ github.workspace }}/gen/downloaded-ctfs/ctf-aggregated \
             ${{ github.workspace }}/gen/ctf
