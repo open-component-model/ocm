@@ -1,0 +1,85 @@
+name: Bump VERSION
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "The branch to bump, use the branch the workflow is called on by default"
+        required: true
+        default: ""
+        type: string
+      bump-type:
+        description: "The type of bump to perform, one of 'minor' or 'patch'"
+        required: true
+        default: "patch"
+        type: string
+
+jobs:
+  create-bump-pr:
+    name: "Pull Request"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    env:
+      REF: ${{ inputs.ref == '' && github.ref || inputs.ref }}
+    steps:
+      - name: Validate Input
+        run: |
+          set -e
+          if [[ ${{ inputs.bump-type }} != "minor" && ${{ inputs.bump-type }} != "patch" ]]; then
+            >&2 echo "Invalid bump type: ${{ inputs.bump-type }}"
+            exit 1
+          fi
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.OCMBOT_APP_ID }}
+          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
+          sparse-checkout: |
+            api/version
+            VERSION
+            go.mod
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: '${{ github.workspace }}/go.mod'
+          cache: 'false'
+      - name: Version Bump
+        id: version-bump
+        run: |
+          set -e
+
+          echo "determining next version"
+          version=$(go run ./api/version/generate bump-${{ inputs.bump-type }})
+          
+          echo "bumping main branch to $version"
+          echo $version > VERSION
+
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "version after bump: $version"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          title: "chore: bump VERSION to ${{ steps.version-bump.outputs.version }}"
+          commit-message: "[github-actions] Bump to ${{ steps.version-bump.outputs.version }}"
+          branch: "chore/bump-${{ inputs.bump-type }}/v${{ steps.version-bump.outputs.version }}"
+          delete-branch: true
+          sign-commits: true
+          add-paths: |
+            VERSION
+          body: |
+            Update OCM Version to ${{ steps.version-bump.outputs.version }} 
+
+            This makes sure that the branch contains the next valid version.
+            
+            ${{ inputs.bump-type == 'minor' && 'This is a minor bump, the next release will be a new minor version and signals opening of the development branch for new features.' || '' }}
+            ${{ inputs.bump-type == 'patch' && 'This is a patch bump, intended to allow creation of the next patch release without manually incrementing the VERSION.' || '' }}
