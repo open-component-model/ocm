@@ -214,7 +214,7 @@ installation methods are described
 ### Addendum
 
 This release process got rewritten as of 0.19.0 and thus earlier releases
-followed model where release branches
+followed another model where release branches
 were kept in the form of `releases/<major>.<minor>.<patch>` and the release
 branches were created on demand with the need
 of branches. This approach has now largely been replaced by the model we see in
