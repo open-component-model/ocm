@@ -18,6 +18,8 @@ jobs:
       contents: write
       id-token: write
       packages: write
-    secrets: inherit
+    secrets:
+      OCMBOT_APP_ID: ${{ secrets.OCMBOT_APP_ID }}
+      OCMBOT_PRIV_KEY: ${{ secrets.OCMBOT_PRIV_KEY }}
     with:
       ref: ${{ github.ref }}
