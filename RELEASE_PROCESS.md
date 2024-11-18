@@ -122,6 +122,13 @@ The transformation thus looks like
 <major>.<minor>.<patch>-dev -> <major>.<minor>.<patch>-rc.<rc-number>
 ```
 
+TODO: Currently all releases are created via tag only, so the VERSION bump
+that is needed for the release is done through a dangling commit (a commit
+that is not part of the history of any branch in the repository). This is not
+ideal and should be changed in the future.
+See [this issue](https://github.com/open-component-model/ocm/issues/1099)
+for details.
+
 ### Creating a Minor release
 
 Once a release candidate is seen as sufficiently tested, the release manager can
@@ -224,10 +231,10 @@ Pull Request to the branch with the corresponding release notes
 and it will be used for the release.
 (TODO: Currently we have not decided if we want to permanently keep the notes
 and thus need a PR to main to append them, or if we want to drop them in the
-future. Thats because they are currently needed to correctly manage notes
+future. That's because they are currently needed to correctly manage notes
 over multiple release candidates, see
-[this issue](https://github.com/open-component-model/ocm/issues/1097) for
-details.) 
+[this issue](https://github.com/open-component-model/ocm/issues/1097)
+for details.)
 
 By default, this file is generated from the
 appropriate draft release with the basic release name (e.g. `v0.1.0-rc.1.md`).
