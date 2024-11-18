@@ -30,6 +30,37 @@ and delivered to end users willing to test the new release.
 
 ## Release Workflow
 
+### Diagram
+
+```mermaid
+gitGraph TB:
+    commit id: "VERSION 0.17.0-dev"
+    commit id: "feat: some feature"
+    branch "releases/v0.17"
+    commit tag: "v0.17.0-rc.1" type: REVERSE
+    checkout main
+    commit id: "fix: hotfix bug" type: HIGHLIGHT
+    checkout releases/v0.17
+    cherry-pick id: "fix: hotfix bug"
+    commit tag: "v0.17.0-rc.2"
+    branch "releases/v0.17.0"
+    checkout "releases/v0.17.0"
+    commit id: "VERSION 0.17.0" tag:"v0.17.0"
+    checkout main
+    commit id: "VERSION 0.18.0-dev"
+    commit id: "fix: another hotfix" type: HIGHLIGHT
+    checkout releases/v0.17
+    cherry-pick id: "fix: another hotfix"
+    commit tag: "v0.17.1-rc.1"
+    branch "releases/v0.17.1"
+    checkout "releases/v0.17.1"
+    commit id: "VERSION 0.17.1" tag:"v0.17.1"
+    checkout main
+    commit id: "feat: another feature"
+    branch "releases/v0.18"
+    commit tag: "v0.18.0-rc.1"
+```
+
 ### The Release Branch Creation / Cutoff
 
 Every minor release starts with the creation of a release branch through [
