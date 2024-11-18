@@ -160,7 +160,8 @@ jobs:
         git commit -m "Release $RELEASE_VERSION"
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
-        git push origin ${{ env.RELEASE_VERSION }}
+        # push both the tag as well as a release branch with that tag.
+        git push origin releases/${{ env.RELEASE_VERSION }} ${{ env.RELEASE_VERSION }}
 
     - name: Create GPG Token file from Secret
       run: |
