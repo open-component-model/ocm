@@ -16,7 +16,6 @@ permissions:
 jobs:
   test:
     name: Run tests
-    if: inputs.release_candidate == false
     uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@main
     permissions:
       contents: write
