@@ -193,9 +193,9 @@ Pull Request to the branch with the corresponding release notes
 and it will be used for the release.
 (TODO: Currently we have not decided if we want to permanently keep the notes
 and thus need a PR to main to append them, or if we want to drop them in the
-future. Thats because they are currently needed to correctly manage notes 
-over multiple release candidates, see 
-[this issue](https://github.com/open-component-model/ocm/issues/1097) for 
+future. Thats because they are currently needed to correctly manage notes
+over multiple release candidates, see
+[this issue](https://github.com/open-component-model/ocm/issues/1097) for
 details.) 
 
 By default, this file is generated from the
@@ -219,7 +219,7 @@ installation methods are described
 This release process got rewritten as of 0.19.0 and thus earlier releases
 followed another model where release branches
 were kept in the form of `releases/<major>.<minor>.<patch>` and the release
-branches were created on demand. 
+branches were created on demand.
 This model has now largely been replaced by the model we see in
 this document. However you might still encounter leftovers form the old model
 and you are encouraged to create issues regarding inconsistencies.
