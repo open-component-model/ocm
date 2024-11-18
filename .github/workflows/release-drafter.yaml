@@ -3,6 +3,9 @@ name: Release Drafter
 on:
   push:
     branches:
+      # we only want to draft release notes for the base version,
+      # e.g. for releases/v0.18, we draft v0.18.0 for all RCs
+      # this means that we explicitly don't want to draft release notes for releases/v0.18.0 or releases/v0.18.1
       - 'releases/v[0-9]+.[0-9]+'
 
 permissions:
