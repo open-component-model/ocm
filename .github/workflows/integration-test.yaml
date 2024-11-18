@@ -11,6 +11,7 @@ on:
 
 permissions:
   # Necessary to write the branch
+  # TODO: Remove once https://github.com/open-component-model/ocm-integrationtest/blob/main/.github/workflows/integrationtest.yaml#L41 is not needed anymore
   contents: write
 
 jobs:
