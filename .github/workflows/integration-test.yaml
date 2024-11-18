@@ -9,11 +9,15 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  # Necessary to write the branch
+  contents: write
+
 jobs:
   test:
     name: Run tests
     if: inputs.release_candidate == false
-    uses: jakobmoellerdev/ocm-integrationtest/.github/workflows/integrationtest.yaml@main
+    uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@main
     permissions:
       contents: write
       id-token: write
