@@ -193,7 +193,10 @@ Pull Request to the branch with the corresponding release notes
 and it will be used for the release.
 (TODO: Currently we have not decided if we want to permanently keep the notes
 and thus need a PR to main to append them, or if we want to drop them in the
-future.)
+future. Thats because they are currently needed to correctly manage notes 
+over multiple release candidates, see 
+[this issue](https://github.com/open-component-model/ocm/issues/1097) for 
+details.) 
 
 By default, this file is generated from the
 appropriate draft release with the basic release name (e.g. `v0.1.0-rc.1.md`).
