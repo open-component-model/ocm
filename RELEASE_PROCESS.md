@@ -143,9 +143,9 @@ Action.
 Make sure that all patched commits have been cherry-picked from main.
 
 *NOTE: It is not valid to create a fresh commit on a patch branch without a
-corresponding cherry-pick from main. Use the next minor version for features.*
+corresponding cherry-pick from main.*
 
-#### How to cherry-pick a commit from Main to a Patch branch
+#### How to cherry-pick a commit from `main` to a `releases/x.y` branch
 
 To cherry-pick a commit from `main` to a patch branch, the following steps are
 necessary:
@@ -182,7 +182,7 @@ overwritten from scratch so any edits get lost.
 In case you want to permanently change the release notes, you will have to carry
 them through all release candidates manually.
 (TODO: this needs improvement by allowing us to do "append-only" style release
-notes)
+notes, see [this issue](https://github.com/open-component-model/ocm/issues/1097) for details)
 
 When a release is created, the release notes are copied to
 the [./docs/releasenotes](./docs/releasenotes) folder in that branch
