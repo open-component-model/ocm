@@ -1,6 +1,12 @@
-name: PR Labeler
+name: Pull Request
 on:
-- pull_request_target
+  pull_request_target:
+    # make sure that when the PR changes, we also update
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
 
 permissions:
   pull-requests: write
@@ -8,8 +14,9 @@ permissions:
 
 jobs:
   branch-name-labeler:
+    name: Label PR based on branch name
     permissions:
-      contents: read
+      issues: write
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
@@ -17,13 +24,12 @@ jobs:
         with:
           sparse-checkout: |
             .github/config/labeler.yml
-      - name: Label PR based on branch name
-        uses: actions/labeler@v5
+      - uses: actions/labeler@v5
         with:
           configuration-path: .github/config/labeler.yml
   size-labeler:
     runs-on: ubuntu-latest
-    name: Label the PR size
+    name: Label PR based on size
     permissions:
       issues: write
       pull-requests: write
@@ -47,12 +53,24 @@ jobs:
             Note this PR might be rejected due to its size.
           # github_api_url: 'api.github.com'
           # files_to_ignore: ''
-  check_labels:
+  verify-labels:
     needs: [branch-name-labeler, size-labeler]
-    name: Check labels
+    name: verify labels
     runs-on: ubuntu-latest
     steps:
-      - uses: docker://agilepathway/pull-request-label-checker:latest
+      - name: PRs should have at least one qualifying label
+        uses: docker://agilepathway/pull-request-label-checker:latest
         with:
           one_of: hore,fix,bugfix,bug,kind/bug,feature,enhancement,kind/enhancement,dependencies
           repo_token: ${{ secrets.GITHUB_TOKEN }}
+  semantic-pr-title:
+    name: ensure pr conforms to semantic commit style
+    runs-on: ubuntu-latest
+    steps:
+      # This enforces Semantic Pull Request titles:
+      # see https://github.com/amannn/action-semantic-pull-request?tab=readme-ov-file#examples for examples
+      # see https://www.conventionalcommits.org/en/v1.0.0/#specification for the full specification
+      # We want this because we use squashing so all squashed commits should conform to our commit style
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
