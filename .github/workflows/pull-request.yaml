@@ -16,7 +16,7 @@ jobs:
   branch-name-labeler:
     name: Label PR based on branch name
     permissions:
-      issues: write
+      contents: read
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
