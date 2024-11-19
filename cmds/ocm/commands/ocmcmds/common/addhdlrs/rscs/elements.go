@@ -102,7 +102,7 @@ func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Eleme
 		SourceRefs: compdescv2.ConvertSourcerefsTo(spec.SourceRefs),
 	}
 	opts := h.getModOpts()
-	if spec.SkipDigestGeneration {
+	if spec.Options.SkipDigestGeneration {
 		opts = append(opts, ocm.SkipDigest()) //nolint:staticcheck // skip digest still used for tests
 	}
 	/*
@@ -133,8 +133,13 @@ type ResourceSpec struct {
 	addhdlrs.ResourceInput `json:",inline"`
 
 	// additional process related options
+	Options Options `json:"options"`
 
 	// SkipDigestGeneration omits the digest generation.
+	SkipDigestGeneration bool `json:"skipDigestGeneration,omitempty"`
+}
+
+type Options struct {
 	SkipDigestGeneration bool `json:"skipDigestGeneration,omitempty"`
 }
 
