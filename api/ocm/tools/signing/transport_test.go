@@ -168,7 +168,7 @@ var _ = Describe("transport and signing", func() {
 		ra := desc.GetResourceIndexByIdentity(metav1.NewIdentity("image"))
 		Expect(ra).To(BeNumerically(">=", 0))
 		// indeed, the artifact set archive hash seems to be reproducible
-		desc.Resources[ra].Access = localblob.New("sha256:b0692bcec00e0a875b6b280f3209d6776f3eca128adcb7e81e82fd32127c0c62", "ocm/value:v2.0", "application/vnd.oci.image.manifest.v1+tar+gzip", nil)
+		desc.Resources[ra].Access = localblob.New("sha256:"+H_OCIARCHMANIFEST1, "ocm/value:v2.0", "application/vnd.oci.image.manifest.v1+tar+gzip", nil)
 		Expect(tcv.GetDescriptor()).To(YAMLEqual(desc))
 
 		descSigned := tcv.GetDescriptor().Copy()

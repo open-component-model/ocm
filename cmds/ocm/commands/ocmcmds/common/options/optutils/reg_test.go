@@ -1,8 +1,6 @@
 package optutils_test
 
 import (
-	"encoding/json"
-
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -37,7 +35,7 @@ var _ = Describe("registration options", func() {
 			Name:         "plugin/name",
 			ArtifactType: "art",
 			MediaType:    "media",
-			Config:       json.RawMessage(`{"name":"Name"}`),
+			Config:       []byte(`{"name":"Name"}`),
 		}}))
 	})
 
@@ -49,7 +47,7 @@ var _ = Describe("registration options", func() {
 			Name:         "plugin/name",
 			ArtifactType: "art",
 			MediaType:    "",
-			Config:       json.RawMessage(`{"name":"Name"}`),
+			Config:       []byte(`{"name":"Name"}`),
 		}}))
 	})
 
@@ -61,7 +59,7 @@ var _ = Describe("registration options", func() {
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
-			Config:       json.RawMessage(`{"name":"Name"}`),
+			Config:       []byte(`{"name":"Name"}`),
 		}}))
 	})
 
@@ -73,7 +71,7 @@ var _ = Describe("registration options", func() {
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
-			Config:       json.RawMessage(`{"name":"Name"}`),
+			Config:       []byte(`{"name":"Name"}`),
 		}}))
 	})
 
@@ -85,7 +83,7 @@ var _ = Describe("registration options", func() {
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
-			Config:       json.RawMessage(`"Name"`),
+			Config:       []byte(`"Name"`),
 		}}))
 	})
 
@@ -101,12 +99,12 @@ var _ = Describe("registration options", func() {
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
-			Config:       json.RawMessage(`{"name":"Name"}`),
+			Config:       []byte(`{"name":"Name"}`),
 		}}))
 	})
 
 	It("fails", func() {
 		MustBeSuccessful(flags.Parse([]string{`--test`, `plugin/name:::=Name`}))
-		MustFailWithMessage(opt.Configure(ctx), "invalid test registration plugin/name::: must be of "+optutils.RegistrationFormat)
+		MustFailWithMessage(opt.Configure(ctx), "invalid test registration plugin/name::: (invalid priority) must be of "+optutils.RegistrationFormat)
 	})
 })

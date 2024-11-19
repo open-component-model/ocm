@@ -18,10 +18,26 @@ ocm execute action [<options>] <action spec> {<cred>=<value>}
 ### Description
 
 Execute an action extension for a given action specification. The specification
-show be a JSON or YAML argument.
+should be a JSON or YAML argument.
 
 Additional properties settings can be used to describe a consumer id
 to retrieve credentials for.
+
+The following actions are supported:
+- Name: oci.repository.prepare
+    Prepare the usage of a repository in an OCI registry.
+
+    The hostname of the target repository is used as selector. The action should
+    assure, that the requested repository is available on the target OCI registry.
+
+    Spec version v1 uses the following specification fields:
+    - <code>hostname</code> *string*: The  hostname of the OCI registry.
+    - <code>repository</code> *string*: The OCI repository name.
+
+  Possible Consumer Attributes:
+  - <code>hostname</code>
+  - <code>port</code>
+  - <code>pathprefix</code>
 
 ### Examples
 

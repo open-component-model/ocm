@@ -227,7 +227,7 @@ func (m *accessMethod) eval(relto oci.Repository) error {
 		ocictx := m.ctx.OCIContext()
 		spec := ocictx.GetAlias(ref.Host)
 		if spec == nil {
-			spec = ocireg.NewRepositorySpec(ref.Host)
+			spec = ocireg.NewRepositorySpec(ref.RepositoryRef())
 		}
 		repo, err := ocictx.RepositoryForSpec(spec)
 		if err != nil {
@@ -247,7 +247,7 @@ func (m *accessMethod) eval(relto oci.Repository) error {
 		}
 		ref = oci.RefSpec{
 			UniformRepositorySpec: *repo.GetSpecification().UniformRepositorySpec(),
-			ArtSpec:               art,
+			ArtSpec:               *art,
 		}
 		m.repo = repo
 	}
@@ -355,7 +355,7 @@ func (m *accessMethod) getBlob() (artifactset.ArtifactBlob, error) {
 	}
 	logger := Logger(WrapContextProvider(m.ctx))
 	logger.Info("synthesize artifact blob", "ref", m.reference)
-	m.blob, err = artifactset.SynthesizeArtifactBlobForArtifact(m.art, m.ref.Version())
+	m.blob, err = artifactset.SynthesizeArtifactBlobForArtifact(m.art, m.ref.VersionSpec())
 	logger.Info("synthesize artifact blob done", "ref", m.reference, "error", logging.ErrorMessage(err))
 	if err != nil {
 		m.err = err
