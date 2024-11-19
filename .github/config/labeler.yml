@@ -8,3 +8,7 @@ dependencies:
 - any:
   - head-branch: 'dependencies/*'
   - head-branch: 'dependabot/*'
+github-actions:
+- any:
+  - changed-files:
+    - '.github/**'
