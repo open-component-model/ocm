@@ -61,7 +61,7 @@ jobs:
       - name: PRs should have at least one qualifying label
         uses: docker://agilepathway/pull-request-label-checker:latest
         with:
-          one_of: hore,fix,bugfix,bug,kind/bug,feature,enhancement,kind/enhancement,dependencies
+          one_of: chore,fix,bugfix,bug,kind/bug,feature,enhancement,kind/enhancement,dependencies
           repo_token: ${{ secrets.GITHUB_TOKEN }}
   semantic-pr-title:
     name: ensure pr conforms to semantic commit style
