@@ -11,7 +11,10 @@ type ResourceSpecHandlerBase struct {
 	options options.OptionSet
 }
 
-var _ options.Options = (*ResourceSpecHandlerBase)(nil)
+var (
+	_ options.Options           = (*ResourceSpecHandlerBase)(nil)
+	_ options.OptionSetProvider = (*ResourceSpecHandlerBase)(nil)
+)
 
 func NewBase(opts ...options.Options) ResourceSpecHandlerBase {
 	return ResourceSpecHandlerBase{options: opts}
@@ -26,7 +29,7 @@ func (h *ResourceSpecHandlerBase) WithCLIOptions(opts ...options.Options) Resour
 	return *h
 }
 
-func (h *ResourceSpecHandlerBase) GetOptions() options.OptionSet {
+func (h *ResourceSpecHandlerBase) AsOptionSet() options.OptionSet {
 	return h.options
 }
 
@@ -34,6 +37,10 @@ func (h *ResourceSpecHandlerBase) AddFlags(opts *pflag.FlagSet) {
 	h.options.AddFlags(opts)
 }
 
-func (h *ResourceSpecHandlerBase) GetTargetOpts() []ocm.TargetOption {
-	return options.FindOptions[ocm.TargetOption](h.options)
+func (h *ResourceSpecHandlerBase) GetTargetOpts() []ocm.TargetElementOption {
+	return options.FindOptions[ocm.TargetElementOption](h.options)
+}
+
+func (h *ResourceSpecHandlerBase) GetElementModificationOpts() []ocm.ElementModificationOption {
+	return options.FindOptions[ocm.ElementModificationOption](h.options)
 }

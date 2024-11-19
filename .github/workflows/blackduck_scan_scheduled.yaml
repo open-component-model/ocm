@@ -24,6 +24,28 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: '${{ github.workspace }}/go.mod'
+          cache: false
+
+      - name: Get go environment for use with cache
+        run: |
+          echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
+          echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
+      # This step will only reuse the go mod and build cache from main made during the Build,
+      # see push_ocm.yaml => "ocm-cli-latest" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Restore / Reuse Cache from central build
+        id: cache-golang-restore
+        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
+        with:
+          path: |
+            ${{ env.go_cache }}
+            ${{ env.go_modcache }}
+          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
+          restore-keys: |
+            ${{ env.cache_name }}-${{ runner.os }}-go-
+        env:
+          cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
           
       - name: Blackduck Full Scan
         uses: mercedesbenzio/detect-action@v2

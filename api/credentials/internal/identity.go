@@ -93,6 +93,10 @@ func orMatcher(list []IdentityMatcher) IdentityMatcher {
 // ConsumerIdentity describes the identity of a credential consumer.
 type ConsumerIdentity map[string]string
 
+// UnmarshalJSON allows a yaml specification containing a data type other
+// string, e.g. a hostpath spec with a port. Previously, it would error if the
+// user specified `port: 5000` and instead, the user had to specify
+// `port: "5000"`.
 func (c *ConsumerIdentity) UnmarshalJSON(data []byte) error {
 	var m map[string]interface{}
 	err := runtime.DefaultJSONEncoding.Unmarshal(data, &m)
@@ -100,15 +104,21 @@ func (c *ConsumerIdentity) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	if len(m) == 0 {
+		return nil
+	}
 	*c = make(map[string]string, len(m))
 	for k, v := range m {
 		switch v.(type) {
+		case nil:
+			(*c)[k] = ""
 		case map[string]interface{}:
 			return fmt.Errorf("cannot unmarshal complex type into consumer identity")
 		case []interface{}:
 			return fmt.Errorf("cannot unmarshal complex type into consumer identity")
+		default:
+			(*c)[k] = fmt.Sprintf("%v", v)
 		}
-		(*c)[k] = fmt.Sprintf("%v", v)
 	}
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/oci/grammar"
+	"ocm.software/ocm/api/oci/ociutils"
 )
 
 // to find a suitable secret for images on Docker Hub, we need its two domains to do matching.
@@ -224,11 +225,18 @@ func (r RefSpec) DeepCopy() RefSpec {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func ParseArt(art string) (ArtSpec, error) {
+// ParseVersion parses an OCI version part of an OCI reference.
+// It has to be placed in a utils package to avoid package cycles
+// for particular users.
+func ParseVersion(vers string) (*ArtVersion, error) {
+	return ociutils.ParseVersion(vers)
+}
+
+func ParseArt(art string) (*ArtSpec, error) {
 	match := grammar.AnchoredArtifactVersionRegexp.FindSubmatch([]byte(art))
 
 	if match == nil {
-		return ArtSpec{}, errors.ErrInvalid(KIND_ARETEFACT_REFERENCE, art)
+		return nil, errors.ErrInvalid(KIND_ARETEFACT_REFERENCE, art)
 	}
 	var tag *string
 	var dig *digest.Digest
@@ -241,57 +249,37 @@ func ParseArt(art string) (ArtSpec, error) {
 		t := string(match[3])
 		d, err := digest.Parse(t)
 		if err != nil {
-			return ArtSpec{}, errors.ErrInvalidWrap(err, KIND_ARETEFACT_REFERENCE, art)
+			return nil, errors.ErrInvalidWrap(err, KIND_ARETEFACT_REFERENCE, art)
 		}
 		dig = &d
 	}
-	return ArtSpec{
+	return &ArtSpec{
 		Repository: string(match[1]),
-		Tag:        tag,
-		Digest:     dig,
+		ArtVersion: ArtVersion{
+			Tag:    tag,
+			Digest: dig,
+		},
 	}, nil
 }
+
+type ArtVersion = ociutils.ArtVersion
 
 // ArtSpec is a go internal representation of a oci reference.
 type ArtSpec struct {
 	// Repository is the part of a reference without its hostname
 	Repository string `json:"repository"`
-	// +optional
-	Tag *string `json:"tag,omitempty"`
-	// +optional
-	Digest *digest.Digest `json:"digest,omitempty"`
-}
-
-func (r *ArtSpec) Version() string {
-	if r.Digest != nil {
-		return "@" + string(*r.Digest)
-	}
-	if r.Tag != nil {
-		return *r.Tag
-	}
-	return "latest"
+	// artifact version
+	ArtVersion `json:",inline"`
 }
 
 func (r *ArtSpec) IsRegistry() bool {
 	return r.Repository == ""
 }
 
-func (r *ArtSpec) IsVersion() bool {
-	return r.Tag != nil || r.Digest != nil
-}
-
-func (r *ArtSpec) IsTagged() bool {
-	return r.Tag != nil
-}
-
-func (r *ArtSpec) GetTag() string {
-	if r.Tag != nil {
-		return *r.Tag
-	}
-	return ""
-}
-
 func (r *ArtSpec) String() string {
+	if r == nil {
+		return ""
+	}
 	s := r.Repository
 	if r.Tag != nil {
 		s += fmt.Sprintf(":%s", *r.Tag)

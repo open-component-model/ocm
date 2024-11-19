@@ -97,7 +97,7 @@ type AccessMethod interface {
 	// AsBlobAccess maps a method object into a
 	// basic blob access interface.
 	// It does not provide a separate reference,
-	// closing the blob access with close the
+	// closing the blob access will close the
 	// access method.
 	AsBlobAccess() BlobAccess
 }
