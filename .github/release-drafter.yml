@@ -14,7 +14,7 @@ exclude-labels:
 categories:
   - title: '☠ Breaking Changes ☠'
     labels:
-    - 'BREAKING CHANGE!!!'
+    - '!BREAKING-CHANGE!'
   - title: '🚀 Features'
     labels:
     - 'kind/epic'
