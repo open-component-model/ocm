@@ -3,9 +3,12 @@ package docker
 import (
 	"context"
 
+	"github.com/mandelsoft/logging"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils"
+	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -50,7 +53,9 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 }
 
 func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, usageContext ...credentials.UsageContext) error {
-	client, err := newDockerClient(a.DockerHost)
+	urs := a.UniformRepositorySpec()
+	logger := logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host))
+	client, err := newDockerClient(a.DockerHost, logger)
 	if err != nil {
 		return err
 	}

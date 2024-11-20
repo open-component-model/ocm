@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"net/http"
 	"path"
 	"strings"
 
@@ -58,12 +59,13 @@ var (
 
 func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) (cpi.Repository, error) {
 	urs := spec.UniformRepositorySpec()
+	logger := logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host))
 	if urs.Scheme == "http" {
-		ocmlog.Logger(REALM).Warn("using insecure http for oci registry {{host}}", "host", urs.Host)
+		logger.Warn("using insecure http for oci registry {{host}}", "host", urs.Host)
 	}
 	i := &RepositoryImpl{
 		RepositoryImplBase: cpi.NewRepositoryImplBase(ctx),
-		logger:             logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host)),
+		logger:             logger,
 		spec:               spec,
 		info:               info,
 	}
@@ -112,6 +114,20 @@ func (r *RepositoryImpl) getCreds(comp string) (credentials.Credentials, error) 
 	return identity.GetCredentials(r.GetContext(), r.info.Locator, comp)
 }
 
+type LoggingRoundTripper struct {
+	logger logging.Logger
+	*http.Transport
+}
+
+func (t *LoggingRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.logger.Trace("roundtrip",
+		"url", req.URL,
+		"method", req.Method,
+		"header", req.Header,
+	)
+	return t.Transport.RoundTrip(req)
+}
+
 func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {
 	creds, err := r.getCreds(comp)
 	if err != nil {
@@ -126,6 +142,11 @@ func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {
 
 	opts := docker.ResolverOptions{
 		Hosts: docker.ConvertHosts(config.ConfigureHosts(context.Background(), config.HostOptions{
+			UpdateClient: func(client *http.Client) error {
+				// copy from http.DefaultTransport with a roundtripper injection
+				client.Transport = ocmlog.NewRoundTripper(client.Transport, logger)
+				return nil
+			},
 			Credentials: func(host string) (string, string, error) {
 				if creds != nil {
 					p := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
