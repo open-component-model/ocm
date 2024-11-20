@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   branch-name-labeler:
-    name: Label PR based on branch name
+    name: Label PR based on Config
     permissions:
       contents: read
       pull-requests: write
