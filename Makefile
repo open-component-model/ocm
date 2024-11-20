@@ -10,7 +10,6 @@ ifeq ($(EFFECTIVE_VERSION),)
 EFFECTIVE_VERSION                              := $(VERSION)+$(COMMIT)
 endif
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
-COMMIT                                         := $(shell git rev-parse --verify HEAD)
 
 CONTROLLER_TOOLS_VERSION ?= v0.14.0
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
