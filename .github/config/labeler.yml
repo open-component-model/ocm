@@ -1,14 +1,14 @@
-feature:
+kind/feature:
 - head-branch: 'feature/*'
-fix:
+kind/fix:
 - head-branch: 'fix/*'
-chore:
+kind/chore:
 - head-branch: 'chore/*'
-dependencies:
+kind/dependency:
 - any:
   - head-branch: 'dependencies/*'
   - head-branch: 'dependabot/*'
-github-actions:
+component/github-actions:
 - any:
   - changed-files:
     - '.github/**'
