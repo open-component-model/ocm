@@ -12,7 +12,7 @@ exclude-labels:
   - 'dev/wont-fix'
   - 'component/github-actions'
 categories:
-  - title: '☠ Breaking Changes ☠'
+  - title: '⚠️ Breaking Changes'
     labels:
     - '!BREAKING-CHANGE!'
   - title: '🚀 Features'
