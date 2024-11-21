@@ -40,6 +40,8 @@ Sources may be specified as
 - registry, if the specified registry implementation supports a namespace/repository lister,
   which is not the case for registries conforming to the OCI distribution specification.
 
+Note that there is an indirection of "ocm oci artifact" to "ocm transfer artifact" out of convenience.
+
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 
@@ -76,10 +78,20 @@ linked library can be used:
 ### Examples
 
 ```bash
-$ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink:v1.0.0 gcr.io
-$ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io
-$ ocm oci artifact transfer ghcr.io/mandelsoft/kubelink gcr.io/my-project
+# Simple:
+$ ocm oci artifact transfer ghcr.io/open-component-model/kubelink:v1.0.0 gcr.io
+$ ocm oci artifact transfer ghcr.io/open-component-model/kubelink gcr.io
+$ ocm oci artifact transfer ghcr.io/open-component-model/kubelink gcr.io/my-project
 $ ocm oci artifact transfer /tmp/ctf gcr.io/my-project
+
+# Complex:
+# Transfer an artifact from a CTF into an OCI Repository:
+# 1. Get the link to all artifacts in the CTF with "ocm get artifact $PATH_TO_CTF",
+$ ocm get artifact $PATH_TO_CTF
+REGISTRY                                                               REPOSITORY
+CommonTransportFormat::$PATH_TO_CTF/ component-descriptors/ocm.software/ocmcli
+# 2. Then use any combination to form an artifact reference:
+$ ocm transfer artifact  CommonTransportFormat::$PATH_TO_CTF//component-descriptors/ocm.software/ocmcli ghcr.io/open-component-model/ocm:latest
 ```
 
 ### SEE ALSO

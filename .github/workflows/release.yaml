@@ -203,7 +203,8 @@ jobs:
         git commit -m "Release $RELEASE_VERSION"
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
-        git push origin ${{ env.RELEASE_VERSION }}
+        # push both the tag as well as a release branch with that tag.
+        git push origin releases/${{ env.RELEASE_VERSION }} ${{ env.RELEASE_VERSION }}
 
     - name: Create GPG Token file from Secret
       run: |
@@ -232,20 +233,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: make plain-push
 
-    - name: Bump Version File
-      if: inputs.release_candidate == false
-      run: |
-        set -e
-        git checkout ${GITHUB_REF#refs/heads/}
-        v="$(go run ./api/version/generate bump-version)"
-        echo "$v" > VERSION
-        # Trigger a bump of any potential files that depend on a new version
-        make -f hack/Makefile mdref && make -f hack/Makefile go-bindata && make generate
-        git add --all
-        git commit -m "Update version to $v"
-        git push origin ${GITHUB_REF#refs/heads/}
-        echo "Next branch version is $v"
-
     - name: Publish Release Event
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v3
@@ -265,3 +252,17 @@ jobs:
         repository: ${{ github.repository_owner }}/ocm
         event-type: publish-ocm-cli
         client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true}'
+
+  # make sure that the branch contains the next valid patch
+  bump-release-branch-pr:
+    if: inputs.release_candidate == false
+    uses: ./.github/workflows/release-bump-version.yaml
+    needs: release
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    with:
+      bump-type: patch
+      ref: ${{ github.ref }}
