@@ -3,8 +3,8 @@ OCI_REPO := ghcr.io/mandelsoft/cnudie
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION                                        = $(shell cat $(REPO_ROOT)/VERSION)
-COMMIT                                         = $(shell git rev-parse HEAD)
-EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
+COMMIT                                         = $(shell git rev-parse --verify HEAD)
+EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
 
 .PHONY: ctf
 ctf: ca ## Create CTF from component archive

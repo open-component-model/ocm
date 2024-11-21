@@ -21,5 +21,5 @@ components:
         input:
           type: (( bool(values.MULTI) ? "dockermulti" :"docker" ))
           repository:  (( index(values.IMAGE, ":") >= 0 ? substr(values.IMAGE,0,index(values.IMAGE,":")) :values.IMAGE ))
-          variants: (( bool(values.MULTI) ? map[split(" ", values.PLATFORMS)|v|-> values.IMAGE "-" replace(v,"/","-")] :~~ ))
+          variants: (( bool(values.MULTI) ? map[split(" ", values.IMAGE_PLATFORMS)|v|-> values.IMAGE "-" replace(v,"/","-")] :~~ ))
           path: (( !bool(values.MULTI) ? values.IMAGE :~~ ))
