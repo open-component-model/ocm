@@ -13,6 +13,9 @@ exclude-labels:
   - 'triage/wont-fix'
   - 'triage/invalid'
 categories:
+  - title: '‼️ Breaking Changes'
+    labels:
+      - 'breaking-change'
   - title: '🚀 Features'
     labels:
       - 'kind/enhancement'

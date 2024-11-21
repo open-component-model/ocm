@@ -3,9 +3,11 @@ package optutils
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
@@ -18,7 +20,15 @@ type Registration struct {
 	Name         string
 	ArtifactType string
 	MediaType    string
-	Config       json.RawMessage
+	Prio         *int
+	Config       interface{}
+}
+
+func (r *Registration) GetPriority(def int) int {
+	if r.Prio != nil {
+		return *r.Prio
+	}
+	return def
 }
 
 func NewRegistrationOption(name, short, desc, usage string) RegistrationOption {
@@ -34,7 +44,7 @@ type RegistrationOption struct {
 	Registrations []*Registration
 }
 
-const RegistrationFormat = "<name>[:<artifact type>[:<media type>]]=<JSON target config"
+const RegistrationFormat = "<name>[:<artifact type>[:<media type>[:<priority>]]]=<JSON target config>"
 
 func (o *RegistrationOption) AddFlags(fs *pflag.FlagSet) {
 	flag.StringToStringVarP(fs, &o.spec, o.name, o.short, nil, fmt.Sprintf("%s (%s)", o.desc, RegistrationFormat))
@@ -46,6 +56,7 @@ func (o *RegistrationOption) HasRegistrations() bool {
 
 func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 	for n, v := range o.spec {
+		var prio *int
 		nam := n
 		art := ""
 		med := ""
@@ -53,18 +64,29 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 		if i >= 0 {
 			art = nam[i+1:]
 			nam = nam[:i]
-			i = strings.Index(art, ":")
-			if i >= 0 {
-				med = art[i+1:]
-				art = art[:i]
-				i = strings.Index(med, ":")
-				if i >= 0 {
-					return fmt.Errorf("invalid %s registration %s must be of %s", o.name, n, RegistrationFormat)
-				}
+		}
+		i = strings.Index(art, ":")
+		if i >= 0 {
+			med = art[i+1:]
+			art = art[:i]
+		}
+		i = strings.Index(med, ":")
+		if i >= 0 {
+			p := med[i+1:]
+			med = med[:i]
+
+			v, err := strconv.ParseInt(p, 10, 32)
+			if err != nil {
+				return fmt.Errorf("invalid %s registration %s (invalid priority) must be of %s", o.name, n, RegistrationFormat)
 			}
+			prio = generics.Pointer(int(v))
+		}
+		i = strings.Index(med, ":")
+		if i >= 0 {
+			return fmt.Errorf("invalid %s registration %s must be of %s", o.name, n, RegistrationFormat)
 		}
 
-		var data json.RawMessage
+		var data interface{}
 		var raw []byte
 		var err error
 		if strings.HasPrefix(v, "@") {
@@ -73,7 +95,9 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 				return errors.Wrapf(err, "cannot read %s config from %q", o.name, v[1:])
 			}
 		} else {
-			raw = []byte(v)
+			if v != "" {
+				raw = []byte(v)
+			}
 		}
 
 		if len(raw) > 0 {
@@ -91,6 +115,7 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 			Name:         nam,
 			ArtifactType: art,
 			MediaType:    med,
+			Prio:         prio,
 			Config:       data,
 		})
 	}

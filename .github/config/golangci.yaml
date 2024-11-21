@@ -91,6 +91,9 @@ linters:
     # Disabled because of deprecation
     - execinquery
 
+    # Seriously, who wants every comment to end in a period???
+    - godot
+
 linters-settings:
   gci:
     sections:

@@ -26,12 +26,14 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -h, --help                      help for componentversions
       --lookup stringArray        repository name or spec for closure lookup fallback
   -O, --output string             output file for dry-run
+  -P, --preserve-signature        preserve existing signatures
   -R, --replace                   replace existing elements
   -S, --scheme string             schema version (default "v2")
   -s, --settings stringArray      settings file with variable settings (yaml)
+      --skip-digest-generation    skip digest creation
       --templater string          templater to use (go, none, spiff, subst) (default "subst")
   -t, --type string               archive format (directory, tar, tgz) (default "directory")
-      --uploader <name>=<value>   repository uploader (<name>[:<artifact type>[:<media type>]]=<JSON target config) (default [])
+      --uploader <name>=<value>   repository uploader (<name>[:<artifact type>[:<media type>[:<priority>]]]=<JSON target config>) (default [])
   -v, --version string            default version for components
 ```
 
@@ -54,7 +56,10 @@ components will be added by value.
 
 The <code>--replace</code> option allows users to specify whether adding an
 element with the same name and extra identity but different version as an
-existing element append (false) or replace (true) the existing element.
+existing element, append (false) or replace (true) the existing element.
+
+The <code>--preserve-signature</code> option prohibits changes of signature
+relevant elements.
 
 
 The source, resource and reference list can be composed according to the commands
@@ -83,13 +88,6 @@ archive does not exist yet. The following formats are supported:
 - tgz
 
 The default format is <code>directory</code>.
-
-
-If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.
-
-The following schema versions are supported for explicit conversions:
-  - <code>ocm.software/v3alpha1</code>
-  - <code>v2</code> (default)
 
 
 All yaml/json defined resources can be templated.

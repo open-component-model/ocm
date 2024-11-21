@@ -1,8 +1,24 @@
-name: component CTFs
+name: Components
 
 on:
   pull_request:
   workflow_call:
+    inputs:
+      effective-version:
+        type: string
+        required: false
+        description: "The version to use for the build"
+        default: ""
+      upload-ctf:
+        type: boolean
+        required: false
+        description: "Whether to upload the final CTF"
+        default: false
+      ref:
+        type: string
+        description: "The ref to use for the component build, defaults to the ref where the workflow was triggered from"
+        required: false
+        default: ""
   push:
     branches:
       - main
@@ -11,165 +27,56 @@ permissions:
   contents: read
   pull-requests: read
 
+env:
+  REF: ${{ inputs.ref == '' && github.ref || inputs.ref }}
+  CTF_TYPE: directory
+  components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin"]'
+  IMAGE_PLATFORMS: 'linux/amd64 linux/arm64'
+  PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
+
 jobs:
-  build-cli:
-    name: Build CLI
-    runs-on: large_runner
+  define-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.componentMatrix.outputs.matrix }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: '${{ github.workspace }}/go.mod'
-          cache: false
-
-      - name: Get go environment for use with cache
+      - id: componentMatrix
+        name: Set Components to be used for Build
         run: |
-          echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.go_cache }}
-            ${{ env.go_modcache }}
-          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
-          restore-keys: |
-            ${{ env.cache_name }}-${{ runner.os }}-go-
+          echo "matrix=$input" >> $GITHUB_OUTPUT
         env:
-          cache_name: cli-go-cache
+          input: ${{ env.components }}
 
-      - name: CTF
-        run: |
-          cd components/ocmcli
-          PATH=$PATH:$(go env GOPATH)/bin make ctf
-
-  build-helminstaller:
-    name: Build HelmInstaller
-    runs-on: large_runner
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: '${{ github.workspace }}/go.mod'
-          cache: false
-
-      - name: Get go environment for use with cache
-        run: |
-          echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.go_cache }}
-            ${{ env.go_modcache }}
-          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
-          restore-keys: |
-            ${{ env.cache_name }}-${{ runner.os }}-go-
-        env:
-          cache_name: helminstaller-go-cache
-
-      - name: CTF
-        run: |
-          cd components/helminstaller
-          PATH=$PATH:$(go env GOPATH)/bin make ctf
-
-  build-helmdemo:
-    name: Build HelmDemo
-    runs-on: large_runner
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: '${{ github.workspace }}/go.mod'
-          cache: false
-
-      - name: Get go environment for use with cache
-        run: |
-          echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.go_cache }}
-            ${{ env.go_modcache }}
-          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
-          restore-keys: |
-            ${{ env.cache_name }}-${{ runner.os }}-go-
-        env:
-          cache_name: helmdemo-go-cache
-
-      - name: CTF
-        run: |
-          cd components/helmdemo
-          PATH=$PATH:$(go env GOPATH)/bin make ctf
-
-  build-subchartsdemo:
-    name: Build Helm SubChartsDemo
-    runs-on: large_runner
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: '${{ github.workspace }}/go.mod'
-          cache: false
-
-      - name: Get go environment for use with cache
-        run: |
-          echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.go_cache }}
-            ${{ env.go_modcache }}
-          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
-          restore-keys: |
-            ${{ env.cache_name }}-${{ runner.os }}-go-
-        env:
-          cache_name: helm-subchart-go-cache
-
-      - name: CTF
-        run: |
-          cd components/subchartsdemo
-          PATH=$PATH:$(go env GOPATH)/bin make ctf
-
-  build-ecrplugin:
-    name: Build ECR Plugin
+  build:
+    name: "Build"
+    needs: define-matrix
+    strategy:
+      matrix:
+        component: ${{fromJSON(needs.define-matrix.outputs.components)}}
     runs-on: large_runner
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@v2.2
-
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version-file: '${{ github.workspace }}/go.mod'
           cache: false
-
       - name: Get go environment for use with cache
         run: |
           echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      - name: Set up cache
-        # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-        uses: actions/cache@v4
+      # This step will only reuse the go mod and build cache from main made during the Build,
+      # see push_ocm.yaml => "ocm-cli-latest" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+      - name: Restore / Reuse Cache from central build
+        id: cache-golang-restore
+        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
         with:
           path: |
             ${{ env.go_cache }}
@@ -178,9 +85,91 @@ jobs:
           restore-keys: |
             ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
-          cache_name: ecr-plugin-go-cache
-
+          cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
       - name: CTF
         run: |
-          cd components/ecrplugin
-          PATH=$PATH:$(go env GOPATH)/bin make ctf
+          cd components/${{ matrix.component }}
+          
+          PATH=$PATH:$(go env GOPATH)/bin \
+          CTF_TYPE=${{ env.CTF_TYPE }} \
+          EFFECTIVE_VERSION=${{ inputs.effective-version }} \
+          PLATFORMS="${{ env.PLATFORMS }}" \
+          IMAGE_PLATFORMS="${{ env.IMAGE_PLATFORMS }}" \
+          make \
+            ctf descriptor describe
+      - name: Upload CTF
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 1
+          name: ctf-component-${{ matrix.component }}
+          path: gen/${{ matrix.component }}/ctf
+
+  aggregate:
+    name: "Aggregate"
+    runs-on: large_runner
+    needs: [build, define-matrix]
+    env:
+      components: ${{ join(fromJSON(needs.define-matrix.outputs.components), ' ') }}
+    steps:
+      - name: Self Hosted Runner Post Job Cleanup Action
+        uses: TooMuch4U/actions-clean@v2.2
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
+      - name: Download CTFs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: 'ctf-component-*'
+          path: gen/downloaded-ctfs
+      - name: Move CTFs into correct directory for aggregation
+        run: |
+          for i in ${{ env.components }}; do
+            mkdir -p ${{ github.workspace }}/gen/${i}
+            mv ${{ github.workspace }}/gen/downloaded-ctfs/ctf-component-${i} ${{ github.workspace }}/gen/${i}/ctf
+            ls -R ${{ github.workspace }}/gen/${i}
+          done
+      - name: Extract OCM Binary from CTF to avoid OCM Inception
+        id: extract-ocm
+        run: |
+          ocm_binary=$(bash ./hack/get_bare_resource_from_ctf.sh \
+            "ocm.software/ocmcli" \
+            "" \
+            "ocmcli" \
+            $(go env GOARCH) \
+            $(go env GOOS) \
+            "application/octet-stream" \
+            ${{ github.workspace }}/gen/ocmcli/ctf)
+          
+          new_loc=${{ github.workspace }}/bin/ocm
+          mkdir -p $(dirname $new_loc)
+          ln -s $ocm_binary $new_loc
+          chmod +x $new_loc
+          echo "OCM binary linked to $new_loc"
+          echo "binary=$new_loc" >> $GITHUB_OUTPUT
+      - name: Create aggregated CTF
+        run: |
+          for i in ${{ env.components }}; do
+            echo "transfering component $i..."
+            ${{ steps.extract-ocm.outputs.binary }} transfer cv \
+              --type ${{ env.CTF_TYPE }} -V \
+                ${{ github.workspace }}/gen/$i/ctf \
+                ${{ github.workspace }}/gen/ctf
+          done
+      - name: Upload aggregated CTF
+        # only upload the artifact if we are not on a PR
+        if: inputs.upload-ctf
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 30
+          name: ctf-aggregated
+          path: gen/ctf
+      - name: Delete old CTFs that lead up to aggregation
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            ctf-component-*

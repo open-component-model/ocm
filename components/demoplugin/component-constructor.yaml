@@ -1,0 +1,23 @@
+---
+helper:
+  <<<: (( &temporary ))
+  executable:
+    <<<: (( &template ))
+    name: demo
+    type: ocmPlugin
+    version: (( values.VERSION ))
+    extraIdentity:
+      os: ((dirname(p) ))
+      architecture: (( basename(p) ))
+    input:
+      type: file
+      # Generate the path to the plugin binary by looking into the base path and encoding the platform
+      path: (( values.GEN "/" values.NAME "." replace(p,"/","-") ))
+
+components:
+  - name: (( values.COMPONENT))
+    version: (( values.VERSION))
+    provider:
+      name: (( values.PROVIDER))
+    # use all platforms and create a resource for each
+    resources: (( map[split(" ", values.PLATFORMS)|p|-> *helper.executable] ))

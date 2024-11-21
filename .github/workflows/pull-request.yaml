@@ -1,0 +1,76 @@
+name: Pull Request
+on:
+  pull_request_target:
+    # make sure that when the PR changes, we also update
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  branch-name-labeler:
+    name: Label PR based on Config
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/config/labeler.yml
+      - uses: actions/labeler@v5
+        with:
+          configuration-path: .github/config/labeler.yml
+  size-labeler:
+    runs-on: ubuntu-latest
+    name: Label PR based on size
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: 'size/xs'
+          xs_max_size: '10'
+          s_label: 'size/s'
+          s_max_size: '100'
+          m_label: 'size/m'
+          m_max_size: '500'
+          l_label: 'size/l'
+          l_max_size: '10000'
+          xl_label: 'size/xl'
+          fail_if_xl: 'true'
+          message_if_xl: >
+            This PR exceeds the recommended size of 10000 lines.
+            Please make sure you are NOT addressing multiple issues with one PR.
+            Note this PR might be rejected due to its size.
+          # github_api_url: 'api.github.com'
+          # files_to_ignore: ''
+  verify-labels:
+    needs: [branch-name-labeler, size-labeler]
+    name: verify labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: PRs should have at least one qualifying label
+        uses: docker://agilepathway/pull-request-label-checker:latest
+        with:
+          one_of: chore,fix,bugfix,bug,kind/bug,feature,enhancement,kind/enhancement,dependencies
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+  semantic-pr-title:
+    name: ensure pr conforms to semantic commit style
+    runs-on: ubuntu-latest
+    steps:
+      # This enforces Semantic Pull Request titles:
+      # see https://github.com/amannn/action-semantic-pull-request?tab=readme-ov-file#examples for examples
+      # see https://www.conventionalcommits.org/en/v1.0.0/#specification for the full specification
+      # We want this because we use squashing so all squashed commits should conform to our commit style
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
