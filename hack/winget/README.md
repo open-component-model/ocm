@@ -33,5 +33,5 @@ winget install  --manifest .\manifests\o\Open-Component-Model\ocm-cli\0.15.0\
 ## update package
 
 ```powershell
-wingetcreate update --urls https://github.com/open-component-model/ocm/releases/download/v0.15.0/ocm-0.15.0-windows-386.zip https://github.com/open-component-model/ocm/releases/download/v0.15.0/ocm-0.15.0-windows-amd64.zip https://github.com/open-component-model/ocm/releases/download/v0.15.0/ocm-0.15.0-windows-arm64.zip --version 0.15.0 --release-notes-url https://github.com/open-component-model/ocm/blob/main/docs/releasenotes/v0.15.0.md ` Open-Component-Model.ocm-cli
+wingetcreate update --urls https://github.com/open-component-model/ocm/releases/download/v0.15.0/ocm-0.15.0-windows-386.zip https://github.com/open-component-model/ocm/releases/download/v0.15.0/ocm-0.15.0-windows-amd64.zip https://github.com/open-component-model/ocm/releases/download/v0.15.0/ocm-0.15.0-windows-arm64.zip --version 0.15.0 --release-notes-url https://github.com/open-component-model/ocm/releases/tag/v0.15.0 ` Open-Component-Model.ocm-cli
 ```

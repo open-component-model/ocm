@@ -31,8 +31,7 @@ pre-release suffix is appended to generate the name of the release (e.g. `0.1.0`
 or `0.1.0-alpha1`) and to prepare a commit for the release which is used to
 create a release tag.
 
-Additionally, this commit will also add a new release note file
-under [./docs/releasenotes](./docs/releasenotes). It is generated from the
+Release notes are generated from the
 appropriate draft release with the basic release name (e.g. `0.1.0`). After the
 release is done, for final releases, a new commit is created to prepare the
 development of the next release by adapting the [`VERSION`](./VERSION) file
