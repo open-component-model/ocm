@@ -1,10 +1,4 @@
 # see https://github.com/actions/labeler?tab=readme-ov-file#match-object to configure correctly
-feature:
-- head-branch: 'feature/*'
-fix:
-- head-branch: 'fix/*'
-chore:
-- head-branch: 'chore/*'
 dependencies:
 - any:
   - head-branch: 'dependencies/*'
