@@ -9,10 +9,13 @@ import (
 	"github.com/docker/cli/cli/config"
 	cliflags "github.com/docker/cli/cli/flags"
 	dockerclient "github.com/docker/docker/client"
+	mlog "github.com/mandelsoft/logging"
 	"github.com/spf13/pflag"
+
+	"ocm.software/ocm/api/utils/logging"
 )
 
-func newDockerClient(dockerhost string) (*dockerclient.Client, error) {
+func newDockerClient(dockerhost string, logger mlog.UnboundLogger) (*dockerclient.Client, error) {
 	if dockerhost == "" {
 		opts := cliflags.NewClientOptions()
 		// set defaults
@@ -30,7 +33,14 @@ func newDockerClient(dockerhost string) (*dockerclient.Client, error) {
 	}
 	url, err := dockerclient.ParseHostURL(dockerhost)
 	if err == nil && url.Scheme == "unix" {
-		dockerclient.WithScheme(url.Scheme)(c)
+		if err := dockerclient.WithScheme(url.Scheme)(c); err != nil {
+			return nil, err
+		}
+	}
+	clnt := c.HTTPClient()
+	clnt.Transport = logging.NewRoundTripper(clnt.Transport, logger)
+	if err := dockerclient.WithHTTPClient(clnt)(c); err != nil {
+		return nil, err
 	}
 	return c, nil
 }

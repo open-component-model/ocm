@@ -6,8 +6,10 @@ import (
 	"github.com/containers/image/v5/types"
 	dockertypes "github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
+	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/oci/cpi"
+	ocmlog "ocm.software/ocm/api/utils/logging"
 )
 
 type RepositoryImpl struct {
@@ -20,7 +22,9 @@ type RepositoryImpl struct {
 var _ cpi.RepositoryImpl = (*RepositoryImpl)(nil)
 
 func NewRepository(ctx cpi.Context, spec *RepositorySpec) (cpi.Repository, error) {
-	client, err := newDockerClient(spec.DockerHost)
+	urs := spec.UniformRepositorySpec()
+	logger := logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host))
+	client, err := newDockerClient(spec.DockerHost, logger)
 	if err != nil {
 		return nil, err
 	}

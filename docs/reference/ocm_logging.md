@@ -29,6 +29,7 @@ The following *realms* are used by the command line tool:
   - <code>ocm/downloader</code>: Downloaders
   - <code>ocm/maven</code>: Maven repository
   - <code>ocm/npm</code>: NPM registry
+  - <code>ocm/oci/docker</code>: Docker repository handling
   - <code>ocm/oci/mapping</code>: OCM to OCI Registry Mapping
   - <code>ocm/oci/ocireg</code>: OCI repository handling
   - <code>ocm/plugins</code>: OCM plugin handling
