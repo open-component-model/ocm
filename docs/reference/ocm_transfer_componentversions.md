@@ -241,8 +241,9 @@ this one is used.
 ### Examples
 
 ```bash
-$ ocm transfer components -t tgz ghcr.io/mandelsoft/kubelink ctf.tgz
-$ ocm transfer components -t tgz --repo OCIRegistry::ghcr.io mandelsoft/kubelink ctf.tgz
+$ ocm transfer components -t tgz ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0 ./ctf.tgz
+$ ocm transfer components --latest -t tgz --repo OCIRegistry::ghcr.io/open-component-model/ocm ocm.software/ocmcli ./ctf.tgz
+$ ocm transfer components --latest --copy-resources --type directory ghcr.io/open-component-model/ocm//ocm.software/ocmcli ./ctf
 ```
 
 ### SEE ALSO

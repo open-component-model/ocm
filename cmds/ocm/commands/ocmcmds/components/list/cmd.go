@@ -53,8 +53,8 @@ List lists the version names of the specified objects, if only a component is sp
 all versions according to the given version constraints are listed.
 `,
 		Example: `
-$ ocm list componentversion ghcr.io/mandelsoft/kubelink
-$ ocm list componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
+$ ocm list componentversion ghcr.io/open-component-model/ocm//ocm.software/ocmcli
+$ ocm list componentversion --repo OCIRegistry::ghcr.io/open-component-model/ocm ocm.software/ocmcli
 `,
 		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
