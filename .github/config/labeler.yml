@@ -1,3 +1,4 @@
+# see https://github.com/actions/labeler?tab=readme-ov-file#match-object to configure correctly
 feature:
 - head-branch: 'feature/*'
 fix:
@@ -11,4 +12,4 @@ dependencies:
 github-actions:
 - any:
   - changed-files:
-    - '.github/**'
+    - any-glob-to-any-file: ['.github/**']
