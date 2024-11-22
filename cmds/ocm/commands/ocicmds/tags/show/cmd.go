@@ -50,7 +50,8 @@ func (o *Command) ForName(name string) *cobra.Command {
 Match tags of an artifact against some patterns.
 `,
 		Example: `
-$ oci show tags ghcr.io/mandelsoft/kubelink
+$ ocm show tags ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image
+$ ocm oci show tags ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image
 `,
 		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}

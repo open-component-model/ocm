@@ -19,7 +19,7 @@ var (
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return signing.NewCommand(ctx, "Sign", true,
 		[]string{"signed", "signing"},
-		desc, "$ ocm sign componentversion --signature mandelsoft --private-key=mandelsoft.key ghcr.io/mandelsoft/kubelink",
+		desc, "$ ocm sign componentversion --signature mysignature --private-key=my.key ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0",
 		utils.Names(Names, names...)...)
 }
 
