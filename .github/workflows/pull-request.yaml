@@ -24,18 +24,18 @@ jobs:
         env:
           TYPE_TO_LABEL: |
             {
-              "feat":"kind/enhancement",
-              "fix":"fix",
-              "chore":"chore",
-              "docs":"kind/documentation",
-              "test":"kind/test",
-              "perf":"kind/performance"
+              "feat":"kind/feature",
+              "fix":"kind/bugfix",
+              "chore":"kind/chore",
+              "docs":"area/documentation",
+              "test":"area/testing",
+              "perf":"area/performance"
             }
           SCOPE_TO_LABEL: |
             {
-              "deps":"dependencies"
+              "deps":"kind/dependency"
             }
-          BREAKING_CHANGE_LABEL: "breaking"
+          BREAKING_CHANGE_LABEL: "!BREAKING-CHANGE!"
         with:
           script: |
             console.log("Verify that the PR title follows the Conventional Commit format");
