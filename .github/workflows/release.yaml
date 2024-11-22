@@ -81,9 +81,9 @@ jobs:
   components:
     name: Component CTF Builds
     uses: ./.github/workflows/components.yaml
-    needs: [check,release-version]
+    needs: [ check,release-version ]
     with:
-      effective-version: ${{ needs.release-version.outputs.version_no_prefix }}
+      version: ${{ needs.release-version.outputs.version_no_prefix }}
       upload-ctf: true
       ref: ${{ github.ref }}
     permissions:
@@ -105,7 +105,6 @@ jobs:
       packages: write
     env:
       RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
-      RELEASE_NOTES: ${{ fromJSON(needs.check.outputs.draft-release-notes).body }}
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action
       uses: TooMuch4U/actions-clean@v2.2
@@ -183,19 +182,24 @@ jobs:
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
         # push both the tag as well as a release branch with that tag.
-        git push origin releases/${{ env.RELEASE_VERSION }} ${{ env.RELEASE_VERSION }}
+        git push origin ${{ env.RELEASE_VERSION }}
 
     - name: Create GPG Token file from Secret
       run: |
         echo "${{ secrets.GPG_PRIVATE_KEY_FOR_SIGNING }}" > ocm-releases-key.gpg
         echo "GPG_KEY_PATH=ocm-releases-key.gpg" >> $GITHUB_ENV
 
+    - name: Setup Release Notes as File to make it readable by GoReleaser
+      run: |
+        echo "${{ fromJSON(needs.check.outputs.draft-release-notes).body }}" > $RUNNER_TEMP/RELEASE_NOTES.md
+        echo "RELEASE_NOTES=$RUNNER_TEMP/RELEASE_NOTES.md" >> $GITHUB_ENV
+        cat $RUNNER_TEMP/RELEASE_NOTES.md
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v6
       with:
         distribution: goreleaser
         version: 2.1.0
-        args: release --clean --timeout 60m --skip=validate --config=.github/config/goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
+        args: release --clean --timeout 60m --skip=validate --config=.github/config/goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES }}
       env:
         GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
