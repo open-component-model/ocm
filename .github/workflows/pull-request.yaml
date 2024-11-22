@@ -158,5 +158,5 @@ jobs:
       - name: PRs should have at least one qualifying label
         uses: docker://agilepathway/pull-request-label-checker:latest
         with:
-          one_of: kind/chore,kind/fix,kind/feature,kind/dependency,area/documentation,kind/refactor,kind/skip-release-notes
+          one_of: kind/chore,kind/bugfix,kind/feature,kind/dependency,area/documentation,kind/refactor,kind/skip-release-notes
           repo_token: ${{ secrets.GITHUB_TOKEN }}
