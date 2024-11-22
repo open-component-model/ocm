@@ -127,8 +127,8 @@ The following modes are supported:
 ### Examples
 
 ```bash
-$ ocm hash componentversion ghcr.io/mandelsoft/kubelink
-$ ocm hash componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
+$ ocm hash componentversion ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0
+$ ocm hash componentversion --repo OCIRegistry::ghcr.io/open-component-model/ocm ocm.software/ocmcli:0.17.0
 ```
 
 ### SEE ALSO
