@@ -52,7 +52,7 @@ The OCM CLI provides commands to
 
 plugins.
 
-Plugins can either be installed manually, just by copying the plugin executable to the plugin directory, or by using the CLI commands. They uye OCM component versions as installation source. Plugins must have the artifact type `ocmPlugin` and follow the rules for providing multi-platform executables by using separate
+Plugins can either be installed manually, just by copying the plugin executable to the plugin directory, or by using the CLI commands. They use OCM component versions as installation source. Plugins must have the artifact type `ocmPlugin` and follow the rules for providing multi-platform executables by using separate
 resources with the same name by different platform attributes as extended identity. (see Go platform and architecture names).
 
 The commands extract the correct variant for the platform the command is running.
@@ -144,8 +144,8 @@ the extension point functionality to the Go interface of the plugin representati
 
 The proxy implementation are found in `plugin` packages below the extension point package (for example the [access method plugin proxy](../extensions/accessmethods/plugin)).
 
-The registration handler registries are typically found in the extension point packages in (for example)) [registrations.go](../extensions/download/registration.go). The generale registration handler registration handling is implemented in package [api/utils/registrations](../../utils/registrations).
+The registration handler registries are typically found in the extension point packages in (for example)) [registrations.go](../extensions/download/registration.go). The general registration handler registration handling is implemented in package [api/utils/registrations](../../utils/registrations).
 It is called registration handler registry, because it is a registry which provides a namespace to name the types of handlers. It is possible to register registration handlers for a sub namespace, which then handle the registration (and creation) of handlers for a particular extension point (for example download handler).
 
 The `command` extension point is implemented by the CLI package [cmds/ocm/commands/ocmcmds/plugins](../../../cmds/ocm/commands/ocmcmds/plugins).
-Command extensions can be registered for any verb and object type name (even those not yet existing) and are automatically added to the CLI's command tree.
+Command extensions can be registered for any verb and object type name (even those not yet existing) and are automatically added to the command tree of the CLI.

@@ -200,6 +200,7 @@ ociregistry
 ocm
 ocmbot
 ocmcli
+ocmcmds
 ocmconfig
 oncefunc
 oo
@@ -228,6 +229,7 @@ pubsub
 readme
 readonly
 refcount
+registerextensions
 relativeocireference
 releasenotes
 releaser
