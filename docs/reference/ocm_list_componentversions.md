@@ -111,8 +111,8 @@ The following modes are supported:
 ### Examples
 
 ```bash
-$ ocm list componentversion ghcr.io/mandelsoft/kubelink
-$ ocm list componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
+$ ocm list componentversion ghcr.io/open-component-model/ocm//ocm.software/ocmcli
+$ ocm list componentversion --repo OCIRegistry::ghcr.io/open-component-model/ocm ocm.software/ocmcli
 ```
 
 ### SEE ALSO

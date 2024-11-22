@@ -79,10 +79,13 @@ linked library can be used:
 
 ```bash
 # Simple:
-$ ocm oci artifact transfer ghcr.io/open-component-model/kubelink:v1.0.0 gcr.io
-$ ocm oci artifact transfer ghcr.io/open-component-model/kubelink gcr.io
-$ ocm oci artifact transfer ghcr.io/open-component-model/kubelink gcr.io/my-project
-$ ocm oci artifact transfer /tmp/ctf gcr.io/my-project
+$ ocm transfer artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.17.0 ghcr.io/MY_USER/ocmcli:0.17.0
+$ ocm transfer artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image ghcr.io/MY_USER/ocmcli
+$ ocm transfer artifact ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image gcr.io
+$ ocm transfer artifact transfer /tmp/ctf ghcr.io/MY_USER/ocmcli
+
+# Equivalent to ocm transfer artifact:
+$ ocm oci artifact transfer
 
 # Complex:
 # Transfer an artifact from a CTF into an OCI Repository:
