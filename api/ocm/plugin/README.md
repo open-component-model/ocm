@@ -8,6 +8,7 @@ This plugin concept is not part of the OCM specification, because it is
 a feature of this library implementation.
 
 The following extension points are supported:
+
 - Access methods
 - Uploaders
 - Downloaders
@@ -40,10 +41,9 @@ The structure of this document is described by the descriptor type in package [`
 
 Plugin are searched in a plugin folder (typically `.ocm/plugins`), This default location can be changed by the `plugincachedir` attribute.
 
-
 ## Plugin-related CLI Commands
 
-The OCM CLI provides commands to 
+The OCM CLI provides commands to
 
 - [install](../../../docs/reference/ocm_install_plugins.md)
 - [update](../../../docs/reference/ocm_install_plugins.md)
@@ -51,7 +51,6 @@ The OCM CLI provides commands to
 - [examine](../../../docs/reference/ocm_describe_plugins.md)
 
 plugins.
-
 
 Plugins can either be installed manually, just by copying the plugin executable to the plugin directory, or by using the CLI commands. They uye OCM component versions as installation source. Plugins must have the artifact type `ocmPlugin` and follow the rules for providing multi-platform executables by using separate
 resources with the same name by different platform attributes as extended identity. (see Go platform and architecture names).
@@ -121,7 +120,7 @@ The standard implementation od the commands can be found below the package
 [`api/plugin/ppi/cmds](ppi/cmds), structured by the extension point name and its
 interface operation. (for example [upload/put](ppi/cmds/upload/put/cmd.go))
 
-## How plugins are used in the library.
+## How plugins are used in the library
 
 The library includes the counterpart of the plugin-side support. It is found directly in package [`api/ocm/plugin](.). It shared the descriptor package for the plugin descriptor and provides a separate [Plugin](plugin.go) object type.
 
