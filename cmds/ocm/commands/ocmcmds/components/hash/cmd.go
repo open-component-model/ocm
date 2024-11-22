@@ -60,8 +60,8 @@ Hash lists normalized forms for all component versions specified, if only a comp
 all versions are listed.
 `,
 		Example: `
-$ ocm hash componentversion ghcr.io/mandelsoft/kubelink
-$ ocm hash componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
+$ ocm hash componentversion ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0
+$ ocm hash componentversion --repo OCIRegistry::ghcr.io/open-component-model/ocm ocm.software/ocmcli:0.17.0
 `,
 		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
