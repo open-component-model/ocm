@@ -150,3 +150,17 @@ jobs:
           https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
           --version ${{ env.RELEASE_VERSION }} `
           Open-Component-Model.ocm-cli
+  push-to-website:
+    name: Update OCM Website
+    runs-on: ubuntu-latest
+    if: github.event.client_payload.push-to-website && github.event.client_payload.version != ''
+    steps:
+    - name: Ensure proper version
+      run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }})" >> $GITHUB_ENV
+    - name: Publish Release Event
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ steps.generate_token.outputs.token }}
+        repository: open-component-model/ocm-website
+        event-type: ocm-cli-release
+        client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
