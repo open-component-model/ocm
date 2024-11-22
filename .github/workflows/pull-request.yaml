@@ -160,14 +160,3 @@ jobs:
         with:
           one_of: kind/chore,kind/fix,kind/feature,kind/dependency,area/documentation,kind/refactor,kind/skip-release-notes
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-  semantic-pr-title:
-    name: ensure pr conforms to semantic commit style
-    runs-on: ubuntu-latest
-    steps:
-      # This enforces Semantic Pull Request titles:
-      # see https://github.com/amannn/action-semantic-pull-request?tab=readme-ov-file#examples for examples
-      # see https://www.conventionalcommits.org/en/v1.0.0/#specification for the full specification
-      # We want this because we use squashing so all squashed commits should conform to our commit style
-      - uses: amannn/action-semantic-pull-request@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
