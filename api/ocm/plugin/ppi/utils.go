@@ -193,13 +193,17 @@ func ComponentVersionQuestionFunc(f func(p Plugin, question *ComponentVersionQue
 	}
 }
 
-func ComponentReferenceQuestionFunc(f func(p Plugin, question *ComponentReferenceQuestionArguments) (bool, error)) QuestionResultFunc {
+type ComponentReferenceQuestionFunc = func(p Plugin, question *ComponentReferenceQuestionArguments) (bool, error)
+
+func ForComponentReferenceQuestion(f func(p Plugin, question *ComponentReferenceQuestionArguments) (bool, error)) QuestionResultFunc {
 	return func(p Plugin, question QuestionArguments) (bool, error) {
 		return f(p, question.(*ComponentReferenceQuestionArguments))
 	}
 }
 
-func ArtifactQuestionFunc(f func(p Plugin, question *ArtifactQuestionArguments) (bool, error)) QuestionResultFunc {
+type ArtifactQuestionFunc = func(p Plugin, question *ArtifactQuestionArguments) (bool, error)
+
+func ForArtifactQuestion(f ArtifactQuestionFunc) QuestionResultFunc {
 	return func(p Plugin, question QuestionArguments) (bool, error) {
 		return f(p, question.(*ArtifactQuestionArguments))
 	}
@@ -212,7 +216,7 @@ type defaultDecisionHandler struct {
 
 // NewDecisionHandler provides a default decision handler based on its standard
 // fields and a handler function.
-func NewDecisionHandler(q, desc string, h func(p Plugin, question QuestionArguments) (bool, error), labels ...string) DecisionHandler {
+func NewDecisionHandler(q, desc string, h QuestionResultFunc, labels ...string) DecisionHandler {
 	return &defaultDecisionHandler{
 		DecisionHandlerBase: NewDecisionHandlerBase(q, desc, labels...),
 		handler:             h,
@@ -221,6 +225,37 @@ func NewDecisionHandler(q, desc string, h func(p Plugin, question QuestionArgume
 
 func (d *defaultDecisionHandler) DecideOn(p Plugin, question QuestionArguments) (bool, error) {
 	return d.handler(p, question)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// specialized handler creation
+
+func NewTransferResourceDecision(desc string, h ArtifactQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_TRANSFER_RESOURCE, desc, ForArtifactQuestion(h))
+}
+
+func NewTransferSourceDecision(desc string, h ArtifactQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_TRANSFER_SOURCE, desc, ForArtifactQuestion(h))
+}
+
+func NewEnforceTransportDesision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_ENFORCE_TRANSPORT, desc, ForComponentReferenceQuestion(h))
+}
+
+func NewTransferversionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_TRANSFER_VERSION, desc, ForComponentReferenceQuestion(h))
+}
+
+func NewOverwriteVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_OVERWRITE_VERSION, desc, ForComponentReferenceQuestion(h))
+}
+
+func NewUpdateVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_UPDATE_VERSION, desc, ForComponentReferenceQuestion(h))
+}
+
+func NewOUpdateVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_UPDATE_VERSION, desc, ForComponentReferenceQuestion(h))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
