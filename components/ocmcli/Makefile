@@ -12,7 +12,9 @@ CTF_TYPE ?= directory
 
 REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
-VERSION                                        = $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
+ifeq ($(VERSION),)
+VERSION                                        := $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
+endif
 COMMIT                                         = $(shell git rev-parse --verify HEAD)
 # if EFFECTIVE_VERSION is not set, set it to VERSION+COMMIT
 # this is not the same as '?=' because it will also set the value if EFFECTIVE_VERSION is set to an empty string
