@@ -222,23 +222,6 @@ them through all release candidates manually.
 (TODO: this needs improvement by allowing us to do "append-only" style release
 notes, see [this issue](https://github.com/open-component-model/ocm/issues/1097) for details)
 
-When a release is created, the release notes are copied to
-the [./docs/releasenotes](./docs/releasenotes) folder in that branch
-with a dedicated commit. If the release notes for that branch already exist in
-the folder, the release notes are taken from the file
-instead of the draft notes from GitHub. This means that you can also create a
-Pull Request to the branch with the corresponding release notes
-and it will be used for the release.
-(TODO: Currently we have not decided if we want to permanently keep the notes
-and thus need a PR to main to append them, or if we want to drop them in the
-future. That's because they are currently needed to correctly manage notes
-over multiple release candidates, see
-[this issue](https://github.com/open-component-model/ocm/issues/1097)
-for details.)
-
-By default, this file is generated from the
-appropriate draft release with the basic release name (e.g. `v0.1.0-rc.1.md`).
-
 ## What is part of a release?
 
 During the build of a release, an OCM CTF (Common Transport Format Archive) is
