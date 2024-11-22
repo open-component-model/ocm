@@ -172,27 +172,6 @@ jobs:
         git config user.name "GitHub Actions Bot"
         git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
 
-    - name: Update Release Notes File
-      env:
-        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-      run: |
-        if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }}; then
-          >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
-          exit 2
-        fi
-        v="${{env.RELEASE_VERSION}}"
-        f="docs/releasenotes/$v.md"
-        if [ ! -f "$f" ]; then
-          echo "# Release ${{ env.RELEASE_VERSION }}" > "$f"
-          echo "$RELEASE_NOTES" | tail -n +2 >> "$f"
-          git add "$f"
-          git commit -m "ReleaseNotes for $RELEASE_VERSION"
-          git push origin ${GITHUB_REF#refs/heads/}
-        else
-          echo "Using release notes file $f from code base"
-        fi
-        echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
-
     - name: Create and Push Release
       env:
         GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
