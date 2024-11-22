@@ -49,6 +49,7 @@ The OCM CLI provides commands to
 - [update](../../../docs/reference/ocm_install_plugins.md)
 - [list](../../../docs/reference/ocm_get_plugins.md)
 - [examine](../../../docs/reference/ocm_describe_plugins.md)
+- [remove](../../../docs/reference/ocm_install_plugins.md)
 
 plugins.
 
@@ -57,7 +58,6 @@ resources with the same name by different platform attributes as extended identi
 
 The commands extract the correct variant for the platform the command is running.
 If the given reference does not include a resource identity, the first resource with the correct artifact type is used.
-plugins.
 
 ## Support for writing Plugins
 
