@@ -8,36 +8,36 @@ template: |
 
   $CHANGES
 exclude-labels:
-  - 'kind/skip-release-notes'
-  - 'dev/wont-fix'
-  - 'component/github-actions'
+- 'kind/skip-release-notes'
+- 'dev/wont-fix'
+- 'component/github-actions'
 categories:
-  - title: '⚠️ Breaking Changes'
-    labels:
-    - '!BREAKING-CHANGE!'
-  - title: '🚀 Features'
-    labels:
-    - 'kind/epic'
-    - 'kind/feature'
-    - 'kind/poc'
-  - title: '🐛 Bug Fixes'
-    collapse-after: 5
-    labels:
-    - 'kind/fix'
-  - title: '📄 Documentation'
-    collapse-after: 5
-    labels:
-    - 'kind/documentation'
-  - title: '🥺 Deprecation'
-    collapse-after: 3
-    labels:
-    - 'kind/deprecation'
-  - title: '🧰 Maintenance'
-    collapse-after: 3
-    labels:
-    - 'kind/chore'
-    - 'kind/refactor'
-  - title: '⬆️ Dependencies'
-    collapse-after: 3
-    labels:
-    - 'kind/dependency'
+- title: '⚠️ Breaking Changes'
+  labels:
+  - '!BREAKING-CHANGE!'
+- title: '🚀 Features'
+  labels:
+  - 'kind/epic'
+  - 'kind/feature'
+  - 'kind/poc'
+- title: '🐛 Bug Fixes'
+  collapse-after: 5
+  labels:
+  - 'kind/bugfix'
+- title: '📄 Documentation'
+  collapse-after: 5
+  labels:
+  - 'area/documentation'
+- title: '🥺 Deprecation'
+  collapse-after: 3
+  labels:
+  - 'kind/deprecation'
+- title: '🧰 Maintenance'
+  collapse-after: 3
+  labels:
+  - 'kind/chore'
+  - 'kind/refactor'
+- title: '⬆️ Dependencies'
+  collapse-after: 3
+  labels:
+  - 'kind/dependency'
