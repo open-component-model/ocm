@@ -4,7 +4,7 @@ on:
   pull_request:
   workflow_call:
     inputs:
-      effective-version:
+      version:
         type: string
         required: false
         description: "The version to use for the build"
@@ -92,7 +92,7 @@ jobs:
           
           PATH=$PATH:$(go env GOPATH)/bin \
           CTF_TYPE=${{ env.CTF_TYPE }} \
-          EFFECTIVE_VERSION=${{ inputs.effective-version }} \
+          VERSION=${{ inputs.version }} \
           PLATFORMS="${{ env.PLATFORMS }}" \
           IMAGE_PLATFORMS="${{ env.IMAGE_PLATFORMS }}" \
           make \

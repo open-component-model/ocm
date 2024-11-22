@@ -38,52 +38,52 @@ jobs:
     outputs:
       draft-release-notes: ${{ steps.release-notes.outputs.json }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Check Tag
-        run: |
-          set -e
-          if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }} ; then
-            >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Check Tag
+      run: |
+        set -e
+        if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }} ; then
+          >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
+          exit 1
+        fi
+    - name: Check if release is running on release branch
+      run: |
+        if [[ ${{ env.REF }} != *"releases/"* ]]; then
+            echo "The branch ${{ env.REF }} is not a valid release branch and cannot be used for a release"
             exit 1
-          fi
-      - name: Check if release is running on release branch
-        run: |
-          if [[ ${{ env.REF }} != *"releases/"* ]]; then
-              echo "The branch ${{ env.REF }} is not a valid release branch and cannot be used for a release"
-              exit 1
-          fi
-          echo "Branch ${{ env.REF }} is a valid release branch"
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.OCMBOT_APP_ID }}
-          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
-      - name: Ensure existing Draft Release Notes exist
-        id: release-notes
-        shell: bash
-        env:
-          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: |
-          RELEASE_JSON=$( \
-            gh api /repos/${{ github.repository }}/releases \
-            -q '.[] | select(.name == "${{ env.RELEASE_VERSION_NO_SUFFIX }}" and .draft == true)' \
-          )
-          echo "json=${RELEASE_JSON}" >> $GITHUB_OUTPUT
-          # if no draft release notes are found, we cannot continue
-          if [ -z "${RELEASE_JSON}" ]; then
-            echo "No draft release notes found for ${{ env.RELEASE_VERSION_NO_SUFFIX }}"
-            exit 1
-          fi
+        fi
+        echo "Branch ${{ env.REF }} is a valid release branch"
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+    - name: Ensure existing Draft Release Notes exist
+      id: release-notes
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+      run: |
+        RELEASE_JSON=$( \
+          gh api /repos/${{ github.repository }}/releases \
+          -q '.[] | select(.name == "${{ env.RELEASE_VERSION_NO_SUFFIX }}" and .draft == true)' \
+        )
+        echo "json=${RELEASE_JSON}" >> $GITHUB_OUTPUT
+        # if no draft release notes are found, we cannot continue
+        if [ -z "${RELEASE_JSON}" ]; then
+          echo "No draft release notes found for ${{ env.RELEASE_VERSION_NO_SUFFIX }}"
+          exit 1
+        fi
   components:
     name: Component CTF Builds
     uses: ./.github/workflows/components.yaml
     needs: [ check,release-version ]
     with:
-      effective-version: ${{ needs.release-version.outputs.version_no_prefix }}
+      version: ${{ needs.release-version.outputs.version_no_prefix }}
       upload-ctf: true
       ref: ${{ github.ref }}
     permissions:
@@ -92,11 +92,11 @@ jobs:
 
   release:
     needs:
-      # run check before actual release to make sure we succeed
-      # they will be skipped from the needs check
-      - check
-      - release-version
-      - components
+    # run check before actual release to make sure we succeed
+    # they will be skipped from the needs check
+    - check
+    - release-version
+    - components
     name: Release Build
     runs-on: large_runner
     permissions:
@@ -105,185 +105,136 @@ jobs:
       packages: write
     env:
       RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
-      RELEASE_NOTES: ${{ fromJSON(needs.check.outputs.draft-release-notes).body }}
     steps:
-      - name: Self Hosted Runner Post Job Cleanup Action
-        uses: TooMuch4U/actions-clean@v2.2
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.OCMBOT_APP_ID }}
-          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          # fetch all history so we can calculate the version and tagging
-          fetch-depth: 0
-          token: ${{ steps.generate_token.outputs.token }}
+    - name: Self Hosted Runner Post Job Cleanup Action
+      uses: TooMuch4U/actions-clean@v2.2
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        # fetch all history so we can calculate the version and tagging
+        fetch-depth: 0
+        token: ${{ steps.generate_token.outputs.token }}
 
-      - name: Setup Syft
-        uses: anchore/sbom-action/download-syft@fc46e51fd3cb168ffb36c6d1915723c47db58abb # v0.17.7
+    - name: Setup Syft
+      uses: anchore/sbom-action/download-syft@fc46e51fd3cb168ffb36c6d1915723c47db58abb # v0.17.7
 
-      - name: Setup Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+    - name: Setup Cosign
+      uses: sigstore/cosign-installer@v3.7.0
 
-      - name: Download CTF
-        uses: actions/download-artifact@v4
-        with:
-          pattern: 'ctf-aggregated'
-          path: gen/downloaded-ctfs
-      - name: Move CTF into correct directory to be recognized by the release process
-        run: |
-          mv \
-              ${{ github.workspace }}/gen/downloaded-ctfs/ctf-aggregated \
-              ${{ github.workspace }}/gen/ctf
+    - name: Download CTF
+      uses: actions/download-artifact@v4
+      with:
+        pattern: 'ctf-aggregated'
+        path: gen/downloaded-ctfs
+    - name: Move CTF into correct directory to be recognized by the release process
+      run: |
+        mv \
+            ${{ github.workspace }}/gen/downloaded-ctfs/ctf-aggregated \
+            ${{ github.workspace }}/gen/ctf
 
-      # TODO: Remove Go setup once binaries no longer need to be built by goreleaser.
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: '${{ github.workspace }}/go.mod'
-          check-latest: false
-          cache: false
-      - name: Get go environment for use with cache
-        run: |
-          echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-        # This step will only reuse the go mod and build cache from main made during the Build,
-        # see push_ocm.yaml => "ocm-cli-latest" Job
-        # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
-        # This is because we have huge storage requirements for our cache because of the mass of dependencies
-      - name: Restore / Reuse Cache from central build
-        id: cache-golang-restore
-        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
-        with:
-          path: |
-            ${{ env.go_cache }}
-            ${{ env.go_modcache }}
-          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
-          restore-keys: |
-            ${{ env.cache_name }}-${{ runner.os }}-go-
-        env:
-          cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
+    # TODO: Remove Go setup once binaries no longer need to be built by goreleaser.
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: '${{ github.workspace }}/go.mod'
+        check-latest: false
+        cache: false
+    - name: Get go environment for use with cache
+      run: |
+        echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
+        echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
+      # This step will only reuse the go mod and build cache from main made during the Build,
+      # see push_ocm.yaml => "ocm-cli-latest" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+    - name: Restore / Reuse Cache from central build
+      id: cache-golang-restore
+      uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
+      with:
+        path: |
+          ${{ env.go_cache }}
+          ${{ env.go_modcache }}
+        key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
+        restore-keys: |
+          ${{ env.cache_name }}-${{ runner.os }}-go-
+      env:
+        cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
 
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
+    - name: Setup git config
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
 
-      - name: Update Release Notes File
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: |
-          if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }}; then
-            >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
-            exit 2
-          fi
-          v="${{env.RELEASE_VERSION}}"
-          f="docs/releasenotes/$v.md"
-          if [ ! -f "$f" ]; then
-            echo "# Release ${{ env.RELEASE_VERSION }}" > "$f"
-            echo "$RELEASE_NOTES" | tail -n +2 >> "$f"
-            git add "$f"
-            git commit -m "ReleaseNotes for $RELEASE_VERSION"
-            git push origin ${GITHUB_REF#refs/heads/}
-          else
-            echo "Using release notes file $f from code base"
-          fi
-          echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
+    - name: Create and Push Release
+      env:
+        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+      run: |
+        # git checkout --detach HEAD
+        echo -n "${RELEASE_VERSION#v}" > VERSION
+        git add VERSION
+        git commit -m "Release $RELEASE_VERSION"
+        msg="Release ${{ env.RELEASE_VERSION }}"
+        git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
+        # push both the tag as well as a release branch with that tag.
+        git push origin ${{ env.RELEASE_VERSION }}
 
-      - name: Create and Push Release
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: |
-          # git checkout --detach HEAD
-          echo -n "${RELEASE_VERSION#v}" > VERSION
-          git add VERSION
-          git commit -m "Release $RELEASE_VERSION"
-          msg="Release ${{ env.RELEASE_VERSION }}"
-          git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
-          # push both the tag as well as a release branch with that tag.
-          git push origin ${{ env.RELEASE_VERSION }}
+    - name: Create GPG Token file from Secret
+      run: |
+        echo "${{ secrets.GPG_PRIVATE_KEY_FOR_SIGNING }}" > ocm-releases-key.gpg
+        echo "GPG_KEY_PATH=ocm-releases-key.gpg" >> $GITHUB_ENV
 
-      - name: Create GPG Token file from Secret
-        run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY_FOR_SIGNING }}" > ocm-releases-key.gpg
-          echo "GPG_KEY_PATH=ocm-releases-key.gpg" >> $GITHUB_ENV
+    - name: Setup Release Notes as File to make it readable by GoReleaser
+      run: |
+        echo "${{ fromJSON(needs.check.outputs.draft-release-notes).body }}" > $RUNNER_TEMP/RELEASE_NOTES.md
+        echo "RELEASE_NOTES=$RUNNER_TEMP/RELEASE_NOTES.md" >> $GITHUB_ENV
+        cat $RUNNER_TEMP/RELEASE_NOTES.md
+    - name: Run GoReleaser
+      uses: goreleaser/goreleaser-action@v6
+      with:
+        distribution: goreleaser
+        version: 2.1.0
+        args: release --clean --timeout 60m --skip=validate --config=.github/config/goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES }}
+      env:
+        GITHUBORG: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
+        NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: 2.1.0
-          args: release --clean --timeout 60m --skip=validate --config=.github/config/goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
-        env:
-          GITHUBORG: ${{ github.repository_owner }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
-          NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    - name: Remove GPG Token file
+      run: |
+        rm ocm-releases-key.gpg
 
-      - name: Remove GPG Token file
-        run: |
-          rm ocm-releases-key.gpg
+    - name: Push OCM Components
+      env:
+        GITHUBORG: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: make plain-push
 
-      - name: Push OCM Components
-        env:
-          GITHUBORG: ${{ github.repository_owner }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: make plain-push
+    - name: Publish Release Event
+      if: inputs.release_candidate == false
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ steps.generate_token.outputs.token }}
+        repository: open-component-model/ocm-website
+        event-type: ocm-cli-release
+        client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
 
-      - name: Publish Release Event
-        if: inputs.release_candidate == false
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.generate_token.outputs.token }}
-          repository: open-component-model/ocm-website
-          event-type: ocm-cli-release
-          client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
-
-      # now distribute the release event so that other jobs can listen for this
-      # and use the event to publish our release to other package registries
-      - name: Publish Release Event for other package registries
-        if: inputs.release_candidate == false
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.generate_token.outputs.token }}
-          repository: ${{ github.repository_owner }}/ocm
-          event-type: publish-ocm-cli
-          client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true}'
-
-  merge-back-release-into-release-branch-history:
-    needs: release
-    runs-on: ubuntu-latest
-    name: Write an empty Commit into the release branch with the tag
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-          # fetch the tags so we can use it in our merge command
-          fetch-tags: true
-          token: ${{ steps.generate_token.outputs.token }}
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
-      # merge the tag back into the release branch
-      # this is necessary to make sure that the release branch contains the tag
-      # and the tag is not "dangling" in the history
-      - name: Merge back Release Tag into history
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: |
-          git checkout ${{ github.ref }}
-          git merge \
-            --no-ff \
-            --no-edit \
-            --message "Release ${{ env.RELEASE_VERSION }}" \
-            --strategy ours \
-            refs/tags/${{ env.RELEASE_VERSION }}
-          git push origin ${{ github.ref }}
+    # now distribute the release event so that other jobs can listen for this
+    # and use the event to publish our release to other package registries
+    - name: Publish Release Event for other package registries
+      if: inputs.release_candidate == false
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ steps.generate_token.outputs.token }}
+        repository: ${{ github.repository_owner }}/ocm
+        event-type: publish-ocm-cli
+        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true}'
 
   # make sure that the branch contains the next valid patch
   bump-release-branch-pr:
