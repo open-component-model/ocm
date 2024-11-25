@@ -136,6 +136,8 @@ jobs:
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+        permissions: |
+          {"contents":"write","pull_requests":"write"}
     - name: Checkout
       uses: actions/checkout@v4
       with:
@@ -150,6 +152,7 @@ jobs:
           https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
           --version ${{ env.RELEASE_VERSION }} `
           Open-Component-Model.ocm-cli
+
   push-to-website:
     name: Update OCM Website
     runs-on: ubuntu-latest
