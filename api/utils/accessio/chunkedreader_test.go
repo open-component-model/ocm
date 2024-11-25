@@ -35,7 +35,7 @@ var _ = FDescribe("Test Environment", func() {
 			n, err = chunked.Read(buf[:])
 			Expect(n).To(Equal(0))
 			Expect(err).To(Equal(io.EOF))
-			Expect(chunked.ChunkDone()).To(Equal(false))
+			Expect(chunked.ChunkDone()).To(Equal(true))
 			Expect(chunked.Next()).To(Equal(false))
 
 			n, err = chunked.Read(buf[:])
@@ -55,7 +55,7 @@ var _ = FDescribe("Test Environment", func() {
 			n, err = chunked.Read(buf[:])
 			Expect(n).To(Equal(0))
 			Expect(err).To(Equal(io.EOF))
-			Expect(chunked.ChunkDone()).To(Equal(false))
+			Expect(chunked.ChunkDone()).To(Equal(true))
 			Expect(chunked.Next()).To(Equal(false))
 
 			n, err = chunked.Read(buf[:])

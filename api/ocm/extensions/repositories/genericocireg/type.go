@@ -91,6 +91,7 @@ func NewComponentRepositoryMeta(subPath string, mapping ComponentNameMapping) *C
 type RepositorySpec struct {
 	oci.RepositorySpec
 	ComponentRepositoryMeta
+	BlobLimit int64
 }
 
 var (
@@ -127,19 +128,26 @@ func (a *RepositorySpec) AsUniformSpec(cpi.Context) *cpi.UniformRepositorySpec {
 	return &cpi.UniformRepositorySpec{Type: a.GetKind(), Scheme: spec.Scheme, Host: spec.Host, Info: spec.Info, TypeHint: spec.TypeHint, SubPath: a.SubPath}
 }
 
+type meta struct {
+	ComponentRepositoryMeta `json:",inline"`
+	BlobLimit               int64 `json:"blobLimit"`
+}
+
 func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
 	logrus.Debugf("unmarshal generic ocireg spec %s\n", string(data))
 	ocispec := &oci.GenericRepositorySpec{}
 	if err := json.Unmarshal(data, ocispec); err != nil {
 		return err
 	}
-	compmeta := &ComponentRepositoryMeta{}
-	if err := json.Unmarshal(data, ocispec); err != nil {
+
+	var m meta
+	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
 
 	u.RepositorySpec = ocispec
-	u.ComponentRepositoryMeta = *compmeta
+	u.ComponentRepositoryMeta = m.ComponentRepositoryMeta
+	u.BlobLimit = m.BlobLimit
 
 	normalizers.Normalize(u)
 	return nil
@@ -154,7 +162,12 @@ func (u RepositorySpec) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	compmeta, err := runtime.ToUnstructuredObject(u.ComponentRepositoryMeta)
+
+	m := meta{
+		ComponentRepositoryMeta: u.ComponentRepositoryMeta,
+		BlobLimit:               u.BlobLimit,
+	}
+	compmeta, err := runtime.ToUnstructuredObject(&m)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +179,7 @@ func (s *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	if err != nil {
 		return nil, err
 	}
-	return NewRepository(ctx, &s.ComponentRepositoryMeta, r), nil
+	return NewRepository(ctx, &s.ComponentRepositoryMeta, r, s.BlobLimit), nil
 }
 
 func (s *RepositorySpec) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {

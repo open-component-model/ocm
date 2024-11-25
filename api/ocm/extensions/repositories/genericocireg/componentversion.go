@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/set"
 	"github.com/opencontainers/go-digest"
 
+	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
@@ -25,7 +26,10 @@ import (
 	ocihdlr "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/oci"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
+	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
+	"ocm.software/ocm/api/utils/blobaccess/chunked"
 	"ocm.software/ocm/api/utils/errkind"
+	"ocm.software/ocm/api/utils/mime"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/runtime"
@@ -183,32 +187,36 @@ func (c *ComponentVersionContainer) Update() (bool, error) {
 			layers.Add(i)
 		}
 		for i, r := range desc.Resources {
-			s, l, err := c.evalLayer(r.Access)
+			s, list, err := c.evalLayer(r.Access)
 			if err != nil {
 				return false, fmt.Errorf("failed resource layer evaluation: %w", err)
 			}
-			if l > 0 {
-				layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
-					Kind:     ARTKIND_RESOURCE,
-					Identity: r.GetIdentity(desc.Resources),
-				})
-				layers.Delete(l)
+			if len(list) > 0 {
+				for _, l := range list {
+					layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
+						Kind:     ARTKIND_RESOURCE,
+						Identity: r.GetIdentity(desc.Resources),
+					})
+					layers.Delete(l)
+				}
 			}
 			if s != r.Access {
 				desc.Resources[i].Access = s
 			}
 		}
 		for i, r := range desc.Sources {
-			s, l, err := c.evalLayer(r.Access)
+			s, list, err := c.evalLayer(r.Access)
 			if err != nil {
 				return false, fmt.Errorf("failed source layer evaluation: %w", err)
 			}
-			if l > 0 {
-				layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
-					Kind:     ARTKIND_SOURCE,
-					Identity: r.GetIdentity(desc.Sources),
-				})
-				layers.Delete(l)
+			if len(list) > 0 {
+				for _, l := range list {
+					layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
+						Kind:     ARTKIND_SOURCE,
+						Identity: r.GetIdentity(desc.Sources),
+					})
+					layers.Delete(l)
+				}
 			}
 			if s != r.Access {
 				desc.Sources[i].Access = s
@@ -259,32 +267,45 @@ func (c *ComponentVersionContainer) Update() (bool, error) {
 	return false, nil
 }
 
-func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.AccessSpec, int, error) {
-	var d *artdesc.Descriptor
+func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.AccessSpec, []int, error) {
+	var (
+		d         *artdesc.Descriptor
+		layernums []int
+	)
 
 	spec, err := c.GetContext().AccessSpecForSpec(s)
 	if err != nil {
-		return s, 0, err
+		return s, nil, err
 	}
 	if a, ok := spec.(*localblob.AccessSpec); ok {
 		if ok, _ := artdesc.IsDigest(a.LocalReference); !ok {
-			return s, 0, errors.ErrInvalid("digest", a.LocalReference)
+			return s, nil, errors.ErrInvalid("digest", a.LocalReference)
 		}
-		d = &artdesc.Descriptor{Digest: digest.Digest(a.LocalReference), MediaType: a.GetMimeType()}
-	}
-	if d != nil {
-		// find layer
-		layers := c.manifest.GetDescriptor().Layers
-		maxLen := len(layers) - 1
-		for i := range layers {
-			l := layers[len(layers)-1-i]
-			if i < maxLen && l.Digest == d.Digest && (d.Digest == "" || d.Digest == l.Digest) {
-				return s, len(layers) - 1 - i, nil
+		refs := strings.Split(a.LocalReference, ",")
+		media := a.GetMimeType()
+		if len(refs) > 1 {
+			media = mime.MIME_OCTET
+		}
+		for _, ref := range refs {
+			d = &artdesc.Descriptor{Digest: digest.Digest(strings.TrimSpace(ref)), MediaType: media}
+			// find layer
+			layers := c.manifest.GetDescriptor().Layers
+			maxLen := len(layers) - 1
+			found := false
+			for i := range layers {
+				l := layers[len(layers)-1-i]
+				if i < maxLen && l.Digest == d.Digest && (d.Digest == "" || d.Digest == l.Digest) {
+					layernums = append(layernums, len(layers)-1-i)
+					found = true
+					break
+				}
+			}
+			if !found {
+				return s, nil, fmt.Errorf("resource access %s: no layer found for local blob %s[%s]", spec.Describe(c.GetContext()), d.Digest, d.MediaType)
 			}
 		}
-		return s, 0, fmt.Errorf("resource access %s: no layer found for local blob %s[%s]", spec.Describe(c.GetContext()), d.Digest, d.MediaType)
 	}
-	return s, 0, nil
+	return s, layernums, nil
 }
 
 func (c *ComponentVersionContainer) GetDescriptor() *compdesc.ComponentDescriptor {
@@ -304,15 +325,49 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 		return nil, errors.New("a resource has to be defined")
 	}
 
+	size := blob.Size()
+	var refs []string
+	if c.comp.repo.blobLimit > 0 && size != blobaccess.BLOB_UNKNOWN_SIZE && size > c.comp.repo.blobLimit {
+		reader, err := blob.Reader()
+		if err != nil {
+			return nil, err
+		}
+		ch := chunked.New(reader, c.comp.repo.blobLimit, vfsattr.Get(c.GetContext()))
+		for {
+			b, err := ch.Next()
+			if err != nil {
+				return nil, errors.Wrapf(err, "chunked blob")
+			}
+			if b == nil {
+				break
+			}
+			err = c.addLayer(b, &refs)
+			b.Close()
+
+			if err != nil {
+				return nil, errors.Wrapf(err, "chunked blob")
+			}
+		}
+	} else {
+		err := c.addLayer(blob, &refs)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return localblob.New(strings.Join(refs, ","), refName, blob.MimeType(), global), nil
+}
+
+func (c *ComponentVersionContainer) addLayer(blob cpi.BlobAccess, refs *[]string) error {
 	err := c.manifest.AddBlob(blob)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	err = ocihdlr.AssureLayer(c.manifest.GetDescriptor(), blob)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return localblob.New(blob.Digest().String(), refName, blob.MimeType(), global), nil
+	*refs = append(*refs, blob.Digest().String())
+	return nil
 }
 
 // AssureGlobalRef provides a global manifest for a local OCI Artifact.
