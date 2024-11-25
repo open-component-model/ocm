@@ -270,7 +270,7 @@ function before finishing.
 The final output of this example looks like:
 
 ```yaml
-versions for component ocm.software/ocmcli: 0.1.0-alpha.2, 0.1.0-dev, 0.3.0-dev, 0.3.0-rc.2, 0.3.0-rc.3, 0.3.0, 0.4.0-dev, 0.4.0, 0.4.1, 0.4.2, 0.4.3, 0.5.0, 0.6.0, 0.7.0, 0.8.0, 0.9.0, 0.10.0, 0.11.0, 0.12.0, 0.12.1, 0.13.0, 0.14.0, 0.15.0, 0.16.0, 0.16.1, 0.16.2, 0.17.0-rc.1, 0.17.0, 0.18.0-rc.1, 0.18.0-rc.2, 0.18.0
+versions for component ocm.software/ocmcli: ..., 0.9.0, 0.10.0, 0.11.0, 0.12.0, 0.12.1, 0.13.0, 0.14.0, 0.15.0, 0.17.0, 0.18.0, ...
 looking up resources of the latest version:
   version:  0.17.0
   provider: ocm.software
