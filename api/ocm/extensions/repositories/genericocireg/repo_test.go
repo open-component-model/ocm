@@ -123,6 +123,59 @@ var _ = Describe("component repository mapping", func() {
 		MustBeSuccessful(finalize.Finalize())
 	})
 
+	FIt("creates a dummy component with chunks", func() {
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
+		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
+		impl := Must(repocpi.GetRepositoryImplementation(repo))
+		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
+		repocpi.SetBlobLimit(impl, 5)
+
+		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
+		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
+
+		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
+		blob := blobaccess.ForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
+		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
+
+		MustBeSuccessful(comp.AddVersion(vers))
+
+		noref := vers.Repository()
+		Expect(noref).NotTo(BeNil())
+		Expect(noref.IsClosed()).To(BeFalse())
+		Expect(noref.Close()).To(Succeed())
+		Expect(noref.IsClosed()).To(BeFalse())
+
+		MustBeSuccessful(finalize.Finalize())
+
+		Expect(noref.IsClosed()).To(BeTrue())
+		Expect(noref.Close()).To(MatchError("closed"))
+		ExpectError(noref.LookupComponent("dummy")).To(MatchError("closed"))
+
+		// access it again
+		repo = finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
+
+		ok := Must(repo.ExistsComponentVersion(COMPONENT, "v1"))
+		Expect(ok).To(BeTrue())
+
+		comp = finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
+		vers = finalizer.ClosingWith(&finalize, Must(comp.LookupVersion("v1")))
+
+		rsc := Must(vers.GetResourceByIndex(0))
+		acc := Must(rsc.Access())
+		local, ok := acc.(*localblob.AccessSpec)
+		Expect(ok).To(BeTrue())
+		Expect(local.LocalReference).To(Equal("sha256:a4853613b2a38568ed4e49196238152469097412d06d5e5fc9be8ab92cfdf2bf,sha256:977817f6f61f4dd501df3036a3e16b31452b36f4aa3edcf9a3f3242a79d7170d"))
+		Expect(rsc.Meta().Digest).NotTo(BeNil())
+		Expect(rsc.Meta().Digest.Value).To(Equal(ocmtesthelper.D_TESTDATA))
+
+		data := Must(ocmutils.GetResourceData(rsc))
+		Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+
+		MustBeSuccessful(finalize.Finalize())
+	})
+
 	It("handles legacylocalociblob access method", func() {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)

@@ -1,92 +1,67 @@
 package chunked
 
 import (
+	"fmt"
 	"io"
 	"sync"
 
-	"github.com/opencontainers/go-digest"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils/accessio"
+	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
+	"ocm.software/ocm/api/utils/mime"
 )
 
-type Chunked interface {
-	bpi.BlobAccess
-
-	Next() bool
-}
-
-type chunked struct {
-	lock sync.Mutex
-	base bpi.BlobAccess
-	blobsize uint64
-	chunksize uint64
-	preread uint
-
-	reader io.Reader
-}
-
-var _ bpi.BlobAccessBase = (*chunked)(nil)
-
-func New(acc bpi.BlobAccess, chunk uint64, preread...uint) (Chunked, error) {
-	b, err := acc.Dup()
+func newChunck(r io.Reader, fss ...vfs.FileSystem) (bpi.BlobAccess, error) {
+	t, err := blobaccess.NewTempFile("", "chunk-*", fss...)
 	if err != nil {
 		return nil, err
 	}
 
-	s := acc.Size()
-
-	return bpi.NewBlobAccessForBase(&chunked{base: b, blobsize: size, chunksize: chunk, preread: utils.OptionalDefaulted(8096, preread...)}), nil
-}
-
-type view struct {
-	bpi.BlobAccess
-}
-
-func (v *view) Dup() bpi.BlobAccess {
-
-}
-func (c *chunked) Close() error {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	if c.base == nil {
-		return bpi.ErrClosed
+	_, err = io.Copy(t.Writer(), r)
+	if err != nil {
+		t.Close()
+		return nil, err
 	}
-	err := c.base.Close()
-	c.base = nil
-	return err
+	return t.AsBlob(mime.MIME_OCTET), nil
 }
 
-func (c *chunked) Get() ([]byte, error) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	if
-	// TODO implement me
-	panic("implement me")
+type ChunkedBlobSource interface {
+	Next() (bpi.BlobAccess, error)
 }
 
-func (c *chunked) Reader() (io.ReadCloser, error) {
-	// TODO implement me
-	panic("implement me")
+type chunkedAccess struct {
+	lock      sync.Mutex
+	chunksize int64
+	reader    *accessio.ChunkedReader
+	fs        vfs.FileSystem
+	cont      bool
 }
 
-func (c *chunked) Digest() digest.Digest {
-	// TODO implement me
-	panic("implement me")
+func New(r io.Reader, chunksize int64, fss ...vfs.FileSystem) ChunkedBlobSource {
+	reader := accessio.NewChunkedReader(r, chunksize)
+	return &chunkedAccess{
+		chunksize: chunksize,
+		reader:    reader,
+		fs:        utils.FileSystem(fss...),
+		cont:      false,
+	}
 }
 
-func (c *chunked) MimeType() string {
-	// TODO implement me
-	panic("implement me")
-}
+func (r *chunkedAccess) Next() (bpi.BlobAccess, error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
-func (c *chunked) DigestKnown() bool {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (c *chunked) Size() int64 {
-	// TODO implement me
-	panic("implement me")
+	if r.cont {
+		if !r.reader.ChunkDone() {
+			return nil, fmt.Errorf("unexpected incomplete read")
+		}
+		if !r.reader.Next() {
+			return nil, nil
+		}
+	}
+	r.cont = true
+	return newChunck(r.reader, r.fs)
 }

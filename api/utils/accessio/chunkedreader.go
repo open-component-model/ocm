@@ -12,9 +12,9 @@ type ChunkedReader struct {
 	lock   sync.Mutex
 	reader io.Reader
 	buffer *bytes.Buffer
-	size   uint64
-	chunk  uint64
-	read   uint64
+	size   int64
+	chunk  int
+	read   int64
 	err    error
 
 	preread uint
@@ -22,7 +22,7 @@ type ChunkedReader struct {
 
 var _ io.Reader = (*ChunkedReader)(nil)
 
-func NewChunkedReader(r io.Reader, chunk uint64, preread ...uint) *ChunkedReader {
+func NewChunkedReader(r io.Reader, chunk int64, preread ...uint) *ChunkedReader {
 	return &ChunkedReader{
 		reader:  r,
 		size:    chunk,
@@ -37,13 +37,13 @@ func (c *ChunkedReader) Read(p []byte) (n int, err error) {
 	if c.read == c.size {
 		return 0, io.EOF
 	}
-	if c.read+uint64(len(p)) > c.size {
+	if c.read+int64(len(p)) > c.size {
 		p = p[:c.size-c.read] // read at most rest of chunk size
 	}
 	if c.buffer != nil && c.buffer.Len() > 0 {
 		// first, consume from buffer
 		n, _ := c.buffer.Read(p)
-		c.read += uint64(n)
+		c.read += int64(n)
 		if c.buffer.Len() == 0 {
 			c.buffer = nil
 		}
@@ -56,7 +56,8 @@ func (c *ChunkedReader) Read(p []byte) (n int, err error) {
 		return 0, c.err
 	}
 	n, err = c.reader.Read(p)
-	c.read += uint64(n)
+	c.read += int64(n)
+	c.err = err
 	return c.report(n, err)
 }
 
@@ -67,11 +68,18 @@ func (c *ChunkedReader) report(n int, err error) (int, error) {
 	return n, err
 }
 
+func (c *ChunkedReader) ChunkNo() int {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	return c.chunk
+}
+
 func (c *ChunkedReader) ChunkDone() bool {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	return c.read >= c.size
+	return c.read >= c.size || c.err != nil
 }
 
 func (c *ChunkedReader) Next() bool {
@@ -82,12 +90,11 @@ func (c *ChunkedReader) Next() bool {
 		return false
 	}
 
+	// cannot assume that read with size 0 returns EOF as proposed
+	// by io.Reader.Read (see bytes.Buffer.Read).
+	// Therefore, we really have to read something.
 	if c.buffer == nil {
-		// cannot assume that read with size 0 returns EOF as proposed
-		// by io.Reader.Read (see bytes.Buffer.Read).
-		// Therefore, we really have to read something.
-
-		var buf = make([]byte, c.preread, c.preread)
+		buf := make([]byte, c.preread)
 		n, err := c.reader.Read(buf)
 		c.err = err
 		if n > 0 {
