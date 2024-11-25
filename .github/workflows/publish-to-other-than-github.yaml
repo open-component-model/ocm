@@ -125,7 +125,6 @@ jobs:
     name: Update Winget
     if: github.event.client_payload.push-to-winget && github.event.client_payload.version != ''
     runs-on: windows-latest
-    permissions: write-all
     steps:
     - name: Ensure proper version
       run: |
@@ -137,6 +136,8 @@ jobs:
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+        permissions: |
+          {"contents":"write","pull_requests":"write"}
     - name: Checkout
       uses: actions/checkout@v4
       with:
