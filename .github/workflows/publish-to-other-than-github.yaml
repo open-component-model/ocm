@@ -130,24 +130,11 @@ jobs:
       run: |
         $version = "${{ github.event.client_payload.version }}" -replace 'v'
         echo "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV
-    - name: Generate token
-      id: generate_token
-      uses: tibdex/github-app-token@v2
-      with:
-        app_id: ${{ secrets.OCMBOT_APP_ID }}
-        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
-        permissions: |
-          {"contents":"write","pull_requests":"write"}
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        token: ${{ steps.generate_token.outputs.token }}
     - name: Install wingetcreate
-      run: choco install wingetcreate
+      run: iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
     - name: Update Winget package
       run: |
-        cd hack\winget
-        wingetcreate update --submit --token ${{ steps.generate_token.outputs.token }} --urls `
+        .\wingetcreate.exe update --submit --token ${{ secrets.OCM_CI_ROBOT_0_REPO }} --urls `
           https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-amd64.zip `
           https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
           --version ${{ env.RELEASE_VERSION }} `
