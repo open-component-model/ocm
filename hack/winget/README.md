@@ -40,7 +40,7 @@ wingetcreate update --urls https://github.com/open-component-model/ocm/releases/
 
 [push-to-winget](../../.github/workflows/publish-to-other-than-github.yaml#L124) requires a ["Personal access tokens (classic)"](https://github.com/organizations/open-component-model/settings/secrets/actions/OCM_CI_ROBOT_0_REPO). There is an open issue on [winget-create](https://github.com/microsoft/winget-create/issues/470). We [tried it](https://github.com/open-component-model/ocm/pull/1133) already with fine grained tokens and our [ocmbot](https://github.com/organizations/open-component-model/settings/apps/ocmbot). But that doesn't work: [ERROR: Resource not accessible by integration](https://github.com/open-component-model/ocm/actions/runs/12008922878/job/33472565698).
 
-## PRs on winget-pkgs
+## winget packages repository
 
 The [pull request](https://github.com/microsoft/winget-pkgs/pull/193703) creator of has to sign the [Contributor License Agreement](https://cla.opensource.microsoft.com/microsoft/winget-pkgs). In case someone else than [ocm-ci-robot-0](https://github.com/orgs/open-component-model/people/ocm-ci-robot-0) creates such an update PR, you'll need to reply with:
 
