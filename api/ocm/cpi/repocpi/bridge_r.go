@@ -34,6 +34,16 @@ type RepositoryImpl interface {
 	io.Closer
 }
 
+type Chunked interface {
+	SetBlobLimit(s int64)
+}
+
+func SetBlobLimit(i RepositoryImpl, s int64) {
+	if c, ok := i.(Chunked); ok {
+		c.SetBlobLimit(s)
+	}
+}
+
 type _repositoryBridgeBase = resource.ResourceImplBase[cpi.Repository]
 
 type repositoryBridge struct {

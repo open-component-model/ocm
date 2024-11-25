@@ -38,12 +38,13 @@ func GetOCIRepository(r cpi.Repository) ocicpi.Repository {
 }
 
 type RepositoryImpl struct {
-	bridge   repocpi.RepositoryBridge
-	ctx      cpi.Context
-	meta     ComponentRepositoryMeta
-	nonref   cpi.Repository
-	ocirepo  oci.Repository
-	readonly bool
+	bridge    repocpi.RepositoryBridge
+	ctx       cpi.Context
+	meta      ComponentRepositoryMeta
+	nonref    cpi.Repository
+	ocirepo   oci.Repository
+	readonly  bool
+	blobLimit int64
 }
 
 var (
@@ -51,14 +52,19 @@ var (
 	_ credentials.ConsumerIdentityProvider = (*RepositoryImpl)(nil)
 )
 
-func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository) cpi.Repository {
+func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository, blobLimit ...int64) cpi.Repository {
 	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
 	impl := &RepositoryImpl{
-		ctx:     ctx,
-		meta:    *DefaultComponentRepositoryMeta(meta),
-		ocirepo: ocirepo,
+		ctx:       ctx,
+		meta:      *DefaultComponentRepositoryMeta(meta),
+		ocirepo:   ocirepo,
+		blobLimit: general.OptionalDefaulted(-1, blobLimit...),
 	}
 	return repocpi.NewRepository(impl, "OCM repo[OCI]")
+}
+
+func (r *RepositoryImpl) SetBlobLimit(s int64) {
+	r.blobLimit = s
 }
 
 func (r *RepositoryImpl) Close() error {

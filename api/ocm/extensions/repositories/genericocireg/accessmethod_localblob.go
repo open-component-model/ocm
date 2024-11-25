@@ -1,10 +1,13 @@
 package genericocireg
 
 import (
+	"bytes"
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/oci"
@@ -88,7 +91,17 @@ func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
 			return nil, errors.ErrNotImplemented("artifact blob synthesis")
 		}
 	}
-	_, data, err := m.namespace.GetBlobData(digest.Digest(m.spec.LocalReference))
+	refs := strings.Split(m.spec.LocalReference, ",")
+
+	var (
+		data blobaccess.DataAccess
+		err  error
+	)
+	if len(refs) < 2 {
+		_, data, err = m.namespace.GetBlobData(digest.Digest(m.spec.LocalReference))
+	} else {
+		data = &composedBlock{m, refs}
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -110,4 +123,108 @@ func (m *localBlobAccessMethod) Get() ([]byte, error) {
 
 func (m *localBlobAccessMethod) MimeType() string {
 	return m.spec.MediaType
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type composedBlock struct {
+	m    *localBlobAccessMethod
+	refs []string
+}
+
+var _ blobaccess.DataAccess = (*composedBlock)(nil)
+
+func (c *composedBlock) Get() ([]byte, error) {
+	buf := bytes.NewBuffer(nil)
+	for _, ref := range c.refs {
+		var finalize finalizer.Finalizer
+
+		_, data, err := c.m.namespace.GetBlobData(digest.Digest(ref))
+		if err != nil {
+			return nil, err
+		}
+		finalize.Close(data)
+		r, err := data.Reader()
+		if err != nil {
+			return nil, err
+		}
+		finalize.Close(r)
+		_, err = io.Copy(buf, r)
+		if err != nil {
+			return nil, err
+		}
+		err = finalize.Finalize()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return buf.Bytes(), nil
+}
+
+func (c *composedBlock) Reader() (io.ReadCloser, error) {
+	return &composedReader{
+		m:    c.m,
+		refs: c.refs,
+	}, nil
+}
+
+func (c composedBlock) Close() error {
+	return nil
+}
+
+type composedReader struct {
+	lock   sync.Mutex
+	m      *localBlobAccessMethod
+	refs   []string
+	reader io.ReadCloser
+	data   blobaccess.DataAccess
+}
+
+func (c *composedReader) Read(p []byte) (n int, err error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	for {
+		if c.reader != nil {
+			n, err := c.reader.Read(p)
+			if n > 0 {
+				if err == io.EOF {
+					err = nil
+				}
+				return n, err
+			}
+			if err != nil {
+				return n, err
+			}
+			c.reader.Close()
+			c.data.Close()
+			c.reader = nil
+		}
+		if len(c.refs) == 0 {
+			return 0, io.EOF
+		}
+
+		ref := strings.TrimSpace(c.refs[0])
+		_, c.data, err = c.m.namespace.GetBlobData(digest.Digest(ref))
+		if err != nil {
+			return 0, err
+		}
+		c.reader, err = c.data.Reader()
+		if err != nil {
+			return 0, err
+		}
+	}
+}
+
+func (c *composedReader) Close() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if c.reader != nil {
+		c.reader.Close()
+		c.data.Close()
+		c.reader = nil
+		c.refs = nil
+	}
+	return nil
 }
