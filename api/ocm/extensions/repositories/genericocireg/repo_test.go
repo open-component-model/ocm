@@ -123,7 +123,7 @@ var _ = Describe("component repository mapping", func() {
 		MustBeSuccessful(finalize.Finalize())
 	})
 
-	FIt("creates a dummy component with chunks", func() {
+	It("creates a dummy component with chunks", func() {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)
 
