@@ -14,7 +14,7 @@ import (
 	"ocm.software/ocm/api/utils/mime"
 )
 
-func newChunck(r io.Reader, fss ...vfs.FileSystem) (bpi.BlobAccess, error) {
+func newChunk(r io.Reader, fss ...vfs.FileSystem) (bpi.BlobAccess, error) {
 	t, err := blobaccess.NewTempFile("", "chunk-*", fss...)
 	if err != nil {
 		return nil, err
@@ -28,6 +28,8 @@ func newChunck(r io.Reader, fss ...vfs.FileSystem) (bpi.BlobAccess, error) {
 	return t.AsBlob(mime.MIME_OCTET), nil
 }
 
+// ChunkedBlobSource provides a sequence of
+// bpi.BlobAccess objects.
 type ChunkedBlobSource interface {
 	Next() (bpi.BlobAccess, error)
 }
@@ -40,6 +42,12 @@ type chunkedAccess struct {
 	cont      bool
 }
 
+// New provides a sequence of
+// bpi.BlobAccess objects for a given io.Reader
+// each with a limited size.
+// The provided blobs are temporarily stored
+// on the filesystem and can therefore be kept
+// and accessed any number of times until they are closed.
 func New(r io.Reader, chunksize int64, fss ...vfs.FileSystem) ChunkedBlobSource {
 	reader := accessio.NewChunkedReader(r, chunksize)
 	return &chunkedAccess{
@@ -63,5 +71,5 @@ func (r *chunkedAccess) Next() (bpi.BlobAccess, error) {
 		}
 	}
 	r.cont = true
-	return newChunck(r.reader, r.fs)
+	return newChunk(r.reader, r.fs)
 }
