@@ -215,6 +215,7 @@ packageversion
 parameterization
 pendingdeprecationwarning
 pflag
+pkgs
 podinfo
 podman
 pre

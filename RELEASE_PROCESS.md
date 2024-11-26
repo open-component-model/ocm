@@ -249,7 +249,7 @@ and you are encouraged to create issues regarding inconsistencies.
 
 Review and merge open pull requests.
 
-### ocm-webiste
+### ocm-website
 
 [Update the website](https://github.com/open-component-model/ocm-website/pulls).
 
