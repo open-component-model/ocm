@@ -1,0 +1,28 @@
+changelog:
+  exclude:
+    labels:
+    - 'kind/skip-release-notes'
+    - 'wontfix'
+    - 'triage/wont-fix'
+    - 'triage/invalid'
+  categories:
+    - title: '‼️ Breaking Changes'
+      labels:
+        - 'breaking-change'
+    - title: '🚀 Features'
+      labels:
+        - 'kind/enhancement'
+        - 'feature'
+        - 'enhancement'
+    - title: '🐛 Bug Fixes'
+      labels:
+        - 'kind/bug'
+        - 'fix'
+        - 'bugfix'
+        - 'bug'
+    - title: '🧰 Maintenance'
+      labels:
+        - 'chore'
+    - title: '⬆️ Dependencies'
+      labels:
+        - 'dependencies'
