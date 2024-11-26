@@ -248,6 +248,8 @@ and you are encouraged to create issues regarding inconsistencies.
 ## Follow up actions
 
 Review and merge open pull requests.
+See [Publish Release to other package registries than Github](https://github.com/open-component-model/ocm/actions/workflows/publish-to-other-than-github.yaml) workflow runs.
+In case of error you can try to [Manually retrigger the publishing of ocm-cli to other repositories](https://github.com/open-component-model/ocm/actions/workflows/retrigger-publish-to-other.yaml).
 
 ### ocm-website
 
