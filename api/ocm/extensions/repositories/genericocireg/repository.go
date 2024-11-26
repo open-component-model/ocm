@@ -11,12 +11,16 @@ import (
 	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci"
 	ocicpi "ocm.software/ocm/api/oci/cpi"
+	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
+	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/repocpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/componentmapping"
+	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/config"
 )
 
 type OCIBasedRepository interface {
@@ -50,21 +54,50 @@ type RepositoryImpl struct {
 var (
 	_ repocpi.RepositoryImpl               = (*RepositoryImpl)(nil)
 	_ credentials.ConsumerIdentityProvider = (*RepositoryImpl)(nil)
+	_ config.Configurable                  = (*RepositoryImpl)(nil)
 )
 
 func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository, blobLimit ...int64) cpi.Repository {
 	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
+
 	impl := &RepositoryImpl{
 		ctx:       ctx,
 		meta:      *DefaultComponentRepositoryMeta(meta),
 		ocirepo:   ocirepo,
 		blobLimit: general.OptionalDefaulted(-1, blobLimit...),
 	}
+	if len(blobLimit) == 0 {
+		ctxp.OCMContext().ConfigContext().ApplyTo(0, impl)
+	}
 	return repocpi.NewRepository(impl, "OCM repo[OCI]")
+}
+
+func (r *RepositoryImpl) ConfigureBlobLimits(limits config.BlobLimits) {
+	if len(limits) == 0 {
+		return
+	}
+	if spec, ok := r.ocirepo.GetSpecification().(*ocireg.RepositorySpec); ok {
+		id := spec.GetConsumerId()
+		hp := hostpath.HostPort(id)
+		l := limits.GetLimit(hp)
+		if l >= 0 {
+			r.blobLimit = l
+		}
+	}
+	if spec, ok := r.ocirepo.GetSpecification().(*ctf.RepositorySpec); ok {
+		l := limits.GetLimit("@" + spec.FilePath)
+		if l >= 0 {
+			r.blobLimit = l
+		}
+	}
 }
 
 func (r *RepositoryImpl) SetBlobLimit(s int64) {
 	r.blobLimit = s
+}
+
+func (r *RepositoryImpl) GetBlobLimit() int64 {
+	return r.blobLimit
 }
 
 func (r *RepositoryImpl) Close() error {

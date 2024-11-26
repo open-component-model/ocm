@@ -91,7 +91,7 @@ func NewComponentRepositoryMeta(subPath string, mapping ComponentNameMapping) *C
 type RepositorySpec struct {
 	oci.RepositorySpec
 	ComponentRepositoryMeta
-	BlobLimit int64
+	BlobLimit *int64
 }
 
 var (
@@ -130,7 +130,7 @@ func (a *RepositorySpec) AsUniformSpec(cpi.Context) *cpi.UniformRepositorySpec {
 
 type meta struct {
 	ComponentRepositoryMeta `json:",inline"`
-	BlobLimit               int64 `json:"blobLimit"`
+	BlobLimit               *int64 `json:"blobLimit,omitempty"`
 }
 
 func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
@@ -147,7 +147,9 @@ func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
 
 	u.RepositorySpec = ocispec
 	u.ComponentRepositoryMeta = m.ComponentRepositoryMeta
-	u.BlobLimit = m.BlobLimit
+	if m.BlobLimit != nil {
+		u.BlobLimit = m.BlobLimit
+	}
 
 	normalizers.Normalize(u)
 	return nil
@@ -179,7 +181,10 @@ func (s *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	if err != nil {
 		return nil, err
 	}
-	return NewRepository(ctx, &s.ComponentRepositoryMeta, r, s.BlobLimit), nil
+	if s.BlobLimit != nil {
+		return NewRepository(ctx, &s.ComponentRepositoryMeta, r, *s.BlobLimit), nil
+	}
+	return NewRepository(ctx, &s.ComponentRepositoryMeta, r), nil
 }
 
 func (s *RepositorySpec) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
