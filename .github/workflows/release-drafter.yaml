@@ -11,7 +11,7 @@ on:
 permissions:
   contents: read
   # The release-drafter action adds PR titles to the release notes once these are merged to main.
-  # A draft release is kept up-to-date listing the changes for the next minor release version.
+  # A draft release is kept up-to-date listing the changes for the next minor or patch release version for that branch.
 jobs:
   release-version:
     name: Release Version
@@ -31,12 +31,72 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
     steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.OCMBOT_APP_ID }}
+          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Drafter
-        uses: release-drafter/release-drafter@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag: ${{env.RELEASE_VERSION }}
-          version: ${{env.RELEASE_VERSION }}
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Setup Release with gh
+        env:
+          REF: ${{ github.ref }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          # generate the release notes based on the last previous tag.
+          # match only a valid semver tag.
+          # also do not match for the cutoff tag for the release branch.
+          # Example: If we are in releases/v0.18, we don't want to match v0.18 as the cutoff tag.
+          # Instead we want to match the one before that, which would be v0.17.
+          # That would generate us the notes from
+          # v0.17 to HEAD, which is what we want.
+          # 
+          # Implementors Note:
+          # ##*\/ removes everything before the last / in the ref,
+          # e.g. refs/heads/releases/v0.18 -> v0.18
+          previous_tag=$(git describe HEAD --abbrev=0 --tags --match "v*" --exclude "${REF##*\/}")
+          
+          if [[ -z $previous_tag ]]; then
+            echo "No previous tag found, cannot generate release notes"
+            exit 1
+          fi
+          
+          echo "Generating release notes for ${{env.RELEASE_VERSION}} starting from ${previous_tag} to HEAD"
+          
+          notes=$(\
+             gh api  \
+               --method POST \
+               -H "Accept: application/vnd.github+json" \
+               -H "X-GitHub-Api-Version: 2022-11-28" \
+               /repos/${REPO}/releases/generate-notes \
+               -f "tag_name=${{env.RELEASE_VERSION}}" \
+               -f "target_commitish=${{ github.ref }}" \
+               -f "previous_tag_name=${previous_tag}" \
+               -f "configuration_file_path=.github/config/release.yml" \
+               -q .body \
+             )
+          
+          echo "Release Notes generated for ${{env.RELEASE_VERSION}}:"
+          echo "${notes}"
+          
+          echo "Verifying if release ${{env.RELEASE_VERSION}} already exists"
+          if [[ -z $(gh release list -R ${REPO} --json name -q '.[] | select(.name == "${{env.RELEASE_VERSION}}")') ]]; then
+            echo "Release ${{env.RELEASE_VERSION}} does not exist yet, creating from scratch"
+            gh release create ${{env.RELEASE_VERSION}} \
+              --title "${{env.RELEASE_VERSION}}" \
+              --notes "${notes}" \
+              --draft \
+              --latest=false \
+              --target ${{ github.ref }} \
+              -R ${REPO}
+          else
+            echo "Release ${{env.RELEASE_VERSION}} already exists, updating existing..."
+            gh release edit ${{env.RELEASE_VERSION}} \
+              --notes "${notes}" \
+              -R ${REPO}
+          fi
