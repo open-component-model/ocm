@@ -244,3 +244,27 @@ branches were created on demand.
 This model has now largely been replaced by the model we see in
 this document. However you might still encounter leftovers form the old model
 and you are encouraged to create issues regarding inconsistencies.
+
+## Follow up actions
+
+Review and merge open pull requests.
+
+### ocm-webiste
+
+[Update the website](https://github.com/open-component-model/ocm-website/pulls).
+
+### homebrew-tap
+
+[Update brew tap](https://github.com/open-component-model/homebrew-tap/pulls).
+
+### winget-pkgs
+
+[Check winget-pkgs PRs for: `New version: Open-Component-Model.ocm-cli`](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+New+version%3A+Open-Component-Model.ocm-cli).
+
+### chocolatey
+
+[Check the `Packages in Moderation`](https://community.chocolatey.org/profiles/ocm.software#profile-moderation).
+
+### piper-ocm-cli
+
+[Update piper-ocm-cli](https://github.tools.sap/open-component-model/piper-ocm-cli/pulls).
