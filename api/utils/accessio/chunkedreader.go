@@ -8,6 +8,12 @@ import (
 	"github.com/mandelsoft/goutils/general"
 )
 
+// ChunkedReader splits a reader into several
+// logical readers with a limited content size.
+// Once the reader reaches its limits it provides
+// a io.EOF.
+// It can be continued by Calling Next, which returns
+// whether a follow-up is required or not.
 type ChunkedReader struct {
 	lock   sync.Mutex
 	reader io.Reader
@@ -34,7 +40,7 @@ func (c *ChunkedReader) Read(p []byte) (n int, err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if c.read == c.size {
+	if c.read >= c.size {
 		return 0, io.EOF
 	}
 	if c.read+int64(len(p)) > c.size {

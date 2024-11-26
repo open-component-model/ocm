@@ -6,10 +6,11 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"ocm.software/ocm/api/utils/accessio"
 )
 
-var _ = FDescribe("Test Environment", func() {
+var _ = Describe("Test Environment", func() {
 	in := "12345678901234567890"
 	var buf *bytes.Buffer
 	var chunked *accessio.ChunkedReader
