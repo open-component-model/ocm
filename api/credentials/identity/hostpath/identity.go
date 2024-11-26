@@ -157,3 +157,14 @@ func PathPrefix(id cpi.ConsumerIdentity) string {
 	}
 	return strings.TrimPrefix(id[ID_PATHPREFIX], "/")
 }
+
+func HostPort(id cpi.ConsumerIdentity) string {
+	if id == nil {
+		return ""
+	}
+	host := id[ID_HOSTNAME]
+	if port, ok := id[ID_PORT]; ok {
+		return host + ":" + port
+	}
+	return host
+}
