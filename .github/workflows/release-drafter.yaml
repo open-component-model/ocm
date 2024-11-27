@@ -82,25 +82,25 @@ jobs:
                -q .body \
              )
           
-          if [[ -z $notes ]]; then
+          if [[ -z "${notes}" ]]; then
             echo "No release notes generated from API, failed"
             exit 1
           fi
           
           echo "Auto-Collapsing release notes to reduce size"
-          printf "%s\n" "$notes" > $RUNNER_TEMP/release_notes.md
+          echo "${notes}" > $RUNNER_TEMP/release_notes.md
           bash hack/collapse/auto_collapse.sh $RUNNER_TEMP/release_notes.md $RUNNER_TEMP/release_notes_processed.md ${{ env.COLLAPSE_THRESHOLD }}
           notes=$(cat $RUNNER_TEMP/release_notes_processed.md)
           
           echo "Release Notes generated for ${{env.RELEASE_VERSION}}:"
-          printf "%s\n" "$notes"
+          echo "${notes}"
           
           echo "Verifying if release ${{env.RELEASE_VERSION}} already exists"
           if [[ -z $(gh release list -R ${REPO} --json name -q '.[] | select(.name == "${{env.RELEASE_VERSION}}")') ]]; then
             echo "Release ${{env.RELEASE_VERSION}} does not exist yet, creating from scratch"
             gh release create ${{env.RELEASE_VERSION}} \
               --title "${{env.RELEASE_VERSION}}" \
-              --notes "$(printf "%s\n" "$notes")" \
+              --notes "${notes}" \
               --draft \
               --latest=false \
               --target ${{ github.ref }} \
