@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# allow > to overwrite files
+set +o noclobber
+
 # Auto Collapse
 #This is a script that takes in
 # - a markdown file
@@ -15,21 +18,21 @@ OUTPUT_FILE=${2:-"README_collapsible.md"}
 THRESHOLD=${3:-10}
 
 # Ensure output file is empty initially
-rm -f "$OUTPUT_FILE"
+true > "$OUTPUT_FILE"
 
 # Variables to track sections
 inside_section=false
 section_lines=()
 section_header=""
 
-INPUT="$(cat "$INPUT_FILE")"
-FULL_CHANGELOG=$(grep -E "Full Changelog" < "$INPUT_FILE")
+input="$(cat "$INPUT_FILE")"
+FULL_CHANGELOG=$(grep "Full Changelog" < "$INPUT_FILE")
 
 if [[ -z $FULL_CHANGELOG ]]; then
     echo "Full Changelog not found in the input file."
 else
     echo "Full Changelog found in the input file."
-    INPUT=$(echo "$INPUT" | sed '/Full Changelog/d')
+    input=$(sed '/Full Changelog/d' <<< "${input}")
 fi
 
 # Function to count changes (lines starting with '*')
@@ -70,7 +73,7 @@ write_section() {
 }
 
 # Read the Markdown file line by line
-echo "${INPUT}" | while IFS= read -r line || [[ -n $line ]]; do
+echo "${input}" | while IFS= read -r line || [[ -n $line ]]; do
     # Preserve comment blocks
     if [[ $line =~ ^\<!-- ]] || [[ $line =~ ^--\> ]]; then
         # Finalize the current section if inside one

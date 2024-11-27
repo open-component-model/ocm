@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Paths to files
 export INPUT_FILE="$SCRIPT_DIR/test_example.md"
