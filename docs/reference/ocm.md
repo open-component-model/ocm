@@ -306,6 +306,11 @@ The value can be a simple type or a JSON/YAML string for complex values
   the backend and descriptor updated will be persisted on AddVersion
   or closing a provided existing component version.
 
+- <code>ocm.software/ocm/feature-gates</code> [<code>featuregates</code>]: *featuregates* Enable/Disable optional features of the OCM library.
+
+  Optionally, particular features modes and attributes can be configured, if
+  supported by the feature implementation.
+
 - <code>ocm.software/signing/sigstore</code> [<code>sigstore</code>]: *sigstore config* Configuration to use for sigstore based signing.
 
   The following fields are used.

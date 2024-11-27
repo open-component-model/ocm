@@ -383,6 +383,8 @@ func (c *_attributes) SetAttribute(name string, value interface{}) error {
 		if *c.updater != nil {
 			(*c.updater).Update()
 		}
+	} else {
+		ocmlog.Logger().LogError(err, "cannot set context attribute", "attr", name, "value", value)
 	}
 	return err
 }
