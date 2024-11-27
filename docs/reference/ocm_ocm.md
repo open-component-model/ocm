@@ -24,6 +24,7 @@ ocm ocm [<options>] <sub command> ...
 * ocm ocm <b>commontransportarchive</b>	 &mdash; Commands acting on common transport archives
 * ocm ocm <b>componentarchive</b>	 &mdash; Commands acting on component archives
 * ocm ocm <b>componentversions</b>	 &mdash; Commands acting on components
+* ocm ocm <b>featuregates</b>	 &mdash; Commands acting on actions
 * ocm ocm <b>plugins</b>	 &mdash; Commands related to OCM plugins
 * ocm ocm <b>pubsub</b>	 &mdash; Commands acting on sub/sub specifications
 * ocm ocm <b>references</b>	 &mdash; Commands related to component references in component versions
@@ -41,5 +42,6 @@ ocm ocm [<options>] <sub command> ...
 
 * [ocm <b>ocm-accessmethods</b>](ocm_ocm-accessmethods.md)	 &mdash; List of all supported access methods
 * [ocm <b>ocm-downloadhandlers</b>](ocm_ocm-downloadhandlers.md)	 &mdash; List of all available download handlers
+* [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references
 * [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references
 * [ocm <b>ocm-uploadhandlers</b>](ocm_ocm-uploadhandlers.md)	 &mdash; List of all available upload handlers

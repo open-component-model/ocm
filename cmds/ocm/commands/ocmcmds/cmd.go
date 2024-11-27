@@ -7,6 +7,7 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/ctf"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/featuregates"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/plugins"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/pubsub"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/references"
@@ -42,7 +43,9 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(routingslips.NewCommand(ctx))
 	cmd.AddCommand(pubsub.NewCommand(ctx))
 	cmd.AddCommand(verified.NewCommand(ctx))
+	cmd.AddCommand(featuregates.NewCommand(ctx))
 
+	cmd.AddCommand(utils.DocuCommandPath(topicocmrefs.New(ctx), "ocm"))
 	cmd.AddCommand(utils.DocuCommandPath(topicocmrefs.New(ctx), "ocm"))
 	cmd.AddCommand(utils.DocuCommandPath(topicocmaccessmethods.New(ctx), "ocm"))
 	cmd.AddCommand(utils.DocuCommandPath(topicocmuploaders.New(ctx), "ocm"))
