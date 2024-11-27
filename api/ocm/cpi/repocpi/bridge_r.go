@@ -34,14 +34,22 @@ type RepositoryImpl interface {
 	io.Closer
 }
 
+// Chunked is an optional interface, which
+// may be implemented to accept a blob limit for mapping
+// local blobs to an external storage system.
 type Chunked interface {
-	SetBlobLimit(s int64)
+	// SetBlobLimit sets the blob limit if possible.
+	// It returns true, if this was successful.
+	SetBlobLimit(s int64) bool
 }
 
-func SetBlobLimit(i RepositoryImpl, s int64) {
+// SetBlobLimit tries to set a blob limt for a repository
+// implementation. It returns true, if this was possible.
+func SetBlobLimit(i RepositoryImpl, s int64) bool {
 	if c, ok := i.(Chunked); ok {
-		c.SetBlobLimit(s)
+		return c.SetBlobLimit(s)
 	}
+	return false
 }
 
 type _repositoryBridgeBase = resource.ResourceImplBase[cpi.Repository]

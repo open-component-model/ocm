@@ -2,6 +2,7 @@ package genericocireg_test
 
 import (
 	"fmt"
+	"io"
 	"path"
 	"reflect"
 
@@ -123,7 +124,7 @@ var _ = Describe("component repository mapping", func() {
 		MustBeSuccessful(finalize.Finalize())
 	})
 
-	It("creates a dummy component with chunks", func() {
+	DescribeTable("creates a dummy component with chunks", func(f func(ocm.ResourceAccess)) {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)
 
@@ -170,11 +171,41 @@ var _ = Describe("component repository mapping", func() {
 		Expect(rsc.Meta().Digest).NotTo(BeNil())
 		Expect(rsc.Meta().Digest.Value).To(Equal(ocmtesthelper.D_TESTDATA))
 
-		data := Must(ocmutils.GetResourceData(rsc))
-		Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		f(rsc)
 
 		MustBeSuccessful(finalize.Finalize())
-	})
+	},
+		Entry("get blob", func(rsc ocm.ResourceAccess) {
+			data := Must(ocmutils.GetResourceData(rsc))
+			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		}),
+		Entry("stream blob", func(rsc ocm.ResourceAccess) {
+			r := Must(ocmutils.GetResourceReader(rsc))
+			data := Must(io.ReadAll(r))
+			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		}),
+		Entry("stream blob with small buffer", func(rsc ocm.ResourceAccess) {
+			var buf [2]byte
+			var data []byte
+
+			r := Must(ocmutils.GetResourceReader(rsc))
+
+			for {
+				n, err := r.Read(buf[:])
+				if n > 0 {
+					data = append(data, buf[:n]...)
+				}
+				if err != nil {
+					if err == io.EOF {
+						break
+					} else {
+						MustBeSuccessful(err)
+					}
+				}
+			}
+			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		}),
+	)
 
 	It("handles legacylocalociblob access method", func() {
 		var finalize finalizer.Finalizer

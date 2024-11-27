@@ -191,14 +191,12 @@ func (c *ComponentVersionContainer) Update() (bool, error) {
 			if err != nil {
 				return false, fmt.Errorf("failed resource layer evaluation: %w", err)
 			}
-			if len(list) > 0 {
-				for _, l := range list {
-					layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
-						Kind:     ARTKIND_RESOURCE,
-						Identity: r.GetIdentity(desc.Resources),
-					})
-					layers.Delete(l)
-				}
+			for _, l := range list {
+				layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
+					Kind:     ARTKIND_RESOURCE,
+					Identity: r.GetIdentity(desc.Resources),
+				})
+				layers.Delete(l)
 			}
 			if s != r.Access {
 				desc.Resources[i].Access = s
@@ -209,14 +207,12 @@ func (c *ComponentVersionContainer) Update() (bool, error) {
 			if err != nil {
 				return false, fmt.Errorf("failed source layer evaluation: %w", err)
 			}
-			if len(list) > 0 {
-				for _, l := range list {
-					layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
-						Kind:     ARTKIND_SOURCE,
-						Identity: r.GetIdentity(desc.Sources),
-					})
-					layers.Delete(l)
-				}
+			for _, l := range list {
+				layerAnnotations[l] = append(layerAnnotations[l], ArtifactInfo{
+					Kind:     ARTKIND_SOURCE,
+					Identity: r.GetIdentity(desc.Sources),
+				})
+				layers.Delete(l)
 			}
 			if s != r.Access {
 				desc.Sources[i].Access = s
@@ -292,10 +288,10 @@ func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.A
 			layers := c.manifest.GetDescriptor().Layers
 			maxLen := len(layers) - 1
 			found := false
-			for i := range layers {
-				l := layers[len(layers)-1-i]
-				if i < maxLen && l.Digest == d.Digest && (d.Digest == "" || d.Digest == l.Digest) {
-					layernums = append(layernums, len(layers)-1-i)
+			for i := maxLen; i > 0; i-- { // layer 0 is the component descriptor
+				l := layers[i]
+				if l.Digest == d.Digest {
+					layernums = append(layernums, i)
 					found = true
 					break
 				}
@@ -326,13 +322,15 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 	}
 
 	size := blob.Size()
+	limit := c.comp.repo.blobLimit
 	var refs []string
-	if c.comp.repo.blobLimit > 0 && size != blobaccess.BLOB_UNKNOWN_SIZE && size > c.comp.repo.blobLimit {
+	if limit > 0 && size != blobaccess.BLOB_UNKNOWN_SIZE && size > limit {
 		reader, err := blob.Reader()
 		if err != nil {
 			return nil, err
 		}
-		ch := chunked.New(reader, c.comp.repo.blobLimit, vfsattr.Get(c.GetContext()))
+		defer reader.Close()
+		ch := chunked.New(reader, limit, vfsattr.Get(c.GetContext()))
 		for {
 			b, err := ch.Next()
 			if err != nil {
