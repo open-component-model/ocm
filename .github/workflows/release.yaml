@@ -81,9 +81,9 @@ jobs:
   components:
     name: Component CTF Builds
     uses: ./.github/workflows/components.yaml
-    needs: [check,release-version]
+    needs: [ check,release-version ]
     with:
-      effective-version: ${{ needs.release-version.outputs.version_no_prefix }}
+      version: ${{ needs.release-version.outputs.version_no_prefix }}
       upload-ctf: true
       ref: ${{ github.ref }}
     permissions:
@@ -105,7 +105,6 @@ jobs:
       packages: write
     env:
       RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
-      RELEASE_NOTES: ${{ fromJSON(needs.check.outputs.draft-release-notes).body }}
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action
       uses: TooMuch4U/actions-clean@v2.2
@@ -123,7 +122,7 @@ jobs:
         token: ${{ steps.generate_token.outputs.token }}
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@fc46e51fd3cb168ffb36c6d1915723c47db58abb # v0.17.7
+      uses: anchore/sbom-action/download-syft@55dc4ee22412511ee8c3142cbea40418e6cec693 # v0.17.8
 
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.7.0
@@ -182,20 +181,44 @@ jobs:
         git commit -m "Release $RELEASE_VERSION"
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
-        # push both the tag as well as a release branch with that tag.
-        git push origin releases/${{ env.RELEASE_VERSION }} ${{ env.RELEASE_VERSION }}
+        # push the tag.
+        git push origin ${{ env.RELEASE_VERSION }}
+    # If we encounter a release (i.e. NOT a candidate), we want to keep the tag in the release branch git history
+    # by merging it (without taking over its contents).
+    # This allows tools that rely on the latest tag (such as Release Note generators or git describe)
+    # to recognize the release as the latest version.
+    # We can then use this to generate release notes based on the previous tag.
+    # If we previously built a release candidate, the tag is not merged back.
+    # That results in the tag being "omitted" / not recognized while generating release notes.
+    # This is intended, because a candidate should never influence further release notes.
+    # Example:
+    # Branch releases/v0.19
+    # - Candidate Build v0.19.0-rc.1 => no merge, release notes based on original cutoff
+    # - Actual Build v0.19.0 => merge, release notes based on original cutoff
+    # - Candidate Build v0.19.1-rc.1 => no merge, release notes based on v0.19.0 due to previous merge
+    - name: Merge Release Tag back into release branch if not a release candidate
+      if: inputs.release_candidate == false
+      run: |
+        git checkout ${{ github.ref }}
+        git merge --strategy ours ${{ env.RELEASE_VERSION }}
+        git push origin ${{ github.ref }}
 
     - name: Create GPG Token file from Secret
       run: |
         echo "${{ secrets.GPG_PRIVATE_KEY_FOR_SIGNING }}" > ocm-releases-key.gpg
         echo "GPG_KEY_PATH=ocm-releases-key.gpg" >> $GITHUB_ENV
 
+    - name: Setup Release Notes as File to make it readable by GoReleaser
+      run: |
+        echo "${{ fromJSON(needs.check.outputs.draft-release-notes).body }}" > $RUNNER_TEMP/RELEASE_NOTES.md
+        echo "RELEASE_NOTES=$RUNNER_TEMP/RELEASE_NOTES.md" >> $GITHUB_ENV
+        cat $RUNNER_TEMP/RELEASE_NOTES.md
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v6
       with:
         distribution: goreleaser
         version: 2.1.0
-        args: release --clean --timeout 60m --skip=validate --config=.github/config/goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
+        args: release --clean --timeout 60m --skip=validate --config=.github/config/goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES }}
       env:
         GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -212,25 +235,16 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: make plain-push
 
-    - name: Publish Release Event
-      if: inputs.release_candidate == false
-      uses: peter-evans/repository-dispatch@v3
-      with:
-        token: ${{ steps.generate_token.outputs.token }}
-        repository: open-component-model/ocm-website
-        event-type: ocm-cli-release
-        client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
-
     # now distribute the release event so that other jobs can listen for this
     # and use the event to publish our release to other package registries
-    - name: Publish Release Event for other package registries
+    - name: Publish Release Event
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v3
       with:
         token: ${{ steps.generate_token.outputs.token }}
         repository: ${{ github.repository_owner }}/ocm
         event-type: publish-ocm-cli
-        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true}'
+        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-website":true,"push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true,"push-to-brew-tap":true}'
 
   # make sure that the branch contains the next valid patch
   bump-release-branch-pr:

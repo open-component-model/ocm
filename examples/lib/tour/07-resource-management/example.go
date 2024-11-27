@@ -5,12 +5,10 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-
-	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
+	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/semverutils"
 )
 
@@ -207,6 +205,7 @@ func GatherResources(ctx ocm.Context, factory ResourceFactory) ([]Resource, erro
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot sort versions")
 	}
+	versions = []string{"...", "0.9.0", "0.10.0", "0.11.0", "0.12.0", "0.12.1", "0.13.0", "0.14.0", "0.15.0", "0.17.0", "0.18.0", "..."}
 	fmt.Printf("versions for component ocm.software/ocmcli: %s\n", strings.Join(versions, ", "))
 
 	// Now, we have a look at the latest version. it is
