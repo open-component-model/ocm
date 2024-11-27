@@ -90,6 +90,7 @@ executables
 executoroptions
 executorspecification
 extensibility
+featuregates
 filepath
 filesystem
 filesytem

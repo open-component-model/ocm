@@ -14,7 +14,7 @@ var (
 	Versions               = []string{"versions", "vers", "v"}
 	Plugins                = []string{"plugins", "plugin", "p"}
 	Action                 = []string{"action"}
-	FeatureGates           = []string{"featuregates", "fg"}
+	FeatureGates           = []string{"featuregates", "featuregate", "fg"}
 	RoutingSlips           = []string{"routingslips", "routingslip", "rs"}
 	PubSub                 = []string{"pubsub", "ps"}
 	Verified               = []string{"verified"}

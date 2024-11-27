@@ -10,7 +10,7 @@ import (
 
 var _ = Describe("setup", func() {
 	It("creates initial", func() {
-		Expect(len(config.DefaultContext().ConfigTypes().KnownTypeNames())).To(Equal(6))
-		Expect(len(internal.DefaultConfigTypeScheme.KnownTypeNames())).To(Equal(6))
+		Expect(len(config.DefaultContext().ConfigTypes().KnownTypeNames())).To(Equal(8))
+		Expect(len(internal.DefaultConfigTypeScheme.KnownTypeNames())).To(Equal(8))
 	})
 })

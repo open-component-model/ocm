@@ -9,7 +9,7 @@ ocm get featuregates [<options>] {<name>}
 #### Aliases
 
 ```text
-featuregates, fg
+featuregates, featuregate, fg
 ```
 
 ### Options
