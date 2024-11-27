@@ -3,6 +3,7 @@ package genericocireg
 import (
 	"bytes"
 	"io"
+	"os"
 	"strings"
 	"sync"
 
@@ -99,11 +100,11 @@ func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
 	)
 	if len(refs) < 2 {
 		_, data, err = m.namespace.GetBlobData(digest.Digest(m.spec.LocalReference))
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		data = &composedBlock{m, refs}
-	}
-	if err != nil {
-		return nil, err
 	}
 	m.data = data
 	return m.data, err
@@ -168,7 +169,7 @@ func (c *composedBlock) Reader() (io.ReadCloser, error) {
 	}, nil
 }
 
-func (c composedBlock) Close() error {
+func (c *composedBlock) Close() error {
 	return nil
 }
 
@@ -187,19 +188,28 @@ func (c *composedReader) Read(p []byte) (n int, err error) {
 	for {
 		if c.reader != nil {
 			n, err := c.reader.Read(p)
-			if n > 0 {
-				if err == io.EOF {
-					err = nil
-				}
+
+			if err == io.EOF {
+				c.reader.Close()
+				c.data.Close()
+				c.refs = c.refs[1:]
+				c.reader = nil
+				c.data = nil
+				// start new layer and return partial (>0) read before next layer is started
+				err = nil
+			}
+			// return partial read (even a zero read if layer is not yet finished) or error
+			if c.reader != nil || err != nil || n > 0 {
 				return n, err
 			}
-			if err != nil {
-				return n, err
-			}
-			c.reader.Close()
-			c.data.Close()
-			c.reader = nil
+			// otherwise, we can use the given buffer for the next layer
+
+			// now, we have to check for a next succeeding layer.
+			// This means to finish with the actual reader and continue
+			// with the next one.
 		}
+
+		// If no more layers are available, report EOF.
 		if len(c.refs) == 0 {
 			return 0, io.EOF
 		}
@@ -220,6 +230,9 @@ func (c *composedReader) Close() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
+	if c.reader == nil && c.refs == nil {
+		return os.ErrClosed
+	}
 	if c.reader != nil {
 		c.reader.Close()
 		c.data.Close()

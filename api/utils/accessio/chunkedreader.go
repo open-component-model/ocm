@@ -15,23 +15,23 @@ import (
 // It can be continued by Calling Next, which returns
 // whether a follow-up is required or not.
 type ChunkedReader struct {
-	lock   sync.Mutex
-	reader io.Reader
-	buffer *bytes.Buffer
-	size   int64
-	chunk  int
-	read   int64
-	err    error
+	lock    sync.Mutex
+	reader  io.Reader
+	buffer  *bytes.Buffer
+	size    int64
+	chunkNo int
+	read    int64
+	err     error
 
 	preread uint
 }
 
 var _ io.Reader = (*ChunkedReader)(nil)
 
-func NewChunkedReader(r io.Reader, chunk int64, preread ...uint) *ChunkedReader {
+func NewChunkedReader(r io.Reader, chunkSize int64, preread ...uint) *ChunkedReader {
 	return &ChunkedReader{
 		reader:  r,
-		size:    chunk,
+		size:    chunkSize,
 		preread: general.OptionalDefaulted(8096, preread...),
 	}
 }
@@ -48,9 +48,9 @@ func (c *ChunkedReader) Read(p []byte) (n int, err error) {
 	}
 	if c.buffer != nil && c.buffer.Len() > 0 {
 		// first, consume from buffer
-		n, _ := c.buffer.Read(p)
+		n, err := c.buffer.Read(p)
 		c.read += int64(n)
-		if c.buffer.Len() == 0 {
+		if err != nil { // the only error returned is io.EOF
 			c.buffer = nil
 		}
 		return c.report(n, nil)
@@ -78,7 +78,7 @@ func (c *ChunkedReader) ChunkNo() int {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	return c.chunk
+	return c.chunkNo
 }
 
 func (c *ChunkedReader) ChunkDone() bool {
@@ -113,6 +113,6 @@ func (c *ChunkedReader) Next() bool {
 	}
 
 	c.read = 0
-	c.chunk++
+	c.chunkNo++
 	return true
 }

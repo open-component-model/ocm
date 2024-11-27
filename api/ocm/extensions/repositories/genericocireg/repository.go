@@ -42,12 +42,16 @@ func GetOCIRepository(r cpi.Repository) ocicpi.Repository {
 }
 
 type RepositoryImpl struct {
-	bridge    repocpi.RepositoryBridge
-	ctx       cpi.Context
-	meta      ComponentRepositoryMeta
-	nonref    cpi.Repository
-	ocirepo   oci.Repository
-	readonly  bool
+	bridge   repocpi.RepositoryBridge
+	ctx      cpi.Context
+	meta     ComponentRepositoryMeta
+	nonref   cpi.Repository
+	ocirepo  oci.Repository
+	readonly bool
+	// blobLimit is the size limit for layers maintained for the storage of localBlobs.
+	// The value -1 means an unconfigured value,
+	// a value == 0 disables the limiting and
+	// a value > 0 enabled the usage of the specified size.
 	blobLimit int64
 }
 
@@ -57,6 +61,13 @@ var (
 	_ config.Configurable                  = (*RepositoryImpl)(nil)
 )
 
+// NewRepository creates a new OCM repository based on any OCI abstraction from
+// the OCI context type.
+// The optional blobLimit is the size limit for layers maintained for the storage of localBlobs.
+// The value -1 means an unconfigured value,
+// a value == 0 disables the limiting and
+// a value > 0 enabled the usage of the specified size.
+// If this parameter is not given -1 is assumed.
 func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository, blobLimit ...int64) cpi.Repository {
 	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
 
@@ -66,8 +77,8 @@ func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocir
 		ocirepo:   ocirepo,
 		blobLimit: general.OptionalDefaulted(-1, blobLimit...),
 	}
-	if len(blobLimit) == 0 {
-		ctxp.OCMContext().ConfigContext().ApplyTo(0, impl)
+	if impl.blobLimit < 0 {
+		ConfigureBlobLimits(ctxp.OCMContext(), impl)
 	}
 	return repocpi.NewRepository(impl, "OCM repo[OCI]")
 }
@@ -92,8 +103,9 @@ func (r *RepositoryImpl) ConfigureBlobLimits(limits config.BlobLimits) {
 	}
 }
 
-func (r *RepositoryImpl) SetBlobLimit(s int64) {
+func (r *RepositoryImpl) SetBlobLimit(s int64) bool {
 	r.blobLimit = s
+	return true
 }
 
 func (r *RepositoryImpl) GetBlobLimit() int64 {
