@@ -27,6 +27,7 @@ bool
 boolean
 buildx
 cas
+changelog
 chocolateyinstall
 cli
 cliconfig
