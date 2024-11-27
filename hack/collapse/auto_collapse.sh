@@ -24,16 +24,7 @@ true > "$OUTPUT_FILE"
 inside_section=false
 section_lines=()
 section_header=""
-
-input="$(cat "$INPUT_FILE")"
-FULL_CHANGELOG=$(grep "Full Changelog" < "$INPUT_FILE")
-
-if [[ -z $FULL_CHANGELOG ]]; then
-    echo "Full Changelog not found in the input file."
-else
-    echo "Full Changelog found in the input file."
-    input=$(sed '/Full Changelog/d' <<< "${input}")
-fi
+last_line=""
 
 # Function to count changes (lines starting with '*')
 count_changes() {
@@ -51,6 +42,7 @@ count_changes() {
 write_section() {
     local header="$1"
     local lines=("${@:2}")
+    local num_changes
     num_changes=$(count_changes "${lines[@]}")
 
     # Write the section header as is
@@ -73,15 +65,24 @@ write_section() {
 }
 
 # Read the Markdown file line by line
-echo "${input}" | while IFS= read -r line || [[ -n $line ]]; do
-    # Preserve comment blocks
-    if [[ $line =~ ^\<!-- ]] || [[ $line =~ ^--\> ]]; then
-        # Finalize the current section if inside one
+while IFS= read -r line || [[ -n $line ]]; do
+    # Check if the line contains "Full Changelog"
+    if [[ $line =~ ^\*\*Full\ Changelog ]]; then
+        # Finalize any pending section
         if [[ $inside_section == true ]]; then
             write_section "$section_header" "${section_lines[@]:1}" # Exclude the header
             inside_section=false
         fi
-        # Write the comment directly
+        last_line="$line"
+        continue
+    fi
+
+    # Preserve comment blocks
+    if [[ $line =~ ^\<!-- ]] || [[ $line =~ ^--\> ]]; then
+        if [[ $inside_section == true ]]; then
+            write_section "$section_header" "${section_lines[@]:1}" # Exclude the header
+            inside_section=false
+        fi
         echo "$line" >> "$OUTPUT_FILE"
         continue
     fi
@@ -99,17 +100,16 @@ echo "${input}" | while IFS= read -r line || [[ -n $line ]]; do
         # Collect lines of the current section
         section_lines+=("$line")
     fi
-done
+done < "$INPUT_FILE"
 
 # Process the last section
 if [[ $inside_section == true ]]; then
     write_section "$section_header" "${section_lines[@]:1}" # Exclude the header
 fi
 
-if [[ ! -z $FULL_CHANGELOG ]]; then
-    echo "Appending Full Changelog to the end of the file."
-    printf "\n%s" "$FULL_CHANGELOG" >> "$OUTPUT_FILE"
+# Write the "Full Changelog" line if it exists
+if [[ -n $last_line ]]; then
+    printf "\n%s" "$last_line" >> "$OUTPUT_FILE"
 fi
 
 echo "Collapsible Markdown written to $OUTPUT_FILE"
-
