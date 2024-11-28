@@ -1,4 +1,6 @@
 FROM --platform=$BUILDPLATFORM golang:1.23-alpine3.20 AS build
+ARG TARGETOS
+ARG TARGETARCH
 
 RUN apk add --no-cache make git
 

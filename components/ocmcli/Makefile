@@ -34,7 +34,7 @@ endif
 ifneq ($(BUILDX_CACHE_REF),)
 	ADDITIONAL_BUILDX_ARGS += --cache-from type=registry,ref=$(BUILDX_CACHE_REF)
 	ifeq ($(BUILDX_CACHE_PUSH),true)
-		ADDITIONAL_BUILDX_ARGS += --cache-to type=registry,ref=$(BUILDX_CACHE_REF),mode=max
+		ADDITIONAL_BUILDX_ARGS += --cache-to type=registry,ref=$(BUILDX_CACHE_REF)
 	endif
 endif
 
