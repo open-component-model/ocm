@@ -5,6 +5,9 @@ changelog:
     - 'kind/skip-release-notes'
     - 'dev/wont-fix'
     - 'dev/cant-reproduce'
+  # if an issue matches more than one category, the first one in the list will be used
+  # Example:
+  # Labels: kind/chore, kind/dependency => Category: Dependencies
   categories:
   - title: '‼️ Breaking Changes'
     labels:
@@ -15,10 +18,10 @@ changelog:
   - title: '🐛 Bug Fixes'
     labels:
     - 'kind/bugfix'
+  - title: '⬆️ Dependencies'
+    labels:
+      - 'kind/dependency'
   - title: '🧰 Maintenance'
     labels:
     - 'kind/chore'
     - 'kind/refactor'
-  - title: '⬆️ Dependencies'
-    labels:
-    - 'kind/dependency'
