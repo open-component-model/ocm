@@ -25,3 +25,6 @@ changelog:
     labels:
     - 'kind/chore'
     - 'kind/refactor'
+  - title: 'Other Changes'
+    labels:
+      - "*"
