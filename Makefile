@@ -32,6 +32,8 @@ LD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
  -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 CGO_ENABLED := 0
+GOOS := $(shell go env GOOS)
+GOARCH := $(shell go env GOARCH)
 
 COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
 
@@ -42,19 +44,19 @@ bin:
 	mkdir -p bin
 
 bin/ocm: bin $(SOURCES)
-	CGO_ENABLED=$(CGO_ENABLED) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/ocm ./cmds/ocm
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/ocm ./cmds/ocm
 
 bin/helminstaller: bin $(SOURCES)
-	CGO_ENABLED=$(CGO_ENABLED) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
 
 bin/demo: bin $(SOURCES)
-	CGO_ENABLED=$(CGO_ENABLED) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/demo ./cmds/demoplugin
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/demo ./cmds/demoplugin
 
 bin/cliplugin: bin $(SOURCES)
-	CGO_ENABLED=$(CGO_ENABLED) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/cliplugin ./cmds/cliplugin
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/cliplugin ./cmds/cliplugin
 
 bin/ecrplugin: bin $(SOURCES)
-	CGO_ENABLED=$(CGO_ENABLED) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
 
 api: $(SOURCES)
 	go build ./api/...
