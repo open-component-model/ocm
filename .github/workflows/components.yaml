@@ -33,6 +33,8 @@ env:
   components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin"]'
   IMAGE_PLATFORMS: 'linux/amd64 linux/arm64'
   PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
+  BUILDX_CACHE_PUSH: ${{ github.ref == 'refs/heads/main' }}
+  BUILDX_CACHE_REF_BASE: ghcr.io/${{ github.repository }}/buildx-cache
 
 jobs:
   define-matrix:
@@ -103,6 +105,8 @@ jobs:
           VERSION=${{ inputs.version }} \
           PLATFORMS="${{ env.PLATFORMS }}" \
           IMAGE_PLATFORMS="${{ env.IMAGE_PLATFORMS }}" \
+          BUILDX_CACHE_REF=${{ env.BUILDX_CACHE_REF_BASE }}:${{ matrix.component }} \
+          BUILDX_CACHE_PUSH=${{ env.BUILDX_CACHE_PUSH }} \
           make \
             ctf descriptor describe
       - name: Upload CTF

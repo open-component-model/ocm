@@ -31,6 +31,13 @@ ifeq ($(MULTI),true)
 FLAGSUF     = .multi
 endif
 
+ifneq ($(BUILDX_CACHE_REF),)
+	ADDITIONAL_BUILDX_ARGS += --cache-from type=registry,ref=$(BUILDX_CACHE_REF)
+	ifeq ($(BUILDX_CACHE_PUSH),true)
+		ADDITIONAL_BUILDX_ARGS += --cache-to type=registry,ref=$(BUILDX_CACHE_REF),mode=max
+	endif
+endif
+
 CREDS ?=
 # Define the path to the binary
 OCM_BIN = $(REPO_ROOT)/bin/ocm
@@ -74,16 +81,13 @@ image:
 		echo; echo "Building linux instead of darwin as there's no native Docker platform for darwin"; echo; \
 		docker buildx build -t $(IMAGE):$(VERSION) --platform linux/$(PLATFORM_ARCH) --file $(REPO_ROOT)/Dockerfile $(REPO_ROOT) \
 			--label org.opencontainers.image.version=$(VERSION) \
-			--label org.opencontainers.image.revision=$(VERSION); \
+			--label org.opencontainers.image.revision=$(VERSION) $(ADDITIONAL_BUILDX_ARGS); \
 	else \
 		echo; echo "Building for $(PLATFORM_OS)/$(ARCH)"; echo; \
 		docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM_OS)/$(PLATFORM_ARCH) --file $(REPO_ROOT)/Dockerfile $(REPO_ROOT) \
 			--label org.opencontainers.image.version=$(VERSION) \
-			--label org.opencontainers.image.revision=$(VERSION); \
+			--label org.opencontainers.image.revision=$(VERSION) $(ADDITIONAL_BUILDX_ARGS); \
 	fi
-
-space := $(subst ,, )
-comma := ,
 
 .PHONY: image.multi
 image.multi:
@@ -93,7 +97,7 @@ image.multi:
 		docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file $(REPO_ROOT)/Dockerfile $(REPO_ROOT) \
 			--build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
 			--label org.opencontainers.image.version=$(VERSION) \
-			--label org.opencontainers.image.revision=$(VERSION); \
+			--label org.opencontainers.image.revision=$(VERSION) $(ADDITIONAL_BUILDX_ARGS); \
 	done
 
 .PHONY: ctf
