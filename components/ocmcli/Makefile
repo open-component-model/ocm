@@ -13,7 +13,7 @@ CTF_TYPE ?= directory
 REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 ifeq ($(VERSION),)
-VERSION                                        := $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
+VERSION                                        := $(shell GOOS=$(PLATFORM_OS) GOARCH=$(PLATFORM_ARCH) go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 endif
 COMMIT                                         = $(shell git rev-parse --verify HEAD)
 # if EFFECTIVE_VERSION is not set, set it to VERSION+COMMIT
