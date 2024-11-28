@@ -2,6 +2,8 @@ FROM --platform=$BUILDPLATFORM golang:1.23 AS builder
 ARG COMMIT EFFECTIVE_VERSION GIT_TREE_STATE
 ARG TARGETOS
 ARG TARGETARCH
+ARG GOMODCACHE="/go/pkg/mod"
+ARG GOCACHE="/go/.cache"
 
 WORKDIR /go/src/ocm.software/ocm/
 COPY go.* *.go VERSION ./

@@ -2,6 +2,9 @@ FROM --platform=$BUILDPLATFORM golang:1.23-alpine3.20 AS build
 ARG TARGETOS
 ARG TARGETARCH
 
+ARG GOMODCACHE="/go/pkg/mod"
+ARG GOCACHE="/go/.cache"
+
 RUN apk add --no-cache make git
 
 WORKDIR /src
@@ -10,7 +13,7 @@ COPY go.mod go.sum *.go VERSION ./
 
 ARG GO_PROXY="https://proxy.golang.org"
 ENV GOPROXY=${GO_PROXY}
-RUN go mod download
+RUN --mount=type=cache,target=${GOMODCACHE} --mount=type=cache,target=${GOCACHE} go mod download
 
 COPY . .
 
@@ -20,7 +23,7 @@ ENV BUILD_FLAGS="-trimpath"
 # was called. For example, if we call make docker-build in a local env which has the Apple Silicon SO
 # the docker BUILDPLATFORM arg will be linux/arm64 when for Apple x86 it will be linux/amd64. Therefore,
 # by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
-RUN make bin/ocm GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH}
+RUN --mount=type=cache,target=${GOMODCACHE} --mount=type=cache,target=${GOCACHE} make bin/ocm GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH}
 
 FROM gcr.io/distroless/static-debian12:nonroot@sha256:d71f4b239be2d412017b798a0a401c44c3049a3ca454838473a4c32ed076bfea
 

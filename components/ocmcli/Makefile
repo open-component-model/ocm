@@ -23,6 +23,8 @@ EFFECTIVE_VERSION                              := $(VERSION)+$(COMMIT)
 endif
 PLATFORM_OS                                    := $(shell go env GOOS)
 PLATFORM_ARCH                                  := $(shell go env GOARCH)
+GOMODCACHE                                     := $(shell go env GOMODCACHE)
+GOCACHE									       := $(shell go env GOCACHE)
 
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
 OCMSRCS=$(shell find $(REPO_ROOT)/api -type f) $(REPO_ROOT)/go.*
@@ -80,11 +82,15 @@ image:
 	if [ $$PLATFORM_OS_OVERRIDE == darwin ]; then \
 		echo; echo "Building linux instead of darwin as there's no native Docker platform for darwin"; echo; \
 		docker buildx build -t $(IMAGE):$(VERSION) --platform linux/$(PLATFORM_ARCH) --file $(REPO_ROOT)/Dockerfile $(REPO_ROOT) \
+		    --build-arg GOMODCACHE=$(GOMODCACHE) \
+		    --build-arg GOCACHE=$(GOCACHE) \
 			--label org.opencontainers.image.version=$(VERSION) \
 			--label org.opencontainers.image.revision=$(VERSION) $(ADDITIONAL_BUILDX_ARGS); \
 	else \
 		echo; echo "Building for $(PLATFORM_OS)/$(ARCH)"; echo; \
 		docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM_OS)/$(PLATFORM_ARCH) --file $(REPO_ROOT)/Dockerfile $(REPO_ROOT) \
+		    --build-arg GOMODCACHE=$(GOMODCACHE) \
+		    --build-arg GOCACHE=$(GOCACHE) \
 			--label org.opencontainers.image.version=$(VERSION) \
 			--label org.opencontainers.image.revision=$(VERSION) $(ADDITIONAL_BUILDX_ARGS); \
 	fi
@@ -95,7 +101,8 @@ image.multi:
 		tag=$$(echo $$i | sed -e s:/:-:g); \
 			echo building platform $$i; \
 		docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file $(REPO_ROOT)/Dockerfile $(REPO_ROOT) \
-			--build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
+		    --build-arg GOMODCACHE=$(GOMODCACHE) \
+		    --build-arg GOCACHE=$(GOCACHE) \
 			--label org.opencontainers.image.version=$(VERSION) \
 			--label org.opencontainers.image.revision=$(VERSION) $(ADDITIONAL_BUILDX_ARGS); \
 	done

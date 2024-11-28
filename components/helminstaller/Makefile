@@ -20,8 +20,8 @@ EFFECTIVE_VERSION                              := $(VERSION)+$(COMMIT)
 endif
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 PLATFORM                                       := $(shell go env GOOS)/$(shell go env GOARCH)
-CACHE_DIR									  := $(shell go env GOCACHE)
-MOD_CACHE_DIR								  := $(shell go env GOMODCACHE)
+GOMODCACHE                                     := $(shell go env GOMODCACHE)
+GOCACHE									       := $(shell go env GOCACHE)
 
 
 ifneq ($(BUILDX_CACHE_REF),)
@@ -94,8 +94,8 @@ build: $(GEN)/image.$(NAME)$(FLAGSUF)
 $(GEN)/image.$(NAME): $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
 	docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM) --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
-          --build-arg CACHE_DIR=$(CACHE_DIR) \
-          --build-arg MOD_CACHE_DIR=$(MOD_CACHE_DIR) \
+		  --build-arg GOMODCACHE=$(GOMODCACHE) \
+		  --build-arg GOCACHE=$(GOCACHE) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
           --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE) $(ADDITIONAL_BUILDX_ARGS); \
 	@touch $(GEN)/image.$(NAME)
