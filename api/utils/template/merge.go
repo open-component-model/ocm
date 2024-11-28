@@ -3,7 +3,7 @@ package template
 import (
 	"encoding/json"
 
-	"github.com/imdario/mergo"
+	"dario.cat/mergo"
 	"sigs.k8s.io/yaml"
 )
 
