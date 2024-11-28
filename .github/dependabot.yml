@@ -27,3 +27,11 @@ updates:
     labels:
       - kind/dependency
       - kind/chore
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - kind/dependency
+      - kind/chore
