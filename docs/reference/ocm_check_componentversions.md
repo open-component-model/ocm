@@ -89,8 +89,8 @@ The following modes are supported:
 ### Examples
 
 ```bash
-$ ocm check componentversion ghcr.io/mandelsoft/kubelink
-$ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
+$ ocm check componentversion ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0
+$ ocm check componentversion --repo OCIRegistry::ghcr.io/open-component-model/ocm ocm.software/ocmcli:0.17.0
 ```
 
 ### SEE ALSO

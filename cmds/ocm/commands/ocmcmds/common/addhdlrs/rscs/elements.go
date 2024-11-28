@@ -102,7 +102,7 @@ func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Eleme
 		SourceRefs: compdescv2.ConvertSourcerefsTo(spec.SourceRefs),
 	}
 	opts := h.getModOpts()
-	if spec.SkipDigestGeneration {
+	if spec.Options.SkipDigestGeneration {
 		opts = append(opts, ocm.SkipDigest()) //nolint:staticcheck // skip digest still used for tests
 	}
 	/*
@@ -132,8 +132,16 @@ type ResourceSpec struct {
 
 	addhdlrs.ResourceInput `json:",inline"`
 
-	// additional process related options
+	// Options describes additional process related options
+	// see ResourceOptions for more details.
+	Options ResourceOptions `json:"options,omitempty"`
+}
 
+// ResourceOptions describes additional process related options
+// which reflect the handling of the resource without describing it directly.
+// Typical examples are any options that require specific changes in handling of the resource
+// but are not reflected in the resource itself (outside of side effects)
+type ResourceOptions struct {
 	// SkipDigestGeneration omits the digest generation.
 	SkipDigestGeneration bool `json:"skipDigestGeneration,omitempty"`
 }

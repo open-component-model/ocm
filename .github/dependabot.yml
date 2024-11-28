@@ -11,6 +11,11 @@ updates:
     schedule:
       interval: "weekly"
       day: "sunday"
+    labels:
+      - kind/dependency
+      - kind/chore
+      - kind/skip-release-notes
+      - component/github-actions
   - package-ecosystem: "gomod"
     directory: "/"
     groups:
@@ -19,3 +24,6 @@ updates:
     schedule:
       interval: "weekly"
       day: "sunday"
+    labels:
+      - kind/dependency
+      - kind/chore

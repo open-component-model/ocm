@@ -3,6 +3,22 @@ name: Components
 on:
   pull_request:
   workflow_call:
+    inputs:
+      version:
+        type: string
+        required: false
+        description: "The version to use for the build"
+        default: ""
+      upload-ctf:
+        type: boolean
+        required: false
+        description: "Whether to upload the final CTF"
+        default: false
+      ref:
+        type: string
+        description: "The ref to use for the component build, defaults to the ref where the workflow was triggered from"
+        required: false
+        default: ""
   push:
     branches:
       - main
@@ -12,8 +28,11 @@ permissions:
   pull-requests: read
 
 env:
+  REF: ${{ inputs.ref == '' && github.ref || inputs.ref }}
   CTF_TYPE: directory
   components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin"]'
+  IMAGE_PLATFORMS: 'linux/amd64 linux/arm64'
+  PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
 
 jobs:
   define-matrix:
@@ -40,6 +59,8 @@ jobs:
         uses: TooMuch4U/actions-clean@v2.2
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -68,7 +89,14 @@ jobs:
       - name: CTF
         run: |
           cd components/${{ matrix.component }}
-          PATH=$PATH:$(go env GOPATH)/bin CTF_TYPE=${{ env.CTF_TYPE }} make ctf descriptor describe
+          
+          PATH=$PATH:$(go env GOPATH)/bin \
+          CTF_TYPE=${{ env.CTF_TYPE }} \
+          VERSION=${{ inputs.version }} \
+          PLATFORMS="${{ env.PLATFORMS }}" \
+          IMAGE_PLATFORMS="${{ env.IMAGE_PLATFORMS }}" \
+          make \
+            ctf descriptor describe
       - name: Upload CTF
         uses: actions/upload-artifact@v4
         with:
@@ -89,6 +117,8 @@ jobs:
         uses: TooMuch4U/actions-clean@v2.2
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
       - name: Download CTFs
         uses: actions/download-artifact@v4
         with:
@@ -96,8 +126,7 @@ jobs:
           path: gen/downloaded-ctfs
       - name: Move CTFs into correct directory for aggregation
         run: |
-          IFS=" " read -a COMPONENTS <<< "${{ env.components }}"
-          for i in "${COMPONENTS[@]}"; do
+          for i in ${{ env.components }}; do
             mkdir -p ${{ github.workspace }}/gen/${i}
             mv ${{ github.workspace }}/gen/downloaded-ctfs/ctf-component-${i} ${{ github.workspace }}/gen/${i}/ctf
             ls -R ${{ github.workspace }}/gen/${i}
@@ -130,14 +159,13 @@ jobs:
                 ${{ github.workspace }}/gen/ctf
           done
       - name: Upload aggregated CTF
-        # TODO This is currently permanently disabled,
-        # until we integrate it with the release build, in which it would be reused
-        if: false
+        # only upload the artifact if we are not on a PR
+        if: inputs.upload-ctf
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
           overwrite: true
-          retention-days: 60
+          retention-days: 30
           name: ctf-aggregated
           path: gen/ctf
       - name: Delete old CTFs that lead up to aggregation

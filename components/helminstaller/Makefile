@@ -5,13 +5,19 @@ IMAGE     := $(NAME)
 COMPONENT := $(PROVIDER)/toi/installers/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 MULTI     ?= true
-PLATFORMS ?= linux/amd64 linux/arm64
+IMAGE_PLATFORMS ?= linux/amd64 linux/arm64
 CTF_TYPE ?= directory
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
+ifeq ($(VERSION),)
 VERSION                                        := $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
+endif
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
-EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
+# if EFFECTIVE_VERSION is not set, set it to VERSION+COMMIT
+# this is not the same as '?=' because it will also set the value if EFFECTIVE_VERSION is set to an empty string
+ifeq ($(EFFECTIVE_VERSION),)
+EFFECTIVE_VERSION                              := $(VERSION)+$(COMMIT)
+endif
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 PLATFORM                                       := $(shell go env GOOS)/$(shell go env GOARCH)
 CACHE_DIR									  := $(shell go env GOCACHE)
@@ -64,7 +70,7 @@ $(GEN)/ctf: $(OCM_BIN) $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) component-c
 		PROVIDER="$(PROVIDER)" \
 		COMMIT="$(COMMIT)" \
 		GEN="$(GEN)" \
-		PLATFORMS="$(PLATFORMS)" \
+		IMAGE_PLATFORMS="$(IMAGE_PLATFORMS)" \
 		MULTI="$(MULTI)" \
 		IMAGE="$(IMAGE):$(VERSION)" \
 		component-constructor.yaml
@@ -94,7 +100,7 @@ push-image:
 multi: $(GEN)/image.$(NAME).multi
 
 $(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
-	for i in $(PLATFORMS); do \
+	for i in $(IMAGE_PLATFORMS); do \
 	tag=$$(echo $$i | sed -e s:/:-:g); \
         echo building platform $$i; \
 	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \

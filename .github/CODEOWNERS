@@ -3,6 +3,10 @@
 # will be requested for review when someone opens a pull request.
 *       @open-component-model/Maintainers
 
+# Changes on repository settings require admin permissions
+/.github/settings.yml   @open-component-model/admins
+/.github/CODEOWNERS     @open-component-model/admins
+
 # Owners for specific directories
 #/docs/  @<org>/<team>
 #/src/   @<org>/<team>

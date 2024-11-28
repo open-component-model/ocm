@@ -1,0 +1,24 @@
+changelog:
+  # ../workflows/pull_request.yaml#verify-labels one_of: kind/chore,kind/bugfix,kind/feature,kind/dependency,kind/refactor
+  exclude:
+    labels:
+    - 'kind/skip-release-notes'
+    - 'dev/wont-fix'
+    - 'dev/cant-reproduce'
+  categories:
+  - title: '‼️ Breaking Changes'
+    labels:
+    - '!BREAKING-CHANGE!'
+  - title: '🚀 Features'
+    labels:
+    - 'kind/feature'
+  - title: '🐛 Bug Fixes'
+    labels:
+    - 'kind/bugfix'
+  - title: '🧰 Maintenance'
+    labels:
+    - 'kind/chore'
+    - 'kind/refactor'
+  - title: '⬆️ Dependencies'
+    labels:
+    - 'kind/dependency'

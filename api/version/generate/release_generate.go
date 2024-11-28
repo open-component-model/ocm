@@ -94,14 +94,8 @@ func main() {
 		} else {
 			fmt.Printf("%s-%s", v, pre)
 		}
-	case "bump-version":
-		var next string
-		if nonpre.Patch() > 0 {
-			next = nonpre.IncPatch().String()
-		} else {
-			next = nonpre.IncMinor().String()
-		}
-		next += "-dev"
+	case "bump-minor":
+		next := nonpre.IncMinor().String() + "-dev"
 		fmt.Printf("%s", next)
 	case "bump-patch":
 		next := nonpre.IncPatch().String() + "-dev"

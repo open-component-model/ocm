@@ -201,7 +201,7 @@ OCM library:
 - <code>ocm.software/signing/sigstore</code> [<code>sigstore</code>]: *sigstore config* Configuration to use for sigstore based signing.
 
   The following fields are used.
-  - *<code>fulcioURL</code>* *string*  default is https://v1.fulcio.sigstore.dev
+  - *<code>fulcioURL</code>* *string*  default is https://fulcio.sigstore.dev
   - *<code>rekorURL</code>* *string*  default is https://rekor.sigstore.dev
   - *<code>OIDCIssuer</code>* *string*  default is https://oauth2.sigstore.dev/auth
   - *<code>OIDCClientID</code>* *string*  default is sigstore

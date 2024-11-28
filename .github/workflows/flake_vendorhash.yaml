@@ -25,7 +25,7 @@ jobs:
         with:
           token: ${{ steps.generate_token.outputs.token }}
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v15
+        uses: DeterminateSystems/nix-installer-action@v16
       - name: Update ocm vendor hash
         run: nix run .#nixpkgs.nix-update -- --flake --version=skip ocm
       - name: Check diff and create action summary
@@ -57,5 +57,8 @@ jobs:
           branch: nix/flake
           delete-branch: true
           sign-commits: true
+          labels: |
+            kind/skip-release-notes
+            kind/chore
           body: |
             Update OCM CLI vendor hash (see: .github/workflows/flake_vendorhash.yaml)

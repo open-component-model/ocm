@@ -13,9 +13,15 @@ PODINFO_CHART_VERSION = 6.3.5
 
 REPO_ROOT                                     := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
-VERSION                                        = $(shell go run $(REPO_ROOT)/api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
-COMMIT                                         = $(shell git rev-parse HEAD)
-EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
+ifeq ($(VERSION),)
+VERSION                                        := $(shell go run ../../api/version/generate/release_generate.go print-rc-version $(CANDIDATE))
+endif
+COMMIT                                         = $(shell git rev-parse --verify HEAD)
+# if EFFECTIVE_VERSION is not set, set it to VERSION+COMMIT
+# this is not the same as '?=' because it will also set the value if EFFECTIVE_VERSION is set to an empty string
+ifeq ($(EFFECTIVE_VERSION),)
+EFFECTIVE_VERSION                              := $(VERSION)+$(COMMIT)
+endif
 HELMINSTVERSION                               ?= $(VERSION)
 
 CREDS ?=

@@ -1,0 +1,27 @@
+name: Integration Tests
+
+on:
+  push:
+      branches:
+      - main
+  pull_request_target:
+      branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  # Necessary to write the branch
+  # TODO: Remove once https://github.com/open-component-model/ocm-integrationtest/blob/main/.github/workflows/integrationtest.yaml#L41 is not needed anymore
+  contents: write
+
+jobs:
+  test:
+    name: Run tests
+    uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@main
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    with:
+      ref: ${{ github.ref }}
