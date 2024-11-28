@@ -1,25 +1,24 @@
-FROM golang:1.23-alpine3.20 AS build
+FROM --platform=$BUILDPLATFORM golang:1.23-alpine3.20 AS build
+
+RUN apk add --no-cache make git
 
 WORKDIR /src
-RUN go env -w GOMODCACHE=/root/.cache/go-build
 
 COPY go.mod go.sum *.go VERSION ./
 
 ARG GO_PROXY="https://proxy.golang.org"
 ENV GOPROXY=${GO_PROXY}
-RUN --mount=type=cache,target=/root/.cache/go-build go mod download
+RUN go mod download
 
 COPY . .
-RUN --mount=type=cache,target=/root/.cache/go-build \
-	export VERSION=$(go run api/version/generate/release_generate.go print-rc-version) && \
-    export NOW=$(date -u +%FT%T%z) && \
-    go build -trimpath -ldflags \
-    "-s -w -X ocm.software/ocm/api/version.gitVersion=$VERSION -X ocm.software/ocm/api/version.buildDate=$NOW" \
-    -o /bin/ocm ./cmds/ocm/main.go
+
+ENV BUILD_FLAGS="-trimpath"
+
+RUN make bin/ocm
 
 FROM gcr.io/distroless/static-debian12:nonroot@sha256:d71f4b239be2d412017b798a0a401c44c3049a3ca454838473a4c32ed076bfea
 
-COPY --from=build /bin/ocm /usr/local/bin/ocm
+COPY --from=build /src/bin/ocm /usr/local/bin/ocm
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 LABEL org.opencontainers.image.description="Open Component Model command line interface based on Distroless"
