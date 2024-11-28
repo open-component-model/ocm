@@ -19,6 +19,8 @@ import (
 	"ocm.software/ocm/api/utils/tarutils"
 )
 
+// BlobAccess clones the repository into a temporary filesystem, packs it into a tar.gz file,
+// and returns a BlobAccess object for the tar.gz file.
 func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)

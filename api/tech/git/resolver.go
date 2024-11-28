@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"sync"
 
@@ -12,11 +13,29 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/cache"
 	"github.com/go-git/go-git/v5/plumbing/transport"
+	gitclient "github.com/go-git/go-git/v5/plumbing/transport/client"
+	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/filesystem"
+	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	"ocm.software/ocm/api/utils/logging"
 )
+
+const LogAttrProtocol = "protocol"
+
+func init() {
+	// override the logging realm for http based git clients
+	gitclient.InstallProtocol("http", githttp.NewClient(&http.Client{
+		Transport: logging.NewRoundTripper(http.DefaultTransport, logging.DynamicLogger(REALM, mlog.NewAttribute(LogAttrProtocol, "http"))),
+	}))
+	gitclient.InstallProtocol("https", githttp.NewClient(&http.Client{
+		Transport: logging.NewRoundTripper(http.DefaultTransport, logging.DynamicLogger(REALM, mlog.NewAttribute(LogAttrProtocol, "https"))),
+	}))
+	//TODO Determine how we ideally log for ssh+git protocol
+}
 
 var DefaultWorktreeBranch = plumbing.NewBranchReferenceName("ocm")
 

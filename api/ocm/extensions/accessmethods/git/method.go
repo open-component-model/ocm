@@ -19,13 +19,13 @@ import (
 )
 
 const (
-	Type   = "git"
-	TypeV1 = Type + runtime.VersionSeparator + "v1"
+	Type         = "git"
+	TypeV1Alpha1 = Type + runtime.VersionSeparator + "v1alpha1"
 )
 
 func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
-	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1Alpha1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 }
 
 // AccessSpec describes the access for a GitHub registry.
