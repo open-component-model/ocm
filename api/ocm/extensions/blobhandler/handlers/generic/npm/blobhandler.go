@@ -13,6 +13,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/npm"
 	npmLogin "ocm.software/ocm/api/tech/npm"
+	"ocm.software/ocm/api/tech/ocmHttp"
 	"ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/mime"
 )
@@ -106,7 +107,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 	req.Header.Set("Content-Type", "application/json")
 
 	// send PUT request - upload tgz
-	client := http.Client{}
+	client := ocmHttp.NewHttpClient()
 	log.Debug("uploading")
 	resp, err := client.Do(req)
 	if err != nil {
@@ -126,7 +127,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ c
 
 // Check if package already exists in npm registry. If it does, checks if it's the same.
 func packageExists(repoUrl string, pkg Package, ctx crds.ContextProvider) (bool, error) {
-	client := http.Client{}
+	client := ocmHttp.NewHttpClient()
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, repoUrl+"/"+url.PathEscape(pkg.Name)+"/"+url.PathEscape(pkg.Version), nil)
 	if err != nil {
 		return false, err
