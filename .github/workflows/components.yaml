@@ -33,7 +33,7 @@ env:
   components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin"]'
   IMAGE_PLATFORMS: 'linux/amd64 linux/arm64'
   PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
-  BUILDX_CACHE_PUSH: ${{ github.ref == 'refs/heads/main' }}
+  BUILDX_CACHE_PUSH: false
   BUILDX_CACHE_REF_BASE: ghcr.io/${{ github.repository }}/buildx-cache
 
 jobs:
