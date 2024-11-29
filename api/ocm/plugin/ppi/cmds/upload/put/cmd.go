@@ -3,7 +3,6 @@ package put
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -73,7 +72,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 func (o *Options) Complete(args []string) error {
 	o.Name = args[0]
 	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[1]), &o.Specification); err != nil {
-		return errors.Wrapf(err, "invalid repository specification")
+		return fmt.Errorf("invalid repository specification: %w", err)
 	}
 	return nil
 }
@@ -81,25 +80,16 @@ func (o *Options) Complete(args []string) error {
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	spec, err := p.DecodeUploadTargetSpecification(opts.Specification)
 	if err != nil {
-		return errors.Wrapf(err, "target specification")
+		return fmt.Errorf("target specification: %w", err)
 	}
 
 	u := p.GetUploader(opts.Name)
 	if u == nil {
 		return errors.ErrNotFound(descriptor.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
-	w, h, err := u.Writer(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, opts.Credentials)
+	h, err := u.Upload(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, opts.Credentials, os.Stdin)
 	if err != nil {
-		return err
-	}
-	_, err = io.Copy(w, os.Stdin)
-	if err != nil {
-		w.Close()
-		return err
-	}
-	err = w.Close()
-	if err != nil {
-		return err
+		return fmt.Errorf("upload failed: %w", err)
 	}
 	acc := h()
 	data, err := json.Marshal(acc)
