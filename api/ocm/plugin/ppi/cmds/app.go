@@ -4,6 +4,7 @@ package cmds
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -15,8 +16,11 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/describe"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/download"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/info"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/input"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/mergehandler"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/signing"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/topics/descriptor"
+	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/transferhandler"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/valueset"
 	"ocm.software/ocm/api/utils/cobrautils"
@@ -31,7 +35,7 @@ func (p *PluginCommand) Command() *cobra.Command {
 	return p.command
 }
 
-func NewPluginCommand(p ppi.Plugin) *PluginCommand {
+func NewPluginCommand(p ppi.Plugin, opts ...Option) *PluginCommand {
 	short := p.Descriptor().Short
 	if short == "" {
 		short = "OCM plugin " + p.Name()
@@ -62,10 +66,13 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 	cmd.AddCommand(action.New(p))
 	cmd.AddCommand(mergehandler.New(p))
 	cmd.AddCommand(accessmethod.New(p))
+	cmd.AddCommand(input.New(p))
 	cmd.AddCommand(upload.New(p))
 	cmd.AddCommand(download.New(p))
 	cmd.AddCommand(valueset.New(p))
 	cmd.AddCommand(command.New(p))
+	cmd.AddCommand(transferhandler.New(p))
+	cmd.AddCommand(signing.New(p))
 
 	cmd.InitDefaultHelpCmd()
 	help := cobrautils.GetHelpCommand(cmd)
@@ -76,8 +83,12 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 
 	help.AddCommand(descriptor.New())
 
-	p.GetOptions().AddFlags(cmd.Flags())
 	pcmd.command = cmd
+	for _, o := range opts {
+		o.ApplyTo(pcmd)
+	}
+
+	p.GetOptions().AddFlags(cmd.Flags())
 	return pcmd
 }
 
@@ -90,6 +101,18 @@ func (p *PluginCommand) PreRunE(cmd *cobra.Command, args []string) error {
 		return handler.HandleConfig(p.plugin.GetOptions().LogConfig)
 	}
 	return nil
+}
+
+func (p *PluginCommand) SetIO(in io.Reader, out, err io.Writer) {
+	if in != nil {
+		p.command.SetIn(in)
+	}
+	if out != nil {
+		p.command.SetOut(out)
+	}
+	if err != nil {
+		p.command.SetErr(err)
+	}
 }
 
 func (p *PluginCommand) Execute(args []string) error {

@@ -6,8 +6,8 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 )
 
-func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
-	return cpi.NewMediaFileSpecOptionType(TYPE, AddConfig,
+func ConfigHandler(t string) flagsets.ConfigOptionTypeSetHandler {
+	return cpi.NewMediaFileSpecOptionType(t, AddConfig,
 		options.PathOption, options.HintOption, options.PlatformsOption)
 }
 

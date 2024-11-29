@@ -12,6 +12,7 @@ import (
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/tech"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets/flagsetscheme"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/refmgmt"
@@ -20,6 +21,8 @@ import (
 
 type AccessType flagsetscheme.VersionTypedObjectType[AccessSpec]
 
+type UniformAccessSpecInfo = tech.UniformAccessSpecInfo
+
 // AccessSpec is the interface access method specifications
 // must fulfill. The main task is to map the specification
 // to a concrete implementation of the access method for a dedicated
@@ -27,6 +30,7 @@ type AccessType flagsetscheme.VersionTypedObjectType[AccessSpec]
 type AccessSpec interface {
 	compdesc.AccessSpec
 	Describe(Context) string
+	Info(ctx Context) *UniformAccessSpecInfo
 	IsLocal(Context) bool
 	GlobalAccessSpec(Context) AccessSpec
 	// AccessMethod provides an access method implementation for
@@ -102,14 +106,14 @@ type AccessMethod interface {
 	AsBlobAccess() BlobAccess
 }
 
-type AccessTypeScheme flagsetscheme.TypeScheme[AccessSpec, AccessType]
+type AccessTypeScheme flagsetscheme.VersionedTypeScheme[AccessSpec, AccessType]
 
 func NewAccessTypeScheme(base ...AccessTypeScheme) AccessTypeScheme {
-	return flagsetscheme.NewTypeScheme[AccessSpec, AccessType, AccessTypeScheme]("Access type", "access", "accessType", "blob access specification", "Access Specification Options", &UnknownAccessSpec{}, true, base...)
+	return flagsetscheme.NewVersionedTypeScheme[AccessSpec, AccessType, AccessTypeScheme]("Access type", "access", "accessType", "blob access specification", "Access Specification Options", &UnknownAccessSpec{}, true, base...)
 }
 
 func NewStrictAccessTypeScheme(base ...AccessTypeScheme) runtime.VersionedTypeRegistry[AccessSpec, AccessType] {
-	return flagsetscheme.NewTypeScheme[AccessSpec, AccessType, AccessTypeScheme]("Access type", "access", "accessType", "blob access specification", "Access Specification Options", nil, false, base...)
+	return flagsetscheme.NewVersionedTypeScheme[AccessSpec, AccessType, AccessTypeScheme]("Access type", "access", "accessType", "blob access specification", "Access Specification Options", nil, false, base...)
 }
 
 // DefaultAccessTypeScheme contains all globally known access serializer.
@@ -144,6 +148,13 @@ func (s *UnknownAccessSpec) AccessMethod(ComponentVersionAccess) (AccessMethod, 
 
 func (s *UnknownAccessSpec) Describe(ctx Context) string {
 	return fmt.Sprintf("unknown access method type %q", s.GetType())
+}
+
+func (s *UnknownAccessSpec) Info(ctx Context) *UniformAccessSpecInfo {
+	return &UniformAccessSpecInfo{
+		Kind: s.GetKind(),
+		Info: fmt.Sprintf("unknown access method type %q", s.GetType()),
+	}
 }
 
 func (_ *UnknownAccessSpec) IsLocal(Context) bool {
@@ -205,6 +216,16 @@ func (s *GenericAccessSpec) Describe(ctx Context) string {
 		return fmt.Sprintf("invalid access specification: %s", err.Error())
 	}
 	return eff.Describe(ctx)
+}
+
+func (s *GenericAccessSpec) Info(ctx Context) *UniformAccessSpecInfo {
+	eff, err := s.Evaluate(ctx)
+	if err != nil {
+		return &UniformAccessSpecInfo{
+			Kind: s.GetType(),
+		}
+	}
+	return eff.Info(ctx)
 }
 
 func (s *GenericAccessSpec) Evaluate(ctx Context) (AccessSpec, error) {
