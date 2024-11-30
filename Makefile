@@ -22,7 +22,11 @@ CTF_TYPE ?= directory
 
 GEN := $(REPO_ROOT)/gen
 
-SOURCES := $(shell go list -f '{{$$I:=.Dir}}{{range .GoFiles }}{{$$I}}/{{.}} {{end}}' ./... )
+SOURCES := $(shell find $$REPO_ROOT -type f -name '*.go' -not -path "./vendor/*" )
+
+sources:
+	@echo $(SOURCES)
+
 GOPATH                                         := $(shell go env GOPATH)
 
 NOW         := $(shell date -u +%FT%T%z)
