@@ -20,7 +20,7 @@ ENV BUILD_FLAGS="-trimpath"
 # by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
 RUN make bin/ocm GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH}
 
-FROM gcr.io/distroless/static-debian12:nonroot@sha256:d71f4b239be2d412017b798a0a401c44c3049a3ca454838473a4c32ed076bfea
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:6cd937e9155bdfd805d1b94e037f9d6a899603306030936a3b11680af0c2ed58
 
 COPY --from=build /src/bin/ocm /usr/local/bin/ocm
 
