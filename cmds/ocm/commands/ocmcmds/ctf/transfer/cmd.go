@@ -9,7 +9,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
-	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/spiff"
 	"ocm.software/ocm/api/utils/accessobj"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -23,10 +22,11 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/skipupdateoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
+	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/transferhandleroption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
+	comptransfer "ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/transfer"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
-	"ocm.software/ocm/cmds/ocm/common/options"
 	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
@@ -56,6 +56,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		stoponexistingoption.New(),
 		uploaderoption.New(ctx.OCMContext()),
 		scriptoption.New(),
+		transferhandleroption.New(),
 	)}, utils.Names(Names, names...)...)
 }
 
@@ -77,7 +78,7 @@ $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 func (o *Command) Complete(args []string) error {
 	o.SourceName = args[0]
 	o.TargetName = args[1]
-	return nil
+	return comptransfer.ValidateHandler(o)
 }
 
 func (o *Command) Run() error {
@@ -103,14 +104,11 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	thdlr, err := spiff.New(
-		append(options.FindOptions[transferhandler.TransferOption](o),
-			spiff.Script(scriptoption.From(o).ScriptData),
-			spiff.ScriptFilesystem(o.FileSystem()),
-		)...)
+	thdlr, err := comptransfer.DetermineTransferHandler(o.Context, o)
 	if err != nil {
 		return err
 	}
+
 	a := &action{
 		printer: common.NewPrinter(o.Context.StdOut()),
 		target:  target,

@@ -43,6 +43,12 @@ func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return "none"
 }
 
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+	}
+}
+
 func (s *AccessSpec) IsLocal(context accspeccpi.Context) bool {
 	return false
 }
