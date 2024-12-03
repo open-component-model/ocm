@@ -87,7 +87,17 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if u == nil {
 		return errors.ErrNotFound(descriptor.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
+
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		fmt.Println("failed to stat stdin", err)
+	}
+	if size := fi.Size(); size == 0 {
+		return fmt.Errorf("stdin is empty, and nothing can be uploaded")
+	}
+
 	h, err := u.Upload(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, opts.Credentials, os.Stdin)
+
 	if err != nil {
 		return fmt.Errorf("upload failed: %w", err)
 	}
