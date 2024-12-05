@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
+	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/credentials"
@@ -112,11 +114,29 @@ func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) (result []by
 		args = append([]string{"--" + ppi.OptPlugingLogConfig, string(data)}, args...)
 	}
 
-	if len(p.config) == 0 {
-		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args)
-	} else {
-		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args, "config", p.config)
+	if p.ctx.Logger(TAG).Enabled(mlog.DebugLevel) {
+		// Plainly kill any credentials found in the logger.
+		// Stupidly match for "credentials" arg.
+		// Not totally safe, but better than nothing.
+		logargs := make([]string, len(args))
+		for i, arg := range args {
+			if strings.Contains(arg, "credentials") {
+				if strings.Contains(arg, "=") {
+					arg = "***"
+				} else if i < len(args)-1 {
+					args[i+1] = "***"
+				}
+			}
+			logargs[i] = arg
+		}
+
+		if len(p.config) == 0 {
+			p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", logargs)
+		} else {
+			p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", logargs, "config", p.config)
+		}
 	}
+
 	data, err := cache.Exec(p.Path(), p.config, r, w, args...)
 
 	if logfile != nil {
