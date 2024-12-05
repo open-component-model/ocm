@@ -120,11 +120,14 @@ func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) (result []by
 		// Not totally safe, but better than nothing.
 		logargs := make([]string, len(args))
 		for i, arg := range args {
+			if logargs[i] != "" {
+				continue
+			}
 			if strings.Contains(arg, "credentials") {
 				if strings.Contains(arg, "=") {
-					arg = "***"
+					logargs[i] = "***"
 				} else if i < len(args)-1 {
-					args[i+1] = "***"
+					logargs[i+1] = "***"
 				}
 			}
 			logargs[i] = arg
