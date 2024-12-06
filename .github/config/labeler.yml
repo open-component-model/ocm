@@ -1,9 +1,27 @@
 # see https://github.com/actions/labeler?tab=readme-ov-file#match-object to configure correctly
-dependencies:
+kind/dependency:
 - any:
   - head-branch: 'dependencies/*'
   - head-branch: 'dependabot/*'
-github-actions:
+  - changed-files:
+    - any-glob-to-any-file: ['go.mod', 'go.sum']
+component/github-actions:
 - any:
   - changed-files:
     - any-glob-to-any-file: ['.github/**']
+area/documentation:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: ['docs/**', 'examples/**']
+component/ocm-cli:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: ['components/ocmcli/**', 'cmds/ocm/**']
+component/ocm-spec:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: ['resources/**']
+kind/skip-release-notes:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: ['flake.lock', 'flake.nix']

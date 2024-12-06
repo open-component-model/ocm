@@ -1,7 +1,7 @@
 ---
 name: User Story
 about: User Story
-labels:
+labels: kind/feature
 title: <User Story> - Title
 ---
 
