@@ -97,14 +97,16 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	}
 
 	h, err := u.Upload(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, opts.Credentials, os.Stdin)
-
 	if err != nil {
 		return fmt.Errorf("upload failed: %w", err)
 	}
+
 	acc := h()
+
 	data, err := json.Marshal(acc)
 	if err == nil {
 		cmd.Printf("%s\n", string(data))
 	}
+
 	return err
 }

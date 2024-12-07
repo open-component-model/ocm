@@ -90,6 +90,9 @@ func (r *ArtifactoryUploadResponse) ToHelmAccessSpec() (ppi.AccessSpec, error) {
 	}
 	chart := path.Base(urlp.Path)
 	chart = strings.TrimSuffix(chart, path.Ext(chart))
+
+	// this is needed so that the chart version constructor for OCM is happy
+	// OCM encodes helm charts with a ":"...
 	if idx := strings.LastIndex(chart, "-"); idx > 0 {
 		chart = chart[:idx] + ":" + chart[idx+1:]
 	}
