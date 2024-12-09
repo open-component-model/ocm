@@ -10,6 +10,19 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 )
 
+func CheckEOF(r io.Reader, err error) {
+	var (
+		buf [20]byte
+		n   int
+	)
+
+	if err == nil {
+		n, err = r.Read(buf[:])
+		ExpectWithOffset(1, n).To(Equal(0))
+	}
+	ExpectWithOffset(1, err).To(Equal(io.EOF))
+}
+
 var _ = Describe("Test Environment", func() {
 	in := "12345678901234567890"
 	var buf *bytes.Buffer
@@ -17,6 +30,83 @@ var _ = Describe("Test Environment", func() {
 
 	BeforeEach(func() {
 		buf = bytes.NewBuffer([]byte(in))
+	})
+
+	Context("max preread", func() {
+		BeforeEach(func() {
+			chunked = accessio.NewChunkedReader(buf, 5)
+		})
+
+		It("reports EOF and splits reader", func() {
+			var buf [30]byte
+			cnt := 0
+
+			n, err := chunked.Read(buf[:])
+			Expect(n).To(Equal(5))
+			Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
+			CheckEOF(chunked, err)
+			Expect(chunked.ChunkDone()).To(Equal(true))
+			cnt += n
+			Expect(chunked.Next()).To(Equal(true))
+
+			for i := 0; i < 3; i++ {
+				n, err := chunked.Read(buf[:])
+				Expect(n).To(Equal(4))
+				Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
+				Expect(err).To(BeNil())
+				Expect(chunked.ChunkDone()).To(Equal(false))
+				cnt += n
+
+				n, err = chunked.Read(buf[:])
+				Expect(n).To(Equal(1))
+				CheckEOF(chunked, err)
+				Expect(chunked.ChunkDone()).To(Equal(true))
+				cnt += n
+
+				Expect(chunked.Next()).To(Equal(i != 2))
+			}
+			Expect(chunked.Next()).To(Equal(false))
+		})
+
+		It("keeps reporting EOF", func() {
+			var buf [30]byte
+			cnt := 0
+
+			n, err := chunked.Read(buf[:])
+			Expect(n).To(Equal(5))
+			Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
+			CheckEOF(chunked, err)
+			cnt += n
+
+			n, err = chunked.Read(buf[:])
+			Expect(n).To(Equal(0))
+			Expect(err).To(Equal(io.EOF))
+
+			Expect(chunked.ChunkDone()).To(Equal(true))
+			Expect(chunked.Next()).To(Equal(true))
+
+			for i := 0; i < 3; i++ {
+				n, err := chunked.Read(buf[:])
+				Expect(n).To(Equal(4))
+				Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
+				Expect(err).To(BeNil())
+				Expect(chunked.ChunkDone()).To(Equal(false))
+				cnt += n
+
+				n, err = chunked.Read(buf[:])
+				Expect(n).To(Equal(1))
+				CheckEOF(chunked, err)
+				cnt += n
+
+				n, err = chunked.Read(buf[:])
+				Expect(n).To(Equal(0))
+				Expect(err).To(Equal(io.EOF))
+				Expect(chunked.ChunkDone()).To(Equal(true))
+
+				Expect(chunked.Next()).To(Equal(i != 2))
+			}
+			Expect(chunked.Next()).To(Equal(false))
+		})
 	})
 
 	Context("complete", func() {
@@ -74,8 +164,8 @@ var _ = Describe("Test Environment", func() {
 			var buf [20]byte
 			n, err := chunked.Read(buf[:])
 			Expect(n).To(Equal(20))
-			Expect(err).To(Equal(io.EOF))
 			Expect(string(buf[:n])).To(Equal(in))
+			CheckEOF(chunked, err)
 			Expect(chunked.ChunkDone()).To(Equal(true))
 			Expect(chunked.Next()).To(Equal(false))
 
@@ -96,8 +186,8 @@ var _ = Describe("Test Environment", func() {
 
 			n, err := chunked.Read(buf[:])
 			Expect(n).To(Equal(5))
-			Expect(err).To(Equal(io.EOF))
 			Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
+			CheckEOF(chunked, err)
 			Expect(chunked.ChunkDone()).To(Equal(true))
 			cnt += n
 			Expect(chunked.Next()).To(Equal(true))
@@ -112,8 +202,8 @@ var _ = Describe("Test Environment", func() {
 
 				n, err = chunked.Read(buf[:])
 				Expect(n).To(Equal(3))
-				Expect(err).To(Equal(io.EOF))
 				Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
+				CheckEOF(chunked, err)
 				Expect(chunked.ChunkDone()).To(Equal(true))
 				cnt += n
 
