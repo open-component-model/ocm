@@ -29,10 +29,6 @@ var (
 
 type TransferOptionsCreator = transferhandler.SpecializedOptionsCreator[*Options, Options]
 
-func (o *Options) NewOptions() transferhandler.TransferHandlerOptions {
-	return &Options{}
-}
-
 func (o *Options) NewTransferHandler() (transferhandler.TransferHandler, error) {
 	return New(o)
 }
@@ -119,6 +115,14 @@ func ScriptByFile(path string, fss ...vfs.FileSystem) transferhandler.TransferOp
 		source: path,
 		script: func() ([]byte, error) { return vfs.ReadFile(utils.FileSystem(fss...), path) },
 	}
+}
+
+func (o *Options) SetConfig(bytes []byte) {
+	o.script = bytes
+}
+
+func (o *Options) GetConfig() []byte {
+	return o.script
 }
 
 ///////////////////////////////////////////////////////////////////////////////

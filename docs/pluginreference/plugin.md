@@ -62,6 +62,7 @@ capabilities of the plugin.
 * [plugin <b>describe</b>](plugin_describe.md)	 &mdash; describe plugin
 * [plugin <b>download</b>](plugin_download.md)	 &mdash; download blob into filesystem
 * [plugin <b>info</b>](plugin_info.md)	 &mdash; show plugin descriptor
+* [plugin <b>transferhandler</b>](plugin_transferhandler.md)	 &mdash; decide on a question related to a component version transport
 * [plugin <b>upload</b>](plugin_upload.md)	 &mdash; upload specific operations
 * [plugin <b>valuemergehandler</b>](plugin_valuemergehandler.md)	 &mdash; value merge handler operations
 * [plugin <b>valueset</b>](plugin_valueset.md)	 &mdash; valueset operations
