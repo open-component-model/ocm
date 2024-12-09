@@ -2,28 +2,31 @@ package descriptivetype
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
-
-	"ocm.software/ocm/api/utils/runtime"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// TypeObjectTarget is used as target for option functions, it provides
+// OptionTargetWrapper is used as target for option functions, it provides
 // setters for fields, which should not be modifiable for a final type object.
-type TypeObjectTarget[E runtime.VersionedTypedObject] struct {
-	target *TypedObjectTypeObject[E]
+type OptionTargetWrapper[T any] struct {
+	target T
+	info   *typeInfoImpl
 }
 
-func NewTypeObjectTarget[E runtime.VersionedTypedObject](target *TypedObjectTypeObject[E]) *TypeObjectTarget[E] {
-	return &TypeObjectTarget[E]{target}
+func NewOptionTargetWrapper[T any](target T, info *typeInfoImpl) *OptionTargetWrapper[T] {
+	return &OptionTargetWrapper[T]{target, info}
 }
 
-func (t *TypeObjectTarget[E]) SetDescription(value string) {
-	t.target.description = value
+func (t *OptionTargetWrapper[T]) SetDescription(value string) {
+	t.info.description = value
 }
 
-func (t *TypeObjectTarget[E]) SetFormat(value string) {
-	t.target.format = value
+func (t *OptionTargetWrapper[T]) SetFormat(value string) {
+	t.info.format = value
+}
+
+func (t *OptionTargetWrapper[T]) Target() T {
+	return t.target
 }
 
 ////////////////////////////////////////////////////////////////////////////////

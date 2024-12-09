@@ -17,6 +17,7 @@ type Descriptor struct {
 	ForwardLogging bool   `json:"forwardLogging"`
 
 	Actions                  []ActionDescriptor                `json:"actions,omitempty"`
+	Inputs                   []InputTypeDescriptor             `json:"inputs,omitempty"`
 	AccessMethods            []AccessMethodDescriptor          `json:"accessMethods,omitempty"`
 	Uploaders                List[UploaderDescriptor]          `json:"uploaders,omitempty"`
 	Downloaders              List[DownloaderDescriptor]        `json:"downloaders,omitempty"`
@@ -24,6 +25,8 @@ type Descriptor struct {
 	LabelMergeSpecifications List[LabelMergeSpecification]     `json:"labelMergeSpecifications,omitempty"`
 	ValueSets                List[ValueSetDescriptor]          `json:"valuesets,omitempty"`
 	Commands                 List[CommandDescriptor]           `json:"commands,omitempty"`
+	TransferHandlers         List[TransferHandlerDescriptor]   `json:"transferHandlers,omitempty"`
+	SigningHandlers          List[SigningHandlerDescriptor]    `json:"signingHandlers,omitempty"`
 	ConfigTypes              List[ConfigTypeDescriptor]        `json:"configTypes,omitempty"`
 }
 
@@ -57,6 +60,12 @@ func (d *Descriptor) Capabilities() []string {
 	}
 	if len(d.ConfigTypes) > 0 {
 		caps = append(caps, "Config Types")
+	}
+	if len(d.TransferHandlers) > 0 {
+		caps = append(caps, "Transfer Handlers")
+	}
+	if len(d.SigningHandlers) > 0 {
+		caps = append(caps, "Signing Handlers")
 	}
 	return caps
 }
@@ -117,7 +126,15 @@ func (d UploaderDescriptor) GetConstraints() []UploaderKey {
 	return d.Constraints
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type AccessMethodDescriptor struct {
+	ValueSetDefinition `json:",inline"`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type InputTypeDescriptor struct {
 	ValueSetDefinition `json:",inline"`
 }
 
@@ -231,6 +248,54 @@ func (a CommandDescriptor) GetName() string {
 
 func (a CommandDescriptor) GetDescription() string {
 	return a.Description
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type TransferHandlerDescriptor struct {
+	Name        string               `json:"name"`
+	Description string               `json:"description,omitempty"`
+	Questions   []QuestionDescriptor `json:"questions,omitempty"`
+}
+
+func (d TransferHandlerDescriptor) GetName() string {
+	return d.Name
+}
+
+func (d TransferHandlerDescriptor) GetQuestion(name string) *QuestionDescriptor {
+	for _, q := range d.Questions {
+		if q.Question == name {
+			return &q
+		}
+	}
+	return nil
+}
+
+type QuestionDescriptor struct {
+	// Question is the name of the question the plugin can answer.
+	// Possible types and their meaning is described by the
+	// variable common.TransferHandlerQuestions.
+	Question    string `json:"question"`
+	Description string `json:"description,omitempty"`
+	// Labels described the list of labels passed to the
+	// plugin if they exist. If not specified all labels
+	// are transferred, if an empty list is specified no
+	// labels are transferred to the plugin command.
+	Labels *[]string `json:"labels,omitempty"`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type SigningHandlerDescriptor struct {
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Credentials bool   `json:"credentials,omitempty"`
+	Signer      bool   `json:"signer,omitempty"`
+	Verifier    bool   `json:"verifier,omitempty"`
+}
+
+func (d SigningHandlerDescriptor) GetName() string {
+	return d.Name
 }
 
 ////////////////////////////////////////////////////////////////////////////////

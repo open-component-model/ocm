@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/set"
 	"golang.org/x/exp/slices"
 
@@ -12,6 +14,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
 )
@@ -80,6 +83,16 @@ func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descrip
 		out.Printf("Config Types for CLI Command Extensions:\n")
 		DescribeConfigTypes(d, out)
 	}
+	if len(d.TransferHandlers) > 0 {
+		out.Printf("\n")
+		out.Printf("Transfer Handlers:\n")
+		DescribeTransferHandlers(d, out)
+	}
+	if len(d.SigningHandlers) > 0 {
+		out.Printf("\n")
+		out.Printf("Signing Handlers:\n")
+		DescribeSigningHandlers(d, out)
+	}
 }
 
 type MethodInfo struct {
@@ -91,7 +104,7 @@ type MethodInfo struct {
 type MethodVersion struct {
 	Name    string
 	Format  string
-	Options map[string]options.OptionType
+	Options map[string]flagsets.ConfigOptionType
 }
 
 func GetAccessMethodInfo(methods []descriptor.AccessMethodDescriptor) map[string]*MethodInfo {
@@ -117,7 +130,7 @@ func GetAccessMethodInfo(methods []descriptor.AccessMethodDescriptor) map[string
 		if v == nil {
 			v = &MethodVersion{
 				Name:    vers,
-				Options: map[string]options.OptionType{},
+				Options: map[string]flagsets.ConfigOptionType{},
 			}
 			i.Versions[vers] = v
 		}
@@ -316,7 +329,7 @@ type ValueSetInfo struct {
 type ValueSetVersion struct {
 	Name    string
 	Format  string
-	Options map[string]options.OptionType
+	Options map[string]flagsets.ConfigOptionType
 }
 
 func GetValueSetInfo(valuesets []descriptor.ValueSetDescriptor) map[string]*ValueSetInfo {
@@ -345,7 +358,7 @@ func GetValueSetInfo(valuesets []descriptor.ValueSetDescriptor) map[string]*Valu
 		if v == nil {
 			v = &ValueSetVersion{
 				Name:    vers,
-				Options: map[string]options.OptionType{},
+				Options: map[string]flagsets.ConfigOptionType{},
 			}
 			i.Versions[vers] = v
 		}
@@ -515,6 +528,102 @@ func DescribeConfigTypes(d *descriptor.Descriptor, out common.Printer) {
 			}
 		}
 	}
+}
+
+type TransferHandlerInfo struct {
+	Name        string
+	Description string
+	Questions   map[string]descriptor.QuestionDescriptor
+}
+
+func GetTransferHandlerInfo(types []descriptor.TransferHandlerDescriptor) map[string]*TransferHandlerInfo {
+	found := map[string]*TransferHandlerInfo{}
+	for _, m := range types {
+		i := found[m.Name]
+		if i == nil {
+			i := &TransferHandlerInfo{
+				Name:        m.Name,
+				Description: m.Description,
+				Questions:   map[string]descriptor.QuestionDescriptor{},
+			}
+			for _, q := range m.Questions {
+				i.Questions[q.Question] = q
+			}
+			found[m.Name] = i
+		}
+	}
+	return found
+}
+
+func DescribeTransferHandlers(d *descriptor.Descriptor, out common.Printer) {
+	types := GetTransferHandlerInfo(d.TransferHandlers)
+	for _, n := range utils.StringMapKeys(types) {
+		out.Printf("- Name: %s\n", n)
+		m := types[n]
+		if m.Description != "" {
+			out.Printf("%s\n", utils.IndentLines(m.Description, "    "))
+		}
+		out := out.AddGap("  ")
+		out.Printf("Questions:\n")
+		for _, qn := range utils.StringMapKeys(m.Questions) {
+			desc := TransferHandlerQuestions[qn]
+			if desc == "" {
+				desc = "invalid question"
+			}
+			out.Printf("- Name: %s (%s)\n", qn, desc)
+			q := m.Questions[qn]
+			if q.Description != "" {
+				out.Printf("%s\n", utils.IndentLines(q.Description, "    "))
+			}
+			out := out.AddGap("  ")
+			if q.Labels == nil {
+				out.Printf("consumes all labels\n")
+			} else {
+				if len(*q.Labels) == 0 {
+					out.Printf("consumes no labels\n")
+				} else {
+					labels := slices.Clone(*q.Labels)
+					sort.Strings(labels)
+					out.Printf("Labels:\n")
+					for _, l := range labels {
+						out.Printf("- %s\n", l)
+					}
+				}
+			}
+		}
+	}
+}
+
+func GetSigningInfo(types []descriptor.SigningHandlerDescriptor) map[string]*descriptor.SigningHandlerDescriptor {
+	found := map[string]*descriptor.SigningHandlerDescriptor{}
+	for _, m := range types {
+		i := found[m.Name]
+		if i == nil {
+			found[m.Name] = generics.Pointer(m)
+		}
+	}
+	return found
+}
+
+func DescribeSigningHandlers(d *descriptor.Descriptor, out common.Printer) {
+	handlers := GetSigningInfo(d.SigningHandlers)
+	for _, n := range maputils.OrderedKeys(handlers) {
+		out.Printf("- Name:        %s\n", n)
+		m := handlers[n]
+		if m.Description != "" {
+			out.Printf("%s\n", utils.IndentLines(m.Description, "    "))
+		}
+		out := out.AddGap("  ")
+		out.Printf("Credentials: %T\n", m.Credentials)
+		out.Printf("Signer:      %T\n", m.Signer)
+		out.Printf("Verifier:    %T\n", m.Verifier)
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func GetName[T descriptor.Named](n T) string {
+	return n.GetName()
 }
 
 type Describable interface {
