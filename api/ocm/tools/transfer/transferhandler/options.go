@@ -6,12 +6,13 @@ import (
 
 //////////////////////////////////////////////////////////////////////////////
 
-// ConfigOption describes generic non-standard options.
-// Specialized option set implementation maps such generic
+// ConfigOptionConsumer is an interface for option sets supporting generic
+// non-standard options.
+// Specialized option set implementations map such generic
 // config to their specialized settings. The format depends
 // on the option target. For example, for spiff it is a spiff
 // script.
-type ConfigOption interface {
+type ConfigOptionConsumer interface {
 	SetConfig([]byte)
 	GetConfig() []byte
 }
@@ -21,7 +22,7 @@ type configOption struct {
 }
 
 func (o *configOption) ApplyTransferOption(to TransferOptions) error {
-	if eff, ok := to.(ConfigOption); ok {
+	if eff, ok := to.(ConfigOptionConsumer); ok {
 		eff.SetConfig(o.config)
 		return nil
 	} else {
@@ -30,7 +31,7 @@ func (o *configOption) ApplyTransferOption(to TransferOptions) error {
 }
 
 // WithConfig configures a handler specific configuration.
-// It is accepted by all handler featuring such a config possibility.
+// It is accepted by all handlers featuring such a config possibility.
 func WithConfig(config []byte) TransferOption {
 	return &configOption{
 		config: config,

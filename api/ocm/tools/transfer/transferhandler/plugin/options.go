@@ -22,8 +22,8 @@ type Options struct {
 }
 
 var (
-	_ transferhandler.TransferOption = (*Options)(nil)
-	_ transferhandler.ConfigOption   = (*Options)(nil)
+	_ transferhandler.TransferOption       = (*Options)(nil)
+	_ transferhandler.ConfigOptionConsumer = (*Options)(nil)
 
 	_ PluginNameOption            = (*Options)(nil)
 	_ TransferHandlerOption       = (*Options)(nil)

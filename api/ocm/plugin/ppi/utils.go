@@ -242,7 +242,7 @@ func NewEnforceTransportDesision(desc string, h ComponentReferenceQuestionFunc, 
 	return NewDecisionHandler(Q_ENFORCE_TRANSPORT, desc, ForComponentReferenceQuestion(h))
 }
 
-func NewTransferversionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+func NewTransferVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
 	return NewDecisionHandler(Q_TRANSFER_VERSION, desc, ForComponentReferenceQuestion(h))
 }
 
@@ -251,10 +251,6 @@ func NewOverwriteVersionDecision(desc string, h ComponentReferenceQuestionFunc, 
 }
 
 func NewUpdateVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
-	return NewDecisionHandler(Q_UPDATE_VERSION, desc, ForComponentReferenceQuestion(h))
-}
-
-func NewOUpdateVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
 	return NewDecisionHandler(Q_UPDATE_VERSION, desc, ForComponentReferenceQuestion(h))
 }
 
