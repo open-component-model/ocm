@@ -26,45 +26,25 @@ The following configuration types are supported:
   </pre>
 - <code>blobLimits.ocireg.ocm.config.ocm.software</code>
   The config type <code>blobLimits.ocireg.ocm.config.ocm.software</code> can be used to set some
-  configurations for an OCM context;
+  blob layer limits for particular OCI registries used to host OCM repositories;
 
   <pre>
       type: blobLimits.ocireg.ocm.config.ocm.software
-      aliases:
-         myrepo:
-            type: &lt;any repository type>
-            &lt;specification attributes>
-            ...
-      resolvers:
-        - repository:
-            type: &lt;any repository type>
-            &lt;specification attributes>
-            ...
-          prefix: ghcr.io/open-component-model/ocm
-          priority: 10
+      blobLimits:
+          dummy.io: 65564
+          dummy.io:8443: 32768
   </pre>
 
-  With aliases repository alias names can be mapped to a repository specification.
-  The alias name can be used in a string notation for an OCM repository.
+  If blob limits apply to a registry, local blobs with a size larger than
+  the configured limit will be split into several layers with a maximum
+  size of the given value.
 
-  Resolvers define a list of OCM repository specifications to be used to resolve
-  dedicated component versions. These settings are used to compose a standard
-  component version resolver provided for an OCM context. Optionally, a component
-  name prefix can be given. It limits the usage of the repository to resolve only
-  components with the given name prefix (always complete name segments).
-  An optional priority can be used to influence the lookup order. Larger value
-  means higher priority (default 10).
+  These settings can be overwritten by explicit settings in an OCM
+  repository specification for those repositories.
 
-  All matching entries are tried to lookup a component version in the following
-  order:
-  - highest priority first
-  - longest matching sequence of component name segments first.
-
-  If resolvers are defined, it is possible to use component version names on the
-  command line without a repository. The names are resolved with the specified
-  resolution rule.
-  They are also used as default lookup repositories to lookup component references
-  for recursive operations on component versions (<code>--lookup</code> option).
+  The most specific entry will be used. If a registry with a dedicated
+  port is requested, but no explicit such configuration is found, the
+  setting for the sole hostname is used (if configured).
 - <code>cli.ocm.config.ocm.software</code>
   The config type <code>cli.ocm.config.ocm.software</code> is used to handle the
   main configuration flags of the OCM command line tool.
