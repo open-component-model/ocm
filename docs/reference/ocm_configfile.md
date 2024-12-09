@@ -76,6 +76,22 @@ The following configuration types are supported:
           config: ...
         ...
   </pre>
+- <code>featuregates.config.ocm.software</code>
+  The config type <code>featuregates.config.ocm.software</code> can be used to define a list
+  of feature gate settings:
+
+  <pre>
+      type: featuregates.config.ocm.software
+      features:
+         &lt;name>: {
+            mode: off | &lt;any key to enable>
+            attributes: {
+               &lt;name>: &lt;any yaml value>
+               ...
+            }
+         }
+         ...
+  </pre>
 - <code>generic.config.ocm.software</code>
   The config type <code>generic.config.ocm.software</code> can be used to define a list
   of arbitrary configuration specifications and named configuration sets:

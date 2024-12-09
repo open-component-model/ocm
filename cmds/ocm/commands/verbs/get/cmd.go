@@ -8,6 +8,7 @@ import (
 	credentials "ocm.software/ocm/cmds/ocm/commands/misccmds/credentials/get"
 	artifacts "ocm.software/ocm/cmds/ocm/commands/ocicmds/artifacts/get"
 	components "ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/get"
+	features "ocm.software/ocm/cmds/ocm/commands/ocmcmds/featuregates/get"
 	plugins "ocm.software/ocm/cmds/ocm/commands/ocmcmds/plugins/get"
 	pubsub "ocm.software/ocm/cmds/ocm/commands/ocmcmds/pubsub/get"
 	references "ocm.software/ocm/cmds/ocm/commands/ocmcmds/references/get"
@@ -35,5 +36,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(config.NewCommand(ctx))
 	cmd.AddCommand(pubsub.NewCommand(ctx))
 	cmd.AddCommand(verified.NewCommand(ctx))
+	cmd.AddCommand(features.NewCommand(ctx))
 	return cmd
 }
