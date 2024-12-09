@@ -1,40 +1,35 @@
 package accessio
 
 import (
-	"bytes"
 	"io"
 	"sync"
 
-	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/errors"
 )
 
 // ChunkedReader splits a reader into several
 // logical readers with a limited content size.
-// Once the reader reaches its limits it provides
-// a io.EOF.
+// Once the reader reaches its limit it provides
+// an io.EOF.
 // It can be continued by Calling Next, which returns
 // whether a follow-up is required or not.
 type ChunkedReader struct {
 	lock      sync.Mutex
-	reader    io.Reader
-	buffer    *bytes.Buffer
+	reader    *LookAheadReader
 	chunkSize int64
 	chunkNo   int
 
-	limited io.Reader
+	limited *io.LimitedReader
 	err     error
-
-	preread uint
 }
 
 var _ io.Reader = (*ChunkedReader)(nil)
 
-func NewChunkedReader(r io.Reader, chunkSize int64, preread ...uint) *ChunkedReader {
+func NewChunkedReader(r io.Reader, chunkSize int64) *ChunkedReader {
 	return &ChunkedReader{
-		reader:    r,
+		reader:    NewLookAheadReader(r),
 		chunkSize: chunkSize,
-		limited:   io.LimitReader(r, chunkSize),
-		preread:   min(uint(chunkSize-1), general.OptionalDefaulted(8096, preread...)),
+		limited:   &io.LimitedReader{r, chunkSize},
 	}
 }
 
@@ -42,28 +37,13 @@ func (c *ChunkedReader) Read(p []byte) (n int, err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if c.err != nil {
-		return 0, c.err
-	}
-	if c.buffer != nil && c.buffer.Len() > 0 {
-		// first, consume from buffer
-		n, err := c.buffer.Read(p)
-		if err != nil { // the only error returned is io.EOF
-			c.buffer = nil
-		}
-		if n > 0 {
-			return n, nil
-		}
-	} else {
-		c.buffer = nil
-	}
-
 	n, err = c.limited.Read(p)
 	c.err = err
 	return n, err
-
 }
 
+// ChunkNo returns the number previously
+// provided chunks.
 func (c *ChunkedReader) ChunkNo() int {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -71,38 +51,43 @@ func (c *ChunkedReader) ChunkNo() int {
 	return c.chunkNo
 }
 
+// ChunkDone returns true, if the actual
+// chunk is completely read.
 func (c *ChunkedReader) ChunkDone() bool {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	return c.err == io.EOF
+	return errors.Is(c.err, io.EOF)
 }
 
+// Next returns true, if a followup chunk
+// has been prepared for the reader.
+// If called while the current chunk is not yet completed
+// it always returns false (check by calling ChunkDone).
 func (c *ChunkedReader) Next() bool {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if c.err != io.EOF {
+	if !errors.Is(c.err, io.EOF) {
 		return false
 	}
 
+	if c.limited.N > 0 {
+		// don't need to check for more data if EOF is
+		// provided before chunk size is reached.
+		return false
+	}
 	// cannot assume that read with size 0 returns EOF as proposed
 	// by io.Reader.Read (see bytes.Buffer.Read).
 	// Therefore, we really have to read something.
-	if c.buffer == nil {
-		buf := make([]byte, c.preread)
-		n, err := c.reader.Read(buf)
-		c.err = err
-		if n > 0 {
-			c.buffer = bytes.NewBuffer(buf[:n])
-		} else {
-			if err == io.EOF {
-				return false
-			}
-		}
+	var buf [1]byte
+	n, err := c.reader.LookAhead(buf[:])
+	if n == 0 && errors.Is(err, io.EOF) {
+		return false
 	}
 
 	c.chunkNo++
-	c.limited = io.LimitReader(c.reader, c.chunkSize-int64(c.preread))
+	c.err = nil
+	c.limited = &io.LimitedReader{c.reader, c.chunkSize}
 	return true
 }

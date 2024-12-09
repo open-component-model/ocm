@@ -23,7 +23,7 @@ func CheckEOF(r io.Reader, err error) {
 	ExpectWithOffset(1, err).To(Equal(io.EOF))
 }
 
-var _ = Describe("Test Environment", func() {
+var _ = Describe("ChunkedReader", func() {
 	in := "12345678901234567890"
 	var buf *bytes.Buffer
 	var chunked *accessio.ChunkedReader
@@ -51,14 +51,8 @@ var _ = Describe("Test Environment", func() {
 
 			for i := 0; i < 3; i++ {
 				n, err := chunked.Read(buf[:])
-				Expect(n).To(Equal(4))
+				Expect(n).To(Equal(5))
 				Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
-				Expect(err).To(BeNil())
-				Expect(chunked.ChunkDone()).To(Equal(false))
-				cnt += n
-
-				n, err = chunked.Read(buf[:])
-				Expect(n).To(Equal(1))
 				CheckEOF(chunked, err)
 				Expect(chunked.ChunkDone()).To(Equal(true))
 				cnt += n
@@ -87,21 +81,11 @@ var _ = Describe("Test Environment", func() {
 
 			for i := 0; i < 3; i++ {
 				n, err := chunked.Read(buf[:])
-				Expect(n).To(Equal(4))
+				Expect(n).To(Equal(5))
 				Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
-				Expect(err).To(BeNil())
-				Expect(chunked.ChunkDone()).To(Equal(false))
-				cnt += n
-
-				n, err = chunked.Read(buf[:])
-				Expect(n).To(Equal(1))
 				CheckEOF(chunked, err)
-				cnt += n
-
-				n, err = chunked.Read(buf[:])
-				Expect(n).To(Equal(0))
-				Expect(err).To(Equal(io.EOF))
 				Expect(chunked.ChunkDone()).To(Equal(true))
+				cnt += n
 
 				Expect(chunked.Next()).To(Equal(i != 2))
 			}
@@ -111,7 +95,7 @@ var _ = Describe("Test Environment", func() {
 
 	Context("complete", func() {
 		BeforeEach(func() {
-			chunked = accessio.NewChunkedReader(buf, 100, 2)
+			chunked = accessio.NewChunkedReader(buf, 100)
 		})
 
 		It("reports EOF", func() {
@@ -155,9 +139,35 @@ var _ = Describe("Test Environment", func() {
 		})
 	})
 
+	Context("non-matching chunk size", func() {
+		BeforeEach(func() {
+			chunked = accessio.NewChunkedReader(buf, 15)
+		})
+		It("reports EOF and Next with non-matching size", func() {
+			var buf [20]byte
+			n, err := chunked.Read(buf[:])
+			Expect(n).To(Equal(15))
+			CheckEOF(chunked, err)
+			Expect(string(buf[:n])).To(Equal(in[:15]))
+			Expect(chunked.ChunkDone()).To(Equal(true))
+			Expect(chunked.Next()).To(Equal(true))
+
+			n, err = chunked.Read(buf[:])
+			Expect(n).To(Equal(5))
+			Expect(string(buf[:n])).To(Equal(in[15:20]))
+			CheckEOF(chunked, err)
+			Expect(chunked.ChunkDone()).To(Equal(true))
+			Expect(chunked.Next()).To(Equal(false))
+
+			n, err = chunked.Read(buf[:])
+			Expect(n).To(Equal(0))
+			Expect(err).To(Equal(io.EOF))
+		})
+	})
+
 	Context("chunk size matches read size", func() {
 		BeforeEach(func() {
-			chunked = accessio.NewChunkedReader(buf, 20, 2)
+			chunked = accessio.NewChunkedReader(buf, 20)
 		})
 
 		It("reports EOF with matched size", func() {
@@ -177,7 +187,7 @@ var _ = Describe("Test Environment", func() {
 
 	Context("split", func() {
 		BeforeEach(func() {
-			chunked = accessio.NewChunkedReader(buf, 5, 2)
+			chunked = accessio.NewChunkedReader(buf, 5)
 		})
 
 		It("reports EOF and splits reader", func() {
@@ -194,15 +204,8 @@ var _ = Describe("Test Environment", func() {
 
 			for i := 0; i < 3; i++ {
 				n, err := chunked.Read(buf[:])
-				Expect(n).To(Equal(2))
-				Expect(err).To(BeNil())
 				Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
-				Expect(chunked.ChunkDone()).To(Equal(false))
-				cnt += n
-
-				n, err = chunked.Read(buf[:])
-				Expect(n).To(Equal(3))
-				Expect(string(buf[:n])).To(Equal(in[cnt : cnt+n]))
+				Expect(n).To(Equal(5))
 				CheckEOF(chunked, err)
 				Expect(chunked.ChunkDone()).To(Equal(true))
 				cnt += n
