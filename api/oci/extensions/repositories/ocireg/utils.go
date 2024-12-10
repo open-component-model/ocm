@@ -11,10 +11,10 @@ import (
 	"github.com/containerd/log"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
+	"ocm.software/ocm/api/tech/regclient"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
-	"ocm.software/ocm/api/tech/docker/resolve"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/logging"
@@ -81,12 +81,12 @@ func readAll(reader io.ReadCloser, err error) ([]byte, error) {
 	return data, nil
 }
 
-func push(ctx context.Context, p resolve.Pusher, blob blobaccess.BlobAccess) error {
+func push(ctx context.Context, p regclient.Pusher, blob blobaccess.BlobAccess) error {
 	desc := *artdesc.DefaultBlobDescriptor(blob)
 	return pushData(ctx, p, desc, blob)
 }
 
-func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, data blobaccess.DataAccess) error {
+func pushData(ctx context.Context, p regclient.Pusher, desc artdesc.Descriptor, data blobaccess.DataAccess) error {
 	key := remotes.MakeRefKey(ctx, desc)
 	if desc.Size == 0 {
 		desc.Size = -1
@@ -100,8 +100,10 @@ func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, da
 
 			return nil
 		}
+
 		return fmt.Errorf("failed to push: %w", err)
 	}
+
 	return req.Commit(ctx, desc.Size, desc.Digest)
 }
 
