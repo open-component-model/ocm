@@ -7,10 +7,10 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
-	"ocm.software/ocm/api/tech/regclient"
 
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/extensions/attrs/cacheattr"
+	"ocm.software/ocm/api/tech/regclient"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )

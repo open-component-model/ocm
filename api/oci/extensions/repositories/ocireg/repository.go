@@ -121,16 +121,24 @@ func (r *RepositoryImpl) getResolver(comp string) (regclient.Resolver, error) {
 		logger.Trace("no credentials")
 	}
 
-	pass := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
-	if pass == "" {
-		pass = creds.GetProperty(credentials.ATTR_PASSWORD)
+	var (
+		password string
+		username string
+	)
+
+	if creds != nil {
+		password = creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
+		if password == "" {
+			password = creds.GetProperty(credentials.ATTR_PASSWORD)
+		}
+		username = creds.GetProperty(credentials.ATTR_USERNAME)
 	}
-	username := creds.GetProperty(credentials.ATTR_USERNAME)
+
 	opts := regclient.ClientOptions{
 		Host: &regconfig.Host{
-			Name: "ghcr.io",
+			Name: "ghcr.io", //TODO: Need to figure out how to set the host.
 			User: username,
-			Pass: pass,
+			Pass: password,
 		},
 		Version: comp,
 	}

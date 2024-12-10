@@ -11,10 +11,10 @@ import (
 	"github.com/containerd/log"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
-	"ocm.software/ocm/api/tech/regclient"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
+	"ocm.software/ocm/api/tech/regclient"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/logging"

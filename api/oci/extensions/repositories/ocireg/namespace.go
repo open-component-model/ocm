@@ -7,12 +7,12 @@ import (
 	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
-	"ocm.software/ocm/api/tech/regclient"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/cpi/support"
 	"ocm.software/ocm/api/oci/extensions/actions/oci-repository-prepare"
+	"ocm.software/ocm/api/tech/regclient"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/logging"

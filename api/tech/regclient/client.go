@@ -53,10 +53,12 @@ func (p *pushRequest) Status() (content.Status, error) {
 
 var _ PushRequest = &pushRequest{}
 
-var _ Resolver = &Client{}
-var _ Fetcher = &Client{}
-var _ Pusher = &Client{}
-var _ Lister = &Client{}
+var (
+	_ Resolver = &Client{}
+	_ Fetcher  = &Client{}
+	_ Pusher   = &Client{}
+	_ Lister   = &Client{}
+)
 
 func New(opts ClientOptions) *Client {
 	rc := regclient.New(
@@ -65,7 +67,7 @@ func New(opts ClientOptions) *Client {
 		regclient.WithDockerCreds(),
 		regclient.WithUserAgent("containerd/"+opts.Version),
 		regclient.WithRegOpts(
-			//reg.WithCertDirs([]string{"."}),
+			// reg.WithCertDirs([]string{"."}),
 			reg.WithDelay(2*time.Second, 15*time.Second),
 			reg.WithRetryLimit(5),
 			reg.WithCache(5*time.Minute, 500), // built in cache!! Nice!
@@ -129,7 +131,7 @@ func (c *Client) convertDescriptorToRegClient(desc ociv1.Descriptor) descriptor.
 }
 
 func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descriptor, error) {
-	//TODO: figure out what to do about closing c.rc.
+	// TODO: figure out what to do about closing c.rc.
 	r, err := regref.New(ref)
 	if err != nil {
 		return "", ociv1.Descriptor{}, err
@@ -141,16 +143,15 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 		if strings.Contains(err.Error(), "not found") {
 			// fallback to finding a blob if we have a digest
 			if r.Digest != "" {
-				blob, err := c.rc.BlobHead(ctx, r, descriptor.Descriptor{
+				blob, err := c.rc.BlobGet(ctx, r, descriptor.Descriptor{
 					Digest: digest.Digest(r.Digest),
-					Size:   -1,
 				})
 				if err != nil {
 					if strings.Contains(err.Error(), "not found") {
 						return "", ociv1.Descriptor{}, errdefs.ErrNotFound
 					}
 
-					return "", ociv1.Descriptor{}, err
+					return "", ociv1.Descriptor{}, fmt.Errorf("failed to resolve blob head: %w", err)
 				}
 
 				return ref, c.convertDescriptorToOCI(blob.GetDescriptor()), nil
@@ -249,9 +250,13 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (_ io.ReadClo
 	}()
 
 	// set up closing the client after fetching is done.
+	// -1 is not a thing in regclient.
+	if desc.Size < 0 {
+		desc.Size = 0
+	}
 	reader, err := c.rc.BlobGet(ctx, c.ref, c.convertDescriptorToRegClient(desc))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get the blob reader: %w", err)
 	}
 
 	return reader, nil
