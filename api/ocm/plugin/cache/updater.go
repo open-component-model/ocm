@@ -296,44 +296,57 @@ func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAcc
 				return nil
 			}
 		}
+
 		dir := plugindirattr.Get(o.Context)
-		if dir != "" {
-			lock, err := filelock.LockDir(dir)
+		if dir == "" {
+			home, err := os.UserHomeDir() // use home if provided
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to determine home directory to determine default plugin directory: %w", err)
 			}
-			defer lock.Close()
+			dir = filepath.Join(home, plugindirattr.DEFAULT_PLUGIN_DIR)
+			if err := os.Mkdir(dir, os.ModePerm|os.ModeDir); err != nil {
+				return fmt.Errorf("failed to create default plugin directory: %w", err)
+			}
+			if err := plugindirattr.Set(o.Context, dir); err != nil {
+				return fmt.Errorf("failed to set plugin dir after defaulting: %w", err)
+			}
+		}
 
-			target := filepath.Join(dir, desc.PluginName)
+		lock, err := filelock.LockDir(dir)
+		if err != nil {
+			return err
+		}
+		defer lock.Close()
 
-			verb := "installing"
-			if ok, _ := vfs.FileExists(fs, target); ok {
-				if !o.Force && (cv.GetVersion() == o.Current || !o.UpdateMode) {
-					return fmt.Errorf("plugin %s already found in %s", desc.PluginName, dir)
-				}
-				if o.UpdateMode {
-					verb = "updating"
-				}
-				fs.Remove(target)
+		target := filepath.Join(dir, desc.PluginName)
+
+		verb := "installing"
+		if ok, _ := vfs.FileExists(fs, target); ok {
+			if !o.Force && (cv.GetVersion() == o.Current || !o.UpdateMode) {
+				return fmt.Errorf("plugin %s already found in %s", desc.PluginName, dir)
 			}
-			o.Printer.Printf("%s plugin %s[%s] in %s...\n", verb, desc.PluginName, desc.PluginVersion, dir)
-			dst, err := fs.OpenFile(target, vfs.O_CREATE|vfs.O_TRUNC|vfs.O_WRONLY, 0o755)
-			if err != nil {
-				return errors.Wrapf(err, "cannot create plugin file %s", target)
+			if o.UpdateMode {
+				verb = "updating"
 			}
-			src, err := fs.OpenFile(file.Name(), vfs.O_RDONLY, 0)
-			if err != nil {
-				dst.Close()
-				return errors.Wrapf(err, "cannot open plugin executable %s", file.Name())
-			}
-			_, err = io.Copy(dst, src)
+			fs.Remove(target)
+		}
+		o.Printer.Printf("%s plugin %s[%s] in %s...\n", verb, desc.PluginName, desc.PluginVersion, dir)
+		dst, err := fs.OpenFile(target, vfs.O_CREATE|vfs.O_TRUNC|vfs.O_WRONLY, 0o755)
+		if err != nil {
+			return errors.Wrapf(err, "cannot create plugin file %s", target)
+		}
+		src, err := fs.OpenFile(file.Name(), vfs.O_RDONLY, 0)
+		if err != nil {
 			dst.Close()
-			utils.IgnoreError(src.Close())
-			utils.IgnoreError(os.Remove(file.Name()))
-			utils.IgnoreError(SetPluginSourceInfo(dir, cv, found.Meta().Name, desc.PluginName))
-			if err != nil {
-				return errors.Wrapf(err, "cannot copy plugin file %s", target)
-			}
+			return errors.Wrapf(err, "cannot open plugin executable %s", file.Name())
+		}
+		_, err = io.Copy(dst, src)
+		dst.Close()
+		utils.IgnoreError(src.Close())
+		utils.IgnoreError(os.Remove(file.Name()))
+		utils.IgnoreError(SetPluginSourceInfo(dir, cv, found.Meta().Name, desc.PluginName))
+		if err != nil {
+			return errors.Wrapf(err, "cannot copy plugin file %s", target)
 		}
 	}
 	return nil
