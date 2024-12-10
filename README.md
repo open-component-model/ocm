@@ -49,14 +49,25 @@ The OCI and OCM support can be found in packages
 
 Install the latest release with
 
-- [Bash](#bash)
-- [Homebrew](#homebrew)
-- [NixOS](#nixos)
-- [AUR](#aur)
-- [Container](#container)
-- [Chocolatey](#chocolatey)
-- [Winget](#winget)
-- [GitHub Releases](https://github.com/open-component-model/ocm/releases/latest)
+- [Open Component Model](#open-component-model)
+  - [OCM Specifications](#ocm-specifications)
+  - [OCM Library](#ocm-library)
+  - [OCM CLI](#ocm-cli)
+  - [Installation](#installation)
+    - [Bash](#bash)
+    - [Homebrew](#homebrew)
+    - [NixOS](#nixos)
+    - [AUR](#aur)
+    - [Container](#container)
+      - [Build and run it yourself](#build-and-run-it-yourself)
+    - [Chocolatey](#chocolatey)
+    - [Winget](#winget)
+  - [Examples](#examples)
+  - [GPG Public Key](#gpg-public-key)
+  - [Contributing](#contributing)
+  - [Release Process](#release-process)
+  - [Licensing](#licensing)
+    - [Third Party Licenses](#third-party-licenses)
 
 ### Bash
 
@@ -191,3 +202,7 @@ Please refer to the [Release Process Documentation](RELEASE_PROCESS.md) for more
 Copyright 2024 SAP SE or an SAP affiliate company and Open Component Model contributors.
 Please see our [LICENSE](LICENSE) for copyright and license information.
 Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/open-component-model/ocm).
+
+### Third Party Licenses
+
+The list of statically linked third-party libraries and their licenses can be found in the [NOTICE](./NOTICE) file.
