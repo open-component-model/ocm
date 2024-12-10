@@ -17,9 +17,9 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"ocm.software/ocm/api/tech/regclient"
 
 	remoteserrors "ocm.software/ocm/api/tech/docker/errors"
-	"ocm.software/ocm/api/tech/docker/resolve"
 	"ocm.software/ocm/api/utils/accessio"
 )
 
@@ -37,11 +37,11 @@ type dockerPusher struct {
 	tracker StatusTracker
 }
 
-func (p dockerPusher) Push(ctx context.Context, desc ocispec.Descriptor, src resolve.Source) (resolve.PushRequest, error) {
+func (p dockerPusher) Push(ctx context.Context, desc ocispec.Descriptor, src regclient.Source) (regclient.PushRequest, error) {
 	return p.push(ctx, desc, src, remotes.MakeRefKey(ctx, desc), false)
 }
 
-func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src resolve.Source, ref string, unavailableOnFail bool) (resolve.PushRequest, error) {
+func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src regclient.Source, ref string, unavailableOnFail bool) (regclient.PushRequest, error) {
 	if l, ok := p.tracker.(StatusTrackLocker); ok {
 		l.Lock(ref)
 		defer l.Unlock(ref)
@@ -322,7 +322,7 @@ type pushRequest struct {
 	ref  string
 
 	responseC  <-chan response
-	source     resolve.Source
+	source     regclient.Source
 	isManifest bool
 
 	expected digest.Digest
