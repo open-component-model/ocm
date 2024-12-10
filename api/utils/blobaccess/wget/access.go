@@ -10,9 +10,10 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/tech/npm"
+	"ocm.software/ocm/api/tech/ocmHttp"
 	"ocm.software/ocm/api/tech/wget/identity"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -64,17 +65,7 @@ func BlobAccess(url string, opts ...Option) (_ bpi.BlobAccess, rerr error) {
 		},
 	}
 
-	var redirectFunc func(req *http.Request, via []*http.Request) error = nil
-	if eff.NoRedirect != nil && *eff.NoRedirect {
-		redirectFunc = func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		}
-	}
-
-	client := &http.Client{
-		CheckRedirect: redirectFunc,
-		Transport:     transport,
-	}
+	client := ocmHttp.Redirect(ocmHttp.NewHttpClient(), eff.NoRedirect)
 
 	if eff.Verb == "" {
 		eff.Verb = http.MethodGet
@@ -94,19 +85,7 @@ func BlobAccess(url string, opts ...Option) (_ bpi.BlobAccess, rerr error) {
 		}
 	}
 
-	if creds != nil {
-		user := creds.GetProperty(identity.ATTR_USERNAME)
-		password := creds.GetProperty(identity.ATTR_PASSWORD)
-		token := creds.GetProperty(identity.ATTR_IDENTITY_TOKEN)
-
-		if user != "" && password != "" {
-			auth := user + ":" + password
-			auth = base64.StdEncoding.EncodeToString([]byte(auth))
-			request.Header.Add("Authorization", "Basic "+auth)
-		} else if token != "" {
-			request.Header.Add("Authorization", "Bearer "+token)
-		}
-	}
+	ocmHttp.Authorize(request, creds)
 
 	// make http request
 	resp, err := client.Do(request)
