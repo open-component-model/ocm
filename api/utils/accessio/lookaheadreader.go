@@ -28,7 +28,12 @@ func (r *LookAheadReader) Read(p []byte) (int, error) {
 	return r.read(p)
 }
 
-func (r *LookAheadReader) read(p []byte) (n int, err error) {
+func (r *LookAheadReader) read(p []byte) (int, error) {
+	var (
+		n   int
+		err error
+	)
+
 	if r.buffer != nil && r.buffer.Len() > 0 {
 		// first, consume from buffer
 		n, err = r.buffer.Read(p)
