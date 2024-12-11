@@ -48,6 +48,7 @@ The OCI and OCM support can be found in packages
 ## Installation
 
 Install the latest release with
+
 - [Bash](#bash)
 - [Homebrew](#homebrew)
 - [NixOS](#nixos)
