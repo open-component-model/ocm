@@ -48,25 +48,13 @@ The OCI and OCM support can be found in packages
 ## Installation
 
 Install the latest release with
-
-- [Open Component Model](#open-component-model)
-  - [OCM Specifications](#ocm-specifications)
-  - [OCM Library](#ocm-library)
-  - [OCM CLI](#ocm-cli)
-  - [Installation](#installation)
-    - [Bash](#bash)
-    - [Homebrew](#homebrew)
-    - [NixOS](#nixos)
-    - [AUR](#aur)
-    - [Container](#container)
-      - [Build and run it yourself](#build-and-run-it-yourself)
-    - [Chocolatey](#chocolatey)
-    - [Winget](#winget)
-  - [Examples](#examples)
-  - [GPG Public Key](#gpg-public-key)
-  - [Contributing](#contributing)
-  - [Release Process](#release-process)
-  - [Licensing](#licensing)
+  - [Bash](#bash)
+  - [Homebrew](#homebrew)
+  - [NixOS](#nixos)
+  - [AUR](#aur)
+  - [Docker and Podman](#container)
+  - [Chocolatey](#chocolatey)
+  - [Winget](#winget)
 
 ### Bash
 
