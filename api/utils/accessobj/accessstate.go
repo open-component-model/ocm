@@ -153,6 +153,7 @@ func newState(mode AccessMode, a StateAccess, p StateHandler) (*state, error) {
 			return nil, fmt.Errorf("failed to get blob data: %w", err)
 		}
 
+		fmt.Println("data: ", blob.MimeType())
 		blob = blobaccess.ForData(blob.MimeType(), data) // cache original data
 		current, err = p.Decode(data)
 		if err != nil {

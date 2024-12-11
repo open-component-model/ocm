@@ -1,6 +1,7 @@
 package cpi
 
 import (
+	"fmt"
 	"reflect"
 
 	"ocm.software/ocm/api/oci/artdesc"
@@ -76,6 +77,7 @@ func (i ArtifactStateHandler) Encode(d interface{}) ([]byte, error) {
 }
 
 func (i ArtifactStateHandler) Decode(data []byte) (interface{}, error) {
+	fmt.Println("artifact state handler")
 	return artdesc.Decode(data)
 }
 

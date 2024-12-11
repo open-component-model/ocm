@@ -4,4 +4,4 @@ set -e
 
 echo "> Generate"
 
-GO111MODULE=on go generate -mod=mod $@
+GO111MODULE=on go generate -v -mod=mod $@

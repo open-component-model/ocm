@@ -2,6 +2,7 @@ package artdesc
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
@@ -104,6 +105,7 @@ func (i *Index) AddManifest(d *Descriptor) {
 ////////////////////////////////////////////////////////////////////////////////
 
 func DecodeIndex(data []byte) (*Index, error) {
+	fmt.Println("index handler")
 	var d Index
 
 	if err := json.Unmarshal(data, &d); err != nil {

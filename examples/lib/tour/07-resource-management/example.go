@@ -160,6 +160,7 @@ func HandleResources(resources []Resource) error {
 // --- end handle ---
 
 func GatherResources(ctx ocm.Context, factory ResourceFactory) ([]Resource, error) {
+	fmt.Println("BEGIN GATHERING")
 	var resources []Resource
 
 	spec := ocireg.NewRepositorySpec("ghcr.io/open-component-model/ocm")
@@ -172,6 +173,7 @@ func GatherResources(ctx ocm.Context, factory ResourceFactory) ([]Resource, erro
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot setup repository")
 	}
+	fmt.Println("GOT REPO:", spec)
 
 	// to release potentially allocated temporary resources,
 	// many objects must be closed, if they should not be used
@@ -185,11 +187,15 @@ func GatherResources(ctx ocm.Context, factory ResourceFactory) ([]Resource, erro
 	// All kinds of repositories, regardless of their type
 	// feature the same interface to work with OCM content.
 	// --- begin lookup component ---
+	fmt.Println("Looking up component...")
 	c, err := repo.LookupComponent("ocm.software/ocmcli")
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot lookup component")
 	}
 	defer c.Close()
+
+	fmt.Println("Lookued up Component: ", c)
+
 	// --- end lookup component ---
 
 	// Now we look for the versions of the component
@@ -198,6 +204,8 @@ func GatherResources(ctx ocm.Context, factory ResourceFactory) ([]Resource, erro
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot query version names")
 	}
+
+	fmt.Println("Versions:", versions)
 
 	// OCM version names must follow the SemVer rules.
 	// Therefore, we can simply order the versions and print them.
@@ -213,6 +221,8 @@ func GatherResources(ctx ocm.Context, factory ResourceFactory) ([]Resource, erro
 	// --- begin lookup version ---
 	// to retrieve the latest version use
 	// cv, err := c.LookupVersion(versions[len(versions)-1])
+
+	fmt.Println("looking up component version: v0.17.0")
 	cv, err := c.LookupVersion("0.17.0")
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get latest version")
@@ -232,25 +242,30 @@ func GatherResources(ctx ocm.Context, factory ResourceFactory) ([]Resource, erro
 	// like the repository specification.
 	// --- begin resources ---
 	for _, r := range cv.GetResources() {
+		fmt.Println("trying to fetch resource: ", r.Meta())
 		res := factory.Create(
 			r.Meta().GetIdentity(cv.GetDescriptor().Resources),
 			r.Meta().GetType(),
 		)
 		acc, err := r.Access()
 		if err != nil {
+			fmt.Printf("cannot access resource 1: %s\n", err)
 			res.SetError(err.Error())
 		} else {
 			m, err := acc.AccessMethod(cv)
+			fmt.Printf("cannot access resource 2: %s\n", err)
 			if err == nil {
 				// delegate data handling to target
 				// we don't know, how this is implemented.
 				err = res.AddDataFromMethod(ctx, m)
+				fmt.Println("ERROR on 3: ", err, m)
 				if err != nil {
 					res.SetError(err.Error())
 				}
 				// release local usage of the access method object
 				m.Close()
 			} else {
+				fmt.Printf("cannot access resource 3: %s\n", err)
 				res.SetError(err.Error())
 			}
 		}

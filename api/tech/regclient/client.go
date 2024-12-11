@@ -138,26 +138,31 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 		return "", ociv1.Descriptor{}, err
 	}
 
-	// if digest is set it will use that.
-	m, err := c.rc.ManifestHead(ctx, r)
-	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			// fallback to finding a blob if we have a digest
-			if r.Digest != "" {
-				blob, err := c.rc.BlobGet(ctx, r, descriptor.Descriptor{
-					Digest: digest.Digest(r.Digest),
-				})
-				if err != nil {
-					if strings.Contains(err.Error(), "not found") {
-						return "", ociv1.Descriptor{}, errdefs.ErrNotFound
-					}
+	if r.Digest != "" {
+		blob, err := c.rc.BlobHead(ctx, r, descriptor.Descriptor{
+			Digest: digest.Digest(r.Digest),
+		})
+		defer blob.Close() // we can safely close it as this is not when we read it.
 
-					return "", ociv1.Descriptor{}, fmt.Errorf("failed to resolve blob head: %w", err)
-				}
-
-				return ref, c.convertDescriptorToOCI(blob.GetDescriptor()), nil
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return "", ociv1.Descriptor{}, errdefs.ErrNotFound
 			}
 
+			return "", ociv1.Descriptor{}, fmt.Errorf("failed to resolve blob head: %w", err)
+		}
+
+		c.ref = r
+
+		return ref, c.convertDescriptorToOCI(blob.GetDescriptor()), nil
+	}
+
+	// if digest is set it will use that.
+	fmt.Println("we are in manifest")
+	m, err := c.rc.ManifestHead(ctx, r)
+	if err != nil {
+		fmt.Println("we are in manifest error: ", err)
+		if strings.Contains(err.Error(), "not found") {
 			return "", ociv1.Descriptor{}, errdefs.ErrNotFound
 		}
 
@@ -167,6 +172,7 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 	// update the Ref of the client to the resolved reference.
 	c.ref = r
 
+	fmt.Println("we returned")
 	return ref, c.convertDescriptorToOCI(m.GetDescriptor()), nil
 }
 
@@ -253,7 +259,10 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (_ io.ReadClo
 		desc.Size = 0
 	}
 
+	fmt.Println("in fetch: ", desc, c.ref)
+
 	if c.isManifest(desc) {
+		fmt.Println("in manifest: ", desc, c.ref)
 		manifestContent, err := c.rc.ManifestGet(ctx, c.ref)
 		if err != nil {
 			return nil, err
