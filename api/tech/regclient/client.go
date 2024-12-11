@@ -1,6 +1,7 @@
 package regclient
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -163,6 +164,9 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 		return "", ociv1.Descriptor{}, fmt.Errorf("failed to get manifest: %w", err)
 	}
 
+	// update the Ref of the client to the resolved reference.
+	c.ref = r
+
 	return ref, c.convertDescriptorToOCI(m.GetDescriptor()), nil
 }
 
@@ -202,13 +206,7 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) (Push
 		return nil, err
 	}
 
-	isManifest := false
-	switch d.MediaType {
-	case images.MediaTypeDockerSchema2Manifest, images.MediaTypeDockerSchema2ManifestList,
-		ociv1.MediaTypeImageManifest, ociv1.MediaTypeImageIndex:
-		isManifest = true
-	}
-	if isManifest {
+	if c.isManifest(d) {
 		manifestContent, err := io.ReadAll(reader)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read manifest: %w", err)
@@ -223,6 +221,7 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) (Push
 			return nil, err
 		}
 
+		// pushRequest closes the RC on `Commit`.
 		return &pushRequest{
 			desc: c.convertDescriptorToRegClient(d),
 			rc:   c.rc,
@@ -249,11 +248,25 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (_ io.ReadClo
 		}
 	}()
 
-	// set up closing the client after fetching is done.
 	// -1 is not a thing in regclient.
 	if desc.Size < 0 {
 		desc.Size = 0
 	}
+
+	if c.isManifest(desc) {
+		manifestContent, err := c.rc.ManifestGet(ctx, c.ref)
+		if err != nil {
+			return nil, err
+		}
+
+		body, err := manifestContent.RawBody()
+		if err != nil {
+			return nil, err
+		}
+
+		return io.NopCloser(bytes.NewReader(body)), nil
+	}
+
 	reader, err := c.rc.BlobGet(ctx, c.ref, c.convertDescriptorToRegClient(desc))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get the blob reader: %w", err)
@@ -275,4 +288,14 @@ func (c *Client) List(ctx context.Context) (_ []string, err error) {
 	}
 
 	return tags.Tags, nil
+}
+
+func (c *Client) isManifest(desc ociv1.Descriptor) bool {
+	switch desc.MediaType {
+	case images.MediaTypeDockerSchema2Manifest, images.MediaTypeDockerSchema2ManifestList,
+		ociv1.MediaTypeImageManifest, ociv1.MediaTypeImageIndex:
+		return true
+	}
+
+	return false
 }
