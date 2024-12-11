@@ -48,13 +48,13 @@ The OCI and OCM support can be found in packages
 ## Installation
 
 Install the latest release with
-  - [Bash](#bash)
-  - [Homebrew](#homebrew)
-  - [NixOS](#nixos)
-  - [AUR](#aur)
-  - [Docker and Podman](#container)
-  - [Chocolatey](#chocolatey)
-  - [Winget](#winget)
+- [Bash](#bash)
+- [Homebrew](#homebrew)
+- [NixOS](#nixos)
+- [AUR](#aur)
+- [Docker and Podman](#container)
+- [Chocolatey](#chocolatey)
+- [Winget](#winget)
 
 ### Bash
 
