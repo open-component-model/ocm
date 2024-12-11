@@ -16,12 +16,3 @@ The list contains the Go module path and the version of the library used.
 - github.com/letsencrypt/boulder-v0.0.0-20241010192615-6692160cedfa
 
 Modifications to original MPL-2.0 files will be documented and made available.
-
-## LGPL-3.0
-
-This project statically links the following [GNU Lesser General Public License 3.0 (LGPL 3.0)](https://www.gnu.org/licenses/lgpl-3.0.txt) libraries.
-The list contains the Go module path and the version of the library used.
-
-- github.com/juju/fslock-v0.0.0-20160525022230-4d5c94c67b4b
-
-Modifications to original LGPL-3.0 files will be documented and made available.
