@@ -49,7 +49,7 @@ func (r *LookAheadReader) read(p []byte) (n int, err error) {
 
 // LookAhead  provides a preview of upcoming data.
 // It tries to fill the complete given buffer.
-// The regular data stream provided by ead is not affected.
+// The regular data stream provided by Read is not affected.
 func (r *LookAheadReader) LookAhead(p []byte) (n int, err error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
