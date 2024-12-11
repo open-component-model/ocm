@@ -2,11 +2,13 @@ package genericocireg
 
 import (
 	"fmt"
+	"io"
 	"path"
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/set"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
@@ -26,8 +28,7 @@ import (
 	ocihdlr "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/oci"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	"ocm.software/ocm/api/utils/blobaccess/chunked"
+	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/mime"
 	common "ocm.software/ocm/api/utils/misc"
@@ -316,11 +317,29 @@ func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
 	return ocihdlr.New(c.comp.GetName(), c.Repository(), c.comp.repo.ocirepo.GetSpecification().GetKind(), c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
 }
 
+func blobAccessForChunk(blob blobaccess.BlobAccess, fs vfs.FileSystem, r io.Reader, limit int64) (cpi.BlobAccess, bool, error) {
+	f, err := blobaccess.NewTempFile("", "chunk-*", fs)
+	if err != nil {
+		return nil, true, err
+	}
+	written, err := io.CopyN(f.Writer(), r, limit)
+	if err != nil && !errors.Is(err, io.EOF) {
+		f.Close()
+		return nil, false, err
+	}
+	if written <= 0 {
+		f.Close()
+		return nil, false, nil
+	}
+	return f.AsBlob(blob.MimeType()), written == limit, nil
+}
+
 func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
 
+	fs := vfsattr.Get(c.GetContext())
 	size := blob.Size()
 	limit := c.comp.repo.blobLimit
 	var refs []string
@@ -330,20 +349,20 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 			return nil, err
 		}
 		defer reader.Close()
-		ch := chunked.New(reader, limit, vfsattr.Get(c.GetContext()))
-		for {
-			b, err := ch.Next()
-			if err != nil {
-				return nil, errors.Wrapf(err, "chunked blob")
-			}
-			if b == nil {
-				break
-			}
-			err = c.addLayer(b, &refs)
-			b.Close()
 
+		var b blobaccess.BlobAccess
+		cont := true
+		for cont {
+			b, cont, err = blobAccessForChunk(blob, fs, reader, limit)
 			if err != nil {
-				return nil, errors.Wrapf(err, "chunked blob")
+				return nil, err
+			}
+			if b != nil {
+				err = c.addLayer(b, &refs)
+				b.Close()
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	} else {

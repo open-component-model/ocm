@@ -43,7 +43,7 @@ type Chunked interface {
 	SetBlobLimit(s int64) bool
 }
 
-// SetBlobLimit tries to set a blob limt for a repository
+// SetBlobLimit tries to set a blob limit for a repository
 // implementation. It returns true, if this was possible.
 func SetBlobLimit(i RepositoryImpl, s int64) bool {
 	if c, ok := i.(Chunked); ok {

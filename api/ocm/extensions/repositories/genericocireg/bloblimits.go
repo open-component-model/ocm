@@ -23,8 +23,8 @@ func init() {
 // AddDefaultBlobLimit can be used to set default blob limits
 // for known repositories.
 // Those limits will be overwritten, by blob limits
-// given by a configuration ovject and the repository
-// specification
+// given by a configuration object and the repository
+// specification.
 func AddDefaultBlobLimit(name string, limit int64) {
 	lock.Lock()
 	defer lock.Unlock()

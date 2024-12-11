@@ -49,8 +49,8 @@ type RepositoryImpl struct {
 	ocirepo  oci.Repository
 	readonly bool
 	// blobLimit is the size limit for layers maintained for the storage of localBlobs.
-	// The value -1 means an unconfigured value,
-	// a value == 0 disables the limiting and
+	// The value -1 means an unconfigured value (a default from the blob limit configuration is used),
+	// a value == 0 disables the limiting and (a default from the blob limit configuration is ignored),
 	// a value > 0 enabled the usage of the specified size.
 	blobLimit int64
 }

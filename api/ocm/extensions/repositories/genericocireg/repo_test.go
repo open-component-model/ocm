@@ -124,14 +124,18 @@ var _ = Describe("component repository mapping", func() {
 		MustBeSuccessful(finalize.Finalize())
 	})
 
-	DescribeTable("creates a dummy component with chunks", func(f func(ocm.ResourceAccess)) {
+	const ref4 = "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08,sha256:3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7"
+	const ref5 = "sha256:a4853613b2a38568ed4e49196238152469097412d06d5e5fc9be8ab92cfdf2bf,sha256:977817f6f61f4dd501df3036a3e16b31452b36f4aa3edcf9a3f3242a79d7170d"
+	const ref8 = "sha256:" + ocmtesthelper.D_TESTDATA
+
+	DescribeTable("creates a dummy component with chunks", func(limit int, f func(ocm.ResourceAccess), ref string) {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)
 
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
 		impl := Must(repocpi.GetRepositoryImplementation(repo))
 		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
-		repocpi.SetBlobLimit(impl, 5)
+		repocpi.SetBlobLimit(impl, int64(limit))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
@@ -167,7 +171,8 @@ var _ = Describe("component repository mapping", func() {
 		acc := Must(rsc.Access())
 		local, ok := acc.(*localblob.AccessSpec)
 		Expect(ok).To(BeTrue())
-		Expect(local.LocalReference).To(Equal("sha256:a4853613b2a38568ed4e49196238152469097412d06d5e5fc9be8ab92cfdf2bf,sha256:977817f6f61f4dd501df3036a3e16b31452b36f4aa3edcf9a3f3242a79d7170d"))
+		// fmt.Printf("localref: %s\n", local.LocalReference)
+		Expect(local.LocalReference).To(Equal(ref))
 		Expect(rsc.Meta().Digest).NotTo(BeNil())
 		Expect(rsc.Meta().Digest.Value).To(Equal(ocmtesthelper.D_TESTDATA))
 
@@ -175,16 +180,16 @@ var _ = Describe("component repository mapping", func() {
 
 		MustBeSuccessful(finalize.Finalize())
 	},
-		Entry("get blob", func(rsc ocm.ResourceAccess) {
+		Entry("get blob", 5, func(rsc ocm.ResourceAccess) {
 			data := Must(ocmutils.GetResourceData(rsc))
 			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
-		}),
-		Entry("stream blob", func(rsc ocm.ResourceAccess) {
+		}, ref5),
+		Entry("stream blob", 5, func(rsc ocm.ResourceAccess) {
 			r := Must(ocmutils.GetResourceReader(rsc))
 			data := Must(io.ReadAll(r))
 			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
-		}),
-		Entry("stream blob with small buffer", func(rsc ocm.ResourceAccess) {
+		}, ref5),
+		Entry("stream blob with small buffer", 5, func(rsc ocm.ResourceAccess) {
 			var buf [2]byte
 			var data []byte
 
@@ -204,7 +209,69 @@ var _ = Describe("component repository mapping", func() {
 				}
 			}
 			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
-		}),
+		}, ref5),
+
+		Entry("get blob (match limit)", len(ocmtesthelper.S_TESTDATA), func(rsc ocm.ResourceAccess) {
+			data := Must(ocmutils.GetResourceData(rsc))
+			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		}, ref8),
+		Entry("stream blob (match limit)", len(ocmtesthelper.S_TESTDATA), func(rsc ocm.ResourceAccess) {
+			r := Must(ocmutils.GetResourceReader(rsc))
+			data := Must(io.ReadAll(r))
+			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		}, ref8),
+		Entry("stream blob with small buffer  (match limit)", len(ocmtesthelper.S_TESTDATA), func(rsc ocm.ResourceAccess) {
+			var buf [2]byte
+			var data []byte
+
+			r := Must(ocmutils.GetResourceReader(rsc))
+
+			for {
+				n, err := r.Read(buf[:])
+				if n > 0 {
+					data = append(data, buf[:n]...)
+				}
+				if err != nil {
+					if err == io.EOF {
+						break
+					} else {
+						MustBeSuccessful(err)
+					}
+				}
+			}
+			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		}, ref8),
+
+		Entry("get blob (match limit/2)", len(ocmtesthelper.S_TESTDATA)/2, func(rsc ocm.ResourceAccess) {
+			data := Must(ocmutils.GetResourceData(rsc))
+			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		}, ref4),
+		Entry("stream blob (match limit/2)", len(ocmtesthelper.S_TESTDATA)/2, func(rsc ocm.ResourceAccess) {
+			r := Must(ocmutils.GetResourceReader(rsc))
+			data := Must(io.ReadAll(r))
+			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		}, ref4),
+		Entry("stream blob with small buffer  (match limit/2)", len(ocmtesthelper.S_TESTDATA)/2, func(rsc ocm.ResourceAccess) {
+			var buf [2]byte
+			var data []byte
+
+			r := Must(ocmutils.GetResourceReader(rsc))
+
+			for {
+				n, err := r.Read(buf[:])
+				if n > 0 {
+					data = append(data, buf[:n]...)
+				}
+				if err != nil {
+					if err == io.EOF {
+						break
+					} else {
+						MustBeSuccessful(err)
+					}
+				}
+			}
+			Expect(string(data)).To(Equal(ocmtesthelper.S_TESTDATA))
+		}, ref4),
 	)
 
 	It("handles legacylocalociblob access method", func() {
