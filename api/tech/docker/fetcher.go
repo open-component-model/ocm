@@ -25,6 +25,8 @@ type dockerFetcher struct {
 func (r dockerFetcher) Fetch(ctx context.Context, desc ocispec.Descriptor) (io.ReadCloser, error) {
 	ctx = log.WithLogger(ctx, log.G(ctx).WithField("digest", desc.Digest))
 
+	fmt.Println("Fetching: ", r.refspec, desc)
+
 	hosts := r.filterHosts(HostCapabilityPull)
 	if len(hosts) == 0 {
 		return nil, errors.Wrap(errdefs.ErrNotFound, "no pull hosts")
@@ -39,7 +41,7 @@ func (r dockerFetcher) Fetch(ctx context.Context, desc ocispec.Descriptor) (io.R
 		// firstly try fetch via external urls
 		for _, us := range desc.URLs {
 			ctx = log.WithLogger(ctx, log.G(ctx).WithField("url", us))
-
+			fmt.Println("us: ", r.refspec, desc, us)
 			u, err := url.Parse(us)
 			if err != nil {
 				log.G(ctx).WithError(err).Debug("failed to parse")

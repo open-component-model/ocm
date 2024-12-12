@@ -249,23 +249,19 @@ func GatherResources(ctx ocm.Context, factory ResourceFactory) ([]Resource, erro
 		)
 		acc, err := r.Access()
 		if err != nil {
-			fmt.Printf("cannot access resource 1: %s\n", err)
 			res.SetError(err.Error())
 		} else {
 			m, err := acc.AccessMethod(cv)
-			fmt.Printf("cannot access resource 2: %s\n", err)
 			if err == nil {
 				// delegate data handling to target
 				// we don't know, how this is implemented.
 				err = res.AddDataFromMethod(ctx, m)
-				fmt.Println("ERROR on 3: ", err, m)
 				if err != nil {
 					res.SetError(err.Error())
 				}
 				// release local usage of the access method object
 				m.Close()
 			} else {
-				fmt.Printf("cannot access resource 3: %s\n", err)
 				res.SetError(err.Error())
 			}
 		}

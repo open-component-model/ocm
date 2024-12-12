@@ -140,12 +140,12 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 	}
 
 	// first, try to find the manifest
-	m, err := c.rc.ManifestGet(ctx, r)
+	m, err := c.rc.ManifestHead(ctx, r)
 	if err != nil {
 		if errors.Is(err, regerr.ErrNotFound) {
 			// try to find a blob
 			if r.Digest != "" {
-				blob, err := c.rc.BlobGet(ctx, r, descriptor.Descriptor{
+				blob, err := c.rc.BlobHead(ctx, r, descriptor.Descriptor{
 					Digest: digest.Digest(r.Digest),
 				})
 				defer blob.Close() // we can safely close it as this is not when we read it.
@@ -261,7 +261,7 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (_ io.ReadClo
 
 	if c.isManifest(desc) {
 		fmt.Println("in manifest: ", desc, c.ref)
-		manifestContent, err := c.rc.ManifestGet(ctx, c.ref)
+		manifestContent, err := c.rc.ManifestGet(ctx, c.ref, regclient.WithManifestDesc(c.convertDescriptorToRegClient(desc)))
 		if err != nil {
 			return nil, err
 		}
@@ -273,6 +273,8 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (_ io.ReadClo
 
 		return io.NopCloser(bytes.NewReader(body)), nil
 	}
+
+	fmt.Println("in blob get: ", desc, c.ref)
 
 	reader, err := c.rc.BlobGet(ctx, c.ref, c.convertDescriptorToRegClient(desc))
 	if err != nil {
