@@ -26,13 +26,14 @@ The following configuration types are supported:
   </pre>
 - <code>blobLimits.ocireg.ocm.config.ocm.software</code>
   The config type <code>blobLimits.ocireg.ocm.config.ocm.software</code> can be used to set some
-  blob layer limits for particular OCI registries used to host OCM repositories;
+  blob layer limits for particular OCI registries used to host OCM repositories.
+  The <code>blobLimits</code> field maps a OCI registry address to the blob limit to use:
 
   <pre>
       type: blobLimits.ocireg.ocm.config.ocm.software
       blobLimits:
           dummy.io: 65564
-          dummy.io:8443: 32768
+          dummy.io:8443: 32768 // with :8443 specifying the port and 32768 specifying the byte limit
   </pre>
 
   If blob limits apply to a registry, local blobs with a size larger than
@@ -43,7 +44,7 @@ The following configuration types are supported:
   repository specification for those repositories.
 
   The most specific entry will be used. If a registry with a dedicated
-  port is requested, but no explicit such configuration is found, the
+  port is requested, but no explicit configuration is found, the
   setting for the sole hostname is used (if configured).
 - <code>cli.ocm.config.ocm.software</code>
   The config type <code>cli.ocm.config.ocm.software</code> is used to handle the

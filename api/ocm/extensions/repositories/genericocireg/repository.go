@@ -64,10 +64,9 @@ var (
 // NewRepository creates a new OCM repository based on any OCI abstraction from
 // the OCI context type.
 // The optional blobLimit is the size limit for layers maintained for the storage of localBlobs.
-// The value -1 means an unconfigured value,
-// a value == 0 disables the limiting and
+// The value -1 means an unconfigured value (a default from the blob limit configuration is used),
+// a value == 0 disables the limiting and (a default from the blob limit configuration is ignored),
 // a value > 0 enabled the usage of the specified size.
-// If this parameter is not given -1 is assumed.
 func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository, blobLimit ...int64) cpi.Repository {
 	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
 
