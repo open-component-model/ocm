@@ -24,7 +24,6 @@ import (
 )
 
 type ClientOptions struct {
-	// TODO: add multiple hosts parsing
 	Host    []config.Host
 	Version string
 }
@@ -40,8 +39,9 @@ type pushRequest struct {
 	ref  regref.Ref
 }
 
-// Commit and Status are actually not really used. Commit is a second stage operation and Status is never called in
-// the library.
+// Commit and Status are actually not really used in the library. Commit is a second stage operation and Status is never called in
+// the library. The Status was a thing mostly in docker being used to track chunk reads. But that's taken care of
+// by regclient internally.
 func (p *pushRequest) Commit(ctx context.Context, size int64, expected digest.Digest, opts ...content.Opt) error {
 	return p.rc.Close(ctx, p.ref)
 }
@@ -133,7 +133,6 @@ func (c *Client) convertDescriptorToRegClient(desc ociv1.Descriptor) descriptor.
 }
 
 func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descriptor, error) {
-	// TODO: figure out what to do about closing c.rc.
 	r, err := regref.New(ref)
 	if err != nil {
 		return "", ociv1.Descriptor{}, err
@@ -257,12 +256,13 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (_ io.ReadClo
 		desc.Size = 0
 	}
 
-	fmt.Println("in fetch: ", desc, c.ref)
-
 	if c.isManifest(desc) {
-		fmt.Println("in manifest: ", desc, c.ref)
 		manifestContent, err := c.rc.ManifestGet(ctx, c.ref, regclient.WithManifestDesc(c.convertDescriptorToRegClient(desc)))
 		if err != nil {
+			if errors.Is(err, regerr.ErrNotFound) {
+				return nil, errdefs.ErrNotFound
+			}
+
 			return nil, err
 		}
 
@@ -274,14 +274,21 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (_ io.ReadClo
 		return io.NopCloser(bytes.NewReader(body)), nil
 	}
 
-	fmt.Println("in blob get: ", desc, c.ref)
-
-	reader, err := c.rc.BlobGet(ctx, c.ref, c.convertDescriptorToRegClient(desc))
+	// check if the blob exists so we can bail early
+	_, err = c.rc.BlobHead(ctx, c.ref, c.convertDescriptorToRegClient(desc))
 	if err != nil {
-		return nil, fmt.Errorf("failed to get the blob reader: %w", err)
+		if errors.Is(err, regerr.ErrNotFound) {
+			return nil, errdefs.ErrNotFound
+		}
+
+		return nil, err
 	}
 
-	return reader, nil
+	delayer := func() (io.ReadCloser, error) {
+		return c.rc.BlobGet(ctx, c.ref, c.convertDescriptorToRegClient(desc))
+	}
+
+	return newDelayedReader(delayer)
 }
 
 func (c *Client) List(ctx context.Context) (_ []string, err error) {

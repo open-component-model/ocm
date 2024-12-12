@@ -8,6 +8,9 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	n := New(ClientOptions{Host: config.HostNew()})
+	host := config.HostNew()
+	n := New(ClientOptions{Host: []config.Host{
+		*host,
+	}})
 	require.NotNil(t, n)
 }
