@@ -12,12 +12,19 @@ var (
 	lock              sync.Mutex
 )
 
+const (
+	KB = int64(1000)
+	MB = 1000 * KB
+	GB = 1000 * MB
+)
+
 func init() {
 	defaultBlobLimits = config.BlobLimits{}
 
 	// Add limits for known OCI repositories, here,
 	// or provide init functions in specialized packages
 	// by calling AddDefaultBlobLimit.
+	AddDefaultBlobLimit("ghcr.io", 10*GB) // https://github.com/orgs/community/discussions/77429
 }
 
 // AddDefaultBlobLimit can be used to set default blob limits
