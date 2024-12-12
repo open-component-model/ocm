@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strings"
 	"time"
 
 	"github.com/containerd/containerd/content"
@@ -18,13 +17,15 @@ import (
 	"github.com/regclient/regclient/config"
 	"github.com/regclient/regclient/scheme/reg"
 	"github.com/regclient/regclient/types/descriptor"
+	regerr "github.com/regclient/regclient/types/errs"
 	"github.com/regclient/regclient/types/manifest"
 	"github.com/regclient/regclient/types/platform"
 	regref "github.com/regclient/regclient/types/ref"
 )
 
 type ClientOptions struct {
-	Host    *config.Host
+	// TODO: add multiple hosts parsing
+	Host    []config.Host
 	Version string
 }
 
@@ -63,7 +64,7 @@ var (
 
 func New(opts ClientOptions) *Client {
 	rc := regclient.New(
-		regclient.WithConfigHost(*opts.Host),
+		regclient.WithConfigHost(opts.Host...),
 		regclient.WithDockerCerts(),
 		regclient.WithDockerCreds(),
 		regclient.WithUserAgent("containerd/"+opts.Version),
@@ -138,32 +139,30 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 		return "", ociv1.Descriptor{}, err
 	}
 
-	if r.Digest != "" {
-		blob, err := c.rc.BlobHead(ctx, r, descriptor.Descriptor{
-			Digest: digest.Digest(r.Digest),
-		})
-		defer blob.Close() // we can safely close it as this is not when we read it.
-
-		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				return "", ociv1.Descriptor{}, errdefs.ErrNotFound
-			}
-
-			return "", ociv1.Descriptor{}, fmt.Errorf("failed to resolve blob head: %w", err)
-		}
-
-		c.ref = r
-
-		return ref, c.convertDescriptorToOCI(blob.GetDescriptor()), nil
-	}
-
-	// if digest is set it will use that.
-	fmt.Println("we are in manifest")
-	m, err := c.rc.ManifestHead(ctx, r)
+	// first, try to find the manifest
+	m, err := c.rc.ManifestGet(ctx, r)
 	if err != nil {
-		fmt.Println("we are in manifest error: ", err)
-		if strings.Contains(err.Error(), "not found") {
-			return "", ociv1.Descriptor{}, errdefs.ErrNotFound
+		if errors.Is(err, regerr.ErrNotFound) {
+			// try to find a blob
+			if r.Digest != "" {
+				blob, err := c.rc.BlobGet(ctx, r, descriptor.Descriptor{
+					Digest: digest.Digest(r.Digest),
+				})
+				defer blob.Close() // we can safely close it as this is not when we read it.
+
+				if err != nil {
+					if errors.Is(err, regerr.ErrNotFound) {
+						return "", ociv1.Descriptor{}, errdefs.ErrNotFound
+					}
+
+					return "", ociv1.Descriptor{}, fmt.Errorf("failed to resolve blob head: %w", err)
+				}
+
+				// update the reference that has been resolved successfully
+				c.ref = r
+
+				return ref, c.convertDescriptorToOCI(blob.GetDescriptor()), nil
+			}
 		}
 
 		return "", ociv1.Descriptor{}, fmt.Errorf("failed to get manifest: %w", err)
@@ -172,7 +171,6 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 	// update the Ref of the client to the resolved reference.
 	c.ref = r
 
-	fmt.Println("we returned")
 	return ref, c.convertDescriptorToOCI(m.GetDescriptor()), nil
 }
 
@@ -224,7 +222,7 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) (Push
 		}
 
 		if err := c.rc.ManifestPut(ctx, c.ref, m); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to put manifest: %w", err)
 		}
 
 		// pushRequest closes the RC on `Commit`.

@@ -135,10 +135,12 @@ func (r *RepositoryImpl) getResolver(comp string) (regclient.Resolver, error) {
 	}
 
 	opts := regclient.ClientOptions{
-		Host: &regconfig.Host{
-			Name: "ghcr.io", //TODO: Need to figure out how to set the host.
-			User: username,
-			Pass: password,
+		Host: []regconfig.Host{
+			{
+				Name: "ghcr.io", //TODO: Need to figure out how to set the host.
+				User: username,
+				Pass: password,
+			},
 		},
 		Version: comp,
 	}
