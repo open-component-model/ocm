@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/containerd/containerd/content"
@@ -141,7 +142,7 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 	// first, try to find the manifest
 	m, err := c.rc.ManifestHead(ctx, r)
 	if err != nil {
-		if errors.Is(err, regerr.ErrNotFound) {
+		if c.isNotFoundError(err) {
 			// try to find a blob
 			if r.Digest != "" {
 				blob, err := c.rc.BlobHead(ctx, r, descriptor.Descriptor{
@@ -150,7 +151,7 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 				defer blob.Close() // we can safely close it as this is not when we read it.
 
 				if err != nil {
-					if errors.Is(err, regerr.ErrNotFound) {
+					if c.isNotFoundError(err) {
 						return "", ociv1.Descriptor{}, errdefs.ErrNotFound
 					}
 
@@ -162,6 +163,8 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 
 				return ref, c.convertDescriptorToOCI(blob.GetDescriptor()), nil
 			}
+
+			return "", ociv1.Descriptor{}, errdefs.ErrNotFound
 		}
 
 		return "", ociv1.Descriptor{}, fmt.Errorf("failed to get manifest: %w", err)
@@ -259,7 +262,7 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (_ io.ReadClo
 	if c.isManifest(desc) {
 		manifestContent, err := c.rc.ManifestGet(ctx, c.ref, regclient.WithManifestDesc(c.convertDescriptorToRegClient(desc)))
 		if err != nil {
-			if errors.Is(err, regerr.ErrNotFound) {
+			if c.isNotFoundError(err) {
 				return nil, errdefs.ErrNotFound
 			}
 
@@ -277,7 +280,7 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (_ io.ReadClo
 	// check if the blob exists so we can bail early
 	_, err = c.rc.BlobHead(ctx, c.ref, c.convertDescriptorToRegClient(desc))
 	if err != nil {
-		if errors.Is(err, regerr.ErrNotFound) {
+		if c.isNotFoundError(err) {
 			return nil, errdefs.ErrNotFound
 		}
 
@@ -314,4 +317,8 @@ func (c *Client) isManifest(desc ociv1.Descriptor) bool {
 	}
 
 	return false
+}
+
+func (c *Client) isNotFoundError(err error) bool {
+	return errors.Is(err, regerr.ErrNotFound) || strings.Contains(err.Error(), regerr.ErrNotFound.Error())
 }

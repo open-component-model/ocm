@@ -1,3 +1,5 @@
+//go:build deprecated
+
 /*
    Copyright The containerd Authors.
 
