@@ -8,7 +8,9 @@ import (
 	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
-	regconfig "github.com/regclient/regclient/config"
+	"ocm.software/ocm/api/tech/oras"
+	"oras.land/oras-go/v2/registry/remote/auth"
+	"oras.land/oras-go/v2/registry/remote/retry"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -120,30 +122,27 @@ func (r *RepositoryImpl) getResolver(comp string) (regclient.Resolver, error) {
 	if creds == nil {
 		logger.Trace("no credentials")
 	}
-
-	var (
-		password string
-		username string
-	)
-
+	
+	authCreds := auth.Credential{}
 	if creds != nil {
-		password = creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
-		if password == "" {
-			password = creds.GetProperty(credentials.ATTR_PASSWORD)
+		pass := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
+		if pass == "" {
+			pass = creds.GetProperty(credentials.ATTR_PASSWORD)
 		}
-		username = creds.GetProperty(credentials.ATTR_USERNAME)
+		authCreds.Username = creds.GetProperty(credentials.ATTR_USERNAME)
+		authCreds.Password = pass
 	}
 
-	opts := regclient.ClientOptions{
-		Host: []regconfig.Host{
-			{
-				Name: "ghcr.io", //TODO: Need to figure out how to set the host.
-				User: username,
-				Pass: password,
-			},
-		},
-		Version: comp,
-	}
+	//opts := regclient.ClientOptions{
+	//	Host: []regconfig.Host{
+	//		{
+	//			Name: "ghcr.io", //TODO: Need to figure out how to set the host.
+	//			User: username,
+	//			Pass: password,
+	//		},
+	//	},
+	//	Version: comp,
+	//}
 	//opts := docker.ResolverOptions{
 	//	Hosts: docker.ConvertHosts(config.ConfigureHosts(context.Background(), config.HostOptions{
 	//		UpdateClient: func(client *http.Client) error {
@@ -193,8 +192,13 @@ func (r *RepositoryImpl) getResolver(comp string) (regclient.Resolver, error) {
 	//		}(),
 	//	})),
 	//}
+	client := &auth.Client{
+		Client:     retry.DefaultClient,
+		Cache:      auth.NewCache(),
+		Credential: auth.StaticCredential(r.info.HostPort(), authCreds),
+	}
 
-	return regclient.New(opts), nil
+	return oras.New(oras.ClientOptions{Client: client}), nil
 }
 
 func (r *RepositoryImpl) GetRef(comp, vers string) string {
