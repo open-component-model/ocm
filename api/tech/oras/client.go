@@ -10,10 +10,10 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
-	regref "github.com/regclient/regclient/types/ref"
-	"ocm.software/ocm/api/tech/regclient"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
+
+	"ocm.software/ocm/api/tech/regclient"
 )
 
 type ClientOptions struct {
@@ -22,15 +22,12 @@ type ClientOptions struct {
 }
 
 type Client struct {
-	Client *auth.Client
-	//Repository *remote.Repository
+	Client    *auth.Client
 	PlainHTTP bool
 	Ref       string
 }
 
-type pushRequest struct {
-	ref regref.Ref
-}
+type pushRequest struct{}
 
 func (p *pushRequest) Commit(ctx context.Context, size int64, expected digest.Digest, opts ...content.Opt) error {
 	return nil
@@ -51,11 +48,6 @@ var (
 
 func New(opts ClientOptions) *Client {
 	return &Client{Client: opts.Client, PlainHTTP: opts.PlainHTTP}
-}
-
-// Close must be called at the end of the operation.
-func (c *Client) Close(ctx context.Context, ref regref.Ref) error {
-	return nil
 }
 
 func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descriptor, error) {
@@ -129,15 +121,6 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src regclient.Sou
 	if err := repository.Push(ctx, d, reader); err != nil {
 		return nil, fmt.Errorf("failed to push: %w, %s", err, c.Ref)
 	}
-
-	//ref, err := registry.ParseReference(c.Ref)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if ref.
-	//if err := repository.Tag(ctx, d, c.Ref); err != nil {
-	//	return nil, fmt.Errorf("failed to push tag: %w", err)
-	//}
 
 	return &pushRequest{}, nil
 }

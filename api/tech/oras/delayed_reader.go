@@ -25,7 +25,6 @@ func (d *delayedReader) Read(p []byte) (n int, err error) {
 	reader, err := d.reader()
 	if err != nil {
 		return 0, err
-
 	}
 
 	return reader.Read(p)

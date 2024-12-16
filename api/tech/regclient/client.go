@@ -148,7 +148,7 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 				blob, err := c.rc.BlobHead(ctx, r, descriptor.Descriptor{
 					Digest: digest.Digest(r.Digest),
 				})
-				defer blob.Close() // we can safely close it as this is not when we read it.
+				defer blob.Close() //nolint:staticcheck // we can safely close it as this is not when we read it.
 
 				if err != nil {
 					if c.isNotFoundError(err) {
