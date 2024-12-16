@@ -86,7 +86,7 @@ ocm check rhubarb — Determine Whether We Are In Rhubarb Season
 Synopsis:
   ocm check rhubarb <options>
 
-Flags:
+Options:
   -d, --date string   the date to ask for (MM/DD)
   -h, --help          help for check
 
@@ -106,7 +106,7 @@ ocm check rhubarb — Determine Whether We Are In Rhubarb Season
 Synopsis:
   ocm check rhubarb <options>
 
-Flags:
+Options:
   -d, --date string   the date to ask for (MM/DD)
   -h, --help          help for check
 

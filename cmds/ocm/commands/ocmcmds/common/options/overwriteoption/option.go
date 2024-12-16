@@ -50,10 +50,14 @@ versions are re-transported).
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
 	if (o.overwrite != nil && o.overwrite.Changed) || o.Overwrite {
-		return standard.Overwrite(o.Overwrite).ApplyTransferOption(opts)
+		if err := standard.Overwrite(o.Overwrite).ApplyTransferOption(opts); err != nil {
+			return err
+		}
 	}
 	if (o.enforce != nil && o.enforce.Changed) || o.EnforceTransport {
-		return standard.EnforceTransport(o.EnforceTransport).ApplyTransferOption(opts)
+		if err := standard.EnforceTransport(o.EnforceTransport).ApplyTransferOption(opts); err != nil {
+			return err
+		}
 	}
 	return nil
 }
