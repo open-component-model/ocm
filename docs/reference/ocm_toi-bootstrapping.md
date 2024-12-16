@@ -113,7 +113,7 @@ to executors. It uses the following fields:
   the executor will be used for all actions. The first matching executor entry
   will be used to execute an action by the bootstrap command
 
-- **<code>resourceRef</code>** *[]ResourceReference*
+- **<code>resourceRef</code>** *ResourceReference*
 
   An OCM resource reference describing a component version resource relative to
   the component version containing the package resource.
