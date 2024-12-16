@@ -4,8 +4,6 @@ import (
 	"context"
 	"io"
 
-	"github.com/containerd/containerd/content"
-	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -54,22 +52,9 @@ type Fetcher interface {
 type Pusher interface {
 	// Push returns a push request for the given resource identified
 	// by the descriptor and the given data source.
-	Push(ctx context.Context, d ocispec.Descriptor, src Source) (PushRequest, error)
+	Push(ctx context.Context, d ocispec.Descriptor, src Source) error
 }
 
 type Lister interface {
 	List(context.Context) ([]string, error)
-}
-
-// PushRequest handles the result of a push request
-// replaces containerd content.Writer.
-type PushRequest interface {
-	// Commit commits the blob (but no roll-back is guaranteed on an error).
-	// size and expected can be zero-value when unknown.
-	// Commit always closes the writer, even on error.
-	// ErrAlreadyExists aborts the writer.
-	Commit(ctx context.Context, size int64, expected digest.Digest, opts ...content.Opt) error
-
-	// Status returns the current state of write
-	Status() (content.Status, error)
 }

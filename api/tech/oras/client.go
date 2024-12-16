@@ -2,14 +2,14 @@ package oras
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 
-	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
-	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+	oraserr "oras.land/oras-go/v2/errdef"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
 )
@@ -24,18 +24,6 @@ type Client struct {
 	PlainHTTP bool
 	Ref       string
 }
-
-type pushRequest struct{}
-
-func (p *pushRequest) Commit(ctx context.Context, size int64, expected digest.Digest, opts ...content.Opt) error {
-	return nil
-}
-
-func (p *pushRequest) Status() (content.Status, error) {
-	return content.Status{}, nil
-}
-
-var _ PushRequest = &pushRequest{}
 
 var (
 	_ Resolver = &Client{}
@@ -61,7 +49,7 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 	// Meaning it will throw that error instead of not found.
 	desc, err := src.Resolve(ctx, ref)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, oraserr.ErrNotFound) {
 			return "", ociv1.Descriptor{}, errdefs.ErrNotFound
 		}
 
@@ -86,15 +74,15 @@ func (c *Client) Lister(ctx context.Context, ref string) (Lister, error) {
 	return c, nil
 }
 
-func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) (PushRequest, error) {
+func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error {
 	reader, err := src.Reader()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	repository, err := c.createRepository(c.Ref)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if split := strings.Split(c.Ref, ":"); len(split) == 2 {
@@ -103,19 +91,19 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) (Push
 		// that layer resulting in the created tag pointing to the right
 		// blob data.
 		if err := repository.PushReference(ctx, d, reader, c.Ref); err != nil {
-			return nil, fmt.Errorf("failed to push tag: %w", err)
+			return fmt.Errorf("failed to push tag: %w", err)
 		}
 
-		return &pushRequest{}, nil
+		return nil
 	}
 
 	// We have a digest, so we push use plain push for the digest.
 	// Push here decides if it's a Manifest or a Blob.
 	if err := repository.Push(ctx, d, reader); err != nil {
-		return nil, fmt.Errorf("failed to push: %w, %s", err, c.Ref)
+		return fmt.Errorf("failed to push: %w, %s", err, c.Ref)
 	}
 
-	return &pushRequest{}, nil
+	return nil
 }
 
 func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadCloser, error) {
@@ -131,7 +119,7 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadClose
 	// that the mediatype is not set at this point.
 	rdesc, err := src.Manifests().Resolve(ctx, desc.Digest.String())
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, oraserr.ErrNotFound) {
 			rdesc, err = src.Blobs().Resolve(ctx, desc.Digest.String())
 			if err != nil {
 				return nil, fmt.Errorf("failed to resolve fetch blob %q: %w", desc.Digest.String(), err)

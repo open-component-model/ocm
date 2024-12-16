@@ -93,8 +93,7 @@ func pushData(ctx context.Context, p oras.Pusher, desc artdesc.Descriptor, data 
 	}
 
 	logging.Logger().Debug("*** push blob", "mediatype", desc.MediaType, "digest", desc.Digest, "key", key)
-	req, err := p.Push(ctx, desc, data)
-	if err != nil {
+	if err := p.Push(ctx, desc, data); err != nil {
 		if errdefs.IsAlreadyExists(err) {
 			logging.Logger().Debug("blob already exists", "mediatype", desc.MediaType, "digest", desc.Digest)
 
@@ -104,7 +103,7 @@ func pushData(ctx context.Context, p oras.Pusher, desc artdesc.Descriptor, data 
 		return fmt.Errorf("failed to push: %w", err)
 	}
 
-	return req.Commit(ctx, desc.Size, desc.Digest)
+	return nil
 }
 
 var dummyContext = nologger()
