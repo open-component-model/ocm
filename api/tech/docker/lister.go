@@ -11,7 +11,7 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/log"
 	"github.com/pkg/errors"
-	"ocm.software/ocm/api/tech/regclient"
+	"ocm.software/ocm/api/tech/oras"
 )
 
 var ErrObjectNotRequired = errors.New("object not required")
@@ -25,7 +25,7 @@ type dockerLister struct {
 	dockerBase *dockerBase
 }
 
-func (r *dockerResolver) Lister(ctx context.Context, ref string) (regclient.Lister, error) {
+func (r *dockerResolver) Lister(ctx context.Context, ref string) (oras.Lister, error) {
 	base, err := r.resolveDockerBase(ref)
 	if err != nil {
 		return nil, err

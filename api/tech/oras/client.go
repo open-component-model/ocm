@@ -12,8 +12,6 @@ import (
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
-
-	"ocm.software/ocm/api/tech/regclient"
 )
 
 type ClientOptions struct {
@@ -37,13 +35,13 @@ func (p *pushRequest) Status() (content.Status, error) {
 	return content.Status{}, nil
 }
 
-var _ regclient.PushRequest = &pushRequest{}
+var _ PushRequest = &pushRequest{}
 
 var (
-	_ regclient.Resolver = &Client{}
-	_ regclient.Fetcher  = &Client{}
-	_ regclient.Pusher   = &Client{}
-	_ regclient.Lister   = &Client{}
+	_ Resolver = &Client{}
+	_ Fetcher  = &Client{}
+	_ Pusher   = &Client{}
+	_ Lister   = &Client{}
 )
 
 func New(opts ClientOptions) *Client {
@@ -73,22 +71,22 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 	return "", desc, nil
 }
 
-func (c *Client) Fetcher(ctx context.Context, ref string) (regclient.Fetcher, error) {
+func (c *Client) Fetcher(ctx context.Context, ref string) (Fetcher, error) {
 	c.Ref = ref
 	return c, nil
 }
 
-func (c *Client) Pusher(ctx context.Context, ref string) (regclient.Pusher, error) {
+func (c *Client) Pusher(ctx context.Context, ref string) (Pusher, error) {
 	c.Ref = ref
 	return c, nil
 }
 
-func (c *Client) Lister(ctx context.Context, ref string) (regclient.Lister, error) {
+func (c *Client) Lister(ctx context.Context, ref string) (Lister, error) {
 	c.Ref = ref
 	return c, nil
 }
 
-func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src regclient.Source) (regclient.PushRequest, error) {
+func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) (PushRequest, error) {
 	reader, err := src.Reader()
 	if err != nil {
 		return nil, err

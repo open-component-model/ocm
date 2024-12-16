@@ -2,6 +2,9 @@ package ocireg
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"net/http"
 	"path"
 	"strings"
 
@@ -12,11 +15,11 @@ import (
 	"oras.land/oras-go/v2/registry/remote/retry"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/tech/oras"
-	"ocm.software/ocm/api/tech/regclient"
 	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/refmgmt"
@@ -111,7 +114,7 @@ func (r *RepositoryImpl) getCreds(comp string) (credentials.Credentials, error) 
 	return identity.GetCredentials(r.GetContext(), r.info.Locator, comp)
 }
 
-func (r *RepositoryImpl) getResolver(comp string) (regclient.Resolver, error) {
+func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 	creds, err := r.getCreds(comp)
 	if err != nil {
 		if !errors.IsErrUnknownKind(err, credentials.KIND_CONSUMER) {
@@ -133,13 +136,44 @@ func (r *RepositoryImpl) getResolver(comp string) (regclient.Resolver, error) {
 		authCreds.Password = pass
 	}
 
-	client := &auth.Client{
-		Client:     retry.DefaultClient,
+	client := retry.DefaultClient
+	if r.info.Scheme == "https" {
+		// set up TLS
+		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
+		conf := &tls.Config{
+			// MinVersion: tls.VersionTLS13,
+			RootCAs: func() *x509.CertPool {
+				var rootCAs *x509.CertPool
+				if creds != nil {
+					c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
+					if c != "" {
+						rootCAs = x509.NewCertPool()
+						rootCAs.AppendCertsFromPEM([]byte(c))
+					}
+				}
+				if rootCAs == nil {
+					rootCAs = rootcertsattr.Get(r.GetContext()).GetRootCertPool(true)
+				}
+				return rootCAs
+			}(),
+		}
+		client = &http.Client{
+			Transport: retry.NewTransport(&http.Transport{
+				TLSClientConfig: conf,
+			}),
+		}
+	}
+
+	authClient := &auth.Client{
+		Client:     client,
 		Cache:      auth.NewCache(),
 		Credential: auth.StaticCredential(r.info.HostPort(), authCreds),
 	}
 
-	return oras.New(oras.ClientOptions{Client: client}), nil
+	return oras.New(oras.ClientOptions{
+		Client:    authClient,
+		PlainHTTP: r.info.Scheme == "http",
+	}), nil
 }
 
 func (r *RepositoryImpl) GetRef(comp, vers string) string {

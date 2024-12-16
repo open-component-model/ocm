@@ -22,8 +22,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context/ctxhttp"
-	"ocm.software/ocm/api/tech/regclient"
-
+	"ocm.software/ocm/api/tech/oras"
 	"ocm.software/ocm/api/utils/accessio"
 )
 
@@ -120,7 +119,7 @@ type dockerResolver struct {
 }
 
 // NewResolver returns a new resolver to a Docker registry.
-func NewResolver(options ResolverOptions) regclient.Resolver {
+func NewResolver(options ResolverOptions) oras.Resolver {
 	if options.Tracker == nil {
 		options.Tracker = NewInMemoryTracker()
 	}
@@ -204,7 +203,7 @@ func (r *countingReader) Read(p []byte) (int, error) {
 	return n, err
 }
 
-var _ regclient.Resolver = &dockerResolver{}
+var _ oras.Resolver = &dockerResolver{}
 
 func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocispec.Descriptor, error) {
 	base, err := r.resolveDockerBase(ref)
@@ -384,7 +383,7 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 	return "", ocispec.Descriptor{}, firstErr
 }
 
-func (r *dockerResolver) Fetcher(ctx context.Context, ref string) (regclient.Fetcher, error) {
+func (r *dockerResolver) Fetcher(ctx context.Context, ref string) (oras.Fetcher, error) {
 	base, err := r.resolveDockerBase(ref)
 	if err != nil {
 		return nil, err
@@ -395,7 +394,7 @@ func (r *dockerResolver) Fetcher(ctx context.Context, ref string) (regclient.Fet
 	}, nil
 }
 
-func (r *dockerResolver) Pusher(ctx context.Context, ref string) (regclient.Pusher, error) {
+func (r *dockerResolver) Pusher(ctx context.Context, ref string) (oras.Pusher, error) {
 	base, err := r.resolveDockerBase(ref)
 	if err != nil {
 		return nil, err

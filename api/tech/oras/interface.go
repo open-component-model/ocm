@@ -1,4 +1,4 @@
-package regclient
+package oras
 
 import (
 	"context"
