@@ -12,10 +12,10 @@ Aliases:
 Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
   {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if and .HasAvailableLocalFlags .IsAvailableCommand}}
 
-Flags:
+Options:
 {{ flagUsages .LocalFlags | trimTrailingWhitespaces}}{{end}}{{if and .HasAvailableInheritedFlags .IsAvailableCommand}}
 
-Global Flags:
+Global Options:
 {{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}
 
 Description:
@@ -44,10 +44,10 @@ Examples:
 Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
   {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
 
-Flags:
+Options:
 {{ flagUsages .LocalFlags | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
 
-Global Flags:
+Global Options:
 {{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
 
 Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
