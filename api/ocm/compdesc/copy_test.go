@@ -52,7 +52,9 @@ var _ = Describe("Component Descripor Copy Test Suitet", func() {
 							Value:                  "digest",
 						},
 					},
-					Access: ociartifact.New("oci.com/image"),
+					Artifact: compdesc.Artifact{
+						Access: ociartifact.New("oci.com/image"),
+					},
 				},
 			}
 			cd.Sources = compdesc.Sources{
@@ -66,7 +68,9 @@ var _ = Describe("Component Descripor Copy Test Suitet", func() {
 						},
 						Type: "src",
 					},
-					Access: ociartifact.New("oci.com/otherimage"),
+					Artifact: compdesc.Artifact{
+						Access: ociartifact.New("oci.com/otherimage"),
+					},
 				},
 			}
 			cd.References = compdesc.References{

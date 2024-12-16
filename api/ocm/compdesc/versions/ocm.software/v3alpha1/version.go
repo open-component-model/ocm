@@ -2,7 +2,6 @@ package v3alpha1
 
 import (
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1/jsonscheme"
@@ -107,13 +106,25 @@ func convertReferencesTo(in []Reference) compdesc.References {
 	return out
 }
 
+func convertArtifactTo(in Artifact) compdesc.Artifact {
+	hints := make(metav1.ReferenceHints, len(in.ReferenceHints))
+
+	for i, h := range in.ReferenceHints {
+		hints[i] = h
+	}
+	return compdesc.Artifact{
+		Access:         compdesc.GenericAccessSpec(in.Access.DeepCopy()),
+		ReferenceHints: hints,
+	}
+}
+
 func convertSourceTo(in Source) compdesc.Source {
 	return compdesc.Source{
 		SourceMeta: compdesc.SourceMeta{
 			ElementMeta: convertElementmetaTo(in.ElementMeta),
 			Type:        in.Type,
 		},
-		Access: compdesc.GenericAccessSpec(in.Access.DeepCopy()),
+		Artifact: convertArtifactTo(in.Artifact),
 	}
 }
 
@@ -150,7 +161,7 @@ func convertResourceTo(in Resource) compdesc.Resource {
 			SourceRefs:  srcRefs,
 			Digest:      in.Digest.Copy(),
 		},
-		Access: compdesc.GenericAccessSpec(in.Access),
+		Artifact: convertArtifactTo(in.Artifact),
 	}
 }
 
@@ -231,17 +242,28 @@ func convertReferencesFrom(in []compdesc.Reference) []Reference {
 	return out
 }
 
-func convertSourceFrom(in compdesc.Source) Source {
+func convertArtifactFrom(in compdesc.Artifact) Artifact {
 	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
 	if err != nil {
 		compdesc.ThrowConversionError(err)
 	}
+	hints := make([]metav1.DefaultReferenceHint, len(in.ReferenceHints))
+	for i, h := range in.ReferenceHints {
+		hints[i] = h.AsDefault()
+	}
+	return Artifact{
+		Access:         acc,
+		ReferenceHints: hints,
+	}
+}
+
+func convertSourceFrom(in compdesc.Source) Source {
 	return Source{
 		SourceMeta: SourceMeta{
 			ElementMeta: convertElementmetaFrom(in.ElementMeta),
 			Type:        in.Type,
 		},
-		Access: acc,
+		Artifact: convertArtifactFrom(in.Artifact),
 	}
 }
 
@@ -266,16 +288,12 @@ func convertElementmetaFrom(in compdesc.ElementMeta) ElementMeta {
 }
 
 func convertResourceFrom(in compdesc.Resource) Resource {
-	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
-	if err != nil {
-		compdesc.ThrowConversionError(err)
-	}
 	return Resource{
 		ElementMeta: convertElementmetaFrom(in.ElementMeta),
 		Type:        in.Type,
 		Relation:    in.Relation,
 		SourceRefs:  convertSourcerefsFrom(in.SourceRefs),
-		Access:      acc,
+		Artifact:    convertArtifactFrom(in.Artifact),
 		Digest:      in.Digest.Copy(),
 	}
 }

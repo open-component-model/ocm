@@ -351,7 +351,9 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 
 	res := &compdesc.Resource{
 		ResourceMeta: *meta.Copy(),
-		Access:       acc,
+		Artifact: compdesc.Artifact{
+			Access: acc,
+		},
 	}
 
 	ctx := c.bridge.GetContext()
@@ -529,7 +531,9 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 
 	res := &compdesc.Source{
 		SourceMeta: *meta.Copy(),
-		Access:     acc,
+		Artifact: compdesc.Artifact{
+			Access: acc,
+		},
 	}
 
 	return c.Execute(func() error {

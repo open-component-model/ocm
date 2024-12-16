@@ -158,6 +158,16 @@ func (o *ElementMeta) GetIdentityDigest(accessor ElementAccessor) []byte {
 	return o.GetIdentity(accessor).Digest()
 }
 
+// Artifact describes common attributes for artifact elements.
+type Artifact struct {
+	// Access describes the type specific method to
+	// access the defined resource.
+	Access *runtime.UnstructuredTypedObject `json:"access"`
+	// ReferenceHints describe several types hints used by uploaders
+	// to decide on used element identities.
+	ReferenceHints []metav1.DefaultReferenceHint `json:"referenceHints,omitempty"`
+}
+
 // Sources describes a set of source specifications.
 type Sources []Source
 
@@ -174,8 +184,7 @@ func (r Sources) Get(i int) ElementMetaAccessor {
 // +k8s:openapi-gen=true
 type Source struct {
 	SourceMeta `json:",inline"`
-
-	Access *runtime.UnstructuredTypedObject `json:"access"`
+	Artifact   `json:",inline"`
 }
 
 // SourceMeta is the definition of the metadata of a source.
@@ -241,9 +250,7 @@ type Resource struct {
 	// The usage of this field in external formats is deprecated.
 	SourceRef []SourceRef `json:"srcRef,omitempty"`
 
-	// Access describes the type specific method to
-	// access the defined resource.
-	Access *runtime.UnstructuredTypedObject `json:"access"`
+	Artifact `json:",inline"`
 
 	// Digest is the optional digest of the referenced resource.
 	// +optional

@@ -351,6 +351,31 @@ func GenericAccessSpec(un *runtime.UnstructuredTypedObject) AccessSpec {
 	}
 }
 
+// Artifact describes common attributes for artifact elements.
+type Artifact struct {
+	// Access describes the type specific method to
+	// access the defined resource.
+	Access AccessSpec `json:"access"`
+	// ReferenceHints describe several types hints used by uploaders
+	// to decide on used element identities.
+	ReferenceHints metav1.ReferenceHints `json:"referenceHints,omitempty"`
+}
+
+func (a *Artifact) Copy() *Artifact {
+	return &Artifact{
+		Access:         a.Access,
+		ReferenceHints: a.ReferenceHints.Copy(),
+	}
+}
+
+func (s *Artifact) GetAccess() AccessSpec {
+	return s.Access
+}
+
+func (r *Artifact) SetAccess(a AccessSpec) {
+	r.Access = a
+}
+
 // Sources describes a set of source specifications.
 type Sources []Source
 
@@ -392,15 +417,7 @@ func (s Sources) Copy() Sources {
 // +k8s:openapi-gen=true
 type Source struct {
 	SourceMeta `json:",inline"`
-	Access     AccessSpec `json:"access"`
-}
-
-func (s *Source) GetAccess() AccessSpec {
-	return s.Access
-}
-
-func (r *Source) SetAccess(a AccessSpec) {
-	r.Access = a
+	Artifact   `json:",inline"`
 }
 
 func (r *Source) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
@@ -417,7 +434,7 @@ func (r *Source) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 func (s *Source) Copy() *Source {
 	return &Source{
 		SourceMeta: *s.SourceMeta.Copy(),
-		Access:     s.Access,
+		Artifact:   *s.Artifact.Copy(),
 	}
 }
 
@@ -564,17 +581,7 @@ func (r Resources) HaveDigests() bool {
 // +k8s:openapi-gen=true
 type Resource struct {
 	ResourceMeta `json:",inline"`
-	// Access describes the type specific method to
-	// access the defined resource.
-	Access AccessSpec `json:"access"`
-}
-
-func (r *Resource) GetAccess() AccessSpec {
-	return r.Access
-}
-
-func (r *Resource) SetAccess(a AccessSpec) {
-	r.Access = a
+	Artifact     `json:",inline"`
 }
 
 func (r *Resource) GetDigest() *metav1.DigestSpec {
@@ -612,7 +619,7 @@ func (r *Resource) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 func (r *Resource) Copy() *Resource {
 	return &Resource{
 		ResourceMeta: *r.ResourceMeta.Copy(),
-		Access:       r.Access,
+		Artifact:     *r.Artifact.Copy(),
 	}
 }
 

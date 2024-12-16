@@ -87,7 +87,9 @@ var _ = Describe("equivalence", func() {
 						Value:                  "x",
 					},
 				},
-				Access: localblob.New("test", "test", "test", nil),
+				Artifact: compdesc.Artifact{
+					Access: localblob.New("test", "test", "test", nil),
+				},
 			}
 			b = a.Copy()
 		})
@@ -190,7 +192,9 @@ var _ = Describe("equivalence", func() {
 							Value:                  "x",
 						},
 					},
-					Access: localblob.New("test1", "test1", "test", nil),
+					Artifact: compdesc.Artifact{
+						Access: localblob.New("test1", "test1", "test", nil),
+					},
 				},
 				compdesc.Resource{
 					ResourceMeta: compdesc.ResourceMeta{
@@ -207,7 +211,9 @@ var _ = Describe("equivalence", func() {
 							Value:                  "y",
 						},
 					},
-					Access: localblob.New("test2", "test2", "test", nil),
+					Artifact: compdesc.Artifact{
+						Access: localblob.New("test2", "test2", "test", nil),
+					},
 				},
 			}
 
@@ -270,7 +276,9 @@ var _ = Describe("equivalence", func() {
 						Value:                  "z",
 					},
 				},
-				Access: localblob.New("test3", "test3", "test", nil),
+				Artifact: compdesc.Artifact{
+					Access: localblob.New("test3", "test3", "test", nil),
+				},
 			})
 			Expect(a.Equivalent(b)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(true))))
 			Expect(b.Equivalent(a)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(true))))
@@ -291,7 +299,9 @@ var _ = Describe("equivalence", func() {
 						Value:                  "z",
 					},
 				},
-				Access: localblob.New("test3", "test3", "test", nil),
+				Artifact: compdesc.Artifact{
+					Access: localblob.New("test3", "test3", "test", nil),
+				},
 			})
 			Expect(a.Equivalent(b)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(true))))
 			Expect(b.Equivalent(a)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(true))))
@@ -307,7 +317,9 @@ var _ = Describe("equivalence", func() {
 					Type:     "test",
 					Relation: v1.LocalRelation,
 				},
-				Access: localblob.New("test3", "test3", "test", nil),
+				Artifact: compdesc.Artifact{
+					Access: localblob.New("test3", "test3", "test", nil),
+				},
 			})
 			Expect(a.Equivalent(b)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(false))))
 			Expect(b.Equivalent(a)).To(Equal(equivalent.StateNotLocalHashEqual().Apply(equivalent.StateNotArtifactEqual(false))))
@@ -325,7 +337,9 @@ var _ = Describe("equivalence", func() {
 					Relation: v1.LocalRelation,
 					Digest:   compdesc.NewExcludeFromSignatureDigest(),
 				},
-				Access: localblob.New("test3", "test3", "test", nil),
+				Artifact: compdesc.Artifact{
+					Access: localblob.New("test3", "test3", "test", nil),
+				},
 			})
 			CheckNotLocalHashEqual(a.Equivalent(b))
 			CheckNotLocalHashEqual(b.Equivalent(a))
@@ -356,7 +370,9 @@ var _ = Describe("equivalence", func() {
 					},
 					Type: "test",
 				},
-				Access: localblob.New("test", "test", "test", nil),
+				Artifact: compdesc.Artifact{
+					Access: localblob.New("test", "test", "test", nil),
+				},
 			}
 			b = a.Copy()
 		})
@@ -411,7 +427,9 @@ var _ = Describe("equivalence", func() {
 						},
 						Type: "test",
 					},
-					Access: localblob.New("test1", "test1", "test", nil),
+					Artifact: compdesc.Artifact{
+						Access: localblob.New("test1", "test1", "test", nil),
+					},
 				},
 				compdesc.Source{
 					SourceMeta: compdesc.SourceMeta{
@@ -422,7 +440,9 @@ var _ = Describe("equivalence", func() {
 						},
 						Type: "test",
 					},
-					Access: localblob.New("test2", "test2", "test", nil),
+					Artifact: compdesc.Artifact{
+						Access: localblob.New("test2", "test2", "test", nil),
+					},
 				},
 			}
 
@@ -464,7 +484,9 @@ var _ = Describe("equivalence", func() {
 					},
 					Type: "test",
 				},
-				Access: localblob.New("test3", "test3", "test", nil),
+				Artifact: compdesc.Artifact{
+					Access: localblob.New("test3", "test3", "test", nil),
+				},
 			})
 			CheckNotLocalHashEqual(a.Equivalent(b))
 			CheckNotLocalHashEqual(b.Equivalent(a))
@@ -479,7 +501,9 @@ var _ = Describe("equivalence", func() {
 					},
 					Type: "test",
 				},
-				Access: localblob.New("test3", "test3", "test", nil),
+				Artifact: compdesc.Artifact{
+					Access: localblob.New("test3", "test3", "test", nil),
+				},
 			})
 			CheckNotLocalHashEqual(a.Equivalent(b))
 			CheckNotLocalHashEqual(b.Equivalent(a))

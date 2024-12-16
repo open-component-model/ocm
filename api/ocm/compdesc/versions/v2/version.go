@@ -116,13 +116,25 @@ func convertComponentReferencesTo(in []ComponentReference) compdesc.References {
 	return out
 }
 
+func convertArtifactTo(in Artifact) compdesc.Artifact {
+	hints := make(metav1.ReferenceHints, len(in.ReferenceHints))
+
+	for i, h := range in.ReferenceHints {
+		hints[i] = h
+	}
+	return compdesc.Artifact{
+		Access:         compdesc.GenericAccessSpec(in.Access.DeepCopy()),
+		ReferenceHints: hints,
+	}
+}
+
 func convertSourceTo(in Source) compdesc.Source {
 	return compdesc.Source{
 		SourceMeta: compdesc.SourceMeta{
 			ElementMeta: convertElementMetaTo(in.ElementMeta),
 			Type:        in.Type,
 		},
-		Access: compdesc.GenericAccessSpec(in.Access.DeepCopy()),
+		Artifact: convertArtifactTo(in.Artifact),
 	}
 }
 
@@ -159,7 +171,7 @@ func convertResourceTo(in Resource) compdesc.Resource {
 			SourceRefs:  srcRefs,
 			Digest:      in.Digest.Copy(),
 		},
-		Access: compdesc.GenericAccessSpec(in.Access),
+		Artifact: convertArtifactTo(in.Artifact),
 	}
 }
 
@@ -253,17 +265,28 @@ func convertComponentReferencesFrom(in []compdesc.Reference) []ComponentReferenc
 	return out
 }
 
-func convertSourceFrom(in compdesc.Source) Source {
+func convertArtifactFrom(in compdesc.Artifact) Artifact {
 	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
 	if err != nil {
 		compdesc.ThrowConversionError(err)
 	}
+	hints := make([]metav1.DefaultReferenceHint, len(in.ReferenceHints))
+	for i, h := range in.ReferenceHints {
+		hints[i] = h.AsDefault()
+	}
+	return Artifact{
+		Access:         acc,
+		ReferenceHints: hints,
+	}
+}
+
+func convertSourceFrom(in compdesc.Source) Source {
 	return Source{
 		SourceMeta: SourceMeta{
 			ElementMeta: convertElementMetaFrom(in.ElementMeta),
 			Type:        in.Type,
 		},
-		Access: acc,
+		Artifact: convertArtifactFrom(in.Artifact),
 	}
 }
 
@@ -288,16 +311,12 @@ func convertElementMetaFrom(in compdesc.ElementMeta) ElementMeta {
 }
 
 func convertResourceFrom(in compdesc.Resource) Resource {
-	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
-	if err != nil {
-		compdesc.ThrowConversionError(err)
-	}
 	return Resource{
 		ElementMeta: convertElementMetaFrom(in.ElementMeta),
 		Type:        in.Type,
 		Relation:    in.Relation,
 		SourceRefs:  convertSourceRefsFrom(in.SourceRefs),
-		Access:      acc,
+		Artifact:    convertArtifactFrom(in.Artifact),
 		Digest:      in.Digest.Copy(),
 	}
 }
