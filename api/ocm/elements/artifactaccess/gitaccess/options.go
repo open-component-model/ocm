@@ -7,10 +7,9 @@ import (
 type Option = optionutils.Option[*Options]
 
 type Options struct {
-	URL      string
-	Ref      string
-	PathSpec string
-	Commit   string
+	URL    string
+	Ref    string
+	Commit string
 }
 
 var _ Option = (*Options)(nil)
@@ -46,16 +45,6 @@ func (h ref) ApplyTo(opts *Options) {
 
 func WithRef(h string) Option {
 	return ref(h)
-}
-
-type pathSpec string
-
-func (h pathSpec) ApplyTo(opts *Options) {
-	opts.PathSpec = string(h)
-}
-
-func WithPathSpec(h string) Option {
-	return pathSpec(h)
 }
 
 type commitSpec string

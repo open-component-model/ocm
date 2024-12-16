@@ -135,17 +135,23 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 		return nil, err
 	}
 
+	depth := 0
+	if c.opts.Commit == "" {
+		depth = 1 // if we have no dedicated commit we can checkout HEAD, and thus a shallow clone is ok
+	}
+
 	newRepo := false
 	repo, err := git.Open(strg, billyFS)
 	if errors.Is(err, git.ErrRepositoryNotExists) {
 		repo, err = git.CloneContext(ctx, strg, billyFS, &git.CloneOptions{
-			Auth:          c.opts.AuthMethod,
-			URL:           c.opts.URL,
-			RemoteName:    git.DefaultRemoteName,
-			ReferenceName: plumbing.ReferenceName(c.opts.Ref),
-			SingleBranch:  true,
-			Depth:         0,
-			Tags:          git.AllTags,
+			Auth:              c.opts.AuthMethod,
+			URL:               c.opts.URL,
+			RemoteName:        git.DefaultRemoteName,
+			ReferenceName:     plumbing.ReferenceName(c.opts.Ref),
+			SingleBranch:      true,
+			Depth:             depth,
+			ShallowSubmodules: depth == 1,
+			Tags:              git.AllTags,
 		})
 		newRepo = true
 	}

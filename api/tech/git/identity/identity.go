@@ -1,7 +1,7 @@
 package identity
 
 import (
-	"strings"
+	"net"
 
 	giturls "github.com/whilp/git-urls"
 
@@ -78,9 +78,8 @@ func GetConsumerId(repoURL string) (cpi.ConsumerIdentity, error) {
 		}
 	}
 
-	if idx := strings.Index(host, ":"); idx > 0 {
-		port = host[idx+1:]
-		host = host[:idx]
+	if h, p, err := net.SplitHostPort(host); err == nil {
+		host, port = h, p
 	}
 
 	id := cpi.ConsumerIdentity{

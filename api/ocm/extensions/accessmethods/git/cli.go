@@ -15,7 +15,7 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "repoUrl")
+	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "repository", "repo", "repoUrl", "repoURL")
 	flagsets.AddFieldByOptionP(opts, options.CommitOption, config, "commit")
 	flagsets.AddFieldByOptionP(opts, options.ReferenceOption, config, "ref")
 	return nil

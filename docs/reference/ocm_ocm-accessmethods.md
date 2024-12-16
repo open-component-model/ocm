@@ -21,7 +21,7 @@ shown below.
   Git repository.
 
   The following versions are supported:
-  - Version <code>v1</code>
+  - Version <code>v1alpha1</code>
 
     The type specific specification fields are:
 

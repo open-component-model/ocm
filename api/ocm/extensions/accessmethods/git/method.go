@@ -33,29 +33,35 @@ type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
 	// RepoURL is the repository URL
-	RepoURL string `json:"repoUrl"`
+	RepoURL string `json:"repository"`
 
 	// Ref defines the hash of the commit
 	Ref string `json:"ref"`
 
 	// Commit defines the hash of the commit in string format to checkout from the Ref
 	Commit string `json:"commit"`
-
-	// PathSpec is a path in the repository to download, can be a file or a regex matching multiple files
-	PathSpec string `json:"pathSpec"`
 }
 
 // AccessSpecOptions defines a set of options which can be applied to the access spec.
 type AccessSpecOptions func(s *AccessSpec)
 
+func WithCommit(commit string) AccessSpecOptions {
+	return func(s *AccessSpec) {
+		s.Commit = commit
+	}
+}
+
+func WithRef(ref string) AccessSpecOptions {
+	return func(s *AccessSpec) {
+		s.Ref = ref
+	}
+}
+
 // New creates a new git registry access spec version v1.
-func New(url, ref, commit, pathSpec string, opts ...AccessSpecOptions) *AccessSpec {
+func New(url string, opts ...AccessSpecOptions) *AccessSpec {
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		RepoURL:             url,
-		Ref:                 ref,
-		Commit:              commit,
-		PathSpec:            pathSpec,
 	}
 	for _, o := range opts {
 		o(s)
