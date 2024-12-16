@@ -253,9 +253,7 @@ var _ = Describe("Normalization", func() {
 					Value:                  "z",
 				},
 			},
-			Artifact: compdesc.Artifact{
-				Access: none.New(),
-			},
+			Access: none.New(),
 		})
 		n, err := compdesc.Normalize(cd1, compdesc.JsonNormalisationV1)
 		Expect(err).To(Succeed())
@@ -277,9 +275,7 @@ var _ = Describe("Normalization", func() {
 					Value:                  "z",
 				},
 			},
-			Artifact: compdesc.Artifact{
-				Access: none.New(),
-			},
+			Access: none.New(),
 		})
 		n, err := compdesc.Normalize(cd1, compdesc.JsonNormalisationV2)
 		Expect(err).To(Succeed())

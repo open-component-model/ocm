@@ -116,25 +116,26 @@ func convertComponentReferencesTo(in []ComponentReference) compdesc.References {
 	return out
 }
 
-func convertArtifactTo(in Artifact) compdesc.Artifact {
-	hints := make(metav1.ReferenceHints, len(in.ReferenceHints))
+func convertHintsTo(in []metav1.DefaultReferenceHint) metav1.ReferenceHints {
+	if in == nil {
+		return nil
+	}
+	hints := make(metav1.ReferenceHints, len(in))
 
-	for i, h := range in.ReferenceHints {
+	for i, h := range in {
 		hints[i] = h
 	}
-	return compdesc.Artifact{
-		Access:         compdesc.GenericAccessSpec(in.Access.DeepCopy()),
-		ReferenceHints: hints,
-	}
+	return hints
 }
 
 func convertSourceTo(in Source) compdesc.Source {
 	return compdesc.Source{
 		SourceMeta: compdesc.SourceMeta{
-			ElementMeta: convertElementMetaTo(in.ElementMeta),
-			Type:        in.Type,
+			ElementMeta:    convertElementMetaTo(in.ElementMeta),
+			Type:           in.Type,
+			ReferenceHints: convertHintsTo(in.ReferenceHints),
 		},
-		Artifact: convertArtifactTo(in.Artifact),
+		Access: compdesc.GenericAccessSpec(in.Access.DeepCopy()),
 	}
 }
 
@@ -165,13 +166,14 @@ func convertResourceTo(in Resource) compdesc.Resource {
 	}
 	return compdesc.Resource{
 		ResourceMeta: compdesc.ResourceMeta{
-			ElementMeta: convertElementMetaTo(in.ElementMeta),
-			Type:        in.Type,
-			Relation:    in.Relation,
-			SourceRefs:  srcRefs,
-			Digest:      in.Digest.Copy(),
+			ElementMeta:    convertElementMetaTo(in.ElementMeta),
+			Type:           in.Type,
+			ReferenceHints: convertHintsTo(in.ReferenceHints),
+			Relation:       in.Relation,
+			SourceRefs:     srcRefs,
+			Digest:         in.Digest.Copy(),
 		},
-		Artifact: convertArtifactTo(in.Artifact),
+		Access: compdesc.GenericAccessSpec(in.Access),
 	}
 }
 
@@ -265,28 +267,29 @@ func convertComponentReferencesFrom(in []compdesc.Reference) []ComponentReferenc
 	return out
 }
 
-func convertArtifactFrom(in compdesc.Artifact) Artifact {
+func convertHintsFrom(in metav1.ReferenceHints) []metav1.DefaultReferenceHint {
+	if in == nil {
+		return nil
+	}
+	hints := make([]metav1.DefaultReferenceHint, len(in))
+	for i, h := range in {
+		hints[i] = h.AsDefault()
+	}
+	return hints
+}
+
+func convertSourceFrom(in compdesc.Source) Source {
 	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
 	if err != nil {
 		compdesc.ThrowConversionError(err)
 	}
-	hints := make([]metav1.DefaultReferenceHint, len(in.ReferenceHints))
-	for i, h := range in.ReferenceHints {
-		hints[i] = h.AsDefault()
-	}
-	return Artifact{
-		Access:         acc,
-		ReferenceHints: hints,
-	}
-}
-
-func convertSourceFrom(in compdesc.Source) Source {
 	return Source{
 		SourceMeta: SourceMeta{
-			ElementMeta: convertElementMetaFrom(in.ElementMeta),
-			Type:        in.Type,
+			ElementMeta:    convertElementMetaFrom(in.ElementMeta),
+			Type:           in.Type,
+			ReferenceHints: convertHintsFrom(in.ReferenceHints),
 		},
-		Artifact: convertArtifactFrom(in.Artifact),
+		Access: acc,
 	}
 }
 
@@ -311,13 +314,18 @@ func convertElementMetaFrom(in compdesc.ElementMeta) ElementMeta {
 }
 
 func convertResourceFrom(in compdesc.Resource) Resource {
+	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
+	if err != nil {
+		compdesc.ThrowConversionError(err)
+	}
 	return Resource{
-		ElementMeta: convertElementMetaFrom(in.ElementMeta),
-		Type:        in.Type,
-		Relation:    in.Relation,
-		SourceRefs:  convertSourceRefsFrom(in.SourceRefs),
-		Artifact:    convertArtifactFrom(in.Artifact),
-		Digest:      in.Digest.Copy(),
+		ElementMeta:    convertElementMetaFrom(in.ElementMeta),
+		Type:           in.Type,
+		ReferenceHints: convertHintsFrom(in.ReferenceHints),
+		Relation:       in.Relation,
+		SourceRefs:     convertSourceRefsFrom(in.SourceRefs),
+		Access:         acc,
+		Digest:         in.Digest.Copy(),
 	}
 }
 

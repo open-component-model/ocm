@@ -215,16 +215,6 @@ func (o *ElementMeta) GetRawIdentity() metav1.Identity {
 	return identity
 }
 
-// Artifact describes common attributes for artifact elements.
-type Artifact struct {
-	// Access describes the type specific method to
-	// access the defined resource.
-	Access *runtime.UnstructuredTypedObject `json:"access"`
-	// ReferenceHints describe several types hints used by uploaders
-	// to decide on used element identities.
-	ReferenceHints []metav1.DefaultReferenceHint `json:"referenceHints,omitempty"`
-}
-
 // Sources describes a set of source specifications.
 type Sources []Source
 
@@ -241,7 +231,8 @@ func (r Sources) Get(i int) ElementMetaAccessor {
 // +k8s:openapi-gen=true
 type Source struct {
 	SourceMeta `json:",inline"`
-	Artifact   `json:",inline"`
+
+	Access *runtime.UnstructuredTypedObject `json:"access"`
 }
 
 // SourceMeta is the definition of the meta data of a source.
@@ -251,6 +242,9 @@ type SourceMeta struct {
 	ElementMeta `json:",inline"`
 	// Type describes the type of the object.
 	Type string `json:"type"`
+	// ReferenceHints describe several types hints used by uploaders
+	// to decide on used element identities.
+	ReferenceHints []metav1.DefaultReferenceHint `json:"referenceHints,omitempty"`
 }
 
 // GetType returns the type of the object.
@@ -295,6 +289,10 @@ type Resource struct {
 	// Type describes the type of the object.
 	Type string `json:"type"`
 
+	// ReferenceHints describe several types hints used by uploaders
+	// to decide on used element identities.
+	ReferenceHints []metav1.DefaultReferenceHint `json:"referenceHints,omitempty"`
+
 	// Relation describes the relation of the resource to the component.
 	// Can be a local or external resource
 	Relation metav1.ResourceRelation `json:"relation,omitempty"`
@@ -307,7 +305,9 @@ type Resource struct {
 	// The usage of this field in external formats is deprecated.
 	SourceRef []SourceRef `json:"srcRef,omitempty"`
 
-	Artifact `json:",inline"`
+	// Access describes the type specific method to
+	// access the defined resource.
+	Access *runtime.UnstructuredTypedObject `json:"access"`
 
 	// Digest is the optional digest of the referenced resource.
 	// +optional

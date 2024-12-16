@@ -351,31 +351,6 @@ func GenericAccessSpec(un *runtime.UnstructuredTypedObject) AccessSpec {
 	}
 }
 
-// Artifact describes common attributes for artifact elements.
-type Artifact struct {
-	// Access describes the type specific method to
-	// access the defined resource.
-	Access AccessSpec `json:"access"`
-	// ReferenceHints describe several types hints used by uploaders
-	// to decide on used element identities.
-	ReferenceHints metav1.ReferenceHints `json:"referenceHints,omitempty"`
-}
-
-func (a *Artifact) Copy() *Artifact {
-	return &Artifact{
-		Access:         a.Access,
-		ReferenceHints: a.ReferenceHints.Copy(),
-	}
-}
-
-func (s *Artifact) GetAccess() AccessSpec {
-	return s.Access
-}
-
-func (r *Artifact) SetAccess(a AccessSpec) {
-	r.Access = a
-}
-
 // Sources describes a set of source specifications.
 type Sources []Source
 
@@ -417,7 +392,15 @@ func (s Sources) Copy() Sources {
 // +k8s:openapi-gen=true
 type Source struct {
 	SourceMeta `json:",inline"`
-	Artifact   `json:",inline"`
+	Access     AccessSpec `json:"access"`
+}
+
+func (s *Source) GetAccess() AccessSpec {
+	return s.Access
+}
+
+func (r *Source) SetAccess(a AccessSpec) {
+	r.Access = a
 }
 
 func (r *Source) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
@@ -434,7 +417,7 @@ func (r *Source) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 func (s *Source) Copy() *Source {
 	return &Source{
 		SourceMeta: *s.SourceMeta.Copy(),
-		Artifact:   *s.Artifact.Copy(),
+		Access:     s.Access,
 	}
 }
 
@@ -445,6 +428,9 @@ type SourceMeta struct {
 	ElementMeta
 	// Type describes the type of the object.
 	Type string `json:"type"`
+	// ReferenceHints describe several types hints used by uploaders
+	// to decide on used element identities.
+	ReferenceHints metav1.ReferenceHints `json:"referenceHints,omitempty"`
 }
 
 // GetType returns the type of the object.
@@ -463,8 +449,9 @@ func (o *SourceMeta) Copy() *SourceMeta {
 		return nil
 	}
 	return &SourceMeta{
-		ElementMeta: *o.ElementMeta.Copy(),
-		Type:        o.Type,
+		ElementMeta:    *o.ElementMeta.Copy(),
+		Type:           o.Type,
+		ReferenceHints: o.ReferenceHints.Copy(),
 	}
 }
 
@@ -581,7 +568,17 @@ func (r Resources) HaveDigests() bool {
 // +k8s:openapi-gen=true
 type Resource struct {
 	ResourceMeta `json:",inline"`
-	Artifact     `json:",inline"`
+	// Access describes the type specific method to
+	// access the defined resource.
+	Access AccessSpec `json:"access"`
+}
+
+func (r *Resource) GetAccess() AccessSpec {
+	return r.Access
+}
+
+func (r *Resource) SetAccess(a AccessSpec) {
+	r.Access = a
 }
 
 func (r *Resource) GetDigest() *metav1.DigestSpec {
@@ -619,7 +616,7 @@ func (r *Resource) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 func (r *Resource) Copy() *Resource {
 	return &Resource{
 		ResourceMeta: *r.ResourceMeta.Copy(),
-		Artifact:     *r.Artifact.Copy(),
+		Access:       r.Access,
 	}
 }
 
@@ -631,6 +628,10 @@ type ResourceMeta struct {
 
 	// Type describes the type of the object.
 	Type string `json:"type"`
+
+	// ReferenceHints describe several types hints used by uploaders
+	// to decide on used element identities.
+	ReferenceHints metav1.ReferenceHints `json:"referenceHints,omitempty"`
 
 	// Relation describes the relation of the resource to the component.
 	// Can be a local or external resource
@@ -674,11 +675,12 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 		return nil
 	}
 	r := &ResourceMeta{
-		ElementMeta: *o.ElementMeta.Copy(),
-		Type:        o.Type,
-		Relation:    o.Relation,
-		SourceRefs:  o.SourceRefs.Copy(),
-		Digest:      o.Digest.Copy(),
+		ElementMeta:    *o.ElementMeta.Copy(),
+		Type:           o.Type,
+		ReferenceHints: o.ReferenceHints.Copy(),
+		Relation:       o.Relation,
+		SourceRefs:     o.SourceRefs.Copy(),
+		Digest:         o.Digest.Copy(),
 	}
 	return r
 }

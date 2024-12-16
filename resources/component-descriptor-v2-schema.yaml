@@ -78,6 +78,10 @@ $defs:
   hint:
     type: 'object'
     description: 'attributes for a reference hint'
+    items:
+      type: 'string'
+    required:
+      - 'type'
 
   sourceDefinition:
     type: 'object'

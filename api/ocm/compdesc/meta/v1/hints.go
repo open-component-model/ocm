@@ -21,7 +21,15 @@ func MatchHintType(typs ...string) matcher.Matcher[ReferenceHint] {
 	}
 }
 
+// ReferenceHintProvider gets the optional hints
+// for list of possible hint types.
+type ReferenceHintProvider interface {
+	GetReferenceHints(typs ...string) []ReferenceHint
+}
+
 type ReferenceHints []ReferenceHint
+
+var _ ReferenceHintProvider = (ReferenceHints)(nil)
 
 func (h ReferenceHints) Copy() ReferenceHints {
 	var result ReferenceHints
@@ -32,7 +40,7 @@ func (h ReferenceHints) Copy() ReferenceHints {
 	return result
 }
 
-func (h ReferenceHints) Get(typs ...string) []ReferenceHint {
+func (h ReferenceHints) GetReferenceHints(typs ...string) []ReferenceHint {
 	if len(typs) == 0 {
 		return slices.Clone(h)
 	}
