@@ -92,8 +92,6 @@ func pushData(ctx context.Context, p regclient.Pusher, desc artdesc.Descriptor, 
 		desc.Size = -1
 	}
 
-	fmt.Println("pushData: ", desc, key)
-
 	logging.Logger().Debug("*** push blob", "mediatype", desc.MediaType, "digest", desc.Digest, "key", key)
 	req, err := p.Push(ctx, desc, data)
 	if err != nil {
