@@ -55,7 +55,7 @@ jobs:
             --outputDirectory ${{ github.workspace }}/tap/Formula)
         mkdir -p ${{ github.workspace }}/tap/Aliases
         cd ${{ github.workspace }}/tap/Aliases
-        ln -s ../Formula/$(basename $formula) ./ocm
+        ln -sf ../Formula/$(basename $formula) ./ocm
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:
