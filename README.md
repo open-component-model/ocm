@@ -53,10 +53,9 @@ Install the latest release with
 - [Homebrew](#homebrew)
 - [NixOS](#nixos)
 - [AUR](#aur)
-- [Container](#container)
+- [Docker and Podman](#container)
 - [Chocolatey](#chocolatey)
 - [Winget](#winget)
-- [GitHub Releases](https://github.com/open-component-model/ocm/releases/latest)
 
 ### Bash
 
