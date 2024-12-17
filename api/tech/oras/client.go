@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 
 	"github.com/containerd/containerd/errdefs"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
@@ -23,6 +24,8 @@ type Client struct {
 	Client    *auth.Client
 	PlainHTTP bool
 	Ref       string
+
+	rw sync.Mutex
 }
 
 var (
@@ -37,6 +40,9 @@ func New(opts ClientOptions) *Client {
 }
 
 func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descriptor, error) {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	src, err := c.createRepository(ref)
 	if err != nil {
 		return "", ociv1.Descriptor{}, err
@@ -60,21 +66,33 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 }
 
 func (c *Client) Fetcher(ctx context.Context, ref string) (Fetcher, error) {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	c.Ref = ref
 	return c, nil
 }
 
 func (c *Client) Pusher(ctx context.Context, ref string) (Pusher, error) {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	c.Ref = ref
 	return c, nil
 }
 
 func (c *Client) Lister(ctx context.Context, ref string) (Lister, error) {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	c.Ref = ref
 	return c, nil
 }
 
 func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	reader, err := src.Reader()
 	if err != nil {
 		return err
@@ -97,7 +115,7 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error
 		return nil
 	}
 
-	// We have a digest, so we push use plain push for the digest.
+	// We have a digest, so we use plain push for the digest.
 	// Push here decides if it's a Manifest or a Blob.
 	if err := repository.Push(ctx, d, reader); err != nil {
 		return fmt.Errorf("failed to push: %w, %s", err, c.Ref)
@@ -107,30 +125,36 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error
 }
 
 func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadCloser, error) {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	src, err := c.createRepository(c.Ref)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve ref %q: %w", c.Ref, err)
 	}
 
 	// oras requires a Resolve to happen before a fetch because
-	// -1 is an invalid size.
+	// -1 is an invalid size and results in a content-length mismatch error by design.
+	// This is a security consideration on ORAS' side.
 	// manifest is not set in the descriptor
 	// We explicitly call resolve on manifest first because it might be
-	// that the mediatype is not set at this point.
+	// that the mediatype is not set at this point so we don't want ORAS to try to
+	// select the wrong layer to fetch from.
 	rdesc, err := src.Manifests().Resolve(ctx, desc.Digest.String())
-	if err != nil {
-		if errors.Is(err, oraserr.ErrNotFound) {
-			rdesc, err = src.Blobs().Resolve(ctx, desc.Digest.String())
-			if err != nil {
-				return nil, fmt.Errorf("failed to resolve fetch blob %q: %w", desc.Digest.String(), err)
-			}
-			delayer := func() (io.ReadCloser, error) {
-				return src.Blobs().Fetch(ctx, rdesc)
-			}
-
-			return newDelayedReader(delayer)
+	if errors.Is(err, oraserr.ErrNotFound) {
+		rdesc, err = src.Blobs().Resolve(ctx, desc.Digest.String())
+		if err != nil {
+			return nil, fmt.Errorf("failed to resolve fetch blob %q: %w", desc.Digest.String(), err)
 		}
 
+		delayer := func() (io.ReadCloser, error) {
+			return src.Blobs().Fetch(ctx, rdesc)
+		}
+
+		return newDelayedReader(delayer)
+	}
+
+	if err != nil {
 		return nil, fmt.Errorf("failed to resolve fetch manifest %q: %w", desc.Digest.String(), err)
 	}
 
@@ -144,12 +168,15 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadClose
 }
 
 func (c *Client) List(ctx context.Context) ([]string, error) {
-	var result []string
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	src, err := c.createRepository(c.Ref)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve ref %q: %w", c.Ref, err)
 	}
 
+	var result []string
 	if err := src.Tags(ctx, "", func(tags []string) error {
 		result = append(result, tags...)
 		return nil
@@ -160,6 +187,8 @@ func (c *Client) List(ctx context.Context) ([]string, error) {
 	return result, nil
 }
 
+// createRepository creates a new repository representation using the passed in ref.
+// This is a cheap operation.
 func (c *Client) createRepository(ref string) (*remote.Repository, error) {
 	src, err := remote.NewRepository(ref)
 	if err != nil {

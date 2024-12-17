@@ -4,8 +4,6 @@ go 1.23.2
 
 replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 
-//replace github.com/regclient/regclient => /Users/skarlso/goprojects/regclient
-
 require (
 	dario.cat/mergo v1.0.1
 	github.com/DataDog/gostackparse v0.7.0

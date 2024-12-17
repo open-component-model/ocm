@@ -137,6 +137,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 	}
 
 	client := retry.DefaultClient
+	client.Transport = ocmlog.NewRoundTripper(retry.DefaultClient.Transport, logger)
 	if r.info.Scheme == "https" {
 		// set up TLS
 		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
@@ -157,11 +158,9 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 				return rootCAs
 			}(),
 		}
-		client = &http.Client{
-			Transport: retry.NewTransport(&http.Transport{
-				TLSClientConfig: conf,
-			}),
-		}
+		client.Transport = ocmlog.NewRoundTripper(retry.NewTransport(&http.Transport{
+			TLSClientConfig: conf,
+		}), logger)
 	}
 
 	authClient := &auth.Client{

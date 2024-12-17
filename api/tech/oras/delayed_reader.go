@@ -1,6 +1,9 @@
 package oras
 
-import "io"
+import (
+	"io"
+	"sync"
+)
 
 // delayedReader sets up a reader that only fetches a blob
 // upon explicit reading request, otherwise, it stores the
@@ -9,6 +12,7 @@ type delayedReader struct {
 	open   func() (io.ReadCloser, error)
 	rc     io.ReadCloser
 	closed bool
+	rw     sync.Mutex
 }
 
 func newDelayedReader(open func() (io.ReadCloser, error)) (*delayedReader, error) {
@@ -18,6 +22,9 @@ func newDelayedReader(open func() (io.ReadCloser, error)) (*delayedReader, error
 }
 
 func (d *delayedReader) Read(p []byte) (n int, err error) {
+	d.rw.Lock()
+	defer d.rw.Unlock()
+
 	if d.closed {
 		return 0, io.EOF
 	}
@@ -31,6 +38,9 @@ func (d *delayedReader) Read(p []byte) (n int, err error) {
 }
 
 func (d *delayedReader) reader() (io.ReadCloser, error) {
+	d.rw.Lock()
+	defer d.rw.Unlock()
+
 	if d.rc != nil {
 		return d.rc, nil
 	}
@@ -45,6 +55,9 @@ func (d *delayedReader) reader() (io.ReadCloser, error) {
 }
 
 func (d *delayedReader) Close() error {
+	d.rw.Lock()
+	defer d.rw.Unlock()
+
 	if d.closed {
 		return nil
 	}
