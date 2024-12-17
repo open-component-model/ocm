@@ -21,11 +21,10 @@ type ClientOptions struct {
 }
 
 type Client struct {
-	Client    *auth.Client
-	PlainHTTP bool
-	Ref       string
-
-	rw sync.Mutex
+	client    *auth.Client
+	plainHTTP bool
+	ref       string
+	mu        sync.Mutex
 }
 
 var (
@@ -36,12 +35,12 @@ var (
 )
 
 func New(opts ClientOptions) *Client {
-	return &Client{Client: opts.Client, PlainHTTP: opts.PlainHTTP}
+	return &Client{client: opts.Client, plainHTTP: opts.PlainHTTP}
 }
 
 func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descriptor, error) {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	src, err := c.createRepository(ref)
 	if err != nil {
@@ -66,49 +65,49 @@ func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descrip
 }
 
 func (c *Client) Fetcher(ctx context.Context, ref string) (Fetcher, error) {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	c.Ref = ref
+	c.ref = ref
 	return c, nil
 }
 
 func (c *Client) Pusher(ctx context.Context, ref string) (Pusher, error) {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	c.Ref = ref
+	c.ref = ref
 	return c, nil
 }
 
 func (c *Client) Lister(ctx context.Context, ref string) (Lister, error) {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	c.Ref = ref
+	c.ref = ref
 	return c, nil
 }
 
 func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	reader, err := src.Reader()
 	if err != nil {
 		return err
 	}
 
-	repository, err := c.createRepository(c.Ref)
+	repository, err := c.createRepository(c.ref)
 	if err != nil {
 		return err
 	}
 
-	if split := strings.Split(c.Ref, ":"); len(split) == 2 {
+	if split := strings.Split(c.ref, ":"); len(split) == 2 {
 		// Once we get a reference that contains a tag, we need to re-push that
 		// layer with the reference included. PushReference then will tag
 		// that layer resulting in the created tag pointing to the right
 		// blob data.
-		if err := repository.PushReference(ctx, d, reader, c.Ref); err != nil {
+		if err := repository.PushReference(ctx, d, reader, c.ref); err != nil {
 			return fmt.Errorf("failed to push tag: %w", err)
 		}
 
@@ -118,19 +117,19 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error
 	// We have a digest, so we use plain push for the digest.
 	// Push here decides if it's a Manifest or a Blob.
 	if err := repository.Push(ctx, d, reader); err != nil {
-		return fmt.Errorf("failed to push: %w, %s", err, c.Ref)
+		return fmt.Errorf("failed to push: %w, %s", err, c.ref)
 	}
 
 	return nil
 }
 
 func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadCloser, error) {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	src, err := c.createRepository(c.Ref)
+	src, err := c.createRepository(c.ref)
 	if err != nil {
-		return nil, fmt.Errorf("failed to resolve ref %q: %w", c.Ref, err)
+		return nil, fmt.Errorf("failed to resolve ref %q: %w", c.ref, err)
 	}
 
 	// oras requires a Resolve to happen before a fetch because
@@ -168,12 +167,12 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadClose
 }
 
 func (c *Client) List(ctx context.Context) ([]string, error) {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	src, err := c.createRepository(c.Ref)
+	src, err := c.createRepository(c.ref)
 	if err != nil {
-		return nil, fmt.Errorf("failed to resolve ref %q: %w", c.Ref, err)
+		return nil, fmt.Errorf("failed to resolve ref %q: %w", c.ref, err)
 	}
 
 	var result []string
@@ -195,8 +194,8 @@ func (c *Client) createRepository(ref string) (*remote.Repository, error) {
 		return nil, fmt.Errorf("failed to create new repository: %w", err)
 	}
 
-	src.Client = c.Client // set up authenticated client.
-	src.PlainHTTP = c.PlainHTTP
+	src.Client = c.client // set up authenticated client.
+	src.PlainHTTP = c.plainHTTP
 
 	return src, nil
 }
