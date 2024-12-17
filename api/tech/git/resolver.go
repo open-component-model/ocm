@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"sync"
 
 	"github.com/go-git/go-billy/v5"
@@ -34,7 +33,7 @@ func init() {
 	gitclient.InstallProtocol("https", githttp.NewClient(&http.Client{
 		Transport: logging.NewRoundTripper(http.DefaultTransport, logging.DynamicLogger(REALM, mlog.NewAttribute(LogAttrProtocol, "https"))),
 	}))
-	//TODO Determine how we ideally log for ssh+git protocol
+	// TODO Determine how we ideally log for ssh+git protocol
 }
 
 var DefaultWorktreeBranch = plumbing.NewBranchReferenceName("ocm")
@@ -63,17 +62,10 @@ type Client interface {
 	// given AuthMethod.
 	Repository(ctx context.Context) (*git.Repository, error)
 
-	// Refresh will attempt to fetch & pull the latest changes from the remote repository.
-	// In case there are no changes, it will do a no-op after having realized that no changes are in the remote.
-	Refresh(ctx context.Context) error
-
-	// Update will stage all changes in the repository, commit them with the given message and push them to the remote repository.
-	Update(ctx context.Context, msg string, push bool) error
-
 	// Setup will override the current filesystem with the given filesystem. This will be the filesystem where the repository will be stored.
 	// There can be only one filesystem per client.
 	// If the filesystem contains a repository already, it can be consumed by a subsequent call to Repository.
-	Setup(vfs.FileSystem) error
+	Setup(context.Context, vfs.FileSystem) error
 }
 
 type ClientOptions struct {
@@ -88,24 +80,15 @@ type ClientOptions struct {
 	// Commit is the commit hash to checkout after cloning the repository.
 	// If empty, it will default to the plumbing.HEAD of the Ref.
 	Commit string
-	// Author is the author to use for commits. If empty, it will default to the git config of the user running the process.
-	Author
 	// AuthMethod is the authentication method to use for the repository.
 	AuthMethod AuthMethod
-}
-
-type Author struct {
-	Name  string
-	Email string
 }
 
 var _ Client = &client{}
 
 func NewClient(opts ClientOptions) (Client, error) {
-	var pref plumbing.ReferenceName
-	if opts.Ref == "" {
-		pref = plumbing.HEAD
-	} else {
+	pref := plumbing.HEAD
+	if opts.Ref != "" {
 		pref = plumbing.ReferenceName(opts.Ref)
 		if err := pref.Validate(); err != nil {
 			return nil, fmt.Errorf("invalid reference %q: %w", opts.Ref, err)
@@ -156,7 +139,10 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 		newRepo = true
 	}
 	if errors.Is(err, transport.ErrEmptyRemoteRepository) {
-		return git.Open(strg, billyFS)
+		repo, err = git.Open(strg, billyFS)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open repository based on URL %q after it was determined to be an empty clone: %w", c.opts.URL, err)
+		}
 	}
 
 	if err != nil {
@@ -166,10 +152,6 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 		if err := c.newRepository(ctx, repo); err != nil {
 			return nil, err
 		}
-	}
-
-	if err := c.opts.applyToRepo(repo); err != nil {
-		return nil, err
 	}
 
 	c.repo = repo
@@ -221,100 +203,10 @@ func GetStorage(base billy.Filesystem) (storage.Storer, error) {
 	), nil
 }
 
-func (c *client) TopLevelDirs(ctx context.Context) ([]os.FileInfo, error) {
-	repo, err := c.Repository(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	fs, err := repo.Worktree()
-	if err != nil {
-		return nil, err
-	}
-
-	return fs.Filesystem.ReadDir(".")
-}
-
-func (c *client) Refresh(ctx context.Context) error {
-	repo, err := c.Repository(ctx)
-	if err != nil {
-		return err
-	}
-
-	worktree, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	if err := worktree.PullContext(ctx, &git.PullOptions{
-		Auth:       c.opts.AuthMethod,
-		RemoteName: git.DefaultRemoteName,
-	}); err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) && !errors.Is(err, transport.ErrEmptyRemoteRepository) {
-		return err
-	}
-
-	return nil
-}
-
-func (c *client) Update(ctx context.Context, msg string, push bool) error {
-	repo, err := c.Repository(ctx)
-	if err != nil {
-		return err
-	}
-
-	worktree, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	if err = worktree.AddGlob("*"); err != nil {
-		return err
-	}
-
-	_, err = worktree.Commit(msg, &git.CommitOptions{})
-
-	if errors.Is(err, git.ErrEmptyCommit) {
-		return nil
-	}
-
-	if err != nil {
-		return err
-	}
-
-	if !push {
-		return nil
-	}
-
-	if err := repo.PushContext(ctx, &git.PushOptions{
-		RemoteName: git.DefaultRemoteName,
-	}); err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-		return err
-	}
-
-	return nil
-}
-
-func (c *client) Setup(system vfs.FileSystem) error {
+func (c *client) Setup(ctx context.Context, system vfs.FileSystem) error {
 	c.vfs = system
-	if _, err := c.Repository(context.Background()); err != nil {
+	if _, err := c.Repository(ctx); err != nil {
 		return fmt.Errorf("failed to setup repository %q: %w", c.opts.URL, err)
 	}
 	return nil
-}
-
-func (o ClientOptions) applyToRepo(repo *git.Repository) error {
-	cfg, err := repo.Config()
-	if err != nil {
-		return err
-	}
-
-	if o.Author.Name != "" {
-		cfg.User.Name = o.Author.Name
-	}
-
-	if o.Author.Email != "" {
-		cfg.User.Email = o.Author.Email
-	}
-
-	return repo.SetConfig(cfg)
 }

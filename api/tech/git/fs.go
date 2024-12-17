@@ -3,15 +3,13 @@ package git
 import (
 	"errors"
 	"fmt"
-	"hash/fnv"
 	"os"
 	"path/filepath"
+	"sync"
 	"syscall"
 
 	"github.com/go-git/go-billy/v5"
-	"github.com/juju/fslock"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -36,19 +34,24 @@ type fs struct {
 
 var _ billy.Filesystem = &fs{}
 
+// file is a wrapper around a vfs.File that implements billy.File.
+// it uses a mutex to lock the file, so it can be used concurrently from the same process, but
+// not across processes (like a flock).
 type file struct {
-	lock *fslock.Lock
 	vfs.File
+	lockMu sync.Mutex
 }
 
 var _ billy.File = &file{}
 
 func (f *file) Lock() error {
-	return f.lock.Lock()
+	f.lockMu.Lock()
+	return nil
 }
 
 func (f *file) Unlock() error {
-	return f.lock.Unlock()
+	f.lockMu.Unlock()
+	return nil
 }
 
 var _ billy.File = &file{}
@@ -62,39 +65,9 @@ func (f *fs) Create(filename string) (billy.File, error) {
 }
 
 // vfsToBillyFileInfo converts a vfs.File to a billy.File
-// It also creates a fslock.Lock for the file to ensure that the file is lockable
-// If the vfs is an osfs.OsFs, the lock is created in the same directory as the file
-// If the vfs is not an osfs.OsFs, a temporary directory is created to store the lock
-// because its not trivial to store the lock for jujufs on a virtual filesystem because
-// juju vfs only operates on syscalls directly and without interface abstraction its not easy to get the root.
 func (f *fs) vfsToBillyFileInfo(vf vfs.File) (billy.File, error) {
-	var lock *fslock.Lock
-	if f.FileSystem == osfs.OsFs {
-		lock = fslock.New(fmt.Sprintf("%s.lock", vf.Name()))
-	} else {
-		hash := fnv.New32()
-		_, _ = hash.Write([]byte(f.FileSystem.Name()))
-		temp, err := os.MkdirTemp("", fmt.Sprintf("git-vfs-locks-%x", hash.Sum32()))
-		if err != nil {
-			return nil, fmt.Errorf("failed to create temp dir to allow mapping vfs to git (billy) filesystem; "+
-				"this temporary directory is mandatory because a virtual filesystem cannot be used to accurately depict os syslocks: %w", err)
-		}
-		_, components := vfs.Components(f.FileSystem, vf.Name())
-		lockPath := filepath.Join(
-			temp,
-			filepath.Join(components[:len(components)-1]...),
-			fmt.Sprintf("%s.lock", components[len(components)-1]),
-		)
-		if err := os.MkdirAll(filepath.Dir(lockPath), 0o755); err != nil {
-			return nil, fmt.Errorf("failed to create temp dir to allow mapping vfs to git (billy) filesystem; "+
-				"this temporary directory is mandatory because a virtual filesystem cannot be used to accurately depict os syslocks: %w", err)
-		}
-		lock = fslock.New(lockPath)
-	}
-
 	return &file{
 		File: vf,
-		lock: lock,
 	}, nil
 }
 

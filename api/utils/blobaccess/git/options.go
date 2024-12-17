@@ -59,9 +59,6 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.URL != "" {
 		opts.URL = o.URL
 	}
-	if o.Author.Name != "" && o.Author.Email != "" {
-		opts.Author = o.Author
-	}
 	if o.Ref != "" {
 		opts.Ref = o.Ref
 	}

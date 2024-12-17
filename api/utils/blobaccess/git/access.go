@@ -61,7 +61,7 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	})
 
 	// redirect the client to the temporary filesystem for storage of the repo, otherwise it would use memory
-	if err := c.Setup(repositoryFS); err != nil {
+	if err := c.Setup(context.Background(), repositoryFS); err != nil {
 		return nil, err
 	}
 

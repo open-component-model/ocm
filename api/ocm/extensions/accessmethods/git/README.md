@@ -40,7 +40,6 @@ The type specific specification fields are:
 
 The go binding can be found [here](method.go)
 
-
 #### Example
 
 ```go
