@@ -48,24 +48,28 @@ type JFrogHelmUploaderSpec struct {
 	// Required for correct reference to Artifactory.
 	Repository string `json:"repository"`
 
-	// ChartName is the desired name of the chart in the repository.
-	// OPTIONAL: If not set, defaulted from the passed Hint.
-	ChartName string `json:"name"`
-	// Version is the desired version of the chart
-	// OPTIONAL: If not set, defaulted from the passed Hint.
-	ChartVersion string `json:"version"`
+	JFrogHelmChart `json:",inline"`
 
 	// Timeout is the maximum duration the upload of the chart can take
 	// before aborting and failing.
 	// OPTIONAL: If not set, set to the internal DEFAULT_TIMEOUT.
-	Timeout time.Duration `json:"timeout"`
+	Timeout *time.Duration `json:"timeout,omitempty"`
+}
+
+type JFrogHelmChart struct {
+	// ChartName is the desired name of the chart in the repository.
+	// OPTIONAL: If not set, defaulted from the passed Hint.
+	Name string `json:"name,omitempty"`
+	// Version is the desired version of the chart
+	// OPTIONAL: If not set, defaulted from the passed Hint.
+	Version string `json:"version,omitempty"`
 }
 
 func (s *JFrogHelmUploaderSpec) GetTimeout() time.Duration {
-	if s.Timeout > 0 {
-		return s.Timeout
+	if s.Timeout == nil {
+		return DEFAULT_TIMEOUT
 	}
-	return DEFAULT_TIMEOUT
+	return *s.Timeout
 }
 
 var types ppi.UploadFormats
@@ -183,17 +187,17 @@ func EnsureSpecWithHelpFromHint(spec *JFrogHelmUploaderSpec, hint string) error 
 		if refFromHint.Digest() != "" && refFromHint.Object == "" {
 			return fmt.Errorf("the hint contained a valid reference but it was a digest, so it cannot be used to deduce a version of the helm chart: %s", refFromHint)
 		}
-		if spec.ChartName == "" {
-			spec.ChartVersion = refFromHint.Object
+		if spec.Version == "" {
+			spec.Version = refFromHint.Object
 		}
-		if spec.ChartName == "" {
-			spec.ChartName = path.Base(refFromHint.Locator)
+		if spec.Name == "" {
+			spec.Name = path.Base(refFromHint.Locator)
 		}
 	}
-	if spec.ChartName == "" {
+	if spec.Name == "" {
 		return fmt.Errorf("the chart name could not be deduced from the hint (%s) or the config (%s)", hint, spec)
 	}
-	if spec.ChartVersion == "" {
+	if spec.Version == "" {
 		return fmt.Errorf("the chart version could not be deduced from the hint (%s) or the config (%s)", hint, spec)
 	}
 	return nil
@@ -217,7 +221,7 @@ func EnsureSpecWithHelpFromHint(spec *JFrogHelmUploaderSpec, hint string) error 
 //
 //	url.URL => https://demo.jfrog.ocm.software/artifactory/my-charts/podinfo-0.0.1.tgz
 func ConvertTargetSpecToHelmUploadURL(spec *JFrogHelmUploaderSpec) (*url.URL, error) {
-	requestURL := path.Join(spec.URL, "artifactory", spec.Repository, fmt.Sprintf("%s-%s.tgz", spec.ChartName, spec.ChartVersion))
+	requestURL := path.Join(spec.URL, "artifactory", spec.Repository, fmt.Sprintf("%s-%s.tgz", spec.Name, spec.Version))
 	requestURLParsed, err := parseURLAllowNoScheme(requestURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse full request URL: %w", err)

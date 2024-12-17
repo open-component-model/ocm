@@ -126,7 +126,7 @@ func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) (result []by
 			if strings.Contains(arg, "credentials") {
 				if strings.Contains(arg, "=") {
 					logargs[i] = "***"
-				} else if i < len(args)-1 {
+				} else if i+1 < len(args)-1 {
 					logargs[i+1] = "***"
 				}
 			}

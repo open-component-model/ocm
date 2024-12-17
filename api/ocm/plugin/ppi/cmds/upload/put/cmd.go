@@ -90,7 +90,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 
 	fi, err := os.Stdin.Stat()
 	if err != nil {
-		fmt.Println("failed to stat stdin", err)
+		return fmt.Errorf("failed to stat stdin: %w", err)
 	}
 	if size := fi.Size(); size == 0 {
 		return fmt.Errorf("stdin is empty, and nothing can be uploaded")

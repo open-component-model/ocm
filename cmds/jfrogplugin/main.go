@@ -24,7 +24,7 @@ func main() {
 	p.SetShort(NAME + " plugin")
 	p.SetLong(`ALPHA GRADE plugin providing custom functions related to interacting with JFrog Repositories (e.g. Artifactory).
 
-This plugin is solely for interacting with JFrog Servers and should not be used for generic repository interactions.
+This plugin is solely for interacting with JFrog Servers and cannot be used for generic repository types.
 Thus, you should only consider this plugin if
 - You need to use a JFrog specific API
 - You cannot use any of the generic (non-jfrog) implementations.
@@ -52,6 +52,7 @@ You can configure the JFrog plugin as an Uploader in an ocm config file with:
 	}
 	err := cmds.NewPluginCommand(p).Execute(os.Args[1:])
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while running plugin: %v\n", err)
 		os.Exit(1)
 	}
 }
