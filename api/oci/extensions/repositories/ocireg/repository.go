@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"net/http"
 	"path"
 	"strings"
@@ -163,6 +164,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		}), logger)
 	}
 
+	fmt.Println("setting up auth cred for host port: ", r.info.HostPort())
 	authClient := &auth.Client{
 		Client:     client,
 		Cache:      auth.NewCache(),
