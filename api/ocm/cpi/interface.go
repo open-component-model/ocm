@@ -50,6 +50,7 @@ type (
 	ComponentLister                  = internal.ComponentLister
 	ComponentAccess                  = internal.ComponentAccess
 	ComponentVersionAccess           = internal.ComponentVersionAccess
+	UniformAccessSpecInfo            = internal.UniformAccessSpecInfo
 	AccessSpec                       = internal.AccessSpec
 	AccessSpecDecoder                = internal.AccessSpecDecoder
 	GenericAccessSpec                = internal.GenericAccessSpec
@@ -182,6 +183,8 @@ func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error
 }
 
 type AccessSpecRef = internal.AccessSpecRef
+
+var _ AccessSpec = &AccessSpecRef{}
 
 func NewAccessSpecRef(spec AccessSpec) *AccessSpecRef {
 	return internal.NewAccessSpecRef(spec)

@@ -1,0 +1,5 @@
+
+transferRepositories:
+  types:
+    ociArtifact:
+    - alias.alias

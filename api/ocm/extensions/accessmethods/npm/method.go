@@ -2,6 +2,7 @@ package npm
 
 import (
 	"fmt"
+	"net/url"
 
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -47,6 +48,20 @@ func New(registry, pkg, version string) *AccessSpec {
 
 func (a *AccessSpec) Describe(_ accspeccpi.Context) string {
 	return fmt.Sprintf("NPM package %s:%s in registry %s", a.Package, a.Version, a.Registry)
+}
+
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	u, err := url.Parse(a.Registry)
+	if err != nil {
+		u = &url.URL{}
+	}
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Host: u.Hostname(),
+		Port: u.Port(),
+		Path: u.Path,
+		Info: a.GetReferenceHint(nil),
+	}
 }
 
 func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
