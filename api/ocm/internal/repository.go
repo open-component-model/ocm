@@ -57,15 +57,22 @@ type (
 	MimeType   = blobaccess.MimeType
 )
 
+// VersionLookup is the interface used to resolve component versions
+// in any context (especially for a ComponentAccess).
+type VersionLookup interface {
+	ListVersions() ([]string, error)
+	HasVersion(vers string) (bool, error)
+	LookupVersion(version string) (ComponentVersionAccess, error)
+}
+
 type ComponentAccess interface {
 	resource.ResourceView[ComponentAccess]
 
 	GetContext() Context
 	GetName() string
 
-	ListVersions() ([]string, error)
-	LookupVersion(version string) (ComponentVersionAccess, error)
-	HasVersion(vers string) (bool, error)
+	VersionLookup
+
 	NewVersion(version string, overrides ...bool) (ComponentVersionAccess, error)
 	AddVersion(cv ComponentVersionAccess, overrides ...bool) error
 	AddVersionOpt(cv ComponentVersionAccess, opts ...AddVersionOption) error

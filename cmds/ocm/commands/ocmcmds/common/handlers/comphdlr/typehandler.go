@@ -12,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/resolvers"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
 	"ocm.software/ocm/cmds/ocm/common/output"
@@ -148,7 +149,7 @@ func (h *TypeHandler) filterVersions(vers []string) ([]string, error) {
 }
 
 func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]output.Object, error) {
-	var component ocm.ComponentAccess
+	var component resolvers.VersionLookup
 	var result []output.Object
 	var err error
 
@@ -176,11 +177,25 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 						evaluated.Repository = cv.Repository()
 						h.session.Closer(cv)
 					}
+				} else {
+					// if the resolver is a component resolver, we can use it to list all available version
+					// cross all repositories found for the given component.
+					if cr, ok := h.resolver.(resolvers.ComponentResolver); ok {
+						cvr, err := resolvers.VersionResolverForComponent(comp.Component, cr)
+						if err != nil {
+							return nil, err
+						}
+						component = cvr
+						evaluated = &ocm.EvaluationResult{}
+						evaluated.Ref.CompSpec = comp
+					}
 				}
 			}
 			if evaluated == nil {
 				return nil, errors.Wrapf(err, "%s: invalid component version reference", name)
 			}
+		} else {
+			component = evaluated.Component
 		}
 		if evaluated.Version != nil {
 			result = append(result, &Object{
@@ -192,7 +207,6 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 			return result, nil
 		}
 		spec = evaluated.Ref
-		component = evaluated.Component
 		repo = evaluated.Repository
 	} else {
 		comp := ocm.CompSpec{Component: ""}
