@@ -24,7 +24,7 @@ type Client struct {
 	client    *auth.Client
 	plainHTTP bool
 	ref       string
-	mu        sync.Mutex
+	mu        sync.RWMutex
 }
 
 var (
@@ -36,32 +36,6 @@ var (
 
 func New(opts ClientOptions) *Client {
 	return &Client{client: opts.Client, plainHTTP: opts.PlainHTTP}
-}
-
-func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descriptor, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	src, err := c.createRepository(ref)
-	if err != nil {
-		return "", ociv1.Descriptor{}, err
-	}
-
-	// We try to first resolve a manifest.
-	// _Note_: If there is an error like not found, but we know that the digest exists
-	// we can add src.Blobs().Resolve in here. If we do that, note that
-	// for Blobs().Resolve `not found` is actually `invalid checksum digest format`.
-	// Meaning it will throw that error instead of not found.
-	desc, err := src.Resolve(ctx, ref)
-	if err != nil {
-		if errors.Is(err, oraserr.ErrNotFound) {
-			return "", ociv1.Descriptor{}, errdefs.ErrNotFound
-		}
-
-		return "", ociv1.Descriptor{}, fmt.Errorf("failed to resolve manifest %q: %w", ref, err)
-	}
-
-	return "", desc, nil
 }
 
 func (c *Client) Fetcher(ctx context.Context, ref string) (Fetcher, error) {
@@ -88,9 +62,35 @@ func (c *Client) Lister(ctx context.Context, ref string) (Lister, error) {
 	return c, nil
 }
 
+func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descriptor, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	src, err := c.createRepository(ref)
+	if err != nil {
+		return "", ociv1.Descriptor{}, err
+	}
+
+	// We try to first resolve a manifest.
+	// _Note_: If there is an error like not found, but we know that the digest exists
+	// we can add src.Blobs().Resolve in here. If we do that, note that
+	// for Blobs().Resolve `not found` is actually `invalid checksum digest format`.
+	// Meaning it will throw that error instead of not found.
+	desc, err := src.Resolve(ctx, ref)
+	if err != nil {
+		if errors.Is(err, oraserr.ErrNotFound) {
+			return "", ociv1.Descriptor{}, errdefs.ErrNotFound
+		}
+
+		return "", ociv1.Descriptor{}, fmt.Errorf("failed to resolve manifest %q: %w", ref, err)
+	}
+
+	return "", desc, nil
+}
+
 func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	reader, err := src.Reader()
 	if err != nil {
@@ -124,8 +124,8 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error
 }
 
 func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadCloser, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	src, err := c.createRepository(c.ref)
 	if err != nil {
@@ -167,8 +167,8 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadClose
 }
 
 func (c *Client) List(ctx context.Context) ([]string, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	src, err := c.createRepository(c.ref)
 	if err != nil {
