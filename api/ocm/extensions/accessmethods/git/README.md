@@ -16,15 +16,15 @@ The artifact content is provided as gnu-zipped tar archive
 This method implements the access of the content of a git commit stored in a
 git repository.
 
-Supported specification version is `v1`
+Supported specification version is `v1alpha1`
 
 ### Specification Versions
 
-#### Version `v1`
+#### Version `v1alpha1`
 
 The type specific specification fields are:
 
-- **`repoUrl`**  *string*
+- **`repository`**  *string*
 
   Repository URL with or without scheme.
 

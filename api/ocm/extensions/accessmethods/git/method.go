@@ -34,14 +34,14 @@ func init() {
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
-	// RepoURL is the repository URL
-	RepoURL string `json:"repository"`
+	// Repository is the repository URL
+	Repository string `json:"repository"`
 
 	// Ref defines the hash of the commit
-	Ref string `json:"ref"`
+	Ref string `json:"ref,omitempty"`
 
 	// Commit defines the hash of the commit in string format to checkout from the Ref
-	Commit string `json:"commit"`
+	Commit string `json:"commit,omitempty"`
 }
 
 // AccessSpecOptions defines a set of options which can be applied to the access spec.
@@ -63,7 +63,7 @@ func WithRef(ref string) AccessSpecOptions {
 func New(url string, opts ...AccessSpecOptions) *AccessSpec {
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
-		RepoURL:             url,
+		Repository:          url,
 	}
 	for _, o := range opts {
 		o(s)
@@ -72,7 +72,7 @@ func New(url string, opts ...AccessSpecOptions) *AccessSpec {
 }
 
 func (a *AccessSpec) Describe(internal.Context) string {
-	return fmt.Sprintf("git commit %s[%s]", a.RepoURL, a.Ref)
+	return fmt.Sprintf("git commit %s[%s]", a.Repository, a.Ref)
 }
 
 func (*AccessSpec) IsLocal(internal.Context) bool {
@@ -88,16 +88,16 @@ func (*AccessSpec) GetType() string {
 }
 
 func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal.AccessMethod, error) {
-	_, err := giturls.Parse(a.RepoURL)
+	_, err := giturls.Parse(a.Repository)
 	if err != nil {
-		return nil, errors.ErrInvalidWrap(err, "repository repoURL", a.RepoURL)
+		return nil, errors.ErrInvalidWrap(err, "repository repoURL", a.Repository)
 	}
 	if err := plumbing.ReferenceName(a.Ref).Validate(); err != nil {
 		return nil, errors.ErrInvalidWrap(err, "commit hash", a.Ref)
 	}
-	creds, _, err := getCreds(a.RepoURL, cva.GetContext().CredentialsContext())
+	creds, _, err := getCreds(a.Repository, cva.GetContext().CredentialsContext())
 	if err != nil {
-		return nil, fmt.Errorf("failed to get credentials for repository %s: %w", a.RepoURL, err)
+		return nil, fmt.Errorf("failed to get credentials for repository %s: %w", a.Repository, err)
 	}
 
 	octx := cva.GetContext()
@@ -105,7 +105,7 @@ func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal
 	opts := []gitblob.Option{
 		gitblob.WithLoggingContext(octx),
 		gitblob.WithCredentialContext(octx),
-		gitblob.WithURL(a.RepoURL),
+		gitblob.WithURL(a.Repository),
 		gitblob.WithRef(a.Ref),
 		gitblob.WithCommit(a.Commit),
 		gitblob.WithCachingFileSystem(vfsattr.Get(octx)),
