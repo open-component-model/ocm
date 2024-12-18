@@ -105,15 +105,6 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error
 		return err
 	}
 
-	ok, err := repository.Exists(ctx, d)
-	if err != nil {
-		return fmt.Errorf("failed to check if repository %q exists: %w", d, err)
-	}
-
-	if ok {
-		return errdefs.ErrAlreadyExists
-	}
-
 	if split := strings.Split(c.ref, ":"); len(split) == 2 {
 		// Once we get a reference that contains a tag, we need to re-push that
 		// layer with the reference included. PushReference then will tag
@@ -124,6 +115,15 @@ func (c *Client) Push(ctx context.Context, d ociv1.Descriptor, src Source) error
 		}
 
 		return nil
+	}
+
+	ok, err := repository.Exists(ctx, d)
+	if err != nil {
+		return fmt.Errorf("failed to check if repository %q exists: %w", d, err)
+	}
+
+	if ok {
+		return errdefs.ErrAlreadyExists
 	}
 
 	// We have a digest, so we use plain push for the digest.
