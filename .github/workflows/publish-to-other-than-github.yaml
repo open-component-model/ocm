@@ -55,7 +55,7 @@ jobs:
             --outputDirectory ${{ github.workspace }}/tap/Formula)
         mkdir -p ${{ github.workspace }}/tap/Aliases
         cd ${{ github.workspace }}/tap/Aliases
-        ln -s ../Formula/$(basename $formula) ./ocm
+        ln -sf ../Formula/$(basename $formula) ./ocm
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:
@@ -147,6 +147,12 @@ jobs:
     steps:
     - name: Ensure proper version
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }})" >> $GITHUB_ENV
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Publish Release Event
       uses: peter-evans/repository-dispatch@v3
       with:
