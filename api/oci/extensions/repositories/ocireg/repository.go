@@ -170,7 +170,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 			fmt.Println("setting up auth cred for host port: ", r.info.HostPort())
 			fmt.Println("matching against: ", hostport)
 			if strings.Contains(hostport, r.info.HostPort()) {
-				logger.Info("using provided credentials")
+				fmt.Println("using: "+authCreds.Username, authCreds.Password)
 				return authCreds, nil
 			}
 			logger.Warn("no credentials for host", "host", hostport)
