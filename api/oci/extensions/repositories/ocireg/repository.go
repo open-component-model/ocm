@@ -172,6 +172,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 	return oras.New(oras.ClientOptions{
 		Client:    authClient,
 		PlainHTTP: r.info.Scheme == "http",
+		Logger:    logger,
 	}), nil
 }
 

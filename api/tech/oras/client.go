@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/containerd/containerd/errdefs"
+	"github.com/mandelsoft/logging"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	oraserr "oras.land/oras-go/v2/errdef"
 	"oras.land/oras-go/v2/registry/remote"
@@ -18,6 +19,7 @@ import (
 type ClientOptions struct {
 	Client    *auth.Client
 	PlainHTTP bool
+	Logger    logging.Logger
 }
 
 type Client struct {
@@ -25,6 +27,7 @@ type Client struct {
 	plainHTTP bool
 	ref       string
 	mu        sync.RWMutex
+	logger    logging.Logger
 }
 
 var (
@@ -35,7 +38,7 @@ var (
 )
 
 func New(opts ClientOptions) *Client {
-	return &Client{client: opts.Client, plainHTTP: opts.PlainHTTP}
+	return &Client{client: opts.Client, plainHTTP: opts.PlainHTTP, logger: opts.Logger}
 }
 
 func (c *Client) Fetcher(ctx context.Context, ref string) (Fetcher, error) {
@@ -127,38 +130,48 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadClose
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
+	c.logger.Trace("beginning fetching descriptor", "desc", desc)
+
 	src, err := c.createRepository(c.ref)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve ref %q: %w", c.ref, err)
 	}
 
 	// oras requires a Resolve to happen before a fetch because
-	// -1 is an invalid size and results in a content-length mismatch error by design.
+	// -1 or 0 are invalid sizes and result in a content-length mismatch error by design.
 	// This is a security consideration on ORAS' side.
-	// manifest is not set in the descriptor
+	// For more information (https://github.com/oras-project/oras-go/issues/822#issuecomment-2325622324)
 	// We explicitly call resolve on manifest first because it might be
 	// that the mediatype is not set at this point so we don't want ORAS to try to
 	// select the wrong layer to fetch from.
-	rdesc, err := src.Manifests().Resolve(ctx, desc.Digest.String())
-	if errors.Is(err, oraserr.ErrNotFound) {
-		rdesc, err = src.Blobs().Resolve(ctx, desc.Digest.String())
+	if desc.Size < 1 || desc.Digest == "" {
+		c.logger.Trace("description is without size or digest, resolving...", "digest", desc.Digest, "size", desc.Size)
+		rdesc, err := src.Manifests().Resolve(ctx, desc.Digest.String())
 		if err != nil {
-			return nil, fmt.Errorf("failed to resolve fetch blob %q: %w", desc.Digest.String(), err)
+			var berr error
+			rdesc, berr = src.Blobs().Resolve(ctx, desc.Digest.String())
+			if berr != nil {
+				// also display the first manifest resolve error
+				err = errors.Join(err, berr)
+
+				return nil, fmt.Errorf("failed to resolve fetch blob %q: %w", desc.Digest.String(), err)
+			}
+
+			// blob resolve succeeded, return the delayed reader
+			delayer := func() (io.ReadCloser, error) {
+				return src.Blobs().Fetch(ctx, rdesc)
+			}
+
+			return newDelayedReader(delayer)
 		}
 
-		delayer := func() (io.ReadCloser, error) {
-			return src.Blobs().Fetch(ctx, rdesc)
-		}
-
-		return newDelayedReader(delayer)
+		// no error
+		desc = rdesc
 	}
 
-	if err != nil {
-		return nil, fmt.Errorf("failed to resolve fetch manifest %q: %w", desc.Digest.String(), err)
-	}
-
-	// lastly, try a manifest fetch.
-	fetch, err := src.Fetch(ctx, rdesc)
+	// manifest resolve succeeded return the reader directly
+	// mediatype of the descriptor should now be set to the correct type.
+	fetch, err := src.Fetch(ctx, desc)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch manifest: %w", err)
 	}
