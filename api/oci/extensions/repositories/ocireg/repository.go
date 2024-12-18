@@ -166,6 +166,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 
 	authClient := &auth.Client{
 		Client: client,
+		Cache:  auth.NewCache(),
 		Credential: auth.CredentialFunc(func(ctx context.Context, hostport string) (auth.Credential, error) {
 			fmt.Println("setting up auth cred for host port: ", r.info.HostPort())
 			fmt.Println("matching against: ", hostport)

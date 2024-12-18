@@ -166,12 +166,7 @@ func (c *Client) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.ReadClose
 				return nil, fmt.Errorf("failed to resolve fetch blob %q: %w", desc.Digest.String(), err)
 			}
 
-			// blob resolve succeeded, return the delayed reader
-			delayer := func() (io.ReadCloser, error) {
-				return src.Blobs().Fetch(ctx, rdesc)
-			}
-
-			return newDelayedReader(delayer)
+			return src.Blobs().Fetch(ctx, rdesc)
 		}
 
 		// no error
