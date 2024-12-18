@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/containerd/errdefs"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"oras.land/oras-go/v2/registry/remote/auth"
 )
@@ -14,15 +15,27 @@ type OrasPusher struct {
 	ref    string
 }
 
-func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) error {
+func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (retErr error) {
 	reader, err := src.Reader()
 	if err != nil {
 		return err
 	}
+	defer func() {
+		reader.Close()
+	}()
 
 	repository, err := createRepository(c.ref, c.client, false)
 	if err != nil {
 		return err
+	}
+
+	ok, err := repository.Exists(ctx, d)
+	if err != nil {
+		return fmt.Errorf("failed to check if repository %q exists: %w", d, err)
+	}
+
+	if ok {
+		return errdefs.ErrAlreadyExists
 	}
 
 	if split := strings.Split(c.ref, ":"); len(split) == 2 {
@@ -36,15 +49,6 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) e
 
 		return nil
 	}
-
-	//ok, err := repository.Exists(ctx, d)
-	//if err != nil {
-	//	return fmt.Errorf("failed to check if repository %q exists: %w", d, err)
-	//}
-	//
-	//if ok {
-	//	return errdefs.ErrAlreadyExists
-	//}
 
 	// We have a digest, so we use plain push for the digest.
 	// Push here decides if it's a Manifest or a Blob.

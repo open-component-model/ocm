@@ -40,7 +40,12 @@ func (c *OrasFetcher) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.Read
 				return nil, fmt.Errorf("failed to resolve fetch blob %q: %w", desc.Digest.String(), err)
 			}
 
-			return src.Blobs().Fetch(ctx, rdesc)
+			reader, err := src.Blobs().Fetch(ctx, rdesc)
+			if err != nil {
+				return nil, fmt.Errorf("failed to fetch blob: %w", err)
+			}
+
+			return reader, nil
 		}
 
 		// no error
@@ -54,5 +59,5 @@ func (c *OrasFetcher) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.Read
 		return nil, fmt.Errorf("failed to fetch manifest: %w", err)
 	}
 
-	return fetch, err
+	return fetch, nil
 }
