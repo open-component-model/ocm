@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
@@ -113,16 +114,16 @@ func (p *PluginHandler) GetMimeType(spec *AccessSpec) string {
 	return info.Short
 }
 
-func (p *PluginHandler) GetReferenceHint(spec *AccessSpec, cv cpi.ComponentVersionAccess) string {
+func (p *PluginHandler) GetReferenceHint(spec *AccessSpec, cv cpi.ComponentVersionAccess) []metav1.ReferenceHint {
 	mspec := p.GetAccessMethodDescriptor(spec.GetKind(), spec.GetVersion())
 	if mspec == nil {
-		return "unknown type " + spec.GetType()
+		return nil
 	}
 	info, err := p.Info(spec)
-	if err != nil {
-		return ""
+	if err != nil || info.Hint == "" {
+		return nil
 	}
-	return info.Hint
+	return metav1.ReferenceHints{metav1.StringToHint(info.Hint)}
 }
 
 func (p *PluginHandler) Validate(spec *AccessSpec) (*ppi.AccessSpecInfo, error) {

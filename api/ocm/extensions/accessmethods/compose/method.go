@@ -5,6 +5,7 @@ import (
 	"io"
 	"sync/atomic"
 
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
@@ -72,8 +73,11 @@ func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return true
 }
 
-func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) string {
-	return a.ReferenceName
+func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) []metav1.ReferenceHint {
+	if a.ReferenceName == "" {
+		return nil
+	}
+	return metav1.ReferenceHints{metav1.StringToHint(a.ReferenceName)}
 }
 
 func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessSpec {

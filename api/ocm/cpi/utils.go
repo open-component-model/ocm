@@ -3,6 +3,7 @@ package cpi
 import (
 	"io"
 
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 
@@ -25,18 +26,11 @@ func GetResourceMimeReader(acc AccessProvider) (io.ReadCloser, string, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func ArtifactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
+func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) []metav1.ReferenceHint {
 	if h, ok := spec.(HintProvider); ok {
 		return h.GetReferenceHint(cv)
 	}
-	return ""
-}
-
-func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) string {
-	if h, ok := spec.(HintProvider); ok {
-		return h.GetReferenceHint(cv)
-	}
-	return ""
+	return nil
 }
 
 func GlobalAccess(spec AccessSpec, ctx Context) AccessSpec {

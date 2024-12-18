@@ -83,7 +83,7 @@ type ComponentAccess interface {
 // method.
 type AccessProvider interface {
 	GetOCMContext() Context
-	ReferenceHint() string
+	ReferenceHint() []metav1.ReferenceHint
 
 	Access() (AccessSpec, error)
 	AccessMethod() (AccessMethod, error)

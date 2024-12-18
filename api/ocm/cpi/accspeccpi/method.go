@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )

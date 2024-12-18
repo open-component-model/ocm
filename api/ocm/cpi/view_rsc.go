@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -47,11 +48,11 @@ func (r *ComponentVersionBasedAccessProvider) GetComponentVersion() (ComponentVe
 	return r.vers.Dup()
 }
 
-func (r *ComponentVersionBasedAccessProvider) ReferenceHint() string {
+func (r *ComponentVersionBasedAccessProvider) ReferenceHint() []metav1.ReferenceHint {
 	if hp, ok := r.access.(cpi.HintProvider); ok {
 		return hp.GetReferenceHint(r.vers)
 	}
-	return ""
+	return nil
 }
 
 func (r *ComponentVersionBasedAccessProvider) GlobalAccess() AccessSpec {
@@ -87,13 +88,13 @@ func (r *ComponentVersionBasedAccessProvider) BlobAccess() (BlobAccess, error) {
 type blobAccessProvider struct {
 	ctx ocm.Context
 	blobaccess.BlobAccessProvider
-	hint   string
+	hint   []metav1.ReferenceHint
 	global AccessSpec
 }
 
 var _ AccessProvider = (*blobAccessProvider)(nil)
 
-func NewAccessProviderForBlobAccessProvider(ctx ocm.Context, prov blobaccess.BlobAccessProvider, hint string, global AccessSpec) AccessProvider {
+func NewAccessProviderForBlobAccessProvider(ctx ocm.Context, prov blobaccess.BlobAccessProvider, hint []metav1.ReferenceHint, global AccessSpec) AccessProvider {
 	return &blobAccessProvider{
 		BlobAccessProvider: prov,
 		hint:               hint,
@@ -106,7 +107,7 @@ func (b *blobAccessProvider) GetOCMContext() cpi.Context {
 	return b.ctx
 }
 
-func (b *blobAccessProvider) ReferenceHint() string {
+func (b *blobAccessProvider) ReferenceHint() []metav1.ReferenceHint {
 	return b.hint
 }
 
@@ -124,7 +125,7 @@ func (b *blobAccessProvider) AccessMethod() (cpi.AccessMethod, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func NewArtifactAccessProviderForBlobAccessProvider[M any](ctx Context, meta *M, src blobAccessProvider, hint string, global AccessSpec) cpi.ArtifactAccess[M] {
+func NewArtifactAccessProviderForBlobAccessProvider[M any](ctx Context, meta *M, src blobAccessProvider, hint []metav1.ReferenceHint, global AccessSpec) cpi.ArtifactAccess[M] {
 	return NewArtifactAccessForProvider(meta, NewAccessProviderForBlobAccessProvider(ctx, src, hint, global))
 }
 
@@ -151,11 +152,11 @@ func (b *accessAccessProvider) GetOCMContext() cpi.Context {
 	return b.ctx
 }
 
-func (b *accessAccessProvider) ReferenceHint() string {
+func (b *accessAccessProvider) ReferenceHint() []metav1.ReferenceHint {
 	if h, ok := b.spec.(HintProvider); ok {
 		return h.GetReferenceHint(&DummyComponentVersionAccess{b.ctx})
 	}
-	return ""
+	return nil
 }
 
 func (b *accessAccessProvider) GlobalAccess() cpi.AccessSpec {

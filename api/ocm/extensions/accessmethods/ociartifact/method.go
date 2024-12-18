@@ -6,11 +6,12 @@ import (
 	"strings"
 	"sync"
 
-	. "github.com/mandelsoft/goutils/finalizer"
-
 	"github.com/mandelsoft/goutils/errors"
+	. "github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/opencontainers/go-digest"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci"
@@ -91,10 +92,10 @@ func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessS
 	return a
 }
 
-func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) []metav1.ReferenceHint {
 	ref, err := oci.ParseRef(a.ImageReference)
 	if err != nil {
-		return ""
+		return nil
 	}
 	hint := ref.Repository
 	r := cv.Repository()
@@ -109,7 +110,7 @@ func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) stri
 	if ref.Tag != nil {
 		hint += grammar.TagSeparator + *ref.Tag
 	}
-	return hint
+	return metav1.ReferenceHints{metav1.NewReferenceHint(oci2.ReferenceHintType, hint)}
 }
 
 func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (string, error) {

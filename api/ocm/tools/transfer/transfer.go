@@ -252,7 +252,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 			if ok {
 				var old compdesc.Resource
 
-				hint := ocmcpi.ArtifactNameHint(a, src)
+				hint := ocmcpi.ReferenceHint(a, src)
 				old, err = cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
 
 				changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
@@ -311,7 +311,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 			}
 			if ok {
 				// sources do not have digests fo far, so they have to copied, always.
-				hint := ocmcpi.ArtifactNameHint(a, src)
+				hint := ocmcpi.ReferenceHint(a, src)
 				notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint)
 				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))
 			}

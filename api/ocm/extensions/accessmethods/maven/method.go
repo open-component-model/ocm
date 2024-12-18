@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/optionutils"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
@@ -87,11 +88,11 @@ func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpe
 }
 
 // GetReferenceHint returns the reference hint for the Maven (mvn) artifact.
-func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) []metav1.ReferenceHint {
 	if a.IsPackage() {
-		return a.GAV()
+		return metav1.ReferenceHints{metav1.NewReferenceHint(maven.ReferenceHintType, a.GAV())}
 	}
-	return ""
+	return nil
 }
 
 func (_ *AccessSpec) GetType() string {

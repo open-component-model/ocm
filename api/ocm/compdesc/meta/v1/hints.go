@@ -3,6 +3,7 @@ package v1
 import (
 	"maps"
 	"slices"
+	"strings"
 
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/matcher"
@@ -47,11 +48,22 @@ func (h ReferenceHints) GetReferenceHints(typs ...string) []ReferenceHint {
 	return sliceutils.Filter(h, MatchHintType(typs...))
 }
 
+func (h ReferenceHints) GetCompatReferenceHint() string {
+	return GetCompatReferenceHint(h)
+}
+
+func GetCompatReferenceHint[H ReferenceHint](h []H) string {
+	for _, e := range h {
+		return e.GetCompatReferenceHint()
+	}
+	return ""
+}
+
 type ReferenceHint interface {
 	runtime.TypedObject
 
 	Copy() ReferenceHint
-
+	GetCompatReferenceHint() string
 	GetReference() string
 	String() string
 
@@ -63,6 +75,13 @@ type ReferenceHint interface {
 type DefaultReferenceHint map[string]string
 
 var _ ReferenceHint = DefaultReferenceHint{}
+
+func NewReferenceHint(typ, ref string) DefaultReferenceHint {
+	return DefaultReferenceHint{
+		HINT_TYPE:      typ,
+		HINT_REFERENCE: ref,
+	}
+}
 
 func (h DefaultReferenceHint) GetType() string {
 	return h[HINT_TYPE]
@@ -78,6 +97,17 @@ func (h DefaultReferenceHint) AsDefault() DefaultReferenceHint {
 
 func (h DefaultReferenceHint) GetProperty(name string) string {
 	return h[name]
+}
+
+func (h DefaultReferenceHint) GetCompatReferenceHint() string {
+	if p, ok := h[HINT_REFERENCE]; ok {
+		if t, ok := h[HINT_TYPE]; ok {
+			return t + "::" + p
+		} else {
+			return p
+		}
+	}
+	return ""
 }
 
 func (h DefaultReferenceHint) GetReference() string {
@@ -110,4 +140,14 @@ func (h DefaultReferenceHint) String() string {
 		}
 	}
 	return s
+}
+
+func StringToHint(s string) ReferenceHint {
+	i := strings.Index(s, "::")
+	if i >= 0 {
+		return NewReferenceHint(s[:i], s[i+2:])
+	}
+	return DefaultReferenceHint{
+		HINT_REFERENCE: s,
+	}
 }

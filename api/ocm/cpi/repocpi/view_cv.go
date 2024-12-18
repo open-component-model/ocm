@@ -299,7 +299,7 @@ func setAccess[T any, A cpi.ArtifactAccess[T]](c *componentVersionAccessView, ki
 
 	var (
 		blob   cpi.BlobAccess
-		hint   string
+		hint   []metav1.ReferenceHint
 		global cpi.AccessSpec
 	)
 

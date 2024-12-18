@@ -51,7 +51,7 @@ type (
 // expanding a blob to a repository specific representation to determine a
 // useful name.
 type HintProvider interface {
-	GetReferenceHint(cv ComponentVersionAccess) string
+	GetReferenceHint(cv ComponentVersionAccess) []metav1.ReferenceHint
 }
 
 // GlobalAccessProvider is used to provide a non-local access specification.

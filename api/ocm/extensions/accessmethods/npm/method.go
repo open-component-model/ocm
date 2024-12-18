@@ -3,7 +3,9 @@ package npm
 import (
 	"fmt"
 
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	"ocm.software/ocm/api/tech/npm"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	npmblob "ocm.software/ocm/api/utils/blobaccess/npm"
 	"ocm.software/ocm/api/utils/mime"
@@ -57,8 +59,8 @@ func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpe
 	return a
 }
 
-func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) string {
-	return a.Package + ":" + a.Version
+func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) []metav1.ReferenceHint {
+	return metav1.ReferenceHints{metav1.NewReferenceHint(npm.ReferenceHintType, a.Package+":"+a.Version)}
 }
 
 func (_ *AccessSpec) GetType() string {

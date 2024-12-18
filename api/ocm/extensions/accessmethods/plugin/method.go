@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
@@ -48,7 +49,7 @@ func (s *AccessSpec) GetMimeType() string {
 	return s.handler.GetMimeType(s)
 }
 
-func (s *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
+func (s *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) []metav1.ReferenceHint {
 	return s.handler.GetReferenceHint(s, cv)
 }
 

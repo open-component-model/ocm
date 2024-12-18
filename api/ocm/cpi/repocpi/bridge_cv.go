@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/optionutils"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -388,27 +389,27 @@ func (b *componentVersionAccessBridge) cacheLocalBlob(acc cpi.AccessSpec, blob c
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *componentVersionAccessBridge) composeAccess(spec cpi.AccessSpec) (blobaccess.BlobAccess, string, cpi.AccessSpec, error) {
+func (b *componentVersionAccessBridge) composeAccess(spec cpi.AccessSpec) (blobaccess.BlobAccess, []metav1.ReferenceHint, cpi.AccessSpec, error) {
 	if !compose.Is(spec) {
-		return nil, "", nil, nil
+		return nil, nil, nil, nil
 	}
 	cspec, ok := spec.(*compose.AccessSpec)
 	if !ok {
-		return nil, "", nil, fmt.Errorf("invalid implementation (%T) for access method compose", spec)
+		return nil, nil, nil, fmt.Errorf("invalid implementation (%T) for access method compose", spec)
 	}
 	blob := b.getLocalBlob(cspec)
 	if blob == nil {
-		return nil, "", nil, errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, common.VersionedElementKey(b).String())
+		return nil, nil, nil, errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, common.VersionedElementKey(b).String())
 	}
 	blob, err := blob.Dup()
 	if err != nil {
-		return nil, "", nil, errors.Wrapf(err, "cached blob")
+		return nil, nil, nil, errors.Wrapf(err, "cached blob")
 	}
 
-	return blob, cspec.ReferenceName, cspec.GlobalAccess.Get(), nil
+	return blob, cspec.GetReferenceHint(nil), cspec.GlobalAccess.Get(), nil
 }
 
-func (b *componentVersionAccessBridge) setupLocalBlobs(kind string, accprov func(cpi.AccessSpec) (blobaccess.BlobAccess, string, cpi.AccessSpec, error), it compdesc.ArtifactAccessor, final bool, opts *cpi.BlobUploadOptions) (ferr error) {
+func (b *componentVersionAccessBridge) setupLocalBlobs(kind string, accprov func(cpi.AccessSpec) (blobaccess.BlobAccess, []metav1.ReferenceHint, cpi.AccessSpec, error), it compdesc.ArtifactAccessor, final bool, opts *cpi.BlobUploadOptions) (ferr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 
@@ -426,7 +427,7 @@ func (b *componentVersionAccessBridge) setupLocalBlobs(kind string, accprov func
 		if blob != nil {
 			nested.Close(blob)
 
-			effspec, err := b.AddBlob(blob, a.GetType(), ref, global, final, opts)
+			effspec, err := b.AddBlob(blob, a.GetType(), metav1.GetCompatReferenceHint(ref), global, final, opts)
 			if err != nil {
 				return errors.Wrapf(err, "cannot store %s %d", kind, i)
 			}
