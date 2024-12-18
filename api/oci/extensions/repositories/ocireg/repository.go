@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"net/http"
 	"path"
 	"strings"
@@ -168,10 +167,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		Client: client,
 		Cache:  auth.NewCache(),
 		Credential: auth.CredentialFunc(func(ctx context.Context, hostport string) (auth.Credential, error) {
-			fmt.Println("setting up auth cred for host port: ", r.info.HostPort())
-			fmt.Println("matching against: ", hostport)
 			if strings.Contains(hostport, r.info.HostPort()) {
-				fmt.Println("using: "+authCreds.Username, authCreds.Password)
 				return authCreds, nil
 			}
 			logger.Warn("no credentials for host", "host", hostport)
