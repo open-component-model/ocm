@@ -38,4 +38,4 @@ jobs:
     secrets: inherit
     with:
       ref: ${{ github.event.pull_request.head.ref }}
-      repo: ${{ github.event.pull_request.head.repo.name }}
+      repo: ${{ github.event.pull_request.head.repo.full_name }}
