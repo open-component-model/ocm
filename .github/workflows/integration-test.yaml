@@ -16,6 +16,7 @@ permissions:
 
 jobs:
   test:
+    if: github.event_name == 'push'
     name: Run tests
     uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@main
     permissions:
@@ -25,3 +26,16 @@ jobs:
     secrets: inherit
     with:
       ref: ${{ github.ref }}
+      repo: ${{ github.repository }}
+  test-pr:
+    if: github.event_name == 'pull_request_target'
+    name: Run tests
+    uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@main
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    with:
+      ref: ${{ github.event.pull_request.head.ref }}
+      repo: ${{ github.event.pull_request.head.repo.name }}
