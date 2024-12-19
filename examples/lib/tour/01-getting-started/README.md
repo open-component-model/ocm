@@ -128,7 +128,9 @@ Now, we have a look at the latest version. It is
 the last one in the list.
 
 ```go
-	cv, err := c.LookupVersion(versions[len(versions)-1])
+	// to retrieve the latest version use
+	// cv, err := c.LookupVersion(versions[len(versions)-1])
+	cv, err := c.LookupVersion("0.17.0")
 	if err != nil {
 		return errors.Wrapf(err, "cannot get latest version")
 	}

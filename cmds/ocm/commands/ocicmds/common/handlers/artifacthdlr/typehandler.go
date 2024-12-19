@@ -192,7 +192,7 @@ func (h *TypeHandler) get(repo oci.Repository, elemspec utils.ElemSpec) ([]outpu
 			return result, nil
 		}
 	} else {
-		art := oci.ArtSpec{Repository: ""}
+		art := &oci.ArtSpec{Repository: ""}
 		if name != "" {
 			art, err = oci.ParseArt(name)
 			if err != nil {

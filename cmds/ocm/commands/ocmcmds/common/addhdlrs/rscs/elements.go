@@ -48,7 +48,7 @@ func (h *ResourceSpecHandler) WithCLIOptions(opts ...options.Options) *ResourceS
 }
 
 func (h *ResourceSpecHandler) getModOpts() []ocm.ModificationOption {
-	opts := options.FindOptions[ocm.ModificationOption](h.GetOptions())
+	opts := options.FindOptions[ocm.ModificationOption](h.AsOptionSet())
 	if h.opts != nil {
 		opts = append(opts, h.opts)
 	}
@@ -63,7 +63,7 @@ func (*ResourceSpecHandler) RequireInputs() bool {
 	return true
 }
 
-func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
+func (*ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	var desc ResourceSpec
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)
 	if err != nil {
@@ -72,7 +72,7 @@ func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	return &desc, nil
 }
 
-func (h ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
+func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
 	spec, ok := r.Spec().(*ResourceSpec)
 	if !ok {
 		return fmt.Errorf("element spec is not a valid resource spec, failed to assert type %T to ResourceSpec", r.Spec())
@@ -102,9 +102,14 @@ func (h ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Elemen
 		SourceRefs: compdescv2.ConvertSourcerefsTo(spec.SourceRefs),
 	}
 	opts := h.getModOpts()
-	if ocm.IsIntermediate(v.Repository().GetSpecification()) {
-		opts = append(opts, ocm.ModifyResource())
+	if spec.Options.SkipDigestGeneration {
+		opts = append(opts, ocm.SkipDigest()) //nolint:staticcheck // skip digest still used for tests
 	}
+	/*
+		if ocm.IsIntermediate(v.Repository().GetSpecification()) {
+			opts = append(opts, ocm.ModifyElement())
+		}
+	*/
 	return v.SetResource(meta, acc, opts...)
 }
 
@@ -126,6 +131,19 @@ type ResourceSpec struct {
 	SourceRefs []compdescv2.SourceRef `json:"srcRefs"`
 
 	addhdlrs.ResourceInput `json:",inline"`
+
+	// Options describes additional process related options
+	// see ResourceOptions for more details.
+	Options ResourceOptions `json:"options,omitempty"`
+}
+
+// ResourceOptions describes additional process related options
+// which reflect the handling of the resource without describing it directly.
+// Typical examples are any options that require specific changes in handling of the resource
+// but are not reflected in the resource itself (outside of side effects)
+type ResourceOptions struct {
+	// SkipDigestGeneration omits the digest generation.
+	SkipDigestGeneration bool `json:"skipDigestGeneration,omitempty"`
 }
 
 var _ addhdlrs.ElementSpec = (*ResourceSpec)(nil)

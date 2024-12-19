@@ -2,10 +2,12 @@
 # However, latest builds (equivalent to nightlies based on the main branch), uses latest.yml
 version: 2
 
+release:
+  prerelease: auto
+
 before:
   hooks:
     - go mod tidy
-    - make CTF_TYPE=directory ctf
 
 builds:
   - <<: &build_defaults
@@ -89,18 +91,6 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-
-brews:
-  - name: ocm
-    repository:
-      owner: open-component-model
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    directory: Formula
-    homepage: "https://ocm.software/"
-    description: "The OCM CLI makes it easy to create component versions and embed them in build processes."
-    test: |
-      system "#{bin}/ocm --version"
 
 nfpms:
   - id: debian

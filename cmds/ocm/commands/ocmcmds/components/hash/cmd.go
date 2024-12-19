@@ -13,6 +13,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/closureoption"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
@@ -59,8 +60,8 @@ Hash lists normalized forms for all component versions specified, if only a comp
 all versions are listed.
 `,
 		Example: `
-$ ocm hash componentversion ghcr.io/mandelsoft/kubelink
-$ ocm hash componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
+$ ocm hash componentversion ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0
+$ ocm hash componentversion --repo OCIRegistry::ghcr.io/open-component-model/ocm ocm.software/ocmcli:0.17.0
 `,
 		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}
@@ -180,17 +181,26 @@ func (h *action) Close() error {
 
 func (h *action) Out() error {
 	if len(h.norms) > 1 {
-		dir := h.mode.outfile
-		dir = strings.TrimSuffix(dir, ".ncd")
-		err := h.ctx.FileSystem().Mkdir(dir, 0o755)
-		if err != nil {
-			return fmt.Errorf("cannot create output dir %s", dir)
-		}
-		for k, n := range h.norms {
-			p := filepath.Join(dir, k.String())
-			err := h.write(p+".ncd", n)
+		if h.mode.outfile == "" || h.mode.outfile == "-" {
+			for _, n := range h.norms {
+				err := h.write(h.mode.outfile, n)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			dir := h.mode.outfile
+			dir = strings.TrimSuffix(dir, ".ncd")
+			err := h.ctx.FileSystem().Mkdir(dir, 0o755)
 			if err != nil {
-				return err
+				return fmt.Errorf("cannot create output dir %s", dir)
+			}
+			for k, n := range h.norms {
+				p := filepath.Join(dir, k.String())
+				err := h.write(p+".ncd", n)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	} else {
@@ -202,12 +212,17 @@ func (h *action) Out() error {
 }
 
 func (h *action) write(p, n string) error {
-	dir := filepath.Dir(p)
-	err := h.ctx.FileSystem().MkdirAll(dir, 0o755)
-	if err != nil {
-		return fmt.Errorf("cannot create dir %s", dir)
+	if p == "" || p == "-" {
+		out.Outln(h.ctx, n)
+		return nil
+	} else {
+		dir := filepath.Dir(p)
+		err := h.ctx.FileSystem().MkdirAll(dir, 0o755)
+		if err != nil {
+			return fmt.Errorf("cannot create dir %s", dir)
+		}
+		return vfs.WriteFile(h.ctx.FileSystem(), p, []byte(n), 0o644)
 	}
-	return vfs.WriteFile(h.ctx.FileSystem(), p, []byte(n), 0o644)
 }
 
 /////////

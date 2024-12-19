@@ -8,68 +8,40 @@ on:
         description: "Release Candidate"
         required: true
         default: true
-      create_branch:
-        type: boolean
-        description: "Create Release Branch (on failure or if already existing, set to false to ensure a successful run)"
-        required: true
-        default: false
-      prerelease:
+      release_candidate_name:
         type: string
         description: "Release Candidate Name, adjust after every succinct release candidate (e.g. to rc.2, rc.3...)"
         required: true
         default: "rc.1"
 
 jobs:
+  release-version:
+    name: Release Version
+    uses: ./.github/workflows/release-version.yaml
+    with:
+      release_candidate: ${{ inputs.release_candidate }}
+      release_candidate_name: ${{ inputs.release_candidate_name }}
+    permissions:
+      contents: read
+      repository-projects: read
   check:
     name: Check Release Preconditions
-    runs-on: large_runner
+    runs-on: ubuntu-latest
     permissions:
-      contents: write
-      id-token: write
+      contents: read
       repository-projects: read
+    needs: release-version
+    env:
+      RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
+      RELEASE_VERSION_NO_SUFFIX: ${{ needs.release-version.outputs.version_no_suffix }}
+      REF: ${{ github.ref }}
+    outputs:
+      draft-release-notes: ${{ steps.release-notes.outputs.json }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-
-    - name: Job Settings
-      run: |
-        echo "Release Job Arguments"
-        if ${{ github.event.inputs.release_candidate }}; then
-          v="v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
-          if [ -n "${{ github.event.inputs.prerelease }}" ]; then
-            echo "Candidate: $v"
-          else
-            echo "Candidate: $v (taken from source)"
-          fi
-        else
-          v="v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)"
-          echo "Final Release: $v"
-          if ${{ github.event.inputs.create_branch }}; then
-            echo "with release branch creation"
-          else
-            echo "without release branch creation"
-          fi
-        fi
-
-    - name: Set Base Version
-      run: |
-        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
-        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
-
-    - name: Set Pre-Release Version
-      if: inputs.release_candidate == true
-      run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-
-    - name: Set Version
-      if: inputs.release_candidate == false
-      run: |
-        RELEASE_VERSION=${{env.BASE_VERSION}}
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-
     - name: Check Tag
       run: |
         set -e
@@ -77,43 +49,43 @@ jobs:
           >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
           exit 1
         fi
-
-    - name: Check Branch
-      if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
+    - name: Check if release is running on release branch
       run: |
-        set -e
-        if git ls-remote --exit-code origin refs/heads/releases/${{ env.RELEASE_VERSION }} ; then
-          >&2 echo "branch releases/${{ env.RELEASE_VERSION }} already exists"
+        if [[ ${{ env.REF }} != *"releases/"* ]]; then
+            echo "The branch ${{ env.REF }} is not a valid release branch and cannot be used for a release"
+            exit 1
+        fi
+        echo "Branch ${{ env.REF }} is a valid release branch"
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+    - name: Ensure existing Draft Release Notes exist
+      id: release-notes
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+      run: |
+        RELEASE_JSON=$( \
+          gh api /repos/${{ github.repository }}/releases \
+          -q '.[] | select(.name == "${{ env.RELEASE_VERSION_NO_SUFFIX }}" and .draft == true)' \
+        )
+        echo "json=${RELEASE_JSON}" >> $GITHUB_OUTPUT
+        # if no draft release notes are found, we cannot continue
+        if [ -z "${RELEASE_JSON}" ]; then
+          echo "No draft release notes found for ${{ env.RELEASE_VERSION_NO_SUFFIX }}"
           exit 1
         fi
-
-    - name: Get Draft Release Notes
-      id: release-notes
-      uses: cardinalby/git-get-release-action@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        draft: true
-        releaseName: ${{ env.BASE_VERSION }}
-
-  lint-and-test:
-    name: Lint and Unit Tests
-    uses: ./.github/workflows/lint_and_test.yaml
-    needs: check
-    permissions:
-      contents: read
-      pull-requests: read
   components:
     name: Component CTF Builds
     uses: ./.github/workflows/components.yaml
-    needs: check
-    permissions:
-      contents: read
-      pull-requests: read
-  diff-check-manifests:
-    name: Check for diff after go mod tidy and generated targets
-    uses: ./.github/workflows/check_diff_action.yaml
-    needs: check
+    needs: [ check,release-version ]
+    with:
+      version: ${{ needs.release-version.outputs.version_no_prefix }}
+      upload-ctf: true
+      ref: ${{ github.ref }}
     permissions:
       contents: read
       pull-requests: read
@@ -123,12 +95,16 @@ jobs:
     # run check before actual release to make sure we succeed
     # they will be skipped from the needs check
     - check
+    - release-version
+    - components
     name: Release Build
     runs-on: large_runner
     permissions:
       contents: write
       id-token: write
       packages: write
+    env:
+      RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action
       uses: TooMuch4U/actions-clean@v2.2
@@ -141,23 +117,45 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
+        # fetch all history so we can calculate the version and tagging
         fetch-depth: 0
         token: ${{ steps.generate_token.outputs.token }}
 
+    - name: Setup Syft
+      uses: anchore/sbom-action/download-syft@df80a981bc6edbc4e220a492d3cbe9f5547a6e75 # v0.17.9
+
+    - name: Setup Cosign
+      uses: sigstore/cosign-installer@v3.7.0
+
+    - name: Download CTF
+      uses: actions/download-artifact@v4
+      with:
+        pattern: 'ctf-aggregated'
+        path: gen/downloaded-ctfs
+    - name: Move CTF into correct directory to be recognized by the release process
+      run: |
+        mv \
+            ${{ github.workspace }}/gen/downloaded-ctfs/ctf-aggregated \
+            ${{ github.workspace }}/gen/ctf
+
+    # TODO: Remove Go setup once binaries no longer need to be built by goreleaser.
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
         check-latest: false
         cache: false
-
     - name: Get go environment for use with cache
       run: |
         echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
         echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-    - name: Set up cache
-      # https://github.com/actions/setup-go/issues/358 - cache is not working with setup-go for multiple jobs
-      uses: actions/cache@v4
+      # This step will only reuse the go mod and build cache from main made during the Build,
+      # see push_ocm.yaml => "ocm-cli-latest" Job
+      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
+      # This is because we have huge storage requirements for our cache because of the mass of dependencies
+    - name: Restore / Reuse Cache from central build
+      id: cache-golang-restore
+      uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
       with:
         path: |
           ${{ env.go_cache }}
@@ -166,68 +164,12 @@ jobs:
         restore-keys: |
           ${{ env.cache_name }}-${{ runner.os }}-go-
       env:
-        cache_name: release-go-cache
-
-    - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@1ca97d9028b51809cf6d3c934c3e160716e1b605 # v0.17.5
-
-    - name: Setup Cosign
-      uses: sigstore/cosign-installer@v3.7.0
+        cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
 
     - name: Setup git config
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
-
-    - name: Set Base Version
-      run: |
-        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate print-version)
-        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
-
-    - name: Set Pre-Release Version
-      if: inputs.release_candidate == true
-      run: |
-        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/api/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-        echo "release name is $RELEASE_VERSION"
-
-    - name: Set Version
-      if: inputs.release_candidate == false
-      run: |
-        RELEASE_VERSION=${{env.BASE_VERSION}}
-        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-        echo "release name is $RELEASE_VERSION"
-
-    - name: Get Draft Release Notes
-      id: release-notes
-      uses: cardinalby/git-get-release-action@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        draft: true
-        releaseName: ${{ env.BASE_VERSION }}
-
-    - name: Update Release Notes File
-      env:
-        RELEASE_NOTES: ${{ steps.release-notes.outputs.body }}
-        GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-      run: |
-        if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }}; then
-          >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
-          exit 2
-        fi
-        v="${{env.RELEASE_VERSION}}"
-        f="docs/releasenotes/$v.md"
-        if [ ! -f "$f" ]; then
-          echo "# Release ${{ env.RELEASE_VERSION }}" > "$f"
-          echo "$RELEASE_NOTES" | tail -n +2 >> "$f"
-          echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
-          git add "$f"
-          git commit -m "ReleaseNotes for $RELEASE_VERSION"
-          git push origin ${GITHUB_REF#refs/heads/}
-        else
-          echo "Using release notes file $f from code base"
-        fi
 
     - name: Create and Push Release
       env:
@@ -239,23 +181,47 @@ jobs:
         git commit -m "Release $RELEASE_VERSION"
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
+        # push the tag.
         git push origin ${{ env.RELEASE_VERSION }}
+    # If we encounter a release (i.e. NOT a candidate), we want to keep the tag in the release branch git history
+    # by merging it (without taking over its contents).
+    # This allows tools that rely on the latest tag (such as Release Note generators or git describe)
+    # to recognize the release as the latest version.
+    # We can then use this to generate release notes based on the previous tag.
+    # If we previously built a release candidate, the tag is not merged back.
+    # That results in the tag being "omitted" / not recognized while generating release notes.
+    # This is intended, because a candidate should never influence further release notes.
+    # Example:
+    # Branch releases/v0.19
+    # - Candidate Build v0.19.0-rc.1 => no merge, release notes based on original cutoff
+    # - Actual Build v0.19.0 => merge, release notes based on original cutoff
+    # - Candidate Build v0.19.1-rc.1 => no merge, release notes based on v0.19.0 due to previous merge
+    - name: Merge Release Tag back into release branch if not a release candidate
+      if: inputs.release_candidate == false
+      run: |
+        git checkout ${{ github.ref }}
+        git merge --strategy ours ${{ env.RELEASE_VERSION }}
+        git push origin ${{ github.ref }}
 
     - name: Create GPG Token file from Secret
       run: |
         echo "${{ secrets.GPG_PRIVATE_KEY_FOR_SIGNING }}" > ocm-releases-key.gpg
         echo "GPG_KEY_PATH=ocm-releases-key.gpg" >> $GITHUB_ENV
 
+    - name: Setup Release Notes as File to make it readable by GoReleaser
+      run: |
+        echo "${{ fromJSON(needs.check.outputs.draft-release-notes).body }}" > $RUNNER_TEMP/RELEASE_NOTES.md
+        echo "RELEASE_NOTES=$RUNNER_TEMP/RELEASE_NOTES.md" >> $GITHUB_ENV
+        cat $RUNNER_TEMP/RELEASE_NOTES.md
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v6
       with:
         distribution: goreleaser
         version: 2.1.0
-        args: release --clean --timeout 60m --skip=validate --config=.github/config/goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
+        args: release --clean --timeout 60m --skip=validate --config=.github/config/goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES }}
       env:
         GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        HOMEBREW_TAP_GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
         NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
@@ -269,47 +235,27 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: make plain-push
 
-    - name: Create Release Branch
-      if: inputs.release_candidate == false && inputs.create_branch && github.ref == 'refs/heads/main'
-      run: |
-        n="releases/${{env.RELEASE_VERSION}}"
-        git checkout -b "$n"
-        v="$(go run ./api/version/generate bump-patch)"
-        echo "$v" > VERSION
-        git add VERSION
-        git commit -m "Prepare Development of v$v"
-        git push origin "$n"
-
-    - name: Bump Version File
-      if: inputs.release_candidate == false
-      run: |
-        set -e
-        git checkout ${GITHUB_REF#refs/heads/}
-        v="$(go run ./api/version/generate bump-version)"
-        echo "$v" > VERSION
-        # Trigger a bump of any potential files that depend on a new version
-        make -f hack/Makefile mdref && make -f hack/Makefile go-bindata && make generate
-        git add --all
-        git commit -m "Update version to $v"
-        git push origin ${GITHUB_REF#refs/heads/}
-        echo "Next branch version is $v"
-
+    # now distribute the release event so that other jobs can listen for this
+    # and use the event to publish our release to other package registries
     - name: Publish Release Event
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v3
       with:
         token: ${{ steps.generate_token.outputs.token }}
-        repository: open-component-model/ocm-website
-        event-type: ocm-cli-release
-        client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
+        repository: ${{ github.repository_owner }}/ocm
+        event-type: publish-ocm-cli
+        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-website":true,"push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true,"push-to-brew-tap":true}'
 
-    # now distribute the release event so that other jobs can listen for this
-    # and use the event to publish our release to other package registries
-    - name: Publish Release Event for other package registries
-      if: inputs.release_candidate == false
-      uses: peter-evans/repository-dispatch@v3
-      with:
-        token: ${{ steps.generate_token.outputs.token }}
-        repository: open-component-model/ocm
-        event-type: ocm-cli-release
-        client-payload: '{"version": "${{ env.RELEASE_VERSION }}"}'
+  # make sure that the branch contains the next valid patch
+  bump-release-branch-pr:
+    if: inputs.release_candidate == false
+    uses: ./.github/workflows/release-bump-version.yaml
+    needs: release
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    with:
+      bump-type: patch
+      ref: ${{ github.ref }}

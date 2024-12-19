@@ -27,9 +27,16 @@ func DefaultComponent(component *ComponentDescriptor) *ComponentDescriptor {
 	return component
 }
 
+func DefaultElements(component *ComponentDescriptor) {
+	DefaultResources(component)
+	DefaultSources(component)
+	DefaultReferences(component)
+}
+
 // DefaultResources defaults a list of resources.
 // The version of the component is defaulted for local resources that do not contain a version.
 // adds the version as identity if the resource identity would clash otherwise.
+// The version is added to an extraIdentity, if it is not unique without it.
 func DefaultResources(component *ComponentDescriptor) {
 	for i, res := range component.Resources {
 		if res.Relation == v1.LocalRelation && len(res.Version) == 0 {
@@ -39,7 +46,45 @@ func DefaultResources(component *ComponentDescriptor) {
 		id := res.GetIdentity(component.Resources)
 		if v, ok := id[SystemIdentityVersion]; ok {
 			if res.ExtraIdentity == nil {
-				res.ExtraIdentity = v1.Identity{
+				component.Resources[i].ExtraIdentity = v1.Identity{
+					SystemIdentityVersion: v,
+				}
+			} else {
+				if _, ok := res.ExtraIdentity[SystemIdentityVersion]; !ok {
+					res.ExtraIdentity[SystemIdentityVersion] = v
+				}
+			}
+		}
+	}
+}
+
+// DefaultSources defaults a list of sources.
+// The version is added to an extraIdentity, if it is not unique without it.
+func DefaultSources(component *ComponentDescriptor) {
+	for i, res := range component.Sources {
+		id := res.GetIdentity(component.Resources)
+		if v, ok := id[SystemIdentityVersion]; ok {
+			if res.ExtraIdentity == nil {
+				component.Sources[i].ExtraIdentity = v1.Identity{
+					SystemIdentityVersion: v,
+				}
+			} else {
+				if _, ok := res.ExtraIdentity[SystemIdentityVersion]; !ok {
+					res.ExtraIdentity[SystemIdentityVersion] = v
+				}
+			}
+		}
+	}
+}
+
+// DefaultReferences defaults a list of references.
+// The version is added to an extraIdentity, if it is not unique without it.
+func DefaultReferences(component *ComponentDescriptor) {
+	for i, res := range component.References {
+		id := res.GetIdentity(component.Resources)
+		if v, ok := id[SystemIdentityVersion]; ok {
+			if res.ExtraIdentity == nil {
+				component.References[i].ExtraIdentity = v1.Identity{
 					SystemIdentityVersion: v,
 				}
 			} else {

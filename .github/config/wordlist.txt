@@ -27,6 +27,7 @@ bool
 boolean
 buildx
 cas
+changelog
 chocolateyinstall
 cli
 cliconfig
@@ -215,6 +216,7 @@ packageversion
 parameterization
 pendingdeprecationwarning
 pflag
+pkgs
 podinfo
 podman
 pre
@@ -236,8 +238,10 @@ repocpi
 repositoryimpl
 repositoryspec
 resendbuffer
+resmgmt
 resolvers
 resourcereference
+retrigger
 routings
 routingslips
 rsa

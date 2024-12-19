@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/utils"
@@ -26,6 +27,7 @@ type ActionTypeRegistry interface {
 	DecodeActionResult(data []byte, unmarshaler runtime.Unmarshaler) (ActionResult, error)
 	EncodeActionResult(spec ActionResult, marshaler runtime.Marshaler) ([]byte, error)
 
+	GetActionNames() []string
 	GetAction(name string) Action
 	SupportedActionVersions(name string) []string
 
@@ -159,6 +161,12 @@ func (r *actionRegistry) RegisterActionType(typ ActionType) error {
 	r.actionspecs.Register(typ.SpecificationType())
 	r.resultspecs.Register(typ.ResultType())
 	return nil
+}
+
+func (r *actionRegistry) GetActionNames() []string {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return maputils.OrderedKeys(r.actions)
 }
 
 func (r *actionRegistry) GetAction(name string) Action {

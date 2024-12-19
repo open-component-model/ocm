@@ -144,10 +144,10 @@ type ComponentVersionAccess interface {
 
 	// SetSource updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
-	SetSource(*SourceMeta, compdesc.AccessSpec, ...TargetOption) error
+	SetSource(*SourceMeta, compdesc.AccessSpec, ...TargetElementOption) error
 	// SetSourceByAccess updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
-	SetSourceByAccess(art SourceAccess, opts ...TargetOption) error
+	SetSourceByAccess(art SourceAccess, opts ...TargetElementOption) error
 
 	GetReference(meta metav1.Identity) (ComponentReference, error)
 	GetReferenceIndex(meta metav1.Identity) int
@@ -155,7 +155,10 @@ type ComponentVersionAccess interface {
 	GetReferences() []ComponentReference
 	SelectReferences(sel ...refsel.Selector) ([]ComponentReference, error)
 
-	SetReference(ref *ComponentReference, opts ...TargetOption) error
+	// SetReference adds or updates a reference. By default, it does not allow for
+	// signature relevant changes. If such operations should be possible
+	// the option ModifyElement() has to be passed as option.
+	SetReference(ref *ComponentReference, opts ...ElementModificationOption) error
 
 	// AddBlob adds a local blob and returns an appropriate local access spec.
 	AddBlob(blob BlobAccess, artType, refName string, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error)
@@ -166,7 +169,7 @@ type ComponentVersionAccess interface {
 	AdjustSourceAccess(meta *SourceMeta, acc compdesc.AccessSpec) error
 	// SetSourceBlob updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
-	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...TargetOption) error
+	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...TargetElementOption) error
 
 	// AccessMethod provides an access method implementation for
 	// an access spec. This might be a repository local implementation

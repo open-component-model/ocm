@@ -1,4 +1,4 @@
-## ocm install &mdash; Install Elements.
+## ocm install &mdash; Install New OCM CLI Components
 
 ### Synopsis
 

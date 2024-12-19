@@ -78,7 +78,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 
 	ocictx := ctx.OCIContext()
 
-	var artspec oci.ArtSpec
+	var artspec *oci.ArtSpec
 	var prefix string
 	var result oci.RefSpec
 
@@ -101,7 +101,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 			return true, "", err
 		}
 		finalize.Close(repo, "repository for downloading OCI artifact")
-		artspec = ref.ArtSpec
+		artspec = &ref.ArtSpec
 	} else {
 		log.Debug("evaluating config")
 		if path != "" {
@@ -117,16 +117,19 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		}
 		result.UniformRepositorySpec = *us
 	}
-	log.Debug("using artifact spec", "spec", artspec.String())
-	if artspec.Digest != nil {
-		return true, "", fmt.Errorf("digest not possible for target")
-	}
 
-	if artspec.Repository != "" {
-		namespace = artspec.Repository
-	}
-	if artspec.IsTagged() {
-		tag = *artspec.Tag
+	if artspec != nil {
+		log.Debug("using artifact spec", "spec", artspec.String())
+		if artspec.IsDigested() {
+			return true, "", fmt.Errorf("digest not possible for target")
+		}
+
+		if artspec.Repository != "" {
+			namespace = artspec.Repository
+		}
+		if artspec.IsTagged() {
+			tag = *artspec.Tag
+		}
 	}
 
 	if prefix != "" && namespace != "" {

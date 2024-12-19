@@ -8,34 +8,77 @@
 name: Publish Release to other package registries than Github
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        type: string
-        description: 'Version of the latest release (e.g. v0.42.0)'
-        required: false
-        default: ''
   repository_dispatch:
-    types: [ocm-cli-release]
+    types: [publish-ocm-cli]
 
 jobs:
+  push-to-brew-tap:
+    name: Update Homebrew Tap
+    if: github.event.client_payload.push-to-brew-tap && github.event.client_payload.version != ''
+    runs-on: ubuntu-latest
+    env:
+      REPO: open-component-model/homebrew-tap
+    steps:
+    - name: Ensure proper version
+      run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v2
+      with:
+        app_id: ${{ secrets.OCMBOT_APP_ID }}
+        private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: tap
+        repository: ${{ env.REPO }}
+        token: ${{ steps.generate_token.outputs.token }}
+    - name: Get Update Script
+      uses: actions/checkout@v4
+      with:
+        path: scripts
+        sparse-checkout: |
+          hack/brew
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: ${{ github.workspace }}/scripts/hack/brew/go.mod
+        cache: false
+    - name: Build Script
+      working-directory: ${{ github.workspace }}/scripts/hack/brew
+      run: go build -o script
+    - name: Update Homebrew Tap
+      run: |
+        formula=$(${{ github.workspace }}/scripts/hack/brew/script \
+            --version ${{ env.RELEASE_VERSION }} \
+            --template ${{ github.workspace }}/scripts/hack/brew/internal/ocm_formula_template.rb.tpl \
+            --outputDirectory ${{ github.workspace }}/tap/Formula)
+        mkdir -p ${{ github.workspace }}/tap/Aliases
+        cd ${{ github.workspace }}/tap/Aliases
+        ln -sf ../Formula/$(basename $formula) ./ocm
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        path: tap
+        token: ${{ steps.generate_token.outputs.token }}
+        title: "chore: update OCM CLI to v${{ env.RELEASE_VERSION }}"
+        commit-message: "[github-actions] update OCM CLI to v${{ env.RELEASE_VERSION }}"
+        branch: chore/update-ocm-cli/${{ env.RELEASE_VERSION }}
+        delete-branch: true
+        sign-commits: true
+        add-paths: |
+          Formula/*
+          Aliases/*
+        body: |
+          Update OCM CLI to v${{ env.RELEASE_VERSION }}.
 
   push-to-aur:
     name: Update Arch Linux User Repository
+    if: github.event.client_payload.push-to-aur && github.event.client_payload.version != ''
     runs-on: ubuntu-latest
     steps:
     - name: Ensure proper version
-      run: |
-        if [ -n "${{ github.event.inputs.version }}" ]; then
-          echo "RELEASE_VERSION=$(echo ${{ github.event.inputs.version }} | tr -d ['v'])" >> $GITHUB_ENV
-          exit 0
-        fi
-        if [ -n "${{ github.event.client_payload.version }}" ]; then
-          echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
-          exit 0
-        fi
-        echo "Version not provided"
-        exit 1
+      run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
     - name: Install SSH key
       uses: shimataro/ssh-key-action@v2
       with:
@@ -56,24 +99,13 @@ jobs:
 
   push-to-chocolatey:
     name: Update Chocolatey
+    if: github.event.client_payload.push-to-chocolatey && github.event.client_payload.version != ''
     runs-on: windows-latest
     steps:
     - name: Ensure proper version
       run: |
-        $workflow_version = "${{ github.event.inputs.version }}"
-        $repository_version = "${{ github.event.client_payload.version }}"
-        if (-not ([string]::IsNullOrEmpty($workflow_version))) {
-          $workflow_version = "$workflow_version" -replace 'v'
-          echo "RELEASE_VERSION=$workflow_version" | Out-File $env:GITHUB_ENV
-          exit 0
-        }
-        if (-not ([string]::IsNullOrEmpty($repository_version))) {
-          $repository_version = "$repository_version" -replace 'v'
-          echo "RELEASE_VERSION=($repository_version -replace 'v')" | Out-File $env:GITHUB_ENV
-          exit 0
-        }
-        Write-Host "Version not provided"
-        exit 1
+        $version = "${{ github.event.client_payload.version }}" -replace 'v'
+        echo "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV
     - name: Generate token
       id: generate_token
       uses: tibdex/github-app-token@v2
@@ -91,41 +123,40 @@ jobs:
 
   push-to-winget:
     name: Update Winget
+    if: github.event.client_payload.push-to-winget && github.event.client_payload.version != ''
     runs-on: windows-latest
     steps:
     - name: Ensure proper version
       run: |
-        $workflow_version = "${{ github.event.inputs.version }}"
-        $repository_version = "${{ github.event.client_payload.version }}"
-        if (-not ([string]::IsNullOrEmpty($workflow_version))) {
-          $workflow_version = "$workflow_version" -replace 'v'
-          echo "RELEASE_VERSION=$workflow_version" | Out-File $env:GITHUB_ENV
-          exit 0
-        }
-        if (-not ([string]::IsNullOrEmpty($repository_version))) {
-          $repository_version = "$repository_version" -replace 'v'
-          echo "RELEASE_VERSION=$repository_version" | Out-File $env:GITHUB_ENV
-          exit 0
-        }
-        Write-Host "Version not provided"
-        exit 1
+        $version = "${{ github.event.client_payload.version }}" -replace 'v'
+        echo "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV
+    - name: Install wingetcreate
+      run: iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+    - name: Update Winget package
+      run: |
+        .\wingetcreate.exe update --submit --token ${{ secrets.OCM_CI_ROBOT_0_REPO }} --urls `
+          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-amd64.zip `
+          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
+          --version ${{ env.RELEASE_VERSION }} `
+          Open-Component-Model.ocm-cli
+
+  push-to-website:
+    name: Update OCM Website
+    runs-on: ubuntu-latest
+    if: github.event.client_payload.push-to-website && github.event.client_payload.version != ''
+    steps:
+    - name: Ensure proper version
+      run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }})" >> $GITHUB_ENV
     - name: Generate token
       id: generate_token
       uses: tibdex/github-app-token@v2
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
-    - name: Checkout
-      uses: actions/checkout@v4
+    - name: Publish Release Event
+      uses: peter-evans/repository-dispatch@v3
       with:
         token: ${{ steps.generate_token.outputs.token }}
-    - name: Install wingetcreate
-      run: choco install wingetcreate
-    - name: Update Winget package
-      run: |
-        cd hack\winget
-        wingetcreate update --submit --token ${{ steps.generate_token.outputs.token }} --urls `
-          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-amd64.zip `
-          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
-          --version ${{ env.RELEASE_VERSION }} `
-          Open-Component-Model.ocm-cli
+        repository: open-component-model/ocm-website
+        event-type: ocm-cli-release
+        client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'

@@ -1,0 +1,36 @@
+name: ocm.software/demo/test
+version: 1.0.0
+provider:
+  name: ocm.software
+  labels:
+    - name: city
+      value: Karlsruhe
+labels:
+  - name: purpose
+    value: test
+
+resources:
+  - name: text
+    type: PlainText
+    labels:
+      - name: city
+        value: Karlsruhe
+        merge:
+          algorithm: default
+          config:
+            overwrite: inbound
+    input:
+      type: file
+      path: testdata
+    options:
+      skipDigestGeneration: true
+  - name: data
+    type: PlainText
+    input:
+      type: binary
+      data: IXN0cmluZ2RhdGE=
+
+references:
+  - name: ref
+    version: v1
+    componentName: github.com/mandelsoft/test2

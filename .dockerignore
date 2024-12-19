@@ -22,6 +22,7 @@ bin
 /hack
 /LICENSES
 /local
+/gen
 
 /pkg/test*
 
@@ -35,3 +36,4 @@ bin
 
 !go.*
 !**/*.go
+!.git

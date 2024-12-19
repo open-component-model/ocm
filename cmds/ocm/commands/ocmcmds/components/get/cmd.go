@@ -59,8 +59,8 @@ Get lists all component versions specified, if only a component is specified
 all versions are listed.
 `,
 		Example: `
-$ ocm get componentversion ghcr.io/mandelsoft/kubelink
-$ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
+$ ocm get componentversion ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0
+$ ocm get componentversion --repo OCIRegistry::ghcr.io/open-component-model/ocm ocm.software/ocmcli:0.17.0
 `,
 		Annotations: map[string]string{"ExampleCodeStyle": "bash"},
 	}

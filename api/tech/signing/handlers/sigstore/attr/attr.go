@@ -15,7 +15,7 @@ const (
 
 var defaultAttr = Attribute{
 	// https://github.com/tektoncd/chains/blob/main/docs/config.md#keyless-signing-with-fulcio
-	FulcioURL:    "https://v1.fulcio.sigstore.dev",
+	FulcioURL:    "https://fulcio.sigstore.dev",
 	RekorURL:     "https://rekor.sigstore.dev",
 	OIDCIssuer:   "https://oauth2.sigstore.dev/auth",
 	OIDCClientID: "sigstore",
@@ -46,7 +46,7 @@ func (a AttributeType) Description() string {
 	return `
 *sigstore config* Configuration to use for sigstore based signing.
 The following fields are used.
-- *<code>fulcioURL</code>* *string*  default is https://v1.fulcio.sigstore.dev
+- *<code>fulcioURL</code>* *string*  default is https://fulcio.sigstore.dev
 - *<code>rekorURL</code>* *string*  default is https://rekor.sigstore.dev
 - *<code>OIDCIssuer</code>* *string*  default is https://oauth2.sigstore.dev/auth
 - *<code>OIDCClientID</code>* *string*  default is sigstore
