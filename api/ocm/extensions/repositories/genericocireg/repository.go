@@ -11,12 +11,16 @@ import (
 	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci"
 	ocicpi "ocm.software/ocm/api/oci/cpi"
+	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
+	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/repocpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/componentmapping"
+	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/config"
 )
 
 type OCIBasedRepository interface {
@@ -44,21 +48,67 @@ type RepositoryImpl struct {
 	nonref   cpi.Repository
 	ocirepo  oci.Repository
 	readonly bool
+	// blobLimit is the size limit for layers maintained for the storage of localBlobs.
+	// The value -1 means an unconfigured value (a default from the blob limit configuration is used),
+	// a value == 0 disables the limiting and (a default from the blob limit configuration is ignored),
+	// a value > 0 enabled the usage of the specified size.
+	blobLimit int64
 }
 
 var (
 	_ repocpi.RepositoryImpl               = (*RepositoryImpl)(nil)
 	_ credentials.ConsumerIdentityProvider = (*RepositoryImpl)(nil)
+	_ config.Configurable                  = (*RepositoryImpl)(nil)
 )
 
-func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository) cpi.Repository {
+// NewRepository creates a new OCM repository based on any OCI abstraction from
+// the OCI context type.
+// The optional blobLimit is the size limit for layers maintained for the storage of localBlobs.
+// The value -1 means an unconfigured value (a default from the blob limit configuration is used),
+// a value == 0 disables the limiting and (a default from the blob limit configuration is ignored),
+// a value > 0 enabled the usage of the specified size.
+func NewRepository(ctxp cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository, blobLimit ...int64) cpi.Repository {
 	ctx := datacontext.InternalContextRef(ctxp.OCMContext())
+
 	impl := &RepositoryImpl{
-		ctx:     ctx,
-		meta:    *DefaultComponentRepositoryMeta(meta),
-		ocirepo: ocirepo,
+		ctx:       ctx,
+		meta:      *DefaultComponentRepositoryMeta(meta),
+		ocirepo:   ocirepo,
+		blobLimit: general.OptionalDefaulted(-1, blobLimit...),
+	}
+	if impl.blobLimit < 0 {
+		ConfigureBlobLimits(ctxp.OCMContext(), impl)
 	}
 	return repocpi.NewRepository(impl, "OCM repo[OCI]")
+}
+
+func (r *RepositoryImpl) ConfigureBlobLimits(limits config.BlobLimits) {
+	if len(limits) == 0 {
+		return
+	}
+	if spec, ok := r.ocirepo.GetSpecification().(*ocireg.RepositorySpec); ok {
+		id := spec.GetConsumerId()
+		hp := hostpath.HostPort(id)
+		l := limits.GetLimit(hp)
+		if l >= 0 {
+			r.blobLimit = l
+		}
+	}
+	if spec, ok := r.ocirepo.GetSpecification().(*ctf.RepositorySpec); ok {
+		l := limits.GetLimit("@" + spec.FilePath)
+		if l >= 0 {
+			r.blobLimit = l
+		}
+	}
+}
+
+func (r *RepositoryImpl) SetBlobLimit(s int64) bool {
+	r.blobLimit = s
+	return true
+}
+
+func (r *RepositoryImpl) GetBlobLimit() int64 {
+	return r.blobLimit
 }
 
 func (r *RepositoryImpl) Close() error {
