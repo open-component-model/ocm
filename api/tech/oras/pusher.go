@@ -5,12 +5,15 @@ import (
 	"fmt"
 
 	"github.com/containerd/errdefs"
+	"github.com/moby/locker"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote/auth"
 
 	"ocm.software/ocm/api/oci/ociutils"
 )
+
+var _locker = locker.New()
 
 type OrasPusher struct {
 	client    *auth.Client
@@ -19,6 +22,9 @@ type OrasPusher struct {
 }
 
 func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (retErr error) {
+	_locker.Lock(c.ref)
+	defer _locker.Unlock(c.ref)
+
 	reader, err := src.Reader()
 	if err != nil {
 		return err
