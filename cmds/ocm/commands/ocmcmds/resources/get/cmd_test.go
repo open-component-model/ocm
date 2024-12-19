@@ -51,7 +51,7 @@ testdata v1               PlainText local
 `))
 		})
 
-		It("lists ambigious resource in component archive", func() {
+		It("lists ambiguous resource in component archive", func() {
 			env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
 				env.Provider(PROVIDER)
 				env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {

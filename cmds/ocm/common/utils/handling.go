@@ -22,8 +22,8 @@ func (s StringSpec) String() string {
 }
 
 // TypeHandler provides base input to an output processing chain
-// using HandleArsg or HandleOutput(s).
-// It provides the exploding of intials specifications
+// using HandleArgs or HandleOutput(s).
+// It provides the exploding of initials specifications
 // to effective objects passed to the output processing chain.
 type TypeHandler interface {
 	// All returns all elements according to its context

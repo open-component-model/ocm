@@ -24,7 +24,7 @@ type (
 	//   - package transferhandler.standard: able to select recursive transfer
 	//     general value artifact transport.
 	//   - package transferhandler.spiff: controls transfer using a spiff script.
-	// Custom implemetations can be used to gain fine-grained control
+	// Custom implementations can be used to gain fine-grained control
 	// over the transfer process, whose general flow is handled by
 	// a uniform Transfer function.
 	TransferHandler = transferhandler.TransferHandler

@@ -174,7 +174,7 @@ func updateFunction[T any](f func(cmd *cobra.Command, args []string), source OCM
 // SetupCommand uses the OCMCommand to create and tweak a cobra command
 // to incorporate the additional reusable option specs and their usage documentation.
 // Before the command executions the various Complete method flavors are
-// executed on the additional options ond the OCMCommand.
+// executed on the additional options on the OCMCommand.
 // It also prepares the help system to reflect dynamic settings provided
 // by root command options by using a generated update function based
 // on optional methods of the OCM command.

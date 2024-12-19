@@ -34,7 +34,7 @@ func traverse(hist common.History, o *Object, octx out.Context) []output.Object 
 		for _, ref := range refs {
 			key := common.NewNameVersion("", ref.Digest.String())
 			if found[key] {
-				continue // skip same ref wit different attributes for recursion
+				continue // skip same ref with different attributes for recursion
 			}
 			found[key] = true
 			nested, err := o.Namespace.GetArtifact(key.GetVersion())

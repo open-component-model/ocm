@@ -126,7 +126,7 @@ type ElementMeta struct {
 	// Version is the semver version of the object.
 	Version string `json:"version"`
 	// ExtraIdentity is the identity of an object.
-	// An additional label with key "name" ist not allowed
+	// An additional label with key "name" is not allowed
 	ExtraIdentity metav1.Identity `json:"extraIdentity,omitempty"`
 	// Labels defines an optional set of additional labels
 	// describing the object.

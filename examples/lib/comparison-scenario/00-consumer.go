@@ -70,7 +70,7 @@ func Consumer(cfg *helper.Config) error {
 	PrintConsumerId(repo, "local repository")
 
 	////////////////////////////////////////////////////////////////////////////
-	fmt.Printf("*** transfer compoment version\n")
+	fmt.Printf("*** transfer component version\n")
 
 	// first, get the version into the local environment
 	err = TransportTo(repo, cfg.Repository)

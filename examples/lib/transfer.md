@@ -119,7 +119,7 @@ get access to the intended target repository:
 
 To parse an OCM repository reference you can use the `ParseRepo` function.
 It provides a uniform representation of a parsed string representation.
-This one can then be mapped to a regular `RespositorySpec` object, which is mapped by the OCM context to a repository implementation.
+This one can then be mapped to a regular `RepositorySpec` object, which is mapped by the OCM context to a repository implementation.
 
 Instead of this string parsing, an appropriate repository specification object
 can directly be created as shown in the other examples.

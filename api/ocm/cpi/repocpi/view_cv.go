@@ -79,7 +79,7 @@ type ComponentVersionAccessBridge interface {
 	// and update mode state
 	ShouldUpdate(final bool) bool
 
-	// GetBlobCache retieves the blob cache used to store preliminary
+	// GetBlobCache retrieves the blob cache used to store preliminary
 	// blob accesses for freshly generated local access specs not directly
 	// usable until a component version is finally added to the repository.
 	GetBlobCache() BlobCache

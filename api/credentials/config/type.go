@@ -23,10 +23,10 @@ func init() {
 // Config describes a configuration for the config context.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	// Consumers describe predefine logical cosumer specs mapped to credentials
+	// Consumers describe predefine logical consumer specs mapped to credentials
 	// These will (potentially) be evaluated if access objects requiring credentials
 	// are provided by other modules (e.g. oci repo access) without
-	// specifying crednentials. Then this module can request credentials here by passing
+	// specifying credentials. Then this module can request credentials here by passing
 	// an appropriate consumer spec.
 	Consumers []ConsumerSpec `json:"consumers,omitempty"`
 	// Repositories describe preloaded credential repositories with potential credential chain

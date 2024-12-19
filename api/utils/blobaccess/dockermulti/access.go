@@ -68,7 +68,7 @@ func BlobAccess(opts ...Option) (bpi.BlobAccess, error) {
 		index.SetAnnotation(annotations.COMPVERS_ANNOTATION, eff.Origin.String())
 	}
 	if version == "" {
-		return nil, fmt.Errorf("no versio specified")
+		return nil, fmt.Errorf("no version specified")
 	}
 
 	feedback := func(blob bpi.BlobAccess, art cpi.ArtifactAccess) error {

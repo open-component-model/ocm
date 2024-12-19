@@ -179,7 +179,7 @@ func (r *registry) Get(spec api.ActionSpec, possible ...string) []ActionHandlerM
 	var result []ActionHandlerMatch
 
 	if kinds := r.registrations[spec.GetKind()]; kinds != nil {
-		// first, check direct selctor match
+		// first, check direct selector match
 		if reg := kinds[spec.Selector()]; reg != nil {
 			if len(reg.versions) != 0 {
 				if v := MatchVersion(r.types.SupportedActionVersions(spec.GetKind()), reg.versions); v != "" {

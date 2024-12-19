@@ -155,7 +155,7 @@ type AttributesContext interface {
 	BindTo(ctx context.Context) context.Context
 }
 
-// AttributeFactory is used to atomicly create a new attribute for a context.
+// AttributeFactory is used to atomically create a new attribute for a context.
 type AttributeFactory func(Context) interface{}
 
 type Attributes interface {

@@ -1,4 +1,4 @@
-package bootstapping
+package bootstrapping
 
 import (
 	"github.com/spf13/cobra"

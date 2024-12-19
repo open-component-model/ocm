@@ -14,7 +14,7 @@ import (
 
 const (
 	ARCH      = "/tmp/ctf"
-	NAMESAPCE = "mandelsoft/test"
+	NAMESPACE = "mandelsoft/test"
 	V13       = "v1.3"
 	V131      = "v1.3.1"
 	V132      = "v1.3.2"
@@ -30,7 +30,7 @@ var _ = Describe("Show OCI Tags", func() {
 		env = NewTestEnv()
 
 		env.OCICommonTransport(ARCH, accessio.FormatDirectory, func() {
-			env.Namespace(NAMESAPCE, func() {
+			env.Namespace(NAMESPACE, func() {
 				env.Manifest(V13, func() {
 					env.Tags(V131, OTHERVERS)
 					env.Config(func() {
@@ -75,7 +75,7 @@ var _ = Describe("Show OCI Tags", func() {
 
 	It("lists tags", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--repo", ARCH, NAMESAPCE)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--repo", ARCH, NAMESPACE)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 sometag
 v1.3
@@ -89,7 +89,7 @@ v2.0
 
 	It("lists tags for same artifact", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--repo", ARCH, NAMESAPCE+":"+V13)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--repo", ARCH, NAMESPACE+":"+V13)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 sometag
 v1.3
@@ -99,7 +99,7 @@ v1.3.1
 
 	It("lists semver tags", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--semver", "--repo", ARCH, NAMESAPCE)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--semver", "--repo", ARCH, NAMESPACE)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 v1.3
 v1.3.1
@@ -112,7 +112,7 @@ v2.0
 
 	It("lists semver tags for same artifact", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--semver", "--repo", ARCH, NAMESAPCE+":"+V13)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--semver", "--repo", ARCH, NAMESPACE+":"+V13)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 v1.3
 v1.3.1

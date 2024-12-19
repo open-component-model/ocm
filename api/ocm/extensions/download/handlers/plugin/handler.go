@@ -43,7 +43,7 @@ func (b *pluginHandler) Download(_ common.Printer, racc cpi.ResourceAccess, path
 
 	finalize.Close(m, "method for download")
 	r := accessio.NewOndemandReader(m)
-	finalize.Close(r, "reader for downlowd download")
+	finalize.Close(r, "reader for download")
 
 	return b.plugin.Download(b.name, r, racc.Meta().Type, m.MimeType(), path, b.config)
 }

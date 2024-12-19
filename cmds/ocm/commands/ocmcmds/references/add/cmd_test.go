@@ -57,7 +57,7 @@ var _ = Describe("Add references", func() {
 		CheckReference(env, cd, "testdata")
 	})
 
-	It("adds simple ref wth extra identity", func() {
+	It("adds simple ref with extra identity", func() {
 		Expect(env.Execute("add", "references", "--file", ARCH, "/testdata/referenceswithid.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())

@@ -23,7 +23,7 @@ func init() {
 // Config describes a memory based repository interface.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	// Attributes descibe a set of geeric attribute settings
+	// Attributes describe a set of generic attribute settings
 	Attributes map[string]json.RawMessage `json:"attributes,omitempty"`
 }
 

@@ -144,7 +144,7 @@ var _ = Describe("syntheses", func() {
 		MustBeSuccessful(nested.Finalize())
 		Expect(vfs.Exists(info.FileSystem(), path)).To(BeFalse())
 
-		// use syntesized blob to extract new blob, useless but should work
+		// use synthesized blob to extract new blob, useless but should work
 		newblob := Must(artifactset.SynthesizeArtifactBlob(set, TAG))
 		finalize.Close(newblob, "newblob")
 

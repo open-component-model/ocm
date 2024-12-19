@@ -204,7 +204,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 		tag := ref[ix+1:]
 		if v.Repository != "" {
 			e.Logger.Debug("substitute image repository", "ref", ref, "target", v.Repository)
-			Mustf(Set(values, v.Repository, repo), "mapping %d: assigning repositry to property %q", v.Repository)
+			Mustf(Set(values, v.Repository, repo), "mapping %d: assigning repository to property %q", v.Repository)
 		}
 		if v.Tag != "" {
 			e.Logger.Debug("substitute image tag", "ref", ref, "target", v.Tag)
