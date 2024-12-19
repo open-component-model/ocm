@@ -3,9 +3,9 @@ package oras
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/containerd/errdefs"
-	"github.com/moby/locker"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote/auth"
@@ -13,17 +13,16 @@ import (
 	"ocm.software/ocm/api/oci/ociutils"
 )
 
-var _locker = locker.New()
-
 type OrasPusher struct {
 	client    *auth.Client
 	ref       string
 	plainHTTP bool
+	mu        sync.Mutex
 }
 
 func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (retErr error) {
-	_locker.Lock(c.ref)
-	defer _locker.Unlock(c.ref)
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	reader, err := src.Reader()
 	if err != nil {
