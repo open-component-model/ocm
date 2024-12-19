@@ -164,14 +164,21 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 	}
 
 	authClient := &auth.Client{
-		Client:     client,
-		Cache:      auth.NewCache(),
-		Credential: auth.StaticCredential(r.info.HostPort(), authCreds),
+		Client: client,
+		Cache:  auth.NewCache(),
+		Credential: auth.CredentialFunc(func(ctx context.Context, hostport string) (auth.Credential, error) {
+			if strings.Contains(hostport, r.info.HostPort()) {
+				return authCreds, nil
+			}
+			logger.Warn("no credentials for host", "host", hostport)
+			return auth.EmptyCredential, nil
+		}),
 	}
 
 	return oras.New(oras.ClientOptions{
 		Client:    authClient,
 		PlainHTTP: r.info.Scheme == "http",
+		Logger:    logger,
 	}), nil
 }
 
