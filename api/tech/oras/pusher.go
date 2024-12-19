@@ -53,7 +53,7 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 
 	ok, err := repository.Exists(ctx, d)
 	if err != nil {
-		return fmt.Errorf("failed to check if repository %q exists: %w", d, err)
+		return fmt.Errorf("failed to check if repository %q exists: %w", ref.Repository, err)
 	}
 
 	if ok {
