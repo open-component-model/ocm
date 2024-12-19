@@ -37,6 +37,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v45 v45.2.0
+	github.com/google/uuid v1.6.0
 	github.com/hashicorp/vault-client-go v0.4.3
 	github.com/klauspost/compress v1.17.11
 	github.com/klauspost/pgzip v1.2.6
@@ -49,6 +50,7 @@ require (
 	github.com/mikefarah/yq/v4 v4.44.6
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mittwald/go-helm-client v0.12.15
+	github.com/moby/locker v1.0.1
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/onsi/ginkgo/v2 v2.22.0
 	github.com/onsi/gomega v1.36.1
@@ -217,7 +219,6 @@ require (
 	github.com/google/pprof v0.0.0-20241029153458-d1b30febd7db // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
@@ -258,7 +259,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
-	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/spdystream v0.5.0 // indirect
 	github.com/moby/sys/capability v0.3.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
