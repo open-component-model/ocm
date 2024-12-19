@@ -7,7 +7,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/set"
 
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/utils"
@@ -36,8 +35,8 @@ const (
 var status = set.New[string](STATUS_PASSED, STATUS_FAILED, STATUS_SKIPPED)
 
 var (
-	StatusOption  = options.NewStringMapOptionType("checkStatus", out.Sprintf("status value for check (%s)", strings.Join(utils.StringMapKeys(status), ", ")))
-	MessageOption = options.NewStringMapOptionType("checkMessage", "message for check")
+	StatusOption  = flagsets.NewStringMapOptionType("checkStatus", out.Sprintf("status value for check (%s)", strings.Join(utils.StringMapKeys(status), ", ")))
+	MessageOption = flagsets.NewStringMapOptionType("checkMessage", "message for check")
 )
 
 type ValueSet struct {
@@ -56,8 +55,8 @@ The status entry has the following format:
 	}
 }
 
-func (v ValueSet) Options() []options.OptionType {
-	return []options.OptionType{
+func (v ValueSet) Options() []flagsets.ConfigOptionType {
+	return []flagsets.ConfigOptionType{
 		StatusOption,
 		MessageOption,
 	}

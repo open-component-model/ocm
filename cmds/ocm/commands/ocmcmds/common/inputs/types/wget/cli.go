@@ -9,7 +9,7 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 	return flagsets.NewConfigOptionTypeSetHandler(
 		TYPE, AddConfig,
 		options.URLOption,
-		options.MediaTypeOption,
+		options.MediatypeOption,
 		options.HTTPHeaderOption,
 		options.HTTPVerbOption,
 		options.HTTPBodyOption,
@@ -19,7 +19,7 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.URLOption, config, "url")
-	flagsets.AddFieldByOptionP(opts, options.MediaTypeOption, config, "mediaType")
+	flagsets.AddFieldByOptionP(opts, options.MediatypeOption, config, "mediaType")
 	flagsets.AddFieldByOptionP(opts, options.HTTPHeaderOption, config, "header")
 	flagsets.AddFieldByOptionP(opts, options.HTTPVerbOption, config, "verb")
 	flagsets.AddFieldByOptionP(opts, options.HTTPBodyOption, config, "body")

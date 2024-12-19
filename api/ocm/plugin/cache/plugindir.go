@@ -118,7 +118,7 @@ func (c *pluginDirImpl) scan(path string) error {
 				errmsg = err.Error()
 			} else {
 				if desc.PluginName != fi.Name() {
-					errmsg = fmt.Sprintf("nmatching plugin name %q", desc.PluginName)
+					errmsg = fmt.Sprintf("no matching plugin name %q, found file %q", desc.PluginName, fi.Name())
 				}
 			}
 			c.add(fi.Name(), desc, execpath, errmsg, list)
