@@ -22,7 +22,6 @@ type ClientOptions struct {
 type Client struct {
 	client    *auth.Client
 	plainHTTP bool
-	ref       string
 	logger    logging.Logger
 }
 
