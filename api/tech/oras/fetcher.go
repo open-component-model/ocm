@@ -44,41 +44,40 @@ func (c *OrasFetcher) Fetch(ctx context.Context, desc ociv1.Descriptor) (io.Read
 	// that the mediatype is not set at this point so we don't want ORAS to try to
 	// select the wrong layer to fetch from.
 	if desc.Size < 1 || desc.Digest == "" {
-		log.Printf("Trying to resolve manifest %s: %s", id.String(), c.ref)
-		rdesc, err := src.Manifests().Resolve(ctx, desc.Digest.String())
+		log.Printf("Trying to resolve blob %s: %s", id.String(), c.ref)
+		bdesc, err := src.Blobs().Resolve(ctx, desc.Digest.String())
 		if err != nil {
-			log.Printf("Failed to resolve manifest, trying to resolve blob %s: %s", id.String(), c.ref)
-			var berr error
-			rdesc, berr = src.Blobs().Resolve(ctx, desc.Digest.String())
-			if berr != nil {
+			log.Printf("Failed to resolve blob, trying to resolve manifest %s: %s", id.String(), c.ref)
+			mdesc, merr := src.Manifests().Resolve(ctx, desc.Digest.String())
+			if merr != nil {
 				// also display the first manifest resolve error
-				err = errors.Join(err, berr)
+				err = errors.Join(err, merr)
 
-				return nil, fmt.Errorf("failed to resolve fetch blob %q: %w", desc.Digest.String(), err)
+				return nil, fmt.Errorf("failed to resolve manifest %q: %w", desc.Digest.String(), err)
 			}
 
-			log.Printf("Blob resolved, fetching reader %s: %s", id.String(), c.ref)
-			reader, err := src.Blobs().Fetch(ctx, rdesc)
+			log.Printf("Fetching manifest %s: %s", id.String(), c.ref)
+			fetch, err := src.Fetch(ctx, mdesc)
 			if err != nil {
-				return nil, fmt.Errorf("failed to fetch blob: %w", err)
+				return nil, fmt.Errorf("failed to fetch manifest: %w", err)
 			}
-			log.Printf("Reader fetched, returning %s: %s", id.String(), c.ref)
 
-			return reader, nil
+			log.Printf("Manifest fetched; returining %s: %s", id.String(), c.ref)
+			return fetch, nil
 		}
 
 		// no error
-		desc = rdesc
+		desc = bdesc
 	}
 
 	// manifest resolve succeeded return the reader directly
 	// mediatype of the descriptor should now be set to the correct type.
-	log.Printf("Fetching manifest %s: %s", id.String(), c.ref)
-	fetch, err := src.Fetch(ctx, desc)
+	log.Printf("Blob resolved, fetching reader %s: %s", id.String(), c.ref)
+	reader, err := src.Blobs().Fetch(ctx, desc)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch manifest: %w", err)
+		return nil, fmt.Errorf("failed to fetch blob: %w", err)
 	}
+	log.Printf("Reader fetched, returning %s: %s", id.String(), c.ref)
 
-	log.Printf("Manifest fetched; returining %s: %s", id.String(), c.ref)
-	return fetch, nil
+	return reader, nil
 }
