@@ -149,16 +149,16 @@ func (f *fileinfo) SubstituteByData(path string, value []byte) error {
 		return err
 	}
 
-	nd := &yqlib.CandidateNode{}
-	nd.SetDocument(0)
-	nd.SetFilename("value")
-	nd.SetFileIndex(0)
+	n := &yqlib.CandidateNode{}
+	n.SetDocument(0)
+	n.SetFilename("value")
+	n.SetFileIndex(0)
 
-	if err = nd.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
+	if err = n.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
 		return err
 	}
 
-	return f.substituteByValue(path, nd)
+	return f.substituteByValue(path, n)
 }
 
 func (f *fileinfo) SubstituteByValue(path string, value interface{}) error {
