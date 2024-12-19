@@ -3,16 +3,19 @@ package oras
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/containerd/errdefs"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote/auth"
+
+	"ocm.software/ocm/api/oci/ociutils"
 )
 
 type OrasPusher struct {
-	client *auth.Client
-	ref    string
+	client    *auth.Client
+	ref       string
+	plainHTTP bool
 }
 
 func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (retErr error) {
@@ -21,12 +24,22 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 		return err
 	}
 
-	repository, err := createRepository(c.ref, c.client, false)
+	repository, err := createRepository(c.ref, c.client, c.plainHTTP)
 	if err != nil {
 		return err
 	}
 
-	if split := strings.Split(c.ref, ":"); len(split) == 2 {
+	ref, err := registry.ParseReference(c.ref)
+	if err != nil {
+		return fmt.Errorf("failed to parse reference %q: %w", c.ref, err)
+	}
+
+	vers, err := ociutils.ParseVersion(ref.Reference)
+	if err != nil {
+		return fmt.Errorf("failed to parse version %q: %w", ref.Reference, err)
+	}
+
+	if vers.IsTagged() {
 		// Once we get a reference that contains a tag, we need to re-push that
 		// layer with the reference included. PushReference then will tag
 		// that layer resulting in the created tag pointing to the right

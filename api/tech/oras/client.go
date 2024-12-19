@@ -33,19 +33,19 @@ func New(opts ClientOptions) *Client {
 }
 
 func (c *Client) Fetcher(ctx context.Context, ref string) (Fetcher, error) {
-	return &OrasFetcher{client: c.client, ref: ref}, nil
+	return &OrasFetcher{client: c.client, ref: ref, plainHTTP: c.plainHTTP}, nil
 }
 
 func (c *Client) Pusher(ctx context.Context, ref string) (Pusher, error) {
-	return &OrasPusher{client: c.client, ref: ref}, nil
+	return &OrasPusher{client: c.client, ref: ref, plainHTTP: c.plainHTTP}, nil
 }
 
 func (c *Client) Lister(ctx context.Context, ref string) (Lister, error) {
-	return &OrasLister{client: c.client, ref: ref}, nil
+	return &OrasLister{client: c.client, ref: ref, plainHTTP: c.plainHTTP}, nil
 }
 
 func (c *Client) Resolve(ctx context.Context, ref string) (string, ociv1.Descriptor, error) {
-	src, err := createRepository(ref, c.client, false)
+	src, err := createRepository(ref, c.client, c.plainHTTP)
 	if err != nil {
 		return "", ociv1.Descriptor{}, err
 	}

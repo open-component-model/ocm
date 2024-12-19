@@ -8,12 +8,13 @@ import (
 )
 
 type OrasLister struct {
-	client *auth.Client
-	ref    string
+	client    *auth.Client
+	ref       string
+	plainHTTP bool
 }
 
 func (c *OrasLister) List(ctx context.Context) ([]string, error) {
-	src, err := createRepository(c.ref, c.client, false)
+	src, err := createRepository(c.ref, c.client, c.plainHTTP)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve ref %q: %w", c.ref, err)
 	}
