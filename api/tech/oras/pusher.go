@@ -23,6 +23,9 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 	if err != nil {
 		return err
 	}
+	defer func() {
+		reader.Close()
+	}()
 
 	repository, err := createRepository(c.ref, c.client, c.plainHTTP)
 	if err != nil {
