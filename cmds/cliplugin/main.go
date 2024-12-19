@@ -25,8 +25,6 @@ func main() {
 	}
 	p.RegisterCommand(cmd)
 	p.ForwardLogging()
-	
-	s := "toi"
 
 	p.RegisterConfigType(check.RhabarberType)
 	p.RegisterConfigType(check.RhabarberTypeV1)
