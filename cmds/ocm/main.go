@@ -9,6 +9,10 @@ import (
 )
 
 func main() {
+	println("start")
+	defer func() {
+		println("end")
+	}()
 	c, err := app.NewCliCommandForArgs(clictx.DefaultContext(), os.Args[1:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
