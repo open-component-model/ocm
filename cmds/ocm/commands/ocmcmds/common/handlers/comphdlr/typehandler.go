@@ -261,7 +261,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 				s := spec
 				s.Version = &t
 				result = append(result, &Object{
-					Repository: repo,
+					Repository: v.Repository(),
 					Spec:       s,
 					// Component:        component,
 					ComponentVersion: v,

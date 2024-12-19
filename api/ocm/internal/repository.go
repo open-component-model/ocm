@@ -125,6 +125,8 @@ type ComponentVersionAccess interface {
 	ReadOnlyFeature
 
 	GetContext() Context
+	// Repository returns the backing repository object without an additional
+	// ref. It should not be closed.
 	Repository() Repository
 	GetDescriptor() *compdesc.ComponentDescriptor
 
