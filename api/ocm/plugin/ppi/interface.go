@@ -113,7 +113,7 @@ type Uploader interface {
 	Description() string
 
 	ValidateSpecification(p Plugin, spec UploadTargetSpec) (info *UploadTargetSpecInfo, err error)
-	Writer(p Plugin, arttype, mediatype string, hint string, spec UploadTargetSpec, creds credentials.Credentials) (io.WriteCloser, AccessSpecProvider, error)
+	Upload(p Plugin, arttype, mediatype string, hint string, spec UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (AccessSpecProvider, error)
 }
 
 type UploadTargetSpec = runtime.TypedObject
