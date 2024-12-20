@@ -11,6 +11,7 @@ import (
 	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
+	"github.com/moby/locker"
 	"oras.land/oras-go/v2/registry/remote/auth"
 	"oras.land/oras-go/v2/registry/remote/retry"
 
@@ -165,14 +166,22 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 	}
 
 	authClient := &auth.Client{
-		Client:     client,
-		Cache:      auth.NewCache(),
-		Credential: auth.StaticCredential(r.info.HostPort(), authCreds),
+		Client: client,
+		Cache:  auth.NewCache(),
+		Credential: auth.CredentialFunc(func(ctx context.Context, hostport string) (auth.Credential, error) {
+			if strings.Contains(hostport, r.info.HostPort()) {
+				return authCreds, nil
+			}
+			logger.Warn("no credentials for host", "host", hostport)
+			return auth.EmptyCredential, nil
+		}),
 	}
 
 	return oras.New(oras.ClientOptions{
 		Client:    authClient,
 		PlainHTTP: r.info.Scheme == "http",
+		Logger:    logger,
+		Lock:      locker.New(),
 	}), nil
 }
 
