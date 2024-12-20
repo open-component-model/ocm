@@ -11,6 +11,7 @@ import (
 	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
+	"github.com/moby/locker"
 	"oras.land/oras-go/v2/registry/remote/auth"
 	"oras.land/oras-go/v2/registry/remote/retry"
 
@@ -179,6 +180,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		Client:    authClient,
 		PlainHTTP: r.info.Scheme == "http",
 		Logger:    logger,
+		Lock:      locker.New(),
 	}), nil
 }
 
