@@ -150,7 +150,7 @@ var _ = Describe("Method", func() {
 			vfs.Cleanup(fs)
 		})
 
-		It("provides comsumer id", func() {
+		It("provides consumer id", func() {
 			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: env.OCMContext()})
 			Expect(err).ToNot(HaveOccurred())
 			Expect(credentials.GetProvidedConsumerId(m)).To(Equal(credentials.NewConsumerIdentity(identity.CONSUMER_TYPE,

@@ -11,7 +11,7 @@ type LoggingHandler interface {
 var handler LoggingHandler
 
 // RegisterLoggingConfigHandler is used to register a configuration handler
-// for logging configration passed by the OCM library.
+// for logging configuration passed by the OCM library.
 // If standard mandelsoft logging is used, it can be adapted
 // by adding the ananymous import  of the ppi/logging package.
 func RegisterLoggingConfigHandler(h LoggingHandler) {

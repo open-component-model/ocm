@@ -72,7 +72,7 @@ var logContext = ocm
 
 // SetContext sets a new preconfigured context.
 // This function should be called prior to any configuration
-// to avoid loosing them.
+// to avoid losing them.
 func SetContext(ctx logging.Context) {
 	logContext = NewContext(ctx)
 }

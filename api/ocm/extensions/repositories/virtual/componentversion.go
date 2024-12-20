@@ -15,7 +15,7 @@ import (
 	"ocm.software/ocm/api/utils/refmgmt"
 )
 
-// newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact acess is closed.
+// newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact access is closed.
 func newComponentVersionAccess(comp *componentAccessImpl, version string, persistent bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	access, err := comp.repo.access.GetComponentVersion(comp.GetName(), version)
 	if err != nil {

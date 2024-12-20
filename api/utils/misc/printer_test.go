@@ -51,7 +51,7 @@ var _ = Describe("Printer", func() {
 		Expect(AssurePrinter(p)).To(BeIdenticalTo(p))
 	})
 
-	Context("loggging", func() {
+	Context("logging", func() {
 		var buf *bytes.Buffer
 		var logctx logging.Context
 		var printer Printer

@@ -21,7 +21,7 @@ var _ = Describe("multi version type", func() {
 
 	multi := Must(runtime.NewMultiFormatVersionedType[TestSpecRealm, TestSpecType](Type1, versions))
 
-	It("decodes plain version wth v2", func() {
+	It("decodes plain version with v2", func() {
 		s := `
 type: ` + Type1 + `
 field: sally

@@ -153,7 +153,7 @@ func (s OptionSet) Get(proto interface{}) bool {
 }
 
 // ProcessOnOptions processes all options found in the option set
-// woth a given OptionsProcessor.
+// with a given OptionsProcessor.
 func (s OptionSet) ProcessOnOptions(f OptionsProcessor) error {
 	for _, n := range s {
 		var err error

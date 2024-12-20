@@ -192,7 +192,7 @@ func GettingStarted() error {
 		defer m.Close()
 		// --- end closing access ---
 
-		// the method now also provides information abount the returned
+		// the method now also provides information about the returned
 		// blob format in form of a mime type.
 		// --- begin getting reader ---
 		fmt.Printf("  found blob with mime type %s\n", m.MimeType())

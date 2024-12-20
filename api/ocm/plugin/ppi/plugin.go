@@ -547,7 +547,7 @@ func (p *plugin) RegisterCommand(c Command) error {
 	}
 	cmd := c.Command()
 	if cmd.HasSubCommands() && c.Verb() != "" {
-		return errors.Newf("no sub commands allowd for CLI command for verb")
+		return errors.Newf("no sub commands allowed for CLI command for verb")
 	}
 
 	objtype := c.ObjectType()

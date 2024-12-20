@@ -51,7 +51,7 @@ testdata v1               git
 `))
 	})
 
-	It("lists ambigious source in component archive", func() {
+	It("lists ambiguous source in component archive", func() {
 		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
 			env.Provider(PROVIDER)
 			env.Source("testdata", "v1", "git", func() {

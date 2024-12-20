@@ -68,7 +68,7 @@ func (s *DefaultCredentialsSpec) UnmarshalJSON(data []byte) error {
 	}{}
 	err = json.Unmarshal(data, specdata)
 	if err != nil {
-		return fmt.Errorf("failed ot unmarshal spec data: %w", err)
+		return fmt.Errorf("failed to unmarshal spec data: %w", err)
 	}
 
 	s.RepositorySpec = repo

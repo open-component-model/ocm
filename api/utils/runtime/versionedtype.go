@@ -65,7 +65,7 @@ func NewInternalVersionedTypedObject[T VersionedTypedObject](encoder TypedObject
 }
 
 func (o *InternalVersionedTypedObject[T]) encode(obj VersionedTypedObject) ([]byte, error) {
-	// cannot use type parameter here, because casts of paramerized objects are not supported in GO
+	// cannot use type parameter here, because casts of parameterized objects are not supported in GO
 	return o.encoder.Encode(obj.(T), DefaultJSONEncoding)
 }
 

@@ -158,7 +158,7 @@ var _ = Describe("access method", func() {
 		Expect(err).To(MatchError(ContainSubstring("component version \"github.com/mandelsoft/ocm:1.0.0\" not found: oci artifact \"1.0.0\" not found in component-descriptors/github.com/mandelsoft/ocm")))
 	})
 
-	It("provides error for invalid bloc access", func() {
+	It("provides error for invalid blob access", func() {
 		final := Finalizer{}
 		defer Defer(final.Finalize)
 

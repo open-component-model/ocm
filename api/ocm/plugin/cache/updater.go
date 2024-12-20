@@ -169,7 +169,7 @@ func (o *PluginUpdater) DownloadRef(session ocm.Session, ref string, name string
 		return o.downloadLatest(session, result.Component, name)
 	}
 	if result.Version.GetVersion() == o.Current && !o.Force {
-		o.Printer.Printf("plugin %s already uptodate\n", name)
+		o.Printer.Printf("plugin %s already up-to-date\n", name)
 		return nil
 	}
 	return o.download(session, result.Version, name)
@@ -188,7 +188,7 @@ func (o *PluginUpdater) DownloadFromRepo(session ocm.Session, repo ocm.Repositor
 	}
 	if cr.IsVersion() {
 		if *cr.Version == o.Current && !o.Force {
-			o.Printer.Printf("plugin %s already uptodate\n", name)
+			o.Printer.Printf("plugin %s already up-to-date\n", name)
 			return nil
 		}
 		cv, err = session.GetComponentVersion(comp, *cr.Version)
@@ -222,7 +222,7 @@ func (o *PluginUpdater) downloadLatest(session ocm.Session, comp ocm.ComponentAc
 		versions = versions[len(versions)-1:]
 	}
 	if versions[0].Original() == o.Current && !o.Force {
-		o.Printer.Printf("plugin %s already uptodate\n", name)
+		o.Printer.Printf("plugin %s already up-to-date\n", name)
 		return nil
 	}
 	cv, err := session.GetComponentVersion(comp, versions[0].Original())

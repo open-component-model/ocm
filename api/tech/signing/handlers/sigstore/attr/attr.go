@@ -76,7 +76,7 @@ func (a AttributeType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (int
 	attr := &Attribute{}
 	err := unmarshaler.Unmarshal(data, attr)
 	if err != nil {
-		return nil, fmt.Errorf("invalud attribute value for %s: %w", ATTR_KEY, err)
+		return nil, fmt.Errorf("invalid attribute value for %s: %w", ATTR_KEY, err)
 	}
 
 	return attr, nil

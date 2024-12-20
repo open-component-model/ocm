@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Referencable Resource Test Suite")
+	RunSpecs(t, "Referenceable Resource Test Suite")
 }

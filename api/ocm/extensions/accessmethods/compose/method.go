@@ -35,7 +35,7 @@ type AccessSpec struct {
 	GlobalAccess *accspeccpi.AccessSpecRef `json:"globalAccess,omitempty"`
 	// ReferenceName is an optional static name the object should be
 	// use in a local repository context. It is use by a repository
-	// to optionally determine a globally referencable access according
+	// to optionally determine a globally referenceable access according
 	// to the OCI distribution spec. The result will be stored
 	// by the repository in the field ImageReference.
 	// The value is typically an OCI repository name optionally

@@ -130,7 +130,7 @@ var _ State = (*state)(nil)
 // and the management of its technical representation as byte array.
 func NewState(mode AccessMode, a StateAccess, p StateHandler) (State, error) {
 	state, err := newState(mode, a, p)
-	// avoid nil pinter problem: go is great
+	// avoid nil pointer problem: go is great
 	if err != nil {
 		return nil, err
 	}

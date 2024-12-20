@@ -166,12 +166,12 @@ func NewAction(ctx clictx.Context, session oci.Session, target string, transferR
 func (a *action) Add(e interface{}) error {
 	src, ok := e.(*artifacthdlr.Object)
 	if !ok {
-		return fmt.Errorf("failed type assertion for type %T to artifacthtlr.Object", e)
+		return fmt.Errorf("failed type assertion for type %T to artifacthdlr.Object", e)
 	}
 
 	ns := src.Namespace.GetNamespace()
 	if ns == "" && a.Ref.IsRegistry() {
-		return errors.Newf("target repository equired for repository-less artifact")
+		return errors.Newf("target repository required for repository-less artifact")
 	}
 	versions, ok := a.repositories[ns]
 	if !ok {

@@ -127,10 +127,10 @@ func (s *StateAccess) readComponentDescriptorFromTar(r io.Reader) ([]byte, error
 		// archive can be an image layer and that can even reach the gigabyte range.
 		// For now, we acknowledge the risk.
 		//
-		// We checked other softwares and tried to figure out how they manage this,
+		// We checked other software and tried to figure out how they manage this,
 		// but it's handled the same way.
 		if _, err := io.Copy(&data, tr); err != nil {
-			return nil, fmt.Errorf("erro while reading component descriptor file from tar: %w", err)
+			return nil, fmt.Errorf("error while reading component descriptor file from tar: %w", err)
 		}
 		return data.Bytes(), err
 	}

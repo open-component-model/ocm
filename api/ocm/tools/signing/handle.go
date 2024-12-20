@@ -714,7 +714,7 @@ func NormalizedDigesterType(digest *metav1.DigestSpec) ocm.DigesterType {
 	return dc
 }
 
-// GetDigestMode checks whether the versio has already been digested.
+// GetDigestMode checks whether the version has already been digested.
 // If so, the digest mode used at this time fixes the mode for all further
 // signing processes.
 // If a version is still undigested, any mode possible and is optionally

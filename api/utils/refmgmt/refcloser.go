@@ -10,7 +10,7 @@ import (
 
 var ErrClosed = errors.ErrClosed()
 
-// ReferencableCloser manages closable views to a basic closer.
+// ReferenceableCloser manages closable views to a basic closer.
 // If the last view is closed, the basic closer is finally closed.
 type ReferencableCloser interface {
 	ExtendedAllocatable

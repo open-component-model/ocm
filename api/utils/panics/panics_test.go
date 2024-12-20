@@ -24,7 +24,7 @@ func callee(topanic interface{}) {
 }
 
 var _ = Describe("catch panics", func() {
-	It("propagates catched panic", func() {
+	It("propagates caught panic", func() {
 		defer func() {
 			Expect(recover()).To(BeNil())
 		}()
@@ -35,7 +35,7 @@ goroutine [0-9]* \[running\]:
 panic.*$`))
 	})
 
-	It("propagates catched panic with handlers", func() {
+	It("propagates caught panic with handlers", func() {
 		defer func() {
 			Expect(recover()).To(BeNil())
 		}()

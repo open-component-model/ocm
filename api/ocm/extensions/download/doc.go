@@ -1,5 +1,5 @@
 // Package download provides an API for resource download handlers.
-// A download handler is used for downloading resoures. By default, the native
+// A download handler is used for downloading resources. By default, the native
 // blob as provided by the access method is the result of a download.
 // A download handler can influence the outbound blob format according
 // to the concrete type of the resource.

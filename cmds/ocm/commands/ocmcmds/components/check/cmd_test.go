@@ -35,7 +35,7 @@ var _ = Describe("Test Environment", func() {
 		env.Cleanup()
 	})
 
-	It("get checks refereces", func() {
+	It("get checks references", func() {
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.ComponentVersion(COMP, VERSION, func() {
 				env.Reference("ref", COMP3, VERSION)

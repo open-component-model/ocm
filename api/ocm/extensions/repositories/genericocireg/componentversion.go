@@ -37,7 +37,7 @@ import (
 	"ocm.software/ocm/api/version"
 )
 
-// newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact acess is closed.
+// newComponentVersionAccess creates a component access for the artifact access, if this fails the artifact access is closed.
 func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtifactAccess, persistent bool) (*repocpi.ComponentVersionAccessInfo, error) {
 	c, err := newComponentVersionContainer(mode, comp, version, access)
 	if err != nil {

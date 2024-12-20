@@ -70,7 +70,7 @@ type ArtifactAccessor interface {
 }
 
 // AccessSpec is an abstract specification of an access method
-// The outbound object is typicall a runtime.UnstructuredTypedObject.
+// The outbound object is typically a runtime.UnstructuredTypedObject.
 // Inbound any serializable AccessSpec implementation is possible.
 type AccessSpec = accessors.AccessSpec
 

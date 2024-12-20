@@ -79,7 +79,7 @@ type Context interface {
 	ApplyConfigSet(name string) error
 
 	// Reset all configs applied so far, subsequent calls to ApplyTo will
-	// ony see configs allpied after the last reset.
+	// only see configs applied after the last reset.
 	Reset() int64
 	// Generation return the actual config generation.
 	// this is a strictly increasing number, regardless of the number

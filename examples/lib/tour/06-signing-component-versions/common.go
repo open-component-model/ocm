@@ -197,7 +197,7 @@ func addVersion(repo ocm.Repository, name, version string) error {
 		return errors.Wrapf(err, "cannot setup new version")
 	}
 
-	// finally, wee add the new version to the repository.
+	// finally, we add the new version to the repository.
 	fmt.Printf("adding component version\n")
 	err = repo.AddComponentVersion(cv)
 	if err != nil {

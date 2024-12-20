@@ -153,7 +153,7 @@ var _ = Describe("blob handler registry test", func() {
 			ext = internal.NewBlobHandlerRegistry(reg)
 		})
 
-		DescribeTable("priortizes complete specs",
+		DescribeTable("prioritizes complete specs",
 			func(eff *internal.BlobHandlerRegistry) {
 				reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
 				reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
@@ -170,7 +170,7 @@ var _ = Describe("blob handler registry test", func() {
 			Entry("extended", &ext),
 		)
 
-		DescribeTable("priortizes mime",
+		DescribeTable("prioritizes mime",
 			func(eff *internal.BlobHandlerRegistry) {
 				reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
 				reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
@@ -185,7 +185,7 @@ var _ = Describe("blob handler registry test", func() {
 			Entry("extended", &ext),
 		)
 
-		DescribeTable("priortizes mime",
+		DescribeTable("prioritizes mime",
 			func(eff *internal.BlobHandlerRegistry) {
 				reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
 				reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
@@ -201,7 +201,7 @@ var _ = Describe("blob handler registry test", func() {
 			Entry("extended", &ext),
 		)
 
-		DescribeTable("priortizes prio",
+		DescribeTable("prioritizes prio",
 			func(eff *internal.BlobHandlerRegistry) {
 				reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
 				reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))

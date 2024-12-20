@@ -412,7 +412,7 @@ var _ = Describe("Validation", func() {
 				}))))
 			})
 
-			It("should pass if labels are defined multiple times in the same context with differnet names", func() {
+			It("should pass if labels are defined multiple times in the same context with different names", func() {
 				comp.ComponentReferences = []ComponentReference{
 					{
 						ElementMeta: ElementMeta{

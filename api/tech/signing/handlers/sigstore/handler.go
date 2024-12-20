@@ -110,7 +110,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 
 	// verify the signed certificate timestamp
 	if err := cosign.VerifySCT(ctx, fs.Cert, fs.Chain, fs.SCT, pubKeys); err != nil {
-		return nil, fmt.Errorf("failed to verify signed certifcate timestamp: %w", err)
+		return nil, fmt.Errorf("failed to verify signed certificate timestamp: %w", err)
 	}
 
 	// get the public key from the signing key pair
@@ -140,7 +140,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	// create a rekor hashed entry
 	hashedEntry := prepareRekorEntry(digest, sig, publicKey)
 
-	// valiate the rekor entry before submission
+	// validate the rekor entry before submission
 	if _, err := hashedEntry.Canonicalize(ctx); err != nil {
 		return nil, fmt.Errorf("rekor entry is not valid: %w", err)
 	}

@@ -21,15 +21,15 @@ const ATTR_TYPE = "type"
 // Anonymous inline struct fields are always marshaled by the default struct
 // marshals in a depth first manner without observing the Marshal interface!!!!
 //
-// Therefore, all structs in this module deriving from UnstructuedTypedObject
+// Therefore, all structs in this module deriving from UnstructuredTypedObject
 // are explicitly implementing the marshal/unmarshal interface.
 //
 // Side Fact: Marshaling a map[interface{}] filled by unmarshaling a marshaled
 // object with anonymous fields is not stable, because the inline fields
-// are sorted depth firt for marshalling, while maps key are marshaled
+// are sorted depth first for marshalling, while maps key are marshaled
 // completely in order.
 // Therefore we do not store the raw bytes but marshal them always from
-// the UnstructuedMap.
+// the UnstructuredMap.
 
 // Unstructured is the interface to represent generic object data for
 // types handled by schemes.

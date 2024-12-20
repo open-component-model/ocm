@@ -548,7 +548,7 @@ func ListElements[E DescribableElement[C], C Describable](msg string, elems []E,
 			out.Printf("%s\n", desc)
 		}
 		if len(m.GetConstraints()) > 0 {
-			out.Printf("Registration Contraints:\n")
+			out.Printf("Registration Constraints:\n")
 			for _, c := range m.GetConstraints() {
 				out.Printf("- %s\n", utils.IndentLines(c.Describe(), "  ", true))
 			}

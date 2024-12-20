@@ -143,7 +143,7 @@ func (r MapIncludes) Field(name string, value interface{}) (string, interface{},
 }
 
 func (r MapIncludes) Element(v interface{}) (bool, interface{}, ExcludeRules) {
-	panic("invalid exclude structure, require arry but found struct rules")
+	panic("invalid exclude structure, require array but found struct rules")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -327,7 +327,7 @@ func (r DynamicMapIncludes) Field(name string, value interface{}) (string, inter
 }
 
 func (r DynamicMapIncludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
-	panic("invalid exclude structure, require arry but found struct rules")
+	panic("invalid exclude structure, require array but found struct rules")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -368,7 +368,7 @@ func (r DynamicMapExcludes) Field(name string, value interface{}) (string, inter
 }
 
 func (r DynamicMapExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
-	panic("invalid exclude structure, require arry but found struct rules")
+	panic("invalid exclude structure, require array but found struct rules")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -414,7 +414,7 @@ func (r ConditionalMapExcludes) Field(name string, value interface{}) (string, i
 }
 
 func (r ConditionalMapExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
-	panic("invalid exclude structure, require arry but found struct rules")
+	panic("invalid exclude structure, require array but found struct rules")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

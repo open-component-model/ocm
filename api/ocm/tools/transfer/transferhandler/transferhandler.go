@@ -36,8 +36,8 @@ type TransferOptions interface{}
 
 // TransferOptionsCreator is an optional interface for a TransferOption.
 // The option may provide a default TransferOptions object if it applies
-// to regular transfer handler options. THis is used to infer an applicable
-// transfer hander for the gicven option set.
+// to regular transfer handler options. This is used to infer an applicable
+// transferhandler for the given option set.
 // Options not intended for the transfer handler MUST NOT implement this
 // interface to not hamper the handler detection process.
 type TransferOptionsCreator interface {

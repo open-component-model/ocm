@@ -27,16 +27,16 @@ func (b *blobprovider) Close() error {
 	return b.blob.Close()
 }
 
-// ProviderForBlobAccess provides subsequent bloc accesses
+// ProviderForBlobAccess provides subsequent blob accesses
 // as long as the given blob access is not closed.
 // If required the blob can be closed with the additionally
 // provided Close method.
-// ATTENTION: the underlying BlobAccess wil not be closed
+// ATTENTION: the underlying BlobAccess will not be closed
 // as long as the provider is not closed, but the BlobProvider
 // interface is no io.Closer.
 // To be on the safe side, this method should only be called
 // with static blob access, featuring a NOP closer without
-// anny attached external resources, which should be released.
+// any attached external resources, which should be released.
 func ProviderForBlobAccess(blob bpi.BlobAccess) *blobprovider {
 	return &blobprovider{blob}
 }

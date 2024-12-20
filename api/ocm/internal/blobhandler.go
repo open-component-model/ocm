@@ -231,7 +231,7 @@ type BlobHandlerRegistry interface {
 
 	IsInitial() bool
 
-	// Copy provides a new independend copy of the registry.
+	// Copy provides a new independent copy of the registry.
 	Copy() BlobHandlerRegistry
 	// RegisterBlobHandler registers a blob handler. It must specify either a sole mime type,
 	// or a context and repository type, or all three keys.
