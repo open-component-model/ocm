@@ -3,11 +3,8 @@ package oras
 import (
 	"context"
 	"fmt"
-	"log"
-	"time"
 
 	"github.com/containerd/errdefs"
-	"github.com/google/uuid"
 	"github.com/moby/locker"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"oras.land/oras-go/v2/registry"
@@ -26,11 +23,6 @@ type OrasPusher struct {
 func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (retErr error) {
 	c.lock.Lock(c.ref)
 	defer c.lock.Unlock(c.ref)
-	start := time.Now()
-	id := uuid.New()
-
-	log.Printf("START push %s; %s: %s\n", id.String(), c.ref, start)
-	defer log.Printf("END push %s; %s: %s\n", id.String(), c.ref, time.Since(start))
 
 	reader, err := src.Reader()
 	if err != nil {
@@ -60,12 +52,10 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 		// layer with the reference included. PushReference then will tag
 		// that layer resulting in the created tag pointing to the right
 		// blob data.
-		log.Printf("Pushing Reference %s: %s", ref, id.String())
 		if err := repository.PushReference(ctx, d, reader, c.ref); err != nil {
 			return fmt.Errorf("failed to push tag: %w", err)
 		}
 
-		log.Printf("Pushing Reference done %s: %s", ref, id.String())
 		return nil
 	}
 
@@ -78,14 +68,9 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 		return errdefs.ErrAlreadyExists
 	}
 
-	// We have a digest, so we use plain push for the digest.
-	// Push here decides if it's a Manifest or a Blob.
-	log.Printf("Pushing blob %s: %s", ref, id.String())
 	if err := repository.Push(ctx, d, reader); err != nil {
 		return fmt.Errorf("failed to push: %w, %s", err, c.ref)
 	}
-
-	log.Printf("Pushing blob done %s: %s", ref, id.String())
 
 	return nil
 }
