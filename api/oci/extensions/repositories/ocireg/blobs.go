@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"ocm.software/ocm/api/oci/cpi"
+	"ocm.software/ocm/api/oci/extensions/attrs/cacheattr"
 	"ocm.software/ocm/api/tech/oras"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -37,7 +38,7 @@ type BlobContainers struct {
 
 func NewBlobContainers(ctx cpi.Context, fetcher remotes.Fetcher, pusher oras.Pusher) *BlobContainers {
 	return &BlobContainers{
-		//cache:   cacheattr.Get(ctx),
+		cache:   cacheattr.Get(ctx),
 		fetcher: fetcher,
 		pusher:  pusher,
 		mimes:   map[string]BlobContainer{},
@@ -80,17 +81,17 @@ func newBlobContainer(mime string, fetcher oras.Fetcher, pusher oras.Pusher) *bl
 	}
 }
 
-func NewBlobContainer(_ accessio.BlobCache, mime string, fetcher oras.Fetcher, pusher oras.Pusher) (BlobContainer, error) {
-	return newBlobContainer(mime, fetcher, pusher), nil
+func NewBlobContainer(cache accessio.BlobCache, mime string, fetcher oras.Fetcher, pusher oras.Pusher) (BlobContainer, error) {
+	c := newBlobContainer(mime, fetcher, pusher)
 
-	//if cache == nil {
-	//	return c, nil
-	//}
-	//r, err := accessio.CachedAccess(c, c, cache)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//return r, nil
+	if cache == nil {
+		return c, nil
+	}
+	r, err := accessio.CachedAccess(c, c, cache)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 func (n *blobContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
