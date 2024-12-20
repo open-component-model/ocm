@@ -8,6 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -56,9 +57,13 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	var repo oci.Repository
 
 	var tag string
-
 	aspec := m.AccessSpec()
-	namespace := racc.ReferenceHint()
+
+	hint := racc.Meta().ReferenceHints.GetReferenceHint(oci2.ReferenceHintType)
+	if hint == nil {
+		hint = racc.ReferenceHintForAccess().GetReferenceHint(oci2.ReferenceHintType, "")
+	}
+	namespace := hint.GetReference()
 	if l, ok := aspec.(*localblob.AccessSpec); namespace == "" && ok {
 		namespace = l.ReferenceName
 	}

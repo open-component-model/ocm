@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -116,11 +117,11 @@ func convertComponentReferencesTo(in []ComponentReference) compdesc.References {
 	return out
 }
 
-func convertHintsTo(in []metav1.DefaultReferenceHint) metav1.ReferenceHints {
+func convertHintsTo(in []refhints.DefaultReferenceHint) refhints.ReferenceHints {
 	if in == nil {
 		return nil
 	}
-	hints := make(metav1.ReferenceHints, len(in))
+	hints := make(refhints.ReferenceHints, len(in))
 
 	for i, h := range in {
 		hints[i] = h
@@ -267,11 +268,11 @@ func convertComponentReferencesFrom(in []compdesc.Reference) []ComponentReferenc
 	return out
 }
 
-func convertHintsFrom(in metav1.ReferenceHints) []metav1.DefaultReferenceHint {
+func convertHintsFrom(in refhints.ReferenceHints) []refhints.DefaultReferenceHint {
 	if in == nil {
 		return nil
 	}
-	hints := make([]metav1.DefaultReferenceHint, len(in))
+	hints := make([]refhints.DefaultReferenceHint, len(in))
 	for i, h := range in {
 		hints[i] = h.AsDefault()
 	}

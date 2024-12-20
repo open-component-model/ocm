@@ -3,6 +3,8 @@ package ociartifactblob
 import (
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
+	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
@@ -21,17 +23,17 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, r
 	}
 
 	hint := eff.Hint
-	if hint == "" {
+	if hint == nil {
 		ref, err := oci.ParseRef(refname)
 		if err == nil {
-			hint = ref.String()
+			hint = metav1.ReferenceHints{metav1.New(oci2.ReferenceHintType, ref.String())}
 		}
 	}
 
 	blobprov := blob.Provider(refname, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
-	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), accprov)
+	return cpi.NewArtifactAccessForProvider[M, P](generics.Cast[*M](meta), accprov)
 }
 
 func ResourceAccess(ctx ocm.Context, meta *cpi.ResourceMeta, path string, opts ...Option) cpi.ResourceAccess {

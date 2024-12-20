@@ -6,6 +6,7 @@ import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/selectors/refsel"
 	"ocm.software/ocm/api/ocm/selectors/rscsel"
 	"ocm.software/ocm/api/ocm/selectors/srcsel"
@@ -83,7 +84,11 @@ type ComponentAccess interface {
 // method.
 type AccessProvider interface {
 	GetOCMContext() Context
-	ReferenceHint() []metav1.ReferenceHint
+
+	// ReferenceHintForAccess is the default hint representation provided
+	// by an access method. This is typically a single hint.
+	// Additionally, the artifact meta data might offer explicit hints.
+	ReferenceHintForAccess() refhints.ReferenceHints
 
 	Access() (AccessSpec, error)
 	AccessMethod() (AccessMethod, error)
@@ -97,6 +102,12 @@ type ArtifactAccess[M any] interface {
 	Meta() *M
 	GetComponentVersion() (ComponentVersionAccess, error)
 	AccessProvider
+
+	// GetReferenceHint provides the effective hints
+	// for an artifact. It is composed of the
+	// hints explicitly given by the artifact metadata
+	// and optional hints provided by the access method.
+	GetReferenceHints() refhints.ReferenceHints
 }
 
 type (
@@ -161,15 +172,15 @@ type ComponentVersionAccess interface {
 	SetReference(ref *ComponentReference, opts ...ElementModificationOption) error
 
 	// AddBlob adds a local blob and returns an appropriate local access spec.
-	AddBlob(blob BlobAccess, artType, refName string, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error)
+	AddBlob(blob BlobAccess, artType string, hints []refhints.ReferenceHint, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error)
 
 	// AdjustResourceAccess is used to modify the access spec. The old and new one MUST refer to the same content.
 	AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error
-	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...BlobModificationOption) error
+	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, hints []refhints.ReferenceHint, global AccessSpec, opts ...BlobModificationOption) error
 	AdjustSourceAccess(meta *SourceMeta, acc compdesc.AccessSpec) error
 	// SetSourceBlob updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
-	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...TargetElementOption) error
+	SetSourceBlob(meta *SourceMeta, blob BlobAccess, hints []refhints.ReferenceHint, global AccessSpec, opts ...TargetElementOption) error
 
 	// AccessMethod provides an access method implementation for
 	// an access spec. This might be a repository local implementation

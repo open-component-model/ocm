@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/tech/maven"
@@ -69,7 +70,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
 	var repo *maven.Repository
 	var err error
 
@@ -77,16 +78,16 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	if s.Path != "" {
 		inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
 		if err != nil {
-			return nil, "", err
+			return nil, nil, err
 		}
 		if !inputInfo.IsDir() {
-			return nil, "", fmt.Errorf("maven file repository must be a directory")
+			return nil, nil, fmt.Errorf("maven file repository must be a directory")
 		}
 		repo = maven.NewFileRepository(inputPath, fs)
 	} else {
 		repo, err = maven.NewUrlRepository(s.RepoUrl, fs)
 		if err != nil {
-			return nil, "", err
+			return nil, nil, err
 		}
 	}
 	access, err := mavenblob.BlobAccessForCoords(repo, &s.Coordinates,
@@ -96,8 +97,8 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	)
 
 	if s.IsPackage() {
-		return access, s.GAV(), err
+		return access, metav1.ReferenceHints{maven.ReferenceHint(s.GAV(), true)}, err
 	}
 
-	return access, "", err
+	return access, nil, err
 }

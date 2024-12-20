@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"ocm.software/ocm/api/oci"
-	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/internal"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	oci2 "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -69,8 +69,8 @@ func (a *AccessSpec) GetDigest() (string, bool) {
 	return "", false
 }
 
-func (a *AccessSpec) GetReferenceHint(cv internal.ComponentVersionAccess) []metav1.ReferenceHint {
-	return metav1.ReferenceHints{metav1.NewReferenceHint(oci2.ReferenceHintType, a.Reference)}
+func (a *AccessSpec) GetReferenceHint(cv internal.ComponentVersionAccess) metav1.ReferenceHints {
+	return metav1.ReferenceHints{metav1.New(oci2.ReferenceHintType, a.Reference, true)}
 }
 
 func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (string, error) {

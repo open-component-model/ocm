@@ -2,6 +2,8 @@ package docker
 
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
+	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci/extensions/repositories/docker"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -41,15 +43,15 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
 	ctx.Printf("image %s\n", s.Path)
 	locator, _, err := docker.ParseGenericRef(s.Path)
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 	blob, version, err := dockerdaemon.BlobAccess(s.Path, dockerdaemon.WithVersion(info.ComponentVersion.GetVersion()), dockerdaemon.WithOrigin(info.ComponentVersion))
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
-	return blob, ociartifact.Hint(info.ComponentVersion, locator, s.Repository, version), nil
+	return blob, metav1.ReferenceHints{oci2.ReferenceHint(ociartifact.Hint(info.ComponentVersion, locator, s.Repository, version), true)}, nil
 }

@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/mandelsoft/goutils/errors"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -69,7 +70,7 @@ type ComponentVersionAccessBridge interface {
 	// The resulting access information (global and local) is provided as
 	// an access method specification usable in a component descriptor.
 	// This is the direct technical storage, without caring about any handler.
-	AddBlob(blob cpi.BlobAccess, arttype, refName string, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error)
+	AddBlob(blob cpi.BlobAccess, arttype string, hints []refhints.ReferenceHint, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error)
 
 	IsReadOnly() bool
 	SetReadOnly()
@@ -217,12 +218,12 @@ func (c *componentVersionAccessView) Update() error {
 	})
 }
 
-func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec, opts ...cpi.BlobUploadOption) (cpi.AccessSpec, error) {
+func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType string, hints []refhints.ReferenceHint, global cpi.AccessSpec, opts ...cpi.BlobUploadOption) (cpi.AccessSpec, error) {
 	var spec cpi.AccessSpec
 	eff := cpi.NewBlobUploadOptions(opts...)
 	err := c.Execute(func() error {
 		var err error
-		spec, err = c.bridge.AddBlob(blob, artType, refName, global, false, eff)
+		spec, err = c.bridge.AddBlob(blob, artType, hints, global, false, eff)
 		return err
 	})
 
@@ -238,13 +239,14 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *cpi.ResourceMeta
 }
 
 // SetResourceBlob adds a blob resource to the component version.
-func (c *componentVersionAccessView) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, opts ...cpi.BlobModificationOption) error {
+func (c *componentVersionAccessView) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, hints []refhints.ReferenceHint, global cpi.AccessSpec, opts ...cpi.BlobModificationOption) error {
 	cpi.Logger(c).Debug("adding resource blob", "resource", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
 	eff := cpi.NewBlobModificationOptions(opts...)
-	acc, err := c.AddBlob(blob, meta.Type, refName, global, eff)
+	hints = refhints.Join(meta.ReferenceHints, refhints.FilterImplicit(hints))
+	acc, err := c.AddBlob(blob, meta.Type, hints, global, eff)
 	if err != nil {
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
@@ -264,12 +266,13 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *cpi.SourceMeta, ac
 	return errors.ErrUnknown(cpi.KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
 }
 
-func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, modopts ...cpi.TargetElementOption) error {
+func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, hints []refhints.ReferenceHint, global cpi.AccessSpec, modopts ...cpi.TargetElementOption) error {
 	cpi.Logger(c).Debug("adding source blob", "source", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
-	acc, err := c.AddBlob(blob, meta.Type, refName, global)
+	hints = refhints.Join(meta.ReferenceHints, refhints.FilterImplicit(hints))
+	acc, err := c.AddBlob(blob, meta.Type, hints, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob: (component %s:%s source %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
@@ -283,7 +286,7 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cp
 
 func setAccess[T any, A cpi.ArtifactAccess[T]](c *componentVersionAccessView, kind string, art A,
 	set func(*T, compdesc.AccessSpec) error,
-	setblob func(*T, cpi.BlobAccess, string, cpi.AccessSpec) error,
+	setblob func(*T, cpi.BlobAccess, []refhints.ReferenceHint, cpi.AccessSpec) error,
 ) error {
 	if c.bridge.IsReadOnly() {
 		return accessio.ErrReadOnly
@@ -299,7 +302,7 @@ func setAccess[T any, A cpi.ArtifactAccess[T]](c *componentVersionAccessView, ki
 
 	var (
 		blob   cpi.BlobAccess
-		hint   []metav1.ReferenceHint
+		hints  refhints.ReferenceHints
 		global cpi.AccessSpec
 	)
 
@@ -312,7 +315,7 @@ func setAccess[T any, A cpi.ArtifactAccess[T]](c *componentVersionAccessView, ki
 		if err != nil && errors.IsErrNotFoundElem(err, "", blobaccess.KIND_BLOB) {
 			return err
 		}
-		hint = cpi.ReferenceHint(acc, c)
+		hints = cpi.ReferenceHint(acc, c)
 		global = cpi.GlobalAccess(acc, c.GetContext())
 	}
 	if blob == nil {
@@ -325,13 +328,13 @@ func setAccess[T any, A cpi.ArtifactAccess[T]](c *componentVersionAccessView, ki
 	if blob == nil {
 		return errors.Newf("neither access nor blob specified in %s access", kind)
 	}
-	if v := art.ReferenceHint(); v != "" {
-		hint = v
+	if v := art.ReferenceHintForAccess(); v != nil {
+		hints = v
 	}
 	if v := art.GlobalAccess(); v != nil {
 		global = v
 	}
-	return setblob(meta, blob, hint, global)
+	return setblob(meta, blob, hints, global)
 }
 
 func (c *componentVersionAccessView) SetResourceByAccess(art cpi.ResourceAccess, modopts ...cpi.BlobModificationOption) error {
@@ -339,7 +342,7 @@ func (c *componentVersionAccessView) SetResourceByAccess(art cpi.ResourceAccess,
 		func(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
 			return c.SetResource(meta, acc, cpi.NewBlobModificationOptions(modopts...))
 		},
-		func(meta *cpi.ResourceMeta, blob cpi.BlobAccess, hint string, global cpi.AccessSpec) error {
+		func(meta *cpi.ResourceMeta, blob cpi.BlobAccess, hint []refhints.ReferenceHint, global cpi.AccessSpec) error {
 			return c.SetResourceBlob(meta, blob, hint, global, modopts...)
 		})
 }
@@ -517,7 +520,7 @@ func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, opt
 		func(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
 			return c.SetSource(meta, acc, optslist...)
 		},
-		func(meta *cpi.SourceMeta, blob cpi.BlobAccess, hint string, global cpi.AccessSpec) error {
+		func(meta *cpi.SourceMeta, blob cpi.BlobAccess, hint []refhints.ReferenceHint, global cpi.AccessSpec) error {
 			return c.SetSourceBlob(meta, blob, hint, global, optslist...)
 		})
 }

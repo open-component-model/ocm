@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
-	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"github.com/mandelsoft/goutils/sliceutils"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
+	"ocm.software/ocm/api/utils/runtime"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -48,7 +50,7 @@ func (r *ComponentVersionBasedAccessProvider) GetComponentVersion() (ComponentVe
 	return r.vers.Dup()
 }
 
-func (r *ComponentVersionBasedAccessProvider) ReferenceHint() []metav1.ReferenceHint {
+func (r *ComponentVersionBasedAccessProvider) ReferenceHintForAccess() metav1.ReferenceHints {
 	if hp, ok := r.access.(cpi.HintProvider); ok {
 		return hp.GetReferenceHint(r.vers)
 	}
@@ -88,16 +90,16 @@ func (r *ComponentVersionBasedAccessProvider) BlobAccess() (BlobAccess, error) {
 type blobAccessProvider struct {
 	ctx ocm.Context
 	blobaccess.BlobAccessProvider
-	hint   []metav1.ReferenceHint
+	hints  metav1.ReferenceHints
 	global AccessSpec
 }
 
 var _ AccessProvider = (*blobAccessProvider)(nil)
 
-func NewAccessProviderForBlobAccessProvider(ctx ocm.Context, prov blobaccess.BlobAccessProvider, hint []metav1.ReferenceHint, global AccessSpec) AccessProvider {
+func NewAccessProviderForBlobAccessProvider(ctx ocm.Context, prov blobaccess.BlobAccessProvider, hints []metav1.ReferenceHint, global AccessSpec) AccessProvider {
 	return &blobAccessProvider{
 		BlobAccessProvider: prov,
-		hint:               hint,
+		hints:              hints,
 		global:             global,
 		ctx:                ctx,
 	}
@@ -107,8 +109,8 @@ func (b *blobAccessProvider) GetOCMContext() cpi.Context {
 	return b.ctx
 }
 
-func (b *blobAccessProvider) ReferenceHint() []metav1.ReferenceHint {
-	return b.hint
+func (b *blobAccessProvider) ReferenceHintForAccess() metav1.ReferenceHints {
+	return b.hints
 }
 
 func (b *blobAccessProvider) GlobalAccess() cpi.AccessSpec {
@@ -125,8 +127,8 @@ func (b *blobAccessProvider) AccessMethod() (cpi.AccessMethod, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func NewArtifactAccessProviderForBlobAccessProvider[M any](ctx Context, meta *M, src blobAccessProvider, hint []metav1.ReferenceHint, global AccessSpec) cpi.ArtifactAccess[M] {
-	return NewArtifactAccessForProvider(meta, NewAccessProviderForBlobAccessProvider(ctx, src, hint, global))
+func NewArtifactAccessProviderForBlobAccessProvider[M any, P ReferenceHintProviderPointer[M]](ctx Context, meta *M, src blobAccessProvider, hint []metav1.ReferenceHint, global AccessSpec) cpi.ArtifactAccess[M] {
+	return NewArtifactAccessForProvider[M, P](meta, NewAccessProviderForBlobAccessProvider(ctx, src, hint, global))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +154,7 @@ func (b *accessAccessProvider) GetOCMContext() cpi.Context {
 	return b.ctx
 }
 
-func (b *accessAccessProvider) ReferenceHint() []metav1.ReferenceHint {
+func (b *accessAccessProvider) ReferenceHintForAccess() metav1.ReferenceHints {
 	if h, ok := b.spec.(HintProvider); ok {
 		return h.GetReferenceHint(&DummyComponentVersionAccess{b.ctx})
 	}
@@ -181,15 +183,19 @@ type (
 	accessProvider = AccessProvider
 )
 
+type ReferenceHintProviderPointer[P any] interface {
+	compdesc.ReferenceHintProvider
+	*P
+}
 type artifactAccessProvider[M any] struct {
 	accessProvider
 	componentVersionProvider ComponentVersionProvider
 	meta                     *M
 }
 
-var _ credentials.ConsumerIdentityProvider = (*artifactAccessProvider[any])(nil)
+var _ credentials.ConsumerIdentityProvider = (*artifactAccessProvider[compdesc.ArtifactMetaAccess])(nil)
 
-func NewArtifactAccessForProvider[M any](meta *M, prov AccessProvider) cpi.ArtifactAccess[M] {
+func NewArtifactAccessForProvider[M any, P ReferenceHintProviderPointer[M]](meta *M, prov AccessProvider) cpi.ArtifactAccess[M] {
 	aa := &artifactAccessProvider[M]{
 		accessProvider: prov,
 		meta:           meta,
@@ -202,6 +208,20 @@ func NewArtifactAccessForProvider[M any](meta *M, prov AccessProvider) cpi.Artif
 
 func (r *artifactAccessProvider[M]) Meta() *M {
 	return r.meta
+}
+
+func (r *artifactAccessProvider[M]) GetReferenceHints() metav1.ReferenceHints {
+	hints := any(r.meta).(compdesc.ReferenceHintProvider).GetReferenceHints()
+
+	a, err := r.Access()
+	if err == nil {
+		cv, err := r.GetComponentVersion()
+		if err == nil {
+			defer cv.Close()
+			sliceutils.AppendUniqueFunc(hints, runtime.MatchType[metav1.ReferenceHint], ReferenceHint(a, cv)...)
+		}
+	}
+	return hints
 }
 
 func (b *artifactAccessProvider[M]) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {

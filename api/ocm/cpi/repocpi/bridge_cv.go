@@ -9,7 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/optionutils"
-	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -301,7 +301,7 @@ func (b *componentVersionAccessBridge) getLocalBlob(acc cpi.AccessSpec) cpi.Blob
 	return b.blobcache.GetBlobFor(string(key))
 }
 
-func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error) {
+func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType string, hints []metav1.ReferenceHint, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -334,7 +334,7 @@ func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType, ref
 		mime := blob.MimeType()
 		h := prov.LookupHandler(storagectx, artType, mime)
 		if h != nil {
-			acc, err := h.StoreBlob(blob, artType, refName, nil, storagectx)
+			acc, err := h.StoreBlob(blob, artType, hints, nil, storagectx)
 			if err != nil {
 				return nil, err
 			}
@@ -350,13 +350,13 @@ func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType, ref
 	var acc cpi.AccessSpec
 
 	if final || b.UseDirectAccess() {
-		acc, err = b.impl.AddBlob(blob, refName, global)
+		acc, err = b.impl.AddBlob(blob, hints, global)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		// use local composition access to be added to the repository with AddVersion.
-		acc = compose.New(refName, blob.MimeType(), global)
+		acc = compose.New(hints, blob.MimeType(), global)
 	}
 	return b.cacheLocalBlob(acc, blob)
 }
@@ -420,14 +420,14 @@ func (b *componentVersionAccessBridge) setupLocalBlobs(kind string, accprov func
 		if err != nil {
 			return errors.Wrapf(err, "%s %d", kind, i)
 		}
-		blob, ref, global, err := accprov(spec)
+		blob, hints, global, err := accprov(spec)
 		if err != nil {
 			return errors.Wrapf(err, "%s %d", kind, i)
 		}
 		if blob != nil {
 			nested.Close(blob)
 
-			effspec, err := b.AddBlob(blob, a.GetType(), metav1.GetCompatReferenceHint(ref), global, final, opts)
+			effspec, err := b.AddBlob(blob, a.GetType(), hints, global, final, opts)
 			if err != nil {
 				return errors.Wrapf(err, "cannot store %s %d", kind, i)
 			}

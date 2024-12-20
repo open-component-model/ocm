@@ -1,7 +1,5 @@
 package npm
 
-const ReferenceHintType = "npm"
-
 type Dist struct {
 	Integrity string `json:"integrity"`
 	Shasum    string `json:"shasum"`

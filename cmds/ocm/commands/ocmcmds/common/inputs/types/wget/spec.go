@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/wget"
@@ -54,7 +55,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
 	access, err := wget.BlobAccess(s.URL,
 		wget.WithCredentialContext(ctx),
 		wget.WithLoggingContext(ctx),
@@ -64,5 +65,5 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		wget.WithBody(bytes.NewReader([]byte(s.Body))),
 		wget.WithNoRedirect(s.NoRedirect),
 	)
-	return access, "", err
+	return access, nil, err
 }

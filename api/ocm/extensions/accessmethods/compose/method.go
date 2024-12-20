@@ -5,8 +5,8 @@ import (
 	"io"
 	"sync/atomic"
 
-	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -51,12 +51,12 @@ var (
 )
 
 // New creates a new GitHub registry access spec version v1.
-func New(hint string, mediaType string, global accspeccpi.AccessSpec) *AccessSpec {
+func New(hints []metav1.ReferenceHint, mediaType string, global accspeccpi.AccessSpec) *AccessSpec {
 	id := fmt.Sprintf("compose-%d", number.Add(1))
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Id:                  id,
-		ReferenceName:       hint,
+		ReferenceName:       metav1.FilterImplicit(hints).Serialize(),
 		MediaType:           mediaType,
 		GlobalAccess:        accspeccpi.NewAccessSpecRef(global),
 	}
@@ -73,11 +73,11 @@ func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return true
 }
 
-func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) []metav1.ReferenceHint {
+func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) metav1.ReferenceHints {
 	if a.ReferenceName == "" {
 		return nil
 	}
-	return metav1.ReferenceHints{metav1.StringToHint(a.ReferenceName)}
+	return metav1.ParseHints(a.ReferenceName)
 }
 
 func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessSpec {

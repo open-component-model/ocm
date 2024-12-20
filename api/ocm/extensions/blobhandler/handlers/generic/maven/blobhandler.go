@@ -12,6 +12,7 @@ import (
 	"github.com/mandelsoft/goutils/ioutils"
 	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	access "ocm.software/ocm/api/ocm/extensions/accessmethods/maven"
@@ -37,11 +38,12 @@ func NewArtifactHandler(repospec *Config) cpi.BlobHandler {
 
 var log = logging.DynamicLogger(identity.REALM)
 
-func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hint string, _ cpi.AccessSpec, ctx cpi.StorageContext) (_ cpi.AccessSpec, rerr error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hints metav1.ReferenceHints, _ cpi.AccessSpec, ctx cpi.StorageContext) (_ cpi.AccessSpec, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
-	if hint == "" {
+	hint := hints.GetReferenceHint(maven.ReferenceHintType, "")
+	if hint == nil {
 		log.Warn("maven package hint is empty, skipping upload")
 		return nil, nil
 	}
@@ -67,7 +69,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, resourceType string, hi
 	// setup logger
 	log := log.WithValues("repository", repo.String())
 	// identify artifact
-	coords, err := maven.Parse(hint)
+	coords, err := maven.Parse(hint.GetReference())
 	if err != nil {
 		return nil, err
 	}

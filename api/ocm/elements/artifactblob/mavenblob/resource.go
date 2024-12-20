@@ -3,6 +3,8 @@ package mavenblob
 import (
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
+	maven2 "ocm.software/ocm/api/tech/maven"
 
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -15,8 +17,8 @@ const TYPE = resourcetypes.MAVEN_PACKAGE
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, repo *maven.Repository, groupId, artifactId, version string, opts ...Option) cpi.ArtifactAccess[M] {
 	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithCredentialContext(ctx))...)
-	if eff.Blob.IsPackage() && eff.Hint == "" {
-		eff.Hint = maven.NewCoordinates(groupId, artifactId, version).GAV()
+	if eff.Blob.IsPackage() && eff.Hint == nil {
+		eff.Hint = metav1.ReferenceHints{metav1.New(maven2.ReferenceHintType, maven.NewCoordinates(groupId, artifactId, version).GAV())}
 	}
 
 	if meta.GetType() == "" {
@@ -26,7 +28,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, r
 	blobprov := maven.Provider(repo, groupId, artifactId, version, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, eff.Hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
-	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), accprov)
+	return cpi.NewArtifactAccessForProvider[M, P](generics.Cast[*M](meta), accprov)
 }
 
 func ResourceAccess(ctx ocm.Context, meta *ocm.ResourceMeta, repo *maven.Repository, groupId, artifactId, version string, opts ...Option) cpi.ResourceAccess {

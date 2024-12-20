@@ -2,6 +2,7 @@ package binary
 
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
@@ -35,6 +36,6 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
 	return s.ProcessBlob(ctx, blobaccess.DataAccessForData([]byte(s.Data)), ctx.FileSystem())
 }

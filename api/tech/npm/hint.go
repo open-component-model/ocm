@@ -1,10 +1,10 @@
-package oci
+package npm
 
 import (
 	metav1 "ocm.software/ocm/api/ocm/refhints"
 )
 
-const ReferenceHintType = "oci"
+const ReferenceHintType = "npm"
 
 // HINT_REFERENCE is the single attribute describing the OCI reference.
 // fior OCI hints.

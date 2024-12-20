@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/modern-go/reflect2"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -51,7 +52,7 @@ type (
 // expanding a blob to a repository specific representation to determine a
 // useful name.
 type HintProvider interface {
-	GetReferenceHint(cv ComponentVersionAccess) []metav1.ReferenceHint
+	GetReferenceHint(cv ComponentVersionAccess) refhints.ReferenceHints
 }
 
 // GlobalAccessProvider is used to provide a non-local access specification.

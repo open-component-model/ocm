@@ -269,13 +269,13 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 							msgs = []interface{}{"overwrite"}
 						}
 					}
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, msgs...)
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint.Serialize(true), msgs...)
 					err = handler.HandleTransferResource(r, m, hint, t)
 				} else {
 					if err == nil { // old resource found -> keep current access method
 						t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify())
 					}
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint.Serialize(true), "already present")
 				}
 			}
 		}
@@ -312,7 +312,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 			if ok {
 				// sources do not have digests fo far, so they have to copied, always.
 				hint := ocmcpi.ReferenceHint(a, src)
-				notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint)
+				notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint.Serialize(true))
 				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))
 			}
 			err = errors.Join(err, m.Close())

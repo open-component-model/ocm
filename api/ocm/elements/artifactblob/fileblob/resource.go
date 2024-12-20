@@ -42,7 +42,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, media str
 
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, eff.Hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
-	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), accprov)
+	return cpi.NewArtifactAccessForProvider[M, P](generics.Cast[*M](meta), accprov)
 }
 
 func ResourceAccess(ctx ocm.Context, media string, meta *ocm.ResourceMeta, path string, opts ...Option) cpi.ResourceAccess {

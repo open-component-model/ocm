@@ -10,6 +10,7 @@ import (
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/oci"
@@ -334,7 +335,7 @@ func blobAccessForChunk(blob blobaccess.BlobAccess, fs vfs.FileSystem, r io.Read
 	return f.AsBlob(blob.MimeType()), written == limit, nil
 }
 
-func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, hints []refhints.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -371,7 +372,7 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 			return nil, err
 		}
 	}
-	return localblob.New(strings.Join(refs, ","), refName, blob.MimeType(), global), nil
+	return localblob.New(strings.Join(refs, ","), refhints.FilterImplicit(hints).Serialize(), blob.MimeType(), global), nil
 }
 
 func (c *ComponentVersionContainer) addLayer(blob cpi.BlobAccess, refs *[]string) error {

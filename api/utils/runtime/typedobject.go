@@ -19,6 +19,10 @@ type TypedObjectType[T TypedObject] interface {
 	TypedObjectDecoder[T]
 }
 
+func MatchType[T TypeGetter](a, b T) bool {
+	return a.GetType() == b.GetType()
+}
+
 type typeObject[T TypedObject] struct {
 	_ObjectType
 	_TypedObjectDecoder[T]

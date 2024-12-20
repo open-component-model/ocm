@@ -4,6 +4,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -14,7 +15,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, a
 	eff := optionutils.EvalOptions(opts...)
 
 	hint := eff.Hint
-	if hint == "" {
+	if len(hint) == 0 {
 		hint = ocm.ReferenceHint(access, &cpi.DummyComponentVersionAccess{ctx})
 	}
 	global := eff.Global
@@ -33,11 +34,11 @@ type _accessProvider = cpi.AccessProvider
 
 type accessProvider struct {
 	_accessProvider
-	hint   string
+	hint   metav1.ReferenceHints
 	global cpi.AccessSpec
 }
 
-func newAccessProvider(prov cpi.AccessProvider, hint string, global cpi.AccessSpec) cpi.AccessProvider {
+func newAccessProvider(prov cpi.AccessProvider, hint metav1.ReferenceHints, global cpi.AccessSpec) cpi.AccessProvider {
 	return &accessProvider{
 		_accessProvider: prov,
 		hint:            hint,
@@ -45,11 +46,11 @@ func newAccessProvider(prov cpi.AccessProvider, hint string, global cpi.AccessSp
 	}
 }
 
-func (p *accessProvider) ReferenceHint() string {
-	if p.hint != "" {
+func (p *accessProvider) ReferenceHintForAccess() metav1.ReferenceHints {
+	if len(p.hint) != 0 {
 		return p.hint
 	}
-	return p._accessProvider.ReferenceHint()
+	return p._accessProvider.ReferenceHintForAccess()
 }
 
 func (p *accessProvider) GlobalAccess() cpi.AccessSpec {

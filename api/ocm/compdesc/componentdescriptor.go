@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -136,6 +137,12 @@ type ArtifactMetaAccess interface {
 	ElementMetaAccess
 	GetType() string
 	SetType(string)
+	ReferenceHintProvider
+}
+
+type ReferenceHintProvider interface {
+	// GetReferenceHints returns the reference hints specified togetjer with the metadata.
+	GetReferenceHints() refhints.ReferenceHints
 }
 
 // ArtifactMetaPointer is a pointer to an artifact meta object.
@@ -430,12 +437,17 @@ type SourceMeta struct {
 	Type string `json:"type"`
 	// ReferenceHints describe several types hints used by uploaders
 	// to decide on used element identities.
-	ReferenceHints metav1.ReferenceHints `json:"referenceHints,omitempty"`
+	ReferenceHints refhints.ReferenceHints `json:"referenceHints,omitempty"`
 }
 
 // GetType returns the type of the object.
 func (o *SourceMeta) GetType() string {
 	return o.Type
+}
+
+// GetReferenceHints returns the reference hints specified togetjer with the metadata.
+func (o *SourceMeta) GetReferenceHints() refhints.ReferenceHints {
+	return o.ReferenceHints.Copy()
 }
 
 // SetType sets the type of the object.
@@ -631,7 +643,7 @@ type ResourceMeta struct {
 
 	// ReferenceHints describe several types hints used by uploaders
 	// to decide on used element identities.
-	ReferenceHints metav1.ReferenceHints `json:"referenceHints,omitempty"`
+	ReferenceHints refhints.ReferenceHints `json:"referenceHints,omitempty"`
 
 	// Relation describes the relation of the resource to the component.
 	// Can be a local or external resource
@@ -657,6 +669,11 @@ func (o *ResourceMeta) Fresh() *ResourceMeta {
 // GetType returns the type of the object.
 func (o *ResourceMeta) GetType() string {
 	return o.Type
+}
+
+// GetReferenceHints returns the reference hints specified togetjer with the metadata.
+func (o *ResourceMeta) GetReferenceHints() refhints.ReferenceHints {
+	return o.ReferenceHints.Copy()
 }
 
 // SetType sets the type of the object.

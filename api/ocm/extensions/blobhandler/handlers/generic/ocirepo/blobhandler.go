@@ -8,6 +8,8 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
+	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -40,7 +42,7 @@ func NewArtifactHandler(repospec ...*ociuploadattr.Attribute) cpi.BlobHandler {
 	return &artifactHandler{utils.Optional(repospec...)}
 }
 
-func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints metav1.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	attr := b.spec
 	if attr == nil {
 		attr = ociuploadattr.Get(ctx.GetContext())
@@ -64,6 +66,12 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot marshal target specification")
 	}
+
+	var hint string
+	if h := hints.GetReferenceHint(oci2.ReferenceHintType, ""); h != nil {
+		hint = h.GetReference()
+	}
+
 	values := []interface{}{
 		"arttype", artType,
 		"mediatype", mediaType,

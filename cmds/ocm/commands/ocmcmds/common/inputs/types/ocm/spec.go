@@ -2,6 +2,7 @@ package ocm
 
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/credentials"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -68,7 +69,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	b, err := ocm.BlobAccess(ocm.ByRepositorySpecAndName(ctx.OCMContext(), s.OCMRepository, s.Component, s.Version), ocm.ByResourceRef(s.ResourceRef))
-	return b, "", err
+	return b, nil, err
 }

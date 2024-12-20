@@ -16,8 +16,6 @@ import (
 	ocmmime "ocm.software/ocm/api/utils/mime"
 )
 
-const ReferenceHintType = "maven"
-
 type CoordinateOption = optionutils.Option[*Coordinates]
 
 type WithClassifier string

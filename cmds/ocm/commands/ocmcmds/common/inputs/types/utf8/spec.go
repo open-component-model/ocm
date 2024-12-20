@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
@@ -106,7 +107,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
 	data, err := Plain([]byte(s.Text))
 
 	if s.Json != nil {
@@ -119,7 +120,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		data, err = Yaml(s.Yaml)
 	}
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 	return s.ProcessBlob(ctx, blobaccess.DataAccessForData(data), ctx.FileSystem())
 }

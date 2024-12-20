@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
@@ -290,7 +291,7 @@ func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
 	return ocmhdlr.New(c.Repository(), c.comp.GetName(), &BlobSink{c.comp.repo.arch.container.fsacc}, Type)
 }
 
-func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, hints []metav1.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -298,7 +299,7 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 	if err != nil {
 		return nil, err
 	}
-	return localblob.New(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
+	return localblob.New(common.DigestToFileName(blob.Digest()), metav1.FilterImplicit(hints).Serialize(), blob.MimeType(), global), nil
 }
 
 func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error) {

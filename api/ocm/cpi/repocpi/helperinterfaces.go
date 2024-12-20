@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"ocm.software/ocm/api/ocm/cpi"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/refmgmt/resource"
 )
 
@@ -28,5 +29,5 @@ type BlobContainer interface {
 	// The resulting access information (global and local) is provided as
 	// an access method specification usable in a component descriptor.
 	// This is the direct technical storage, without caring about any handler.
-	AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
+	AddBlob(blob cpi.BlobAccess, hints []metav1.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error)
 }

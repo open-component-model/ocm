@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/mandelsoft/goutils/errors"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -144,11 +145,11 @@ func (d *DummyComponentVersionAccess) Execute(f func() error) error {
 	return f()
 }
 
-func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype, refName string, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error) {
+func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype string, hints []refhints.ReferenceHint, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error) {
 	return nil, errors.ErrNotSupported("adding blobs")
 }
 
-func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...BlobModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, hints []refhints.ReferenceHint, global AccessSpec, opts ...BlobModificationOption) error {
 	return errors.ErrNotSupported("adding blobs")
 }
 
@@ -164,7 +165,7 @@ func (d *DummyComponentVersionAccess) SetResourceByAccess(art ResourceAccess, mo
 	return errors.ErrNotSupported("resource modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...TargetElementOption) error {
+func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, hints []refhints.ReferenceHint, global AccessSpec, opts ...TargetElementOption) error {
 	return errors.ErrNotSupported("source modification")
 }
 
