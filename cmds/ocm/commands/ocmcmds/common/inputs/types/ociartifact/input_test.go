@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/oci/testhelper"
+	oci2 "ocm.software/ocm/api/tech/oci"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/spf13/pflag"
@@ -45,7 +46,7 @@ func CheckComponent(env *TestEnv) {
 	a := Must(r.Access())
 
 	expDigest := "sha256:bde0f428596a33a6ba00b2df6047227e06130409fae69cf37edbe2eca13e8448"
-	Expect(a.Describe(env.OCMContext())).To(Equal("Local blob " + expDigest + "[ocm.software/demo/test/image:v2.0-index]"))
+	Expect(a.Describe(env.OCMContext())).To(Equal("Local blob " + expDigest + "[" + oci2.ReferenceHintType + "::ocm.software/demo/test/image:v2.0-index]"))
 
 	m := Must(r.AccessMethod())
 	defer Close(m, "method")

@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/oci/testhelper"
+	oci2 "ocm.software/ocm/api/tech/oci"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -220,7 +221,7 @@ var _ = Describe("Add resources", func() {
 
 		acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
 		Expect(err).To(Succeed())
-		Expect(acc.(*localblob.AccessSpec).ReferenceName).To(Equal("test.de/x/mandelsoft/testchart:0.1.0"))
+		Expect(acc.(*localblob.AccessSpec).ReferenceName).To(Equal(oci2.ReferenceHintType + "::" + "test.de/x/mandelsoft/testchart:0.1.0"))
 		// sha is always different for helm artifact
 		// Expect(acc.(*localblob.AccessSpec).LocalReference).To(Equal("sha256.817db2696ed23f7779a7f848927e2958d2236e5483ad40875274462d8fa8ef9a"))
 
@@ -284,7 +285,7 @@ var _ = Describe("Add resources", func() {
 
 	It("rejects duplicate hints", func() {
 		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm.yaml")).To(Succeed())
-		ExpectError(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(MatchError("cannot add resource \"chart2\"(/testdata/helm2.yaml[1][1]): reference name (hint) \"test.de/x/mandelsoft/testchart:0.1.0\" with base media type application/vnd.oci.image.manifest.v1 already used for resource chart:v1"))
+		ExpectError(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(MatchError("cannot add resource \"chart2\"(/testdata/helm2.yaml[1][1]): reference name (hint) \"" + oci2.ReferenceHintType + "::test.de/x/mandelsoft/testchart:0.1.0\" with base media type application/vnd.oci.image.manifest.v1 already used for resource chart:v1"))
 	})
 
 	Context("resource by options", func() {

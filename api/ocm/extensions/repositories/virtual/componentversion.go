@@ -10,6 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localfsblob"
 	ocmhdlr "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/ocm"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/refmgmt"
@@ -138,7 +139,7 @@ func (c *ComponentVersionContainer) GetStorageContext() cpi.StorageContext {
 	return ocmhdlr.New(c.Repository(), c.comp.GetName(), c.access, Type, c.access)
 }
 
-func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, hints []interface{}, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, hints []refhints.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if c.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
@@ -150,5 +151,5 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, hints []interfa
 	if err != nil {
 		return nil, err
 	}
-	return localblob.New(ref, hints, blob.MimeType(), global), nil
+	return localblob.New(ref, refhints.FilterImplicit(hints).Serialize(), blob.MimeType(), global), nil
 }

@@ -3,14 +3,14 @@ package ociartifactblob
 import (
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
-	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/ocm/refhints"
+	oci2 "ocm.software/ocm/api/tech/oci"
 	blob "ocm.software/ocm/api/utils/blobaccess/ociartifact"
 )
 
@@ -26,7 +26,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, r
 	if hint == nil {
 		ref, err := oci.ParseRef(refname)
 		if err == nil {
-			hint = metav1.ReferenceHints{metav1.New(oci2.ReferenceHintType, ref.String())}
+			hint = refhints.NewHints(oci2.ReferenceHint, ref.String())
 		}
 	}
 

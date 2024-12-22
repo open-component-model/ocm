@@ -2,6 +2,7 @@ package transfer
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
@@ -11,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmcpi "ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/none"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/tools/transfer/internal"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/api/utils/errkind"
@@ -269,13 +271,13 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 							msgs = []interface{}{"overwrite"}
 						}
 					}
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint.Serialize(true), msgs...)
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), simpleHint(hint), msgs...)
 					err = handler.HandleTransferResource(r, m, hint, t)
 				} else {
 					if err == nil { // old resource found -> keep current access method
 						t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify())
 					}
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint.Serialize(true), "already present")
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), simpleHint(hint), "already present")
 				}
 			}
 		}
@@ -312,7 +314,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 			if ok {
 				// sources do not have digests fo far, so they have to copied, always.
 				hint := ocmcpi.ReferenceHint(a, src)
-				notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint.Serialize(true))
+				notifyArtifactInfo(printer, log, "source", i, r.Meta(), simpleHint(hint))
 				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))
 			}
 			err = errors.Join(err, m.Close())
@@ -350,4 +352,16 @@ func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string,
 	} else {
 		log.Debug("handle artifact", "kind", kind, "name", meta.GetName(), "type", meta.GetType(), "index", index, "message", msg)
 	}
+}
+
+func simpleHint(hints refhints.ReferenceHints) string {
+	h := hints.Serialize()
+	if strings.ContainsAny(h, ",;") {
+		return h
+	}
+	i := strings.Index(h, "::")
+	if i < 0 {
+		return h
+	}
+	return h[i+2:]
 }

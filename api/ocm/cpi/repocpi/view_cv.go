@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/mandelsoft/goutils/errors"
-	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -14,6 +13,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/selectors"
 	"ocm.software/ocm/api/ocm/selectors/refsel"
 	"ocm.software/ocm/api/ocm/selectors/rscsel"

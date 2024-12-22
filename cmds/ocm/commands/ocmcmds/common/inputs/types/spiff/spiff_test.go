@@ -36,7 +36,7 @@ var _ = Describe("spiff processing", func() {
 		Expect(err).To(Succeed())
 		blob, s, err := spec.GetBlob(ictx, info)
 		Expect(err).To(Succeed())
-		Expect(s).To(Equal(""))
+		Expect(s).To(BeNil())
 		data, err := blob.Get()
 		Expect(err).To(Succeed())
 		Expect("\n" + string(data)).To(Equal(`
@@ -49,7 +49,7 @@ bob: 25
 		Expect(err).To(Succeed())
 		blob, s, err := spec.GetBlob(ictx, info)
 		Expect(err).To(Succeed())
-		Expect(s).To(Equal(""))
+		Expect(s).To(BeNil())
 		data, err := blob.Get()
 		Expect(err).To(Succeed())
 		Expect("\n" + string(data)).To(Equal(`
@@ -63,7 +63,7 @@ bob: 26
 		info.InputFilePath = "/testdata/subdir/dummy"
 		blob, s, err := spec.GetBlob(ictx, info)
 		Expect(err).To(Succeed())
-		Expect(s).To(Equal(""))
+		Expect(s).To(BeNil())
 		data, err := blob.Get()
 		Expect(err).To(Succeed())
 		Expect("\n" + string(data)).To(Equal(`

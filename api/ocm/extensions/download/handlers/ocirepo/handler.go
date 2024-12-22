@@ -8,7 +8,6 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -21,6 +20,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/extensions/download"
+	oci2 "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessobj"
 	common "ocm.software/ocm/api/utils/misc"
 )
@@ -63,9 +63,10 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	if hint == nil {
 		hint = racc.ReferenceHintForAccess().GetReferenceHint(oci2.ReferenceHintType, "")
 	}
-	namespace := hint.GetReference()
-	if l, ok := aspec.(*localblob.AccessSpec); namespace == "" && ok {
-		namespace = l.ReferenceName
+
+	var namespace string
+	if hint != nil {
+		namespace = hint.GetReference()
 	}
 
 	// get rid of digest

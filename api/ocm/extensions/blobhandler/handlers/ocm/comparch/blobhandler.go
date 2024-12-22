@@ -5,7 +5,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
@@ -13,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/compatattr"
 	storagecontext "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
+	"ocm.software/ocm/api/ocm/refhints"
 	common "ocm.software/ocm/api/utils/misc"
 )
 
@@ -29,7 +29,7 @@ func NewBlobHandler() cpi.BlobHandler {
 	return &blobHandler{}
 }
 
-func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints metav1.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints refhints.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	ocmctx, ok := ctx.(storagecontext.StorageContext)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to storagecontext.StorageContext", ctx)
@@ -46,6 +46,6 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints metav
 	if compatattr.Get(ctx.GetContext()) {
 		return localfsblob.New(path, blob.MimeType()), nil
 	} else {
-		return localblob.New(path, metav1.FilterImplicit(hints).Serialize(), blob.MimeType(), global), nil
+		return localblob.New(path, refhints.FilterImplicit(hints).Serialize(), blob.MimeType(), global), nil
 	}
 }

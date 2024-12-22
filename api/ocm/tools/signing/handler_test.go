@@ -31,7 +31,7 @@ var _ = Describe("Simple signing handlers", func() {
 	Context("standard", func() {
 		BeforeEach(func() {
 			cv = composition.NewComponentVersion(ctx, COMPONENTA, VERSION)
-			MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), blobaccess.ForString(mime.MIME_TEXT, "test data"), "", nil))
+			MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), blobaccess.ForString(mime.MIME_TEXT, "test data"), nil, nil))
 		})
 
 		DescribeTable("rsa handlers", func(kind string) {
@@ -58,10 +58,10 @@ var _ = Describe("Simple signing handlers", func() {
 
 			meta := ocm.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation)
 			meta.Version = "v1"
-			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "test data"), "", nil))
+			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "test data"), nil, nil))
 			meta.ExtraIdentity = map[string]string{}
 			meta.Version = "v2"
-			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "other test data"), "", nil, ocm.TargetIndex(-1)))
+			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "other test data"), nil, nil, ocm.TargetIndex(-1)))
 		})
 
 		It("signs without modification (compatibility)", func() {

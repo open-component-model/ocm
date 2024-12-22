@@ -3,10 +3,10 @@ package helm
 import (
 	"github.com/mandelsoft/goutils/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
-	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
+	"ocm.software/ocm/api/ocm/refhints"
+	oci2 "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/helm"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -86,7 +86,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blob blobaccess.BlobAccess, hint []metav1.ReferenceHint, err error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blob blobaccess.BlobAccess, hint []refhints.ReferenceHint, err error) {
 	path := s.Path
 	if s.HelmRepository == "" {
 		_, inputPath, err := inputs.FileInfo(ctx, path, info.InputFilePath)
@@ -114,7 +114,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blob 
 	if err != nil {
 		return nil, nil, err
 	}
-	hint = metav1.ReferenceHints{oci2.ReferenceHint(ociartifact.Hint(info.ComponentVersion, name, s.Repository, vers), true)}
+	hint = refhints.NewHints(oci2.ReferenceHint, ociartifact.Hint(info.ComponentVersion, name, s.Repository, vers), true)
 	return blob, hint, err
 }
 

@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
@@ -14,6 +13,7 @@ import (
 	cpi "ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"

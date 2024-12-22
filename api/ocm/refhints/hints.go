@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/matcher"
 	"github.com/mandelsoft/goutils/sliceutils"
+
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -40,6 +41,10 @@ func MatchType(typs ...string) matcher.Matcher[ReferenceHint] {
 // ReferenceHints is list of hints.
 // Notaion: a sequence of hint notations separated by a ;.
 type ReferenceHints []ReferenceHint
+
+func NewHints(f func(ref string, implicit ...bool) ReferenceHint, ref string, implicit ...bool) ReferenceHints {
+	return ReferenceHints{f(ref, implicit...)}
+}
 
 func (h ReferenceHints) Copy() ReferenceHints {
 	var result ReferenceHints
@@ -160,6 +165,10 @@ func New(typ, ref string, implicit ...bool) DefaultReferenceHint {
 	return h
 }
 
+func DefaultHint(ref string, implicit ...bool) ReferenceHint {
+	return New("", ref, implicit...)
+}
+
 func (h DefaultReferenceHint) GetType() string {
 	if h == nil {
 		return ""
@@ -230,40 +239,18 @@ func (h DefaultReferenceHint) Serialize(implicit ...bool) string {
 }
 
 func escapeHintValue(v string) string {
-	if !strings.ContainsAny(v, "\\\",;") {
+	if !strings.ContainsAny(v, "\",;") {
 		return v
 	}
 
 	r := "\""
 	for _, c := range v {
-		if c == '\\' || c == '"' || c == ',' || c == ';' {
+		if c == '\\' || c == '"' {
 			r += "\\"
 		}
 		r += string(c)
 	}
 	return r + "\""
-}
-
-func unescapeHintValue(v string) string {
-	if !strings.HasSuffix(v, "\"") {
-		return v
-	}
-
-	v = v[1 : len(v)-1]
-	r := ""
-	mask := false
-	for _, c := range v {
-		if mask {
-			mask = false
-		} else {
-			if c == '\\' {
-				mask = true
-				continue
-			}
-		}
-		r += string(c)
-	}
-	return r
 }
 
 func newHint(impl bool) DefaultReferenceHint {
@@ -385,15 +372,15 @@ func ParseHints(v string, implicit ...bool) ReferenceHints {
 
 	switch state {
 	case 0, 1:
-		hint = newHint(impl).SetProperty(HINT_REFERENCE, v[start:len(v)])
+		hint = newHint(impl).SetProperty(HINT_REFERENCE, v[start:])
 	case 2:
-		hint[HINT_REFERENCE] = v[start:len(v)]
+		hint[HINT_REFERENCE] = v[start:]
 	case 3:
 		hint[prop] = ""
 	case 4:
-		hint[prop] = v[start:len(v)]
+		hint[prop] = v[start:]
 	case 5:
-		hint[prop] = v[start:len(v)]
+		hint[prop] = v[start:]
 	case 6:
 	}
 	hints = append(hints, hint)
@@ -403,7 +390,7 @@ func ParseHints(v string, implicit ...bool) ReferenceHints {
 func Join(hints ...[]ReferenceHint) ReferenceHints {
 	var result []ReferenceHint
 	for _, h := range hints {
-		sliceutils.AppendUniqueFunc(result, runtime.MatchType[ReferenceHint], h...)
+		result = sliceutils.AppendUniqueFunc(result, runtime.MatchType[ReferenceHint], h...)
 	}
 	return result
 }

@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/selectors/accessors"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/runtime"
@@ -141,8 +141,13 @@ type ArtifactMetaAccess interface {
 }
 
 type ReferenceHintProvider interface {
-	// GetReferenceHints returns the reference hints specified togetjer with the metadata.
+	// GetReferenceHints returns the reference hints specified together with the metadata.
 	GetReferenceHints() refhints.ReferenceHints
+}
+
+type ReferenceHintSink interface {
+	// SetReferenceHints sets the reference hints specified together with the metadata.
+	SetReferenceHints([]refhints.ReferenceHint)
 }
 
 // ArtifactMetaPointer is a pointer to an artifact meta object.
@@ -445,9 +450,14 @@ func (o *SourceMeta) GetType() string {
 	return o.Type
 }
 
-// GetReferenceHints returns the reference hints specified togetjer with the metadata.
+// GetReferenceHints returns the reference hints specified together with the metadata.
 func (o *SourceMeta) GetReferenceHints() refhints.ReferenceHints {
 	return o.ReferenceHints.Copy()
+}
+
+// SetReferenceHints sets the reference hints specified together with the metadata.
+func (o *SourceMeta) SetReferenceHints(hints []refhints.ReferenceHint) {
+	o.ReferenceHints = refhints.ReferenceHints(hints).Copy()
 }
 
 // SetType sets the type of the object.
@@ -671,9 +681,14 @@ func (o *ResourceMeta) GetType() string {
 	return o.Type
 }
 
-// GetReferenceHints returns the reference hints specified togetjer with the metadata.
+// GetReferenceHints returns the reference hints specified together with the metadata.
 func (o *ResourceMeta) GetReferenceHints() refhints.ReferenceHints {
 	return o.ReferenceHints.Copy()
+}
+
+// SetReferenceHints sets the reference hints specified together with the metadata.
+func (o *ResourceMeta) SetReferenceHints(hints []refhints.ReferenceHint) {
+	o.ReferenceHints = refhints.ReferenceHints(hints).Copy()
 }
 
 // SetType sets the type of the object.

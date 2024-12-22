@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -73,7 +74,7 @@ var _ = Describe("blobhandler generic maven tests", func() {
 		ocmrepo := composition.NewRepository(env)
 		defer Close(ocmrepo)
 		cv := composition.NewComponentVersion(env, "acme.org/test", "1.0.0")
-		MustBeSuccessful(cv.SetResourceBlob(Must(elements.ResourceMeta("test", resourcetypes.MAVEN_PACKAGE)), bacc, coords.GAV(), nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(elements.ResourceMeta("test", resourcetypes.MAVEN_PACKAGE)), bacc, refhints.NewHints(maven.ReferenceHint, coords.GAV(), true), nil))
 		MustBeSuccessful(ocmrepo.AddComponentVersion(cv))
 		l := sliceutils.Transform(Must(vfs.ReadDir(env.FileSystem(), "target/com/sap/cloud/sdk/sdk-modules-bom/5.7.0")),
 			func(info os.FileInfo) string {

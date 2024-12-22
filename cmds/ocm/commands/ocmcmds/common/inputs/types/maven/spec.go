@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/tech/maven"
 	"ocm.software/ocm/api/utils/blobaccess"
 	mavenblob "ocm.software/ocm/api/utils/blobaccess/maven"
@@ -70,7 +70,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	var repo *maven.Repository
 	var err error
 
@@ -97,7 +97,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	)
 
 	if s.IsPackage() {
-		return access, metav1.ReferenceHints{maven.ReferenceHint(s.GAV(), true)}, err
+		return access, refhints.NewHints(maven.ReferenceHint, s.GAV(), true), err
 	}
 
 	return access, nil, err

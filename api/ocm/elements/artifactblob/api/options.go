@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/refhints"
 )
 
 type (
@@ -14,7 +14,7 @@ type (
 
 type Options struct {
 	Global cpi.AccessSpec
-	Hint   metav1.ReferenceHints
+	Hint   refhints.ReferenceHints
 }
 
 var (
@@ -40,7 +40,7 @@ func (o *Options) Apply(opts ...Option) {
 }
 
 type hint struct {
-	hint metav1.ReferenceHints
+	hint refhints.ReferenceHints
 }
 
 func (o hint) ApplyTo(opts *Options) {
@@ -51,10 +51,10 @@ func WithHint(h string) Option {
 	if h == "" {
 		return hint{nil}
 	}
-	return hint{metav1.ParseHints(h)}
+	return hint{refhints.ParseHints(h)}
 }
 
-func WithReferenceHint(h ...metav1.ReferenceHint) Option {
+func WithReferenceHint(h ...refhints.ReferenceHint) Option {
 	return hint{h}
 }
 

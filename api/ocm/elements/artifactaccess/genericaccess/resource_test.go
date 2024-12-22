@@ -6,6 +6,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
+	"ocm.software/ocm/api/ocm/refhints"
+	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -44,7 +46,7 @@ var _ = Describe("dir tree resource access", func() {
 
 		acc := Must(me.ResourceAccess(env.OCMContext(), compdesc.NewResourceMeta("test", resourcetypes.OCI_IMAGE, compdesc.LocalRelation), spec))
 
-		Expect(acc.ReferenceHintForAccess()).To(Equal(OCINAMESPACE + ":" + OCIVERSION))
+		Expect(acc.ReferenceHintForAccess()).To(Equal(refhints.NewHints(oci2.ReferenceHint, OCINAMESPACE+":"+OCIVERSION, true)))
 		Expect(acc.GlobalAccess()).To(BeNil())
 		Expect(acc.Meta().Type).To(Equal(resourcetypes.OCI_IMAGE))
 

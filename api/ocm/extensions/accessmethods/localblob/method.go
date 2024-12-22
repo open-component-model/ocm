@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	. "github.com/mandelsoft/goutils/exception"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/mime"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -134,11 +134,11 @@ func (a *AccessSpec) GetMimeType() string {
 	return a.MediaType
 }
 
-func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) metav1.ReferenceHints {
+func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) refhints.ReferenceHints {
 	if a.ReferenceName == "" {
 		return nil
 	}
-	return metav1.ParseHints(a.ReferenceName, true)
+	return refhints.ParseHints(a.ReferenceName, true)
 }
 
 func (a *AccessSpec) AccessMethod(cv accspeccpi.ComponentVersionAccess) (accspeccpi.AccessMethod, error) {

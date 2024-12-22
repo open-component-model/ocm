@@ -12,15 +12,17 @@ var _ = Describe("Hints Test Environment", func() {
 	Context("hint", func() {
 		It("single attr", func() {
 			CheckHint("test", v1.New("", "test"))
+			CheckHint(`te\st`, v1.New("", "te\\st"))
 			CheckHint(`"test"`, v1.New("", "test"))
+			CheckHint(`"te;st"`, v1.New("", "te;st"))
+			CheckHint(`"te,st"`, v1.New("", "te,st"))
+			CheckHint("typ::te\\st", v1.New("typ", "te\\st"))
 			CheckHint("typ::test", v1.New("typ", "test"))
 			CheckHint(`typ::"te\"st"`, v1.New("typ", `te"st`))
-			CheckHint(`typ::"te\;st"`, v1.New("typ", `te;st`))
-			CheckHint(`typ::"te\,st"`, v1.New("typ", `te,st`))
-			CheckHint(`typ::"te\\st"`, v1.New("typ", `te\st`))
-			CheckHint(`typ::x="te\\st"`, v1.DefaultReferenceHint{
+			CheckHint(`typ::te\st`, v1.New("typ", `te\st`))
+			CheckHint(`typ::x="te\\;st"`, v1.DefaultReferenceHint{
 				v1.HINT_TYPE: "typ",
-				"x":          `te\st`,
+				"x":          `te\;st`,
 			})
 			CheckHint(`typ::x=test`, v1.DefaultReferenceHint{
 				v1.HINT_TYPE: "typ",
@@ -37,7 +39,7 @@ var _ = Describe("Hints Test Environment", func() {
 		})
 
 		It("multi attr", func() {
-			CheckHint(`typ::x="te\\st",xy=test`, v1.DefaultReferenceHint{
+			CheckHint(`typ::x=te\st,xy=test`, v1.DefaultReferenceHint{
 				v1.HINT_TYPE: "typ",
 				"x":          `te\st`,
 				"xy":         "test",
@@ -56,16 +58,16 @@ var _ = Describe("Hints Test Environment", func() {
 			CheckHint(`x::y;typ::"te\"st"`,
 				v1.New("x", `y`),
 				v1.New("typ", `te"st`))
-			CheckHint(`x::y;typ::"te\;st"`,
+			CheckHint(`x::y;typ::"te;st"`,
 				v1.New("x", `y`),
 				v1.New("typ", `te;st`))
-			CheckHint(`x::y;typ::"te\,st"`,
+			CheckHint(`x::y;typ::"te,st"`,
 				v1.New("x", `y`),
 				v1.New("typ", `te,st`))
-			CheckHint(`x::y;typ::"te\\st"`,
+			CheckHint(`x::y;typ::te\st`,
 				v1.New("x", `y`),
 				v1.New("typ", `te\st`))
-			CheckHint(`x::y;typ::x="te\\st"`,
+			CheckHint(`x::y;typ::x=te\st`,
 				v1.New("x", `y`),
 				v1.DefaultReferenceHint{
 					v1.HINT_TYPE: "typ",
@@ -102,7 +104,7 @@ var _ = Describe("Hints Test Environment", func() {
 
 func CheckHint(s string, h ...v1.ReferenceHint) {
 	r := v1.ParseHints(s)
-	if strings.HasPrefix(s, "\"") {
+	if strings.HasPrefix(s, "\"") && !strings.ContainsAny(s, ",;") {
 		s = s[1 : len(s)-1]
 	}
 	ExpectWithOffset(1, r).To(Equal(v1.ReferenceHints(h)))

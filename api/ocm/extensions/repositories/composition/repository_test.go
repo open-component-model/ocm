@@ -53,7 +53,7 @@ var _ = Describe("repository", func() {
 		// wrap a non-closer access into a ref counting access to check cleanup
 		blob := bpi.NewBlobAccessForBase(blobaccess.ForString(mime.MIME_TEXT, "testdata"))
 		nested.Close(blob, "blob")
-		MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blob, "", nil))
+		MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blob, nil, nil))
 		MustBeSuccessful(c.AddVersion(cv))
 
 		MustBeSuccessful(nested.Finalize())

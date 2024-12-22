@@ -9,10 +9,10 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/datacontext"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
@@ -84,7 +84,7 @@ type InputResourceInfo struct {
 type InputSpec interface {
 	runtime.VersionedTypedObject
 	Validate(fldPath *field.Path, ctx Context, inputFilePath string) field.ErrorList
-	GetBlob(ctx Context, info InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error)
+	GetBlob(ctx Context, info InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error)
 	GetInputVersion(ctx Context) string
 }
 
@@ -281,7 +281,7 @@ func (r *UnknownInputSpec) Validate(fldPath *field.Path, ctx Context, inputFileP
 	return field.ErrorList{field.Invalid(fldPath.Child("type"), r.GetType(), "unknown type")}
 }
 
-func (r *UnknownInputSpec) GetBlob(ctx Context, info InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
+func (r *UnknownInputSpec) GetBlob(ctx Context, info InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	return nil, nil, errors.ErrUnknown("input type", r.GetType())
 }
 
@@ -338,7 +338,7 @@ func (s *GenericInputSpec) Validate(fldPath *field.Path, ctx Context, inputFileP
 	return s.effective.Validate(fldPath, ctx, inputFilePath)
 }
 
-func (s *GenericInputSpec) GetBlob(ctx Context, info InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
+func (s *GenericInputSpec) GetBlob(ctx Context, info InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	if s.effective == nil {
 		var err error
 		s.effective, err = s.Evaluate(For(ctx))

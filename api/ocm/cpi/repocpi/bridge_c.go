@@ -6,11 +6,11 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/optionutils"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/attrs/compositionmodeattr"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/refmgmt/resource"
@@ -173,7 +173,7 @@ func (c *componentAccessBridge) AddVersion(cv cpi.ComponentVersionAccess, opts *
 func (c *componentAccessBridge) setupLocalBlobs(kind string, src cpi.ComponentVersionAccess, tgtbridge ComponentVersionAccessBridge, it compdesc.ArtifactAccessor, opts *cpi.BlobUploadOptions) (ferr error) {
 	ctx := src.GetContext()
 	// transfer all local blobs
-	prov := func(spec cpi.AccessSpec) (blob blobaccess.BlobAccess, ref []metav1.ReferenceHint, global cpi.AccessSpec, err error) {
+	prov := func(spec cpi.AccessSpec) (blob blobaccess.BlobAccess, ref []refhints.ReferenceHint, global cpi.AccessSpec, err error) {
 		if spec.IsLocal(ctx) {
 			m, err := spec.AccessMethod(src)
 			if err != nil {

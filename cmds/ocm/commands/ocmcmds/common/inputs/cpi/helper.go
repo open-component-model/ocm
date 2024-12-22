@@ -9,9 +9,9 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/mime"
@@ -77,7 +77,7 @@ func (s *ProcessSpec) SetMediaTypeIfNotDefined(mediaType string) {
 	s.MediaType = mediaType
 }
 
-func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc blobaccess.DataAccess, fs vfs.FileSystem) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
+func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc blobaccess.DataAccess, fs vfs.FileSystem) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	if !s.Compress() {
 		if s.MediaType == "" {
 			s.MediaType = mime.MIME_OCTET

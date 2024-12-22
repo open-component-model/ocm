@@ -6,12 +6,12 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/internal"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -101,7 +101,7 @@ func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
 	return internal.WrapContextProvider(ctx)
 }
 
-func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) metav1.ReferenceHints {
+func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) refhints.ReferenceHints {
 	if h, ok := spec.(internal.HintProvider); ok {
 		return h.GetReferenceHint(cv)
 	}

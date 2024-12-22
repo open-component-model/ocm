@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
+	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -125,7 +126,7 @@ var _ = Describe("oci artifact transfer", func() {
 			data := Must(json.Marshal(comp.GetDescriptor().Resources[1].Access))
 
 			fmt.Printf("%s\n", string(data))
-			Expect(string(data)).To(StringEqualWithContext(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:` + D_OCIMANIFEST1 + `","type":"ociArtifact"},"localReference":"sha256:` + H_OCIARCHMANIFEST1 + `","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`))
+			Expect(string(data)).To(StringEqualWithContext(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:` + D_OCIMANIFEST1 + `","type":"ociArtifact"},"localReference":"sha256:` + H_OCIARCHMANIFEST1 + `","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"` + oci2.ReferenceHintType + `::ocm/value:v2.0","type":"localBlob"}`))
 			ocirepo := genericocireg.GetOCIRepository(tgt)
 			Expect(ocirepo).NotTo(BeNil())
 

@@ -3,7 +3,6 @@ package comparch
 import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	ocicpi "ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -12,6 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localfsblob"
 	ocmhdlr "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/ocm"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/errkind"
@@ -183,7 +183,7 @@ func (s *BlobSink) AddBlob(blob blobaccess.BlobAccess) (string, error) {
 	return blob.Digest().String(), nil
 }
 
-func (c *componentArchiveContainer) AddBlob(blob cpi.BlobAccess, hints []metav1.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *componentArchiveContainer) AddBlob(blob cpi.BlobAccess, hints []refhints.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -191,7 +191,7 @@ func (c *componentArchiveContainer) AddBlob(blob cpi.BlobAccess, hints []metav1.
 	if err != nil {
 		return nil, err
 	}
-	return localblob.New(common.DigestToFileName(blob.Digest()), metav1.FilterImplicit(hints).Serialize(), blob.MimeType(), global), nil
+	return localblob.New(common.DigestToFileName(blob.Digest()), refhints.FilterImplicit(hints).Serialize(), blob.MimeType(), global), nil
 }
 
 func (c *componentArchiveContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error) {

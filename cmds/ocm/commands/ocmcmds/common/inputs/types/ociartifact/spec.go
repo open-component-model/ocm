@@ -4,13 +4,13 @@ import (
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
-	"ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci/extensions/repositories/docker"
 	"ocm.software/ocm/api/oci/grammar"
 	"ocm.software/ocm/api/oci/tools/transfer/filters"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
+	"ocm.software/ocm/api/ocm/refhints"
+	"ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/blobaccess"
 	ociartifactblob "ocm.software/ocm/api/utils/blobaccess/ociartifact"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -64,7 +64,7 @@ func (s *Spec) CreateFilter() ociartifactblob.Option {
 	return nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	filter := s.CreateFilter()
 	blob, version, err := ociartifactblob.BlobAccess(s.Path,
 		filter,
@@ -75,7 +75,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	if err != nil {
 		return nil, nil, err
 	}
-	return blob, metav1.ReferenceHints{oci.ReferenceHint(ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, version), true)}, nil
+	return blob, refhints.NewHints(oci.ReferenceHint, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, version), true), nil
 }
 
 func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo string) field.ErrorList {

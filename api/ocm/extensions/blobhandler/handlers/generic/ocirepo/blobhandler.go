@@ -8,8 +8,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
-	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -17,6 +15,8 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
+	"ocm.software/ocm/api/ocm/refhints"
+	oci2 "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -42,7 +42,7 @@ func NewArtifactHandler(repospec ...*ociuploadattr.Attribute) cpi.BlobHandler {
 	return &artifactHandler{utils.Optional(repospec...)}
 }
 
-func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints metav1.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints refhints.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	attr := b.spec
 	if attr == nil {
 		attr = ociuploadattr.Get(ctx.GetContext())

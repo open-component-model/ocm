@@ -4,6 +4,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 
@@ -13,6 +14,7 @@ type ocmSource struct {
 	meta   compdesc.SourceMeta
 	access compdesc.AccessSpec
 	blob   blobaccess.BlobAccess
+	hint   refhints.ReferenceHints
 }
 
 const T_OCMSOURCE = "source"
@@ -25,8 +27,10 @@ func (r *ocmSource) Set() {
 	r.Builder.ocm_src = &r.meta
 	r.Builder.ocm_acc = &r.access
 	r.Builder.ocm_meta = &r.meta.ElementMeta
+	r.Builder.ocm_metahints = &r.meta
 	r.Builder.ocm_labels = &r.meta.ElementMeta.Labels
 	r.Builder.blob = &r.blob
+	r.Builder.blobhint = &r.hint
 }
 
 func (r *ocmSource) Close() error {
@@ -34,7 +38,7 @@ func (r *ocmSource) Close() error {
 	case r.access != nil:
 		return r.Builder.ocm_vers.SetSource(&r.meta, r.access)
 	case r.blob != nil:
-		return r.Builder.ocm_vers.SetSourceBlob(&r.meta, r.blob, "", nil)
+		return r.Builder.ocm_vers.SetSourceBlob(&r.meta, r.blob, r.hint, nil)
 	}
 	return errors.New("access or blob required")
 }

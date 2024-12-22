@@ -4,6 +4,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	testenv "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -37,7 +38,7 @@ var _ = Describe("dir tree resource access", func() {
 			me.WithGlobalAccess(global),
 		)
 
-		Expect(acc.ReferenceHintForAccess()).To(Equal("demo"))
+		Expect(acc.ReferenceHintForAccess()).To(Equal(refhints.NewHints(refhints.DefaultHint, "demo")))
 		Expect(acc.GlobalAccess()).To(Equal(global))
 		Expect(acc.Meta().Type).To(Equal(resourcetypes.DIRECTORY_TREE))
 

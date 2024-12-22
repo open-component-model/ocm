@@ -102,6 +102,8 @@ Put() {
 
   if [ -z "$hint" ]; then
     hint="$NAME-$$.blob"
+  else
+     hint="$(expr match "$hint" ".*reference=\(.*\)" )"
   fi
   P="$ROOT/$repo/$hint"
   mkdir -p "$(dirname "$P")"

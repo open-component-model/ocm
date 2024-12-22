@@ -9,7 +9,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/optionutils"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -19,6 +18,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/keepblobattr"
 	"ocm.software/ocm/api/ocm/extensions/pubsub"
 	"ocm.software/ocm/api/ocm/internal"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -301,7 +301,7 @@ func (b *componentVersionAccessBridge) getLocalBlob(acc cpi.AccessSpec) cpi.Blob
 	return b.blobcache.GetBlobFor(string(key))
 }
 
-func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType string, hints []metav1.ReferenceHint, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error) {
+func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType string, hints []refhints.ReferenceHint, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -389,7 +389,7 @@ func (b *componentVersionAccessBridge) cacheLocalBlob(acc cpi.AccessSpec, blob c
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *componentVersionAccessBridge) composeAccess(spec cpi.AccessSpec) (blobaccess.BlobAccess, []metav1.ReferenceHint, cpi.AccessSpec, error) {
+func (b *componentVersionAccessBridge) composeAccess(spec cpi.AccessSpec) (blobaccess.BlobAccess, []refhints.ReferenceHint, cpi.AccessSpec, error) {
 	if !compose.Is(spec) {
 		return nil, nil, nil, nil
 	}
@@ -409,7 +409,7 @@ func (b *componentVersionAccessBridge) composeAccess(spec cpi.AccessSpec) (bloba
 	return blob, cspec.GetReferenceHint(nil), cspec.GlobalAccess.Get(), nil
 }
 
-func (b *componentVersionAccessBridge) setupLocalBlobs(kind string, accprov func(cpi.AccessSpec) (blobaccess.BlobAccess, []metav1.ReferenceHint, cpi.AccessSpec, error), it compdesc.ArtifactAccessor, final bool, opts *cpi.BlobUploadOptions) (ferr error) {
+func (b *componentVersionAccessBridge) setupLocalBlobs(kind string, accprov func(cpi.AccessSpec) (blobaccess.BlobAccess, []refhints.ReferenceHint, cpi.AccessSpec, error), it compdesc.ArtifactAccessor, final bool, opts *cpi.BlobUploadOptions) (ferr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 

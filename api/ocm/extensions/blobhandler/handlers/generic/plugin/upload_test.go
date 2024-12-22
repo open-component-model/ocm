@@ -108,7 +108,7 @@ var _ = Describe("setup plugin cache", func() {
 				env.Version(VERS, func() {
 					env.Provider(PROVIDER)
 					env.Resource("testdata", VERS, RSCTYPE, metav1.LocalRelation, func() {
-						env.Hint(HINT)
+						env.AccessHint(HINT)
 						env.BlobStringData(MEDIA, CONTENT)
 						// env.Access(NewAccessSpec(MEDIA, "given", "dummy"))
 					})

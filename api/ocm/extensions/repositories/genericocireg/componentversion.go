@@ -10,7 +10,6 @@ import (
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
-	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/oci"
@@ -27,6 +26,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/relativeociref"
 	"ocm.software/ocm/api/ocm/extensions/attrs/compatattr"
 	ocihdlr "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/oci"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess"

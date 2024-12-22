@@ -11,5 +11,5 @@ const ReferenceHintType = "npm"
 const HINT_REFERENCE = metav1.HINT_REFERENCE
 
 func ReferenceHint(ref string, implicit ...bool) metav1.ReferenceHint {
-	return metav1.New(ReferenceHintType, ref)
+	return metav1.New(ReferenceHintType, ref, implicit...)
 }

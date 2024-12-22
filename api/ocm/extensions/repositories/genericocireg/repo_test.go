@@ -9,6 +9,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -287,7 +288,7 @@ var _ = Describe("component repository mapping", func() {
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
-		acc := Must(vers.AddBlob(blob, "", "", nil))
+		acc := Must(vers.AddBlob(blob, "", nil, nil))
 
 		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
@@ -336,7 +337,7 @@ var _ = Describe("component repository mapping", func() {
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
-		acc := Must(vers.AddBlob(blob, "", "", nil))
+		acc := Must(vers.AddBlob(blob, "", nil, nil))
 		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
 
@@ -392,7 +393,7 @@ var _ = Describe("component repository mapping", func() {
 		blob := blobaccess.ForFile(mime, "test.tgz", tempfs)
 
 		fmt.Printf("physical digest: %s\n", blob.Digest())
-		acc := Must(vers.AddBlob(blob, "", "artifact1", nil))
+		acc := Must(vers.AddBlob(blob, "", refhints.NewHints(refhints.DefaultHint, "artifact1", true), nil))
 		MustBeSuccessful(vers.SetResource(cpi.NewResourceMeta("image", resourcetypes.OCI_IMAGE, metav1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
 
@@ -411,7 +412,7 @@ var _ = Describe("component repository mapping", func() {
 		o := acc.(*ociartifact.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact1@sha256:" + testhelper.DIGEST_MANIFEST))
 
-		acc = Must(vers.AddBlob(blob, "", "artifact2:v1", nil))
+		acc = Must(vers.AddBlob(blob, "", refhints.NewHints(refhints.DefaultHint, "artifact2:v1", true), nil))
 		MustBeSuccessful(vers.SetResource(cpi.NewResourceMeta("image2", resourcetypes.OCI_IMAGE, metav1.LocalRelation), acc, cpi.ModifyResource()))
 		MustBeSuccessful(comp.AddVersion(vers))
 
@@ -448,7 +449,7 @@ var _ = Describe("component repository mapping", func() {
 		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
 		blob := blobaccess.ForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
 
-		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
+		MustBeSuccessful(vers.SetResourceBlob(m1, blob, nil, nil))
 		MustBeSuccessful(comp.AddVersion(vers))
 
 		MustBeSuccessful(nested.Finalize())
@@ -456,7 +457,7 @@ var _ = Describe("component repository mapping", func() {
 		// modify resource in component
 		vers = finalizer.ClosingWith(nested, Must(repo.LookupComponentVersion(COMPONENT, "v1")))
 		blob = blobaccess.ForString(mime.MIME_TEXT, "otherdata")
-		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
+		MustBeSuccessful(vers.SetResourceBlob(m1, blob, nil, nil))
 		MustBeSuccessful(vers.Update())
 		MustBeSuccessful(nested.Finalize())
 

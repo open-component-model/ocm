@@ -5,10 +5,10 @@ import (
 	"sync/atomic"
 
 	"github.com/mandelsoft/goutils/errors"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
@@ -52,7 +52,7 @@ type StorageBackendImpl interface {
 	AccessMethod(key common.NameVersion, acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
 	GetStorageContext(key common.NameVersion) cpi.StorageContext
 	GetBlob(key common.NameVersion, name string) (cpi.DataAccess, error)
-	AddBlob(key common.NameVersion, blob cpi.BlobAccess, hints []metav1.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error)
+	AddBlob(key common.NameVersion, blob cpi.BlobAccess, hints []refhints.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error)
 }
 
 type storageBackendRepository struct {
@@ -290,6 +290,6 @@ func (s storageBackendComponentVersion) GetBlob(name string) (cpi.DataAccess, er
 	return s.comp.repo.impl.GetBlob(s.name, name)
 }
 
-func (s storageBackendComponentVersion) AddBlob(blob cpi.BlobAccess, hints []metav1.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (s storageBackendComponentVersion) AddBlob(blob cpi.BlobAccess, hints []refhints.ReferenceHint, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	return s.comp.repo.impl.AddBlob(s.name, blob, hints, global)
 }

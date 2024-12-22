@@ -8,8 +8,8 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -32,7 +32,7 @@ func (s *FileProcessSpec) Validate(fldPath *field.Path, ctx inputs.Context, inpu
 	return allErrs
 }
 
-func (s *FileProcessSpec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
+func (s *FileProcessSpec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	fs := ctx.FileSystem()
 	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
 	if err != nil {

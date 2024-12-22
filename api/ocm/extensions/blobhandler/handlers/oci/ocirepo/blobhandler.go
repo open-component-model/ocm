@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	. "github.com/mandelsoft/goutils/finalizer"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
-	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
@@ -29,6 +27,8 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/keepblobattr"
 	"ocm.software/ocm/api/ocm/extensions/attrs/mapocirepoattr"
 	storagecontext "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/oci"
+	"ocm.software/ocm/api/ocm/refhints"
+	oci2 "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
@@ -78,7 +78,7 @@ func NewBlobHandler(base BaseFunction) cpi.BlobHandler {
 	return &blobHandler{base}
 }
 
-func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType string, hint metav1.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType string, hint refhints.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	ocictx, ok := ctx.(*storagecontext.StorageContext)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to storagecontext.StorageContext", ctx)
@@ -205,14 +205,14 @@ func (b *artifactHandler) CheckBlob(blob cpi.BlobAccess, artType, hint string, g
 	return ok, true, err
 }
 
-func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints metav1.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints refhints.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	mediaType := blob.MimeType()
 
 	if !artdesc.IsOCIMediaType(mediaType) || (!strings.HasSuffix(mediaType, "+tar") && !strings.HasSuffix(mediaType, "+tar+gzip")) {
 		return nil, nil
 	}
 
-	hint := metav1.GetReference(hints, oci2.ReferenceHintType, "")
+	hint := refhints.GetReference(hints, oci2.ReferenceHintType, "")
 	errhint := "[" + hint + "]"
 	log := cpi.BlobHandlerLogger(ctx.GetContext())
 

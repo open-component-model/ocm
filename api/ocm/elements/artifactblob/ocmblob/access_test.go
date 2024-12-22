@@ -46,7 +46,7 @@ var _ = Describe("blobaccess for maven", func() {
 				maven.WithClassifier("random-content"), maven.WithExtension("json"))
 
 			a := me.ResourceAccessForMavenCoords(env.OCMContext(), Must(elements.ResourceMeta("mavenblob", resourcetypes.OCM_JSON, elements.WithLocalRelation())), repo, coords, me.WithCachingFileSystem(env.FileSystem()))
-			Expect(a.ReferenceHintForAccess()).To(Equal(""))
+			Expect(a.ReferenceHintForAccess()).To(BeNil())
 			b := Must(a.BlobAccess())
 			defer Close(b)
 			Expect(string(Must(b.Get()))).To(Equal(`{"some": "test content"}`))
@@ -65,7 +65,7 @@ var _ = Describe("blobaccess for maven", func() {
 			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
 
 			a := me.ResourceAccessForMavenCoords(env.OCMContext(), Must(elements.ResourceMeta("mavenblob", resourcetypes.OCM_JSON, elements.WithLocalRelation())), repo, coords, me.WithCachingFileSystem(env.FileSystem()))
-			Expect(a.ReferenceHintForAccess()).To(Equal(coords.GAV()))
+			Expect(a.ReferenceHintForAccess().Serialize()).To(Equal(maven.ReferenceHintType + "::" + coords.GAV()))
 		})
 	})
 })

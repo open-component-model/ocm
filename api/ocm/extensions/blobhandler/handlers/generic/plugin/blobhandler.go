@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/accessio"
 )
 

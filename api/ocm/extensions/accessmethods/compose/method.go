@@ -77,7 +77,7 @@ func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) meta
 	if a.ReferenceName == "" {
 		return nil
 	}
-	return metav1.ParseHints(a.ReferenceName)
+	return metav1.ParseHints(a.ReferenceName, true)
 }
 
 func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessSpec {

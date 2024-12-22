@@ -5,16 +5,16 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
-	"ocm.software/ocm/api/utils/runtime"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	cpi "ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
+	"ocm.software/ocm/api/ocm/refhints"
 	ocm "ocm.software/ocm/api/ocm/types"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,8 +50,12 @@ func (r *ComponentVersionBasedAccessProvider) GetComponentVersion() (ComponentVe
 	return r.vers.Dup()
 }
 
-func (r *ComponentVersionBasedAccessProvider) ReferenceHintForAccess() metav1.ReferenceHints {
-	if hp, ok := r.access.(cpi.HintProvider); ok {
+func (r *ComponentVersionBasedAccessProvider) ReferenceHintForAccess() refhints.ReferenceHints {
+	a, err := r.vers.GetContext().AccessSpecForSpec(r.access)
+	if err == nil {
+		return ReferenceHint(a, r.vers)
+	}
+	if hp, ok := r.access.(HintProvider); ok {
 		return hp.GetReferenceHint(r.vers)
 	}
 	return nil
@@ -90,13 +94,13 @@ func (r *ComponentVersionBasedAccessProvider) BlobAccess() (BlobAccess, error) {
 type blobAccessProvider struct {
 	ctx ocm.Context
 	blobaccess.BlobAccessProvider
-	hints  metav1.ReferenceHints
+	hints  refhints.ReferenceHints
 	global AccessSpec
 }
 
 var _ AccessProvider = (*blobAccessProvider)(nil)
 
-func NewAccessProviderForBlobAccessProvider(ctx ocm.Context, prov blobaccess.BlobAccessProvider, hints []metav1.ReferenceHint, global AccessSpec) AccessProvider {
+func NewAccessProviderForBlobAccessProvider(ctx ocm.Context, prov blobaccess.BlobAccessProvider, hints []refhints.ReferenceHint, global AccessSpec) AccessProvider {
 	return &blobAccessProvider{
 		BlobAccessProvider: prov,
 		hints:              hints,
@@ -109,7 +113,7 @@ func (b *blobAccessProvider) GetOCMContext() cpi.Context {
 	return b.ctx
 }
 
-func (b *blobAccessProvider) ReferenceHintForAccess() metav1.ReferenceHints {
+func (b *blobAccessProvider) ReferenceHintForAccess() refhints.ReferenceHints {
 	return b.hints
 }
 
@@ -127,7 +131,7 @@ func (b *blobAccessProvider) AccessMethod() (cpi.AccessMethod, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func NewArtifactAccessProviderForBlobAccessProvider[M any, P ReferenceHintProviderPointer[M]](ctx Context, meta *M, src blobAccessProvider, hint []metav1.ReferenceHint, global AccessSpec) cpi.ArtifactAccess[M] {
+func NewArtifactAccessProviderForBlobAccessProvider[M any, P ReferenceHintProviderPointer[M]](ctx Context, meta *M, src blobAccessProvider, hint []refhints.ReferenceHint, global AccessSpec) cpi.ArtifactAccess[M] {
 	return NewArtifactAccessForProvider[M, P](meta, NewAccessProviderForBlobAccessProvider(ctx, src, hint, global))
 }
 
@@ -154,7 +158,7 @@ func (b *accessAccessProvider) GetOCMContext() cpi.Context {
 	return b.ctx
 }
 
-func (b *accessAccessProvider) ReferenceHintForAccess() metav1.ReferenceHints {
+func (b *accessAccessProvider) ReferenceHintForAccess() refhints.ReferenceHints {
 	if h, ok := b.spec.(HintProvider); ok {
 		return h.GetReferenceHint(&DummyComponentVersionAccess{b.ctx})
 	}
@@ -210,7 +214,7 @@ func (r *artifactAccessProvider[M]) Meta() *M {
 	return r.meta
 }
 
-func (r *artifactAccessProvider[M]) GetReferenceHints() metav1.ReferenceHints {
+func (r *artifactAccessProvider[M]) GetReferenceHints() refhints.ReferenceHints {
 	hints := any(r.meta).(compdesc.ReferenceHintProvider).GetReferenceHints()
 
 	a, err := r.Access()
@@ -218,7 +222,7 @@ func (r *artifactAccessProvider[M]) GetReferenceHints() metav1.ReferenceHints {
 		cv, err := r.GetComponentVersion()
 		if err == nil {
 			defer cv.Close()
-			sliceutils.AppendUniqueFunc(hints, runtime.MatchType[metav1.ReferenceHint], ReferenceHint(a, cv)...)
+			hints = sliceutils.AppendUniqueFunc(hints, runtime.MatchType[refhints.ReferenceHint], ReferenceHint(a, cv)...)
 		}
 	}
 	return hints

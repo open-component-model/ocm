@@ -21,7 +21,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/compositionmodeattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/virtual"
 	"ocm.software/ocm/api/ocm/extensions/repositories/virtual/example"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
 )
@@ -91,7 +91,7 @@ var _ = Describe("virtual repo", func() {
 			finalize.Close(vers, "version")
 
 			blob := blobaccess.ForString(mime.MIME_TEXT, "new test data")
-			MustBeSuccessful(vers.SetResourceBlob(compdesc.NewResourceMeta("new", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blob, "", nil))
+			MustBeSuccessful(vers.SetResourceBlob(compdesc.NewResourceMeta("new", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blob, nil, nil))
 
 			r := Must(vers.GetResourceByIndex(0))
 			a := Must(r.Access())

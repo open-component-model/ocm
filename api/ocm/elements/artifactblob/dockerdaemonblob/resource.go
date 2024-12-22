@@ -3,14 +3,14 @@ package dockerdaemonblob
 import (
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
-	metav1 "ocm.software/ocm/api/ocm/refhints"
-	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/ocm/refhints"
+	oci2 "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/blobaccess/dockerdaemon"
 )
 
@@ -29,7 +29,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, n
 	h := eff.Hint.GetReferenceHint(oci2.ReferenceHintType, "")
 	hint := ociartifact.Hint(optionutils.AsValue(eff.Blob.Origin), locator, h.GetReference(), version)
 	blobprov := dockerdaemon.Provider(name, &eff.Blob)
-	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, metav1.ReferenceHints{oci2.ReferenceHint(hint)}, eff.Global)
+	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, refhints.ReferenceHints{oci2.ReferenceHint(hint)}, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
 	return cpi.NewArtifactAccessForProvider[M, P](generics.Cast[*M](meta), accprov)
 }
