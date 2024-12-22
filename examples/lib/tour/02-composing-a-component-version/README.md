@@ -192,7 +192,7 @@ optional additional information:
   (we don't use it, here).
 
 ```go
-		err = cv.SetResourceBlob(meta, blob, "", nil)
+		err = cv.SetResourceBlob(meta, blob, nil, nil)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")
 		}

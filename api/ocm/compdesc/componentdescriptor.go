@@ -138,6 +138,7 @@ type ArtifactMetaAccess interface {
 	GetType() string
 	SetType(string)
 	ReferenceHintProvider
+	ReferenceHintSink
 }
 
 type ReferenceHintProvider interface {
