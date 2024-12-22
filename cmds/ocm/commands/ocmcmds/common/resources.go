@@ -238,6 +238,7 @@ func NewContentResourceSpecificationProvider(ctx clictx.Context, name string, ad
 		ElementMetaDataSpecificationsProvider: NewElementMetaDataSpecificationsProvider(name, flagsets.ComposedAdder(addContentMeta, adder),
 			sliceutils.CopyAppend(types,
 				flagsets.NewStringOptionType("type", fmt.Sprintf("%s type", name)),
+				flagsets.NewStringMapSliceOptionType("refhint", "type", fmt.Sprintf("%s reference hints (hint starts with type attribute)", name)),
 			)...,
 		),
 	}
@@ -246,6 +247,9 @@ func NewContentResourceSpecificationProvider(ctx clictx.Context, name string, ad
 
 func addContentMeta(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOption(opts, "type", config)
+	if err := flagsets.AddFieldByMappedOption(opts, "refhint", config, MapRefHintSpecs, "referenceHints"); err != nil {
+		return err
+	}
 	return nil
 }
 

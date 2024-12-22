@@ -98,6 +98,7 @@ source-configuration, sourceconfig, srccfg, scfg
       --extra <name>=<value>                source extra identity (default [])
       --label <name>=<YAML>                 source label (leading * indicates signature relevant, optional version separated by @)
       --name string                         source name
+      --refhint {<name[type]>=<value>}      source reference hints (hint starts with type attribute)
       --source YAML                         source meta data (yaml)
       --type string                         source type
       --version string                      source version

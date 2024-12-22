@@ -99,6 +99,7 @@ resource-configuration, resourceconfig, rsccfg, rcfg
       --extra <name>=<value>                resource extra identity (default [])
       --label <name>=<YAML>                 resource label (leading * indicates signature relevant, optional version separated by @)
       --name string                         resource name
+      --refhint {<name[type]>=<value>}      resource reference hints (hint starts with type attribute)
       --resource YAML                       resource meta data (yaml)
       --type string                         resource type
       --version string                      resource version

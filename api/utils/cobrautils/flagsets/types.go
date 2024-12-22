@@ -444,6 +444,45 @@ func (o *StringMapOption) Value() interface{} {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+type StringMapSliceOptionType struct {
+	TypeOptionBase
+	main string
+}
+
+func NewStringMapSliceOptionType(name string, main string, description string) ConfigOptionType {
+	return &StringMapSliceOptionType{
+		TypeOptionBase: TypeOptionBase{name, description},
+		main:           main,
+	}
+}
+
+func (s *StringMapSliceOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *StringMapSliceOptionType) Create() Option {
+	return &StringMapSliceOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
+type StringMapSliceOption struct {
+	OptionBase
+	value []map[string]string
+}
+
+var _ Option = (*StringMapSliceOption)(nil)
+
+func (o *StringMapSliceOption) AddFlags(fs *pflag.FlagSet) {
+	o.TweakFlag(flag.StringMapSliceVarPF(fs, o.otyp.(*StringMapSliceOptionType).main, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+}
+
+func (o *StringMapSliceOption) Value() interface{} {
+	return o.value
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 type BytesOptionType struct {
 	TypeOptionBase
 }
