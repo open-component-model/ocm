@@ -46,6 +46,10 @@ func NewHints(f func(ref string, implicit ...bool) ReferenceHint, ref string, im
 	return ReferenceHints{f(ref, implicit...)}
 }
 
+func (h *ReferenceHints) Add(hints ...ReferenceHint) {
+	*h = sliceutils.AppendUniqueFunc(*h, runtime.MatchType[ReferenceHint], hints...)
+}
+
 func (h ReferenceHints) Copy() ReferenceHints {
 	var result ReferenceHints
 

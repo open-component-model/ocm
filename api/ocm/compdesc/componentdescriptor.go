@@ -461,6 +461,11 @@ func (o *SourceMeta) SetReferenceHints(hints []refhints.ReferenceHint) {
 	o.ReferenceHints = refhints.ReferenceHints(hints).Copy()
 }
 
+// AddReferenceHints sets the reference hints specified together with the metadata.
+func (o *SourceMeta) AddReferenceHints(hints ...refhints.ReferenceHint) {
+	o.ReferenceHints.Add(hints...)
+}
+
 // SetType sets the type of the object.
 func (o *SourceMeta) SetType(ttype string) {
 	o.Type = ttype
@@ -690,6 +695,11 @@ func (o *ResourceMeta) GetReferenceHints() refhints.ReferenceHints {
 // SetReferenceHints sets the reference hints specified together with the metadata.
 func (o *ResourceMeta) SetReferenceHints(hints []refhints.ReferenceHint) {
 	o.ReferenceHints = refhints.ReferenceHints(hints).Copy()
+}
+
+// AddReferenceHints sets the reference hints specified together with the metadata.
+func (o *ResourceMeta) AddReferenceHints(hints ...refhints.ReferenceHint) {
+	o.ReferenceHints.Add(hints...)
 }
 
 // SetType sets the type of the object.
