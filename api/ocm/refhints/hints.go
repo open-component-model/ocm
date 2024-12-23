@@ -293,9 +293,28 @@ func ParseHints(v string, implicit ...bool) ReferenceHints {
 				state = 0
 			}
 			fallthrough
-		case 0: // type
+		case 0: // type or plain value
 			if c == ':' {
 				state = 1
+			}
+			if c == '=' {
+				hint = DefaultReferenceHint{}
+				prop = v[start:i]
+				start = i + 1
+				state = 3
+			}
+			if c == ',' || c == ';' {
+				hint = DefaultReferenceHint{}
+				hint[HINT_REFERENCE] = v[start:i]
+				start = i + 1
+				if c == ',' {
+					state = 7
+				}
+				if c == ';' {
+					hints = append(hints, hint)
+					hint = nil
+					state = -1
+				}
 			}
 		case 1: // colon
 			if c == ':' {
@@ -346,7 +365,7 @@ func ParseHints(v string, implicit ...bool) ReferenceHints {
 					hint = nil
 					state = -1
 				} else {
-					state = 2
+					state = 7
 				}
 			}
 		case 5: // escaped value

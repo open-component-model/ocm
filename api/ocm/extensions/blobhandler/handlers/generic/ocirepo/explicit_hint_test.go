@@ -5,13 +5,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-	. "ocm.software/ocm/api/oci/testhelper"
-	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
-	"ocm.software/ocm/api/ocm/refhints"
-
 	"ocm.software/ocm/api/oci"
 	ctfoci "ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/oci/grammar"
+	. "ocm.software/ocm/api/oci/testhelper"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -19,11 +16,14 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/extensions/blobhandler"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
+	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
 	ctfocm "ocm.software/ocm/api/ocm/extensions/repositories/ctf"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 const LOCALNAMESPACE = "ocm/local"
@@ -100,6 +100,26 @@ var _ = Describe("explicit hint upload", func() {
 		ra := Must(cv.GetResourceByIndex(0))
 
 		Expect(ra.GetReferenceHints().Serialize(true)).To(Equal("oci::" + LOCALNAMESPACE + ":" + LOCALVERS))
+		Expect(ra.ReferenceHintForAccess().Serialize(true)).To(Equal(""))
+	})
+
+	It("validated legacy hint", func() {
+		ctx := env.OCMContext()
+
+		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_WRITABLE, CTF, 0o700, env))
+		defer Close(ctf, "ctf")
+
+		cv := Must(ctf.LookupComponentVersion(COMP, VERS))
+		defer Close(cv, "component version")
+
+		a := cv.GetDescriptor().Resources[0].Access
+		Expect(a.(*runtime.UnstructuredVersionedTypedObject).Object["referenceName"]).To(BeNil())
+		a.(*runtime.UnstructuredVersionedTypedObject).Object["referenceName"] = OCINAMESPACE + ":" + OCIVERSION
+
+		ra := Must(cv.GetResourceByIndex(0))
+
+		Expect(ra.GetReferenceHints().Serialize(true)).To(Equal("oci::" + LOCALNAMESPACE + ":" + LOCALVERS + ";implicit=true,reference=" + OCINAMESPACE + ":" + OCIVERSION))
+		Expect(ra.ReferenceHintForAccess().Serialize(true)).To(Equal("implicit=true,reference=" + OCINAMESPACE + ":" + OCIVERSION))
 	})
 
 	It("validated original digest", func() {
