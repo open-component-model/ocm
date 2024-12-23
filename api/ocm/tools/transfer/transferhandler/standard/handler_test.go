@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
+	"ocm.software/ocm/api/ocm/refhints"
 	. "ocm.software/ocm/api/ocm/testhelper"
 	oci2 "ocm.software/ocm/api/tech/oci"
 
@@ -129,7 +130,7 @@ var _ = Describe("Transfer handler", func() {
 
 		blob := Must(accspeccpi.BlobAccessForAccessMethod(m))
 		defer Close(blob, "blob")
-		MustBeSuccessful(tcv.SetResourceBlob(res.Meta(), blob, nil, nil, ocm.SkipVerify()))
+		MustBeSuccessful(tcv.SetResourceBlob(res.Meta(), blob, refhints.NONE, nil, ocm.SkipVerify()))
 
 		MustBeSuccessful(tgt.AddComponentVersion(tcv))
 	})
@@ -252,7 +253,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		MustBeSuccessful(nested.Finalize())
 
 		// modify one artifact and overwrite
-		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), nil, nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), refhints.NONE, nil))
 		tcd.Resources[0].Digest = DS_OTHERDATA
 		tcd.Resources[0].Access = Must(runtime.ToUnstructuredVersionedTypedObject(localblob.New("sha256:"+D_OTHERDATA, "", mime.MIME_TEXT, nil)))
 		buf.Reset()
@@ -387,7 +388,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		MustBeSuccessful(nested.Finalize())
 
 		// modify one artifact and overwrite
-		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), nil, nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), refhints.NONE, nil))
 		tcd.Resources[0].Digest = DS_OTHERDATA
 		tcd.Resources[0].Access = Must(runtime.ToUnstructuredVersionedTypedObject(localblob.New("sha256:"+D_OTHERDATA, "", mime.MIME_TEXT, nil)))
 		buf.Reset()

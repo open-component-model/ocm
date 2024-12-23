@@ -151,7 +151,17 @@ func (a *Attribute) getBySpec(ctx cpi.Context) (oci.Repository, *oci.UniformRepo
 		a.prefix = a.NamespacePrefix
 		a.spec = data
 		a.ref = &oci.RefSpec{UniformRepositorySpec: *spec.UniformRepositorySpec()}
-		ctx.Finalizer().Close(a)
+		ctx.Finalizer().With(func() error {
+			a.lock.Lock()
+			defer a.lock.Unlock()
+
+			r := a.repo
+			a.reset()
+			if r != nil {
+				return r.Close()
+			}
+			return nil
+		})
 	}
 	return a.repo, &a.ref.UniformRepositorySpec, a.prefix, nil
 }

@@ -6,6 +6,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/ocm/refhints"
 	. "ocm.software/ocm/api/ocm/testhelper"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -118,7 +119,7 @@ var _ = Describe("Repository", func() {
 		arch.SetVersion("v1.0.1")
 
 		MustBeSuccessful(arch.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
-			blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+			blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 
 		res := Must(arch.SelectResources(selectors.Name("blob")))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
@@ -158,7 +159,7 @@ var _ = Describe("Repository", func() {
 		arch.SetVersion("v1.0.1")
 
 		MustBeSuccessful(arch.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
-			blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+			blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 
 		res := Must(arch.SelectResources(selectors.Name("blob")))
 		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
@@ -237,7 +238,7 @@ var _ = Describe("Repository", func() {
 		finalize.Close(cv, "compvers")
 
 		MustBeSuccessful(cv.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
-			blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil))
+			blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil))
 
 		MustBeSuccessful(comp.AddVersion(cv))
 
@@ -273,7 +274,7 @@ var _ = Describe("Repository", func() {
 		MustBeSuccessful(cv2.Close())
 
 		MustBeSuccessful(cv1.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
-			blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil))
+			blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil))
 
 		MustBeSuccessful(finalize.Finalize())
 

@@ -17,7 +17,7 @@ var _ = Describe("string map slice", func() {
 
 	It("handles simple identity", func() {
 		var flag []map[string]string
-		StringMapSliceVarP(flags, "type", &flag, "flag", "", nil, "test flag")
+		StringMapSliceVarP(flags, &flag, "type", "flag", "", nil, "test flag")
 
 		value := `type=alice`
 
@@ -27,7 +27,7 @@ var _ = Describe("string map slice", func() {
 
 	It("handles simple path", func() {
 		var flag []map[string]string
-		StringMapSliceVarP(flags, "type", &flag, "flag", "", nil, "test flag")
+		StringMapSliceVarP(flags, &flag, "type", "flag", "", nil, "test flag")
 
 		value1 := `type=alice`
 		value2 := `husband=bob`
@@ -38,7 +38,7 @@ var _ = Describe("string map slice", func() {
 
 	It("handles multi path", func() {
 		var flag []map[string]string
-		StringMapSliceVarP(flags, "type", &flag, "flag", "", nil, "test flag")
+		StringMapSliceVarP(flags, &flag, "type", "flag", "", nil, "test flag")
 
 		value1 := `type=alice`
 		value2 := `husband=bob`
@@ -51,14 +51,14 @@ var _ = Describe("string map slice", func() {
 
 	It("shows default", func() {
 		var flag []map[string]string
-		StringMapSliceVarP(flags, "type", &flag, "flag", "", []map[string]string{{"type": "alice"}}, "test flag")
+		StringMapSliceVarP(flags, &flag, "type", "flag", "", []map[string]string{{"type": "alice"}}, "test flag")
 
 		Expect(flags.FlagUsages()).To(testutils.StringEqualTrimmedWithContext(`--flag {<name[type]>=<value>}   test flag (default [{"type":"alice"}])`))
 	})
 
 	It("handles replaces default content", func() {
 		var flag []map[string]string
-		StringMapSliceVarP(flags, "type", &flag, "flag", "", []map[string]string{{"name": "other"}}, "test flag")
+		StringMapSliceVarP(flags, &flag, "type", "flag", "", []map[string]string{{"name": "other"}}, "test flag")
 
 		value1 := `type=alice`
 		value2 := `husband=bob`
@@ -69,7 +69,7 @@ var _ = Describe("string map slice", func() {
 
 	It("rejects invalid value", func() {
 		var flag []map[string]string
-		StringMapSliceVarP(flags, "type", &flag, "flag", "", nil, "test flag")
+		StringMapSliceVarP(flags, &flag, "type", "flag", "", nil, "test flag")
 
 		value := `a=b`
 
@@ -78,14 +78,27 @@ var _ = Describe("string map slice", func() {
 		Expect(err.Error()).To(Equal("invalid argument \"a=b\" for \"--flag\" flag: first attribute must be the \"type\" attribute"))
 	})
 
-	It("rejects invalid assignment", func() {
+	It("simplified main", func() {
 		var flag []map[string]string
-		StringMapSliceVarP(flags, "type", &flag, "flag", "", nil, "test flag")
+		StringMapSliceVarP(flags, &flag, "type", "flag", "", nil, "test flag")
 
-		value := `a`
+		value := `alice`
 
 		err := flags.Parse([]string{"--flag", value})
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(Equal("invalid argument \"a\" for \"--flag\" flag: expected <name>=<value>"))
+		Expect(err).To(Succeed())
+		Expect(flag).To(Equal([]map[string]string{{"type": "alice"}}))
 	})
+
+	/*
+		It("rejects invalid assignment", func() {
+			var flag []map[string]string
+			StringMapSliceVarP(flags, &flag, "type", "flag", "", nil, "test flag")
+
+			value := `a`
+
+			err := flags.Parse([]string{"--flag", value})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("invalid argument \"a\" for \"--flag\" flag: expected <name>=<value>"))
+		})
+	*/
 })

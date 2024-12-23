@@ -4,6 +4,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/ocm/refhints"
 	. "ocm.software/ocm/api/ocm/testhelper"
 
 	"ocm.software/ocm/api/datacontext"
@@ -38,50 +39,50 @@ var _ = Describe("add resources", func() {
 		It("adds resource", func() {
 			meta := ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation)
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_TESTDATA))
 		})
 
 		It("replaces resource", func() {
 			meta := ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation)
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil))
 			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_OTHERDATA))
 		})
 
 		It("replaces resource (enforced)", func() {
 			meta := ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation)
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.UpdateElement))
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.UpdateElement))
 			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_OTHERDATA))
 
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v2"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.UpdateElement))
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.UpdateElement))
 			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_OTHERDATA))
 		})
 
 		It("fails replace non-existent resource)", func() {
 			meta := ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation)
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 
 			Expect(cv.SetResourceBlob(meta.WithVersion("v1").WithExtraIdentity("attr", "value"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.UpdateElement)).To(
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.UpdateElement)).To(
 				MatchError("unable to set resource: element \"attr\"=\"value\",\"name\"=\"test\" not found"))
 		})
 
 		It("adds duplicate resource with different version", func() {
 			meta := ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation)
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v2"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.AppendElement))
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.AppendElement))
 			Expect(len(Must(cv.SelectResources(selectors.Name("test"))))).To(Equal(2))
 			Expect(Must(cv.SelectResources(selectors.Name("test")))[0].Meta().Digest).To(Equal(DS_TESTDATA))
 			Expect(Must(cv.SelectResources(selectors.Name("test")))[1].Meta().Digest).To(Equal(DS_OTHERDATA))
@@ -90,18 +91,18 @@ var _ = Describe("add resources", func() {
 		It("rejects duplicate resource with same version", func() {
 			meta := ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.ExternalRelation)
 			MustBeSuccessful(cv.SetResourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 			Expect(cv.SetResourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.AppendElement)).
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.AppendElement)).
 				To(MatchError("unable to set resource: adding a new resource with same base identity requires different version"))
 		})
 
 		It("rejects duplicate resource with extra identity", func() {
 			meta := ocm.NewResourceMeta("test", resourcetypes.PLAIN_TEXT, metav1.LocalRelation).WithExtraIdentity("attr", "value")
 			MustBeSuccessful(cv.SetResourceBlob(meta,
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 			Expect(cv.SetResourceBlob(meta,
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.AppendElement)).
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.AppendElement)).
 				To(MatchError("unable to set resource: adding a new resource with same base identity requires different version"))
 		})
 	})
@@ -110,68 +111,68 @@ var _ = Describe("add resources", func() {
 		It("adds source", func() {
 			meta := ocm.NewSourceMeta("test", resourcetypes.PLAIN_TEXT)
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 			Expect(len(cv.GetDescriptor().Sources)).To(Equal(1))
 		})
 
 		It("replaces source", func() {
 			meta := ocm.NewSourceMeta("test", resourcetypes.PLAIN_TEXT)
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil))
 			Expect(len(Must(cv.SelectSources(selectors.Name("test"))))).To(Equal(1))
 		})
 
 		It("replaces source (enforced)", func() {
 			meta := ocm.NewSourceMeta("test", resourcetypes.PLAIN_TEXT)
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.UpdateElement))
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.UpdateElement))
 			Expect(len(Must(cv.SelectSources(selectors.Name("test"))))).To(Equal(1))
 
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v2"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.UpdateElement))
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.UpdateElement))
 			Expect(len(Must(cv.SelectSources(selectors.Name("test"))))).To(Equal(1))
 		})
 
 		It("fails replace non-existent source)", func() {
 			meta := ocm.NewSourceMeta("test", resourcetypes.PLAIN_TEXT)
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 
 			Expect(cv.SetSourceBlob(meta.WithVersion("v1").WithExtraIdentity("attr", "value"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.UpdateElement)).To(
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.UpdateElement)).To(
 				MatchError("unable to set source: element \"attr\"=\"value\",\"name\"=\"test\" not found"))
 		})
 
 		It("adds duplicate source with different version", func() {
 			meta := ocm.NewSourceMeta("test", resourcetypes.PLAIN_TEXT)
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v2"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.AppendElement))
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.AppendElement))
 			Expect(len(Must(cv.SelectSources(selectors.Name("test"))))).To(Equal(2))
 		})
 
 		It("rejects duplicate source with same version", func() {
 			meta := ocm.NewSourceMeta("test", resourcetypes.PLAIN_TEXT)
 			MustBeSuccessful(cv.SetSourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 			Expect(cv.SetSourceBlob(meta.WithVersion("v1"),
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.AppendElement)).
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.AppendElement)).
 				To(MatchError("unable to set source: adding a new source with same base identity requires different version"))
 		})
 
 		It("rejects duplicate source with extra identity", func() {
 			meta := ocm.NewSourceMeta("test", resourcetypes.PLAIN_TEXT).WithExtraIdentity("attr", "value")
 			MustBeSuccessful(cv.SetSourceBlob(meta,
-				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), nil, nil))
+				blobaccess.ForString(mime.MIME_TEXT, S_TESTDATA), refhints.NONE, nil))
 			Expect(cv.SetSourceBlob(meta,
-				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), nil, nil, ocm.AppendElement)).
+				blobaccess.ForString(mime.MIME_TEXT, S_OTHERDATA), refhints.NONE, nil, ocm.AppendElement)).
 				To(MatchError("unable to set source: adding a new source with same base identity requires different version"))
 		})
 	})

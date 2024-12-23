@@ -4,6 +4,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/ocm"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -31,7 +32,7 @@ var _ = Describe("Simple signing handlers", func() {
 	Context("standard", func() {
 		BeforeEach(func() {
 			cv = composition.NewComponentVersion(ctx, COMPONENTA, VERSION)
-			MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), blobaccess.ForString(mime.MIME_TEXT, "test data"), nil, nil))
+			MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), blobaccess.ForString(mime.MIME_TEXT, "test data"), refhints.NONE, nil))
 		})
 
 		DescribeTable("rsa handlers", func(kind string) {
@@ -58,10 +59,10 @@ var _ = Describe("Simple signing handlers", func() {
 
 			meta := ocm.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation)
 			meta.Version = "v1"
-			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "test data"), nil, nil))
+			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "test data"), refhints.NONE, nil))
 			meta.ExtraIdentity = map[string]string{}
 			meta.Version = "v2"
-			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "other test data"), nil, nil, ocm.TargetIndex(-1)))
+			MustBeSuccessful(cv.SetResourceBlob(meta, blobaccess.ForString(mime.MIME_TEXT, "other test data"), refhints.NONE, nil, ocm.TargetIndex(-1)))
 		})
 
 		It("signs without modification (compatibility)", func() {

@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/helper/env"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/layerfs"
@@ -91,7 +92,7 @@ var _ = Describe("virtual repo", func() {
 			finalize.Close(vers, "version")
 
 			blob := blobaccess.ForString(mime.MIME_TEXT, "new test data")
-			MustBeSuccessful(vers.SetResourceBlob(compdesc.NewResourceMeta("new", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blob, nil, nil))
+			MustBeSuccessful(vers.SetResourceBlob(compdesc.NewResourceMeta("new", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), blob, refhints.NONE, nil))
 
 			r := Must(vers.GetResourceByIndex(0))
 			a := Must(r.Access())

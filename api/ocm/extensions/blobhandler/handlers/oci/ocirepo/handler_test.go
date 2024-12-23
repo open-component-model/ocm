@@ -60,22 +60,6 @@ var _ = Describe("oci artifact transfer", func() {
 			ldesc = OCIManifest1(env)
 		})
 
-		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-			env.Component(COMPONENT, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
-					})
-					env.Resource("artifact", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
-						env.Access(
-							ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
-						)
-					})
-				})
-			})
-		})
-
 		_ = ldesc
 	})
 

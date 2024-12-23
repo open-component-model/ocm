@@ -65,26 +65,26 @@ func (s *stringMapSlice) GetSlice() []map[string]string {
 	return *s.value
 }
 
-func StringMapSliceVar(f *pflag.FlagSet, main string, p *[]map[string]string, name string, value []map[string]string, usage string) {
+func StringMapSliceVar(f *pflag.FlagSet, p *[]map[string]string, main string, name string, value []map[string]string, usage string) {
 	f.VarP(newStringMapSliceValue(main, value, p), name, "", usage)
 }
 
-func StringMapSliceVarP(f *pflag.FlagSet, main string, p *[]map[string]string, name, shorthand string, value []map[string]string, usage string) {
+func StringMapSliceVarP(f *pflag.FlagSet, p *[]map[string]string, main, name, shorthand string, value []map[string]string, usage string) {
 	f.VarP(newStringMapSliceValue(main, value, p), name, shorthand, usage)
 }
 
-func StringMapSliceVarPF(f *pflag.FlagSet, main string, p *[]map[string]string, name, shorthand string, value []map[string]string, usage string) *pflag.Flag {
+func StringMapSliceVarPF(f *pflag.FlagSet, p *[]map[string]string, main, name, shorthand string, value []map[string]string, usage string) *pflag.Flag {
 	return f.VarPF(newStringMapSliceValue(main, value, p), name, shorthand, usage)
 }
 
-func StringMapSlice(f *pflag.FlagSet, main string, name string, value []map[string]string, usage string) *[]map[string]string {
+func StringMapSlice(f *pflag.FlagSet, name string, main string, value []map[string]string, usage string) *[]map[string]string {
 	p := []map[string]string{}
-	StringMapSliceVarP(f, main, &p, name, "", value, usage)
+	StringMapSliceVarP(f, &p, main, name, "", value, usage)
 	return &p
 }
 
-func StringMapSliceP(f *pflag.FlagSet, main string, name, shorthand string, value []map[string]string, usage string) *[]map[string]string {
+func StringMapSliceP(f *pflag.FlagSet, main, name, shorthand string, value []map[string]string, usage string) *[]map[string]string {
 	p := []map[string]string{}
-	StringMapSliceVarP(f, main, &p, name, shorthand, value, usage)
+	StringMapSliceVarP(f, &p, main, name, shorthand, value, usage)
 	return &p
 }

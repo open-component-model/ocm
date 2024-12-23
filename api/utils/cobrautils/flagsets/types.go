@@ -474,7 +474,7 @@ type StringMapSliceOption struct {
 var _ Option = (*StringMapSliceOption)(nil)
 
 func (o *StringMapSliceOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(flag.StringMapSliceVarPF(fs, o.otyp.(*StringMapSliceOptionType).main, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.StringMapSliceVarPF(fs, &o.value, o.otyp.(*StringMapSliceOptionType).main, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
 }
 
 func (o *StringMapSliceOption) Value() interface{} {

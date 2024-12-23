@@ -26,21 +26,10 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 )
 
-const (
-	COMP   = "github.com/compa"
-	VERS   = "1.0.0"
-	CA     = "ca"
-	CTF    = "ctf"
-	COPY   = "ctf.copy"
-	TARGET = "/tmp/target"
-)
+const LOCALNAMESPACE = "ocm/local"
+const LOCALVERS = OCIVERSION + "-local"
 
-const (
-	OCIHOST = "alias"
-	OCIPATH = "/tmp/source"
-)
-
-var _ = Describe("upload", func() {
+var _ = Describe("explicit hint upload", func() {
 	var env *Builder
 
 	BeforeEach(func() {
@@ -58,6 +47,7 @@ var _ = Describe("upload", func() {
 		env.ComponentArchive(CA, accessio.FormatDirectory, COMP, VERS, func() {
 			env.Provider("mandelsoft")
 			env.Resource("value", "", resourcetypes.OCI_IMAGE, v1.LocalRelation, func() {
+				env.ElementHint("oci::" + LOCALNAMESPACE + ":" + LOCALVERS)
 				env.Access(
 					ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 				)
@@ -96,6 +86,20 @@ var _ = Describe("upload", func() {
 		defer Close(art, "artifact")
 
 		Expect(art.Digest().Encoded()).To(Equal(D_OCIMANIFEST1))
+	})
+
+	It("validated hint", func() {
+		ctx := env.OCMContext()
+
+		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0o700, env))
+		defer Close(ctf, "ctf")
+
+		cv := Must(ctf.LookupComponentVersion(COMP, VERS))
+		defer Close(cv, "component version")
+
+		ra := Must(cv.GetResourceByIndex(0))
+
+		Expect(ra.GetReferenceHints().Serialize(true)).To(Equal("oci::" + LOCALNAMESPACE + ":" + LOCALVERS))
 	})
 
 	It("validated original digest", func() {
@@ -148,13 +152,13 @@ var _ = Describe("upload", func() {
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		val := Must(ctx.AccessSpecForSpec(acc))
 		// TODO: the result is invalid for ctf: better handling for ctf refs
-		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
+		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/" + LOCALNAMESPACE + ":" + LOCALVERS + "@sha256:" + D_OCIMANIFEST1))
 
 		attr.Close()
 		target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
 		Expect(err).To(Succeed())
 		defer Close(target)
-		Expect(target.ExistsArtifact("copy/ocm/value", "v2.0")).To(BeTrue())
+		Expect(target.ExistsArtifact("copy/"+LOCALNAMESPACE, LOCALVERS)).To(BeTrue())
 	})
 
 	It("transfers oci artifact with named handler and object config", func() {
@@ -190,14 +194,14 @@ var _ = Describe("upload", func() {
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		val := Must(ctx.AccessSpecForSpec(acc))
 		// TODO: the result is invalid for ctf: better handling for ctf refs
-		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
+		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/" + LOCALNAMESPACE + ":" + LOCALVERS + "@sha256:" + D_OCIMANIFEST1))
 
 		// attr.Close()
 		env.OCMContext().Finalize()
 		target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
 		Expect(err).To(Succeed())
 		defer Close(target)
-		Expect(target.ExistsArtifact("copy/ocm/value", "v2.0")).To(BeTrue())
+		Expect(target.ExistsArtifact("copy/"+LOCALNAMESPACE, LOCALVERS)).To(BeTrue())
 	})
 
 	It("transfers oci artifact with named handler and string config", func() {
@@ -234,17 +238,17 @@ var _ = Describe("upload", func() {
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		val := Must(ctx.AccessSpecForSpec(acc))
 		// TODO: the result is invalid for ctf: better handling for ctf refs
-		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
+		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/" + LOCALNAMESPACE + ":" + LOCALVERS + "@sha256:" + D_OCIMANIFEST1))
 
 		// attr.Close()
 		env.OCMContext().Finalize()
 		target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
 		Expect(err).To(Succeed())
 		defer Close(target)
-		Expect(target.ExistsArtifact("copy/ocm/value", "v2.0")).To(BeTrue())
+		Expect(target.ExistsArtifact("copy/"+LOCALNAMESPACE, LOCALVERS)).To(BeTrue())
 	})
 
-	Context("hint compatibility", func() {
+	Context("hint compatibility and precedence", func() {
 		It("uploads with untyped hint", func() {
 			ctx := env.OCMContext()
 
@@ -275,7 +279,7 @@ var _ = Describe("upload", func() {
 			target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
 			Expect(err).To(Succeed())
 			defer Close(target)
-			Expect(target.ExistsArtifact("copy/ocm/value", "v2.0-beta")).To(BeTrue())
+			Expect(target.ExistsArtifact("copy/"+LOCALNAMESPACE, LOCALVERS)).To(BeTrue())
 		})
 	})
 })

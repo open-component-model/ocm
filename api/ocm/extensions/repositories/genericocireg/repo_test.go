@@ -288,7 +288,7 @@ var _ = Describe("component repository mapping", func() {
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
-		acc := Must(vers.AddBlob(blob, "", nil, nil))
+		acc := Must(vers.AddBlob(blob, "", refhints.NONE, nil))
 
 		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
@@ -337,7 +337,7 @@ var _ = Describe("component repository mapping", func() {
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
-		acc := Must(vers.AddBlob(blob, "", nil, nil))
+		acc := Must(vers.AddBlob(blob, "", refhints.NONE, nil))
 		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
 
@@ -449,7 +449,7 @@ var _ = Describe("component repository mapping", func() {
 		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
 		blob := blobaccess.ForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
 
-		MustBeSuccessful(vers.SetResourceBlob(m1, blob, nil, nil))
+		MustBeSuccessful(vers.SetResourceBlob(m1, blob, refhints.NONE, nil))
 		MustBeSuccessful(comp.AddVersion(vers))
 
 		MustBeSuccessful(nested.Finalize())
@@ -457,7 +457,7 @@ var _ = Describe("component repository mapping", func() {
 		// modify resource in component
 		vers = finalizer.ClosingWith(nested, Must(repo.LookupComponentVersion(COMPONENT, "v1")))
 		blob = blobaccess.ForString(mime.MIME_TEXT, "otherdata")
-		MustBeSuccessful(vers.SetResourceBlob(m1, blob, nil, nil))
+		MustBeSuccessful(vers.SetResourceBlob(m1, blob, refhints.NONE, nil))
 		MustBeSuccessful(vers.Update())
 		MustBeSuccessful(nested.Finalize())
 

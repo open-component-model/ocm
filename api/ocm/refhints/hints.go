@@ -13,6 +13,9 @@ import (
 	"ocm.software/ocm/api/utils/runtime"
 )
 
+// NONE described non-existing hints.
+var NONE = []ReferenceHint(nil)
+
 const (
 	// HINT_TYPE describes the type of the hinf.
 	// For example oci or maven.

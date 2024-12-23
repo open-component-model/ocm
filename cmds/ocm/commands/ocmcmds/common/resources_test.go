@@ -78,7 +78,7 @@ input:
 		Expect(err.Error()).To(Equal("input.excludeFiles: Forbidden: unknown field"))
 	})
 
-	FContext("resource provider", func() {
+	Context("resource provider", func() {
 		var prov *common.ContentResourceSpecificationsProvider
 		var fs *pflag.FlagSet
 
