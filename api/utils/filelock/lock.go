@@ -5,11 +5,10 @@ import (
 	"os"
 	"sync"
 
-	"github.com/juju/fslock"
 	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	fslock "github.com/rogpeppe/go-internal/lockedfile"
 )
 
 const DIRECTORY_LOCK = ".lock"
@@ -25,19 +24,22 @@ const DIRECTORY_LOCK = ".lock"
 type Mutex struct {
 	lock     sync.Mutex
 	path     string
-	lockfile *fslock.Lock
+	lockfile *fslock.Mutex
+	unlock   func()
 }
 
 func (m *Mutex) Lock() (io.Closer, error) {
 	m.lock.Lock()
 	if m.lockfile == nil {
-		m.lockfile = fslock.New(m.path)
+		m.lockfile = fslock.MutexAt(m.path)
 	}
-	err := m.lockfile.Lock()
+	unlock, err := m.lockfile.Lock()
 	if err != nil {
 		m.lock.Unlock()
 		return nil, err
 	}
+	m.unlock = unlock
+
 	return &lock{mutex: m}, nil
 }
 
@@ -46,16 +48,15 @@ func (m *Mutex) TryLock() (io.Closer, error) {
 		return nil, nil
 	}
 	if m.lockfile == nil {
-		m.lockfile = fslock.New(m.path)
+		m.lockfile = fslock.MutexAt(m.path)
 	}
-	err := m.lockfile.TryLock()
+	unlock, err := m.lockfile.Lock()
 	if err != nil {
 		m.lock.Unlock()
-		if errors.Is(err, fslock.ErrLocked) {
-			err = nil
-		}
 		return nil, err
 	}
+	m.unlock = unlock
+
 	return &lock{mutex: m}, nil
 }
 
@@ -75,14 +76,15 @@ func (l *lock) Close() error {
 	if l.mutex == nil {
 		return os.ErrClosed
 	}
-	l.mutex.lockfile.Unlock()
+
+	l.mutex.unlock()
 	l.mutex.lock.Unlock()
 	l.mutex = nil
 	return nil
 }
 
 var (
-	_filelocks = map[string]*Mutex{}
+	_fileLocks = map[string]*Mutex{}
 	_lock      sync.Mutex
 )
 
@@ -121,12 +123,12 @@ func MutexFor(path string) (*Mutex, error) {
 	_lock.Lock()
 	defer _lock.Unlock()
 
-	mutex := _filelocks[file]
+	mutex := _fileLocks[file]
 	if mutex == nil {
 		mutex = &Mutex{
 			path: file,
 		}
-		_filelocks[file] = mutex
+		_fileLocks[file] = mutex
 	}
 	return mutex, nil
 }

@@ -23,6 +23,14 @@ PLATFORM                                       := $(shell go env GOOS)/$(shell g
 CACHE_DIR									  := $(shell go env GOCACHE)
 MOD_CACHE_DIR								  := $(shell go env GOMODCACHE)
 
+
+ifneq ($(BUILDX_CACHE_REF),)
+	ADDITIONAL_BUILDX_ARGS += --cache-from type=registry,ref=$(BUILDX_CACHE_REF)
+	ifeq ($(BUILDX_CACHE_PUSH),true)
+		ADDITIONAL_BUILDX_ARGS += --cache-to type=registry,ref=$(BUILDX_CACHE_REF)
+	endif
+endif
+
 CREDS ?=
 # Define the path to the binary
 OCM_BIN = $(REPO_ROOT)/bin/ocm
@@ -48,7 +56,7 @@ BUILD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
-OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
+OCMSRCS=$(shell find $(REPO_ROOT)/api -type f) $(REPO_ROOT)/go.*
 
 ifeq ($(MULTI),true)
 FLAGSUF     = .multi
@@ -89,7 +97,7 @@ $(GEN)/image.$(NAME): $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
           --build-arg CACHE_DIR=$(CACHE_DIR) \
           --build-arg MOD_CACHE_DIR=$(MOD_CACHE_DIR) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
-          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE); \
+          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE) $(ADDITIONAL_BUILDX_ARGS); \
 	@touch $(GEN)/image.$(NAME)
 
 push-image:
@@ -108,7 +116,7 @@ $(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
           --build-arg CACHE_DIR=$(CACHE_DIR) \
           --build-arg MOD_CACHE_DIR=$(MOD_CACHE_DIR) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
-          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE); \
+          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE) $(ADDITIONAL_BUILDX_ARGS); \
 	done
 	@touch $(GEN)/image.$(NAME).multi
 

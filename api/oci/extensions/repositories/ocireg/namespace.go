@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/cpi/support"
 	"ocm.software/ocm/api/oci/extensions/actions/oci-repository-prepare"
-	"ocm.software/ocm/api/tech/docker/resolve"
+	"ocm.software/ocm/api/tech/oras"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/logging"
@@ -22,10 +22,10 @@ import (
 type NamespaceContainer struct {
 	impl     support.NamespaceAccessImpl
 	repo     *RepositoryImpl
-	resolver resolve.Resolver
-	lister   resolve.Lister
-	fetcher  resolve.Fetcher
-	pusher   resolve.Pusher
+	resolver oras.Resolver
+	lister   oras.Lister
+	fetcher  oras.Fetcher
+	pusher   oras.Pusher
 	blobs    *BlobContainers
 	checked  bool
 }
@@ -69,7 +69,7 @@ func (n *NamespaceContainer) SetImplementation(impl support.NamespaceAccessImpl)
 	n.impl = impl
 }
 
-func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
+func (n *NamespaceContainer) getPusher(vers string) (oras.Pusher, error) {
 	err := n.assureCreated()
 	if err != nil {
 		return nil, err

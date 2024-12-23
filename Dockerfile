@@ -1,25 +1,28 @@
-FROM golang:1.23-alpine3.20 AS build
+FROM --platform=$BUILDPLATFORM golang:1.23-alpine3.20 AS build
+
+RUN apk add --no-cache make git
 
 WORKDIR /src
-RUN go env -w GOMODCACHE=/root/.cache/go-build
 
 COPY go.mod go.sum *.go VERSION ./
 
 ARG GO_PROXY="https://proxy.golang.org"
 ENV GOPROXY=${GO_PROXY}
-RUN --mount=type=cache,target=/root/.cache/go-build go mod download
+RUN go mod download
 
 COPY . .
-RUN --mount=type=cache,target=/root/.cache/go-build \
-	export VERSION=$(go run api/version/generate/release_generate.go print-rc-version) && \
-    export NOW=$(date -u +%FT%T%z) && \
-    go build -trimpath -ldflags \
-    "-s -w -X ocm.software/ocm/api/version.gitVersion=$VERSION -X ocm.software/ocm/api/version.buildDate=$NOW" \
-    -o /bin/ocm ./cmds/ocm/main.go
 
-FROM gcr.io/distroless/static-debian12:nonroot@sha256:d71f4b239be2d412017b798a0a401c44c3049a3ca454838473a4c32ed076bfea
+ENV BUILD_FLAGS="-trimpath"
 
-COPY --from=build /bin/ocm /usr/local/bin/ocm
+# the GOARCH has not a default value to allow the binary be built according to the host where the command
+# was called. For example, if we call make docker-build in a local env which has the Apple Silicon SO
+# the docker BUILDPLATFORM arg will be linux/arm64 when for Apple x86 it will be linux/amd64. Therefore,
+# by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
+RUN make bin/ocm GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH}
+
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:6cd937e9155bdfd805d1b94e037f9d6a899603306030936a3b11680af0c2ed58
+
+COPY --from=build /src/bin/ocm /usr/local/bin/ocm
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 LABEL org.opencontainers.image.description="Open Component Model command line interface based on Distroless"
