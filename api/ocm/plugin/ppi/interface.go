@@ -5,7 +5,6 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
-	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials"
@@ -13,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/internal"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/runtime"
 )
 

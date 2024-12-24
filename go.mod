@@ -44,7 +44,7 @@ require (
 	github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc
 	github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a
 	github.com/mandelsoft/spiff v1.7.0-beta-6
-	github.com/mandelsoft/vfs v0.4.4
+	github.com/mandelsoft/vfs v0.4.5-0.20241116195817-0f273ab32e08
 	github.com/marstr/guid v1.1.0
 	github.com/mikefarah/yq/v4 v4.44.6
 	github.com/mitchellh/copystructure v1.2.0

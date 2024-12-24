@@ -8,12 +8,12 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/errors"
-	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
@@ -26,7 +26,11 @@ const (
 	VERSION = "v1"
 )
 
-const ReferenceHintType = "demo"
+const ReferenceHintType = NAME
+
+func ReferenceHint(p string, implicit ...bool) refhints.ReferenceHint {
+	return refhints.New(ReferenceHintType, p, implicit...)
+}
 
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`

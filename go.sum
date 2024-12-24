@@ -703,6 +703,8 @@ github.com/mandelsoft/spiff v1.7.0-beta-6 h1:0h2Si4u73Ys1TDK9MFzwzcsVZTviN3xHWvL
 github.com/mandelsoft/spiff v1.7.0-beta-6/go.mod h1:HXurS33cKPLXXAI3SYll+Z6QotB1yzFFDyOFZ4QODcA=
 github.com/mandelsoft/vfs v0.4.4 h1:hq+nI7NWzLLWR3Ii/w4agup4KpWjLpw6dAGtmvWr1Vw=
 github.com/mandelsoft/vfs v0.4.4/go.mod h1:3ODt1ze/dCdOJCbhHX8ARAw7l422fDZUhbt0wqplBRs=
+github.com/mandelsoft/vfs v0.4.5-0.20241116195817-0f273ab32e08 h1:L8gm2bTrd3YjjabU5AlsVUQCOcc62cyq0pOLYtlcKIk=
+github.com/mandelsoft/vfs v0.4.5-0.20241116195817-0f273ab32e08/go.mod h1:3ODt1ze/dCdOJCbhHX8ARAw7l422fDZUhbt0wqplBRs=
 github.com/marstr/guid v1.1.0 h1:/M4H/1G4avsieL6BbUwCOBzulmoeKVP5ux/3mQNnbyI=
 github.com/marstr/guid v1.1.0/go.mod h1:74gB1z2wpxxInTG6yaqA7KrtM0NZ+RbrcqDvYHefzho=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=

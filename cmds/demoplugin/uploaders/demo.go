@@ -37,7 +37,17 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	types = ppi.UploadFormats{NAME + runtime.VersionSeparator + VERSION: decoder}
+	types = ppi.UploadFormats{
+		NAME + runtime.VersionSeparator + VERSION: decoder,
+		NAME: decoder,
+	}
+}
+
+func NewTarget(p string) *TargetSpec {
+	return &TargetSpec{
+		ObjectVersionedType: runtime.NewVersionedTypedObject(NAME),
+		Path:                p,
+	}
 }
 
 type Uploader struct {
