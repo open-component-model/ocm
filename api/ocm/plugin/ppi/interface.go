@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials"
@@ -106,6 +107,10 @@ type AccessSpecProvider func() AccessSpec
 
 type UploadFormats runtime.KnownTypes[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
+type ReferenceHints = refhints.ReferenceHints
+
+type ReferenceHint = refhints.ReferenceHint
+
 type Uploader interface {
 	Decoders() UploadFormats
 
@@ -113,7 +118,7 @@ type Uploader interface {
 	Description() string
 
 	ValidateSpecification(p Plugin, spec UploadTargetSpec) (info *UploadTargetSpecInfo, err error)
-	Writer(p Plugin, arttype, mediatype string, hint string, spec UploadTargetSpec, creds credentials.Credentials) (io.WriteCloser, AccessSpecProvider, error)
+	Writer(p Plugin, arttype, mediatype string, hints ReferenceHints, spec UploadTargetSpec, creds credentials.Credentials) (io.WriteCloser, AccessSpecProvider, error)
 }
 
 type UploadTargetSpec = runtime.TypedObject

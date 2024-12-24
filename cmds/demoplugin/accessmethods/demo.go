@@ -8,6 +8,7 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/errors"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/cpi"
@@ -24,6 +25,8 @@ const (
 	NAME    = "demo"
 	VERSION = "v1"
 )
+
+const ReferenceHintType = "demo"
 
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
@@ -86,7 +89,7 @@ func (a *AccessMethod) ValidateSpecification(p ppi.Plugin, spec ppi.AccessSpec) 
 		identity.ID_PATHPREFIX: my.Path,
 	}
 	info.Short = "temp file " + my.Path
-	info.Hint = "temp file " + my.Path
+	info.Hint = refhints.New(ReferenceHintType, my.Path).Serialize()
 	return &info, nil
 }
 
