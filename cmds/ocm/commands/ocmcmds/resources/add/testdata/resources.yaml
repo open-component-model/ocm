@@ -1,6 +1,10 @@
 ---
 name: testdata
 type: plainText
+referenceHints:
+  - type: test
+    reference: laber
+
 input:
   type: file
   path: testcontent

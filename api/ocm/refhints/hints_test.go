@@ -1,8 +1,10 @@
 package refhints_test
 
 import (
+	"encoding/json"
 	"strings"
 
+	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -131,6 +133,35 @@ var _ = Describe("Hints Test Environment", func() {
 		It("regular", func() {
 			CheckHintImplicit("", "test", "implicit=true,reference=test")
 			CheckHintImplicit("typ", "test", "typ::implicit=true,reference=test")
+		})
+	})
+
+	Context("marshal unmarshal", func() {
+		It("works", func() {
+			var hints refhints.DefaultReferenceHints
+
+			hints.Add(refhints.New("test", "label"))
+
+			data := Must(json.Marshal(hints))
+			Expect(string(data)).To(Equal(`[{"reference":"label","type":"test"}]`))
+
+			var result refhints.DefaultReferenceHints
+
+			MustBeSuccessful(json.Unmarshal(data, &result))
+			Expect(result).To(DeepEqual(hints))
+		})
+
+		It("unmarshalls string", func() {
+			var hints refhints.DefaultReferenceHints
+
+			hints.Add(refhints.New("test", "label"))
+
+			data := hints.Serialize()
+
+			var result refhints.DefaultReferenceHints
+
+			MustBeSuccessful(json.Unmarshal([]byte(`"`+data+`"`), &result))
+			Expect(result).To(DeepEqual(hints))
 		})
 	})
 })

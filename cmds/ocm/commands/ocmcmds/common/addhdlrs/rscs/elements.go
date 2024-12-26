@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	clictx "ocm.software/ocm/api/cli"
@@ -11,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	compdescv2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
@@ -97,9 +99,10 @@ func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Eleme
 			ExtraIdentity: spec.ExtraIdentity,
 			Labels:        spec.Labels,
 		},
-		Type:       spec.Type,
-		Relation:   spec.Relation,
-		SourceRefs: compdescv2.ConvertSourcerefsTo(spec.SourceRefs),
+		Type:           spec.Type,
+		Relation:       spec.Relation,
+		SourceRefs:     compdescv2.ConvertSourcerefsTo(spec.SourceRefs),
+		ReferenceHints: spec.GetReferenceHints(),
 	}
 	opts := h.getModOpts()
 	if spec.Options.SkipDigestGeneration {
@@ -130,12 +133,16 @@ type ResourceSpec struct {
 	// component.sources.
 	SourceRefs []compdescv2.SourceRef `json:"srcRefs"`
 
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
+
 	addhdlrs.ResourceInput `json:",inline"`
 
 	// Options describes additional process related options
 	// see ResourceOptions for more details.
 	Options ResourceOptions `json:"options,omitempty"`
 }
+
+var _ addhdlrs.ArtifactElementSpec = (*ResourceSpec)(nil)
 
 // ResourceOptions describes additional process related options
 // which reflect the handling of the resource without describing it directly.
@@ -176,13 +183,26 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *addhdlrs.ResourceInpu
 		r.Version = ComponentVersionTag
 	}
 	rsc := compdescv2.Resource{
-		ElementMeta: r.ElementMeta,
-		Type:        r.Type,
-		Relation:    r.Relation,
-		SourceRefs:  r.SourceRefs,
+		ElementMeta:    r.ElementMeta,
+		Type:           r.Type,
+		Relation:       r.Relation,
+		SourceRefs:     r.SourceRefs,
+		ReferenceHints: r.ReferenceHints,
 	}
 	if err := compdescv2.ValidateResource(fldPath, rsc, false); err != nil {
 		allErrs = append(allErrs, err...)
 	}
 	return allErrs.ToAggregate()
+}
+
+func (r *ResourceSpec) GetReferenceHints() refhints.ReferenceHints {
+	return refhints.ReferenceHints(sliceutils.Convert[refhints.ReferenceHint](r.ReferenceHints))
+}
+
+func (r *ResourceSpec) SetReferenceHints(hints []refhints.ReferenceHint) {
+	r.ReferenceHints = sliceutils.Transform(hints, refhints.AsDefault)
+}
+
+func (r *ResourceSpec) AddReferenceHints(hints ...refhints.ReferenceHint) {
+	refhints.AddUnique(&r.ReferenceHints, sliceutils.Transform(hints, refhints.AsDefault)...)
 }

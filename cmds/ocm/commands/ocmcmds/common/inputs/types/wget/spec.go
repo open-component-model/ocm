@@ -3,6 +3,7 @@ package wget
 import (
 	"bytes"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"ocm.software/ocm/api/ocm/refhints"
@@ -26,6 +27,8 @@ type Spec struct {
 	Body string `json:"body"`
 	// NoRedirect allows to disable redirects
 	NoRedirect bool `json:"noRedirect"`
+
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)
@@ -65,5 +68,5 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		wget.WithBody(bytes.NewReader([]byte(s.Body))),
 		wget.WithNoRedirect(s.NoRedirect),
 	)
-	return access, nil, err
+	return access, sliceutils.Convert[refhints.ReferenceHint](refhints.AsImplicit(s.ReferenceHints)), err
 }

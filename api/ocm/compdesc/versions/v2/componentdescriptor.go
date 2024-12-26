@@ -245,7 +245,7 @@ type SourceMeta struct {
 	Type string `json:"type"`
 	// ReferenceHints describe several types hints used by uploaders
 	// to decide on used element identities.
-	ReferenceHints []refhints.DefaultReferenceHint `json:"referenceHints,omitempty"`
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
 }
 
 // GetType returns the type of the object.
@@ -292,7 +292,7 @@ type Resource struct {
 
 	// ReferenceHints describe several types hints used by uploaders
 	// to decide on used element identities.
-	ReferenceHints []refhints.DefaultReferenceHint `json:"referenceHints,omitempty"`
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
 
 	// Relation describes the relation of the resource to the component.
 	// Can be a local or external resource

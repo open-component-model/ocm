@@ -245,7 +245,7 @@ func (c *componentVersionAccessView) SetResourceBlob(meta *cpi.ResourceMeta, blo
 		return err
 	}
 	eff := cpi.NewBlobModificationOptions(opts...)
-	hints = refhints.Join(meta.ReferenceHints, refhints.FilterImplicit(hints))
+	hints = refhints.JoinUnique(meta.ReferenceHints, refhints.FilterImplicit(hints))
 	acc, err := c.AddBlob(blob, meta.Type, hints, global, eff)
 	if err != nil {
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
@@ -271,7 +271,7 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cp
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
-	hints = refhints.Join(meta.ReferenceHints, refhints.FilterImplicit(hints))
+	hints = refhints.JoinUnique(meta.ReferenceHints, refhints.FilterImplicit(hints))
 	acc, err := c.AddBlob(blob, meta.Type, hints, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob: (component %s:%s source %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)

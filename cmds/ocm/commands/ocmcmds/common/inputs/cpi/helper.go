@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -77,12 +78,12 @@ func (s *ProcessSpec) SetMediaTypeIfNotDefined(mediaType string) {
 	s.MediaType = mediaType
 }
 
-func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc blobaccess.DataAccess, fs vfs.FileSystem) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
+func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc blobaccess.DataAccess, fs vfs.FileSystem, hints ...refhints.DefaultReferenceHint) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	if !s.Compress() {
 		if s.MediaType == "" {
 			s.MediaType = mime.MIME_OCTET
 		}
-		return blobaccess.ForDataAccess(blobaccess.BLOB_UNKNOWN_DIGEST, blobaccess.BLOB_UNKNOWN_SIZE, s.MediaType, acc), nil, nil
+		return blobaccess.ForDataAccess(blobaccess.BLOB_UNKNOWN_DIGEST, blobaccess.BLOB_UNKNOWN_SIZE, s.MediaType, acc), sliceutils.Convert[refhints.ReferenceHint](hints), nil
 	}
 
 	reader, err := acc.Reader()
@@ -106,7 +107,7 @@ func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc blobaccess.DataAccess,
 		return nil, nil, errors.Wrapf(err, "unable to close gzip writer")
 	}
 
-	return temp.AsBlob(s.MediaType), nil, nil
+	return temp.AsBlob(s.MediaType), sliceutils.Convert[refhints.ReferenceHint](hints), nil
 }
 
 func AddProcessSpecOptionTypes(set flagsets.ConfigOptionTypeSetHandler) {

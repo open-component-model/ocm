@@ -35,6 +35,10 @@ This blob type specification supports the following fields:
   The default media type is ` + mime.MIME_TAR + ` and
   ` + mime.MIME_GZIP + ` if compression is enabled.
 
+- **<code>referenceHints</code>** *[]map[string]string*
+
+  This OPTIONAL property describes a list of implicit reference hints.
+
 - **<code>compress</code>** *bool*
 
   This OPTIONAL property describes whether the file content should be stored

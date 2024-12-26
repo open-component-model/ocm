@@ -149,6 +149,8 @@ type ReferenceHintProvider interface {
 type ReferenceHintSink interface {
 	// SetReferenceHints sets the reference hints specified together with the metadata.
 	SetReferenceHints([]refhints.ReferenceHint)
+	// AddReferenceHints adds additional hints if their type is not yet available.
+	AddReferenceHints(hints ...refhints.ReferenceHint)
 }
 
 // ArtifactMetaPointer is a pointer to an artifact meta object.

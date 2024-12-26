@@ -9,7 +9,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/cwdfs"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	metav1 "ocm.software/ocm/api/ocm/refhints"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -23,6 +23,8 @@ type Spec struct {
 	Values json.RawMessage `json:"values,omitempty"`
 	// Libraries specifies a list of spiff libraries to include in template processing
 	Libraries []string `json:"libraries,omitempty"`
+	// ReferenceHints are optional implicit reference hints.
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)
@@ -46,7 +48,7 @@ func New(path, mediatype string, compress bool, values interface{}, libs ...stri
 }
 
 func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
-	allErrs := (&file.FileProcessSpec{s.MediaFileSpec, nil}).Validate(fldPath, ctx, inputFilePath)
+	allErrs := (&file.FileProcessSpec{s.MediaFileSpec, refhints.AsImplicit(s.ReferenceHints), nil}).Validate(fldPath, ctx, inputFilePath)
 	for i, v := range s.Libraries {
 		pathField := fldPath.Index(i)
 		fileInfo, filePath, err := inputs.FileInfo(ctx, v, inputFilePath)
@@ -59,8 +61,8 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []metav1.ReferenceHint, error) {
-	return (&file.FileProcessSpec{s.MediaFileSpec, s.process}).GetBlob(ctx, info)
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
+	return (&file.FileProcessSpec{s.MediaFileSpec, refhints.AsImplicit(s.ReferenceHints), s.process}).GetBlob(ctx, info)
 }
 
 func (s *Spec) process(ctx inputs.Context, inputFilePath string, data []byte) ([]byte, error) {

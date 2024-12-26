@@ -16,6 +16,8 @@ type Spec struct {
 	inputs.InputSpecBase `json:",inline"`
 	cpi.ProcessSpec      `json:",inline"`
 
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
+
 	// Text is an utf8 string
 	Text          string          `json:"text,omitempty"`
 	Json          json.RawMessage `json:"json,omitempty"`
@@ -122,7 +124,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	if err != nil {
 		return nil, nil, err
 	}
-	return s.ProcessBlob(ctx, blobaccess.DataAccessForData(data), ctx.FileSystem())
+	return s.ProcessBlob(ctx, blobaccess.DataAccessForData(data), ctx.FileSystem(), refhints.AsImplicit(s.ReferenceHints)...)
 }
 
 func Prepare(raw []byte) (interface{}, error) {

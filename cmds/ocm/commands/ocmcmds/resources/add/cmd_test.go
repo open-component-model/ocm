@@ -124,6 +124,12 @@ var _ = Describe("Add resources", func() {
 		Expect(len(cd.Resources)).To(Equal(1))
 
 		CheckTextResource(env, cd, "testdata")
+
+		Expect(cd.Resources[0].ReferenceHints.Serialize(true)).To(Equal(`test::laber`))
+	})
+
+	It("rejects duplicate expl and impl hint", func() {
+		ExpectError(env.Execute("add", "resources", "--file", ARCH, "/testdata/resources3.yaml")).To(MatchError(`cannot add resource "testdata2"(/testdata/resources3.yaml[2][1]): reference name (hint) "test::laber" already used for resource testdata:v1`))
 	})
 
 	It("adds simple text blob with explicit version info", func() {
@@ -285,7 +291,7 @@ var _ = Describe("Add resources", func() {
 
 	It("rejects duplicate hints", func() {
 		Expect(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm.yaml")).To(Succeed())
-		ExpectError(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(MatchError("cannot add resource \"chart2\"(/testdata/helm2.yaml[1][1]): reference name (hint) \"" + oci2.ReferenceHintType + "::test.de/x/mandelsoft/testchart:0.1.0\" with base media type application/vnd.oci.image.manifest.v1 already used for resource chart:v1"))
+		ExpectError(env.Execute("add", "resources", "--skip-digest-generation", "--file", ARCH, "/testdata/helm2.yaml")).To(MatchError("cannot add resource \"chart2\"(/testdata/helm2.yaml[1][1]): reference name (hint) \"" + oci2.ReferenceHintType + "::test.de/x/mandelsoft/testchart:0.1.0\" already used for resource chart:v1"))
 	})
 
 	Context("resource by options", func() {

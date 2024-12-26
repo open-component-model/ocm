@@ -3,6 +3,7 @@ package directory
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"ocm.software/ocm/api/ocm/refhints"
@@ -15,6 +16,9 @@ import (
 
 type Spec struct {
 	cpi.MediaFileSpec `json:",inline"`
+
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
+
 	// PreserveDir defines that the directory specified in the Path field should be included in the blob.
 	// Only supported for Type dir.
 	PreserveDir *bool `json:"preserveDir,omitempty"`
@@ -74,5 +78,5 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		dirtree.WithFollowSymlinks(utils.AsBool(s.FollowSymlinks)),
 		dirtree.WithPreserveDir(utils.AsBool(s.PreserveDir)),
 	)
-	return access, nil, err
+	return access, sliceutils.Convert[refhints.ReferenceHint](refhints.AsImplicit(s.ReferenceHints)), err
 }

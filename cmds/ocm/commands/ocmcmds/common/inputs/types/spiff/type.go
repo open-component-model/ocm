@@ -23,6 +23,10 @@ func usage() string {
   This OPTIONAL property describes a list of spiff libraries to include in template
   processing.
 
+- **<code>referenceHints</code>** *[]map[string]string*
+
+  This OPTIONAL property describes a list of implicit reference hints.
+
 The variable settings from the command line are available as binding, also. They are provided under the node
 <code>values</code>.
 `

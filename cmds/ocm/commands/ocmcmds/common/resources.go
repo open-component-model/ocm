@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 
@@ -18,14 +19,14 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
+	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
+	"ocm.software/ocm/api/ocm/refhints"
 	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/logging"
-	"ocm.software/ocm/api/utils/mime"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -56,17 +57,15 @@ func checkHint(v ocm.ComponentVersionAccess, typ string, elem addhdlrs.Element, 
 	if err != nil {
 		return err
 	}
-	local, ok := spec.(*localblob.AccessSpec)
-	if !ok {
-		return nil
-	}
-	if local.ReferenceName == "" {
+	hints := refhints.JoinUnique(elem.Spec().(addhdlrs.ArtifactElementSpec).GetReferenceHints(), cpi.ReferenceHint(spec, v))
+	if len(hints) == 0 {
 		return nil
 	}
 	elemid := elem.Spec().GetRawIdentity()
 	if elemid[v1.SystemIdentityVersion] == ComponentVersionTag {
 		elemid[v1.SystemIdentityVersion] = v.GetVersion()
 	}
+
 	accessor := artacc(v.GetDescriptor())
 	for i := 0; i < accessor.Len(); i++ {
 		a := accessor.GetArtifact(i)
@@ -77,16 +76,20 @@ func checkHint(v ocm.ComponentVersionAccess, typ string, elem addhdlrs.Element, 
 		if elemid.Equals(a.GetMeta().GetRawIdentity()) {
 			continue
 		}
-		olocal, ok := other.(*localblob.AccessSpec)
-		if !ok {
-			continue
-		}
-		if olocal.ReferenceName != local.ReferenceName {
-			continue
-		}
-		if mime.BaseType(local.MediaType) == mime.BaseType(olocal.MediaType) {
-			return fmt.Errorf("reference name (hint) %q with base media type %s already used for %s %s:%s",
-				local.ReferenceName, mime.BaseType(local.MediaType), typ, a.GetMeta().GetName(), a.GetMeta().GetVersion())
+		r := accessor.Get(i)
+		ohints := refhints.JoinUnique(r.(compdesc.ReferenceHintProvider).GetReferenceHints(), cpi.ReferenceHint(other, v))
+
+		for _, h := range hints {
+			if slices.ContainsFunc(ohints, refhints.Equal(h)) {
+				/*
+					if mime.BaseType(local.MediaType) == mime.BaseType(olocal.MediaType) {
+						return fmt.Errorf("reference name (hint) %q with base media type %s already used for %s %s:%s",
+							local.ReferenceName, mime.BaseType(local.MediaType), typ, a.GetMeta().GetName(), a.GetMeta().GetVersion())
+					}
+				*/
+				return fmt.Errorf("reference name (hint) %q already used for %s %s:%s",
+					h.Serialize(), typ, a.GetMeta().GetName(), a.GetMeta().GetVersion())
+			}
 		}
 	}
 	return nil
@@ -486,14 +489,18 @@ func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems [
 					ElementName:      elem.Spec().GetName(),
 					InputFilePath:    general.OptionalDefaulted(elem.Source().Origin(), elem.Input().SourceFile),
 				}
-				blob, hint, berr := elem.Input().Input.GetBlob(ictx, info)
+				blob, hints, berr := elem.Input().Input.GetBlob(ictx, info)
 				if berr != nil {
 					return errors.Wrapf(berr, "cannot get %s blob for %q(%s)", h.Key(), elem.Spec().GetName(), elem.Source())
 				}
 				if iv := elem.Input().Input.GetInputVersion(ictx); iv != "" && !IsVersionSet(elem.Spec().GetVersion()) {
 					elem.Spec().SetVersion(iv)
 				}
-				acc, err = cv.AddBlob(blob, elem.Type(), hint, nil)
+
+				expl := refhints.Filter(hints, refhints.IsExplicit)
+				elem.Spec().(addhdlrs.ArtifactElementSpec).AddReferenceHints(expl...)
+
+				acc, err = cv.AddBlob(blob, elem.Type(), hints, nil)
 				blob.Close()
 				if err == nil {
 					err = CheckHint(cv, elem, acc)

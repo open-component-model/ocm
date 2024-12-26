@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"ocm.software/ocm/api/ocm/refhints"
@@ -18,7 +19,8 @@ import (
 
 type FileProcessSpec struct {
 	cpi.MediaFileSpec
-	Transformer func(ctx inputs.Context, inputDir string, data []byte) ([]byte, error)
+	ReferenceHints []refhints.DefaultReferenceHint `json:"referenceHints,omitempty"`
+	Transformer    func(ctx inputs.Context, inputDir string, data []byte) ([]byte, error)
 }
 
 func (s *FileProcessSpec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
@@ -72,9 +74,9 @@ func (s *FileProcessSpec) GetBlob(ctx inputs.Context, info inputs.InputResourceI
 		}
 		if data == nil {
 			inputBlob.Close()
-			return blobaccess.ForFile(s.MediaType, inputPath, fs), nil, nil
+			return blobaccess.ForFile(s.MediaType, inputPath, fs), sliceutils.Convert[refhints.ReferenceHint](s.ReferenceHints), nil
 		}
-		return blobaccess.ForData(s.MediaType, data), nil, nil
+		return blobaccess.ForData(s.MediaType, data), sliceutils.Convert[refhints.ReferenceHint](s.ReferenceHints), nil
 	}
 
 	temp, err := blobaccess.NewTempFile("", "compressed*.gzip", fs)
@@ -92,7 +94,7 @@ func (s *FileProcessSpec) GetBlob(ctx inputs.Context, info inputs.InputResourceI
 		return nil, nil, fmt.Errorf("unable to close gzip writer: %w", err)
 	}
 
-	return temp.AsBlob(s.MediaType), nil, nil
+	return temp.AsBlob(s.MediaType), sliceutils.Convert[refhints.ReferenceHint](s.ReferenceHints), nil
 }
 
 func Usage(head string) string {
@@ -106,5 +108,9 @@ This blob type specification supports the following fields:
 
   This REQUIRED property describes the path to the file relative to the
   resource file location.
+
+- **<code>referenceHints</code>** *[]map[string]string*
+
+  This OPTIONAL property describes a list of implicit reference hints
 ` + cpi.ProcessSpecUsage
 }

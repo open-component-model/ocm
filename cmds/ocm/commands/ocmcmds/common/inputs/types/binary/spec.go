@@ -14,6 +14,8 @@ type Spec struct {
 	inputs.InputSpecBase `json:",inline"`
 	cpi.ProcessSpec      `json:",inline"`
 
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
+
 	// Data is plain inline data as byte array
 	Data runtime.Binary `json:"data,omitempty"` // json rejects to unmarshal some !string into []byte
 }
@@ -37,5 +39,5 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
-	return s.ProcessBlob(ctx, blobaccess.DataAccessForData([]byte(s.Data)), ctx.FileSystem())
+	return s.ProcessBlob(ctx, blobaccess.DataAccessForData([]byte(s.Data)), ctx.FileSystem(), refhints.AsImplicit(s.ReferenceHints)...)
 }
