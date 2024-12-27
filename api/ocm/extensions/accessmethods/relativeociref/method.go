@@ -44,6 +44,13 @@ func (a *AccessSpec) Describe(context accspeccpi.Context) string {
 	return fmt.Sprintf("local OCI artifact %s", a.Reference)
 }
 
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Info: a.Reference,
+	}
+}
+
 func (a *AccessSpec) IsLocal(context accspeccpi.Context) bool {
 	return true
 }
