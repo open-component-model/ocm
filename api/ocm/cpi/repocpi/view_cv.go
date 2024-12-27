@@ -239,12 +239,16 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *cpi.ResourceMeta
 }
 
 // SetResourceBlob adds a blob resource to the component version.
-func (c *componentVersionAccessView) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, hints []refhints.ReferenceHint, global cpi.AccessSpec, opts ...cpi.BlobModificationOption) error {
+func (c *componentVersionAccessView) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, hintspec refhints.AnyReferenceHint, global cpi.AccessSpec, opts ...cpi.BlobModificationOption) error {
 	cpi.Logger(c).Debug("adding resource blob", "resource", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
 	}
 	eff := cpi.NewBlobModificationOptions(opts...)
+	hints, err := refhints.HintsFor(hintspec, true)
+	if err != nil {
+		return err
+	}
 	hints = refhints.JoinUnique(meta.ReferenceHints, refhints.FilterImplicit(hints))
 	acc, err := c.AddBlob(blob, meta.Type, hints, global, eff)
 	if err != nil {
@@ -266,9 +270,13 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *cpi.SourceMeta, ac
 	return errors.ErrUnknown(cpi.KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
 }
 
-func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, hints []refhints.ReferenceHint, global cpi.AccessSpec, modopts ...cpi.TargetElementOption) error {
+func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, hintspec refhints.AnyReferenceHint, global cpi.AccessSpec, modopts ...cpi.TargetElementOption) error {
 	cpi.Logger(c).Debug("adding source blob", "source", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
+		return err
+	}
+	hints, err := refhints.HintsFor(hintspec, true)
+	if err != nil {
 		return err
 	}
 	hints = refhints.JoinUnique(meta.ReferenceHints, refhints.FilterImplicit(hints))

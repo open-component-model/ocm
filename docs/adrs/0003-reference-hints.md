@@ -47,16 +47,17 @@ similar to the `localBlob` access method. But this can only be a workaround, bec
 
 ### Proposed Solution
 
-Hints have to be typed, to allow uploaders to know what identities are provided and how the
-hint string has to be interpreted. Additionally, it must be possible to store
-multiple hints for an artifact.
+Hints have to be typed to allow uploaders to know what identities are provided, how the
+hint string has to be interpreted and to decide for uploaders, which hint to use. Additionally,
+it must be possible to store multiple hints for an artifact to support multiple possible upload
+repository types.
 
 To be compatible a serialization format is defined for a list of type hints, which maps such
 a list to a single string.
 
-The library provides a new type `ReferenceHint = map[string]string`, which provides access to
-a formal hint, by providing access to a set of string attributes. There are three predefined
-attributes:
+The library provides a new type `ReferenceHint`, which provides access to
+a formal hint, by providing access to a set of string attributes. The semantic type is a string map
+of strings. There are three predefined attributes:
 
 - `type` the formal type of the hint (may be empty to cover old component versions)
   The types are defined like the resource types. The following types are defined for now:
@@ -143,8 +144,11 @@ characters enforcing a quoted form.
 
 #### OCM Library
 
-- The `SetResourceBlob`and `SetSourceBlob` API method no accepts
-  a hint array instead of a string-based hint.
+- The `SetResourceBlob` and `SetSourceBlob` API methods now accept
+  a hint specification instead of a string. To be as compatible as possible,
+  it still accepts  a string (as before), which is mapped by a hint parser to a hint list.
+  Therefore, the technical type is `interface{}`, which accepts
+  various effective types (single hints, string and hint lists).
 - Uploaders provided by a plugin now get a serialized hint list
   instead of a simple un-typed reference format.
 - There are new options for creating resource(source access objects.

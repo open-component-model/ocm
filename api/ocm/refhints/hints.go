@@ -2,13 +2,16 @@ package refhints
 
 import (
 	"encoding/json"
+	"fmt"
 	"maps"
 	"strings"
 
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/modern-go/reflect2"
 
+	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -33,6 +36,8 @@ const (
 
 	IMPLICIT_TRUE = "true"
 )
+
+type AnyReferenceHint = interface{}
 
 // ReferenceHints is list of hints.
 // Notaion: a sequence of hint notations separated by a ;.
@@ -465,4 +470,38 @@ func JoinUnique(hints ...[]ReferenceHint) ReferenceHints {
 // AddUnique adds hints to hint list, whode type is not yet present in the list.
 func AddUnique[S ~[]T, T ReferenceHint](hints *S, add ...T) {
 	*hints = sliceutils.AppendUniqueFunc(*hints, runtime.MatchType[T], add...)
+}
+
+// HintsFor provide hints for several kinds of hint specifications:
+//   - string (uses ParseHint)
+//   - single ReferenceHint
+//   - []ReferenceHint
+//   - ReferenceHints
+//   - []DefaultReferenceHint
+//   - DefaultReferenceHints
+//   - map[string]string
+//   - common.Properties
+func HintsFor(spec interface{}, implicit ...bool) (ReferenceHints, error) {
+	if reflect2.IsNil(spec) {
+		return nil, nil
+	}
+	switch t := spec.(type) {
+	case string:
+		return ParseHints(t, implicit...), nil
+	case ReferenceHint:
+		return ReferenceHints{t}, nil
+	case []ReferenceHint:
+		return t, nil
+	case ReferenceHints:
+		return t, nil
+	case []DefaultReferenceHint:
+		return sliceutils.Convert[ReferenceHint](t), nil
+	case DefaultReferenceHints:
+		return sliceutils.Convert[ReferenceHint](t), nil
+	case map[string]string:
+		return ReferenceHints{DefaultReferenceHint(t)}, nil
+	case common.Properties:
+		return ReferenceHints{DefaultReferenceHint(t)}, nil
+	}
+	return nil, fmt.Errorf("unknown hint specification type (%T)", spec)
 }

@@ -178,13 +178,13 @@ type ComponentVersionAccess interface {
 	AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error
 	// SetResourceBlob sets a resource given by a blob access, the optional hints (must be implicit) are observed
 	// when adding a local blob to store them as implicit hints.
-	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, hints []refhints.ReferenceHint, global AccessSpec, opts ...BlobModificationOption) error
+	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, hints refhints.AnyReferenceHint, global AccessSpec, opts ...BlobModificationOption) error
 	AdjustSourceAccess(meta *SourceMeta, acc compdesc.AccessSpec) error
 	// SetSourceBlob updates or sets anew source. The options only use the
 	// target options. All other options are ignored.
 	// The optional hints (must be implicit) are observed
 	// when adding a local blob to store them as implicit hints.
-	SetSourceBlob(meta *SourceMeta, blob BlobAccess, hints []refhints.ReferenceHint, global AccessSpec, opts ...TargetElementOption) error
+	SetSourceBlob(meta *SourceMeta, blob BlobAccess, hints refhints.AnyReferenceHint, global AccessSpec, opts ...TargetElementOption) error
 
 	// AccessMethod provides an access method implementation for
 	// an access spec. This might be a repository local implementation

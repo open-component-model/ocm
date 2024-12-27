@@ -149,7 +149,7 @@ func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype string, h
 	return nil, errors.ErrNotSupported("adding blobs")
 }
 
-func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, hints []refhints.ReferenceHint, global AccessSpec, opts ...BlobModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, hints refhints.AnyReferenceHint, global AccessSpec, opts ...BlobModificationOption) error {
 	return errors.ErrNotSupported("adding blobs")
 }
 
@@ -165,7 +165,7 @@ func (d *DummyComponentVersionAccess) SetResourceByAccess(art ResourceAccess, mo
 	return errors.ErrNotSupported("resource modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, hints []refhints.ReferenceHint, global AccessSpec, opts ...TargetElementOption) error {
+func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, hints refhints.AnyReferenceHint, global AccessSpec, opts ...TargetElementOption) error {
 	return errors.ErrNotSupported("source modification")
 }
 

@@ -7,7 +7,7 @@ import (
 const ReferenceHintType = "npm"
 
 // HINT_REFERENCE is the single attribute describing the OCI reference.
-// fior OCI hints.
+// for OCI hints.
 const HINT_REFERENCE = metav1.HINT_REFERENCE
 
 func ReferenceHint(ref string, implicit ...bool) metav1.ReferenceHint {
