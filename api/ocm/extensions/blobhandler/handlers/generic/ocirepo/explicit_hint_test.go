@@ -5,10 +5,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
+	. "ocm.software/ocm/api/oci/testhelper"
+
 	"ocm.software/ocm/api/oci"
 	ctfoci "ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/oci/grammar"
-	. "ocm.software/ocm/api/oci/testhelper"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -21,6 +22,7 @@ import (
 	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/runtime"
@@ -47,7 +49,7 @@ var _ = Describe("explicit hint upload", func() {
 		env.ComponentArchive(CA, accessio.FormatDirectory, COMP, VERS, func() {
 			env.Provider("mandelsoft")
 			env.Resource("value", "", resourcetypes.OCI_IMAGE, v1.LocalRelation, func() {
-				env.ElementHint("oci::" + LOCALNAMESPACE + ":" + LOCALVERS)
+				env.ArtifactHint(techoci.ReferenceHint(LOCALNAMESPACE + ":" + LOCALVERS))
 				env.Access(
 					ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 				)

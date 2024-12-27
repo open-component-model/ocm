@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
-	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -26,6 +25,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 )
@@ -91,7 +91,7 @@ var _ = Describe("Transfer handler", func() {
 
 		fmt.Printf("%s\n", string(data))
 		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(`{"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"`+oci2.ReferenceHintType+`::ocm/value:v2.0","type":"localBlob"}`, hash)))
+		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(`{"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"`+techoci.ReferenceHintType+`::ocm/value:v2.0","type":"localBlob"}`, hash)))
 
 		r, err := comp.GetResourceByIndex(0)
 		Expect(err).To(Succeed())
@@ -145,6 +145,6 @@ var _ = Describe("Transfer handler", func() {
 
 		fmt.Printf("%s\n", string(data))
 		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:`+D_OCIMANIFEST1+`","type":"ociArtifact"},"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"`+oci2.ReferenceHintType+`::ocm/value:v2.0","type":"localBlob"}`, hash)))
+		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:`+D_OCIMANIFEST1+`","type":"ociArtifact"},"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"`+techoci.ReferenceHintType+`::ocm/value:v2.0","type":"localBlob"}`, hash)))
 	})
 })

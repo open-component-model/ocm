@@ -21,7 +21,7 @@ import (
 	ocmcpi "ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/refhints"
-	oci2 "ocm.software/ocm/api/tech/oci"
+	techoci "ocm.software/ocm/api/tech/oci"
 	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/logging"
@@ -111,7 +111,7 @@ func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) refh
 	if ref.Tag != nil {
 		hint += grammar.TagSeparator + *ref.Tag
 	}
-	return refhints.NewHints(oci2.ReferenceHint, hint, true)
+	return refhints.NewHints(techoci.ReferenceHint, hint, true)
 }
 
 func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (string, error) {

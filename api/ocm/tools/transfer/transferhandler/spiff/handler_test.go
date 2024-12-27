@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
-	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"github.com/mandelsoft/goutils/testutils"
 
@@ -23,6 +22,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/spiff"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
@@ -198,13 +198,13 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(err).To(Succeed())
 			fmt.Printf("%s\n", string(data))
 			hash := HashManifest2(artifactset.DefaultArtifactSetDescriptorFileName)
-			Expect(string(data)).To(testutils.StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + oci2.ReferenceHintType + "::" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			Expect(string(data)).To(testutils.StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + techoci.ReferenceHintType + "::" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 			Expect(err).To(Succeed())
 			fmt.Printf("%s\n", string(data))
 			hash = HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-			Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + oci2.ReferenceHintType + "::" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + techoci.ReferenceHintType + "::" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			racc, err := comp.GetResourceByIndex(1)
 			Expect(err).To(Succeed())
@@ -253,7 +253,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 			Expect(err).To(Succeed())
 			hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-			Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + oci2.ReferenceHintType + "::" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + techoci.ReferenceHintType + "::" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			racc, err := comp.GetResourceByIndex(1)
 			Expect(err).To(Succeed())

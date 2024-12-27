@@ -8,7 +8,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/ocm/refhints"
-	oci2 "ocm.software/ocm/api/tech/oci"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -70,7 +70,7 @@ func (a *AccessSpec) GetDigest() (string, bool) {
 }
 
 func (a *AccessSpec) GetReferenceHint(cv internal.ComponentVersionAccess) refhints.ReferenceHints {
-	return refhints.NewHints(oci2.ReferenceHint, a.Reference, true)
+	return refhints.NewHints(techoci.ReferenceHint, a.Reference, true)
 }
 
 func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (string, error) {

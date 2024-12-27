@@ -10,7 +10,6 @@ import (
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
 	. "ocm.software/ocm/api/ocm/testhelper"
-	oci2 "ocm.software/ocm/api/tech/oci"
 
 	"github.com/mandelsoft/goutils/finalizer"
 
@@ -23,6 +22,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -169,7 +169,7 @@ var _ = Describe("transport and signing", func() {
 		ra := desc.GetResourceIndexByIdentity(metav1.NewIdentity("image"))
 		Expect(ra).To(BeNumerically(">=", 0))
 		// indeed, the artifact set archive hash seems to be reproducible
-		desc.Resources[ra].Access = localblob.New("sha256:"+H_OCIARCHMANIFEST1, oci2.ReferenceHintType+"::ocm/value:v2.0", "application/vnd.oci.image.manifest.v1+tar+gzip", nil)
+		desc.Resources[ra].Access = localblob.New("sha256:"+H_OCIARCHMANIFEST1, techoci.ReferenceHintType+"::ocm/value:v2.0", "application/vnd.oci.image.manifest.v1+tar+gzip", nil)
 		Expect(tcv.GetDescriptor()).To(YAMLEqual(desc))
 
 		descSigned := tcv.GetDescriptor().Copy()

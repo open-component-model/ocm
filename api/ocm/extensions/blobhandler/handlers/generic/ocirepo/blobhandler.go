@@ -16,7 +16,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/refhints"
-	oci2 "ocm.software/ocm/api/tech/oci"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -68,7 +68,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints r
 	}
 
 	var hint string
-	if h := hints.GetReferenceHint(oci2.ReferenceHintType, ""); h != nil {
+	if h := hints.GetReferenceHint(techoci.ReferenceHintType, ""); h != nil {
 		hint = h.GetReference()
 	}
 

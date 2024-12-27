@@ -20,7 +20,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/extensions/download"
-	oci2 "ocm.software/ocm/api/tech/oci"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessobj"
 	common "ocm.software/ocm/api/utils/misc"
 )
@@ -59,9 +59,9 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	var tag string
 	aspec := m.AccessSpec()
 
-	hint := racc.Meta().ReferenceHints.GetReferenceHint(oci2.ReferenceHintType)
+	hint := racc.Meta().ReferenceHints.GetReferenceHint(techoci.ReferenceHintType)
 	if hint == nil {
-		hint = racc.ReferenceHintForAccess().GetReferenceHint(oci2.ReferenceHintType, "")
+		hint = racc.ReferenceHintForAccess().GetReferenceHint(techoci.ReferenceHintType, "")
 	}
 
 	var namespace string

@@ -28,7 +28,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/mapocirepoattr"
 	storagecontext "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/oci"
 	"ocm.software/ocm/api/ocm/refhints"
-	oci2 "ocm.software/ocm/api/tech/oci"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
@@ -212,7 +212,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints r
 		return nil, nil
 	}
 
-	hint := refhints.GetReference(hints, oci2.ReferenceHintType, "")
+	hint := refhints.GetReference(hints, techoci.ReferenceHintType, "")
 	errhint := "[" + hint + "]"
 	log := cpi.BlobHandlerLogger(ctx.GetContext())
 

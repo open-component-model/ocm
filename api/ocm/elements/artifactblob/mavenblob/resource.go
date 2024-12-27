@@ -9,7 +9,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/refhints"
-	maven2 "ocm.software/ocm/api/tech/maven"
+	techmaven "ocm.software/ocm/api/tech/maven"
 	"ocm.software/ocm/api/utils/blobaccess/maven"
 )
 
@@ -18,7 +18,7 @@ const TYPE = resourcetypes.MAVEN_PACKAGE
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, repo *maven.Repository, groupId, artifactId, version string, opts ...Option) cpi.ArtifactAccess[M] {
 	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithCredentialContext(ctx))...)
 	if eff.Blob.IsPackage() && eff.Hint == nil {
-		eff.Hint = refhints.NewHints(maven2.ReferenceHint, maven.NewCoordinates(groupId, artifactId, version).GAV())
+		eff.Hint = refhints.NewHints(techmaven.ReferenceHint, maven.NewCoordinates(groupId, artifactId, version).GAV())
 	}
 
 	if meta.GetType() == "" {
