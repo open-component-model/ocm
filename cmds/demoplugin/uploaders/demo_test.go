@@ -88,7 +88,7 @@ var _ = Describe("demoplugin", func() {
 
 			hint := "uploaded"
 			blob := blobaccess.ForString(mime.MIME_TEXT, CONTENT)
-			spec := Must(uploader.StoreBlob(blob, resourcetypes.PLAIN_TEXT, refhints.NewHints(accessmethods.ReferenceHint, hint), nil, sctx))
+			spec := Must(uploader.StoreBlob(blob, resourcetypes.PLAIN_TEXT, refhints.DefaultList(accessmethods.ReferenceHint, hint), nil, sctx))
 
 			Expect(spec).NotTo(BeNil())
 

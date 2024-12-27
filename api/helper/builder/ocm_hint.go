@@ -5,6 +5,7 @@ import (
 
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/modern-go/reflect2"
+
 	"ocm.software/ocm/api/ocm/refhints"
 )
 

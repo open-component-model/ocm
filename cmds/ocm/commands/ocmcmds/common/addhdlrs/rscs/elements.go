@@ -196,7 +196,7 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *addhdlrs.ResourceInpu
 }
 
 func (r *ResourceSpec) GetReferenceHints() refhints.ReferenceHints {
-	return refhints.ReferenceHints(sliceutils.Convert[refhints.ReferenceHint](r.ReferenceHints))
+	return sliceutils.Convert[refhints.ReferenceHint](r.ReferenceHints)
 }
 
 func (r *ResourceSpec) SetReferenceHints(hints []refhints.ReferenceHint) {

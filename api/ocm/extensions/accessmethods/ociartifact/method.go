@@ -111,7 +111,7 @@ func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) refh
 	if ref.Tag != nil {
 		hint += grammar.TagSeparator + *ref.Tag
 	}
-	return refhints.NewHints(techoci.ReferenceHint, hint, true)
+	return refhints.DefaultList(techoci.ReferenceHint, hint, true)
 }
 
 func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (string, error) {

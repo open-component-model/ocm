@@ -171,7 +171,7 @@ var CD3 = `
         referenceName: vasu1124/introspect:1.0.0
         type: localBlob
       referenceHints:
-      - type: OCI
+      - type: oci
         reference: vasu1124/introspect:1.0.0
       digest:
         hashAlgorithm: SHA-256
@@ -193,7 +193,7 @@ var CD3 = `
         repository: github.com/vasu1124/introspect
         type: git
       referenceHints:
-      - type: OCI
+      - type: oci
         reference: vasu1124/introspect:1.0.0
       name: introspect
       type: git
@@ -235,7 +235,7 @@ var _ = Describe("Normalization", func() {
 	It("hashes referenceHints", func() {
 		n, err := compdesc.Normalize(cd3, compdesc.JsonNormalisationV2)
 		Expect(err).To(Succeed())
-		Expect(string(n)).To(Equal("{\"component\":{\"componentReferences\":[],\"name\":\"github.com/vasu1124/introspect\",\"provider\":{\"name\":\"internal\"},\"resources\":[{\"digest\":{\"hashAlgorithm\":\"SHA-256\",\"normalisationAlgorithm\":\"ociArtifactDigest/v1\",\"value\":\"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c\"},\"labels\":[{\"name\":\"label2\",\"signing\":true,\"value\":\"bar\"}],\"name\":\"introspect-image\",\"referenceHints\":[{\"reference\":\"vasu1124/introspect:1.0.0\",\"type\":\"OCI\"}],\"relation\":\"local\",\"type\":\"ociImage\",\"version\":\"1.0.0\"}],\"sources\":[{\"name\":\"introspect\",\"referenceHints\":[{\"reference\":\"vasu1124/introspect:1.0.0\",\"type\":\"OCI\"}],\"type\":\"git\",\"version\":\"1.0.0\"}],\"version\":\"1.0.0\"}}"))
+		Expect(string(n)).To(Equal("{\"component\":{\"componentReferences\":[],\"name\":\"github.com/vasu1124/introspect\",\"provider\":{\"name\":\"internal\"},\"resources\":[{\"digest\":{\"hashAlgorithm\":\"SHA-256\",\"normalisationAlgorithm\":\"ociArtifactDigest/v1\",\"value\":\"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c\"},\"labels\":[{\"name\":\"label2\",\"signing\":true,\"value\":\"bar\"}],\"name\":\"introspect-image\",\"referenceHints\":[{\"reference\":\"vasu1124/introspect:1.0.0\",\"type\":\"oci\"}],\"relation\":\"local\",\"type\":\"ociImage\",\"version\":\"1.0.0\"}],\"sources\":[{\"name\":\"introspect\",\"referenceHints\":[{\"reference\":\"vasu1124/introspect:1.0.0\",\"type\":\"oci\"}],\"type\":\"git\",\"version\":\"1.0.0\"}],\"version\":\"1.0.0\"}}"))
 	})
 
 	It("hashes v1 with none access", func() {

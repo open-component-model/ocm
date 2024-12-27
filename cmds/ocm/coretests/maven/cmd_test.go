@@ -110,7 +110,7 @@ sdk-modules-bom-5.7.0.pom: 5`))
 				Expect(len(cv.GetDescriptor().Resources)).To(Equal(1))
 				acc := Must(env.OCMContext().AccessSpecForSpec(cv.GetDescriptor().Resources[0].Access))
 				Expect(acc.IsLocal(env.OCMContext())).To(BeFalse())
-				Expect(acc.(ocm.HintProvider).GetReferenceHint(cv)).To(Equal(refhints.NewHints(maven.ReferenceHint, coords.GAV(), true)))
+				Expect(acc.(ocm.HintProvider).GetReferenceHint(cv)).To(Equal(refhints.DefaultList(maven.ReferenceHint, coords.GAV(), true)))
 
 				Expect(env.Execute("transfer", "ctf", ARCH, DEST_ARCH, "--copy-resources", "--uploader", "ocm/mavenPackage=file://localhost/mavenrepo")).To(Succeed())
 				Expect(env.DirExists(DEST_ARCH)).To(BeTrue())

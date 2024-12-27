@@ -267,7 +267,7 @@ var _ = Describe("upload", func() {
 
 			tgt := composition.NewComponentVersion(ctx, COMP, VERS)
 			defer Close(tgt, "tgt")
-			MustBeSuccessful(tgt.SetResourceBlob(ra.Meta(), blob, refhints.NewHints(refhints.DefaultHint, OCINAMESPACE+":"+OCIVERSION+"-beta", true), nil))
+			MustBeSuccessful(tgt.SetResourceBlob(ra.Meta(), blob, refhints.DefaultList(refhints.DefaultHint, OCINAMESPACE+":"+OCIVERSION+"-beta", true), nil))
 
 			// close pending handler config
 			MustBeSuccessful(ctx.Finalize())

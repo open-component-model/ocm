@@ -75,7 +75,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	if err != nil {
 		return nil, nil, err
 	}
-	return blob, refhints.NewHints(oci.ReferenceHint, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, version), true), nil
+	return blob, refhints.DefaultList(oci.ReferenceHint, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, version), true), nil
 }
 
 func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo string) field.ErrorList {

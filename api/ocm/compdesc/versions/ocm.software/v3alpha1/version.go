@@ -2,10 +2,12 @@ package v3alpha1
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1/jsonscheme"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -107,11 +109,16 @@ func convertReferencesTo(in []Reference) compdesc.References {
 	return out
 }
 
+func convertHintsTo(in []refhints.DefaultReferenceHint) refhints.ReferenceHints {
+	return sliceutils.Convert[refhints.ReferenceHint](in)
+}
+
 func convertSourceTo(in Source) compdesc.Source {
 	return compdesc.Source{
 		SourceMeta: compdesc.SourceMeta{
-			ElementMeta: convertElementmetaTo(in.ElementMeta),
-			Type:        in.Type,
+			ElementMeta:    convertElementmetaTo(in.ElementMeta),
+			Type:           in.Type,
+			ReferenceHints: convertHintsTo(in.ReferenceHints),
 		},
 		Access: compdesc.GenericAccessSpec(in.Access.DeepCopy()),
 	}
@@ -144,11 +151,12 @@ func convertResourceTo(in Resource) compdesc.Resource {
 	}
 	return compdesc.Resource{
 		ResourceMeta: compdesc.ResourceMeta{
-			ElementMeta: convertElementmetaTo(in.ElementMeta),
-			Type:        in.Type,
-			Relation:    in.Relation,
-			SourceRefs:  srcRefs,
-			Digest:      in.Digest.Copy(),
+			ElementMeta:    convertElementmetaTo(in.ElementMeta),
+			Type:           in.Type,
+			ReferenceHints: convertHintsTo(in.ReferenceHints),
+			Relation:       in.Relation,
+			SourceRefs:     srcRefs,
+			Digest:         in.Digest.Copy(),
 		},
 		Access: compdesc.GenericAccessSpec(in.Access),
 	}
@@ -231,6 +239,10 @@ func convertReferencesFrom(in []compdesc.Reference) []Reference {
 	return out
 }
 
+func convertHintsFrom(in refhints.ReferenceHints) []refhints.DefaultReferenceHint {
+	return sliceutils.Transform(in, refhints.AsDefault)
+}
+
 func convertSourceFrom(in compdesc.Source) Source {
 	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
 	if err != nil {
@@ -238,8 +250,9 @@ func convertSourceFrom(in compdesc.Source) Source {
 	}
 	return Source{
 		SourceMeta: SourceMeta{
-			ElementMeta: convertElementmetaFrom(in.ElementMeta),
-			Type:        in.Type,
+			ElementMeta:    convertElementmetaFrom(in.ElementMeta),
+			Type:           in.Type,
+			ReferenceHints: convertHintsFrom(in.ReferenceHints),
 		},
 		Access: acc,
 	}
@@ -271,12 +284,13 @@ func convertResourceFrom(in compdesc.Resource) Resource {
 		compdesc.ThrowConversionError(err)
 	}
 	return Resource{
-		ElementMeta: convertElementmetaFrom(in.ElementMeta),
-		Type:        in.Type,
-		Relation:    in.Relation,
-		SourceRefs:  convertSourcerefsFrom(in.SourceRefs),
-		Access:      acc,
-		Digest:      in.Digest.Copy(),
+		ElementMeta:    convertElementmetaFrom(in.ElementMeta),
+		Type:           in.Type,
+		ReferenceHints: convertHintsFrom(in.ReferenceHints),
+		Relation:       in.Relation,
+		SourceRefs:     convertSourcerefsFrom(in.SourceRefs),
+		Access:         acc,
+		Digest:         in.Digest.Copy(),
 	}
 }
 

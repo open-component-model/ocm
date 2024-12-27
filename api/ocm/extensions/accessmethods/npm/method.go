@@ -60,7 +60,7 @@ func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpe
 }
 
 func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) refhints.ReferenceHints {
-	return refhints.NewHints(npm.ReferenceHint, a.Package+":"+a.Version, true)
+	return refhints.DefaultList(npm.ReferenceHint, a.Package+":"+a.Version, true)
 }
 
 func (_ *AccessSpec) GetType() string {

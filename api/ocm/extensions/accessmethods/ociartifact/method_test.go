@@ -55,7 +55,7 @@ var _ = Describe("Method", func() {
 			spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION))
 
 			hint := spec.GetReferenceHint(&cpi.DummyComponentVersionAccess{env.OCMContext()})
-			Expect(hint).To(Equal(refhints.NewHints(techoci.ReferenceHint, "ocm/value:v2.0", true)))
+			Expect(hint).To(Equal(refhints.DefaultList(techoci.ReferenceHint, "ocm/value:v2.0", true)))
 		})
 	})
 
@@ -81,7 +81,7 @@ var _ = Describe("Method", func() {
 			spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION+"@sha256:"+D_OCIMANIFEST1))
 
 			hint := spec.GetReferenceHint(&cpi.DummyComponentVersionAccess{env.OCMContext()})
-			Expect(hint).To(Equal(refhints.NewHints(techoci.ReferenceHint, "ocm/value:v2.0", true)))
+			Expect(hint).To(Equal(refhints.DefaultList(techoci.ReferenceHint, "ocm/value:v2.0", true)))
 		})
 	})
 
@@ -107,7 +107,7 @@ var _ = Describe("Method", func() {
 			spec := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, "@sha256:"+D_OCIMANIFEST1))
 
 			hint := spec.GetReferenceHint(&cpi.DummyComponentVersionAccess{env.OCMContext()})
-			Expect(hint).To(Equal(refhints.NewHints(techoci.ReferenceHint, "ocm/value", true)))
+			Expect(hint).To(Equal(refhints.DefaultList(techoci.ReferenceHint, "ocm/value", true)))
 		})
 	})
 })

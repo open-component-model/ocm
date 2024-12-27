@@ -97,7 +97,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	)
 
 	if s.IsPackage() {
-		return access, refhints.NewHints(maven.ReferenceHint, s.GAV(), true), err
+		return access, refhints.DefaultList(maven.ReferenceHint, s.GAV(), true), err
 	}
 
 	return access, nil, err

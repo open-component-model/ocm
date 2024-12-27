@@ -46,7 +46,7 @@ var _ = Describe("dir tree resource access", func() {
 
 		acc := Must(me.ResourceAccess(env.OCMContext(), compdesc.NewResourceMeta("test", resourcetypes.OCI_IMAGE, compdesc.LocalRelation), spec))
 
-		Expect(acc.ReferenceHintForAccess()).To(Equal(refhints.NewHints(techoci.ReferenceHint, OCINAMESPACE+":"+OCIVERSION, true)))
+		Expect(acc.ReferenceHintForAccess()).To(Equal(refhints.DefaultList(techoci.ReferenceHint, OCINAMESPACE+":"+OCIVERSION, true)))
 		Expect(acc.GlobalAccess()).To(BeNil())
 		Expect(acc.Meta().Type).To(Equal(resourcetypes.OCI_IMAGE))
 

@@ -38,7 +38,7 @@ var _ = Describe("dir tree resource access", func() {
 			me.WithGlobalAccess(global),
 		)
 
-		Expect(acc.ReferenceHintForAccess()).To(Equal(refhints.NewHints(refhints.DefaultHint, "demo")))
+		Expect(acc.ReferenceHintForAccess()).To(Equal(refhints.DefaultList(refhints.DefaultHint, "demo")))
 		Expect(acc.GlobalAccess()).To(Equal(global))
 		Expect(acc.Meta().Type).To(Equal(resourcetypes.DIRECTORY_TREE))
 

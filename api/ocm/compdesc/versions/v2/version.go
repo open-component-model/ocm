@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -118,15 +119,7 @@ func convertComponentReferencesTo(in []ComponentReference) compdesc.References {
 }
 
 func convertHintsTo(in []refhints.DefaultReferenceHint) refhints.ReferenceHints {
-	if in == nil {
-		return nil
-	}
-	hints := make(refhints.ReferenceHints, len(in))
-
-	for i, h := range in {
-		hints[i] = h
-	}
-	return hints
+	return sliceutils.Convert[refhints.ReferenceHint](in)
 }
 
 func convertSourceTo(in Source) compdesc.Source {
@@ -269,14 +262,7 @@ func convertComponentReferencesFrom(in []compdesc.Reference) []ComponentReferenc
 }
 
 func convertHintsFrom(in refhints.ReferenceHints) []refhints.DefaultReferenceHint {
-	if in == nil {
-		return nil
-	}
-	hints := make([]refhints.DefaultReferenceHint, len(in))
-	for i, h := range in {
-		hints[i] = h.AsDefault()
-	}
-	return hints
+	return sliceutils.Transform(in, refhints.AsDefault)
 }
 
 func convertSourceFrom(in compdesc.Source) Source {

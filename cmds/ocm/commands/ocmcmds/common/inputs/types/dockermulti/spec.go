@@ -70,5 +70,5 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 	if err != nil {
 		return nil, nil, err
 	}
-	return blob, refhints.NewHints(oci2.ReferenceHint, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, info.ComponentVersion.GetVersion()), true), nil
+	return blob, refhints.DefaultList(oci2.ReferenceHint, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, info.ComponentVersion.GetVersion()), true), nil
 }

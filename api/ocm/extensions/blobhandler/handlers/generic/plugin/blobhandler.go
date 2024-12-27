@@ -88,5 +88,5 @@ func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints met
 	r := accessio.NewOndemandReader(blob)
 	defer errors.PropagateError(&err, r.Close)
 
-	return b.plugin.Put(b.name, r, artType, blob.MimeType(), hint, creddata, target)
+	return b.plugin.Put(b.name, r, artType, blob.MimeType(), hints, creddata, target)
 }

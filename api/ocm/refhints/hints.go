@@ -3,12 +3,10 @@ package refhints
 import (
 	"encoding/json"
 	"maps"
-	"slices"
 	"strings"
 
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/maputils"
-	"github.com/mandelsoft/goutils/matcher"
 	"github.com/mandelsoft/goutils/sliceutils"
 
 	"ocm.software/ocm/api/utils/runtime"
@@ -40,7 +38,10 @@ const (
 // Notaion: a sequence of hint notations separated by a ;.
 type ReferenceHints []ReferenceHint
 
-func NewHints(f func(ref string, implicit ...bool) ReferenceHint, ref string, implicit ...bool) ReferenceHints {
+// DefaultList provide a list with a single typed default reference hint.
+// It uses the hint creation function provided by the hint technologies
+// supporting a default hint.
+func DefaultList(f func(ref string, implicit ...bool) ReferenceHint, ref string, implicit ...bool) ReferenceHints {
 	return ReferenceHints{f(ref, implicit...)}
 }
 
@@ -80,10 +81,16 @@ func (h ReferenceHints) GetReferenceHint(typs ...string) ReferenceHint {
 // Serialize provides a string representation. The implicit
 // attribute is only serialized, if it is called with true.
 func (h ReferenceHints) Serialize(implicit ...bool) string {
-	return HintsToString(h, implicit...)
+	return Serialize(h, implicit...)
 }
 
-func HintsToString(hints []ReferenceHint, implicit ...bool) string {
+// Serialize provides a string representation for any kind of hint slice.
+// The implicit attribute is only serialized, if it is called with true.
+func Serialize[S ~[]T, T ReferenceHint](hints S, implicit ...bool) string {
+	if len(hints) == 0 {
+		return ""
+	}
+
 	sep := ""
 	r := ""
 	for _, h := range hints {
@@ -121,57 +128,6 @@ type ReferenceHint interface {
 	GetProperty(name string) string
 
 	AsDefault() DefaultReferenceHint
-}
-
-func MatchType(typs ...string) matcher.Matcher[ReferenceHint] {
-	return func(h ReferenceHint) bool {
-		return slices.Contains(typs, h.GetType())
-	}
-}
-
-func Equal(o ReferenceHint) matcher.Matcher[ReferenceHint] {
-	d := o.Serialize()
-	return func(h ReferenceHint) bool {
-		return h.Serialize() == d
-	}
-}
-
-func IsImplicit(h ReferenceHint) bool {
-	if h == nil {
-		return false
-	}
-	return h.GetProperty(HINT_IMPLICIT) == IMPLICIT_TRUE
-}
-
-func IsExplicit(h ReferenceHint) bool {
-	if h == nil {
-		return false
-	}
-	return !IsImplicit(h)
-}
-
-func Filter(hints []ReferenceHint, cond matcher.Matcher[ReferenceHint]) ReferenceHints {
-	if len(hints) == 0 {
-		return nil
-	}
-	return sliceutils.Filter(hints, cond)
-}
-
-func FilterImplicit(hints []ReferenceHint) ReferenceHints {
-	return Filter(hints, IsImplicit)
-}
-
-func AsImplicit[S ~[]T, T ReferenceHint](hints S) DefaultReferenceHints {
-	var result DefaultReferenceHints
-
-	for _, h := range hints {
-		if IsImplicit(h) {
-			result.Add(h)
-		} else {
-			result.Add(h.AsDefault().SetProperty(HINT_IMPLICIT, IMPLICIT_TRUE))
-		}
-	}
-	return result
 }
 
 // GetReference returns the default reference hint attribute
@@ -297,7 +253,7 @@ func (h DefaultReferenceHints) Copy() ReferenceHints {
 // Serialize provides a string representation. The implicit
 // attribute is only serialized, if it is called with true.
 func (h DefaultReferenceHints) Serialize(implicit ...bool) string {
-	return HintsToString(sliceutils.Convert[ReferenceHint](h), implicit...)
+	return Serialize(h, implicit...)
 }
 
 var _ json.Marshaler = DefaultReferenceHints{}
@@ -509,10 +465,4 @@ func JoinUnique(hints ...[]ReferenceHint) ReferenceHints {
 // AddUnique adds hints to hint list, whode type is not yet present in the list.
 func AddUnique[S ~[]T, T ReferenceHint](hints *S, add ...T) {
 	*hints = sliceutils.AppendUniqueFunc(*hints, runtime.MatchType[T], add...)
-}
-
-// AsDefault transforms a generic hint into a default hint.
-// It can be used by sliceutils.Transform.
-func AsDefault(h ReferenceHint) DefaultReferenceHint {
-	return h.AsDefault()
 }

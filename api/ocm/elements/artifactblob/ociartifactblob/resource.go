@@ -26,7 +26,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, r
 	if hint == nil {
 		ref, err := oci.ParseRef(refname)
 		if err == nil {
-			hint = refhints.NewHints(techoci.ReferenceHint, ref.String())
+			hint = refhints.DefaultList(techoci.ReferenceHint, ref.String())
 		}
 	}
 

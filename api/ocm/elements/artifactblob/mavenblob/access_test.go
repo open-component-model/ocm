@@ -66,7 +66,7 @@ var _ = Describe("blobaccess for maven", func() {
 			coords := maven.NewCoordinates("com.sap.cloud.sdk", "sdk-modules-bom", "5.7.0")
 
 			a := me.ResourceAccessForMavenCoords(env.OCMContext(), Must(elements.ResourceMeta("mavenblob", resourcetypes.OCM_JSON, elements.WithLocalRelation())), repo, coords, me.WithCachingFileSystem(env.FileSystem()))
-			Expect(a.ReferenceHintForAccess()).To(Equal(refhints.NewHints(maven.ReferenceHint, coords.GAV())))
+			Expect(a.ReferenceHintForAccess()).To(Equal(refhints.DefaultList(maven.ReferenceHint, coords.GAV())))
 		})
 	})
 })

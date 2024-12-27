@@ -393,7 +393,7 @@ var _ = Describe("component repository mapping", func() {
 		blob := blobaccess.ForFile(mime, "test.tgz", tempfs)
 
 		fmt.Printf("physical digest: %s\n", blob.Digest())
-		acc := Must(vers.AddBlob(blob, "", refhints.NewHints(refhints.DefaultHint, "artifact1", true), nil))
+		acc := Must(vers.AddBlob(blob, "", refhints.DefaultList(refhints.DefaultHint, "artifact1", true), nil))
 		MustBeSuccessful(vers.SetResource(cpi.NewResourceMeta("image", resourcetypes.OCI_IMAGE, metav1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
 
@@ -412,7 +412,7 @@ var _ = Describe("component repository mapping", func() {
 		o := acc.(*ociartifact.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact1@sha256:" + testhelper.DIGEST_MANIFEST))
 
-		acc = Must(vers.AddBlob(blob, "", refhints.NewHints(refhints.DefaultHint, "artifact2:v1", true), nil))
+		acc = Must(vers.AddBlob(blob, "", refhints.DefaultList(refhints.DefaultHint, "artifact2:v1", true), nil))
 		MustBeSuccessful(vers.SetResource(cpi.NewResourceMeta("image2", resourcetypes.OCI_IMAGE, metav1.LocalRelation), acc, cpi.ModifyResource()))
 		MustBeSuccessful(comp.AddVersion(vers))
 

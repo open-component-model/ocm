@@ -90,7 +90,7 @@ func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpe
 // GetReferenceHint returns the reference hint for the Maven (mvn) artifact.
 func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) refhints.ReferenceHints {
 	if a.IsPackage() {
-		return refhints.NewHints(maven.ReferenceHint, a.GAV(), true)
+		return refhints.DefaultList(maven.ReferenceHint, a.GAV(), true)
 	}
 	return nil
 }

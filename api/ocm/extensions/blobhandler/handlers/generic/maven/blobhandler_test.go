@@ -74,7 +74,7 @@ var _ = Describe("blobhandler generic maven tests", func() {
 		ocmrepo := composition.NewRepository(env)
 		defer Close(ocmrepo)
 		cv := composition.NewComponentVersion(env, "acme.org/test", "1.0.0")
-		MustBeSuccessful(cv.SetResourceBlob(Must(elements.ResourceMeta("test", resourcetypes.MAVEN_PACKAGE)), bacc, refhints.NewHints(maven.ReferenceHint, coords.GAV(), true), nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(elements.ResourceMeta("test", resourcetypes.MAVEN_PACKAGE)), bacc, refhints.DefaultList(maven.ReferenceHint, coords.GAV(), true), nil))
 		MustBeSuccessful(ocmrepo.AddComponentVersion(cv))
 		l := sliceutils.Transform(Must(vfs.ReadDir(env.FileSystem(), "target/com/sap/cloud/sdk/sdk-modules-bom/5.7.0")),
 			func(info os.FileInfo) string {

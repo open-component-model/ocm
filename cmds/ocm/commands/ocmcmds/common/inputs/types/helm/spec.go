@@ -114,7 +114,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blob 
 	if err != nil {
 		return nil, nil, err
 	}
-	hint = refhints.NewHints(oci2.ReferenceHint, ociartifact.Hint(info.ComponentVersion, name, s.Repository, vers), true)
+	hint = refhints.DefaultList(oci2.ReferenceHint, ociartifact.Hint(info.ComponentVersion, name, s.Repository, vers), true)
 	return blob, hint, err
 }
 

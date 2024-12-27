@@ -70,7 +70,7 @@ func (a *AccessSpec) GetDigest() (string, bool) {
 }
 
 func (a *AccessSpec) GetReferenceHint(cv internal.ComponentVersionAccess) refhints.ReferenceHints {
-	return refhints.NewHints(techoci.ReferenceHint, a.Reference, true)
+	return refhints.DefaultList(techoci.ReferenceHint, a.Reference, true)
 }
 
 func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (string, error) {

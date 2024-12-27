@@ -29,7 +29,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, n
 	h := eff.Hint.GetReferenceHint(techoci.ReferenceHintType, "")
 	hint := ociartifact.Hint(optionutils.AsValue(eff.Blob.Origin), locator, h.GetReference(), version)
 	blobprov := dockerdaemon.Provider(name, &eff.Blob)
-	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, refhints.ReferenceHints{techoci.ReferenceHint(hint)}, eff.Global)
+	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, refhints.DefaultList(techoci.ReferenceHint, hint), eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
 	return cpi.NewArtifactAccessForProvider[M, P](generics.Cast[*M](meta), accprov)
 }
