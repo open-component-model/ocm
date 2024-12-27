@@ -14,7 +14,7 @@ import (
 	"ocm.software/ocm/api/utils/runtime"
 )
 
-// NONE described non-existing hints.
+// NONE describes non-existing hints.
 var NONE = []ReferenceHint(nil)
 
 const (

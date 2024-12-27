@@ -143,7 +143,7 @@ var _ = Describe("component repository mapping", func() {
 
 		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
 		blob := blobaccess.ForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
-		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
+		MustBeSuccessful(vers.SetResourceBlob(m1, blob, refhints.NONE, nil))
 
 		MustBeSuccessful(comp.AddVersion(vers))
 
