@@ -13,6 +13,7 @@ import (
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
+	"ocm.software/ocm/api/tech"
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
@@ -36,7 +37,7 @@ type AccessMethod struct {
 	ppi.AccessMethodBase
 }
 
-var PathOption = options.NewStringOptionType("accessPath", "path in temp repository")
+var PathOption = flagsets.NewStringOptionType("accessPath", "path in temp repository")
 
 var _ ppi.AccessMethod = (*AccessMethod)(nil)
 
@@ -46,8 +47,8 @@ func New() ppi.AccessMethod {
 	}
 }
 
-func (a *AccessMethod) Options() []options.OptionType {
-	return []options.OptionType{
+func (a *AccessMethod) Options() []flagsets.ConfigOptionType {
+	return []flagsets.ConfigOptionType{
 		options.MediatypeOption,
 		PathOption,
 	}
@@ -87,6 +88,11 @@ func (a *AccessMethod) ValidateSpecification(p ppi.Plugin, spec ppi.AccessSpec) 
 	}
 	info.Short = "temp file " + my.Path
 	info.Hint = "temp file " + my.Path
+	// optional information for extended access spec interface
+	info.Info = &tech.UniformAccessSpecInfo{
+		Kind: my.GetKind(),
+		Info: my.Path,
+	}
 	return &info, nil
 }
 

@@ -105,6 +105,20 @@ func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("GitHub commit %s[%s]", a.RepoURL, a.Commit)
 }
 
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	u, err := url.Parse(a.RepoURL)
+	if err != nil {
+		u = &url.URL{}
+	}
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Host: u.Hostname(),
+		Port: u.Port(),
+		Path: u.Path,
+		Info: a.Commit,
+	}
+}
+
 func (_ *AccessSpec) IsLocal(accspeccpi.Context) bool {
 	return false
 }

@@ -18,8 +18,10 @@ import (
 	"ocm.software/ocm/api/ocm/ocmutils/registry"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/utils/cobrautils"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/runtime"
+	inpoptions "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 )
 
 type plugin struct {
@@ -39,12 +41,19 @@ type plugin struct {
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
+	inputs      map[string]InputType
+	inputScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
+
 	actions       map[string]Action
 	mergehandlers map[string]ValueMergeHandler
 	mergespecs    map[string]*descriptor.LabelMergeSpecification
 
 	valuesets map[string]map[string]ValueSet
 	setScheme map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
+
+	transferhandlers map[string]TransferHandler
+
+	signinghandlers map[string]SigningHandler
 
 	clicmds map[string]Command
 
@@ -55,7 +64,9 @@ func NewPlugin(name string, version string) Plugin {
 	return &plugin{
 		name:    name,
 		version: version,
+
 		methods: map[string]AccessMethod{},
+		inputs:  map[string]InputType{},
 
 		downloaders:  map[string]Downloader{},
 		downmappings: registry.NewRegistry[Downloader, DownloaderKey](),
@@ -63,12 +74,16 @@ func NewPlugin(name string, version string) Plugin {
 		uploaders:  map[string]Uploader{},
 		upmappings: registry.NewRegistry[Uploader, UploaderKey](),
 
+		inputScheme:    runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		accessScheme:   runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		uploaderScheme: runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 
 		actions:       map[string]Action{},
 		mergehandlers: map[string]ValueMergeHandler{},
 		mergespecs:    map[string]*descriptor.LabelMergeSpecification{},
+
+		transferhandlers: map[string]TransferHandler{},
+		signinghandlers:  map[string]SigningHandler{},
 
 		valuesets: map[string]map[string]ValueSet{},
 		setScheme: map[string]runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]{},
@@ -278,6 +293,65 @@ func (p *plugin) DecodeUploadTargetSpecification(data []byte) (UploadTargetSpec,
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func cliOpts(reg flagsets.ConfigOptionTypeRegistry, optTypes []flagsets.ConfigOptionType) ([]CLIOption, error) {
+	var optlist []CLIOption
+	for _, o := range optTypes {
+		known := reg.GetOptionType(o.GetName())
+		if known != nil {
+			if o.ValueType() != known.ValueType() {
+				return nil, fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
+			}
+			optlist = append(optlist, CLIOption{
+				Name: o.GetName(),
+			})
+		} else {
+			optlist = append(optlist, CLIOption{
+				Name:        o.GetName(),
+				Type:        o.ValueType(),
+				Description: o.GetDescription(),
+			})
+		}
+	}
+	return optlist, nil
+}
+
+func (p *plugin) RegisterInputType(m InputType) error {
+	if p.GetInputType(m.Name()) != nil {
+		n := m.Name()
+		return errors.ErrAlreadyExists(descriptor.KIND_INPUTTYPE, n)
+	}
+
+	optlist, err := cliOpts(inpoptions.DefaultRegistry, m.Options())
+	if err != nil {
+		return err
+	}
+
+	inp := descriptor.InputTypeDescriptor{
+		ValueSetDefinition: descriptor.ValueSetDefinition{
+			ValueTypeDefinition: descriptor.ValueTypeDefinition{
+				Name:        m.Name(),
+				Description: m.Description(),
+				Format:      m.Format(),
+			},
+			CLIOptions: optlist,
+		},
+	}
+	p.descriptor.Inputs = append(p.descriptor.Inputs, inp)
+	p.inputScheme.RegisterByDecoder(m.Name(), m)
+	p.inputs[m.Name()] = m
+	return nil
+}
+
+func (p *plugin) DecodeInputSpecification(data []byte) (InputSpec, error) {
+	return p.inputScheme.Decode(data, nil)
+}
+
+func (p *plugin) GetInputType(name string) InputType {
+	return p.inputs[name]
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	if p.GetAccessMethod(m.Name(), m.Version()) != nil {
 		n := m.Name()
@@ -287,24 +361,11 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		return errors.ErrAlreadyExists(errkind.KIND_ACCESSMETHOD, n)
 	}
 
-	var optlist []CLIOption
-	for _, o := range m.Options() {
-		known := options.DefaultRegistry.GetOptionType(o.GetName())
-		if known != nil {
-			if o.ValueType() != known.ValueType() {
-				return fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
-			}
-			optlist = append(optlist, CLIOption{
-				Name: o.GetName(),
-			})
-		} else {
-			optlist = append(optlist, CLIOption{
-				Name:        o.GetName(),
-				Type:        o.ValueType(),
-				Description: o.GetDescriptionText(),
-			})
-		}
+	optlist, err := cliOpts(options.DefaultRegistry, m.Options())
+	if err != nil {
+		return err
 	}
+
 	vers := m.Version()
 	if vers == "" {
 		meth := descriptor.AccessMethodDescriptor{
@@ -321,6 +382,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		p.methods[m.Name()] = m
 		vers = "v1"
 	}
+
 	meth := descriptor.AccessMethodDescriptor{
 		ValueSetDefinition: descriptor.ValueSetDefinition{
 			ValueTypeDefinition: descriptor.ValueTypeDefinition{
@@ -455,24 +517,11 @@ func (p *plugin) RegisterValueSet(s ValueSet) error {
 		}
 	}
 
-	var optlist []CLIOption
-	for _, o := range s.Options() {
-		known := options.DefaultRegistry.GetOptionType(o.GetName())
-		if known != nil {
-			if o.ValueType() != known.ValueType() {
-				return fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
-			}
-			optlist = append(optlist, CLIOption{
-				Name: o.GetName(),
-			})
-		} else {
-			optlist = append(optlist, CLIOption{
-				Name:        o.GetName(),
-				Type:        o.ValueType(),
-				Description: o.GetDescriptionText(),
-			})
-		}
+	optlist, err := cliOpts(options.DefaultRegistry, s.Options())
+	if err != nil {
+		return err
 	}
+
 	vers := s.Version()
 	if vers == "" {
 		set := descriptor.ValueSetDescriptor{
@@ -593,6 +642,64 @@ func (p *plugin) RegisterCommand(c Command) error {
 
 func (p *plugin) Commands() []Command {
 	return maputils.OrderedValues(p.clicmds)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (p *plugin) GetTransferHandler(name string) TransferHandler {
+	return p.transferhandlers[name]
+}
+
+func (p *plugin) RegisterTransferHandler(h TransferHandler) error {
+	if p.GetTransferHandler(h.GetName()) != nil {
+		return errors.ErrAlreadyExists("transfer handler", h.GetName())
+	}
+	d := descriptor.TransferHandlerDescriptor{
+		Name:        h.GetName(),
+		Description: h.GetDescription(),
+	}
+	for _, q := range h.GetQuestions() {
+		qd := descriptor.QuestionDescriptor{
+			Question:    q.GetQuestion(),
+			Description: q.GetDescription(),
+			Labels:      q.GetLabels(),
+		}
+		d.Questions = append(d.Questions, qd)
+	}
+	p.descriptor.TransferHandlers = append(p.descriptor.TransferHandlers, d)
+	p.transferhandlers[h.GetName()] = h
+	return nil
+}
+
+func (p *plugin) TransferHandlers() []TransferHandler {
+	return maputils.OrderedValues(p.transferhandlers)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (p *plugin) GetSigningHandler(name string) SigningHandler {
+	return p.signinghandlers[name]
+}
+
+func (p *plugin) RegisterSigningHandler(h SigningHandler) error {
+	if p.GetSigningHandler(h.GetName()) != nil {
+		return errors.ErrAlreadyExists("signing handler", h.GetName())
+	}
+	d := descriptor.SigningHandlerDescriptor{
+		Name:        h.GetName(),
+		Description: h.GetDescription(),
+		Credentials: h.GetConsumerProvider() != nil,
+		Signer:      h.GetSigner() != nil,
+		Verifier:    h.GetVerifier() != nil,
+	}
+
+	p.signinghandlers[h.GetName()] = h
+	p.descriptor.SigningHandlers = append(p.descriptor.SigningHandlers, d)
+	return nil
+}
+
+func (p *plugin) SigningHandlers() []SigningHandler {
+	return maputils.OrderedValues(p.signinghandlers)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

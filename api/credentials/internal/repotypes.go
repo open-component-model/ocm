@@ -13,7 +13,7 @@ import (
 )
 
 type RepositoryType interface {
-	descriptivetype.TypedObjectType[RepositorySpec]
+	descriptivetype.VersionedTypedObjectType[RepositorySpec]
 }
 
 type RepositorySpec interface {
@@ -28,22 +28,22 @@ type (
 )
 
 type RepositoryTypeScheme interface {
-	descriptivetype.TypeScheme[RepositorySpec, RepositoryType]
+	descriptivetype.VersionedTypeScheme[RepositorySpec, RepositoryType]
 }
 
-type _Scheme = descriptivetype.TypeScheme[RepositorySpec, RepositoryType]
+type _Scheme = descriptivetype.VersionedTypeScheme[RepositorySpec, RepositoryType]
 
 type repositoryTypeScheme struct {
 	_Scheme
 }
 
 func NewRepositoryTypeScheme(defaultDecoder RepositorySpecDecoder, base ...RepositoryTypeScheme) RepositoryTypeScheme {
-	scheme := descriptivetype.MustNewDefaultTypeScheme[RepositorySpec, RepositoryType, RepositoryTypeScheme]("Credential provider", nil, &UnknownRepositorySpec{}, true, defaultDecoder, utils.Optional(base...))
+	scheme := descriptivetype.MustNewDefaultVersionedTypeScheme[RepositorySpec, RepositoryType, RepositoryTypeScheme]("Credential provider", nil, &UnknownRepositorySpec{}, true, defaultDecoder, utils.Optional(base...))
 	return &repositoryTypeScheme{scheme}
 }
 
 func NewStrictRepositoryTypeScheme(base ...RepositoryTypeScheme) runtime.VersionedTypeRegistry[RepositorySpec, RepositoryType] {
-	scheme := descriptivetype.MustNewDefaultTypeScheme[RepositorySpec, RepositoryType, RepositoryTypeScheme]("Credential provider", nil, nil, false, nil, utils.Optional(base...))
+	scheme := descriptivetype.MustNewDefaultVersionedTypeScheme[RepositorySpec, RepositoryType, RepositoryTypeScheme]("Credential provider", nil, nil, false, nil, utils.Optional(base...))
 	return &repositoryTypeScheme{scheme}
 }
 

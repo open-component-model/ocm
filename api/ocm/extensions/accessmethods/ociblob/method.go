@@ -3,6 +3,7 @@ package ociblob
 import (
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -60,6 +61,22 @@ var _ accspeccpi.AccessSpec = (*AccessSpec)(nil)
 
 func (a *AccessSpec) Describe(ctx accspeccpi.Context) string {
 	return fmt.Sprintf("OCI blob %s in repository %s", a.Digest, a.Reference)
+}
+
+func (a *AccessSpec) Info(ctx accspeccpi.Context) *accspeccpi.UniformAccessSpecInfo {
+	segs := strings.Split(a.Reference, "/")
+	comps := strings.Split(segs[0], ":")
+	port := ""
+	if len(comps) > 1 {
+		port = comps[1]
+	}
+	return &accspeccpi.UniformAccessSpecInfo{
+		Kind: Type,
+		Host: comps[0],
+		Port: port,
+		Path: strings.Join(segs[1:], "/"),
+		Info: a.Digest.String(),
+	}
 }
 
 func (s *AccessSpec) IsLocal(context accspeccpi.Context) bool {
