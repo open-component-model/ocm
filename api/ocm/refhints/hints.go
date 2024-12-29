@@ -205,6 +205,7 @@ func (h DefaultReferenceHint) GetReference() string {
 	return h[HINT_REFERENCE]
 }
 
+// Serialize see ParseHints for serialization rules.
 func (h DefaultReferenceHint) Serialize(implicit ...bool) string {
 	if h == nil {
 		return ""
@@ -312,150 +313,7 @@ func newHint(impl bool) DefaultReferenceHint {
 	return h
 }
 
-// ParseHints parses a string containing servialized reference hints,
-// If implicit is set to true, the implicit attribute is set
-func ParseHints(v string, implicit ...bool) ReferenceHints {
-	var hints ReferenceHints
-
-	var prop string
-	var val string
-
-	var hint DefaultReferenceHint
-	state := -1
-	start := 0
-	mask := false
-	impl := general.Optional(implicit...)
-	for i, c := range v {
-		switch state {
-		case -1:
-			if c == '"' {
-				hint = newHint(impl)
-				prop = HINT_REFERENCE
-				start = i + 1
-				state = 5
-			} else {
-				state = 0
-			}
-			fallthrough
-		case 0: // type or plain value
-			if c == ':' {
-				state = 1
-			}
-			if c == '=' {
-				hint = DefaultReferenceHint{}
-				prop = v[start:i]
-				start = i + 1
-				state = 3
-			}
-			if c == ',' || c == ';' {
-				hint = DefaultReferenceHint{}
-				hint[HINT_REFERENCE] = v[start:i]
-				start = i + 1
-				if c == ',' {
-					state = 7
-				}
-				if c == ';' {
-					hints = append(hints, hint)
-					hint = nil
-					state = -1
-				}
-			}
-		case 1: // colon
-			if c == ':' {
-				hint = newHint(impl).SetProperty(HINT_TYPE, v[start:i-1])
-				start = i + 1
-				state = 7
-			} else {
-				state = 0
-			}
-		case 7: // prop start
-			if c == '"' {
-				val = ""
-				prop = HINT_REFERENCE
-				state = 5
-				start = i + 1
-				continue
-			}
-			state = 2
-			fallthrough
-		case 2: // prop
-			switch c {
-			case '=':
-				prop = v[start:i]
-				start = i + 1
-				state = 3
-			case ';':
-				hint[HINT_REFERENCE] = v[start:i]
-				hints = append(hints, hint)
-				hint = nil
-				state = -1
-				start = i + 1
-			}
-		case 3: // value start
-			if c == '"' {
-				val = ""
-				state = 5
-				start = i + 1
-			} else {
-				state = 4
-				start = i
-			}
-		case 4: // plain value
-			if c == ',' || c == ';' {
-				hint[prop] = v[start:i]
-				start = i + 1
-				if c == ';' {
-					hints = append(hints, hint)
-					hint = nil
-					state = -1
-				} else {
-					state = 7
-				}
-			}
-		case 5: // escaped value
-			if mask {
-				mask = false
-			} else {
-				if c == '\\' {
-					mask = true
-					continue
-				}
-				if c == '"' {
-					hint[prop] = val
-					state = 6
-				}
-			}
-			val += string(c)
-		case 6: // end escaped
-			if c == ',' {
-				start = i + 1
-				state = 2
-			}
-			if c == ';' {
-				hints = append(hints, hint)
-				hint = nil
-				start = i + 1
-				state = -1
-			}
-		}
-	}
-
-	switch state {
-	case 0, 1:
-		hint = newHint(impl).SetProperty(HINT_REFERENCE, v[start:])
-	case 2:
-		hint[HINT_REFERENCE] = v[start:]
-	case 3:
-		hint[prop] = ""
-	case 4:
-		hint[prop] = v[start:]
-	case 5:
-		hint[prop] = v[start:]
-	case 6:
-	}
-	hints = append(hints, hint)
-	return hints
-}
+////////////////////////////////////////////////////////////////////////////////#
 
 // JoinUnique joins multiple hint lists, where the first occurrence of a
 // hint type takes precedence.
