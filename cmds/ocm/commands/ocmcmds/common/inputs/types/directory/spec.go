@@ -3,8 +3,10 @@ package directory
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/dirtree"
@@ -14,6 +16,9 @@ import (
 
 type Spec struct {
 	cpi.MediaFileSpec `json:",inline"`
+
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
+
 	// PreserveDir defines that the directory specified in the Path field should be included in the blob.
 	// Only supported for Type dir.
 	PreserveDir *bool `json:"preserveDir,omitempty"`
@@ -54,14 +59,14 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	fs := ctx.FileSystem()
 	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
 	if err != nil {
-		return nil, "", fmt.Errorf("resource dir %s: %w", info.InputFilePath, err)
+		return nil, nil, fmt.Errorf("resource dir %s: %w", info.InputFilePath, err)
 	}
 	if !inputInfo.IsDir() {
-		return nil, "", fmt.Errorf("resource type is dir but a file was provided")
+		return nil, nil, fmt.Errorf("resource type is dir but a file was provided")
 	}
 
 	access, err := dirtree.BlobAccess(inputPath,
@@ -73,5 +78,5 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		dirtree.WithFollowSymlinks(utils.AsBool(s.FollowSymlinks)),
 		dirtree.WithPreserveDir(utils.AsBool(s.PreserveDir)),
 	)
-	return access, "", err
+	return access, sliceutils.Convert[refhints.ReferenceHint](refhints.AsImplicit(s.ReferenceHints)), err
 }

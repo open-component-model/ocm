@@ -20,6 +20,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/extensions/download"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessobj"
 	common "ocm.software/ocm/api/utils/misc"
 )
@@ -56,11 +57,16 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	var repo oci.Repository
 
 	var tag string
-
 	aspec := m.AccessSpec()
-	namespace := racc.ReferenceHint()
-	if l, ok := aspec.(*localblob.AccessSpec); namespace == "" && ok {
-		namespace = l.ReferenceName
+
+	hint := racc.Meta().ReferenceHints.GetReferenceHint(techoci.ReferenceHintType)
+	if hint == nil {
+		hint = racc.ReferenceHintForAccess().GetReferenceHint(techoci.ReferenceHintType, "")
+	}
+
+	var namespace string
+	if hint != nil {
+		namespace = hint.GetReference()
 	}
 
 	// get rid of digest

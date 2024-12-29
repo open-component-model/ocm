@@ -4,6 +4,7 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/refhints"
 )
 
 type (
@@ -13,7 +14,7 @@ type (
 
 type Options struct {
 	Global cpi.AccessSpec
-	Hint   string
+	Hint   refhints.ReferenceHints
 }
 
 var (
@@ -29,7 +30,7 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.Global != nil {
 		opts.Global = o.Global
 	}
-	if o.Hint != "" {
+	if o.Hint != nil {
 		opts.Hint = o.Hint
 	}
 }
@@ -38,14 +39,23 @@ func (o *Options) Apply(opts ...Option) {
 	optionutils.ApplyOptions(o, opts...)
 }
 
-type hint string
+type hint struct {
+	hint refhints.ReferenceHints
+}
 
 func (o hint) ApplyTo(opts *Options) {
-	opts.Hint = string(o)
+	opts.Hint = o.hint
 }
 
 func WithHint(h string) Option {
-	return hint(h)
+	if h == "" {
+		return hint{nil}
+	}
+	return hint{refhints.ParseHints(h)}
+}
+
+func WithReferenceHint(h ...refhints.ReferenceHint) Option {
+	return hint{h}
 }
 
 func WrapHint[O any, P optionutils.OptionTargetProvider[*Options, O]](h string) optionutils.Option[P] {

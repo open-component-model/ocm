@@ -9,6 +9,7 @@ import (
 
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/selectors/accessors"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/runtime"
@@ -136,6 +137,20 @@ type ArtifactMetaAccess interface {
 	ElementMetaAccess
 	GetType() string
 	SetType(string)
+	ReferenceHintProvider
+	ReferenceHintSink
+}
+
+type ReferenceHintProvider interface {
+	// GetReferenceHints returns the reference hints specified together with the metadata.
+	GetReferenceHints() refhints.ReferenceHints
+}
+
+type ReferenceHintSink interface {
+	// SetReferenceHints sets the reference hints specified together with the metadata.
+	SetReferenceHints([]refhints.ReferenceHint)
+	// AddReferenceHints adds additional hints if their type is not yet available.
+	AddReferenceHints(hints ...refhints.ReferenceHint)
 }
 
 // ArtifactMetaPointer is a pointer to an artifact meta object.
@@ -428,11 +443,29 @@ type SourceMeta struct {
 	ElementMeta
 	// Type describes the type of the object.
 	Type string `json:"type"`
+	// ReferenceHints describe several types hints used by uploaders
+	// to decide on used element identities.
+	ReferenceHints refhints.ReferenceHints `json:"referenceHints,omitempty"`
 }
 
 // GetType returns the type of the object.
 func (o *SourceMeta) GetType() string {
 	return o.Type
+}
+
+// GetReferenceHints returns the reference hints specified together with the metadata.
+func (o *SourceMeta) GetReferenceHints() refhints.ReferenceHints {
+	return o.ReferenceHints.Copy()
+}
+
+// SetReferenceHints sets the reference hints specified together with the metadata.
+func (o *SourceMeta) SetReferenceHints(hints []refhints.ReferenceHint) {
+	o.ReferenceHints = refhints.ReferenceHints(hints).Copy()
+}
+
+// AddReferenceHints sets the reference hints specified together with the metadata.
+func (o *SourceMeta) AddReferenceHints(hints ...refhints.ReferenceHint) {
+	o.ReferenceHints.Add(hints...)
 }
 
 // SetType sets the type of the object.
@@ -446,8 +479,9 @@ func (o *SourceMeta) Copy() *SourceMeta {
 		return nil
 	}
 	return &SourceMeta{
-		ElementMeta: *o.ElementMeta.Copy(),
-		Type:        o.Type,
+		ElementMeta:    *o.ElementMeta.Copy(),
+		Type:           o.Type,
+		ReferenceHints: o.ReferenceHints.Copy(),
 	}
 }
 
@@ -625,6 +659,10 @@ type ResourceMeta struct {
 	// Type describes the type of the object.
 	Type string `json:"type"`
 
+	// ReferenceHints describe several types hints used by uploaders
+	// to decide on used element identities.
+	ReferenceHints refhints.ReferenceHints `json:"referenceHints,omitempty"`
+
 	// Relation describes the relation of the resource to the component.
 	// Can be a local or external resource
 	Relation metav1.ResourceRelation `json:"relation,omitempty"`
@@ -651,6 +689,21 @@ func (o *ResourceMeta) GetType() string {
 	return o.Type
 }
 
+// GetReferenceHints returns the reference hints specified together with the metadata.
+func (o *ResourceMeta) GetReferenceHints() refhints.ReferenceHints {
+	return o.ReferenceHints.Copy()
+}
+
+// SetReferenceHints sets the reference hints specified together with the metadata.
+func (o *ResourceMeta) SetReferenceHints(hints []refhints.ReferenceHint) {
+	o.ReferenceHints = refhints.ReferenceHints(hints).Copy()
+}
+
+// AddReferenceHints sets the reference hints specified together with the metadata.
+func (o *ResourceMeta) AddReferenceHints(hints ...refhints.ReferenceHint) {
+	o.ReferenceHints.Add(hints...)
+}
+
 // SetType sets the type of the object.
 func (o *ResourceMeta) SetType(ttype string) {
 	o.Type = ttype
@@ -667,11 +720,12 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 		return nil
 	}
 	r := &ResourceMeta{
-		ElementMeta: *o.ElementMeta.Copy(),
-		Type:        o.Type,
-		Relation:    o.Relation,
-		SourceRefs:  o.SourceRefs.Copy(),
-		Digest:      o.Digest.Copy(),
+		ElementMeta:    *o.ElementMeta.Copy(),
+		Type:           o.Type,
+		ReferenceHints: o.ReferenceHints.Copy(),
+		Relation:       o.Relation,
+		SourceRefs:     o.SourceRefs.Copy(),
+		Digest:         o.Digest.Copy(),
 	}
 	return r
 }

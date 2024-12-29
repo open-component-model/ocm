@@ -25,11 +25,13 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/compositionmodeattr"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/resolvers"
 	ocmsign "ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -128,7 +130,7 @@ var _ = Describe("Transfer handler", func() {
 
 		blob := Must(accspeccpi.BlobAccessForAccessMethod(m))
 		defer Close(blob, "blob")
-		MustBeSuccessful(tcv.SetResourceBlob(res.Meta(), blob, "", nil, ocm.SkipVerify()))
+		MustBeSuccessful(tcv.SetResourceBlob(res.Meta(), blob, refhints.NONE, nil, ocm.SkipVerify()))
 
 		MustBeSuccessful(tgt.AddComponentVersion(tcv))
 	})
@@ -251,7 +253,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		MustBeSuccessful(nested.Finalize())
 
 		// modify one artifact and overwrite
-		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), "", nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), refhints.NONE, nil))
 		tcd.Resources[0].Digest = DS_OTHERDATA
 		tcd.Resources[0].Access = Must(runtime.ToUnstructuredVersionedTypedObject(localblob.New("sha256:"+D_OTHERDATA, "", mime.MIME_TEXT, nil)))
 		buf.Reset()
@@ -269,18 +271,18 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		MustBeSuccessful(nested.Finalize())
 	},
 		Entry("without preserve global",
-			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+techoci.ReferenceHintType+"::"+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
 			false),
 		Entry("with preserve global",
-			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+techoci.ReferenceHintType+"::"+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
 			false,
 			standard.KeepGlobalAccess()),
 
 		Entry("with composition and without preserve global",
-			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+techoci.ReferenceHintType+"::"+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
 			true),
 		Entry("with composition and with preserve global",
-			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+techoci.ReferenceHintType+"::"+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
 			true,
 			standard.KeepGlobalAccess()),
 	)
@@ -386,7 +388,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		MustBeSuccessful(nested.Finalize())
 
 		// modify one artifact and overwrite
-		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), "", nil))
+		MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(), blobaccess.ForString(mime.MIME_TEXT, "otherdata"), refhints.NONE, nil))
 		tcd.Resources[0].Digest = DS_OTHERDATA
 		tcd.Resources[0].Access = Must(runtime.ToUnstructuredVersionedTypedObject(localblob.New("sha256:"+D_OTHERDATA, "", mime.MIME_TEXT, nil)))
 		buf.Reset()
@@ -407,17 +409,17 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		MustBeSuccessful(nested.Finalize())
 	},
 		Entry("without preserve global",
-			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+techoci.ReferenceHintType+"::"+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
 			false),
 		Entry("with preserve global",
-			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+techoci.ReferenceHintType+"::ocm/value:v2.0\",\"type\":\"localBlob\"}",
 			false,
 			standard.KeepGlobalAccess()),
 		Entry("with composition and without preserve global",
-			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+techoci.ReferenceHintType+"::"+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}",
 			true),
 		Entry("with composition and with preserve global",
-			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+techoci.ReferenceHintType+"::ocm/value:v2.0\",\"type\":\"localBlob\"}",
 			true,
 			standard.KeepGlobalAccess()),
 	)

@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/oci/testhelper"
+	oci2 "ocm.software/ocm/api/tech/oci"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/spf13/cobra"
@@ -22,7 +23,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	ctfocm "ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	handlercfg "ocm.software/ocm/api/ocm/tools/transfer/transferhandler/config"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
@@ -62,12 +63,12 @@ func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository)
 	data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
 	Expect(err).To(Succeed())
 	hash := HashManifest2(artifactset.DefaultArtifactSetDescriptorFileName)
-	Expect(string(data)).To(StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/ref:v2.0\",\"type\":\"localBlob\"}"))
+	Expect(string(data)).To(StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + oci2.ReferenceHintType + "::ocm/ref:v2.0\",\"type\":\"localBlob\"}"))
 
 	data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 	Expect(err).To(Succeed())
 	hash = HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-	Expect(string(data)).To(StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}"))
+	Expect(string(data)).To(StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + oci2.ReferenceHintType + "::ocm/value:v2.0\",\"type\":\"localBlob\"}"))
 
 	racc, err := comp.GetResourceByIndex(1)
 	Expect(err).To(Succeed())

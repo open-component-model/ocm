@@ -20,6 +20,8 @@ import (
 	"ocm.software/ocm/api/oci/grammar"
 	ocmcpi "ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	"ocm.software/ocm/api/ocm/refhints"
+	techoci "ocm.software/ocm/api/tech/oci"
 	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/logging"
@@ -91,10 +93,10 @@ func (a *AccessSpec) GlobalAccessSpec(ctx accspeccpi.Context) accspeccpi.AccessS
 	return a
 }
 
-func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) refhints.ReferenceHints {
 	ref, err := oci.ParseRef(a.ImageReference)
 	if err != nil {
-		return ""
+		return nil
 	}
 	hint := ref.Repository
 	r := cv.Repository()
@@ -109,7 +111,7 @@ func (a *AccessSpec) GetReferenceHint(cv accspeccpi.ComponentVersionAccess) stri
 	if ref.Tag != nil {
 		hint += grammar.TagSeparator + *ref.Tag
 	}
-	return hint
+	return refhints.DefaultList(techoci.ReferenceHint, hint, true)
 }
 
 func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (string, error) {

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/registrations"
 )
@@ -47,7 +48,7 @@ type BlobHandler interface {
 	// If this is possible and done an appropriate access spec
 	// must be returned, if this is not done, nil has to be returned
 	// without error
-	StoreBlob(blob BlobAccess, artType, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error)
+	StoreBlob(blob BlobAccess, artType string, hint metav1.ReferenceHints, global AccessSpec, ctx StorageContext) (AccessSpec, error)
 }
 
 // MultiBlobHandler is a BlobHandler consisting of a sequence of handlers.
@@ -55,7 +56,7 @@ type MultiBlobHandler []BlobHandler
 
 var _ sort.Interface = MultiBlobHandler(nil)
 
-func (m MultiBlobHandler) StoreBlob(blob BlobAccess, artType, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error) {
+func (m MultiBlobHandler) StoreBlob(blob BlobAccess, artType string, hint metav1.ReferenceHints, global AccessSpec, ctx StorageContext) (AccessSpec, error) {
 	for _, h := range m {
 		a, err := h.StoreBlob(blob, artType, hint, global, ctx)
 		if err != nil {

@@ -14,7 +14,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, a
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid external access method %q", access.GetKind())
 	}
-	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), prov), nil
+	return cpi.NewArtifactAccessForProvider[M, P](generics.Cast[*M](meta), prov), nil
 }
 
 func MustAccess[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, access ocm.AccessSpec) cpi.ArtifactAccess[M] {

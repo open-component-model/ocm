@@ -14,6 +14,8 @@ import (
 	me "ocm.software/ocm/api/ocm/elements/artifactaccess/genericaccess"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/ocm/refhints"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessio"
 )
 
@@ -44,7 +46,7 @@ var _ = Describe("dir tree resource access", func() {
 
 		acc := Must(me.ResourceAccess(env.OCMContext(), compdesc.NewResourceMeta("test", resourcetypes.OCI_IMAGE, compdesc.LocalRelation), spec))
 
-		Expect(acc.ReferenceHint()).To(Equal(OCINAMESPACE + ":" + OCIVERSION))
+		Expect(acc.ReferenceHintForAccess()).To(Equal(refhints.DefaultList(techoci.ReferenceHint, OCINAMESPACE+":"+OCIVERSION, true)))
 		Expect(acc.GlobalAccess()).To(BeNil())
 		Expect(acc.Meta().Type).To(Equal(resourcetypes.OCI_IMAGE))
 

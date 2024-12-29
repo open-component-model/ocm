@@ -105,6 +105,7 @@ sources, source, src, s
       --extra <name>=<value>                source extra identity (default [])
       --label <name>=<YAML>                 source label (leading * indicates signature relevant, optional version separated by @)
       --name string                         source name
+      --refhint {<name[type]>=<value>}      source reference hints (hint starts with type attribute)
       --source YAML                         source meta data (yaml)
       --type string                         source type
       --version string                      source version
@@ -200,6 +201,10 @@ with the field <code>type</code> in the <code>input</code> field:
 
     The binary data to provide.
 
+  - **<code>referenceHints</code>** *[]map[string]string*
+
+    This OPTIONAL property describes a list of implicit reference hints.
+
   - **<code>mediaType</code>** *string*
 
     This OPTIONAL property describes the media type to store with the local blob.
@@ -237,6 +242,10 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is application/x-tar and
     application/gzip if compression is enabled.
+
+  - **<code>referenceHints</code>** *[]map[string]string*
+
+    This OPTIONAL property describes a list of implicit reference hints.
 
   - **<code>compress</code>** *bool*
 
@@ -323,6 +332,10 @@ with the field <code>type</code> in the <code>input</code> field:
 
     This REQUIRED property describes the path to the file relative to the
     resource file location.
+
+  - **<code>referenceHints</code>** *[]map[string]string*
+
+    This OPTIONAL property describes a list of implicit reference hints
 
   - **<code>mediaType</code>** *string*
 
@@ -511,6 +524,10 @@ with the field <code>type</code> in the <code>input</code> field:
     This REQUIRED property describes the path to the file relative to the
     resource file location.
 
+  - **<code>referenceHints</code>** *[]map[string]string*
+
+    This OPTIONAL property describes a list of implicit reference hints
+
   - **<code>mediaType</code>** *string*
 
     This OPTIONAL property describes the media type to store with the local blob.
@@ -531,6 +548,10 @@ with the field <code>type</code> in the <code>input</code> field:
 
     This OPTIONAL property describes a list of spiff libraries to include in template
     processing.
+
+  - **<code>referenceHints</code>** *[]map[string]string*
+
+    This OPTIONAL property describes a list of implicit reference hints.
 
   The variable settings from the command line are available as binding, also. They are provided under the node
   <code>values</code>.
@@ -556,6 +577,10 @@ with the field <code>type</code> in the <code>input</code> field:
   - **<code>yaml</code>** *AML/JSON or JSON/YAML string interpreted as YAML*
 
     The content emitted as YAML.
+
+  - **<code>referenceHints</code>** *[]map[string]string*
+
+    This OPTIONAL property describes a list of implicit reference hints.
 
   - **<code>mediaType</code>** *string*
 

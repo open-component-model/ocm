@@ -9,6 +9,8 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/ocm/refhints"
+	techoci "ocm.software/ocm/api/tech/oci"
 	blob "ocm.software/ocm/api/utils/blobaccess/ociartifact"
 )
 
@@ -21,17 +23,17 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, r
 	}
 
 	hint := eff.Hint
-	if hint == "" {
+	if hint == nil {
 		ref, err := oci.ParseRef(refname)
 		if err == nil {
-			hint = ref.String()
+			hint = refhints.DefaultList(techoci.ReferenceHint, ref.String())
 		}
 	}
 
 	blobprov := blob.Provider(refname, &eff.Blob)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.
-	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), accprov)
+	return cpi.NewArtifactAccessForProvider[M, P](generics.Cast[*M](meta), accprov)
 }
 
 func ResourceAccess(ctx ocm.Context, meta *cpi.ResourceMeta, path string, opts ...Option) cpi.ResourceAccess {

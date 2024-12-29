@@ -7,10 +7,12 @@ import (
 	"os"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/mime"
@@ -76,36 +78,36 @@ func (s *ProcessSpec) SetMediaTypeIfNotDefined(mediaType string) {
 	s.MediaType = mediaType
 }
 
-func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc blobaccess.DataAccess, fs vfs.FileSystem) (blobaccess.BlobAccess, string, error) {
+func (s *ProcessSpec) ProcessBlob(ctx inputs.Context, acc blobaccess.DataAccess, fs vfs.FileSystem, hints ...refhints.DefaultReferenceHint) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	if !s.Compress() {
 		if s.MediaType == "" {
 			s.MediaType = mime.MIME_OCTET
 		}
-		return blobaccess.ForDataAccess(blobaccess.BLOB_UNKNOWN_DIGEST, blobaccess.BLOB_UNKNOWN_SIZE, s.MediaType, acc), "", nil
+		return blobaccess.ForDataAccess(blobaccess.BLOB_UNKNOWN_DIGEST, blobaccess.BLOB_UNKNOWN_SIZE, s.MediaType, acc), sliceutils.Convert[refhints.ReferenceHint](hints), nil
 	}
 
 	reader, err := acc.Reader()
 	if err != nil {
-		return nil, "", errors.Wrapf(err, "cannot read blob data")
+		return nil, nil, errors.Wrapf(err, "cannot read blob data")
 	}
 	defer reader.Close()
 
 	temp, err := blobaccess.NewTempFile("", "compressed*.gzip", fs)
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 	defer temp.Close()
 
 	s.SetMediaTypeIfNotDefined(mime.MIME_GZIP)
 	gw := gzip.NewWriter(temp.Writer())
 	if _, err := io.Copy(gw, reader); err != nil {
-		return nil, "", errors.Wrapf(err, "unable to compress input")
+		return nil, nil, errors.Wrapf(err, "unable to compress input")
 	}
 	if err := gw.Close(); err != nil {
-		return nil, "", errors.Wrapf(err, "unable to close gzip writer")
+		return nil, nil, errors.Wrapf(err, "unable to close gzip writer")
 	}
 
-	return temp.AsBlob(s.MediaType), "", nil
+	return temp.AsBlob(s.MediaType), sliceutils.Convert[refhints.ReferenceHint](hints), nil
 }
 
 func AddProcessSpecOptionTypes(set flagsets.ConfigOptionTypeSetHandler) {

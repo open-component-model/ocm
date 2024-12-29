@@ -6,11 +6,13 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/set"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/refhints"
 	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/common/options"
 )
@@ -132,4 +134,39 @@ func MapLabelSpecs(d interface{}) (interface{}, error) {
 		labels = append(labels, entry)
 	}
 	return labels, nil
+}
+
+func MapRefHintSpecs(d interface{}) (interface{}, error) {
+	if d == nil {
+		return nil, nil
+	}
+
+	m, ok := d.([]map[string]string)
+	if !ok {
+		return nil, errors.ErrInvalid("go type", fmt.Sprintf("%T", d))
+	}
+
+	var hints []interface{}
+	found := set.Set[string]{}
+	for _, h := range m {
+		t := h["type"]
+		if len(h) == 1 {
+			// simple syntax: use hint type as hint spec.
+			hints := refhints.ParseHints(t)
+			if len(hints) > 1 {
+				return nil, errors.New("only one hint per argument")
+			}
+			h = hints[0].AsDefault()
+			t = hints[0].GetType()
+		}
+		entry := map[string]interface{}{}
+		for k, v := range h {
+			entry[k] = v
+		}
+		if _, ok := found[t]; ok {
+			return nil, fmt.Errorf("duplicate reference type %q", t)
+		}
+		hints = append(hints, entry)
+	}
+	return hints, nil
 }

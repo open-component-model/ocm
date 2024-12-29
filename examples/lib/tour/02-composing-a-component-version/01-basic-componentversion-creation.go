@@ -150,7 +150,7 @@ data: some very important data required to understand this component
 		//   global technology specific access to the same content
 		//   (we don't use it, here).
 		// --- begin setup by blob access ---
-		err = cv.SetResourceBlob(meta, blob, "", nil)
+		err = cv.SetResourceBlob(meta, blob, nil, nil)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")
 		}

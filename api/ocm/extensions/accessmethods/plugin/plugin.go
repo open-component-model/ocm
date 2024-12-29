@@ -13,6 +13,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/errkind"
 )
 
@@ -113,16 +114,16 @@ func (p *PluginHandler) GetMimeType(spec *AccessSpec) string {
 	return info.Short
 }
 
-func (p *PluginHandler) GetReferenceHint(spec *AccessSpec, cv cpi.ComponentVersionAccess) string {
+func (p *PluginHandler) GetReferenceHint(spec *AccessSpec, cv cpi.ComponentVersionAccess) metav1.ReferenceHints {
 	mspec := p.GetAccessMethodDescriptor(spec.GetKind(), spec.GetVersion())
 	if mspec == nil {
-		return "unknown type " + spec.GetType()
+		return nil
 	}
 	info, err := p.Info(spec)
-	if err != nil {
-		return ""
+	if err != nil || info.Hint == "" {
+		return nil
 	}
-	return info.Hint
+	return metav1.ParseHints(info.Hint, true)
 }
 
 func (p *PluginHandler) Validate(spec *AccessSpec) (*ppi.AccessSpecInfo, error) {

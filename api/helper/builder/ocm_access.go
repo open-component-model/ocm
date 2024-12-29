@@ -13,7 +13,7 @@ func (b *Builder) Access(acc compdesc.AccessSpec) {
 	if b.blob != nil && *b.blob != nil {
 		b.fail("access already set")
 	}
-	if b.hint != nil && *b.hint != "" {
+	if *b.blobhint != nil {
 		b.fail("hint requires blob", 1)
 	}
 

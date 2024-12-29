@@ -12,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/compatattr"
 	storagecontext "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
+	"ocm.software/ocm/api/ocm/refhints"
 	common "ocm.software/ocm/api/utils/misc"
 )
 
@@ -28,7 +29,7 @@ func NewBlobHandler() cpi.BlobHandler {
 	return &blobHandler{}
 }
 
-func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints refhints.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	ocmctx, ok := ctx.(storagecontext.StorageContext)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to storagecontext.StorageContext", ctx)
@@ -45,6 +46,6 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 	if compatattr.Get(ctx.GetContext()) {
 		return localfsblob.New(path, blob.MimeType()), nil
 	} else {
-		return localblob.New(path, hint, blob.MimeType(), global), nil
+		return localblob.New(path, refhints.FilterImplicit(hints).Serialize(), blob.MimeType(), global), nil
 	}
 }

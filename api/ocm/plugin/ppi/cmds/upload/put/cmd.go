@@ -14,6 +14,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/common"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -59,7 +60,9 @@ type Options struct {
 	MediaType    string
 	ArtifactType string
 
-	Hint string
+	hint string
+
+	Hints ppi.ReferenceHints
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
@@ -67,7 +70,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	flag.StringToStringVarPF(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
 	fs.StringVarP(&o.MediaType, OptMedia, "m", "", "media type of input blob")
 	fs.StringVarP(&o.ArtifactType, OptArt, "a", "", "artifact type of input blob")
-	fs.StringVarP(&o.Hint, OptHint, "H", "", "reference hint for storing blob")
+	fs.StringVarP(&o.hint, OptHint, "H", "", "reference hint for storing blob")
 }
 
 func (o *Options) Complete(args []string) error {
@@ -75,6 +78,7 @@ func (o *Options) Complete(args []string) error {
 	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[1]), &o.Specification); err != nil {
 		return errors.Wrapf(err, "invalid repository specification")
 	}
+	o.Hints = refhints.ParseHints(o.hint)
 	return nil
 }
 
@@ -88,7 +92,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if u == nil {
 		return errors.ErrNotFound(descriptor.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
-	w, h, err := u.Writer(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, opts.Credentials)
+	w, h, err := u.Writer(p, opts.ArtifactType, opts.MediaType, opts.Hints, spec, opts.Credentials)
 	if err != nil {
 		return err
 	}

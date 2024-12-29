@@ -1,0 +1,21 @@
+---
+sources:
+- name: testdata
+  type: git
+  referenceHints: test::laber
+  input:
+    type: file
+    path: testcontent
+    mediaType: text/plain
+- name: 'myothersrc'
+  type: 'git'
+  input:
+    type: "dir"
+    path: .
+    compress: true # defaults to false
+    excludeFiles:
+      - "*.yaml"
+      - "*.tmpl"
+    preserveDir: false # optional, defaulted to false; if true, the top level folder "my/path" is included
+    referenceHints:
+      dummy::blubber

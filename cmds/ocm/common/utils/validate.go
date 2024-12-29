@@ -47,15 +47,15 @@ func CheckForUnknown(fldPath *field.Path, orig, accepted interface{}) field.Erro
 	case map[string]interface{}:
 		if o, ok := orig.(map[string]interface{}); ok {
 			allErrs = append(allErrs, CheckForUnknownFields(fldPath, o, a)...)
-		} else {
-			allErrs = append(allErrs, field.Forbidden(fldPath, "map expected"))
-		}
+		} /*else { // accept different parsing by explicit unmarshaller
+			 allErrs = append(allErrs, field.Forbidden(fldPath, "map expected"))
+		}*/
 	case []interface{}:
 		if o, ok := orig.([]interface{}); ok {
 			allErrs = append(allErrs, CheckForUnknownElements(fldPath, o, a)...)
-		} else {
-			allErrs = append(allErrs, field.Forbidden(fldPath, "list expected"))
-		}
+		} /*else { // accept different parsing by explicit unmarshaller
+			 allErrs = append(allErrs, field.Forbidden(fldPath, "list expected"))
+		}*/
 	default:
 	}
 	return allErrs

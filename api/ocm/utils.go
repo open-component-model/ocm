@@ -11,6 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/internal"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -100,11 +101,11 @@ func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
 	return internal.WrapContextProvider(ctx)
 }
 
-func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) string {
+func ReferenceHint(spec AccessSpec, cv ComponentVersionAccess) refhints.ReferenceHints {
 	if h, ok := spec.(internal.HintProvider); ok {
 		return h.GetReferenceHint(cv)
 	}
-	return ""
+	return nil
 }
 
 func GlobalAccess(spec AccessSpec, ctx Context) AccessSpec {

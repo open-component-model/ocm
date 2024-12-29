@@ -15,6 +15,8 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
+	"ocm.software/ocm/api/ocm/refhints"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -40,7 +42,7 @@ func NewArtifactHandler(repospec ...*ociuploadattr.Attribute) cpi.BlobHandler {
 	return &artifactHandler{utils.Optional(repospec...)}
 }
 
-func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints refhints.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	attr := b.spec
 	if attr == nil {
 		attr = ociuploadattr.Get(ctx.GetContext())
@@ -64,6 +66,12 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot marshal target specification")
 	}
+
+	var hint string
+	if h := hints.GetReferenceHint(techoci.ReferenceHintType, ""); h != nil {
+		hint = h.GetReference()
+	}
+
 	values := []interface{}{
 		"arttype", artType,
 		"mediatype", mediaType,

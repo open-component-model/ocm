@@ -7,6 +7,7 @@ import (
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/selectors/refsel"
 	"ocm.software/ocm/api/ocm/selectors/rscsel"
 	"ocm.software/ocm/api/ocm/selectors/srcsel"
@@ -144,11 +145,11 @@ func (d *DummyComponentVersionAccess) Execute(f func() error) error {
 	return f()
 }
 
-func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype, refName string, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error) {
+func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype string, hints []refhints.ReferenceHint, global AccessSpec, opts ...BlobUploadOption) (AccessSpec, error) {
 	return nil, errors.ErrNotSupported("adding blobs")
 }
 
-func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...BlobModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, hints refhints.AnyReferenceHint, global AccessSpec, opts ...BlobModificationOption) error {
 	return errors.ErrNotSupported("adding blobs")
 }
 
@@ -164,7 +165,7 @@ func (d *DummyComponentVersionAccess) SetResourceByAccess(art ResourceAccess, mo
 	return errors.ErrNotSupported("resource modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...TargetElementOption) error {
+func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, hints refhints.AnyReferenceHint, global AccessSpec, opts ...TargetElementOption) error {
 	return errors.ErrNotSupported("source modification")
 }
 
@@ -189,4 +190,31 @@ func (d *DummyComponentVersionAccess) IsPersistent() bool {
 
 func (d *DummyComponentVersionAccess) UseDirectAccess() bool {
 	return true
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type DummyStorageContext struct {
+	Context    Context
+	Component  string
+	Repository Repository
+	RepoTypes  ImplementationRepositoryType
+}
+
+var _ StorageContext = (*DummyStorageContext)(nil)
+
+func (d *DummyStorageContext) GetContext() Context {
+	return d.Context
+}
+
+func (d *DummyStorageContext) TargetComponentName() string {
+	return d.Component
+}
+
+func (d *DummyStorageContext) TargetComponentRepository() Repository {
+	return d.Repository
+}
+
+func (d *DummyStorageContext) GetImplementationRepositoryType() ImplementationRepositoryType {
+	return d.RepoTypes
 }

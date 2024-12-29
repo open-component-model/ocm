@@ -70,7 +70,7 @@ var _ = Describe("Input Type", func() {
 			a, info := Must2(inp.GetBlob(ctx, inputs.InputResourceInfo{}))
 			Expect(a.MimeType()).To(Equal("media"))
 			Expect(a.Get()).To(Equal([]byte("stringdata")))
-			Expect(info).To(Equal(""))
+			Expect(info).To(BeNil())
 		})
 
 		It("handles json from string", func() {
@@ -79,7 +79,7 @@ var _ = Describe("Input Type", func() {
 			a, info := Must2(inp.GetBlob(ctx, inputs.InputResourceInfo{}))
 			Expect(a.MimeType()).To(Equal("media"))
 			Expect(a.Get()).To(Equal([]byte(`{"field":"value"}`)))
-			Expect(info).To(Equal(""))
+			Expect(info).To(BeNil())
 		})
 		It("handles json", func() {
 			inp := Must(NewJson(map[string]interface{}{"field": "value"}, "media", false))
@@ -87,7 +87,7 @@ var _ = Describe("Input Type", func() {
 			a, info := Must2(inp.GetBlob(ctx, inputs.InputResourceInfo{}))
 			Expect(a.MimeType()).To(Equal("media"))
 			Expect(a.Get()).To(Equal([]byte(`{"field":"value"}`)))
-			Expect(info).To(Equal(""))
+			Expect(info).To(BeNil())
 		})
 
 		It("handles formatted json from string", func() {
@@ -98,7 +98,7 @@ var _ = Describe("Input Type", func() {
 			Expect(a.Get()).To(Equal([]byte(`{
   "field": "value"
 }`)))
-			Expect(info).To(Equal(""))
+			Expect(info).To(BeNil())
 		})
 		It("handles formatted json", func() {
 			inp := Must(NewFormattedJson(map[string]interface{}{"field": "value"}, "media", false))
@@ -108,7 +108,7 @@ var _ = Describe("Input Type", func() {
 			Expect(a.Get()).To(Equal([]byte(`{
   "field": "value"
 }`)))
-			Expect(info).To(Equal(""))
+			Expect(info).To(BeNil())
 		})
 
 		It("handles yaml from string", func() {
@@ -118,7 +118,7 @@ var _ = Describe("Input Type", func() {
 			Expect(a.MimeType()).To(Equal("media"))
 			Expect(a.Get()).To(Equal([]byte(`field: value
 `)))
-			Expect(info).To(Equal(""))
+			Expect(info).To(BeNil())
 		})
 		It("handles yaml", func() {
 			inp := Must(NewYaml(map[string]interface{}{"field": "value"}, "media", false))
@@ -127,7 +127,7 @@ var _ = Describe("Input Type", func() {
 			Expect(a.MimeType()).To(Equal("media"))
 			Expect(a.Get()).To(Equal([]byte(`field: value
 `)))
-			Expect(info).To(Equal(""))
+			Expect(info).To(BeNil())
 		})
 	})
 })

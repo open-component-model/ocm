@@ -3,6 +3,7 @@ package srcs
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	clictx "ocm.software/ocm/api/cli"
@@ -10,6 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	compdescv2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
@@ -68,7 +70,8 @@ func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Eleme
 			ExtraIdentity: spec.ExtraIdentity,
 			Labels:        spec.Labels,
 		},
-		Type: spec.Type,
+		Type:           spec.Type,
+		ReferenceHints: spec.GetReferenceHints(),
 	}
 	return v.SetSource(meta, acc, h.GetTargetOpts()...)
 }
@@ -81,7 +84,7 @@ type ResourceSpec struct {
 	addhdlrs.ResourceInput `json:",inline"`
 }
 
-var _ addhdlrs.ElementSpec = (*ResourceSpec)(nil)
+var _ addhdlrs.ArtifactElementSpec = (*ResourceSpec)(nil)
 
 func (r *ResourceSpec) GetRawIdentity() metav1.Identity {
 	return r.ElementMeta.GetRawIdentity()
@@ -116,4 +119,16 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *addhdlrs.ResourceInpu
 		}
 	}
 	return allErrs.ToAggregate()
+}
+
+func (r *ResourceSpec) GetReferenceHints() refhints.ReferenceHints {
+	return refhints.ReferenceHints(sliceutils.Convert[refhints.ReferenceHint](r.ReferenceHints))
+}
+
+func (r *ResourceSpec) SetReferenceHints(hints []refhints.ReferenceHint) {
+	r.ReferenceHints = sliceutils.Transform(hints, refhints.AsDefault)
+}
+
+func (r *ResourceSpec) AddReferenceHints(hints ...refhints.ReferenceHint) {
+	refhints.AddUnique(&r.ReferenceHints, sliceutils.Transform(hints, refhints.AsDefault)...)
 }

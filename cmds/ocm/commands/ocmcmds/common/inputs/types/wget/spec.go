@@ -3,8 +3,10 @@ package wget
 import (
 	"bytes"
 
+	"github.com/mandelsoft/goutils/sliceutils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/wget"
 	"ocm.software/ocm/api/utils/runtime"
@@ -25,6 +27,8 @@ type Spec struct {
 	Body string `json:"body"`
 	// NoRedirect allows to disable redirects
 	NoRedirect bool `json:"noRedirect"`
+
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)
@@ -54,7 +58,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	access, err := wget.BlobAccess(s.URL,
 		wget.WithCredentialContext(ctx),
 		wget.WithLoggingContext(ctx),
@@ -64,5 +68,5 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		wget.WithBody(bytes.NewReader([]byte(s.Body))),
 		wget.WithNoRedirect(s.NoRedirect),
 	)
-	return access, "", err
+	return access, sliceutils.Convert[refhints.ReferenceHint](refhints.AsImplicit(s.ReferenceHints)), err
 }

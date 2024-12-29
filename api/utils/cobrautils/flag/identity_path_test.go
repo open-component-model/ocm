@@ -79,8 +79,8 @@ var _ = Describe("identity path", func() {
 	})
 
 	It("rejects invalid assignment", func() {
-		var flag map[string]interface{}
-		StringToValueVarP(flags, &flag, "flag", "", nil, "test flag")
+		var flag []map[string]string
+		IdentityPathVarP(flags, &flag, "flag", "", nil, "test flag")
 
 		value := `a`
 

@@ -25,6 +25,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	techoci "ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
@@ -57,22 +58,6 @@ var _ = Describe("oci artifact transfer", func() {
 
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 			ldesc = OCIManifest1(env)
-		})
-
-		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-			env.Component(COMPONENT, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
-					})
-					env.Resource("artifact", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
-						env.Access(
-							ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
-						)
-					})
-				})
-			})
 		})
 
 		_ = ldesc
@@ -125,7 +110,7 @@ var _ = Describe("oci artifact transfer", func() {
 			data := Must(json.Marshal(comp.GetDescriptor().Resources[1].Access))
 
 			fmt.Printf("%s\n", string(data))
-			Expect(string(data)).To(StringEqualWithContext(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:` + D_OCIMANIFEST1 + `","type":"ociArtifact"},"localReference":"sha256:` + H_OCIARCHMANIFEST1 + `","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`))
+			Expect(string(data)).To(StringEqualWithContext(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:` + D_OCIMANIFEST1 + `","type":"ociArtifact"},"localReference":"sha256:` + H_OCIARCHMANIFEST1 + `","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"` + techoci.ReferenceHintType + `::ocm/value:v2.0","type":"localBlob"}`))
 			ocirepo := genericocireg.GetOCIRepository(tgt)
 			Expect(ocirepo).NotTo(BeNil())
 

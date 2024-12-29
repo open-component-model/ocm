@@ -10,6 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/accessio"
 )
 
@@ -44,7 +45,7 @@ func New(p plugin.Plugin, name string, target json.RawMessage) (cpi.BlobHandler,
 	}, nil
 }
 
-func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (acc cpi.AccessSpec, err error) {
+func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType string, hints metav1.ReferenceHints, global cpi.AccessSpec, ctx cpi.StorageContext) (acc cpi.AccessSpec, err error) {
 	var creds credentials.Credentials
 
 	if b.targetinfo != nil {
@@ -65,6 +66,8 @@ func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, glo
 		}
 	}
 
+	// pass complete hint information.
+	hint := hints.Serialize(true)
 	cpi.BlobHandlerLogger(ctx.GetContext()).Debug("plugin blob handler",
 		"plugin", b.plugin.Name(),
 		"uploader", b.name,
@@ -85,5 +88,5 @@ func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, glo
 	r := accessio.NewOndemandReader(blob)
 	defer errors.PropagateError(&err, r.Close)
 
-	return b.plugin.Put(b.name, r, artType, blob.MimeType(), hint, creddata, target)
+	return b.plugin.Put(b.name, r, artType, blob.MimeType(), hints, creddata, target)
 }

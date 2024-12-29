@@ -12,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -45,20 +46,28 @@ type static struct {
 	def_modopts ocm.ModificationOptions
 }
 
+// state descibes an actual set of targets
+// for different kinds of information added
+// by builder methods. If such a method is applicable
+// for a given context depends on the set of
+// available targets.
+// Every method may provide a new (extended) context
+// for embedded function calls by adding more targets.
 type state struct {
 	*static
-	ocm_repo    ocm.Repository
-	ocm_comp    ocm.ComponentAccess
-	ocm_vers    ocm.ComponentVersionAccess
-	ocm_rsc     *compdesc.ResourceMeta
-	ocm_src     *compdesc.SourceMeta
-	ocm_meta    *compdesc.ElementMeta
-	ocm_labels  *metav1.Labels
-	ocm_acc     *compdesc.AccessSpec
-	ocm_modopts *ocm.ModificationOptions
+	ocm_repo      ocm.Repository
+	ocm_comp      ocm.ComponentAccess
+	ocm_vers      ocm.ComponentVersionAccess
+	ocm_rsc       *compdesc.ResourceMeta
+	ocm_src       *compdesc.SourceMeta
+	ocm_meta      *compdesc.ElementMeta
+	ocm_metahints compdesc.ReferenceHintSink
+	ocm_labels    *metav1.Labels
+	ocm_acc       *compdesc.AccessSpec
+	ocm_modopts   *ocm.ModificationOptions
 
-	blob *blobaccess.BlobAccess
-	hint *string
+	blob     *blobaccess.BlobAccess
+	blobhint *refhints.ReferenceHints
 
 	oci_repo          oci.Repository
 	oci_nsacc         oci.NamespaceAccess
@@ -70,6 +79,16 @@ type state struct {
 	oci_platform      *artdesc.Platform
 }
 
+// Builder provides composition methods
+// working on an actual context described by
+// a state providing information about possible
+// information targets. A method may depend on the
+// availability of dedicated targets in the actual context.
+// Every method may provide
+// an own (extended) context for nested function calls.
+// The previous contexts will be preserved in a stack,
+// and restored when the method providing a new context
+// is left.
 type Builder struct {
 	*env.Environment
 	stack []element
@@ -197,14 +216,4 @@ func (b *Builder) Configure(funcs ...func()) {
 			f()
 		}
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-func (b *Builder) Hint(hint string) {
-	b.expect(b.hint, T_OCMACCESS)
-	if b.ocm_acc != nil && *b.ocm_acc != nil {
-		b.fail("access already set")
-	}
-	*(b.hint) = hint
 }

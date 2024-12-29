@@ -8,13 +8,14 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/refhints"
 )
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, access ocm.AccessSpec, opts ...Option) (cpi.ArtifactAccess[M], error) {
 	eff := optionutils.EvalOptions(opts...)
 
 	hint := eff.Hint
-	if hint == "" {
+	if len(hint) == 0 {
 		hint = ocm.ReferenceHint(access, &cpi.DummyComponentVersionAccess{ctx})
 	}
 	global := eff.Global
@@ -26,18 +27,18 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, a
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid external access method %q", access.GetKind())
 	}
-	return cpi.NewArtifactAccessForProvider(generics.Cast[*M](meta), newAccessProvider(prov, hint, global)), nil
+	return cpi.NewArtifactAccessForProvider[M, P](generics.Cast[*M](meta), newAccessProvider(prov, hint, global)), nil
 }
 
 type _accessProvider = cpi.AccessProvider
 
 type accessProvider struct {
 	_accessProvider
-	hint   string
+	hint   refhints.ReferenceHints
 	global cpi.AccessSpec
 }
 
-func newAccessProvider(prov cpi.AccessProvider, hint string, global cpi.AccessSpec) cpi.AccessProvider {
+func newAccessProvider(prov cpi.AccessProvider, hint refhints.ReferenceHints, global cpi.AccessSpec) cpi.AccessProvider {
 	return &accessProvider{
 		_accessProvider: prov,
 		hint:            hint,
@@ -45,11 +46,11 @@ func newAccessProvider(prov cpi.AccessProvider, hint string, global cpi.AccessSp
 	}
 }
 
-func (p *accessProvider) ReferenceHint() string {
-	if p.hint != "" {
+func (p *accessProvider) ReferenceHintForAccess() refhints.ReferenceHints {
+	if len(p.hint) != 0 {
 		return p.hint
 	}
-	return p._accessProvider.ReferenceHint()
+	return p._accessProvider.ReferenceHintForAccess()
 }
 
 func (p *accessProvider) GlobalAccess() cpi.AccessSpec {

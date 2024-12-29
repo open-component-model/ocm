@@ -75,6 +75,13 @@ $defs:
     description: 'base type for accesses (for extensions)'
     required:
       - 'type'
+  hint:
+    type: 'object'
+    description: 'attributes for a reference hint'
+    items:
+      type: 'string'
+    required:
+      - 'type'
 
   sourceDefinition:
     type: 'object'
@@ -99,6 +106,10 @@ $defs:
           $ref: '#/$defs/label'
       access:
          $ref: '#/$defs/access'
+      referenceHints:
+        type: 'array'
+        items:
+          $ref: '#/$defs/hint'
 
   digestSpec:
     type: 'object'
@@ -257,6 +268,10 @@ $defs:
           $ref: '#/$defs/label'
       access:
           $ref: '#/$defs/access'
+      referenceHints:
+        type: 'array'
+        items:
+          $ref: '#/$defs/hint'
       digest:
         oneOf:
           - type: 'null'
@@ -268,7 +283,6 @@ $defs:
     required:
       - 'name'
       - 'version'
-      - 'repositoryContexts'
       - 'provider'
       - 'sources'
       - 'componentReferences'

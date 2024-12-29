@@ -7,6 +7,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/refhints"
 )
 
 const KIND_TRANSFEROPTION = "transfer option"
@@ -100,9 +101,9 @@ type TransferHandler interface {
 	TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.SourceAccess) (bool, error)
 
 	// HandleTransferResource technically transfers a resource.
-	HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
+	HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMethod, hints []refhints.ReferenceHint, t ocm.ComponentVersionAccess) error
 	// HandleTransferSource technically transfers a source.
-	HandleTransferSource(r ocm.SourceAccess, m cpi.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
+	HandleTransferSource(r ocm.SourceAccess, m cpi.AccessMethod, hints []refhints.ReferenceHint, t ocm.ComponentVersionAccess) error
 }
 
 func ApplyOptions(set TransferOptions, opts ...TransferOption) error {

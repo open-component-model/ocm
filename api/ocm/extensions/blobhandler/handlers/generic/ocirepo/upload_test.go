@@ -6,6 +6,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
+	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
+	"ocm.software/ocm/api/ocm/refhints"
 
 	"ocm.software/ocm/api/oci"
 	ctfoci "ocm.software/ocm/api/oci/extensions/repositories/ctf"
@@ -240,5 +242,40 @@ var _ = Describe("upload", func() {
 		Expect(err).To(Succeed())
 		defer Close(target)
 		Expect(target.ExistsArtifact("copy/ocm/value", "v2.0")).To(BeTrue())
+	})
+
+	Context("hint compatibility", func() {
+		It("uploads with untyped hint", func() {
+			ctx := env.OCMContext()
+
+			// prepare upload to target OCI repo
+			attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
+			MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "ocm/ociArtifacts", attr))
+
+			ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0o700, env))
+			defer Close(ctf, "ctf")
+
+			cv := Must(ctf.LookupComponentVersion(COMP, VERS))
+			ocv := accessio.OnceCloser(cv)
+			defer Close(ocv)
+			ra := Must(cv.GetResourceByIndex(0))
+			acc := Must(ra.Access())
+			Expect(acc.GetKind()).To(Equal(localblob.Type))
+
+			blob := Must(ra.BlobAccess())
+			defer Close(blob, "blob")
+
+			tgt := composition.NewComponentVersion(ctx, COMP, VERS)
+			defer Close(tgt, "tgt")
+			MustBeSuccessful(tgt.SetResourceBlob(ra.Meta(), blob, refhints.DefaultList(refhints.DefaultHint, OCINAMESPACE+":"+OCIVERSION+"-beta", true), nil))
+
+			// close pending handler config
+			MustBeSuccessful(ctx.Finalize())
+
+			target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
+			Expect(err).To(Succeed())
+			defer Close(target)
+			Expect(target.ExistsArtifact("copy/ocm/value", "v2.0-beta")).To(BeTrue())
+		})
 	})
 })

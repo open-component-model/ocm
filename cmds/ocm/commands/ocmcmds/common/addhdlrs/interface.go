@@ -8,6 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/sliceutils"
 
 	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -104,6 +105,14 @@ type ElementSpec interface {
 	GetRawIdentity() metav1.Identity
 	Info() string
 	Validate(ctx clictx.Context, input *ResourceInput) error
+}
+
+// ArtifactElementSpec is the interface for elements
+// representing artifacts (like Resources a d Source).
+type ArtifactElementSpec interface {
+	ElementSpec
+	compdesc.ReferenceHintSink
+	compdesc.ReferenceHintProvider
 }
 
 // Element is the abstraction over model elements handled by
