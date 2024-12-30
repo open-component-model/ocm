@@ -9,12 +9,9 @@ import (
 )
 
 type (
-	TargetElement        = internal.TargetElement
-	TargetElementOption  = internal.TargetElementOption
-	TargetElementOptions = internal.TargetElementOptions
-
-	ElementModificationOption  = internal.ElementModificationOption
-	ElementModificationOptions = internal.ElementModificationOptions
+	TargetElement = internal.TargetElement
+	TargetOption  = internal.TargetOption
+	TargetOptions = internal.TargetOptions
 
 	ModificationOption  = internal.ModificationOption
 	ModificationOptions = internal.ModificationOptions
@@ -63,7 +60,7 @@ func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 }
 
 func TargetIndex(idx int) internal.TargetOptionImpl {
-	return internal.TargetIndex(idx)
+	return internal.TargetIndex(-1)
 }
 
 const AppendElement = internal.TargetIndex(-1)
@@ -78,13 +75,8 @@ func TargetIdentityOrCreate(id v1.Identity) internal.TargetOptionImpl {
 	return internal.TargetIdentityOrAppend(id)
 }
 
-// Deprecated: use ModifyElement.
 func ModifyResource(flag ...bool) internal.ModOptionImpl {
 	return internal.ModifyResource(flag...)
-}
-
-func ModifyElement(flag ...bool) internal.ElemModOptionImpl {
-	return internal.ModifyElement(flag...)
 }
 
 func AcceptExistentDigests(flag ...bool) internal.ModOptionImpl {

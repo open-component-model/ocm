@@ -26,7 +26,6 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -h, --help                      help for componentversions
       --lookup stringArray        repository name or spec for closure lookup fallback
   -O, --output string             output file for dry-run
-  -P, --preserve-signature        preserve existing signatures
   -R, --replace                   replace existing elements
   -S, --scheme string             schema version (default "v2")
   -s, --settings stringArray      settings file with variable settings (yaml)
@@ -56,10 +55,7 @@ components will be added by value.
 
 The <code>--replace</code> option allows users to specify whether adding an
 element with the same name and extra identity but different version as an
-existing element, append (false) or replace (true) the existing element.
-
-The <code>--preserve-signature</code> option prohibits changes of signature
-relevant elements.
+existing element append (false) or replace (true) the existing element.
 
 
 The source, resource and reference list can be composed according to the commands

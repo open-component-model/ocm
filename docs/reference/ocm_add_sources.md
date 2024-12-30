@@ -20,7 +20,6 @@ sources, source, src, s
   -F, --file string                         target file/directory (default "component-archive")
   -h, --help                                help for sources
   -O, --output string                       output file for dry-run
-  -P, --preserve-signature                  preserve existing signatures
   -R, --replace                             replace existing elements
   -s, --settings stringArray                settings file with variable settings (yaml)
       --templater string                    templater to use (go, none, spiff, subst) (default "subst")
@@ -975,10 +974,7 @@ shown below.
 
 The <code>--replace</code> option allows users to specify whether adding an
 element with the same name and extra identity but different version as an
-existing element, append (false) or replace (true) the existing element.
-
-The <code>--preserve-signature</code> option prohibits changes of signature
-relevant elements.
+existing element append (false) or replace (true) the existing element.
 
 
 All yaml/json defined resources can be templated.

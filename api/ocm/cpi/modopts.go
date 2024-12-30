@@ -9,12 +9,9 @@ import (
 )
 
 type (
-	TargetElement        = internal.TargetElement
-	TargetElementOption  = internal.TargetElementOption
-	TargetElementOptions = internal.TargetElementOptions
-
-	ElementModificationOption  = internal.ElementModificationOption
-	ElementModificationOptions = internal.ElementModificationOptions
+	TargetElement = internal.TargetElement
+	TargetOption  = internal.TargetOption
+	TargetOptions = internal.TargetOptions
 
 	ModificationOption  = internal.ModificationOption
 	ModificationOptions = internal.ModificationOptions
@@ -29,8 +26,8 @@ type (
 	AddVersionOptions = internal.AddVersionOptions
 )
 
-func NewTargetElementOptions(list ...TargetElementOption) *TargetElementOptions {
-	var m TargetElementOptions
+func NewTargetOptions(list ...TargetOption) *TargetOptions {
+	var m TargetOptions
 	m.ApplyTargetOptions(list...)
 	return &m
 }
@@ -68,10 +65,6 @@ func NewModificationOptions(list ...ModificationOption) *ModificationOptions {
 	return internal.NewModificationOptions(list...)
 }
 
-func NewElementModificationOptions(list ...ElementModificationOption) *ElementModificationOptions {
-	return internal.NewElementModificationOptions(list...)
-}
-
 func TargetIndex(idx int) internal.TargetIndex {
 	return internal.TargetIndex(-1)
 }
@@ -84,13 +77,8 @@ func TargetIdentity(id v1.Identity) internal.TargetIdentity {
 	return internal.TargetIdentity(id)
 }
 
-// Deprecated: use ModifyElement.
 func ModifyResource(flag ...bool) internal.ModOptionImpl {
 	return internal.ModifyResource(flag...)
-}
-
-func ModifyElement(flag ...bool) internal.ElemModOptionImpl {
-	return internal.ModifyElement(flag...)
 }
 
 func AcceptExistentDigests(flag ...bool) internal.ModOptionImpl {

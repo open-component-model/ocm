@@ -37,10 +37,6 @@ func (h *ResourceSpecHandlerBase) AddFlags(opts *pflag.FlagSet) {
 	h.options.AddFlags(opts)
 }
 
-func (h *ResourceSpecHandlerBase) GetTargetOpts() []ocm.TargetElementOption {
-	return options.FindOptions[ocm.TargetElementOption](h.options)
-}
-
-func (h *ResourceSpecHandlerBase) GetElementModificationOpts() []ocm.ElementModificationOption {
-	return options.FindOptions[ocm.ElementModificationOption](h.options)
+func (h *ResourceSpecHandlerBase) GetTargetOpts() []ocm.TargetOption {
+	return options.FindOptions[ocm.TargetOption](h.options)
 }

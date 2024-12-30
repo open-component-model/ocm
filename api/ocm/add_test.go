@@ -179,13 +179,13 @@ var _ = Describe("add resources", func() {
 	Context("references", func() {
 		It("adds reference", func() {
 			ref := ocm.NewComponentReference("test", COMPONENT+"/sub", "v1")
-			MustBeSuccessful(cv.SetReference(ref, ocm.ModifyElement()))
+			MustBeSuccessful(cv.SetReference(ref))
 			Expect(len(cv.GetDescriptor().References)).To(Equal(1))
 		})
 
 		It("replaces reference", func() {
 			ref := ocm.NewComponentReference("test", COMPONENT+"/sub", "v1")
-			MustBeSuccessful(cv.SetReference(ref, ocm.ModifyElement()))
+			MustBeSuccessful(cv.SetReference(ref))
 
 			MustBeSuccessful(cv.SetReference(ref.WithVersion("v1")))
 			Expect(len(Must(cv.SelectReferences(selectors.Name("test"))))).To(Equal(1))
@@ -193,7 +193,7 @@ var _ = Describe("add resources", func() {
 
 		It("replaces source (enforced)", func() {
 			ref := ocm.NewComponentReference("test", COMPONENT+"/sub", "v1")
-			MustBeSuccessful(cv.SetReference(ref, ocm.ModifyElement()))
+			MustBeSuccessful(cv.SetReference(ref))
 
 			MustBeSuccessful(cv.SetReference(ref.WithVersion("v2")))
 			Expect(len(Must(cv.SelectReferences(selectors.Name("test"))))).To(Equal(1))
@@ -201,7 +201,7 @@ var _ = Describe("add resources", func() {
 
 		It("fails replace non-existent source)", func() {
 			ref := ocm.NewComponentReference("test", COMPONENT+"/sub", "v1")
-			MustBeSuccessful(cv.SetReference(ref, ocm.ModifyElement()))
+			MustBeSuccessful(cv.SetReference(ref))
 
 			Expect(cv.SetReference(ref.WithExtraIdentity("attr", "value"), ocm.UpdateElement)).To(
 				MatchError("element \"attr\"=\"value\",\"name\"=\"test\" not found"))
@@ -209,21 +209,21 @@ var _ = Describe("add resources", func() {
 
 		It("adds duplicate reference with different version", func() {
 			ref := ocm.NewComponentReference("test", COMPONENT+"/sub", "v1")
-			MustBeSuccessful(cv.SetReference(ref, ocm.ModifyElement()))
+			MustBeSuccessful(cv.SetReference(ref))
 			MustBeSuccessful(cv.SetReference(ref.WithVersion("v2"), ocm.AppendElement))
 			Expect(len(Must(cv.SelectReferences(selectors.Name("test"))))).To(Equal(2))
 		})
 
 		It("rejects duplicate reference with same version", func() {
 			ref := ocm.NewComponentReference("test", COMPONENT+"/sub", "v1")
-			MustBeSuccessful(cv.SetReference(ref, ocm.ModifyElement()))
+			MustBeSuccessful(cv.SetReference(ref))
 			Expect(cv.SetReference(ref.WithVersion("v1"), ocm.AppendElement)).
 				To(MatchError("adding a new reference with same base identity requires different version"))
 		})
 
 		It("rejects duplicate reference with extra identity", func() {
 			ref := ocm.NewComponentReference("test", COMPONENT+"/sub", "v1").WithExtraIdentity("attr", "value")
-			MustBeSuccessful(cv.SetReference(ref, ocm.ModifyElement()))
+			MustBeSuccessful(cv.SetReference(ref))
 			Expect(cv.SetReference(ref, ocm.AppendElement)).
 				To(MatchError("adding a new reference with same base identity requires different version"))
 		})

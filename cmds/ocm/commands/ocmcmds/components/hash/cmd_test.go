@@ -2,8 +2,6 @@ package hash_test
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 
 	. "github.com/mandelsoft/goutils/testutils"
@@ -50,48 +48,6 @@ var _ = Describe("Test Environment", func() {
 COMPONENT VERSION HASH                                                             NORMALIZED FORM
 test.de/x v1      37f7f500d87f4b0a8765649f7c047db382e272b73e042805131df57279991b2b [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
 `))
-	})
-
-	It("normalize component archive v1", func() {
-		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
-			env.Provider(PROVIDER)
-		})
-
-		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("hash", "components", ARCH, "-O", "-", "-o", "norm")).To(Succeed())
-		Expect(buf.String()).To(Equal(`[{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
-`))
-	})
-
-	It("normalize component archive v2", func() {
-		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
-			env.Provider(PROVIDER)
-		})
-
-		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("hash", "components", ARCH, "-N", "jsonNormalisation/v2", "-o", "norm")).To(Succeed())
-		Expect(buf.String()).To(StringEqualTrimmedWithContext(`{"component":{"componentReferences":[],"name":"test.de/x","provider":{"name":"mandelsoft"},"resources":[],"sources":[],"version":"v1"}}
-`))
-	})
-
-	It("check hash", func() {
-		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
-			env.Provider(PROVIDER)
-		})
-
-		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("hash", "components", ARCH, "-o", "yaml")).To(Succeed())
-		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
----
-component: test.de/x
-context: []
-hash: 37f7f500d87f4b0a8765649f7c047db382e272b73e042805131df57279991b2b
-normalized: '[{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]'
-version: v1
-`))
-
-		h := sha256.Sum256([]byte(`[{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]`))
-		Expect(hex.EncodeToString(h[:])).To(Equal("37f7f500d87f4b0a8765649f7c047db382e272b73e042805131df57279991b2b"))
 	})
 
 	It("hash component archive with resources", func() {

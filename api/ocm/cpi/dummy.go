@@ -164,19 +164,19 @@ func (d *DummyComponentVersionAccess) SetResourceByAccess(art ResourceAccess, mo
 	return errors.ErrNotSupported("resource modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...TargetElementOption) error {
+func (d *DummyComponentVersionAccess) SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...TargetOption) error {
 	return errors.ErrNotSupported("source modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.AccessSpec, opts ...TargetElementOption) error {
+func (d *DummyComponentVersionAccess) SetSource(meta *SourceMeta, spec compdesc.AccessSpec, opts ...TargetOption) error {
 	return errors.ErrNotSupported("source modification")
 }
 
-func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess, opts ...TargetElementOption) error {
+func (d *DummyComponentVersionAccess) SetSourceByAccess(art SourceAccess, opts ...TargetOption) error {
 	return errors.ErrNotSupported()
 }
 
-func (d *DummyComponentVersionAccess) SetReference(ref *ComponentReference, opts ...ElementModificationOption) error {
+func (d *DummyComponentVersionAccess) SetReference(ref *ComponentReference, opts ...TargetOption) error {
 	return errors.ErrNotSupported()
 }
 

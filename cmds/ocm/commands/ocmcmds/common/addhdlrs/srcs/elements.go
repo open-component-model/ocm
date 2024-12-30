@@ -29,11 +29,11 @@ func New(opts ...options.Options) *ResourceSpecHandler {
 	return &ResourceSpecHandler{addhdlrs.NewBase(opts...)}
 }
 
-func (*ResourceSpecHandler) Key() string {
+func (ResourceSpecHandler) Key() string {
 	return "source"
 }
 
-func (*ResourceSpecHandler) RequireInputs() bool {
+func (ResourceSpecHandler) RequireInputs() bool {
 	return true
 }
 

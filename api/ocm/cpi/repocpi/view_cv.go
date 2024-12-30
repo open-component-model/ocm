@@ -249,7 +249,7 @@ func (c *componentVersionAccessView) SetResourceBlob(meta *cpi.ResourceMeta, blo
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
-	if err := c.SetResource(meta, acc, eff, cpi.ModifyElement()); err != nil {
+	if err := c.SetResource(meta, acc, eff, cpi.ModifyResource()); err != nil {
 		return fmt.Errorf("unable to set resource: %w", err)
 	}
 
@@ -264,7 +264,7 @@ func (c *componentVersionAccessView) AdjustSourceAccess(meta *cpi.SourceMeta, ac
 	return errors.ErrUnknown(cpi.KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
 }
 
-func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, modopts ...cpi.TargetElementOption) error {
+func (c *componentVersionAccessView) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec, modopts ...cpi.TargetOption) error {
 	cpi.Logger(c).Debug("adding source blob", "source", meta.Name)
 	if err := utils.ValidateObject(blob); err != nil {
 		return err
@@ -384,7 +384,7 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 
 		cd := c.bridge.GetDescriptor()
 
-		idx, err := c.getElementIndex("resource", cd.Resources, res, &opts.TargetElementOptions)
+		idx, err := c.getElementIndex("resource", cd.Resources, res, &opts.TargetOptions)
 		if err != nil {
 			return err
 		}
@@ -393,7 +393,7 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 		}
 
 		if old == nil {
-			if !opts.IsModifyElement() && c.bridge.IsPersistent() {
+			if !opts.IsModifyResource() && c.bridge.IsPersistent() {
 				return fmt.Errorf("new resource would invalidate signature")
 			}
 		}
@@ -456,7 +456,7 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 		if old != nil {
 			eq := res.Equivalent(old)
 			if !eq.IsLocalHashEqual() && c.bridge.IsPersistent() {
-				if !opts.IsModifyElement() {
+				if !opts.IsModifyResource() {
 					return fmt.Errorf("resource would invalidate signature")
 				}
 				cd.Signatures = nil
@@ -467,10 +467,6 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 			cd.Resources = append(cd.Resources, *res)
 		} else {
 			cd.Resources[idx] = *res
-		}
-		if opts.IsModifyElement() {
-			// default handling for completing an extra identity for modifications, only.
-			compdesc.DefaultResources(cd)
 		}
 		return c.bridge.Update(false)
 	})
@@ -503,7 +499,7 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 		if !old.Digest.IsNone() {
 			digester.HashAlgorithm = old.Digest.HashAlgorithm
 			digester.NormalizationAlgorithm = old.Digest.NormalisationAlgorithm
-			if opts.IsAcceptExistentDigests() && !opts.IsModifyElement() && c.bridge.IsPersistent() {
+			if opts.IsAcceptExistentDigests() && !opts.IsModifyResource() && c.bridge.IsPersistent() {
 				res.Digest = old.Digest
 				value = old.Digest.Value
 			}
@@ -512,7 +508,7 @@ func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.R
 	return hashAlgo, digester, value
 }
 
-func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, optslist ...cpi.TargetElementOption) error {
+func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, optslist ...cpi.TargetOption) error {
 	return setAccess(c, "source", art,
 		func(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
 			return c.SetSource(meta, acc, optslist...)
@@ -522,7 +518,7 @@ func (c *componentVersionAccessView) SetSourceByAccess(art cpi.SourceAccess, opt
 		})
 }
 
-func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, optlist ...cpi.TargetElementOption) error {
+func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec, optlist ...cpi.TargetOption) error {
 	if c.bridge.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -548,51 +544,33 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		} else {
 			cd.Sources[idx] = *res
 		}
-		compdesc.DefaultSources(cd)
 		return c.bridge.Update(false)
 	})
 }
 
-func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, optlist ...cpi.ElementModificationOption) error {
-	opts := cpi.NewElementModificationOptions(optlist...)
-	moddef := false
-
+func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, optlist ...cpi.TargetOption) error {
 	return c.Execute(func() error {
 		cd := c.bridge.GetDescriptor()
 
 		if ref.Version == "" {
 			return fmt.Errorf("version required for component version reference")
 		}
-		idx, err := c.getElementIndex("reference", cd.References, ref, &opts.TargetElementOptions)
+		idx, err := c.getElementIndex("reference", cd.References, ref, optlist...)
 		if err != nil {
 			return err
 		}
 
 		if idx < 0 {
-			if !opts.IsModifyElement(moddef) {
-				return fmt.Errorf("adding reference would invalidate signature")
-			}
 			cd.References = append(cd.References, *ref)
 		} else {
-			eq := ref.Equivalent(&cd.References[idx])
-			if !eq.IsEquivalent() && c.bridge.IsPersistent() {
-				if !opts.IsModifyElement(moddef) {
-					return fmt.Errorf("reference would invalidate signature")
-				}
-				cd.Signatures = nil
-			}
-			cd.References[idx].Equivalent(ref)
 			cd.References[idx] = *ref
-		}
-		if opts.IsModifyElement(moddef) {
-			compdesc.DefaultReferences(cd)
 		}
 		return c.bridge.Update(false)
 	})
 }
 
-func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.ElementListAccessor, prov compdesc.ElementMetaProvider, optlist ...cpi.TargetElementOption) (int, error) {
-	opts := internal.NewTargetElementOptions(optlist...)
+func (c *componentVersionAccessView) getElementIndex(kind string, acc compdesc.ElementListAccessor, prov compdesc.ElementMetaProvider, optlist ...cpi.TargetOption) (int, error) {
+	opts := internal.NewTargetOptions(optlist...)
 	curidx := compdesc.ElementIndex(acc, prov)
 	meta := prov.GetMeta()
 	var idx int

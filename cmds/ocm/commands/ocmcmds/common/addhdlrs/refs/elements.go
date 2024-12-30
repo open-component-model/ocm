@@ -66,8 +66,7 @@ func (h *ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Eleme
 		},
 		ComponentName: spec.ComponentName,
 	}
-
-	return v.SetReference(meta, h.GetElementModificationOpts()...)
+	return v.SetReference(meta, h.GetTargetOpts()...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,6 @@
 package builder
 
 import (
-	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 )
 
@@ -23,7 +22,7 @@ func (r *ocmReference) Set() {
 }
 
 func (r *ocmReference) Close() error {
-	return r.ocm_vers.SetReference(&r.meta, ocm.ModifyElement())
+	return r.ocm_vers.SetReference(&r.meta)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
