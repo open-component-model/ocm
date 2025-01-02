@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -15,8 +16,12 @@ import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
+	"ocm.software/ocm/api/oci/artdesc"
+	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
+	"ocm.software/ocm/api/tech/helm"
+	"ocm.software/ocm/api/tech/helm/loader"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -122,7 +127,7 @@ func (a *Uploader) ValidateSpecification(_ ppi.Plugin, spec ppi.UploadTargetSpec
 //  3. creating a request respecting the passed credentials based on SetHeadersFromCredentials
 //  4. uploading the passed blob as is (expected to be a tgz byte stream)
 //  5. intepreting the JFrog API response, and converting it from ArtifactoryUploadResponse to ppi.AccessSpec
-func (a *Uploader) Upload(_ ppi.Plugin, arttype, _, hint, digest string, targetSpec ppi.UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
+func (a *Uploader) Upload(_ ppi.Plugin, arttype, mediaType, hint, digest string, targetSpec ppi.UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
 	if arttype != artifacttypes.HELM_CHART {
 		return nil, fmt.Errorf("unsupported artifact type %s", arttype)
 	}
@@ -130,6 +135,28 @@ func (a *Uploader) Upload(_ ppi.Plugin, arttype, _, hint, digest string, targetS
 	spec, ok := targetSpec.(*JFrogHelmUploaderSpec)
 	if !ok {
 		return nil, fmt.Errorf("the type %T is not a valid target spec type", spec)
+	}
+
+	switch mediaType {
+	case helm.ChartMediaType:
+		// if it is a native chart tgz we can pass it on as is
+		var buf bytes.Buffer
+		chart, err := loader.LoadArchive(io.TeeReader(reader, &buf))
+		if err != nil {
+			return nil, fmt.Errorf("failed to load chart: %w", err)
+		}
+		spec.Name = chart.Metadata.Name
+		spec.Version = chart.Metadata.Version
+		reader = &buf
+	case artifactset.MediaType(artdesc.MediaTypeImageManifest):
+		// if we have an artifact set (ocm custom version of index + locally colocated blobs as files, we need
+		// to translate it.
+		var err error
+		if reader, digest, err = ConvertArtifactSetHelmChartToPlainTGZChart(reader); err != nil {
+			return nil, fmt.Errorf("failed to convert OCI Helm Chart to plain TGZ: %w", err)
+		}
+	default:
+		return nil, fmt.Errorf("unsupported media type %s", mediaType)
 	}
 
 	if err := EnsureSpecWithHelpFromHint(spec, hint); err != nil {
@@ -147,6 +174,10 @@ func (a *Uploader) Upload(_ ppi.Plugin, arttype, _, hint, digest string, targetS
 	access, err := Upload(ctx, reader, a.Client, targetURL, creds, digest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload: %w", err)
+	}
+
+	if err := ReindexChart(ctx, a.Client, spec.URL, spec.Repository, creds); err != nil {
+		return nil, fmt.Errorf("failed to reindex chart: %w", err)
 	}
 
 	return func() ppi.AccessSpec {
