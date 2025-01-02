@@ -7,4 +7,5 @@ const (
 	OptArt       = "artifactType"
 	OptConfig    = "config"
 	OptCliConfig = "cli-config"
+	OptDigest    = "digest"
 )

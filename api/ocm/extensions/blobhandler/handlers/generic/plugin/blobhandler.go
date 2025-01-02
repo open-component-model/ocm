@@ -70,6 +70,7 @@ func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, glo
 		"uploader", b.name,
 		"arttype", artType,
 		"mediatype", blob.MimeType(),
+		"digest", blob.Digest(),
 		"hint", hint,
 		"target", string(target),
 	)
@@ -85,5 +86,5 @@ func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, glo
 	r := accessio.NewOndemandReader(blob)
 	defer errors.PropagateError(&err, r.Close)
 
-	return b.plugin.Put(b.name, r, artType, blob.MimeType(), hint, creddata, target)
+	return b.plugin.Put(b.name, r, artType, blob.MimeType(), hint, string(blob.Digest()), creddata, target)
 }
