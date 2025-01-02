@@ -72,7 +72,7 @@ func (a *Uploader) ValidateSpecification(_ ppi.Plugin, spec ppi.UploadTargetSpec
 	return &info, nil
 }
 
-func (a *Uploader) Upload(p ppi.Plugin, _, mediatype, hint string, repo ppi.UploadTargetSpec, _ credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
+func (a *Uploader) Upload(p ppi.Plugin, arttype, mediatype, hint, digest string, spec ppi.UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
 	var file *os.File
 	var err error
 
@@ -91,7 +91,7 @@ func (a *Uploader) Upload(p ppi.Plugin, _, mediatype, hint string, repo ppi.Uplo
 	}
 
 	path := hint
-	my := repo.(*TargetSpec)
+	my := spec.(*TargetSpec)
 	dir := root
 	if my.Path != "" {
 		root = filepath.Join(root, my.Path)

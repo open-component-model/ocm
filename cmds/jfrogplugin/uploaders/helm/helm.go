@@ -122,9 +122,9 @@ func (a *Uploader) ValidateSpecification(_ ppi.Plugin, spec ppi.UploadTargetSpec
 //  3. creating a request respecting the passed credentials based on SetHeadersFromCredentials
 //  4. uploading the passed blob as is (expected to be a tgz byte stream)
 //  5. intepreting the JFrog API response, and converting it from ArtifactoryUploadResponse to ppi.AccessSpec
-func (a *Uploader) Upload(_ ppi.Plugin, artifactType, _, hint string, targetSpec ppi.UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
-	if artifactType != artifacttypes.HELM_CHART {
-		return nil, fmt.Errorf("unsupported artifact type %s", artifactType)
+func (a *Uploader) Upload(_ ppi.Plugin, arttype, _, hint, digest string, targetSpec ppi.UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
+	if arttype != artifacttypes.HELM_CHART {
+		return nil, fmt.Errorf("unsupported artifact type %s", arttype)
 	}
 
 	spec, ok := targetSpec.(*JFrogHelmUploaderSpec)
@@ -144,7 +144,7 @@ func (a *Uploader) Upload(_ ppi.Plugin, artifactType, _, hint string, targetSpec
 	ctx, cancel := context.WithTimeout(context.TODO(), spec.GetTimeout())
 	defer cancel()
 
-	access, err := Upload(ctx, reader, a.Client, targetURL, creds)
+	access, err := Upload(ctx, reader, a.Client, targetURL, creds, digest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload: %w", err)
 	}

@@ -316,7 +316,7 @@ func (p *pluginImpl) Get(w io.Writer, creds, spec json.RawMessage) error {
 	return err
 }
 
-func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint string, creds, target json.RawMessage) (ocm.AccessSpec, error) {
+func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint, digest string, creds, target json.RawMessage) (ocm.AccessSpec, error) {
 	args := []string{upload.Name, put.Name, name, string(target)}
 
 	if creds != nil {
@@ -330,6 +330,9 @@ func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint strin
 	}
 	if artType != "" {
 		args = append(args, "--"+put.OptArt, artType)
+	}
+	if digest != "" {
+		args = append(args, "--"+put.OptDigest, digest)
 	}
 	result, err := p.Exec(r, nil, args...)
 	if err != nil {

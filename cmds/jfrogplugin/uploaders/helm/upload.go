@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -10,6 +11,8 @@ import (
 	"net/url"
 	"path"
 	"strings"
+
+	godigest "github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/helm"
@@ -22,6 +25,7 @@ func Upload(
 	client *http.Client,
 	url *url.URL,
 	creds credentials.Credentials,
+	digest string,
 ) (_ ppi.AccessSpec, err error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -31,6 +35,21 @@ func Upload(
 	if req, err = http.NewRequestWithContext(ctx, http.MethodPut, url.String(), data); err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request for upload: %w", err)
 	}
+
+	parsedDigest, err := godigest.Parse(digest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse digest: %w", err)
+	}
+
+	// see https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact-by-checksum for the checksum headers
+	switch parsedDigest.Algorithm() {
+	case godigest.SHA256:
+		req.Header.Set("X-Checksum-Sha256", parsedDigest.Encoded())
+	default:
+		return nil, fmt.Errorf("unsupported digest algorithm, must be %s to allow upload to jfrog: %s", godigest.SHA256, parsedDigest.Algorithm())
+	}
+	req.Header.Set("X-Checksum-Deploy", "false")
+
 	SetHeadersFromCredentials(req, creds)
 
 	if res, err = client.Do(req); err != nil {
@@ -51,9 +70,11 @@ func Upload(
 		}
 	}
 
+	var buf bytes.Buffer
+	body := io.TeeReader(res.Body, &buf)
 	uploadResponse := &ArtifactoryUploadResponse{}
-	if err = json.NewDecoder(res.Body).Decode(uploadResponse); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+	if err = json.NewDecoder(body).Decode(uploadResponse); err != nil {
+		return nil, fmt.Errorf("failed to decode response (original %q): %w", buf.String(), err)
 	}
 
 	return uploadResponse.ToHelmAccessSpec()

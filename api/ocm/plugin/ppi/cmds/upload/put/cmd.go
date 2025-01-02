@@ -3,6 +3,7 @@ package put
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -14,15 +15,17 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/common"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
+	"ocm.software/ocm/api/utils/iotools"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
 const (
-	Name     = "put"
-	OptCreds = common.OptCreds
-	OptHint  = common.OptHint
-	OptMedia = common.OptMedia
-	OptArt   = common.OptArt
+	Name      = "put"
+	OptCreds  = common.OptCreds
+	OptHint   = common.OptHint
+	OptMedia  = common.OptMedia
+	OptArt    = common.OptArt
+	OptDigest = common.OptDigest
 )
 
 func New(p ppi.Plugin) *cobra.Command {
@@ -57,6 +60,7 @@ type Options struct {
 	Credentials  credentials.DirectCredentials
 	MediaType    string
 	ArtifactType string
+	Digest       string
 
 	Hint string
 }
@@ -67,6 +71,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.MediaType, OptMedia, "m", "", "media type of input blob")
 	fs.StringVarP(&o.ArtifactType, OptArt, "a", "", "artifact type of input blob")
 	fs.StringVarP(&o.Hint, OptHint, "H", "", "reference hint for storing blob")
+	fs.StringVarP(&o.Digest, OptDigest, "d", "", "digest of the blob")
 }
 
 func (o *Options) Complete(args []string) error {
@@ -88,15 +93,26 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 		return errors.ErrNotFound(descriptor.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
 
-	fi, err := os.Stdin.Stat()
-	if err != nil {
-		return fmt.Errorf("failed to stat stdin: %w", err)
-	}
-	if size := fi.Size(); size == 0 {
-		return fmt.Errorf("stdin is empty, and nothing can be uploaded")
+	reader := io.Reader(os.Stdin)
+	// if we are not size aware, buffer the file to avoid OOM.
+	if opts.Digest == "" {
+		tmp, err := os.CreateTemp("", "ocm-upload-")
+		if err != nil {
+			return fmt.Errorf("failed to create temporary file to buffer access data: %w", err)
+		}
+		defer func() {
+			tmp.Close()
+			os.Remove(tmp.Name())
+		}()
+		digestReader := iotools.NewDefaultDigestReader(reader)
+		if _, err := io.Copy(tmp, digestReader); err != nil {
+			return fmt.Errorf("failed to read from stdin: %w", err)
+		}
+		reader = tmp
+		opts.Digest = digestReader.Digest().String()
 	}
 
-	h, err := u.Upload(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, opts.Credentials, os.Stdin)
+	h, err := u.Upload(p, opts.ArtifactType, opts.MediaType, opts.Hint, opts.Digest, spec, opts.Credentials, reader)
 	if err != nil {
 		return fmt.Errorf("upload failed: %w", err)
 	}
