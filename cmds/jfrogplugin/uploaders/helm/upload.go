@@ -59,15 +59,16 @@ func Upload(
 		err = errors.Join(err, res.Body.Close())
 	}()
 
-	if invalid := 200 > res.StatusCode || res.StatusCode >= 300; invalid {
-		var responseBytes []byte
-		if responseBytes, err = io.ReadAll(res.Body); err != nil {
-			var body string
-			if len(responseBytes) > 0 {
-				body = fmt.Sprintf(": %s", string(responseBytes))
-			}
-			return nil, fmt.Errorf("invalid response (status %v)%s", res.StatusCode, body)
+	if res.StatusCode != http.StatusOK {
+		responseBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body but server returned %v: %w", res.StatusCode, err)
 		}
+		var body string
+		if len(responseBytes) > 0 {
+			body = fmt.Sprintf(": %s", string(responseBytes))
+		}
+		return nil, fmt.Errorf("invalid response (status %v)%s", res.StatusCode, body)
 	}
 
 	var buf bytes.Buffer
