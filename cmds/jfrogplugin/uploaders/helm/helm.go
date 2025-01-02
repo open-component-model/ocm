@@ -146,7 +146,7 @@ func (a *Uploader) Upload(_ ppi.Plugin, artifactType, _, hint string, targetSpec
 
 	access, err := Upload(ctx, reader, a.Client, targetURL, creds)
 	if err != nil {
-		return nil, fmt.Errorf("failed to upload")
+		return nil, fmt.Errorf("failed to upload: %w", err)
 	}
 
 	return func() ppi.AccessSpec {
