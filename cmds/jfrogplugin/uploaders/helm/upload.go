@@ -59,7 +59,7 @@ func Upload(
 		err = errors.Join(err, res.Body.Close())
 	}()
 
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode != http.StatusCreated {
 		responseBytes, err := io.ReadAll(res.Body)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read response body but server returned %v: %w", res.StatusCode, err)
