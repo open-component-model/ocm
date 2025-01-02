@@ -27,6 +27,7 @@ The following *realms* are used by the command line tool:
   - <code>ocm/credentials/dockerconfig</code>: docker config handling as credential repository
   - <code>ocm/credentials/vault</code>: HashiCorp Vault Access
   - <code>ocm/downloader</code>: Downloaders
+  - <code>ocm/git</code>: git repository
   - <code>ocm/maven</code>: Maven repository
   - <code>ocm/npm</code>: NPM registry
   - <code>ocm/oci/docker</code>: Docker repository handling
