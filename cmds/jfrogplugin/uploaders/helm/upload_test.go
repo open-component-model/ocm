@@ -53,7 +53,7 @@ func TestUpload(t *testing.T) {
 	accessSpec, err := Upload(ctx, data, client, url, credentials.DirectCredentials{
 		credentials.ATTR_USERNAME: "foo",
 		credentials.ATTR_PASSWORD: "bar",
-	})
+	}, "")
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

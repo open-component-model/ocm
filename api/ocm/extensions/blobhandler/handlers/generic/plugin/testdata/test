@@ -13,6 +13,7 @@ media=
 artifact=
 hint=
 creds=
+digest=
 args=( )
 
 parseArgs() {
@@ -20,6 +21,9 @@ parseArgs() {
     case "$1" in
     --mediaType|-m)
         media="$2"
+        shift 2;;
+    --digest|-d)
+        digest="$2"
         shift 2;;
     --artifactType|-a)
         artifact="$2"

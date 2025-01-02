@@ -12,6 +12,7 @@ plugin upload put [<flags>] <name> <repository specification> [<options>]
   -a, --artifactType string         artifact type of input blob
   -C, --credential <name>=<value>   dedicated credential value (default [])
   -c, --credentials YAML            credentials
+  -d, --digest string               digest of the blob
   -h, --help                        help for put
   -H, --hint string                 reference hint for storing blob
   -m, --mediaType string            media type of input blob
