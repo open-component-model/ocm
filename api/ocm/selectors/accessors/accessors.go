@@ -27,6 +27,7 @@ type ElementMeta interface {
 	GetMeta() ElementMeta // ElementMeta is again a Meta provider
 
 	SetLabels(labels []v1.Label)
+	SetExtraIdentity(identity v1.Identity)
 }
 
 // ElementMetaProvider just provides access to element meta data

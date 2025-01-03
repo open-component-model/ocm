@@ -10,11 +10,13 @@ package jsonv2
 
 import (
 	"ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/compdesc/normalizations/legacy"
 	"ocm.software/ocm/api/ocm/compdesc/normalizations/rules"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/norm/jcs"
 )
 
+// Deprecated: use compdesc.JsonNormalisationV3 instead
 const Algorithm = compdesc.JsonNormalisationV2
 
 func init() {
@@ -24,6 +26,7 @@ func init() {
 type normalization struct{}
 
 func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, error) {
+	legacy.DefaultingOfVersionIntoExtraIdentity(cd)
 	data, err := signing.Normalize(jcs.Type, cd, CDExcludes)
 	return data, err
 }

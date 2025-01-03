@@ -9,7 +9,7 @@ import (
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm/compdesc"
-	"ocm.software/ocm/api/ocm/compdesc/normalizations/jsonv1"
+	"ocm.software/ocm/api/ocm/compdesc/normalizations/jsonv3"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	ocmsign "ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/tech/signing"
@@ -151,7 +151,7 @@ The following signing types are supported with option <code>--algorithm</code>:
 		s += `
 
 The following normalization modes are supported with option <code>--normalization</code>:
-` + listformat.FormatList(jsonv1.Algorithm, compdesc.Normalizations.Names()...)
+` + listformat.FormatList(jsonv3.Algorithm, compdesc.Normalizations.Names()...)
 
 		s += `
 

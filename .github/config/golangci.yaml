@@ -173,4 +173,26 @@ issues:
     - path: ignore/.*\.go
       linters:
       - dupword
+    # Deprecated algorithms and fields for extra identity field defaulting
+    # TODO: To be removed once v1 + v2 are removed.
+    - path: "cmds/.*|api/.*"
+      linters:
+      - staticcheck
+      text: "SA1019: jsonv1.Algorithm is deprecated"
+    - path: "cmds/.*|api/.*"
+      linters:
+      - staticcheck
+      text: "SA1019: compdesc.JsonNormalisationV1 is deprecated"
+    - path: "cmds/.*|api/.*"
+      linters:
+        - staticcheck
+      text: "SA1019: jsonv2.Algorithm is deprecated"
+    - path: "cmds/.*|api/.*"
+      linters:
+        - staticcheck
+      text: "SA1019: compdesc.JsonNormalisationV2 is deprecated"
+    - path: "cmds/.*|api/.*"
+      linters:
+        - staticcheck
+      text: "SA1019: legacy.DefaultingOfVersionIntoExtraIdentity is deprecated"
 

@@ -309,3 +309,4 @@ yaml
 yitsushi
 yml
 yyyy
+jsonNormalisation

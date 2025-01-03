@@ -7,7 +7,9 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "ocm.software/ocm/api/oci/testhelper"
+	"ocm.software/ocm/api/ocm/compdesc"
 	. "ocm.software/ocm/api/ocm/testhelper"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
@@ -52,19 +54,50 @@ const (
 )
 
 const (
-	D_COMPONENTA = "01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d"
-	D_COMPONENTB = "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
+	D_COMPONENTA_V1 = "01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d"
+	D_COMPONENTB_V1 = "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
 )
 
 const VERIFIED_FILE = "verified.yaml"
 
-var substitutions = Substitutions{
-	"test": D_COMPONENTA,
-	"r0":   D_TESTDATA,
-	"r1":   DS_OCIMANIFEST1.Value,
-	"r2":   DS_OCIMANIFEST2.Value,
-	"ref":  D_COMPONENTB,
-	"rb0":  D_OTHERDATA,
+var substitutionsV1 = Substitutions{
+	"test":     D_COMPONENTA_V1,
+	"r0":       D_TESTDATA,
+	"r1":       DS_OCIMANIFEST1.Value,
+	"r2":       DS_OCIMANIFEST2.Value,
+	"ref":      D_COMPONENTB_V1,
+	"rb0":      D_OTHERDATA,
+	"normAlgo": compdesc.JsonNormalisationV1,
+}
+
+const (
+	D_COMPONENTA_V2 = "10ac0b3a850e1f1becf56d5d45e9742fa0a91103d25ba93cc3a509f68797e90f"
+	D_COMPONENTB_V2 = "1ae74420ef29436ad75133d81bceb59fa8ef1e2ce083a45b5f4baaec641a4266"
+)
+
+var substitutionsV2 = Substitutions{
+	"test":     D_COMPONENTA_V2,
+	"r0":       D_TESTDATA,
+	"r1":       DS_OCIMANIFEST1.Value,
+	"r2":       DS_OCIMANIFEST2.Value,
+	"ref":      D_COMPONENTB_V2,
+	"rb0":      D_OTHERDATA,
+	"normAlgo": compdesc.JsonNormalisationV2,
+}
+
+const (
+	D_COMPONENTA_V3 = D_COMPONENTA_V2
+	D_COMPONENTB_V3 = "766f26b09237f9647714e85fac914f115d0b4c3277b01ec00cfeb3b50a68cde9"
+)
+
+var substitutionsV3 = Substitutions{
+	"test":     D_COMPONENTA_V3,
+	"r0":       D_TESTDATA,
+	"r1":       DS_OCIMANIFEST1.Value,
+	"r2":       DS_OCIMANIFEST2.Value,
+	"ref":      D_COMPONENTB_V3,
+	"rb0":      D_OTHERDATA,
+	"normAlgo": compdesc.JsonNormalisationV3,
 }
 
 var _ = Describe("access method", func() {
@@ -116,7 +149,7 @@ var _ = Describe("access method", func() {
 			prepareEnv(env, ARCH, "")
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTA+":"+VERSION)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTA+":"+VERSION, "--normalization", compdesc.JsonNormalisationV1)).To(Succeed())
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
@@ -124,7 +157,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
   resource 1:  "name"="value": digest SHA-256:${r1}[ociArtifactDigest/v1]
   resource 2:  "name"="ref": digest SHA-256:${r2}[ociArtifactDigest/v1]
 successfully signed github.com/mandelsoft/test:v1 (digest SHA-256:${test})`,
-				substitutions),
+				substitutionsV1),
 			)
 
 			session := datacontext.NewSession()
@@ -136,14 +169,14 @@ successfully signed github.com/mandelsoft/test:v1 (digest SHA-256:${test})`,
 			cv, err := src.LookupComponentVersion(COMPONENTA, VERSION)
 			Expect(err).To(Succeed())
 			session.AddCloser(cv)
-			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTA))
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTA_V1))
 		})
 
 		It("signs transport archive", func() {
 			prepareEnv(env, ARCH, ARCH)
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION, "--normalization", compdesc.JsonNormalisationV1)).To(Succeed())
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
@@ -155,7 +188,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
   reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${test}[jsonNormalisation/v1]
   resource 0:  "name"="otherdata": digest SHA-256:${rb0}[genericBlobDigest/v1]
 successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
-`, substitutions))
+`, substitutionsV1))
 
 			session := datacontext.NewSession()
 			defer session.Close()
@@ -166,14 +199,14 @@ successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
 			cv, err := src.LookupComponentVersion(COMPONENTB, VERSION)
 			Expect(err).To(Succeed())
 			session.AddCloser(cv)
-			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTB))
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTB_V1))
 		})
 
 		It("signs transport archive with --lookup option", func() {
 			prepareEnv(env, ARCH2, ARCH)
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("sign", "components", "--lookup", ARCH2, "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("sign", "components", "--lookup", ARCH2, "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION, "--normalization", compdesc.JsonNormalisationV1)).To(Succeed())
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
@@ -185,7 +218,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
   reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${test}[jsonNormalisation/v1]
   resource 0:  "name"="otherdata": digest SHA-256:${rb0}[genericBlobDigest/v1]
 successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
-`, substitutions))
+`, substitutionsV1))
 
 			session := datacontext.NewSession()
 			defer session.Close()
@@ -196,7 +229,7 @@ successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
 			cv, err := src.LookupComponentVersion(COMPONENTB, VERSION)
 			Expect(err).To(Succeed())
 			session.AddCloser(cv)
-			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTB))
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(D_COMPONENTB_V1))
 		})
 	})
 
@@ -281,7 +314,7 @@ Error: signing: github.com/mandelsoft/ref:v1: failed resolving component referen
 		It("signs comp arch with lookup", func() {
 			buf := bytes.NewBuffer(nil)
 
-			MustBeSuccessful(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--lookup", ARCH, "--repo", COMPARCH))
+			MustBeSuccessful(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--lookup", ARCH, "--repo", COMPARCH, "--normalization", compdesc.JsonNormalisationV1))
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
   no digest found for "github.com/mandelsoft/test:v1"
@@ -330,7 +363,7 @@ created rsa key pair key.priv[key.cert]
 
 		// sigh component with certificate
 		buf.Reset()
-		Expect(env.CatchOutput(buf).Execute("sign", "component", ARCH, "-K", "key.priv", "-k", "key.cert", "--ca-cert", "root.cert", "-s", "mandelsoft", "-I", "CN=mandelsoft")).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("sign", "component", ARCH, "-K", "key.priv", "-k", "key.cert", "--ca-cert", "root.cert", "-s", "mandelsoft", "-I", "CN=mandelsoft", "--normalization", compdesc.JsonNormalisationV1)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v1]...
 successfully signed github.com/mandelsoft/test:v1 (digest SHA-256:5ed8bb27309c3c2fff43f3b0f3ebb56a5737ad6db4bc8ace73c5455cb86faf54)
@@ -371,11 +404,11 @@ successfully verified github.com/mandelsoft/test:v1 (digest SHA-256:5ed8bb27309c
 			})
 		})
 
-		It("signs transport archive", func() {
+		DescribeTable("signs transport archive", func(substitutions Substitutions, normAlgo string) {
 			prepareEnv(env, ARCH, ARCH)
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("sign", "components", "--verified", VERIFIED_FILE, "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("sign", "components", "--verified", VERIFIED_FILE, "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION, "--normalization", normAlgo)).To(Succeed())
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
@@ -384,7 +417,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
     resource 0:  "name"="testdata": digest SHA-256:${r0}[genericBlobDigest/v1]
     resource 1:  "name"="value": digest SHA-256:${r1}[ociArtifactDigest/v1]
     resource 2:  "name"="ref": digest SHA-256:${r2}[ociArtifactDigest/v1]
-  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${test}[jsonNormalisation/v1]
+  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:${test}[${normAlgo}]
   resource 0:  "name"="otherdata": digest SHA-256:${rb0}[genericBlobDigest/v1]
 successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
 `, substitutions))
@@ -395,7 +428,11 @@ successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
 
 			CheckStore(store, common.NewNameVersion(COMPONENTA, VERSION))
 			CheckStore(store, common.NewNameVersion(COMPONENTB, VERSION))
-		})
+		},
+			Entry("v1", substitutionsV1, compdesc.JsonNormalisationV1),
+			Entry("v2", substitutionsV2, compdesc.JsonNormalisationV2),
+			Entry("v3", substitutionsV3, compdesc.JsonNormalisationV3),
+		)
 	})
 })
 
