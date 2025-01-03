@@ -7,6 +7,8 @@ import (
 )
 
 type Options struct {
+	// Replace enables to replace existing elements (same raw identity) with a different version instead
+	// of appending a new element.
 	Replace bool
 }
 

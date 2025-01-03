@@ -33,7 +33,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.Actual, "actual", "", false, "use actual component descriptor")
 	fs.BoolVarP(&o.Update, "update", "U", false, "update digests in component version")
 	fs.BoolVarP(&o.Verify, "verify", "V", false, "verify digests found in component version")
-	fs.StringVarP(&o.outfile, "outfile", "O", "norm.ncd", "Output file for normalized component descriptor")
+	fs.StringVarP(&o.outfile, "outfile", "O", "-", "Output file for normalized component descriptor")
 }
 
 func (o *Option) Complete(cmd *Command) error {
