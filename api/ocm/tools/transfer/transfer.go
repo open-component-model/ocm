@@ -273,7 +273,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 					err = handler.HandleTransferResource(r, m, hint, t)
 				} else {
 					if err == nil { // old resource found -> keep current access method
-						t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify())
+						t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify(), ocm.RawIdentity())
 					}
 					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
 				}

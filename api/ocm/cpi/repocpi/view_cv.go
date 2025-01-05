@@ -468,7 +468,7 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 		} else {
 			cd.Resources[idx] = *res
 		}
-		if opts.IsModifyElement() {
+		if opts.IsModifyElement() && !opts.IsRawIdentity() {
 			// default handling for completing an extra identity for modifications, only.
 			compdesc.DefaultResources(cd)
 		}
@@ -527,6 +527,7 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		return accessio.ErrReadOnly
 	}
 
+	opts := cpi.NewTargetElementOptions(optlist...)
 	res := &compdesc.Source{
 		SourceMeta: *meta.Copy(),
 		Access:     acc,
@@ -548,7 +549,9 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		} else {
 			cd.Sources[idx] = *res
 		}
-		compdesc.DefaultSources(cd)
+		if !opts.IsRawIdentity() {
+			compdesc.DefaultSources(cd)
+		}
 		return c.bridge.Update(false)
 	})
 }
@@ -584,7 +587,7 @@ func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, o
 			cd.References[idx].Equivalent(ref)
 			cd.References[idx] = *ref
 		}
-		if opts.IsModifyElement(moddef) {
+		if opts.IsModifyElement(moddef) && !opts.IsRawIdentity() {
 			compdesc.DefaultReferences(cd)
 		}
 		return c.bridge.Update(false)
