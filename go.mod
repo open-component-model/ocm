@@ -12,9 +12,9 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.32.7
 	github.com/aws/aws-sdk-go-v2/config v1.28.7
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.48
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.44
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.38.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.71.1
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.45
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.38.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.72.0
 	github.com/cloudflare/cfssl v1.6.5
 	github.com/containerd/containerd v1.7.24
 	github.com/containerd/errdefs v1.0.0
@@ -51,7 +51,7 @@ require (
 	github.com/mittwald/go-helm-client v0.12.16
 	github.com/moby/locker v1.0.1
 	github.com/modern-go/reflect2 v1.0.2
-	github.com/onsi/ginkgo/v2 v2.22.1
+	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.0
@@ -72,7 +72,7 @@ require (
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/net v0.33.0
-	golang.org/x/oauth2 v0.24.0
+	golang.org/x/oauth2 v0.25.0
 	golang.org/x/text v0.21.0
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1
