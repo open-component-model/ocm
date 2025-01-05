@@ -108,6 +108,10 @@ type TargetOptionImpl interface {
 
 type TargetElementOptions struct {
 	TargetElement TargetElement
+
+	// RawIdentity disables the implicit defaulting of the extraIdentity.
+	// A transfer operation must set this flag to preserve the normalizations.
+	RawIdentity *bool
 }
 
 type TargetElementOption interface {
@@ -128,6 +132,11 @@ func (m *TargetElementOptions) ApplyElementModificationOption(opts *ElementModif
 
 func (m *TargetElementOptions) ApplyTargetOption(opts *TargetElementOptions) {
 	optionutils.Transfer(&opts.TargetElement, m.TargetElement)
+	optionutils.Transfer(&opts.RawIdentity, m.RawIdentity)
+}
+
+func (m *TargetElementOptions) IsRawIdentity() bool {
+	return utils.AsBool(m.RawIdentity)
 }
 
 func (m *TargetElementOptions) ApplyTargetOptions(list ...TargetElementOption) *TargetElementOptions {
@@ -351,6 +360,31 @@ func (m TargetIdentity) ApplyElementModificationOption(opts *ElementModification
 
 func (m TargetIdentity) ApplyTargetOption(opts *TargetElementOptions) {
 	opts.TargetElement = m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type rawidentity bool
+
+func (m rawidentity) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m rawidentity) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
+}
+
+func (m rawidentity) ApplyElementModificationOption(opts *ElementModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
+}
+
+func (m rawidentity) ApplyTargetOption(opts *TargetElementOptions) {
+	opts.RawIdentity = utils.BoolP(m)
+}
+
+// RawIdentity disables the defaulting of the extra identity.
+func RawIdentity(flag ...bool) TargetOptionImpl {
+	return rawidentity(utils.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
