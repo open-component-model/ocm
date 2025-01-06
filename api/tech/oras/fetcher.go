@@ -65,6 +65,7 @@ func (c *OrasFetcher) resolveDescriptor(ctx context.Context, desc ociv1.Descript
 		if err != nil {
 			return ociv1.Descriptor{}, fmt.Errorf("failed to resolve descriptor %q: %w", desc.Digest.String(), err)
 		}
+
 		return desc, nil
 	}
 
@@ -79,10 +80,9 @@ func (c *OrasFetcher) resolveDescriptor(ctx context.Context, desc ociv1.Descript
 
 			return ociv1.Descriptor{}, fmt.Errorf("failed to resolve manifest %q: %w", desc.Digest.String(), err)
 		}
-		desc = mdesc
-	} else {
-		desc = bdesc
+
+		return mdesc, nil
 	}
 
-	return desc, err
+	return bdesc, err
 }
