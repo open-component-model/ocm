@@ -15,7 +15,7 @@ var Names = names.FeatureGates
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Commands acting on actions",
+		Short: "Commands acting on feature gates",
 	}, Names...)
 	AddCommands(ctx, cmd)
 	return cmd
