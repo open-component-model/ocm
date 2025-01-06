@@ -31,18 +31,18 @@ func (a *artifactBase) IsReadOnly() bool {
 }
 
 func (a *artifactBase) IsIndex() bool {
-	d := a.state.GetState().(*artdesc.Artifact)
-	return d.IsIndex()
+	d, ok := a.state.GetState().(*artdesc.Artifact)
+	return ok && d.IsIndex()
 }
 
 func (a *artifactBase) IsManifest() bool {
-	d := a.state.GetState().(*artdesc.Artifact)
-	return d.IsManifest()
+	d, ok := a.state.GetState().(*artdesc.Artifact)
+	return ok && d.IsManifest()
 }
 
 func (a *artifactBase) IsValid() bool {
-	d := a.state.GetState().(*artdesc.Artifact)
-	return d.IsValid()
+	d, ok := a.state.GetState().(*artdesc.Artifact)
+	return ok && d.IsValid()
 }
 
 func (a *artifactBase) blob() (cpi.BlobAccess, error) {

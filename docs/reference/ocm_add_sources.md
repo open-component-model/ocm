@@ -337,6 +337,29 @@ with the field <code>type</code> in the <code>input</code> field:
 
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
+- Input type <code>git</code>
+
+  The repository type allows accessing an arbitrary git repository
+  using the manifest annotation <code>software.ocm/component-version</code>.
+  The ref can be used to further specify the branch or tag to checkout, otherwise the remote HEAD is used.
+
+  This blob type specification supports the following fields:
+  - **<code>repository</code>** *string*
+
+    This REQUIRED property describes the URL of the git repository to access. All git URL formats are supported.
+
+  - **<code>ref</code>** *string*
+
+    This OPTIONAL property can be used to specify the remote branch or tag to checkout (commonly called ref).
+    If not set, the default HEAD (remotes/origin/HEAD) of the remote is used.
+
+  - **<code>commit</code>** *string*
+
+    This OPTIONAL property can be used to specify the commit hash to checkout.
+    If not set, the default HEAD of the ref is used.
+
+  Options used to configure fields: <code>--inputRepository</code>, <code>--inputVersion</code>
+
 - Input type <code>helm</code>
 
   The path must denote an helm chart archive or directory
@@ -616,6 +639,30 @@ Typically there is special support for the CLI artifact add commands.
 The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.
+
+- Access type <code>git</code>
+
+  This method implements the access of the content of a git commit stored in a
+  Git repository.
+
+  The following versions are supported:
+  - Version <code>v1alpha1</code>
+
+    The type specific specification fields are:
+
+    - **<code>repoUrl</code>**  *string*
+
+      Repository URL with or without scheme.
+
+    - **<code>ref</code>** (optional) *string*
+
+      Original ref used to get the commit from
+
+    - **<code>commit</code>** *string*
+
+      The sha/id of the git commit
+
+  Options used to configure fields: <code>--accessRepository</code>, <code>--commit</code>, <code>--reference</code>
 
 - Access type <code>gitHub</code>
 
