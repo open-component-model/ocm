@@ -29,7 +29,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.CatchOutput(buf).Execute("-X", `featuregates={ "features": { "test": {"mode": "on"}}}`, "get", "fg")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-FEATURE ENABLED MODE DESCRIPTION
+FEATURE ENABLED MODE SHORT
 test    enabled on   <unknown>
 `))
 	})
@@ -39,8 +39,8 @@ test    enabled on   <unknown>
 		Expect(env.CatchOutput(buf).Execute("-X", `featuregates={ "features": { "test": {"mode": "on", "attributes": { "attr": "value"}}}}`, "get", "fg", "-o", "wide")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-FEATURE ENABLED MODE DESCRIPTION ATTRIBUTES
-test    enabled on   <unknown>   {"attr":"value"}
+FEATURE ENABLED MODE SHORT     DESCRIPTION ATTRIBUTES
+test    enabled on   <unknown>             {"attr":"value"}
 `))
 	})
 

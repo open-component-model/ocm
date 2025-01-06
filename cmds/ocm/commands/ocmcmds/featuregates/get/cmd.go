@@ -75,7 +75,7 @@ func (o *Command) Run() error {
 
 func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
 	def := &output.TableOutput{
-		Headers: output.Fields("FEATURE", "ENABLED", "MODE", "DESCRIPTION", wide),
+		Headers: output.Fields("FEATURE", "ENABLED", "MODE", "SHORT", wide),
 		Options: opts,
 		Mapping: mapping,
 	}
@@ -93,7 +93,7 @@ func getRegular(opts *output.Options) output.Output {
 }
 
 func getWide(opts *output.Options) output.Output {
-	return TableOutput(opts, mapGetWideOutput, "ATTRIBUTES").New()
+	return TableOutput(opts, mapGetWideOutput, "DESCRIPTION", "ATTRIBUTES").New()
 }
 
 func mapGetRegularOutput(e interface{}) interface{} {
@@ -115,5 +115,5 @@ func mapGetWideOutput(e interface{}) interface{} {
 		}
 	}
 	reg := output.Fields(mapGetRegularOutput(e))
-	return output.Fields(reg, attr)
+	return output.Fields(reg, p.Description, attr)
 }
