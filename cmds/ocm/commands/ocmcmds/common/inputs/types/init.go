@@ -6,6 +6,7 @@ import (
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/docker"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/dockermulti"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/file"
+	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/git"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/helm"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/maven"
 	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/npm"
