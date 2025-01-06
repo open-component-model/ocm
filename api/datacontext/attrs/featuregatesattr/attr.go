@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	ATTR_KEY   = "ocm.software/ocm/feature-gates"
 	ATTR_SHORT = "featuregates"
+	ATTR_KEY   = "ocm.software/ocm/" + ATTR_SHORT
 )
 
 func init() {
