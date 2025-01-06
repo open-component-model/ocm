@@ -3,12 +3,12 @@ package featuregates_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/datacontext/attrs/featuregatesattr"
-	"ocm.software/ocm/api/datacontext/config/attrs"
-	"ocm.software/ocm/api/datacontext/config/featuregates"
 
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/datacontext"
+	"ocm.software/ocm/api/datacontext/attrs/featuregatesattr"
+	"ocm.software/ocm/api/datacontext/config/attrs"
+	"ocm.software/ocm/api/datacontext/config/featuregates"
 )
 
 var _ = Describe("feature gates", func() {
@@ -71,6 +71,5 @@ var _ = Describe("feature gates", func() {
 			Expect(g).NotTo(BeNil())
 			Expect(g.Mode).To(Equal("on"))
 		})
-
 	})
 })
