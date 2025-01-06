@@ -2,6 +2,7 @@ name: publish as latest
 on:
   # publish on pushes to the main branch (image tagged as "latest")
   # https://ocm.software/ocm/pkgs/container/ocm
+  workflow_dispatch:
   push:
     branches:
       - main
