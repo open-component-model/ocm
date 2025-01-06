@@ -37,7 +37,7 @@ var _ = Describe("feature gates", func() {
 			a := featuregatesattr.Get(ctx)
 
 			Expect(a.IsEnabled("test")).To(BeTrue())
-			Expect(a.IsEnabled("test", true)).To(BeTrue())
+			Expect(a.IsEnabled("test", false)).To(BeTrue())
 			g := a.GetFeature("test")
 			Expect(g).NotTo(BeNil())
 			Expect(g.Mode).To(Equal("on"))
