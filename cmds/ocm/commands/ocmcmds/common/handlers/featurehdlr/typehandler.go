@@ -86,7 +86,6 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	def := featuregates.DefaultRegistry().Get(elemspec.String())
 
-	enabled := false
 	if def == nil {
 		def = &featuregates.FeatureGate{
 			Name:        elemspec.String(),
@@ -95,7 +94,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 			Enabled:     false,
 		}
 	}
-	s := featuregatesattr.Get(h.octx).GetFeature(elemspec.String(), enabled)
+	s := featuregatesattr.Get(h.octx).GetFeature(elemspec.String(), false)
 	return []output.Object{
 		&Object{
 			FeatureGate: *def,

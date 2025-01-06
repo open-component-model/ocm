@@ -41,9 +41,6 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	if !ok {
 		return cfgcpi.ErrNoContext(ConfigType)
 	}
-	if len(a.Features) == 0 {
-		return nil
-	}
 	for n, g := range a.Features {
 		featuregatesattr.SetFeature(t, n, g)
 	}
