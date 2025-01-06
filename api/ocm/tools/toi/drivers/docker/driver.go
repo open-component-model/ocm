@@ -264,6 +264,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}
 	options := container.CopyToContainerOptions{
 		AllowOverwriteDirWithFile: false,
+		CopyUIDGID:                true,
 	}
 	// This copies the tar to the root of the container. The tar has been assembled using the
 	// path from the given file, starting at the /.
