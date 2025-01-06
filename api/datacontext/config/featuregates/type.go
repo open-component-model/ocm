@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ConfigType   = "featuregates" + cfgcpi.OCM_CONFIG_TYPE_SUFFIX
+	ConfigType   = featuregatesattr.ATTR_SHORT + cfgcpi.OCM_CONFIG_TYPE_SUFFIX
 	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
 )
 
