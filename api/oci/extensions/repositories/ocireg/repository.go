@@ -70,6 +70,7 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) 
 		spec:               spec,
 		info:               info,
 	}
+	i.logger.Debug("created repository")
 	return cpi.NewRepository(i), nil
 }
 
