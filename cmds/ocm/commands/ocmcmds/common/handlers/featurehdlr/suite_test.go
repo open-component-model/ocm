@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Version handler Test Suite")
+	RunSpecs(t, "feature handler Test Suite")
 }
