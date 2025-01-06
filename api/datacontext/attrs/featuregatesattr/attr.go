@@ -18,7 +18,7 @@ const (
 )
 
 func init() {
-	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
+	_ = datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
 }
 
 type AttributeType struct{}
