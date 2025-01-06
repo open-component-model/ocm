@@ -48,7 +48,7 @@ func ReindexChart(ctx context.Context, client *http.Client, artifactoryURL strin
 // convertToReindexURL converts the base URL and repository to a reindex URL.
 // see https://jfrog.com/help/r/jfrog-rest-apis/calculate-helm-chart-index for the reindex API
 func convertToReindexURL(baseURL string, repository string) (string, error) {
-	u, err := parseURLAllowNoScheme(baseURL)
+	u, err := ParseURLAllowNoScheme(baseURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse url: %w", err)
 	}

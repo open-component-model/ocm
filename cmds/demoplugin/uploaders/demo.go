@@ -1,6 +1,7 @@
 package uploaders
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -72,7 +73,7 @@ func (a *Uploader) ValidateSpecification(_ ppi.Plugin, spec ppi.UploadTargetSpec
 	return &info, nil
 }
 
-func (a *Uploader) Upload(p ppi.Plugin, arttype, mediatype, hint, digest string, spec ppi.UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
+func (a *Uploader) Upload(_ context.Context, p ppi.Plugin, arttype, mediatype, hint, digest string, spec ppi.UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
 	var file *os.File
 	var err error
 

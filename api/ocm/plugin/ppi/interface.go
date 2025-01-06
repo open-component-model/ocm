@@ -1,6 +1,7 @@
 package ppi
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 
@@ -113,7 +114,7 @@ type Uploader interface {
 	Description() string
 
 	ValidateSpecification(p Plugin, spec UploadTargetSpec) (info *UploadTargetSpecInfo, err error)
-	Upload(p Plugin, arttype, mediatype, hint, digest string, spec UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (AccessSpecProvider, error)
+	Upload(ctx context.Context, p Plugin, arttype, mediatype, hint, digest string, spec UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (AccessSpecProvider, error)
 }
 
 type UploadTargetSpec = runtime.TypedObject

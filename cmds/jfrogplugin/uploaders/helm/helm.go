@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/containerd/containerd/reference"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
@@ -26,11 +24,21 @@ import (
 )
 
 const (
+	// MEDIA_TYPE is the media type of the HELM Chart artifact as tgz.
+	// It is the definitive format for JFrog Uploads
+	MEDIA_TYPE = helm.ChartMediaType
+
+	// NAME of the Uploader and the Configuration
 	NAME = "JFrogHelm"
 
 	// VERSION of the Uploader TODO Increment once stable
 	VERSION = "v1alpha1"
 
+	// VERSIONED_NAME is the name of the Uploader including the version
+	VERSIONED_NAME = NAME + runtime.VersionSeparator + VERSION
+
+	// ID_TYPE is the type of the JFrog Artifactory credentials
+	ID_TYPE = cpi.ID_TYPE
 	// ID_HOSTNAME is the hostname of the artifactory server to upload to
 	ID_HOSTNAME = hostpath.ID_HOSTNAME
 	// ID_PORT is the port of the artifactory server to upload to
@@ -84,7 +92,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	types = ppi.UploadFormats{NAME + runtime.VersionSeparator + VERSION: decoder}
+	types = ppi.UploadFormats{VERSIONED_NAME: decoder}
 }
 
 func (a *Uploader) Decoders() ppi.UploadFormats {
@@ -99,9 +107,14 @@ type Uploader struct {
 var _ ppi.Uploader = (*Uploader)(nil)
 
 func New() ppi.Uploader {
+	client := &http.Client{}
+	// we do not want to double compress helm tgz files
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.DisableCompression = true
+	client.Transport = transport
 	return &Uploader{
 		UploaderBase: ppi.MustNewUploaderBase(NAME, "upload artifacts to JFrog HELM repositories by using the JFrog REST API."),
-		Client:       http.DefaultClient,
+		Client:       client,
 	}
 }
 
@@ -127,7 +140,14 @@ func (a *Uploader) ValidateSpecification(_ ppi.Plugin, spec ppi.UploadTargetSpec
 //  3. creating a request respecting the passed credentials based on SetHeadersFromCredentials
 //  4. uploading the passed blob as is (expected to be a tgz byte stream)
 //  5. intepreting the JFrog API response, and converting it from ArtifactoryUploadResponse to ppi.AccessSpec
-func (a *Uploader) Upload(_ ppi.Plugin, arttype, mediaType, hint, digest string, targetSpec ppi.UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
+func (a *Uploader) Upload(
+	ctx context.Context,
+	p ppi.Plugin,
+	arttype, mediaType, _, digest string,
+	targetSpec ppi.UploadTargetSpec,
+	creds credentials.Credentials,
+	reader io.Reader,
+) (ppi.AccessSpecProvider, error) {
 	if arttype != artifacttypes.HELM_CHART {
 		return nil, fmt.Errorf("unsupported artifact type %s", arttype)
 	}
@@ -140,35 +160,36 @@ func (a *Uploader) Upload(_ ppi.Plugin, arttype, mediaType, hint, digest string,
 	switch mediaType {
 	case helm.ChartMediaType:
 		// if it is a native chart tgz we can pass it on as is
-		var buf bytes.Buffer
-		chart, err := loader.LoadArchive(io.TeeReader(reader, &buf))
-		if err != nil {
-			return nil, fmt.Errorf("failed to load chart: %w", err)
-		}
-		spec.Name = chart.Metadata.Name
-		spec.Version = chart.Metadata.Version
-		reader = &buf
 	case artifactset.MediaType(artdesc.MediaTypeImageManifest):
 		// if we have an artifact set (ocm custom version of index + locally colocated blobs as files, we need
-		// to translate it.
+		// to translate it. This translation is not perfect because the ociArtifactDigest that might be
+		// generated in OCM is not the same as the one that is used within Artifactory, but Uploaders
+		// do not have a way of providing back digest information to the caller.
+		// TODO: At some point consider this for a plugin rework.
 		var err error
-		if reader, digest, err = ConvertArtifactSetHelmChartToPlainTGZChart(reader); err != nil {
+		if reader, digest, err = ConvertArtifactSetWithOCIImageHelmChartToPlainTGZChart(reader); err != nil {
 			return nil, fmt.Errorf("failed to convert OCI Helm Chart to plain TGZ: %w", err)
 		}
 	default:
 		return nil, fmt.Errorf("unsupported media type %s", mediaType)
 	}
 
-	if err := EnsureSpecWithHelpFromHint(spec, hint); err != nil {
-		return nil, fmt.Errorf("could not ensure spec to be ready for upload: %w", err)
+	var buf bytes.Buffer
+	chart, err := loader.LoadArchive(io.TeeReader(reader, &buf))
+	if err != nil {
+		return nil, fmt.Errorf("failed to load chart: %w", err)
 	}
+	spec.Name = chart.Metadata.Name
+	spec.Version = chart.Metadata.Version
+	reader = &buf
 
+	// now based on the chart and repository we can upload it to the correct location.
 	targetURL, err := ConvertTargetSpecToHelmUploadURL(spec)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert target spec to URL: %w", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.TODO(), spec.GetTimeout())
+	ctx, cancel := context.WithTimeout(ctx, spec.GetTimeout())
 	defer cancel()
 
 	access, err := Upload(ctx, reader, a.Client, targetURL, creds, digest)
@@ -190,7 +211,7 @@ func (a *Uploader) Upload(_ ppi.Plugin, arttype, mediaType, hint, digest string,
 // in the library to identify the correct credentials that need to
 // be passed to it.
 func ConvertTargetSpecToInfo(spec *JFrogHelmUploaderSpec) (*ppi.UploadTargetSpecInfo, error) {
-	purl, err := parseURLAllowNoScheme(spec.URL)
+	purl, err := ParseURLAllowNoScheme(spec.URL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %w", err)
 	}
@@ -200,7 +221,7 @@ func ConvertTargetSpecToInfo(spec *JFrogHelmUploaderSpec) (*ppi.UploadTargetSpec
 	// By default, we identify an artifactory repository as a combination
 	// of Host & Repository
 	info.ConsumerId = credentials.ConsumerIdentity{
-		cpi.ID_TYPE:   NAME,
+		ID_TYPE:       NAME,
 		ID_HOSTNAME:   purl.Hostname(),
 		ID_REPOSITORY: spec.Repository,
 	}
@@ -209,29 +230,6 @@ func ConvertTargetSpecToInfo(spec *JFrogHelmUploaderSpec) (*ppi.UploadTargetSpec
 	}
 
 	return &info, nil
-}
-
-// EnsureSpecWithHelpFromHint introspects the hint and fills the target spec based on it.
-// It makes sure that the spec can be used to access a JFrog Artifactory HELM Repository.
-func EnsureSpecWithHelpFromHint(spec *JFrogHelmUploaderSpec, hint string) error {
-	if refFromHint, err := reference.Parse(hint); err == nil {
-		if refFromHint.Digest() != "" && refFromHint.Object == "" {
-			return fmt.Errorf("the hint contained a valid reference but it was a digest, so it cannot be used to deduce a version of the helm chart: %s", refFromHint)
-		}
-		if spec.Version == "" {
-			spec.Version = refFromHint.Object
-		}
-		if spec.Name == "" {
-			spec.Name = path.Base(refFromHint.Locator)
-		}
-	}
-	if spec.Name == "" {
-		return fmt.Errorf("the chart name could not be deduced from the hint (%s) or the config (%s)", hint, spec)
-	}
-	if spec.Version == "" {
-		return fmt.Errorf("the chart version could not be deduced from the hint (%s) or the config (%s)", hint, spec)
-	}
-	return nil
 }
 
 // ConvertTargetSpecToHelmUploadURL interprets the JFrogHelmUploaderSpec into a valid REST API Endpoint URL to upload to.
@@ -252,19 +250,19 @@ func EnsureSpecWithHelpFromHint(spec *JFrogHelmUploaderSpec, hint string) error 
 //
 //	url.URL => https://demo.jfrog.ocm.software/artifactory/my-charts/podinfo-0.0.1.tgz
 func ConvertTargetSpecToHelmUploadURL(spec *JFrogHelmUploaderSpec) (*url.URL, error) {
-	requestURL := path.Join(spec.URL, "artifactory", spec.Repository, fmt.Sprintf("%s-%s.tgz", spec.Name, spec.Version))
-	requestURLParsed, err := parseURLAllowNoScheme(requestURL)
+	requestURLParsed, err := ParseURLAllowNoScheme(spec.URL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse full request URL: %w", err)
 	}
+	requestURLParsed.Path = path.Join("artifactory", spec.Repository, fmt.Sprintf("%s-%s.tgz", spec.Name, spec.Version))
 	return requestURLParsed, nil
 }
 
-// parseURLAllowNoScheme is an adaptation / hack on url.Parse because
+// ParseURLAllowNoScheme is an adaptation / hack on url.Parse because
 // url.Parse does not support parsing a URL without a prefixed scheme.
 // However, we would like to accept these kind of URLs because we default them
 // to "https://" out of convenience.
-func parseURLAllowNoScheme(urlToParse string) (*url.URL, error) {
+func ParseURLAllowNoScheme(urlToParse string) (*url.URL, error) {
 	const dummyScheme = "dummy"
 	if !strings.Contains(urlToParse, "://") {
 		urlToParse = dummyScheme + "://" + urlToParse

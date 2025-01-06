@@ -36,19 +36,25 @@ func Upload(
 		return nil, fmt.Errorf("failed to create HTTP request for upload: %w", err)
 	}
 
-	parsedDigest, err := godigest.Parse(digest)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse digest: %w", err)
+	// if there is no digest information, we skip the digest headers.
+	// note that this will cause insecure uploads and should be avoided where possible
+	if digest != "" {
+		parsedDigest, err := godigest.Parse(digest)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse digest: %w", err)
+		}
+
+		// see https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact-by-checksum for the checksum headers
+		switch parsedDigest.Algorithm() {
+		case godigest.SHA256:
+			req.Header.Set("X-Checksum-Sha256", parsedDigest.Encoded())
+		default:
+			return nil, fmt.Errorf("unsupported digest algorithm, must be %s to allow upload to jfrog: %s", godigest.SHA256, parsedDigest.Algorithm())
+		}
+		req.Header.Set("X-Checksum-Deploy", "false")
 	}
 
-	// see https://jfrog.com/help/r/jfrog-rest-apis/deploy-artifact-by-checksum for the checksum headers
-	switch parsedDigest.Algorithm() {
-	case godigest.SHA256:
-		req.Header.Set("X-Checksum-Sha256", parsedDigest.Encoded())
-	default:
-		return nil, fmt.Errorf("unsupported digest algorithm, must be %s to allow upload to jfrog: %s", godigest.SHA256, parsedDigest.Algorithm())
-	}
-	req.Header.Set("X-Checksum-Deploy", "false")
+	req.Header.Set("Accept-Encoding", "gzip")
 
 	SetHeadersFromCredentials(req, creds)
 
@@ -82,19 +88,21 @@ func Upload(
 }
 
 type ArtifactoryUploadResponse struct {
-	Repo        string `json:"repo,omitempty"`
-	Path        string `json:"path,omitempty"`
-	Created     string `json:"created,omitempty"`
-	CreatedBy   string `json:"createdBy,omitempty"`
-	DownloadUri string `json:"downloadUri,omitempty"`
-	MimeType    string `json:"mimeType,omitempty"`
-	Size        string `json:"size,omitempty"`
-	Checksums   struct {
-		Sha1   string `json:"sha1,omitempty"`
-		Sha256 string `json:"sha256,omitempty"`
-		Md5    string `json:"md5,omitempty"`
-	} `json:"checksums,omitempty"`
-	Uri string `json:"uri"`
+	Repo        string                     `json:"repo,omitempty"`
+	Path        string                     `json:"path,omitempty"`
+	Created     string                     `json:"created,omitempty"`
+	CreatedBy   string                     `json:"createdBy,omitempty"`
+	DownloadUri string                     `json:"downloadUri,omitempty"`
+	MimeType    string                     `json:"mimeType,omitempty"`
+	Size        string                     `json:"size,omitempty"`
+	Checksums   ArtifactoryUploadChecksums `json:"checksums,omitempty"`
+	Uri         string                     `json:"uri"`
+}
+
+type ArtifactoryUploadChecksums struct {
+	Sha1   string `json:"sha1,omitempty"`
+	Sha256 string `json:"sha256,omitempty"`
+	Md5    string `json:"md5,omitempty"`
 }
 
 func (r *ArtifactoryUploadResponse) URL() string {

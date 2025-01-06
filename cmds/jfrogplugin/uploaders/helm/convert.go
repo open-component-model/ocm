@@ -11,7 +11,12 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 )
 
-func ConvertArtifactSetHelmChartToPlainTGZChart(reader io.Reader) (_ io.ReadCloser, _ string, err error) {
+// ConvertArtifactSetWithOCIImageHelmChartToPlainTGZChart converts an artifact set with a single layer helm OCI image to a plain tgz chart.
+// Note that this transformation is not completely reversible because an OCI artifact contains provenance data, while
+// a plain tgz chart does not.
+// This means converting back from a signed tgz chart to an OCI image will lose the provenance data, and also change digests.
+// The returned digest is the digest of the tgz chart.
+func ConvertArtifactSetWithOCIImageHelmChartToPlainTGZChart(reader io.Reader) (_ io.ReadCloser, _ string, err error) {
 	set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(io.NopCloser(reader)))
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to open helm OCI artifact as artifact set: %w", err)

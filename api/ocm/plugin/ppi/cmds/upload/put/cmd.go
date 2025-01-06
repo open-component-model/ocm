@@ -3,8 +3,6 @@ package put
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"os"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
@@ -15,7 +13,6 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/common"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
-	"ocm.software/ocm/api/utils/iotools"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -82,10 +79,10 @@ func (o *Options) Complete(args []string) error {
 	return nil
 }
 
-func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
-	spec, err := p.DecodeUploadTargetSpecification(opts.Specification)
-	if err != nil {
-		return fmt.Errorf("target specification: %w", err)
+func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) (err error) {
+	var spec ppi.UploadTargetSpec
+	if spec, err = p.DecodeUploadTargetSpecification(opts.Specification); err != nil {
+		return fmt.Errorf("error decoding upload target specification: %w", err)
 	}
 
 	u := p.GetUploader(opts.Name)
@@ -93,36 +90,28 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 		return errors.ErrNotFound(descriptor.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
 
-	reader := io.Reader(os.Stdin)
-	// if we are not size aware, buffer the file to avoid OOM.
-	if opts.Digest == "" {
-		tmp, err := os.CreateTemp("", "ocm-upload-")
-		if err != nil {
-			return fmt.Errorf("failed to create temporary file to buffer access data: %w", err)
-		}
-		defer func() {
-			tmp.Close()
-			os.Remove(tmp.Name())
-		}()
-		digestReader := iotools.NewDefaultDigestReader(reader)
-		if _, err := io.Copy(tmp, digestReader); err != nil {
-			return fmt.Errorf("failed to read from stdin: %w", err)
-		}
-		reader = tmp
-		opts.Digest = digestReader.Digest().String()
-	}
+	reader := cmd.InOrStdin()
 
-	h, err := u.Upload(p, opts.ArtifactType, opts.MediaType, opts.Hint, opts.Digest, spec, opts.Credentials, reader)
-	if err != nil {
+	var provider ppi.AccessSpecProvider
+	if provider, err = u.Upload(
+		cmd.Context(),
+		p,
+		opts.ArtifactType,
+		opts.MediaType,
+		opts.Hint,
+		opts.Digest,
+		spec,
+		opts.Credentials,
+		reader,
+	); err != nil {
 		return fmt.Errorf("upload failed: %w", err)
 	}
 
-	acc := h()
+	acc := provider()
 
-	data, err := json.Marshal(acc)
-	if err == nil {
+	var data []byte
+	if data, err = json.Marshal(acc); err == nil {
 		cmd.Printf("%s\n", string(data))
 	}
-
 	return err
 }
