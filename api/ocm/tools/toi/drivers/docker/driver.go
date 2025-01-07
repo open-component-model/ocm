@@ -469,7 +469,7 @@ func generateTar(files map[string]blobaccess.BlobAccess, uid int) (io.ReadCloser
 			dir := path
 			for dir != "/" {
 				dir = unix_path.Dir(dir)
-				if !have[dir] {
+				if dir != "/" && dir != "." && !have[dir] {
 					dirHdr := &tar.Header{
 						Typeflag: tar.TypeDir,
 						Name:     dir,
