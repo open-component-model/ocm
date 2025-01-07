@@ -109,9 +109,9 @@ type TargetOptionImpl interface {
 type TargetElementOptions struct {
 	TargetElement TargetElement
 
-	// RawIdentity disables the implicit defaulting of the extraIdentity.
+	// DisableExtraIdentityDefaulting disables the implicit defaulting of the extraIdentity.
 	// A transfer operation must set this flag to preserve the normalizations.
-	RawIdentity *bool
+	DisableExtraIdentityDefaulting *bool
 }
 
 type TargetElementOption interface {
@@ -132,11 +132,11 @@ func (m *TargetElementOptions) ApplyElementModificationOption(opts *ElementModif
 
 func (m *TargetElementOptions) ApplyTargetOption(opts *TargetElementOptions) {
 	optionutils.Transfer(&opts.TargetElement, m.TargetElement)
-	optionutils.Transfer(&opts.RawIdentity, m.RawIdentity)
+	optionutils.Transfer(&opts.DisableExtraIdentityDefaulting, m.DisableExtraIdentityDefaulting)
 }
 
-func (m *TargetElementOptions) IsRawIdentity() bool {
-	return utils.AsBool(m.RawIdentity)
+func (m *TargetElementOptions) IsDisableExtraIdentityDefaulting() bool {
+	return utils.AsBool(m.DisableExtraIdentityDefaulting)
 }
 
 func (m *TargetElementOptions) ApplyTargetOptions(list ...TargetElementOption) *TargetElementOptions {
@@ -364,27 +364,27 @@ func (m TargetIdentity) ApplyTargetOption(opts *TargetElementOptions) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type rawidentity bool
+type disableextraidentitydefaulting bool
 
-func (m rawidentity) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+func (m disableextraidentitydefaulting) ApplyBlobModificationOption(opts *BlobModificationOptions) {
 	m.ApplyModificationOption(&opts.ModificationOptions)
 }
 
-func (m rawidentity) ApplyModificationOption(opts *ModificationOptions) {
+func (m disableextraidentitydefaulting) ApplyModificationOption(opts *ModificationOptions) {
 	m.ApplyTargetOption(&opts.TargetElementOptions)
 }
 
-func (m rawidentity) ApplyElementModificationOption(opts *ElementModificationOptions) {
+func (m disableextraidentitydefaulting) ApplyElementModificationOption(opts *ElementModificationOptions) {
 	m.ApplyTargetOption(&opts.TargetElementOptions)
 }
 
-func (m rawidentity) ApplyTargetOption(opts *TargetElementOptions) {
-	opts.RawIdentity = utils.BoolP(m)
+func (m disableextraidentitydefaulting) ApplyTargetOption(opts *TargetElementOptions) {
+	opts.DisableExtraIdentityDefaulting = utils.BoolP(m)
 }
 
-// RawIdentity disables the defaulting of the extra identity.
-func RawIdentity(flag ...bool) TargetOptionImpl {
-	return rawidentity(utils.OptionalDefaultedBool(true, flag...))
+// DisableExtraIdentityDefaulting disables the defaulting of the extra identity.
+func DisableExtraIdentityDefaulting(flag ...bool) TargetOptionImpl {
+	return disableextraidentitydefaulting(utils.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

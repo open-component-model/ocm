@@ -468,7 +468,7 @@ func (c *componentVersionAccessView) SetResource(meta *cpi.ResourceMeta, acc com
 		} else {
 			cd.Resources[idx] = *res
 		}
-		if opts.IsModifyElement() && !opts.IsRawIdentity() {
+		if opts.IsModifyElement() && !opts.IsDisableExtraIdentityDefaulting() {
 			// default handling for completing an extra identity for modifications, only.
 			compdesc.DefaultResources(cd)
 		}
@@ -549,7 +549,7 @@ func (c *componentVersionAccessView) SetSource(meta *cpi.SourceMeta, acc compdes
 		} else {
 			cd.Sources[idx] = *res
 		}
-		if !opts.IsRawIdentity() {
+		if !opts.IsDisableExtraIdentityDefaulting() {
 			compdesc.DefaultSources(cd)
 		}
 		return c.bridge.Update(false)
@@ -587,7 +587,7 @@ func (c *componentVersionAccessView) SetReference(ref *cpi.ComponentReference, o
 			cd.References[idx].Equivalent(ref)
 			cd.References[idx] = *ref
 		}
-		if opts.IsModifyElement(moddef) && !opts.IsRawIdentity() {
+		if opts.IsModifyElement(moddef) && !opts.IsDisableExtraIdentityDefaulting() {
 			compdesc.DefaultReferences(cd)
 		}
 		return c.bridge.Update(false)

@@ -35,8 +35,8 @@ func NewTargetElementOptions(list ...TargetElementOption) *TargetElementOptions 
 	return &m
 }
 
-func RawIdentity(flag ...bool) internal.TargetOptionImpl {
-	return internal.RawIdentity(flag...)
+func DisableExtraIdentityDefaulting(flag ...bool) internal.TargetOptionImpl {
+	return internal.DisableExtraIdentityDefaulting(flag...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

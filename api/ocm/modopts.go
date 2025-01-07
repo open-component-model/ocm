@@ -66,9 +66,9 @@ func TargetIndex(idx int) internal.TargetOptionImpl {
 	return internal.TargetIndex(idx)
 }
 
-// RawIdentity disables the defaulting of the extra identity
-func RawIdentity(flag ...bool) internal.TargetOptionImpl {
-	return internal.RawIdentity(flag...)
+// DisableExtraIdentityDefaulting disables the defaulting of the extra identity
+func DisableExtraIdentityDefaulting(flag ...bool) internal.TargetOptionImpl {
+	return internal.DisableExtraIdentityDefaulting(flag...)
 }
 
 const AppendElement = internal.TargetIndex(-1)
