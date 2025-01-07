@@ -38,7 +38,7 @@ The following *realms* are used by the command line tool:
   - <code>ocm/refcnt</code>: reference counting
   - <code>ocm/toi</code>: TOI logging
   - <code>ocm/transfer</code>: OCM transfer handling
-  - <code>ocm/valuemerge</code>: value marge handling
+  - <code>ocm/valuemerge</code>: value merge handling
 
 
 ### Examples
