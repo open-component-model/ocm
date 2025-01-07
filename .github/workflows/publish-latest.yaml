@@ -60,8 +60,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          # supported platforms of https://hub.docker.com/_/golang/tags?page=1&name=1.23-alpine3.20
-          # platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x
+          # supported platforms: https://github.com/GoogleContainerTools/distroless?tab=readme-ov-file#what-images-are-available
+          platforms: linux/amd64,linux/arm64 #linux/arm,linux/ppc64le,linux/s390x
           push: true
           tags: |
             ghcr.io/open-component-model/ocm:latest

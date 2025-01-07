@@ -1,0 +1,6 @@
+name: hello-world
+type: git
+input:
+  type: git
+  repository: https://github.com/octocat/Hello-World.git
+  version: refs/heads/master
