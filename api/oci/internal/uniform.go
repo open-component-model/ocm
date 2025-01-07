@@ -31,7 +31,7 @@ type UniformRepositorySpec struct {
 	// Host is the hostname of an oci ref.
 	Host string `json:"host,omitempty"`
 	// Info is the file path used to host ctf component versions
-	Info string `json:"filePath,omitempty"`
+	Info string `json:"info,omitempty"`
 
 	// CreateIfMissing indicates whether a file based or dynamic repo should be created if it does not exist
 	CreateIfMissing bool `json:"createIfMissing,omitempty"`
