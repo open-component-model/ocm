@@ -2,7 +2,6 @@ name: publish as latest
 on:
   # publish on pushes to the main branch (image tagged as "latest")
   # https://ocm.software/ocm/pkgs/container/ocm
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -61,11 +60,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          # supported platforms of https://hub.docker.com/_/golang/tags?page=1&name=1.23-alpine3.20
-          platforms: linux/amd64,linux/arm64
+          # supported platforms: https://github.com/GoogleContainerTools/distroless?tab=readme-ov-file#what-images-are-available
+          platforms: linux/amd64,linux/arm64 #linux/arm,linux/ppc64le,linux/s390x
           push: true
           tags: |
-            ghcr.io/hilmarf/ocm/ocm.software/ocmcli/ocmcli-image:latest
+            ghcr.io/open-component-model/ocm:latest
+            ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:latest
+            ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   ocm-cli-latest:
     name: Build latest ocm-cli
