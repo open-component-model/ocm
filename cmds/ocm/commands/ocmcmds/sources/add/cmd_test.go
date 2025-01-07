@@ -17,6 +17,7 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
 	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/runtime"
 )
 
 const (
@@ -159,6 +160,20 @@ mediaType: text/plain
 			Expect(len(cd.Sources)).To(Equal(1))
 
 			CheckTextSource(env, cd, "testdata")
+		})
+
+		It("handles hints", func() {
+			Expect(env.Execute("add", "sources", "--file", ARCH, "/testdata/sources2.yaml")).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Sources)).To(Equal(2))
+
+			Expect(cd.Sources[0].ReferenceHints.Serialize(true)).To(Equal("test::laber"))
+			Expect(cd.Sources[1].Access.(*runtime.UnstructuredVersionedTypedObject).Object["referenceName"]).To(Equal("dummy::blubber"))
+			CheckTextSource(env, cd, "testdata")
+			CheckArchiveSource(env, cd, "myothersrc")
 		})
 	})
 })

@@ -30,4 +30,8 @@ specification supports the following fields:
 - **<code>yaml</code>** *AML/JSON or JSON/YAML string interpreted as YAML*
 
   The content emitted as YAML.
+
+- **<code>referenceHints</code>** *[]map[string]string*
+
+  This OPTIONAL property describes a list of implicit reference hints.
 ` + cpi.ProcessSpecUsage

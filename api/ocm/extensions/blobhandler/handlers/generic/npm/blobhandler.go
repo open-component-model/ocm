@@ -12,6 +12,7 @@ import (
 	crds "ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/npm"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	npmLogin "ocm.software/ocm/api/tech/npm"
 	"ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/mime"
@@ -27,7 +28,7 @@ func NewArtifactHandler(repospec *Config) cpi.BlobHandler {
 	return &artifactHandler{repospec}
 }
 
-func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ string, _ cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, _ string, _ metav1.ReferenceHints, _ cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	if b.spec == nil {
 		return nil, nil
 	}

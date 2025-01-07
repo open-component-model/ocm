@@ -7,6 +7,7 @@ import (
 
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/tech/maven"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	mavenblob "ocm.software/ocm/api/utils/blobaccess/maven"
@@ -87,11 +88,11 @@ func (a *AccessSpec) GlobalAccessSpec(_ accspeccpi.Context) accspeccpi.AccessSpe
 }
 
 // GetReferenceHint returns the reference hint for the Maven (mvn) artifact.
-func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) string {
+func (a *AccessSpec) GetReferenceHint(_ accspeccpi.ComponentVersionAccess) refhints.ReferenceHints {
 	if a.IsPackage() {
-		return a.GAV()
+		return refhints.DefaultList(maven.ReferenceHint, a.GAV(), true)
 	}
-	return ""
+	return nil
 }
 
 func (_ *AccessSpec) GetType() string {

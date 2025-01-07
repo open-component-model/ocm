@@ -6,6 +6,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 
@@ -17,7 +18,7 @@ type ocmResource struct {
 	access compdesc.AccessSpec
 	blob   blobaccess.BlobAccess
 	opts   ocm.ModificationOptions
-	hint   string
+	hint   refhints.ReferenceHints
 }
 
 const T_OCMRESOURCE = "resource"
@@ -30,10 +31,11 @@ func (r *ocmResource) Set() {
 	r.Builder.ocm_rsc = &r.meta
 	r.Builder.ocm_acc = &r.access
 	r.Builder.ocm_meta = &r.meta.ElementMeta
+	r.Builder.ocm_metahints = &r.meta
 	r.Builder.ocm_labels = &r.meta.ElementMeta.Labels
 	r.Builder.ocm_modopts = &r.opts
 	r.Builder.blob = &r.blob
-	r.Builder.hint = &r.hint
+	r.Builder.blobhint = &r.hint
 }
 
 func (r *ocmResource) Close() error {

@@ -5,6 +5,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -14,6 +15,8 @@ import (
 type Spec struct {
 	inputs.InputSpecBase `json:",inline"`
 	cpi.ProcessSpec      `json:",inline"`
+
+	ReferenceHints refhints.DefaultReferenceHints `json:"referenceHints,omitempty"`
 
 	// Text is an utf8 string
 	Text          string          `json:"text,omitempty"`
@@ -106,7 +109,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	data, err := Plain([]byte(s.Text))
 
 	if s.Json != nil {
@@ -119,9 +122,9 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		data, err = Yaml(s.Yaml)
 	}
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
-	return s.ProcessBlob(ctx, blobaccess.DataAccessForData(data), ctx.FileSystem())
+	return s.ProcessBlob(ctx, blobaccess.DataAccessForData(data), ctx.FileSystem(), refhints.AsImplicit(s.ReferenceHints)...)
 }
 
 func Prepare(raw []byte) (interface{}, error) {

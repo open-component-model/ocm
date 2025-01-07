@@ -18,4 +18,8 @@ specification supports the following fields:
 - **<code>data</code>** *[]byte*
 
   The binary data to provide.
+
+- **<code>referenceHints</code>** *[]map[string]string*
+
+  This OPTIONAL property describes a list of implicit reference hints.
 ` + cpi.ProcessSpecUsage

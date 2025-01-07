@@ -13,6 +13,7 @@ import (
 	cpi "ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
+	metav1 "ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
@@ -48,7 +49,7 @@ func (s *AccessSpec) GetMimeType() string {
 	return s.handler.GetMimeType(s)
 }
 
-func (s *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
+func (s *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) metav1.ReferenceHints {
 	return s.handler.GetReferenceHint(s, cv)
 }
 

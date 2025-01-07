@@ -10,6 +10,7 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/utils/accessio"
@@ -80,25 +81,25 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 	return h.opts.IsSourcesByValue(), nil
 }
 
-func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
+func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMethod, hints []refhints.ReferenceHint, t ocm.ComponentVersionAccess) error {
 	blob, err := accspeccpi.BlobAccessForAccessMethod(m)
 	if err != nil {
 		return err
 	}
 	defer blob.Close()
 	return accessio.Retry(h.opts.GetRetries(), time.Second, func() error {
-		return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m), ocm.SkipVerify())
+		return t.SetResourceBlob(r.Meta(), blob, hints, h.GlobalAccess(t.GetContext(), m), ocm.SkipVerify())
 	})
 }
 
-func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m cpi.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
+func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m cpi.AccessMethod, hints []refhints.ReferenceHint, t ocm.ComponentVersionAccess) error {
 	blob, err := accspeccpi.BlobAccessForAccessMethod(m)
 	if err != nil {
 		return err
 	}
 	defer blob.Close()
 	return accessio.Retry(h.opts.GetRetries(), time.Second, func() error {
-		return t.SetSourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
+		return t.SetSourceBlob(r.Meta(), blob, hints, h.GlobalAccess(t.GetContext(), m))
 	})
 }
 

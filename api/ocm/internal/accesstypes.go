@@ -12,6 +12,7 @@ import (
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets/flagsetscheme"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/refmgmt"
@@ -51,7 +52,7 @@ type (
 // expanding a blob to a repository specific representation to determine a
 // useful name.
 type HintProvider interface {
-	GetReferenceHint(cv ComponentVersionAccess) string
+	GetReferenceHint(cv ComponentVersionAccess) refhints.ReferenceHints
 }
 
 // GlobalAccessProvider is used to provide a non-local access specification.

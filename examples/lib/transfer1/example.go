@@ -55,7 +55,7 @@ func setupComponents(repo ocm.Repository) (rerr error) {
 	cv.GetDescriptor().Provider.Name = "acne.org"
 	err = cv.SetResourceBlob(compdesc.NewResourceMeta(resourceName, resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
 		blobaccess.ForString(mime.MIME_TEXT, "test data"),
-		"", nil)
+		nil, nil)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add resource test")
 	}

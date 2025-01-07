@@ -66,7 +66,7 @@ func SimpleWriteWithCredentials() (ferr error) {
 			Relation: metav1.LocalRelation,
 		},
 		blobaccess.ForString(mime.MIME_TEXT, "testdata"),
-		"", nil,
+		nil, nil,
 	)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add resource")

@@ -92,6 +92,10 @@ $defs:
     required:
       - 'type'
 
+  hint:
+    type: 'object'
+    description: 'attributes for a reference hint'
+
   sourceDefinition:
     type: 'object'
     required:
@@ -113,6 +117,10 @@ $defs:
         $ref: '#/$defs/labels'
       access:
         $ref: '#/$defs/access'
+      referenceHints:
+        type: 'array'
+        items:
+          $ref: '#/$defs/hint'
 
   digestSpec:
     type: 'object'
@@ -271,6 +279,10 @@ $defs:
         $ref: '#/$defs/labels'
       access:
         $ref: '#/$defs/access'
+      referenceHints:
+        type: 'array'
+        items:
+          $ref: '#/$defs/hint'
       digest:
         oneOf:
           - type: 'null'

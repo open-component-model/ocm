@@ -18,6 +18,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/keepblobattr"
 	"ocm.software/ocm/api/ocm/extensions/pubsub"
 	"ocm.software/ocm/api/ocm/internal"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -300,7 +301,7 @@ func (b *componentVersionAccessBridge) getLocalBlob(acc cpi.AccessSpec) cpi.Blob
 	return b.blobcache.GetBlobFor(string(key))
 }
 
-func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error) {
+func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType string, hints []refhints.ReferenceHint, global cpi.AccessSpec, final bool, opts *cpi.BlobUploadOptions) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -333,7 +334,7 @@ func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType, ref
 		mime := blob.MimeType()
 		h := prov.LookupHandler(storagectx, artType, mime)
 		if h != nil {
-			acc, err := h.StoreBlob(blob, artType, refName, nil, storagectx)
+			acc, err := h.StoreBlob(blob, artType, hints, nil, storagectx)
 			if err != nil {
 				return nil, err
 			}
@@ -349,13 +350,13 @@ func (b *componentVersionAccessBridge) AddBlob(blob cpi.BlobAccess, artType, ref
 	var acc cpi.AccessSpec
 
 	if final || b.UseDirectAccess() {
-		acc, err = b.impl.AddBlob(blob, refName, global)
+		acc, err = b.impl.AddBlob(blob, hints, global)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		// use local composition access to be added to the repository with AddVersion.
-		acc = compose.New(refName, blob.MimeType(), global)
+		acc = compose.New(hints, blob.MimeType(), global)
 	}
 	return b.cacheLocalBlob(acc, blob)
 }
@@ -388,27 +389,27 @@ func (b *componentVersionAccessBridge) cacheLocalBlob(acc cpi.AccessSpec, blob c
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *componentVersionAccessBridge) composeAccess(spec cpi.AccessSpec) (blobaccess.BlobAccess, string, cpi.AccessSpec, error) {
+func (b *componentVersionAccessBridge) composeAccess(spec cpi.AccessSpec) (blobaccess.BlobAccess, []refhints.ReferenceHint, cpi.AccessSpec, error) {
 	if !compose.Is(spec) {
-		return nil, "", nil, nil
+		return nil, nil, nil, nil
 	}
 	cspec, ok := spec.(*compose.AccessSpec)
 	if !ok {
-		return nil, "", nil, fmt.Errorf("invalid implementation (%T) for access method compose", spec)
+		return nil, nil, nil, fmt.Errorf("invalid implementation (%T) for access method compose", spec)
 	}
 	blob := b.getLocalBlob(cspec)
 	if blob == nil {
-		return nil, "", nil, errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, common.VersionedElementKey(b).String())
+		return nil, nil, nil, errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, common.VersionedElementKey(b).String())
 	}
 	blob, err := blob.Dup()
 	if err != nil {
-		return nil, "", nil, errors.Wrapf(err, "cached blob")
+		return nil, nil, nil, errors.Wrapf(err, "cached blob")
 	}
 
-	return blob, cspec.ReferenceName, cspec.GlobalAccess.Get(), nil
+	return blob, cspec.GetReferenceHint(nil), cspec.GlobalAccess.Get(), nil
 }
 
-func (b *componentVersionAccessBridge) setupLocalBlobs(kind string, accprov func(cpi.AccessSpec) (blobaccess.BlobAccess, string, cpi.AccessSpec, error), it compdesc.ArtifactAccessor, final bool, opts *cpi.BlobUploadOptions) (ferr error) {
+func (b *componentVersionAccessBridge) setupLocalBlobs(kind string, accprov func(cpi.AccessSpec) (blobaccess.BlobAccess, []refhints.ReferenceHint, cpi.AccessSpec, error), it compdesc.ArtifactAccessor, final bool, opts *cpi.BlobUploadOptions) (ferr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&ferr)
 
@@ -419,14 +420,14 @@ func (b *componentVersionAccessBridge) setupLocalBlobs(kind string, accprov func
 		if err != nil {
 			return errors.Wrapf(err, "%s %d", kind, i)
 		}
-		blob, ref, global, err := accprov(spec)
+		blob, hints, global, err := accprov(spec)
 		if err != nil {
 			return errors.Wrapf(err, "%s %d", kind, i)
 		}
 		if blob != nil {
 			nested.Close(blob)
 
-			effspec, err := b.AddBlob(blob, a.GetType(), ref, global, final, opts)
+			effspec, err := b.AddBlob(blob, a.GetType(), hints, global, final, opts)
 			if err != nil {
 				return errors.Wrapf(err, "cannot store %s %d", kind, i)
 			}

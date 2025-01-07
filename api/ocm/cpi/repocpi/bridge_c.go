@@ -10,6 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/attrs/compositionmodeattr"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/refmgmt/resource"
@@ -172,15 +173,15 @@ func (c *componentAccessBridge) AddVersion(cv cpi.ComponentVersionAccess, opts *
 func (c *componentAccessBridge) setupLocalBlobs(kind string, src cpi.ComponentVersionAccess, tgtbridge ComponentVersionAccessBridge, it compdesc.ArtifactAccessor, opts *cpi.BlobUploadOptions) (ferr error) {
 	ctx := src.GetContext()
 	// transfer all local blobs
-	prov := func(spec cpi.AccessSpec) (blob blobaccess.BlobAccess, ref string, global cpi.AccessSpec, err error) {
+	prov := func(spec cpi.AccessSpec) (blob blobaccess.BlobAccess, ref []refhints.ReferenceHint, global cpi.AccessSpec, err error) {
 		if spec.IsLocal(ctx) {
 			m, err := spec.AccessMethod(src)
 			if err != nil {
-				return nil, "", nil, err
+				return nil, nil, nil, err
 			}
 			return m.AsBlobAccess(), cpi.ReferenceHint(spec, src), cpi.GlobalAccess(spec, tgtbridge.GetContext()), nil
 		}
-		return nil, "", nil, nil
+		return nil, nil, nil, nil
 	}
 
 	return tgtbridge.(*componentVersionAccessBridge).setupLocalBlobs(kind, prov, it, false, opts)

@@ -1,0 +1,20 @@
+---
+name: testdata
+type: plainText
+referenceHints:
+  - type: test
+    reference: laber
+
+input:
+  type: file
+  path: testcontent
+  mediaType: text/plain
+---
+name: testdata2
+type: plainText
+
+input:
+  type: file
+  path: testcontent
+  mediaType: text/plain
+  referenceHints: test::laber

@@ -286,7 +286,9 @@ typename
 unmarshaller
 unmodifiable
 untrusted
+untyped
 updatevendorhash
+uploadable
 uploader
 uploaderdescriptor
 uploaders
@@ -309,3 +311,5 @@ yaml
 yitsushi
 yml
 yyyy
+fabianburth
+jakobmoellerdev

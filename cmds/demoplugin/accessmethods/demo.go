@@ -13,6 +13,7 @@ import (
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
@@ -24,6 +25,12 @@ const (
 	NAME    = "demo"
 	VERSION = "v1"
 )
+
+const ReferenceHintType = NAME
+
+func ReferenceHint(p string, implicit ...bool) refhints.ReferenceHint {
+	return refhints.New(ReferenceHintType, p, implicit...)
+}
 
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
@@ -86,7 +93,7 @@ func (a *AccessMethod) ValidateSpecification(p ppi.Plugin, spec ppi.AccessSpec) 
 		identity.ID_PATHPREFIX: my.Path,
 	}
 	info.Short = "temp file " + my.Path
-	info.Hint = "temp file " + my.Path
+	info.Hint = refhints.New(ReferenceHintType, my.Path).Serialize()
 	return &info, nil
 }
 

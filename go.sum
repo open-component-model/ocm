@@ -716,12 +716,16 @@ github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3 h1:oo9nIgnyiBg
 github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3/go.mod h1:LxhqC7khDoRENwooP6f/vWvia9ivj6TqLYrR39zqkN0=
 github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc h1:706IHCvAg6DjmG4cQ24CRNpvNVJ8+KQkcGEdQiLyJbU=
 github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc/go.mod h1:9TJgkwSY43RWHiIAAz7fL8SEIHf0L13Pk4w8fDIt+i4=
+github.com/mandelsoft/goutils v0.0.0-20241227142622-83a787399095 h1:Vvdz+jvOC7OMSmjcHYgHeNr0CrQmwIZSuoAo0lVcORw=
+github.com/mandelsoft/goutils v0.0.0-20241227142622-83a787399095/go.mod h1:UeYhFI0gRoiTcmZH7VD/Oy5dYz4O8vyOv5tsiBTEUPo=
 github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a h1:MAvh0gbP2uwKmf7wWCkYCzrYa6vPjBvYeGhoUlVHwtI=
 github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
 github.com/mandelsoft/spiff v1.7.0-beta-6 h1:0h2Si4u73Ys1TDK9MFzwzcsVZTviN3xHWvLk2HGrPLk=
 github.com/mandelsoft/spiff v1.7.0-beta-6/go.mod h1:HXurS33cKPLXXAI3SYll+Z6QotB1yzFFDyOFZ4QODcA=
 github.com/mandelsoft/vfs v0.4.4 h1:hq+nI7NWzLLWR3Ii/w4agup4KpWjLpw6dAGtmvWr1Vw=
 github.com/mandelsoft/vfs v0.4.4/go.mod h1:3ODt1ze/dCdOJCbhHX8ARAw7l422fDZUhbt0wqplBRs=
+github.com/mandelsoft/vfs v0.4.5-0.20241116195817-0f273ab32e08 h1:L8gm2bTrd3YjjabU5AlsVUQCOcc62cyq0pOLYtlcKIk=
+github.com/mandelsoft/vfs v0.4.5-0.20241116195817-0f273ab32e08/go.mod h1:3ODt1ze/dCdOJCbhHX8ARAw7l422fDZUhbt0wqplBRs=
 github.com/marstr/guid v1.1.0 h1:/M4H/1G4avsieL6BbUwCOBzulmoeKVP5ux/3mQNnbyI=
 github.com/marstr/guid v1.1.0/go.mod h1:74gB1z2wpxxInTG6yaqA7KrtM0NZ+RbrcqDvYHefzho=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=

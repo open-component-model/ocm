@@ -9,6 +9,8 @@ import (
 	"ocm.software/ocm/api/oci/grammar"
 	"ocm.software/ocm/api/oci/tools/transfer/filters"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
+	"ocm.software/ocm/api/ocm/refhints"
+	"ocm.software/ocm/api/tech/oci"
 	"ocm.software/ocm/api/utils/blobaccess"
 	ociartifactblob "ocm.software/ocm/api/utils/blobaccess/ociartifact"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -62,7 +64,7 @@ func (s *Spec) CreateFilter() ociartifactblob.Option {
 	return nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, []refhints.ReferenceHint, error) {
 	filter := s.CreateFilter()
 	blob, version, err := ociartifactblob.BlobAccess(s.Path,
 		filter,
@@ -71,9 +73,9 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		ociartifactblob.WithVersion(info.ComponentVersion.GetVersion()),
 	)
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
-	return blob, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, version), nil
+	return blob, refhints.DefaultList(oci.ReferenceHint, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, version), true), nil
 }
 
 func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo string) field.ErrorList {

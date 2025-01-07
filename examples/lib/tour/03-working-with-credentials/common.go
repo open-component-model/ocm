@@ -120,7 +120,7 @@ data: some very important data required to understand this component
 		// - an additional access type, which provides an alternative
 		//   global technology specific access to the same content.
 		// we don't use it, here.
-		err = cv.SetResourceBlob(meta, blob, "", nil)
+		err = cv.SetResourceBlob(meta, blob, nil, nil)
 		if err != nil {
 			return errors.Wrapf(err, "cannot add yaml document")
 		}

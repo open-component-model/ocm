@@ -35,6 +35,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/valueset"
 	vscompose "ocm.software/ocm/api/ocm/plugin/ppi/cmds/valueset/compose"
 	vsval "ocm.software/ocm/api/ocm/plugin/ppi/cmds/valueset/validate"
+	"ocm.software/ocm/api/ocm/refhints"
 	"ocm.software/ocm/api/ocm/valuemergehandler"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/cobrautils/logopts/logging"
@@ -293,9 +294,10 @@ func (p *pluginImpl) Get(w io.Writer, creds, spec json.RawMessage) error {
 	return err
 }
 
-func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint string, creds, target json.RawMessage) (ocm.AccessSpec, error) {
+func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType string, hints []refhints.ReferenceHint, creds, target json.RawMessage) (ocm.AccessSpec, error) {
 	args := []string{upload.Name, put.Name, name, string(target)}
 
+	hint := refhints.Serialize(hints, true)
 	if creds != nil {
 		args = append(args, "--"+put.OptCreds, string(creds))
 	}

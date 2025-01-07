@@ -86,7 +86,7 @@ var _ = Describe("upload", func() {
 					env.Provider("mandelsoft")
 					env.Resource("value", "", resourcetypes.OCI_IMAGE, v1.LocalRelation, func() {
 						env.BlobFromFile(artifactset.MediaType(ociv1.MediaTypeImageManifest), ARTIFACTSET)
-						env.Hint(HINT)
+						env.AccessHint(HINT)
 					})
 				})
 			})
@@ -209,13 +209,13 @@ var _ = Describe("upload", func() {
 
 			ok, path := Must2(download.For(env).Download(nil, racc, TARGETHOST+".alias"+grammar.RepositorySeparator+UPLOAD, env))
 			Expect(ok).To(BeTrue())
-			Expect(path).To(Equal("target.alias/ocm.software/upload:1.0.0"))
+			Expect(path).To(Equal("target.alias/ocm.software/upload:v2.0"))
 
 			MustBeSuccessful(env.OCMContext().Finalize())
 
 			target := Must(ctfoci.Open(env.OCIContext(), accessobj.ACC_READONLY, TARGETPATH, 0, env))
 			defer Close(target, "download target")
-			Expect(target.ExistsArtifact(path[strings.Index(path, grammar.RepositorySeparator)+1:strings.Index(path, ":")], VERS)).To(BeTrue())
+			Expect(target.ExistsArtifact(path[strings.Index(path, grammar.RepositorySeparator)+1:strings.Index(path, ":")], OCIVERSION)).To(BeTrue())
 		})
 	})
 })

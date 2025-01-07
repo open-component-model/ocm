@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/runtime"
@@ -74,12 +73,7 @@ func (o *Options) Complete(args []string) error {
 	return nil
 }
 
-type Result struct {
-	MediaType  string                       `json:"mediaType"`
-	Short      string                       `json:"description"`
-	Hint       string                       `json:"hint"`
-	ConsumerId credentials.ConsumerIdentity `json:"consumerId"`
-}
+type Result = ppi.AccessSpecInfo
 
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	spec, err := p.DecodeAccessSpecification(opts.Specification)
@@ -95,8 +89,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if err != nil {
 		return err
 	}
-	result := Result{MediaType: info.MediaType, ConsumerId: info.ConsumerId, Hint: info.Hint, Short: info.Short}
-	data, err := json.Marshal(result)
+	data, err := json.Marshal(info)
 	if err != nil {
 		return err
 	}

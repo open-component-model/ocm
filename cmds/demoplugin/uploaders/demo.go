@@ -37,7 +37,17 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	types = ppi.UploadFormats{NAME + runtime.VersionSeparator + VERSION: decoder}
+	types = ppi.UploadFormats{
+		NAME + runtime.VersionSeparator + VERSION: decoder,
+		NAME: decoder,
+	}
+}
+
+func NewTarget(p string) *TargetSpec {
+	return &TargetSpec{
+		ObjectVersionedType: runtime.NewVersionedTypedObject(NAME),
+		Path:                p,
+	}
 }
 
 type Uploader struct {
@@ -72,7 +82,7 @@ func (a *Uploader) ValidateSpecification(p ppi.Plugin, spec ppi.UploadTargetSpec
 	return &info, nil
 }
 
-func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype, hint string, repo ppi.UploadTargetSpec, creds credentials.Credentials) (io.WriteCloser, ppi.AccessSpecProvider, error) {
+func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype string, hints ppi.ReferenceHints, repo ppi.UploadTargetSpec, creds credentials.Credentials) (io.WriteCloser, ppi.AccessSpecProvider, error) {
 	var file *os.File
 	var err error
 
@@ -88,6 +98,12 @@ func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype, hint string, repo pp
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "cannot create root dir")
 		}
+	}
+
+	h := hints.GetReferenceHint(accessmethods.ReferenceHintType, "")
+	var hint string
+	if h != nil {
+		hint = h.GetReference()
 	}
 
 	path := hint
