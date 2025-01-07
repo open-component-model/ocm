@@ -10,7 +10,7 @@ import (
 
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/extensions/attrs/cacheattr"
-	"ocm.software/ocm/api/tech/docker/resolve"
+	"ocm.software/ocm/api/tech/oras"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
@@ -23,20 +23,20 @@ type BlobContainer interface {
 
 type blobContainer struct {
 	accessio.StaticAllocatable
-	fetcher resolve.Fetcher
-	pusher  resolve.Pusher
+	fetcher oras.Fetcher
+	pusher  oras.Pusher
 	mime    string
 }
 
 type BlobContainers struct {
 	lock    sync.Mutex
 	cache   accessio.BlobCache
-	fetcher resolve.Fetcher
-	pusher  resolve.Pusher
+	fetcher oras.Fetcher
+	pusher  oras.Pusher
 	mimes   map[string]BlobContainer
 }
 
-func NewBlobContainers(ctx cpi.Context, fetcher remotes.Fetcher, pusher resolve.Pusher) *BlobContainers {
+func NewBlobContainers(ctx cpi.Context, fetcher remotes.Fetcher, pusher oras.Pusher) *BlobContainers {
 	return &BlobContainers{
 		cache:   cacheattr.Get(ctx),
 		fetcher: fetcher,
@@ -73,7 +73,7 @@ func (c *BlobContainers) Release() error {
 	return list.Result()
 }
 
-func newBlobContainer(mime string, fetcher resolve.Fetcher, pusher resolve.Pusher) *blobContainer {
+func newBlobContainer(mime string, fetcher oras.Fetcher, pusher oras.Pusher) *blobContainer {
 	return &blobContainer{
 		mime:    mime,
 		fetcher: fetcher,
@@ -81,7 +81,7 @@ func newBlobContainer(mime string, fetcher resolve.Fetcher, pusher resolve.Pushe
 	}
 }
 
-func NewBlobContainer(cache accessio.BlobCache, mime string, fetcher resolve.Fetcher, pusher resolve.Pusher) (BlobContainer, error) {
+func NewBlobContainer(cache accessio.BlobCache, mime string, fetcher oras.Fetcher, pusher oras.Pusher) (BlobContainer, error) {
 	c := newBlobContainer(mime, fetcher, pusher)
 
 	if cache == nil {

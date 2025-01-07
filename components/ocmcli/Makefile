@@ -31,6 +31,13 @@ ifeq ($(MULTI),true)
 FLAGSUF     = .multi
 endif
 
+ifneq ($(BUILDX_CACHE_REF),)
+	ADDITIONAL_BUILDX_ARGS += --cache-from type=registry,ref=$(BUILDX_CACHE_REF)
+	ifeq ($(BUILDX_CACHE_PUSH),true)
+		ADDITIONAL_BUILDX_ARGS += --cache-to type=registry,ref=$(BUILDX_CACHE_REF),mode=max
+	endif
+endif
+
 CREDS ?=
 # Define the path to the binary
 OCM_BIN = $(REPO_ROOT)/bin/ocm
@@ -55,8 +62,6 @@ BUILD_FLAGS := "-s -w \
  -X ocm.software/ocm/api/version.gitCommit=$(COMMIT) \
  -X ocm.software/ocm/api/version.buildDate=$(NOW)"
 
-ALPINE_LATEST_VER=$(shell curl -s https://registry.hub.docker.com/v2/repositories/library/alpine/tags | jq '.results[1].name' | xargs)
-
 .PHONY: build
 build: $(GEN)/build
 
@@ -70,44 +75,35 @@ $(GEN)/build: $(GEN) $(GEN)/.exists $(CMDSRCS) $(OCMSRCS)
 	@touch $(GEN)/build
 
 .PHONY: image
-image: $(GEN)/image
-
-$(GEN)/image: $(GEN)/.exists Dockerfile $(GEN)/build
+image:
 	@PLATFORM_OS_OVERRIDE=$(PLATFORM_OS); \
 	if [ $$PLATFORM_OS_OVERRIDE == darwin ]; then \
 		echo; echo "Building linux instead of darwin as there's no native Docker platform for darwin"; echo; \
-		docker buildx build -t $(IMAGE):$(VERSION) --platform linux/$(PLATFORM_ARCH) --file Dockerfile $(REPO_ROOT) \
-			--build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
-			--build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
-			--build-arg SUFFIX=$$(echo linux/$(PLATFORM_ARCH) | sed -e s:/:-:g); \
+		docker buildx build -t $(IMAGE):$(VERSION) --platform linux/$(PLATFORM_ARCH) --file $(REPO_ROOT)/Dockerfile $(REPO_ROOT) \
+			--label org.opencontainers.image.version=$(VERSION) \
+			--label org.opencontainers.image.revision=$(VERSION) $(ADDITIONAL_BUILDX_ARGS); \
 	else \
 		echo; echo "Building for $(PLATFORM_OS)/$(ARCH)"; echo; \
-		docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM_OS)/$(PLATFORM_ARCH) --file Dockerfile $(REPO_ROOT) \
-			--build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
-			--build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
-			--build-arg SUFFIX=$$(echo $(PLATFORM_OS)/$(PLATFORM_ARCH) | sed -e s:/:-:g); \
+		docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM_OS)/$(PLATFORM_ARCH) --file $(REPO_ROOT)/Dockerfile $(REPO_ROOT) \
+			--label org.opencontainers.image.version=$(VERSION) \
+			--label org.opencontainers.image.revision=$(VERSION) $(ADDITIONAL_BUILDX_ARGS); \
 	fi
-	@touch $(GEN)/image
 
 .PHONY: image.multi
-image.multi: $(GEN)/image.multi
-
-$(GEN)/image.multi: Dockerfile $(GEN)/build
-	echo "Building with Alpine version: ${ALPINE_LATEST_VER}"
+image.multi:
 	for i in $(IMAGE_PLATFORMS); do \
-	tag=$$(echo $$i | sed -e s:/:-:g); \
-        echo building platform $$i; \
-	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
-          --build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
-		  --build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
-          --build-arg SUFFIX=$$tag; \
+		tag=$$(echo $$i | sed -e s:/:-:g); \
+			echo building platform $$i; \
+		docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file $(REPO_ROOT)/Dockerfile $(REPO_ROOT) \
+			--build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
+			--label org.opencontainers.image.version=$(VERSION) \
+			--label org.opencontainers.image.revision=$(VERSION) $(ADDITIONAL_BUILDX_ARGS); \
 	done
-	@touch $(GEN)/image.multi
 
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(OCM_BIN) $(GEN)/.exists $(GEN)/build $(GEN)/image$(FLAGSUF) component-constructor.yaml $(CHARTSRCS) Makefile
+$(GEN)/ctf: $(OCM_BIN) $(GEN)/.exists $(GEN)/build image$(FLAGSUF) component-constructor.yaml $(CHARTSRCS) Makefile
 	@rm -rf "$(GEN)/ctf"
 	$(OCM) add componentversions \
 		--create \

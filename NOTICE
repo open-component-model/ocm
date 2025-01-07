@@ -1,0 +1,18 @@
+# THIRD-PARTY LIBRARIES
+
+## MPL-2.0
+
+This project statically links the following [Mozilla Public License 2.0 (MPL-2.0)](https://www.mozilla.org/en-US/MPL/2.0/) libraries.
+The list contains the Go module path and the version of the library used.
+
+- github.com/hashicorp/errwrap-v1.1.0
+- github.com/hashicorp/go-cleanhttp-v0.5.2
+- github.com/hashicorp/go-multierror-v1.1.1
+- github.com/hashicorp/go-retryablehttp-v0.7.7
+- github.com/hashicorp/go-rootcerts-v1.0.2
+- github.com/hashicorp/go-secure-stdlib/strutil-configutil/v0.1.5
+- github.com/hashicorp/hcl-v1.0.1-vault-5
+- github.com/hashicorp/vault-client-go-v0.4.3
+- github.com/letsencrypt/boulder-v0.0.0-20241010192615-6692160cedfa
+
+Modifications to original MPL-2.0 files will be documented and made available.

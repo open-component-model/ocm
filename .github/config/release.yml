@@ -1,0 +1,30 @@
+changelog:
+  # ../workflows/pull_request.yaml#verify-labels one_of: kind/chore,kind/bugfix,kind/feature,kind/dependency,kind/refactor
+  exclude:
+    labels:
+    - 'kind/skip-release-notes'
+    - 'dev/wont-fix'
+    - 'dev/cant-reproduce'
+  # if an issue matches more than one category, the first one in the list will be used
+  # Example:
+  # Labels: kind/chore, kind/dependency => Category: Dependencies
+  categories:
+  - title: '‼️ Breaking Changes'
+    labels:
+    - '!BREAKING-CHANGE!'
+  - title: '🚀 Features'
+    labels:
+    - 'kind/feature'
+  - title: '🐛 Bug Fixes'
+    labels:
+    - 'kind/bugfix'
+  - title: '⬆️ Dependencies'
+    labels:
+      - 'kind/dependency'
+  - title: '🧰 Maintenance'
+    labels:
+    - 'kind/chore'
+    - 'kind/refactor'
+  - title: 'Other Changes'
+    labels:
+      - "*"
