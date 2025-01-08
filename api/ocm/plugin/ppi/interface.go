@@ -9,9 +9,10 @@ import (
 	"ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext/action"
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/internal"
+	"ocm.software/ocm/api/tech/signing"
+	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -26,9 +27,20 @@ type (
 
 	ActionSpecInfo       = internal.ActionSpecInfo
 	AccessSpecInfo       = internal.AccessSpecInfo
+	InputSpecInfo        = internal.InputSpecInfo
 	ValueSetInfo         = internal.ValueSetInfo
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
+
+	SourceComponentVersion  = internal.SourceComponentVersion
+	TargetRepositorySpec    = internal.TargetRepositorySpec
+	StandardTransferOptions = internal.TransferOptions
+
+	SignatureSpec = internal.SignatureSpec
 )
+
+func SignatureSpecFor(sig *signing.Signature) *SignatureSpec {
+	return internal.SignatureSpecFor(sig)
+}
 
 var REALM = descriptor.REALM
 
@@ -57,6 +69,10 @@ type Plugin interface {
 	DecodeAccessSpecification(data []byte) (AccessSpec, error)
 	GetAccessMethod(name string, version string) AccessMethod
 
+	RegisterInputType(m InputType) error
+	DecodeInputSpecification(data []byte) (InputSpec, error)
+	GetInputType(name string) InputType
+
 	RegisterAction(a Action) error
 	DecodeAction(data []byte) (ActionSpec, error)
 	GetAction(name string) Action
@@ -72,6 +88,14 @@ type Plugin interface {
 	GetCommand(name string) Command
 	Commands() []Command
 
+	RegisterTransferHandler(h TransferHandler) error
+	GetTransferHandler(name string) TransferHandler
+	TransferHandlers() []TransferHandler
+
+	RegisterSigningHandler(h SigningHandler) error
+	GetSigningHandler(name string) SigningHandler
+	SigningHandlers() []SigningHandler
+
 	RegisterConfigType(c cpi.ConfigType) error
 	GetConfigType(name string) *descriptor.ConfigTypeDescriptor
 	ConfigTypes() []descriptor.ConfigTypeDescriptor
@@ -79,6 +103,31 @@ type Plugin interface {
 	GetOptions() *Options
 	GetConfig() (interface{}, error)
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type InputType interface {
+	runtime.TypedObjectDecoder[InputSpec]
+
+	Name() string
+
+	// Options provides the list of CLI options supported to compose the access
+	// specification.
+	Options() []flagsets.ConfigOptionType
+
+	// Description provides a general description for the access mehod kind.
+	Description() string
+	// Format describes the attributes of the dedicated version.
+	Format() string
+
+	ValidateSpecification(p Plugin, dir string, spec InputSpec) (info *InputSpecInfo, err error)
+	Reader(p Plugin, dir string, spec InputSpec, creds credentials.Credentials) (io.ReadCloser, error)
+	ComposeSpecification(p Plugin, opts Config, config Config) error
+}
+
+type InputSpec = runtime.TypedObject
+
+////////////////////////////////////////////////////////////////////////////////
 
 type AccessMethod interface {
 	runtime.TypedObjectDecoder[AccessSpec]
@@ -88,7 +137,7 @@ type AccessMethod interface {
 
 	// Options provides the list of CLI options supported to compose the access
 	// specification.
-	Options() []options.OptionType
+	Options() []flagsets.ConfigOptionType
 
 	// Description provides a general description for the access mehod kind.
 	Description() string
@@ -104,6 +153,8 @@ type AccessSpec = runtime.TypedObject
 
 type AccessSpecProvider func() AccessSpec
 
+////////////////////////////////////////////////////////////////////////////////
+
 type UploadFormats runtime.KnownTypes[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
 type Uploader interface {
@@ -118,6 +169,8 @@ type Uploader interface {
 
 type UploadTargetSpec = runtime.TypedObject
 
+////////////////////////////////////////////////////////////////////////////////
+
 type DownloadResultProvider func() (string, error)
 
 type Downloader interface {
@@ -127,6 +180,8 @@ type Downloader interface {
 
 	Writer(p Plugin, arttype, mediatype string, filepath string, config []byte) (io.WriteCloser, DownloadResultProvider, error)
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type ActionSpec = action.ActionSpec
 
@@ -140,6 +195,8 @@ type Action interface {
 
 	Execute(p Plugin, spec ActionSpec, creds credentials.DirectCredentials) (result ActionResult, err error)
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type Value = runtime.RawValue
 
@@ -173,7 +230,7 @@ type ValueSet interface {
 
 	// Options provides the list of CLI options supported to compose the access
 	// specification.
-	Options() []options.OptionType
+	Options() []flagsets.ConfigOptionType
 
 	// Description provides a general description for the access mehod kind.
 	Description() string
@@ -183,6 +240,8 @@ type ValueSet interface {
 	ValidateSpecification(p Plugin, spec runtime.TypedObject) (info *ValueSetInfo, err error)
 	ComposeSpecification(p Plugin, opts Config, config Config) error
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 // Command is the interface for a CLI command provided by a plugin.
 type Command interface {
@@ -210,4 +269,69 @@ type Command interface {
 	CLIConfigRequired() bool
 
 	Command() *cobra.Command
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// TransferHandler is the support interface
+// for implementing a transfer handler for the plugin support
+// library.
+// There is a standard implementation NewTransferHandler.
+type TransferHandler interface {
+	GetName() string
+	GetDescription() string
+	GetQuestions() []DecisionHandler
+}
+
+// DecisionHandler is the support interface for implementing
+// the answer to a question used for the TransferHandler.
+// A base implementation providing the non-functional attributues
+// cane be obtained by NewDecisionHandlerBase.
+type DecisionHandler interface {
+	// GetQuestion returns the name of the question answered by this handler
+	// (see common.TransferHandlerQuestions).
+	GetQuestion() string
+
+	GetDescription() string
+	// GetLabels returns the list of labels, which should be passed
+	// to the transfer handler. If nothing is specified all labels
+	// are transferred, if an empty list is given no label is handed over
+	// to the plugin command.
+	GetLabels() *[]string
+
+	// DecideOn implements the calculation of the answer to
+	// the question. The given question contains the arguments for
+	// the questions. There are three kinds of arguments:
+	// ArtifactQuestionArguments, ComponentVersionQuestionArguments and ComponentReferenceQuestionArguments.
+	// TransferHandlerQuestions maps the question name to the used
+	// argument type.
+	DecideOn(p Plugin, question QuestionArguments) (bool, error)
+}
+
+type (
+	TransferOptions                     = internal.TransferOptions
+	Artifact                            = internal.Artifact
+	AccessInfo                          = internal.UniformAccessSpecInfo
+	QuestionArguments                   = internal.QuestionArguments
+	ComponentVersionQuestionArguments   = internal.ComponentVersionQuestionArguments
+	ComponentReferenceQuestionArguments = internal.ComponentReferenceQuestionArguments
+	ArtifactQuestionArguments           = internal.ArtifactQuestionArguments
+	Resolution                          = internal.Resolution
+	DecisionRequestResult               = internal.DecisionRequestResult
+)
+
+////////////////////////////////////////////////////////////////////////////////
+
+type (
+	SigningContext   = internal.SigningContext
+	ConsumerProvider func(sctx signing.SigningContext) credentials.ConsumerIdentity
+)
+
+type SigningHandler interface {
+	GetName() string
+	GetDescription() string
+	GetSigner() signing.Signer
+	GetVerifier() signing.Verifier
+
+	GetConsumerProvider() ConsumerProvider
 }

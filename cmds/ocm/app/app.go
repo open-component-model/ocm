@@ -30,6 +30,7 @@ import (
 	creds "ocm.software/ocm/cmds/ocm/commands/misccmds/credentials"
 	"ocm.software/ocm/cmds/ocm/commands/ocicmds"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds"
+	inputplugins "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/plugin"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/components"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -393,6 +394,7 @@ func (o *CLIOptions) Complete() error {
 	if err != nil {
 		return err
 	}
+	inputplugins.RegisterPlugins(o.Context)
 	return o.Context.ConfigContext().Validate()
 }
 

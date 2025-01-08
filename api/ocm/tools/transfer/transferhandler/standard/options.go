@@ -52,10 +52,6 @@ var (
 
 type TransferOptionsCreator = transferhandler.SpecializedOptionsCreator[*Options, Options]
 
-func (o *Options) NewOptions() transferhandler.TransferHandlerOptions {
-	return &Options{}
-}
-
 func (o *Options) NewTransferHandler() (transferhandler.TransferHandler, error) {
 	return New(o)
 }
@@ -141,12 +137,20 @@ func (o *Options) IsTransportEnforced() bool {
 	return optionutils.AsBool(o.enforceTransport)
 }
 
+func (o *Options) GetEnforceTransport() *bool {
+	return o.enforceTransport
+}
+
 func (o *Options) SetOverwrite(overwrite bool) {
 	o.overwrite = &overwrite
 }
 
 func (o *Options) IsOverwrite() bool {
 	return optionutils.AsBool(o.overwrite)
+}
+
+func (o *Options) GetOverwrite() *bool {
+	return o.overwrite
 }
 
 func (o *Options) SetSkipUpdate(skipupdate bool) {
@@ -157,12 +161,20 @@ func (o *Options) IsSkipUpdate() bool {
 	return optionutils.AsBool(o.skipUpdate)
 }
 
+func (o *Options) GetSkipUpdate() *bool {
+	return o.skipUpdate
+}
+
 func (o *Options) SetRecursive(recursive bool) {
 	o.recursive = &recursive
 }
 
 func (o *Options) IsRecursive() bool {
 	return optionutils.AsBool(o.recursive)
+}
+
+func (o *Options) GetRecursive() *bool {
+	return o.recursive
 }
 
 func (o *Options) SetResourcesByValue(resourcesByValue bool) {
@@ -173,12 +185,20 @@ func (o *Options) IsResourcesByValue() bool {
 	return optionutils.AsBool(o.resourcesByValue)
 }
 
+func (o *Options) GetResourcesByValue() *bool {
+	return o.resourcesByValue
+}
+
 func (o *Options) SetLocalResourcesByValue(resourcesByValue bool) {
 	o.localByValue = &resourcesByValue
 }
 
 func (o *Options) IsLocalResourcesByValue() bool {
 	return optionutils.AsBool(o.localByValue)
+}
+
+func (o *Options) GetLocalResourcesByValue() *bool {
+	return o.localByValue
 }
 
 func (o *Options) SetSourcesByValue(sourcesByValue bool) {
@@ -189,12 +209,20 @@ func (o *Options) IsSourcesByValue() bool {
 	return optionutils.AsBool(o.sourcesByValue)
 }
 
+func (o *Options) GetSourcesByValue() *bool {
+	return o.sourcesByValue
+}
+
 func (o *Options) SetKeepGlobalAccess(keepGlobalAccess bool) {
 	o.keepGlobalAccess = &keepGlobalAccess
 }
 
 func (o *Options) IsKeepGlobalAccess() bool {
 	return optionutils.AsBool(o.keepGlobalAccess)
+}
+
+func (o *Options) GetKeepGlobalAccess() *bool {
+	return o.keepGlobalAccess
 }
 
 func (o *Options) SetRetries(retries int) {
@@ -222,6 +250,10 @@ func (o *Options) SetStopOnExistingVersion(stopOnExistingVersion bool) {
 
 func (o *Options) IsStopOnExistingVersion() bool {
 	return optionutils.AsBool(o.stopOnExisting)
+}
+
+func (o *Options) GetStopOnExistingVersion() *bool {
+	return o.stopOnExisting
 }
 
 func (o *Options) SetOmittedAccessTypes(list ...string) {
