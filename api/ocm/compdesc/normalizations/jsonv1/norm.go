@@ -8,9 +8,11 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/compdesc/normalizations/legacy"
 	"ocm.software/ocm/api/utils/errkind"
 )
 
+// Deprecated: use compdesc.JsonNormalisationV3 instead
 const Algorithm = compdesc.JsonNormalisationV1
 
 func init() {
@@ -20,11 +22,10 @@ func init() {
 type normalization struct{}
 
 func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, error) {
+	legacy.DefaultingOfVersionIntoExtraIdentity(cd)
 	cv := compdesc.DefaultSchemes[cd.SchemaVersion()]
 	if cv == nil {
-		if cv == nil {
-			return nil, errors.ErrNotSupported(errkind.KIND_SCHEMAVERSION, cd.SchemaVersion())
-		}
+		return nil, errors.ErrNotSupported(errkind.KIND_SCHEMAVERSION, cd.SchemaVersion())
 	}
 	v, err := cv.ConvertFrom(cd)
 	if err != nil {
