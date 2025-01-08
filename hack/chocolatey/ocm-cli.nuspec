@@ -25,7 +25,7 @@ This is a nuspec. It mostly adheres to https://docs.nuget.org/create/Nuspec-Refe
     <!-- There are a number of CDN Services that can be used for hosting the Icon for a package. More information can be found here: https://docs.chocolatey.org/en-us/create/create-packages#package-icon-guidelines -->
     <!-- Here is an example using Githack -->
     <iconUrl>https://ocm.software/favicon.svg</iconUrl>
-    <copyright>2024 SAP SE or an SAP affiliate company and Open Component Model contributors</copyright>
+    <copyright>2025 SAP SE or an SAP affiliate company and Open Component Model contributors</copyright>
     <!-- If there is a license Url available, it is required for the community feed -->
     <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>

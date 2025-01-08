@@ -1,6 +1,7 @@
 package uploaders
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -56,7 +57,7 @@ func (a *Uploader) Decoders() ppi.UploadFormats {
 	return types
 }
 
-func (a *Uploader) ValidateSpecification(p ppi.Plugin, spec ppi.UploadTargetSpec) (*ppi.UploadTargetSpecInfo, error) {
+func (a *Uploader) ValidateSpecification(_ ppi.Plugin, spec ppi.UploadTargetSpec) (*ppi.UploadTargetSpecInfo, error) {
 	var info ppi.UploadTargetSpecInfo
 	my := spec.(*TargetSpec)
 
@@ -72,13 +73,13 @@ func (a *Uploader) ValidateSpecification(p ppi.Plugin, spec ppi.UploadTargetSpec
 	return &info, nil
 }
 
-func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype, hint string, repo ppi.UploadTargetSpec, creds credentials.Credentials) (io.WriteCloser, ppi.AccessSpecProvider, error) {
+func (a *Uploader) Upload(_ context.Context, p ppi.Plugin, arttype, mediatype, hint, digest string, spec ppi.UploadTargetSpec, creds credentials.Credentials, reader io.Reader) (ppi.AccessSpecProvider, error) {
 	var file *os.File
 	var err error
 
 	cfg, err := p.GetConfig()
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "can't get config for access method %s", mediatype)
+		return nil, errors.Wrapf(err, "can't get config for access method %s", mediatype)
 	}
 
 	root := os.TempDir()
@@ -86,12 +87,12 @@ func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype, hint string, repo pp
 		root = cfg.(*config.Config).Uploaders.Path
 		err := os.MkdirAll(root, 0o700)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "cannot create root dir")
+			return nil, errors.Wrapf(err, "cannot create root dir")
 		}
 	}
 
 	path := hint
-	my := repo.(*TargetSpec)
+	my := spec.(*TargetSpec)
 	dir := root
 	if my.Path != "" {
 		root = filepath.Join(root, my.Path)
@@ -106,7 +107,7 @@ func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype, hint string, repo pp
 
 	err = os.MkdirAll(dir, 0o700)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if hint == "" {
@@ -115,8 +116,13 @@ func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype, hint string, repo pp
 		file, err = os.OpenFile(filepath.Join(os.TempDir(), path), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o600)
 	}
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	writer := NewWriter(file, path, mediatype, hint == "", accessmethods.NAME, accessmethods.VERSION)
-	return writer, writer.Specification, nil
+
+	if _, err = io.Copy(writer, reader); err != nil {
+		return nil, fmt.Errorf("cannot write to %q: %w", file.Name(), err)
+	}
+
+	return writer.Specification, nil
 }

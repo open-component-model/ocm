@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
+	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/credentials"
@@ -112,11 +114,32 @@ func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) (result []by
 		args = append([]string{"--" + ppi.OptPlugingLogConfig, string(data)}, args...)
 	}
 
-	if len(p.config) == 0 {
-		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args)
-	} else {
-		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args, "config", p.config)
+	if p.ctx.Logger(TAG).Enabled(mlog.DebugLevel) {
+		// Plainly kill any credentials found in the logger.
+		// Stupidly match for "credentials" arg.
+		// Not totally safe, but better than nothing.
+		logargs := make([]string, len(args))
+		for i, arg := range args {
+			if logargs[i] != "" {
+				continue
+			}
+			if strings.Contains(arg, "credentials") {
+				if strings.Contains(arg, "=") {
+					logargs[i] = "***"
+				} else if i+1 < len(args)-1 {
+					logargs[i+1] = "***"
+				}
+			}
+			logargs[i] = arg
+		}
+
+		if len(p.config) == 0 {
+			p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", logargs)
+		} else {
+			p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", logargs, "config", p.config)
+		}
 	}
+
 	data, err := cache.Exec(p.Path(), p.config, r, w, args...)
 
 	if logfile != nil {
@@ -293,7 +316,7 @@ func (p *pluginImpl) Get(w io.Writer, creds, spec json.RawMessage) error {
 	return err
 }
 
-func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint string, creds, target json.RawMessage) (ocm.AccessSpec, error) {
+func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint, digest string, creds, target json.RawMessage) (ocm.AccessSpec, error) {
 	args := []string{upload.Name, put.Name, name, string(target)}
 
 	if creds != nil {
@@ -307,6 +330,9 @@ func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint strin
 	}
 	if artType != "" {
 		args = append(args, "--"+put.OptArt, artType)
+	}
+	if digest != "" {
+		args = append(args, "--"+put.OptDigest, digest)
 	}
 	result, err := p.Exec(r, nil, args...)
 	if err != nil {
