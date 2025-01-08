@@ -13,7 +13,7 @@ import (
 	"ocm.software/ocm/api/utils/runtime"
 )
 
-func InOut(log logging.Logger, in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObject, string, error) {
+func getOutput(log logging.Logger, in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObject, string, error) {
 	t := reflect.TypeOf(in)
 	log.Info("in", "type", t)
 	for t.Kind() == reflect.Ptr {
@@ -59,24 +59,24 @@ var _ = Describe("*** unstructured", func() {
 	})
 
 	It("unmarshal json test", func() {
-		out, data, err := InOut(log, runtime.NewEmptyUnstructured("test"), runtime.DefaultJSONEncoding)
+		out, data, err := getOutput(log, runtime.NewEmptyUnstructured("test"), runtime.DefaultJSONEncoding)
 		Expect(err).To(Succeed())
 		Expect(out.GetType()).To(Equal("test"))
 		Expect(data).To(Equal(result))
 
-		out, data, err = InOut(log, runtime.NewEmptyUnstructuredVersioned("test"), runtime.DefaultJSONEncoding)
+		out, data, err = getOutput(log, runtime.NewEmptyUnstructuredVersioned("test"), runtime.DefaultJSONEncoding)
 		Expect(err).To(Succeed())
 		Expect(out.GetType()).To(Equal("test"))
 		Expect(data).To(Equal(result))
 	})
 
 	It("unmarshal yaml test", func() {
-		out, data, err := InOut(log, runtime.NewEmptyUnstructured("test"), runtime.DefaultYAMLEncoding)
+		out, data, err := getOutput(log, runtime.NewEmptyUnstructured("test"), runtime.DefaultYAMLEncoding)
 		Expect(err).To(Succeed())
 		Expect(out.GetType()).To(Equal("test"))
 		Expect(data).To(Equal("type: test\n"))
 
-		out, data, err = InOut(log, runtime.NewEmptyUnstructuredVersioned("test"), runtime.DefaultYAMLEncoding)
+		out, data, err = getOutput(log, runtime.NewEmptyUnstructuredVersioned("test"), runtime.DefaultYAMLEncoding)
 		Expect(err).To(Succeed())
 		Expect(out.GetType()).To(Equal("test"))
 		Expect(data).To(Equal("type: test\n"))
