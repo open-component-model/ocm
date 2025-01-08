@@ -21,7 +21,7 @@ componentversions, componentversion, cv, components, component, comps, comp, c
   -h, --help                      help for componentversions
       --latest                    restrict component versions to latest
       --lookup stringArray        repository name or spec for closure lookup fallback
-  -N, --normalization string      normalization algorithm (default "jsonNormalisation/v1")
+  -N, --normalization string      normalization algorithm (default "jsonNormalisation/v3")
   -O, --outfile string            Output file for normalized component descriptor (default "-")
   -o, --output string             output mode (JSON, json, norm, wide, yaml)
   -r, --recursive                 follow component reference nesting
@@ -63,8 +63,18 @@ references.
 
 
 The following normalization modes are supported with option <code>--normalization</code>:
-  - <code>jsonNormalisation/v1</code> (default)
+  - <code>jsonNormalisation/v1</code>
   - <code>jsonNormalisation/v2</code>
+  - <code>jsonNormalisation/v3</code> (default)
+
+
+Note that the normalization algorithm is important to be equivalent when used for signing and verification, otherwise
+the verification can fail. Please always migrate to the latest normalization algorithm whenever possible.
+New signature algorithms can be used as soon as they are available in the component version after signing it.
+
+The algorithms jsonNormalisation/v1 and jsonNormalisation/v2 are deprecated and should not be used anymore.
+Please switch to jsonNormalisation/v3 as soon as possible.
+
 
 
 The following hash modes are supported with option <code>--hash</code>:
