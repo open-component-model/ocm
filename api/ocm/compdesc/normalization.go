@@ -11,8 +11,11 @@ import (
 type NormalisationAlgorithm = string
 
 const (
+	// Deprecated: use JsonNormalisationV3 instead
 	JsonNormalisationV1 NormalisationAlgorithm = "jsonNormalisation/v1"
+	// Deprecated: use JsonNormalisationV3 instead
 	JsonNormalisationV2 NormalisationAlgorithm = "jsonNormalisation/v2"
+	JsonNormalisationV3 NormalisationAlgorithm = "jsonNormalisation/v3"
 )
 
 type Normalization interface {

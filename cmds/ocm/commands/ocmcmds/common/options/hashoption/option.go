@@ -7,6 +7,8 @@ import (
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/compdesc/normalizations/jsonv1"
+	"ocm.software/ocm/api/ocm/compdesc/normalizations/jsonv2"
+	"ocm.software/ocm/api/ocm/compdesc/normalizations/jsonv3"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	ocmsign "ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/tech/signing"
@@ -34,13 +36,13 @@ type Option struct {
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.NormAlgorithm, "normalization", "N", jsonv1.Algorithm, "normalization algorithm")
+	fs.StringVarP(&o.NormAlgorithm, "normalization", "N", jsonv3.Algorithm, "normalization algorithm")
 	fs.StringVarP(&o.hashAlgorithm, "hash", "H", sha256.Algorithm, "hash algorithm")
 }
 
 func (o *Option) Configure(ctx clictx.Context) error {
 	if o.NormAlgorithm == "" {
-		o.NormAlgorithm = jsonv1.Algorithm
+		o.NormAlgorithm = jsonv3.Algorithm
 	}
 	if o.hashAlgorithm == "" {
 		o.hashAlgorithm = sha256.Algorithm
@@ -59,7 +61,18 @@ func (o *Option) Configure(ctx clictx.Context) error {
 func (o *Option) Usage() string {
 	s := `
 The following normalization modes are supported with option <code>--normalization</code>:
-` + listformat.FormatList(jsonv1.Algorithm, compdesc.Normalizations.Names()...)
+` + listformat.FormatList(jsonv3.Algorithm, compdesc.Normalizations.Names()...)
+
+	s += `
+
+Note that the normalization algorithm is important to be equivalent when used for signing and verification, otherwise
+the verification can fail. Please always migrate to the latest normalization algorithm whenever possible.
+New signature algorithms can be used as soon as they are available in the component version after signing it.
+
+The algorithms ` + jsonv1.Algorithm + ` and ` + jsonv2.Algorithm + ` are deprecated and should not be used anymore.
+Please switch to ` + jsonv3.Algorithm + ` as soon as possible.
+
+`
 
 	s += `
 
