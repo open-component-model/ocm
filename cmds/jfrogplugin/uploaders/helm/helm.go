@@ -67,6 +67,10 @@ type JFrogHelmUploaderSpec struct {
 	// before aborting and failing.
 	// OPTIONAL: If not set, set to the internal DEFAULT_TIMEOUT.
 	Timeout *time.Duration `json:"timeout,omitempty"`
+
+	// ReIndexAfterUpload is a flag to indicate if the chart should be reindexed after upload or not.
+	// OPTIONAL: If not set, defaulted to false.
+	ReIndexAfterUpload bool `json:"reindexAfterUpload,omitempty"`
 }
 
 type JFrogHelmChart struct {
@@ -197,8 +201,10 @@ func (a *Uploader) Upload(
 		return nil, fmt.Errorf("failed to upload: %w", err)
 	}
 
-	if err := ReindexChart(ctx, a.Client, spec.URL, spec.Repository, creds); err != nil {
-		return nil, fmt.Errorf("failed to reindex chart: %w", err)
+	if spec.ReIndexAfterUpload {
+		if err := ReindexChart(ctx, a.Client, spec.URL, spec.Repository, creds); err != nil {
+			return nil, fmt.Errorf("failed to reindex chart: %w", err)
+		}
 	}
 
 	return func() ppi.AccessSpec {

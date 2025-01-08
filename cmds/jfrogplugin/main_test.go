@@ -32,7 +32,16 @@ import (
 )
 
 var _ = Describe(helm.VERSIONED_NAME, func() {
-	var env *TestEnv
+	var (
+		env                  *TestEnv
+		server               *httptest.Server
+		reindexedAfterUpload bool
+		user, pass           = "foo", "bar"
+		creds                = string(Must(json.Marshal(credentials.DirectCredentials{
+			credentials.ATTR_USERNAME: user,
+			credentials.ATTR_PASSWORD: pass,
+		})))
+	)
 
 	BeforeEach(func() {
 		env = Must(NewTestEnv())
@@ -96,18 +105,8 @@ var _ = Describe(helm.VERSIONED_NAME, func() {
 			" match the correct repository for a resource transfer")
 	})
 
-	It("Upload Artifact Set to Server", func(ctx SpecContext) {
-		env.CLI.Command().SetContext(ctx)
-
-		user, pass := "mocked", "mocked"
-		testDataPath := Must(filepath.Abs("../../api/ocm/extensions/download/handlers/helm/testdata/test-chart-oci-artifact.tgz"))
-		testDataFile := Must(os.OpenFile(testDataPath, os.O_RDONLY, 0o400))
-		DeferCleanup(testDataFile.Close)
-		testData := Must(io.ReadAll(testDataFile))
-
-		// explicit variable for in-scope reference to server
-		var server *httptest.Server
-		reindexedAfterUpload := false
+	BeforeEach(func() {
+		reindexedAfterUpload = false
 		server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if strings.Contains(r.URL.String(), "reindex") {
 				w.WriteHeader(http.StatusOK)
@@ -166,7 +165,17 @@ var _ = Describe(helm.VERSIONED_NAME, func() {
 				Fail(fmt.Sprintf("failed to write response: %v", err))
 			}
 		}))
+
 		DeferCleanup(server.Close)
+	})
+
+	It("Upload Artifact Set to Server (no reindex) with Basic Auth", func(ctx SpecContext) {
+		env.CLI.Command().SetContext(ctx)
+
+		testDataPath := Must(filepath.Abs("../../api/ocm/extensions/download/handlers/helm/testdata/test-chart-oci-artifact.tgz"))
+		testDataFile := Must(os.OpenFile(testDataPath, os.O_RDONLY, 0o400))
+		DeferCleanup(testDataFile.Close)
+		testData := Must(io.ReadAll(testDataFile))
 
 		purl := Must(helm.ParseURLAllowNoScheme(server.URL))
 		uploadSpec := &helm.JFrogHelmUploaderSpec{
@@ -179,10 +188,7 @@ var _ = Describe(helm.VERSIONED_NAME, func() {
 		Expect(env.Execute("upload", "put",
 			"--artifactType", artifacttypes.HELM_CHART,
 			"--mediaType", artifactset.MediaType(artdesc.MediaTypeImageManifest),
-			"--credentials", string(Must(json.Marshal(credentials.DirectCredentials{
-				credentials.ATTR_USERNAME: user,
-				credentials.ATTR_PASSWORD: pass,
-			}))),
+			"--credentials", creds,
 			helm.NAME,
 			string(Must(json.Marshal(uploadSpec)))),
 		).To(Succeed())
@@ -196,6 +202,43 @@ var _ = Describe(helm.VERSIONED_NAME, func() {
 		Expect(splitChart).To(HaveLen(2), "helm chart is separated with version")
 		Expect(splitChart[0]).To(Equal("test-chart"), "the chart name should be test-chart")
 		Expect(splitChart[1]).To(Equal("0.1.0"), "the chart version should be 0.1.0")
-		Expect(reindexedAfterUpload).To(BeTrue(), "the server should have been reindexed after the upload")
+		Expect(reindexedAfterUpload).To(BeFalse(), "the server should not have been reindexed as it wasnt requested explicitly")
+	})
+
+	It("Upload Artifact Set to Server (with reindex) with Basic Auth", func(ctx SpecContext) {
+		env.CLI.Command().SetContext(ctx)
+
+		testDataPath := Must(filepath.Abs("../../api/ocm/extensions/download/handlers/helm/testdata/test-chart-oci-artifact.tgz"))
+		testDataFile := Must(os.OpenFile(testDataPath, os.O_RDONLY, 0o400))
+		DeferCleanup(testDataFile.Close)
+		testData := Must(io.ReadAll(testDataFile))
+
+		purl := Must(helm.ParseURLAllowNoScheme(server.URL))
+		uploadSpec := &helm.JFrogHelmUploaderSpec{
+			ObjectVersionedType: runtime.ObjectVersionedType{Type: helm.VERSIONED_NAME},
+			URL:                 purl.String(),
+			Repository:          "my-repo",
+			ReIndexAfterUpload:  true,
+		}
+
+		env.CLI.SetInput(io.NopCloser(bytes.NewReader(testData)))
+		Expect(env.Execute("upload", "put",
+			"--artifactType", artifacttypes.HELM_CHART,
+			"--mediaType", artifactset.MediaType(artdesc.MediaTypeImageManifest),
+			"--credentials", creds,
+			helm.NAME,
+			string(Must(json.Marshal(uploadSpec)))),
+		).To(Succeed())
+
+		var spec helmaccess.AccessSpec
+		Expect(json.Unmarshal(env.GetOutput(), &spec)).To(Succeed())
+		Expect(spec).To(Not(BeNil()))
+		Expect(spec.HelmRepository).To(Equal(fmt.Sprintf("%s/artifactory/api/helm/%s", server.URL, "my-repo")))
+		Expect(spec.HelmChart).To(ContainSubstring(":"), "helm chart is separated with version")
+		splitChart := strings.Split(spec.HelmChart, ":")
+		Expect(splitChart).To(HaveLen(2), "helm chart is separated with version")
+		Expect(splitChart[0]).To(Equal("test-chart"), "the chart name should be test-chart")
+		Expect(splitChart[1]).To(Equal("0.1.0"), "the chart version should be 0.1.0")
+		Expect(reindexedAfterUpload).To(BeTrue(), "the server should not have been reindexed as it wasnt requested explicitly")
 	})
 })
