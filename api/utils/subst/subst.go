@@ -190,12 +190,12 @@ func (f *fileinfo) substituteByValue(path string, value *yqlib.CandidateNode) er
 	yqlib.InitExpressionParser()
 	expr := "." + path + " |= $newValue"
 
-	nd, err := yqlib.ExpressionParser.ParseExpression(expr)
+	expressionNode, err := yqlib.ExpressionParser.ParseExpression(expr)
 	if err != nil {
 		return err
 	}
 
 	ngvtr := yqlib.NewDataTreeNavigator()
-	_, err = ngvtr.GetMatchingNodes(ctxt, nd)
+	_, err = ngvtr.GetMatchingNodes(ctxt, expressionNode)
 	return err
 }
