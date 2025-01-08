@@ -90,7 +90,7 @@ COMPONENTVERSION NAME COMPONENT VERSION IDENTITY
 `))
 		})
 
-		It("lits reference closure in ctf file", func() {
+		It("list reference closure in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "references", "-r", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(

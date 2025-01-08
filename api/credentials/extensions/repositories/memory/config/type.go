@@ -31,7 +31,7 @@ type Config struct {
 
 type CredentialsSpec struct {
 	CredentialsName string `json:"credentialsName"`
-	// Reference refers to credentials store in some othe repo
+	// Reference refers to credentials store in some other repo
 	Reference *cpi.GenericCredentialsSpec `json:"reference,omitempty"`
 	// Credentials are direct credentials (one of Reference or Credentials must be set)
 	Credentials common.Properties `json:"credentials"`

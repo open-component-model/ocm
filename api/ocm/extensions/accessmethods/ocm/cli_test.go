@@ -26,8 +26,8 @@ var _ = Describe("OCM access CLI Test Environment", func() {
 			Expect(h).NotTo(BeNil())
 			Expect(h.GetName()).To(Equal(ocm.Type))
 
-			ot := h.OptionTypes()
-			Expect(len(ot)).To(Equal(4))
+			optionTypes := h.OptionTypes()
+			Expect(len(optionTypes)).To(Equal(4))
 
 			opts := h.CreateOptions()
 			Expect(sliceutils.Transform(opts.Options(), transformer.GetName[flagsets.Option, string])).To(ConsistOf(

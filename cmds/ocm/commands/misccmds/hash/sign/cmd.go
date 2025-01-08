@@ -79,7 +79,7 @@ func (o *Command) Complete(args []string) error {
 	var err error
 
 	if len(args) < 2 {
-		return fmt.Errorf("key file and hash argumnt required")
+		return fmt.Errorf("key file and hash argument required")
 	}
 	if len(args) > 3 {
 		return fmt.Errorf("too many arguments")

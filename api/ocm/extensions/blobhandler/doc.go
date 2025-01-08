@@ -4,5 +4,5 @@
 // implementations of the oci go binding interface
 // In those sub packages there a handler packages for dedicated repository
 // implementations for this type, for example the oci registry implementation
-// for the contect type oci.
+// for the connect type oci.
 package blobhandler

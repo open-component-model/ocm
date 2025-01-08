@@ -135,7 +135,7 @@ const ProcessSpecUsage = `
 ////////////////////////////////////////////////////////////////////////////////
 
 type MediaFileSpec struct {
-	// PathSpec holds the path that points to a file to be the base for the imput
+	// PathSpec holds the path that points to a file to be the base for the input
 	PathSpec    `json:",inline"`
 	ProcessSpec `json:",inline"`
 }

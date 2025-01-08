@@ -57,19 +57,19 @@ func merge(ctx cpi.Context, c *Config, lv Value, tv *Value) (bool, error) {
 		key := le[c.KeyField]
 		if key != nil {
 			found := -1
-			for i, te := range *tv {
-				if te[c.KeyField] == key {
+			for i, entry := range *tv {
+				if entry[c.KeyField] == key {
 					found = i
-					if !reflect.DeepEqual(le, te) {
+					if !reflect.DeepEqual(le, entry) {
 						switch c.Overwrite {
 						case MODE_DEFAULT:
 							if c.Entries != nil {
-								subm, te, err = hpi.GenericMerge(ctx, c.Entries, "", le, te)
+								subm, entry, err = hpi.GenericMerge(ctx, c.Entries, "", le, entry)
 								if err != nil {
 									return false, errors.Wrapf(err, "entry identity %q", key)
 								}
 								if subm {
-									(*tv)[i] = te
+									(*tv)[i] = entry
 									modified = true
 								}
 								break

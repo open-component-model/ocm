@@ -104,12 +104,12 @@ func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) (result []by
 		lcfg := &logging.LoggingConfiguration{}
 		_, err = p.Context().ConfigContext().ApplyTo(0, lcfg)
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot extract plugin logging configration")
+			return nil, errors.Wrapf(err, "cannot extract plugin logging configuration")
 		}
 		lcfg.LogFileName = logfile.Name()
 		data, err := json.Marshal(lcfg)
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot marshal plugin logging configration")
+			return nil, errors.Wrapf(err, "cannot marshal plugin logging configuration")
 		}
 		args = append([]string{"--" + ppi.OptPlugingLogConfig, string(data)}, args...)
 	}

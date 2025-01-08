@@ -29,7 +29,7 @@ type RepositorySpec interface {
 	// AsUniformSpec transforms the specification object
 	// into a uniform repository spec as provided by
 	// the string based parsing for repository/component/version
-	// notations. The provided spec MUST be convertable again
+	// notations. The provided spec MUST be convertible again
 	// into a repository spec with the same meaning
 	// by registering an appropriate RepositorySpecHandler.
 	AsUniformSpec(Context) *UniformRepositorySpec

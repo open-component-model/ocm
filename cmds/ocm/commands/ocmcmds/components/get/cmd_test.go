@@ -145,7 +145,7 @@ test.de/x v2      mandelsoft
 `))
 		})
 
-		It("lists constrainted version", func() {
+		It("lists constrained version", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "components", "--constraints", ">1.0", "--repo", ARCH, COMP)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
@@ -156,7 +156,7 @@ test.de/x v2      mandelsoft
 `))
 		})
 
-		It("lists constrainted version", func() {
+		It("lists constrained version", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "components", "--constraints", "1.x.x", "--latest", "--repo", ARCH, COMP)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(

@@ -1250,7 +1250,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			})
 		})
 
-		It("rembers all indirectly signed component descriptors", func() {
+		It("remembers all indirectly signed component descriptors", func() {
 			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 			defer Close(src, "ctf")
 

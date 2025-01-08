@@ -4,7 +4,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 )
 
-type Validater interface {
+type Validater interface { // codespell:ignore
 	Validate() error
 }
 
@@ -14,7 +14,7 @@ func Validate(o interface{}) error {
 			return errors.New("type missing")
 		}
 	}
-	if v, ok := o.(Validater); ok {
+	if v, ok := o.(Validater); ok { // codespell:ignore
 		return v.Validate()
 	}
 	return nil

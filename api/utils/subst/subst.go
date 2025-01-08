@@ -134,7 +134,7 @@ func (f *fileinfo) SubstituteByData(path string, value []byte) error {
 		// attempt to re-enode the value as yaml before inserting into the target document.
 		// However... we don't want to perform re-encoding for everything because if the
 		// value is actually yaml with some snippets in json style for readability
-		// purposes we don't want to unecessarily lose that styling.  Hence the initial
+		// purposes we don't want to unnecessarily lose that styling.  Hence the initial
 		// sniff test for json instead of always re-encoding.
 		var valueData interface{}
 		if err = runtime.DefaultJSONEncoding.Unmarshal(value, &valueData); err == nil {
@@ -149,16 +149,16 @@ func (f *fileinfo) SubstituteByData(path string, value []byte) error {
 		return err
 	}
 
-	nd := &yqlib.CandidateNode{}
-	nd.SetDocument(0)
-	nd.SetFilename("value")
-	nd.SetFileIndex(0)
+	n := &yqlib.CandidateNode{}
+	n.SetDocument(0)
+	n.SetFilename("value")
+	n.SetFileIndex(0)
 
-	if err = nd.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
+	if err = n.UnmarshalYAML(m.Content[0], map[string]*yqlib.CandidateNode{}); err != nil {
 		return err
 	}
 
-	return f.substituteByValue(path, nd)
+	return f.substituteByValue(path, n)
 }
 
 func (f *fileinfo) SubstituteByValue(path string, value interface{}) error {
@@ -190,12 +190,12 @@ func (f *fileinfo) substituteByValue(path string, value *yqlib.CandidateNode) er
 	yqlib.InitExpressionParser()
 	expr := "." + path + " |= $newValue"
 
-	nd, err := yqlib.ExpressionParser.ParseExpression(expr)
+	expressionNode, err := yqlib.ExpressionParser.ParseExpression(expr)
 	if err != nil {
 		return err
 	}
 
 	ngvtr := yqlib.NewDataTreeNavigator()
-	_, err = ngvtr.GetMatchingNodes(ctxt, nd)
+	_, err = ngvtr.GetMatchingNodes(ctxt, expressionNode)
 	return err
 }

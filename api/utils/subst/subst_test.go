@@ -184,7 +184,7 @@ space: sac`
 			Expect(string(result)).To(MatchYAML(expected))
 		})
 
-		It("Converts json subtitution to yaml when destination is yaml doc", func() {
+		It("Converts json substitution to yaml when destination is yaml doc", func() {
 			value := `{
   "certificate_authority_url": "https://example1.com/v1/pki/root/ca/pem",
   "deployment": "deveaws",

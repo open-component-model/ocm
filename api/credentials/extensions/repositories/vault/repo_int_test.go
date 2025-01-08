@@ -130,7 +130,7 @@ var _ = Describe("vault config", func() {
 			Expect(err).To(BeNil())
 		})
 
-		It("authenticate with approle with unsufficient authorizations and fail to retrieve credentials", func() {
+		It("authenticate with approle with insufficient authorizations and fail to retrieve credentials", func() {
 			SetUpVaultAccess(ctx, DefaultContext, vaultClient, VAULT_INSUFFICIENT_POLICY_RULE)
 
 			_ = Must(vaultClient.Secrets.KvV2Write(ctx, VAULT_PATH_REPO1+"/"+VAULT_SECRET, schema.KvV2WriteRequest{
@@ -169,7 +169,7 @@ var _ = Describe("vault config", func() {
 				vault.WithMountPath("secret"),
 			))
 
-			// This is how we restrict the secrets accessible through the respository
+			// This is how we restrict the secrets accessible through the repository
 			spec.Secrets = append(spec.Secrets, VAULT_SECRET)
 			repo := Must(DefaultContext.RepositoryForSpec(spec, nil))
 			Expect(repo).ToNot(BeNil())
@@ -218,7 +218,7 @@ var _ = Describe("vault config", func() {
 				vault.WithMountPath("secret"),
 			))
 
-			// This is how we restrict the secrets accessible through the respository
+			// This is how we restrict the secrets accessible through the repository
 			spec.Secrets = append(spec.Secrets, VAULT_CUSTOM_SECRETS)
 			repo := Must(DefaultContext.RepositoryForSpec(spec, nil))
 			Expect(repo).ToNot(BeNil())

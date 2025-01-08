@@ -44,7 +44,7 @@ type Option interface {
 // This indirection (Option -> OptionHandler) is introduced
 // to enable objects to be usable as env option
 // (for example Environment) without the need to pollute its
-// interface with the effective option methods defiuned by
+// interface with the effective option methods defined by
 // OptionHandler. This would make no sense, because an option
 // typically does nothing but for a selected set of methods
 // according to its intended functionality. Nevertheless,
@@ -55,7 +55,7 @@ type OptionHandler interface {
 	GetFailHandler() FailHandler
 	GetEnvironment() *Environment
 
-	// actions on environment ot properties
+	// actions on environment of properties
 
 	// Mount mounts a new filesystem to the actual env filesystem.
 	Mount(fs *composefs.ComposedFileSystem) error
@@ -283,7 +283,7 @@ func (o tdOpt) OptionHandler() OptionHandler {
 func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 	fs, err := projectionfs.New(osfs.New(), o.source)
 	if err != nil {
-		return fmt.Errorf("faild to create new project fs: %w", err)
+		return fmt.Errorf("failed to create new project fs: %w", err)
 	}
 
 	if o.modifiable {
@@ -297,7 +297,7 @@ func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 	}
 
 	if err := cfs.Mount(o.path, fs); err != nil {
-		return fmt.Errorf("faild to mount cfs: %w", err)
+		return fmt.Errorf("failed to mount cfs: %w", err)
 	}
 
 	return nil

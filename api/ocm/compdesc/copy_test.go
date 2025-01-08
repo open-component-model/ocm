@@ -14,7 +14,7 @@ import (
 	"ocm.software/ocm/api/utils/runtime"
 )
 
-var _ = Describe("Component Descripor Copy Test Suitet", func() {
+var _ = Describe("Component Descriptor Copy Test Suitet", func() {
 	Context("compdesc copy", func() {
 		It("copies CD", func() {
 			labels := v1.Labels{

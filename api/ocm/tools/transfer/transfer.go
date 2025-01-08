@@ -310,7 +310,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 				}
 			}
 			if ok {
-				// sources do not have digests fo far, so they have to copied, always.
+				// sources do not have digests so far, so they have to copied, always.
 				hint := ocmcpi.ArtifactNameHint(a, src)
 				notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint)
 				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))

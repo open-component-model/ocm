@@ -65,7 +65,7 @@ spec:
                       additionalProperties:
                         type: string
                       description: ExtraIdentity is the identity of an object. An
-                        additional label with key "name" ist not allowed
+                        additional label with key "name" is not allowed
                       type: object
                     labels:
                       description: Labels defines an optional set of additional labels
@@ -190,7 +190,7 @@ spec:
                       additionalProperties:
                         type: string
                       description: ExtraIdentity is the identity of an object. An
-                        additional label with key "name" ist not allowed
+                        additional label with key "name" is not allowed
                       type: object
                     labels:
                       description: Labels defines an optional set of additional labels
@@ -301,7 +301,7 @@ spec:
                       additionalProperties:
                         type: string
                       description: ExtraIdentity is the identity of an object. An
-                        additional label with key "name" ist not allowed
+                        additional label with key "name" is not allowed
                       type: object
                     labels:
                       description: Labels defines an optional set of additional labels
@@ -413,7 +413,7 @@ spec:
                       additionalProperties:
                         type: string
                       description: ExtraIdentity is the identity of an object. An
-                        additional label with key "name" ist not allowed
+                        additional label with key "name" is not allowed
                       type: object
                     labels:
                       description: Labels defines an optional set of additional labels
@@ -490,7 +490,7 @@ spec:
                       additionalProperties:
                         type: string
                       description: ExtraIdentity is the identity of an object. An
-                        additional label with key "name" ist not allowed
+                        additional label with key "name" is not allowed
                       type: object
                     labels:
                       description: Labels defines an optional set of additional labels
@@ -601,7 +601,7 @@ spec:
                       additionalProperties:
                         type: string
                       description: ExtraIdentity is the identity of an object. An
-                        additional label with key "name" ist not allowed
+                        additional label with key "name" is not allowed
                       type: object
                     labels:
                       description: Labels defines an optional set of additional labels

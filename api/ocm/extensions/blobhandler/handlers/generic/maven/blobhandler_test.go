@@ -41,7 +41,7 @@ var _ = Describe("blobhandler generic maven tests", func() {
 		  			"path" : "/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar",
 					"created" : "2024-04-11T15:09:28.920Z",
 		  			"createdBy" : "john.doe",
-		  			"downloadUri" : "https://ocm.sofware/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar",
+		  			"downloadUri" : "https://ocm.software/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar",
 		  			"mimeType" : "application/java-archive",
 		  			"size" : "1792",
 		  			"checksums" : {
@@ -50,13 +50,13 @@ var _ = Describe("blobhandler generic maven tests", func() {
 		    			"sha256" : "b19dcd275f72a0cbdead1e5abacb0ef25a0cb55ff36252ef44b1178eeedf9c30" },
 		  			"originalChecksums" : {
 		    			"sha256" : "b19dcd275f72a0cbdead1e5abacb0ef25a0cb55ff36252ef44b1178eeedf9c30" },
-		  			"uri" : "https://ocm.sofware/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar" }`
+		  			"uri" : "https://ocm.software/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar" }`
 		var body maven.Body
 		err := json.Unmarshal([]byte(resp), &body)
 		Expect(err).To(BeNil())
 		Expect(body.Repo).To(Equal("ocm-mvn-test"))
-		Expect(body.DownloadUri).To(Equal("https://ocm.sofware/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
-		Expect(body.Uri).To(Equal("https://ocm.sofware/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
+		Expect(body.DownloadUri).To(Equal("https://ocm.software/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
+		Expect(body.Uri).To(Equal("https://ocm.software/repository/ocm-mvn-test/open-component-model/hello-ocm/0.0.2/hello-ocm-0.0.2.jar"))
 		Expect(body.MimeType).To(Equal("application/java-archive"))
 		Expect(body.Size).To(Equal("1792"))
 		Expect(body.Checksums["md5"]).To(Equal("6cb7520b65d820b3b35773a8daa8368e"))

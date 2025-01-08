@@ -91,7 +91,7 @@ type AccessMethod interface {
 	// specification.
 	Options() []options.OptionType
 
-	// Description provides a general description for the access mehod kind.
+	// Description provides a general description for the access method kind.
 	Description() string
 	// Format describes the attributes of the dedicated version.
 	Format() string
@@ -176,7 +176,7 @@ type ValueSet interface {
 	// specification.
 	Options() []options.OptionType
 
-	// Description provides a general description for the access mehod kind.
+	// Description provides a general description for the access method kind.
 	Description() string
 	// Format describes the attributes of the dedicated version.
 	Format() string

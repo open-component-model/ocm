@@ -39,7 +39,7 @@ func (o *Option) Complete(args []string) ([]string, error) {
 
 func (o *Option) Usage() string {
 	s := `
-The <code>--path</code> options accets a sequence of identities,
+The <code>--path</code> options accepts a sequence of identities,
 that will be used to follow component references a the specified
 component(s).
 
