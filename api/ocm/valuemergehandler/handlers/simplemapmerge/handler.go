@@ -47,18 +47,18 @@ func merge(ctx hpi.Context, c *Config, lv Value, tv *Value) (bool, error) {
 	subm := false
 	modified := false
 	for lk, le := range lv {
-		if te, ok := (*tv)[lk]; ok {
-			if !reflect.DeepEqual(le, te) {
+		if entry, ok := (*tv)[lk]; ok {
+			if !reflect.DeepEqual(le, entry) {
 				switch c.Overwrite {
 				case MODE_DEFAULT:
 					if c.Entries != nil {
 						hpi.Log.Trace("different entry found in target -> merge it", "name", lk, "entries", c.Entries)
-						subm, te, err = hpi.GenericMerge(ctx, c.Entries, "", le, te)
+						subm, entry, err = hpi.GenericMerge(ctx, c.Entries, "", le, entry)
 						if err != nil {
 							return false, errors.Wrapf(err, "map key %q", lk)
 						}
 						if subm {
-							(*tv)[lk] = te
+							(*tv)[lk] = entry
 							modified = true
 							hpi.Log.Trace("entry merge result", "result", (*tv))
 						} else {

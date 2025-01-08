@@ -34,8 +34,8 @@ func merge(ctx hpi.Context, c *Config, lv Value, tv *Value) (bool, error) {
 	modified := false
 outer:
 	for _, le := range lv {
-		for _, te := range *tv {
-			if equal(c, le, te) {
+		for _, entry := range *tv {
+			if equal(c, le, entry) {
 				continue outer
 			}
 		}
