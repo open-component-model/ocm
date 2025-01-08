@@ -20,8 +20,8 @@ type option struct {
 }
 
 func (o *option) Equal(t flagsets.ConfigOptionType) bool {
-	if ot, ok := t.(*option); ok {
-		return o.valueType == ot.valueType && o.GetName() == ot.GetName()
+	if optionType, ok := t.(*option); ok {
+		return o.valueType == optionType.valueType && o.GetName() == optionType.GetName()
 	}
 	return false
 }

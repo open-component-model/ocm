@@ -15,7 +15,7 @@ var (
 
 // DefaultingOfVersionIntoExtraIdentity normalizes the extra identity of the resources.
 // It sets the version of the resource, reference or source as extra identity field if the combination of name+extra identity
-// is the same for multiple items. However, the last item in the list will not be updated as it is unique wihout this.
+// is the same for multiple items. However, the last item in the list will not be updated as it is unique without this.
 //
 // TODO: To be removed once v1 + v2 are removed.
 //

@@ -51,8 +51,8 @@ var _ = Describe("Add with new access method", func() {
 		Expect(h).NotTo(BeNil())
 		Expect(h.GetName()).To(Equal("test"))
 
-		ot := h.OptionTypes()
-		Expect(len(ot)).To(Equal(2))
+		optionTypes := h.OptionTypes()
+		Expect(len(optionTypes)).To(Equal(2))
 
 		opts := h.CreateOptions()
 		Expect(sliceutils.Transform(opts.Options(), transformer.GetName[flagsets.Option, string])).To(ConsistOf(
