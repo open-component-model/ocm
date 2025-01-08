@@ -14,8 +14,8 @@ func Validate(o interface{}) error {
 			return errors.New("type missing")
 		}
 	}
-	if v, ok := o.(Validater); ok {
+	if v, ok := o.(Validater); ok { // codespell:ignore
 		return v.Validate()
-	} // codespell:ignore
+	}
 	return nil
 }
