@@ -1,6 +1,7 @@
 package v2
 
 import (
+	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -19,5 +20,31 @@ func (cd *ComponentDescriptor) Default() error {
 		cd.Resources = make([]Resource, 0)
 	}
 
+	DefaultResources(cd)
 	return nil
+}
+
+// DefaultResources defaults a list of resources.
+// The version of the component is defaulted for local resources that do not contain a version.
+// adds the version as identity if the resource identity would clash otherwise.
+func DefaultResources(component *ComponentDescriptor) {
+	for i, res := range component.Resources {
+		if res.Relation == v1.LocalRelation && len(res.Version) == 0 {
+			component.Resources[i].Version = component.GetVersion()
+		}
+
+		id := res.GetIdentity(component.Resources)
+		if v, ok := id[SystemIdentityVersion]; ok {
+			if res.ExtraIdentity == nil {
+				// due to compatibility with very old faulty original implementation
+				// we cannot default the version for a not existing identity map.
+				// res is copy of the resource and setting this field here never worked
+				// as intended.
+			} else {
+				if _, ok := res.ExtraIdentity[SystemIdentityVersion]; !ok {
+					res.ExtraIdentity[SystemIdentityVersion] = v
+				}
+			}
+		}
+	}
 }
