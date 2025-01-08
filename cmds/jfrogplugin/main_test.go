@@ -159,7 +159,7 @@ var _ = Describe(helm.VERSIONED_NAME, func() {
 				http.Error(w, fmt.Sprintf("failed to marshal response: %v", err), http.StatusInternalServerError)
 			}
 
-			// mimick the upload response
+			// mimic the upload response
 			w.WriteHeader(http.StatusCreated)
 			if _, err := io.Copy(w, bytes.NewReader(resData)); err != nil {
 				Fail(fmt.Sprintf("failed to write response: %v", err))
@@ -202,7 +202,7 @@ var _ = Describe(helm.VERSIONED_NAME, func() {
 		Expect(splitChart).To(HaveLen(2), "helm chart is separated with version")
 		Expect(splitChart[0]).To(Equal("test-chart"), "the chart name should be test-chart")
 		Expect(splitChart[1]).To(Equal("0.1.0"), "the chart version should be 0.1.0")
-		Expect(reindexedAfterUpload).To(BeFalse(), "the server should not have been reindexed as it wasnt requested explicitly")
+		Expect(reindexedAfterUpload).To(BeFalse(), "the server should not have been re-indexed as it wasn't requested explicitly")
 	})
 
 	It("Upload Artifact Set to Server (with reindex) with Basic Auth", func(ctx SpecContext) {
@@ -239,6 +239,6 @@ var _ = Describe(helm.VERSIONED_NAME, func() {
 		Expect(splitChart).To(HaveLen(2), "helm chart is separated with version")
 		Expect(splitChart[0]).To(Equal("test-chart"), "the chart name should be test-chart")
 		Expect(splitChart[1]).To(Equal("0.1.0"), "the chart version should be 0.1.0")
-		Expect(reindexedAfterUpload).To(BeTrue(), "the server should not have been reindexed as it wasnt requested explicitly")
+		Expect(reindexedAfterUpload).To(BeTrue(), "the server should not have been re-indexed as it wasn't requested explicitly")
 	})
 })

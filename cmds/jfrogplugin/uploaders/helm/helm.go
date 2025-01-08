@@ -143,7 +143,7 @@ func (a *Uploader) ValidateSpecification(_ ppi.Plugin, spec ppi.UploadTargetSpec
 //  2. building an Artifactory Style JFrog Upload URL out of it (see ConvertTargetSpecToHelmUploadURL),
 //  3. creating a request respecting the passed credentials based on SetHeadersFromCredentials
 //  4. uploading the passed blob as is (expected to be a tgz byte stream)
-//  5. intepreting the JFrog API response, and converting it from ArtifactoryUploadResponse to ppi.AccessSpec
+//  5. interpreting the JFrog API response, and converting it from ArtifactoryUploadResponse to ppi.AccessSpec
 func (a *Uploader) Upload(
 	ctx context.Context,
 	p ppi.Plugin,
