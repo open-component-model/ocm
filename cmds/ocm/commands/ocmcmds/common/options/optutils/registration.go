@@ -57,13 +57,13 @@ func (o *RegistrationOption) HasRegistrations() bool {
 func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 	for n, v := range o.spec {
 		var prio *int
-		nam := n
+		name := n
 		art := ""
 		med := ""
-		i := strings.Index(nam, ":")
+		i := strings.Index(name, ":")
 		if i >= 0 {
-			art = nam[i+1:]
-			nam = nam[:i]
+			art = name[i+1:]
+			name = name[:i]
 		}
 		i = strings.Index(art, ":")
 		if i >= 0 {
@@ -112,7 +112,7 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 		}
 
 		o.Registrations = append(o.Registrations, &Registration{
-			Name:         nam,
+			Name:         name,
 			ArtifactType: art,
 			MediaType:    med,
 			Prio:         prio,

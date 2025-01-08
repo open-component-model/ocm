@@ -105,11 +105,11 @@ test.de/x:v1      acme.org comment ` + e1a.Timestamp.String() + ` Comment: first
 			e2a = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, comment.New("first other entry"), nil))
 			e2b = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, comment.New("second other entry"), nil))
 
-			te := Must(routingslip.NewGenericEntryWith("acme.org/test",
+			entry := Must(routingslip.NewGenericEntryWith("acme.org/test",
 				"name", "unit-tests",
 				"status", "passed",
 			))
-			e2c = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, te, nil))
+			e2c = Must(routingslip.AddEntry(cv, OTHER, rsa.Algorithm, entry, nil))
 
 			MustBeSuccessful(cv.Update())
 		})

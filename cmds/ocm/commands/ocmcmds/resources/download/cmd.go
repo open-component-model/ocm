@@ -63,7 +63,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Short: "download resources of a component version",
 		Long: `
 Download resources of a component version. Resources are specified
-by identities. An identity consists of 
+by identities. An identity consists of
 a name argument followed by optional <code>&lt;key>=&lt;value></code>
 arguments.
 
@@ -149,7 +149,7 @@ func (o *Command) Run() (err error) {
 
 	if storeoption.From(o).Store != nil {
 		if From(opts).UseHandlers {
-			return errors.Newf("verification fot supported together with download handlers")
+			return errors.Newf("verification for supported together with download handlers")
 		}
 	}
 
