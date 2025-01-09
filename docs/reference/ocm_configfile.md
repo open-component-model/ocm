@@ -198,12 +198,12 @@ The following configuration types are supported:
           reference:  # refer to a credential set stored in some other credential repository
             type: Credentials # this is a repo providing just one explicit credential set
             properties:
-              username: mandelsoft
-              password: specialsecret
+              username: <my-user>
+              password: <my-secret-password>
         - credentialsName: direct
           credentials: # direct credential specification
-              username: mandelsoft2
-              password: specialsecret2
+              username: <my-user>
+              password: <my-secret-password>
   </pre>
 - <code>merge.config.ocm.software</code>
   The config type <code>merge.config.ocm.software</code> can be used to set some
