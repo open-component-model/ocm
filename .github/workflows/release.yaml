@@ -36,7 +36,7 @@ jobs:
       RELEASE_VERSION_NO_SUFFIX: ${{ needs.release-version.outputs.version_no_suffix }}
       REF: ${{ github.ref }}
     outputs:
-      draft-release-notes: ${{ steps.release-notes.outputs.json }}
+      draft-release-notes-body-base64: ${{ steps.release-notes.outputs.release_notes_body_base64 }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -68,13 +68,14 @@ jobs:
       env:
         GH_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
-        RELEASE_JSON=$( \
+        RELEASE_BODY_BASE64=$( \
           gh api /repos/${{ github.repository }}/releases \
-          -q '.[] | select(.name == "${{ env.RELEASE_VERSION_NO_SUFFIX }}" and .draft == true)' \
+          -q '.[] | select(.name == "${{ env.RELEASE_VERSION_NO_SUFFIX }}" and .draft == true) | .body' \
+          | base64 \
         )
-        echo "json=${RELEASE_JSON}" >> $GITHUB_OUTPUT
+        echo "release_notes_body_base64=${RELEASE_BODY_BASE64}" >> $GITHUB_OUTPUT
         # if no draft release notes are found, we cannot continue
-        if [ -z "${RELEASE_JSON}" ]; then
+        if [ -z "${RELEASE_BODY_BASE64}" ]; then
           echo "No draft release notes found for ${{ env.RELEASE_VERSION_NO_SUFFIX }}"
           exit 1
         fi
@@ -210,7 +211,7 @@ jobs:
 
     - name: Setup Release Notes as File to make it readable by GoReleaser
       run: |
-        echo "${{ fromJSON(needs.check.outputs.draft-release-notes).body }}" > $RUNNER_TEMP/RELEASE_NOTES.md
+        base64 -d <<< "${{ needs.check.outputs.draft-release-notes-body-base64 }}" > $RUNNER_TEMP/RELEASE_NOTES.md
         echo "RELEASE_NOTES=$RUNNER_TEMP/RELEASE_NOTES.md" >> $GITHUB_ENV
         cat $RUNNER_TEMP/RELEASE_NOTES.md
     - name: Run GoReleaser
