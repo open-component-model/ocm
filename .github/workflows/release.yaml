@@ -36,7 +36,7 @@ jobs:
       RELEASE_VERSION_NO_SUFFIX: ${{ needs.release-version.outputs.version_no_suffix }}
       REF: ${{ github.ref }}
     outputs:
-      draft-release-notes-body-base64: ${{ steps.release-notes.outputs.release_notes_body_base64 }}
+      draft-release-notes-body: ${{ steps.release-notes.outputs.release_notes_body }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -68,17 +68,20 @@ jobs:
       env:
         GH_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
-        RELEASE_BODY_BASE64=$( \
+        RELEASE_BODY=$( \
           gh api /repos/${{ github.repository }}/releases \
           -q '.[] | select(.name == "${{ env.RELEASE_VERSION_NO_SUFFIX }}" and .draft == true) | .body' \
-          | base64 \
         )
-        echo "release_notes_body_base64=${RELEASE_BODY_BASE64}" >> $GITHUB_OUTPUT
         # if no draft release notes are found, we cannot continue
-        if [ -z "${RELEASE_BODY_BASE64}" ]; then
+        if [ -z "${RELEASE_BODY}" ]; then
           echo "No draft release notes found for ${{ env.RELEASE_VERSION_NO_SUFFIX }}"
           exit 1
         fi
+        {
+            echo 'release_notes_body<<EOF'
+            echo "${RELEASE_BODY}"
+            echo 'EOF'
+        } >> $GITHUB_OUTPUT
   components:
     name: Component CTF Builds
     uses: ./.github/workflows/components.yaml
@@ -211,7 +214,10 @@ jobs:
 
     - name: Setup Release Notes as File to make it readable by GoReleaser
       run: |
-        base64 -d <<< "${{ needs.check.outputs.draft-release-notes-body-base64 }}" > $RUNNER_TEMP/RELEASE_NOTES.md
+        touch $RUNNER_TEMP/RELEASE_NOTES.md
+        cat > $RUNNER_TEMP/RELEASE_NOTES.md << EOF
+        ${{ needs.check.outputs.draft-release-notes-body }}
+        EOF
         echo "RELEASE_NOTES=$RUNNER_TEMP/RELEASE_NOTES.md" >> $GITHUB_ENV
         cat $RUNNER_TEMP/RELEASE_NOTES.md
     - name: Run GoReleaser
