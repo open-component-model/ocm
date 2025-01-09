@@ -66,6 +66,11 @@ func TargetIndex(idx int) internal.TargetOptionImpl {
 	return internal.TargetIndex(idx)
 }
 
+// DisableExtraIdentityDefaulting disables the defaulting of the extra identity
+func DisableExtraIdentityDefaulting(flag ...bool) internal.TargetOptionImpl {
+	return internal.DisableExtraIdentityDefaulting(flag...)
+}
+
 const AppendElement = internal.TargetIndex(-1)
 
 var UpdateElement = internal.UpdateElement
