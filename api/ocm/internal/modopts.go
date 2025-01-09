@@ -108,6 +108,10 @@ type TargetOptionImpl interface {
 
 type TargetElementOptions struct {
 	TargetElement TargetElement
+
+	// DisableExtraIdentityDefaulting disables the implicit defaulting of the extraIdentity.
+	// A transfer operation must set this flag to preserve the normalizations.
+	DisableExtraIdentityDefaulting *bool
 }
 
 type TargetElementOption interface {
@@ -128,6 +132,11 @@ func (m *TargetElementOptions) ApplyElementModificationOption(opts *ElementModif
 
 func (m *TargetElementOptions) ApplyTargetOption(opts *TargetElementOptions) {
 	optionutils.Transfer(&opts.TargetElement, m.TargetElement)
+	optionutils.Transfer(&opts.DisableExtraIdentityDefaulting, m.DisableExtraIdentityDefaulting)
+}
+
+func (m *TargetElementOptions) IsDisableExtraIdentityDefaulting() bool {
+	return utils.AsBool(m.DisableExtraIdentityDefaulting)
 }
 
 func (m *TargetElementOptions) ApplyTargetOptions(list ...TargetElementOption) *TargetElementOptions {
@@ -351,6 +360,31 @@ func (m TargetIdentity) ApplyElementModificationOption(opts *ElementModification
 
 func (m TargetIdentity) ApplyTargetOption(opts *TargetElementOptions) {
 	opts.TargetElement = m
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type disableextraidentitydefaulting bool
+
+func (m disableextraidentitydefaulting) ApplyBlobModificationOption(opts *BlobModificationOptions) {
+	m.ApplyModificationOption(&opts.ModificationOptions)
+}
+
+func (m disableextraidentitydefaulting) ApplyModificationOption(opts *ModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
+}
+
+func (m disableextraidentitydefaulting) ApplyElementModificationOption(opts *ElementModificationOptions) {
+	m.ApplyTargetOption(&opts.TargetElementOptions)
+}
+
+func (m disableextraidentitydefaulting) ApplyTargetOption(opts *TargetElementOptions) {
+	opts.DisableExtraIdentityDefaulting = utils.BoolP(m)
+}
+
+// DisableExtraIdentityDefaulting disables the defaulting of the extra identity.
+func DisableExtraIdentityDefaulting(flag ...bool) TargetOptionImpl {
+	return disableextraidentitydefaulting(utils.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
