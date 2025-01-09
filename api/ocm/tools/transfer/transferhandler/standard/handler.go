@@ -87,7 +87,7 @@ func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m cpi.AccessMetho
 	}
 	defer blob.Close()
 	return accessio.Retry(h.opts.GetRetries(), time.Second, func() error {
-		return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m), ocm.SkipVerify())
+		return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m), ocm.SkipVerify(), ocm.DisableExtraIdentityDefaulting())
 	})
 }
 
@@ -98,7 +98,7 @@ func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m cpi.AccessMethod, h
 	}
 	defer blob.Close()
 	return accessio.Retry(h.opts.GetRetries(), time.Second, func() error {
-		return t.SetSourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
+		return t.SetSourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m), ocm.DisableExtraIdentityDefaulting())
 	})
 }
 
