@@ -24,17 +24,20 @@ import (
 	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 var (
 	Names = names.ComponentArchive
 	Verb  = verbs.Transfer
 )
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 type Command struct {
 	utils.BaseCommand
 	Path       string
 	TargetName string
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // NewCommand creates a new transfer command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
@@ -48,11 +51,12 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		)}, utils.Names(Names, names...)...)
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>]  <source> <target>",
 		Args:  cobra.MinimumNArgs(2),
-		Short: "transfer component archive to some component repository",
+		Short: "(DEPRECATED) transfer component archive to some component repository",
 		Long: `
 Transfer a component archive to some component repository. This might
 be a CTF Archive or a regular repository.
@@ -65,6 +69,7 @@ either via inline argument or command configuration file and name.
 	}
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) Complete(args []string) error {
 	o.Path = args[0]
 	o.TargetName = args[1]
@@ -72,6 +77,7 @@ func (o *Command) Complete(args []string) error {
 	return nil
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()

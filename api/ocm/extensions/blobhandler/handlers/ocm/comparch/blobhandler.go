@@ -15,19 +15,23 @@ import (
 	common "ocm.software/ocm/api/utils/misc"
 )
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func init() {
 	cpi.RegisterBlobHandler(NewBlobHandler(), cpi.ForRepo(cpi.CONTEXT_TYPE, comparch.Type))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // blobHandler is the default handling to store local blobs as local blobs.
 type blobHandler struct{}
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func NewBlobHandler() cpi.BlobHandler {
 	return &blobHandler{}
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	ocmctx, ok := ctx.(storagecontext.StorageContext)
 	if !ok {

@@ -7,6 +7,7 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 )
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 const AltType = "ca"
 
 func init() {
@@ -25,6 +26,7 @@ func explicit(t string) bool {
 	return t == Type || t == AltType
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.RepositorySpec, error) {
 	path := u.Info
 	if u.Info == "" {
