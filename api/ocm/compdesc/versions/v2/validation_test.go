@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"testing"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
@@ -21,11 +20,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/utils/runtime"
 )
-
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "V2 Test Suite")
-}
 
 var _ = Describe("Validation", func() {
 	testutils.TestCompName(jsonscheme.ResourcesComponentDescriptorV2SchemaYamlBytes())

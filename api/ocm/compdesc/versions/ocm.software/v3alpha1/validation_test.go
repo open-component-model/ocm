@@ -1,8 +1,6 @@
 package v3alpha1_test
 
 import (
-	"testing"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -16,11 +14,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/utils/runtime"
 )
-
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "V2 Test Suite")
-}
 
 var _ = Describe("Validation", func() {
 	testutils.TestCompName(jsonscheme.ResourcesComponentDescriptorOcmV3SchemaYamlBytes())

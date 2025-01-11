@@ -233,10 +233,7 @@ func (o *ElementMeta) AddExtraIdentity(identity metav1.Identity) {
 
 // GetIdentity returns the identity of the object.
 func (o *ElementMeta) GetIdentity(accessor ElementListAccessor) metav1.Identity {
-	identity := o.ExtraIdentity.Copy()
-	if identity == nil {
-		identity = metav1.Identity{}
-	}
+	identity := o.GetExtraIdentity()
 	identity[SystemIdentityName] = o.Name
 	if identity.Get(SystemIdentityVersion) == "" && accessor != nil {
 		found := false
@@ -266,7 +263,7 @@ func (o *ElementMeta) GetRawIdentity() metav1.Identity {
 		identity = metav1.Identity{}
 	}
 	identity[SystemIdentityName] = o.Name
-	if o.Version != "" {
+	if _, ok := identity[SystemIdentityVersion]; !ok && o.Version != "" {
 		identity[SystemIdentityVersion] = o.Version
 	}
 	return identity
@@ -279,8 +276,9 @@ func (o *ElementMeta) GetMatchBaseIdentity() metav1.Identity {
 		identity = metav1.Identity{}
 	}
 	identity[SystemIdentityName] = o.Name
-	identity[SystemIdentityVersion] = o.Version
-
+	if _, ok := identity[SystemIdentityVersion]; !ok {
+		identity[SystemIdentityVersion] = o.Version
+	}
 	return identity
 }
 
