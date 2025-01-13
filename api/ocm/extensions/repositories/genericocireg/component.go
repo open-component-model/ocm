@@ -128,10 +128,6 @@ func (c *componentAccessImpl) HasVersion(vers string) (bool, error) {
 }
 
 func (c *componentAccessImpl) LookupVersion(version string) (*repocpi.ComponentVersionAccessInfo, error) {
-	// LookupVersion '0.0.1-20250108132333.build-af79499' would fail with:
-	// unable to unref last: unable to cleanup component version [%v] while unref last: closing component version [%v]: check failed: component version [%v] is invalid
-	// This is because the version comes from an artifact tag, which doesn't allow '+' characters, which we replace with '.build-' during the push
-	version = toVersion(version) // ensure the cv doesn't contain '.build-'
 	tag, err := toTag(version)
 	if err != nil {
 		return nil, err
