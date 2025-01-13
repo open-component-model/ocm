@@ -1,4 +1,4 @@
-## ocm transfer componentarchive &mdash; Transfer Component Archive To Some Component Repository
+## ocm transfer componentarchive &mdash; (DEPRECATED) Transfer Component Archive To Some Component Repository
 
 ### Synopsis
 
