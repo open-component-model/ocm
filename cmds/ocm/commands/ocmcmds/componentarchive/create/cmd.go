@@ -1,5 +1,7 @@
 package create
 
+//nolint:staticcheck
+
 import (
 	"fmt"
 	"strings"

@@ -1,5 +1,7 @@
 package componentarchive
 
+//nolint:staticcheck
+
 import (
 	"github.com/spf13/cobra"
 

@@ -1,5 +1,7 @@
 package transfer
 
+//nolint:staticcheck
+
 import (
 	"github.com/spf13/cobra"
 
