@@ -1,7 +1,5 @@
 package componentarchive
 
-//nolint:staticcheck
-
 import (
 	"github.com/spf13/cobra"
 
@@ -13,6 +11,7 @@ import (
 )
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
+//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 var Names = names.ComponentArchive
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489

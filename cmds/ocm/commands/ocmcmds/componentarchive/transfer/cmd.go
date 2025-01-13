@@ -1,7 +1,5 @@
 package transfer
 
-//nolint:staticcheck
-
 import (
 	"github.com/spf13/cobra"
 
@@ -28,6 +26,7 @@ import (
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 var (
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	Names = names.ComponentArchive
 	Verb  = verbs.Transfer
 )
