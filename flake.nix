@@ -35,7 +35,7 @@
             state = if (self ? rev) then "clean" else "dirty";
 
             # This vendorHash represents a derivative of all go.mod dependencies and needs to be adjusted with every change
-            vendorHash = "sha256-0jxArvCync+cw/gyyKPu4AQBnCvLdA28yFzPXvg0mxQ=";
+            vendorHash = "sha256-nDftL/7C07pyyPJq1sxHf5GlY7PBl2AxogBbyO2zCHo=";
 
             src = ./.;
 
