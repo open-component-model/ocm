@@ -32,10 +32,11 @@ and delivered to end users willing to test the new release.
 
 Minor releases are done every sprint, i.e. every two weeks. To be even more precise,
 technically speaking, two releases are produced every sprint:
+
 * Release Candidate for the current version in main
 * Promotion of the previous sprint's candidate to a normal minor version
 
-At the end of each sprint (usually on Friday) a new release ungineer is selected, 
+At the end of each sprint (usually on Friday) a new release ungineer is selected,
 who has to produce the releases.
 
 Patch releases are produced on demand, if a fix for a hefty bug must be released quickly,
@@ -43,8 +44,9 @@ and it is approved by the responsible engineer and release manager.
 
 ### Release Manager
 
-Release manager (aka release coordinator, release responsible) is an engineer, whose job 
+Release manager (aka release coordinator, release responsible) is an engineer, whose job
 is to deal with the release process. Responsibilities of the release manager include:
+
 * Agreeing with the team, if a new release has to be produced. Sometimes, e.g. if there were
 no significant contributions, or the branch is not ready, the release can be skipped
 * Release branch cut-off
@@ -113,13 +115,13 @@ At this point in time we call the minor release `0.17` cut-off.
 
 This means that:
 
-- We no longer accept features for the development of this branch
-- We no longer accept breaking changes for the development of this branch
-- Any change that is not a bug fix or a documentation change must be approved by
+* We no longer accept features for the development of this branch
+* We no longer accept breaking changes for the development of this branch
+* Any change that is not a bug fix or a documentation change must be approved by
   the release manager
-- Any bug fix that is not deemed critical must be approved by the release
+* Any bug fix that is not deemed critical must be approved by the release
   manager
-- Any bug fix must first be merged to main and then
+* Any bug fix must first be merged to main and then
   [`cherry-picked`](https://git-scm.com/docs/git-cherry-pick) to the release
   branch.
 
