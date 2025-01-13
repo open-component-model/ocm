@@ -36,6 +36,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(references.NewCommand(ctx))
 	cmd.AddCommand(components.NewCommand(ctx))
 	cmd.AddCommand(ctf.NewCommand(ctx))
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	cmd.AddCommand(componentarchive.NewCommand(ctx))
 	cmd.AddCommand(versions.NewCommand(ctx))
 	cmd.AddCommand(plugins.NewCommand(ctx))
