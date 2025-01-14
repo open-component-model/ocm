@@ -7,9 +7,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	. "ocm.software/ocm/api/oci/testhelper"
-	"ocm.software/ocm/api/ocm/compdesc"
 	. "ocm.software/ocm/api/ocm/testhelper"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
@@ -17,6 +15,7 @@ import (
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci"
+	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
