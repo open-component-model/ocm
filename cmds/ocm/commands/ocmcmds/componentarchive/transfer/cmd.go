@@ -41,7 +41,7 @@ type Command struct {
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // NewCommand creates a new transfer command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(
+	c := utils.SetupCommand(
 		&Command{BaseCommand: utils.NewBaseCommand(ctx,
 			formatoption.New(),
 			lookupoption.New(),
@@ -50,6 +50,8 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 			rscbyvalueoption.New(),
 			srcbyvalueoption.New(),
 		)}, utils.Names(Names, names...)...)
+	c.Deprecated = "Deprecated - use " + ocm.CommonTransportFormat + " instead"
+	return c
 }
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489

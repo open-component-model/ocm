@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/pflag"
 
 	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/attrs/compatattr"
@@ -53,7 +54,14 @@ type Command struct {
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(comparch.GetFormats()...), fileoption.NewCompArch(), schemaoption.New(compdesc.DefaultSchemeVersion))}, utils.Names(Names, names...)...)
+	c := utils.SetupCommand(
+		&Command{BaseCommand: utils.NewBaseCommand(ctx,
+			formatoption.New(comparch.GetFormats()...),
+			fileoption.NewCompArch(),
+			schemaoption.New(compdesc.DefaultSchemeVersion))},
+		utils.Names(Names, names...)...)
+	c.Deprecated = "Deprecated - use " + ocm.CommonTransportFormat + " instead"
+	return c
 }
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
