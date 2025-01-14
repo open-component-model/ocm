@@ -6,17 +6,18 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/config"
 
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/cpi/repocpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
+	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/config"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 )
