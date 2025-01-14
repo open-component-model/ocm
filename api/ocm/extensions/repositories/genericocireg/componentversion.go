@@ -97,6 +97,12 @@ func (c *ComponentVersionContainer) SetReadOnly() {
 
 func (c *ComponentVersionContainer) Check() error {
 	if c.version != c.GetDescriptor().Version {
+		// check if version contained '+' which has been replaced by META_SEPARATOR to create OCI compliant tag
+		if replaced, _ := toTag(c.GetDescriptor().Version); replaced != c.GetDescriptor().Version && replaced == c.version {
+			Logger(c.GetContext()).Warn(fmt.Sprintf(
+				"checked version %q contains %q, this is discouraged and you should prefer the original component version %q", c.version, META_SEPARATOR, c.GetDescriptor().Version))
+			return nil
+		}
 		return errors.ErrInvalid("component version", c.GetDescriptor().Version)
 	}
 	if c.comp.name != c.GetDescriptor().Name {
