@@ -41,7 +41,7 @@ type Command struct {
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // NewCommand creates a new transfer command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	c := utils.SetupCommand(
+	return utils.SetupCommand(
 		&Command{BaseCommand: utils.NewBaseCommand(ctx,
 			formatoption.New(),
 			lookupoption.New(),
@@ -50,16 +50,15 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 			rscbyvalueoption.New(),
 			srcbyvalueoption.New(),
 		)}, utils.Names(Names, names...)...)
-	c.Deprecated = "Deprecated - use " + ocm.CommonTransportFormat + " instead"
-	return c
 }
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>]  <source> <target>",
-		Args:  cobra.MinimumNArgs(2),
-		Short: "(DEPRECATED) transfer component archive to some component repository",
+		Use:        "[<options>]  <source> <target>",
+		Args:       cobra.MinimumNArgs(2),
+		Short:      "(DEPRECATED) transfer component archive to some component repository",
+		Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
 		Long: `
 Transfer a component archive to some component repository. This might
 be a CTF Archive or a regular repository.

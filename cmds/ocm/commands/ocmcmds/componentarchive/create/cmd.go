@@ -54,22 +54,16 @@ type Command struct {
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	c := utils.SetupCommand(
-		&Command{BaseCommand: utils.NewBaseCommand(ctx,
-			formatoption.New(comparch.GetFormats()...),
-			fileoption.NewCompArch(),
-			schemaoption.New(compdesc.DefaultSchemeVersion))},
-		utils.Names(Names, names...)...)
-	c.Deprecated = "Deprecated - use " + ocm.CommonTransportFormat + " instead"
-	return c
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(comparch.GetFormats()...), fileoption.NewCompArch(), schemaoption.New(compdesc.DefaultSchemeVersion))}, utils.Names(Names, names...)...)
 }
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}",
-		Args:  cobra.MinimumNArgs(2),
-		Short: "(DEPRECATED) create new component archive",
+		Use:        "[<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}",
+		Args:       cobra.MinimumNArgs(2),
+		Short:      "(DEPRECATED) create new component archive",
+		Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
 		Example: `
 $ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org acme.org/demo 1.0
 `,
