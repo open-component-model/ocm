@@ -63,10 +63,8 @@ For the *Common Transport Format* the types <code>directory</code>,
 Using the JSON variant any repository types supported by the
 linked library can be used:
 
-Dedicated OCM repository types:
-  - <code>ComponentArchive</code>: v1
-
 OCI Repository types (using standard component repository to OCI mapping):
+
   - <code>CommonTransportFormat</code>: v1
   - <code>OCIRegistry</code>: v1
   - <code>oci</code>: v1

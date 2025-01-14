@@ -139,7 +139,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 
 		subheader := false
 		for _, child := range children {
-			if OverviewOnly(child) || !child.IsAvailableCommand() || child.IsAdditionalHelpTopicCommand() {
+			if OverviewOnly(child) || !child.IsAvailableCommand() || child.IsAdditionalHelpTopicCommand() || IsDeprecated(child) {
 				continue
 			}
 			if header && !subheader {
@@ -264,6 +264,10 @@ func DocuCommandPath(cmd *cobra.Command) string {
 		}
 	}
 	return cmd.CommandPath()
+}
+
+func IsDeprecated(cmd *cobra.Command) bool {
+	return cmd.Deprecated != ""
 }
 
 func ExampleCodeStyle(cmd *cobra.Command) string {
