@@ -107,9 +107,8 @@ func (c *ComponentVersionContainer) Check() error {
 			Logger(c.GetContext()).Warn(fmt.Sprintf(
 				"checked version %q contains %q, this is discouraged and you should prefer the original component version %q", c.version, META_SEPARATOR, c.GetDescriptor().Version))
 			return nil
-		} else {
-			return errors.ErrInvalid("component version", c.GetDescriptor().Version)
 		}
+		return errors.ErrInvalid("component version", c.GetDescriptor().Version)
 	}
 	if c.comp.name != c.GetDescriptor().Name {
 		return errors.ErrInvalid("component name", c.GetDescriptor().Name)
