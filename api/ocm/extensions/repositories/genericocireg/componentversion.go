@@ -110,7 +110,6 @@ func (c *ComponentVersionContainer) Check() error {
 		} else {
 			return errors.ErrInvalid("component version", c.GetDescriptor().Version)
 		}
-		return errors.ErrInvalid("component version", c.GetDescriptor().Version)
 	}
 	if c.comp.name != c.GetDescriptor().Name {
 		return errors.ErrInvalid("component name", c.GetDescriptor().Name)
