@@ -456,10 +456,13 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions() error {
 		return addhdlrs.PrintElements(printer, elems, dr.Outfile, o.Context.FileSystem())
 	}
 
+	// FIXME: use CommonTransportFormat archives to store OCM components
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	obj, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, o.Archive, 0, accessio.PathFileSystem(fs))
 	if err != nil {
 		return err
 	}
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	defer obj.Close()
 	return ProcessElements(ictx, obj, elems, o.Handler)
 }
