@@ -17,14 +17,16 @@ so that [business value/benefit]
 
 ## Scope
 
-#### In Scope
+### In Scope
 
 List features/capabilities that are part of this epic
+
 - 
 
-#### Out of Scope
+### Out of Scope
 
 List explicitly what will not be included
+
 - 
 
 ## User Stories
