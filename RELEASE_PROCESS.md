@@ -34,7 +34,7 @@ Minor releases are done every sprint, i.e. every two weeks. To be even more prec
 technically speaking, two releases are produced every sprint:
 
 * Release Candidate for the current version in main
-* Promotion of the previous sprint's candidate to a normal minor version
+* Promotion of the previous sprint's candidate to an official minor version
 
 At the end of each sprint (usually on Friday) a new release ungineer is selected,
 who has to produce the releases.
