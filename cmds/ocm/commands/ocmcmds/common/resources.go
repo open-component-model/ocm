@@ -192,7 +192,7 @@ it is possible to add extra identity attributes. Explicitly specified options
 override values specified by the <code>--%s</code> option.
 (Note: Go templates are not supported for YAML-based option values. Besides
 this restriction, the finally composed element description is still processed
-by the selected template engine.) 
+by the selected template engine.)
 `, a.typename, a.typename, a.typename)
 }
 
@@ -388,6 +388,7 @@ func NewResourceAdderCommand(ctx clictx.Context, h ResourceSpecHandler, provider
 	}
 	return ResourceAdderCommand{
 		BaseCommand: utils.NewBaseCommand(ctx, sliceutils.CopyAppend[options.Options](opts,
+			//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 			fileoption.NewCompArch(),
 			dryrunoption.New(fmt.Sprintf("evaluate and print %s specifications", h.Key()), true),
 			templateroption.New(""),
