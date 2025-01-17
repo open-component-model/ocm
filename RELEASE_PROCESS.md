@@ -28,6 +28,41 @@ the release action execution. This will lead (for most use cases) to the
 creation of a "Release Candidate" which can be tested
 and delivered to end users willing to test the new release.
 
+### Schedule
+
+Minor releases are done every sprint, i.e. every two weeks. To be even more precise,
+technically speaking, two releases are produced every sprint:
+
+* Release Candidate for the current version in main
+* Promotion of the previous sprint's candidate to an official minor version, which means there
+is a grace period of one sprint.
+
+At the end of each sprint (usually on Friday) a new release engineer is selected,
+who has to produce the releases.
+
+Patch releases are produced on demand, if a fix for a hefty bug must be released quickly,
+and it is approved by the responsible engineer and release manager. For example, a patch
+is recommended for any change that is breaking backwards-compatibility or has high/critical
+security relevance.
+
+In very rare cases it might be required to build a version outside the regular release
+schedule, e.g. a special beta release.
+
+### Release Manager
+
+Release manager (aka release coordinator, release responsible) is an engineer, whose job
+is to deal with the release process. Responsibilities of the release manager include:
+
+* Agreeing with the team, if a new release has to be produced. Sometimes, e.g. if there were
+no significant contributions, or the branch is not ready, the release can be skipped
+* [Release branch cut-off](#the-release-branch-creation--cutoff)
+* [Preparing a minor release candidate](#preparing-a-minor-release-candidate)
+* [Creating a minor release](#creating-a-minor-release)
+* [Creating patch releases](#creating-a-patch-release)
+* Approving merges into release branches and making sure the changes were cherry-picked from main
+and fulfill "feature freeze" and "no breaking changes" requirements
+* Improving release process documentation (this page)
+
 ## Release Workflow
 
 ### Diagram
@@ -64,7 +99,8 @@ gitGraph TB:
 ### The Release Branch Creation / Cutoff
 
 Every minor release starts with the creation of a release branch through
-[`Release Branch Creation`](./.github/workflows/release-branch.yaml).
+[`Release Branch Creation`](./.github/workflows/release-branch.yaml), by
+executing the [Release Branch Cutoff action](https://github.com/open-component-model/ocm/actions/workflows/release-branch.yaml).
 
 The version / minor of the release is based on the content of the file
 [`VERSION`](./VERSION) which
@@ -87,13 +123,13 @@ At this point in time we call the minor release `0.17` cut-off.
 
 This means that:
 
-- We no longer accept features for the development of this branch
-- We no longer accept breaking changes for the development of this branch
-- Any change that is not a bug fix or a documentation change must be approved by
+* We no longer accept features for the development of this branch
+* We no longer accept breaking changes for the development of this branch
+* Any change that is not a bug fix or a documentation change must be approved by
   the release manager
-- Any bug fix that is not deemed critical must be approved by the release
+* Any bug fix that is not deemed critical must be approved by the release
   manager
-- Any bug fix must first be merged to main and then
+* Any bug fix must first be merged to main and then
   [`cherry-picked`](https://git-scm.com/docs/git-cherry-pick) to the release
   branch.
 
@@ -103,8 +139,8 @@ version as a base.
 ### Preparing a Minor release candidate
 
 After the cut-off, the release manager will usually prepare a release candidate.
-This is done by creating a pre-release on the release branch, that goes along
-with a qualifying suffix.
+This is done by running [Release workflow](https://github.com/open-component-model/ocm/actions/workflows/release.yaml)
+on the release branch, while specifying a qualifying suffix.
 
 Currently we only use one form of suffixed, pre-release, the
 `Release Candidate`: Any Release Candidate
@@ -132,12 +168,12 @@ for details.
 ### Creating a Minor release
 
 Once a release candidate is seen as sufficiently tested, the release manager can
-promote the release candidate to a full release.
+promote the release candidate to a full release, by running
+[Release workflow](https://github.com/open-component-model/ocm/actions/workflows/release.yaml)
+on the release branch, without specifying a qualifying suffix.
 
-By default one should always create a draft release first (as a Release
-Candidate),
-open it up for testing (by communicating the new release candidate as available
-to stakeholders),
+By default one should always create [release candidate](#preparing-a-minor-release-candidate)
+first (automated announcement is posted to an internal Slack channel, so the stakeholders can start testing),
 and after a grace period, promote the draft release to a full release.
 
 This promotion is currently effectively a full rebuild from the release branch,
@@ -148,7 +184,8 @@ After the build, instead of finishing, the
 release.
 
 This publishing to package registries (such as brew) is delegated to
-[`publish-to-other-than-github`](./.github/workflows/publish-to-other-than-github.yaml)
+[`publish-to-other-than-github`](./.github/workflows/publish-to-other-than-github.yaml),
+which runs automatically as part of the release workflow.
 
 After the official release on a release branch was successful, the version is considered `burned`.
 This means that, even if bugs are found for that release in the future, a
@@ -208,6 +245,9 @@ necessary:
 4. Merge the Pull-Request to the patch branch.
 
 ### How Release Notes are managed
+
+The release notes are auto-generated by the release action,
+thus don't have to be explicitly handled by the release manager.
 
 For every release branch there is a Github Action
 called [Release Drafter](./.github/workflows/release-drafter.yaml).
