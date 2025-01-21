@@ -8,6 +8,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/compdesc/normalizations/legacy"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/utils"
@@ -127,9 +128,17 @@ func (dc *DigestContext) Propagate(d *metav1.DigestSpec) error {
 	preset := dc.GetPreset(dc.Key)
 
 	if preset != nil {
-		if !digs.Resources.Match(preset.Resources) {
+		var match bool
+		switch d.NormalisationAlgorithm {
+		case compdesc.JsonNormalisationV1, compdesc.JsonNormalisationV2:
+			match = matchLegacy(digs.Resources, preset.Resources)
+		default:
+			match = digs.Resources.Match(preset.Resources)
+		}
+		if !match {
 			return fmt.Errorf("digest set for %s does not match", dc.Key)
 		}
+
 		digs = preset
 	}
 	dc.Out[dc.Key] = digs
@@ -138,7 +147,19 @@ func (dc *DigestContext) Propagate(d *metav1.DigestSpec) error {
 			dc.Parent.Refs[nv] = d
 		}
 	}
+
 	return nil
+}
+
+func matchLegacy(resources, preset metav1.ArtefactDigests) bool {
+	preset = preset.DeepCopy()
+	presetWithDefaults := make([]legacy.IdentityDefaultable, len(preset))
+	for i := range preset {
+		presetWithDefaults[i] = &preset[i]
+	}
+	legacy.DefaultingOfVersionIntoExtraIdentity(presetWithDefaults)
+
+	return resources.Match(preset)
 }
 
 func (dc *DigestContext) Use(ctx *DigestContext) error {
