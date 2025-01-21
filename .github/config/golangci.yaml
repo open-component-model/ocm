@@ -194,5 +194,5 @@ issues:
     - path: "cmds/.*|api/.*"
       linters:
         - staticcheck
-      text: "SA1019: legacy.DefaultingOfVersionIntoExtraIdentity is deprecated"
+      text: "SA1019: legacy.DefaultingOfVersionIntoExtraIdentityForDescriptor is deprecated"
 

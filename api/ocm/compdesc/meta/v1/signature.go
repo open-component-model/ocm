@@ -333,6 +333,22 @@ type ArtefactDigest struct {
 	Digest        DigestSpec `json:"digest"`
 }
 
+func (d *ArtefactDigest) GetExtraIdentity() Identity {
+	return d.ExtraIdentity
+}
+
+func (d *ArtefactDigest) GetName() string {
+	return d.Name
+}
+
+func (d *ArtefactDigest) GetVersion() string {
+	return d.Version
+}
+
+func (d *ArtefactDigest) SetExtraIdentity(identity Identity) {
+	d.ExtraIdentity = identity
+}
+
 func (d *ArtefactDigest) Copy() *ArtefactDigest {
 	r := *d
 	r.ExtraIdentity = d.ExtraIdentity.Copy()

@@ -22,7 +22,7 @@ func init() {
 type normalization struct{}
 
 func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, error) {
-	legacy.DefaultingOfVersionIntoExtraIdentity(cd)
+	legacy.DefaultingOfVersionIntoExtraIdentityForDescriptor(cd)
 	cv := compdesc.DefaultSchemes[cd.SchemaVersion()]
 	if cv == nil {
 		return nil, errors.ErrNotSupported(errkind.KIND_SCHEMAVERSION, cd.SchemaVersion())
