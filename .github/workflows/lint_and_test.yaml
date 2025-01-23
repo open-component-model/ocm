@@ -121,7 +121,7 @@ jobs:
 
   gosec:
     name: Go Security Checker
-    runs-on: large_runner
+    runs-on: ubuntu-latest
     env:
       GO111MODULE: on
     steps:
