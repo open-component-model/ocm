@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/pflag"
 
 	clictx "ocm.software/ocm/api/cli"
-	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/attrs/compatattr"
@@ -60,10 +59,11 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:        "[<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}",
-		Args:       cobra.MinimumNArgs(2),
-		Short:      "(DEPRECATED) create new component archive",
-		Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
+		Use:   "[<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}",
+		Args:  cobra.MinimumNArgs(2),
+		Short: "(DEPRECATED) create new component archive",
+		// this removes the command from the help output - https://github.com/open-component-model/ocm/issues/1242#issuecomment-2609312927
+		// Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
 		Example: `
 $ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org acme.org/demo 1.0
 `,

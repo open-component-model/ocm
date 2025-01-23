@@ -55,10 +55,11 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:        "[<options>]  <source> <target>",
-		Args:       cobra.MinimumNArgs(2),
-		Short:      "(DEPRECATED) transfer component archive to some component repository",
-		Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
+		Use:   "[<options>]  <source> <target>",
+		Args:  cobra.MinimumNArgs(2),
+		Short: "(DEPRECATED) transfer component archive to some component repository",
+		// this removes the command from the help output - https://github.com/open-component-model/ocm/issues/1242#issuecomment-2609312927
+		// Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
 		Long: `
 Transfer a component archive to some component repository. This might
 be a CTF Archive or a regular repository.

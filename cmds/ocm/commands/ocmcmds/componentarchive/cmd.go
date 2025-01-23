@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 
 	clictx "ocm.software/ocm/api/cli"
-	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -20,8 +19,9 @@ var Names = names.ComponentArchive
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short:      "Commands acting on component archives",
-		Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
+		Short: "Commands acting on component archives",
+		// this removes the command from the help output - https://github.com/open-component-model/ocm/issues/1242#issuecomment-2609312927
+		// Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
 	}, Names...)
 	cmd.AddCommand(transfer.NewCommand(ctx, transfer.Verb))
 	cmd.AddCommand(create.NewCommand(ctx, create.Verb))
