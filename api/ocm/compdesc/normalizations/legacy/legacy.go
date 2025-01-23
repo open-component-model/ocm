@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"ocm.software/ocm/api/ocm/compdesc"
-	"ocm.software/ocm/api/ocm/selectors/accessors"
+	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils/logging"
 )
 
@@ -13,7 +13,7 @@ var (
 	Logger = logging.DynamicLogger(REALM)
 )
 
-// DefaultingOfVersionIntoExtraIdentity normalizes the extra identity of the resources.
+// DefaultingOfVersionIntoExtraIdentityForDescriptor normalizes the extra identity of the resources.
 // It sets the version of the resource, reference or source as extra identity field if the combination of name+extra identity
 // is the same for multiple items. However, the last item in the list will not be updated as it is unique without this.
 //
@@ -23,15 +23,23 @@ var (
 // for backwards compatibility of normalization (for example used for signatures). It was needed because the original
 // defaulting was made part of the normalization by accident and is now no longer included by default due to
 // https://github.com/open-component-model/ocm/pull/1026
-func DefaultingOfVersionIntoExtraIdentity(cd *compdesc.ComponentDescriptor) {
-	resources := make([]accessors.ElementMeta, len(cd.Resources))
+func DefaultingOfVersionIntoExtraIdentityForDescriptor(cd *compdesc.ComponentDescriptor) {
+	resources := make([]IdentityDefaultable, len(cd.Resources))
 	for i := range cd.Resources {
 		resources[i] = &cd.Resources[i]
 	}
-	defaultingOfVersionIntoExtraIdentity(resources)
+
+	DefaultingOfVersionIntoExtraIdentity(resources)
 }
 
-func defaultingOfVersionIntoExtraIdentity(meta []accessors.ElementMeta) {
+type IdentityDefaultable interface {
+	GetExtraIdentity() metav1.Identity
+	SetExtraIdentity(metav1.Identity)
+	GetName() string
+	GetVersion() string
+}
+
+func DefaultingOfVersionIntoExtraIdentity(meta []IdentityDefaultable) {
 	for i := range meta {
 		for j := range meta {
 			// don't match with itself and only match with the same name
@@ -46,7 +54,7 @@ func defaultingOfVersionIntoExtraIdentity(meta []accessors.ElementMeta) {
 			}
 
 			eid.Set(compdesc.SystemIdentityVersion, meta[i].GetVersion())
-			meta[i].GetMeta().SetExtraIdentity(eid)
+			meta[i].SetExtraIdentity(eid)
 
 			Logger.Warn(fmt.Sprintf("resource identity duplication was normalized for backwards compatibility, "+
 				"to avoid this either specify a unique extra identity per item or switch to %s", compdesc.JsonNormalisationV3),

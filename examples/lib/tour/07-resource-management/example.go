@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
@@ -80,8 +81,7 @@ func (r *resource) Close() error {
 // --- begin caching factory ---
 // CachingFactory provides resource inmplementations
 // using the original access as cache.
-type CachingFactory struct {
-}
+type CachingFactory struct{}
 
 func (c CachingFactory) Create(id metav1.Identity, typ string) Resource {
 	return &resource{
@@ -95,6 +95,7 @@ func (c CachingFactory) Create(id metav1.Identity, typ string) Resource {
 func (r *resource) GetIdentity() metav1.Identity {
 	return r.Identity
 }
+
 func (r *resource) GetType() string {
 	return r.ArtifactType
 }

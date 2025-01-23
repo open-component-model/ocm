@@ -26,7 +26,7 @@ func init() {
 type normalization struct{}
 
 func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, error) {
-	legacy.DefaultingOfVersionIntoExtraIdentity(cd)
+	legacy.DefaultingOfVersionIntoExtraIdentityForDescriptor(cd)
 	data, err := signing.Normalize(jcs.Type, cd, CDExcludes)
 	return data, err
 }

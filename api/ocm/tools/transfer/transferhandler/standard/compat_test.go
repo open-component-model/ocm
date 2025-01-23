@@ -13,13 +13,14 @@ import (
 	common "ocm.software/ocm/api/utils/misc"
 )
 
-const COMPAT_ARCH = "/testdata/v0.18.0"
-const COMPAT_COMP = "github.com/mandelsoft/test1"
-const COMPAT_VERS = "1.0.0"
+const (
+	COMPAT_ARCH = "/testdata/v0.18.0"
+	COMPAT_COMP = "github.com/mandelsoft/test1"
+	COMPAT_VERS = "1.0.0"
+)
 
 var _ = Describe("Transfer Test Environment", func() {
 	Context("extraid compatibility transfer", func() {
-
 		var env *TestEnv
 
 		BeforeEach(func() {
