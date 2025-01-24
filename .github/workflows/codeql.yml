@@ -111,6 +111,11 @@ jobs:
       if: matrix.build-mode == 'manual'
       run: make build -j
 
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+
   gosec:
     name: Go Security Checker
     runs-on: large_runner
