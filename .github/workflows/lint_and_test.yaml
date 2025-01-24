@@ -118,28 +118,3 @@ jobs:
     with:
       codespell-ignore: .github/config/wordlist.txt
       codespell-files-glob: ./**/*.y*ml ./**/*.go
-
-  gosec:
-    name: Go Security Checker
-    runs-on: large_runner
-    env:
-      GO111MODULE: on
-    steps:
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.OCMBOT_APP_ID }}
-          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Run Gosec Security Scanner
-        uses: securego/gosec@v2.22.0
-        with:
-          args: '-no-fail -fmt sarif -out results.sarif ./...'
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          # Path to SARIF file relative to the root of the repository
-          sarif_file: results.sarif
-          token: ${{ steps.generate_token.outputs.token }}
