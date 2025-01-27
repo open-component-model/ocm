@@ -22,7 +22,7 @@ ocm ocm [<options>] <sub command> ...
 ##### Sub Commands
 
 * ocm ocm <b>commontransportarchive</b>	 &mdash; Commands acting on common transport archives
-* ocm ocm <b>componentarchive</b>	 &mdash; (DEPRECATED) Commands acting on component archives
+* ocm ocm <b>componentarchive</b>	 &mdash; (DEPRECATED) - Please use commontransportarchive instead
 * ocm ocm <b>componentversions</b>	 &mdash; Commands acting on components
 * ocm ocm <b>plugins</b>	 &mdash; Commands related to OCM plugins
 * ocm ocm <b>pubsub</b>	 &mdash; Commands acting on sub/sub specifications

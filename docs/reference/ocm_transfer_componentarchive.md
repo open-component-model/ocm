@@ -1,9 +1,9 @@
-## ocm transfer componentarchive &mdash; (DEPRECATED) Transfer Component Archive To Some Component Repository
+## ocm transfer componentarchive &mdash; (DEPRECATED) - Please Use Commontransportarchive Instead
 
 ### Synopsis
 
 ```bash
-ocm transfer componentarchive [<options>]  <source> <target>
+ocm transfer componentarchive [<options>] <source> <target>
 ```
 
 #### Aliases

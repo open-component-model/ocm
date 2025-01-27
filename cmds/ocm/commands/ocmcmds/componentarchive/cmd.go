@@ -19,7 +19,7 @@ var Names = names.ComponentArchive
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "(DEPRECATED) Commands acting on component archives",
+		Short: "(DEPRECATED) - Please use " + names.CommonTransportArchive[0] + " instead",
 		// this removes the command from the help output - https://github.com/open-component-model/ocm/issues/1242#issuecomment-2609312927
 		// Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
 	}, Names...)
