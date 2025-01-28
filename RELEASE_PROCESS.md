@@ -158,13 +158,6 @@ The transformation thus looks like
 <major>.<minor>.<patch>-dev -> <major>.<minor>.<patch>-rc.<rc-number>
 ```
 
-TODO: Currently all releases are created via tag only, so the VERSION bump
-that is needed for the release is done through a dangling commit (a commit
-that is not part of the history of any branch in the repository). This is not
-ideal and should be changed in the future.
-See [this issue](https://github.com/open-component-model/ocm/issues/1099)
-for details.
-
 ### Creating a Minor release
 
 Once a release candidate is seen as sufficiently tested, the release manager can
