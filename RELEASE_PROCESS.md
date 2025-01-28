@@ -248,13 +248,6 @@ This workflow interprets the Pull Requests merged against main and the release
 branches and generates a draft release
 in Github which can be formed and edited.
 
-Note that when you are updating the branches, the release notes currently get
-overwritten from scratch so any edits get lost.
-In case you want to permanently change the release notes, you will have to carry
-them through all release candidates manually.
-(TODO: this needs improvement by allowing us to do "append-only" style release
-notes, see [this issue](https://github.com/open-component-model/ocm/issues/1097) for details)
-
 ## What is part of a release?
 
 During the build of a release, an OCM CTF (Common Transport Format Archive) is
