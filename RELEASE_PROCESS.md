@@ -104,7 +104,7 @@ executing the [Release Branch Cutoff action](https://github.com/open-component-m
 
 The version / minor of the release is based on the content of the file
 [`VERSION`](./VERSION) which
-is updated automatically said `release` action. During development, the
+is updated automatically by said `release` action. During development, the
 content of this file is the complete release name of the release currently under
 development and the suffix `-dev` (e.g. `0.1.0-dev`). The content of this file
 is used for generating the version information compiled into the ocm
@@ -142,7 +142,7 @@ After the cut-off, the release manager will usually prepare a release candidate.
 This is done by running [Release workflow](https://github.com/open-component-model/ocm/actions/workflows/release.yaml)
 on the release branch, while specifying a qualifying suffix.
 
-Currently we only use one form of suffixed, pre-release, the
+Currently, we only use one form of suffixed pre-release, the
 `Release Candidate`: Any Release Candidate
 is testable by users and signalled in the form of
 `<major>.<minor>.<patch>-rc.<rc-number>`.
