@@ -104,7 +104,7 @@ executing the [Release Branch Cutoff action](https://github.com/open-component-m
 
 The version / minor of the release is based on the content of the file
 [`VERSION`](./VERSION) which
-is updated automatically said `release` action. During development, the
+is updated automatically by said `release` action. During development, the
 content of this file is the complete release name of the release currently under
 development and the suffix `-dev` (e.g. `0.1.0-dev`). The content of this file
 is used for generating the version information compiled into the ocm
@@ -142,7 +142,7 @@ After the cut-off, the release manager will usually prepare a release candidate.
 This is done by running [Release workflow](https://github.com/open-component-model/ocm/actions/workflows/release.yaml)
 on the release branch, while specifying a qualifying suffix.
 
-Currently we only use one form of suffixed, pre-release, the
+Currently, we only use one form of suffixed pre-release, the
 `Release Candidate`: Any Release Candidate
 is testable by users and signalled in the form of
 `<major>.<minor>.<patch>-rc.<rc-number>`.
@@ -157,13 +157,6 @@ The transformation thus looks like
 ```text
 <major>.<minor>.<patch>-dev -> <major>.<minor>.<patch>-rc.<rc-number>
 ```
-
-TODO: Currently all releases are created via tag only, so the VERSION bump
-that is needed for the release is done through a dangling commit (a commit
-that is not part of the history of any branch in the repository). This is not
-ideal and should be changed in the future.
-See [this issue](https://github.com/open-component-model/ocm/issues/1099)
-for details.
 
 ### Creating a Minor release
 
@@ -254,13 +247,6 @@ called [Release Drafter](./.github/workflows/release-drafter.yaml).
 This workflow interprets the Pull Requests merged against main and the release
 branches and generates a draft release
 in Github which can be formed and edited.
-
-Note that when you are updating the branches, the release notes currently get
-overwritten from scratch so any edits get lost.
-In case you want to permanently change the release notes, you will have to carry
-them through all release candidates manually.
-(TODO: this needs improvement by allowing us to do "append-only" style release
-notes, see [this issue](https://github.com/open-component-model/ocm/issues/1097) for details)
 
 ## What is part of a release?
 
