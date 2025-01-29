@@ -25,16 +25,20 @@ import (
 	"ocm.software/ocm/cmds/ocm/common/utils"
 )
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 var (
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	Names = names.ComponentArchive
 	Verb  = verbs.Create
 )
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 type Command struct {
 	utils.BaseCommand
 
 	providerattrs []string
 
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	Handler comparch.FormatHandler
 	Force   bool
 	Format  string
@@ -46,16 +50,20 @@ type Command struct {
 	Labels         metav1.Labels
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(comparch.GetFormats()...), fileoption.NewCompArch(), schemaoption.New(compdesc.DefaultSchemeVersion))}, utils.Names(Names, names...)...)
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}",
 		Args:  cobra.MinimumNArgs(2),
-		Short: "create new component archive",
+		Short: "(DEPRECATED) create new component archive",
+		// this removes the command from the help output - https://github.com/open-component-model/ocm/issues/1242#issuecomment-2609312927
+		// Deprecated: "Deprecated - use " + ocm.CommonTransportFormat + " instead",
 		Example: `
 $ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org acme.org/demo 1.0
 `,
@@ -69,12 +77,14 @@ A provider must be specified, additional provider labels are optional.
 	}
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.StringArrayVarP(&o.providerattrs, "provider", "p", nil, "provider attribute")
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) Complete(args []string) error {
 	var err error
 
@@ -112,6 +122,7 @@ func (o *Command) Complete(args []string) error {
 	return nil
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (o *Command) Run() error {
 	mode := formatoption.From(o).Mode()
 	fs := o.Context.FileSystem()

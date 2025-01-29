@@ -13,12 +13,15 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 )
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // ComponentDescriptorFileName is the name of the component-descriptor file.
 const ComponentDescriptorFileName = compdesc.ComponentDescriptorFileName
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // BlobsDirectoryName is the name of the blob directory in the tar.
 const BlobsDirectoryName = "blobs"
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
 	DescriptorFileName:       ComponentDescriptorFileName,
 	ObjectTypeName:           "component archive",
@@ -28,13 +31,16 @@ var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
 	DescriptorValidator:      validateDescriptor,
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func validateDescriptor(data []byte) error {
 	_, err := compdesc.Decode(data)
 	return err
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 type Object = ComponentArchive
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 type FormatHandler interface {
 	accessio.Option
 
@@ -45,10 +51,12 @@ type FormatHandler interface {
 	Write(obj *Object, path string, opts accessio.Options, mode vfs.FileMode) error
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 type formatHandler struct {
 	accessobj.FormatHandler
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 var (
 	FormatDirectory = RegisterFormat(accessobj.FormatDirectory)
 	FormatTAR       = RegisterFormat(accessobj.FormatTAR)
@@ -57,11 +65,13 @@ var (
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 var (
 	fileFormats = map[accessio.FileFormat]*formatHandler{}
 	lock        sync.RWMutex
 )
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func RegisterFormat(f accessobj.FormatHandler) *formatHandler {
 	lock.Lock()
 	defer lock.Unlock()
@@ -70,12 +80,14 @@ func RegisterFormat(f accessobj.FormatHandler) *formatHandler {
 	return h
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func GetFormats() []string {
 	lock.RLock()
 	defer lock.RUnlock()
 	return accessio.GetFormatsFor(fileFormats)
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func GetFormat(name accessio.FileFormat) FormatHandler {
 	lock.RLock()
 	defer lock.RUnlock()
@@ -88,6 +100,7 @@ func GetFormat(name accessio.FileFormat) FormatHandler {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode vfs.FileMode, olist ...accessio.Option) (*Object, error) {
 	opts, err := accessio.AccessOptions(&accessio.StandardOptions{PathFileSystem: vfsattr.Get(ctx.OCMContext())}, olist...)
 	if err != nil {
@@ -107,6 +120,7 @@ func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode v
 	return h.Open(ctx, acc, path, o)
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func Create(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
 	o, err := accessio.AccessOptions(nil, opts...)
 	if err != nil {
@@ -122,6 +136,7 @@ func Create(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (h *formatHandler) Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
 	obj, err := h.FormatHandler.Open(accessObjectInfo, acc, path, opts)
 	if err != nil {
@@ -131,6 +146,7 @@ func (h *formatHandler) Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, 
 	return _Wrap(ctx, obj, spec, err)
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (h *formatHandler) Create(ctx cpi.ContextProvider, path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
 	obj, err := h.FormatHandler.Create(accessObjectInfo, path, opts, mode)
 	if err != nil {
@@ -140,6 +156,7 @@ func (h *formatHandler) Create(ctx cpi.ContextProvider, path string, opts access
 	return _Wrap(ctx, obj, spec, err)
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 // WriteToFilesystem writes the current object to a filesystem.
 func (h *formatHandler) Write(obj *Object, path string, opts accessio.Options, mode vfs.FileMode) error {
 	return h.FormatHandler.Write(obj.container.fsacc.Access(), path, opts, mode)
