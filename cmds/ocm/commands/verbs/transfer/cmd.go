@@ -17,6 +17,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
 		Short: "Transfer artifacts or components",
 	}, verbs.Transfer)
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	cmd.AddCommand(comparch.NewCommand(ctx))
 	cmd.AddCommand(artifacts.NewCommand(ctx))
 	cmd.AddCommand(components.NewCommand(ctx))

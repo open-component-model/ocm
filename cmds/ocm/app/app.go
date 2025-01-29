@@ -86,7 +86,7 @@ type CLIOptions struct {
 
 var desc = `
 The Open Component Model command line client supports the work with OCM
-artifacts, like Component Archives, Common Transport Archive,
+artifacts, like Common Transport Archive,
 Component Repositories, and Component Versions.
 
 Additionally it provides some limited support for the docker daemon, OCI artifacts and
@@ -243,6 +243,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(execute.NewCommand(opts.Context))
 	cmd.AddCommand(controller.NewCommand(opts.Context))
 
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	cmd.AddCommand(cmdutils.HideCommand(componentarchive.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(resources.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(references.NewCommand(opts.Context)))

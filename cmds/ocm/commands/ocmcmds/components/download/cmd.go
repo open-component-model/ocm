@@ -134,10 +134,13 @@ func (d *action) Save(o *comphdlr.Object, f string) (err error) {
 	}
 
 	format := formatoption.From(d.cmd)
+	// FIXME: use CommonTransportFormat archives to store OCM components
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	set, err := comparch.Create(d.cmd.OCMContext(), accessobj.ACC_CREATE, f, format.Mode(), format.Format, accessio.PathFileSystem(dest.PathFilesystem))
 	if err != nil {
 		return err
 	}
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	defer errors.PropagateError(&err, set.Close)
 
 	nv := common.VersionedElementKey(src)
