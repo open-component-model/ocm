@@ -1,6 +1,7 @@
 package names
 
 var (
+	// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	ComponentArchive       = []string{"componentarchive", "comparch", "ca"}
 	CommonTransportArchive = []string{"commontransportarchive", "ctf"}
 	Components             = []string{"componentversions", "componentversion", "cv", "components", "component", "comps", "comp", "c"}

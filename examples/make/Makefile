@@ -9,7 +9,8 @@ EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
 .PHONY: ctf
 ctf: ca ## Create CTF from component archive
 	ocm transfer ca gen/ca gen/ctf
-	
+
+# Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 .PHONY: ca
 ca: gen releasenotes ## Create component archive
 	ocm create ca -f $(COMPONENT) "$(VERSION)" mandelsoft gen/ca
@@ -57,7 +58,7 @@ content/RELEASENOTES.md: VERSION
 	echo '- **Release '"`cat VERSION`"'**\n' > content/RELEASENOTES.md
 	cat /tmp/RELEASENOTES.md >>content/RELEASENOTES.md
 
-.PHONY: push 
+.PHONY: push
 push: ctf ## Push local CTF file into a OCI repository
 	ocm transfer ctf -f gen/ctf $(OCI_REPO)
 
@@ -72,7 +73,7 @@ commit: releasenotes ## Commit changes
 
 .PHONY: release
 release: commit push ## Release component
-	
+
 .PHONY: info
 info: ## Display information about the component
 	@echo "VERSION:  $(VERSION)"

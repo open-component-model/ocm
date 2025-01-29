@@ -19,6 +19,7 @@ func From(o options.OptionSetProvider) *Option {
 	return opt
 }
 
+// Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func NewCompArch() *Option {
 	return New("component-archive")
 }

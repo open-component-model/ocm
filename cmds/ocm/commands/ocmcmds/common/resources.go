@@ -192,7 +192,7 @@ it is possible to add extra identity attributes. Explicitly specified options
 override values specified by the <code>--%s</code> option.
 (Note: Go templates are not supported for YAML-based option values. Besides
 this restriction, the finally composed element description is still processed
-by the selected template engine.) 
+by the selected template engine.)
 `, a.typename, a.typename, a.typename)
 }
 
@@ -388,6 +388,7 @@ func NewResourceAdderCommand(ctx clictx.Context, h ResourceSpecHandler, provider
 	}
 	return ResourceAdderCommand{
 		BaseCommand: utils.NewBaseCommand(ctx, sliceutils.CopyAppend[options.Options](opts,
+			//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 			fileoption.NewCompArch(),
 			dryrunoption.New(fmt.Sprintf("evaluate and print %s specifications", h.Key()), true),
 			templateroption.New(""),
@@ -456,10 +457,13 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions() error {
 		return addhdlrs.PrintElements(printer, elems, dr.Outfile, o.Context.FileSystem())
 	}
 
+	// FIXME: use CommonTransportFormat archives to store OCM components
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	obj, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, o.Archive, 0, accessio.PathFileSystem(fs))
 	if err != nil {
 		return err
 	}
+	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	defer obj.Close()
 	return ProcessElements(ictx, obj, elems, o.Handler)
 }
