@@ -117,19 +117,9 @@ jobs:
         category: "/language:${{matrix.language}}"
 
   gosec:
-    name: Go Security Checker
-    runs-on: large_runner
     permissions:
       # Required to upload SARIF files
       security-events: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Run Gosec Security Scanner
-        uses: securego/gosec@v2.22.0
-        with:
-          args: "-no-fail -fmt sarif -out results.sarif ./..."
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
+    # call reusable workflow from central '.github' repo
+    uses: open-component-model/.github/.github/workflows/code-scan.yml@main
+    secrets: inherit
