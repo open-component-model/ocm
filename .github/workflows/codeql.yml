@@ -122,8 +122,6 @@ jobs:
     permissions:
       # Required to upload SARIF files
       security-events: write
-    env:
-      GO111MODULE: on
     steps:
       - name: Checkout
         uses: actions/checkout@v4
