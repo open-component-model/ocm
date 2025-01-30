@@ -120,6 +120,8 @@ jobs:
     permissions:
       # Required to upload SARIF files
       security-events: write
+      # for actions/checkout to fetch code
+      contents: read
     # call reusable workflow from central '.github' repo
     uses: open-component-model/.github/.github/workflows/code-scan.yml@main
     secrets: inherit
