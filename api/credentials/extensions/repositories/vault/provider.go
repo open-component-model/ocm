@@ -57,6 +57,10 @@ var (
 	_ cpi.ConsumerIdentityProvider = (*ConsumerProvider)(nil)
 )
 
+func (p *ConsumerProvider) SanitizedString() string {
+	return fmt.Sprintf("ConsumerProvider{repository: %v}", p.repository)
+}
+
 func NewConsumerProvider(repo *Repository) (*ConsumerProvider, error) {
 	src, err := repo.ctx.GetCredentialsForConsumer(repo.id)
 	if err != nil {

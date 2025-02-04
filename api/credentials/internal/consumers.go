@@ -250,7 +250,7 @@ func (p *consumerProviderRegistry) catchedMatch(ectx EvaluationContext, sub Cons
 	if !useprov {
 		return nil, cur
 	}
-	log.Trace("attempt match with provider: {{provider}}", "provider", sub)
+	log.Trace("attempt match with provider: {{provider}}", "provider", sub.SanitizedString())
 	return sub.Match(ectx, pattern, cur, m)
 }
 

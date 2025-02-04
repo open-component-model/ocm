@@ -21,6 +21,10 @@ func NewConsumerProvider(cfg *configfile.ConfigFile) *ConsumerProvider {
 
 var _ cpi.ConsumerProvider = (*ConsumerProvider)(nil)
 
+func (p *ConsumerProvider) SanitizedString() string {
+	return fmt.Sprintf("ConsumerProvider{cfg: %v}", p.cfg)
+}
+
 func (p *ConsumerProvider) Unregister(id cpi.ProviderIdentity) {
 }
 
