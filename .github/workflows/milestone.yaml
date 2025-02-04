@@ -1,0 +1,26 @@
+name: Set milestone
+on:
+  issues:
+    types:
+      - closed
+  pull_request:
+    types:
+      - closed
+jobs:
+  set_milestone:
+    name: Set milestone
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write    
+    steps:
+      - name: Set milestone on issue
+        if: github.event.issue.state_reason == 'completed'
+        run: gh issue edit ${{ github.event.issue.number }} --milestone "$(date +"%Y-Q%q")" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set milestone on pull request
+        if: github.event.pull_request.merged == true
+        run: gh pr edit ${{ github.event.pull_request.number }} --milestone "$(date +"%Y-Q%q")" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
