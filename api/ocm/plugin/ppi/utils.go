@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/pkg/errors"
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/generics"
 	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
@@ -12,6 +13,8 @@ import (
 )
 
 type decoder runtime.TypedObjectDecoder[runtime.TypedObject]
+
+const KIND_QUESTION = "question"
 
 type AccessMethodBase struct {
 	decoder
@@ -111,6 +114,144 @@ func (b *nameDescription) Name() string {
 
 func (b *nameDescription) Description() string {
 	return b.desc
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type transferHandler struct {
+	name        string
+	description string
+	questions   []DecisionHandler
+}
+
+func NewTransferHandler(name, desc string) *transferHandler {
+	return &transferHandler{
+		name:        name,
+		description: desc,
+		questions:   nil,
+	}
+}
+
+func (t *transferHandler) GetName() string {
+	return t.name
+}
+
+func (t *transferHandler) GetDescription() string {
+	return t.description
+}
+
+func (t *transferHandler) GetQuestions() []DecisionHandler {
+	return t.questions
+}
+
+func (t *transferHandler) RegisterDecision(h DecisionHandler) error {
+	if TransferHandlerQuestions[h.GetQuestion()] == nil {
+		return errors.ErrInvalid(KIND_QUESTION, h.GetQuestion())
+	}
+	for _, e := range t.questions {
+		if e.GetQuestion() == h.GetQuestion() {
+			return errors.ErrAlreadyExists(KIND_QUESTION, e.GetQuestion())
+		}
+	}
+	t.questions = append(t.questions, h)
+	return nil
+}
+
+// DecisionHandlerBase provides access to the
+// non-functional attributes of a DecisionHandler.
+// It can be created with NewDecisionHandlerBase and
+// embedded into the final DecisionHandler implementation.
+type DecisionHandlerBase struct {
+	question    string
+	description string
+	labels      *[]string
+}
+
+func (d *DecisionHandlerBase) GetQuestion() string {
+	return d.question
+}
+
+func (d *DecisionHandlerBase) GetDescription() string {
+	return d.description
+}
+
+func (d *DecisionHandlerBase) GetLabels() *[]string {
+	return d.labels
+}
+
+func NewDecisionHandlerBase(q, desc string, labels ...string) DecisionHandlerBase {
+	return DecisionHandlerBase{q, desc, generics.Pointer(slices.Clone(labels))}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type QuestionResultFunc func(p Plugin, question QuestionArguments) (bool, error)
+
+func ComponentVersionQuestionFunc(f func(p Plugin, question *ComponentVersionQuestionArguments) (bool, error)) QuestionResultFunc {
+	return func(p Plugin, question QuestionArguments) (bool, error) {
+		return f(p, question.(*ComponentVersionQuestionArguments))
+	}
+}
+
+type ComponentReferenceQuestionFunc = func(p Plugin, question *ComponentReferenceQuestionArguments) (bool, error)
+
+func ForComponentReferenceQuestion(f func(p Plugin, question *ComponentReferenceQuestionArguments) (bool, error)) QuestionResultFunc {
+	return func(p Plugin, question QuestionArguments) (bool, error) {
+		return f(p, question.(*ComponentReferenceQuestionArguments))
+	}
+}
+
+type ArtifactQuestionFunc = func(p Plugin, question *ArtifactQuestionArguments) (bool, error)
+
+func ForArtifactQuestion(f ArtifactQuestionFunc) QuestionResultFunc {
+	return func(p Plugin, question QuestionArguments) (bool, error) {
+		return f(p, question.(*ArtifactQuestionArguments))
+	}
+}
+
+type defaultDecisionHandler struct {
+	DecisionHandlerBase
+	handler func(p Plugin, question QuestionArguments) (bool, error)
+}
+
+// NewDecisionHandler provides a default decision handler based on its standard
+// fields and a handler function.
+func NewDecisionHandler(q, desc string, h QuestionResultFunc, labels ...string) DecisionHandler {
+	return &defaultDecisionHandler{
+		DecisionHandlerBase: NewDecisionHandlerBase(q, desc, labels...),
+		handler:             h,
+	}
+}
+
+func (d *defaultDecisionHandler) DecideOn(p Plugin, question QuestionArguments) (bool, error) {
+	return d.handler(p, question)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// specialized handler creation
+
+func NewTransferResourceDecision(desc string, h ArtifactQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_TRANSFER_RESOURCE, desc, ForArtifactQuestion(h))
+}
+
+func NewTransferSourceDecision(desc string, h ArtifactQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_TRANSFER_SOURCE, desc, ForArtifactQuestion(h))
+}
+
+func NewEnforceTransportDesision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_ENFORCE_TRANSPORT, desc, ForComponentReferenceQuestion(h))
+}
+
+func NewTransferVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_TRANSFER_VERSION, desc, ForComponentReferenceQuestion(h))
+}
+
+func NewOverwriteVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_OVERWRITE_VERSION, desc, ForComponentReferenceQuestion(h))
+}
+
+func NewUpdateVersionDecision(desc string, h ComponentReferenceQuestionFunc, labels ...string) DecisionHandler {
+	return NewDecisionHandler(Q_UPDATE_VERSION, desc, ForComponentReferenceQuestion(h))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

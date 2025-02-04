@@ -29,6 +29,10 @@ type (
 	AccessSpecInfo       = internal.AccessSpecInfo
 	ValueSetInfo         = internal.ValueSetInfo
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
+
+	SourceComponentVersion  = internal.SourceComponentVersion
+	TargetRepositorySpec    = internal.TargetRepositorySpec
+	StandardTransferOptions = internal.TransferOptions
 )
 
 var REALM = descriptor.REALM
@@ -72,6 +76,10 @@ type Plugin interface {
 	RegisterCommand(c Command) error
 	GetCommand(name string) Command
 	Commands() []Command
+
+	RegisterTransferHandler(h TransferHandler) error
+	GetTransferHandler(name string) TransferHandler
+	TransferHandlers() []TransferHandler
 
 	RegisterConfigType(c cpi.ConfigType) error
 	GetConfigType(name string) *descriptor.ConfigTypeDescriptor
@@ -212,3 +220,50 @@ type Command interface {
 
 	Command() *cobra.Command
 }
+
+// TransferHandler is the support interface
+// for implementing a transfer handler for the plugin support
+// library.
+// There is a standard implementation NewTransferHandler.
+type TransferHandler interface {
+	GetName() string
+	GetDescription() string
+	GetQuestions() []DecisionHandler
+}
+
+// DecisionHandler is the support interface for implementing
+// the answer to a question used for the TransferHandler.
+// A base implementation providing the non-functional attributues
+// cane be obtained by NewDecisionHandlerBase.
+type DecisionHandler interface {
+	// GetQuestion returns the name of the question answered by this handler
+	// (see common.TransferHandlerQuestions).
+	GetQuestion() string
+
+	GetDescription() string
+	// GetLabels returns the list of labels, which should be passed
+	// to the transfer handler. If nothing is specified all labels
+	// are transferred, if an empty list is given no label is handed over
+	// to the plugin command.
+	GetLabels() *[]string
+
+	// DecideOn implements the calculation of the answer to
+	// the question. The given question contains the arguments for
+	// the questions. There are three kinds of arguments:
+	// ArtifactQuestionArguments, ComponentVersionQuestionArguments and ComponentReferenceQuestionArguments.
+	// TransferHandlerQuestions maps the question name to the used
+	// argument type.
+	DecideOn(p Plugin, question QuestionArguments) (bool, error)
+}
+
+type (
+	TransferOptions                     = internal.TransferOptions
+	Artifact                            = internal.Artifact
+	AccessInfo                          = internal.UniformAccessSpecInfo
+	QuestionArguments                   = internal.QuestionArguments
+	ComponentVersionQuestionArguments   = internal.ComponentVersionQuestionArguments
+	ComponentReferenceQuestionArguments = internal.ComponentReferenceQuestionArguments
+	ArtifactQuestionArguments           = internal.ArtifactQuestionArguments
+	Resolution                          = internal.Resolution
+	DecisionRequestResult               = internal.DecisionRequestResult
+)
