@@ -244,8 +244,8 @@ func (p *consumerProviderRegistry) catchedMatch(ectx EvaluationContext, sub Cons
 		cs = nil
 		ci = cur
 	}, exception.ByPrototypes(&UnwindStack{}))
-	log.Trace("pattern: {{pattern}}\ncontext: {{context}}\nprovider: {{provider}}",
-		"pattern", pattern, "context", ectx, "provider", sub)
+	log.Trace("pattern: {{pattern}}\ncontext: {{context}}",
+		"pattern", pattern, "context", ectx)
 	ectx, useprov, _ := p.checkHandleProvider(ectx, sub, pattern)
 	if !useprov {
 		return nil, cur
