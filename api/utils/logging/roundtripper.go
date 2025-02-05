@@ -21,10 +21,12 @@ type RoundTripper struct {
 
 func (t *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	// Redact the Authorization header to make sure it doesn't get logged at any point.
-	header := req.Header
-	if key := "Authorization"; req.Header.Get(key) != "" {
-		header = header.Clone()
-		header.Set(key, "***")
+	header := req.Header.Clone()
+	sensitiveHeaders := []string{"Authorization", "Cookie", "Set-Cookie", "Proxy-Authorization", "WWW-Authenticate"}
+	for _, key := range sensitiveHeaders {
+		if header.Get(key) != "" {
+			header.Set(key, "***")
+		}
 	}
 
 	t.logger.Trace("roundtrip",
