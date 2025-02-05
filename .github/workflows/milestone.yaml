@@ -14,13 +14,19 @@ jobs:
       issues: write
       pull-requests: write    
     steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.OCMBOT_APP_ID }}
+          private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
       - name: Set milestone on issue
         if: github.event.issue.state_reason == 'completed'
         run: gh issue edit ${{ github.event.issue.number }} --milestone "$(date +"%Y-Q%q")" --repo ${{ github.repository }}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
       - name: Set milestone on pull request
         if: github.event.pull_request.merged == true
         run: gh pr edit ${{ github.event.pull_request.number }} --milestone "$(date +"%Y-Q%q")" --repo ${{ github.repository }}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}  # For PRs and branch protection the standard GITHUB_TOKEN is not sufficient
