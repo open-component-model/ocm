@@ -117,7 +117,7 @@ func (c *_consumer) GetCredentials() CredentialsSource {
 	return c.credentials
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type consumerPrio struct {
 	ConsumerProvider
@@ -135,7 +135,7 @@ func WithPriority(p ConsumerProvider, prio int) ConsumerProvider {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type PriorityProvider interface {
 	GetPriority() int
@@ -244,13 +244,13 @@ func (p *consumerProviderRegistry) catchedMatch(ectx EvaluationContext, sub Cons
 		cs = nil
 		ci = cur
 	}, exception.ByPrototypes(&UnwindStack{}))
-	log.Trace("pattern: {{pattern}}\ncontext: {{context}}\nprovider: {{provider}}",
-		"pattern", pattern, "context", ectx, "provider", sub)
+	log.Trace("pattern: {{pattern}}\ncontext: {{context}}",
+		"pattern", pattern, "context", ectx)
 	ectx, useprov, _ := p.checkHandleProvider(ectx, sub, pattern)
 	if !useprov {
 		return nil, cur
 	}
-	log.Trace("attempt match with provider: {{provider}}", "provider", sub)
+	log.Trace("attempt match with provider")
 	return sub.Match(ectx, pattern, cur, m)
 }
 

@@ -34,7 +34,7 @@ var _ = Describe("RoundTripper", func() {
 		}
 	})
 
-	It("redacts Authorization header", func() {
+	It("does not log header information", func() {
 		r := logcfg.ConditionalRule("trace")
 		cfg := &logcfg.Config{
 			Rules: []logcfg.Rule{r},
@@ -51,15 +51,14 @@ var _ = Describe("RoundTripper", func() {
 		req, err := http.NewRequest("GET", server.URL, nil)
 		Expect(err).NotTo(HaveOccurred())
 		req.Header.Set("Authorization", "this should be redacted")
+		req.Header.Set("Cookie", "my secret session token")
+		req.Header.Set("MyArbitraryHeader", "some secret information")
 
 		_, err = client.Do(req)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(buf.String()).To(ContainSubstring("roundtrip"))
-		Expect(buf.String()).To(ContainSubstring("url"))
-		Expect(buf.String()).To(ContainSubstring("method"))
-		Expect(buf.String()).To(ContainSubstring("header"))
-		Expect(buf.String()).To(ContainSubstring("***"))
 		Expect(buf.String()).NotTo(ContainSubstring("this should be redacted"))
+		Expect(buf.String()).NotTo(ContainSubstring("my secret session token"))
+		Expect(buf.String()).NotTo(ContainSubstring("some secret information"))
 	})
 })
