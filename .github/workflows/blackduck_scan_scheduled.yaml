@@ -50,7 +50,7 @@ jobs:
           DETECT_SOURCE_PATH: ./
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           blackducksca_url: ${{ secrets.BLACKDUCK_URL }}
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: true
