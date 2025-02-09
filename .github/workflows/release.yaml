@@ -129,7 +129,7 @@ jobs:
       uses: anchore/sbom-action/download-syft@f325610c9f50a54015d37c8d16cb3b0e2c8f4de0 # v0.18.0
 
     - name: Setup Cosign
-      uses: sigstore/cosign-installer@v3.7.0
+      uses: sigstore/cosign-installer@v3.8.0
 
     - name: Download CTF
       uses: actions/download-artifact@v4
