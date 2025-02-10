@@ -163,7 +163,7 @@ The transformation thus looks like
 Once a release candidate is seen as sufficiently tested, the release manager can
 promote the release candidate to a full release, by running
 [Release workflow](https://github.com/open-component-model/ocm/actions/workflows/release.yaml)
-on the release branch, without specifying a qualifying suffix.
+on the release branch. Just ensure to de-select the `Release Candidate` box, when triggering.
 
 By default one should always create [release candidate](#preparing-a-minor-release-candidate)
 first (automated announcement is posted to an internal Slack channel, so the stakeholders can start testing),
