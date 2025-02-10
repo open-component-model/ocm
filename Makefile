@@ -11,7 +11,7 @@ EFFECTIVE_VERSION                              := $(VERSION)+$(COMMIT)
 endif
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 
-CONTROLLER_TOOLS_VERSION ?= v0.14.0
+CONTROLLER_TOOLS_VERSION ?= v0.17.1
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 
 PLATFORMS = windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64
