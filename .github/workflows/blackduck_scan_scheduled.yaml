@@ -48,9 +48,11 @@ jobs:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
           DETECT_SOURCE_PATH: ./
+          DETECT.EXCLUDED.DIRECTORIES: .bridge
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           blackducksca_url: ${{ secrets.BLACKDUCK_URL }}
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: true
+          blackduck.scan.excluded.directories: .bridge
