@@ -15,6 +15,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.60
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.41.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.76.0
+	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/cloudflare/cfssl v1.6.5
 	github.com/containerd/containerd v1.7.25
 	github.com/containerd/errdefs v1.0.0
@@ -70,7 +71,6 @@ require (
 	github.com/texttheater/golang-levenshtein v1.0.1
 	github.com/tonglil/buflogr v1.1.1
 	github.com/ulikunitz/xz v0.5.12
-	github.com/whilp/git-urls v1.0.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616

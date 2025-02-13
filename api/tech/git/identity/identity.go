@@ -3,7 +3,7 @@ package identity
 import (
 	"net"
 
-	giturls "github.com/whilp/git-urls"
+	giturls "github.com/chainguard-dev/git-urls"
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
