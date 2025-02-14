@@ -1,5 +1,9 @@
-name: Blackduck Scan Cronjob
+name: Blackduck SCA Scan
 on:
+  #push:
+  #  branches: [ "main" ]
+  #pull_request:
+  #  branches: [ "main" ]
   schedule:
     - cron:  '5 0 * * 0'
   workflow_dispatch:
@@ -29,6 +33,7 @@ jobs:
       # see push_ocm.yaml => "ocm-cli-latest" Job
       # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
       # This is because we have huge storage requirements for our cache because of the mass of dependencies
+
       - name: Restore / Reuse Cache from central build
         id: cache-golang-restore
         uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
@@ -42,17 +47,34 @@ jobs:
         env:
           cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
           
-      - name: Blackduck Full Scan
+      - name: Run Black Duck Full SCA Scan (Manual Trigger)
+        if: github.event_name == 'workflow_dispatch' 
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
-          DETECT_PROJECT_VERSION_DISTRIBUTION: SAAS
+          DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
           DETECT_SOURCE_PATH: ./
-          DETECT.EXCLUDED.DIRECTORIES: .bridge
+          DETECT_EXCLUDED_DIRECTORIES: .bridge
+          DETECT_BLACKDUCK_SIGNATURE_SCANNER_ARGUMENTS: '--min-scan-interval=0'
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           blackducksca_url: ${{ secrets.BLACKDUCK_URL }}
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: true
-          blackduck.scan.excluded.directories: .bridge
+
+      - name: Run Black Duck SCA Scan (Pull Request or Push)
+        if: github.event_name != 'workflow_dispatch'
+            # The action sets blackducksca_scan_full internally: for pushes to true and PRs to false
+        uses: blackduck-inc/black-duck-security-scan@v2.0.0
+        env:
+          DETECT_PROJECT_USER_GROUPS: opencomponentmodel
+          DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
+          DETECT_SOURCE_PATH: ./
+          DETECT_EXCLUDED_DIRECTORIES: .bridge
+          NODE_TLS_REJECT_UNAUTHORIZED: true
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          blackducksca_url: ${{ secrets.BLACKDUCK_URL }}
+          blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+          blackducksca_prComment_enabled: true
