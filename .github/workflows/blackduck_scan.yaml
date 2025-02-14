@@ -47,8 +47,8 @@ jobs:
         env:
           cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
           
-      - name: Run Black Duck Full SCA Scan (Manual Trigger)
-        if: github.event_name == 'workflow_dispatch' 
+      - name: Run Black Duck Full SCA Scan (Manual Trigger and Scheduled)
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
