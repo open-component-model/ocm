@@ -1,6 +1,6 @@
 module ocm.software/ocm
 
-go 1.23.6
+go 1.24.0
 
 replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 
@@ -386,4 +386,9 @@ retract [v0.16.0, v0.16.9] // Retract all from v0.16 due to https://github.com/o
 // such as https://github.com/open-component-model/ocm/issues/1027 and do not want to pin our crypto/tls version.
 // As such we have decided to globally override tlskyber=0
 // For more info, see https://github.com/golang/go/issues/70047
-godebug tlskyber=0
+
+// godebug tlskyber=0
+// tlskyber has been removed with go 1.24 - https://github.com/open-component-model/ocm/pull/1304#issuecomment-2665487299
+// we might need to use different setting 'tlsmlkem' now in case we're again facing issues with TLS handshake
+// see https://pkg.go.dev/crypto/tls#Config.CurvePreferences
+// godebug tlsmlkem=0
