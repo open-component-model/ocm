@@ -384,11 +384,7 @@ retract [v0.16.0, v0.16.9] // Retract all from v0.16 due to https://github.com/o
 // crypto/tls: Client Hello is always sent in 2 TCP frames if GODEBUG=tlskyber=1 (default) which causes
 // issues with various enterprise network gateways such as Palo Alto Networks. We have been reported issues
 // such as https://github.com/open-component-model/ocm/issues/1027 and do not want to pin our crypto/tls version.
-// As such we have decided to globally override tlskyber=0
-// For more info, see https://github.com/golang/go/issues/70047
+// As such we have decided to globally override tlsmlkem=0
+// For more info, see https://github.com/golang/go/issues/70047 and https://pkg.go.dev/crypto/tls#Config.CurvePreferences
+godebug tlsmlkem=0
 
-// godebug tlskyber=0
-// tlskyber has been removed with go 1.24 - https://github.com/open-component-model/ocm/pull/1304#issuecomment-2665487299
-// we might need to use different setting 'tlsmlkem' now in case we're again facing issues with TLS handshake
-// see https://pkg.go.dev/crypto/tls#Config.CurvePreferences
-// godebug tlsmlkem=0
