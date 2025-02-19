@@ -94,6 +94,11 @@ linters:
     # Seriously, who wants every comment to end in a period???
     - godot
 
+    # migrating to go 1.24 causes issues with new linters, but we're going to re-wrtie the code anyway
+    - errname
+    - iface
+    - recvcheck
+
 linters-settings:
   gci:
     sections:

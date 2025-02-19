@@ -21,7 +21,7 @@ func createFile(d *DirNode, header *tar.Header, r io.Reader) (*FileNode, error) 
 	if header.Mode < 0 || header.Mode > math.MaxUint32 {
 		return nil, fmt.Errorf("file %s: mode %d out of range for uint32", header.Name, header.Mode)
 	}
-	n, err := NewFileNode(d.ctx, vfs.FileMode(header.Mode), header.Size, r) //nolint:gosec // disable G115
+	n, err := NewFileNode(d.ctx, vfs.FileMode(header.Mode), header.Size, r)
 	if err == nil {
 		err = d.AddNode(name, n)
 	}
