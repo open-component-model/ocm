@@ -2,7 +2,6 @@ package signing
 
 import (
 	"io"
-	"maps"
 	"os"
 	"sync"
 
@@ -139,8 +138,11 @@ func (v *verifiedStore) Entries() []common.NameVersion {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 
-	return sliceutils.Transform(maps.Values(v.storage.ComponentVersions),
-		func(cd *StorageEntry) common.NameVersion { return common.VersionedElementKey(cd.Descriptor) })
+	entries := make([]common.NameVersion, 0, len(v.storage.ComponentVersions))
+	for _, entry := range v.storage.ComponentVersions {
+		entries = append(entries, common.VersionedElementKey(entry.Descriptor))
+	}
+	return entries
 }
 
 func (v *verifiedStore) Add(cd *compdesc.ComponentDescriptor, signatures ...string) {
