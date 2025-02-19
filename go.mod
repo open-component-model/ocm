@@ -525,6 +525,8 @@ retract [v0.16.0, v0.16.9] // Retract all from v0.16 due to https://github.com/o
 godebug tlsmlkem=0
 
 tool (
+	github.com/daixiang0/gci
 	github.com/golangci/golangci-lint/cmd/golangci-lint
 	golang.org/x/tools/cmd/goimports
+	mvdan.cc/gofumpt
 )

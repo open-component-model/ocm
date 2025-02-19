@@ -38,16 +38,6 @@ GO_BINDATA := $(shell (go-bindata -version 2>/dev/null || echo 0.0.0) | head -n 
 ifneq ("v$(GO_BINDATA)",$(GO_BINDATA_VERSION))
 	deps += go-bindata
 endif
-GCI_VERSION := "v0.13.4"
-GCI := $(shell (gci --version 2>/dev/null || echo 0.0) | sed 's/.* \([0-9\.]*\).*/\1/')
-ifneq ("v$(GCI)", $(GCI_VERSION))
-	deps += gci
-endif
-GOFUMPT_VERSION := "v0.6.0"
-GOFUMPT := $(shell (gofumpt --version 2>/dev/null || echo 0.0) | sed 's/\(v[0-9\.]*\).*/\1/')
-ifneq ("$(GOFUMPT)", $(GOFUMPT_VERSION))
-	deps += gofumpt
-endif
 VAULT_VERSION := 1.16.2
 VAULT := $(shell ($(LOCALBIN)/vault --version 2>/dev/null || echo 0.0) | sed 's/.*Vault v\([0-9\.]*\).*/\1/')
 ifneq ($(VAULT), $(VAULT_VERSION))
@@ -64,14 +54,6 @@ install-requirements: mkbin $(deps) mdref
 
 mkbin:
 	mkdir -p $(LOCALBIN)
-
-.PHONY: gci
-gci:
-	go install -v github.com/daixiang0/gci@$(GCI_VERSION)
-
-.PHONY: gofumpt
-gofumpt:
-	go install -v mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
 
 .PHONY: go-bindata
 go-bindata:
