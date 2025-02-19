@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"maps"
 	"math/big"
 	"math/rand"
 	"net/http"
@@ -241,7 +240,7 @@ func StringMapKeys[K ~string, E any](m map[K]E) []K {
 	if m == nil {
 		return nil
 	}
-	keys := maps.Keys(m)
+	keys := MapKeys(m)
 	slices.Sort(keys)
 	return keys
 }
@@ -258,8 +257,7 @@ func MapKeys[K comparable, E any](m map[K]E) []K {
 	if m == nil {
 		return nil
 	}
-
-	keys := []K{}
+	keys := make([]K, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
