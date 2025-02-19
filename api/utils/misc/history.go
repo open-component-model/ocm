@@ -7,7 +7,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

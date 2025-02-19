@@ -5,7 +5,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
-	"golang.org/x/exp/maps"
+	"maps"
 
 	"ocm.software/ocm/api/ocm/cpi"
 )

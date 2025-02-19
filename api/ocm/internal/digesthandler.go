@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"golang.org/x/exp/slices"
+	"slices"
 
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/tech/signing"

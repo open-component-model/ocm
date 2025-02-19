@@ -8,7 +8,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/datacontext"

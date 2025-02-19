@@ -17,7 +17,7 @@ import (
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/ioutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"golang.org/x/exp/maps"
+	"maps"
 	"golang.org/x/net/html"
 
 	"ocm.software/ocm/api/utils"

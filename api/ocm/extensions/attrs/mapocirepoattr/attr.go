@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-	"golang.org/x/exp/maps"
+	"maps"
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci/grammar"

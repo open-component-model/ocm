@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/spf13/pflag"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 type Option interface {

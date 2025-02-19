@@ -3,7 +3,7 @@ package internal
 import (
 	"sync"
 
-	"golang.org/x/exp/maps"
+	"maps"
 
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"

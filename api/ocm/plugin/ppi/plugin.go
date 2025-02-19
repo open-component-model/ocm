@@ -9,7 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/datacontext/action"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"

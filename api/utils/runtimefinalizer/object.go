@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"sync"
 
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 // NumberRange can be used as source for successive id numbers to tag

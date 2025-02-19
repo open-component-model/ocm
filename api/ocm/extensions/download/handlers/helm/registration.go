@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
-	"golang.org/x/exp/slices"
+	"slices"
 	helmregistry "helm.sh/helm/v3/pkg/registry"
 
 	"ocm.software/ocm/api/oci/artdesc"

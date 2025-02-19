@@ -10,7 +10,7 @@ import (
 	"github.com/containerd/containerd/reference"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"ocm.software/ocm/api/oci/grammar"
 	"ocm.software/ocm/api/utils/runtime"

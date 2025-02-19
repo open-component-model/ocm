@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/pkg/errors"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/utils/runtime"

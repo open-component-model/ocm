@@ -1,9 +1,9 @@
 package vault
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
-	"golang.org/x/exp/slices"
+	"slices"
 
+	"github.com/mandelsoft/goutils/optionutils"
 	"ocm.software/ocm/api/utils"
 )
 

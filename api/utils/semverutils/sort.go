@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 type VersionCache map[string]*semver.Version

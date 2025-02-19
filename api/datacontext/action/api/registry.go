@@ -6,7 +6,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/maputils"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"

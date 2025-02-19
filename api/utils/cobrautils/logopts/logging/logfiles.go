@@ -6,7 +6,7 @@ import (
 
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 type LogFile struct {

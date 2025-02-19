@@ -5,7 +5,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/download"
