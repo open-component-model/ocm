@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"maps"
 	"net/http"
 	"net/url"
 	"strings"
@@ -199,7 +198,7 @@ func (r *Repository) Upload(coords *Coordinates, reader ioutils.DupReadCloser, c
 		return err
 	}
 
-	algorithm := bestAvailableHash(maps.Keys(hashes))
+	algorithm := bestAvailableHash(utils.MapKeys(hashes))
 	digest := hashes.GetString(algorithm)
 	remoteDigest := artifactBody.Checksums[strings.ReplaceAll(strings.ToLower(algorithm.String()), "-", "")]
 	if remoteDigest == "" {

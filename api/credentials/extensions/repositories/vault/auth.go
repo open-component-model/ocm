@@ -2,7 +2,6 @@ package vault
 
 import (
 	"context"
-	"maps"
 	"sort"
 	"sync"
 
@@ -12,6 +11,7 @@ import (
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"
+	"ocm.software/ocm/api/utils"
 )
 
 type AuthMethod interface {
@@ -51,7 +51,7 @@ func (r *AuthMethods) Names() []string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	names := maps.Keys(r.methods)
+	names := utils.MapKeys(r.methods)
 	sort.Strings(names)
 	return names
 }
