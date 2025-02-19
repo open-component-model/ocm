@@ -1,10 +1,10 @@
 package runtime
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-	"slices"
 
 	"ocm.software/ocm/api/utils"
 )

@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/vault-client-go"
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"
 	"ocm.software/ocm/api/credentials/internal"

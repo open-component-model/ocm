@@ -2,9 +2,9 @@ package ocirepo
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
-	"slices"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"

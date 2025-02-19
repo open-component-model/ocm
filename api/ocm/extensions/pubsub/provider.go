@@ -1,11 +1,11 @@
 package pubsub
 
 import (
+	"maps"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
-	"maps"
 
 	"ocm.software/ocm/api/ocm/cpi"
 )

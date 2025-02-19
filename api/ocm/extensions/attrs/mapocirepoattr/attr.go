@@ -4,10 +4,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-	"maps"
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci/grammar"

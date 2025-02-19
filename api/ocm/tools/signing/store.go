@@ -2,6 +2,7 @@ package signing
 
 import (
 	"io"
+	"maps"
 	"os"
 	"sync"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"maps"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"

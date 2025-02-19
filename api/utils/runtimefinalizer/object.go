@@ -3,9 +3,8 @@ package runtimefinalizer
 import (
 	"fmt"
 	"runtime"
-	"sync"
-
 	"slices"
+	"sync"
 )
 
 // NumberRange can be used as source for successive id numbers to tag

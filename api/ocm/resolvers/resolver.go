@@ -1,11 +1,11 @@
 package resolvers
 
 import (
+	"slices"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
-	"slices"
 
 	"ocm.software/ocm/api/ocm/internal"
 	common "ocm.software/ocm/api/utils/misc"

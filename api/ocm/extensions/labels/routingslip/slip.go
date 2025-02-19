@@ -3,11 +3,11 @@ package routingslip
 import (
 	"crypto/x509/pkix"
 	"fmt"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/set"
 	"github.com/opencontainers/go-digest"
-	"slices"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"

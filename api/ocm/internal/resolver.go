@@ -1,13 +1,13 @@
 package internal
 
 import (
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
-	"slices"
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/utils"

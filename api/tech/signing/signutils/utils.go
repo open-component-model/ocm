@@ -11,13 +11,13 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
-	"slices"
 
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"

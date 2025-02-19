@@ -2,11 +2,11 @@ package logging
 
 import (
 	"os"
+	"slices"
 	"sync"
 
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"slices"
 )
 
 type LogFile struct {

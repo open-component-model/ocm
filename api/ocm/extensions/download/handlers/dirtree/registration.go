@@ -2,10 +2,10 @@ package dirtree
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
-	"slices"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/download"

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,7 +18,6 @@ import (
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/ioutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"maps"
 	"golang.org/x/net/html"
 
 	"ocm.software/ocm/api/utils"

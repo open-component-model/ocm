@@ -3,12 +3,12 @@ package internal
 import (
 	"context"
 	"fmt"
+	"maps"
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/maputils"
-	"maps"
 
 	"ocm.software/ocm/api/config"
 	cfgcpi "ocm.software/ocm/api/config/cpi"

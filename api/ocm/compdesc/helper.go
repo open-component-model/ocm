@@ -2,9 +2,9 @@ package compdesc
 
 import (
 	"bytes"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
-	"slices"
 
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors"

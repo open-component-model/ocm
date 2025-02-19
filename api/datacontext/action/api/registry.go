@@ -2,11 +2,11 @@ package api
 
 import (
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/maputils"
-	"slices"
 
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"

@@ -1,9 +1,10 @@
 package dirtree
 
 import (
+	"slices"
+
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"slices"
 
 	"ocm.software/ocm/api/utils"
 )

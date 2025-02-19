@@ -1,9 +1,8 @@
 package internal
 
 import (
-	"sync"
-
 	"maps"
+	"sync"
 
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"

@@ -3,13 +3,13 @@ package ppi
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/spf13/cobra"
-	"slices"
 
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/datacontext/action"
