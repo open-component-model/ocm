@@ -2,7 +2,6 @@ package vault
 
 import (
 	"context"
-	"sort"
 	"sync"
 
 	"github.com/hashicorp/vault-client-go"
@@ -51,9 +50,7 @@ func (r *AuthMethods) Names() []string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	names := utils.MapKeys(r.methods)
-	sort.Strings(names)
-	return names
+	return utils.StringMapKeys(r.methods)
 }
 
 func RegisterAuthMethod(m AuthMethod) {
