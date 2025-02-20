@@ -1,11 +1,11 @@
 package semverutils
 
 import (
+	"slices"
 	"sort"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
-	"golang.org/x/exp/slices"
 )
 
 type VersionCache map[string]*semver.Version

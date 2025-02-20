@@ -5,10 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"golang.org/x/exp/slices"
 
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/datacontext"

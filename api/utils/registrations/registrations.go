@@ -7,13 +7,13 @@ package registrations
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/set"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/utils"
 )

@@ -8,10 +8,10 @@ import (
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
 	"github.com/mandelsoft/goutils/errors"
-	"golang.org/x/exp/maps"
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"
+	"ocm.software/ocm/api/utils"
 )
 
 type AuthMethod interface {
@@ -51,7 +51,7 @@ func (r *AuthMethods) Names() []string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	names := maps.Keys(r.methods)
+	names := utils.MapKeys(r.methods)
 	sort.Strings(names)
 	return names
 }

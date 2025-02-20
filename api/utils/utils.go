@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -21,8 +22,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 	"sigs.k8s.io/yaml"
 
 	ocmlog "ocm.software/ocm/api/utils/logging"
@@ -241,7 +240,7 @@ func StringMapKeys[K ~string, E any](m map[K]E) []K {
 	if m == nil {
 		return nil
 	}
-	keys := maps.Keys(m)
+	keys := MapKeys(m)
 	slices.Sort(keys)
 	return keys
 }
@@ -258,8 +257,7 @@ func MapKeys[K comparable, E any](m map[K]E) []K {
 	if m == nil {
 		return nil
 	}
-
-	keys := []K{}
+	keys := make([]K, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}

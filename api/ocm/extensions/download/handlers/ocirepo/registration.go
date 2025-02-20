@@ -2,9 +2,9 @@ package ocirepo
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"

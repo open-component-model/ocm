@@ -2,10 +2,10 @@ package flagsets
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 
 	"github.com/spf13/pflag"
-	"golang.org/x/exp/slices"
 )
 
 type Option interface {

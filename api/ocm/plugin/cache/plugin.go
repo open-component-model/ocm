@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 )

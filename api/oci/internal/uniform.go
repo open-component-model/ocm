@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/containerd/containerd/reference"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/oci/grammar"
 	"ocm.software/ocm/api/utils/runtime"

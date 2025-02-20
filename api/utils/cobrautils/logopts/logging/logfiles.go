@@ -2,11 +2,11 @@ package logging
 
 import (
 	"os"
+	"slices"
 	"sync"
 
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"golang.org/x/exp/slices"
 )
 
 type LogFile struct {

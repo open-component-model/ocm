@@ -91,7 +91,7 @@ func ExtractTarToFsWithInfo(fs vfs.FileSystem, in io.Reader) (fcnt int64, bcnt i
 		if header.Mode < 0 || header.Mode > math.MaxUint32 {
 			return fcnt, bcnt, fmt.Errorf("file %s: mode %d out of range for uint32", header.Name, header.Mode)
 		}
-		fileMode := vfs.FileMode(header.Mode) //nolint:gosec // disable G115
+		fileMode := vfs.FileMode(header.Mode)
 
 		switch header.Typeflag {
 		case tar.TypeDir:

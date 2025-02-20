@@ -1,12 +1,12 @@
 package common
 
 import (
+	"slices"
 	"sort"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/mandelsoft/goutils/set"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/datacontext/action/api"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"

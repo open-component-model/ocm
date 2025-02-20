@@ -12,10 +12,10 @@ pkgprefix="ocm.software/ocm"
 
 log "Format with gci" # gci write --custom-order --skip-generated -s standard -s blank -s dot -s default -s "Prefix(ocm.software/ocm)"
 GCIFMT=( -s standard -s blank -s dot -s default -s="prefix(${pkgprefix})" --custom-order )
-gci diff --skip-generated "${GCIFMT[@]}" "${@%/...}" </dev/null \
+go tool gci diff --skip-generated "${GCIFMT[@]}" "${@%/...}" </dev/null \
   | awk '/^--- / { print $2 }' \
   | xargs -I "{}" \
-    gci write --skip-generated  "${GCIFMT[@]}" "{}"
+    go tool gci write --skip-generated  "${GCIFMT[@]}" "{}"
 log "Format done"
 
 log "Format with gofumpt"
@@ -33,6 +33,6 @@ for dir in "${directories[@]}"; do
 done
 
 # Format the files using gofmt with xargs
-printf '%s\0' "${files[@]}" | xargs -0 gofumpt -d -e -l -w
+printf '%s\0' "${files[@]}" | xargs -0 go tool gofumpt -d -e -l -w
 
 log "Format done"

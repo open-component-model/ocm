@@ -3,9 +3,9 @@ package vault
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/mandelsoft/goutils/optionutils"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"

@@ -3,11 +3,11 @@ package misc
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"sort"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
-	"golang.org/x/exp/slices"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

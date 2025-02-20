@@ -2,9 +2,9 @@ package helm
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
-	"golang.org/x/exp/slices"
 	helmregistry "helm.sh/helm/v3/pkg/registry"
 
 	"ocm.software/ocm/api/oci/artdesc"

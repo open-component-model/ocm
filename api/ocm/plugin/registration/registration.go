@@ -1,7 +1,7 @@
 package registration
 
 import (
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"ocm.software/ocm/api/config/plugin"
 	"ocm.software/ocm/api/datacontext/action"

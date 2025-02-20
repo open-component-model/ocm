@@ -3,9 +3,8 @@ package runtimefinalizer
 import (
 	"fmt"
 	"runtime"
+	"slices"
 	"sync"
-
-	"golang.org/x/exp/slices"
 )
 
 // NumberRange can be used as source for successive id numbers to tag

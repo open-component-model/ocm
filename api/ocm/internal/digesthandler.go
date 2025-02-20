@@ -2,9 +2,8 @@ package internal
 
 import (
 	"fmt"
+	"slices"
 	"sync"
-
-	"golang.org/x/exp/slices"
 
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/tech/signing"

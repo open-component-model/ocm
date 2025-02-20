@@ -1,12 +1,13 @@
 package standard
 
 import (
+	"slices"
+
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/goutils/sliceutils"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"

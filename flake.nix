@@ -28,7 +28,7 @@
           inherit (pkgs) stdenv lib ;
         in
         {
-          ${pname} = pkgs.buildGoModule.override { go = pkgs.go_1_23; } rec {
+          ${pname} = pkgs.buildGoModule.override { go = pkgs.go_1_24; } rec {
             inherit pname self;
             version = lib.fileContents ./VERSION;
             gitCommit = if (self ? rev) then self.rev else self.dirtyRev;
@@ -86,7 +86,7 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              go_1_23   # golang 1.23
+              go_1_24   # golang 1.24
               gopls     # go language server
               gotools   # go imports
               go-tools  # static checks

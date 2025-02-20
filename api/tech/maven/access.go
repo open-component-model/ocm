@@ -17,7 +17,6 @@ import (
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/ioutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"golang.org/x/exp/maps"
 	"golang.org/x/net/html"
 
 	"ocm.software/ocm/api/utils"
@@ -199,7 +198,7 @@ func (r *Repository) Upload(coords *Coordinates, reader ioutils.DupReadCloser, c
 		return err
 	}
 
-	algorithm := bestAvailableHash(maps.Keys(hashes))
+	algorithm := bestAvailableHash(utils.MapKeys(hashes))
 	digest := hashes.GetString(algorithm)
 	remoteDigest := artifactBody.Checksums[strings.ReplaceAll(strings.ToLower(algorithm.String()), "-", "")]
 	if remoteDigest == "" {

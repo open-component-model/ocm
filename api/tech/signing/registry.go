@@ -2,13 +2,13 @@ package signing
 
 import (
 	"crypto/x509/pkix"
+	"maps"
+	"slices"
 	"sort"
 	"sync"
 
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/goutils/sliceutils"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/tech/signing/signutils"
 )

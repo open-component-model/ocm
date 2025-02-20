@@ -2,10 +2,10 @@ package blueprint
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/download"

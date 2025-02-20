@@ -1,9 +1,8 @@
 package internal
 
 import (
+	"maps"
 	"sync"
-
-	"golang.org/x/exp/maps"
 
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"

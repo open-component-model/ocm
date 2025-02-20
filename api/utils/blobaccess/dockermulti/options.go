@@ -1,8 +1,9 @@
 package dockermulti
 
 import (
+	"slices"
+
 	"github.com/mandelsoft/goutils/optionutils"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/oci"
 	common "ocm.software/ocm/api/utils/misc"

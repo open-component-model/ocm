@@ -3,9 +3,9 @@ package ppi
 import (
 	"encoding/json"
 	"reflect"
+	"slices"
 
 	"github.com/pkg/errors"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/utils/runtime"

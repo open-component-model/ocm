@@ -33,26 +33,10 @@ ifeq ("v$(JQ)","v0.0")
 	deps += $(detected_OS)_jq
 endif
 
-GOLANGCILINT_VERSION := "v1.61.0"
-# under MAC the version v1.59.1, on linux the v is omitted
-GOLANGCILINTV := $(shell (golangci-lint --version 2>/dev/null || echo 0.0.0) | sed 's/.*version v\{0,1\}\([0-9\.]*\) .*/\1/')
-ifneq ("v$(GOLANGCILINTV)",$(GOLANGCILINT_VERSION))
-  deps += golangci-lint
-endif
 GO_BINDATA_VERSION := "v3.1.3"
 GO_BINDATA := $(shell (go-bindata -version 2>/dev/null || echo 0.0.0) | head -n 1 | sed 's/.*go-bindata \([0-9\.]*\).*/\1/')
 ifneq ("v$(GO_BINDATA)",$(GO_BINDATA_VERSION))
 	deps += go-bindata
-endif
-GCI_VERSION := "v0.13.4"
-GCI := $(shell (gci --version 2>/dev/null || echo 0.0) | sed 's/.* \([0-9\.]*\).*/\1/')
-ifneq ("v$(GCI)", $(GCI_VERSION))
-	deps += gci
-endif
-GOFUMPT_VERSION := "v0.6.0"
-GOFUMPT := $(shell (gofumpt --version 2>/dev/null || echo 0.0) | sed 's/\(v[0-9\.]*\).*/\1/')
-ifneq ("$(GOFUMPT)", $(GOFUMPT_VERSION))
-	deps += gofumpt
 endif
 VAULT_VERSION := 1.16.2
 VAULT := $(shell ($(LOCALBIN)/vault --version 2>/dev/null || echo 0.0) | sed 's/.*Vault v\([0-9\.]*\).*/\1/')
@@ -66,30 +50,10 @@ ifneq ($(OCI_REGISTRY), $(OCI_REGISTRY_VERSION))
 endif
 
 .PHONY: install-requirements
-install-requirements: mkbin $(deps) $(GOPATH)/bin/goimports mdref
+install-requirements: mkbin $(deps) mdref
 
 mkbin:
 	mkdir -p $(LOCALBIN)
-
-.PHONY: gci
-gci:
-	go install -v github.com/daixiang0/gci@$(GCI_VERSION)
-
-.PHONY: gofumpt
-gofumpt:
-	go install -v mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
-
-.PHONY: golangci-lint
-golangci-lint:
-ifneq ("v$(GOLANGCILINTV)",$(GOLANGCILINT_VERSION))
-	@# no recommended by website
-	@# go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCILINT_VERSION)
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin $(GOLANGCILINT_VERSION)
-endif
-
-.PHONY: golangci-lint-version
-golangci-lint-version:
-	@echo "$(GOLANGCILINT_VERSION)"
 
 .PHONY: go-bindata
 go-bindata:
@@ -109,9 +73,6 @@ oci-registry:
 ifeq (,$(findstring $(OCI_REGISTRY_VERSION), $(OCI_REGISTRY)))
 	go install -v github.com/distribution/distribution/v3/cmd/registry@v$(OCI_REGISTRY_VERSION)
 endif
-
-$(GOPATH)/bin/goimports:
-	go install -v golang.org/x/tools/cmd/goimports@latest
 
 .PHONY: mdref
 mdref:

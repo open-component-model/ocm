@@ -3,13 +3,13 @@ package ppi
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/datacontext/action"
@@ -177,7 +177,7 @@ func (p *plugin) RegisterDownloader(arttype, mediatype string, hdlr Downloader) 
 	}
 	if cur == nil {
 		p.downmappings.Register(key, hdlr)
-		desc.Constraints = append(desc.Constraints, DownloaderKey{ArtifactType: key.ArtifactType, MediaType: key.MediaType})
+		desc.Constraints = append(desc.Constraints, descriptor.ArtifactContext{ArtifactType: key.ArtifactType, MediaType: key.MediaType})
 	}
 	p.downloaders[hdlr.Name()] = hdlr
 	return nil

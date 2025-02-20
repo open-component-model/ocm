@@ -3,13 +3,13 @@ package handlers
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/datacontext/action/api"
 	"ocm.software/ocm/api/utils"

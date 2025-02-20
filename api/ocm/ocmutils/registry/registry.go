@@ -1,10 +1,10 @@
 package registry
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/mandelsoft/goutils/set"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/utils/mime"
 )

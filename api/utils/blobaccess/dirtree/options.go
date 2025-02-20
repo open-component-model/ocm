@@ -1,9 +1,10 @@
 package dirtree
 
 import (
+	"slices"
+
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/utils"
 )

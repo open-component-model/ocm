@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"path"
+	"slices"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/hashicorp/vault-client-go"
 	"github.com/mandelsoft/goutils/errors"
-	"golang.org/x/exp/slices"
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"
