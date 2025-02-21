@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"math/big"
 	"math/rand"
 	"net/http"
@@ -240,7 +241,7 @@ func StringMapKeys[K ~string, E any](m map[K]E) []K {
 	if m == nil {
 		return nil
 	}
-	keys := MapKeys(m)
+	keys := slices.Collect(maps.Keys(m))
 	slices.Sort(keys)
 	return keys
 }
@@ -251,17 +252,6 @@ type Comparable[K any] interface {
 
 func Sort[K Comparable[K]](a []K) {
 	sort.Slice(a, func(i, j int) bool { return a[i].Compare(a[j]) < 0 })
-}
-
-func MapKeys[K comparable, E any](m map[K]E) []K {
-	if m == nil {
-		return nil
-	}
-	keys := make([]K, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
 }
 
 type ComparableMapKey[K any] interface {
