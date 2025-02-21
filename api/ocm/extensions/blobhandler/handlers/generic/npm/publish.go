@@ -6,7 +6,8 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
-	//nolint:gosec // older npm (prior to v5) uses sha1
+
+	// #nosec G505 -- older npm (prior to v5) uses sha1
 	"crypto/sha1"
 	"crypto/sha512"
 	"encoding/base64"
@@ -62,7 +63,7 @@ func createSha512(data []byte) string {
 }
 
 func createSha1(data []byte) string {
-	hash := sha1.New() //nolint:gosec // older npm (prior to v5) uses sha1
+	hash := sha1.New() // #nosec G505 -- older npm (prior to v5) uses sha1
 	hash.Write(data)
 	return hex.EncodeToString(hash.Sum(nil))
 }

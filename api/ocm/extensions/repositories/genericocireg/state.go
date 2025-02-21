@@ -123,12 +123,13 @@ func (s *StateAccess) readComponentDescriptorFromTar(r io.Reader) ([]byte, error
 		}
 
 		var data bytes.Buffer
-		//nolint:gosec // We don't know what size limit we could set, the tar
+		// We don't know what size limit we could set, the tar
 		// archive can be an image layer and that can even reach the gigabyte range.
 		// For now, we acknowledge the risk.
 		//
 		// We checked other software and tried to figure out how they manage this,
 		// but it's handled the same way.
+		// #nosec G110
 		if _, err := io.Copy(&data, tr); err != nil {
 			return nil, fmt.Errorf("error while reading component descriptor file from tar: %w", err)
 		}

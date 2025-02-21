@@ -142,7 +142,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 	client.Transport = ocmlog.NewRoundTripper(retry.DefaultClient.Transport, logger)
 	if r.info.Scheme == "https" {
 		// set up TLS
-		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
+		// #nosec G402 -- used like the default, there are OCI servers (quay.io) not working with min version.
 		conf := &tls.Config{
 			// MinVersion: tls.VersionTLS13,
 			RootCAs: func() *x509.CertPool {

@@ -118,12 +118,13 @@ func ExtractTarToFsWithInfo(fs vfs.FileSystem, in io.Reader) (fcnt int64, bcnt i
 				return fcnt, bcnt, fmt.Errorf("unable to open file %s: %w", header.Name, err)
 			}
 			bcnt += header.Size
-			//nolint:gosec // We don't know what size limit we could set, the tar
+			// We don't know what size limit we could set, the tar
 			// archive can be an image layer and that can even reach the gigabyte range.
 			// For now, we acknowledge the risk.
 			//
 			// We checked other software and tried to figure out how they manage this,
 			// but it's handled the same way.
+			// # nosec G110
 			if _, err := io.Copy(file, tr); err != nil {
 				return fcnt, bcnt, fmt.Errorf("unable to copy tar file to filesystem: %w", err)
 			}
