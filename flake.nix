@@ -3,7 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; # doesn
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -17,7 +16,15 @@
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
       # Nixpkgs instantiated for supported system types.
-      nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+      nixpkgsFor = forAllSystems (system: import (builtins.fetchGit {
+        # https://lazamar.co.uk/nix-versions/?package=go&channel=nixpkgs-unstable
+        # https://lazamar.co.uk/nix-versions/?package=go&version=1.24rc2&fullName=go-1.24rc2&keyName=go_1_24&revision=21808d22b1cda1898b71cf1a1beb524a97add2c4&channel=nixpkgs-unstable
+        name = "1.24.0";
+        url = "https://github.com/NixOS/nixpkgs.git";
+        ref = "refs/heads/nixos-unstable";
+        # take latest commit sha from https://github.com/NixOS/nixpkgs/commits/nixos-unstable/
+        rev = "73cf49b8ad837ade2de76f87eb53fc85ed5d4680";
+      }) { inherit system; });
 
     in
     {
@@ -51,9 +58,12 @@
 
             subPackages = [
               "cmds/ocm"
-              "cmds/helminstaller"
+              "cmds/cliplugin"
               "cmds/demoplugin"
               "cmds/ecrplugin"
+              "cmds/helminstaller"
+              "cmds/subcmdplugin"
+              "cmds/jfrogplugin"
             ];
 
             nativeBuildInputs = [ pkgs.installShellFiles ];
