@@ -1,5 +1,6 @@
 name: "Flake.nix vendorHash updater"
 on:
+  workflow_dispatch:
   push:
     branches: 
     - main
@@ -26,6 +27,8 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v16
+        with:
+          nix-package-url: https://releases.nixos.org/nix/nix-2.26.2/nix-2.26.2-x86_64-linux.tar.xz
       - name: Update ocm vendor hash
         run: nix run .#nixpkgs.nix-update -- --flake --version=skip ocm
       - name: Check diff and create action summary
