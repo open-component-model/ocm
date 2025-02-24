@@ -36,5 +36,6 @@ jobs:
           GITHUB_CLIENT_ID: ${{ secrets.OCMBOT_CLIENT_ID }}
           GITHUB_CLIENT_SECRET: ${{ secrets.OCMBOT_CLIENT_SECRET }}
           ADMIN_REPO: ocm
+          LOG_LEVEL: trace
           CONFIG_PATH: .github
           DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/.github/config/safe-settings.yaml
