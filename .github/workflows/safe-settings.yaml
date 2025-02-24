@@ -5,6 +5,8 @@ on:
 jobs:
   safeSettingsSync:
     runs-on: ubuntu-latest
+    env:
+      SAFE_SETTINGS_CODE_DIR: "${{ github.workspace }}/.safe-settings-code"
     steps:
       # Self-checkout of 'admin' repo for access to safe-settings config:
       - uses: actions/checkout@v4
@@ -14,16 +16,16 @@ jobs:
         with:
           repository: github/safe-settings
           ref: '2.1.16'
-          path: ${{ github.workspace }}/.safe-settings-code
+          path: "$SAFE_SETTINGS_CODE_DIR"
 
       # setup node
       - uses: actions/setup-node@v4      
       - run: npm install
-        working-directory: $SAFE_SETTINGS_CODE_DIR
+        working-directory: "$SAFE_SETTINGS_CODE_DIR"
 
       # run full-sync
       - run: npm run full-sync
-        working-directory: $SAFE_SETTINGS_CODE_DIR
+        working-directory: "$SAFE_SETTINGS_CODE_DIR"
         env:
           GH_ORG: hilmarf
           APP_ID: ${{ secrets.OCMBOT_APP_ID }}
