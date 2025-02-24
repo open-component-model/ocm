@@ -5,12 +5,6 @@ on:
 jobs:
   safeSettingsSync:
     runs-on: ubuntu-latest
-    env:
-      # Version/tag of github/safe-settings repo to use:
-      SAFE_SETTINGS_VERSION: 2.1.16
-
-      # Path on GHA runner box where safe-settings code downloaded to:
-      SAFE_SETTINGS_CODE_DIR: ${{ github.workspace }}/.safe-settings-code
     steps:
       # Self-checkout of 'admin' repo for access to safe-settings config:
       - uses: actions/checkout@v4
@@ -19,8 +13,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: github/safe-settings
-          ref: $SAFE_SETTINGS_VERSION
-          path: $SAFE_SETTINGS_CODE_DIR
+          ref: '2.1.16'
+          path: ${{ github.workspace }}/.safe-settings-code
 
       # setup node
       - uses: actions/setup-node@v4      
