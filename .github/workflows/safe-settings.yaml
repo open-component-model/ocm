@@ -1,0 +1,41 @@
+name: Safe Settings Sync
+on:
+  workflow_dispatch: {}
+
+jobs:
+  safeSettingsSync:
+    runs-on: ubuntu-latest
+    env:
+      # Version/tag of github/safe-settings repo to use:
+      SAFE_SETTINGS_VERSION: 2.1.16
+
+      # Path on GHA runner box where safe-settings code downloaded to:
+      SAFE_SETTINGS_CODE_DIR: ${{ github.workspace }}/.safe-settings-code
+    steps:
+      # Self-checkout of 'admin' repo for access to safe-settings config:
+      - uses: actions/checkout@v4
+
+      # Checkout of safe-settings repo for running full sync:
+      - uses: actions/checkout@v4
+        with:
+          repository: github/safe-settings
+          ref: $SAFE_SETTINGS_VERSION
+          path: $SAFE_SETTINGS_CODE_DIR
+
+      # setup node
+      - uses: actions/setup-node@v4      
+      - run: npm install
+        working-directory: $SAFE_SETTINGS_CODE_DIR
+
+      # run full-sync
+      - run: npm run full-sync
+        working-directory: $SAFE_SETTINGS_CODE_DIR
+        env:
+          GH_ORG: ${{ vars.SAFE_SETTINGS_GH_ORG }}
+          APP_ID: ${{ vars.SAFE_SETTINGS_APP_ID }}
+          PRIVATE_KEY: ${{ secrets.SAFE_SETTINGS_PRIVATE_KEY }}
+          GITHUB_CLIENT_ID: ${{ vars.SAFE_SETTINGS_GITHUB_CLIENT_ID }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.SAFE_SETTINGS_GITHUB_CLIENT_SECRET }}
+          ADMIN_REPO: .github
+          CONFIG_PATH: safe-settings
+          DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/safe-settings/deployment-settings.yml
