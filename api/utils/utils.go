@@ -114,7 +114,7 @@ func RandomString(n int) string {
 		} else {
 			// insecure fallback to provide a valid result
 			ocmlog.Logger().Error("failed to generate random number", "error", err.Error())
-			value = rand.Intn(len(chars)) //nolint: gosec // only used as fallback
+			value = rand.Intn(len(chars)) //nolint:gosec // only used as fallback
 		}
 		b[i] = chars[value]
 	}

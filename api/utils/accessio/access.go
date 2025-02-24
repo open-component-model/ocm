@@ -67,7 +67,7 @@ func Retry(cnt int, d time.Duration, f func() error) error {
 		if err == nil || cnt <= 0 || !IsRetriableError(err) {
 			return err
 		}
-		jitter := time.Duration(rand.Int63n(int64(d))) //nolint: gosec // just an random number
+		jitter := time.Duration(rand.Int63n(int64(d))) //nolint:gosec // just an random number
 		d = 2*d + (d/2-jitter)/10
 		cnt--
 	}
@@ -79,7 +79,7 @@ func Retry1[T any](cnt int, d time.Duration, f func() (T, error)) (T, error) {
 		if err == nil || cnt <= 0 || !IsRetriableError(err) {
 			return r, err
 		}
-		jitter := time.Duration(rand.Int63n(int64(d))) //nolint: gosec // just an random number
+		jitter := time.Duration(rand.Int63n(int64(d))) //nolint:gosec // just an random number
 		d = 2*d + (d/2-jitter)/10
 		cnt--
 	}
@@ -91,7 +91,7 @@ func Retry2[S, T any](cnt int, d time.Duration, f func() (S, T, error)) (S, T, e
 		if err == nil || cnt <= 0 || !IsRetriableError(err) {
 			return s, t, err
 		}
-		jitter := time.Duration(rand.Int63n(int64(d))) //nolint: gosec // just an random number
+		jitter := time.Duration(rand.Int63n(int64(d))) //nolint:gosec // just an random number
 		d = 2*d + (d/2-jitter)/10
 		cnt--
 	}

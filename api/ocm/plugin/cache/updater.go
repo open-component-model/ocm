@@ -391,7 +391,7 @@ func writePluginInstallationInfo(src *PluginInstallationInfo, dir string, name s
 	if err != nil {
 		return err
 	}
-	//nolint: gosec // yes
+	//nolint:gosec // yes
 	return os.WriteFile(filepath.Join(dir, "."+name+".info"), data, 0o644)
 }
 
