@@ -1,0 +1,290 @@
+# https://github.com/orgs/open-component-model/repositories?q=mirror%3Afalse+fork%3Afalse+archived%3Afalse+-topic%3Aocm-gear+sort%3Aname-asc
+suborgrepos:
+  - demo-secure-delivery
+  - homebrew-tap
+  - internal-processes
+  - ocm
+  - ocm-action
+  - ocm-cicd-playground
+  - ocm-controller
+  - ocm-e2e-framework
+  - ocm-examples
+  - ocm-integrationtest
+  - ocm-k8s-toolkit
+  - ocm-project
+  - ocm-setup-action
+  - ocm-spec
+  - ocm-website
+  - pkg
+  - pocm
+  - podinfo
+  - repository-template
+  - service-model
+  - signing-server
+
+# This are the settings that will be applied to the repositories listed above.
+# See https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-an-organization-repository for all available settings for a repository
+repository:
+  # A URL with more information about the repository
+  homepage: https://ocm.software/
+
+  # Create an initial commit with empty README.
+  # Keep this set to true in most cases since many of the policies below cannot be implemented on bare repos
+  auto_init: true
+
+  # A list of topics to set on the repository - can alternatively set like this: [github, probot, new-topic, another-topic, topic-12]
+  topics:
+    - ocm
+    - open-component-model
+
+  # Settings for Code security and analysis
+  # Dependabot Alerts
+  security:
+    enableVulnerabilityAlerts: true
+    enableAutomatedSecurityFixes: true
+
+  # Either `true` to enable issues for this repository, `false` to disable them.
+  has_issues: true
+
+  # Either `true` to enable projects for this repository, or `false` to disable them.
+  # If projects are disabled for the organization, passing `true` will cause an API error.
+  has_projects: true
+
+  # Either `true` to enable the wiki for this repository, `false` to disable it.
+  has_wiki: false
+
+  # The default branch for this repository.
+  default_branch: main
+
+  # Desired language or platform [.gitignore template](https://github.com/github/gitignore)
+  # to apply. Use the name of the template without the extension.
+  # For example, "Haskell".
+  gitignore_template: go
+
+  # Choose an [open source license template](https://choosealicense.com/)
+  # that best suits your needs, and then use the
+  # [license keyword](https://help.github.com/articles/licensing-a-repository/#searching-github-by-license-type)
+  # as the `license_template` string. For example, "mit" or "mpl-2.0".
+  license_template: Apache-2.0
+
+  # Either `true` to allow squash-merging pull requests, or `false` to prevent
+  # squash-merging.
+  allow_squash_merge: true
+
+  # Either `true` to allow merging pull requests with a merge commit, or `false`
+  # to prevent merging pull requests with merge commits.
+  allow_merge_commit: false
+
+  # Either `true` to allow rebase-merging pull requests, or `false` to prevent
+  # rebase-merging.
+  allow_rebase_merge: false
+
+  # Either `true` to allow auto-merge on pull requests,
+  # or `false` to disallow auto-merge.
+  # Default: `false`
+  allow_auto_merge: true
+
+  # Either `true` to allow automatically deleting head branches
+  # when pull requests are merged, or `false` to prevent automatic deletion.
+  # Default: `false`
+  delete_branch_on_merge: true
+
+  # Either `true` to  allow update branch on pull requests,
+  # or `false` to disallow update branch.
+  # Default: `false`
+  allow_update_branch: true
+
+# The following attributes are applied to any repo within the org
+# So if a repo is not listed above is created or edited
+# The app will apply the following settings to it
+labels:
+## The different areas of the project
+- name: needs/validation
+  color: f980d1
+  description: Validate the issue and assign a priority
+- name: needs/tech-advice
+  color: f980d1
+  description: Outline technical tasks that need to be done
+- name: needs/refinement
+  color: f980d1
+  description: Discuss with the team and gain a shared understanding
+- name: area/cicd
+  color: 0052cc
+  description: Continuous Integration and Continuous Deployment related
+- name: area/community
+  color: 0052cc
+  description: Community related
+- name: area/compliance
+  color: 0052cc
+  description: Compliance related
+- name: area/documentation
+  color: 0052cc
+  description: Documentation related
+- name: area/ipcei
+  color: 0052cc
+  description: Important Project of Common European Interest
+- name: area/performance
+  color: 0052cc
+  description: Performance related (across all domains)
+- name: area/quality
+  color: 0052cc
+  description: Output qualification (tests, checks, scans, automation in general, etc.) related
+- name: area/security
+  color: 0052cc
+  description: Security relevant
+- name: area/network
+  color: 0052cc
+  description: Network related
+- name: area/testing
+  color: 0052cc
+  description: Testing related
+## The different components of the project
+- name: component/ocm-core
+  color: 25399e
+  description: Open Component Model Core aka. go API
+- name: component/ocm-cli
+  color: 25399e
+  description: OCM Command Line Interface
+- name: component/ocm-controllers
+  color: 25399e
+  description: OCM Controllers
+- name: component/ocm-spec
+  color: 25399e
+  description: Open Component Model Specification
+- name: component/ocm-website
+  color: 25399e
+  description: https://ocm.software/
+- name: component/github-actions
+  color: 25399e
+  description: Changes on GitHub Actions or within `.github/` directory
+## The different kinds of issues and pull requests - will be used for release notes grouping
+- name: kind/bugfix
+  color: B60205
+  description: Bug
+- name: kind/feature
+  color: c7def8
+  description: new feature, enhancement, improvement, extension
+- name: kind/task
+  color: c7def8
+  description: small task, normally part of feature or epic
+- name: kind/epic
+  color: c7def8
+  description: Large multi-story topic
+- name: kind/good-first-issue
+  color: 7057ff
+  description: Good for newcomers
+- name: kind/poc
+  color: c7def8
+  description: Proof of Concept or Prototype
+- name: kind/chore
+  color: c7def8
+  description: chore, maintenance, etc.
+- name: kind/dependency
+  color: c7def8
+  description: dependency update, etc.
+- name: kind/refactor
+  color: c7def8
+  description: refactoring, maintenance, etc.
+- name: kind/deprecation
+  color: c7def8
+  description: whenever something gets deprecated
+- name: kind/skip-release-notes
+  color: c7def8
+  description: Pull request will not appear in release notes
+## The different lifecycle stages of an issue or pull request for project management
+- name: lifecycle/icebox
+  color: e5fefc
+  description: Temporarily on hold (will not age; may have dependencies, lack priority, miss feedback, etc.)
+- name: lifecycle/rotten
+  color: e5fefc
+  description: Nobody worked on this for 12 months (final aging stage)
+- name: lifecycle/stale
+  color: e5fefc
+  description: Nobody worked on this for 6 months (will further age)
+- name: lifecycle/duplicate
+  color: e5fefc
+  description: Duplicate of another issue or PR
+## The different states of an issue or pull request for easier collaboration
+- name: dev/help-wanted
+  color: fef2c0
+  description: Needs help by someone else
+- name: dev/blocked
+  color: fef2c0
+  description: Needs help by someone else
+- name: dev/cant-reproduce
+  color: fef2c0
+  description: Cannot reproduce the issue
+- name: dev/wont-fix
+  color: fef2c0
+  description: Will not fix the issue
+- name: dev/second-opinion
+  color: fef2c0
+  description: PR or issue needs a second opinion, is open for discussion
+## The different sizes of an issue or pull request
+- name: size/xs
+  color: bfdadc
+  description: Extra small
+- name: size/s
+  color: bfdadc
+  description: Small
+- name: size/m
+  color: bfdadc
+  description: Medium
+- name: size/l
+  color: bfdadc
+  description: Large
+- name: size/xl
+  color: bfdadc
+  description: Extra large
+## Breaking changes, which will require special attention or follow-up actions
+- name: "!BREAKING-CHANGE!"
+  color: B60205
+  description: Breaking change in API or ocm-cli or spec
+## PRs that should not be merged yet (although they are ready), because they are waiting for something else to be done first. If you are still working on the PR, put it in 'draft' mode instead or use project board status 'in pro'.
+- name: do-not-merge
+  color: B60205
+  description: Do not merge this PR yet!
+- name: hint/Fingerspitzengefühl
+  color: FF00FF
+  description: Needs a little bit of "Fingerspitzengefühl" - aka. be careful when implementing
+
+# Teams
+# See https://docs.github.com/en/rest/teams/teams?apiVersion=2022-11-28#create-a-team for available options
+teams:
+- name: Maintainers
+  permission: maintain
+- name: Admins
+  permission: admin
+
+# Branch protection rules
+# See https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#update-branch-protection for available options
+branches:
+- name: main
+  # https://docs.github.com/en/rest/reference/repos#update-branch-protection
+  # Branch Protection settings. Set to null to disable
+  protection:
+    # Required. Require at least one approving review on a pull request, before merging. Set to null to disable.
+    required_pull_request_reviews:
+      # The number of approvals required. (1-6)
+      required_approving_review_count: 1
+      # Whether the most recent push must be approved by someone other than the person who pushed it. Default: false.
+      require_last_push_approval: true
+      # Dismiss approved reviews automatically when a new commit is pushed.
+      dismiss_stale_reviews: true
+      # Blocks merge until code owners have reviewed.
+      require_code_owner_reviews: true
+      # Specify which users and teams can dismiss pull request reviews. Pass an empty dismissal_restrictions object to disable. User and team dismissal_restrictions are only available for organization-owned repositories. Omit this parameter for personal repositories.
+      dismissal_restrictions:
+        #users: []
+        teams:
+        - Maintainers
+    # Required. Require status checks to pass before merging. Set to null to disable
+    required_status_checks:
+      # Required. Require branches to be up to date before merging.
+      strict: true
+      # Required. The list of status checks to require in order to merge into this branch
+      contexts: []
+    # Required. Enforce all configured restrictions for administrators. Set to true to enforce required status checks for repository administrators. Set to null to disable.
+    enforce_admins: true
+    # Prevent merge commits from being pushed to matching branches
+    required_linear_history: true
