@@ -31,11 +31,11 @@ jobs:
       - run: npm run full-sync
         working-directory: $SAFE_SETTINGS_CODE_DIR
         env:
-          GH_ORG: ${{ vars.SAFE_SETTINGS_GH_ORG }}
-          APP_ID: ${{ vars.SAFE_SETTINGS_APP_ID }}
-          PRIVATE_KEY: ${{ secrets.SAFE_SETTINGS_PRIVATE_KEY }}
-          GITHUB_CLIENT_ID: ${{ vars.SAFE_SETTINGS_GITHUB_CLIENT_ID }}
-          GITHUB_CLIENT_SECRET: ${{ secrets.SAFE_SETTINGS_GITHUB_CLIENT_SECRET }}
+          GH_ORG: hilmarf
+          APP_ID: ${{ secrets.OCMBOT_APP_ID }}
+          PRIVATE_KEY: ${{ secrets.OCMBOT_PRIV_KEY }}
+          GITHUB_CLIENT_ID: ${{ secrets.OCMBOT_CLIENT_ID }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.OCMBOT_CLIENT_SECRET }}
           ADMIN_REPO: .github
           CONFIG_PATH: safe-settings
           DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/safe-settings/deployment-settings.yml
