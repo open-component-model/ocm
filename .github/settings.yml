@@ -1,8 +1,23 @@
-# These settings are synced to GitHub by https://probot.github.io/apps/settings/
+# These settings are synced to GitHub by https://github.com/github/safe-settings?tab=readme-ov-file#github-safe-settings
 
-# see: https://github.com/open-component-model/.github/blob/main/.github/settings.yml
-_extends: .github
+# Milestones: define milestones for Issues and Pull Requests
+milestones:
+- title: 2024-Q4
+  #description: milestone-description
+  # The state of the milestone. Either `open` or `closed`
+  state: closed
 
-labels:
-- name: repo/ocm
-  color: bfd4f2
+- title: 2025-Q1
+  state: open
+
+- title: 2025-Q2
+  state: open
+
+- title: 2025-Q3
+  state: open
+
+- title: 2025-Q4
+  state: open
+
+- title: 2026-Q1
+  state: open
