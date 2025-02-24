@@ -1,6 +1,9 @@
 name: Safe Settings Sync
 on:
   workflow_dispatch: {}
+  push:
+    branches: 
+    - main
 
 jobs:
   safeSettingsSync:
@@ -32,6 +35,6 @@ jobs:
           PRIVATE_KEY: ${{ secrets.OCMBOT_PRIV_KEY }}
           GITHUB_CLIENT_ID: ${{ secrets.OCMBOT_CLIENT_ID }}
           GITHUB_CLIENT_SECRET: ${{ secrets.OCMBOT_CLIENT_SECRET }}
-          ADMIN_REPO: .github
-          CONFIG_PATH: safe-settings
-          DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/safe-settings/deployment-settings.yml
+          ADMIN_REPO: ocm
+          CONFIG_PATH: .github
+          DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/.github/config/safe-settings.yaml
