@@ -51,3 +51,9 @@ jobs:
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: false
           blackducksca_prComment_enabled: true
+
+      - name: Upload status.json
+        uses: actions/upload-artifact@v3
+        with:
+          name: blackduck-status
+          path: ${{ steps.find-status.outputs.status_file }}
