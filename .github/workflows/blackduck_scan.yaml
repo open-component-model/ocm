@@ -18,37 +18,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: '${{ github.workspace }}/go.mod'
-          cache: false
-
-      - name: Get go environment for use with cache
-        run: |
-          echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
-      # This step will only reuse the go mod and build cache from main made during the Build,
-      # see push_ocm.yaml => "ocm-cli-latest" Job
-      # This means it never caches by itself and PRs cannot cause cache pollution / thrashing
-      # This is because we have huge storage requirements for our cache because of the mass of dependencies
-
-      - name: Restore / Reuse Cache from central build
-        id: cache-golang-restore
-        uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
-        with:
-          path: |
-            ${{ env.go_cache }}
-            ${{ env.go_modcache }}
-          key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
-          restore-keys: |
-            ${{ env.cache_name }}-${{ runner.os }}-go-
-        env:
-          cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
-          
-      - name: Run Black Duck Full SCA Scan (Manual Trigger and Scheduled)
-        if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+       
+      - name: Run Black Duck Full SCA Scan (Push, Manual Trigger or Schedule)
+        if: ${{ github.event_name != 'pull_request' }} 
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
@@ -63,18 +35,20 @@ jobs:
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: true
 
-      - name: Run Black Duck SCA Scan (Pull Request or Push)
-        if: github.event_name != 'workflow_dispatch'
-            # The action sets blackducksca_scan_full internally: for pushes to true and PRs to false
+      - name: Run Black Duck SCA Scan (Pull Requests)
+        if: ${{ github.event_name == 'pull_request' }}
+           # The action sets blackducksca_scan_full internally: for pushes to true and PRs to false
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
           DETECT_SOURCE_PATH: ./
+          DETECT_SCAN_MODE: RAPID 
           DETECT_EXCLUDED_DIRECTORIES: .bridge
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           blackducksca_url: ${{ secrets.BLACKDUCK_URL }}
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+          blackducksca_scan_full: false
           blackducksca_prComment_enabled: true
