@@ -39,6 +39,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
            # The action sets blackducksca_scan_full internally: for pushes to true and PRs to false
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
+        continue-on-error: true
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
@@ -51,3 +52,15 @@ jobs:
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: false
           blackducksca_prComment_enabled: true
+
+      - name: Find status.json
+        id: find-status
+        run: |
+          FILE=$(find /home/runner/work/ocm/ocm/.bridge/Blackduck\ SCA\ Detect\ Execution/detect/runs -type f -name 'status.json' -print0 | xargs -0 -n1) 
+          echo "::set-output name=status_file::${FILE}"
+  
+      - name: Upload status.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: blackduck-status
+          path: ${{ steps.find-status.outputs.status_file }}
