@@ -53,7 +53,7 @@ jobs:
           blackducksca_prComment_enabled: true
 
       - name: Upload status.json
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: blackduck-status
           path: ${{ steps.find-status.outputs.status_file }}
