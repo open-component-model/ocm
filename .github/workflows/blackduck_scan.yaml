@@ -57,4 +57,16 @@ jobs:
           blackducksca_scan_full: false
           blackducksca_prComment_enabled: true
 
+      - name: Find status.json
+        id: find-status
+        run: |
+          FILE=$(find /home/runner/work/ocm/ocm/.bridge/Blackduck\ SCA\ Detect\ Execution/detect/runs -type f -name 'status.json' -print0 | xargs -0 -n1 basename) 
+          echo "::set-output name=status_file::${FILE}"
+
+      - name: Upload status.json
+        uses: actions/upload-artifact@v3
+        with:
+          name: blackduck-status
+          path: ${{ steps.find-status.outputs.status_file }}
+
           
