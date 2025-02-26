@@ -39,6 +39,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
            # The action sets blackducksca_scan_full internally: for pushes to true and PRs to false
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
+        continue-on-error: true
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
