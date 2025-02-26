@@ -1,7 +1,7 @@
 package dirtree
 
 import (
-	"crypto/sha1" //nolint: gosec // required
+	"crypto/sha1" //nolint:gosec // required
 	"fmt"
 	"hash"
 	"io"
@@ -32,7 +32,7 @@ type defaultContext struct {
 }
 
 func (d defaultContext) Hasher() hash.Hash {
-	return sha1.New() //nolint: gosec // required
+	return sha1.New() //nolint:gosec // required
 }
 
 func (d defaultContext) FileMode(mode vfs.FileMode) Mode {
