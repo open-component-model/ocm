@@ -1,8 +1,13 @@
 name: Check for diff after go mod tidy and generated targets
 
 on:
-  pull_request: {}
+  pull_request:
+    paths-ignore:
+      - ".github/**"
   workflow_call:
+
+permissions:
+  contents: read
 
 jobs:
   diff-check-manifests:
