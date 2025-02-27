@@ -44,7 +44,6 @@ jobs:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
           DETECT_SOURCE_PATH: ./
-          DETECT_SCAN_MODE: RAPID 
           DETECT_EXCLUDED_DIRECTORIES: .bridge
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
@@ -53,4 +52,3 @@ jobs:
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: false
           blackducksca_prComment_enabled: true
-          
