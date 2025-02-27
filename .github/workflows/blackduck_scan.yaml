@@ -2,7 +2,7 @@ name: Blackduck SCA Scan
 on:
   push:
     branches: [ "main" ]
-  pull_request:
+  pull_request_target:
     branches: [ "main" ]
   schedule:
     - cron:  '5 0 * * 0'
@@ -17,10 +17,10 @@ jobs:
     runs-on: [ ubuntu-latest ]
     steps:
       - name: Checkout code
+        if: github.event_name != 'pull_request_target'
         uses: actions/checkout@v4
-       
       - name: Run Black Duck Full SCA Scan (Push, Manual Trigger or Schedule)
-        if: ${{ github.event_name != 'pull_request' }} 
+        if: github.event_name != 'pull_request_target'
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
@@ -35,8 +35,13 @@ jobs:
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: true
 
+      - name: Checkout code
+        if: github.event_name == 'pull_request_target'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Run Black Duck SCA Scan (Pull Requests)
-        if: ${{ github.event_name == 'pull_request' }}
+        if: github.event_name == 'pull_request_target'
            # The action sets blackducksca_scan_full internally: for pushes to true and PRs to false
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
         env:
