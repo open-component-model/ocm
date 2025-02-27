@@ -17,6 +17,7 @@ jobs:
     runs-on: [ ubuntu-latest ]
     steps:
       - name: Checkout code
+        if: github.event_name != 'pull_request_target'
         uses: actions/checkout@v4
        
       - name: Run Black Duck Full SCA Scan (Push, Manual Trigger or Schedule)
@@ -52,18 +53,4 @@ jobs:
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: false
           blackducksca_prComment_enabled: true
-      
-      # Find and Upload Status.json as artifact to analyze potential issues during scan    
-      - name: Find status.json
-        id: find-status
-        run: |
-          FILE=$(find /home/runner/work/ocm/ocm/.bridge/Blackduck\ SCA\ Detect\ Execution/detect/runs -type f -name 'status.json' -print0 | xargs -0 -n1 basename)
-          echo "status_file=${FILE}" >> $GITHUB_OUTPUT
-        
-      - name: Upload status.json
-        uses: actions/upload-artifact@v3
-        with:
-          name: blackduck-status
-          path: ${{ steps.find-status.outputs.status_file }}
-
           
