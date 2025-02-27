@@ -4,7 +4,7 @@ on:
     branches: [ "main" ]
     # paths-ignore:
     #   - ".github/**"
-  pull_request:
+  pull_request_target:
     branches: [ "main" ]
     # paths-ignore:
     #   - ".github/**"
@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
        
       - name: Run Black Duck Full SCA Scan (Push, Manual Trigger or Schedule)
-        if: ${{ github.event_name != 'pull_request' }} 
+        if: ${{ github.event_name != 'pull_request_target' }} 
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
@@ -40,7 +40,7 @@ jobs:
           blackducksca_scan_full: true
 
       - name: Run Black Duck SCA Scan (Pull Requests)
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request_target' }}
            # The action sets blackducksca_scan_full internally: for pushes to true and PRs to false
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
         env:
