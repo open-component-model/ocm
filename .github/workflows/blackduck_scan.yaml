@@ -51,3 +51,9 @@ jobs:
           blackducksca_url: ${{ secrets.BLACKDUCK_URL }}
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: false
+
+      - name: Upload STATUS JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: status-json
+          path: "/home/runner/work/ocm/ocm/.bridge/Blackduck SCA Detect Execution/detect/status.json"
