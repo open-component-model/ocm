@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin" // Vulnerable dependency, older version
-	"github.com/unknwon/com"   // GPL 2.0 license
+	"github.com/unknwon/com"   // GPL 2.0 licenses
 )
 
 func main() {
