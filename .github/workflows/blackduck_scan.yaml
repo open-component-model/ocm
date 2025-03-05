@@ -51,4 +51,3 @@ jobs:
           blackducksca_url: ${{ secrets.BLACKDUCK_URL }}
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: false
-          blackducksca_prComment_enabled: true
