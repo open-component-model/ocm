@@ -266,7 +266,8 @@ jobs:
     with:
       bump-type: patch
       ref: ${{ github.ref }}
-
+  
+  # Trigger the BDBA scan for a release
   trigger-bdba-workflow:
     name: Trigger BDBA Scan
     needs: release
