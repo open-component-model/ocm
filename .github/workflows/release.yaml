@@ -279,4 +279,4 @@ jobs:
       BDBA_GROUP_ID: ${{ secrets.BDBA_GROUP_ID }}
     permissions:
       contents: read 
-      actions: read 
+      actions: read
