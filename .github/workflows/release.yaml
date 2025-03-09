@@ -266,3 +266,17 @@ jobs:
     with:
       bump-type: patch
       ref: ${{ github.ref }}
+
+  trigger-bdba-workflow:
+    name: Trigger BDBA Scan
+    needs: release
+    uses: ./.github/workflows/bdba.yaml
+    with:
+      artifact_id: ctf-aggregated
+    secrets:
+      BDBA_API_TOKEN: ${{ secrets.BDBA_API_TOKEN }}
+      BDBA_URL: ${{ secrets.BDBA_URL }}
+      BDBA_GROUP_ID: ${{ secrets.BDBA_GROUP_ID }}
+    permissions:
+      contents: read 
+      actions: read 
