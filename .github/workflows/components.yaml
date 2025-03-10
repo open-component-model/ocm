@@ -31,7 +31,7 @@ env:
   REF: ${{ inputs.ref == '' && github.ref || inputs.ref }}
   CTF_TYPE: directory
   components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin", "jfrogplugin"]'
-  components_for_aggregated_ctf: '["ocmcli", "ecrplugin", "jfrogplugin"]' # only bundle relevant components for the aggregated CTF
+  components_for_aggregated_ctf: "ocmcli ecrplugin jfrogplugin" # only bundle relevant components for the aggregated CTF
   IMAGE_PLATFORMS: 'linux/amd64 linux/arm64'
   PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
   BUILDX_CACHE_PUSH: false
@@ -165,7 +165,7 @@ jobs:
       # Create aggregated CTF without TOI demo components
       - name: Create aggregated CTF
         run: |
-          for i in ${{ fromJSON(env.components_for_aggregated_ctf) }}; do
+          for i in ${{ env.components_for_aggregated_ctf }}; do
             echo "transfering component $i..."
             ${{ steps.extract-ocm.outputs.binary }} transfer cv \
               --type ${{ env.CTF_TYPE }} -V \
