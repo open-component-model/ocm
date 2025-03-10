@@ -26,6 +26,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          repository: open-component-model/ocm
+          ref: main
 
       - name: Download CTF
         uses: actions/download-artifact@v4
