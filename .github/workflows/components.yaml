@@ -165,9 +165,7 @@ jobs:
       # Create aggregated CTF without TOI demo components
       - name: Create aggregated CTF
         run: |
-          # construct the components string from the JSON array
-          components_str="${{ join(fromJSON(env.components_for_aggregated_ctf), ' ') }}"
-          for i in $components_str; do
+          for i in ${{ env.components_for_aggregated_ctf }}; do
             echo "transfering component $i..."
             ${{ steps.extract-ocm.outputs.binary }} transfer cv \
               --type ${{ env.CTF_TYPE }} -V \
