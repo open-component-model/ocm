@@ -146,21 +146,21 @@ jobs:
       - name: Extract OCM Binary from CTF to avoid OCM Inception
         id: extract-ocm
         run: |
-          ocm_binary=$(bash ./hack/get_bare_resource_from_ctf.sh \
+          ocm_binary="$(bash ./hack/get_bare_resource_from_ctf.sh \
             "ocm.software/ocmcli" \
             "" \
             "ocmcli" \
             $(go env GOARCH) \
             $(go env GOOS) \
             "application/octet-stream" \
-            ${{ github.workspace }}/gen/ocmcli/ctf)
+            ${{ github.workspace }}/gen/ocmcli/ctf)"
           
-          new_loc=${{ github.workspace }}/bin/ocm
-          mkdir -p $(dirname $new_loc)
-          ln -s $ocm_binary $new_loc
-          chmod +x $new_loc
-          echo "OCM binary linked to $new_loc"
-          echo "binary=$new_loc" >> $GITHUB_OUTPUT
+            new_loc="${{ github.workspace }}/bin/ocm"
+            mkdir -p "$(dirname "$new_loc")"
+            ln -s "$ocm_binary" "$new_loc"
+            chmod +x "$new_loc"
+            echo "OCM binary linked to \"$new_loc\""
+            echo "binary=\"$new_loc\"" >> "$GITHUB_OUTPUT"
       - name: Create aggregated CTF
         run: |
           for i in ${{ env.components }}; do
