@@ -61,9 +61,9 @@ jobs:
             echo "::warning file=status.json::No Black Duck status file found"
             exit 1
           else
-            ISSUES=$(jq '.issues' "$STATUS_FILE")
+            ISSUE_COUNT=$(jq '.issues | length' "$STATUS_FILE")
             
-            if [[ "$ISSUES" == "null" ]] || [[ "$ISSUES" == "[]" ]]; then
+            if [[ "$ISSUE_COUNT" -eq 0 ]]; then
               echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
               echo "Black Duck scan successfully executed. Status JSON will be uploaded as an artifact to the GitHub action.""
             else
@@ -72,10 +72,10 @@ jobs:
               echo "::error file=$STATUS_FILE::Black Duck scan had issues:"
               
               # Extract and print issue details
-              jq -r '.issues[] | 
-                  "\(.type)\n" + 
-                  "--\ \(.title)\ --\n" + 
-                  "\(.messages | join(", "))"' "$STATUS_FILE"
+              jq -r '.issues[] | "\(.type): \(.title)\n  Details: \((.messages | if type == "string" then [.] else . end) | join("; "))"' status.json | \
+              while IFS= read -r line; do
+                echo "::error::$line"
+              done
               echo
               echo "Black Duck Overall Status:"
               jq -r '.overallStatus[0].key + " - " + .overallStatus[0].status' "$STATUS_FILE"
