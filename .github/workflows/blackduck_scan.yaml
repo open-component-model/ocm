@@ -26,7 +26,6 @@ jobs:
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
-          DETECT_SOURCE_PATH: ./
           DETECT_EXCLUDED_DIRECTORIES: .bridge
           DETECT_BLACKDUCK_SIGNATURE_SCANNER_ARGUMENTS: '--min-scan-interval=0'
           NODE_TLS_REJECT_UNAUTHORIZED: true
@@ -43,7 +42,6 @@ jobs:
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
-          DETECT_SOURCE_PATH: ./
           DETECT_EXCLUDED_DIRECTORIES: .bridge
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
@@ -51,9 +49,3 @@ jobs:
           blackducksca_url: ${{ secrets.BLACKDUCK_URL }}
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: false
-
-      - name: Upload STATUS JSON
-        uses: actions/upload-artifact@v4
-        with:
-          name: status-json
-          path: "/home/runner/work/ocm/ocm/.bridge/Blackduck SCA Detect Execution/detect/status.json"
