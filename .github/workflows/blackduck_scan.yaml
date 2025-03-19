@@ -17,9 +17,8 @@ jobs:
     runs-on: [ ubuntu-latest ]
     steps:
       - name: Checkout code
-        if: github.event_name != 'pull_request_target'
         uses: actions/checkout@v4
-       
+      
       - name: Run Black Duck Full SCA Scan (Push, Manual Trigger or Schedule)
         if: ${{ github.event_name != 'pull_request_target' }} 
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
