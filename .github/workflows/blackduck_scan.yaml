@@ -17,7 +17,6 @@ jobs:
     runs-on: [ ubuntu-latest ]
     steps:
       - name: Checkout code
-        if: github.event_name != 'pull_request_target'
         uses: actions/checkout@v4
        
       - name: Run Black Duck Full SCA Scan (Push, Manual Trigger or Schedule)
@@ -49,3 +48,46 @@ jobs:
           blackducksca_url: ${{ secrets.BLACKDUCK_URL }}
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: false
+
+      - name: Check Black Duck status
+        if: always()
+        id: check_blackduck_status
+        shell: bash
+        run: |
+          # Use find to locate status file
+          STATUS_FILE=$(find "/home/runner/work/ocm-cicd-playground/ocm-cicd-playground/.bridge/Blackduck SCA Detect Execution/detect/runs" -name "status.json" | head -n 1)
+      
+          if [ -z "$STATUS_FILE" ]; then
+            echo "::warning file=status.json::No Black Duck status file found"
+            exit 1
+          else
+            ISSUES=$(jq '.issues' "$STATUS_FILE")
+            
+            if [[ "$ISSUES" == "null" ]] || [[ "$ISSUES" == "[]" ]]; then
+              echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
+              echo "Black Duck scan successfully executed. Status JSON will be uploaded as an artifact to the GitHub action.""
+            else
+              # Issues exist, fail step but save file path for upload
+              echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
+              echo "::error file=$STATUS_FILE::Black Duck scan had issues:"
+              
+              # Extract and print issue details
+              jq -r '.issues[] | 
+                  "\(.type)\n" + 
+                  "--\ \(.title)\ --\n" + 
+                  "\(.messages | join(", "))"' "$STATUS_FILE"
+              echo
+              echo "Black Duck Overall Status:"
+              jq -r '.overallStatus[0].key + " - " + .overallStatus[0].status' "$STATUS_FILE"
+              echo
+              echo "Status JSON will be uploaded as an artifact to the GitHub action."
+              exit 1
+            fi
+          fi
+            
+      - name: Upload Blackduck status file
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: status-json
+          path: ${{ steps.check_blackduck_status.outputs.status_file_path }}
