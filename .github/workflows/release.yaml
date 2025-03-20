@@ -278,6 +278,8 @@ jobs:
       BDBA_API_TOKEN: ${{ secrets.BDBA_API_TOKEN }}
       BDBA_URL: ${{ secrets.BDBA_URL }}
       BDBA_GROUP_ID: ${{ secrets.BDBA_GROUP_ID }}
+      BDBA_USERNAME: ${{ secrets.BDBA_USERNAME }}
+      BDBA_PASSWORD: ${{ secrets.BDBA_PASSWORD }}
     permissions:
       contents: read 
       actions: read
