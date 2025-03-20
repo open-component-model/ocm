@@ -49,6 +49,8 @@ jobs:
           blackducksca_token: ${{ secrets.BLACKDUCK_API_TOKEN }}
           blackducksca_scan_full: false
 
+      # Check Black Duck status and upload status file as artifact.
+      # This step is required to be set as always(), so the status file is uploaded even if the Black Duck scan fails.
       - name: Check Black Duck status
         if: always()
         id: check_blackduck_status
