@@ -7,6 +7,7 @@ on:
   pull_request_target:
     paths-ignore:
     - '.github/workflows/**'
+    branches: [ "main" ]
   schedule:
     - cron:  '6 0 * * 0'
   workflow_dispatch:
