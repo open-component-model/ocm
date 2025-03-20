@@ -1,9 +1,12 @@
 name: Blackduck SCA Scan
 on:
   push:
+    paths-ignore:
+    - '.github/workflows/**'
     branches: [ "main" ]
   pull_request_target:
-    branches: [ "main" ]
+    paths-ignore:
+    - '.github/workflows/**'
   schedule:
     - cron:  '6 0 * * 0'
   workflow_dispatch:
