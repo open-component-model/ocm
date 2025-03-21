@@ -26,6 +26,10 @@ import (
 	"ocm.software/ocm/api/utils/refmgmt"
 )
 
+const (
+	azureDomain = "azurecr.io"
+)
+
 type RepositoryInfo struct {
 	Scheme  string
 	Locator string
@@ -134,8 +138,19 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		if pass == "" {
 			pass = creds.GetProperty(credentials.ATTR_PASSWORD)
 		}
+
 		authCreds.Username = creds.GetProperty(credentials.ATTR_USERNAME)
-		authCreds.Password = pass
+		switch {
+		case strings.Contains(r.info.HostPort(), azureDomain):
+			// Azure registry is special in that it requires a RefreshToken instead of an AccessToken or a Password.
+			// None of the other registries need this functionality. Ideally this would be some kind of dynamic
+			// fall-back in case of an Unauthorized error, but right now, this functionality is not supported
+			// by Oras or the structure of this library.
+			// Until that is resolved, this is a working patch offering a functioning cli.
+			authCreds.RefreshToken = pass
+		default:
+			authCreds.Password = pass
+		}
 	}
 
 	client := retry.DefaultClient
