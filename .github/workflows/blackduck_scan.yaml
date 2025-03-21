@@ -29,7 +29,6 @@ jobs:
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
-          DETECT_EXCLUDED_DIRECTORIES: .bridge
           DETECT_BLACKDUCK_SIGNATURE_SCANNER_ARGUMENTS: '--min-scan-interval=0'
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
@@ -39,13 +38,10 @@ jobs:
           blackducksca_scan_full: true
 
       - name: Run Black Duck SCA Scan (Pull Requests)
-        if: ${{ github.event_name == 'pull_request_target' }}
-           # The action sets blackducksca_scan_full internally: for pushes to true and PRs to false
         uses: blackduck-inc/black-duck-security-scan@v2.0.0
         env:
           DETECT_PROJECT_USER_GROUPS: opencomponentmodel
           DETECT_PROJECT_VERSION_DISTRIBUTION: opensource
-          DETECT_EXCLUDED_DIRECTORIES: .bridge
           NODE_TLS_REJECT_UNAUTHORIZED: true
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -61,34 +57,32 @@ jobs:
         shell: bash
         run: |
           # Use find to locate status file
-          STATUS_FILE=$(find "/home/runner/work/ocm-cicd-playground/ocm-cicd-playground/.bridge/Blackduck SCA Detect Execution/detect/runs" -name "status.json" | head -n 1)
+          STATUS_FILE=$(find "$GITHUB_WORKSPACE/.bridge/Blackduck SCA Detect Execution/detect/runs" -name "status.json" | head -n 1)
       
           if [ -z "$STATUS_FILE" ]; then
             echo "::warning file=status.json::No Black Duck status file found"
             exit 1
+          fi
+          
+          ISSUE_COUNT=$(jq '.issues | length' "$STATUS_FILE")
+          
+          if [[ "$ISSUE_COUNT" -eq 0 ]]; then
+            echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
+            echo "Black Duck scan successful, no technical issues during scan."
           else
-            ISSUE_COUNT=$(jq '.issues | length' "$STATUS_FILE")
+            # Technical issues with scan exist, fail step but save file path for upload
+            echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
+            echo "::error file=$STATUS_FILE::Black Duck scan had technical issues:"
             
-            if [[ "$ISSUE_COUNT" -eq 0 ]]; then
-              echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
-              echo "Black Duck scan successfully executed. Status JSON will be uploaded as an artifact to the GitHub action.""
-            else
-              # Issues exist, fail step but save file path for upload
-              echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
-              echo "::error file=$STATUS_FILE::Black Duck scan had issues:"
-              
-              # Extract and print issue details
-              jq -r '.issues[] | "\(.type): \(.title)\n  Details: \((.messages | if type == "string" then [.] else . end) | join("; "))"' status.json | \
-              while IFS= read -r line; do
-                echo "::error::$line"
-              done
-              echo
-              echo "Black Duck Overall Status:"
-              jq -r '.overallStatus[0].key + " - " + .overallStatus[0].status' "$STATUS_FILE"
-              echo
-              echo "Status JSON will be uploaded as an artifact to the GitHub action."
-              exit 1
-            fi
+            # Extract and print issue details
+            jq -r '.issues[] | "\(.type): \(.title)\n  Details: \((.messages | if type == "string" then [.] else . end) | join("; "))"' "$STATUS_FILE" | \
+            while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            echo
+            echo "Black Duck Overall Status:"
+            jq -r '.overallStatus[0].key + " - " + .overallStatus[0].status' "$STATUS_FILE"
+            exit 1
           fi
             
       - name: Upload Blackduck status file
@@ -97,3 +91,4 @@ jobs:
         with:
           name: status-json
           path: ${{ steps.check_blackduck_status.outputs.status_file_path }}
+  
