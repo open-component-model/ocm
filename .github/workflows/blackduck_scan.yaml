@@ -63,15 +63,14 @@ jobs:
             echo "::warning file=status.json::No Black Duck status file found"
             exit 1
           fi
-          
+
+          echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
           ISSUE_COUNT=$(jq '.issues | length' "$STATUS_FILE")
           
           if [[ "$ISSUE_COUNT" -eq 0 ]]; then
-            echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
             echo "Black Duck scan successful, no technical issues during scan."
           else
-            # Technical issues with scan exist, fail step but save file path for upload
-            echo "status_file_path=$STATUS_FILE" >> "$GITHUB_OUTPUT"
+            # Technical issues with scan exist
             echo "::error file=$STATUS_FILE::Black Duck scan had technical issues:"
             
             # Extract and print issue details
@@ -91,4 +90,4 @@ jobs:
         with:
           name: status-json
           path: ${{ steps.check_blackduck_status.outputs.status_file_path }}
-  
+     
