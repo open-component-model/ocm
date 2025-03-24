@@ -130,12 +130,11 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 
 	authCreds := auth.Credential{}
 	if creds != nil {
-		pass := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
-		if pass == "" {
-			pass = creds.GetProperty(credentials.ATTR_PASSWORD)
+		authCreds = auth.Credential{
+			Username:     creds.GetProperty(credentials.ATTR_USERNAME),
+			Password:     creds.GetProperty(credentials.ATTR_PASSWORD),
+			RefreshToken: creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN),
 		}
-		authCreds.Username = creds.GetProperty(credentials.ATTR_USERNAME)
-		authCreds.Password = pass
 	}
 
 	client := retry.DefaultClient
