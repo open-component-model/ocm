@@ -130,10 +130,26 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 
 	authCreds := auth.Credential{}
 	if creds != nil {
+		username := creds.GetProperty(credentials.ATTR_USERNAME)
+		password := creds.GetProperty(credentials.ATTR_PASSWORD)
+		token := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
+
+		// If ATTR_PASSWORD was not set but there IS a username defined we do have an ATTR_IDENTITY_TOKEN set,
+		// we have to provide that token through the `Password` field for authentication.
+		if password == "" && token != "" && username != "" {
+			password = token
+		}
+
 		authCreds = auth.Credential{
-			Username:     creds.GetProperty(credentials.ATTR_USERNAME),
-			Password:     creds.GetProperty(credentials.ATTR_PASSWORD),
-			RefreshToken: creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN),
+			Username: username,
+			Password: password,
+		}
+
+		// If there was NO username set ( for example, docker login, azure login, etc... ) but the token
+		// IS set we are dealing with a RefreshToken. RefreshTokens CANNOT be used together with a username.
+		// There are checks for that resulting in a "The operation is unsupported" error.
+		if token != "" && username == "" {
+			authCreds.RefreshToken = token
 		}
 	}
 
