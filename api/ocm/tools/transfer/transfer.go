@@ -1,6 +1,7 @@
 package transfer
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -23,14 +24,23 @@ type WalkingState = common.WalkingState[*struct{}, interface{}]
 type TransportClosure = common.NameVersionInfo[*struct{}]
 
 func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
+	return TransferVersionWithContext(common.WithPrinter(context.Background(), common.AssurePrinter(printer)), closure, src, tgt, handler)
+}
+
+func TransferVersionWithContext(ctx context.Context, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
 	state := WalkingState{Closure: closure}
-	return transferVersion(common.AssurePrinter(printer), Logger(src), state, src, tgt, handler)
+	return transferVersion(ctx, Logger(src), state, src, tgt, handler)
 }
 
-func transferVersion(printer common.Printer, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) (rerr error) {
+func transferVersion(ctx context.Context, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) (rerr error) {
+	printer := common.GetPrinter(ctx)
+	if err := common.IsContextCanceled(ctx); err != nil {
+		printer.Printf("transfer cancelled by caller\n")
+		return err
+	}
 	nv := common.VersionedElementKey(src)
 	log = log.WithValues("history", state.History.String(), "version", nv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
@@ -155,7 +165,6 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		return errors.Wrapf(err, "%s: creating target version", state.History)
 	}
 
-	subp := printer.AddGap("  ")
 	list := errors.ErrListf("component references for %s", nv)
 	log.Info("  transferring references")
 	for _, r := range d.References {
@@ -164,7 +173,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
 		}
 		if cv != nil {
-			list.Add(transferVersion(subp, log.WithValues("ref", r.Name), state, cv, tgt, shdlr))
+			list.Add(transferVersion(common.AddPrinterGap(ctx, "  "), log.WithValues("ref", r.Name), state, cv, tgt, shdlr))
 			list.Addf(nil, cv.Close(), "closing reference %s", r.Name)
 		}
 	}
