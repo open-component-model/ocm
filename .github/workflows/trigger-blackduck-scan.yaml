@@ -1,0 +1,26 @@
+# Trigger central Black Duck scan workflow for the Open Component Model project.
+name: Trigger Blackduck Scan
+on: 
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    branches: [ "main" ]
+  pull_request_target:
+    paths-ignore:
+    - '.github/workflows/**'
+    branches: [ "main" ]
+  schedule:
+    - cron:  '25 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  trigger-scan:
+    uses: open-component-model/.github/.github/workflows/blackduck-scan.yaml@47e68e42a6d78125d519e6e008c2b203385a0a72
+    with:
+      # required to be able to differentiate between PRs and pushes in the called workflow (rapid or full scan)
+      event_type: ${{ github.event_name }}
+    secrets:
+      BLACKDUCK_API_TOKEN: ${{ secrets.BLACKDUCK_API_TOKEN }}
+      BLACKDUCK_URL: ${{ secrets.BLACKDUCK_URL }}
+    permissions:
+      contents: read
