@@ -2,14 +2,11 @@ name: lint-and-test
 
 on:
   pull_request:
-    paths-ignore:
-      - ".github/workflows/**"
+    
   workflow_call:
   push:
     branches:
       - main
-    paths-ignore:
-      - ".github/workflows/**"
 
 permissions:
   contents: read
