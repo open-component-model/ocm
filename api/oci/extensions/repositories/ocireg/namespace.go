@@ -147,7 +147,8 @@ func (n *NamespaceContainer) GetArtifact(i support.NamespaceAccessImpl, vers str
 		if errdefs.IsNotFound(err) {
 			return nil, errors.ErrNotFound(cpi.KIND_OCIARTIFACT, ref, n.impl.GetNamespace())
 		}
-		return nil, err
+
+		return nil, errors.ErrUnknown(cpi.KIND_OCIARTIFACT, err.Error())
 	}
 	blobData, err := n.blobs.Get(desc.MediaType)
 	if err != nil {
