@@ -274,8 +274,7 @@ jobs:
     uses: open-component-model/.github/.github/workflows/bdba.yaml@main
     with:
       artifact_id: ctf-aggregated
-    secrets:
-      secrets: inherit
+    secrets: inherit
     permissions:
       contents: read 
       actions: read
