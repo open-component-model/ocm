@@ -274,10 +274,7 @@ jobs:
     uses: open-component-model/.github/.github/workflows/bdba.yaml@main
     with:
       artifact_id: ctf-aggregated
-    secrets:
-      BDBA_API_TOKEN: ${{ secrets.BDBA_API_TOKEN }}
-      BDBA_URL: ${{ secrets.BDBA_URL }}
-      BDBA_GROUP_ID: ${{ secrets.BDBA_GROUP_ID }}
+    secrets: inherit
     permissions:
       contents: read 
       actions: read
