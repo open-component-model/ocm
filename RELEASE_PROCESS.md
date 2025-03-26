@@ -30,8 +30,8 @@ and delivered to end users willing to test the new release.
 
 ### Schedule
 
-Minor releases are done every sprint, i.e. every two weeks. To be even more precise,
-technically speaking, two releases are produced every sprint:
+Minor releases should be produced on the first day of every sprint, i.e. every two weeks. To be even more precise,
+technically speaking, two releases are done every sprint:
 
 * Release Candidate for the current version in main
 * Promotion of the previous sprint's candidate to an official minor version, which means there
