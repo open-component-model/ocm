@@ -270,7 +270,7 @@ func _apply(cctx context.Context, state WalkingState, nv common.NameVersion, cv 
 		if err := calculateReferenceDigests(cctx, state, opts, legacy); err != nil {
 			return nil, err
 		}
-		if err := calculateResourceDigests(state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
+		if err := calculateResourceDigests(cctx, state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
 			return nil, err
 		}
 		dt := ctx.DigestType
@@ -625,13 +625,18 @@ func calculateReferenceDigests(cctx context.Context, state WalkingState, opts *O
 	return nil
 }
 
-func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) (rerr error) {
+func calculateResourceDigests(cctx context.Context, state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) (rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
 	octx := cv.GetContext()
 	blobdigesters := octx.BlobDigesters()
 	for i, res := range cv.GetResources() {
+		if err := common.IsContextCanceled(cctx); err != nil {
+			opts.Printer.Printf("cancelled by caller\n")
+			return err
+		}
+
 		loop := finalize.Nested()
 
 		meta := res.Meta()

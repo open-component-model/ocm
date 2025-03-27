@@ -205,7 +205,7 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 		// corrupted content in target.
 		// If no copy is done, merge must keep the access methods in target!!!
 		if !doMerge || doCopy {
-			err = copyVersion(printer, log, state.History, src, t, n, handler)
+			err = copyVersion(ctx, printer, log, state.History, src, t, n, handler)
 			if err != nil {
 				return err
 			}
@@ -221,11 +221,15 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 }
 
 func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	return copyVersion(common.AssurePrinter(printer), log, hist, src, t, src.GetDescriptor().Copy(), handler)
+	return copyVersion(context.Background(), common.AssurePrinter(printer), log, hist, src, t, src.GetDescriptor().Copy(), handler)
+}
+
+func CopyVersionWithContext(cctx context.Context, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
+	return copyVersion(cctx, common.GetPrinter(cctx), log, hist, src, t, src.GetDescriptor().Copy(), handler)
 }
 
 // copyVersion (purely internal) expects an already prepared target comp desc for t given as prep.
-func copyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler) (rerr error) {
+func copyVersion(cctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler) (rerr error) {
 	var finalize finalizer.Finalizer
 
 	defer errors.PropagateError(&rerr, finalize.Finalize)
@@ -240,6 +244,11 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 	log.Info("  transferring resources")
 	for i, r := range src.GetResources() {
 		var m ocmcpi.AccessMethod
+
+		if err := common.IsContextCanceled(cctx); err != nil {
+			printer.Printf("cancelled by caller\n")
+			return err
+		}
 
 		nested := finalize.Nested()
 
@@ -303,6 +312,11 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 	log.Info("  transferring sources")
 	for i, r := range src.GetSources() {
 		var m ocmcpi.AccessMethod
+
+		if err := common.IsContextCanceled(cctx); err != nil {
+			printer.Printf("cancelled by caller\n")
+			return err
+		}
 
 		a, err := r.Access()
 		if err == nil {
