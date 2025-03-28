@@ -9,8 +9,7 @@ updates:
         patterns:
           - "*"
     schedule:
-      interval: "weekly"
-      day: "sunday"
+      interval: "daily"
     labels:
       - kind/dependency
       - kind/chore
