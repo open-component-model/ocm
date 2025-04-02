@@ -2,6 +2,11 @@ module ocm.software/ocm
 
 go 1.24.0
 
+// Add retract directive for v0.22.0
+retract (
+    v0.22.0 // Accidental release with incorrect content
+)
+
 replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 
 require (
