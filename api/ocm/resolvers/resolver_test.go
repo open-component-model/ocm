@@ -42,25 +42,29 @@ var _ = Describe("resolver", func() {
 		env.Cleanup()
 	})
 
-	It("lookup cv per standard resolver", func() {
-		// ocmlog.Context().AddRule(logging.NewConditionRule(logging.TraceLevel, accessio.ALLOC_REALM))
+	Context("resolver", func() {
+		var ctx ocm.Context
 
-		ctx := ocm.New()
+		BeforeEach(func() {
+			ctx = ocm.New()
+			spec := Must(ctf.NewRepositorySpec(accessobj.ACC_READONLY, ARCH, env))
+			ctx.AddResolverRule("ocm.software", spec, 10)
+		})
 
-		spec := Must(ctf.NewRepositorySpec(accessobj.ACC_READONLY, ARCH, env))
-		ctx.AddResolverRule("ocm.software", spec, 10)
+		It("lookup cv per standard resolver", func() {
+			cv := Must(ctx.GetResolver().LookupComponentVersion(COMPONENT, VERSION))
+			Close(cv)
+			Expect(ctx.Finalize()).To(Succeed())
+		})
 
-		cv := Must(ctx.GetResolver().LookupComponentVersion(COMPONENT, VERSION))
+		It("lookup cv per version resolver", func() {
+			vr := Must(resolvers.VersionResolverForComponent(COMPONENT, ctx.GetResolver().(resolvers.ComponentResolver)))
+			Expect(vr.ListVersions()).To(ContainElements(VERSION))
 
-		/*
-			err := cv.Repository().Close()
-			if err != nil {
-				defer cv.Close()
-				Expect(err).To(Succeed())
-			}
-		*/
-		Close(cv)
-		Expect(ctx.Finalize()).To(Succeed())
+			cv := Must(vr.LookupVersion(VERSION))
+			Close(cv)
+			Expect(ctx.Finalize()).To(Succeed())
+		})
 	})
 
 	It("orders resolver rules", func() {
