@@ -1,6 +1,7 @@
 package signing
 
 import (
+	"context"
 	"crypto"
 	"encoding/hex"
 	"fmt"
@@ -107,6 +108,14 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 		opts = opts.Dup()
 		opts.Printer = printer
 	}
+	return ApplyWithContext(context.Background(), state, cv, opts, closecv...)
+}
+
+func ApplyWithContext(ctx context.Context, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
+	if opts.Printer == nil {
+		opts = opts.Dup()
+		opts.Printer = common.GetPrinter(ctx)
+	}
 	err := opts.Complete(cv.GetContext())
 	if err != nil {
 		return nil, err
@@ -114,7 +123,7 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 	if state == nil {
 		state = DefaultWalkingState(cv.GetContext())
 	}
-	dc, err := apply(*state, cv, opts, general.Optional(closecv...))
+	dc, err := apply(ctx, *state, cv, opts, general.Optional(closecv...))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +149,7 @@ func RequireReProcessing(vi *VersionInfo, ctx *DigestContext, opts *Options) boo
 	return opts.DoSign() && !vi.digestingContexts[ctx.CtxKey].Signed
 }
 
-func apply(state WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv bool) (dc *DigestContext, efferr error) {
+func apply(ctx context.Context, state WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv bool) (dc *DigestContext, efferr error) {
 	var closer errors.ErrorFunction
 	if closecv {
 		closer = func() error {
@@ -163,10 +172,15 @@ func apply(state WalkingState, cv ocm.ComponentVersionAccess, opts *Options, clo
 			return dc, nil
 		}
 	}
-	return _apply(state, nv, cv, vi, opts)
+	return _apply(ctx, state, nv, cv, vi, opts)
 }
 
-func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAccess, vi *VersionInfo, opts *Options) (*DigestContext, error) { //nolint: maintidx // yes
+func _apply(cctx context.Context, state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAccess, vi *VersionInfo, opts *Options) (*DigestContext, error) { //nolint: maintidx // yes
+	if err := common.IsContextCanceled(cctx); err != nil {
+		opts.Printer.Printf("cancelled by caller\n")
+		return nil, err
+	}
+
 	prefix := ""
 	var ctx *DigestContext
 	if vi == nil {
@@ -213,7 +227,7 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		// digests used for the existing signatures.
 		substate := state
 		substate.Context = nil
-		nctx, err := _apply(substate, nv, cv, vi, opts)
+		nctx, err := _apply(cctx, substate, nv, cv, vi, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -253,10 +267,10 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 	var spec *metav1.DigestSpec
 	legacy := signing.IsLegacyHashAlgorithm(ctx.RootContextInfo.DigestType.HashAlgorithm) && !opts.DoSign()
 	if ctx.Digest == nil {
-		if err := calculateReferenceDigests(state, opts, legacy); err != nil {
+		if err := calculateReferenceDigests(cctx, state, opts, legacy); err != nil {
 			return nil, err
 		}
-		if err := calculateResourceDigests(state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
+		if err := calculateResourceDigests(cctx, state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
 			return nil, err
 		}
 		dt := ctx.DigestType
@@ -544,7 +558,7 @@ func GetPublicKeyFromSignature(sig *compdesc.Signature, sctx signing.SigningCont
 	return cert.PublicKey, nil
 }
 
-func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) (rerr error) {
+func calculateReferenceDigests(cctx context.Context, state WalkingState, opts *Options, legacy bool) (rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
@@ -568,7 +582,7 @@ func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) (
 
 		if nctx == nil || opts.Recursively || opts.Verify {
 			digestOpts := opts.Nested()
-			nctx, err = apply(state, nested, digestOpts, false)
+			nctx, err = apply(cctx, state, nested, digestOpts, false)
 			if err != nil {
 				return errors.Wrap(err, refMsg(reference, "failed applying to component reference"))
 			}
@@ -611,13 +625,18 @@ func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) (
 	return nil
 }
 
-func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) (rerr error) {
+func calculateResourceDigests(cctx context.Context, state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) (rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
 	octx := cv.GetContext()
 	blobdigesters := octx.BlobDigesters()
 	for i, res := range cv.GetResources() {
+		if err := common.IsContextCanceled(cctx); err != nil {
+			opts.Printer.Printf("cancelled by caller\n")
+			return err
+		}
+
 		loop := finalize.Nested()
 
 		meta := res.Meta()

@@ -1,6 +1,7 @@
 package standard_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -107,6 +108,26 @@ var _ = Describe("Transfer handler", func() {
 
 	AfterEach(func() {
 		env.Cleanup()
+	})
+
+	It("cancelled", func() {
+		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+		defer Close(src, "source")
+		cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+		defer Close(cv, "source cv")
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
+		defer Close(tgt, "target")
+
+		// handler, err := standard.New(standard.ResourcesByValue())
+		p, buf := common.NewBufferedPrinter()
+		opts := []transferhandler.TransferOption{standard.ResourcesByValue(), &optionsChecker{}}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		ctx = common.WithPrinter(ctx, p)
+		cancel()
+		ExpectError(transfer.TransferWithContext(ctx, cv, tgt, opts...)).To(MatchError(context.Canceled))
+
+		Expect(buf.String()).To(Equal("transfer cancelled by caller\n"))
 	})
 
 	It("test", func() {
