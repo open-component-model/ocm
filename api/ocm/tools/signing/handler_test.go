@@ -1,9 +1,13 @@
 package signing_test
 
 import (
+	"context"
+
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
+	common "ocm.software/ocm/api/utils/misc"
 
 	"ocm.software/ocm/api/ocm"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -32,6 +36,31 @@ var _ = Describe("Simple signing handlers", func() {
 		BeforeEach(func() {
 			cv = composition.NewComponentVersion(ctx, COMPONENTA, VERSION)
 			MustBeSuccessful(cv.SetResourceBlob(ocm.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), blobaccess.ForString(mime.MIME_TEXT, "test data"), "", nil))
+		})
+
+		It("cancelled", func() {
+			var opts signing.Options
+			p, buf := common.NewBufferedPrinter()
+			opts.Printer = p
+
+			opts.Eval(
+				signing.SignatureName("signature"),
+				signing.Update(),
+				signing.Recursive(),
+				signing.VerifyDigests(),
+
+				signing.PrivateKey("signature", priv),
+				signing.SignerByAlgo(rsa.Algorithm),
+			)
+
+			if opts.Signer == nil {
+				opts.Signer = signingattr.Get(cv.GetContext()).GetSigner(rsa.Algorithm)
+			}
+			MustBeSuccessful(opts.Complete(cv.GetContext()))
+			ctx, cancel := context.WithCancel(context.Background())
+			cancel()
+			ExpectError(signing.ApplyWithContext(ctx, nil, cv, &opts)).To(MatchError(context.Canceled))
+			Expect(buf.String()).To(Equal("cancelled by caller\n"))
 		})
 
 		DescribeTable("rsa handlers", func(kind string) {
