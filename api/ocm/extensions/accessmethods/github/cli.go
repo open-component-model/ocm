@@ -11,12 +11,14 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 		options.RepositoryOption,
 		options.HostnameOption,
 		options.CommitOption,
+		options.ReferenceOption,
 	)
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "repoUrl")
 	flagsets.AddFieldByOptionP(opts, options.CommitOption, config, "commit")
+	flagsets.AddFieldByOptionP(opts, options.ReferenceOption, config, "ref")
 	flagsets.AddFieldByOptionP(opts, options.HostnameOption, config, "apiHostname")
 	return nil
 }
@@ -35,9 +37,9 @@ The type specific specification fields are:
 
 - **<code>ref</code>** (optional) *string*
 
-  Original ref used to get the commit from
+  Original ref used to get the commit from. Mutually exclusive with <code>ref</code>.
 
 - **<code>commit</code>** *string*
 
-  The sha/id of the git commit
+  The sha/id of the git commit. Mutually exclusive with <code>commit</code>.
 `
