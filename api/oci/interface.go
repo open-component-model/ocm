@@ -38,6 +38,8 @@ type (
 	BlobAccess                       = internal.BlobAccess
 	DataAccess                       = internal.DataAccess
 	ConsumerIdentityProvider         = internal.ConsumerIdentityProvider
+
+	UniformRepositorySpecProvider = internal.UniformRepositorySpecProvider
 )
 
 func DefaultContext() internal.Context {
