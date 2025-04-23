@@ -13,7 +13,6 @@ import (
 
 	"github.com/distribution/reference"
 	"github.com/docker/cli/cli/command"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	registrytypes "github.com/docker/docker/api/types/registry"
@@ -506,10 +505,10 @@ func generateTar(files map[string]blobaccess.BlobAccess, uid int) (io.ReadCloser
 // ConfigurationOption is an option used to customize docker driver container and host config.
 type ConfigurationOption func(*container.Config, *container.HostConfig) error
 
-// inspectImage inspects the operation image and returns an object of types.ImageInspect,
+// inspectImage inspects the operation image and returns an object of image.InspectResponse,
 // pulling the image if not found locally.
-func (d *Driver) inspectImage(ctx context.Context, image string) (types.ImageInspect, error) {
-	ii, _, err := d.dockerCli.Client().ImageInspectWithRaw(ctx, image)
+func (d *Driver) inspectImage(ctx context.Context, image string) (image.InspectResponse, error) {
+	ii, err := d.dockerCli.Client().ImageInspect(ctx, image)
 	switch {
 	case client.IsErrNotFound(err):
 		fmt.Fprintf(d.dockerCli.Err(), "Unable to find image '%s' locally\n", image)
@@ -519,7 +518,7 @@ func (d *Driver) inspectImage(ctx context.Context, image string) (types.ImageIns
 		if err := pullImage(ctx, d.dockerCli, image); err != nil {
 			return ii, err
 		}
-		if ii, _, err = d.dockerCli.Client().ImageInspectWithRaw(ctx, image); err != nil {
+		if ii, err = d.dockerCli.Client().ImageInspect(ctx, image); err != nil {
 			return ii, errors.Wrapf(err, "cannot inspect image %s", image)
 		}
 	case err != nil:
