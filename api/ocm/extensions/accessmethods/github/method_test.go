@@ -114,7 +114,6 @@ var _ = Describe("Method", func() {
 			content, err := m.Get()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(content).To(Equal(expectedBlobContent))
-
 		},
 		Entry("with commit", "https://github.com/test/test", "", "7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f", "", "https://api.github.com/repos/test/test/tarball/7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f"),
 		Entry("with ref", "https://github.com/test/test", "", "", "refs/heads/main", "https://api.github.com/repos/test/test/tarball/refs/heads/main"),

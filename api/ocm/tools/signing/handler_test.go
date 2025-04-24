@@ -6,12 +6,11 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
-	common "ocm.software/ocm/api/utils/misc"
 
 	"ocm.software/ocm/api/ocm"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
+	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
 	"ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
@@ -19,6 +18,7 @@ import (
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
+	common "ocm.software/ocm/api/utils/misc"
 )
 
 var _ = Describe("Simple signing handlers", func() {
