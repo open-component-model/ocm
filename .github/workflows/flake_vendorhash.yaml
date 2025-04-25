@@ -26,7 +26,7 @@ jobs:
         with:
           token: ${{ steps.generate_token.outputs.token }}
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v16
+        uses: DeterminateSystems/nix-installer-action@v17
         with:
           nix-package-url: https://releases.nixos.org/nix/nix-2.26.2/nix-2.26.2-x86_64-linux.tar.xz
       - name: Update ocm vendor hash
