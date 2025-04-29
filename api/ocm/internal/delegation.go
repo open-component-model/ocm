@@ -4,7 +4,9 @@ import (
 	"sort"
 	"sync"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/maputils"
+
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -47,7 +49,7 @@ var _ DelegationRegistry[Context, RepositorySpec] = (*delegationRegistry[Context
 func NewDelegationRegistry[C any, T runtime.TypedObject](base ...DelegationRegistry[C, T]) DelegationRegistry[C, T] {
 	return &delegationRegistry[C, T]{
 		decoders: map[string]PriorityDecoder[C, T]{},
-		base:     utils.Optional(base...),
+		base:     general.Optional(base...),
 	}
 }
 
@@ -92,7 +94,7 @@ func (d *delegationRegistry[C, T]) Decode(ctx C, data []byte, unmarshaller runti
 	var list []PriorityDecoder[C, T]
 
 	delegates := d.Delegations()
-	names := utils.StringMapKeys(delegates)
+	names := maputils.OrderedKeys(delegates)
 
 	for _, n := range names {
 		list = append(list, delegates[n])

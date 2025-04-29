@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/tech/oci/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var _ = Describe("consumer id handling", func() {
@@ -41,7 +41,7 @@ var _ = Describe("consumer id handling", func() {
 
 		creds = Must(credentials.CredentialsForConsumer(credctx, id))
 
-		Expect(creds.Properties()).To(Equal(common.Properties{
+		Expect(creds.Properties()).To(Equal(misc.Properties{
 			identity.ATTR_USERNAME: "test",
 			identity.ATTR_PASSWORD: "password",
 		}))

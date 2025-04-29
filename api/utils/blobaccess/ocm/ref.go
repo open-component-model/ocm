@@ -2,12 +2,12 @@ package ocm
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/selectors/rscsel"
-	"ocm.software/ocm/api/utils"
 )
 
 // ResourceProvider selects a resource from a component version.
@@ -57,7 +57,7 @@ func ByResourcePath(id metav1.Identity, path ...metav1.Identity) ResourceProvide
 }
 
 func ByResourceRef(ref metav1.ResourceReference, res ...cpi.ComponentVersionResolver) ResourceProvider {
-	return &byref{utils.Optional(res...), ref}
+	return &byref{general.Optional(res...), ref}
 }
 
 func (r *byref) GetResource(cv cpi.ComponentVersionAccess) (cpi.ResourceAccess, cpi.ComponentVersionAccess, error) {

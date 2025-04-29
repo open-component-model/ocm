@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -16,7 +17,6 @@ import (
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/tech/signing/signutils"
-	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/misccmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
@@ -92,14 +92,14 @@ func (o *Command) Complete(args []string) error {
 	}
 
 	if o.pubFile != "" {
-		o.pub, err = utils2.ReadFile(o.pubFile, o.FileSystem())
+		o.pub, err = optionutils.ReadFile(o.pubFile, o.FileSystem())
 		if err != nil {
 			return err
 		}
 	}
 
 	if o.rootFile != "" {
-		roots, err := utils2.ReadFile(o.rootFile, o.FileSystem())
+		roots, err := optionutils.ReadFile(o.rootFile, o.FileSystem())
 		if err != nil {
 			return err
 		}
@@ -112,7 +112,7 @@ func (o *Command) Complete(args []string) error {
 	if len(o.rootCAs) > 0 {
 		var list []*x509.Certificate
 		for _, r := range o.rootCAs {
-			data, err := utils2.ReadFile(r, o.FileSystem())
+			data, err := optionutils.ReadFile(r, o.FileSystem())
 			if err != nil {
 				return errors.Wrapf(err, "root CA")
 			}
@@ -131,7 +131,7 @@ func (o *Command) Complete(args []string) error {
 		}
 	}
 
-	o.priv, err = utils2.ReadFile(args[0], o.FileSystem())
+	o.priv, err = optionutils.ReadFile(args[0], o.FileSystem())
 	if err != nil {
 		return err
 	}

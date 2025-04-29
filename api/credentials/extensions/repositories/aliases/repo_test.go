@@ -9,13 +9,13 @@ import (
 
 	"ocm.software/ocm/api/credentials"
 	local "ocm.software/ocm/api/credentials/extensions/repositories/aliases"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var DefaultContext = credentials.New()
 
 var _ = Describe("alias credentials", func() {
-	props := common.Properties{
+	props := misc.Properties{
 		"user":     "USER",
 		"password": "PASSWORD",
 	}

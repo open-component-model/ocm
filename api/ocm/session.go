@@ -9,7 +9,7 @@ import (
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/ocm/internal"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -156,7 +156,7 @@ func (s *session) LookupComponentVersion(r ComponentVersionResolver, comp, vers 
 
 	key := datacontext.ObjectKey{
 		Object: r,
-		Name:   common.NewNameVersion(comp, vers).String(),
+		Name:   misc.NewNameVersion(comp, vers).String(),
 	}
 	s.base.Lock()
 	defer s.base.Unlock()

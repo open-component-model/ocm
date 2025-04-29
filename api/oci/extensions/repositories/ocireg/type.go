@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/containerd/containerd/reference"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/tech/oci/identity"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/tcp"
 )
@@ -147,7 +147,7 @@ func (a *RepositorySpec) GetConsumerId(uctx ...credentials.UsageContext) credent
 	if err != nil {
 		return nil
 	}
-	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
+	if c, ok := general.Optional(uctx...).(credentials.StringUsageContext); ok {
 		return identity.GetConsumerId(info.Locator, c.String())
 	}
 	return identity.GetConsumerId(info.Locator, "")

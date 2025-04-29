@@ -5,6 +5,8 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/ioutils"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -13,12 +15,11 @@ import (
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 )
 
@@ -51,7 +52,7 @@ func (o *ExecutorOptions) Complete() error {
 	if o.ComponentVersionName == "" {
 		return fmt.Errorf("component version required")
 	}
-	compvers, err := common.ParseNameVersion(o.ComponentVersionName)
+	compvers, err := misc.ParseNameVersion(o.ComponentVersionName)
 	if err != nil {
 		return fmt.Errorf("unable to parse component name and version: %w", err)
 	}
@@ -88,14 +89,14 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.Config != "" && o.ConfigData == nil {
-		o.ConfigData, err = utils.ReadFile(o.Config, o.FileSystem())
+		o.ConfigData, err = optionutils.ReadFile(o.Config, o.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "cannot read config %q", o.Config)
 		}
 	}
 
 	if o.OCMConfig == "" {
-		cfg, err := utils.ResolvePath(o.Inputs + "/" + install.InputOCMConfig)
+		cfg, err := ioutils.ResolvePath(o.Inputs + "/" + install.InputOCMConfig)
 		if err != nil {
 			return errors.Wrapf(err, "cannot resolve OCM config %q", o.Inputs)
 		}
@@ -110,7 +111,7 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.Parameters == "" {
-		p, err := utils.ResolvePath(o.Inputs + "/" + install.InputParameters)
+		p, err := ioutils.ResolvePath(o.Inputs + "/" + install.InputParameters)
 		if err != nil {
 			return errors.Wrapf(err, "cannot resolve path %q", o.Inputs)
 		}
@@ -120,7 +121,7 @@ func (o *ExecutorOptions) Complete() error {
 	}
 
 	if o.Parameters != "" && o.ParameterData == nil {
-		o.ParameterData, err = utils.ReadFile(o.Parameters, o.FileSystem())
+		o.ParameterData, err = optionutils.ReadFile(o.Parameters, o.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "cannot read parameters %q", o.Config)
 		}

@@ -12,19 +12,19 @@ import (
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type RootContextInfo struct {
-	CtxKey     common.NameVersion
+	CtxKey     misc.NameVersion
 	Sign       bool
 	DigestType ocm.DigesterType
 	Hasher     signing.Hasher
-	In         map[common.NameVersion]*metav1.NestedComponentDigests
-	Out        map[common.NameVersion]*metav1.NestedComponentDigests
+	In         map[misc.NameVersion]*metav1.NestedComponentDigests
+	Out        map[misc.NameVersion]*metav1.NestedComponentDigests
 }
 
-func (dc *RootContextInfo) GetPreset(nv common.NameVersion) *metav1.NestedComponentDigests {
+func (dc *RootContextInfo) GetPreset(nv misc.NameVersion) *metav1.NestedComponentDigests {
 	if p := dc.Out[nv]; p != nil {
 		return p
 	}
@@ -37,27 +37,27 @@ func (dc *RootContextInfo) GetPreset(nv common.NameVersion) *metav1.NestedCompon
 type DigestContext struct {
 	*RootContextInfo
 
-	Key        common.NameVersion
+	Key        misc.NameVersion
 	Parent     *DigestContext
 	Descriptor *compdesc.ComponentDescriptor
 	Digest     *metav1.DigestSpec
 	Signed     bool
-	Source     common.NameVersion
-	Refs       map[common.NameVersion]*metav1.DigestSpec
+	Source     misc.NameVersion
+	Refs       map[misc.NameVersion]*metav1.DigestSpec
 }
 
 func NewDigestContext(cd *compdesc.ComponentDescriptor, parent *DigestContext) *DigestContext {
 	var root *RootContextInfo
 
-	key := common.VersionedElementKey(cd)
+	key := misc.VersionedElementKey(cd)
 	if parent == nil {
 		root = &RootContextInfo{
 			CtxKey: key,
-			Out:    map[common.NameVersion]*metav1.NestedComponentDigests{},
-			In:     map[common.NameVersion]*metav1.NestedComponentDigests{},
+			Out:    map[misc.NameVersion]*metav1.NestedComponentDigests{},
+			In:     map[misc.NameVersion]*metav1.NestedComponentDigests{},
 		}
 		for _, c := range cd.NestedDigests {
-			nv := common.NewNameVersion(c.Name, c.Version)
+			nv := misc.NewNameVersion(c.Name, c.Version)
 			digs := metav1.NestedComponentDigests{
 				Name:    nv.GetName(),
 				Version: nv.GetVersion(),
@@ -82,7 +82,7 @@ func NewDigestContext(cd *compdesc.ComponentDescriptor, parent *DigestContext) *
 		Key:             key,
 		Parent:          parent,
 		Descriptor:      cd,
-		Refs:            map[common.NameVersion]*metav1.DigestSpec{},
+		Refs:            map[misc.NameVersion]*metav1.DigestSpec{},
 	}
 }
 

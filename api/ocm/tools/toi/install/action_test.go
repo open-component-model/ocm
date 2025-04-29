@@ -19,7 +19,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -46,7 +46,7 @@ var _ = Describe("Transfer handler", func() {
 	var driver *Driver
 
 	cid1 := credentials.NewConsumerIdentity("test", hostpath.ID_HOSTNAME, "test.de")
-	creds1 := credentials.NewCredentials(common.Properties{"user": "test", "password": "pw"})
+	creds1 := credentials.NewCredentials(misc.Properties{"user": "test", "password": "pw"})
 
 	BeforeEach(func() {
 		env = NewBuilder(FileSystem(memoryfs.New(), ""))
@@ -73,7 +73,7 @@ var _ = Describe("Transfer handler", func() {
 	It("executes with credential substitution", func() {
 		env.CredentialsContext().SetCredentialsForConsumer(cid1, creds1)
 
-		p, _ := common.NewBufferedPrinter()
+		p, _ := misc.NewBufferedPrinter()
 
 		mapping := `
 testparam: (( merge ))
@@ -131,7 +131,7 @@ testparam: value
 	It("executes with credential property substitution", func() {
 		env.CredentialsContext().SetCredentialsForConsumer(cid1, creds1)
 
-		p, _ := common.NewBufferedPrinter()
+		p, _ := misc.NewBufferedPrinter()
 
 		mapping := `
 testparam: (( merge ))
@@ -185,11 +185,11 @@ testparam: value
 	})
 
 	It("executes with single credential property substitution", func() {
-		creds1 := credentials.NewCredentials(common.Properties{"user": "test"})
+		creds1 := credentials.NewCredentials(misc.Properties{"user": "test"})
 
 		env.CredentialsContext().SetCredentialsForConsumer(cid1, creds1)
 
-		p, _ := common.NewBufferedPrinter()
+		p, _ := misc.NewBufferedPrinter()
 
 		mapping := `
 testparam: (( merge ))
@@ -245,7 +245,7 @@ testparam: value
 	It("executes with optional credential substitution without credentials", func() {
 		env.CredentialsContext().SetCredentialsForConsumer(cid1, creds1)
 
-		p, _ := common.NewBufferedPrinter()
+		p, _ := misc.NewBufferedPrinter()
 
 		mapping := `
 testparam: (( merge ))

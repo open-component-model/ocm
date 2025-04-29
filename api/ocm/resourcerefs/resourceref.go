@@ -10,7 +10,7 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	ocm "ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/resolvers"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity, resolver ocm.ComponentVersionResolver) (ocm.ComponentVersionAccess, error) {
@@ -29,7 +29,7 @@ func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity,
 		final.Close(eff)
 		cref, err := eff.GetReference(cr)
 		if err != nil {
-			return nil, errors.Wrapf(err, "%s", common.VersionedElementKey(cv))
+			return nil, errors.Wrapf(err, "%s", misc.VersionedElementKey(cv))
 		}
 
 		compoundResolver := resolvers.NewCompoundResolver(eff.Repository(), resolver)

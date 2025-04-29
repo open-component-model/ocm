@@ -2,7 +2,7 @@ package directcreds
 
 import (
 	"ocm.software/ocm/api/credentials/cpi"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -19,7 +19,7 @@ func init() {
 // RepositorySpec describes a repository interface for single direct credentials.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	Properties                  common.Properties `json:"properties"`
+	Properties                  misc.Properties `json:"properties"`
 }
 
 var (
@@ -28,7 +28,7 @@ var (
 )
 
 // NewRepositorySpec creates a new RepositorySpec.
-func NewRepositorySpec(credentials common.Properties) *RepositorySpec {
+func NewRepositorySpec(credentials misc.Properties) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Properties:          credentials,

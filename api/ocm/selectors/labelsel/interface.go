@@ -7,12 +7,12 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	"gopkg.in/op/go-logging.v1"
 
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -64,7 +64,7 @@ func (n signed) MatchLabel(l *v1.Label) bool {
 }
 
 func Signed(b ...bool) *selectors.LabelSelectorImpl {
-	return &selectors.LabelSelectorImpl{signed(utils.OptionalDefaultedBool(true, b...))}
+	return &selectors.LabelSelectorImpl{signed(general.OptionalDefaultedBool(true, b...))}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

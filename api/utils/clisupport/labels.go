@@ -5,12 +5,12 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"sigs.k8s.io/yaml"
 
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/utils"
 )
 
 func gkind(kind ...string) string {
@@ -34,7 +34,7 @@ func ParseLabel(fs vfs.FileSystem, a string, kind ...string) (*metav1.Label, err
 	}
 	label := a[:i]
 
-	data, err := utils.ResolveData(a[i+1:], fs)
+	data, err := optionutils.ResolveData(a[i+1:], fs)
 	if err != nil {
 		return nil, err
 	}

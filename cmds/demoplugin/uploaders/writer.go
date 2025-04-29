@@ -8,7 +8,7 @@ import (
 
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/utils/iotools"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/demoplugin/accessmethods"
 )
@@ -43,7 +43,7 @@ func (w *Writer) Close() error {
 	if err == nil {
 		n := w.path
 		if w.rename {
-			n = filepath.Join(os.TempDir(), n, common.DigestToFileName(w.writer.Digest()))
+			n = filepath.Join(os.TempDir(), n, misc.DigestToFileName(w.writer.Digest()))
 			err := os.Rename(w.file.Name(), n)
 			if err != nil {
 				return errors.Wrapf(err, "cannot rename %q to %q", w.file.Name(), n)

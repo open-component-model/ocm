@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/pflag"
 
 	"ocm.software/ocm/api/datacontext"
@@ -14,7 +15,6 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/signutils"
-	"ocm.software/ocm/api/utils"
 )
 
 type ConfigFragment struct {
@@ -71,7 +71,7 @@ func (c *ConfigFragment) Evaluate(ctx ocm.Context, keys signing.KeyRegistry) (*E
 	if len(c.RootCAs) > 0 {
 		var list []*x509.Certificate
 		for _, r := range c.RootCAs {
-			data, err := utils.ReadFile(r, vfsattr.Get(ctx))
+			data, err := optionutils.ReadFile(r, vfsattr.Get(ctx))
 			if err != nil {
 				return nil, errors.Wrapf(err, "root CA")
 			}
@@ -103,9 +103,9 @@ func (c *ConfigFragment) HandleKeys(ctx datacontext.Context, desc string, keys [
 		var err error
 		switch file[0] {
 		case '=', '!', '@':
-			data, err = utils.ResolveData(file, fs)
+			data, err = optionutils.ResolveData(file, fs)
 		default:
-			data, err = utils.ReadFile(file, fs)
+			data, err = optionutils.ReadFile(file, fs)
 		}
 		if err != nil {
 			return errors.Wrapf(err, "cannot read %s file %q", desc, file)

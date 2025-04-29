@@ -20,7 +20,7 @@ import (
 	"ocm.software/ocm/api/utils/clisupport"
 	"ocm.software/ocm/api/utils/cobrautils"
 	"ocm.software/ocm/api/utils/cobrautils/logopts"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/api/version"
 )
@@ -97,7 +97,7 @@ func (o *BootstrapperCLIOptions) Complete() error {
 	}
 
 	id := credentials.ConsumerIdentity{}
-	attrs := common.Properties{}
+	attrs := misc.Properties{}
 
 	for _, s := range o.CredentialSettings {
 		i := strings.Index(s, "=")
@@ -112,7 +112,7 @@ func (o *BootstrapperCLIOptions) Complete() error {
 			if len(attrs) != 0 {
 				o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
 				id = credentials.ConsumerIdentity{}
-				attrs = common.Properties{}
+				attrs = misc.Properties{}
 			}
 			name = name[1:]
 			id[name] = value

@@ -3,7 +3,7 @@ package internal
 import (
 	"github.com/mandelsoft/goutils/set"
 
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Repository interface {
@@ -17,16 +17,16 @@ type Credentials interface {
 	ExistsProperty(name string) bool
 	GetProperty(name string) string
 	PropertyNames() set.Set[string]
-	Properties() common.Properties
+	Properties() misc.Properties
 }
 
-type DirectCredentials common.Properties
+type DirectCredentials misc.Properties
 
 var _ Credentials = (*DirectCredentials)(nil)
 
-func NewCredentials(props common.Properties) DirectCredentials {
+func NewCredentials(props misc.Properties) DirectCredentials {
 	if props == nil {
-		props = common.Properties{}
+		props = misc.Properties{}
 	} else {
 		props = props.Copy()
 	}
@@ -43,11 +43,11 @@ func (c DirectCredentials) GetProperty(name string) string {
 }
 
 func (c DirectCredentials) PropertyNames() set.Set[string] {
-	return common.Properties(c).Names()
+	return misc.Properties(c).Names()
 }
 
-func (c DirectCredentials) Properties() common.Properties {
-	return common.Properties(c).Copy()
+func (c DirectCredentials) Properties() misc.Properties {
+	return misc.Properties(c).Copy()
 }
 
 func (c DirectCredentials) Credentials(Context, ...CredentialsSource) (Credentials, error) {
@@ -55,9 +55,9 @@ func (c DirectCredentials) Credentials(Context, ...CredentialsSource) (Credentia
 }
 
 func (c DirectCredentials) Copy() DirectCredentials {
-	return DirectCredentials(common.Properties(c).Copy())
+	return DirectCredentials(misc.Properties(c).Copy())
 }
 
 func (c DirectCredentials) String() string {
-	return common.Properties(c).String()
+	return misc.Properties(c).String()
 }

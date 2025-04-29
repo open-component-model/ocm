@@ -36,7 +36,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var DefaultContext = ocm.New()
@@ -145,7 +145,7 @@ var _ = Describe("access method", func() {
 
 			digest := "123d48879559d16965a54eba9a3e845709770f4f0be984ec8db2f507aa78f338"
 
-			pr, buf := common.NewBufferedPrinter()
+			pr, buf := misc.NewBufferedPrinter()
 			// key taken from signing attr
 			dig := Must(SignComponentVersion(cv, SIGNATURE, SignerByAlgo(SIGN_ALGO), Resolver(resolver), DigestMode(mode), Printer(pr)))
 			Expect(closer.Close()).To(Succeed())
@@ -240,7 +240,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			)
 			Expect(opts.Complete(env)).To(Succeed())
 
-			pr, buf := common.NewBufferedPrinter()
+			pr, buf := misc.NewBufferedPrinter()
 			dig, err := Apply(pr, nil, cv, opts)
 			Expect(err).To(Succeed())
 			Expect(closer.Close()).To(Succeed())
@@ -371,7 +371,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			)
 			Expect(opts.Complete(env)).To(Succeed())
 
-			pr, buf := common.NewBufferedPrinter()
+			pr, buf := misc.NewBufferedPrinter()
 			dig, err := Apply(pr, nil, cv, opts)
 			Expect(err).To(Succeed())
 			closer.Close()
@@ -1080,7 +1080,7 @@ github.com/mandelsoft/test:v1: SHA-256:${D_COMPA}[jsonNormalisation/v1]
 			MustBeSuccessful(opts.Complete(env))
 
 			digestC := "1e81ac0fe69614e6fd73ab7a1c809dd31fcbcb810f0036be7a296d226e4bd64b"
-			pr, buf := common.NewBufferedPrinter()
+			pr, buf := misc.NewBufferedPrinter()
 			dig := Must(Apply(pr, nil, cv, opts))
 			Expect(dig.Value).To(StringEqualWithContext(digestC))
 
@@ -1268,7 +1268,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			)
 			MustBeSuccessful(opts.Complete(env))
 
-			pr, buf := common.NewBufferedPrinter()
+			pr, buf := misc.NewBufferedPrinter()
 			Must(Apply(pr, nil, cv, opts))
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
@@ -1282,8 +1282,8 @@ applying to version "github.com/mandelsoft/ref2:v1"[github.com/mandelsoft/ref2:v
 `))
 
 			CheckStore(store, cv)
-			CheckStore(store, common.NewNameVersion(COMPONENTB, VERSION))
-			CheckStore(store, common.NewNameVersion(COMPONENTA, VERSION))
+			CheckStore(store, misc.NewNameVersion(COMPONENTB, VERSION))
+			CheckStore(store, misc.NewNameVersion(COMPONENTA, VERSION))
 		})
 	})
 
@@ -1374,7 +1374,7 @@ version: v2
 
 			digest := "70c1b7f5e2260a283e24788c81ea7f8f6e9a70a8544dbf62d6f3a27285f6b633"
 
-			pr, buf := common.NewBufferedPrinter()
+			pr, buf := misc.NewBufferedPrinter()
 			// key taken from signing attr
 			dig := Must(SignComponentVersion(cv, SIGNATURE, SignerByAlgo(SIGN_ALGO), Printer(pr)))
 			Expect(closer.Close()).To(Succeed())
@@ -1441,10 +1441,10 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 	})
 })
 
-func CheckStore(store VerifiedStore, ve common.VersionedElement) {
+func CheckStore(store VerifiedStore, ve misc.VersionedElement) {
 	e := store.Get(ve)
 	ExpectWithOffset(1, e).NotTo(BeNil())
-	ExpectWithOffset(1, common.VersionedElementKey(e)).To(Equal(common.VersionedElementKey(ve)))
+	ExpectWithOffset(1, misc.VersionedElementKey(e)).To(Equal(misc.VersionedElementKey(ve)))
 }
 
 func HashComponent(resolver ocm.ComponentVersionResolver, name string, digest string, other ...Option) string {
@@ -1459,7 +1459,7 @@ func HashComponent(resolver ocm.ComponentVersionResolver, name string, digest st
 	opts.Eval(other...)
 	ExpectWithOffset(1, opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
 
-	pr, buf := common.NewBufferedPrinter()
+	pr, buf := misc.NewBufferedPrinter()
 	dig, err := Apply(pr, nil, cv, opts)
 	ExpectWithOffset(1, err).To(Succeed())
 	ExpectWithOffset(1, dig.Value).To(StringEqualWithContext(digest))
@@ -1494,7 +1494,7 @@ func SignComponent(resolver ocm.ComponentVersionResolver, signame, name string, 
 	opts.Eval(other...)
 	ExpectWithOffset(1, opts.Complete(cv.GetContext())).To(Succeed())
 
-	pr, buf := common.NewBufferedPrinter()
+	pr, buf := misc.NewBufferedPrinter()
 	dig, err := Apply(pr, nil, cv, opts)
 	ExpectWithOffset(1, err).To(Succeed())
 	ExpectWithOffset(1, dig.Value).To(StringEqualWithContext(digest))

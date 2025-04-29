@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	cfgcpi "ocm.software/ocm/api/config/cpi"
@@ -78,7 +79,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 			if spec.Path == "" {
 				return errors.Newf("script or path must be set for entry %q", t.Script)
 			}
-			data, err := utils.ReadFile(spec.Path, utils.FileSystem(spec.FileSystem, t.FileSystem))
+			data, err := optionutils.ReadFile(spec.Path, utils.FileSystem(spec.FileSystem, t.FileSystem))
 			if err != nil {
 				return errors.Wrapf(err, "script file %q", spec.Path)
 			}

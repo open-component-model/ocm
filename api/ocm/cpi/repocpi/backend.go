@@ -5,11 +5,11 @@ import (
 	"sync/atomic"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 )
 
@@ -29,15 +29,15 @@ type StorageBackendImpl interface {
 
 	// IsReadOnly returns readonly mode for repo,
 	// if key is given for the dedicated component version access.
-	IsReadOnly(key ...common.NameVersion) bool
+	IsReadOnly(key ...misc.NameVersion) bool
 
 	// SetReadOnly sets readonly mode for repo,
 	// if key is given for the dedicated component version access.
-	SetReadOnly(key ...common.NameVersion)
+	SetReadOnly(key ...misc.NameVersion)
 
 	ComponentLister() cpi.ComponentLister
 	HasComponent(name string) (bool, error)
-	HasComponentVersion(key common.NameVersion) (bool, error)
+	HasComponentVersion(key misc.NameVersion) (bool, error)
 
 	// component related methods.
 
@@ -46,12 +46,12 @@ type StorageBackendImpl interface {
 
 	// version related methods.
 
-	GetDescriptor(key common.NameVersion) (*compdesc.ComponentDescriptor, error)
-	SetDescriptor(key common.NameVersion, descriptor *compdesc.ComponentDescriptor) (bool, error)
-	AccessMethod(key common.NameVersion, acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
-	GetStorageContext(key common.NameVersion) cpi.StorageContext
-	GetBlob(key common.NameVersion, name string) (cpi.DataAccess, error)
-	AddBlob(key common.NameVersion, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
+	GetDescriptor(key misc.NameVersion) (*compdesc.ComponentDescriptor, error)
+	SetDescriptor(key misc.NameVersion, descriptor *compdesc.ComponentDescriptor) (bool, error)
+	AccessMethod(key misc.NameVersion, acc cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error)
+	GetStorageContext(key misc.NameVersion) cpi.StorageContext
+	GetBlob(key misc.NameVersion, name string) (cpi.DataAccess, error)
+	AddBlob(key misc.NameVersion, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
 }
 
 type storageBackendRepository struct {
@@ -114,7 +114,7 @@ func (s *storageBackendRepository) ComponentLister() cpi.ComponentLister {
 }
 
 func (s *storageBackendRepository) ExistsComponentVersion(name string, version string) (bool, error) {
-	return s.impl.HasComponentVersion(common.NewNameVersion(name, version))
+	return s.impl.HasComponentVersion(misc.NewNameVersion(name, version))
 }
 
 func (s *storageBackendRepository) LookupComponent(name string) (*ComponentAccessInfo, error) {
@@ -175,11 +175,11 @@ func (s *storageBackendComponent) HasVersion(vers string) (bool, error) {
 }
 
 func (s *storageBackendComponent) LookupVersion(version string) (*ComponentVersionAccessInfo, error) {
-	if ok, err := s.repo.impl.HasComponentVersion(common.NewNameVersion(s.name, version)); !ok || err != nil {
+	if ok, err := s.repo.impl.HasComponentVersion(misc.NewNameVersion(s.name, version)); !ok || err != nil {
 		return nil, err
 	}
 
-	name := common.NewNameVersion(s.name, version)
+	name := misc.NewNameVersion(s.name, version)
 	d, err := s.repo.impl.GetDescriptor(name)
 	if err != nil {
 		return nil, err
@@ -198,15 +198,15 @@ func (s *storageBackendComponent) LookupVersion(version string) (*ComponentVersi
 }
 
 func (s *storageBackendComponent) NewVersion(version string, overwrite ...bool) (*ComponentVersionAccessInfo, error) {
-	ok, err := s.repo.impl.HasComponentVersion(common.NewNameVersion(s.name, version))
+	ok, err := s.repo.impl.HasComponentVersion(misc.NewNameVersion(s.name, version))
 	if err != nil {
 		return nil, err
 	}
-	if ok && !utils.Optional(overwrite...) {
+	if ok && !general.Optional(overwrite...) {
 		return nil, errors.ErrAlreadyExists(cpi.KIND_COMPONENTVERSION, s.name+"/"+version)
 	}
 
-	name := common.NewNameVersion(s.name, version)
+	name := misc.NewNameVersion(s.name, version)
 	d := compdesc.New(s.name, version)
 
 	impl := &storageBackendComponentVersion{
@@ -226,7 +226,7 @@ func (s *storageBackendComponent) NewVersion(version string, overwrite ...bool) 
 type storageBackendComponentVersion struct {
 	bridge     ComponentVersionAccessBridge
 	comp       *storageBackendComponent
-	name       common.NameVersion
+	name       misc.NameVersion
 	descriptor *compdesc.ComponentDescriptor
 }
 

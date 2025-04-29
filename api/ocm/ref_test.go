@@ -5,9 +5,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
-	"ocm.software/ocm/api/utils"
 )
 
 func Type(t string) string {
@@ -73,7 +74,7 @@ func CheckRef(ref, ut, scheme, h, us, c, uv, i string, th ...string) {
 			Host:            h,
 			SubPath:         us,
 			Info:            i,
-			TypeHint:        utils.Optional(th...),
+			TypeHint:        general.Optional(th...),
 			CreateIfMissing: ref[0] == '+',
 		},
 		CompSpec: ocm.CompSpec{

@@ -8,6 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"
 	"ocm.software/ocm/api/ocm"
@@ -17,8 +18,7 @@ import (
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/hasher/sha256"
 	"ocm.software/ocm/api/tech/signing/signutils"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Option interface {
@@ -28,12 +28,12 @@ type Option interface {
 ////////////////////////////////////////////////////////////////////////////////
 
 type printer struct {
-	printer common.Printer
+	printer misc.Printer
 }
 
 // Printer provides an option configuring a printer for a signing/verification
 // operation.
-func Printer(p common.Printer) Option {
+func Printer(p misc.Printer) Option {
 	return &printer{p}
 }
 
@@ -74,7 +74,7 @@ type recursive struct {
 // operation. If enabled the operation will be done for all component versions
 // in the reference graph.
 func Recursive(flags ...bool) Option {
-	return &recursive{utils.GetOptionFlag(flags...)}
+	return &recursive{optionutils.GetOptionFlag(flags...)}
 }
 
 func (o *recursive) ApplySigningOption(opts *Options) {
@@ -90,7 +90,7 @@ type update struct {
 // Update provides an option configuring the update mode for a signing/verification
 // operation. Only if enabled, state changes will be persisted.
 func Update(flags ...bool) Option {
-	return &update{utils.GetOptionFlag(flags...)}
+	return &update{optionutils.GetOptionFlag(flags...)}
 }
 
 func (o *update) ApplySigningOption(opts *Options) {
@@ -106,7 +106,7 @@ type verify struct {
 // VerifyDigests provides an option requesting signature verification for a
 // signing/verification operation.
 func VerifyDigests(flags ...bool) Option {
-	return &verify{utils.GetOptionFlag(flags...)}
+	return &verify{optionutils.GetOptionFlag(flags...)}
 }
 
 func (o *verify) ApplySigningOption(opts *Options) {
@@ -283,7 +283,7 @@ type signame struct {
 // SignatureName provides an option requesting to use dedicated signature names
 // for a signing/verification operation.
 func SignatureName(name string, reset ...bool) Option {
-	return &signame{name, utils.Optional(reset...)}
+	return &signame{name, general.Optional(reset...)}
 }
 
 func (o *signame) ApplySigningOption(opts *Options) {
@@ -336,9 +336,9 @@ func (o *issuer) ApplySigningOption(opts *Options) {
 		if opts.Keys == nil {
 			opts.Keys = signing.NewKeyRegistry()
 		}
-		opts.Keys.RegisterIssuer(o.name, generics.Pointer(o.issuer))
+		opts.Keys.RegisterIssuer(o.name, generics.PointerTo(o.issuer))
 	} else {
-		opts.Issuer = generics.Pointer(o.issuer)
+		opts.Issuer = generics.PointerTo(o.issuer)
 	}
 }
 
@@ -413,7 +413,7 @@ type tsaOpt struct {
 
 // UseTSA enables the usage of a timestamp server authority.
 func UseTSA(flag ...bool) Option {
-	return &tsaOpt{use: utils.BoolP(utils.GetOptionFlag(flag...))}
+	return &tsaOpt{use: optionutils.BoolP(optionutils.GetOptionFlag(flag...))}
 }
 
 // TSAUrl selects the TSA server URL to use, if TSA mode is enabled.
@@ -449,7 +449,7 @@ func (o *verifyedstore) ApplySigningOption(opts *Options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type Options struct {
-	Printer           common.Printer
+	Printer           misc.Printer
 	Update            bool
 	Recursively       bool
 	DigestMode        string
@@ -566,7 +566,7 @@ func (o *Options) Complete(ctx interface{}) error {
 		return fmt.Errorf("context argument (%T) is invalid", ctx)
 	}
 
-	o.Printer = common.AssurePrinter(o.Printer)
+	o.Printer = misc.AssurePrinter(o.Printer)
 
 	if o.Registry == nil {
 		o.Registry = reg

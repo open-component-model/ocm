@@ -16,7 +16,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -70,7 +70,7 @@ func CheckTextSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string
 	dig := rblob.Digest()
 	data, err := rblob.Get()
 	Expect(err).To(Succeed())
-	bpath := env.Join(ARCH, comparch.BlobsDirectoryName, common.DigestToFileName(dig))
+	bpath := env.Join(ARCH, comparch.BlobsDirectoryName, misc.DigestToFileName(dig))
 	Expect(env.FileExists(bpath)).To(BeTrue())
 	Expect(env.ReadFile(bpath)).To(Equal(data))
 
@@ -81,7 +81,7 @@ func CheckTextSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string
 	spec, err := env.OCMContext().AccessSpecForSpec(r.Access)
 	Expect(err).To(Succeed())
 	Expect(spec.GetType()).To(Equal(localblob.Type))
-	Expect(spec.(*localblob.AccessSpec).LocalReference).To(Equal(common.DigestToFileName(dig)))
+	Expect(spec.(*localblob.AccessSpec).LocalReference).To(Equal(misc.DigestToFileName(dig)))
 	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_TEXT))
 }
 

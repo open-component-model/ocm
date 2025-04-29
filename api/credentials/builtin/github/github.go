@@ -5,7 +5,7 @@ import (
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/tech/github/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 func init() {
@@ -15,7 +15,7 @@ func init() {
 		id := identity.GetConsumerId(us)
 
 		if src, err := cpi.DefaultContext.GetCredentialsForConsumer(id); err != nil || src == nil {
-			creds := cpi.NewCredentials(common.Properties{cpi.ATTR_TOKEN: t})
+			creds := cpi.NewCredentials(misc.Properties{cpi.ATTR_TOKEN: t})
 			cpi.DefaultContext.SetCredentialsForConsumer(id, creds)
 		}
 	}

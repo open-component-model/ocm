@@ -58,7 +58,7 @@ func WithFileSystem(fss ...vfs.FileSystem) Option {
 type size int64
 
 func (o size) ApplyTo(opts *Options) {
-	opts.Size = generics.Pointer(int64(o))
+	opts.Size = generics.PointerTo(int64(o))
 }
 
 func WithSize(s int64) Option {

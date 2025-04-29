@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1"
 	v2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 	"ocm.software/ocm/api/ocm/tools/signing"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -62,11 +62,11 @@ var _ = Describe("Store", func() {
 
 			desc := signing.StorageDescriptor{
 				ComponentVersions: map[string]*signing.StorageEntry{
-					common.VersionedElementKey(cd1).String(): {
+					misc.VersionedElementKey(cd1).String(): {
 						Signatures: []string{"a"},
 						Descriptor: (*compdesc.GenericComponentDescriptor)(cd1),
 					},
-					common.VersionedElementKey(cd2).String(): {
+					misc.VersionedElementKey(cd2).String(): {
 						Signatures: []string{"b", "c"},
 						Descriptor: (*compdesc.GenericComponentDescriptor)(cd2),
 					},

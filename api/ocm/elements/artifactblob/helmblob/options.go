@@ -8,7 +8,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/elements/artifactblob/api"
 	base "ocm.software/ocm/api/utils/blobaccess/helm"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Option = optionutils.Option[*Options]
@@ -82,6 +82,6 @@ func WithHelmRepository(v string) Option {
 	return wrapBase(base.WithHelmRepository(v))
 }
 
-func WithPrinter(v common.Printer) Option {
+func WithPrinter(v misc.Printer) Option {
 	return wrapBase(base.WithPrinter(v))
 }

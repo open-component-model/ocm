@@ -16,7 +16,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/logging"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type NamespaceContainer struct {
@@ -179,7 +179,7 @@ func (n *NamespaceContainer) assureCreated() error {
 	if n.checked {
 		return nil
 	}
-	var props common.Properties
+	var props misc.Properties
 	if creds, err := n.repo.getCreds(n.impl.GetNamespace()); err == nil && creds != nil {
 		props = creds.Properties()
 	}

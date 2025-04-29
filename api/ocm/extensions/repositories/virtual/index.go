@@ -4,12 +4,12 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 
 	ocicpi "ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type IndexEntry[I interface{}] struct {
@@ -45,7 +45,7 @@ func (i *Index[I]) NumComponents(prefix string) (int, error) {
 	i.lock.Lock()
 	defer i.lock.Unlock()
 
-	list := ocicpi.FilterByNamespacePrefix(prefix, utils.StringMapKeys(i.descriptors))
+	list := ocicpi.FilterByNamespacePrefix(prefix, maputils.OrderedKeys(i.descriptors))
 	return len(list), nil
 }
 
@@ -53,7 +53,7 @@ func (i *Index[I]) GetComponents(prefix string, closure bool) ([]string, error) 
 	i.lock.Lock()
 	defer i.lock.Unlock()
 
-	return ocicpi.FilterChildren(closure, prefix, utils.StringMapKeys(i.descriptors)), nil
+	return ocicpi.FilterChildren(closure, prefix, maputils.OrderedKeys(i.descriptors)), nil
 }
 
 func (i *Index[I]) GetVersions(comp string) []string {
@@ -64,7 +64,7 @@ func (i *Index[I]) GetVersions(comp string) []string {
 	if len(vers) == 0 {
 		return []string{}
 	}
-	return utils.StringMapKeys(vers)
+	return maputils.OrderedKeys(vers)
 }
 
 func (i *Index[I]) Get(comp, vers string) *IndexEntry[I] {
@@ -89,7 +89,7 @@ func (i *Index[I]) Add(cd *compdesc.ComponentDescriptor, info I) error {
 		i.descriptors[cd.Name] = set
 	}
 	if set[cd.Version] != nil {
-		return errors.ErrAlreadyExists(cpi.KIND_COMPONENTVERSION, common.VersionedElementKey(cd).String())
+		return errors.ErrAlreadyExists(cpi.KIND_COMPONENTVERSION, misc.VersionedElementKey(cd).String())
 	}
 	set[cd.Version] = &IndexEntry[I]{cd, info}
 	return nil

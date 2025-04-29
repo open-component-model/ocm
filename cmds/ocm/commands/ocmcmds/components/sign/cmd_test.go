@@ -26,7 +26,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -425,8 +425,8 @@ successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
 
 			store := Must(signing.NewVerifiedStore(VERIFIED_FILE, env.FileSystem()))
 
-			CheckStore(store, common.NewNameVersion(COMPONENTA, VERSION))
-			CheckStore(store, common.NewNameVersion(COMPONENTB, VERSION))
+			CheckStore(store, misc.NewNameVersion(COMPONENTA, VERSION))
+			CheckStore(store, misc.NewNameVersion(COMPONENTB, VERSION))
 		},
 			Entry("v1", substitutionsV1, compdesc.JsonNormalisationV1),
 			Entry("v2", substitutionsV2, compdesc.JsonNormalisationV2),
@@ -435,10 +435,10 @@ successfully signed github.com/mandelsoft/ref:v1 (digest SHA-256:${ref})
 	})
 })
 
-func CheckStore(store signing.VerifiedStore, ve common.VersionedElement) {
+func CheckStore(store signing.VerifiedStore, ve misc.VersionedElement) {
 	e := store.Get(ve)
 	ExpectWithOffset(1, e).NotTo(BeNil())
-	ExpectWithOffset(1, common.VersionedElementKey(e)).To(Equal(common.VersionedElementKey(ve)))
+	ExpectWithOffset(1, misc.VersionedElementKey(e)).To(Equal(misc.VersionedElementKey(ve)))
 }
 
 func prepareEnv(env *TestEnv, componentAArchive, componentBArchive string) {

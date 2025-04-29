@@ -5,13 +5,13 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/logging"
 	"github.com/spf13/pflag"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/cmds/ocm/common/options"
 	"ocm.software/ocm/cmds/ocm/common/processing"
@@ -115,7 +115,7 @@ func (o *Options) UseColumnOptimization() bool {
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	s := ""
 	if len(o.Outputs) > 1 {
-		list := utils.StringMapKeys(o.Outputs)
+		list := maputils.OrderedKeys(o.Outputs)
 		sep := ""
 		for _, o := range list {
 			if o != "" {
@@ -200,7 +200,7 @@ func (o *Options) Usage() string {
 		s += `
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
-` + listformat.FormatList(o.OutputMode, utils.StringMapKeys(o.Outputs)...)
+` + listformat.FormatList(o.OutputMode, maputils.OrderedKeys(o.Outputs)...)
 	}
 	return s
 }

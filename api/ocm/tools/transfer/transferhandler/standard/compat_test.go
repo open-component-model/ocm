@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -35,7 +35,7 @@ var _ = Describe("Transfer Test Environment", func() {
 			tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
 			defer Close(tgt, "target")
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			MustBeSuccessful(transfer.Transfer(cv, tgt, transfer.WithPrinter(p)))
 			Expect(env.DirExists(OUT)).To(BeTrue())
 

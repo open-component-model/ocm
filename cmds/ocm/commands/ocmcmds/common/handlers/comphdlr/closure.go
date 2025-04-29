@@ -4,7 +4,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/ocm"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"ocm.software/ocm/cmds/ocm/common/output"
@@ -13,11 +13,11 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
-	return traverse(common.History{}, e.(*Object), opts.Context, opts.Session, lookupoption.From(opts))
+	return traverse(misc.History{}, e.(*Object), opts.Context, opts.Session, lookupoption.From(opts))
 }
 
-func traverse(hist common.History, o *Object, octx out.Context, sess ocm.Session, lookup ocm.ComponentVersionResolver) []interface{} {
-	key := common.VersionedElementKey(o.ComponentVersion)
+func traverse(hist misc.History, o *Object, octx out.Context, sess ocm.Session, lookup ocm.ComponentVersionResolver) []interface{} {
+	key := misc.VersionedElementKey(o.ComponentVersion)
 	if err := hist.Add(ocm.KIND_COMPONENTVERSION, key); err != nil {
 		return nil
 	}
@@ -27,7 +27,7 @@ func traverse(hist common.History, o *Object, octx out.Context, sess ocm.Session
 		refs=append(refs[:0:0], refs...)
 		sort.Sort(refs)
 	*/
-	found := map[common.NameVersion]bool{}
+	found := map[misc.NameVersion]bool{}
 	for _, ref := range refs {
 		key := ocm.ComponentRefKey(&ref)
 		if found[key] {

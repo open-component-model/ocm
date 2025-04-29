@@ -5,11 +5,12 @@ import (
 
 	. "github.com/mandelsoft/goutils/exception"
 
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/s3/identity"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessio/downloader"
 	"ocm.software/ocm/api/utils/accessio/downloader/s3"
@@ -76,7 +77,7 @@ func New(region, bucket, key, version, mediaType string, downloader ...downloade
 		Key:                          key,
 		Version:                      version,
 		MediaType:                    mediaType,
-		downloader:                   utils.Optional(downloader...),
+		downloader:                   general.Optional(downloader...),
 	}
 }
 

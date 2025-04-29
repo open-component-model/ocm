@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/credentials/cpi"
 	npmCredentials "ocm.software/ocm/api/tech/npm/identity"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const PROVIDER = "ocm.software/credentialprovider/" + Type
@@ -21,7 +21,7 @@ type Repository struct {
 }
 
 func NewRepository(ctx cpi.Context, path string, prop ...bool) (*Repository, error) {
-	return newRepository(ctx, path, utils.OptionalDefaultedBool(true, prop...))
+	return newRepository(ctx, path, general.OptionalDefaultedBool(true, prop...))
 }
 
 func newRepository(ctx cpi.Context, path string, prop bool) (*Repository, error) {
@@ -81,7 +81,7 @@ func (r *Repository) Read(force bool) error {
 }
 
 func newCredentials(token string) cpi.Credentials {
-	props := common.Properties{
+	props := misc.Properties{
 		npmCredentials.ATTR_TOKEN: token,
 	}
 	return cpi.NewCredentials(props)

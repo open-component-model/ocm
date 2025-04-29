@@ -8,6 +8,7 @@ import (
 	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	cfgcpi "ocm.software/ocm/api/config/cpi"
@@ -15,7 +16,6 @@ import (
 	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/signutils"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -171,7 +171,7 @@ func (a *Config) AddPrivateKeyFile(name, path string, fss ...vfs.FileSystem) {
 }
 
 func (a *Config) AddRootCertificateFile(name string, fss ...vfs.FileSystem) {
-	a.RootCertificates = append(a.RootCertificates, KeySpec{Path: name, FileSystem: utils.Optional(fss...)})
+	a.RootCertificates = append(a.RootCertificates, KeySpec{Path: name, FileSystem: general.Optional(fss...)})
 }
 
 func (a *Config) addKeyData(set *map[string]KeySpec, name string, data []byte) {

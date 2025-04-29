@@ -11,9 +11,9 @@ import (
 	tsa "github.com/InfiniteLoopSpace/go_S-MIME/timestamp"
 	"github.com/go-test/deep"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/tech/signing/signutils"
-	"ocm.software/ocm/api/utils"
 )
 
 // NewMessageImprint creates a new MessageImprint using hash and digest.
@@ -88,7 +88,7 @@ func Verify(mi *tsa.MessageImprint, sd *TimeStamp, now bool, rootpool ...signuti
 	if !now {
 		opts.CurrentTime = info.GenTime
 	}
-	opts.Roots, err = signutils.GetCertPool(utils.Optional(rootpool...), false)
+	opts.Roots, err = signutils.GetCertPool(general.Optional(rootpool...), false)
 	if err != nil {
 		return nil, errors.Wrapf(err, "root cert pool")
 	}

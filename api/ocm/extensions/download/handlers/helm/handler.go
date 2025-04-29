@@ -19,7 +19,7 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const TYPE = resourcetypes.HELM_CHART
@@ -41,7 +41,7 @@ func AssureArchiveSuffix(name string) string {
 	return name
 }
 
-func (h Handler) fromArchive(p common.Printer, meth cpi.AccessMethod, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
+func (h Handler) fromArchive(p misc.Printer, meth cpi.AccessMethod, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
 	basetype := mime.BaseType(helmregistry.ChartLayerMediaType)
 	if mime.BaseType(meth.MimeType()) != basetype {
 		return false, "", nil
@@ -56,7 +56,7 @@ func (h Handler) fromArchive(p common.Printer, meth cpi.AccessMethod, path strin
 	return true, chart, nil
 }
 
-func (h Handler) fromOCIArtifact(p common.Printer, meth cpi.AccessMethod, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
+func (h Handler) fromOCIArtifact(p misc.Printer, meth cpi.AccessMethod, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&err, "from OCI artifact")
 
@@ -82,7 +82,7 @@ func (h Handler) fromOCIArtifact(p common.Printer, meth cpi.AccessMethod, path s
 	return true, chart, nil
 }
 
-func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
+func (h Handler) Download(p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&err, "downloading helm chart")
 
@@ -101,7 +101,7 @@ func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string
 	return h.fromOCIArtifact(p, meth, path, fs)
 }
 
-func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.FileSystem) (chart, prov string, err error) {
+func download(p misc.Printer, art oci.ArtifactAccess, path string, fs vfs.FileSystem) (chart, prov string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 
@@ -138,7 +138,7 @@ func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.File
 	return chart, prov, err
 }
 
-func write(p common.Printer, blob blobaccess.DataReader, path string, fs vfs.FileSystem) (err error) {
+func write(p misc.Printer, blob blobaccess.DataReader, path string, fs vfs.FileSystem) (err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 

@@ -7,6 +7,7 @@ import (
 
 	. "github.com/mandelsoft/goutils/finalizer"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/modern-go/reflect2"
 
 	"ocm.software/ocm/api/config"
@@ -16,7 +17,6 @@ import (
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/compdesc"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -151,7 +151,7 @@ type gcWrapper struct {
 }
 
 func newView(c *_context, ref ...bool) Context {
-	if utils.Optional(ref...) {
+	if general.Optional(ref...) {
 		return datacontext.FinalizedContext[gcWrapper](c)
 	}
 	return c

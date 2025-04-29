@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -78,7 +78,7 @@ var _ ConfigTypeOptionSetConfigProvider = (*typedConfigProvider)(nil)
 
 func NewTypedConfigProvider(name string, desc, typeOption string, acceptUnknown ...bool) ConfigTypeOptionSetConfigProvider {
 	typeOpt := NewStringOptionType(name+"Type", "type of "+desc)
-	return &typedConfigProvider{NewTypedConfigProviderBase(name, desc, TypeNameProviderFromOptions(typeOption), utils.Optional(acceptUnknown...), typeOpt), typeOpt}
+	return &typedConfigProvider{NewTypedConfigProviderBase(name, desc, TypeNameProviderFromOptions(typeOption), general.Optional(acceptUnknown...), typeOpt), typeOpt}
 }
 
 func (p *typedConfigProvider) GetTypeOptionType() ConfigOptionType {
@@ -116,7 +116,7 @@ var _ ConfigTypeOptionSetConfigProvider = (*typedConfigProvider)(nil)
 
 func NewExplicitlyTypedConfigProvider(name string, desc string, acceptUnknown ...bool) ExplicitlyTypedConfigTypeOptionSetConfigProvider {
 	p := &explicitlyTypedConfigProvider{}
-	p._ConfigTypeOptionSetConfigProvider = NewTypedConfigProviderBase(name, desc, p.getTypeName, utils.Optional(acceptUnknown...))
+	p._ConfigTypeOptionSetConfigProvider = NewTypedConfigProviderBase(name, desc, p.getTypeName, general.Optional(acceptUnknown...))
 	return p
 }
 

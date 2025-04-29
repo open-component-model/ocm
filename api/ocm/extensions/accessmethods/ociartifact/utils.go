@@ -6,7 +6,7 @@ import (
 
 	"ocm.software/ocm/api/oci/grammar"
 	"ocm.software/ocm/api/ocm/cpi"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 // OCIArtifactReferenceProvider should be implemented by
@@ -41,7 +41,7 @@ func GetOCIArtifactReference(ctx cpi.Context, spec cpi.AccessSpec, cv cpi.Compon
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Hint(nv common.NameVersion, locator, repo, version string) string {
+func Hint(nv misc.NameVersion, locator, repo, version string) string {
 	if i := strings.LastIndex(version, "@"); i >= 0 {
 		version = version[:i] // remove digest
 	}
@@ -61,7 +61,7 @@ func Hint(nv common.NameVersion, locator, repo, version string) string {
 	return repository
 }
 
-func repoName(nv common.NameVersion, locator string) string {
+func repoName(nv misc.NameVersion, locator string) string {
 	if nv.GetName() == "" {
 		return locator
 	} else {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/stringutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
-	"ocm.software/ocm/api/utils"
 )
 
 const KIND_TEMPLATER = "templater"
@@ -85,7 +85,7 @@ func (r *registry) KnownTypeNames() []string {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	return utils.StringMapKeys(r.templaters)
+	return maputils.OrderedKeys(r.templaters)
 }
 
 func Usage(scheme Registry) string {
@@ -104,7 +104,7 @@ There are several templaters that can be selected by the <code>--templater</code
 			if strings.TrimSpace(desc) == "" {
 				s = fmt.Sprintf("%s- <code>%s</code> %s\n\n", s, t, title)
 			} else {
-				s = fmt.Sprintf("%s- <code>%s</code> %s\n\n%s", s, t, title, utils.IndentLines(desc, "  "))
+				s = fmt.Sprintf("%s- <code>%s</code> %s\n\n%s", s, t, title, stringutils.IndentLines(desc, "  "))
 			}
 			if !strings.HasSuffix(s, "\n") {
 				s += "\n"

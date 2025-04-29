@@ -6,7 +6,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/elements/artifactblob/api"
 	base "ocm.software/ocm/api/utils/blobaccess/dockerdaemon"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Option = optionutils.Option[*Options]
@@ -64,6 +64,6 @@ func WithVersionOverride(v string, flag ...bool) Option {
 	return wrapBase(base.WithVersionOverride(v, flag...))
 }
 
-func WithOrigin(o common.NameVersion) Option {
+func WithOrigin(o misc.NameVersion) Option {
 	return wrapBase(base.WithOrigin(o))
 }

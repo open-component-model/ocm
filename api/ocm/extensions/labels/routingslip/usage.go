@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/stringutils"
+
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -56,24 +58,24 @@ kinds of entries can be configured using the <code>--entry</code> option.
 		}
 	}
 
-	for _, t := range utils.StringMapKeys(descs) {
+	for _, t := range maputils.OrderedKeys(descs) {
 		info := descs[t]
 		desc := strings.Trim(info.desc, "\n")
 		if desc != "" {
-			s = fmt.Sprintf("%s\n- Entry type <code>%s</code>\n\n%s\n\n", s, t, utils.IndentLines(desc, "  "))
+			s = fmt.Sprintf("%s\n- Entry type <code>%s</code>\n\n%s\n\n", s, t, stringutils.IndentLines(desc, "  "))
 
 			format := ""
-			for _, f := range utils.StringMapKeys(info.versions) {
+			for _, f := range maputils.OrderedKeys(info.versions) {
 				desc = strings.Trim(info.versions[f], "\n")
 				if desc != "" {
-					format = fmt.Sprintf("%s\n- Version <code>%s</code>\n\n%s\n", format, f, utils.IndentLines(desc, "  "))
+					format = fmt.Sprintf("%s\n- Version <code>%s</code>\n\n%s\n", format, f, stringutils.IndentLines(desc, "  "))
 				}
 			}
 			if format != "" {
-				s += fmt.Sprintf("  The following versions are supported:\n%s\n", strings.Trim(utils.IndentLines(format, "  "), "\n"))
+				s += fmt.Sprintf("  The following versions are supported:\n%s\n", strings.Trim(stringutils.IndentLines(format, "  "), "\n"))
 			}
 		}
-		s += utils.IndentLines(flagsets.FormatConfigOptions(info.options), "  ")
+		s += stringutils.IndentLines(flagsets.FormatConfigOptions(info.options), "  ")
 	}
 	return s
 }

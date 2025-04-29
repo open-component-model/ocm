@@ -8,7 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/sliceutils"
 
 	"ocm.software/ocm/api/ocm/internal"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type DedicatedResolver []ComponentVersionAccess
@@ -111,7 +111,7 @@ func (c *CompoundResolver) LookupComponentVersion(name string, version string) (
 			return nil, err
 		}
 	}
-	return nil, errors.ErrNotFound(KIND_OCM_REFERENCE, common.NewNameVersion(name, version).String())
+	return nil, errors.ErrNotFound(KIND_OCM_REFERENCE, misc.NewNameVersion(name, version).String())
 }
 
 func (c *CompoundResolver) LookupComponentProviders(name string) []ResolvedComponentProvider {

@@ -11,7 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/none"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 // VerifyResourceDigestByResourceAccess verifies the digest of a resource passed by ResourceAccess.
@@ -68,10 +68,10 @@ func VerifyResourceDigest(cv ocm.ComponentVersionAccess, i int, bacc ocm.DataAcc
 	if store != nil {
 		vcd := store.Get(cv)
 		if vcd == nil {
-			return false, fmt.Errorf("component version %s not verified", common.VersionedElementKey(cv))
+			return false, fmt.Errorf("component version %s not verified", misc.VersionedElementKey(cv))
 		}
 		if !vcd.Resources[i].Digest.Equal(raw.Digest) {
-			return false, fmt.Errorf("component version %s corrupted", common.VersionedElementKey(cv))
+			return false, fmt.Errorf("component version %s corrupted", misc.VersionedElementKey(cv))
 		}
 	}
 

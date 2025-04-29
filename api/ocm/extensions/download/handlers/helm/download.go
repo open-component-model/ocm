@@ -12,15 +12,15 @@ import (
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
-func Download(p common.Printer, ctx oci.Context, ref string, path string, fs vfs.FileSystem, creds ...credentials.CredentialsSource) error {
+func Download(p misc.Printer, ctx oci.Context, ref string, path string, fs vfs.FileSystem, creds ...credentials.CredentialsSource) error {
 	_, _, _, err := Download2(p, ctx, ref, path, fs, false, creds...)
 	return err
 }
 
-func Download2(p common.Printer, ctx oci.Context, ref string, path string, fs vfs.FileSystem, asartifact bool, creds ...credentials.CredentialsSource) (chart, prov string, aset string, err error) {
+func Download2(p misc.Printer, ctx oci.Context, ref string, path string, fs vfs.FileSystem, asartifact bool, creds ...credentials.CredentialsSource) (chart, prov string, aset string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&err, "downloading helm chart %q", ref)
 

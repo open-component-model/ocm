@@ -12,8 +12,7 @@ import (
 	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/datacontext/action/api"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/registrations"
 	"ocm.software/ocm/api/utils/semverutils"
 )
@@ -31,7 +30,7 @@ type ActionsProvider interface {
 }
 
 type ActionHandler interface {
-	Handle(api.ActionSpec, common.Properties) (api.ActionResult, error)
+	Handle(api.ActionSpec, misc.Properties) (api.ActionResult, error)
 }
 
 type ActionHandlerMatch struct {
@@ -57,7 +56,7 @@ type Registry interface {
 	GetActionTypes() api.ActionTypeRegistry
 
 	Register(h ActionHandler, opts ...Option) error
-	Execute(spec api.ActionSpec, creds common.Properties) (api.ActionResult, error)
+	Execute(spec api.ActionSpec, creds misc.Properties) (api.ActionResult, error)
 	Get(spec api.ActionSpec, possible ...string) []ActionHandlerMatch
 	AddTo(t Registry)
 }
@@ -86,7 +85,7 @@ type registry struct {
 var _ Registry = (*registry)(nil)
 
 func NewRegistry(types api.ActionTypeRegistry, base ...Registry) Registry {
-	b := utils.Optional(base...)
+	b := general.Optional(base...)
 	if types == nil {
 		if b == nil {
 			types = api.DefaultRegistry()
@@ -156,7 +155,7 @@ func (r *registry) Register(h ActionHandler, olist ...Option) error {
 	return nil
 }
 
-func (r *registry) Execute(spec api.ActionSpec, creds common.Properties) (api.ActionResult, error) {
+func (r *registry) Execute(spec api.ActionSpec, creds misc.Properties) (api.ActionResult, error) {
 	result := r.Get(spec)
 	sort.SliceStable(result, func(a, b int) bool {
 		return result[a].Priority < result[b].Priority

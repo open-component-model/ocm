@@ -25,7 +25,7 @@ import (
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -154,7 +154,7 @@ var _ = Describe("transport and signing", func() {
 
 		desc := cv.GetDescriptor().Copy()
 
-		printer, buf := common.NewBufferedPrinter()
+		printer, buf := misc.NewBufferedPrinter()
 		// transport
 		handler := Must(standard.New(standard.ResourcesByValue()))
 		MustBeSuccessful(transfer.TransferVersion(printer, nil, cv, target, handler))
@@ -301,7 +301,7 @@ func sourceSignature(cv, tcv ocm.ComponentVersionAccess, merged *compdesc.Compon
 		signing.Sign(signingattr.Get(cv.GetContext()).GetSigner(SIGN_ALGO), SIGNATURE2),
 		signing.Update(), signing.VerifyDigests(),
 	)
-	spec, err := signing.Apply(common.NewPrinter(nil), nil, cv, sopts)
+	spec, err := signing.Apply(misc.NewPrinter(nil), nil, cv, sopts)
 	ExpectWithOffset(1, err).To(Succeed())
 
 	signatures := []compdesc.Signature{

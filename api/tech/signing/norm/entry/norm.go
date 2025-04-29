@@ -7,8 +7,9 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/tech/signing"
-	"ocm.software/ocm/api/utils"
 )
 
 var Type = normalization{}
@@ -76,11 +77,11 @@ func (n *normalized) ToString(gap string) string {
 }
 
 func (l *normalized) String() string {
-	return string(utils.Must(json.Marshal(l.value)))
+	return string(general.Must(json.Marshal(l.value)))
 }
 
 func (l *normalized) Formatted() string {
-	return string(utils.Must(json.MarshalIndent(l.value, "", "  ")))
+	return string(general.Must(json.MarshalIndent(l.value, "", "  ")))
 }
 
 func (n *normalized) Marshal(gap string) ([]byte, error) {
@@ -141,11 +142,11 @@ func (l *Entries) Add(key string, value interface{}) {
 }
 
 func (l Entries) String() string {
-	return string(utils.Must(json.Marshal(l)))
+	return string(general.Must(json.Marshal(l)))
 }
 
 func (l Entries) Formatted() string {
-	return string(utils.Must(json.MarshalIndent(l, "", "  ")))
+	return string(general.Must(json.MarshalIndent(l, "", "  ")))
 }
 
 func (l Entries) ToString(gap string) string {

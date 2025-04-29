@@ -4,11 +4,11 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/tech/signing/signutils"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -40,7 +40,7 @@ func (a *Config) GetType() string {
 }
 
 func (a *Config) AddRootCertificateFile(name string, fss ...vfs.FileSystem) {
-	a.RootCertificates = append(a.RootCertificates, cfgcpi.ContentSpec{Path: name, FileSystem: utils.Optional(fss...)})
+	a.RootCertificates = append(a.RootCertificates, cfgcpi.ContentSpec{Path: name, FileSystem: general.Optional(fss...)})
 }
 
 func (a *Config) AddRootCertificateData(data []byte) {

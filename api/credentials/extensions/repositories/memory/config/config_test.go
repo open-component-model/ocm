@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/extensions/repositories/memory"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var _ = Describe("configure credentials", func() {
@@ -41,7 +41,7 @@ var _ = Describe("configure credentials", func() {
 		Expect(mem.ExistsCredentials("ref")).To(BeTrue())
 		creds, err := mem.LookupCredentials("ref")
 		Expect(err).To(Succeed())
-		Expect(creds.Properties()).To(Equal(common.Properties{"username": "mandelsoft", "password": "specialsecret"}))
+		Expect(creds.Properties()).To(Equal(misc.Properties{"username": "mandelsoft", "password": "specialsecret"}))
 	})
 
 	It("reads config with direct", func() {
@@ -57,6 +57,6 @@ var _ = Describe("configure credentials", func() {
 		Expect(mem.ExistsCredentials("direct")).To(BeTrue())
 		creds, err := mem.LookupCredentials("direct")
 		Expect(err).To(Succeed())
-		Expect(creds.Properties()).To(Equal(common.Properties{"username": "mandelsoft2", "password": "specialsecret2"}))
+		Expect(creds.Properties()).To(Equal(misc.Properties{"username": "mandelsoft2", "password": "specialsecret2"}))
 	})
 })

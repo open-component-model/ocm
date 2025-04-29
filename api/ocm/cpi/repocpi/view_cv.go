@@ -20,7 +20,7 @@ import (
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/refmgmt/resource"
 )
@@ -42,7 +42,7 @@ type ComponentVersionAccessViewManager = resource.ViewManager[cpi.ComponentVersi
 
 type ComponentVersionAccessBridge interface {
 	resource.ResourceImplementation[cpi.ComponentVersionAccess]
-	common.VersionedElement
+	misc.VersionedElement
 	io.Closer
 
 	GetContext() cpi.Context
@@ -150,7 +150,7 @@ func (c *componentVersionAccessView) SetReadOnly() {
 }
 
 func (c *componentVersionAccessView) Close() error {
-	list := errors.ErrListf("closing %s", common.VersionedElementKey(c))
+	list := errors.ErrListf("closing %s", misc.VersionedElementKey(c))
 	err := c._componentVersionAccessView.Close()
 	return list.Add(c.err, err).Result()
 }

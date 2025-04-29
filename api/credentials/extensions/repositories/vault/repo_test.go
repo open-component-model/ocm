@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/credentials"
 	me "ocm.software/ocm/api/credentials/extensions/repositories/vault"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -57,7 +57,7 @@ var _ = Describe("", func() {
 			// for a corresponding consumer exist. Thus, creating such credentials is required to test the method even
 			// though they are not used
 			consumerId := Must(identity.GetConsumerId(VAULT_HTTP_URL, VAULT_NAMESPACE, VAULT_MOUNT_PATH, VAULT_PATH_REPO1))
-			creds := credentials.NewCredentials(common.Properties{
+			creds := credentials.NewCredentials(misc.Properties{
 				identity.ATTR_AUTHMETH: identity.AUTH_TOKEN,
 				identity.ATTR_TOKEN:    "token",
 			})

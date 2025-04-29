@@ -7,15 +7,15 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/stringutils"
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -25,7 +25,7 @@ const KIND_INPUTTYPE = "input type"
 
 type Context interface {
 	clictx.Context
-	Printer() common.Printer
+	Printer() misc.Printer
 	Printf(msg string, args ...interface{}) (int, error)
 	Variables() map[string]interface{}
 	Section(msg string, args ...interface{}) Context
@@ -34,11 +34,11 @@ type Context interface {
 
 type context struct {
 	clictx.Context
-	printer   common.Printer
+	printer   misc.Printer
 	variables map[string]interface{}
 }
 
-func NewContext(ctx clictx.Context, pr common.Printer, variables map[string]interface{}) Context {
+func NewContext(ctx clictx.Context, pr misc.Printer, variables map[string]interface{}) Context {
 	return &context{
 		Context:   ctx,
 		printer:   pr,
@@ -50,7 +50,7 @@ func (c *context) Printf(msg string, args ...interface{}) (int, error) {
 	return c.printer.Printf(msg, args...)
 }
 
-func (c *context) Printer() common.Printer {
+func (c *context) Printer() misc.Printer {
 	return c.printer
 }
 
@@ -73,7 +73,7 @@ func (c *context) AddGap(gap string) Context {
 
 type InputResourceInfo struct {
 	// ComponentVersion is the name of the component version to generate.
-	ComponentVersion common.NameVersion
+	ComponentVersion misc.NameVersion
 	// ElementName is the name of the element to create.
 	ElementName string
 	// The path of the file the inputs description has been taken from.
@@ -433,7 +433,7 @@ func Usage(scheme InputTypeScheme) string {
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:`
 	for _, t := range scheme.KnownTypeNames() {
-		s = fmt.Sprintf("%s\n\n- Input type <code>%s</code>\n\n%s", s, t, utils.IndentLines(scheme.GetInputType(t).Usage(), "  "))
+		s = fmt.Sprintf("%s\n\n- Input type <code>%s</code>\n\n%s", s, t, stringutils.IndentLines(scheme.GetInputType(t).Usage(), "  "))
 	}
 	return s + "\n"
 }

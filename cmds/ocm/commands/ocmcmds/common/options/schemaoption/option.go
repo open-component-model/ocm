@@ -2,11 +2,11 @@ package schemaoption
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/spf13/pflag"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/cmds/ocm/common/options"
@@ -19,7 +19,7 @@ func From(o options.OptionSetProvider) *Option {
 }
 
 func New(def string, internal ...bool) *Option {
-	return &Option{Defaulted: def, internal: utils2.Optional(internal...)}
+	return &Option{Defaulted: def, internal: general.Optional(internal...)}
 }
 
 type Option struct {

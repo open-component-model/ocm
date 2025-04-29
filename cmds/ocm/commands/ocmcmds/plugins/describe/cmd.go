@@ -7,7 +7,7 @@ import (
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/utils/cobrautils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	handler "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
@@ -64,13 +64,13 @@ func (o *Command) Run() error {
 /////////////////////////////////////////////////////////////////////////////
 
 type action struct {
-	Printer common.Printer
+	Printer misc.Printer
 	Count   int
 }
 
 func NewAction(o *Command) *action {
 	return &action{
-		Printer: common.NewPrinter(o.StdOut()),
+		Printer: misc.NewPrinter(o.StdOut()),
 	}
 }
 
@@ -78,7 +78,7 @@ func (a *action) Add(e interface{}) error {
 	a.Count++
 	p := handler.Elem(e)
 
-	out, buf := common.NewBufferedPrinter()
+	out, buf := misc.NewBufferedPrinter()
 	DescribePlugin(p, out)
 	if a.Count > 1 {
 		a.Printer.Printf("----------------------\n")

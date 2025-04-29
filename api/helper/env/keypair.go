@@ -2,11 +2,11 @@ package env
 
 import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/ioutils"
 
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/tech/signing/signutils"
-	"ocm.software/ocm/api/utils"
 )
 
 func (e *Environment) RSAKeyPair(name ...string) {
@@ -22,7 +22,7 @@ func (e *Environment) RSAKeyPair(name ...string) {
 func (e *Environment) ReadRSAKeyPair(name, path string) {
 	reg := signingattr.Get(e.OCMContext())
 	pubfound := false
-	path, _ = utils.ResolvePath(path)
+	path, _ = ioutils.ResolvePath(path)
 	if ok, _ := e.Exists(filepath.Join(path, "rsa.pub")); ok {
 		pubbytes, err := e.ReadFile(filepath.Join(path, "rsa.pub"))
 		e.failOn(err)

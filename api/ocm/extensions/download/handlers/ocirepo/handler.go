@@ -21,7 +21,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ func New(repospec ...*ociuploadattr.Attribute) download.Handler {
 	return &handler{spec: general.Optional(repospec...)}
 }
 
-func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (accepted bool, target string, err error) {
+func (h *handler) Download(p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (accepted bool, target string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&err, "upload to OCI registry")
 

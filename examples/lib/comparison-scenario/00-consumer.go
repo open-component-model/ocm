@@ -11,11 +11,11 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/tarutils"
 	"ocm.software/ocm/examples/lib/helper"
 )
@@ -43,7 +43,7 @@ func TransportTo(target ocm.Repository, src string) error {
 	err = transfer.Transfer(cv, target,
 		standard.ResourcesByValue(),
 		standard.Overwrite(),
-		transfer.WithPrinter(common.StdoutPrinter))
+		transfer.WithPrinter(misc.StdoutPrinter))
 	if err != nil {
 		return errors.Wrapf(err, "transfer failed")
 	}

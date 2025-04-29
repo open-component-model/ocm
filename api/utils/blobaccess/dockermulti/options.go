@@ -6,7 +6,7 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/oci"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Option = optionutils.Option[*Options]
@@ -15,8 +15,8 @@ type Options struct {
 	Context  oci.Context
 	Version  string
 	Variants []string
-	Origin   *common.NameVersion
-	Printer  common.Printer
+	Origin   *misc.NameVersion
+	Printer  misc.Printer
 }
 
 func (o *Options) ApplyTo(opts *Options) {
@@ -68,14 +68,14 @@ func WithVersion(v string) Option {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type compvers common.NameVersion
+type compvers misc.NameVersion
 
 func (o compvers) ApplyTo(opts *Options) {
-	n := common.NameVersion(o)
+	n := misc.NameVersion(o)
 	opts.Origin = &n
 }
 
-func WithOrigin(o common.NameVersion) Option {
+func WithOrigin(o misc.NameVersion) Option {
 	return compvers(o)
 }
 
@@ -94,13 +94,13 @@ func WithVariants(v ...string) Option {
 ////////////////////////////////////////////////////////////////////////////////
 
 type printer struct {
-	common.Printer
+	misc.Printer
 }
 
 func (o printer) ApplyTo(opts *Options) {
 	opts.Printer = o
 }
 
-func WithPrinter(p common.Printer) Option {
+func WithPrinter(p misc.Printer) Option {
 	return printer{p}
 }

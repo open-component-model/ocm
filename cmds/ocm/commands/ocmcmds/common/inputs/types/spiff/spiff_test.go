@@ -5,7 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/spiff"
 )
@@ -15,7 +15,7 @@ var _ = Describe("spiff processing", func() {
 	var ictx inputs.Context
 	var info inputs.InputResourceInfo
 
-	nv := common.NewNameVersion("test", "v1")
+	nv := misc.NewNameVersion("test", "v1")
 
 	BeforeEach(func() {
 		info = inputs.InputResourceInfo{
@@ -24,7 +24,7 @@ var _ = Describe("spiff processing", func() {
 			InputFilePath:    "/testdata/dummy",
 		}
 		env = NewTestEnv(TestData())
-		ictx = inputs.NewContext(env.Context, common.NewPrinter(env.Context.StdOut()), nil)
+		ictx = inputs.NewContext(env.Context, misc.NewPrinter(env.Context.StdOut()), nil)
 	})
 
 	AfterEach(func() {

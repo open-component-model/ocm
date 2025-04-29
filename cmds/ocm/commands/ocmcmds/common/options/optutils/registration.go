@@ -8,11 +8,11 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
 	clictx "ocm.software/ocm/api/cli"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
 )
 
@@ -79,7 +79,7 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 			if err != nil {
 				return fmt.Errorf("invalid %s registration %s (invalid priority) must be of %s", o.name, n, RegistrationFormat)
 			}
-			prio = generics.Pointer(int(v))
+			prio = generics.PointerTo(int(v))
 		}
 		i = strings.Index(med, ":")
 		if i >= 0 {
@@ -90,7 +90,7 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 		var raw []byte
 		var err error
 		if strings.HasPrefix(v, "@") {
-			raw, err = utils.ReadFile(v[1:], ctx.FileSystem())
+			raw, err = optionutils.ReadFile(v[1:], ctx.FileSystem())
 			if err != nil {
 				return errors.Wrapf(err, "cannot read %s config from %q", o.name, v[1:])
 			}

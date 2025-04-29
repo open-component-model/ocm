@@ -26,7 +26,7 @@ import (
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/dryrunoption"
@@ -446,7 +446,7 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 
 func (o *ResourceAdderCommand) ProcessResourceDescriptions() error {
 	fs := o.Context.FileSystem()
-	printer := common.NewPrinter(o.Context.StdOut())
+	printer := misc.NewPrinter(o.Context.StdOut())
 	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, templateroption.From(o).Options, o.Handler, o.Resources)
 	if err != nil {
 		return err
@@ -482,9 +482,9 @@ func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems [
 				var acc ocm.AccessSpec
 				// Local Blob
 				info := inputs.InputResourceInfo{
-					ComponentVersion: common.VersionedElementKey(cv),
+					ComponentVersion: misc.VersionedElementKey(cv),
 					ElementName:      elem.Spec().GetName(),
-					InputFilePath:    general.OptionalDefaulted(elem.Source().Origin(), elem.Input().SourceFile),
+					InputFilePath:    general.OptionalNonZeroDefaulted(elem.Source().Origin(), elem.Input().SourceFile),
 				}
 				blob, hint, berr := elem.Input().Input.GetBlob(ictx, info)
 				if berr != nil {

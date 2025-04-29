@@ -17,7 +17,7 @@ import (
 	ctfocm "ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/tarutils"
 )
 
@@ -88,7 +88,7 @@ var _ = Describe("download blueprint", func() {
 
 		racc := Must(cv.GetResourceByIndex(index))
 
-		p, buf := common.NewBufferedPrinter()
+		p, buf := misc.NewBufferedPrinter()
 		ok, path := Must2(download.For(env).Download(p, racc, DOWNLOAD_PATH, env))
 		Expect(ok).To(BeTrue())
 		Expect(path).To(Equal(DOWNLOAD_PATH))

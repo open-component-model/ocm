@@ -1,9 +1,10 @@
 package maplistmerge
 
 import (
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/defaultmerge"
 	"ocm.software/ocm/api/ocm/valuemergehandler/hpi"
-	"ocm.software/ocm/api/utils"
 )
 
 type Mode = defaultmerge.Mode
@@ -19,7 +20,7 @@ func NewConfig(field string, overwrite Mode, entries ...*hpi.Specification) *Con
 	return &Config{
 		KeyField: field,
 		Config:   *defaultmerge.NewConfig(overwrite),
-		Entries:  utils.Optional(entries...),
+		Entries:  general.Optional(entries...),
 	}
 }
 

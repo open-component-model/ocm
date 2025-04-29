@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -12,8 +13,7 @@ import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext/action"
 	"ocm.software/ocm/api/datacontext/action/api"
-	utils2 "ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -80,7 +80,7 @@ func (o *Command) Complete(args []string) error {
 
 	data := []byte(args[0])
 	if strings.HasPrefix(args[0], "@") {
-		data, err = utils2.ResolveData(args[0][1:], o.FileSystem())
+		data, err = optionutils.ResolveData(args[0][1:], o.FileSystem())
 		if err != nil {
 			return err
 		}
@@ -142,7 +142,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	var creds common.Properties
+	var creds misc.Properties
 
 	if len(o.Consumer) > 0 {
 		c, err := credentials.RequiredCredentialsForConsumer(o.CredentialsContext(), o.Consumer, o.Matcher)

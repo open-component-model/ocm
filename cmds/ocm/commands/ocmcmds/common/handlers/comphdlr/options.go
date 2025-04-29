@@ -2,9 +2,9 @@ package comphdlr
 
 import (
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/ocm"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
 	"ocm.software/ocm/cmds/ocm/common/options"
@@ -63,7 +63,7 @@ func (o latestonly) ApplyToCompHandler(handler *TypeHandler) {
 }
 
 func LatestOnly(b ...bool) Option {
-	return latestonly{utils.OptionalDefaultedBool(true, b...)}
+	return latestonly{general.OptionalDefaultedBool(true, b...)}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

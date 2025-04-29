@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/stringutils"
+
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -45,7 +48,7 @@ type typeScheme[T runtime.VersionedTypedObject, R TypedObjectType[T], S TypeSche
 }
 
 func MustNewDefaultTypeScheme[T runtime.VersionedTypedObject, R TypedObjectType[T], S TypeScheme[T, R]](name string, extender DescriptionExtender[R], unknown runtime.Unstructured, acceptUnknown bool, defaultdecoder runtime.TypedObjectDecoder[T], base ...TypeScheme[T, R]) TypeScheme[T, R] {
-	scheme := runtime.MustNewDefaultTypeScheme[T, R](unknown, acceptUnknown, defaultdecoder, utils.Optional(base...))
+	scheme := runtime.MustNewDefaultTypeScheme[T, R](unknown, acceptUnknown, defaultdecoder, general.Optional(base...))
 	return &typeScheme[T, R, S]{
 		name:        name,
 		extender:    extender,
@@ -56,7 +59,7 @@ func MustNewDefaultTypeScheme[T runtime.VersionedTypedObject, R TypedObjectType[
 // NewTypeScheme provides an TypeScheme implementation based on the interfaces
 // and the default runtime.TypeScheme implementation.
 func NewTypeScheme[T runtime.VersionedTypedObject, R TypedObjectType[T], S TypeScheme[T, R]](name string, extender DescriptionExtender[R], unknown runtime.Unstructured, acceptUnknown bool, base ...S) TypeScheme[T, R] {
-	scheme := runtime.MustNewDefaultTypeScheme[T, R](unknown, acceptUnknown, nil, utils.Optional(base...))
+	scheme := runtime.MustNewDefaultTypeScheme[T, R](unknown, acceptUnknown, nil, general.Optional(base...))
 	return &typeScheme[T, R, S]{
 		name:        name,
 		extender:    extender,
@@ -116,21 +119,21 @@ func (t *typeScheme[T, R, S]) Describe() string {
 		}
 	}
 
-	for _, tn := range utils.StringMapKeys(descs) {
+	for _, tn := range maputils.OrderedKeys(descs) {
 		info := descs[tn]
 		desc := strings.Trim(info.desc, "\n")
 		if desc != "" {
-			s = fmt.Sprintf("%s\n- %s <code>%s</code>\n\n%s\n\n", s, t.name, tn, utils.IndentLines(desc, "  "))
+			s = fmt.Sprintf("%s\n- %s <code>%s</code>\n\n%s\n\n", s, t.name, tn, stringutils.IndentLines(desc, "  "))
 
 			format := ""
-			for _, f := range utils.StringMapKeys(info.versions) {
+			for _, f := range maputils.OrderedKeys(info.versions) {
 				desc = strings.Trim(info.versions[f], "\n")
 				if desc != "" {
-					format = fmt.Sprintf("%s\n- Version <code>%s</code>\n\n%s\n", format, f, utils.IndentLines(desc, "  "))
+					format = fmt.Sprintf("%s\n- Version <code>%s</code>\n\n%s\n", format, f, stringutils.IndentLines(desc, "  "))
 				}
 			}
 			if format != "" {
-				s += fmt.Sprintf("  The following versions are supported:\n%s\n", strings.Trim(utils.IndentLines(format, "  "), "\n"))
+				s += fmt.Sprintf("  The following versions are supported:\n%s\n", strings.Trim(stringutils.IndentLines(format, "  "), "\n"))
 			}
 		}
 		s += info.more

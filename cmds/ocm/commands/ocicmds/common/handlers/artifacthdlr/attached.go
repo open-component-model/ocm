@@ -7,7 +7,7 @@ import (
 	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/common/output"
 	"ocm.software/ocm/cmds/ocm/common/processing"
 )
@@ -31,7 +31,7 @@ func explodeAttached(o interface{}) []interface{} {
 	dig := blob.Digest()
 	prefix := Attachment(dig, "")
 	list, err := obj.Namespace.ListTags()
-	hist := sliceutils.CopyAppend(obj.History, common.NewNameVersion("", dig.String()))
+	hist := sliceutils.CopyAppend(obj.History, misc.NewNameVersion("", dig.String()))
 	if err == nil {
 		for _, l := range list {
 			if strings.HasPrefix(l, prefix) {

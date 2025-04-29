@@ -24,7 +24,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/filelock"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
 )
 
@@ -104,13 +104,13 @@ type PluginUpdater struct {
 	Constraints []*semver.Constraints
 
 	Current string
-	Printer common.Printer
+	Printer misc.Printer
 }
 
-func NewPluginUpdater(ctx ocm.ContextProvider, printer common.Printer) *PluginUpdater {
+func NewPluginUpdater(ctx ocm.ContextProvider, printer misc.Printer) *PluginUpdater {
 	return &PluginUpdater{
 		Context: ctx.OCMContext(),
-		Printer: common.AssurePrinter(printer),
+		Printer: misc.AssurePrinter(printer),
 	}
 }
 
@@ -233,7 +233,7 @@ func (o *PluginUpdater) downloadLatest(session ocm.Session, comp ocm.ComponentAc
 }
 
 func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAccess, name string) (err error) {
-	defer errors.PropagateErrorf(&err, nil, "%s", common.VersionedElementKey(cv))
+	defer errors.PropagateErrorf(&err, nil, "%s", misc.VersionedElementKey(cv))
 
 	var found ocm.ResourceAccess
 	var wrong ocm.ResourceAccess

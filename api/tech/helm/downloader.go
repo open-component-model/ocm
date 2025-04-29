@@ -19,18 +19,18 @@ import (
 	"ocm.software/ocm/api/oci"
 	ocihelm "ocm.software/ocm/api/ocm/extensions/download/handlers/helm"
 	"ocm.software/ocm/api/tech/helm/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
 type chartDownloader struct {
 	*downloader.ChartDownloader
 	*chartAccess
-	creds   common.Properties
+	creds   misc.Properties
 	keyring []byte
 }
 
-func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, repourl string, opts ...Option) (ChartAccess, error) {
+func DownloadChart(out misc.Printer, ctx oci.ContextProvider, ref, version, repourl string, opts ...Option) (ChartAccess, error) {
 	if version == "" {
 		return nil, fmt.Errorf("version required")
 	}
@@ -112,7 +112,7 @@ func (d *chartDownloader) complete(ctx oci.ContextProvider, ref, repourl string)
 	}
 	creds := d.creds
 	if creds == nil {
-		creds = common.Properties{}
+		creds = misc.Properties{}
 	}
 
 	config := vfs.Join(d.fs, d.root, ".config")

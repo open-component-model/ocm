@@ -3,9 +3,9 @@ package directory
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/optionutils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/dirtree"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -70,8 +70,8 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		dirtree.WithCompressWithGzip(s.Compress()),
 		dirtree.WithIncludeFiles(s.IncludeFiles),
 		dirtree.WithExcludeFiles(s.ExcludeFiles),
-		dirtree.WithFollowSymlinks(utils.AsBool(s.FollowSymlinks)),
-		dirtree.WithPreserveDir(utils.AsBool(s.PreserveDir)),
+		dirtree.WithFollowSymlinks(optionutils.AsBool(s.FollowSymlinks)),
+		dirtree.WithPreserveDir(optionutils.AsBool(s.PreserveDir)),
 	)
 	return access, "", err
 }

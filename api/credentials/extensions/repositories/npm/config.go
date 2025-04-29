@@ -6,15 +6,14 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/ioutils"
 )
 
 type npmConfig map[string]string
 
 // readNpmConfigFile reads "~/.npmrc" file line by line, parse it and return the result as a npmConfig.
 func readNpmConfigFile(path string) (npmConfig, string, error) {
-	path, err := utils.ResolvePath(path)
+	path, err := ioutils.ResolvePath(path)
 	if err != nil {
 		return nil, path, errors.Wrapf(err, "cannot resolve path %q", path)
 	}

@@ -14,7 +14,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/virtual"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ func NewRepository(ctxp cpi.ContextProvider, names ...string) cpi.Repository {
 	return repo
 }
 
-type Index = virtual.Index[common.NameVersion]
+type Index = virtual.Index[misc.NameVersion]
 
 type Access struct {
 	lock     sync.Mutex
@@ -54,7 +54,7 @@ var _ virtual.Access = (*Access)(nil)
 func NewAccess(name string) *Access {
 	return &Access{
 		name:  name,
-		index: virtual.NewIndex[common.NameVersion](),
+		index: virtual.NewIndex[misc.NameVersion](),
 		blobs: map[string]blobaccess.BlobAccess{},
 	}
 }
@@ -178,7 +178,7 @@ func (v *VersionAccess) Update() (bool, error) {
 		return false, accessio.ErrReadOnly
 	}
 	if v.desc.GetName() != v.comp || v.desc.GetVersion() != v.vers {
-		return false, errors.ErrInvalid(cpi.KIND_COMPONENTVERSION, common.VersionedElementKey(v.desc).String())
+		return false, errors.ErrInvalid(cpi.KIND_COMPONENTVERSION, misc.VersionedElementKey(v.desc).String())
 	}
 	i := v.access.index.Get(v.comp, v.vers)
 	if !reflect.DeepEqual(v.desc, i.CD()) {

@@ -9,11 +9,11 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -131,7 +131,7 @@ func (o *Options) Execute(data string) (string, error) {
 
 func ReadYAMLSettings(fs vfs.FileSystem, path string) (Values, error) {
 	result := Values{}
-	data, err := utils.ReadFile(path, fs)
+	data, err := optionutils.ReadFile(path, fs)
 	if err != nil {
 		return nil, err
 	}

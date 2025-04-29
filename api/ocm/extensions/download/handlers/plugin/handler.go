@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/utils/accessio"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 // pluginHandler delegates download format of artifacts to a plugin based handler.
@@ -33,7 +33,7 @@ func New(p plugin.Plugin, name string, config []byte) (download.Handler, error) 
 	}, nil
 }
 
-func (b *pluginHandler) Download(_ common.Printer, racc cpi.ResourceAccess, path string, _ vfs.FileSystem) (resp bool, eff string, rerr error) {
+func (b *pluginHandler) Download(_ misc.Printer, racc cpi.ResourceAccess, path string, _ vfs.FileSystem) (resp bool, eff string, rerr error) {
 	m, err := racc.AccessMethod()
 	if err != nil {
 		return true, "", err

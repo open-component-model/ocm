@@ -8,10 +8,10 @@ import (
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/listformat"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
-const CONSUMER_TYPE = "Buildcredentials" + common.OCM_TYPE_GROUP_SUFFIX
+const CONSUMER_TYPE = "Buildcredentials" + misc.OCM_TYPE_GROUP_SUFFIX
 
 // used identity attributes.
 const (

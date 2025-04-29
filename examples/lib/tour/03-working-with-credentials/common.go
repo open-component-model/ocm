@@ -17,7 +17,7 @@ import (
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
 )
 
@@ -156,7 +156,7 @@ data: some very important data required to understand this component
 		return errors.Wrapf(err, "invalid resource meta")
 	}
 	res := dockermultiblob.ResourceAccess(cv.GetContext(), meta,
-		dockermultiblob.WithPrinter(common.StdoutPrinter),
+		dockermultiblob.WithPrinter(misc.StdoutPrinter),
 		dockermultiblob.WithHint("ocm.software/ocmci"),
 		dockermultiblob.WithVersion(current_version),
 		dockermultiblob.WithVariants(
@@ -272,14 +272,14 @@ func listVersions(repo ocm.Repository, list ...string) error {
 		if err != nil {
 			return errors.Wrapf(err, "cannot get latest version for %s", name)
 		}
-		nested.Close(cv, "component version", common.VersionedElementKey(cv).String())
+		nested.Close(cv, "component version", misc.VersionedElementKey(cv).String())
 
 		nested.Finalize()
 	}
 	return nil
 }
 
-func obfuscate(props common.Properties) string {
+func obfuscate(props misc.Properties) string {
 	if pw, ok := props[credentials.ATTR_PASSWORD]; ok {
 		if len(pw) > 5 {
 			pw = pw[:5] + "***"

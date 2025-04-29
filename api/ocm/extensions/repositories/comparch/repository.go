@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
@@ -15,10 +16,9 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localfsblob"
 	ocmhdlr "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/ocm"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/errkind"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 )
 
@@ -234,7 +234,7 @@ func (c *ComponentAccessImpl) NewVersion(version string, overrides ...bool) (*re
 	if version != c.repo.arch.GetVersion() {
 		return nil, errors.ErrNotSupported(cpi.KIND_COMPONENTVERSION, version, fmt.Sprintf("component archive %s:%s", c.GetName(), c.repo.arch.GetVersion()))
 	}
-	if !utils.Optional(overrides...) {
+	if !general.Optional(overrides...) {
 		return nil, errors.ErrAlreadyExists(cpi.KIND_COMPONENTVERSION, fmt.Sprintf("%s:%s", c.GetName(), c.repo.arch.GetVersion()))
 	}
 	return newComponentVersionAccess(c, version, false)
@@ -341,7 +341,7 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 	if err != nil {
 		return nil, err
 	}
-	return localblob.New(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
+	return localblob.New(misc.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489

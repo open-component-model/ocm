@@ -6,23 +6,25 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/set"
+	"github.com/mandelsoft/goutils/stringutils"
 
 	"ocm.software/ocm/api/datacontext/action/api"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
 )
 
-func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out common.Printer) {
+func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out misc.Printer) {
 	out.Printf("Plugin Name:      %s\n", d.PluginName)
 	out.Printf("Plugin Version:   %s\n", d.PluginVersion)
 	DescribePluginDescriptorCapabilities(reg, d, out)
 }
 
-func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out common.Printer) {
+func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out misc.Printer) {
 	caps := d.Capabilities()
 	if len(caps) == 0 {
 		out.Printf("Capabilities:     none\n")
@@ -31,9 +33,9 @@ func DescribePluginDescriptorCapabilities(reg api.ActionTypeRegistry, d *descrip
 	}
 	out.Printf("Description: \n")
 	if d.Long == "" {
-		out.Printf("%s\n", utils.IndentLines(d.Short, "      "))
+		out.Printf("%s\n", stringutils.IndentLines(d.Short, "      "))
 	} else {
-		out.Printf("%s\n", utils.IndentLines(d.Long, "      "))
+		out.Printf("%s\n", stringutils.IndentLines(d.Long, "      "))
 	}
 	if len(d.AccessMethods) > 0 {
 		out.Printf("\n")
@@ -144,18 +146,18 @@ func GetAccessMethodInfo(methods []descriptor.AccessMethodDescriptor) map[string
 	return found
 }
 
-func DescribeAccessMethods(d *descriptor.Descriptor, out common.Printer) {
+func DescribeAccessMethods(d *descriptor.Descriptor, out misc.Printer) {
 	methods := GetAccessMethodInfo(d.AccessMethods)
 
-	for _, n := range utils.StringMapKeys(methods) {
+	for _, n := range maputils.OrderedKeys(methods) {
 		out.Printf("- Name: %s\n", n)
 		m := methods[n]
 		if m.Description != "" {
-			out.Printf("%s\n", utils.IndentLines(m.Description, "    "))
+			out.Printf("%s\n", stringutils.IndentLines(m.Description, "    "))
 		}
 		out := out.AddGap("  ")
 		out.Printf("Versions:\n")
-		for _, vn := range utils.StringMapKeys(m.Versions) {
+		for _, vn := range maputils.OrderedKeys(m.Versions) {
 			out.Printf("- Version: %s\n", vn)
 			out := out.AddGap("  ")
 			v := m.Versions[vn]
@@ -221,21 +223,21 @@ func GetActionInfo(reg api.ActionTypeRegistry, actions []descriptor.ActionDescri
 	return found
 }
 
-func DescribeActions(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out common.Printer) {
+func DescribeActions(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out misc.Printer) {
 	actions := GetActionInfo(reg, d.Actions)
 
-	for _, n := range utils.StringMapKeys(actions) {
+	for _, n := range maputils.OrderedKeys(actions) {
 		a := actions[n]
 		out.Printf("- Name: %s%s\n", n, a.Error)
 		if a.Description != "" {
-			out.Printf("%s\n", utils.IndentLines(a.Description, "    "))
+			out.Printf("%s\n", stringutils.IndentLines(a.Description, "    "))
 		}
 		if a.Usage != "" {
-			out.Printf("\n%s\n", utils.IndentLines(a.Usage, "    "))
+			out.Printf("\n%s\n", stringutils.IndentLines(a.Usage, "    "))
 		}
 		if a.ActionDesc != "" {
 			out.Printf("  Info:\n")
-			out.Printf("%s\n", utils.IndentLines(a.ActionDesc, "    "))
+			out.Printf("%s\n", stringutils.IndentLines(a.ActionDesc, "    "))
 		}
 		out := out.AddGap("  ")
 		if a.BestVersion == "" {
@@ -270,28 +272,28 @@ func DescribeActions(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out c
 	}
 }
 
-func DescribeValueMergeHandlers(d *descriptor.Descriptor, out common.Printer) {
+func DescribeValueMergeHandlers(d *descriptor.Descriptor, out misc.Printer) {
 	handlers := map[string]descriptor.ValueMergeHandlerDescriptor{}
 	for _, h := range d.ValueMergeHandlers {
 		handlers[h.GetName()] = h
 	}
 
-	for _, n := range utils.StringMapKeys(handlers) {
+	for _, n := range maputils.OrderedKeys(handlers) {
 		a := handlers[n]
 		out.Printf("- Name: %s\n", n)
 		if a.Description != "" {
-			out.Printf("%s\n", utils.IndentLines(a.Description, "    "))
+			out.Printf("%s\n", stringutils.IndentLines(a.Description, "    "))
 		}
 	}
 }
 
-func DescribeLabelMergeSpecifications(d *descriptor.Descriptor, out common.Printer) {
+func DescribeLabelMergeSpecifications(d *descriptor.Descriptor, out misc.Printer) {
 	handlers := map[string]descriptor.LabelMergeSpecification{}
 	for _, h := range d.LabelMergeSpecifications {
 		handlers[h.GetName()] = h
 	}
 
-	for _, n := range utils.StringMapKeys(handlers) {
+	for _, n := range maputils.OrderedKeys(handlers) {
 		a := handlers[n]
 		out.Printf("- Name: %s\n", n)
 		if a.Description != "" {
@@ -300,7 +302,7 @@ func DescribeLabelMergeSpecifications(d *descriptor.Descriptor, out common.Print
 				out.Printf("  Config: %s\n", string(a.Config))
 			}
 			if a.Description != "" {
-				out.Printf("%s\n", utils.IndentLines(a.Description, "    "))
+				out.Printf("%s\n", stringutils.IndentLines(a.Description, "    "))
 			}
 		}
 	}
@@ -372,19 +374,19 @@ func GetValueSetInfo(valuesets []descriptor.ValueSetDescriptor) map[string]*Valu
 	return found
 }
 
-func DescribeValueSets(d *descriptor.Descriptor, out common.Printer) {
+func DescribeValueSets(d *descriptor.Descriptor, out misc.Printer) {
 	valuesets := GetValueSetInfo(d.ValueSets)
 
-	for _, n := range utils.StringMapKeys(valuesets) {
+	for _, n := range maputils.OrderedKeys(valuesets) {
 		out.Printf("- Name: %s\n", n)
 		m := valuesets[n]
 		out.Printf("  Purposes: %s\n", strings.Join(m.Purposes.AsArray(), ", "))
 		if m.Description != "" {
-			out.Printf("%s\n", utils.IndentLines(m.Description, "    "))
+			out.Printf("%s\n", stringutils.IndentLines(m.Description, "    "))
 		}
 		out := out.AddGap("  ")
 		out.Printf("Versions:\n")
-		for _, vn := range utils.StringMapKeys(m.Versions) {
+		for _, vn := range maputils.OrderedKeys(m.Versions) {
 			out.Printf("- Version: %s\n", vn)
 			out := out.AddGap("  ")
 			v := m.Versions[vn]
@@ -399,13 +401,13 @@ func DescribeValueSets(d *descriptor.Descriptor, out common.Printer) {
 	}
 }
 
-func DescribeCLIExtensions(d *descriptor.Descriptor, out common.Printer) {
+func DescribeCLIExtensions(d *descriptor.Descriptor, out misc.Printer) {
 	handlers := map[string]descriptor.CommandDescriptor{}
 	for _, h := range d.Commands {
 		handlers[h.GetName()] = h
 	}
 
-	for _, n := range utils.StringMapKeys(handlers) {
+	for _, n := range maputils.OrderedKeys(handlers) {
 		a := handlers[n]
 		s := a.Short
 		if s != "" {
@@ -441,11 +443,11 @@ func DescribeCLIExtensions(d *descriptor.Descriptor, out common.Printer) {
 				out.Printf("  Usage:  %s\n", usage[1:])
 			}
 			if a.Description != "" {
-				out.Printf("%s\n", utils.IndentLines(a.Description, "    "))
+				out.Printf("%s\n", stringutils.IndentLines(a.Description, "    "))
 			}
 			if a.Example != "" {
 				out.Printf("  Example:\n")
-				out.Printf("%s\n", utils.IndentLines(a.Example, "    "))
+				out.Printf("%s\n", stringutils.IndentLines(a.Example, "    "))
 			}
 		}
 	}
@@ -495,18 +497,18 @@ func GetTypeInfo(types []descriptor.ConfigTypeDescriptor) map[string]*TypeInfo {
 	return found
 }
 
-func DescribeConfigTypes(d *descriptor.Descriptor, out common.Printer) {
+func DescribeConfigTypes(d *descriptor.Descriptor, out misc.Printer) {
 	types := GetTypeInfo(d.ConfigTypes)
 
-	for _, n := range utils.StringMapKeys(types) {
+	for _, n := range maputils.OrderedKeys(types) {
 		out.Printf("- Name: %s\n", n)
 		m := types[n]
 		if m.Description != "" {
-			out.Printf("%s\n", utils.IndentLines(m.Description, "    "))
+			out.Printf("%s\n", stringutils.IndentLines(m.Description, "    "))
 		}
 		out := out.AddGap("  ")
 		out.Printf("Versions:\n")
-		for _, vn := range utils.StringMapKeys(m.Versions) {
+		for _, vn := range maputils.OrderedKeys(m.Versions) {
 			out.Printf("- Version: %s\n", vn)
 			out := out.AddGap("  ")
 			v := m.Versions[vn]
@@ -528,7 +530,7 @@ type DescribableElement[C Describable] interface {
 }
 
 // ListElements lists describable elements.
-func ListElements[E DescribableElement[C], C Describable](msg string, elems []E, out common.Printer) {
+func ListElements[E DescribableElement[C], C Describable](msg string, elems []E, out misc.Printer) {
 	keys := map[string]E{}
 	for _, e := range elems {
 		keys[e.GetName()] = e
@@ -536,7 +538,7 @@ func ListElements[E DescribableElement[C], C Describable](msg string, elems []E,
 	if len(keys) > 0 {
 		out.Printf("%s:\n", msg)
 	}
-	for _, n := range utils.StringMapKeys(keys) {
+	for _, n := range maputils.OrderedKeys(keys) {
 		m := keys[n]
 		out.Printf("- Name: %s\n", n)
 		out := out.AddGap("  ")
@@ -550,7 +552,7 @@ func ListElements[E DescribableElement[C], C Describable](msg string, elems []E,
 		if len(m.GetConstraints()) > 0 {
 			out.Printf("Registration Constraints:\n")
 			for _, c := range m.GetConstraints() {
-				out.Printf("- %s\n", utils.IndentLines(c.Describe(), "  ", true))
+				out.Printf("- %s\n", stringutils.IndentLines(c.Describe(), "  ", true))
 			}
 		}
 	}

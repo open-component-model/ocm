@@ -46,7 +46,7 @@ var _ = Describe("utils", func() {
 		me.HandleOption[Flag](v, t)
 		Expect(t.flag).To(BeNil())
 
-		v = generics.Pointer(false)
+		v = generics.PointerTo(false)
 		me.HandleOption[Flag](v, t)
 		Expect(t.flag).NotTo(BeNil())
 		Expect(*t.flag).To(BeFalse())

@@ -5,7 +5,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/maputils"
+
 	"ocm.software/ocm/api/utils/registrations"
 )
 
@@ -61,7 +62,7 @@ func (t *TestRegistrationHandler) RegisterByName(handler string, target Target, 
 func (t *TestRegistrationHandler) GetHandlers(target Target) registrations.HandlerInfos {
 	infos := registrations.HandlerInfos{}
 
-	for _, n := range utils.StringMapKeys(t.registered) {
+	for _, n := range maputils.OrderedKeys(t.registered) {
 		infos = append(infos, registrations.NewLeafHandlerInfo(n, "")...)
 	}
 	return infos

@@ -7,7 +7,7 @@ import (
 	"ocm.software/ocm/api/datacontext/action/api"
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -66,9 +66,9 @@ func (s *ActionSpecV1) Selector() api.Selector {
 	return api.Selector(s.Hostname)
 }
 
-func (s *ActionSpecV1) GetConsumerAttributes() common.Properties {
+func (s *ActionSpecV1) GetConsumerAttributes() misc.Properties {
 	host, port, base := utils.SplitLocator(s.Hostname)
-	return common.Properties{
+	return misc.Properties{
 		cpi.ID_TYPE:            identity.CONSUMER_TYPE,
 		identity.ID_HOSTNAME:   host,
 		identity.ID_PATHPREFIX: path.Join(base, s.Repository),

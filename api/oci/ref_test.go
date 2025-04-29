@@ -848,7 +848,7 @@ var _ = Describe("ref parsing", func() {
 			v := Must(oci.ParseVersion("tag"))
 
 			Expect(v).To(Equal(&oci.ArtVersion{
-				Tag:    generics.Pointer("tag"),
+				Tag:    generics.PointerTo("tag"),
 				Digest: nil,
 			}))
 		})
@@ -858,7 +858,7 @@ var _ = Describe("ref parsing", func() {
 
 			Expect(v).To(Equal(&oci.ArtVersion{
 				Tag:    nil,
-				Digest: generics.Pointer(godigest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")),
+				Digest: generics.PointerTo(godigest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")),
 			}))
 		})
 
@@ -866,8 +866,8 @@ var _ = Describe("ref parsing", func() {
 			v := Must(oci.ParseVersion("tag@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"))
 
 			Expect(v).To(Equal(&oci.ArtVersion{
-				Tag:    generics.Pointer("tag"),
-				Digest: generics.Pointer(godigest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")),
+				Tag:    generics.PointerTo("tag"),
+				Digest: generics.PointerTo(godigest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")),
 			}))
 		})
 	})

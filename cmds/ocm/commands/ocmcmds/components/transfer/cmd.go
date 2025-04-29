@@ -15,7 +15,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/spiff"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/closureoption"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/formatoption"
@@ -143,7 +143,7 @@ func (o *Command) Run() error {
 	hdlr := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository, comphdlr.OptionsFor(o))
 	err = utils.HandleOutput(&action{
 		cmd:     o,
-		printer: common.NewPrinter(o.Context.StdOut()),
+		printer: misc.NewPrinter(o.Context.StdOut()),
 		target:  target,
 		handler: thdlr,
 		closure: transfer.TransportClosure{},
@@ -159,7 +159,7 @@ func (o *Command) Run() error {
 
 type action struct {
 	cmd     *Command
-	printer common.Printer
+	printer misc.Printer
 	target  ocm.Repository
 	handler transferhandler.TransferHandler
 	closure transfer.TransportClosure
@@ -197,7 +197,7 @@ func (a *action) Out() error {
 
 	if a.cmd.BOMFile != "" {
 		bom := BOM{}
-		for _, nv := range maputils.Keys(a.closure, common.CompareNameVersion) {
+		for _, nv := range maputils.Keys(a.closure, misc.CompareNameVersion) {
 			bom.List = append(bom.List, BomEntry{
 				Component: nv.GetName(),
 				Version:   nv.GetVersion(),

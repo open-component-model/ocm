@@ -13,9 +13,8 @@ import (
 	"time"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/modern-go/reflect2"
-
-	"ocm.software/ocm/api/utils"
 )
 
 type Usages []interface{}
@@ -221,7 +220,7 @@ func VerifyCertificate(cert *x509.Certificate, intermediates GenericCertificateC
 		return err
 	}
 	timestamp := cert.NotBefore
-	if ts := utils.Optional(ts...); ts != nil && !ts.IsZero() {
+	if ts := general.Optional(ts...); ts != nil && !ts.IsZero() {
 		timestamp = *ts
 	}
 	opts := x509.VerifyOptions{

@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/selectors/rscsel"
 	"ocm.software/ocm/api/ocm/selectors/srcsel"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt/resource"
 )
 
@@ -113,7 +113,7 @@ type ComponentReference = compdesc.Reference
 
 type ComponentVersionAccess interface {
 	resource.ResourceView[ComponentVersionAccess]
-	common.VersionedElement
+	misc.VersionedElement
 	io.Closer
 	ReadOnlyFeature
 

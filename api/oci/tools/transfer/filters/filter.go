@@ -3,11 +3,11 @@ package filters
 import (
 	"encoding/json"
 
+	"github.com/mandelsoft/goutils/general"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
-	"ocm.software/ocm/api/utils"
 )
 
 type Filter interface {
@@ -88,7 +88,7 @@ type platform struct {
 }
 
 func Platform(os string, arch string, excl ...bool) Filter {
-	return &platform{os, arch, utils.Optional(excl...)}
+	return &platform{os, arch, general.Optional(excl...)}
 }
 
 func (f *platform) Accept(art cpi.ArtifactAccess, platform *artdesc.Platform) bool {

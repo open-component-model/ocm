@@ -2,6 +2,7 @@ package spiff
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/ioutils"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -114,7 +115,7 @@ func Script(data []byte) transferhandler.TransferOption {
 }
 
 func ScriptByFile(path string, fss ...vfs.FileSystem) transferhandler.TransferOption {
-	path, _ = utils.ResolvePath(path)
+	path, _ = ioutils.ResolvePath(path)
 	return &scriptOption{
 		source: path,
 		script: func() ([]byte, error) { return vfs.ReadFile(utils.FileSystem(fss...), path) },

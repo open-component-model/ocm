@@ -3,11 +3,12 @@
 package hpi
 
 import (
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/datacontext"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/valuemergehandler/internal"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -43,7 +44,7 @@ func Assign(hint Hint, spec *Specification) {
 }
 
 func NewSpecification(algo string, cfg ...Config) (*Specification, error) {
-	raw, err := runtime.AsRawMessage(utils.Optional(cfg...))
+	raw, err := runtime.AsRawMessage(general.Optional(cfg...))
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func NewRegistry(base ...Registry) Registry {
 
 func LabelHint(name string, optversion ...string) Hint {
 	hint := "label:" + name
-	v := utils.Optional(optversion...)
+	v := general.Optional(optversion...)
 	if v != "" {
 		hint += "@" + v
 	}

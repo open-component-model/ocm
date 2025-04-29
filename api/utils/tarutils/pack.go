@@ -13,16 +13,16 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/finalizer"
-	"github.com/mandelsoft/goutils/general"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	"ocm.software/ocm/api/utils"
 )
 
 func CreateTarFromFs(fs vfs.FileSystem, path string, compress func(w io.Writer) io.WriteCloser, fss ...vfs.FileSystem) (err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 
-	tfs := general.OptionalDefaulted(osfs.New(), fss...)
+	tfs := utils.FileSystem(fss...)
 
 	f, err := tfs.OpenFile(path, vfs.O_CREATE|vfs.O_TRUNC|vfs.O_WRONLY, 0o600)
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -36,10 +36,10 @@ func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Reposit
 		return err
 	}
 
-	index := set.New[common.NameVersion]()
+	index := set.New[misc.NameVersion]()
 	for _, elem := range elems {
 		if r, ok := elem.Spec().(*ResourceSpec); ok {
-			index.Add(common.NewNameVersion(r.Name, r.Version))
+			index.Add(misc.NewNameVersion(r.Name, r.Version))
 		}
 	}
 
@@ -63,7 +63,7 @@ func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Reposit
 				ictx.Printf("completing %s:%s...\n", r.Name, r.Version)
 				for _, cr := range cv.GetDescriptor().References {
 					loop := loop.Nested()
-					nv := common.NewNameVersion(cr.ComponentName, cr.Version)
+					nv := misc.NewNameVersion(cr.ComponentName, cr.Version)
 					if index.Contains(nv) {
 						continue
 					}

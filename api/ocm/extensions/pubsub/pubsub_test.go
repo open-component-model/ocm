@@ -17,7 +17,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/pubsub"
 	"ocm.software/ocm/api/ocm/extensions/pubsub/types/compound"
 	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -30,7 +30,7 @@ const (
 type Provider struct {
 	lock      sync.Mutex
 	settings  map[string]pubsub.PubSubSpec
-	published sliceutils.Slice[common.NameVersion]
+	published sliceutils.Slice[misc.NameVersion]
 }
 
 var _ pubsub.Provider = (*Provider)(nil)
@@ -114,7 +114,7 @@ type Method struct {
 
 var _ pubsub.PubSubMethod = (*Method)(nil)
 
-func (m *Method) NotifyComponentVersion(version common.NameVersion) error {
+func (m *Method) NotifyComponentVersion(version misc.NameVersion) error {
 	m.provider.lock.Lock()
 	defer m.provider.lock.Unlock()
 
@@ -148,7 +148,7 @@ var _ = Describe("Pub SubTest Environment", func() {
 
 		Expect(prov.published).To(BeNil())
 		MustBeSuccessful(repo.AddComponentVersion(cv))
-		Expect(prov.published).To(ConsistOf(common.VersionedElementKey(cv)))
+		Expect(prov.published).To(ConsistOf(misc.VersionedElementKey(cv)))
 	})
 
 	It("indirect setting", func() {
@@ -164,6 +164,6 @@ var _ = Describe("Pub SubTest Environment", func() {
 
 		Expect(prov.published).To(BeNil())
 		MustBeSuccessful(repo.AddComponentVersion(cv))
-		Expect(prov.published).To(ConsistOf(common.VersionedElementKey(cv)))
+		Expect(prov.published).To(ConsistOf(misc.VersionedElementKey(cv)))
 	})
 })

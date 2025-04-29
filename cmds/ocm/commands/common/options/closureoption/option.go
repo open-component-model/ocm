@@ -3,14 +3,14 @@ package closureoption
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/modern-go/reflect2"
 	"github.com/spf13/pflag"
 
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/common/options"
 	"ocm.software/ocm/cmds/ocm/common/output"
 	"ocm.software/ocm/cmds/ocm/common/processing"
@@ -129,7 +129,7 @@ func (o *Option) Mapper(opts options.OptionSetProvider, path func(interface{}) s
 }
 
 func History(e interface{}) string {
-	if o, ok := e.(common.HistorySource); ok {
+	if o, ok := e.(misc.HistorySource); ok {
 		if h := o.GetHistory(); h != nil {
 			return h.String()
 		}
@@ -175,7 +175,7 @@ func AddChain(opts *output.Options, chain, add processing.ProcessChain) processi
 }
 
 func TableOutput(in *output.TableOutput, closure ...ClosureFunction) *output.TableOutput {
-	cf := utils.Optional(closure...)
+	cf := general.Optional(closure...)
 	chain := processing.Append(in.Chain, processing.Explode(cf.Exploder(in.Options)))
 	copts := From(in.Options)
 	return &output.TableOutput{

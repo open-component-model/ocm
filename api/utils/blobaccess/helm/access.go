@@ -13,7 +13,7 @@ import (
 	"ocm.software/ocm/api/tech/helm/loader"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 func BlobAccess(path string, opts ...Option) (blob bpi.BlobAccess, name, version string, err error) {
@@ -22,7 +22,7 @@ func BlobAccess(path string, opts ...Option) (blob bpi.BlobAccess, name, version
 	fs := utils.FileSystem(eff.FileSystem)
 	printer := eff.Printer
 	if printer == nil {
-		printer = common.NewPrinter(nil)
+		printer = misc.NewPrinter(nil)
 	}
 
 	var chartLoader loader.Loader

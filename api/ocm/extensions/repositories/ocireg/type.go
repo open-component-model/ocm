@@ -1,10 +1,11 @@
 package ocireg
 
 import (
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
-	"ocm.software/ocm/api/utils"
 )
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
@@ -30,11 +31,11 @@ type RepositorySpec = genericocireg.RepositorySpec
 // If no ocm meta is given, the subPath part is extracted from the base URL.
 // Otherwise, the given URL is used as OCI registry URL as it is.
 func NewRepositorySpec(baseURL string, metas ...*ComponentRepositoryMeta) *RepositorySpec {
-	return genericocireg.NewRepositorySpec(ocireg.NewRepositorySpec(baseURL), utils.Optional(metas...))
+	return genericocireg.NewRepositorySpec(ocireg.NewRepositorySpec(baseURL), general.Optional(metas...))
 }
 
 func NewComponentRepositoryMeta(subPath string, mapping ...ComponentNameMapping) *ComponentRepositoryMeta {
-	return genericocireg.NewComponentRepositoryMeta(subPath, utils.OptionalDefaulted(OCIRegistryURLPathMapping, mapping...))
+	return genericocireg.NewComponentRepositoryMeta(subPath, general.OptionalDefaulted(OCIRegistryURLPathMapping, mapping...))
 }
 
 func NewRepository(ctx cpi.ContextProvider, baseURL string, metas ...*ComponentRepositoryMeta) (cpi.Repository, error) {

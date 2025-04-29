@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/stringutils"
+
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 )
 
@@ -93,6 +94,6 @@ func InputFieldDoc(name string, desc string, opt flagsets.ConfigOptionType) stri
 	}
 	return `- **<code>` + name + `</code>** *string* ` + oname + `
 
-` + utils.IndentLines(strings.TrimSpace(desc), "  ", false) + `
+` + stringutils.IndentLines(strings.TrimSpace(desc), "  ", false) + `
 `
 }

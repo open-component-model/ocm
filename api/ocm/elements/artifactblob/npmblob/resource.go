@@ -9,13 +9,13 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	base "ocm.software/ocm/api/utils/blobaccess/npm"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const TYPE = resourcetypes.NPM_PACKAGE
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, repo, pkg, version string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithHint(common.NewNameVersion(pkg, version).String()), WithCredentialContext(ctx))...)
+	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithHint(misc.NewNameVersion(pkg, version).String()), WithCredentialContext(ctx))...)
 
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)

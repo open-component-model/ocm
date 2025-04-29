@@ -41,7 +41,7 @@ func (o *Options) addBoolFlag(fs *pflag.FlagSet, p *bool, long string, short str
 
 func (o *Options) applyPreserve(opts *ocm.ElementModificationOptions) {
 	if !o.PreserveSignature {
-		opts.ModifyElement = generics.Pointer(true)
+		opts.ModifyElement = generics.PointerTo(true)
 	}
 }
 

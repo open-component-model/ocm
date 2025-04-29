@@ -8,7 +8,7 @@ import (
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/grammar"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 // ParseRepo parses a standard ocm repository reference into a internal representation.
@@ -217,11 +217,11 @@ func (r *CompSpec) IsVersion() bool {
 	return r.Version != nil
 }
 
-func (r *CompSpec) NameVersion() common.NameVersion {
+func (r *CompSpec) NameVersion() misc.NameVersion {
 	if r.Version != nil {
-		return common.NewNameVersion(r.Component, *r.Version)
+		return misc.NewNameVersion(r.Component, *r.Version)
 	}
-	return common.NewNameVersion(r.Component, "-")
+	return misc.NewNameVersion(r.Component, "-")
 }
 
 func (r *CompSpec) Reference() string {

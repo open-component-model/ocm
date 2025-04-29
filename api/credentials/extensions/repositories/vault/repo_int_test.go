@@ -20,7 +20,7 @@ import (
 	me "ocm.software/ocm/api/credentials/extensions/repositories/vault"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -96,7 +96,7 @@ var _ = Describe("vault config", func() {
 
 			consumerId := Must(identity.GetConsumerId(vaultClient.Configuration().Address,
 				"", "secret", VAULT_PATH_REPO1))
-			creds := credentials.NewCredentials(common.Properties{
+			creds := credentials.NewCredentials(misc.Properties{
 				identity.ATTR_AUTHMETH: identity.AUTH_TOKEN,
 				identity.ATTR_TOKEN:    VAULT_ROOT_TOKEN,
 			})
@@ -481,7 +481,7 @@ func SetUpVaultAccess(ctx context.Context, credctx credentials.Context, client *
 	secretid := secret.Data["secret_id"].(string)
 
 	consumerId := Must(identity.GetConsumerId(client.Configuration().Address, "", "secret", VAULT_PATH_REPO1))
-	creds := credentials.NewCredentials(common.Properties{
+	creds := credentials.NewCredentials(misc.Properties{
 		identity.ATTR_AUTHMETH: identity.AUTH_APPROLE,
 		identity.ATTR_ROLEID:   roleid,
 		identity.ATTR_SECRETID: secretid,

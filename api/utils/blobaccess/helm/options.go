@@ -1,12 +1,12 @@
 package helm
 
 import (
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/oci"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Option = optionutils.Option[*Options]
@@ -20,7 +20,7 @@ type Options struct {
 	CACert          string
 	CACertFile      string
 
-	Printer common.Printer
+	Printer misc.Printer
 }
 
 func (o *Options) ApplyTo(opts *Options) {
@@ -108,14 +108,14 @@ type override struct {
 }
 
 func (o *override) ApplyTo(opts *Options) {
-	opts.OverrideVersion = utils.BoolP(o.flag)
+	opts.OverrideVersion = optionutils.BoolP(o.flag)
 	opts.Version = o.version
 }
 
 func WithVersionOverride(v string, flag ...bool) Option {
 	return &override{
 		version: v,
-		flag:    utils.OptionalDefaultedBool(true, flag...),
+		flag:    general.OptionalDefaultedBool(true, flag...),
 	}
 }
 
@@ -159,13 +159,13 @@ func WithCACertFile(v string) Option {
 ////////////////////////////////////////////////////////////////////////////////
 
 type printer struct {
-	common.Printer
+	misc.Printer
 }
 
 func (o printer) ApplyTo(opts *Options) {
 	opts.Printer = o
 }
 
-func WithPrinter(p common.Printer) Option {
+func WithPrinter(p misc.Printer) Option {
 	return printer{p}
 }

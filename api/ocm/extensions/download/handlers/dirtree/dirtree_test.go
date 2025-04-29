@@ -23,7 +23,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/tarutils"
 )
 
@@ -68,7 +68,7 @@ var _ = Describe("artifact management", func() {
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig)
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			accepted, path := Must2(h.Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
@@ -91,7 +91,7 @@ result: 2 file(s) with 25 byte(s) written
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig).SetArchiveMode(true)
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			accepted, path, err := h.Download(p, res, "target", env)
 			Expect(err).To(Succeed())
 			Expect(accepted).To(BeTrue())
@@ -117,7 +117,7 @@ target: 3584 byte(s) written
 			defer Close(cv)
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			accepted, path, err := download.For(env).Download(p, res, "result", env)
 			Expect(err).To(Succeed())
 			Expect(accepted).To(BeTrue())
@@ -167,7 +167,7 @@ result: 2 file(s) with 25 byte(s) written
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig)
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			accepted, path := Must2(h.Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
@@ -190,7 +190,7 @@ result: 2 file(s) with 25 byte(s) written
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig).SetArchiveMode(true)
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			accepted, path := Must2(h.Download(p, res, "target", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("target"))
@@ -215,7 +215,7 @@ target: 3584 byte(s) written
 			defer Close(cv)
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			accepted, path := Must2(download.For(env).Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
@@ -267,7 +267,7 @@ result: 2 file(s) with 25 byte(s) written
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig)
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			accepted, path := Must2(h.Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
@@ -290,7 +290,7 @@ result: 2 file(s) with 25 byte(s) written
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig).SetArchiveMode(true)
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			accepted, path := Must2(h.Download(p, res, "target", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("target"))
@@ -315,7 +315,7 @@ target: 3584 byte(s) written
 			defer Close(cv)
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			accepted, path := Must2(download.For(env).Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))

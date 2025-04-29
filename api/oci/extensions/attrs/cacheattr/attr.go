@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/ioutils"
 
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -45,7 +45,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 	var value string
 	err := unmarshaller.Unmarshal(data, &value)
 	if value != "" {
-		value, err = utils.ResolvePath(value)
+		value, err = ioutils.ResolvePath(value)
 		if err != nil {
 			return nil, err
 		}

@@ -22,7 +22,7 @@ import (
 	"ocm.software/ocm/api/utils/cobrautils/logopts"
 	logdata "ocm.software/ocm/api/utils/cobrautils/logopts/logging"
 	"ocm.software/ocm/api/utils/logging"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/keyoption"
 )
@@ -133,7 +133,7 @@ func (c *Config) Evaluate(ctx ocm.Context, main bool) (*EvaluatedOptions, error)
 	}
 
 	id := credentials.ConsumerIdentity{}
-	attrs := common.Properties{}
+	attrs := misc.Properties{}
 	for _, s := range c.Credentials {
 		i := strings.Index(s, "=")
 		if i < 0 {
@@ -145,7 +145,7 @@ func (c *Config) Evaluate(ctx ocm.Context, main bool) (*EvaluatedOptions, error)
 			if len(attrs) != 0 {
 				ctx.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
 				id = credentials.ConsumerIdentity{}
-				attrs = common.Properties{}
+				attrs = misc.Properties{}
 			}
 			name = name[1:]
 			id[name] = value

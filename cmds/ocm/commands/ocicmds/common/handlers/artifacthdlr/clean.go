@@ -3,7 +3,7 @@ package artifacthdlr
 import (
 	"github.com/opencontainers/go-digest"
 
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/common/data"
 	"ocm.software/ocm/cmds/ocm/common/output"
 	"ocm.software/ocm/cmds/ocm/common/processing"
@@ -55,7 +55,7 @@ func clean(iterable data.Iterable) data.Iterable {
 		d := depth[dig]
 		if l == 0 && l < d && (e.Spec.Tag == nil || *e.Spec.Tag == tags[dig]) {
 			j := i + 1
-			prefix := e.History.Append(common.NewNameVersion("", dig.String()))
+			prefix := e.History.Append(misc.NewNameVersion("", dig.String()))
 			for ; j < len(data) && data[j].(*Object).History.HasPrefix(prefix); j++ {
 			}
 			data = append(data[:i], data[j:]...)

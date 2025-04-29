@@ -12,7 +12,7 @@ import (
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/closureoption"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -114,18 +114,18 @@ func TableOutput(opts *output.Options, h *action, mapping processing.MappingFunc
 
 type Object struct {
 	Spec       ocm.RefSpec
-	History    common.History
+	History    misc.History
 	Descriptor *compdesc.ComponentDescriptor
 	Error      error
 }
 
 type Manifest struct {
-	History    common.History `json:"context"`
-	Component  string         `json:"component"`
-	Version    string         `json:"version"`
-	Normalized string         `json:"normalized,omitempty"`
-	Hash       string         `json:"hash,omitempty"`
-	Error      string         `json:"error,omitempty"`
+	History    misc.History `json:"context"`
+	Component  string       `json:"component"`
+	Version    string       `json:"version"`
+	Normalized string       `json:"normalized,omitempty"`
+	Hash       string       `json:"hash,omitempty"`
+	Error      string       `json:"error,omitempty"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +163,7 @@ type action struct {
 	opts *hashoption.Option
 	mode *Option
 
-	norms map[common.NameVersion]string
+	norms map[misc.NameVersion]string
 }
 
 func (h *action) Add(e interface{}) error {
@@ -171,7 +171,7 @@ func (h *action) Add(e interface{}) error {
 	if m.Error != "" {
 		return fmt.Errorf("cannot handle %s: %s\n", m.History, m.Error)
 	}
-	h.norms[common.NewNameVersion(m.Component, m.Version)] = m.Normalized
+	h.norms[misc.NewNameVersion(m.Component, m.Version)] = m.Normalized
 	return nil
 }
 
@@ -234,7 +234,7 @@ func newAction(opts *output.Options) *action {
 		mode: From(opts),
 	}
 	if opts.OutputMode == "norm" {
-		h.norms = map[common.NameVersion]string{}
+		h.norms = map[misc.NameVersion]string{}
 	}
 	return h
 }
@@ -253,7 +253,7 @@ func (h *action) _manifester(e interface{}) *Manifest {
 
 	hist := p.History
 	if hist == nil {
-		hist = common.History{}
+		hist = misc.History{}
 	}
 
 	m := &Manifest{

@@ -22,7 +22,7 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/examples/lib/helper"
 )
 
@@ -147,7 +147,7 @@ func TransferApplication() (rerr error) {
 		return errors.Wrapf(err, "cannot list components")
 	}
 
-	printer := common.NewPrinter(os.Stdout)
+	printer := misc.NewPrinter(os.Stdout)
 	// gather transferred component versions
 	// especially for transitive transports this should be
 	// shared among multiple calls to TransferVersion to avoid

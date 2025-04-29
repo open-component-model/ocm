@@ -4,12 +4,12 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/tech/wget/identity"
-	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 )
 
@@ -180,9 +180,9 @@ func WithBody(v io.Reader) Option {
 type noredirect bool
 
 func (o noredirect) ApplyTo(opts *Options) {
-	opts.NoRedirect = utils.BoolP(o)
+	opts.NoRedirect = optionutils.BoolP(o)
 }
 
 func WithNoRedirect(r ...bool) Option {
-	return noredirect(utils.OptionalDefaultedBool(true, r...))
+	return noredirect(general.OptionalDefaultedBool(true, r...))
 }

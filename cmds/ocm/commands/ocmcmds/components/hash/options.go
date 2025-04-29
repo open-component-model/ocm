@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"ocm.software/ocm/api/ocm/tools/signing"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	signingcmd "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/cmds/signing"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/hashoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
@@ -45,7 +45,7 @@ func (o *Option) Complete(cmd *Command) error {
 	sopts := signing.NewOptions(hashoption.From(cmd), signing.Resolver(repo, lookup.Resolver), signing.Update(o.Update), signing.VerifyDigests(o.Verify))
 	err := sopts.Complete(cmd.Context.OCMContext())
 	if err == nil {
-		o.action = signingcmd.NewAction([]string{"", ""}, cmd.Context.OCMContext(), common.NewPrinter(nil), sopts)
+		o.action = signingcmd.NewAction([]string{"", ""}, cmd.Context.OCMContext(), misc.NewPrinter(nil), sopts)
 	}
 	return err
 }

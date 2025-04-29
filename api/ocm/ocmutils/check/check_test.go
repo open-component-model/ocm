@@ -15,7 +15,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/ocmutils/check"
 	"ocm.software/ocm/api/utils/accessio"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -52,7 +52,7 @@ var _ = Describe("Test Environment", func() {
 		spec := Must(ctf.NewRepositorySpec(ctf.ACC_READONLY, ARCH, env))
 		repo := Must(env.OCMContext().RepositoryForSpec(spec))
 		defer Close(repo, "repo")
-		result := Must(check.Check().ForId(repo, common.NewNameVersion(COMP, VERSION)))
+		result := Must(check.Check().ForId(repo, misc.NewNameVersion(COMP, VERSION)))
 		Expect(result).To(BeNil())
 	})
 
@@ -78,7 +78,7 @@ var _ = Describe("Test Environment", func() {
 		})
 
 		It("outputs table", func() {
-			result := Must(check.Check().ForId(repo, common.NewNameVersion(COMP, VERSION)))
+			result := Must(check.Check().ForId(repo, misc.NewNameVersion(COMP, VERSION)))
 
 			Expect(result).NotTo(BeNil())
 			Expect(json.Marshal(result)).To(YAMLEqual(`
@@ -109,7 +109,7 @@ missing:
 		spec := Must(ctf.NewRepositorySpec(ctf.ACC_READONLY, ARCH, env))
 		repo := Must(env.OCMContext().RepositoryForSpec(spec))
 		defer Close(repo, "repo")
-		result := Must(check.Check().ForId(repo, common.NewNameVersion(COMP, VERSION)))
+		result := Must(check.Check().ForId(repo, misc.NewNameVersion(COMP, VERSION)))
 		Expect(result).To(BeNil())
 	})
 
@@ -129,7 +129,7 @@ missing:
 		spec := Must(ctf.NewRepositorySpec(ctf.ACC_READONLY, ARCH, env))
 		repo := Must(env.OCMContext().RepositoryForSpec(spec))
 		defer Close(repo, "repo")
-		ExpectError(check.Check().ForId(repo, common.NewNameVersion(COMP, VERSION))).To(
+		ExpectError(check.Check().ForId(repo, misc.NewNameVersion(COMP, VERSION))).To(
 			MatchError("component version recursion: use of test.de/z:v1 for test.de/x:v1->test.de/z:v1->test.de/y:v1"))
 	})
 
@@ -149,7 +149,7 @@ missing:
 			spec := Must(ctf.NewRepositorySpec(ctf.ACC_READONLY, ARCH, env))
 			repo := Must(env.OCMContext().RepositoryForSpec(spec))
 			defer Close(repo, "repo")
-			result := Must(check.Check(check.LocalResourcesOnly()).ForId(repo, common.NewNameVersion(COMP, VERSION)))
+			result := Must(check.Check(check.LocalResourcesOnly()).ForId(repo, misc.NewNameVersion(COMP, VERSION)))
 			Expect(result).NotTo(BeNil())
 			Expect(result).To(YAMLEqual(`
 resources:
@@ -161,7 +161,7 @@ resources:
 			spec := Must(ctf.NewRepositorySpec(ctf.ACC_READONLY, ARCH, env))
 			repo := Must(env.OCMContext().RepositoryForSpec(spec))
 			defer Close(repo, "repo")
-			result := Must(check.Check().ForId(repo, common.NewNameVersion(COMP, VERSION)))
+			result := Must(check.Check().ForId(repo, misc.NewNameVersion(COMP, VERSION)))
 			Expect(result).To(BeNil())
 		})
 	})
@@ -182,7 +182,7 @@ resources:
 			spec := Must(ctf.NewRepositorySpec(ctf.ACC_READONLY, ARCH, env))
 			repo := Must(env.OCMContext().RepositoryForSpec(spec))
 			defer Close(repo, "repo")
-			result := Must(check.Check(check.LocalSourcesOnly()).ForId(repo, common.NewNameVersion(COMP, VERSION)))
+			result := Must(check.Check(check.LocalSourcesOnly()).ForId(repo, misc.NewNameVersion(COMP, VERSION)))
 			Expect(result).NotTo(BeNil())
 			Expect(result).To(YAMLEqual(`
 sources:
@@ -194,7 +194,7 @@ sources:
 			spec := Must(ctf.NewRepositorySpec(ctf.ACC_READONLY, ARCH, env))
 			repo := Must(env.OCMContext().RepositoryForSpec(spec))
 			defer Close(repo, "repo")
-			result := Must(check.Check().ForId(repo, common.NewNameVersion(COMP, VERSION)))
+			result := Must(check.Check().ForId(repo, misc.NewNameVersion(COMP, VERSION)))
 			Expect(result).To(BeNil())
 		})
 	})

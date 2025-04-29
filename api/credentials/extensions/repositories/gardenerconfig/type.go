@@ -3,13 +3,14 @@ package gardenerconfig
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/credentials/cpi"
 	gardenercfgcpi "ocm.software/ocm/api/credentials/extensions/repositories/gardenerconfig/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/gardenerconfig/identity"
 	"ocm.software/ocm/api/credentials/internal"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -41,7 +42,7 @@ func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher 
 		URL:                       url,
 		ConfigType:                configType,
 		Cipher:                    cipher,
-		PropagateConsumerIdentity: generics.Pointer(utils.OptionalDefaultedBool(true, propagateConsumerIdentity...)),
+		PropagateConsumerIdentity: generics.PointerTo(general.OptionalDefaultedBool(true, propagateConsumerIdentity...)),
 	}
 }
 
@@ -61,7 +62,7 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi
 		return nil, fmt.Errorf("unable to get key from context: %w", err)
 	}
 
-	return repos.GetRepository(ctx, a.URL, a.ConfigType, a.Cipher, key, utils.AsBool(a.PropagateConsumerIdentity, true))
+	return repos.GetRepository(ctx, a.URL, a.ConfigType, a.Cipher, key, optionutils.AsBool(a.PropagateConsumerIdentity, true))
 }
 
 func (a *RepositorySpec) GetConsumerId(uctx ...internal.UsageContext) internal.ConsumerIdentity {

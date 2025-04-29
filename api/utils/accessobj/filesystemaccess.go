@@ -13,7 +13,7 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/file"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/tarutils"
 )
 
@@ -62,7 +62,7 @@ func (a *FileSystemBlobAccess) GetState() State {
 
 // DigestPath returns the path to the blob for a given name.
 func (a *FileSystemBlobAccess) DigestPath(digest digest.Digest) string {
-	return a.BlobPath(common.DigestToFileName(digest))
+	return a.BlobPath(misc.DigestToFileName(digest))
 }
 
 // BlobPath returns the path to the blob for a given name.

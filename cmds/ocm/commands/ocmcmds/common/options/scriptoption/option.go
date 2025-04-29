@@ -2,6 +2,7 @@ package scriptoption
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
@@ -9,7 +10,6 @@ import (
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/spiff"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/common/options"
 )
 
@@ -59,7 +59,7 @@ func (o *Option) Configure(ctx clictx.Context) error {
 		}
 	}
 	if o.ScriptFile != "" {
-		data, err := utils.ReadFile(o.ScriptFile, ctx.FileSystem())
+		data, err := optionutils.ReadFile(o.ScriptFile, ctx.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "invalid transfer script file")
 		}

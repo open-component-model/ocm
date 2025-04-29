@@ -7,7 +7,7 @@ import (
 	"ocm.software/ocm/api/oci/ociutils"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/componentmapping"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -44,7 +44,7 @@ func (h handler) Info(m cpi.ManifestAccess, config []byte) interface{} {
 	return info
 }
 
-func (h handler) Description(pr common.Printer, m cpi.ManifestAccess, config []byte) {
+func (h handler) Description(pr misc.Printer, m cpi.ManifestAccess, config []byte) {
 	pr.Printf("component version:\n")
 	acc := NewStateAccess(m)
 	data, err := blobaccess.BlobData(acc.Get())

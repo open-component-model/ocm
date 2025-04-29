@@ -21,7 +21,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -249,7 +249,7 @@ successfully verified test.de/x:v1 (digest SHA-256:ba5b4af72fcb707a4a8ebc48b088c
 
 			store := Must(signing.NewVerifiedStore(VERIFIED_FILE, env.FileSystem()))
 
-			cd := store.Get(common.NewNameVersion(COMP, VERSION))
+			cd := store.Get(misc.NewNameVersion(COMP, VERSION))
 
 			cd.Resources[0].Digest.Value = "b" + cd.Resources[0].Digest.Value[1:]
 			store.Add(cd)

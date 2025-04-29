@@ -14,8 +14,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/set"
-
-	"ocm.software/ocm/api/utils"
 )
 
 type HandlerConfig interface{}
@@ -116,7 +114,7 @@ type handlerRegistrationRegistry[T any, O any] struct {
 }
 
 func NewHandlerRegistrationRegistry[T any, O any](base ...HandlerRegistrationRegistry[T, O]) HandlerRegistrationRegistry[T, O] {
-	return &handlerRegistrationRegistry[T, O]{base: utils.Optional(base...)}
+	return &handlerRegistrationRegistry[T, O]{base: general.Optional(base...)}
 }
 
 func (c *handlerRegistrationRegistry[T, O]) GetAllRegistrationHandlers() []*RegistrationHandlerInfo[T, O] {

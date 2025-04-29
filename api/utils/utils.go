@@ -9,19 +9,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"maps"
 	"math/big"
 	"math/rand"
 	"net/http"
 	"os"
-	"reflect"
-	"slices"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/modern-go/reflect2"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
 
@@ -217,35 +213,6 @@ func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWrit
 	return nil
 }
 
-func IndentLines(orig string, gap string, skipfirst ...bool) string {
-	return JoinIndentLines(strings.Split(strings.TrimPrefix(orig, "\n"), "\n"), gap, skipfirst...)
-}
-
-func JoinIndentLines(orig []string, gap string, skipfirst ...bool) string {
-	if len(orig) == 0 {
-		return ""
-	}
-	skip := false
-	for _, b := range skipfirst {
-		skip = skip || b
-	}
-
-	s := ""
-	if !skip {
-		s = gap
-	}
-	return s + strings.Join(orig, "\n"+gap)
-}
-
-func StringMapKeys[K ~string, E any](m map[K]E) []K {
-	if m == nil {
-		return nil
-	}
-	keys := slices.Collect(maps.Keys(m))
-	slices.Sort(keys)
-	return keys
-}
-
 type Comparable[K any] interface {
 	Compare(o K) int
 }
@@ -272,74 +239,5 @@ func SortedMapKeys[K ComparableMapKey[K], E any](m map[K]E) []K {
 	return keys
 }
 
-// Optional returns the first optional non-zero element given as variadic argument,
-// if given, or the zero element as default.
-func Optional[T any](list ...T) T {
-	var zero T
-	for _, e := range list {
-		if !reflect.DeepEqual(e, zero) {
-			return e
-		}
-	}
-	return zero
-}
-
-// OptionalDefaulted returns the first optional non-nil element given as variadic
-// argument, or the given default element. For value types a given zero
-// argument is excepted, also.
-func OptionalDefaulted[T any](def T, list ...T) T {
-	for _, e := range list {
-		if !reflect2.IsNil(e) {
-			return e
-		}
-	}
-	return def
-}
-
-// OptionalDefaultedBool checks all args for true. If arg is given
-// the given default is returned.
-func OptionalDefaultedBool(def bool, list ...bool) bool {
-	if len(list) == 0 {
-		return def
-	}
-	for _, e := range list {
-		if e {
-			return e
-		}
-	}
-	return false
-}
-
-// GetOptionFlag returns the flag value used to set a bool option
-// based on optionally specified explicit value(s).
-// The default value is to enable the option (true).
-func GetOptionFlag(list ...bool) bool {
-	return OptionalDefaultedBool(true, list...)
-}
-
-func IsNil(o interface{}) bool {
-	return reflect2.IsNil(o)
-}
-
-// Must expect a result to be provided without error.
-func Must[T any](o T, err error) T {
-	if err != nil {
-		panic(fmt.Errorf("expected a %T, but got error %w", o, err))
-	}
-	return o
-}
-
 func IgnoreError(_ error) {
-}
-
-func BoolP[T ~bool](b T) *bool {
-	v := bool(b)
-	return &v
-}
-
-func AsBool(b *bool, def ...bool) bool {
-	if b == nil && len(def) > 0 {
-		return Optional(def...)
-	}
-	return b != nil && *b
 }

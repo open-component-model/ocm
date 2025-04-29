@@ -1,7 +1,9 @@
 package flagsetscheme
 
 import (
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/stringutils"
+
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/runtime"
@@ -71,7 +73,7 @@ type typeScheme[T runtime.VersionedTypedObject, R VersionTypedObjectType[T], S T
 
 func flagExtender[T runtime.VersionedTypedObject, R VersionTypedObjectType[T]](ty R) string {
 	if h := ty.ConfigOptionTypeSetHandler(); h != nil {
-		return utils.IndentLines(flagsets.FormatConfigOptions(h), "  ")
+		return stringutils.IndentLines(flagsets.FormatConfigOptions(h), "  ")
 	}
 	return ""
 }
@@ -79,7 +81,7 @@ func flagExtender[T runtime.VersionedTypedObject, R VersionTypedObjectType[T]](t
 // NewTypeScheme provides an TypeScheme implementation based on the interfaces
 // and the default runtime.TypeScheme implementation.
 func NewTypeScheme[T runtime.VersionedTypedObject, R VersionTypedObjectType[T], S TypeScheme[T, R]](kindname string, cfgname, typeOption, desc, group string, unknown runtime.Unstructured, acceptUnknown bool, base ...S) TypeScheme[T, R] {
-	scheme := descriptivetype.NewTypeScheme[T, R](kindname, flagExtender[T, R], unknown, acceptUnknown, utils.Optional(base...))
+	scheme := descriptivetype.NewTypeScheme[T, R](kindname, flagExtender[T, R], unknown, acceptUnknown, general.Optional(base...))
 	return &typeScheme[T, R, S]{
 		cfgname:     cfgname,
 		description: desc,

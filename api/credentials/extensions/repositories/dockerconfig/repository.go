@@ -11,11 +11,11 @@ import (
 	"github.com/docker/cli/cli/config/configfile"
 	"github.com/docker/cli/cli/config/types"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/ioutils"
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtimefinalizer"
 )
 
@@ -87,7 +87,7 @@ func (r *Repository) Read(force bool) error {
 		id   runtimefinalizer.ObjectIdentity
 	)
 	if r.path != "" {
-		path, err := utils.ResolvePath(r.path)
+		path, err := ioutils.ResolvePath(r.path)
 		if err != nil {
 			return errors.Wrapf(err, "cannot resolve path %q", r.path)
 		}
@@ -113,7 +113,7 @@ func (r *Repository) Read(force bool) error {
 }
 
 func newCredentials(auth types.AuthConfig) cpi.Credentials {
-	props := common.Properties{
+	props := misc.Properties{
 		cpi.ATTR_USERNAME: norm(auth.Username),
 		cpi.ATTR_PASSWORD: norm(auth.Password),
 	}

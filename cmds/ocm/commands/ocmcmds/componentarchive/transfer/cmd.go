@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
@@ -110,5 +110,5 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	return transfer.TransferVersion(common.NewPrinter(o.Context.StdOut()), nil, source, target, thdlr)
+	return transfer.TransferVersion(misc.NewPrinter(o.Context.StdOut()), nil, source, target, thdlr)
 }

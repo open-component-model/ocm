@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"ocm.software/ocm/api/ocm"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TransferWithHandler uses the specified transfer handler to control
 // the transfer process.
-func TransferWithHandler(pr common.Printer, cv ocm.ComponentVersionAccess, tgt ocm.Repository, handler TransferHandler) error {
+func TransferWithHandler(pr misc.Printer, cv ocm.ComponentVersionAccess, tgt ocm.Repository, handler TransferHandler) error {
 	return TransferVersion(pr, nil, cv, tgt, handler)
 }
 
@@ -27,7 +27,7 @@ func Transfer(cv ocm.ComponentVersionAccess, tgt ocm.Repository, optlist ...Tran
 	if err != nil {
 		return err
 	}
-	return TransferVersionWithContext(common.WithPrinter(context.Background(), local.printer), nil, cv, tgt, h)
+	return TransferVersionWithContext(misc.WithPrinter(context.Background(), local.printer), nil, cv, tgt, h)
 }
 
 // TransferWithContext uses the transfer handler based on the given options to control
@@ -43,7 +43,7 @@ func TransferWithContext(ctx context.Context, cv ocm.ComponentVersionAccess, tgt
 		return err
 	}
 	if local.printer != nil {
-		ctx = common.WithPrinter(ctx, local.printer)
+		ctx = misc.WithPrinter(ctx, local.printer)
 	}
 	return TransferVersionWithContext(ctx, nil, cv, tgt, h)
 }

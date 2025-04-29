@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/stringutils"
 	"github.com/spf13/cobra"
 
 	clictx "ocm.software/ocm/api/cli"
@@ -15,8 +17,7 @@ import (
 	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
-	utils3 "ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
@@ -135,7 +136,7 @@ func (a *action) Out() error {
 		if i > 0 {
 			a.Outf("\n")
 		}
-		nv := common.VersionedElementKey(a.data[i].ComponentVersion)
+		nv := misc.VersionedElementKey(a.data[i].ComponentVersion)
 		err := a.describe(a.data[i].ComponentVersion)
 		if err != nil {
 			out.Errf(a.cmd.Context, "%s: %s\n", nv, err)
@@ -158,7 +159,7 @@ type einfo struct {
 }
 
 func (a *action) describe(cv ocm.ComponentVersionAccess) error {
-	nv := common.VersionedElementKey(cv)
+	nv := misc.VersionedElementKey(cv)
 	rid := metav1.NewResourceRef(a.cmd.Id)
 	resolver := lookupoption.From(a.cmd)
 
@@ -177,12 +178,12 @@ func (a *action) describe(cv ocm.ComponentVersionAccess) error {
 	a.Outf("TOI Package %s[%s]\n", nv, ires.Meta().GetName())
 
 	if spec.Description != "" {
-		a.Outf("  Package Description:\n%s\n\n", utils3.IndentLines(strings.TrimSpace(spec.Description), "    ", false))
+		a.Outf("  Package Description:\n%s\n\n", stringutils.IndentLines(strings.TrimSpace(spec.Description), "    ", false))
 	}
 	if len(spec.AdditionalResources) == 0 {
 		a.Outf("  no additional resources found\n")
 	} else {
-		keys := utils3.StringMapKeys(spec.AdditionalResources)
+		keys := maputils.OrderedKeys(spec.AdditionalResources)
 		a.Outf("  Additional Resources:\n")
 		for _, k := range keys {
 			switch k {
@@ -223,14 +224,14 @@ func (a *action) describe(cv ocm.ComponentVersionAccess) error {
 	if len(actions) == 0 {
 		a.Outf("  Warning: no actions defined\n")
 	} else {
-		keys := utils3.StringMapKeys(actions)
+		keys := maputils.OrderedKeys(actions)
 		a.Outf("  Supported Actions:\n")
 		for _, k := range keys {
 			info := actions[k]
 			exec := spec.Executors[info.index]
 			out.Outf(a.cmd.Context, "    - %s: provided by %s\n", k, exec.Name())
 			if len(exec.CredentialMapping) > 0 {
-				ckeys := utils3.StringMapKeys(exec.CredentialMapping)
+				ckeys := maputils.OrderedKeys(exec.CredentialMapping)
 				out.Outf(a.cmd.Context, "      credential key mappings\n")
 				for _, c := range ckeys {
 					out.Outf(a.cmd.Context, "      - %s: %s\n", c, exec.CredentialMapping[c])
@@ -241,7 +242,7 @@ func (a *action) describe(cv ocm.ComponentVersionAccess) error {
 	if len(spec.Credentials) == 0 {
 		a.Outf("  no credentials required\n")
 	} else {
-		keys := utils3.StringMapKeys(spec.Credentials)
+		keys := maputils.OrderedKeys(spec.Credentials)
 		a.Outf("  Required Credentials:\n")
 		for _, k := range keys {
 			cred := spec.Credentials[k]
@@ -250,15 +251,15 @@ func (a *action) describe(cv ocm.ComponentVersionAccess) error {
 				opt = " (optional)"
 			}
 			out.Outf(a.cmd.Context, "    - %s%s\n", k, opt)
-			out.Outf(a.cmd.Context, "      description: %s\n", utils3.IndentLines(strings.TrimSpace(cred.Description), "      ", true))
+			out.Outf(a.cmd.Context, "      description: %s\n", stringutils.IndentLines(strings.TrimSpace(cred.Description), "      ", true))
 			if len(cred.ConsumerId) != 0 {
 				out.Outf(a.cmd.Context, "      used as consumer id: %s\n", cred.ConsumerId)
 			}
 			if len(cred.Properties) != 0 {
-				ckeys := utils3.StringMapKeys(cred.Properties)
+				ckeys := maputils.OrderedKeys(cred.Properties)
 				out.Outf(a.cmd.Context, "      required properties:\n")
 				for _, c := range ckeys {
-					out.Outf(a.cmd.Context, "      - %s: %s\n", c, utils3.IndentLines(strings.TrimSpace(cred.Properties[c]), "        ", true))
+					out.Outf(a.cmd.Context, "      - %s: %s\n", c, stringutils.IndentLines(strings.TrimSpace(cred.Properties[c]), "        ", true))
 				}
 			}
 		}

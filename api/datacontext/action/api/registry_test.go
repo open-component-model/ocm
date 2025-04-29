@@ -8,16 +8,16 @@ import (
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/action/api"
 	"ocm.software/ocm/api/datacontext/action/handlers"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
 type Handler struct {
 	spec  api.ActionSpec
-	creds common.Properties
+	creds misc.Properties
 }
 
-func (h *Handler) Handle(spec api.ActionSpec, creds common.Properties) (api.ActionResult, error) {
+func (h *Handler) Handle(spec api.ActionSpec, creds misc.Properties) (api.ActionResult, error) {
 	h.spec = spec
 	h.creds = creds
 	r := NewActionResult(spec.(*ActionSpec).Field)
@@ -88,7 +88,7 @@ var _ = Describe("action registry", func() {
 
 		It("", func() {
 			spec := NewActionSpec("acme.com")
-			creds := common.Properties{"alice": "bob"}
+			creds := misc.Properties{"alice": "bob"}
 			r := Must(ctx.GetActions().Execute(spec, creds))
 			Expect(handler.spec).To(Equal(spec))
 			Expect(handler.creds).To(Equal(creds))

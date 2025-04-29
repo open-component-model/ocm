@@ -6,9 +6,9 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/set"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/errkind"
 )
 
@@ -47,7 +47,7 @@ func NewMultiFormatVersion[T VersionedTypedObject](kind string, formats FormatVe
 		for k := range found {
 			aliases.Delete(k)
 		}
-		return nil, errors.Newf("missing base formats %s", utils.StringMapKeys(aliases))
+		return nil, errors.Newf("missing base formats %s", maputils.OrderedKeys(aliases))
 	}
 	return &multiFormatVersion[T]{kind, formats}, nil
 }

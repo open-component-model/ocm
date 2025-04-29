@@ -10,6 +10,7 @@ import (
 
 	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/logging"
 	"github.com/moby/locker"
 	"oras.land/oras-go/v2/registry/remote/auth"
@@ -91,7 +92,7 @@ func (r *RepositoryImpl) Close() error {
 }
 
 func (r *RepositoryImpl) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
-	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
+	if c, ok := general.Optional(uctx...).(credentials.StringUsageContext); ok {
 		return identity.GetConsumerId(r.info.Locator, c.String())
 	}
 	return identity.GetConsumerId(r.info.Locator, "")

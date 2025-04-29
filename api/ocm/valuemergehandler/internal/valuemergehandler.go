@@ -4,7 +4,8 @@ import (
 	"maps"
 	"sync"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -45,7 +46,7 @@ var _ Registry = (*registry)(nil)
 
 func NewRegistry(base ...Registry) Registry {
 	return &registry{
-		base:         utils.Optional(base...),
+		base:         general.Optional(base...),
 		handlerTypes: Handlers{},
 		assignments:  MergeHandlerAssignments{},
 	}

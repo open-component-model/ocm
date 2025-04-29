@@ -9,7 +9,7 @@ import (
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/listformat"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 // CONSUMER_TYPE is the Helm chart repository type.
@@ -90,7 +90,7 @@ func GetConsumerId(repourl string, chartname string) cpi.ConsumerIdentity {
 	}
 }
 
-func GetCredentials(ctx cpi.ContextProvider, repourl string, chartname string) common.Properties {
+func GetCredentials(ctx cpi.ContextProvider, repourl string, chartname string) misc.Properties {
 	id := GetConsumerId(repourl, chartname)
 	if id == nil {
 		return nil

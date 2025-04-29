@@ -3,6 +3,7 @@ package check
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/util/json"
@@ -10,8 +11,7 @@ import (
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/ocmutils/check"
-	utils2 "ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/failonerroroption"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
@@ -139,7 +139,7 @@ func mapWideOutput(e interface{}) interface{} {
 			missing[id.String()] = d + "]"
 		}
 		sep := ""
-		for _, k := range utils2.StringMapKeys(missing) {
+		for _, k := range maputils.OrderedKeys(missing) {
 			mmsg += sep + k + missing[k]
 			sep = ", "
 		}
@@ -170,10 +170,10 @@ func mapWideOutput(e interface{}) interface{} {
 type CheckResult = check.Result
 
 type Entry struct {
-	Status           string             `json:"status"`
-	ComponentVersion common.NameVersion `json:"componentVersion"`
-	Results          *CheckResult       `json:",inline"` // does not work
-	Error            error              `json:"error,omitempty"`
+	Status           string           `json:"status"`
+	ComponentVersion misc.NameVersion `json:"componentVersion"`
+	Results          *CheckResult     `json:",inline"` // does not work
+	Error            error            `json:"error,omitempty"`
 }
 
 func (n Entry) MarshalJSON() ([]byte, error) {
@@ -211,7 +211,7 @@ func NewAction(opts *output.Options) processing.ProcessChain {
 func (a *action) Map(in interface{}) interface{} {
 	i := in.(*comphdlr.Object)
 	o := &Entry{
-		ComponentVersion: common.VersionedElementKey(i.ComponentVersion),
+		ComponentVersion: misc.VersionedElementKey(i.ComponentVersion),
 	}
 	status := ""
 	o.Results, o.Error = a.options.For(i.ComponentVersion)
@@ -221,17 +221,17 @@ func (a *action) Map(in interface{}) interface{} {
 	}
 	if !o.Results.IsEmpty() {
 		if len(o.Results.Missing) > 0 {
-			a.erropt.AddError(fmt.Errorf("incomplete component version %s", common.VersionedElementKey(i.ComponentVersion)))
+			a.erropt.AddError(fmt.Errorf("incomplete component version %s", misc.VersionedElementKey(i.ComponentVersion)))
 			status += ",Incomplete"
 		}
 		if len(o.Results.Sources) > 0 || len(o.Results.Resources) > 0 {
 			if len(o.Results.Resources) > 0 {
 				status += ",Resources"
-				a.erropt.AddError(fmt.Errorf("version %s with non-local resources", common.VersionedElementKey(i.ComponentVersion)))
+				a.erropt.AddError(fmt.Errorf("version %s with non-local resources", misc.VersionedElementKey(i.ComponentVersion)))
 			}
 			if len(o.Results.Sources) > 0 {
 				status += ",Sources"
-				a.erropt.AddError(fmt.Errorf("version %s with non-local sources", common.VersionedElementKey(i.ComponentVersion)))
+				a.erropt.AddError(fmt.Errorf("version %s with non-local sources", misc.VersionedElementKey(i.ComponentVersion)))
 			}
 		}
 	}

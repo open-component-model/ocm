@@ -16,7 +16,7 @@ import (
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"
 	"ocm.software/ocm/api/credentials/internal"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const PROVIDER = "ocm.software/credentialprovider/" + Type
@@ -199,7 +199,7 @@ func (p *ConsumerProvider) error(err error, msg string, secret string, keypairs 
 	)
 }
 
-func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secret string) (common.Properties, common.Properties, []string, error) {
+func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secret string) (misc.Properties, misc.Properties, []string, error) {
 	// read the secret
 
 	secret = path.Join(p.repository.spec.Path, secret)
@@ -209,14 +209,14 @@ func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secre
 		return nil, nil, nil, err
 	}
 
-	var id common.Properties
+	var id misc.Properties
 	var list []string
 	props := getProps(s.Data.Data)
 
 	if meta, ok := s.Data.Metadata["custom_metadata"].(map[string]interface{}); ok {
 		sub := false
 		if cid := meta[CUSTOM_CONSUMERID]; cid != nil {
-			id = common.Properties{}
+			id = misc.Properties{}
 			if err := json.Unmarshal([]byte(cid.(string)), &id); err != nil {
 				id = nil
 			}
@@ -240,8 +240,8 @@ func (p *ConsumerProvider) read(ctx context.Context, client *vault.Client, secre
 	return props, id, list, nil
 }
 
-func getProps(data map[string]interface{}) common.Properties {
-	props := common.Properties{}
+func getProps(data map[string]interface{}) misc.Properties {
+	props := misc.Properties{}
 	for k, v := range data {
 		if s, ok := v.(string); ok {
 			props[k] = s

@@ -6,9 +6,9 @@ import (
 	. "ocm.software/ocm/api/utils/out"
 	. "ocm.software/ocm/cmds/ocm/common/processing"
 
+	"github.com/mandelsoft/goutils/stringutils"
 	"sigs.k8s.io/yaml"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -73,16 +73,16 @@ func (this *ComplexProcessingOutput) out(gap string, m map[string]interface{}) {
 				Outf(this.Context, "%s%s:\n", gap, k)
 				s, err := yaml.Marshal(v)
 				if err == nil {
-					utils.IndentLines(string(s), gap)
+					stringutils.IndentLines(string(s), gap)
 				}
 			default:
-				eff := utils.IndentLines(fmt.Sprintf("%v", v), gap+"  ")
+				eff := stringutils.IndentLines(fmt.Sprintf("%v", v), gap+"  ")
 				Outf(this.Context, "%s%s: %s", gap, k, eff[len(gap)+2:])
 			}
 		}
 	}
 	s, err := yaml.Marshal(rest)
 	if err == nil {
-		Out(this.Context, utils.IndentLines(string(s), gap))
+		Out(this.Context, stringutils.IndentLines(string(s), gap))
 	}
 }

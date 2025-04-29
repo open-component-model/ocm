@@ -1,8 +1,9 @@
 package api
 
 import (
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"github.com/mandelsoft/goutils/stringutils"
+
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -40,15 +41,15 @@ func (a *actionType) ResultType() ActionResultType {
 }
 
 func Usage(reg ActionTypeRegistry) string {
-	p, buf := common.NewBufferedPrinter()
+	p, buf := misc.NewBufferedPrinter()
 	for _, n := range reg.GetActionNames() {
 		a := reg.GetAction(n)
 		p.Printf("- Name: %s\n", n)
 		if a.Description() != "" {
-			p.Printf("%s\n", utils.IndentLines(a.Description(), "    "))
+			p.Printf("%s\n", stringutils.IndentLines(a.Description(), "    "))
 		}
 		if a.Usage() != "" {
-			p.Printf("\n%s\n", utils.IndentLines(a.Usage(), "    "))
+			p.Printf("\n%s\n", stringutils.IndentLines(a.Usage(), "    "))
 		}
 		p := p.AddGap("  ")
 

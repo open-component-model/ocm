@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/plugincacheattr"
 	"ocm.software/ocm/api/ocm/plugin/cache"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
@@ -96,7 +96,7 @@ func (o *Command) Complete(args []string) error {
 		}
 		o.Ref = args[0]
 	}
-	o.Printer = common.NewPrinter(o.StdOut())
+	o.Printer = misc.NewPrinter(o.StdOut())
 	return nil
 }
 

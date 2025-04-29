@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/stringutils"
 	"github.com/modern-go/reflect2"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -36,7 +37,7 @@ type configTypeScheme struct {
 }
 
 func NewConfigTypeScheme(defaultDecoder ConfigDecoder, base ...ConfigTypeScheme) ConfigTypeScheme {
-	scheme := runtime.MustNewDefaultTypeScheme[Config, ConfigType](&GenericConfig{}, true, defaultDecoder, utils.Optional(base...))
+	scheme := runtime.MustNewDefaultTypeScheme[Config, ConfigType](&GenericConfig{}, true, defaultDecoder, general.Optional(base...))
 	return &configTypeScheme{scheme}
 }
 
@@ -54,7 +55,7 @@ type versionRegistry struct {
 }
 
 func NewStrictConfigTypeScheme(base ...ConfigTypeScheme) runtime.VersionedTypeRegistry[Config, ConfigType] {
-	scheme := runtime.MustNewDefaultTypeScheme[Config, ConfigType](nil, false, nil, utils.Optional(base...))
+	scheme := runtime.MustNewDefaultTypeScheme[Config, ConfigType](nil, false, nil, general.Optional(base...))
 	return &versionRegistry{scheme}
 }
 
@@ -80,7 +81,7 @@ func (t *configTypeScheme) Usage() string {
 		for strings.HasSuffix(u, "\n") {
 			u = u[:len(u)-1]
 		}
-		s = fmt.Sprintf("%s\n- <code>%s</code>\n%s", s, ct.GetKind(), utils.IndentLines(u, "  "))
+		s = fmt.Sprintf("%s\n- <code>%s</code>\n%s", s, ct.GetKind(), stringutils.IndentLines(u, "  "))
 	}
 	return s + "\n"
 }

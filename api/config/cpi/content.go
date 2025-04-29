@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 
@@ -76,5 +76,5 @@ func (k ContentSpec) Get() (interface{}, error) {
 		fs = osfs.New()
 	}
 
-	return utils.ReadFile(k.Path, fs)
+	return optionutils.ReadFile(k.Path, fs)
 }

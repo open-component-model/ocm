@@ -15,14 +15,14 @@ import (
 	"ocm.software/ocm/api/credentials/extensions/repositories/aliases"
 	"ocm.software/ocm/api/credentials/extensions/repositories/directcreds"
 	"ocm.software/ocm/api/credentials/extensions/repositories/memory"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
 var DefaultContext = credentials.New()
 
 var _ = Describe("generic credentials", func() {
-	props := common.Properties{
+	props := misc.Properties{
 		"user":     "USER",
 		"password": "PASSWORD",
 	}
@@ -154,7 +154,7 @@ var _ = Describe("generic credentials", func() {
 				credentials.ID_TYPE: "mytype",
 				"host":              "localhost",
 			}
-			props := common.Properties{"token": "mytoken"}
+			props := misc.Properties{"token": "mytoken"}
 			creds := directcreds.NewCredentials(props)
 			Expect(cfg.AddConsumer(consumer, creds)).To(Succeed())
 
@@ -182,7 +182,7 @@ type: credentials.config.ocm.software
 		})
 
 		It("applies a config for consumers", func() {
-			props := common.Properties{"token": "mytoken"}
+			props := misc.Properties{"token": "mytoken"}
 			consumer := credentials.ConsumerIdentity{
 				credentials.ID_TYPE: "mytype",
 				"host":              "localhost",

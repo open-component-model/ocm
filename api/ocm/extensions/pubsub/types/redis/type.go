@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/pubsub"
 	"ocm.software/ocm/api/ocm/extensions/pubsub/types/redis/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -78,7 +78,7 @@ type Method struct {
 
 var _ pubsub.PubSubMethod = (*Method)(nil)
 
-func (m *Method) NotifyComponentVersion(version common.NameVersion) error {
+func (m *Method) NotifyComponentVersion(version misc.NameVersion) error {
 	// TODO: update to credential provider interface
 	opts := &redis.Options{
 		Addr: m.spec.ServerAddr,

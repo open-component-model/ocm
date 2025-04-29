@@ -17,7 +17,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/composition"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/utils/accessio"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -38,7 +38,7 @@ var _ = Describe("Test Environment", func() {
 
 		env.CredentialsContext().SetCredentialsForConsumer(
 			identity.GetConsumerId("localhost:6379", "ocm", 0),
-			credentials.NewCredentials(common.Properties{identity.ATTR_PASSWORD: "redis-test-0815"}),
+			credentials.NewCredentials(misc.Properties{identity.ATTR_PASSWORD: "redis-test-0815"}),
 		)
 
 		repo = Must(ctf.Open(env, ctf.ACC_WRITABLE, ARCH, 0o600, env))

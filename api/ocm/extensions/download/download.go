@@ -1,18 +1,19 @@
 package download
 
 import (
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Option = optionutils.Option[*Options]
 
 type Options struct {
-	Printer    common.Printer
+	Printer    misc.Printer
 	FileSystem vfs.FileSystem
 }
 
@@ -44,7 +45,7 @@ func WithFileSystem(fs vfs.FileSystem) Option {
 ////////////////////////////////////////////////////////////////////////////////
 
 type printer struct {
-	pr common.Printer
+	pr misc.Printer
 }
 
 func (o *printer) ApplyTo(opts *Options) {
@@ -53,7 +54,7 @@ func (o *printer) ApplyTo(opts *Options) {
 	}
 }
 
-func WithPrinter(pr common.Printer) Option {
+func WithPrinter(pr misc.Printer) Option {
 	return &printer{pr}
 }
 
@@ -63,7 +64,7 @@ func DownloadResource(ctx cpi.ContextProvider, r cpi.ResourceAccess, path string
 	eff := optionutils.EvalOptions(opts...)
 
 	fs := utils.FileSystem(eff.FileSystem)
-	pr := utils.OptionalDefaulted(common.NewPrinter(nil), eff.Printer)
+	pr := general.OptionalDefaulted(misc.NewPrinter(nil), eff.Printer)
 	_, tgt, err := For(ctx).Download(pr, r, path, fs)
 	return tgt, err
 }

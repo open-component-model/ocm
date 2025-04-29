@@ -8,16 +8,17 @@ import (
 	"io"
 	"strings"
 
+	"github.com/mandelsoft/goutils/maputils"
+
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/tech/signing"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/compression"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
-func PrintArtifact(pr common.Printer, art cpi.ArtifactAccess, listFiles bool) {
+func PrintArtifact(pr misc.Printer, art cpi.ArtifactAccess, listFiles bool) {
 	if art.IsManifest() {
 		pr.Printf("type: %s\n", artdesc.MediaTypeImageManifest)
 		PrintManifest(pr, art.ManifestAccess(), listFiles)
@@ -31,7 +32,7 @@ func PrintArtifact(pr common.Printer, art cpi.ArtifactAccess, listFiles bool) {
 	pr.Printf("unspecific\n")
 }
 
-func PrintManifest(pr common.Printer, m cpi.ManifestAccess, listFiles bool) {
+func PrintManifest(pr misc.Printer, m cpi.ManifestAccess, listFiles bool) {
 	data, err := blobaccess.BlobData(m.Blob())
 	if err != nil {
 		pr.Printf("descriptor: invalid: %s\n", err)
@@ -70,7 +71,7 @@ func PrintManifest(pr common.Printer, m cpi.ManifestAccess, listFiles bool) {
 	}
 }
 
-func PrintLayer(pr common.Printer, blob blobaccess.BlobAccess, listFiles bool) {
+func PrintLayer(pr misc.Printer, blob blobaccess.BlobAccess, listFiles bool) {
 	reader, err := blob.Reader()
 	if err != nil {
 		pr.Printf("cannot read blob: %s\n", err.Error())
@@ -114,7 +115,7 @@ func PrintLayer(pr common.Printer, blob blobaccess.BlobAccess, listFiles bool) {
 	}
 }
 
-func PrintIndex(pr common.Printer, i cpi.IndexAccess, listFiles bool) {
+func PrintIndex(pr misc.Printer, i cpi.IndexAccess, listFiles bool) {
 	data, err := blobaccess.BlobData(i.Blob())
 	if err != nil {
 		pr.Printf("descriptor: invalid: %s\n", err)
@@ -148,17 +149,17 @@ func PrintIndex(pr common.Printer, i cpi.IndexAccess, listFiles bool) {
 	}
 }
 
-func optS(pr common.Printer, key string, value string) {
+func optS(pr misc.Printer, key string, value string) {
 	if value != "" {
 		desc := strings.Replace(key, " ", ":", 1)
 		pr.Printf("%s %s\n", desc, value)
 	}
 }
 
-func printAnnotations(pr common.Printer, annos map[string]string) {
+func printAnnotations(pr misc.Printer, annos map[string]string) {
 	if len(annos) > 0 {
 		pr.Printf("annotations:\n")
-		keys := utils.StringMapKeys(annos)
+		keys := maputils.OrderedKeys(annos)
 		l := 0
 		for _, k := range keys {
 			if len(k) > l {

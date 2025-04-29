@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var _ = Describe("consumer id handling", func() {
@@ -92,7 +92,7 @@ var _ = Describe("consumer id handling", func() {
 			)
 
 			creds := testutils.Must(GetCredentials(ctx, repo))
-			Expect(creds).To(BeEquivalentTo(common.Properties{
+			Expect(creds).To(BeEquivalentTo(misc.Properties{
 				ATTR_USERNAME: user,
 				ATTR_PASSWORD: pass,
 			}))
@@ -108,7 +108,7 @@ var _ = Describe("consumer id handling", func() {
 			)
 
 			creds := testutils.Must(GetCredentials(ctx, repo))
-			Expect(creds).To(BeEquivalentTo(common.Properties{
+			Expect(creds).To(BeEquivalentTo(misc.Properties{
 				ATTR_TOKEN: token,
 			}))
 		})
@@ -124,7 +124,7 @@ var _ = Describe("consumer id handling", func() {
 			)
 
 			creds := testutils.Must(GetCredentials(ctx, repo))
-			Expect(creds).To(BeEquivalentTo(common.Properties{
+			Expect(creds).To(BeEquivalentTo(misc.Properties{
 				ATTR_USERNAME:    user,
 				ATTR_PRIVATE_KEY: key,
 			}))

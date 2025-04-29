@@ -14,7 +14,7 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/errkind"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 )
 
@@ -219,7 +219,7 @@ func (c *componentArchiveContainer) AddBlob(blob cpi.BlobAccess, refName string,
 	if err != nil {
 		return nil, err
 	}
-	return localblob.New(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
+	return localblob.New(misc.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489

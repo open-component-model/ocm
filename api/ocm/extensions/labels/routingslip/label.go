@@ -3,24 +3,24 @@ package routingslip
 import (
 	"sort"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/maplistmerge"
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/simplemapmerge"
 	"ocm.software/ocm/api/ocm/valuemergehandler/hpi"
-	"ocm.software/ocm/api/utils"
 )
 
 const NAME = "routing-slips"
 
 type LabelValue map[string]HistoryEntries
 
-var spec = utils.Must(hpi.NewSpecification(
+var spec = general.Must(hpi.NewSpecification(
 	simplemapmerge.ALGORITHM,
 	simplemapmerge.NewConfig(
 		"",
-		utils.Must(hpi.NewSpecification(
+		general.Must(hpi.NewSpecification(
 			maplistmerge.ALGORITHM,
 			maplistmerge.NewConfig("digest", maplistmerge.MODE_INBOUND),
 		)),

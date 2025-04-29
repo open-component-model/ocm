@@ -5,7 +5,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type ComponentVersionResolver interface {
@@ -16,15 +16,15 @@ type ComponentVersionResolver interface {
 
 type ComponentVersionSet struct {
 	lock sync.RWMutex
-	cds  map[common.NameVersion]*ComponentDescriptor
+	cds  map[misc.NameVersion]*ComponentDescriptor
 }
 
 var _ ComponentVersionResolver = (*ComponentVersionSet)(nil)
 
 func NewComponentVersionSet(cds ...*ComponentDescriptor) *ComponentVersionSet {
-	r := map[common.NameVersion]*ComponentDescriptor{}
+	r := map[misc.NameVersion]*ComponentDescriptor{}
 	for _, cd := range cds {
-		r[common.NewNameVersion(cd.Name, cd.Version)] = cd.Copy()
+		r[misc.NewNameVersion(cd.Name, cd.Version)] = cd.Copy()
 	}
 	return &ComponentVersionSet{cds: r}
 }
@@ -33,7 +33,7 @@ func (c *ComponentVersionSet) LookupComponentVersion(name string, version string
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	nv := common.NewNameVersion(name, version)
+	nv := misc.NewNameVersion(name, version)
 
 	cd := c.cds[nv]
 	if cd == nil {
@@ -46,7 +46,7 @@ func (c *ComponentVersionSet) AddVersion(cd *ComponentDescriptor) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	c.cds[common.NewNameVersion(cd.Name, cd.Version)] = cd.Copy()
+	c.cds[misc.NewNameVersion(cd.Name, cd.Version)] = cd.Copy()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ func (c *CompoundResolver) LookupComponentVersion(name string, version string) (
 			return nil, err
 		}
 	}
-	return nil, errors.ErrNotFound(KIND_REFERENCE, common.NewNameVersion(name, version).String())
+	return nil, errors.ErrNotFound(KIND_REFERENCE, misc.NewNameVersion(name, version).String())
 }
 
 func (c *CompoundResolver) AddResolver(r ComponentVersionResolver) {

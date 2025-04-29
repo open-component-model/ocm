@@ -6,7 +6,7 @@ import (
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/utils/listformat"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -38,7 +38,7 @@ func PubSubForRepo(repo cpi.Repository) (PubSubMethod, error) {
 	return spec.PubSubMethod(repo)
 }
 
-func Notify(repo cpi.Repository, nv common.NameVersion) error {
+func Notify(repo cpi.Repository, nv misc.NameVersion) error {
 	m, err := PubSubForRepo(repo)
 	if m == nil || err != nil {
 		return err
