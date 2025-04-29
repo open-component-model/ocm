@@ -76,8 +76,7 @@ endif
 
 .PHONY: mdref
 mdref:
-	# https://github.com/mandelsoft/mdref/issues/1 as workaround set GONOSUMDB
-	GONOSUMDB='github.com/mandelsoft/mdref' go install -v github.com/mandelsoft/mdref@v0.5.0
+	go install -v github.com/mandelsoft/mdref@v0.5.1
 
 Linux_jq:
 	$(info -> jq is missing)
