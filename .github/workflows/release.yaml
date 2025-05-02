@@ -39,7 +39,7 @@ jobs:
       draft-release-notes-body: ${{ steps.release-notes.outputs.release_notes_body }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         fetch-depth: 0
     - name: Check Tag
@@ -58,7 +58,7 @@ jobs:
         echo "Branch ${{ env.REF }} is a valid release branch"
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@v2
+      uses: tibdex/github-app-token@0af3325639c0a60612b2eeaf010f0f88e468e800 # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -111,28 +111,28 @@ jobs:
       RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action
-      uses: TooMuch4U/actions-clean@v2.2
+      uses: TooMuch4U/actions-clean@3f61bacac66e425c632b77a19065e4ba2f43a04e # v2.1
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@v2
+      uses: tibdex/github-app-token@0af3325639c0a60612b2eeaf010f0f88e468e800 # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         # fetch all history so we can calculate the version and tagging
         fetch-depth: 0
         token: ${{ steps.generate_token.outputs.token }}
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@9f7302141466aa6482940f15371237e9d9f4c34a # v0.19.0
+      uses: anchore/sbom-action/download-syft@9f7302141466aa6482940f15371237e9d9f4c34a # v0.19.0 # v0.19.0
 
     - name: Setup Cosign
-      uses: sigstore/cosign-installer@v3.8.2
+      uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
 
     - name: Download CTF
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
       with:
         pattern: 'ctf-aggregated'
         path: gen/downloaded-ctfs
@@ -144,7 +144,7 @@ jobs:
 
     # TODO: Remove Go setup once binaries no longer need to be built by goreleaser.
     - name: Setup Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
         check-latest: false
@@ -159,7 +159,7 @@ jobs:
       # This is because we have huge storage requirements for our cache because of the mass of dependencies
     - name: Restore / Reuse Cache from central build
       id: cache-golang-restore
-      uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
+      uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3 # Only Restore, not build another cache (too big)
       with:
         path: |
           ${{ env.go_cache }}
@@ -221,7 +221,7 @@ jobs:
         echo "RELEASE_NOTES=$RUNNER_TEMP/RELEASE_NOTES.md" >> $GITHUB_ENV
         cat $RUNNER_TEMP/RELEASE_NOTES.md
     - name: Run GoReleaser
-      uses: goreleaser/goreleaser-action@v6
+      uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
       with:
         distribution: goreleaser
         version: 2.1.0
@@ -246,7 +246,7 @@ jobs:
     # and use the event to publish our release to other package registries
     - name: Publish Release Event
       if: inputs.release_candidate == false
-      uses: peter-evans/repository-dispatch@v3
+      uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
       with:
         token: ${{ steps.generate_token.outputs.token }}
         repository: ${{ github.repository_owner }}/ocm
