@@ -29,6 +29,8 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v17
         with:
           nix-package-url: https://releases.nixos.org/nix/nix-2.26.2/nix-2.26.2-x86_64-linux.tar.xz
+      - name: Update flake.lock
+        run: nix flake update
       - name: Update ocm vendor hash
         run: nix run .#nixpkgs.nix-update -- --flake --version=skip ocm
       - name: Check diff and create action summary
