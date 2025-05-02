@@ -2,7 +2,8 @@
   description = "Nix flake for ocm";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -48,9 +49,9 @@
             # "-X ocm.software/ocm/api/version.buildDate=1970-01-01T0:00:00+0000"
             ];
 
-            env = {
-              CGO_ENABLED = "0";
-            };
+            # env = {
+            #   CGO_ENABLED = "0";
+            # };
 
             subPackages = [
               "cmds/ocm"
