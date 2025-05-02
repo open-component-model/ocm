@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint Markdown
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Markdown Linting
-        uses: nosborn/github-action-markdown-cli@v3
+        uses: nosborn/github-action-markdown-cli@f396664ad917522fc6248dacab77d030a14895cb # v3.4.0
         with:
           files: .
           dot: true
@@ -24,9 +24,9 @@ jobs:
     name: Verify links
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Markdown verify links
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        uses: gaurav-nelson/github-action-markdown-link-check@4a1af151f4d7cf4d8f8ac5780597672a3671b88b # 1.0.17
         with:
           use-quiet-mode: yes
           use-verbose-mode: no
@@ -35,9 +35,9 @@ jobs:
     name: Spellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Spellcheck
-        uses: rojopolis/spellcheck-github-actions@v0
+        uses: rojopolis/spellcheck-github-actions@23dc186319866e1de224f94fe1d31b72797aeec7 # 0.48.0
         with:
           config_path: .github/config/spellcheck.yml
           task_name: Markdown
