@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/download"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/api/utils/registrations"
 )
@@ -85,7 +85,7 @@ If the config is given, the target is used as repository name prefixed with an
 optional repository prefix given by the configuration.
 
 The following artifact media types are supported:
-`+listformat.FormatList("", utils.StringMapKeys(mimeTypeExtractorRegistry)...)+`
+`+listformat.FormatList("", maputils.OrderedKeys(mimeTypeExtractorRegistry)...)+`
 It accepts a config with the following fields:
 `+listformat.FormatMapElements("", AttributeDescription())+`
 

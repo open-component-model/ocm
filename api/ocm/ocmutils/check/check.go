@@ -9,7 +9,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Result struct {
@@ -29,17 +29,17 @@ func (r *Result) IsEmpty() bool {
 	return len(r.Missing) == 0 && len(r.Resources) == 0 && len(r.Sources) == 0
 }
 
-type Missing map[common.NameVersion]common.History
+type Missing map[misc.NameVersion]misc.History
 
 func (n Missing) MarshalJSON() ([]byte, error) {
-	m := map[string]common.History{}
+	m := map[string]misc.History{}
 	for k, v := range n {
 		m[k.String()] = v
 	}
 	return json.Marshal(m)
 }
 
-type Cache = map[common.NameVersion]*Result
+type Cache = map[misc.NameVersion]*Result
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -55,10 +55,10 @@ func Check(opts ...Option) *Options {
 
 func (a *Options) For(cv ocm.ComponentVersionAccess) (*Result, error) {
 	cache := Cache{}
-	return a.handle(cache, cv, common.History{common.VersionedElementKey(cv)})
+	return a.handle(cache, cv, misc.History{misc.VersionedElementKey(cv)})
 }
 
-func (a *Options) ForId(repo ocm.Repository, id common.NameVersion) (*Result, error) {
+func (a *Options) ForId(repo ocm.Repository, id misc.NameVersion) (*Result, error) {
 	cv, err := repo.LookupComponentVersion(id.GetName(), id.GetVersion())
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (a *Options) ForId(repo ocm.Repository, id common.NameVersion) (*Result, er
 	return a.For(cv)
 }
 
-func (a *Options) check(cache Cache, repo ocm.Repository, id common.NameVersion, h common.History) (*Result, error) {
+func (a *Options) check(cache Cache, repo ocm.Repository, id misc.NameVersion, h misc.History) (*Result, error) {
 	if r, ok := cache[id]; ok {
 		return r, nil
 	}
@@ -95,11 +95,11 @@ func (a *Options) check(cache Cache, repo ocm.Repository, id common.NameVersion,
 	return r, err
 }
 
-func (a *Options) handle(cache Cache, cv ocm.ComponentVersionAccess, h common.History) (*Result, error) {
+func (a *Options) handle(cache Cache, cv ocm.ComponentVersionAccess, h misc.History) (*Result, error) {
 	result := newResult()
 
 	for _, r := range cv.GetDescriptor().References {
-		id := common.NewNameVersion(r.ComponentName, r.Version)
+		id := misc.NewNameVersion(r.ComponentName, r.Version)
 		n, err := a.check(cache, cv.Repository(), id, h)
 		if err != nil {
 			return result, err

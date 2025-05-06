@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/ioutils"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
@@ -12,7 +13,7 @@ import (
 
 	clictx "ocm.software/ocm/api/cli"
 	utils2 "ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
@@ -101,12 +102,12 @@ func (o *ResourceConfigAdderCommand) Complete(args []string) error {
 
 func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(h ResourceSpecHandler) error {
 	fs := o.Context.FileSystem()
-	ictx := inputs.NewContext(o.Context, common.NewPrinter(o.Context.StdOut()), templateroption.From(o).Vars)
+	ictx := inputs.NewContext(o.Context, misc.NewPrinter(o.Context.StdOut()), templateroption.From(o).Vars)
 	mode := vfs.FileMode(0o600)
 	listkey := utils.Plural(h.Key(), 0)
 
 	var current string
-	configFile, err := utils2.ResolvePath(o.ConfigFile)
+	configFile, err := ioutils.ResolvePath(o.ConfigFile)
 	if err != nil {
 		return errors.Wrapf(err, "failed to resolve config file %s", o.ConfigFile)
 	}

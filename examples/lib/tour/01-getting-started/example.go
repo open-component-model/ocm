@@ -15,7 +15,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/extraid"
 	utils "ocm.software/ocm/api/ocm/ocmutils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
 )
 
@@ -232,7 +232,7 @@ func GettingStarted() error {
 	// The executable downloader is registered by default and automatically
 	// sets the `X `flag for the written file.
 	// --- begin download ---
-	_, err = download.DownloadResource(ctx, res, "/tmp/ocmcli", download.WithPrinter(common.NewPrinter(os.Stdout)))
+	_, err = download.DownloadResource(ctx, res, "/tmp/ocmcli", download.WithPrinter(misc.NewPrinter(os.Stdout)))
 	if err != nil {
 		return errors.Wrapf(err, "download failed")
 	}

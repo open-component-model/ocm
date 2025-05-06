@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/modern-go/reflect2"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/runtime/descriptivetype"
 )
@@ -38,12 +38,12 @@ type repositoryTypeScheme struct {
 }
 
 func NewRepositoryTypeScheme(defaultDecoder RepositorySpecDecoder, base ...RepositoryTypeScheme) RepositoryTypeScheme {
-	scheme := descriptivetype.MustNewDefaultTypeScheme[RepositorySpec, RepositoryType, RepositoryTypeScheme]("Credential provider", nil, &UnknownRepositorySpec{}, true, defaultDecoder, utils.Optional(base...))
+	scheme := descriptivetype.MustNewDefaultTypeScheme[RepositorySpec, RepositoryType, RepositoryTypeScheme]("Credential provider", nil, &UnknownRepositorySpec{}, true, defaultDecoder, general.Optional(base...))
 	return &repositoryTypeScheme{scheme}
 }
 
 func NewStrictRepositoryTypeScheme(base ...RepositoryTypeScheme) runtime.VersionedTypeRegistry[RepositorySpec, RepositoryType] {
-	scheme := descriptivetype.MustNewDefaultTypeScheme[RepositorySpec, RepositoryType, RepositoryTypeScheme]("Credential provider", nil, nil, false, nil, utils.Optional(base...))
+	scheme := descriptivetype.MustNewDefaultTypeScheme[RepositorySpec, RepositoryType, RepositoryTypeScheme]("Credential provider", nil, nil, false, nil, general.Optional(base...))
 	return &repositoryTypeScheme{scheme}
 }
 

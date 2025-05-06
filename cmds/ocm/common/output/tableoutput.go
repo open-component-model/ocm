@@ -6,8 +6,8 @@ import (
 	. "ocm.software/ocm/cmds/ocm/common/processing"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/api/utils/semverutils"
 	"ocm.software/ocm/cmds/ocm/common/data"
@@ -141,7 +141,7 @@ func (this *TableProcessingOutput) Out() error {
 // if vers is set to true, a semver based comparison is applied, otherwise
 // a regular string comparison.
 func compareColumn(c int, vers ...bool) CompareFunction {
-	if utils.Optional(vers...) {
+	if general.Optional(vers...) {
 		return _compareColumn(c, semverutils.VersionCache{}.Compare)
 	} else {
 		return _compareColumn(c, strings.Compare)

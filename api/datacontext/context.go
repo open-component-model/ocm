@@ -9,18 +9,18 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/datacontext/action/handlers"
-	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/runtimefinalizer"
 )
 
-const OCM_CONTEXT_SUFFIX = ".context" + common.OCM_TYPE_GROUP_SUFFIX
+const OCM_CONTEXT_SUFFIX = ".context" + misc.OCM_TYPE_GROUP_SUFFIX
 
 // BuilderMode controls the handling of unset information in the
 // builder configuration when calling the New method.
@@ -64,7 +64,7 @@ func (m BuilderMode) String() string {
 }
 
 func Mode(m ...BuilderMode) BuilderMode {
-	return utils.OptionalDefaulted(MODE_EXTENDED, m...)
+	return general.OptionalDefaulted(MODE_EXTENDED, m...)
 }
 
 type ContextIdentity = runtimefinalizer.ObjectIdentity
@@ -218,7 +218,7 @@ type gcWrapper struct {
 }
 
 func newView(c *_context, ref ...bool) AttributesContext {
-	if utils.Optional(ref...) {
+	if general.Optional(ref...) {
 		return FinalizedContext[gcWrapper](c)
 	}
 	return c
@@ -235,7 +235,7 @@ var (
 
 // New provides a root attribute context.
 func New(parentAttrs ...Attributes) AttributesContext {
-	return NewWithActions(utils.Optional(parentAttrs...), handlers.NewRegistry(nil, handlers.DefaultRegistry()))
+	return NewWithActions(general.Optional(parentAttrs...), handlers.NewRegistry(nil, handlers.DefaultRegistry()))
 }
 
 func NewWithActions(parentAttrs Attributes, actions handlers.Registry) AttributesContext {
@@ -339,7 +339,7 @@ func (c *_attributes) GetAttribute(name string, def ...interface{}) interface{} 
 			return a
 		}
 	}
-	return utils.Optional(def...)
+	return general.Optional(def...)
 }
 
 func (c *_attributes) SetEncodedAttribute(name string, data []byte, unmarshaller runtime.Unmarshaler) error {

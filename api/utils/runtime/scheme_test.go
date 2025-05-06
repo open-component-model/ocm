@@ -5,7 +5,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/maputils"
+
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -55,7 +56,7 @@ var _ = Describe("scheme", func() {
 	It("decodes object", func() {
 		Expect(Must(scheme.Decode(t1data, nil))).To(Equal(t1))
 		Expect(scheme.KnownTypeNames()).To(Equal([]string{"t1"}))
-		Expect(utils.StringMapKeys(scheme.KnownTypes())).To(Equal([]string{"t1"}))
+		Expect(maputils.OrderedKeys(scheme.KnownTypes())).To(Equal([]string{"t1"}))
 	})
 
 	It("handles derived scheme", func() {
@@ -71,7 +72,7 @@ var _ = Describe("scheme", func() {
 		Expect(scheme.KnownTypeNames()).To(Equal([]string{"t1"}))
 		Expect(derived.KnownTypeNames()).To(Equal([]string{"t1", "t2"}))
 
-		Expect(utils.StringMapKeys(scheme.KnownTypes())).To(Equal([]string{"t1"}))
-		Expect(utils.StringMapKeys(derived.KnownTypes())).To(Equal([]string{"t1", "t2"}))
+		Expect(maputils.OrderedKeys(scheme.KnownTypes())).To(Equal([]string{"t1"}))
+		Expect(maputils.OrderedKeys(derived.KnownTypes())).To(Equal([]string{"t1", "t2"}))
 	})
 })

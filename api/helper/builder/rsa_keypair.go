@@ -2,11 +2,11 @@ package builder
 
 import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/ioutils"
 
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/tech/signing/signutils"
-	"ocm.software/ocm/api/utils"
 )
 
 // TODO: switch to context local setting.
@@ -23,7 +23,7 @@ func (b *Builder) RSAKeyPair(name ...string) {
 func (b *Builder) ReadRSAKeyPair(name, path string) {
 	reg := signingattr.Get(b.OCMContext())
 	pubfound := false
-	path, _ = utils.ResolvePath(path)
+	path, _ = ioutils.ResolvePath(path)
 	if ok, _ := b.Exists(filepath.Join(path, "rsa.pub")); ok {
 		pubbytes, err := b.ReadFile(filepath.Join(path, "rsa.pub"))
 		b.failOn(err)

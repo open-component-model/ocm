@@ -1,9 +1,10 @@
 package download
 
 import (
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/pflag"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/common/output"
 )
 
@@ -14,7 +15,7 @@ func From(o *output.Options) *Option {
 }
 
 func NewOptions(silent ...bool) *Option {
-	return &Option{SilentOption: utils.Optional(silent...)}
+	return &Option{SilentOption: general.Optional(silent...)}
 }
 
 type Option struct {
@@ -24,7 +25,7 @@ type Option struct {
 }
 
 func (o *Option) SetUseHandlers(ok ...bool) *Option {
-	o.UseHandlers = utils.OptionalDefaultedBool(true, ok...)
+	o.UseHandlers = optionutils.BoolOption(ok...)
 	return o
 }
 

@@ -16,18 +16,18 @@ import (
 	local "ocm.software/ocm/api/credentials/extensions/repositories/dockerconfig"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/tech/oci/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtimefinalizer"
 )
 
 var _ = Describe("docker config", func() {
-	props := common.Properties{
+	props := misc.Properties{
 		"username":      "mandelsoft",
 		"password":      "password",
 		"serverAddress": "https://index.docker.io/v1/",
 	}
 
-	props2 := common.Properties{
+	props2 := misc.Properties{
 		"username":      "mandelsoft",
 		"password":      "token",
 		"serverAddress": "https://ghcr.io",

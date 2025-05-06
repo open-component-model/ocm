@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/sliceutils"
 
 	"ocm.software/ocm/api/oci"
@@ -15,7 +16,6 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
@@ -37,7 +37,7 @@ type artifactHandler struct {
 }
 
 func NewArtifactHandler(repospec ...*ociuploadattr.Attribute) cpi.BlobHandler {
-	return &artifactHandler{utils.Optional(repospec...)}
+	return &artifactHandler{general.Optional(repospec...)}
 }
 
 func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {

@@ -5,7 +5,7 @@ import (
 
 	"ocm.software/ocm/api/credentials/extensions/repositories/directcreds"
 	"ocm.software/ocm/api/credentials/internal"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -77,7 +77,7 @@ func NewGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (Rep
 	return internal.NewGenericRepositorySpec(data, unmarshaler)
 }
 
-func NewCredentials(props common.Properties) Credentials {
+func NewCredentials(props misc.Properties) Credentials {
 	return internal.NewCredentials(props)
 }
 

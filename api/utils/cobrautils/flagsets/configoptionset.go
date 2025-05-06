@@ -5,8 +5,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
-
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/maputils"
 )
 
 type ConfigOptionType interface {
@@ -133,7 +132,7 @@ func (s *configOptionTypeSet) OptionTypeNames() []string {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
-	return utils.StringMapKeys(s.options)
+	return maputils.OrderedKeys(s.options)
 }
 
 func (s *configOptionTypeSet) SharedOptionTypes() []ConfigOptionType {

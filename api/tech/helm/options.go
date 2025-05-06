@@ -2,7 +2,7 @@ package helm
 
 import (
 	"ocm.software/ocm/api/tech/helm/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Option interface {
@@ -12,7 +12,7 @@ type Option interface {
 ////////////////////////////////////////////////////////////////////////////////
 
 type credOption struct {
-	creds common.Properties
+	creds misc.Properties
 }
 
 func (c *credOption) apply(dl *chartDownloader) error {
@@ -22,7 +22,7 @@ func (c *credOption) apply(dl *chartDownloader) error {
 	return nil
 }
 
-func WithCredentials(creds common.Properties) Option {
+func WithCredentials(creds misc.Properties) Option {
 	return &credOption{creds}
 }
 
@@ -34,7 +34,7 @@ type authOption struct {
 
 func (c *authOption) apply(dl *chartDownloader) error {
 	if dl.creds == nil {
-		dl.creds = common.Properties{}
+		dl.creds = misc.Properties{}
 	}
 	dl.creds[identity.ATTR_USERNAME] = c.user
 	dl.creds[identity.ATTR_PASSWORD] = c.password
@@ -55,7 +55,7 @@ type certOption struct {
 func (c *certOption) apply(dl *chartDownloader) error {
 	if len(c.privkey) != 0 {
 		if dl.creds == nil {
-			dl.creds = common.Properties{}
+			dl.creds = misc.Properties{}
 		}
 		dl.creds[identity.ATTR_CERTIFICATE] = string(c.cert)
 		dl.creds[identity.ATTR_PRIVATE_KEY] = string(c.privkey)
@@ -76,7 +76,7 @@ type cacertOption struct {
 func (c *cacertOption) apply(dl *chartDownloader) error {
 	if len(c.data) > 0 {
 		if dl.creds == nil {
-			dl.creds = common.Properties{}
+			dl.creds = misc.Properties{}
 		}
 		dl.creds[identity.ATTR_CERTIFICATE_AUTHORITY] = string(c.data)
 	}

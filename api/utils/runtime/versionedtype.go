@@ -5,8 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/general"
 )
 
 const VersionSeparator = "/"
@@ -81,7 +80,7 @@ func MarshalVersionedTypedObject[T VersionedTypedObject](obj T, toe ...TypedObje
 	if e := GetEncoder(obj); e != nil {
 		return e.encode(obj)
 	}
-	if e := utils.Optional(toe...); e != nil {
+	if e := general.Optional(toe...); e != nil {
 		return e.Encode(obj, DefaultJSONEncoding)
 	}
 	return nil, errors.ErrUnknown("object type", obj.GetType())

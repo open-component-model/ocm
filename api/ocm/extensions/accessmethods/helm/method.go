@@ -13,7 +13,7 @@ import (
 	"ocm.software/ocm/api/tech/helm"
 	"ocm.software/ocm/api/tech/helm/identity"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -167,7 +167,7 @@ func (m *accessMethod) getBlob() (blobaccess.BlobAccess, error) {
 		return nil, errors.ErrInvalid("helm chart", m.spec.HelmChart)
 	}
 
-	acc, err := helm.DownloadChart(common.NonePrinter, m.comp.GetContext(), name, vers, m.spec.HelmRepository,
+	acc, err := helm.DownloadChart(misc.NonePrinter, m.comp.GetContext(), name, vers, m.spec.HelmRepository,
 		helm.WithCredentials(identity.GetCredentials(m.comp.GetContext(), m.spec.HelmRepository, m.spec.GetChartName())),
 		helm.WithKeyring([]byte(m.spec.Keyring)),
 		helm.WithRootCert([]byte(m.spec.CACert)))

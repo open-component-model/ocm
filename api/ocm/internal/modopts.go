@@ -10,7 +10,6 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors/accessors"
-	"ocm.software/ocm/api/utils"
 )
 
 type BlobUploadOption interface {
@@ -51,7 +50,7 @@ func (o *BlobUploadOptions) ApplyBlobUploadOption(opts *BlobUploadOptions) {
 	optionutils.ApplyOption(o.UseNoDefaultIfNotSet, &opts.UseNoDefaultIfNotSet)
 	if o.BlobHandlerProvider != nil {
 		opts.BlobHandlerProvider = o.BlobHandlerProvider
-		opts.UseNoDefaultIfNotSet = utils.BoolP(true)
+		opts.UseNoDefaultIfNotSet = optionutils.BoolP(true)
 	}
 }
 
@@ -64,11 +63,11 @@ func (o nodefaulthandler) ApplyBlobModificationOption(opts *BlobModificationOpti
 }
 
 func (o nodefaulthandler) ApplyBlobUploadOption(opts *BlobUploadOptions) {
-	opts.UseNoDefaultIfNotSet = optionutils.PointerTo(bool(o))
+	opts.UseNoDefaultIfNotSet = generics.PointerTo(bool(o))
 }
 
 func UseNoDefaultBlobHandlers(b ...bool) BlobOptionImpl {
-	return nodefaulthandler(utils.OptionalDefaultedBool(true, b...))
+	return nodefaulthandler(general.OptionalDefaultedBool(true, b...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +135,7 @@ func (m *TargetElementOptions) ApplyTargetOption(opts *TargetElementOptions) {
 }
 
 func (m *TargetElementOptions) IsDisableExtraIdentityDefaulting() bool {
-	return utils.AsBool(m.DisableExtraIdentityDefaulting)
+	return optionutils.AsBool(m.DisableExtraIdentityDefaulting)
 }
 
 func (m *TargetElementOptions) ApplyTargetOptions(list ...TargetElementOption) *TargetElementOptions {
@@ -188,7 +187,7 @@ func (m *ElementModificationOptions) ApplyElementModificationOptions(list ...Ele
 }
 
 func (m *ElementModificationOptions) IsModifyElement(def ...bool) bool {
-	return utils.AsBool(m.ModifyElement, def...)
+	return optionutils.AsBool(m.ModifyElement, def...)
 }
 
 func NewElementModificationOptions(list ...ElementModificationOption) *ElementModificationOptions {
@@ -233,15 +232,15 @@ type ModificationOptions struct {
 }
 
 func (m *ModificationOptions) IsAcceptExistentDigests() bool {
-	return utils.AsBool(m.AcceptExistentDigests)
+	return optionutils.AsBool(m.AcceptExistentDigests)
 }
 
 func (m *ModificationOptions) IsSkipDigest() bool {
-	return utils.AsBool(m.SkipDigest)
+	return optionutils.AsBool(m.SkipDigest)
 }
 
 func (m *ModificationOptions) IsSkipVerify() bool {
-	return utils.AsBool(m.SkipVerify)
+	return optionutils.AsBool(m.SkipVerify)
 }
 
 func (m *ModificationOptions) ApplyModificationOptions(list ...ModificationOption) *ModificationOptions {
@@ -298,7 +297,7 @@ func (m TargetIndex) ApplyModificationOption(opts *ModificationOptions) {
 
 func (m TargetIndex) ApplyElementModificationOption(opts *ElementModificationOptions) {
 	if m < 0 {
-		opts.ModifyElement = generics.Pointer(true)
+		opts.ModifyElement = generics.PointerTo(true)
 	}
 	m.ApplyTargetOption(&opts.TargetElementOptions)
 }
@@ -379,12 +378,12 @@ func (m disableextraidentitydefaulting) ApplyElementModificationOption(opts *Ele
 }
 
 func (m disableextraidentitydefaulting) ApplyTargetOption(opts *TargetElementOptions) {
-	opts.DisableExtraIdentityDefaulting = utils.BoolP(m)
+	opts.DisableExtraIdentityDefaulting = optionutils.BoolP(m)
 }
 
 // DisableExtraIdentityDefaulting disables the defaulting of the extra identity.
 func DisableExtraIdentityDefaulting(flag ...bool) TargetOptionImpl {
-	return disableextraidentitydefaulting(utils.OptionalDefaultedBool(true, flag...))
+	return disableextraidentitydefaulting(general.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -428,19 +427,19 @@ func (m modifyelement) ApplyBlobModificationOption(opts *BlobModificationOptions
 }
 
 func (m modifyelement) ApplyModificationOption(opts *ModificationOptions) {
-	opts.ModifyElement = utils.BoolP(m)
+	opts.ModifyElement = optionutils.BoolP(m)
 }
 
 func (m modifyelement) ApplyElementModificationOption(opts *ElementModificationOptions) {
-	opts.ModifyElement = utils.BoolP(m)
+	opts.ModifyElement = optionutils.BoolP(m)
 }
 
 func ModifyResource(flag ...bool) ModOptionImpl {
-	return modifyelement(utils.OptionalDefaultedBool(true, flag...))
+	return modifyelement(general.OptionalDefaultedBool(true, flag...))
 }
 
 func ModifyElement(flag ...bool) ElemModOptionImpl {
-	return modifyelement(utils.OptionalDefaultedBool(true, flag...))
+	return modifyelement(general.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -452,11 +451,11 @@ func (m acceptdigests) ApplyBlobModificationOption(opts *BlobModificationOptions
 }
 
 func (m acceptdigests) ApplyModificationOption(opts *ModificationOptions) {
-	opts.AcceptExistentDigests = utils.BoolP(m)
+	opts.AcceptExistentDigests = optionutils.BoolP(m)
 }
 
 func AcceptExistentDigests(flag ...bool) ModOptionImpl {
-	return acceptdigests(utils.OptionalDefaultedBool(true, flag...))
+	return acceptdigests(general.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -472,7 +471,7 @@ func (m hashalgo) ApplyModificationOption(opts *ModificationOptions) {
 }
 
 func WithDefaultHashAlgorithm(algo ...string) ModOptionImpl {
-	return hashalgo(utils.Optional(algo...))
+	return hashalgo(general.Optional(algo...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -502,11 +501,11 @@ func (m skipverify) ApplyBlobModificationOption(opts *BlobModificationOptions) {
 }
 
 func (m skipverify) ApplyModificationOption(opts *ModificationOptions) {
-	opts.SkipVerify = utils.BoolP(m)
+	opts.SkipVerify = optionutils.BoolP(m)
 }
 
 func SkipVerify(flag ...bool) ModOptionImpl {
-	return skipverify(utils.OptionalDefaultedBool(true, flag...))
+	return skipverify(general.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -518,14 +517,14 @@ func (m skipdigest) ApplyBlobModificationOption(opts *BlobModificationOptions) {
 }
 
 func (m skipdigest) ApplyModificationOption(opts *ModificationOptions) {
-	opts.SkipDigest = utils.BoolP(m)
+	opts.SkipDigest = optionutils.BoolP(m)
 }
 
 // SkipDigest disables digest creation if enabled.
 //
 // Deprecated: for legacy code, only.
 func SkipDigest(flag ...bool) ModOptionImpl {
-	return skipdigest(utils.OptionalDefaultedBool(true, flag...))
+	return skipdigest(general.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -605,10 +604,10 @@ func (o *AddVersionOptions) ApplyAddVersionOption(opts *AddVersionOptions) {
 type overwrite bool
 
 func (m overwrite) ApplyAddVersionOption(opts *AddVersionOptions) {
-	opts.Overwrite = utils.BoolP(m)
+	opts.Overwrite = optionutils.BoolP(m)
 }
 
 // Overwrite enabled the overwrite mode for adding a component version.
 func Overwrite(flag ...bool) AddVersionOption {
-	return overwrite(utils.OptionalDefaultedBool(true, flag...))
+	return overwrite(general.OptionalDefaultedBool(true, flag...))
 }

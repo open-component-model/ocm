@@ -2,9 +2,9 @@ package common
 
 import (
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/ocm"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
@@ -47,7 +47,7 @@ func (o verify) ApplyToElemHandler(handler *TypeHandler) {
 }
 
 func WithVerification(flag ...bool) Option {
-	return verify(utils.OptionalDefaultedBool(true, flag...))
+	return verify(optionutils.BoolOption(flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

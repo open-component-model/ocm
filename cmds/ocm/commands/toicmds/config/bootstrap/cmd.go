@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/stringutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -19,8 +20,7 @@ import (
 	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
-	utils3 "ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/api/utils/runtime"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -155,7 +155,7 @@ type Binary struct {
 
 func (a *action) Out() error {
 	cv := a.data[0].ComponentVersion
-	nv := common.VersionedElementKey(cv)
+	nv := misc.VersionedElementKey(cv)
 	rid := metav1.NewResourceRef(a.cmd.Id)
 	resolver := lookupoption.From(a.cmd)
 
@@ -173,7 +173,7 @@ func (a *action) Out() error {
 	}
 
 	if spec.Description != "" {
-		out.Outf(a.cmd.Context, "\nPackage Description:\n%s\n\n", utils3.IndentLines(spec.Description, "  ", false))
+		out.Outf(a.cmd.Context, "\nPackage Description:\n%s\n\n", stringutils.IndentLines(spec.Description, "  ", false))
 	}
 	if spec.AdditionalResources == nil {
 		out.Outf(a.cmd.Context, "no configuration templates found for %s in %s\n", ires.Meta().GetName(), nv)
@@ -246,7 +246,7 @@ func (a *action) download(kind, path string, cv ocm.ComponentVersionAccess, spec
 		return errors.Wrapf(err, "%s resource", kind)
 	}
 	out.Outf(a.cmd.Context, "downloading %s...\n", kind)
-	ok, _, err := download.For(a.cmd.Context).DownloadAsBlob(common.NewPrinter(a.cmd.StdOut()), res, path, a.cmd.FileSystem())
+	ok, _, err := download.For(a.cmd.Context).DownloadAsBlob(misc.NewPrinter(a.cmd.StdOut()), res, path, a.cmd.FileSystem())
 	if err != nil {
 		return err
 	}

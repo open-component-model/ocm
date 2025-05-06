@@ -3,12 +3,13 @@ package hashattr
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	ocm "ocm.software/ocm/api/ocm/types"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/hasher/sha256"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -87,7 +88,7 @@ type Attribute struct {
 }
 
 func (a *Attribute) GetHasher(ctx ContextProvider, names ...string) Hasher {
-	name := utils.Optional(names...)
+	name := general.Optional(names...)
 	if name != "" {
 		return signingattr.Get(ctx).GetHasher(name)
 	}

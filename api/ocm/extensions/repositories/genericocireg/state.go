@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-test/deep"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
@@ -21,7 +22,6 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/componentmapping"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	ocmlog "ocm.software/ocm/api/utils/logging"
@@ -42,7 +42,7 @@ var _ accessobj.StateAccess = (*StateAccess)(nil)
 
 func NewStateAccess(access oci.ManifestAccess, compat ...bool) accessobj.StateAccess {
 	return &StateAccess{
-		compat: utils.Optional(compat...),
+		compat: general.Optional(compat...),
 		access: access,
 	}
 }

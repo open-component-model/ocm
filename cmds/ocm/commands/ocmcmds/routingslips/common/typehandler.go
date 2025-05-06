@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/labels/routingslip"
-	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"ocm.software/ocm/cmds/ocm/common/output"
 	"ocm.software/ocm/cmds/ocm/common/utils"
@@ -148,7 +148,7 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 				Error:     err.Error(),
 			})
 		} else {
-			for _, n := range utils2.StringMapKeys(slips) {
+			for _, n := range maputils.OrderedKeys(slips) {
 				s, err := slips.Get(n)
 				if err != nil {
 					return nil, errors.ErrInvalid(routingslip.KIND_ROUTING_SLIP, n)

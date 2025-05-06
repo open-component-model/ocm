@@ -12,7 +12,6 @@ import (
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/modern-go/reflect2"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/errkind"
 )
 
@@ -174,7 +173,7 @@ type defaultScheme[T TypedObject, R TypedObjectDecoder[T]] struct {
 var _ Scheme[VersionedTypedObject, TypedObjectDecoder[VersionedTypedObject]] = (*defaultScheme[VersionedTypedObject, TypedObjectDecoder[VersionedTypedObject]])(nil)
 
 func MustNewDefaultScheme[T TypedObject, R TypedObjectDecoder[T]](protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder[T], base ...Scheme[T, R]) Scheme[T, R] {
-	return utils.Must(NewDefaultScheme[T](protoUnstr, acceptUnknown, defaultdecoder, base...))
+	return general.Must(NewDefaultScheme[T](protoUnstr, acceptUnknown, defaultdecoder, base...))
 }
 
 func NewScheme[T TypedObject, R TypedObjectDecoder[T]](base ...Scheme[T, R]) Scheme[T, R] {
@@ -206,7 +205,7 @@ func NewDefaultScheme[T TypedObject, R TypedObjectDecoder[T]](protoUnstr Unstruc
 	}
 
 	return &defaultScheme[T, R]{
-		base:           utils.Optional(base...),
+		base:           general.Optional(base...),
 		instance:       it,
 		unstructured:   ut,
 		defaultdecoder: defaultdecoder,
@@ -444,7 +443,7 @@ type defaultTypeScheme[T TypedObject, R TypedObjectType[T]] struct {
 }
 
 func MustNewDefaultTypeScheme[T TypedObject, R TypedObjectType[T]](protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder[T], base ...TypeScheme[T, R]) TypeScheme[T, R] {
-	return utils.Must(NewDefaultTypeScheme[T, R](protoUnstr, acceptUnknown, defaultdecoder, base...))
+	return general.Must(NewDefaultTypeScheme[T, R](protoUnstr, acceptUnknown, defaultdecoder, base...))
 }
 
 func NewTypeScheme[T TypedObject, R TypedObjectType[T]](base ...TypeScheme[T, R]) TypeScheme[T, R] {

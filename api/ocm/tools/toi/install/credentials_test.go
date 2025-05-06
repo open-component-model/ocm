@@ -12,13 +12,13 @@ import (
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
 	"ocm.software/ocm/api/tech/oci/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
 var _ = Describe("credential mapping", func() {
 	consumerid := credentials.NewConsumerIdentity("CT", identity.ID_HOSTNAME, "github.com", identity.ID_PATHPREFIX, "open-component-model")
-	ccreds := common.Properties{
+	ccreds := misc.Properties{
 		"user": "open-component-model",
 		"pass": "mypass",
 	}

@@ -3,10 +3,11 @@ package npm
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/credentials/cpi"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -38,7 +39,7 @@ func NewRepositorySpec(path string, propagate ...bool) *RepositorySpec {
 		}
 	}
 	if len(propagate) > 0 {
-		p = generics.Pointer(utils.OptionalDefaultedBool(true, propagate...))
+		p = generics.PointerTo(general.OptionalDefaultedBool(true, propagate...))
 	}
 
 	return &RepositorySpec{
@@ -58,5 +59,5 @@ func (rs *RepositorySpec) Repository(ctx cpi.Context, _ cpi.Credentials) (cpi.Re
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to Cache", r)
 	}
-	return cache.GetRepository(ctx, rs.NpmrcFile, utils.AsBool(rs.PropgateConsumerIdentity, true))
+	return cache.GetRepository(ctx, rs.NpmrcFile, optionutils.AsBool(rs.PropgateConsumerIdentity, true))
 }

@@ -5,11 +5,12 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/config"
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -96,7 +97,7 @@ type gcWrapper struct {
 }
 
 func newView(c *_context, ref ...bool) Context {
-	if utils.Optional(ref...) {
+	if general.Optional(ref...) {
 		return datacontext.FinalizedContext[gcWrapper](c)
 	}
 	return c

@@ -15,7 +15,7 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/compression"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type BlobInfo struct {
@@ -73,7 +73,7 @@ func GetManifestInfo(m cpi.ManifestAccess, layerFiles bool) *ArtifactInfo {
 	h := getHandler(man.Config.MediaType)
 
 	if h != nil {
-		pr, buf := common.NewBufferedPrinter()
+		pr, buf := misc.NewBufferedPrinter()
 		h.Description(pr, m, config)
 		cfg.Info = buf.String()
 	}

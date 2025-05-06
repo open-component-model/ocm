@@ -8,6 +8,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -21,7 +22,7 @@ import (
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/refmgmt/resource"
 	"ocm.software/ocm/api/utils/runtimefinalizer"
@@ -118,8 +119,8 @@ func GetComponentVersionImpl[T ComponentVersionAccessImpl](cv cpi.ComponentVersi
 }
 
 func (b *componentVersionAccessBridge) Close() error {
-	list := errors.ErrListf("closing component version %s", common.VersionedElementKey(b))
-	refmgmt.AllocLog.Trace("closing component version base", "name", common.VersionedElementKey(b))
+	list := errors.ErrListf("closing component version %s", misc.VersionedElementKey(b))
+	refmgmt.AllocLog.Trace("closing component version base", "name", misc.VersionedElementKey(b))
 	// prepare artifact access for final close in
 	// direct access mode.
 	if !compositionmodeattr.Get(b.ctx) {
@@ -128,7 +129,7 @@ func (b *componentVersionAccessBridge) Close() error {
 	list.Add(b.impl.Close())
 	list.Add(b._componentVersionAccessBridgeBase.Close())
 	list.Add(b.blobcache.Clear())
-	refmgmt.AllocLog.Trace("closed component version base", "name", common.VersionedElementKey(b))
+	refmgmt.AllocLog.Trace("closed component version base", "name", misc.VersionedElementKey(b))
 	return list.Result()
 }
 
@@ -197,7 +198,7 @@ func (b *componentVersionAccessBridge) AccessMethod(spec cpi.AccessSpec, cv refm
 		}
 		blob := b.getLocalBlob(cspec)
 		if blob == nil {
-			return nil, errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, common.VersionedElementKey(b).String())
+			return nil, errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, misc.VersionedElementKey(b).String())
 		}
 		meth, err = compose.NewMethod(cspec, blob)
 	case spec.IsLocal(b.ctx):
@@ -261,7 +262,7 @@ func (b *componentVersionAccessBridge) update(final bool) error {
 	d := b.getDescriptor()
 
 	opts := &cpi.BlobUploadOptions{
-		UseNoDefaultIfNotSet: optionutils.PointerTo(true),
+		UseNoDefaultIfNotSet: generics.PointerTo(true),
 	}
 	err := b.setupLocalBlobs("resource", b.composeAccess, d.Resources, true, opts)
 	if err == nil {
@@ -283,7 +284,7 @@ func (b *componentVersionAccessBridge) update(final bool) error {
 			return err
 		}
 		if pub != nil {
-			err := pub.NotifyComponentVersion(common.VersionedElementKey(b))
+			err := pub.NotifyComponentVersion(misc.VersionedElementKey(b))
 			if err != nil {
 				return err
 			}
@@ -398,7 +399,7 @@ func (b *componentVersionAccessBridge) composeAccess(spec cpi.AccessSpec) (bloba
 	}
 	blob := b.getLocalBlob(cspec)
 	if blob == nil {
-		return nil, "", nil, errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, common.VersionedElementKey(b).String())
+		return nil, "", nil, errors.ErrUnknown(blobaccess.KIND_BLOB, cspec.Id, misc.VersionedElementKey(b).String())
 	}
 	blob, err := blob.Dup()
 	if err != nil {

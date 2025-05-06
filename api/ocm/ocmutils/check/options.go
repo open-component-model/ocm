@@ -1,9 +1,9 @@
 package check
 
 import (
+	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
-
-	"ocm.software/ocm/api/utils"
 )
 
 type Option = optionutils.Option[*Options]
@@ -25,11 +25,11 @@ func (o *Options) ApplyTo(opts *Options) {
 type localSources bool
 
 func LocalSourcesOnly(b ...bool) Option {
-	return localSources(utils.OptionalDefaultedBool(true, b...))
+	return localSources(general.OptionalDefaultedBool(true, b...))
 }
 
 func (l localSources) ApplyTo(t *Options) {
-	t.CheckLocalSources = optionutils.PointerTo(bool(l))
+	t.CheckLocalSources = generics.PointerTo(bool(l))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,9 +37,9 @@ func (l localSources) ApplyTo(t *Options) {
 type localResources bool
 
 func LocalResourcesOnly(b ...bool) Option {
-	return localResources(utils.OptionalDefaultedBool(true, b...))
+	return localResources(general.OptionalDefaultedBool(true, b...))
 }
 
 func (l localResources) ApplyTo(t *Options) {
-	t.CheckLocalResources = optionutils.PointerTo(bool(l))
+	t.CheckLocalResources = generics.PointerTo(bool(l))
 }

@@ -8,15 +8,15 @@ import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/extensions/repositories/npm"
 	"ocm.software/ocm/api/tech/npm/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var _ = Describe("Config deserialization Test Environment", func() {
 	It("read .npmrc", func() {
 		ctx := credentials.New()
 		repo := Must(npm.NewRepository(ctx, "testdata/.npmrc"))
-		Expect(Must(repo.LookupCredentials("registry.npmjs.org")).Properties()).To(Equal(common.Properties{identity.ATTR_TOKEN: "npm_TOKEN"}))
-		Expect(Must(repo.LookupCredentials("npm.registry.acme.com/api/npm")).Properties()).To(Equal(common.Properties{identity.ATTR_TOKEN: "bearer_TOKEN"}))
+		Expect(Must(repo.LookupCredentials("registry.npmjs.org")).Properties()).To(Equal(misc.Properties{identity.ATTR_TOKEN: "npm_TOKEN"}))
+		Expect(Must(repo.LookupCredentials("npm.registry.acme.com/api/npm")).Properties()).To(Equal(misc.Properties{identity.ATTR_TOKEN: "bearer_TOKEN"}))
 	})
 
 	It("propagates credentials", func() {

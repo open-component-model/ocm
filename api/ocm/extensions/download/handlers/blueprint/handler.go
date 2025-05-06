@@ -2,6 +2,7 @@ package blueprint
 
 import (
 	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -9,10 +10,9 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	registry "ocm.software/ocm/api/ocm/extensions/download"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 	CONFIG_MIME_TYPE = "application/vnd.gardener.landscaper.blueprint.config.v1"
 )
 
-type Extractor func(pr common.Printer, handler *Handler, access blobaccess.DataAccess, path string, fs vfs.FileSystem) (bool, error)
+type Extractor func(pr misc.Printer, handler *Handler, access blobaccess.DataAccess, path string, fs vfs.FileSystem) (bool, error)
 
 var (
 	supportedArtifactTypes    []string
@@ -54,7 +54,7 @@ func init() {
 }
 
 func New(configmimetypes ...string) *Handler {
-	if len(configmimetypes) == 0 || utils.Optional(configmimetypes...) == "" {
+	if len(configmimetypes) == 0 || general.Optional(configmimetypes...) == "" {
 		configmimetypes = []string{CONFIG_MIME_TYPE}
 	}
 	return &Handler{
@@ -62,7 +62,7 @@ func New(configmimetypes ...string) *Handler {
 	}
 }
 
-func (h *Handler) Download(pr common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
+func (h *Handler) Download(pr misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&err, "downloading blueprint")
 

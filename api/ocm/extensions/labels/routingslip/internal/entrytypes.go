@@ -7,13 +7,13 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/modern-go/reflect2"
 
 	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets/flagsetscheme"
 	"ocm.software/ocm/api/utils/runtime"
@@ -145,7 +145,7 @@ func ToGenericEntry(spec Entry) (*GenericEntry, error) {
 }
 
 func NewGenericEntry(data []byte, unmarshaler ...runtime.Unmarshaler) (Entry, error) {
-	return generics.CastPointerR[Entry](newGenericEntry(data, utils.Optional(unmarshaler...)))
+	return generics.CastPointerR[Entry](newGenericEntry(data, general.Optional(unmarshaler...)))
 }
 
 func newGenericEntry(data []byte, unmarshaler runtime.Unmarshaler) (*GenericEntry, error) {

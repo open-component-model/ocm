@@ -8,7 +8,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/maputils"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -68,7 +67,7 @@ func (a *action) GetVersion(v string) ActionType {
 }
 
 func (a *action) SupportedVersions() []string {
-	return utils.StringMapKeys(a.types)
+	return maputils.OrderedKeys(a.types)
 }
 
 type actionRegistry struct {

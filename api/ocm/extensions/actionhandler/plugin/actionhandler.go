@@ -8,7 +8,7 @@ import (
 	"ocm.software/ocm/api/datacontext/action"
 	"ocm.software/ocm/api/datacontext/action/handlers"
 	"ocm.software/ocm/api/ocm/plugin"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 // pluginHandler delegates action to a plugin based handler.
@@ -29,7 +29,7 @@ func New(p plugin.Plugin, name string) (handlers.ActionHandler, error) {
 	}, nil
 }
 
-func (b *pluginHandler) Handle(spec action.ActionSpec, creds common.Properties) (action.ActionResult, error) {
+func (b *pluginHandler) Handle(spec action.ActionSpec, creds misc.Properties) (action.ActionResult, error) {
 	var err error
 	var creddata json.RawMessage
 

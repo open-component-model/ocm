@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
 	"ocm.software/ocm/cmds/ocm/common/output"
 	"ocm.software/ocm/cmds/ocm/common/tree"
@@ -26,7 +26,7 @@ func Elem(e interface{}) ocm.ComponentVersionAccess {
 ////////////////////////////////////////////////////////////////////////////////
 
 type Object struct {
-	History  common.History
+	History  misc.History
 	Identity metav1.Identity
 
 	Spec       ocm.RefSpec
@@ -36,19 +36,19 @@ type Object struct {
 }
 
 var (
-	_ common.HistorySource = (*Object)(nil)
-	_ tree.Object          = (*Object)(nil)
+	_ misc.HistorySource = (*Object)(nil)
+	_ tree.Object        = (*Object)(nil)
 )
 
 type Manifest struct {
-	History common.History                `json:"context"`
+	History misc.History                  `json:"context"`
 	Element *compdesc.ComponentDescriptor `json:"element"`
 }
 
 func (o *Object) AsManifest() interface{} {
 	h := o.History
 	if h == nil {
-		h = common.History{}
+		h = misc.History{}
 	}
 	return &Manifest{
 		h,
@@ -56,16 +56,16 @@ func (o *Object) AsManifest() interface{} {
 	}
 }
 
-func (o *Object) GetHistory() common.History {
+func (o *Object) GetHistory() misc.History {
 	return o.History
 }
 
-func (o *Object) IsNode() *common.NameVersion {
-	var nv common.NameVersion
+func (o *Object) IsNode() *misc.NameVersion {
+	var nv misc.NameVersion
 	if o.ComponentVersion == nil {
 		nv = o.Spec.NameVersion()
 	} else {
-		nv = common.VersionedElementKey(o.ComponentVersion)
+		nv = misc.VersionedElementKey(o.ComponentVersion)
 	}
 	return &nv
 }

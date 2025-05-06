@@ -31,7 +31,7 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/errkind"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/version"
@@ -178,7 +178,7 @@ const (
 )
 
 func (c *ComponentVersionContainer) Update() (bool, error) {
-	logger := Logger(c.GetContext()).WithValues("cv", common.NewNameVersion(c.comp.name, c.version))
+	logger := Logger(c.GetContext()).WithValues("cv", misc.NewNameVersion(c.comp.name, c.version))
 	err := c.Check()
 	if err != nil {
 		return false, fmt.Errorf("check failed: %w", err)
@@ -230,7 +230,7 @@ func (c *ComponentVersionContainer) Update() (bool, error) {
 		if m.Annotations == nil {
 			m.Annotations = map[string]string{}
 		}
-		m.Annotations[OCM_COMPONENTVERSION] = common.VersionedElementKey(c.bridge).String()
+		m.Annotations[OCM_COMPONENTVERSION] = misc.VersionedElementKey(c.bridge).String()
 		m.Annotations[OCM_CREATOR] = "OCM Go Library " + version.Current()
 
 		for layer, info := range layerAnnotations {

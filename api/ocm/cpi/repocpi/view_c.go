@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/utils"
@@ -116,7 +117,7 @@ func (c *componentAccessView) AddVersion(acc cpi.ComponentVersionAccess, overwri
 	}
 
 	return c.Execute(func() error {
-		return c.bridge.AddVersion(acc, cpi.NewAddVersionOptions(cpi.Overwrite(utils.Optional(overwrite...))))
+		return c.bridge.AddVersion(acc, cpi.NewAddVersionOptions(cpi.Overwrite(general.Optional(overwrite...))))
 	})
 }
 

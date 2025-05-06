@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -53,7 +53,7 @@ func DecodeConfig[T any](config interface{}, d ...Decoder) (*T, error) {
 }
 
 func decodeConfig[T any](data []byte, dec ...Decoder) (*T, error) {
-	if d := utils.Optional(dec...); d != nil {
+	if d := general.Optional(dec...); d != nil {
 		r, err := d(data, runtime.DefaultYAMLEncoding)
 		if err != nil {
 			return nil, err

@@ -5,7 +5,7 @@ package cpi
 import (
 	"ocm.software/ocm/api/credentials/internal"
 	"ocm.software/ocm/api/datacontext"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -83,7 +83,7 @@ func RegisterStandardIdentity(typ string, matcher IdentityMatcher, desc string, 
 	internal.StandardIdentityMatchers.Register(typ, matcher, desc, attrs)
 }
 
-func NewCredentials(props common.Properties) Credentials {
+func NewCredentials(props misc.Properties) Credentials {
 	return internal.NewCredentials(props)
 }
 

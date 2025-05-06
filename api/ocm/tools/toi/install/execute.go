@@ -8,10 +8,10 @@ import (
 	"ocm.software/ocm/api/ocm/resourcerefs"
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
-func Execute(p common.Printer, d Driver, name string, rid metav1.Identity, credsrc blobaccess.DataSource, paramsrc blobaccess.DataSource, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func Execute(p misc.Printer, d Driver, name string, rid metav1.Identity, credsrc blobaccess.DataSource, paramsrc blobaccess.DataSource, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var creds *Credentials
 	var params []byte
 	var err error
@@ -35,7 +35,7 @@ func Execute(p common.Printer, d Driver, name string, rid metav1.Identity, creds
 
 	ires, _, err := resourcerefs.MatchResourceReference(cv, toi.TypeTOIPackage, metav1.NewResourceRef(rid), nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "package resource in %s", common.VersionedElementKey(cv).String())
+		return nil, errors.Wrapf(err, "package resource in %s", misc.VersionedElementKey(cv).String())
 	}
 
 	var spec toi.PackageSpecification

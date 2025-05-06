@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/optionutils"
 )
 
 // CreateAndVerifyX509CertificateFromFiles creates and verifies a x509 certificate from certificate files.
@@ -17,7 +17,7 @@ func CreateAndVerifyX509CertificateFromFiles(certPath, intermediateCAsCertsPath,
 
 	var rootCACert []byte
 	if rootCACertPath != "" {
-		rootCACert, err = utils.ReadFile(rootCACertPath)
+		rootCACert, err = optionutils.ReadFile(rootCACertPath)
 		if err != nil {
 			return nil, fmt.Errorf("unable to read root CA certificate file: %w", err)
 		}
@@ -25,13 +25,13 @@ func CreateAndVerifyX509CertificateFromFiles(certPath, intermediateCAsCertsPath,
 
 	var intermediateCAsCerts []byte
 	if intermediateCAsCertsPath != "" {
-		intermediateCAsCerts, err = utils.ReadFile(intermediateCAsCertsPath)
+		intermediateCAsCerts, err = optionutils.ReadFile(intermediateCAsCertsPath)
 		if err != nil {
 			return nil, fmt.Errorf("unable to read intermediate CAs certificates file: %w", err)
 		}
 	}
 
-	cert, err := utils.ReadFile(certPath)
+	cert, err := optionutils.ReadFile(certPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read certificate file: %w", err)
 	}

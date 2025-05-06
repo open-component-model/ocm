@@ -7,13 +7,13 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/maputils"
 
 	"ocm.software/ocm/api/config"
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/runtimefinalizer"
 )
@@ -148,7 +148,7 @@ type gcWrapper struct {
 }
 
 func newView(c *_context, ref ...bool) Context {
-	if utils.Optional(ref...) {
+	if general.Optional(ref...) {
 		return datacontext.FinalizedContext[gcWrapper](c)
 	}
 	return c

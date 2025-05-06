@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/stringutils"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
-	"ocm.software/ocm/api/utils"
 )
 
 const (
@@ -62,7 +63,7 @@ func MyFirstOCMApplication() error {
 		return err
 	}
 
-	fmt.Printf("  content:\n%s\n", utils.IndentLines(string(data), "    "))
+	fmt.Printf("  content:\n%s\n", stringutils.IndentLines(string(data), "    "))
 
 	return nil
 }

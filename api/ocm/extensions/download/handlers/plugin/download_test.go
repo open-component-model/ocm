@@ -23,7 +23,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/plugins"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -114,7 +114,7 @@ var _ = Describe("setup plugin cache", func() {
 		file := vfs.Join(env.FileSystem(), repodir, "download")
 
 		octx, buf := out.NewBuffered()
-		ok, eff, err := download.For(env).Download(common.NewPrinter(octx.StdOut()), racc, file, nil)
+		ok, eff, err := download.For(env).Download(misc.NewPrinter(octx.StdOut()), racc, file, nil)
 
 		MustBeSuccessful(err)
 		Expect(buf.String()).To(Equal(""))

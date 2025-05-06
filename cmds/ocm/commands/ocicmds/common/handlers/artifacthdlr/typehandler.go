@@ -10,7 +10,7 @@ import (
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/common/output"
 	"ocm.software/ocm/cmds/ocm/common/tree"
 	"ocm.software/ocm/cmds/ocm/common/utils"
@@ -23,8 +23,8 @@ func Elem(e interface{}) oci.ArtifactAccess {
 ////////////////////////////////////////////////////////////////////////////////
 
 type Object struct {
-	History    common.History
-	Key        common.NameVersion
+	History    misc.History
+	Key        misc.NameVersion
 	Spec       oci.RefSpec
 	AttachKind string
 	Namespace  oci.NamespaceAccess
@@ -32,16 +32,16 @@ type Object struct {
 }
 
 var (
-	_ common.HistoryElement = (*Object)(nil)
-	_ tree.Object           = (*Object)(nil)
-	_ tree.Typed            = (*Object)(nil)
+	_ misc.HistoryElement = (*Object)(nil)
+	_ tree.Object         = (*Object)(nil)
+	_ tree.Typed          = (*Object)(nil)
 )
 
-func (o *Object) GetHistory() common.History {
+func (o *Object) GetHistory() misc.History {
 	return o.History
 }
 
-func (o *Object) GetKey() common.NameVersion {
+func (o *Object) GetKey() misc.NameVersion {
 	return o.Key
 }
 
@@ -49,7 +49,7 @@ func (o *Object) GetKind() string {
 	return o.AttachKind
 }
 
-func (o *Object) IsNode() *common.NameVersion {
+func (o *Object) IsNode() *misc.NameVersion {
 	blob, err := o.Artifact.Blob()
 	if err != nil {
 		logging.DefaultContext().Logger().LogError(err, "failed to fetch blob from artifact")
@@ -57,7 +57,7 @@ func (o *Object) IsNode() *common.NameVersion {
 		return nil
 	}
 
-	nv := common.NewNameVersion("", blob.Digest().String())
+	nv := misc.NewNameVersion("", blob.Digest().String())
 	return &nv
 }
 
@@ -98,13 +98,13 @@ type Manifest struct {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Key(a oci.ArtifactAccess) (common.NameVersion, error) {
+func Key(a oci.ArtifactAccess) (misc.NameVersion, error) {
 	blob, err := a.Blob()
 	if err != nil {
-		return common.NameVersion{}, fmt.Errorf("unable to determine blob name: %w", err)
+		return misc.NameVersion{}, fmt.Errorf("unable to determine blob name: %w", err)
 	}
 
-	return common.NewNameVersion("", blob.Digest().String()), nil
+	return misc.NewNameVersion("", blob.Digest().String()), nil
 }
 
 type TypeHandler struct {

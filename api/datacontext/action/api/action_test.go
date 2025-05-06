@@ -4,7 +4,7 @@ import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/datacontext/action/api"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -47,8 +47,8 @@ func (a *ActionSpec) Selector() api.Selector {
 	return api.Selector(a.Field)
 }
 
-func (a *ActionSpec) GetConsumerAttributes() common.Properties {
-	return common.Properties(credentials.NewConsumerIdentity(CONSUMER_TYPE,
+func (a *ActionSpec) GetConsumerAttributes() misc.Properties {
+	return misc.Properties(credentials.NewConsumerIdentity(CONSUMER_TYPE,
 		ID_HOSTNAME, a.Field,
 	))
 }

@@ -6,10 +6,10 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
-func TransferComponents(printer common.Printer, closure TransportClosure, repo ocm.Repository, prefix string, all bool, tgt ocm.Repository, handler TransferHandler) error {
+func TransferComponents(printer misc.Printer, closure TransportClosure, repo ocm.Repository, prefix string, all bool, tgt ocm.Repository, handler TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
@@ -27,12 +27,12 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 	}
 	list := errors.ErrListf("component transport")
 	for _, c := range comps {
-		transferVersions(common.AssurePrinter(printer), closure, list, handler, repo, c, tgt)
+		transferVersions(misc.AssurePrinter(printer), closure, list, handler, repo, c, tgt)
 	}
 	return list.Result()
 }
 
-func transferVersions(printer common.Printer, closure TransportClosure, list *errors.ErrorList, handler TransferHandler, repo ocm.Repository, c string, tgt ocm.Repository) {
+func transferVersions(printer misc.Printer, closure TransportClosure, list *errors.ErrorList, handler TransferHandler, repo ocm.Repository, c string, tgt ocm.Repository) {
 	comp, err := repo.LookupComponent(c)
 	if list.Addf(printer, err, "component %s", c) == nil {
 		defer comp.Close()

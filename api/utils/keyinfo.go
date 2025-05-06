@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/mandelsoft/goutils/maputils"
 )
 
 type DescriptionProvider interface {
@@ -32,7 +34,7 @@ func FormatList(def string, elems ...KeyInfo) string {
 }
 
 func FormatMap[T DescriptionProvider](def string, elems map[string]T) string {
-	keys := StringMapKeys(elems)
+	keys := maputils.OrderedKeys(elems)
 	sort.Strings(keys)
 	names := ""
 	for _, k := range keys {

@@ -608,7 +608,7 @@ func (p *plugin) GetConfigType(name string) *descriptor.ConfigTypeDescriptor {
 			return &d
 		}
 		if d.Name == name && (def == nil || d.Version == "v1") {
-			def = generics.Pointer(d)
+			def = generics.PointerTo(d)
 		}
 	}
 	return def

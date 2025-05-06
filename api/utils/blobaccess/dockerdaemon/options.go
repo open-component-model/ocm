@@ -1,11 +1,11 @@
 package dockerdaemon
 
 import (
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/optionutils"
 
 	cpi "ocm.software/ocm/api/oci/types"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Option = optionutils.Option[*Options]
@@ -15,7 +15,7 @@ type Options struct {
 	Name            string
 	Version         string
 	OverrideVersion *bool
-	Origin          *common.NameVersion
+	Origin          *misc.NameVersion
 }
 
 func (o *Options) ApplyTo(opts *Options) {
@@ -85,26 +85,26 @@ type override struct {
 }
 
 func (o *override) ApplyTo(opts *Options) {
-	opts.OverrideVersion = utils.BoolP(o.flag)
+	opts.OverrideVersion = optionutils.BoolP(o.flag)
 	opts.Version = o.version
 }
 
 func WithVersionOverride(v string, flag ...bool) Option {
 	return &override{
 		version: v,
-		flag:    utils.OptionalDefaultedBool(true, flag...),
+		flag:    general.OptionalDefaultedBool(true, flag...),
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type compvers common.NameVersion
+type compvers misc.NameVersion
 
 func (o compvers) ApplyTo(opts *Options) {
-	n := common.NameVersion(o)
+	n := misc.NameVersion(o)
 	opts.Origin = &n
 }
 
-func WithOrigin(o common.NameVersion) Option {
+func WithOrigin(o misc.NameVersion) Option {
 	return compvers(o)
 }

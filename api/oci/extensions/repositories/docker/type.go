@@ -3,11 +3,11 @@ package docker
 import (
 	"context"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/cpi"
-	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -32,7 +32,7 @@ type RepositorySpec struct {
 func NewRepositorySpec(host ...string) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
-		DockerHost:          utils.Optional(host...),
+		DockerHost:          general.OptionalNonZero(host...),
 	}
 }
 

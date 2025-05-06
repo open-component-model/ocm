@@ -5,9 +5,10 @@ import (
 	"slices"
 	"sync"
 
+	"github.com/mandelsoft/goutils/general"
+
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/tech/signing"
-	"ocm.software/ocm/api/utils"
 )
 
 type DigesterType struct {
@@ -77,7 +78,7 @@ var DefaultBlobDigesterRegistry = NewBlobDigesterRegistry()
 
 func NewBlobDigesterRegistry(base ...BlobDigesterRegistry) BlobDigesterRegistry {
 	return &blobDigesterRegistry{
-		base:         utils.Optional(base...),
+		base:         general.Optional(base...),
 		typehandlers: map[string][]BlobDigester{},
 		normhandlers: map[string][]BlobDigester{},
 		digesters:    map[DigesterType]BlobDigester{},

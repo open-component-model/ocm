@@ -11,7 +11,7 @@ import (
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 	"ocm.software/ocm/api/utils/registrations"
 )
@@ -309,7 +309,7 @@ func (r *MatchingResolver) LookupComponentVersion(name string, version string) (
 			}
 		}
 	}
-	return nil, errors.ErrNotFound(KIND_COMPONENTVERSION, common.NewNameVersion(name, version).String())
+	return nil, errors.ErrNotFound(KIND_COMPONENTVERSION, misc.NewNameVersion(name, version).String())
 }
 
 func (r *MatchingResolver) LookupComponentProviders(name string) []ResolvedComponentProvider {

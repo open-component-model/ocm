@@ -9,7 +9,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/examples/lib/helper"
 )
 
@@ -60,7 +60,7 @@ func TransportComponentVersion(ctx ocm.Context, cfg *helper.Config) error {
 	err = transfer.Transfer(cv, target,
 		standard.ResourcesByValue(),
 		standard.Overwrite(),
-		transfer.WithPrinter(common.StdoutPrinter))
+		transfer.WithPrinter(misc.StdoutPrinter))
 	if err != nil {
 		return errors.Wrapf(err, "transfer failed")
 	}

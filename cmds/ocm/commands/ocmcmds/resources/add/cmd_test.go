@@ -27,7 +27,7 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -54,7 +54,7 @@ func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name 
 
 	list, err := vfs.ReadDir(env, env.Join(ARCH, comparch.BlobsDirectoryName))
 	found := map[string]string{}
-	blobname := common.DigestToFileName(dig)
+	blobname := misc.DigestToFileName(dig)
 	for _, e := range list {
 		data, err := env.ReadFile(env.Join(ARCH, comparch.BlobsDirectoryName, e.Name()))
 		Expect(err).To(Succeed())
@@ -81,7 +81,7 @@ func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name 
 	spec, err := env.OCMContext().AccessSpecForSpec(cd.Resources[0].Access)
 	Expect(err).To(Succeed())
 	Expect(spec.GetType()).To(Equal(localblob.Type))
-	Expect(spec.(*localblob.AccessSpec).LocalReference).To(Equal(common.DigestToFileName(dig)))
+	Expect(spec.(*localblob.AccessSpec).LocalReference).To(Equal(misc.DigestToFileName(dig)))
 	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal("text/plain"))
 }
 
@@ -224,7 +224,7 @@ var _ = Describe("Add resources", func() {
 		// sha is always different for helm artifact
 		// Expect(acc.(*localblob.AccessSpec).LocalReference).To(Equal("sha256.817db2696ed23f7779a7f848927e2958d2236e5483ad40875274462d8fa8ef9a"))
 
-		blobpath := env.Join(ARCH, comparch.BlobsDirectoryName, common.DigestToFileName(digest.Digest(acc.(*localblob.AccessSpec).LocalReference)))
+		blobpath := env.Join(ARCH, comparch.BlobsDirectoryName, misc.DigestToFileName(digest.Digest(acc.(*localblob.AccessSpec).LocalReference)))
 		blob := blobaccess.ForFile(mime.MIME_GZIP, blobpath, env)
 
 		set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob)

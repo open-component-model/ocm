@@ -3,6 +3,7 @@ package set
 import (
 	"fmt"
 
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -10,7 +11,6 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/pubsub"
-	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
@@ -70,7 +70,7 @@ func (o *Command) Complete(args []string) error {
 		if o.Delete {
 			return fmt.Errorf("delete does not require a specification argument")
 		}
-		o.Spec, err = utils2.ResolveData(args[1], o.FileSystem())
+		o.Spec, err = optionutils.ResolveData(args[1], o.FileSystem())
 		if err != nil {
 			return err
 		}

@@ -10,7 +10,7 @@ import (
 
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var _ = Describe("cache management", func() {
@@ -47,11 +47,11 @@ var _ = Describe("cache management", func() {
 	})
 
 	It("blob copied to cache", func() {
-		Expect(vfs.FileExists(tempfs, common.DigestToFileName(td1_digest))).To(BeFalse())
+		Expect(vfs.FileExists(tempfs, misc.DigestToFileName(td1_digest))).To(BeFalse())
 		_, data, err := cache.GetBlobData(td1_digest)
 		Expect(err).To(Succeed())
-		Expect(vfs.FileExists(tempfs, common.DigestToFileName(td1_digest))).To(BeFalse())
+		Expect(vfs.FileExists(tempfs, misc.DigestToFileName(td1_digest))).To(BeFalse())
 		Expect(data.Get()).To(Equal([]byte("testdata")))
-		Expect(vfs.FileExists(tempfs, common.DigestToFileName(td1_digest))).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, misc.DigestToFileName(td1_digest))).To(BeTrue())
 	})
 })

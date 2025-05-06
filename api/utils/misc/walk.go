@@ -1,9 +1,9 @@
 package misc
 
 import (
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/logging"
 
-	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 )
 
@@ -11,7 +11,7 @@ type NameVersionInfo[T any] map[NameVersion]T
 
 func (s NameVersionInfo[T]) Add(nv NameVersion, data ...T) bool {
 	if _, ok := s[nv]; !ok {
-		s[nv] = utils.Optional(data...)
+		s[nv] = general.Optional(data...)
 		return true
 	}
 	return false
@@ -31,7 +31,7 @@ type WalkingState[T any, C any] struct {
 }
 
 func NewWalkingState[T any, C any](ctx C, lctx ...logging.Context) WalkingState[T, C] {
-	logctx := utils.OptionalDefaulted[logging.Context](ocmlog.Context(), lctx...)
+	logctx := general.OptionalDefaulted[logging.Context](ocmlog.Context(), lctx...)
 	return WalkingState[T, C]{Context: ctx, Closure: NameVersionInfo[T]{}, LogCtx: logctx, Logger: logctx.Logger()}
 }
 

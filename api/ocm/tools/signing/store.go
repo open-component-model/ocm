@@ -7,13 +7,14 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/ioutils"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -30,14 +31,14 @@ import (
 // component versions (see NewVerifiedStore).
 type VerifiedStore interface {
 	Add(cd *compdesc.ComponentDescriptor, signatures ...string)
-	Remove(n common.VersionedElement)
-	Get(n common.VersionedElement) *compdesc.ComponentDescriptor
-	GetEntry(n common.VersionedElement) *StorageEntry
+	Remove(n misc.VersionedElement)
+	Get(n misc.VersionedElement) *compdesc.ComponentDescriptor
+	GetEntry(n misc.VersionedElement) *StorageEntry
 
-	GetResourceDigest(n common.VersionedElement, id metav1.Identity) *metav1.DigestSpec
-	GetResourceDigestByIndex(n common.VersionedElement, idx int) *metav1.DigestSpec
+	GetResourceDigest(n misc.VersionedElement, id metav1.Identity) *metav1.DigestSpec
+	GetResourceDigestByIndex(n misc.VersionedElement, idx int) *metav1.DigestSpec
 
-	Entries() []common.NameVersion
+	Entries() []misc.NameVersion
 
 	Load() error
 	Save() error
@@ -59,7 +60,7 @@ func NewLocalVerifiedStore() VerifiedStore {
 
 // NewVerifiedStore loads or creates a new filesystem based VerifiedStore.
 func NewVerifiedStore(path string, fss ...vfs.FileSystem) (VerifiedStore, error) {
-	eff, err := utils.ResolvePath(path)
+	eff, err := ioutils.ResolvePath(path)
 	if err != nil {
 		return nil, err
 	}
@@ -134,13 +135,13 @@ func (v *verifiedStore) Save() error {
 	return nil
 }
 
-func (v *verifiedStore) Entries() []common.NameVersion {
+func (v *verifiedStore) Entries() []misc.NameVersion {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 
-	entries := make([]common.NameVersion, 0, len(v.storage.ComponentVersions))
+	entries := make([]misc.NameVersion, 0, len(v.storage.ComponentVersions))
 	for _, entry := range v.storage.ComponentVersions {
-		entries = append(entries, common.VersionedElementKey(entry.Descriptor))
+		entries = append(entries, misc.VersionedElementKey(entry.Descriptor))
 	}
 	return entries
 }
@@ -155,7 +156,7 @@ func (v *verifiedStore) Add(cd *compdesc.ComponentDescriptor, signatures ...stri
 	if v.storage.ComponentVersions == nil {
 		v.storage.ComponentVersions = map[string]*StorageEntry{}
 	}
-	key := common.VersionedElementKey(cd).String()
+	key := misc.VersionedElementKey(cd).String()
 	old := v.storage.ComponentVersions[key]
 	if old == nil || !old.Descriptor.Descriptor().Equal(cd) {
 		old = &StorageEntry{
@@ -168,32 +169,32 @@ func (v *verifiedStore) Add(cd *compdesc.ComponentDescriptor, signatures ...stri
 	v.storage.ComponentVersions[key] = old
 }
 
-func (v *verifiedStore) Remove(n common.VersionedElement) {
+func (v *verifiedStore) Remove(n misc.VersionedElement) {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 
-	delete(v.storage.ComponentVersions, common.VersionedElementKey(n).String())
+	delete(v.storage.ComponentVersions, misc.VersionedElementKey(n).String())
 }
 
-func (v *verifiedStore) GetEntry(n common.VersionedElement) *StorageEntry {
+func (v *verifiedStore) GetEntry(n misc.VersionedElement) *StorageEntry {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 
-	return v.storage.ComponentVersions[common.VersionedElementKey(n).String()]
+	return v.storage.ComponentVersions[misc.VersionedElementKey(n).String()]
 }
 
-func (v *verifiedStore) Get(n common.VersionedElement) *compdesc.ComponentDescriptor {
+func (v *verifiedStore) Get(n misc.VersionedElement) *compdesc.ComponentDescriptor {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 
-	entry := v.storage.ComponentVersions[common.VersionedElementKey(n).String()]
+	entry := v.storage.ComponentVersions[misc.VersionedElementKey(n).String()]
 	if entry == nil {
 		return nil
 	}
 	return entry.Descriptor.Descriptor()
 }
 
-func (v *verifiedStore) GetResourceDigest(n common.VersionedElement, id metav1.Identity) *metav1.DigestSpec {
+func (v *verifiedStore) GetResourceDigest(n misc.VersionedElement, id metav1.Identity) *metav1.DigestSpec {
 	cd := v.Get(n)
 	if cd == nil {
 		return nil
@@ -205,7 +206,7 @@ func (v *verifiedStore) GetResourceDigest(n common.VersionedElement, id metav1.I
 	return r.Digest
 }
 
-func (v *verifiedStore) GetResourceDigestByIndex(n common.VersionedElement, idx int) *metav1.DigestSpec {
+func (v *verifiedStore) GetResourceDigestByIndex(n misc.VersionedElement, idx int) *metav1.DigestSpec {
 	cd := v.Get(n)
 	if cd == nil {
 		return nil

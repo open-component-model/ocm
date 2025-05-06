@@ -22,7 +22,7 @@ import (
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/tech/signing/tsa"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var REALM = logging.NewRealm("signing")
@@ -40,26 +40,26 @@ func ArtefactDigest(r *compdesc.Resource) metav1.ArtefactDigest {
 // and provides the digest context used for a dedicated root component
 // this component version is digested for (by following component references).
 type VersionInfo struct {
-	digestingContexts map[common.NameVersion]*DigestContext
+	digestingContexts map[misc.NameVersion]*DigestContext
 }
 
 func NewVersionInfo(cd *compdesc.ComponentDescriptor, parent *DigestContext) (*VersionInfo, *DigestContext) {
 	vi := &VersionInfo{
-		digestingContexts: map[common.NameVersion]*DigestContext{},
+		digestingContexts: map[misc.NameVersion]*DigestContext{},
 	}
 	return vi, vi.CreateContext(cd, parent)
 }
 
-func (vi *VersionInfo) GetContext(nv common.NameVersion) *DigestContext {
+func (vi *VersionInfo) GetContext(nv misc.NameVersion) *DigestContext {
 	return vi.digestingContexts[nv]
 }
 
 func (vi *VersionInfo) CreateContext(cd *compdesc.ComponentDescriptor, parent *DigestContext) *DigestContext {
-	var key common.NameVersion
+	var key misc.NameVersion
 	if parent != nil {
 		key = parent.CtxKey
 	} else {
-		key = common.VersionedElementKey(cd)
+		key = misc.VersionedElementKey(cd)
 	}
 	nctx := NewDigestContext(cd.Copy(), parent)
 
@@ -83,14 +83,14 @@ func (vi *VersionInfo) CreateContext(cd *compdesc.ComponentDescriptor, parent *D
 }
 
 type WalkingState struct {
-	common.WalkingState[*VersionInfo, *DigestContext]
+	misc.WalkingState[*VersionInfo, *DigestContext]
 }
 
 func NewWalkingState(lctx ...logging.Context) WalkingState {
-	return WalkingState{common.NewWalkingState[*VersionInfo, *DigestContext](nil, lctx...)}
+	return WalkingState{misc.NewWalkingState[*VersionInfo, *DigestContext](nil, lctx...)}
 }
 
-func (s *WalkingState) GetContext(nv common.NameVersion, ctxkey common.NameVersion) *DigestContext {
+func (s *WalkingState) GetContext(nv misc.NameVersion, ctxkey misc.NameVersion) *DigestContext {
 	vi := s.Get(nv)
 	if vi == nil {
 		return nil
@@ -103,7 +103,7 @@ func DefaultWalkingState(octx ocm.ContextProvider) *WalkingState {
 	return &s
 }
 
-func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
+func Apply(printer misc.Printer, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
 	if printer != nil {
 		opts = opts.Dup()
 		opts.Printer = printer
@@ -114,7 +114,7 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 func ApplyWithContext(ctx context.Context, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
 	if opts.Printer == nil {
 		opts = opts.Dup()
-		opts.Printer = common.GetPrinter(ctx)
+		opts.Printer = misc.GetPrinter(ctx)
 	}
 	err := opts.Complete(cv.GetContext())
 	if err != nil {
@@ -136,7 +136,7 @@ func ListComponentDescriptors(cv ocm.ComponentVersionAccess, state *WalkingState
 		return []*compdesc.ComponentDescriptor{}
 	}
 	c := state.WalkingState.Closure
-	nv := common.VersionedElementKey(cv)
+	nv := misc.VersionedElementKey(cv)
 	return maputils.TransformedValues(c, func(in *VersionInfo) *compdesc.ComponentDescriptor {
 		return in.digestingContexts[nv].Descriptor
 	})
@@ -156,7 +156,7 @@ func apply(ctx context.Context, state WalkingState, cv ocm.ComponentVersionAcces
 			return cv.Close()
 		}
 	}
-	nv := common.VersionedElementKey(cv)
+	nv := misc.VersionedElementKey(cv)
 	defer errors.PropagateErrorf(&efferr, closer, "%s", state.History.Append(nv))
 
 	vi := state.Get(nv)
@@ -175,8 +175,8 @@ func apply(ctx context.Context, state WalkingState, cv ocm.ComponentVersionAcces
 	return _apply(ctx, state, nv, cv, vi, opts)
 }
 
-func _apply(cctx context.Context, state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAccess, vi *VersionInfo, opts *Options) (*DigestContext, error) { //nolint: maintidx // yes
-	if err := common.IsContextCanceled(cctx); err != nil {
+func _apply(cctx context.Context, state WalkingState, nv misc.NameVersion, cv ocm.ComponentVersionAccess, vi *VersionInfo, opts *Options) (*DigestContext, error) { //nolint: maintidx // yes
+	if err := misc.IsContextCanceled(cctx); err != nil {
 		opts.Printer.Printf("cancelled by caller\n")
 		return nil, err
 	}
@@ -368,7 +368,7 @@ func _apply(cctx context.Context, state WalkingState, nv common.NameVersion, cv 
 			}
 			signature.Timestamp = &metav1.TimestampSpec{
 				Value: string(data),
-				Time:  generics.Pointer(compdesc.NewTimestampFor(t)),
+				Time:  generics.PointerTo(compdesc.NewTimestampFor(t)),
 			}
 		}
 		if found >= 0 {
@@ -615,7 +615,7 @@ func calculateReferenceDigests(cctx context.Context, state WalkingState, opts *O
 		}
 		cd.References[i].Digest = nctx.Digest
 		ctx.Refs[nctx.Key] = nctx.Digest
-		state.Logger.Debug("reference digest", "index", i, "reference", common.NewNameVersion(reference.ComponentName, reference.Version), "hashalgo", nctx.Digest.HashAlgorithm, "normalgo", nctx.Digest.NormalisationAlgorithm, "digest", nctx.Digest.Value)
+		state.Logger.Debug("reference digest", "index", i, "reference", misc.NewNameVersion(reference.ComponentName, reference.Version), "hashalgo", nctx.Digest.HashAlgorithm, "normalgo", nctx.Digest.NormalisationAlgorithm, "digest", nctx.Digest.Value)
 		opts.Printer.Printf("  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, nctx.Digest)
 
 		if err := loop.Finalize(); err != nil {
@@ -632,7 +632,7 @@ func calculateResourceDigests(cctx context.Context, state WalkingState, cv ocm.C
 	octx := cv.GetContext()
 	blobdigesters := octx.BlobDigesters()
 	for i, res := range cv.GetResources() {
-		if err := common.IsContextCanceled(cctx); err != nil {
+		if err := misc.IsContextCanceled(cctx); err != nil {
 			opts.Printer.Printf("cancelled by caller\n")
 			return err
 		}
@@ -752,14 +752,14 @@ func GetDigestMode(cd *compdesc.ComponentDescriptor, def ...string) string {
 
 func addVerified(state WalkingState, cd *compdesc.ComponentDescriptor, opts *Options, signatures ...string) {
 	if opts.VerifiedStore != nil {
-		_addVerified(state, common.VersionedElementKey(cd), cd, opts, signatures...)
+		_addVerified(state, misc.VersionedElementKey(cd), cd, opts, signatures...)
 	}
 }
 
-func _addVerified(state WalkingState, ctx common.NameVersion, cd *compdesc.ComponentDescriptor, opts *Options, signatures ...string) {
+func _addVerified(state WalkingState, ctx misc.NameVersion, cd *compdesc.ComponentDescriptor, opts *Options, signatures ...string) {
 	opts.VerifiedStore.Add(cd, signatures...)
 	for _, ref := range cd.References {
-		nv := common.NewNameVersion(ref.ComponentName, ref.Version)
+		nv := misc.NewNameVersion(ref.ComponentName, ref.Version)
 		s := state.Get(nv)
 		rs := s.GetContext(ctx)
 		if rs != nil {

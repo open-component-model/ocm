@@ -1,8 +1,9 @@
 package mock
 
 import (
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/ocm/tools/toi/install"
-	"ocm.software/ocm/api/utils"
 )
 
 type Driver struct {
@@ -12,7 +13,7 @@ type Driver struct {
 var _ install.Driver = (*Driver)(nil)
 
 func New(handler ...func(*install.Operation) (*install.OperationResult, error)) install.Driver {
-	return &Driver{utils.Optional(handler...)}
+	return &Driver{general.Optional(handler...)}
 }
 
 func (d *Driver) SetConfig(props map[string]string) error {

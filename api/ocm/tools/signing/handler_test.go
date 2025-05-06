@@ -18,7 +18,7 @@ import (
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var _ = Describe("Simple signing handlers", func() {
@@ -40,7 +40,7 @@ var _ = Describe("Simple signing handlers", func() {
 
 		It("cancelled", func() {
 			var opts signing.Options
-			p, buf := common.NewBufferedPrinter()
+			p, buf := misc.NewBufferedPrinter()
 			opts.Printer = p
 
 			opts.Eval(

@@ -5,13 +5,13 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/set"
 	"github.com/spf13/cobra"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/common"
-	utils2 "ocm.software/ocm/api/utils"
 	handler "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
@@ -115,7 +115,7 @@ func mapGetWideOutput(e interface{}) interface{} {
 	}
 
 	var methods []string
-	for _, m := range utils2.StringMapKeys(found) {
+	for _, m := range maputils.OrderedKeys(found) {
 		l := found[m]
 		if len(l) == 0 {
 			methods = append(methods, m)

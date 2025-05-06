@@ -5,7 +5,6 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/utils"
@@ -13,7 +12,7 @@ import (
 )
 
 func ListArchiveContent(path string, fss ...vfs.FileSystem) ([]string, error) {
-	sfs := utils.OptionalDefaulted(osfs.New(), fss...)
+	sfs := utils.FileSystem(fss...)
 
 	f, err := sfs.Open(path)
 	if err != nil {

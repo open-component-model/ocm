@@ -2,7 +2,7 @@ package transfer
 
 import (
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type (
@@ -36,7 +36,7 @@ type (
 // To distinguish them from transferhandler options, they do NOT implement
 // the transferhandler.TransferOptionsCreator interface.
 type localOptions struct {
-	printer common.Printer
+	printer misc.Printer
 }
 
 func (opts *localOptions) Eval(optlist ...transferhandler.TransferOption) error {
@@ -53,7 +53,7 @@ func (opts *localOptions) Eval(optlist ...transferhandler.TransferOption) error 
 
 // WithPrinter provides a explicit printer object. By default,
 // a non-printing printer will be used.
-func WithPrinter(p common.Printer) transferhandler.TransferOption {
+func WithPrinter(p misc.Printer) transferhandler.TransferOption {
 	return &localOptions{
 		printer: p,
 	}

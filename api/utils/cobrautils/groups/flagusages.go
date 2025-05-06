@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/spf13/pflag"
-
-	"ocm.software/ocm/api/utils"
 )
 
 const FlagGroupAnnotation = "flag-group-annotation"
@@ -21,7 +20,7 @@ func FlagUsagesWrapped(f *pflag.FlagSet, cols int) string {
 
 	sep := ""
 	buf := new(bytes.Buffer)
-	for _, g := range utils.StringMapKeys(lines) {
+	for _, g := range maputils.OrderedKeys(lines) {
 		if g != "" {
 			fmt.Fprintln(buf, sep+"  "+g+":")
 		}
@@ -43,7 +42,7 @@ func GroupedFlagUsagesWrapped(f *pflag.FlagSet, cols int) []UsageGroup {
 	lines := DetermineGroups(f, cols)
 
 	var groups []UsageGroup
-	for _, g := range utils.StringMapKeys(lines) {
+	for _, g := range maputils.OrderedKeys(lines) {
 		buf := new(bytes.Buffer)
 		for _, line := range lines[g] {
 			fmt.Fprintln(buf, line)

@@ -8,7 +8,7 @@ import (
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/memory"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -34,7 +34,7 @@ type CredentialsSpec struct {
 	// Reference refers to credentials store in some other repo
 	Reference *cpi.GenericCredentialsSpec `json:"reference,omitempty"`
 	// Credentials are direct credentials (one of Reference or Credentials must be set)
-	Credentials common.Properties `json:"credentials"`
+	Credentials misc.Properties `json:"credentials"`
 }
 
 // New creates a new memory ConfigSpec.
@@ -50,7 +50,7 @@ func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *Config) AddCredentials(name string, props common.Properties) error {
+func (a *Config) AddCredentials(name string, props misc.Properties) error {
 	a.Credentials = append(a.Credentials, CredentialsSpec{CredentialsName: name, Credentials: props})
 	return nil
 }

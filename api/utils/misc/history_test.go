@@ -4,30 +4,30 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Elem struct {
-	history common.History
-	key     common.NameVersion
+	history misc.History
+	key     misc.NameVersion
 }
 
-var _ common.HistoryElement = (*Elem)(nil)
+var _ misc.HistoryElement = (*Elem)(nil)
 
-func (e *Elem) GetHistory() common.History {
+func (e *Elem) GetHistory() misc.History {
 	return e.history
 }
 
-func (e *Elem) GetKey() common.NameVersion {
+func (e *Elem) GetKey() misc.NameVersion {
 	return e.key
 }
 
 func New(n string, hist ...string) *Elem {
 	e := &Elem{
-		key: common.NewNameVersion(n, ""),
+		key: misc.NewNameVersion(n, ""),
 	}
 	for _, h := range hist {
-		e.history.Add("test", common.NewNameVersion(h, ""))
+		e.history.Add("test", misc.NewNameVersion(h, ""))
 	}
 	return e
 }
@@ -35,27 +35,27 @@ func New(n string, hist ...string) *Elem {
 var _ = Describe("processing buffer", func() {
 	Context("history", func() {
 		It("compare", func() {
-			Expect(common.CompareHistoryElement(New("a"), New("b")) < 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("b"), New("a")) > 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("a"), New("a")) == 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a"), New("b")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("b"), New("a")) > 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a"), New("a")) == 0).To(BeTrue())
 
-			Expect(common.CompareHistoryElement(New("a", "a"), New("b", "a")) < 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("b", "a"), New("a", "a")) > 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("a", "a"), New("a", "a")) == 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a", "a"), New("b", "a")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("b", "a"), New("a", "a")) > 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a", "a"), New("a", "a")) == 0).To(BeTrue())
 
-			Expect(common.CompareHistoryElement(New("a", "a"), New("a", "b")) < 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("b", "a"), New("a", "b")) < 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("a", "a"), New("b", "b")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a", "a"), New("a", "b")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("b", "a"), New("a", "b")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a", "a"), New("b", "b")) < 0).To(BeTrue())
 
-			Expect(common.CompareHistoryElement(New("a", "a"), New("a", "a", "b")) < 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("b", "a"), New("a", "a", "b")) < 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("a", "a"), New("b", "a", "b")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a", "a"), New("a", "a", "b")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("b", "a"), New("a", "a", "b")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a", "a"), New("b", "a", "b")) < 0).To(BeTrue())
 
-			Expect(common.CompareHistoryElement(New("a"), New("a", "a")) < 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("b"), New("a", "a")) > 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a"), New("a", "a")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("b"), New("a", "a")) > 0).To(BeTrue())
 
-			Expect(common.CompareHistoryElement(New("a", "a"), New("a")) > 0).To(BeTrue())
-			Expect(common.CompareHistoryElement(New("a", "a"), New("b")) < 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a", "a"), New("a")) > 0).To(BeTrue())
+			Expect(misc.CompareHistoryElement(New("a", "a"), New("b")) < 0).To(BeTrue())
 		})
 		It("sort", func() {
 			s := []*Elem{
@@ -71,7 +71,7 @@ var _ = Describe("processing buffer", func() {
 				New("b", "a", "c"),
 				New("b", "a", "c", "d"),
 			}
-			common.SortHistoryElements(s)
+			misc.SortHistoryElements(s)
 			r := []*Elem{
 				New("a"),
 				New("a", "a"),

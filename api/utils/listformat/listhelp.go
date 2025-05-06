@@ -6,7 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/stringutils"
 )
 
 type StringElementDescriptionList []string
@@ -39,7 +40,7 @@ func FormatMapElements[K ~string, E any](def string, m map[K]E, desc ...func(E) 
 	if len(desc) == 0 || desc[0] == nil {
 		desc = []func(E) string{StringDescription[E]}
 	}
-	keys := utils.StringMapKeys(m)
+	keys := maputils.OrderedKeys(m)
 	return FormatListElements(def, &maplist[K, E]{
 		desc: desc[0],
 		keys: keys,
@@ -83,7 +84,7 @@ func FormatListElements(def string, elems ListElements) string {
 		}
 		desc := elems.Description(i)
 		if desc != "" {
-			names += ": " + utils.IndentLines(desc, "    ", true)
+			names += ": " + stringutils.IndentLines(desc, "    ", true)
 			if strings.Contains(desc, "\n") {
 				names += "\n"
 			}
@@ -100,7 +101,7 @@ func FormatDescriptionList(def string, elems ...string) string {
 	out := ""
 	for _, l := range list {
 		if l != "" {
-			out += "  - " + utils.IndentLines(l, "    ", true)
+			out += "  - " + stringutils.IndentLines(l, "    ", true)
 			if strings.Contains(l, "\n") {
 				out += "\n"
 			}
