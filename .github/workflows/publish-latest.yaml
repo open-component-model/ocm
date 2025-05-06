@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate_token
-        uses: tibdex/github-app-token@0af3325639c0a60612b2eeaf010f0f88e468e800 # v2.1.0
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
         with:
           app_id: ${{ secrets.OCMBOT_APP_ID }}
           private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -53,7 +53,7 @@ jobs:
           path: go-build-cache
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
       - name: inject go-build-cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@9380a95413d28427de1842dc121f44b9e8a3f406 # v3.1.2
+        uses: reproducible-containers/buildkit-cache-dance@5b6db76d1da5c8b307d5d2e0706d266521b710de # v3.1.2
         with:
           cache-source: go-build-cache
       - name: Build and push
@@ -78,10 +78,10 @@ jobs:
       packages: write
     steps:
     - name: Self hosted runner post job cleanup
-      uses: TooMuch4U/actions-clean@3f61bacac66e425c632b77a19065e4ba2f43a04e # v2.1
+      uses: TooMuch4U/actions-clean@7a3f0222bf1b25b735164c70e3c95ef227bf893c # v2.1
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@0af3325639c0a60612b2eeaf010f0f88e468e800 # v2.1.0
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}

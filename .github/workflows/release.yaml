@@ -58,7 +58,7 @@ jobs:
         echo "Branch ${{ env.REF }} is a valid release branch"
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@0af3325639c0a60612b2eeaf010f0f88e468e800 # v2.1.0
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -111,10 +111,10 @@ jobs:
       RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action
-      uses: TooMuch4U/actions-clean@3f61bacac66e425c632b77a19065e4ba2f43a04e # v2.1
+      uses: TooMuch4U/actions-clean@7a3f0222bf1b25b735164c70e3c95ef227bf893c # v2.1
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@0af3325639c0a60612b2eeaf010f0f88e468e800 # v2.1.0
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
