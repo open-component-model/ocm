@@ -41,6 +41,9 @@ components:
           repoUrl: github.com/open-component-model/ocm
           commit: (( values.COMMIT ))
         version: (( values.VERSION ))
-
-
-
+    labels:
+      - name: cloud.gardener.cnudie/responsibles
+        value:
+          - github_hostname: github.com
+            teamname: open-component-model/ocm-cli-team
+            type: githubTeam
