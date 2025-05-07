@@ -111,7 +111,7 @@ jobs:
       RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action
-      uses: TooMuch4U/actions-clean@7a3f0222bf1b25b735164c70e3c95ef227bf893c # v2.1
+      uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
     - name: Generate token
       id: generate_token
       uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
