@@ -11,6 +11,9 @@ on:
   repository_dispatch:
     types: [publish-ocm-cli]
 
+permissions:
+  contents: read
+
 jobs:
   push-to-brew-tap:
     name: Update Homebrew Tap
