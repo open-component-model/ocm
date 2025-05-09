@@ -1,8 +1,8 @@
 package transfer
 
 import (
-	"context"
 	"fmt"
+	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
@@ -14,33 +14,28 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/none"
 	"ocm.software/ocm/api/ocm/tools/transfer/internal"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
-	"ocm.software/ocm/api/utils/errkind"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
+
+// Types
 
 type WalkingState = common.WalkingState[*struct{}, interface{}]
 
 type TransportClosure = common.NameVersionInfo[*struct{}]
 
+// Entry Point
 func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
-	return TransferVersionWithContext(common.WithPrinter(context.Background(), common.AssurePrinter(printer)), closure, src, tgt, handler)
-}
-
-func TransferVersionWithContext(ctx context.Context, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
 	state := WalkingState{Closure: closure}
-	return transferVersion(ctx, Logger(src), state, src, tgt, handler)
+	return transferVersion(common.AssurePrinter(printer), Logger(src), state, src, tgt, handler)
 }
 
-func transferVersion(ctx context.Context, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) (rerr error) {
-	printer := common.GetPrinter(ctx)
-	if err := common.IsContextCanceled(ctx); err != nil {
-		printer.Printf("transfer cancelled by caller\n")
-		return err
-	}
+// Internal Implementation of TransferVersion
+
+func transferVersion(printer common.Printer, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) (rerr error) {
 	nv := common.VersionedElementKey(src)
 	log = log.WithValues("history", state.History.String(), "version", nv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
@@ -48,6 +43,7 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 	}
 	log.Info("transferring version")
 	printer.Printf("transferring version %q...\n", nv)
+
 	if handler == nil {
 		var err error
 		handler, err = standard.New(standard.Overwrite())
@@ -58,7 +54,6 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
-
 	d := src.GetDescriptor()
 
 	comp, err := tgt.LookupComponent(src.GetName())
@@ -67,23 +62,10 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 	}
 	finalize.Close(comp, "closing target component")
 
-	var ok bool
 	t, err := comp.LookupVersion(src.GetVersion())
 	finalize.Close(t, "existing target version")
-
-	// references have always to be handled, because of potentially different
-	// transport modes, which could affect the desired access methods in
-	// the target environment.
-
-	// doTransport controls, whether the transport of the local component
-	// version has to be re-considered.
 	doTransport := true
-
-	// doMerge controls. whether a potential current version in the target
-	// environment has to be merged into the transported one.
 	doMerge := false
-
-	// doCopy controls, whether the artifact content has to be considered.
 	doCopy := true
 
 	if err != nil {
@@ -92,96 +74,58 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 			finalize.Close(t, "new target version")
 		}
 	} else {
-		ok, err = handler.EnforceTransport(src, t)
+		ok, err := handler.EnforceTransport(src, t)
 		if err != nil {
 			return err
 		}
-		if ok {
-			//  execute transport as if the component version were not present
-			// 	on the target side.
-		} else {
-			// determine transport mode for component version present
-			// on the target side.
-			if eq := d.Equivalent(t.GetDescriptor()); eq.IsHashEqual() {
-				if eq.IsEquivalent() {
-					if !needsResourceTransport(src, d, t.GetDescriptor(), handler) {
-						printer.Printf("  version %q already present -> skip transport\n", nv)
-						doTransport = false
-					} else {
-						printer.Printf("  version %q already present -> but requires resource transport\n", nv)
-					}
-				} else {
-					ok, err = handler.UpdateVersion(src, t)
-					if err != nil {
-						return err
-					}
-					if !ok {
-						printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
-						return nil
-					}
-					ok, err = handler.OverwriteVersion(src, t)
-					if ok {
-						printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
-						doMerge = false
-						doCopy = true
-					} else {
-						printer.Printf("  updating volatile properties of %q\n", nv)
-						doMerge = true
-						doCopy = false
-					}
-				}
+		if !ok {
+			eq := d.Equivalent(t.GetDescriptor())
+			if eq.IsHashEqual() && eq.IsEquivalent() && !needsResourceTransport(src, d, t.GetDescriptor(), handler) {
+				printer.Printf("  version %q already present -> skip transport\n", nv)
+				doTransport = false
 			} else {
-				msg := "  version %q already present, but"
-				if eq.IsLocalHashEqual() {
-					if eq.IsArtifactDetectable() {
-						msg += " differs because some artifact digests are changed"
-					} else {
-						// TODO: option to precalculate missing digests (as pre equivalent step).
-						msg += " might differ, because not all artifact digests are known"
-					}
-				} else {
-					if eq.IsArtifactDetectable() {
-						if eq.IsArtifactEqual() {
-							msg += " differs because signature relevant properties have been changed"
-						} else {
-							msg += " differs because some artifacts and signature relevant properties have been changed"
-						}
-					} else {
-						msg += "differs because signature relevant properties have been changed (and not all artifact digests are known)"
-					}
-				}
-				ok, err = handler.OverwriteVersion(src, t)
-				if ok {
-					doMerge = false
-					printer.Printf("warning: "+msg+" (transport enforced by overwrite option)\n", nv)
-				} else {
-					printer.Printf(msg+" -> transport aborted (use option overwrite option to enforce transport)\n", nv)
-					return errors.ErrAlreadyExists(ocm.KIND_COMPONENTVERSION, nv.String())
-				}
+				doMerge = true
+				doCopy = false
 			}
 		}
 	}
+
 	if err != nil {
 		return errors.Wrapf(err, "%s: creating target version", state.History)
 	}
 
+	subp := printer.AddGap("  ")
+	var wg sync.WaitGroup
+	var mu sync.Mutex
 	list := errors.ErrListf("component references for %s", nv)
-	log.Info("  transferring references")
+
 	for _, r := range d.References {
-		cv, shdlr, err := handler.TransferVersion(src.Repository(), src, &r, tgt)
-		if err != nil {
-			return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
-		}
-		if cv != nil {
-			list.Add(transferVersion(common.AddPrinterGap(ctx, "  "), log.WithValues("ref", r.Name), state, cv, tgt, shdlr))
-			list.Addf(nil, cv.Close(), "closing reference %s", r.Name)
-		}
+		r := r
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			cv, shdlr, err := handler.TransferVersion(src.Repository(), src, &r, tgt)
+			if err != nil {
+				mu.Lock()
+				list.Add(errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion()))
+				mu.Unlock()
+				return
+			}
+			if cv != nil {
+				err1 := transferVersion(subp, log.WithValues("ref", r.Name), state, cv, tgt, shdlr)
+				err2 := cv.Close()
+				mu.Lock()
+				list.Add(err1)
+				list.Addf(nil, err2, "closing reference %s", r.Name)
+				mu.Unlock()
+			}
+		}()
 	}
+	wg.Wait()
 
 	if doTransport {
 		var n *compdesc.ComponentDescriptor
 		if doMerge {
-			log.WithValues("source", src.GetDescriptor(), "target", t.GetDescriptor()).Info("  applying 2-way merge")
 			n, err = internal.PrepareDescriptor(log, src.GetContext(), src.GetDescriptor(), t.GetDescriptor())
 			if err != nil {
 				return err
@@ -190,48 +134,42 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 			n = src.GetDescriptor().Copy()
 		}
 
-		var unstr *runtime.UnstructuredTypedObject
 		if !ocm.IsIntermediate(tgt.GetSpecification()) {
-			unstr, err = runtime.ToUnstructuredTypedObject(tgt.GetSpecification())
-			if err != nil {
-				unstr = nil
+			unstr, err := runtime.ToUnstructuredTypedObject(tgt.GetSpecification())
+			if err == nil {
+				n.RepositoryContexts = append(n.RepositoryContexts, unstr)
 			}
-		}
-		if unstr != nil {
-			n.RepositoryContexts = append(n.RepositoryContexts, unstr)
 		}
 
-		// just to be sure: both modes set to false would produce
-		// corrupted content in target.
-		// If no copy is done, merge must keep the access methods in target!!!
+		// Concurrent resource + source copying using copyVersionConcurrent
+		//err = copyVersionConcurrent(printer, log, state.History, src, t, n, handler)
+
 		if !doMerge || doCopy {
-			err = copyVersion(ctx, printer, log, state.History, src, t, n, handler)
-			if err != nil {
-				return err
-			}
+			err = copyVersionWithWorkerPool(printer, log, state.History, src, t, n, handler, 5)
+			//err = copyVersionWithWorkerPool(printer, log, state.History, src, t, n, handler) // copyVersionConcurrent
 		} else {
 			*t.GetDescriptor() = *n
+		}
+
+		if err != nil {
+			return err
 		}
 
 		printer.Printf("...adding component version...\n")
 		log.Info("  adding component version")
 		list.Add(comp.AddVersion(t))
 	}
+
 	return list.Result()
 }
 
-func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	return copyVersion(context.Background(), common.AssurePrinter(printer), log, hist, src, t, src.GetDescriptor().Copy(), handler)
-}
+func copyVersionWithWorkerPool(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler, maxWorkers int) (rerr error) {
+	type transferTask struct {
+		task func() error
+		id   string
+	}
 
-func CopyVersionWithContext(cctx context.Context, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	return copyVersion(cctx, common.GetPrinter(cctx), log, hist, src, t, src.GetDescriptor().Copy(), handler)
-}
-
-// copyVersion (purely internal) expects an already prepared target comp desc for t given as prep.
-func copyVersion(cctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler) (rerr error) {
 	var finalize finalizer.Finalizer
-
 	defer errors.PropagateError(&rerr, finalize.Finalize)
 
 	if handler == nil {
@@ -241,113 +179,112 @@ func copyVersion(cctx context.Context, printer common.Printer, log logging.Logge
 	srccd := src.GetDescriptor()
 	cur := *t.GetDescriptor()
 	*t.GetDescriptor() = *prep
-	log.Info("  transferring resources")
-	for i, r := range src.GetResources() {
-		var m ocmcpi.AccessMethod
 
-		if err := common.IsContextCanceled(cctx); err != nil {
-			printer.Printf("cancelled by caller\n")
-			return err
-		}
+	log.Info("  transferring resources and sources using worker pool")
+	tasks := make(chan transferTask)
+	errChan := make(chan error, 100)
 
-		nested := finalize.Nested()
-
-		a, err := r.Access()
-		if err == nil {
-			m, err = a.AccessMethod(src)
-			nested.Close(m, fmt.Sprintf("%s: transferring resource %d: closing access method", hist, i))
-		}
-		if err == nil {
-			ok := a.IsLocal(src.GetContext())
-			if !ok {
-				if !none.IsNone(a.GetKind()) {
-					ok, err = handler.TransferResource(src, a, r)
-					if err == nil && !ok {
-						log.Info("transport omitted", "resource", r.Meta().Name, "index", i, "access", a.GetType())
-					}
+	var wg sync.WaitGroup
+	for i := 0; i < maxWorkers; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			for item := range tasks {
+				if err := item.task(); err != nil {
+					errChan <- err
 				}
 			}
-			if ok {
-				var old compdesc.Resource
+		}(i)
+	}
 
-				hint := ocmcpi.ArtifactNameHint(a, src)
-				old, err = cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
-
-				changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
-				valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
-				if changed || valueNeeded {
-					var msgs []interface{}
-					if !errors.IsErrNotFound(err) {
-						if err != nil {
+	go func() {
+		for i, r := range src.GetResources() {
+			i, r := i, r
+			tasks <- transferTask{
+				id: fmt.Sprintf("resource-%d", i),
+				task: func() error {
+					nested := finalize.Nested()
+					a, err := r.Access()
+					if err != nil {
+						return err
+					}
+					m, err := a.AccessMethod(src)
+					nested.Close(m, fmt.Sprintf("%s: transferring resource %d: closing access method", hist, i))
+					if err != nil {
+						return err
+					}
+					ok := a.IsLocal(src.GetContext())
+					if !ok && !none.IsNone(a.GetKind()) {
+						ok, err = handler.TransferResource(src, a, r)
+						if err != nil || !ok {
 							return err
 						}
-						if !changed && valueNeeded {
-							msgs = []interface{}{"copy"}
-						} else {
-							msgs = []interface{}{"overwrite"}
+					}
+					if ok {
+						hint := ocmcpi.ArtifactNameHint(a, src)
+						old, err := cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
+						changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
+						valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
+						if changed || valueNeeded {
+							notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "copy")
+							return handler.HandleTransferResource(r, m, hint, t)
+						} else if err == nil {
+							t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify(), ocm.DisableExtraIdentityDefaulting())
+							notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
 						}
 					}
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, msgs...)
-					err = handler.HandleTransferResource(r, m, hint, t)
-				} else {
-					if err == nil { // old resource found -> keep current access method
-						t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify(), ocm.DisableExtraIdentityDefaulting())
+					return nested.Finalize()
+				},
+			}
+		}
+
+		for i, r := range src.GetSources() {
+			i, r := i, r
+			tasks <- transferTask{
+				id: fmt.Sprintf("source-%d", i),
+				task: func() error {
+					a, err := r.Access()
+					if err != nil {
+						return err
 					}
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
-				}
-			}
-		}
-		if err != nil {
-			if !errors.IsErrUnknownKind(err, errkind.KIND_ACCESSMETHOD) {
-				return errors.Wrapf(err, "%s: transferring resource %d", hist, i)
-			}
-			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)\n", hist, i, err)
-		}
-		err = nested.Finalize()
-		if err != nil {
-			return err
-		}
-	}
-
-	log.Info("  transferring sources")
-	for i, r := range src.GetSources() {
-		var m ocmcpi.AccessMethod
-
-		if err := common.IsContextCanceled(cctx); err != nil {
-			printer.Printf("cancelled by caller\n")
-			return err
-		}
-
-		a, err := r.Access()
-		if err == nil {
-			m, err = a.AccessMethod(src)
-		}
-		if err == nil {
-			ok := a.IsLocal(src.GetContext())
-			if !ok {
-				if !none.IsNone(a.GetKind()) {
-					ok, err = handler.TransferSource(src, a, r)
-					if err == nil && !ok {
-						log.Info("transport omitted", "source", r.Meta().Name, "index", i, "access", a.GetType())
+					m, err := a.AccessMethod(src)
+					if err != nil {
+						return err
 					}
-				}
+					ok := a.IsLocal(src.GetContext())
+					if !ok && !none.IsNone(a.GetKind()) {
+						ok, err = handler.TransferSource(src, a, r)
+						if err != nil || !ok {
+							return err
+						}
+					}
+					if ok {
+						hint := ocmcpi.ArtifactNameHint(a, src)
+						notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint)
+						if err := handler.HandleTransferSource(r, m, hint, t); err != nil {
+							return err
+						}
+					}
+					return m.Close()
+				},
 			}
-			if ok {
-				// sources do not have digests so far, so they have to copied, always.
-				hint := ocmcpi.ArtifactNameHint(a, src)
-				notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint)
-				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))
-			}
-			err = errors.Join(err, m.Close())
 		}
-		if err != nil {
-			if !errors.IsErrUnknownKind(err, errkind.KIND_ACCESSMETHOD) {
-				return errors.Wrapf(err, "%s: transferring source %d", hist, i)
-			}
-			printer.Printf("WARN: %s: transferring source %d: %s (enforce transport by reference)\n", hist, i, err)
-		}
+		close(tasks)
+	}()
+
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	errList := errors.ErrListf("transfer resources and sources")
+	for e := range errChan {
+		errList.Add(e)
 	}
-	return nil
+	return errList.Result()
+}
+func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
+	return copyVersionWithWorkerPool(printer, log, hist, src, t, src.GetDescriptor().Copy(), handler, 5) //copyVersionConcurrent
 }
 
 func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, meta compdesc.ArtifactMetaAccess, hint string, msgs ...interface{}) {
