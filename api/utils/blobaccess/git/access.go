@@ -2,6 +2,7 @@ package git
 
 import (
 	"context"
+	"fmt"
 
 	gogit "github.com/go-git/go-git/v5"
 	"github.com/mandelsoft/goutils/errors"
@@ -87,8 +88,8 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	dw := iotools.NewDigestWriterWith(digest.SHA256, tgz)
 	finalize.Close(dw)
 
-	if err := tarutils.TgzFs(filteredRepositoryFS, dw); err != nil {
-		return nil, err
+	if err := tarutils.TgzFs(filteredRepositoryFS, dw, tarutils.TarFileSystemOptions{ZeroModTime: true}); err != nil {
+		return nil, fmt.Errorf("failed to create tgz: %w", err)
 	}
 
 	log.Debug("created", "file", tgz.Name())

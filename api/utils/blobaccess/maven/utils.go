@@ -118,7 +118,7 @@ func (s *spec) getBlobAccess() (_ bpi.BlobAccess, rerr error) {
 	dw := iotools.NewDigestWriterWith(digest.SHA256, tgz)
 	finalize.Close(dw)
 
-	err = tarutils.TgzFs(tmpfs, dw)
+	err = tarutils.TgzFlatFs(tmpfs, dw)
 	if err != nil {
 		return nil, err
 	}
