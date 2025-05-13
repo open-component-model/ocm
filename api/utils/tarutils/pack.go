@@ -119,6 +119,8 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 	}
 	header.Name = path
 
+	// TODO: @jakobmoellerdev pass options to omit modtime
+
 	switch {
 	case info.IsDir():
 		// do not write root header

@@ -151,4 +151,6 @@ var _ = Describe("git Blob Access", func() {
 			Expect(files).To(ConsistOf("README", "CONTRIBUTING.md"))
 		})
 	})
+
+	// TODO: @jakobmoellerdev add tests for new tar behaviour and nested directories
 })

@@ -1,6 +1,7 @@
 package git
 
 import (
+	"compress/gzip"
 	"context"
 
 	gogit "github.com/go-git/go-git/v5"
@@ -87,7 +88,13 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	dw := iotools.NewDigestWriterWith(digest.SHA256, tgz)
 	finalize.Close(dw)
 
-	if err := tarutils.TgzFs(filteredRepositoryFS, dw); err != nil {
+	zip := gzip.NewWriter(dw)
+
+	if err := tarutils.PackFsIntoTar(filteredRepositoryFS, "", zip, tarutils.TarFileSystemOptions{}); err != nil {
+		return nil, err
+	}
+	// Close the write to make sure that the digest writer calculates on a closed file
+	if err := zip.Close(); err != nil {
 		return nil, err
 	}
 
