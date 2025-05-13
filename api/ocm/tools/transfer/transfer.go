@@ -1,6 +1,7 @@
 package transfer
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -18,24 +19,28 @@ import (
 	"ocm.software/ocm/api/utils/runtime"
 )
 
-// Types
-
 type WalkingState = common.WalkingState[*struct{}, interface{}]
 
 type TransportClosure = common.NameVersionInfo[*struct{}]
 
-// Entry Point
 func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
+	return TransferVersionWithContext(common.WithPrinter(context.Background(), common.AssurePrinter(printer)), closure, src, tgt, handler)
+}
+
+func TransferVersionWithContext(ctx context.Context, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
 	state := WalkingState{Closure: closure}
-	return transferVersion(common.AssurePrinter(printer), Logger(src), state, src, tgt, handler)
+	return transferVersion(ctx, Logger(src), state, src, tgt, handler)
 }
 
-// Internal Implementation of TransferVersion
-
-func transferVersion(printer common.Printer, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) (rerr error) {
+func transferVersion(ctx context.Context, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) (rerr error) {
+	printer := common.GetPrinter(ctx)
+	if err := common.IsContextCanceled(ctx); err != nil {
+		printer.Printf("transfer cancelled by caller\n")
+		return err
+	}
 	nv := common.VersionedElementKey(src)
 	log = log.WithValues("history", state.History.String(), "version", nv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
@@ -43,7 +48,6 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	}
 	log.Info("transferring version")
 	printer.Printf("transferring version %q...\n", nv)
-
 	if handler == nil {
 		var err error
 		handler, err = standard.New(standard.Overwrite())
@@ -54,6 +58,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
+
 	d := src.GetDescriptor()
 
 	comp, err := tgt.LookupComponent(src.GetName())
@@ -62,8 +67,10 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	}
 	finalize.Close(comp, "closing target component")
 
+	var ok bool
 	t, err := comp.LookupVersion(src.GetVersion())
 	finalize.Close(t, "existing target version")
+
 	doTransport := true
 	doMerge := false
 	doCopy := true
@@ -74,27 +81,80 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			finalize.Close(t, "new target version")
 		}
 	} else {
-		ok, err := handler.EnforceTransport(src, t)
+		ok, err = handler.EnforceTransport(src, t)
 		if err != nil {
 			return err
 		}
-		if !ok {
-			eq := d.Equivalent(t.GetDescriptor())
-			if eq.IsHashEqual() && eq.IsEquivalent() && !needsResourceTransport(src, d, t.GetDescriptor(), handler) {
-				printer.Printf("  version %q already present -> skip transport\n", nv)
-				doTransport = false
+		if ok {
+			// execute transport as if the component version were not present
+			// on the target side.
+		} else {
+			// determine transport mode for component version present
+			// on the target side.
+			if eq := d.Equivalent(t.GetDescriptor()); eq.IsHashEqual() {
+				if eq.IsEquivalent() {
+					if !needsResourceTransport(src, d, t.GetDescriptor(), handler) {
+						printer.Printf("  version %q already present -> skip transport\n", nv)
+						doTransport = false
+					} else {
+						printer.Printf("  version %q already present -> but requires resource transport\n", nv)
+					}
+				} else {
+					ok, err = handler.UpdateVersion(src, t)
+					if err != nil {
+						return err
+					}
+					if !ok {
+						printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
+						return nil
+					}
+					ok, err = handler.OverwriteVersion(src, t)
+					if ok {
+						printer.Printf("  warning: version %q already present, but transport enforced by overwrite option)\n", nv)
+						doMerge = false
+						doCopy = true
+					} else {
+						printer.Printf("  updating volatile properties of %q\n", nv)
+						doMerge = true
+						doCopy = false
+					}
+				}
 			} else {
-				doMerge = true
-				doCopy = false
+				msg := "  version %q already present, but"
+				if eq.IsLocalHashEqual() {
+					if eq.IsArtifactDetectable() {
+						msg += " differs because some artifact digests are changed"
+					} else {
+						// TODO: option to precalculate missing digests (as pre equivalent step).
+						msg += " might differ, because not all artifact digests are known"
+					}
+				} else {
+					if eq.IsArtifactDetectable() {
+						if eq.IsArtifactEqual() {
+							msg += " differs because signature relevant properties have been changed"
+						} else {
+							msg += " differs because some artifacts and signature relevant properties have been changed"
+						}
+					} else {
+						msg += "differs because signature relevant properties have been changed (and not all artifact digests are known)"
+					}
+				}
+				ok, err = handler.OverwriteVersion(src, t)
+				if ok {
+					doMerge = false
+					printer.Printf("warning: "+msg+" (transport enforced by overwrite option)\n", nv)
+				} else {
+					printer.Printf(msg+" -> transport aborted (use option overwrite option to enforce transport)\n", nv)
+					return errors.ErrAlreadyExists(ocm.KIND_COMPONENTVERSION, nv.String())
+				}
 			}
 		}
 	}
-
 	if err != nil {
 		return errors.Wrapf(err, "%s: creating target version", state.History)
 	}
 
-	subp := printer.AddGap("  ")
+	// subp := common.AddPrinterGap(ctx, "  ")
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	list := errors.ErrListf("component references for %s", nv)
@@ -112,7 +172,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 				return
 			}
 			if cv != nil {
-				err1 := transferVersion(subp, log.WithValues("ref", r.Name), state, cv, tgt, shdlr)
+				err1 := transferVersion(ctx, log.WithValues("ref", r.Name), state, cv, tgt, shdlr)
 				err2 := cv.Close()
 				mu.Lock()
 				list.Add(err1)
@@ -134,19 +194,16 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			n = src.GetDescriptor().Copy()
 		}
 
+		var unstr *runtime.UnstructuredTypedObject
 		if !ocm.IsIntermediate(tgt.GetSpecification()) {
-			unstr, err := runtime.ToUnstructuredTypedObject(tgt.GetSpecification())
+			unstr, err = runtime.ToUnstructuredTypedObject(tgt.GetSpecification())
 			if err == nil {
 				n.RepositoryContexts = append(n.RepositoryContexts, unstr)
 			}
 		}
 
-		// Concurrent resource + source copying using copyVersionConcurrent
-		//err = copyVersionConcurrent(printer, log, state.History, src, t, n, handler)
-
 		if !doMerge || doCopy {
-			err = copyVersionWithWorkerPool(printer, log, state.History, src, t, n, handler, 5)
-			//err = copyVersionWithWorkerPool(printer, log, state.History, src, t, n, handler) // copyVersionConcurrent
+			err = copyVersionWithWorkerPool(ctx, printer, log, state.History, src, t, n, handler, 5)
 		} else {
 			*t.GetDescriptor() = *n
 		}
@@ -159,11 +216,18 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		log.Info("  adding component version")
 		list.Add(comp.AddVersion(t))
 	}
-
 	return list.Result()
 }
 
-func copyVersionWithWorkerPool(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler, maxWorkers int) (rerr error) {
+func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
+	return CopyVersionWithContext(context.Background(), printer, log, hist, src, t, handler)
+}
+
+func CopyVersionWithContext(cctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
+	return copyVersionWithWorkerPool(cctx, printer, log, hist, src, t, src.GetDescriptor().Copy(), handler, 5)
+}
+
+func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler, maxWorkers int) (rerr error) {
 	type transferTask struct {
 		task func() error
 		id   string
@@ -282,9 +346,6 @@ func copyVersionWithWorkerPool(printer common.Printer, log logging.Logger, hist 
 		errList.Add(e)
 	}
 	return errList.Result()
-}
-func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	return copyVersionWithWorkerPool(printer, log, hist, src, t, src.GetDescriptor().Copy(), handler, 5) //copyVersionConcurrent
 }
 
 func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, meta compdesc.ArtifactMetaAccess, hint string, msgs ...interface{}) {
