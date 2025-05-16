@@ -1,6 +1,8 @@
 ---
 title: "create transportarchive"
 url: "/docs/cli-reference/create/transportarchive/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm create transportarchive &mdash; Create New OCI/OCM Transport  Archive

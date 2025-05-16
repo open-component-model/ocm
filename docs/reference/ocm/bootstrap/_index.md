@@ -1,6 +1,8 @@
 ---
 title: "bootstrap"
 url: "/docs/cli-reference/bootstrap/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm bootstrap &mdash; Bootstrap Components

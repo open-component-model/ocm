@@ -1,6 +1,8 @@
 ---
 title: "attributes"
 url: "/docs/cli-reference/attributes/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm attributes &mdash; Configuration Attributes Used To Control The Behaviour

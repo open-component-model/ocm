@@ -1,6 +1,8 @@
 ---
 title: "controller install"
 url: "/docs/cli-reference/controller/install/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm controller install &mdash; Install Either A Specific Or Latest Version Of The Ocm-Controller. Optionally Install Prerequisites Required By The Controller.

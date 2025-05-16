@@ -1,6 +1,8 @@
 ---
 title: "get plugins"
 url: "/docs/cli-reference/get/plugins/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm get plugins &mdash; Get Plugins

@@ -1,6 +1,8 @@
 ---
 title: "sign hash"
 url: "/docs/cli-reference/sign/hash/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm sign hash &mdash; Sign Hash

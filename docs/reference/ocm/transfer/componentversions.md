@@ -1,6 +1,8 @@
 ---
 title: "transfer componentversions"
 url: "/docs/cli-reference/transfer/componentversions/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm transfer componentversions &mdash; Transfer Component Version

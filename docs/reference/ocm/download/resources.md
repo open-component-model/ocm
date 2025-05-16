@@ -1,6 +1,8 @@
 ---
 title: "download resources"
 url: "/docs/cli-reference/download/resources/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm download resources &mdash; Download Resources Of A Component Version

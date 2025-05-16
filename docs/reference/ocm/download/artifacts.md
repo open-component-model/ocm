@@ -1,6 +1,8 @@
 ---
 title: "download artifacts"
 url: "/docs/cli-reference/download/artifacts/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm download artifacts &mdash; Download Oci Artifacts

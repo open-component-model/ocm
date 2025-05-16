@@ -1,6 +1,8 @@
 ---
 title: "get componentversions"
 url: "/docs/cli-reference/get/componentversions/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm get componentversions &mdash; Get Component Version

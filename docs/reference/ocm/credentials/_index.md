@@ -1,6 +1,8 @@
 ---
 title: "credentials"
 url: "/docs/cli-reference/credentials/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm credentials &mdash; Commands Acting On Credentials

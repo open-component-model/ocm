@@ -1,6 +1,8 @@
 ---
 title: "list"
 url: "/docs/cli-reference/list/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm list &mdash; List Information About Components

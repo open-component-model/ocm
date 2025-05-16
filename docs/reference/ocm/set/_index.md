@@ -1,6 +1,8 @@
 ---
 title: "set"
 url: "/docs/cli-reference/set/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm set &mdash; Set Information About OCM Repositories

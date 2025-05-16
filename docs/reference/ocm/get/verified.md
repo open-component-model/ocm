@@ -1,6 +1,8 @@
 ---
 title: "get verified"
 url: "/docs/cli-reference/get/verified/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm get verified &mdash; Get Verified Component Versions

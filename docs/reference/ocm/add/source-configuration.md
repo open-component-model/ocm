@@ -1,6 +1,8 @@
 ---
 title: "add source configuration"
 url: "/docs/cli-reference/add/source-configuration/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm add source-configuration &mdash; Add A Source Specification To A Source Config File

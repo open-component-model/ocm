@@ -1,6 +1,8 @@
 ---
 title: "execute action"
 url: "/docs/cli-reference/execute/action/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm execute action &mdash; Execute An Action

@@ -1,6 +1,8 @@
 ---
 title: "set pubsub"
 url: "/docs/cli-reference/set/pubsub/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm set pubsub &mdash; Set The Pubsub Spec For An Ocm Repository

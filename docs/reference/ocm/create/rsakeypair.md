@@ -1,6 +1,8 @@
 ---
 title: "create rsakeypair"
 url: "/docs/cli-reference/create/rsakeypair/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm create rsakeypair &mdash; Create RSA Public Key Pair

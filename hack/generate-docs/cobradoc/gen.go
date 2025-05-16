@@ -18,16 +18,19 @@ import (
 //	ocm/_index.md
 //	ocm/<command>/_index.md
 //	ocm/<command>/<subcommand>.md
+//
+// Each front matter includes title, url, and sidebar.collapsed
 func Generate(name string, root *cobra.Command, outputDir string, clear bool) {
 	// Clean output and prepare
 	if clear {
 		check(os.RemoveAll(outputDir))
 	}
 
-	// filePrepender injects front matter with title and url
+	// filePrepender injects front matter with title, url, and sidebar
 	filePrepender := func(filename string) string {
 		base := filepath.Base(filename)
 		nameOnly := strings.TrimSuffix(base, ".md")
+
 		// Title: drop "ocm_" prefix, replace separators, lowercase
 		titleKey := strings.TrimPrefix(nameOnly, "ocm_")
 		titleKey = strings.ReplaceAll(titleKey, "_", " ")
@@ -48,7 +51,15 @@ func Generate(name string, root *cobra.Command, outputDir string, clear bool) {
 			// ocm_<command>_<sub>.md
 			url = fmt.Sprintf("/docs/cli-reference/%s/%s/", parts[1], parts[2])
 		}
-		return fmt.Sprintf("---\ntitle: \"%s\"\nurl: \"%s\"\n---\n\n", title, url)
+		// return front matter including sidebar collapsed
+		return fmt.Sprintf(
+			"---\n"+
+				"title: \"%s\"\n"+
+				"url: \"%s\"\n"+
+				"sidebar:\n  collapsed: true\n"+
+				"---\n\n",
+			title, url,
+		)
 	}
 
 	// 1) Generate flat markdown into temp directory

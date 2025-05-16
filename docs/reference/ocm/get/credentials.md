@@ -1,6 +1,8 @@
 ---
 title: "get credentials"
 url: "/docs/cli-reference/get/credentials/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm get credentials &mdash; Get Credentials For A Dedicated Consumer Spec

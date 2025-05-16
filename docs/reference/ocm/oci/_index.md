@@ -1,6 +1,8 @@
 ---
 title: "oci"
 url: "/docs/cli-reference/oci/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm oci &mdash; Dedicated Command Flavors For The OCI Layer

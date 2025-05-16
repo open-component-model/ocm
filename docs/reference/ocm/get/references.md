@@ -1,6 +1,8 @@
 ---
 title: "get references"
 url: "/docs/cli-reference/get/references/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm get references &mdash; Get References Of A Component Version

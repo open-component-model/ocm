@@ -1,6 +1,8 @@
 ---
 title: "describe"
 url: "/docs/cli-reference/describe/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm describe &mdash; Describe Various Elements By Using Appropriate Sub Commands.

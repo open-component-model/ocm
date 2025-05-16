@@ -1,6 +1,8 @@
 ---
 title: "add resource configuration"
 url: "/docs/cli-reference/add/resource-configuration/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm add resource-configuration &mdash; Add A Resource Specification To A Resource Config File

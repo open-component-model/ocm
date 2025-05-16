@@ -1,6 +1,8 @@
 ---
 title: "ocm"
 url: "/docs/cli-reference/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm &mdash; Open Component Model Command Line Client

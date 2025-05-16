@@ -1,6 +1,8 @@
 ---
 title: "configfile"
 url: "/docs/cli-reference/configfile/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm configfile &mdash; Configuration File

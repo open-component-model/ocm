@@ -1,6 +1,8 @@
 ---
 title: "add componentversions"
 url: "/docs/cli-reference/add/componentversions/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm add componentversions &mdash; Add Component Version(S) To A (New) Transport Archive

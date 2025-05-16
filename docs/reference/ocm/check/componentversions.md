@@ -1,6 +1,8 @@
 ---
 title: "check componentversions"
 url: "/docs/cli-reference/check/componentversions/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm check componentversions &mdash; Check Completeness Of A Component Version In An OCM Repository

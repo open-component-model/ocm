@@ -1,6 +1,8 @@
 ---
 title: "show"
 url: "/docs/cli-reference/show/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm show &mdash; Show Tags Or Versions

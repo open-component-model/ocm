@@ -1,6 +1,8 @@
 ---
 title: "transfer commontransportarchive"
 url: "/docs/cli-reference/transfer/commontransportarchive/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm transfer commontransportarchive &mdash; Transfer Transport Archive

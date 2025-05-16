@@ -1,6 +1,8 @@
 ---
 title: "get config"
 url: "/docs/cli-reference/get/config/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm get config &mdash; Get Evaluated Config For Actual Command Call

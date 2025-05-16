@@ -1,6 +1,8 @@
 ---
 title: "ocm pubsub"
 url: "/docs/cli-reference/ocm-pubsub/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm ocm-pubsub &mdash; List Of All Supported Publish/Subscribe Implementations

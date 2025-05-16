@@ -1,6 +1,8 @@
 ---
 title: "get"
 url: "/docs/cli-reference/get/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm get &mdash; Get Information About Artifacts And Components

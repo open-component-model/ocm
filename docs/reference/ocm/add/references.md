@@ -1,6 +1,8 @@
 ---
 title: "add references"
 url: "/docs/cli-reference/add/references/"
+sidebar:
+  collapsed: true
 ---
 
 ## ocm add references &mdash; Add Aggregation Information To A Component Version
