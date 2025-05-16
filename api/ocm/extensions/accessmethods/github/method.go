@@ -64,10 +64,6 @@ type AccessSpec struct {
 	// Commit defines the hash of the commit
 	Commit string `json:"commit"`
 
-	// Reference defines the original ref used to get the commit from
-	// Mutually exclusive with Commit
-	Reference string `json:"ref,omitempty"`
-
 	client     *http.Client
 	downloader downloader.Downloader
 }
@@ -91,24 +87,13 @@ func WithDownloader(downloader downloader.Downloader) AccessSpecOptions {
 	}
 }
 
-func WithCommit(commit string) AccessSpecOptions {
-	return func(s *AccessSpec) {
-		s.Commit = commit
-	}
-}
-
-func WithReference(ref string) AccessSpecOptions {
-	return func(s *AccessSpec) {
-		s.Reference = ref
-	}
-}
-
 // New creates a new GitHub registry access spec version v1.
-func New(repoURL, apiHostname string, opts ...AccessSpecOptions) *AccessSpec {
+func New(repoURL, apiHostname, commit string, opts ...AccessSpecOptions) *AccessSpec {
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		RepoURL:             repoURL,
 		APIHostname:         apiHostname,
+		Commit:              commit,
 	}
 	for _, o := range opts {
 		o(s)
@@ -171,15 +156,8 @@ type accessMethod struct {
 var _ accspeccpi.AccessMethodImpl = (*accessMethod)(nil)
 
 func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, error) {
-	if a.Commit != "" && a.Reference != "" {
-		return nil, fmt.Errorf("commit and ref cannot be specified at the same time")
-	}
-
-	if a.Commit != "" {
-		if err := validateCommit(a.Commit); err != nil {
-			return nil, fmt.Errorf("failed to validate commit: %w", err)
-		}
-		a.Reference = a.Commit
+	if err := validateCommit(a.Commit); err != nil {
+		return nil, fmt.Errorf("failed to validate commit: %w", err)
 	}
 
 	unparsed := a.RepoURL
@@ -317,7 +295,7 @@ func (m *accessMethod) setup() error {
 
 func (m *accessMethod) getDownloadLink() (string, error) {
 	link, resp, err := m.repositoryService.GetArchiveLink(context.Background(), m.owner, m.repo, github.Tarball, &github.RepositoryContentGetOptions{
-		Ref: m.spec.Reference,
+		Ref: m.spec.Commit,
 	}, true)
 	if err != nil {
 		return "", err
