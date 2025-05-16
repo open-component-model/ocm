@@ -1,5 +1,6 @@
 ---
 title: "ocm ocm &mdash; Dedicated Command Flavors For The Open Component Model"
+linkTitle: "ocm"
 url: "/docs/cli-reference/ocm/"
 sidebar:
   collapsed: true

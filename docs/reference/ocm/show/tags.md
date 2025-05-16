@@ -1,5 +1,6 @@
 ---
 title: "ocm show tags &mdash; Show Dedicated Tags Of OCI Artifacts"
+linkTitle: "show tags"
 url: "/docs/cli-reference/show/tags/"
 sidebar:
   collapsed: true

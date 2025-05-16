@@ -1,5 +1,6 @@
 ---
 title: "ocm describe package &mdash; Describe TOI Package"
+linkTitle: "describe package"
 url: "/docs/cli-reference/describe/package/"
 sidebar:
   collapsed: true

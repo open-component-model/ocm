@@ -1,5 +1,6 @@
 ---
 title: "ocm download cli &mdash; Download OCM CLI From An OCM Repository"
+linkTitle: "download cli"
 url: "/docs/cli-reference/download/cli/"
 sidebar:
   collapsed: true

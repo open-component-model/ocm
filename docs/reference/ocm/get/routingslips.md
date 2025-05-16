@@ -1,5 +1,6 @@
 ---
 title: "ocm get routingslips &mdash; Get Routings Slips For A Component Version"
+linkTitle: "get routingslips"
 url: "/docs/cli-reference/get/routingslips/"
 sidebar:
   collapsed: true

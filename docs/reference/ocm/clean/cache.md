@@ -1,5 +1,6 @@
 ---
 title: "ocm clean cache &mdash; Cleanup Oci Blob Cache"
+linkTitle: "clean cache"
 url: "/docs/cli-reference/clean/cache/"
 sidebar:
   collapsed: true

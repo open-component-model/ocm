@@ -1,5 +1,6 @@
 ---
 title: "ocm get verified &mdash; Get Verified Component Versions"
+linkTitle: "get verified"
 url: "/docs/cli-reference/get/verified/"
 sidebar:
   collapsed: true

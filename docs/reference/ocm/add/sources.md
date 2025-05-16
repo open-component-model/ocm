@@ -1,5 +1,6 @@
 ---
 title: "ocm add sources &mdash; Add Source Information To A Component Version"
+linkTitle: "add sources"
 url: "/docs/cli-reference/add/sources/"
 sidebar:
   collapsed: true

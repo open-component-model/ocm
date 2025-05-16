@@ -1,5 +1,6 @@
 ---
 title: "ocm get sources &mdash; Get Sources Of A Component Version"
+linkTitle: "get sources"
 url: "/docs/cli-reference/get/sources/"
 sidebar:
   collapsed: true

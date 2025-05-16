@@ -1,5 +1,6 @@
 ---
 title: "ocm configfile &mdash; Configuration File"
+linkTitle: "configfile"
 url: "/docs/cli-reference/configfile/"
 sidebar:
   collapsed: true

@@ -1,5 +1,6 @@
 ---
 title: "ocm cache &mdash; Cache Related Commands"
+linkTitle: "cache"
 url: "/docs/cli-reference/cache/"
 sidebar:
   collapsed: true

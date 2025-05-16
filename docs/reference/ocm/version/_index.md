@@ -1,5 +1,6 @@
 ---
 title: "ocm version &mdash; Displays The Version"
+linkTitle: "version"
 url: "/docs/cli-reference/version/"
 sidebar:
   collapsed: true

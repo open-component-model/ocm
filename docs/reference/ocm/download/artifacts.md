@@ -1,5 +1,6 @@
 ---
 title: "ocm download artifacts &mdash; Download Oci Artifacts"
+linkTitle: "download artifacts"
 url: "/docs/cli-reference/download/artifacts/"
 sidebar:
   collapsed: true

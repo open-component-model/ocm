@@ -1,5 +1,6 @@
 ---
 title: "ocm sign componentversions &mdash; Sign Component Version"
+linkTitle: "sign componentversions"
 url: "/docs/cli-reference/sign/componentversions/"
 sidebar:
   collapsed: true

@@ -1,5 +1,6 @@
 ---
 title: "ocm toi-bootstrapping &mdash; Tiny OCM Installer Based On Component Versions"
+linkTitle: "toi-bootstrapping"
 url: "/docs/cli-reference/toi-bootstrapping/"
 sidebar:
   collapsed: true

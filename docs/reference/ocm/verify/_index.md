@@ -1,5 +1,6 @@
 ---
 title: "ocm verify &mdash; Verify Component Version Signatures"
+linkTitle: "verify"
 url: "/docs/cli-reference/verify/"
 sidebar:
   collapsed: true

@@ -1,5 +1,6 @@
 ---
 title: "ocm get pubsub &mdash; Get The Pubsub Spec For An Ocm Repository"
+linkTitle: "get pubsub"
 url: "/docs/cli-reference/get/pubsub/"
 sidebar:
   collapsed: true

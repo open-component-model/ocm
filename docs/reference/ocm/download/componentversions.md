@@ -1,5 +1,6 @@
 ---
 title: "ocm download componentversions &mdash; Download Ocm Component Versions"
+linkTitle: "download componentversions"
 url: "/docs/cli-reference/download/componentversions/"
 sidebar:
   collapsed: true

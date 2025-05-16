@@ -1,5 +1,6 @@
 ---
 title: "ocm add resources &mdash; Add Resources To A Component Version"
+linkTitle: "add resources"
 url: "/docs/cli-reference/add/resources/"
 sidebar:
   collapsed: true

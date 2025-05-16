@@ -1,5 +1,6 @@
 ---
 title: "ocm ocm-downloadhandlers &mdash; List Of All Available Download Handlers"
+linkTitle: "ocm-downloadhandlers"
 url: "/docs/cli-reference/ocm-downloadhandlers/"
 sidebar:
   collapsed: true
