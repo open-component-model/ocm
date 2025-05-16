@@ -19,7 +19,7 @@ func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, r
 		meta.SetType(TYPE)
 	}
 
-	spec := access.New(repo, eff.APIHostName, access.WithCommit(commit))
+	spec := access.New(repo, eff.APIHostName, commit)
 	// is global access, must work, otherwise there is an error in the lib.
 	return genericaccess.MustAccess(ctx, meta, spec)
 }

@@ -30,11 +30,11 @@ The type specific specification fields are:
 
 - **`ref`** (optional) *string*
 
-  Original ref used to get the commit from. mutually exclusive with `commit`.
+  Original ref used to get the commit from
 
-- **`commit`** (optional) *string*
+- **`commit`** *string*
 
-  The sha/id of the git commit. mutually exclusive with `ref`.
+  The sha/id of the git commit
 
 ### Go Bindings
 

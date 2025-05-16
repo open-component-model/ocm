@@ -680,13 +680,13 @@ shown below.
 
     - **<code>ref</code>** (optional) *string*
 
-      Original ref used to get the commit from. Mutually exclusive with <code>ref</code>.
+      Original ref used to get the commit from
 
     - **<code>commit</code>** *string*
 
-      The sha/id of the git commit. Mutually exclusive with <code>commit</code>.
+      The sha/id of the git commit
 
-  Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>, <code>--reference</code>
+  Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>
 
 - Access type <code>helm</code>
 
