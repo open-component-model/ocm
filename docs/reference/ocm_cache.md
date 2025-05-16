@@ -1,3 +1,9 @@
+---
+title: "cache"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm cache &mdash; Cache Related Commands
 
 ### Synopsis

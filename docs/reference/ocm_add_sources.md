@@ -1,3 +1,9 @@
+---
+title: "add sources"
+menu:
+  docs:
+    parent: add
+---
 ## ocm add sources &mdash; Add Source Information To A Component Version
 
 ### Synopsis

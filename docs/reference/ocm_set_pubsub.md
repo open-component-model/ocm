@@ -1,3 +1,9 @@
+---
+title: "set pubsub"
+menu:
+  docs:
+    parent: set
+---
 ## ocm set pubsub &mdash; Set The Pubsub Spec For An Ocm Repository
 
 ### Synopsis

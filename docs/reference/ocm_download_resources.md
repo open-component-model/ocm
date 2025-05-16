@@ -1,3 +1,9 @@
+---
+title: "download resources"
+menu:
+  docs:
+    parent: download
+---
 ## ocm download resources &mdash; Download Resources Of A Component Version
 
 ### Synopsis

@@ -1,3 +1,9 @@
+---
+title: "show"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm show &mdash; Show Tags Or Versions
 
 ### Synopsis

@@ -1,3 +1,9 @@
+---
+title: "execute"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm execute &mdash; Execute An Element.
 
 ### Synopsis

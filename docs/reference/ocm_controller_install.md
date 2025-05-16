@@ -1,3 +1,9 @@
+---
+title: "controller install"
+menu:
+  docs:
+    parent: controller
+---
 ## ocm controller install &mdash; Install Either A Specific Or Latest Version Of The Ocm-Controller. Optionally Install Prerequisites Required By The Controller.
 
 ### Synopsis

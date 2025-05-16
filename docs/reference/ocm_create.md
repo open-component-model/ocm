@@ -1,3 +1,9 @@
+---
+title: "create"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm create &mdash; Create Transport Or Component Archive
 
 ### Synopsis

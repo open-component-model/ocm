@@ -1,3 +1,9 @@
+---
+title: "get plugins"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get plugins &mdash; Get Plugins
 
 ### Synopsis

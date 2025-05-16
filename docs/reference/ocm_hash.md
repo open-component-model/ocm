@@ -1,3 +1,9 @@
+---
+title: "hash"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm hash &mdash; Hash And Normalization Operations
 
 ### Synopsis

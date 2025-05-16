@@ -1,3 +1,9 @@
+---
+title: "add routingslips"
+menu:
+  docs:
+    parent: add
+---
 ## ocm add routingslips &mdash; Add Routing Slip Entry
 
 ### Synopsis

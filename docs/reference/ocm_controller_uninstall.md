@@ -1,3 +1,9 @@
+---
+title: "controller uninstall"
+menu:
+  docs:
+    parent: controller
+---
 ## ocm controller uninstall &mdash; Uninstalls The Ocm-Controller And All Of Its Dependencies
 
 ### Synopsis

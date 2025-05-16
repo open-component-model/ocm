@@ -1,3 +1,9 @@
+---
+title: "sign"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm sign &mdash; Sign Components Or Hashes
 
 ### Synopsis

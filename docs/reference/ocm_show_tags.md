@@ -1,3 +1,9 @@
+---
+title: "show tags"
+menu:
+  docs:
+    parent: show
+---
 ## ocm show tags &mdash; Show Dedicated Tags Of OCI Artifacts
 
 ### Synopsis

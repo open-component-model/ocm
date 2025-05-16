@@ -1,3 +1,9 @@
+---
+title: "install plugins"
+menu:
+  docs:
+    parent: install
+---
 ## ocm install plugins &mdash; Install Or Update An OCM Plugin
 
 ### Synopsis

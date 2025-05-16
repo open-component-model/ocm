@@ -1,3 +1,9 @@
+---
+title: "ocm"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm &mdash; Open Component Model Command Line Client
 
 ### Synopsis

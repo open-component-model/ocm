@@ -1,3 +1,9 @@
+---
+title: "hash componentversions"
+menu:
+  docs:
+    parent: hash
+---
 ## ocm hash componentversions &mdash; Hash Component Version
 
 ### Synopsis

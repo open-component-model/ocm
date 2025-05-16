@@ -1,3 +1,9 @@
+---
+title: "ocm accessmethods"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm ocm-accessmethods &mdash; List Of All Supported Access Methods
 
 ### Description

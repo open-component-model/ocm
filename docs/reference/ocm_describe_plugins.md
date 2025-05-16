@@ -1,3 +1,9 @@
+---
+title: "describe plugins"
+menu:
+  docs:
+    parent: describe
+---
 ## ocm describe plugins &mdash; Get Plugins
 
 ### Synopsis

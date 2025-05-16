@@ -1,3 +1,9 @@
+---
+title: "ocm"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm ocm &mdash; Dedicated Command Flavors For The Open Component Model
 
 ### Synopsis

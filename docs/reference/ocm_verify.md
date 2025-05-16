@@ -1,3 +1,9 @@
+---
+title: "verify"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm verify &mdash; Verify Component Version Signatures
 
 ### Synopsis

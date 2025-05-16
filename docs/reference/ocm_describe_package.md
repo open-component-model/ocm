@@ -1,3 +1,9 @@
+---
+title: "describe package"
+menu:
+  docs:
+    parent: describe
+---
 ## ocm describe package &mdash; Describe TOI Package
 
 ### Synopsis

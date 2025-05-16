@@ -1,3 +1,9 @@
+---
+title: "add source configuration"
+menu:
+  docs:
+    parent: add
+---
 ## ocm add source-configuration &mdash; Add A Source Specification To A Source Config File
 
 ### Synopsis

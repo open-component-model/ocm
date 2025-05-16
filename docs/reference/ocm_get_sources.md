@@ -1,3 +1,9 @@
+---
+title: "get sources"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get sources &mdash; Get Sources Of A Component Version
 
 ### Synopsis

@@ -1,3 +1,9 @@
+---
+title: "get artifacts"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get artifacts &mdash; Get Artifact Version
 
 ### Synopsis

@@ -1,3 +1,9 @@
+---
+title: "bootstrap"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm bootstrap &mdash; Bootstrap Components
 
 ### Synopsis

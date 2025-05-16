@@ -1,3 +1,9 @@
+---
+title: "logging"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm logging &mdash; Configured Logging Keys
 
 ### Description

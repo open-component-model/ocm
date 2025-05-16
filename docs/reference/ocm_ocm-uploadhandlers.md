@@ -1,3 +1,9 @@
+---
+title: "ocm uploadhandlers"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm ocm-uploadhandlers &mdash; List Of All Available Upload Handlers
 
 ### Description

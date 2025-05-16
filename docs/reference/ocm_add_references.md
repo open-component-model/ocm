@@ -1,3 +1,9 @@
+---
+title: "add references"
+menu:
+  docs:
+    parent: add
+---
 ## ocm add references &mdash; Add Aggregation Information To A Component Version
 
 ### Synopsis

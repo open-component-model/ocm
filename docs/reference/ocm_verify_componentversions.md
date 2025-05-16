@@ -1,3 +1,9 @@
+---
+title: "verify componentversions"
+menu:
+  docs:
+    parent: verify
+---
 ## ocm verify componentversions &mdash; Verify Signature Of Component Version
 
 ### Synopsis

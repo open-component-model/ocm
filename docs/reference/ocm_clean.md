@@ -1,3 +1,9 @@
+---
+title: "clean"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm clean &mdash; Cleanup/Re-Organize Elements
 
 ### Synopsis

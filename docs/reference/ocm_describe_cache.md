@@ -1,3 +1,9 @@
+---
+title: "describe cache"
+menu:
+  docs:
+    parent: describe
+---
 ## ocm describe cache &mdash; Show OCI Blob Cache Information
 
 ### Synopsis

@@ -1,3 +1,9 @@
+---
+title: "download artifacts"
+menu:
+  docs:
+    parent: download
+---
 ## ocm download artifacts &mdash; Download Oci Artifacts
 
 ### Synopsis

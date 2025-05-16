@@ -1,3 +1,9 @@
+---
+title: "oci"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm oci &mdash; Dedicated Command Flavors For The OCI Layer
 
 ### Synopsis

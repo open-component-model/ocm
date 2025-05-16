@@ -1,3 +1,9 @@
+---
+title: "download cli"
+menu:
+  docs:
+    parent: download
+---
 ## ocm download cli &mdash; Download OCM CLI From An OCM Repository
 
 ### Synopsis

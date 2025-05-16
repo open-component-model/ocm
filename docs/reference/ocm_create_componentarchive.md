@@ -1,3 +1,9 @@
+---
+title: "create componentarchive"
+menu:
+  docs:
+    parent: create
+---
 ## ocm create componentarchive &mdash; (DEPRECATED) Create New Component Archive
 
 ### Synopsis

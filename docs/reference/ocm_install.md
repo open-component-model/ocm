@@ -1,3 +1,9 @@
+---
+title: "install"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm install &mdash; Install New OCM CLI Components
 
 ### Synopsis

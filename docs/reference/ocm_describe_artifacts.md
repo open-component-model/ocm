@@ -1,3 +1,9 @@
+---
+title: "describe artifacts"
+menu:
+  docs:
+    parent: describe
+---
 ## ocm describe artifacts &mdash; Describe Artifact Version
 
 ### Synopsis

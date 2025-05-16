@@ -1,3 +1,9 @@
+---
+title: "add"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm add &mdash; Add Elements To A Component Repository Or Component Version
 
 ### Synopsis

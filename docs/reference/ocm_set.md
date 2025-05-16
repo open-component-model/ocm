@@ -1,3 +1,9 @@
+---
+title: "set"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm set &mdash; Set Information About OCM Repositories
 
 ### Synopsis

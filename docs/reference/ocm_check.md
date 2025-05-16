@@ -1,3 +1,9 @@
+---
+title: "check"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm check &mdash; Check Components In OCM Repository
 
 ### Synopsis

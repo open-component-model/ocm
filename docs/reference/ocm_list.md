@@ -1,3 +1,9 @@
+---
+title: "list"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm list &mdash; List Information About Components
 
 ### Synopsis

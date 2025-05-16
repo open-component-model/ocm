@@ -1,3 +1,9 @@
+---
+title: "toi bootstrapping"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm toi-bootstrapping &mdash; Tiny OCM Installer Based On Component Versions
 
 ### Description

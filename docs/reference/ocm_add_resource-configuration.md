@@ -1,3 +1,9 @@
+---
+title: "add resource configuration"
+menu:
+  docs:
+    parent: add
+---
 ## ocm add resource-configuration &mdash; Add A Resource Specification To A Resource Config File
 
 ### Synopsis

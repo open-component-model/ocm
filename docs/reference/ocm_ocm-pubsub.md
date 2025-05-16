@@ -1,3 +1,9 @@
+---
+title: "ocm pubsub"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm ocm-pubsub &mdash; List Of All Supported Publish/Subscribe Implementations
 
 ### Description

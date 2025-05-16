@@ -1,3 +1,9 @@
+---
+title: "add resources"
+menu:
+  docs:
+    parent: add
+---
 ## ocm add resources &mdash; Add Resources To A Component Version
 
 ### Synopsis

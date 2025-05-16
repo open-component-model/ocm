@@ -1,3 +1,9 @@
+---
+title: "version"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm version &mdash; Displays The Version
 
 ### Synopsis

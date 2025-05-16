@@ -1,3 +1,9 @@
+---
+title: "describe"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm describe &mdash; Describe Various Elements By Using Appropriate Sub Commands.
 
 ### Synopsis

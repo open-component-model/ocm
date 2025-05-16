@@ -1,3 +1,9 @@
+---
+title: "credential handling"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm credential-handling &mdash; Provisioning Of Credentials For Credential Consumers
 
 ### Description

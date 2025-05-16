@@ -1,3 +1,9 @@
+---
+title: "ocm labels"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm ocm-labels &mdash; Labels And Label Merging
 
 ### Description

@@ -1,3 +1,9 @@
+---
+title: "credentials"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm credentials &mdash; Commands Acting On Credentials
 
 ### Synopsis

@@ -1,3 +1,9 @@
+---
+title: "check componentversions"
+menu:
+  docs:
+    parent: check
+---
 ## ocm check componentversions &mdash; Check Completeness Of A Component Version In An OCM Repository
 
 ### Synopsis

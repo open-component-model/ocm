@@ -1,3 +1,9 @@
+---
+title: "add componentversions"
+menu:
+  docs:
+    parent: add
+---
 ## ocm add componentversions &mdash; Add Component Version(S) To A (New) Transport Archive
 
 ### Synopsis

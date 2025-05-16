@@ -1,3 +1,9 @@
+---
+title: "get componentversions"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get componentversions &mdash; Get Component Version
 
 ### Synopsis

@@ -1,3 +1,9 @@
+---
+title: "bootstrap configuration"
+menu:
+  docs:
+    parent: bootstrap
+---
 ## ocm bootstrap configuration &mdash; Bootstrap TOI Configuration Files
 
 ### Synopsis

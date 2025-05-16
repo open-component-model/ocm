@@ -1,3 +1,9 @@
+---
+title: "get"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm get &mdash; Get Information About Artifacts And Components
 
 ### Synopsis

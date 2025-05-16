@@ -1,3 +1,9 @@
+---
+title: "controller"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm controller &mdash; Commands Acting On The Ocm-Controller
 
 ### Synopsis

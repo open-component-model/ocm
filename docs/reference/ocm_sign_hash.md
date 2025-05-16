@@ -1,3 +1,9 @@
+---
+title: "sign hash"
+menu:
+  docs:
+    parent: sign
+---
 ## ocm sign hash &mdash; Sign Hash
 
 ### Synopsis

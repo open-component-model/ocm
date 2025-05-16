@@ -1,3 +1,9 @@
+---
+title: "create rsakeypair"
+menu:
+  docs:
+    parent: create
+---
 ## ocm create rsakeypair &mdash; Create RSA Public Key Pair
 
 ### Synopsis

@@ -1,3 +1,9 @@
+---
+title: "configfile"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm configfile &mdash; Configuration File
 
 ### Description

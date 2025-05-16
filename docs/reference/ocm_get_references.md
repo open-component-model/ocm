@@ -1,3 +1,9 @@
+---
+title: "get references"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get references &mdash; Get References Of A Component Version
 
 ### Synopsis

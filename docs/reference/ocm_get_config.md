@@ -1,3 +1,9 @@
+---
+title: "get config"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get config &mdash; Get Evaluated Config For Actual Command Call
 
 ### Synopsis

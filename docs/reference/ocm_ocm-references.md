@@ -1,3 +1,9 @@
+---
+title: "ocm references"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm ocm-references &mdash; Notation For OCM References
 
 ### Description

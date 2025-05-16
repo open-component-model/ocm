@@ -1,3 +1,9 @@
+---
+title: "get routingslips"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get routingslips &mdash; Get Routings Slips For A Component Version
 
 ### Synopsis

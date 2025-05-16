@@ -1,3 +1,9 @@
+---
+title: "sign componentversions"
+menu:
+  docs:
+    parent: sign
+---
 ## ocm sign componentversions &mdash; Sign Component Version
 
 ### Synopsis

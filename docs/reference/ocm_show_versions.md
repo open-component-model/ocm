@@ -1,3 +1,9 @@
+---
+title: "show versions"
+menu:
+  docs:
+    parent: show
+---
 ## ocm show versions &mdash; Show Dedicated Versions (Semver Compliant)
 
 ### Synopsis

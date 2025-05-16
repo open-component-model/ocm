@@ -1,3 +1,9 @@
+---
+title: "toi"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm toi &mdash; Dedicated Command Flavors For The TOI Layer
 
 ### Synopsis

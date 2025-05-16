@@ -1,3 +1,9 @@
+---
+title: "list componentversions"
+menu:
+  docs:
+    parent: list
+---
 ## ocm list componentversions &mdash; List Component Version Names
 
 ### Synopsis

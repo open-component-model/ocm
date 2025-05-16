@@ -1,3 +1,9 @@
+---
+title: "ocm downloadhandlers"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm ocm-downloadhandlers &mdash; List Of All Available Download Handlers
 
 ### Description

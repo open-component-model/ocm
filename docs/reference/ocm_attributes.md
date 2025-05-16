@@ -1,3 +1,9 @@
+---
+title: "attributes"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm attributes &mdash; Configuration Attributes Used To Control The Behaviour
 
 ### Description

@@ -1,3 +1,9 @@
+---
+title: "get resources"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get resources &mdash; Get Resources Of A Component Version
 
 ### Synopsis

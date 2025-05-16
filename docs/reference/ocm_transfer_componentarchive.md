@@ -1,3 +1,9 @@
+---
+title: "transfer componentarchive"
+menu:
+  docs:
+    parent: transfer
+---
 ## ocm transfer componentarchive &mdash; (DEPRECATED) - Please Use Commontransportarchive Instead
 
 ### Synopsis

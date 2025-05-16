@@ -1,3 +1,9 @@
+---
+title: "get pubsub"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get pubsub &mdash; Get The Pubsub Spec For An Ocm Repository
 
 ### Synopsis

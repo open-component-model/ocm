@@ -1,3 +1,9 @@
+---
+title: "bootstrap package"
+menu:
+  docs:
+    parent: bootstrap
+---
 ## ocm bootstrap package &mdash; Bootstrap Component Version
 
 ### Synopsis

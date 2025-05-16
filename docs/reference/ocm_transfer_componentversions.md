@@ -1,3 +1,9 @@
+---
+title: "transfer componentversions"
+menu:
+  docs:
+    parent: transfer
+---
 ## ocm transfer componentversions &mdash; Transfer Component Version
 
 ### Synopsis

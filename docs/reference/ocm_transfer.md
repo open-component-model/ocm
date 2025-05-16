@@ -1,3 +1,9 @@
+---
+title: "transfer"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm transfer &mdash; Transfer Artifacts Or Components
 
 ### Synopsis

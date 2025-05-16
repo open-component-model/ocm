@@ -1,3 +1,9 @@
+---
+title: "transfer artifacts"
+menu:
+  docs:
+    parent: transfer
+---
 ## ocm transfer artifacts &mdash; Transfer OCI Artifacts
 
 ### Synopsis

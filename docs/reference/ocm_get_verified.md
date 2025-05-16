@@ -1,3 +1,9 @@
+---
+title: "get verified"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get verified &mdash; Get Verified Component Versions
 
 ### Synopsis

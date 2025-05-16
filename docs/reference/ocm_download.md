@@ -1,3 +1,9 @@
+---
+title: "download"
+menu:
+  docs:
+    parent: cli-reference
+---
 ## ocm download &mdash; Download Oci Artifacts, Resources Or Complete Components
 
 ### Synopsis

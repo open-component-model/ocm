@@ -1,3 +1,9 @@
+---
+title: "execute action"
+menu:
+  docs:
+    parent: execute
+---
 ## ocm execute action &mdash; Execute An Action
 
 ### Synopsis

@@ -1,3 +1,9 @@
+---
+title: "download componentversions"
+menu:
+  docs:
+    parent: download
+---
 ## ocm download componentversions &mdash; Download Ocm Component Versions
 
 ### Synopsis

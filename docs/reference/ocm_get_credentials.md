@@ -1,3 +1,9 @@
+---
+title: "get credentials"
+menu:
+  docs:
+    parent: get
+---
 ## ocm get credentials &mdash; Get Credentials For A Dedicated Consumer Spec
 
 ### Synopsis

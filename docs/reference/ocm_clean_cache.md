@@ -1,3 +1,9 @@
+---
+title: "clean cache"
+menu:
+  docs:
+    parent: clean
+---
 ## ocm clean cache &mdash; Cleanup Oci Blob Cache
 
 ### Synopsis
