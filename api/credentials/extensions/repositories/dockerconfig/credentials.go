@@ -7,7 +7,7 @@ import (
 	"github.com/mandelsoft/goutils/set"
 
 	"ocm.software/ocm/api/credentials/cpi"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Credentials struct {
@@ -27,10 +27,10 @@ func NewCredentials(cfg *configfile.ConfigFile, name string, store dockercred.St
 	}
 }
 
-func (c *Credentials) get() common.Properties {
+func (c *Credentials) get() misc.Properties {
 	auth, err := c.config.GetAuthConfig(c.name)
 	if err != nil {
-		return common.Properties{}
+		return misc.Properties{}
 	}
 	return newCredentials(auth).Properties()
 }
@@ -62,6 +62,6 @@ func (c *Credentials) PropertyNames() set.Set[string] {
 	return c.get().Names()
 }
 
-func (c *Credentials) Properties() common.Properties {
+func (c *Credentials) Properties() misc.Properties {
 	return c.get()
 }

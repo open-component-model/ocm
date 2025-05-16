@@ -9,18 +9,18 @@ import (
 
 	"ocm.software/ocm/api/credentials"
 	local "ocm.software/ocm/api/credentials/extensions/repositories/memory"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var DefaultContext = credentials.New()
 
 var _ = Describe("direct credentials", func() {
-	props := common.Properties{
+	props := misc.Properties{
 		"user":     "USER",
 		"password": "PASSWORD",
 	}
 
-	props2 := common.Properties{
+	props2 := misc.Properties{
 		"user":     "OTHER",
 		"password": "OTHERPASSWORD",
 	}

@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/compatattr"
 	storagecontext "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
@@ -45,7 +45,7 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 	if err != nil {
 		return nil, err
 	}
-	path := common.DigestToFileName(digest.Digest(ref))
+	path := misc.DigestToFileName(digest.Digest(ref))
 	if compatattr.Get(ctx.GetContext()) {
 		return localfsblob.New(path, blob.MimeType()), nil
 	} else {

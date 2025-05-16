@@ -2,9 +2,9 @@ package versionconstraintsoption
 
 import (
 	"github.com/Masterminds/semver/v3"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/spf13/pflag"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
 	"ocm.software/ocm/cmds/ocm/common/options"
 )
@@ -16,7 +16,7 @@ func From(o options.OptionSetProvider) *Option {
 }
 
 func New(silent ...bool) *Option {
-	return &Option{SilentLatestOption: utils.Optional(silent...)}
+	return &Option{SilentLatestOption: general.Optional(silent...)}
 }
 
 type Option struct {
@@ -33,7 +33,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Option) SetLatest(latest ...bool) *Option {
-	o.Latest = utils.OptionalDefaultedBool(true, latest...)
+	o.Latest = general.OptionalDefaultedBool(true, latest...)
 	return o
 }
 

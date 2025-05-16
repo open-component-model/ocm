@@ -4,7 +4,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/ocm"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 // WalkingStep is used to process a component version during graph traversal.
@@ -12,15 +12,15 @@ import (
 // If an error is returned the traversal is aborted with this error.
 // Additionally, an info object of type T can be registered in the state for the
 // component version.
-type WalkingStep[T any] func(state common.WalkingState[T, ocm.ComponentVersionAccess], cv ocm.ComponentVersionAccess) (bool, error)
+type WalkingStep[T any] func(state misc.WalkingState[T, ocm.ComponentVersionAccess], cv ocm.ComponentVersionAccess) (bool, error)
 
 // Walk traverses a component version graph using the WalkingStep to
 // process found component version.
-func Walk[T any](closure common.NameVersionInfo[T], cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver, step WalkingStep[T]) (common.NameVersionInfo[T], error) {
+func Walk[T any](closure misc.NameVersionInfo[T], cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver, step WalkingStep[T]) (misc.NameVersionInfo[T], error) {
 	if closure == nil {
-		closure = common.NameVersionInfo[T]{}
+		closure = misc.NameVersionInfo[T]{}
 	}
-	state := common.WalkingState[T, ocm.ComponentVersionAccess]{
+	state := misc.WalkingState[T, ocm.ComponentVersionAccess]{
 		Closure: closure,
 		Context: cv,
 	}
@@ -28,8 +28,8 @@ func Walk[T any](closure common.NameVersionInfo[T], cv ocm.ComponentVersionAcces
 	return closure, err
 }
 
-func walk[T any](state common.WalkingState[T, ocm.ComponentVersionAccess], cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver, step WalkingStep[T]) error {
-	nv := common.VersionedElementKey(cv)
+func walk[T any](state misc.WalkingState[T, ocm.ComponentVersionAccess], cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver, step WalkingStep[T]) error {
+	nv := misc.VersionedElementKey(cv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok || err != nil {
 		return err
 	}

@@ -36,7 +36,7 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -119,11 +119,11 @@ var _ = Describe("Transfer handler", func() {
 		defer Close(tgt, "target")
 
 		// handler, err := standard.New(standard.ResourcesByValue())
-		p, buf := common.NewBufferedPrinter()
+		p, buf := misc.NewBufferedPrinter()
 		opts := []transferhandler.TransferOption{standard.ResourcesByValue(), &optionsChecker{}}
 
 		ctx, cancel := context.WithCancel(context.Background())
-		ctx = common.WithPrinter(ctx, p)
+		ctx = misc.WithPrinter(ctx, p)
 		cancel()
 		ExpectError(transfer.TransferWithContext(ctx, cv, tgt, opts...)).To(MatchError(context.Canceled))
 
@@ -164,7 +164,7 @@ var _ = Describe("Transfer handler", func() {
 		defer Close(tgt, "target")
 
 		// handler, err := standard.New(standard.ResourcesByValue())
-		p, buf := common.NewBufferedPrinter()
+		p, buf := misc.NewBufferedPrinter()
 		opts := append(topts, standard.ResourcesByValue(), transfer.WithPrinter(p), &optionsChecker{})
 		MustBeSuccessful(transfer.Transfer(cv, tgt, opts...))
 		Expect(env.DirExists(OUT)).To(BeTrue())
@@ -203,7 +203,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		defer Close(tgt, "target")
 
 		// handler, err := standard.New(standard.ResourcesByValue())
-		p, buf := common.NewBufferedPrinter()
+		p, buf := misc.NewBufferedPrinter()
 		opts := append(topts, standard.ResourcesByValue(), transfer.WithPrinter(p), &optionsChecker{})
 		MustBeSuccessful(transfer.Transfer(cv, tgt, opts...))
 		Expect(env.DirExists(OUT)).To(BeTrue())
@@ -316,7 +316,7 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		defer Close(tgt, "target")
 
 		// transfer by reference, first
-		p, buf := common.NewBufferedPrinter()
+		p, buf := misc.NewBufferedPrinter()
 		opts := append(topts, transfer.WithPrinter(p), &optionsChecker{})
 		MustBeSuccessful(transfer.Transfer(cv, tgt, opts...))
 		Expect(env.DirExists(OUT)).To(BeTrue())

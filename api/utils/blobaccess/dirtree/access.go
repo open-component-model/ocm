@@ -38,8 +38,8 @@ func BlobAccess(path string, opts ...Option) (_ bpi.BlobAccess, rerr error) {
 	taropts := tarutils.TarFileSystemOptions{
 		IncludeFiles:   eff.IncludeFiles,
 		ExcludeFiles:   eff.ExcludeFiles,
-		PreserveDir:    utils.AsBool(eff.PreserveDir),
-		FollowSymlinks: utils.AsBool(eff.FollowSymlinks),
+		PreserveDir:    optionutils.AsBool(eff.PreserveDir),
+		FollowSymlinks: optionutils.AsBool(eff.FollowSymlinks),
 	}
 
 	temp, err := file.NewTempFile(fs.FSTempDir(), "resourceblob*.tgz", fs)
@@ -48,7 +48,7 @@ func BlobAccess(path string, opts ...Option) (_ bpi.BlobAccess, rerr error) {
 	}
 	defer errors.PropagateError(&rerr, temp.Close)
 
-	if utils.AsBool(eff.CompressWithGzip) {
+	if optionutils.AsBool(eff.CompressWithGzip) {
 		if eff.MimeType == "" {
 			eff.MimeType = mime.MIME_TGZ
 		}

@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/compression"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/tarutils"
 )
 
@@ -21,7 +21,7 @@ const (
 	BLUEPRINT_MIMETYPE_COMPRESSED        = "application/vnd.gardener.landscaper.blueprint.v1+tar+gzip"
 )
 
-func ExtractArchive(pr common.Printer, _ *Handler, access blobaccess.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
+func ExtractArchive(pr misc.Printer, _ *Handler, access blobaccess.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&rerr, "extracting archived (and compressed) blueprint")
 
@@ -54,7 +54,7 @@ func ExtractArchive(pr common.Printer, _ *Handler, access blobaccess.DataAccess,
 	return true, nil
 }
 
-func ExtractArtifact(pr common.Printer, handler *Handler, access blobaccess.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
+func ExtractArtifact(pr misc.Printer, handler *Handler, access blobaccess.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&rerr, "extracting oci artifact containing a blueprint")
 

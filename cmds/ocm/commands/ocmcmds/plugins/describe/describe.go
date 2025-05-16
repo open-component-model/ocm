@@ -5,10 +5,10 @@ import (
 
 	"ocm.software/ocm/api/ocm/plugin"
 	plugincommon "ocm.software/ocm/api/ocm/plugin/common"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
-func DescribePlugin(p plugin.Plugin, out common.Printer) {
+func DescribePlugin(p plugin.Plugin, out misc.Printer) {
 	out.Printf("Plugin Name:      %s\n", p.Name())
 	out.Printf("Plugin Version:   %s\n", p.Version())
 	out.Printf("Path:             %s\n", p.Path())

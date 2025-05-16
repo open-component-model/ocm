@@ -5,7 +5,7 @@ import (
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/tech/oci/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const HOST = "ghcr.io"
@@ -23,7 +23,7 @@ func init() {
 			user = "any"
 		}
 		if src, err := cpi.DefaultContext.GetCredentialsForConsumer(id); err != nil || src == nil {
-			creds := cpi.NewCredentials(common.Properties{cpi.ATTR_IDENTITY_TOKEN: t, cpi.ATTR_USERNAME: user})
+			creds := cpi.NewCredentials(misc.Properties{cpi.ATTR_IDENTITY_TOKEN: t, cpi.ATTR_USERNAME: user})
 			cpi.DefaultContext.SetCredentialsForConsumer(id, creds)
 		}
 	}

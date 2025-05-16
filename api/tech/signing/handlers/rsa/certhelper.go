@@ -5,8 +5,9 @@ import (
 	"crypto/x509/pkix"
 	"time"
 
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/tech/signing/signutils"
-	"ocm.software/ocm/api/utils"
 )
 
 func CreateRootCertificate(sub *pkix.Name, validity time.Duration) (*x509.Certificate, *PrivateKey, error) {
@@ -33,7 +34,7 @@ func CreateSigningCertificate(sub *pkix.Name, intermediate signutils.GenericCert
 		return nil, nil, nil, err
 	}
 	spec := &signutils.Specification{
-		IsCA:         utils.Optional(isCA...),
+		IsCA:         general.Optional(isCA...),
 		Subject:      *sub,
 		Validity:     validity,
 		RootCAs:      roots,

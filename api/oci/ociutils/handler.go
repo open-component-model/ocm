@@ -4,11 +4,11 @@ import (
 	"sync"
 
 	"ocm.software/ocm/api/oci/cpi"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type InfoHandler interface {
-	Description(pr common.Printer, m cpi.ManifestAccess, config []byte)
+	Description(pr misc.Printer, m cpi.ManifestAccess, config []byte)
 	Info(m cpi.ManifestAccess, config []byte) interface{}
 }
 

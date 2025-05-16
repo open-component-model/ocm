@@ -5,12 +5,12 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/goutils/set"
 
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/plugin/ppi"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
 )
@@ -36,7 +36,7 @@ const (
 var status = set.New[string](STATUS_PASSED, STATUS_FAILED, STATUS_SKIPPED)
 
 var (
-	StatusOption  = options.NewStringMapOptionType("checkStatus", out.Sprintf("status value for check (%s)", strings.Join(utils.StringMapKeys(status), ", ")))
+	StatusOption  = options.NewStringMapOptionType("checkStatus", out.Sprintf("status value for check (%s)", strings.Join(maputils.OrderedKeys(status), ", ")))
 	MessageOption = options.NewStringMapOptionType("checkMessage", "message for check")
 )
 
@@ -74,7 +74,7 @@ func (v ValueSet) ValidateSpecification(_ ppi.Plugin, spec runtime.TypedObject) 
 			return nil, out.Errorf("status not specified")
 		}
 		if !status.Contains(v.Status) {
-			return nil, out.Errorf("invalid status (%s), expected %s", v.Status, strings.Join(utils.StringMapKeys(status), ", "))
+			return nil, out.Errorf("invalid status (%s), expected %s", v.Status, strings.Join(maputils.OrderedKeys(status), ", "))
 		}
 
 		if len(desc) > 0 {

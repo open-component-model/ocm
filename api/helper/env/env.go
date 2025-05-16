@@ -25,7 +25,6 @@ import (
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/oci"
 	ocm "ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 )
 
@@ -132,7 +131,7 @@ type fsOpt struct {
 
 func FileSystem(fs vfs.FileSystem, path ...string) Option {
 	return fsOpt{
-		path: utils.Optional(path...),
+		path: general.Optional(path...),
 		fs:   fs,
 	}
 }
@@ -239,7 +238,7 @@ func projectTestData(modifiable bool, source string, dest ...string) Option {
 	}
 	pathToTestdata := filepath.Join(pathToRoot, source)
 
-	return testData(modifiable, pathToTestdata, general.OptionalDefaulted("/testdata", dest...))
+	return testData(modifiable, pathToTestdata, general.OptionalNonZeroDefaulted("/testdata", dest...))
 }
 
 func ProjectTestData(source string, dest ...string) Option {
@@ -472,7 +471,7 @@ func (e *Environment) FileSystem() vfs.FileSystem {
 }
 
 func ExceptionFailHandler(msg string, callerSkip ...int) {
-	skip := utils.Optional(callerSkip...) + 1
+	skip := general.Optional(callerSkip...) + 1
 	st, _ := gostackparse.Parse(bytes.NewReader(debug.Stack()))
 	if st == nil {
 		exception.Throw(fmt.Errorf("%s", msg))
@@ -486,7 +485,7 @@ func ExceptionFailHandler(msg string, callerSkip ...int) {
 // by default a fail handler throwing an exception
 // is set.
 func (e *Environment) SetFailHandler(h ...FailHandler) *Environment {
-	e.failhandler = utils.OptionalDefaulted(FailHandler(ExceptionFailHandler), h...)
+	e.failhandler = general.OptionalDefaulted(FailHandler(ExceptionFailHandler), h...)
 	return e
 }
 
@@ -504,14 +503,14 @@ func (e *Environment) FailOnErr(err error, msg string, callerSkip ...int) {
 func (e *Environment) fail(msg string, callerSkip ...int) {
 	fh := e.failhandler
 	if fh == nil {
-		ExceptionFailHandler(msg, utils.Optional(callerSkip...)+2)
+		ExceptionFailHandler(msg, general.Optional(callerSkip...)+2)
 	} else {
-		fh(msg, utils.Optional(callerSkip...)+2)
+		fh(msg, general.Optional(callerSkip...)+2)
 	}
 }
 
 func (e *Environment) failOn(err error, callerSkip ...int) {
 	if err != nil {
-		e.fail(err.Error(), utils.Optional(callerSkip...)+1)
+		e.fail(err.Error(), general.Optional(callerSkip...)+1)
 	}
 }

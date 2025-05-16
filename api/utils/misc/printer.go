@@ -7,9 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/logging"
-
-	"ocm.software/ocm/api/utils"
 )
 
 type Flusher interface {
@@ -56,7 +55,7 @@ func NewPrinter(writer io.Writer) Printer {
 }
 
 func AssurePrinter(p Printer) Printer {
-	return utils.OptionalDefaulted(NonePrinter, p)
+	return general.OptionalDefaulted(NonePrinter, p)
 }
 
 func NewBufferedPrinter() (Printer, *bytes.Buffer) {

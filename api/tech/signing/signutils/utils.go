@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
 
@@ -252,7 +253,7 @@ func SystemCertPool() (*x509.CertPool, error) {
 
 func RootPoolFromFile(pemfile string, useOS bool, fss ...vfs.FileSystem) (*x509.CertPool, error) {
 	fs := utils.FileSystem(fss...)
-	pemdata, err := utils.ReadFile(pemfile, fs)
+	pemdata, err := optionutils.ReadFile(pemfile, fs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot read cert pem file %q", pemfile)
 	}

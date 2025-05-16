@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/credentials"
@@ -72,7 +73,7 @@ func repositoryViewCreator(i RepositoryImpl, v resource.CloserView, d Repository
 }
 
 func NewRepository(impl RepositoryImpl, name ...string) Repository {
-	return resource.NewResource[Repository](impl, repositoryViewCreator, utils.OptionalDefaulted("OCI repo", name...), true)
+	return resource.NewResource[Repository](impl, repositoryViewCreator, general.OptionalNonZeroDefaulted("OCI repo", name...), true)
 }
 
 func (r *repositoryView) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
@@ -179,7 +180,7 @@ func namespaceAccessViewCreator(i NamespaceAccessImpl, v resource.CloserView, d 
 }
 
 func NewNamespaceAccess(impl NamespaceAccessImpl, kind ...string) NamespaceAccess {
-	return resource.NewResource[NamespaceAccess](impl, namespaceAccessViewCreator, fmt.Sprintf("%s %s", utils.OptionalDefaulted("namespace", kind...), impl.GetNamespace()), true)
+	return resource.NewResource[NamespaceAccess](impl, namespaceAccessViewCreator, fmt.Sprintf("%s %s", general.OptionalNonZeroDefaulted("namespace", kind...), impl.GetNamespace()), true)
 }
 
 func (n *namespaceAccessView) GetNamespace() string {

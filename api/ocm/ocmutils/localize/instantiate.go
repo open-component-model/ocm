@@ -8,7 +8,7 @@ import (
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/ocm/resourcerefs"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 func Instantiate(rules *InstantiationRules, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver, config []byte, fs vfs.FileSystem, types ...string) error {
@@ -38,7 +38,7 @@ func Instantiate(rules *InstantiationRules, cv ocm.ComponentVersionAccess, resol
 		}
 	}
 
-	ok, _, err := download.For(cv.GetContext()).Download(common.NewPrinter(nil), template, ".", fs)
+	ok, _, err := download.For(cv.GetContext()).Download(misc.NewPrinter(nil), template, ".", fs)
 	if err != nil {
 		return errors.Wrapf(err, "cannot download resource %s", rules.Template)
 	}

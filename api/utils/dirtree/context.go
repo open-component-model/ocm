@@ -6,10 +6,9 @@ import (
 	"hash"
 	"io"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
-	"ocm.software/ocm/api/utils"
 )
 
 type Context interface {
@@ -24,7 +23,7 @@ type Context interface {
 // DefaultContext provides a default directory tree hashing context.
 // It is based on the Git tree hash mechanism.
 func DefaultContext(ctx ...logging.Context) Context {
-	return &defaultContext{utils.OptionalDefaulted(LogContext, ctx...)}
+	return &defaultContext{general.OptionalDefaulted(LogContext, ctx...)}
 }
 
 type defaultContext struct {

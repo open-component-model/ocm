@@ -18,7 +18,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/virtual"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/file"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ import (
 func NewRepository(ctx cpi.ContextProvider, fs vfs.FileSystem, readonly bool, path ...string) (cpi.Repository, error) {
 	var err error
 
-	p := general.Optional(path...)
+	p := general.OptionalNonZero(path...)
 	if p != "" && p != "/" {
 		fs, err = projectionfs.New(fs, p)
 		if err != nil {
@@ -128,7 +128,7 @@ func (a *Access) GetComponentVersion(comp, version string) (virtual.VersionAcces
 	i := a.index.Get(comp, version)
 	if i == nil {
 		if a.readonly {
-			return nil, errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, common.NewNameVersion(comp, version).String())
+			return nil, errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, misc.NewNameVersion(comp, version).String())
 		}
 		cd = compdesc.New(comp, version)
 		hash := sha256.Sum256([]byte(comp + ":" + version))
@@ -197,7 +197,7 @@ func (v *VersionAccess) Update() (bool, error) {
 	defer v.access.lock.Unlock()
 
 	if v.desc.GetName() != v.comp || v.desc.GetVersion() != v.vers {
-		return false, errors.ErrInvalid(cpi.KIND_COMPONENTVERSION, common.VersionedElementKey(v.desc).String())
+		return false, errors.ErrInvalid(cpi.KIND_COMPONENTVERSION, misc.VersionedElementKey(v.desc).String())
 	}
 	i := v.access.index.Get(v.comp, v.vers)
 	if !reflect.DeepEqual(v.desc, i.CD()) {

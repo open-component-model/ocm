@@ -9,7 +9,7 @@ import (
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci"
 	ociidentity "ocm.software/ocm/api/tech/oci/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 var _ = Describe("consumer id handling", func() {
@@ -52,7 +52,7 @@ var _ = Describe("consumer id handling", func() {
 			)
 
 			creds := GetCredentials(ctx, "https://acme.org/charts", "demo:v1")
-			Expect(creds).To(Equal(common.Properties{
+			Expect(creds).To(Equal(misc.Properties{
 				ATTR_USERNAME: "helm",
 				ATTR_PASSWORD: "helmpass",
 			}))
@@ -68,7 +68,7 @@ var _ = Describe("consumer id handling", func() {
 			)
 
 			creds := GetCredentials(ctx, "oci://acme.org/charts", "demo:v1")
-			Expect(creds).To(Equal(common.Properties{
+			Expect(creds).To(Equal(misc.Properties{
 				ATTR_USERNAME: "oci",
 				ATTR_PASSWORD: "ocipass",
 			}))

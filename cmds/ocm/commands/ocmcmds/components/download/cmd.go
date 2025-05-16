@@ -13,7 +13,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/destoption"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/formatoption"
@@ -143,8 +143,8 @@ func (d *action) Save(o *comphdlr.Object, f string) (err error) {
 	//nolint:staticcheck // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 	defer errors.PropagateError(&err, set.Close)
 
-	nv := common.VersionedElementKey(src)
-	hist := common.History{nv}
+	nv := misc.VersionedElementKey(src)
+	hist := misc.History{nv}
 
 	err = transfer.CopyVersion(nil, d.cmd.OCMContext().Logger().WithValues("download", f), hist, src, set, nil)
 	if err == nil {

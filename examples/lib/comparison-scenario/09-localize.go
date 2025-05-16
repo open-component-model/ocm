@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/stringutils"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/chart"
@@ -150,13 +151,13 @@ func Localize(cfg *helper.Config, config template.Values, release, namespace str
 		fmt.Printf("  - %s\n", f)
 	}
 	desc, _ := runtime.ToYAML(chart.Metadata)
-	fmt.Printf("chart meta data:\n%s\n", utils.IndentLines(string(desc), "    ", false))
+	fmt.Printf("chart meta data:\n%s\n", stringutils.IndentLines(string(desc), "    ", false))
 
 	yamlvalues, err := runtime.ToYAML(values)
 	if err != nil {
 		return errors.Wrapf(err, "invalid values")
 	}
-	fmt.Printf("localized and configured values:\n%s\n", utils.IndentLines(string(yamlvalues), "    ", false))
+	fmt.Printf("localized and configured values:\n%s\n", stringutils.IndentLines(string(yamlvalues), "    ", false))
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// installation

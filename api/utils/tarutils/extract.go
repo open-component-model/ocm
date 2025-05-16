@@ -16,7 +16,7 @@ import (
 
 // ExtractArchiveToFs wunpacks an archive to a filesystem.
 func ExtractArchiveToFs(fs vfs.FileSystem, path string, fss ...vfs.FileSystem) error {
-	sfs := utils.OptionalDefaulted(osfs.New(), fss...)
+	sfs := utils.FileSystem(fss...)
 
 	f, err := sfs.Open(path)
 	if err != nil {
@@ -32,7 +32,7 @@ func ExtractArchiveToFs(fs vfs.FileSystem, path string, fss ...vfs.FileSystem) e
 
 // ExtractArchiveToFsWithInfo unpacks an archive to a filesystem.
 func ExtractArchiveToFsWithInfo(fs vfs.FileSystem, path string, fss ...vfs.FileSystem) (int64, int64, error) {
-	sfs := utils.OptionalDefaulted(osfs.New(), fss...)
+	sfs := utils.FileSystem(fss...)
 
 	f, err := sfs.Open(path)
 	if err != nil {

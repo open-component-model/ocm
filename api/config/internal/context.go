@@ -5,16 +5,16 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
 // OCM_CONFIG_TYPE_SUFFIX is the standard suffix used for configuration
 // types provided by this library.
-const OCM_CONFIG_TYPE_SUFFIX = ".config" + common.OCM_TYPE_GROUP_SUFFIX
+const OCM_CONFIG_TYPE_SUFFIX = ".config" + misc.OCM_TYPE_GROUP_SUFFIX
 
 type ConfigSelector interface {
 	Select(Config) bool
@@ -157,7 +157,7 @@ type gcWrapper struct {
 }
 
 func newView(c *_context, ref ...bool) Context {
-	if utils.Optional(ref...) {
+	if general.Optional(ref...) {
 		return datacontext.FinalizedContext[gcWrapper](c)
 	}
 	return c

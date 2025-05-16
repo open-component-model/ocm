@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/logging/config"
 	"github.com/mandelsoft/logging/logrusl/adapter"
@@ -48,7 +49,7 @@ func (c *ConfigFragment) GetLogConfig(fss ...vfs.FileSystem) (*config.Config, er
 	if c.LogConfig != "" {
 		var data []byte
 		if strings.HasPrefix(c.LogConfig, "@") {
-			data, err = utils.ReadFile(c.LogConfig[1:], utils.FileSystem(fss...))
+			data, err = optionutils.ReadFile(c.LogConfig[1:], utils.FileSystem(fss...))
 			if err != nil {
 				return nil, errors.Wrapf(err, "cannot read logging config file %q", c.LogConfig[1:])
 			}

@@ -19,7 +19,7 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/file"
 	"ocm.software/ocm/api/utils/iotools"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/refmgmt"
 )
 
@@ -48,7 +48,7 @@ type CleanupCache interface {
 	//	- handled entries (cnt, size)
 	//	- not handled entries (ncnt, nsize)
 	//	- failing entries (fcnt, fsize)
-	Cleanup(p common.Printer, before *time.Time, dryrun bool) (cnt int, ncnt int, fcnt int, size int64, nsize int64, fsize int64, err error)
+	Cleanup(p misc.Printer, before *time.Time, dryrun bool) (cnt int, ncnt int, fcnt int, size int64, nsize int64, fsize int64, err error)
 }
 
 type BlobCache interface {
@@ -115,12 +115,12 @@ func (c *blobCache) Unlock() {
 	c.lock.Unlock()
 }
 
-func (c *blobCache) Cleanup(p common.Printer, before *time.Time, dryrun bool) (cnt int, ncnt int, fcnt int, size int64, nsize int64, fsize int64, err error) {
+func (c *blobCache) Cleanup(p misc.Printer, before *time.Time, dryrun bool) (cnt int, ncnt int, fcnt int, size int64, nsize int64, fsize int64, err error) {
 	c.Lock()
 	defer c.Unlock()
 
 	if p == nil {
-		p = common.NewPrinter(nil)
+		p = misc.NewPrinter(nil)
 	}
 	path, fs := c.Root()
 
@@ -181,7 +181,7 @@ func (c *blobCache) GetBlobData(digest digest.Digest) (int64, blobaccess.DataAcc
 		c.lock.RLock()
 		defer c.lock.RUnlock()
 
-		path := common.DigestToFileName(digest)
+		path := misc.DigestToFileName(digest)
 		fi, err := c.cache.Stat(path)
 		if err == nil {
 			vfs.WriteFile(c.cache, path+ACCESS_SUFFIX, []byte{}, 0o600)
@@ -207,7 +207,7 @@ func (c *blobCache) AddBlob(blob blobaccess.BlobAccess) (int64, digest.Digest, e
 
 	if blob.DigestKnown() {
 		c.lock.RLock()
-		path := common.DigestToFileName(blob.Digest())
+		path := misc.DigestToFileName(blob.Digest())
 		if ok, err := vfs.Exists(c.cache, path); ok || err != nil {
 			c.lock.RUnlock()
 			return blob.Size(), blob.Digest(), err
@@ -247,7 +247,7 @@ func (c *blobCache) AddBlob(blob blobaccess.BlobAccess) (int64, digest.Digest, e
 	} else {
 		digest = blob.Digest()
 	}
-	target := common.DigestToFileName(digest)
+	target := misc.DigestToFileName(digest)
 
 	c.lock.Lock()
 	defer c.lock.Unlock()

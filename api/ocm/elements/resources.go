@@ -2,10 +2,10 @@ package elements
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/general"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/utils"
 )
 
 type ResourceMetaOption interface {
@@ -38,12 +38,12 @@ func (o local) ApplyToResourceMeta(m *compdesc.ResourceMeta) error {
 
 // WithLocalRelation sets the resource relation to metav1.LocalRelation.
 func WithLocalRelation(flag ...bool) ResourceMetaOption {
-	return local(utils.OptionalDefaultedBool(true, flag...))
+	return local(general.OptionalDefaultedBool(true, flag...))
 }
 
 // WithExternalRelation sets the resource relation to metav1.ExternalRelation.
 func WithExternalRelation(flag ...bool) ResourceMetaOption {
-	return local(!utils.OptionalDefaultedBool(true, flag...))
+	return local(!general.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

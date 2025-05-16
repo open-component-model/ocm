@@ -21,7 +21,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/toi/support"
 	"ocm.software/ocm/api/tech/helm/loader"
 	"ocm.software/ocm/api/utils/compression"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/tarutils"
@@ -99,7 +99,7 @@ func (e *Execution) addSubCharts(finalize *Finalizer, subCharts map[string]v1.Re
 	Mustf(e.fs.Mkdir(charts, 0o700), "cannot mkdir %q", charts)
 	e.outf("Loading %d sub charts into %s...\n", len(subCharts), charts)
 	for n, r := range subCharts {
-		e.outf("  Loading sub chart %q from resource %s@%s\n", n, r, common.VersionedElementKey(e.ComponentVersion))
+		e.outf("  Loading sub chart %q from resource %s@%s\n", n, r, misc.VersionedElementKey(e.ComponentVersion))
 		acc, rcv := Must2f(R2(resourcerefs.ResolveResourceReference(e.ComponentVersion, r, nil)), "chart reference", r.String())
 		loop.Close(rcv)
 
@@ -107,7 +107,7 @@ func (e *Execution) addSubCharts(finalize *Finalizer, subCharts map[string]v1.Re
 			Throw(errors.Newf("%s: resource type %q required, but found %q", r, resourcetypes.HELM_CHART, acc.Meta().Type))
 		}
 
-		_, subpath := Must2f(R2(download.For(e.Context).Download(common.NewPrinter(e.OutputContext.StdOut()), acc, filepath.Join(charts, n), e.fs)), "downloading helm chart %s", r)
+		_, subpath := Must2f(R2(download.For(e.Context).Download(misc.NewPrinter(e.OutputContext.StdOut()), acc, filepath.Join(charts, n), e.fs)), "downloading helm chart %s", r)
 
 		chartObj := Must1f(R1(loader.Load(subpath, e.fs)), "cannot load subchart %q", subpath)
 		found := false
@@ -158,7 +158,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 
 	values = Merge(Must1(cfg.GetValues()), values)
 
-	e.outf("Loading helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(e.ComponentVersion))
+	e.outf("Loading helm chart from resource %s@%s\n", cfg.Chart, misc.VersionedElementKey(e.ComponentVersion))
 	acc, rcv := Must2f(R2(resourcerefs.ResolveResourceReference(e.ComponentVersion, cfg.Chart, nil)), "chart reference", cfg.Chart.String())
 	finalize.Close(rcv)
 
@@ -179,7 +179,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 	}
 	e.Logger.Info("starting download", "path", path, "access", string(data))
 
-	_, e.path = Must2f(R2(download.For(e.Context).Download(common.NewPrinter(e.OutputContext.StdOut()), acc, path, e.fs)), "downloading helm chart")
+	_, e.path = Must2f(R2(download.For(e.Context).Download(misc.NewPrinter(e.OutputContext.StdOut()), acc, path, e.fs)), "downloading helm chart")
 
 	finalize.With(Calling1(e.fs.Remove, e.path))
 

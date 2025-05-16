@@ -6,12 +6,12 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/maputils"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/common/options"
 )
 
@@ -109,7 +109,7 @@ func MapLabelSpecs(d interface{}) (interface{}, error) {
 
 	var labels []interface{}
 	found := map[string]struct{}{}
-	for _, k := range utils2.StringMapKeys(m) {
+	for _, k := range maputils.OrderedKeys(m) {
 		v := m[k]
 		entry := map[string]interface{}{}
 		if strings.HasPrefix(k, "*") {

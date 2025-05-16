@@ -12,7 +12,7 @@ import (
 	"ocm.software/ocm/api/oci/extensions/attrs/cacheattr"
 	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/commands/cachecmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
@@ -92,7 +92,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	cnt, ncnt, fcnt, size, nsize, fsize, err := o.cache.Cleanup(common.NewPrinter(o.Context.StdErr()), &o.before, o.dryrun)
+	cnt, ncnt, fcnt, size, nsize, fsize, err := o.cache.Cleanup(misc.NewPrinter(o.Context.StdErr()), &o.before, o.dryrun)
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,7 @@ package artifacthdlr
 
 import (
 	"ocm.software/ocm/api/oci"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/cmds/ocm/common/output"
 )
@@ -10,17 +10,17 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
-	return traverse(common.History{}, e.(*Object), opts.Context)
+	return traverse(misc.History{}, e.(*Object), opts.Context)
 }
 
-func traverse(hist common.History, o *Object, octx out.Context) []output.Object {
+func traverse(hist misc.History, o *Object, octx out.Context) []output.Object {
 	blob, err := o.Artifact.Blob()
 	if err != nil {
 		out.Errf(octx, "unable to get artifact blob: %s", err)
 
 		return nil
 	}
-	key := common.NewNameVersion("", blob.Digest().String())
+	key := misc.NewNameVersion("", blob.Digest().String())
 	if err := hist.Add(oci.KIND_OCIARTIFACT, key); err != nil {
 		out.Errf(octx, "unable to add artifact to history: %s", err)
 
@@ -30,9 +30,9 @@ func traverse(hist common.History, o *Object, octx out.Context) []output.Object 
 	if o.Artifact.IsIndex() {
 		refs := o.Artifact.IndexAccess().GetDescriptor().Manifests
 
-		found := map[common.NameVersion]bool{}
+		found := map[misc.NameVersion]bool{}
 		for _, ref := range refs {
-			key := common.NewNameVersion("", ref.Digest.String())
+			key := misc.NewNameVersion("", ref.Digest.String())
 			if found[key] {
 				continue // skip same ref with different attributes for recursion
 			}

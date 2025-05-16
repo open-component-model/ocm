@@ -2,6 +2,7 @@ package builder
 
 import (
 	"github.com/mandelsoft/goutils/exception"
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/modern-go/reflect2"
 	"github.com/onsi/ginkgo/v2"
@@ -12,7 +13,6 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
@@ -151,11 +151,11 @@ func (b *Builder) expect(p interface{}, msg string, tests ...func() bool) {
 }
 
 func (b *Builder) fail(msg string, callerSkip ...int) {
-	b.Fail(msg, utils.Optional(callerSkip...)+2)
+	b.Fail(msg, general.Optional(callerSkip...)+2)
 }
 
 func (b *Builder) failOn(err error, callerSkip ...int) {
-	b.FailOnErr(err, "", utils.Optional(callerSkip...)+2)
+	b.FailOnErr(err, "", general.Optional(callerSkip...)+2)
 }
 
 func (b *Builder) peek() element {
@@ -186,7 +186,7 @@ func (b *Builder) configure(e element, funcs []func(), skip ...int) interface{} 
 	b.Configure(funcs...)
 	err := b.pop().Close()
 	if err != nil {
-		b.fail(err.Error(), utils.Optional(skip...)+1)
+		b.fail(err.Error(), general.Optional(skip...)+1)
 	}
 	return e.Result()
 }

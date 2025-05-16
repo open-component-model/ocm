@@ -26,7 +26,7 @@ import (
 	"ocm.software/ocm/api/utils/compression"
 	"ocm.software/ocm/api/utils/iotools"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/tarutils"
 )
 
@@ -73,7 +73,7 @@ func (h *Handler) SetArchiveMode(b bool) *Handler {
 	return h
 }
 
-func (h *Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (h *Handler) Download(p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	lfs, r, err := h.GetForResource(racc)
 	if err != nil || (lfs == nil && r == nil) {
 		return err != nil, "", err
@@ -84,7 +84,7 @@ func (h *Handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	return h.download(p, fs, path, lfs, r)
 }
 
-func (h *Handler) DownloadFromArtifactSet(pr common.Printer, set *artifactset.ArtifactSet, path string, fs vfs.FileSystem) (bool, string, error) {
+func (h *Handler) DownloadFromArtifactSet(pr misc.Printer, set *artifactset.ArtifactSet, path string, fs vfs.FileSystem) (bool, string, error) {
 	lfs, r, err := h.GetForArtifactSet(set)
 	if err != nil || (lfs == nil && r != nil) {
 		return err != nil, "", err
@@ -92,10 +92,10 @@ func (h *Handler) DownloadFromArtifactSet(pr common.Printer, set *artifactset.Ar
 	if path == "" {
 		path = set.GetMain().String()
 	}
-	return h.download(common.NewPrinter(nil), fs, path, lfs, r)
+	return h.download(misc.NewPrinter(nil), fs, path, lfs, r)
 }
 
-func (h *Handler) download(pr common.Printer, fs vfs.FileSystem, path string, lfs vfs.FileSystem, r io.ReadCloser) (ok bool, dest string, err error) {
+func (h *Handler) download(pr misc.Printer, fs vfs.FileSystem, path string, lfs vfs.FileSystem, r io.ReadCloser) (ok bool, dest string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 

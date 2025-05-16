@@ -2,6 +2,7 @@ package install
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 
@@ -12,8 +13,7 @@ import (
 	"ocm.software/ocm/api/credentials/extensions/repositories/memory"
 	memorycfg "ocm.software/ocm/api/credentials/extensions/repositories/memory/config"
 	"ocm.software/ocm/api/ocm/tools/toi"
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -24,7 +24,7 @@ type (
 	CredentialsRequestSpec = toi.CredentialsRequestSpec
 )
 
-type CredentialValues map[string]common.Properties
+type CredentialValues map[string]misc.Properties
 
 func ParseCredentialSpecification(data []byte, desc string) (*Credentials, error) {
 	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION)
@@ -69,7 +69,7 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 
 	credvalues := CredentialValues{}
 	var sub *errors.ErrorList
-	for _, n := range utils.StringMapKeys(req) {
+	for _, n := range maputils.OrderedKeys(req) {
 		r := req[n]
 		list.Add(sub.Result())
 		sub = errors.ErrListf("credential request %q", n)
@@ -143,9 +143,9 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 	return main, credvalues, list.Result()
 }
 
-func evaluate(ctx credentials.Context, spec *CredentialSpec) (common.Properties, credentials.ConsumerIdentity, error) {
+func evaluate(ctx credentials.Context, spec *CredentialSpec) (misc.Properties, credentials.ConsumerIdentity, error) {
 	var err error
-	var props common.Properties
+	var props misc.Properties
 	var src credentials.CredentialsSource
 	cnt := 0
 	if len(spec.Credentials) > 0 {

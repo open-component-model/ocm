@@ -6,7 +6,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -33,7 +33,7 @@ type AttributeScheme interface {
 	GetType(attr string) (AttributeType, error)
 
 	AddKnownTypes(scheme AttributeScheme)
-	Shortcuts() common.Properties
+	Shortcuts() misc.Properties
 	KnownTypes() KnownTypes
 	KnownTypeNames() []string
 }
@@ -65,13 +65,13 @@ func (t KnownTypes) TypeNames() []string {
 type defaultScheme struct {
 	lock  sync.RWMutex
 	types KnownTypes
-	short common.Properties
+	short misc.Properties
 }
 
 func NewDefaultAttributeScheme() AttributeScheme {
 	return &defaultScheme{
 		types: KnownTypes{},
-		short: common.Properties{},
+		short: misc.Properties{},
 	}
 }
 
@@ -92,7 +92,7 @@ func (d *defaultScheme) KnownTypes() KnownTypes {
 	return d.types.Copy()
 }
 
-func (d *defaultScheme) Shortcuts() common.Properties {
+func (d *defaultScheme) Shortcuts() misc.Properties {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return d.short.Copy()

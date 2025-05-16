@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -17,10 +19,9 @@ import (
 	"ocm.software/ocm/api/ocm/tools/toi/drivers/docker"
 	"ocm.software/ocm/api/ocm/tools/toi/drivers/filesystem"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
-	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/listformat"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/api/utils/runtime"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -147,7 +148,7 @@ for the parameter and credentials file using the command <CMD>ocm bootstrap conf
 Using the option <code>--config</code> it is possible to configure options
 for the execution environment (so far only docker is supported).
 The following options are possible:
-` + listformat.FormatListElements("", listformat.StringElementList(utils2.StringMapKeys(docker.Options))) + `
+` + listformat.FormatListElements("", listformat.StringElementList(maputils.OrderedKeys(docker.Options))) + `
 
 Using the option <code>--create-env  &lt;toi root folder></code> it is possible to
 create a local execution environment for an executor according to the executor
@@ -195,7 +196,7 @@ func (o *Command) Complete(args []string) error {
 	}
 	o.Id = id
 	if len(o.CredentialsFile) > 0 {
-		data, err := utils2.ReadFile(o.CredentialsFile, o.Context.FileSystem())
+		data, err := optionutils.ReadFile(o.CredentialsFile, o.Context.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "failed reading credentials file %q", o.CredentialsFile)
 		}
@@ -207,7 +208,7 @@ func (o *Command) Complete(args []string) error {
 		}
 	}
 	if len(o.ParameterFile) > 0 {
-		data, err := utils2.ReadFile(o.ParameterFile, o.Context.FileSystem())
+		data, err := optionutils.ReadFile(o.ParameterFile, o.Context.FileSystem())
 		if err != nil {
 			return errors.Wrapf(err, "failed reading parameter file %q", o.ParameterFile)
 		}
@@ -280,8 +281,8 @@ func (a *action) Out() error {
 		}
 	}
 
-	common.NewPrinter(a.cmd.StdOut())
-	result, err := install.Execute(common.NewPrinter(a.cmd.StdOut()), driver, a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
+	misc.NewPrinter(a.cmd.StdOut())
+	result, err := install.Execute(misc.NewPrinter(a.cmd.StdOut()), driver, a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
 	if err != nil {
 		return err
 	}

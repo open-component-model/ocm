@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/ioutils"
 	parse "github.com/mandelsoft/spiff/dynaml/x509"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
@@ -20,7 +21,6 @@ import (
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/tech/signing/signutils"
-	utils2 "ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
 	"ocm.software/ocm/api/utils/encrypt"
 	"ocm.software/ocm/api/utils/out"
@@ -137,7 +137,7 @@ func (o *Command) Complete(args []string) error {
 	if o.rootcerts != "" {
 		pool, err := signutils.GetCertPool(o.rootcerts, false)
 		if err != nil {
-			path, err := utils2.ResolvePath(o.rootcerts)
+			path, err := ioutils.ResolvePath(o.rootcerts)
 			if err != nil {
 				return errors.Wrapf(err, "failed to resolve root certificates")
 			}
@@ -190,7 +190,7 @@ func (o *Command) Complete(args []string) error {
 		raw := []byte(o.cacert)
 		cert, pool, err := signutils.GetCertificate(o.cacert, false)
 		if err != nil {
-			path, err := utils2.ResolvePath(o.cacert)
+			path, err := ioutils.ResolvePath(o.cacert)
 			if err != nil {
 				return errors.Wrapf(err, "failed to resolve cacert file %q", o.cacert)
 			}
@@ -225,7 +225,7 @@ func (o *Command) Complete(args []string) error {
 	if o.cakey != "" {
 		key, err := parse.ParsePrivateKey(o.cakey)
 		if err != nil {
-			path, err := utils2.ResolvePath(o.cakey)
+			path, err := ioutils.ResolvePath(o.cakey)
 			if err != nil {
 				return errors.Wrapf(err, "failed to resolve ca key file %q", o.cakey)
 			}

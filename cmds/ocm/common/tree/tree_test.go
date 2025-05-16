@@ -6,25 +6,25 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/common/tree"
 )
 
 type Elem struct {
-	common.History
+	misc.History
 	Node bool
 	Data string
 }
 
 var _ tree.Object = (*Elem)(nil)
 
-func (e *Elem) GetHistory() common.History {
+func (e *Elem) GetHistory() misc.History {
 	return e.History
 }
 
-func (e *Elem) IsNode() *common.NameVersion {
+func (e *Elem) IsNode() *misc.NameVersion {
 	if e.Node {
-		n := common.NewNameVersion(e.Data, "")
+		n := misc.NewNameVersion(e.Data, "")
 		return &n
 	}
 	return nil
@@ -43,25 +43,25 @@ func (e *Invalid) IsValid() bool {
 }
 
 func I(hist ...string) *Invalid {
-	h := common.History{}
+	h := misc.History{}
 	for _, v := range hist {
-		h = append(h, common.NewNameVersion(v, ""))
+		h = append(h, misc.NewNameVersion(v, ""))
 	}
 	return &Invalid{Elem{h, false, ""}}
 }
 
 func E(d string, hist ...string) *Elem {
-	h := common.History{}
+	h := misc.History{}
 	for _, v := range hist {
-		h = append(h, common.NewNameVersion(v, ""))
+		h = append(h, misc.NewNameVersion(v, ""))
 	}
 	return &Elem{h, false, d}
 }
 
 func N(d string, hist ...string) *Elem {
-	h := common.History{}
+	h := misc.History{}
 	for _, v := range hist {
-		h = append(h, common.NewNameVersion(v, ""))
+		h = append(h, misc.NewNameVersion(v, ""))
 	}
 	return &Elem{h, true, d}
 }

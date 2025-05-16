@@ -7,10 +7,10 @@ import (
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"
-	"ocm.software/ocm/api/utils"
 )
 
 type AuthMethod interface {
@@ -50,7 +50,7 @@ func (r *AuthMethods) Names() []string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	return utils.StringMapKeys(r.methods)
+	return maputils.OrderedKeys(r.methods)
 }
 
 func RegisterAuthMethod(m AuthMethod) {

@@ -10,6 +10,7 @@ import (
 	. "ocm.software/ocm/api/oci/testhelper"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
+	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/cobra"
 
 	clictx "ocm.software/ocm/api/cli"
@@ -22,9 +23,8 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	ctfocm "ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	handlercfg "ocm.software/ocm/api/ocm/tools/transfer/transferhandler/config"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
@@ -254,7 +254,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 
 	It("transfers ctf to ctf+tgz with config option", func() {
 		cfg := handlercfg.NewConfig()
-		cfg.ResourcesByValue = utils.BoolP(true)
+		cfg.ResourcesByValue = optionutils.BoolP(true)
 
 		mod := func(ctx clictx.Context, cmd *cobra.Command) {
 			if cmd == nil {
@@ -278,7 +278,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 
 	It("transfers ctf to ctf+tgz with config set", func() {
 		cfg := handlercfg.NewConfig()
-		cfg.ResourcesByValue = utils.BoolP(true)
+		cfg.ResourcesByValue = optionutils.BoolP(true)
 
 		cfgcfg := config.New()
 		cfgcfg.AddSet("transfer", "standard transfer options to use")

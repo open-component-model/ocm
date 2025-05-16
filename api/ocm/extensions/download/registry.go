@@ -11,7 +11,7 @@ import (
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/ocmutils/registry"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/registrations"
 	"ocm.software/ocm/api/utils/runtimefinalizer"
 )
@@ -19,7 +19,7 @@ import (
 const ALL = "*"
 
 type Handler interface {
-	Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
+	Download(p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
 }
 
 const DEFAULT_BLOBHANDLER_PRIO = 100
@@ -34,7 +34,7 @@ type MultiHandler []Handler
 
 var _ sort.Interface = MultiHandler(nil)
 
-func (m MultiHandler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (m MultiHandler) Download(p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	errs := errors.ErrListf("download")
 	for _, h := range m {
 		ok, p, err := h.Download(p, racc, path, fs)
@@ -76,7 +76,7 @@ type Registry interface {
 	Register(hdlr Handler, olist ...HandlerOption)
 	LookupHandler(art, media string) MultiHandler
 	Handler
-	DownloadAsBlob(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
+	DownloadAsBlob(p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
 }
 
 func AsHandlerRegistrationRegistry(r Registry) registrations.HandlerRegistrationRegistry[Target, HandlerOption] {
@@ -140,8 +140,8 @@ func (r *_registry) getHandlers(arttype, mediatype string) MultiHandler {
 	return list
 }
 
-func (r *_registry) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
-	p = common.AssurePrinter(p)
+func (r *_registry) Download(p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+	p = misc.AssurePrinter(p)
 	art := racc.Meta().GetType()
 	m, err := racc.AccessMethod()
 	if err != nil {
@@ -155,11 +155,11 @@ func (r *_registry) Download(p common.Printer, racc cpi.ResourceAccess, path str
 	return r.download(r.LookupHandler(ALL, ""), p, racc, path, fs)
 }
 
-func (r *_registry) DownloadAsBlob(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (r *_registry) DownloadAsBlob(p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	return r.download(r.LookupHandler(ALL, ""), p, racc, path, fs)
 }
 
-func (r *_registry) download(list MultiHandler, p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (r *_registry) download(list MultiHandler, p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	sort.Stable(list)
 	return list.Download(p, racc, path, fs)
 }

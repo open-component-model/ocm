@@ -4,8 +4,6 @@ import (
 	"slices"
 
 	"github.com/mandelsoft/goutils/optionutils"
-
-	"ocm.software/ocm/api/utils"
 )
 
 type Option = optionutils.Option[*Options]
@@ -93,5 +91,5 @@ func (o pr) ApplyTo(opts *Options) {
 }
 
 func WithPropagation(b ...bool) Option {
-	return pr(utils.OptionalDefaultedBool(true, b...))
+	return pr(optionutils.BoolOption(b...))
 }

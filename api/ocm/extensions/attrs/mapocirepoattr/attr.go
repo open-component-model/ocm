@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/maputils"
 
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci/grammar"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -192,7 +192,7 @@ func (a *Attribute) Map(name string) string {
 }
 
 func (a *Attribute) MapPrefix(name string) string {
-	keys := utils.StringMapKeys(a.PrefixMappings)
+	keys := maputils.OrderedKeys(a.PrefixMappings)
 	for i := range keys {
 		k := keys[len(keys)-i-1]
 		if strings.HasPrefix(name, k+grammar.RepositorySeparator) {

@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/credentials/cpi"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 const (
@@ -109,7 +109,7 @@ type CredentialsRequestSpec struct {
 	Description string `json:"description"`
 	// Properties describes the meaning of the used properties for this
 	// credential set.
-	Properties common.Properties `json:"properties"`
+	Properties misc.Properties `json:"properties"`
 	// Optional set to true make the request optional
 	Optional bool `json:"optional,omitempty"`
 }
@@ -151,7 +151,7 @@ type CredentialSpec struct {
 	// Reference refers to credentials store in some other repo
 	Reference *cpi.GenericCredentialsSpec `json:"reference,omitempty"`
 	// Credentials are direct credentials (one of Reference or Credentials must be set)
-	Credentials common.Properties `json:"credentials,omitempty"`
+	Credentials misc.Properties `json:"credentials,omitempty"`
 
 	// TargetConsumerId specifies the consumer id to feed with these credentials
 	TargetConsumerId credentials.ConsumerIdentity `json:"targetConsumerId,omitempty"`

@@ -9,6 +9,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/stringutils"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/xeipuuv/gojsonschema"
@@ -26,12 +27,11 @@ import (
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/spiff"
 )
@@ -285,7 +285,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 }
 
 // ExecuteAction prepared the execution options and executes the action.
-func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpecification, creds *Credentials, params []byte, octxp ocm.ContextProvider, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func ExecuteAction(p misc.Printer, d Driver, name string, spec *toi.PackageSpecification, creds *Credentials, params []byte, octxp ocm.ContextProvider, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var err error
 
 	var finalize Finalizer
@@ -349,7 +349,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	if econfig == nil {
 		p.Printf("no executor config found\n")
 	} else {
-		p.Printf("using executor config:\n%s\n", utils.IndentLines(string(econfig), "  "))
+		p.Printf("using executor config:\n%s\n", stringutils.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
 	credreqs, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
@@ -388,7 +388,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	}
 	{
 		data, _ := yaml.Marshal(ccfg)
-		p.Printf("using ocm config:\n%s\n", utils.IndentLines(string(data), "  "))
+		p.Printf("using ocm config:\n%s\n", stringutils.IndentLines(string(data), "  "))
 	}
 
 	// prepare user config
@@ -399,7 +399,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	if params == nil {
 		p.Printf("no parameter config found\n")
 	} else {
-		p.Printf("using package parameters:\n:%s\n", utils.IndentLines(string(params), "  "))
+		p.Printf("using package parameters:\n:%s\n", stringutils.IndentLines(string(params), "  "))
 	}
 
 	if executor.ParameterMapping != nil {
@@ -411,7 +411,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 
 		if err == nil {
 			if !bytes.Equal(orig, params) {
-				p.Printf("using executor parameters:\n%s\n", utils.IndentLines(string(params), "  "))
+				p.Printf("using executor parameters:\n%s\n", stringutils.IndentLines(string(params), "  "))
 			}
 		}
 	}
@@ -453,7 +453,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 
 	op.Outputs = executor.Outputs
 
-	op.ComponentVersion = common.VersionedElementKey(cv).String()
+	op.ComponentVersion = misc.VersionedElementKey(cv).String()
 	return d.Exec(op)
 }
 

@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"github.com/mandelsoft/goutils/general"
+
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Object interface {
-	common.HistorySource
-	IsNode() *common.NameVersion
+	misc.HistorySource
+	IsNode() *misc.NameVersion
 }
 
 type Typed interface {
@@ -21,7 +22,7 @@ type ValidTreeElement interface {
 	IsValid() bool
 }
 
-type NodeCreator func(common.History, common.NameVersion) Object
+type NodeCreator func(misc.History, misc.NameVersion) Object
 
 // TreeObject is an element enriched by a textual
 // tree graph prefix line.
@@ -39,8 +40,8 @@ func (t *TreeObject) String() string {
 }
 
 type TreeNode struct {
-	common.NameVersion
-	History  common.History
+	misc.NameVersion
+	History  misc.History
 	CausedBy Object // the object causing the synthesized node to be inserted
 }
 
@@ -61,7 +62,7 @@ var (
 // is not desired, pass an empty symbol string.
 func MapToTree(objs Objects, creator NodeCreator, symbols ...string) TreeObjects {
 	result := TreeObjects{}
-	nodeSym := utils.OptionalDefaulted(node, symbols...)
+	nodeSym := general.OptionalDefaulted(node, symbols...)
 	if nodeSym != "" && !strings.HasPrefix(nodeSym, " ") {
 		nodeSym = " " + nodeSym
 	}
@@ -69,8 +70,8 @@ func MapToTree(objs Objects, creator NodeCreator, symbols ...string) TreeObjects
 	return result
 }
 
-func handleLevel(objs Objects, header string, prefix common.History, start int, creator NodeCreator, result *TreeObjects, nodeSym string) {
-	var node *common.NameVersion
+func handleLevel(objs Objects, header string, prefix misc.History, start int, creator NodeCreator, result *TreeObjects, nodeSym string) {
+	var node *misc.NameVersion
 	lvl := len(prefix)
 	for i := start; i < len(objs); {
 		var next int

@@ -11,7 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/download"
 	"ocm.software/ocm/api/utils/compression"
 	"ocm.software/ocm/api/utils/mime"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Handler struct{}
@@ -32,7 +32,7 @@ func wrapErr(err error, racc cpi.ResourceAccess) error {
 	return errors.Wrapf(err, "resource %s/%s%s", m.GetName(), m.GetVersion(), m.ExtraIdentity.String())
 }
 
-func (_ Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (_ Handler) Download(p misc.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	rd, err := cpi.GetResourceReader(racc)
 	if err != nil {
 		return true, "", wrapErr(err, racc)

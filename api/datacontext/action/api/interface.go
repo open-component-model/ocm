@@ -1,7 +1,7 @@
 package api
 
 import (
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -27,7 +27,7 @@ type ActionSpec interface {
 	runtime.VersionedTypedObject
 	SetVersion(string)
 	Selector() Selector
-	GetConsumerAttributes() common.Properties
+	GetConsumerAttributes() misc.Properties
 }
 
 type ActionSpecType runtime.VersionedTypedObjectType[ActionSpec]

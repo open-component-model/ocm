@@ -8,6 +8,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
+	"github.com/mandelsoft/goutils/maputils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -78,7 +79,7 @@ func DetermineElementsForSource(ctx clictx.Context, ictx inputs.Context, templ t
 		listkey := cliutils.Plural(h.Key(), 0)
 		if reslist, ok := tmp[listkey]; ok {
 			if len(tmp) != 1 {
-				return nil, errors.Newf("invalid %s spec %d: either a list or a single spec possible for %s (found keys %s)", h.Key(), i, listkey, utils.StringMapKeys(tmp))
+				return nil, errors.Newf("invalid %s spec %d: either a list or a single spec possible for %s (found keys %s)", h.Key(), i, listkey, maputils.OrderedKeys(tmp))
 			}
 			l, ok := reslist.([]interface{})
 			if !ok {
@@ -96,7 +97,7 @@ func DetermineElementsForSource(ctx clictx.Context, ictx inputs.Context, templ t
 			if entry, ok := tmp[h.Key()]; ok {
 				if m, ok := entry.(map[string]interface{}); ok {
 					if len(tmp) != 1 {
-						return nil, errors.Newf("invalid %s spec %d: either a list or a single spec possible for %s (found keys %s)", h.Key(), i, listkey, utils.StringMapKeys(tmp))
+						return nil, errors.Newf("invalid %s spec %d: either a list or a single spec possible for %s (found keys %s)", h.Key(), i, listkey, maputils.OrderedKeys(tmp))
 					}
 					tmp = m
 				}
@@ -163,7 +164,7 @@ func DetermineElementForData(ctx clictx.Context, ictx inputs.Context, si SourceI
 		if err != nil {
 			return nil, err
 		}
-		if err = Validate(input, ictx, general.OptionalDefaulted(si.Origin(), input.SourceFile)); err != nil {
+		if err = Validate(input, ictx, general.OptionalNonZeroDefaulted(si.Origin(), input.SourceFile)); err != nil {
 			return nil, err
 		}
 	}

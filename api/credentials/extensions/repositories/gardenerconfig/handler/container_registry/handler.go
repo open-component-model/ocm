@@ -11,7 +11,7 @@ import (
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 func init() {
@@ -90,7 +90,7 @@ func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfgcpi.Credentia
 }
 
 func newCredentialsFromContainerRegistryCredentials(auth *containerRegistryCredentials) cpi.Credentials {
-	props := common.Properties{
+	props := misc.Properties{
 		cpi.ATTR_USERNAME: auth.Username,
 		cpi.ATTR_PASSWORD: auth.Password,
 	}

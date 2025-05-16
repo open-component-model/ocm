@@ -11,7 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/spiff"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/closureoption"
 	"ocm.software/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -112,7 +112,7 @@ func (o *Command) Run() error {
 		return err
 	}
 	a := &action{
-		printer: common.NewPrinter(o.Context.StdOut()),
+		printer: misc.NewPrinter(o.Context.StdOut()),
 		target:  target,
 		handler: thdlr,
 		closure: transfer.TransportClosure{},
@@ -124,7 +124,7 @@ func (o *Command) Run() error {
 /////////////////////////////////////////////////////////////////////////////
 
 type action struct {
-	printer common.Printer
+	printer misc.Printer
 	target  ocm.Repository
 	handler transferhandler.TransferHandler
 	closure transfer.TransportClosure

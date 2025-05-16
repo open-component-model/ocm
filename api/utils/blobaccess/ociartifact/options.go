@@ -5,7 +5,7 @@ import (
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/tools/transfer/filters"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 type Option = optionutils.Option[*Options]
@@ -16,7 +16,7 @@ type Options struct {
 	Context oci.Context
 	Version string
 	Filter  Filter
-	Printer common.Printer
+	Printer misc.Printer
 }
 
 func (o *Options) OCIContext() oci.Context {
@@ -26,9 +26,9 @@ func (o *Options) OCIContext() oci.Context {
 	return o.Context
 }
 
-func (o *Options) GetPrinter() common.Printer {
+func (o *Options) GetPrinter() misc.Printer {
 	if o.Printer == nil {
-		return common.NewPrinter(nil)
+		return misc.NewPrinter(nil)
 	}
 	return o.Printer
 }
@@ -86,14 +86,14 @@ func WithVersion(v string) Option {
 ////////////////////////////////////////////////////////////////////////////////
 
 type printer struct {
-	common.Printer
+	misc.Printer
 }
 
 func (o printer) ApplyTo(opts *Options) {
 	opts.Printer = o
 }
 
-func WithPrinter(p common.Printer) Option {
+func WithPrinter(p misc.Printer) Option {
 	return printer{p}
 }
 

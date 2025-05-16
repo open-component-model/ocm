@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/goutils/optionutils"
 	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
@@ -28,7 +29,7 @@ type SubstitutionTarget interface {
 func ParseFile(file string, fss ...vfs.FileSystem) (SubstitutionTarget, error) {
 	fs := utils.FileSystem(fss...)
 
-	data, err := utils.ReadFile(file, fs)
+	data, err := optionutils.ReadFile(file, fs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot read file %q", file)
 	}

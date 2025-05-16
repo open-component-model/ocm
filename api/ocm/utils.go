@@ -14,7 +14,7 @@ import (
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -84,8 +84,8 @@ func IsIntermediate(spec RepositorySpec) bool {
 	return false
 }
 
-func ComponentRefKey(ref *compdesc.Reference) common.NameVersion {
-	return common.NewNameVersion(ref.GetComponentName(), ref.GetVersion())
+func ComponentRefKey(ref *compdesc.Reference) misc.NameVersion {
+	return misc.NewNameVersion(ref.GetComponentName(), ref.GetVersion())
 }
 
 func IsUnknownRepositorySpec(s RepositorySpec) bool {

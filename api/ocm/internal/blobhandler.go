@@ -6,7 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"ocm.software/ocm/api/utils"
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/utils/registrations"
 )
 
@@ -303,7 +304,7 @@ type blobHandlerRegistry struct {
 var DefaultBlobHandlerRegistry = NewBlobHandlerRegistry()
 
 func NewBlobHandlerRegistry(base ...BlobHandlerRegistry) BlobHandlerRegistry {
-	b := utils.Optional(base...)
+	b := general.Optional(base...)
 	r := &blobHandlerRegistry{
 		base:                        b,
 		handlers:                    map[BlobHandlerKey]BlobHandler{},

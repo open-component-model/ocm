@@ -15,16 +15,16 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer/internal"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/api/utils/errkind"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
-type WalkingState = common.WalkingState[*struct{}, interface{}]
+type WalkingState = misc.WalkingState[*struct{}, interface{}]
 
-type TransportClosure = common.NameVersionInfo[*struct{}]
+type TransportClosure = misc.NameVersionInfo[*struct{}]
 
-func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
-	return TransferVersionWithContext(common.WithPrinter(context.Background(), common.AssurePrinter(printer)), closure, src, tgt, handler)
+func TransferVersion(printer misc.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
+	return TransferVersionWithContext(misc.WithPrinter(context.Background(), misc.AssurePrinter(printer)), closure, src, tgt, handler)
 }
 
 func TransferVersionWithContext(ctx context.Context, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
@@ -36,12 +36,12 @@ func TransferVersionWithContext(ctx context.Context, closure TransportClosure, s
 }
 
 func transferVersion(ctx context.Context, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) (rerr error) {
-	printer := common.GetPrinter(ctx)
-	if err := common.IsContextCanceled(ctx); err != nil {
+	printer := misc.GetPrinter(ctx)
+	if err := misc.IsContextCanceled(ctx); err != nil {
 		printer.Printf("transfer cancelled by caller\n")
 		return err
 	}
-	nv := common.VersionedElementKey(src)
+	nv := misc.VersionedElementKey(src)
 	log = log.WithValues("history", state.History.String(), "version", nv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
 		return err
@@ -173,7 +173,7 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 			return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
 		}
 		if cv != nil {
-			list.Add(transferVersion(common.AddPrinterGap(ctx, "  "), log.WithValues("ref", r.Name), state, cv, tgt, shdlr))
+			list.Add(transferVersion(misc.AddPrinterGap(ctx, "  "), log.WithValues("ref", r.Name), state, cv, tgt, shdlr))
 			list.Addf(nil, cv.Close(), "closing reference %s", r.Name)
 		}
 	}
@@ -220,16 +220,16 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 	return list.Result()
 }
 
-func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	return copyVersion(context.Background(), common.AssurePrinter(printer), log, hist, src, t, src.GetDescriptor().Copy(), handler)
+func CopyVersion(printer misc.Printer, log logging.Logger, hist misc.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
+	return copyVersion(context.Background(), misc.AssurePrinter(printer), log, hist, src, t, src.GetDescriptor().Copy(), handler)
 }
 
-func CopyVersionWithContext(cctx context.Context, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	return copyVersion(cctx, common.GetPrinter(cctx), log, hist, src, t, src.GetDescriptor().Copy(), handler)
+func CopyVersionWithContext(cctx context.Context, log logging.Logger, hist misc.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
+	return copyVersion(cctx, misc.GetPrinter(cctx), log, hist, src, t, src.GetDescriptor().Copy(), handler)
 }
 
 // copyVersion (purely internal) expects an already prepared target comp desc for t given as prep.
-func copyVersion(cctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler) (rerr error) {
+func copyVersion(cctx context.Context, printer misc.Printer, log logging.Logger, hist misc.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler) (rerr error) {
 	var finalize finalizer.Finalizer
 
 	defer errors.PropagateError(&rerr, finalize.Finalize)
@@ -245,7 +245,7 @@ func copyVersion(cctx context.Context, printer common.Printer, log logging.Logge
 	for i, r := range src.GetResources() {
 		var m ocmcpi.AccessMethod
 
-		if err := common.IsContextCanceled(cctx); err != nil {
+		if err := misc.IsContextCanceled(cctx); err != nil {
 			printer.Printf("cancelled by caller\n")
 			return err
 		}
@@ -313,7 +313,7 @@ func copyVersion(cctx context.Context, printer common.Printer, log logging.Logge
 	for i, r := range src.GetSources() {
 		var m ocmcpi.AccessMethod
 
-		if err := common.IsContextCanceled(cctx); err != nil {
+		if err := misc.IsContextCanceled(cctx); err != nil {
 			printer.Printf("cancelled by caller\n")
 			return err
 		}
@@ -350,7 +350,7 @@ func copyVersion(cctx context.Context, printer common.Printer, log logging.Logge
 	return nil
 }
 
-func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, meta compdesc.ArtifactMetaAccess, hint string, msgs ...interface{}) {
+func notifyArtifactInfo(printer misc.Printer, log logging.Logger, kind string, index int, meta compdesc.ArtifactMetaAccess, hint string, msgs ...interface{}) {
 	msg := "copying"
 	cmsg := "..."
 	if len(msgs) > 0 {

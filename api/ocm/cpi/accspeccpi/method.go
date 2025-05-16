@@ -4,9 +4,9 @@ import (
 	"io"
 	"sync"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/opencontainers/go-digest"
 
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 
@@ -43,7 +43,7 @@ func NewDefaultMethodImpl(c ComponentVersionAccess, a AccessSpec, digest digest.
 		mime:    mime,
 		digest:  digest,
 		factory: fac,
-		local:   utils.Optional(local...),
+		local:   general.Optional(local...),
 	}
 }
 
@@ -63,7 +63,7 @@ func NewDefaultMethodImplForBlobAccess(c ComponentVersionAccess, a AccessSpec, d
 		mime:    blob.MimeType(),
 		digest:  digest,
 		factory: nil,
-		local:   utils.Optional(local...),
+		local:   general.Optional(local...),
 	}, nil
 }
 

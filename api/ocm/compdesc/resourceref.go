@@ -6,7 +6,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 )
 
 func ResolveReferencePath(cv *ComponentDescriptor, path []metav1.Identity, resolver ComponentVersionResolver) (*ComponentDescriptor, error) {
@@ -18,7 +18,7 @@ func ResolveReferencePath(cv *ComponentDescriptor, path []metav1.Identity, resol
 	for _, cr := range path {
 		cref, err := eff.GetReferenceByIdentity(cr)
 		if err != nil {
-			return nil, errors.Wrapf(err, "%s", common.VersionedElementKey(cv))
+			return nil, errors.Wrapf(err, "%s", misc.VersionedElementKey(cv))
 		}
 
 		compoundResolver := NewCompoundResolver(NewComponentVersionSet(cv), resolver)

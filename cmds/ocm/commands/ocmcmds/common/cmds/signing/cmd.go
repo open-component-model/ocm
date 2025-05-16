@@ -12,7 +12,7 @@ import (
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/resolvers"
 	"ocm.software/ocm/api/ocm/tools/signing"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	ocmcommon "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
@@ -97,7 +97,7 @@ func (o *SignatureCommand) Run() (rerr error) {
 	if err != nil {
 		return err
 	}
-	err = utils.HandleOutput(NewAction(o.spec.terms, o.Context.OCMContext(), common.NewPrinter(o.Context.StdOut()), sopts), handler, utils.StringElemSpecs(o.Refs...)...)
+	err = utils.HandleOutput(NewAction(o.spec.terms, o.Context.OCMContext(), misc.NewPrinter(o.Context.StdOut()), sopts), handler, utils.StringElemSpecs(o.Refs...)...)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ type Action interface {
 
 type action struct {
 	desc         []string
-	printer      common.Printer
+	printer      misc.Printer
 	state        signing.WalkingState
 	baseresolver ocm.ComponentVersionResolver
 	sopts        *signing.Options
@@ -125,7 +125,7 @@ type action struct {
 
 var _ output.Output = (*action)(nil)
 
-func NewAction(desc []string, ctx ocm.Context, p common.Printer, sopts *signing.Options) Action {
+func NewAction(desc []string, ctx ocm.Context, p misc.Printer, sopts *signing.Options) Action {
 	return &action{
 		desc:         desc,
 		printer:      p,
@@ -142,7 +142,7 @@ func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.Compo
 
 	d, err := signing.Apply(a.printer, &a.state, o.ComponentVersion, &sopts)
 	var cd *compdesc.ComponentDescriptor
-	nv := common.VersionedElementKey(o.ComponentVersion)
+	nv := misc.VersionedElementKey(o.ComponentVersion)
 	vi := a.state.Get(nv)
 	if vi != nil {
 		cd = vi.GetContext(nv).Descriptor

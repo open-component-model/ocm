@@ -12,16 +12,16 @@ import (
 	"ocm.software/ocm/api/credentials/cpi"
 	local "ocm.software/ocm/api/credentials/extensions/repositories/npm"
 	npmCredentials "ocm.software/ocm/api/tech/npm/identity"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtimefinalizer"
 )
 
 var _ = Describe("NPM config - .npmrc", func() {
-	props := common.Properties{
+	props := misc.Properties{
 		npmCredentials.ATTR_TOKEN: "npm_TOKEN",
 	}
 
-	props2 := common.Properties{
+	props2 := misc.Properties{
 		npmCredentials.ATTR_TOKEN: "bearer_TOKEN",
 	}
 

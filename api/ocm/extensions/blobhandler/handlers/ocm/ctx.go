@@ -1,8 +1,9 @@
 package ocm
 
 import (
+	"github.com/mandelsoft/goutils/general"
+
 	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 
@@ -27,7 +28,7 @@ func New(repo cpi.Repository, compname string, access BlobSink, impltyp string, 
 	return &DefaultStorageContext{
 		DefaultStorageContext: *cpi.NewDefaultStorageContext(repo, compname, cpi.ImplementationRepositoryType{cpi.CONTEXT_TYPE, impltyp}),
 		Sink:                  access,
-		Payload:               utils.Optional(payload...),
+		Payload:               general.Optional(payload...),
 	}
 }
 

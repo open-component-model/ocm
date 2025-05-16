@@ -8,7 +8,7 @@ import (
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/pubsub"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -93,7 +93,7 @@ type Method struct {
 
 var _ pubsub.PubSubMethod = (*Method)(nil)
 
-func (m *Method) NotifyComponentVersion(version common.NameVersion) error {
+func (m *Method) NotifyComponentVersion(version misc.NameVersion) error {
 	list := errors.ErrList()
 	for _, m := range m.meths {
 		list.Add(m.NotifyComponentVersion(version))

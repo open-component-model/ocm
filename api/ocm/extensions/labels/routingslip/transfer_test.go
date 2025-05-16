@@ -18,7 +18,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/utils/accessobj"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -64,7 +64,7 @@ var _ = Describe("management", func() {
 
 		target := Must(ctf.Open(env, accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, TARGET, 0o700, env))
 		finalize.Close(target, "target")
-		pr, buf := common.NewBufferedPrinter()
+		pr, buf := misc.NewBufferedPrinter()
 
 		MustBeSuccessful(transfer.TransferVersion(pr, nil, cv, target, Must(standard.New())))
 

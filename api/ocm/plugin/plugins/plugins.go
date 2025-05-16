@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/mandelsoft/goutils/maputils"
+
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/cache"
 	"ocm.software/ocm/api/ocm/plugin/config"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
-	"ocm.software/ocm/api/utils"
 )
 
 type Set = *pluginsImpl
@@ -97,7 +98,7 @@ func (pi *pluginsImpl) PluginNames() []string {
 	pi.lock.RLock()
 	defer pi.lock.RUnlock()
 
-	return utils.StringMapKeys(pi.plugins)
+	return maputils.OrderedKeys(pi.plugins)
 }
 
 func (pi *pluginsImpl) Get(name string) plugin.Plugin {

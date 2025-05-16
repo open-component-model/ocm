@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/generics"
+	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/credentials/cpi"
-	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
 )
 
@@ -38,7 +39,7 @@ func (s RepositorySpec) WithConsumerPropagation(propagate bool) *RepositorySpec 
 func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 	var p *bool
 	if len(prop) > 0 {
-		p = generics.Pointer(utils.Optional(prop...))
+		p = generics.PointerTo(general.Optional(prop...))
 	}
 	if path == "" {
 		path = "~/.docker/config.json"
@@ -53,7 +54,7 @@ func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 func NewRepositorySpecForConfig(data []byte, prop ...bool) *RepositorySpec {
 	var p *bool
 	if len(prop) > 0 {
-		p = generics.Pointer(utils.Optional(prop...))
+		p = generics.PointerTo(general.Optional(prop...))
 	}
 	return &RepositorySpec{
 		ObjectVersionedType:      runtime.NewVersionedTypedObject(Type),
@@ -72,5 +73,5 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to Repositories", r)
 	}
-	return repos.GetRepository(ctx, a.DockerConfigFile, a.DockerConfig, utils.AsBool(a.PropgateConsumerIdentity, true))
+	return repos.GetRepository(ctx, a.DockerConfigFile, a.DockerConfig, optionutils.AsBool(a.PropgateConsumerIdentity, true))
 }

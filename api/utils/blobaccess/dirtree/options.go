@@ -3,10 +3,9 @@ package dirtree
 import (
 	"slices"
 
+	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
-	"ocm.software/ocm/api/utils"
 )
 
 type Option = optionutils.Option[*Options]
@@ -42,10 +41,10 @@ func (o *Options) ApplyTo(opts *Options) {
 		opts.MimeType = o.MimeType
 	}
 	if o.CompressWithGzip != nil {
-		opts.CompressWithGzip = utils.BoolP(*o.CompressWithGzip)
+		opts.CompressWithGzip = optionutils.BoolP(*o.CompressWithGzip)
 	}
 	if o.PreserveDir != nil {
-		opts.PreserveDir = utils.BoolP(*o.PreserveDir)
+		opts.PreserveDir = optionutils.BoolP(*o.PreserveDir)
 	}
 	if len(o.IncludeFiles) != 0 {
 		opts.IncludeFiles = slices.Clone(o.IncludeFiles)
@@ -54,7 +53,7 @@ func (o *Options) ApplyTo(opts *Options) {
 		opts.ExcludeFiles = slices.Clone(o.ExcludeFiles)
 	}
 	if o.FollowSymlinks != nil {
-		opts.FollowSymlinks = utils.BoolP(*o.FollowSymlinks)
+		opts.FollowSymlinks = optionutils.BoolP(*o.FollowSymlinks)
 	}
 }
 
@@ -87,21 +86,21 @@ func WithMimeType(mime string) Option {
 type compressWithGzip bool
 
 func (o compressWithGzip) ApplyTo(opts *Options) {
-	opts.CompressWithGzip = utils.BoolP(o)
+	opts.CompressWithGzip = optionutils.BoolP(o)
 }
 
 func WithCompressWithGzip(b ...bool) Option {
-	return compressWithGzip(utils.OptionalDefaultedBool(true, b...))
+	return compressWithGzip(general.OptionalDefaultedBool(true, b...))
 }
 
 type preserveDir bool
 
 func (o preserveDir) ApplyTo(opts *Options) {
-	opts.PreserveDir = utils.BoolP(o)
+	opts.PreserveDir = optionutils.BoolP(o)
 }
 
 func WithPreserveDir(b ...bool) Option {
-	return preserveDir(utils.OptionalDefaultedBool(true, b...))
+	return preserveDir(general.OptionalDefaultedBool(true, b...))
 }
 
 type includeFiles []string
@@ -127,9 +126,9 @@ func WithExcludeFiles(files []string) Option {
 type followSymlinks bool
 
 func (o followSymlinks) ApplyTo(opts *Options) {
-	opts.FollowSymlinks = utils.BoolP(o)
+	opts.FollowSymlinks = optionutils.BoolP(o)
 }
 
 func WithFollowSymlinks(b ...bool) Option {
-	return followSymlinks(utils.OptionalDefaultedBool(true, b...))
+	return followSymlinks(general.OptionalDefaultedBool(true, b...))
 }

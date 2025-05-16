@@ -14,7 +14,7 @@ import (
 
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/utils/errkind"
-	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/api/utils/runtime/descriptivetype"
 )
@@ -54,7 +54,7 @@ type (
 // PubSubMethod is the handler able to publish
 // an OCM component version event.
 type PubSubMethod interface {
-	NotifyComponentVersion(version common.NameVersion) error
+	NotifyComponentVersion(version misc.NameVersion) error
 }
 
 // TypeScheme is the registry for specification types for
