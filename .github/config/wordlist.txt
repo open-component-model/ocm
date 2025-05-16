@@ -302,8 +302,6 @@ valueset
 versionedtypedobjects
 walkthrough
 wget
-winget
-wingetcreate
 xml
 yaml
 yitsushi

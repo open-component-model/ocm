@@ -55,7 +55,6 @@ Install the latest release with
 - [AUR](#aur)
 - [Docker and Podman](#container)
 - [Chocolatey](#chocolatey)
-- [Winget](#winget)
 
 ### Bash
 
@@ -155,14 +154,6 @@ choco install ocm-cli
 ```
 
 see: [chocolatey community package: ocm-cli](https://community.chocolatey.org/packages/ocm-cli)
-
-### Winget
-
-```powershell
-winget install ocm-cli
-```
-
-see: [microsoft/winget-packages: Open-Component-Model](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/Open-Component-Model)
 
 ## Examples
 
