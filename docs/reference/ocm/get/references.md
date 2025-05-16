@@ -1,9 +1,12 @@
 ---
-title: "ocm get references &mdash; Get References Of A Component Version"
+title: "ocm get references - Get References Of A Component Version"
 linkTitle: "get references"
 url: "/docs/cli-reference/get/references/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "get references"
 ---
 
 ### Synopsis

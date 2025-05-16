@@ -1,9 +1,12 @@
 ---
-title: "ocm sign hash &mdash; Sign Hash"
+title: "ocm sign hash - Sign Hash"
 linkTitle: "sign hash"
 url: "/docs/cli-reference/sign/hash/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "sign hash"
 ---
 
 ### Synopsis

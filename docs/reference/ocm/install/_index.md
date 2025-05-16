@@ -1,9 +1,12 @@
 ---
-title: "ocm install &mdash; Install New OCM CLI Components"
+title: "ocm install - Install New OCM CLI Components"
 linkTitle: "install"
 url: "/docs/cli-reference/install/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "install"
 ---
 
 ### Synopsis

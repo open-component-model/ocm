@@ -1,9 +1,12 @@
 ---
-title: "ocm get credentials &mdash; Get Credentials For A Dedicated Consumer Spec"
+title: "ocm get credentials - Get Credentials For A Dedicated Consumer Spec"
 linkTitle: "get credentials"
 url: "/docs/cli-reference/get/credentials/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "get credentials"
 ---
 
 ### Synopsis

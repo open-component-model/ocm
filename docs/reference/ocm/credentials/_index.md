@@ -1,9 +1,12 @@
 ---
-title: "ocm credentials &mdash; Commands Acting On Credentials"
+title: "ocm credentials - Commands Acting On Credentials"
 linkTitle: "credentials"
 url: "/docs/cli-reference/credentials/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "credentials"
 ---
 
 ### Synopsis

@@ -1,9 +1,12 @@
 ---
-title: "ocm transfer &mdash; Transfer Artifacts Or Components"
+title: "ocm transfer - Transfer Artifacts Or Components"
 linkTitle: "transfer"
 url: "/docs/cli-reference/transfer/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "transfer"
 ---
 
 ### Synopsis

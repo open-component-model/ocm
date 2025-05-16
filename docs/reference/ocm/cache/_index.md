@@ -1,9 +1,12 @@
 ---
-title: "ocm cache &mdash; Cache Related Commands"
+title: "ocm cache - Cache Related Commands"
 linkTitle: "cache"
 url: "/docs/cli-reference/cache/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "cache"
 ---
 
 ### Synopsis

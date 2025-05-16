@@ -1,9 +1,12 @@
 ---
-title: "ocm bootstrap configuration &mdash; Bootstrap TOI Configuration Files"
+title: "ocm bootstrap configuration - Bootstrap TOI Configuration Files"
 linkTitle: "bootstrap configuration"
 url: "/docs/cli-reference/bootstrap/configuration/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "bootstrap configuration"
 ---
 
 ### Synopsis

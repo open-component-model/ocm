@@ -1,9 +1,12 @@
 ---
-title: "ocm download &mdash; Download Oci Artifacts, Resources Or Complete Components"
+title: "ocm download - Download Oci Artifacts, Resources Or Complete Components"
 linkTitle: "download"
 url: "/docs/cli-reference/download/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "download"
 ---
 
 ### Synopsis

@@ -1,9 +1,12 @@
 ---
-title: "ocm describe package &mdash; Describe TOI Package"
+title: "ocm describe package - Describe TOI Package"
 linkTitle: "describe package"
 url: "/docs/cli-reference/describe/package/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "describe package"
 ---
 
 ### Synopsis

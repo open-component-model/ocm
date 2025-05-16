@@ -1,9 +1,12 @@
 ---
-title: "ocm download resources &mdash; Download Resources Of A Component Version"
+title: "ocm download resources - Download Resources Of A Component Version"
 linkTitle: "download resources"
 url: "/docs/cli-reference/download/resources/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "download resources"
 ---
 
 ### Synopsis

@@ -1,9 +1,12 @@
 ---
-title: "ocm hash &mdash; Hash And Normalization Operations"
+title: "ocm hash - Hash And Normalization Operations"
 linkTitle: "hash"
 url: "/docs/cli-reference/hash/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "hash"
 ---
 
 ### Synopsis

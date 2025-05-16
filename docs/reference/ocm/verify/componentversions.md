@@ -1,9 +1,12 @@
 ---
-title: "ocm verify componentversions &mdash; Verify Signature Of Component Version"
+title: "ocm verify componentversions - Verify Signature Of Component Version"
 linkTitle: "verify componentversions"
 url: "/docs/cli-reference/verify/componentversions/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "verify componentversions"
 ---
 
 ### Synopsis

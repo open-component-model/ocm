@@ -1,9 +1,12 @@
 ---
-title: "ocm get artifacts &mdash; Get Artifact Version"
+title: "ocm get artifacts - Get Artifact Version"
 linkTitle: "get artifacts"
 url: "/docs/cli-reference/get/artifacts/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "get artifacts"
 ---
 
 ### Synopsis

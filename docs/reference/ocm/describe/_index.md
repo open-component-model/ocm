@@ -1,9 +1,12 @@
 ---
-title: "ocm describe &mdash; Describe Various Elements By Using Appropriate Sub Commands."
+title: "ocm describe - Describe Various Elements By Using Appropriate Sub Commands."
 linkTitle: "describe"
 url: "/docs/cli-reference/describe/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "describe"
 ---
 
 ### Synopsis

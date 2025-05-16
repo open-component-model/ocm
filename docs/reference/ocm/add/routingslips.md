@@ -1,9 +1,12 @@
 ---
-title: "ocm add routingslips &mdash; Add Routing Slip Entry"
+title: "ocm add routingslips - Add Routing Slip Entry"
 linkTitle: "add routingslips"
 url: "/docs/cli-reference/add/routingslips/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "add routingslips"
 ---
 
 ### Synopsis

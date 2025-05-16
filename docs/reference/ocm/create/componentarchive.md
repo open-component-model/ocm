@@ -1,9 +1,12 @@
 ---
-title: "ocm create componentarchive &mdash; (DEPRECATED) Create New Component Archive"
+title: "ocm create componentarchive - (DEPRECATED) Create New Component Archive"
 linkTitle: "create componentarchive"
 url: "/docs/cli-reference/create/componentarchive/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "create componentarchive"
 ---
 
 ### Synopsis

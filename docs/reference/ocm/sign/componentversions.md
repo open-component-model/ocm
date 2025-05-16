@@ -1,9 +1,12 @@
 ---
-title: "ocm sign componentversions &mdash; Sign Component Version"
+title: "ocm sign componentversions - Sign Component Version"
 linkTitle: "sign componentversions"
 url: "/docs/cli-reference/sign/componentversions/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "sign componentversions"
 ---
 
 ### Synopsis

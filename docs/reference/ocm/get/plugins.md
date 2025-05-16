@@ -1,9 +1,12 @@
 ---
-title: "ocm get plugins &mdash; Get Plugins"
+title: "ocm get plugins - Get Plugins"
 linkTitle: "get plugins"
 url: "/docs/cli-reference/get/plugins/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "get plugins"
 ---
 
 ### Synopsis

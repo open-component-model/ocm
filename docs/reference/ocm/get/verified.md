@@ -1,9 +1,12 @@
 ---
-title: "ocm get verified &mdash; Get Verified Component Versions"
+title: "ocm get verified - Get Verified Component Versions"
 linkTitle: "get verified"
 url: "/docs/cli-reference/get/verified/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "get verified"
 ---
 
 ### Synopsis

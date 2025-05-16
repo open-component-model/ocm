@@ -1,9 +1,12 @@
 ---
-title: "ocm describe artifacts &mdash; Describe Artifact Version"
+title: "ocm describe artifacts - Describe Artifact Version"
 linkTitle: "describe artifacts"
 url: "/docs/cli-reference/describe/artifacts/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "describe artifacts"
 ---
 
 ### Synopsis

@@ -83,13 +83,14 @@ func Generate(name string, root *cobra.Command, outputDir string, clear bool) {
 		}
 		check(os.MkdirAll(destDir, os.ModePerm))
 
-		// Prepare title and linkTitle
+		// Prepare title: strip '## ' and replace HTML entity/em dash
 		title := strings.TrimPrefix(headLine, "## ")
+		title = strings.ReplaceAll(title, "&mdash;", "-")
+		title = strings.ReplaceAll(title, "—", "-")
+
+		// Prepare linkTitle: remove leading "ocm ", then drop after em dash
 		linkTitle := strings.TrimPrefix(title, "ocm ")
-		// drop everything after em dash
-		if idx := strings.Index(linkTitle, " &mdash; "); idx != -1 {
-			linkTitle = linkTitle[:idx]
-		} else if idx := strings.Index(linkTitle, " — "); idx != -1 {
+		if idx := strings.Index(linkTitle, " - "); idx != -1 {
 			linkTitle = linkTitle[:idx]
 		}
 		if linkTitle == "" {
@@ -111,9 +112,13 @@ func Generate(name string, root *cobra.Command, outputDir string, clear bool) {
 			`sidebar:
   collapsed: true
 `+
+			`menu:
+  docs:
+    name: "%s"
+`+
 			`---
 
-`, title, linkTitle, url)
+`, title, linkTitle, url, linkTitle)
 		_, err = out.WriteString(fm + body)
 		check(err)
 		out.Close()

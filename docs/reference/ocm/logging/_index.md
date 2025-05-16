@@ -1,9 +1,12 @@
 ---
-title: "ocm logging &mdash; Configured Logging Keys"
+title: "ocm logging - Configured Logging Keys"
 linkTitle: "logging"
 url: "/docs/cli-reference/logging/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "logging"
 ---
 
 ### Description

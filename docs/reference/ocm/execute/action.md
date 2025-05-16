@@ -1,9 +1,12 @@
 ---
-title: "ocm execute action &mdash; Execute An Action"
+title: "ocm execute action - Execute An Action"
 linkTitle: "execute action"
 url: "/docs/cli-reference/execute/action/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "execute action"
 ---
 
 ### Synopsis

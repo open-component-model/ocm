@@ -1,9 +1,12 @@
 ---
-title: "ocm execute &mdash; Execute An Element."
+title: "ocm execute - Execute An Element."
 linkTitle: "execute"
 url: "/docs/cli-reference/execute/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "execute"
 ---
 
 ### Synopsis

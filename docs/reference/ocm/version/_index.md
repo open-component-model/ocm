@@ -1,9 +1,12 @@
 ---
-title: "ocm version &mdash; Displays The Version"
+title: "ocm version - Displays The Version"
 linkTitle: "version"
 url: "/docs/cli-reference/version/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "version"
 ---
 
 ### Synopsis

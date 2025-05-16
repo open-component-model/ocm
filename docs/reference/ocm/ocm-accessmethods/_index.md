@@ -1,9 +1,12 @@
 ---
-title: "ocm ocm-accessmethods &mdash; List Of All Supported Access Methods"
+title: "ocm ocm-accessmethods - List Of All Supported Access Methods"
 linkTitle: "ocm-accessmethods"
 url: "/docs/cli-reference/ocm-accessmethods/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "ocm-accessmethods"
 ---
 
 ### Description

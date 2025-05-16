@@ -1,9 +1,12 @@
 ---
-title: "ocm transfer artifacts &mdash; Transfer OCI Artifacts"
+title: "ocm transfer artifacts - Transfer OCI Artifacts"
 linkTitle: "transfer artifacts"
 url: "/docs/cli-reference/transfer/artifacts/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "transfer artifacts"
 ---
 
 ### Synopsis

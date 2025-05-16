@@ -1,9 +1,12 @@
 ---
-title: "ocm get &mdash; Get Information About Artifacts And Components"
+title: "ocm get - Get Information About Artifacts And Components"
 linkTitle: "get"
 url: "/docs/cli-reference/get/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "get"
 ---
 
 ### Synopsis

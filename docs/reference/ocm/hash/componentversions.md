@@ -1,9 +1,12 @@
 ---
-title: "ocm hash componentversions &mdash; Hash Component Version"
+title: "ocm hash componentversions - Hash Component Version"
 linkTitle: "hash componentversions"
 url: "/docs/cli-reference/hash/componentversions/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "hash componentversions"
 ---
 
 ### Synopsis

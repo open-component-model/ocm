@@ -1,9 +1,12 @@
 ---
-title: "ocm list componentversions &mdash; List Component Version Names"
+title: "ocm list componentversions - List Component Version Names"
 linkTitle: "list componentversions"
 url: "/docs/cli-reference/list/componentversions/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "list componentversions"
 ---
 
 ### Synopsis

@@ -1,9 +1,12 @@
 ---
-title: "ocm controller install &mdash; Install Either A Specific Or Latest Version Of The Ocm-Controller. Optionally Install Prerequisites Required By The Controller."
+title: "ocm controller install - Install Either A Specific Or Latest Version Of The Ocm-Controller. Optionally Install Prerequisites Required By The Controller."
 linkTitle: "controller install"
 url: "/docs/cli-reference/controller/install/"
 sidebar:
   collapsed: true
+menu:
+  docs:
+    name: "controller install"
 ---
 
 ### Synopsis
