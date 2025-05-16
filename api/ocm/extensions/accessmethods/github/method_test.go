@@ -59,6 +59,7 @@ var _ = Describe("Method", func() {
 		expectedBlobContent []byte
 		err                 error
 		defaultLink         string
+		accessSpec          *me.AccessSpec
 		fs                  vfs.FileSystem
 		expectedURL         string
 		clientFn            func(url string) *http.Client
@@ -87,6 +88,15 @@ var _ = Describe("Method", func() {
 			})
 		}
 
+		accessSpec = me.New(
+			"https://github.com/test/test",
+			"",
+			"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
+			me.WithClient(clientFn(expectedURL)),
+			me.WithDownloader(&mockDownloader{
+				expected: expectedBlobContent,
+			}),
+		)
 		fs, err = osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
 		vfsattr.Set(ctx, fs)
@@ -97,38 +107,7 @@ var _ = Describe("Method", func() {
 		vfs.Cleanup(fs)
 	})
 
-	DescribeTable("AccessMethod",
-		func(repoURL, apiHostname, commit, ref, expectedURL string) {
-			accessSpec := me.New(
-				repoURL,
-				apiHostname,
-				me.WithCommit(commit),
-				me.WithReference(ref),
-				me.WithClient(clientFn(expectedURL)),
-				me.WithDownloader(&mockDownloader{
-					expected: expectedBlobContent,
-				}),
-			)
-			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
-			Expect(err).ToNot(HaveOccurred())
-			content, err := m.Get()
-			Expect(err).ToNot(HaveOccurred())
-			Expect(content).To(Equal(expectedBlobContent))
-		},
-		Entry("with commit", "https://github.com/test/test", "", "7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f", "", "https://api.github.com/repos/test/test/tarball/7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f"),
-		Entry("with ref", "https://github.com/test/test", "", "", "refs/heads/main", "https://api.github.com/repos/test/test/tarball/refs/heads/main"),
-	)
-
 	It("provides consumer id", func() {
-		accessSpec := me.New(
-			"https://github.com/test/test",
-			"",
-			me.WithCommit("7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f"),
-			me.WithClient(clientFn(expectedURL)),
-			me.WithDownloader(&mockDownloader{
-				expected: expectedBlobContent,
-			}),
-		)
 		m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 		Expect(err).ToNot(HaveOccurred())
 		Expect(credentials.GetProvidedConsumerId(m)).To(Equal(credentials.NewConsumerIdentity(identity.CONSUMER_TYPE,
@@ -136,12 +115,20 @@ var _ = Describe("Method", func() {
 			identity.ID_PATHPREFIX, "test/test")))
 	})
 
+	It("downloads artifacts", func() {
+		m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+		Expect(err).ToNot(HaveOccurred())
+		content, err := m.Get()
+		Expect(err).ToNot(HaveOccurred())
+		Expect(content).To(Equal(expectedBlobContent))
+	})
+
 	When("the commit sha is of an invalid length", func() {
 		It("errors", func() {
 			accessSpec := me.New(
 				"hostname",
 				"",
-				me.WithCommit("not-a-sha"),
+				"not-a-sha",
 				me.WithClient(clientFn(expectedURL)),
 				me.WithDownloader(&mockDownloader{
 					expected: expectedBlobContent,
@@ -160,7 +147,7 @@ var _ = Describe("Method", func() {
 			accessSpec := me.New(
 				"hostname",
 				"1234",
-				me.WithCommit("refs/heads/veryinteresting_branch_namess"),
+				"refs/heads/veryinteresting_branch_namess",
 				me.WithClient(clientFn(expectedURL)),
 				me.WithDownloader(&mockDownloader{
 					expected: expectedBlobContent,
@@ -197,17 +184,17 @@ var _ = Describe("Method", func() {
 					}
 				})
 			}
-		})
-		It("can use those to access private repos", func() {
-			accessSpec := me.New(
+			accessSpec = me.New(
 				"https://github.com/test/test",
 				"",
-				me.WithCommit("7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f"),
+				"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
 				me.WithClient(clientFn(expectedURL)),
 				me.WithDownloader(&mockDownloader{
 					expected: expectedBlobContent,
 				}),
 			)
+		})
+		It("can use those to access private repos", func() {
 			mcc := ocm.New(datacontext.MODE_INITIAL)
 			src := &mockCredSource{
 				Context: mcc.CredentialsContext(),
@@ -227,10 +214,26 @@ var _ = Describe("Method", func() {
 		})
 	})
 
+	When("GetCredentialsForConsumer returns an error", func() {
+		It("errors", func() {
+			mcc := ocm.New(datacontext.MODE_INITIAL)
+			src := &mockCredSource{
+				Context: mcc.CredentialsContext(),
+				err:     fmt.Errorf("danger will robinson"),
+			}
+			mcc.CredentialsContext().SetCredentialsForConsumer(credentials.NewConsumerIdentity(identity.CONSUMER_TYPE), src)
+			_, err := accessSpec.AccessMethod(&mockComponentVersionAccess{
+				ocmContext: mcc,
+			})
+			Expect(err).To(MatchError(ContainSubstring("danger will robinson")))
+			Expect(src.called).To(BeTrue())
+		})
+	})
+
 	When("an enterprise repo URL is provided", func() {
 		It("uses that domain and includes api/v3 in the request URL", func() {
 			expectedURL = "https://github.tools.sap/api/v3/repos/test/test/tarball/25d9a3f0031c0b42e9ef7ab0117c35378040ef82"
-			spec := me.New("https://github.tools.sap/test/test", "", me.WithCommit("25d9a3f0031c0b42e9ef7ab0117c35378040ef82"), me.WithClient(clientFn(expectedURL)))
+			spec := me.New("https://github.tools.sap/test/test", "", "25d9a3f0031c0b42e9ef7ab0117c35378040ef82", me.WithClient(clientFn(expectedURL)))
 			_, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -239,7 +242,7 @@ var _ = Describe("Method", func() {
 	When("hostname is different from github.com", func() {
 		It("will use an enterprise client", func() {
 			expectedURL = "https://custom/api/v3/repos/test/test/tarball/25d9a3f0031c0b42e9ef7ab0117c35378040ef82"
-			spec := me.New("https://github.tools.sap/test/test", "custom", me.WithCommit("25d9a3f0031c0b42e9ef7ab0117c35378040ef82"), me.WithClient(clientFn(expectedURL)))
+			spec := me.New("https://github.tools.sap/test/test", "custom", "25d9a3f0031c0b42e9ef7ab0117c35378040ef82", me.WithClient(clientFn(expectedURL)))
 			_, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -248,7 +251,7 @@ var _ = Describe("Method", func() {
 	When("repoURL doesn't have an https prefix", func() {
 		It("will add one", func() {
 			expectedURL = "https://api.github.com/repos/test/test/tarball/25d9a3f0031c0b42e9ef7ab0117c35378040ef82"
-			spec := me.New("github.com/test/test", "", me.WithCommit("25d9a3f0031c0b42e9ef7ab0117c35378040ef82"), me.WithClient(clientFn(expectedURL)))
+			spec := me.New("github.com/test/test", "", "25d9a3f0031c0b42e9ef7ab0117c35378040ef82", me.WithClient(clientFn(expectedURL)))
 			_, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 			Expect(err).ToNot(HaveOccurred())
 		})
