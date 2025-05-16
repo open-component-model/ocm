@@ -1,11 +1,9 @@
 ---
-title: "ocm uploadhandlers"
+title: "ocm ocm-uploadhandlers &mdash; List Of All Available Upload Handlers"
 url: "/docs/cli-reference/ocm-uploadhandlers/"
 sidebar:
   collapsed: true
 ---
-
-## ocm ocm-uploadhandlers &mdash; List Of All Available Upload Handlers
 
 ### Description
 

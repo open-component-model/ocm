@@ -1,11 +1,9 @@
 ---
-title: "add"
+title: "ocm add &mdash; Add Elements To A Component Repository Or Component Version"
 url: "/docs/cli-reference/add/"
 sidebar:
   collapsed: true
 ---
-
-## ocm add &mdash; Add Elements To A Component Repository Or Component Version
 
 ### Synopsis
 

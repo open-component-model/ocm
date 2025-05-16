@@ -1,11 +1,9 @@
 ---
-title: "show versions"
+title: "ocm show versions &mdash; Show Dedicated Versions (Semver Compliant)"
 url: "/docs/cli-reference/show/versions/"
 sidebar:
   collapsed: true
 ---
-
-## ocm show versions &mdash; Show Dedicated Versions (Semver Compliant)
 
 ### Synopsis
 

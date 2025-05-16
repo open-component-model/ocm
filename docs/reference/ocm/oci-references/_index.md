@@ -1,11 +1,9 @@
 ---
-title: "oci references"
+title: "ocm oci-references &mdash; Notation For OCI References"
 url: "/docs/cli-reference/oci-references/"
 sidebar:
   collapsed: true
 ---
-
-## ocm oci-references &mdash; Notation For OCI References
 
 ### Description
 

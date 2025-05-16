@@ -1,11 +1,9 @@
 ---
-title: "describe plugins"
+title: "ocm describe plugins &mdash; Get Plugins"
 url: "/docs/cli-reference/describe/plugins/"
 sidebar:
   collapsed: true
 ---
-
-## ocm describe plugins &mdash; Get Plugins
 
 ### Synopsis
 

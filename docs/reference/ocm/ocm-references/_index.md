@@ -1,11 +1,9 @@
 ---
-title: "ocm references"
+title: "ocm ocm-references &mdash; Notation For OCM References"
 url: "/docs/cli-reference/ocm-references/"
 sidebar:
   collapsed: true
 ---
-
-## ocm ocm-references &mdash; Notation For OCM References
 
 ### Description
 

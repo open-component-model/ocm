@@ -1,11 +1,9 @@
 ---
-title: "controller uninstall"
+title: "ocm controller uninstall &mdash; Uninstalls The Ocm-Controller And All Of Its Dependencies"
 url: "/docs/cli-reference/controller/uninstall/"
 sidebar:
   collapsed: true
 ---
-
-## ocm controller uninstall &mdash; Uninstalls The Ocm-Controller And All Of Its Dependencies
 
 ### Synopsis
 

@@ -1,11 +1,9 @@
 ---
-title: "install plugins"
+title: "ocm install plugins &mdash; Install Or Update An OCM Plugin"
 url: "/docs/cli-reference/install/plugins/"
 sidebar:
   collapsed: true
 ---
-
-## ocm install plugins &mdash; Install Or Update An OCM Plugin
 
 ### Synopsis
 

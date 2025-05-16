@@ -1,11 +1,9 @@
 ---
-title: "check"
+title: "ocm check &mdash; Check Components In OCM Repository"
 url: "/docs/cli-reference/check/"
 sidebar:
   collapsed: true
 ---
-
-## ocm check &mdash; Check Components In OCM Repository
 
 ### Synopsis
 

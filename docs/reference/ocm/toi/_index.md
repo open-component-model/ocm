@@ -1,11 +1,9 @@
 ---
-title: "toi"
+title: "ocm toi &mdash; Dedicated Command Flavors For The TOI Layer"
 url: "/docs/cli-reference/toi/"
 sidebar:
   collapsed: true
 ---
-
-## ocm toi &mdash; Dedicated Command Flavors For The TOI Layer
 
 ### Synopsis
 

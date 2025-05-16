@@ -1,11 +1,9 @@
 ---
-title: "add sources"
+title: "ocm add sources &mdash; Add Source Information To A Component Version"
 url: "/docs/cli-reference/add/sources/"
 sidebar:
   collapsed: true
 ---
-
-## ocm add sources &mdash; Add Source Information To A Component Version
 
 ### Synopsis
 

@@ -1,11 +1,9 @@
 ---
-title: "describe cache"
+title: "ocm describe cache &mdash; Show OCI Blob Cache Information"
 url: "/docs/cli-reference/describe/cache/"
 sidebar:
   collapsed: true
 ---
-
-## ocm describe cache &mdash; Show OCI Blob Cache Information
 
 ### Synopsis
 

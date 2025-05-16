@@ -1,11 +1,9 @@
 ---
-title: "get routingslips"
+title: "ocm get routingslips &mdash; Get Routings Slips For A Component Version"
 url: "/docs/cli-reference/get/routingslips/"
 sidebar:
   collapsed: true
 ---
-
-## ocm get routingslips &mdash; Get Routings Slips For A Component Version
 
 ### Synopsis
 

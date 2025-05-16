@@ -1,11 +1,9 @@
 ---
-title: "clean"
+title: "ocm clean &mdash; Cleanup/Re-Organize Elements"
 url: "/docs/cli-reference/clean/"
 sidebar:
   collapsed: true
 ---
-
-## ocm clean &mdash; Cleanup/Re-Organize Elements
 
 ### Synopsis
 

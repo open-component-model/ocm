@@ -1,11 +1,9 @@
 ---
-title: "controller"
+title: "ocm controller &mdash; Commands Acting On The Ocm-Controller"
 url: "/docs/cli-reference/controller/"
 sidebar:
   collapsed: true
 ---
-
-## ocm controller &mdash; Commands Acting On The Ocm-Controller
 
 ### Synopsis
 

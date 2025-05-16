@@ -1,11 +1,9 @@
 ---
-title: "sign"
+title: "ocm sign &mdash; Sign Components Or Hashes"
 url: "/docs/cli-reference/sign/"
 sidebar:
   collapsed: true
 ---
-
-## ocm sign &mdash; Sign Components Or Hashes
 
 ### Synopsis
 

@@ -11,97 +11,97 @@ import (
 	"ocm.software/ocm/api/utils/cobrautils"
 )
 
-// Generate produces Hugo-ready CLI docs in nested folders.
-// Input: Cobra command tree, outputDir, clear flag.
-// Output under outputDir/ocm: hierarchical structure:
-//
-//	ocm/_index.md
-//	ocm/<command>/_index.md
-//	ocm/<command>/<subcommand>.md
-//
-// Each front matter includes title, url, and sidebar.collapsed
+// Generate produces Hugo-ready CLI docs by extracting titles from headers
+// and reorganizing flat Markdown into nested folders with front matter.
 func Generate(name string, root *cobra.Command, outputDir string, clear bool) {
-	// Clean output and prepare
+	// 1) Prepare output directories
 	if clear {
 		check(os.RemoveAll(outputDir))
 	}
-
-	// filePrepender injects front matter with title, url, and sidebar
-	filePrepender := func(filename string) string {
-		base := filepath.Base(filename)
-		nameOnly := strings.TrimSuffix(base, ".md")
-
-		// Title: drop "ocm_" prefix, replace separators, lowercase
-		titleKey := strings.TrimPrefix(nameOnly, "ocm_")
-		titleKey = strings.ReplaceAll(titleKey, "_", " ")
-		titleKey = strings.ReplaceAll(titleKey, "-", " ")
-		title := strings.ToLower(titleKey)
-
-		// URL: build based on segments
-		parts := strings.Split(nameOnly, "_")
-		var url string
-		switch len(parts) {
-		case 1:
-			// ocm.md
-			url = "/docs/cli-reference/"
-		case 2:
-			// ocm_<command>.md
-			url = fmt.Sprintf("/docs/cli-reference/%s/", parts[1])
-		default:
-			// ocm_<command>_<sub>.md
-			url = fmt.Sprintf("/docs/cli-reference/%s/%s/", parts[1], parts[2])
-		}
-		// return front matter including sidebar collapsed
-		return fmt.Sprintf(
-			"---\n"+
-				"title: \"%s\"\n"+
-				"url: \"%s\"\n"+
-				"sidebar:\n  collapsed: true\n"+
-				"---\n\n",
-			title, url,
-		)
-	}
-
-	// 1) Generate flat markdown into temp directory
 	flatDir := filepath.Join(outputDir, "_flat")
 	check(os.RemoveAll(flatDir))
 	check(os.MkdirAll(flatDir, os.ModePerm))
-	check(GenMarkdownTreeCustom(root, flatDir, filePrepender, cobrautils.LinkForPath))
 
-	// 2) Rearrange files into nested structure
+	// 2) Generate flat Markdown without front matter
+	emptyPrepender := func(string) string { return "" }
+	check(GenMarkdownTreeCustom(root, flatDir, emptyPrepender, cobrautils.LinkForPath))
+
+	// 3) Reorganize files
 	entries, err := ioutil.ReadDir(flatDir)
 	check(err)
-	for _, fi := range entries {
-		if fi.IsDir() {
+	for _, entry := range entries {
+		if entry.IsDir() {
 			continue
 		}
-		fname := fi.Name()
-		nameOnly := strings.TrimSuffix(fname, ".md")
-		parts := strings.Split(nameOnly, "_")[1:] // skip "ocm"
+		// Read flat file
+		src := filepath.Join(flatDir, entry.Name())
+		data, err := ioutil.ReadFile(src)
+		check(err)
+		content := string(data)
 
-		var destDir, destName string
-		switch len(parts) {
-		case 0:
+		// Extract and remove first header line
+		parts := strings.SplitN(content, "\n", 3)
+		headLine := ""
+		body := ""
+		if len(parts) > 0 {
+			headLine = strings.TrimSpace(parts[0])
+		}
+		if len(parts) >= 3 {
+			body = parts[2]
+		} else if len(parts) == 2 {
+			body = parts[1]
+		}
+
+		// Determine raw command path
+		nameOnly := strings.TrimSuffix(entry.Name(), ".md")
+		raw := strings.TrimPrefix(nameOnly, "ocm_")
+		rawParts := strings.SplitN(raw, "_", 2)
+
+		// Build URL
+		url := "/docs/cli-reference/"
+		switch {
+		case raw == "":
 			// root ocm.md
-			destDir = filepath.Join(outputDir, "ocm")
+			url = "/docs/cli-reference/"
+		case len(rawParts) == 1:
+			url = fmt.Sprintf("/docs/cli-reference/%s/", rawParts[0])
+		case len(rawParts) == 2:
+			url = fmt.Sprintf("/docs/cli-reference/%s/%s/", rawParts[0], rawParts[1])
+		}
+
+		// Destination path
+		destDir := filepath.Join(outputDir, "ocm")
+		destName := "_index.md"
+		switch {
+		case raw == "":
+			// stays destDir/ocm/_index.md
+		case len(rawParts) == 1:
+			destDir = filepath.Join(destDir, rawParts[0])
 			destName = "_index.md"
-		case 1:
-			// command
-			destDir = filepath.Join(outputDir, "ocm", parts[0])
-			destName = "_index.md"
-		default:
-			// subcommand
-			destDir = filepath.Join(outputDir, "ocm", parts[0])
-			sub := strings.Join(parts[1:], "_")
-			destName = sub + ".md"
+		case len(rawParts) == 2:
+			destDir = filepath.Join(destDir, rawParts[0])
+			destName = rawParts[1] + ".md"
 		}
 		check(os.MkdirAll(destDir, os.ModePerm))
-		srcPath := filepath.Join(flatDir, fname)
-		dstPath := filepath.Join(destDir, destName)
-		check(os.Rename(srcPath, dstPath))
+
+		// Prepare front matter title
+		title := strings.TrimPrefix(headLine, "## ")
+
+		// Write new file
+		dst := filepath.Join(destDir, destName)
+		out, err := os.Create(dst)
+		check(err)
+		fm := fmt.Sprintf("---\n"+
+			"title: \"%s\"\n"+
+			"url: \"%s\"\n"+
+			"sidebar:\n  collapsed: true\n"+
+			"---\n\n", title, url)
+		_, err = out.WriteString(fm + body)
+		check(err)
+		out.Close()
 	}
 
-	// 3) Cleanup
+	// 4) Cleanup
 	check(os.RemoveAll(flatDir))
 
 	fmt.Printf("Successfully written %s docs to %s\n", name, outputDir)

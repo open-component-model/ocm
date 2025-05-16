@@ -1,11 +1,9 @@
 ---
-title: "credential handling"
+title: "ocm credential-handling &mdash; Provisioning Of Credentials For Credential Consumers"
 url: "/docs/cli-reference/credential-handling/"
 sidebar:
   collapsed: true
 ---
-
-## ocm credential-handling &mdash; Provisioning Of Credentials For Credential Consumers
 
 ### Description
 

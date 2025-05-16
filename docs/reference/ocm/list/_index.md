@@ -1,11 +1,9 @@
 ---
-title: "list"
+title: "ocm list &mdash; List Information About Components"
 url: "/docs/cli-reference/list/"
 sidebar:
   collapsed: true
 ---
-
-## ocm list &mdash; List Information About Components
 
 ### Synopsis
 

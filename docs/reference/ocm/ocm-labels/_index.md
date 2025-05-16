@@ -1,11 +1,9 @@
 ---
-title: "ocm labels"
+title: "ocm ocm-labels &mdash; Labels And Label Merging"
 url: "/docs/cli-reference/ocm-labels/"
 sidebar:
   collapsed: true
 ---
-
-## ocm ocm-labels &mdash; Labels And Label Merging
 
 ### Description
 

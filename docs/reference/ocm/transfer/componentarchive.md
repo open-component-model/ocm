@@ -1,11 +1,9 @@
 ---
-title: "transfer componentarchive"
+title: "ocm transfer componentarchive &mdash; (DEPRECATED) - Please Use Commontransportarchive Instead"
 url: "/docs/cli-reference/transfer/componentarchive/"
 sidebar:
   collapsed: true
 ---
-
-## ocm transfer componentarchive &mdash; (DEPRECATED) - Please Use Commontransportarchive Instead
 
 ### Synopsis
 

@@ -1,11 +1,9 @@
 ---
-title: "bootstrap package"
+title: "ocm bootstrap package &mdash; Bootstrap Component Version"
 url: "/docs/cli-reference/bootstrap/package/"
 sidebar:
   collapsed: true
 ---
-
-## ocm bootstrap package &mdash; Bootstrap Component Version
 
 ### Synopsis
 

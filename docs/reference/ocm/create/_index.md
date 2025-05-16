@@ -1,11 +1,9 @@
 ---
-title: "create"
+title: "ocm create &mdash; Create Transport Or Component Archive"
 url: "/docs/cli-reference/create/"
 sidebar:
   collapsed: true
 ---
-
-## ocm create &mdash; Create Transport Or Component Archive
 
 ### Synopsis
 

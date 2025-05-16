@@ -1,11 +1,9 @@
 ---
-title: "hash"
+title: "ocm hash &mdash; Hash And Normalization Operations"
 url: "/docs/cli-reference/hash/"
 sidebar:
   collapsed: true
 ---
-
-## ocm hash &mdash; Hash And Normalization Operations
 
 ### Synopsis
 
