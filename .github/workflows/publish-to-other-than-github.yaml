@@ -11,6 +11,9 @@ on:
   repository_dispatch:
     types: [publish-ocm-cli]
 
+permissions:
+  contents: read
+
 jobs:
   push-to-brew-tap:
     name: Update Homebrew Tap
@@ -23,24 +26,24 @@ jobs:
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@v2
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         path: tap
         repository: ${{ env.REPO }}
         token: ${{ steps.generate_token.outputs.token }}
     - name: Get Update Script
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         path: scripts
         sparse-checkout: |
           hack/brew
     - name: Setup Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
       with:
         go-version-file: ${{ github.workspace }}/scripts/hack/brew/go.mod
         cache: false
@@ -57,7 +60,7 @@ jobs:
         cd ${{ github.workspace }}/tap/Aliases
         ln -sf ../Formula/$(basename $formula) ./ocm
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
       with:
         path: tap
         token: ${{ steps.generate_token.outputs.token }}
@@ -80,7 +83,7 @@ jobs:
     - name: Ensure proper version
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
     - name: Install SSH key
-      uses: shimataro/ssh-key-action@v2
+      uses: shimataro/ssh-key-action@d4fffb50872869abe2d9a9098a6d9c5aa7d16be4 # v2.7.0
       with:
         name: aur
         key: ${{ secrets.ARCHLINUX_SSH_PRIVATE_KEY }}
@@ -108,12 +111,12 @@ jobs:
         echo "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@v2
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         token: ${{ steps.generate_token.outputs.token }}
     - name: Update Chocolatey package
@@ -149,12 +152,12 @@ jobs:
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }})" >> $GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@v2
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Publish Release Event
-      uses: peter-evans/repository-dispatch@v3
+      uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
       with:
         token: ${{ steps.generate_token.outputs.token }}
         repository: open-component-model/ocm-website

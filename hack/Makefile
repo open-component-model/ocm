@@ -76,7 +76,7 @@ endif
 
 .PHONY: mdref
 mdref:
-	go install -v github.com/mandelsoft/mdref@master
+	go install -v github.com/mandelsoft/mdref@v0.5.1
 
 Linux_jq:
 	$(info -> jq is missing)

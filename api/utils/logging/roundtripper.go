@@ -2,6 +2,7 @@ package logging
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/mandelsoft/logging"
 )
@@ -20,8 +21,12 @@ type RoundTripper struct {
 }
 
 func (t *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	reqURL := *req.URL
+	if _, set := reqURL.User.Password(); set {
+		reqURL.User = url.UserPassword(reqURL.User.Username(), "****")
+	}
 	t.logger.Trace("roundtrip",
-		"url", req.URL,
+		"url", reqURL.String(),
 		"method", req.Method,
 	)
 	return t.RoundTripper.RoundTrip(req)
