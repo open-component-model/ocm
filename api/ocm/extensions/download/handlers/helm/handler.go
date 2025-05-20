@@ -116,7 +116,7 @@ func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string
 // download downloads the chart and optional provenance file from an  oci.ArtifactAccess.
 // the format of the artifact is expected to match the official HELM Reference Specification
 //
-// see https://github.com/helm/community/blob/main/hips/hip-0006.md
+// see https://github.com/helm/community/blob/dd5fe7878e293c573cc22db5d36558709c7b8a43/hips/hip-0006.md
 func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.FileSystem) (chart, prov string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
