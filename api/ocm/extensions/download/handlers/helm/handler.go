@@ -1,12 +1,14 @@
 package helm
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"strings"
 
-	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	helmregistry "helm.sh/helm/v3/pkg/registry"
 
 	"ocm.software/ocm/api/oci"
@@ -23,6 +25,16 @@ import (
 )
 
 const TYPE = resourcetypes.HELM_CHART
+
+var (
+	// ErrNoMatchingLayer denotes that no layer matching the requested media type was found,,
+	// which is invalid as per HELM OCI specification for [helmregistry.ChartLayerMediaType]
+	// but valid for [helmregistry.ProvLayerMediaType].
+	ErrNoMatchingLayer = errors.New("no matching layer found")
+	// ErrMultipleMatchingLayers denotes that multiple layers matching the requested media type were found,
+	// which is invalid as per HELM OCI specification.
+	ErrMultipleMatchingLayers = errors.New("multiple matching layers found")
+)
 
 type Handler struct{}
 
@@ -101,41 +113,72 @@ func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string
 	return h.fromOCIArtifact(p, meth, path, fs)
 }
 
+// download downloads the chart and optional provenance file from an  oci.ArtifactAccess.
+// the format of the artifact is expected to match the official HELM Reference Specification
+//
+// see https://github.com/helm/community/blob/main/hips/hip-0006.md
 func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.FileSystem) (chart, prov string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 
 	m := art.ManifestAccess()
 	if m == nil {
-		return "", "", errors.Newf("artifact is no image manifest")
+		return "", "", errors.New("artifact is no image manifest")
 	}
-	if len(m.GetDescriptor().Layers) < 1 {
-		return "", "", errors.Newf("no layers found")
+	desc := m.GetDescriptor()
+
+	chartDesc, err := findLayer(desc.Layers, helmregistry.ChartLayerMediaType)
+	if err != nil {
+		return "", "", fmt.Errorf("no valid chart layer found: %w", err)
 	}
 
-	blob, err := m.GetBlob(m.GetDescriptor().Layers[0].Digest)
+	chartBlob, err := m.GetBlob(chartDesc.Digest)
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("no valid chart blob found: %w", err)
 	}
-	finalize.Close(blob)
+	finalize.Close(chartBlob)
 
 	chart = AssureArchiveSuffix(path)
-	err = write(p, blob, chart, fs)
-	if err != nil {
+	if err := write(p, chartBlob, chart, fs); err != nil {
 		return "", "", err
 	}
-	if len(m.GetDescriptor().Layers) > 1 {
-		prov = chart[:len(chart)-3] + "prov"
-		blob, err := m.GetBlob(m.GetDescriptor().Layers[1].Digest)
+
+	// Optional provenance layer, if present, add it separately
+	if provDesc, err := findLayer(desc.Layers, helmregistry.ProvLayerMediaType); err == nil {
+		provBlob, err := m.GetBlob(provDesc.Digest)
 		if err != nil {
 			return "", "", err
 		}
-		err = write(p, blob, path, fs)
-		if err != nil {
+		finalize.Close(provBlob)
+
+		prov = chart[:len(chart)-3] + "prov"
+		if err := write(p, provBlob, path, fs); err != nil {
 			return "", "", err
+		}
+	} else if !errors.Is(err, ErrNoMatchingLayer) { // Ignore if no provenance layer is found, because its optional.
+		return "", "", err
+	}
+
+	return chart, prov, nil
+}
+
+func findLayer(layers []ocispec.Descriptor, mediaType string) (*ocispec.Descriptor, error) {
+	var candidates []*ocispec.Descriptor
+
+	for _, l := range layers {
+		if mime.BaseType(l.MediaType) == mime.BaseType(mediaType) {
+			candidates = append(candidates, &l)
 		}
 	}
-	return chart, prov, err
+
+	switch {
+	case len(candidates) > 1:
+		return nil, fmt.Errorf("%w: %s", ErrMultipleMatchingLayers, mediaType)
+	case len(candidates) == 0:
+		return nil, fmt.Errorf("%w: %s", ErrNoMatchingLayer, mediaType)
+	default:
+		return candidates[0], nil
+	}
 }
 
 func write(p common.Printer, blob blobaccess.DataReader, path string, fs vfs.FileSystem) (err error) {
