@@ -4,6 +4,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "ocm.software/ocm/api/helper/builder"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -31,6 +32,7 @@ const (
 
 	ArtifactType       = "NotHelmChart"
 	SpecialOCIResource = "specialhelm"
+	UnusualOCIResource = "unusualhelm"
 )
 
 var _ = Describe("upload", func() {
@@ -47,6 +49,9 @@ var _ = Describe("upload", func() {
 					})
 					env.Resource(SpecialOCIResource, Version, ArtifactType, v1.LocalRelation, func() {
 						env.BlobFromFile(artifactset.MediaType(artdesc.MediaTypeImageManifest), filepath.Join("/testdata/test-chart-oci-artifact.tgz"))
+					})
+					env.Resource(UnusualOCIResource, Version, resourcetypes.HELM_CHART, v1.LocalRelation, func() {
+						env.BlobFromFile(artifactset.MediaType(artdesc.MediaTypeImageManifest), filepath.Join("/testdata/unusual-ordered-helm-chart.tgz"))
 					})
 				})
 			})
@@ -72,5 +77,15 @@ var _ = Describe("upload", func() {
 		path := Must(download.DownloadResource(env.OCMContext(), Must(cv.SelectResources(selectors.Identity(v1.Identity{"name": SpecialOCIResource})))[0], "/resource", download.WithFileSystem(env.FileSystem())))
 		MustBeSuccessful(tarutils.ExtractArchiveToFs(env.FileSystem(), path, env.FileSystem()))
 		Expect(Must(vfs.DirExists(env.FileSystem(), "/test-chart"))).To(BeTrue())
+	})
+
+	It("successfully download unusual artifacts with non-defacto helm chart order", func() {
+		MustBeSuccessful(download.RegisterHandlerByName(env, helm.PATH, nil, download.ForArtifactType(ArtifactType)))
+
+		repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, CTFPath, 0o777, env))
+		cv := Must(repo.LookupComponentVersion(Component, Version))
+		path := Must(download.DownloadResource(env.OCMContext(), Must(cv.SelectResources(selectors.Identity(v1.Identity{"name": UnusualOCIResource})))[0], "/resource", download.WithFileSystem(env.FileSystem())))
+		MustBeSuccessful(tarutils.ExtractArchiveToFs(env.FileSystem(), path, env.FileSystem()))
+		Expect(Must(vfs.FileExists(env.FileSystem(), "/postgresql/Chart.yaml"))).To(BeTrue())
 	})
 })
