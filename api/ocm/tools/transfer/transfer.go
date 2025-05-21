@@ -164,7 +164,6 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 	list := errors.ErrListf("component references for %s", nv)
 
 	for _, r := range d.References {
-		//r := r
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
