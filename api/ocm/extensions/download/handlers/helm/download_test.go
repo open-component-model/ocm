@@ -33,6 +33,7 @@ const (
 	ArtifactType       = "NotHelmChart"
 	SpecialOCIResource = "specialhelm"
 	UnusualOCIResource = "unusualhelm"
+	LegacyOCIResource  = "legacyhelm"
 )
 
 var _ = Describe("upload", func() {
@@ -52,6 +53,9 @@ var _ = Describe("upload", func() {
 					})
 					env.Resource(UnusualOCIResource, Version, resourcetypes.HELM_CHART, v1.LocalRelation, func() {
 						env.BlobFromFile(artifactset.MediaType(artdesc.MediaTypeImageManifest), filepath.Join("/testdata/unusual-ordered-helm-chart.tgz"))
+					})
+					env.Resource(LegacyOCIResource, Version, resourcetypes.HELM_CHART, v1.LocalRelation, func() {
+						env.BlobFromFile(artifactset.MediaType(artdesc.MediaTypeImageManifest), filepath.Join("/testdata/legacy-pre-hip-helm-chart.tgz"))
 					})
 				})
 			})
@@ -87,5 +91,15 @@ var _ = Describe("upload", func() {
 		path := Must(download.DownloadResource(env.OCMContext(), Must(cv.SelectResources(selectors.Identity(v1.Identity{"name": UnusualOCIResource})))[0], "/resource", download.WithFileSystem(env.FileSystem())))
 		MustBeSuccessful(tarutils.ExtractArchiveToFs(env.FileSystem(), path, env.FileSystem()))
 		Expect(Must(vfs.FileExists(env.FileSystem(), "/postgresql/Chart.yaml"))).To(BeTrue())
+	})
+
+	It("successfully download artifacts with helm chart content with legacy content type", func() {
+		MustBeSuccessful(download.RegisterHandlerByName(env, helm.PATH, nil, download.ForArtifactType(ArtifactType)))
+
+		repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, CTFPath, 0o777, env))
+		cv := Must(repo.LookupComponentVersion(Component, Version))
+		path := Must(download.DownloadResource(env.OCMContext(), Must(cv.SelectResources(selectors.Identity(v1.Identity{"name": LegacyOCIResource})))[0], "/resource", download.WithFileSystem(env.FileSystem())))
+		MustBeSuccessful(tarutils.ExtractArchiveToFs(env.FileSystem(), path, env.FileSystem()))
+		Expect(Must(vfs.FileExists(env.FileSystem(), "/ingress-nginx/Chart.yaml"))).To(BeTrue())
 	})
 })
