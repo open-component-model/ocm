@@ -6,5 +6,6 @@
     ,{ "pattern": "^https://.*\\.sigstore\\.dev.*" }
     ,{ "pattern": "^{{.*}}$" }
     ,{ "pattern": "^https://github.com/.*/compare/.*" }
+    ,{ "pattern": "%7B%7B.*%7D%7D" }
   ]
 }
