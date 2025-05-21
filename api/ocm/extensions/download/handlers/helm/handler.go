@@ -129,7 +129,12 @@ func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.File
 
 	chartDesc, err := findLayer(desc.Layers, helmregistry.ChartLayerMediaType)
 	if err != nil {
-		return "", "", fmt.Errorf("no valid chart layer found: %w", err)
+		// Fallback to legacy chart layer media type if no chart layer is found in the normal order.
+		// See https://helm.sh/docs/topics/registries/#oci-feature-deprecation-and-behavior-changes-with-v370
+		var fallbackErr error
+		if chartDesc, fallbackErr = findLayer(desc.Layers, helmregistry.LegacyChartLayerMediaType); fallbackErr != nil {
+			return "", "", errors.Join(err, fallbackErr)
+		}
 	}
 
 	chartBlob, err := m.GetBlob(chartDesc.Digest)
