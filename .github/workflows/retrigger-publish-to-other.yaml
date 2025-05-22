@@ -18,11 +18,6 @@ on:
         description: Do you want to push to Chocolatey?
         required: false
         default: false
-      push-to-winget:
-        type: boolean
-        description: Do you want to push to Winget?
-        required: false
-        default: false
       push-to-brew-tap:
         type: boolean
         description: Do you want to push to the Homebrew Tap at https://github.com/open-component-model/homebrew-tap?
@@ -67,4 +62,4 @@ jobs:
         token: ${{ steps.generate_token.outputs.token }}
         repository: ${{ github.repository_owner }}/ocm
         event-type: publish-ocm-cli
-        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-website":${{ github.event.inputs.push-to-website }},"push-to-aur":${{ github.event.inputs.push-to-aur }},"push-to-chocolatey":${{ github.event.inputs.push-to-chocolatey }},"push-to-winget":${{ github.event.inputs.push-to-winget }},"push-to-brew-tap":${{ github.event.inputs.push-to-brew-tap }}}'
+        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-website":${{ github.event.inputs.push-to-website }},"push-to-aur":${{ github.event.inputs.push-to-aur }},"push-to-chocolatey":${{ github.event.inputs.push-to-chocolatey }},"push-to-brew-tap":${{ github.event.inputs.push-to-brew-tap }}}'

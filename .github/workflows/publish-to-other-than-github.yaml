@@ -124,25 +124,6 @@ jobs:
         .\hack\chocolatey\update.ps1
         choco push ocm-cli.${{ env.RELEASE_VERSION }}.nupkg --source "'https://push.chocolatey.org/'" --api-key="${{ secrets.CHOCO_API_KEY }}"
 
-  push-to-winget:
-    name: Update Winget
-    if: github.event.client_payload.push-to-winget && github.event.client_payload.version != ''
-    runs-on: windows-latest
-    steps:
-    - name: Ensure proper version
-      run: |
-        $version = "${{ github.event.client_payload.version }}" -replace 'v'
-        echo "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV
-    - name: Install wingetcreate
-      run: iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-    - name: Update Winget package
-      run: |
-        .\wingetcreate.exe update --submit --token ${{ secrets.OCM_CI_ROBOT_0_REPO }} --urls `
-          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-amd64.zip `
-          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
-          --version ${{ env.RELEASE_VERSION }} `
-          Open-Component-Model.ocm-cli
-
   push-to-website:
     name: Update OCM Website
     runs-on: ubuntu-latest
