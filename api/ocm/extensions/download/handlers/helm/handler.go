@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
 	"strings"
 
 	"github.com/mandelsoft/goutils/finalizer"
@@ -155,9 +156,8 @@ func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.File
 			return "", "", err
 		}
 		finalize.Close(provBlob)
-
-		prov = chart[:len(chart)-3] + "prov"
-		if err := write(p, provBlob, path, fs); err != nil {
+		prov = trimExtN(chart, 2) + ".prov"
+		if err := write(p, provBlob, prov, fs); err != nil {
 			return "", "", err
 		}
 	} else if !errors.Is(err, ErrNoMatchingLayer) { // Ignore if no provenance layer is found, because its optional.
@@ -165,6 +165,19 @@ func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.File
 	}
 
 	return chart, prov, nil
+}
+
+// trimExtN trims the file extension from the path, at most n times.
+// This is useful for removing the ".tgz" or ".tar.gz" suffix from a file name.
+func trimExtN(path string, n int) string {
+	for i := 0; i < n; i++ {
+		trimmed := strings.TrimSuffix(path, filepath.Ext(path))
+		if trimmed == path {
+			break
+		}
+		path = trimmed
+	}
+	return path
 }
 
 func findLayer(layers []ocispec.Descriptor, mediaType string) (*ocispec.Descriptor, error) {
