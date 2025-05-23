@@ -1,4 +1,4 @@
-# AWS ECR Repository Creation Plugin
+# AWS Elastic Container Registry Repository Creation Plugin
 
 The goal of the plugin is to assure the existence of required AWS Elastic Container Registry repositories, when used with OCM CLI.
 
