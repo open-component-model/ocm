@@ -252,7 +252,7 @@ jobs:
         token: ${{ steps.generate_token.outputs.token }}
         repository: ${{ github.repository_owner }}/ocm
         event-type: publish-ocm-cli
-        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-website":true,"push-to-aur":true,"push-to-chocolatey":true,"push-to-winget":true,"push-to-brew-tap":true}'
+        client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-website":true,"push-to-aur":true,"push-to-chocolatey":true,"push-to-brew-tap":true}'
 
   # make sure that the branch contains the next valid patch
   bump-release-branch-pr:
