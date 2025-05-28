@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"path/filepath"
 	"strings"
 
 	"github.com/mandelsoft/goutils/finalizer"
@@ -156,7 +155,10 @@ func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.File
 			return "", "", err
 		}
 		finalize.Close(provBlob)
-		prov = trimExtN(chart, 2) + ".prov"
+
+		// Path to provenance file is the same as chart, but with .prov suffix. See
+		// https://github.com/helm/helm-www/blob/cf3e4f875101fa3f72ff6194499b5365723f0ec1/content/en/docs/topics/provenance.md
+		prov = chart + ".prov"
 		if err := write(p, provBlob, prov, fs); err != nil {
 			return "", "", err
 		}
@@ -165,19 +167,6 @@ func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.File
 	}
 
 	return chart, prov, nil
-}
-
-// trimExtN trims the file extension from the path, at most n times.
-// This is useful for removing the ".tgz" or ".tar.gz" suffix from a file name.
-func trimExtN(path string, n int) string {
-	for i := 0; i < n; i++ {
-		trimmed := strings.TrimSuffix(path, filepath.Ext(path))
-		if trimmed == path {
-			break
-		}
-		path = trimmed
-	}
-	return path
 }
 
 func findLayer(layers []ocispec.Descriptor, mediaType string) (*ocispec.Descriptor, error) {
