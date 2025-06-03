@@ -11,12 +11,12 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/containerd/errdefs"
 	"github.com/distribution/reference"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	registrytypes "github.com/docker/docker/api/types/registry"
-	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/docker/registry"
@@ -510,7 +510,7 @@ type ConfigurationOption func(*container.Config, *container.HostConfig) error
 func (d *Driver) inspectImage(ctx context.Context, image string) (image.InspectResponse, error) {
 	ii, err := d.dockerCli.Client().ImageInspect(ctx, image)
 	switch {
-	case client.IsErrNotFound(err):
+	case errdefs.IsNotFound(err):
 		fmt.Fprintf(d.dockerCli.Err(), "Unable to find image '%s' locally\n", image)
 		if d.config[OptionPullPolicy] == PullPolicyNever {
 			return ii, errors.Wrapf(err, "image %s not found", image)
