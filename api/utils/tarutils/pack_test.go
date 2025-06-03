@@ -1,11 +1,13 @@
 package tarutils_test
 
 import (
+	"bytes"
 	"io/fs"
 	"os"
 	"runtime"
 
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -54,5 +56,30 @@ var _ = Describe("tar utils mapping", func() {
 		} else {
 			Expect(err.Error()).To(ContainSubstring("no such file or directory"))
 		}
+	})
+
+	It("test byte-equivalent compressed archives", func() {
+		fs := memoryfs.New()
+		f1, err := fs.Create("some file")
+		Expect(err).ToNot(HaveOccurred())
+		_, err = f1.Write([]byte("some content"))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(f1.Close()).ToNot(HaveOccurred())
+
+		var buf1, buf2 bytes.Buffer
+
+		Expect(tarutils.TgzFs(fs, &buf1, tarutils.TarFileSystemOptions{
+			ZeroModTime: true,
+		})).To(Succeed())
+
+		Expect(tarutils.TgzFs(fs, &buf2, tarutils.TarFileSystemOptions{
+			ZeroModTime: true,
+		})).To(Succeed())
+
+		Expect(buf1.Bytes()).To(Equal(buf2.Bytes()))
+
+		var buf3 bytes.Buffer
+		Expect(tarutils.TgzFs(fs, &buf3, tarutils.TarFileSystemOptions{})).To(Succeed())
+		Expect(buf1.Bytes()).ToNot(Equal(buf3.Bytes()))
 	})
 })

@@ -2,12 +2,12 @@ package git_test
 
 import (
 	"embed"
+	_ "embed"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"time"
-
-	_ "embed"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
@@ -56,26 +56,39 @@ var _ = Describe("git Blob Access", func() {
 			repoTestData, err := testData.ReadDir(repoBase)
 			Expect(err).ToNot(HaveOccurred())
 
-			for _, entry := range repoTestData {
-				path := filepath.Join(repoBase, entry.Name())
-				repoPath := filepath.Join(repoDir, entry.Name())
+			var process func(base string, entries []fs.DirEntry)
+			process = func(base string, infos []fs.DirEntry) {
+				for _, entry := range infos {
+					path := filepath.Join(base, entry.Name())
+					repoPath := filepath.Join(repoDir, entry.Name())
 
-				file, err := testData.Open(path)
-				Expect(err).ToNot(HaveOccurred())
+					file, err := testData.Open(path)
+					Expect(err).ToNot(HaveOccurred())
+					fi, err := file.Stat()
+					Expect(err).ToNot(HaveOccurred())
+					if fi.IsDir() {
+						Expect(os.MkdirAll(repoPath, 0o700)).ToNot(HaveOccurred())
+						entries, err := testData.ReadDir(path)
+						Expect(err).ToNot(HaveOccurred())
+						process(filepath.Join(base, fi.Name()), entries)
+						continue
+					}
 
-				fileInRepo, err := os.OpenFile(
-					repoPath,
-					os.O_CREATE|os.O_RDWR|os.O_TRUNC,
-					0o600,
-				)
-				Expect(err).ToNot(HaveOccurred())
+					fileInRepo, err := os.OpenFile(
+						repoPath,
+						os.O_CREATE|os.O_RDWR|os.O_TRUNC,
+						0o600,
+					)
+					Expect(err).ToNot(HaveOccurred())
 
-				_, err = io.Copy(fileInRepo, file)
-				Expect(err).ToNot(HaveOccurred())
+					_, err = io.Copy(fileInRepo, file)
+					Expect(err).ToNot(HaveOccurred())
 
-				Expect(fileInRepo.Close()).To(Succeed())
-				Expect(file.Close()).To(Succeed())
+					Expect(fileInRepo.Close()).To(Succeed())
+					Expect(file.Close()).To(Succeed())
+				}
 			}
+			process(repoBase, repoTestData)
 
 			wt, err := repo.Worktree()
 			Expect(err).ToNot(HaveOccurred())
@@ -100,7 +113,22 @@ var _ = Describe("git Blob Access", func() {
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			Expect(files).To(ConsistOf("file_in_repo"))
+			Expect(files).To(ConsistOf("file_in_repo", "file_in_dir_in_repo"))
+
+			data1, err := b.Reader()
+			Expect(err).ToNot(HaveOccurred())
+
+			By("testing equivalence of byte streams from equivalent accesses")
+			b2 := Must(gitblob.BlobAccess(
+				gitblob.WithURL(url),
+				gitblob.WithLoggingContext(ctx),
+				gitblob.WithCachingContext(ctx),
+			))
+			defer Close(b2)
+			data2, err := b2.Reader()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(data1).ToNot(BeIdenticalTo(data2))
 		})
 	})
 
@@ -151,4 +179,5 @@ var _ = Describe("git Blob Access", func() {
 			Expect(files).To(ConsistOf("README", "CONTRIBUTING.md"))
 		})
 	})
+
 })
