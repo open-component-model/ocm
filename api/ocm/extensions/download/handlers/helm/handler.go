@@ -156,8 +156,10 @@ func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.File
 		}
 		finalize.Close(provBlob)
 
-		prov = chart[:len(chart)-3] + "prov"
-		if err := write(p, provBlob, path, fs); err != nil {
+		// Path to provenance file is the same as chart, but with .prov suffix. See
+		// https://github.com/helm/helm-www/blob/cf3e4f875101fa3f72ff6194499b5365723f0ec1/content/en/docs/topics/provenance.md
+		prov = chart + ".prov"
+		if err := write(p, provBlob, prov, fs); err != nil {
 			return "", "", err
 		}
 	} else if !errors.Is(err, ErrNoMatchingLayer) { // Ignore if no provenance layer is found, because its optional.
