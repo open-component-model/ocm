@@ -80,7 +80,6 @@ var _ = Describe("upload", func() {
 	})
 	It("register helm download handler by name for special artifact type", func() {
 		MustBeSuccessful(download.RegisterHandlerByName(env, helm.PATH, nil, download.ForArtifactType(ArtifactType)))
-
 		repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, CTFPath, 0o777, env))
 		cv := Must(repo.LookupComponentVersion(Component, Version))
 		path := Must(download.DownloadResource(env.OCMContext(), Must(cv.SelectResources(selectors.Identity(v1.Identity{"name": SpecialOCIResource})))[0], "/resource", download.WithFileSystem(env.FileSystem())))
@@ -94,6 +93,7 @@ var _ = Describe("upload", func() {
 		cv := Must(repo.LookupComponentVersion(Component, Version))
 		path := Must(download.DownloadResource(env.OCMContext(), Must(cv.SelectResources(selectors.Identity(v1.Identity{"name": UnusualOCIResource})))[0], "/resource", download.WithFileSystem(env.FileSystem())))
 		MustBeSuccessful(tarutils.ExtractArchiveToFs(env.FileSystem(), path, env.FileSystem()))
+		Expect(Must(vfs.FileExists(env.FileSystem(), path+".prov"))).To(BeTrue())
 		Expect(Must(vfs.FileExists(env.FileSystem(), "/postgresql/Chart.yaml"))).To(BeTrue())
 	})
 
@@ -103,6 +103,7 @@ var _ = Describe("upload", func() {
 		cv := Must(repo.LookupComponentVersion(Component, Version))
 		path := Must(download.DownloadResource(env.OCMContext(), Must(cv.SelectResources(selectors.Identity(v1.Identity{"name": UnusualOCIResource})))[0], "/path.tgz", download.WithFileSystem(env.FileSystem())))
 		MustBeSuccessful(tarutils.ExtractArchiveToFs(env.FileSystem(), path, env.FileSystem()))
+		Expect(Must(vfs.FileExists(env.FileSystem(), path+".prov"))).To(BeTrue())
 		Expect(Must(vfs.FileExists(env.FileSystem(), "/postgresql/Chart.yaml"))).To(BeTrue())
 	})
 
@@ -112,6 +113,7 @@ var _ = Describe("upload", func() {
 		cv := Must(repo.LookupComponentVersion(Component, Version))
 		path := Must(download.DownloadResource(env.OCMContext(), Must(cv.SelectResources(selectors.Identity(v1.Identity{"name": UnusualOCIResource})))[0], "/path.tar.gz", download.WithFileSystem(env.FileSystem())))
 		MustBeSuccessful(tarutils.ExtractArchiveToFs(env.FileSystem(), path, env.FileSystem()))
+		Expect(Must(vfs.FileExists(env.FileSystem(), path+".prov"))).To(BeTrue())
 		Expect(Must(vfs.FileExists(env.FileSystem(), "/postgresql/Chart.yaml"))).To(BeTrue())
 	})
 
