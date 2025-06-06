@@ -1,6 +1,7 @@
 package transfer
 
 import (
+	// 1. standard
 	"context"
 	"fmt"
 	"os"
@@ -8,10 +9,18 @@ import (
 	"strconv"
 	"sync"
 
+	// 2. blank
+
+	// 3. dot
+
+	// 4. default
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/logging"
 
+	// 5. blank
+
+	// 6. prefix(ocm.software/ocm)
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmcpi "ocm.software/ocm/api/ocm/cpi"
@@ -19,7 +28,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer/internal"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	common "ocm.software/ocm/api/utils/misc"
-	runtimeutil "ocm.software/ocm/api/utils/runtime" // Alias for clarity
+	runtimeutil "ocm.software/ocm/api/utils/runtime"
 )
 
 type WalkingState = common.WalkingState[*struct{}, interface{}]
@@ -77,8 +86,19 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 	t, err := comp.LookupVersion(src.GetVersion())
 	finalize.Close(t, "existing target version")
 
+	// references have always to be handled, because of potentially different
+	// transport modes, which could affect the desired access methods in
+	// the target environment.
+
+	// doTransport controls, whether the transport of the local component
+	// version has to be re-considered.
 	doTransport := true
+
+	// doMerge controls. whether a potential current version in the target
+	// environment has to be merged into the transported one.
 	doMerge := false
+
+	// doCopy controls, whether the artifact content has to be considered.
 	doCopy := true
 
 	if err != nil {
@@ -164,6 +184,7 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 	list := errors.ErrListf("component references for %s", nv)
 
 	for _, r := range d.References {
+		// r := r
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -198,9 +219,9 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 			n = src.GetDescriptor().Copy()
 		}
 
-		var unstr *runtimeutil.UnstructuredTypedObject 
+		var unstr *runtimeutil.UnstructuredTypedObject
 		if !ocm.IsIntermediate(tgt.GetSpecification()) {
-			unstr, err = runtimeutil.ToUnstructuredTypedObject(tgt.GetSpecification()) 
+			unstr, err = runtimeutil.ToUnstructuredTypedObject(tgt.GetSpecification())
 			if err == nil {
 				n.RepositoryContexts = append(n.RepositoryContexts, unstr)
 			}
@@ -286,41 +307,56 @@ func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log 
 			}
 		}(i)
 	}
-
 	// Helper function to handle resource transfer
 	handleResourceTransfer := func(i int, r ocmcpi.ResourceAccess) func() error {
 		return func() error {
 			nested := finalize.Nested()
+			defer nested.Finalize() // Ensure nested finalizer is run at the end of the goroutine
+
 			a, err := r.Access()
 			if err != nil {
 				return err
 			}
 			m, err := a.AccessMethod(src)
 			nested.Close(m, fmt.Sprintf("%s: transferring resource %d: closing access method", hist, i))
+
 			if err != nil {
 				return err
 			}
-			ok := a.IsLocal(src.GetContext())
-			if !ok && !none.IsNone(a.GetKind()) {
-				ok, err = handler.TransferResource(src, a, r)
-				if err != nil || !ok {
+
+			hint := ocmcpi.ArtifactNameHint(a, src)
+			old, err := cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
+
+			changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
+			valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
+
+			// Re-introducing the detailed message logic for notifyArtifactInfo
+			var msgs []interface{}
+			if changed || valueNeeded {
+				if errors.IsErrNotFound(err) {
+					// Resource not found in target, so it's a new addition (copy)
+					msgs = []interface{}{"copy"}
+				} else if err != nil {
+					// Propagate actual error if not ErrNotFound
 					return err
+				} else if !changed && valueNeeded {
+					// Resource exists, not changed, but value is needed (e.g., local reference materialize)
+					msgs = []interface{}{"copy"}
+				} else {
+					// Resource exists and is changed (overwrite)
+					msgs = []interface{}{"overwrite"}
 				}
-			}
-			if ok {
-				hint := ocmcpi.ArtifactNameHint(a, src)
-				old, err := cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
-				changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
-				valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
-				if changed || valueNeeded {
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "copy")
-					return handler.HandleTransferResource(r, m, hint, t)
-				} else if err == nil {
+
+				notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, msgs...)
+				return handler.HandleTransferResource(r, m, hint, t) // This line was already present in your 'after'
+			} else {
+				// Resource is not changed and value is not needed (already present)
+				if err == nil { // Ensure old resource was actually found
 					t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify(), ocm.DisableExtraIdentityDefaulting())
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
 				}
+				notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
+				return nil // No error, resource was already present or handled
 			}
-			return nested.Finalize()
 		}
 	}
 
@@ -380,8 +416,8 @@ func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log 
 		errList.Add(e)
 	}
 	return errList.Result()
-}
 
+}
 func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, meta compdesc.ArtifactMetaAccess, hint string, msgs ...interface{}) {
 	msg := "copying"
 	cmsg := "..."
