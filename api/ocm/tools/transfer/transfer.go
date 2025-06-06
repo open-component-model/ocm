@@ -1,7 +1,6 @@
 package transfer
 
 import (
-	// 1. standard
 	"context"
 	"fmt"
 	"os"
@@ -9,18 +8,10 @@ import (
 	"strconv"
 	"sync"
 
-	// 2. blank
-
-	// 3. dot
-
-	// 4. default
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/logging"
 
-	// 5. blank
-
-	// 6. prefix(ocm.software/ocm)
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmcpi "ocm.software/ocm/api/ocm/cpi"
@@ -28,7 +19,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer/internal"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	common "ocm.software/ocm/api/utils/misc"
-	runtimeutil "ocm.software/ocm/api/utils/runtime"
+	runtimeutil "ocm.software/ocm/api/utils/runtime" // Alias for clarity
 )
 
 type WalkingState = common.WalkingState[*struct{}, interface{}]
@@ -184,7 +175,7 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 	list := errors.ErrListf("component references for %s", nv)
 
 	for _, r := range d.References {
-		// r := r
+		r := r
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -262,14 +253,13 @@ func getTransferWorkers() int {
 
 	numCPU := runtime.NumCPU()
 
-	switch {
-	case numCPU <= 2:
+	if numCPU <= 2 {
 		return 1
-	case numCPU <= 4:
+	} else if numCPU <= 4 {
 		return 2
-	case numCPU <= 8:
+	} else if numCPU <= 8 {
 		return 4
-	default:
+	} else {
 		return numCPU / 2
 	}
 }
@@ -307,56 +297,41 @@ func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log 
 			}
 		}(i)
 	}
+
 	// Helper function to handle resource transfer
 	handleResourceTransfer := func(i int, r ocmcpi.ResourceAccess) func() error {
 		return func() error {
 			nested := finalize.Nested()
-			defer nested.Finalize() // Ensure nested finalizer is run at the end of the goroutine
-
 			a, err := r.Access()
 			if err != nil {
 				return err
 			}
 			m, err := a.AccessMethod(src)
 			nested.Close(m, fmt.Sprintf("%s: transferring resource %d: closing access method", hist, i))
-
 			if err != nil {
 				return err
 			}
-
-			hint := ocmcpi.ArtifactNameHint(a, src)
-			old, err := cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
-
-			changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
-			valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
-
-			// Re-introducing the detailed message logic for notifyArtifactInfo
-			var msgs []interface{}
-			if changed || valueNeeded {
-				if errors.IsErrNotFound(err) {
-					// Resource not found in target, so it's a new addition (copy)
-					msgs = []interface{}{"copy"}
-				} else if err != nil {
-					// Propagate actual error if not ErrNotFound
+			ok := a.IsLocal(src.GetContext())
+			if !ok && !none.IsNone(a.GetKind()) {
+				ok, err = handler.TransferResource(src, a, r)
+				if err != nil || !ok {
 					return err
-				} else if !changed && valueNeeded {
-					// Resource exists, not changed, but value is needed (e.g., local reference materialize)
-					msgs = []interface{}{"copy"}
-				} else {
-					// Resource exists and is changed (overwrite)
-					msgs = []interface{}{"overwrite"}
 				}
-
-				notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, msgs...)
-				return handler.HandleTransferResource(r, m, hint, t) // This line was already present in your 'after'
-			} else {
-				// Resource is not changed and value is not needed (already present)
-				if err == nil { // Ensure old resource was actually found
-					t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify(), ocm.DisableExtraIdentityDefaulting())
-				}
-				notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
-				return nil // No error, resource was already present or handled
 			}
+			if ok {
+				hint := ocmcpi.ArtifactNameHint(a, src)
+				old, err := cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
+				changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
+				valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
+				if changed || valueNeeded {
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "copy")
+					return handler.HandleTransferResource(r, m, hint, t)
+				} else if err == nil {
+					t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify(), ocm.DisableExtraIdentityDefaulting())
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
+				}
+			}
+			return nested.Finalize()
 		}
 	}
 
@@ -416,8 +391,8 @@ func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log 
 		errList.Add(e)
 	}
 	return errList.Result()
-
 }
+
 func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, meta compdesc.ArtifactMetaAccess, hint string, msgs ...interface{}) {
 	msg := "copying"
 	cmsg := "..."
