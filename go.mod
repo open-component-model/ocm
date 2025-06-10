@@ -2,8 +2,6 @@ module ocm.software/ocm
 
 go 1.24.2
 
-replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
-
 require (
 	dario.cat/mergo v1.0.2
 	github.com/DataDog/gostackparse v0.7.0
