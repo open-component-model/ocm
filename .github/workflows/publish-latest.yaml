@@ -53,7 +53,7 @@ jobs:
           path: go-build-cache
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
       - name: inject go-build-cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@653a570f730e3b9460adc576db523788ba59a0d7 # v3.2.0
+        uses: reproducible-containers/buildkit-cache-dance@5b81f4d29dc8397a7d341dba3aeecc7ec54d6361 # v3.3.0
         with:
           cache-source: go-build-cache
       - name: Build and push
