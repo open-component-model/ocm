@@ -293,7 +293,16 @@ func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log 
 	*t.GetDescriptor() = *prep
 
 	log.Info("  transferring resources and sources using worker pool", "workers", maxWorkers)
-	tasks := make(chan transferTask)
+	// The suggested change: make tasks a buffered channel
+	// A common buffer size is equal to or a small multiple of the number of workers.
+	// This provides some buffer without allowing an unbounded queue.
+	taskBufferSize := maxWorkers * 2 // Example: buffer size is twice the number of workers
+	if taskBufferSize == 0 { // Handle case where maxWorkers might be 0 or 1, ensure at least a small buffer or 1
+		taskBufferSize = 1
+	}
+	tasks := make(chan transferTask, taskBufferSize) // Now a buffered channel
+
+	// The 'errChan' should also ideally be buffered to avoid blocking when reporting multiple errors
 	errChan := make(chan error, len(src.GetResources())+len(src.GetSources()))
 
 	var wg sync.WaitGroup
