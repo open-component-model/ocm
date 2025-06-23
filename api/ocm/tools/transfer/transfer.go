@@ -211,8 +211,19 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 
 		var unstr *runtimeutil.UnstructuredTypedObject
 		if !ocm.IsIntermediate(tgt.GetSpecification()) {
-			unstr, err = runtimeutil.ToUnstructuredTypedObject(tgt.GetSpecification())
-			if err == nil {
+			// Capture the error specifically for this operation
+			specErr := error(nil) // Declare a local error variable
+			unstr, specErr = runtimeutil.ToUnstructuredTypedObject(tgt.GetSpecification())
+			if specErr != nil {
+				// Log the error as a warning, but don't fail the transfer.
+				// The `log` variable from the function signature is suitable here.
+				log.Warn("Failed to convert target repository specification to unstructured object for RepositoryContext",
+					"error", specErr.Error(), // Use .Error() for string representation
+					"spec_type", tgt.GetSpecification().GetType(), // Log the type of spec
+				)
+				// unstr remains nil, so it won't be appended.
+			} else {
+				// Only append if conversion was successful
 				n.RepositoryContexts = append(n.RepositoryContexts, unstr)
 			}
 		}
