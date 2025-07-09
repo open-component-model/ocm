@@ -24,7 +24,7 @@ func init() {
 
 var _ accspeccpi.HintProvider = (*AccessSpec)(nil)
 
-// New creates a new localFilesystemBlob accessor.
+// New creates a new relativeOciReference accessor.
 func New(ref string) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
@@ -82,7 +82,17 @@ func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (stri
 	defer m.Close()
 
 	if o, ok := accspeccpi.GetAccessMethodImplementation(m).(ociartifact.OCIArtifactReferenceProvider); ok {
-		return o.GetOCIReference(nil)
+		im, err := o.GetOCIReference(cv)
+		if err == nil {
+			if s, ok := cv.Repository().GetSpecification().(oci.UniformRepositorySpecProvider); ok {
+				host := s.UniformRepositorySpec().Host
+				// not supported for fake repos
+				if host != "" {
+					im = host + "/" + im
+				}
+			}
+		}
+		return im, err
 	}
 	return "", nil
 }
