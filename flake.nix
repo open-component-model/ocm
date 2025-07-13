@@ -3,7 +3,7 @@
 
   inputs = {
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -37,7 +37,7 @@
             state = if (self ? rev) then "clean" else "dirty";
 
             # This vendorHash represents a derivative of all go.mod dependencies and needs to be adjusted with every change
-            vendorHash = "sha256-ADl11ZUEBsePHGLS3m/dG1bhJF/S+8fuxaLsmJFuLfQ=";
+            vendorHash = "sha256-WlcE8yCwu2ytH9sDi0aXbswlvx5DKwp7HYHB3vKEs8w=";
 
             src = ./.;
 
