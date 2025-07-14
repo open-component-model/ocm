@@ -3,9 +3,7 @@ package transfer
 import (
 	"context"
 	"fmt"
-	"os"
 	"runtime"
-	"strconv"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -16,10 +14,11 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmcpi "ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/none"
+	"ocm.software/ocm/api/ocm/extensions/attrs/maxworkersattr"
 	"ocm.software/ocm/api/ocm/tools/transfer/internal"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	common "ocm.software/ocm/api/utils/misc"
-	runtimeutil "ocm.software/ocm/api/utils/runtime" // Alias for clarity
+	runtimeutil "ocm.software/ocm/api/utils/runtime" 
 )
 
 type WalkingState = common.WalkingState[*struct{}, interface{}]
@@ -27,7 +26,7 @@ type WalkingState = common.WalkingState[*struct{}, interface{}]
 type TransportClosure = common.NameVersionInfo[*struct{}]
 
 // TransferWorkersEnvVar is the environment variable to configure the number of transfer workers.
-const TransferWorkersEnvVar = "OCM_TRANSFER_WORKERS"
+const TransferWorkersEnvVar = "OCM_TRANSFER_WORKERS" // This constant is now technically unused, but kept for context.
 
 func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	return TransferVersionWithContext(common.WithPrinter(context.Background(), common.AssurePrinter(printer)), closure, src, tgt, handler)
@@ -229,7 +228,8 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 		}
 
 		if !doMerge || doCopy {
-			numWorkers := getTransferWorkers()
+			// *** FIX: Pass 'ctx' argument here ***
+			numWorkers := calculateEffectiveTransferWorkers(ctx) // Line 231
 			err = copyVersionWithWorkerPool(ctx, printer, log, state.History, src, t, n, handler, numWorkers)
 			if err != nil {
 				return err
@@ -250,27 +250,45 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 }
 
 func CopyVersionWithContext(cctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	numWorkers := getTransferWorkers()
+	// *** FIX: Pass 'cctx' argument here ***
+	numWorkers := calculateEffectiveTransferWorkers(cctx) // Line 252
 	return copyVersionWithWorkerPool(cctx, printer, log, hist, src, t, src.GetDescriptor().Copy(), handler, numWorkers)
 }
 
-func getTransferWorkers() int {
-	if envWorkers := os.Getenv(TransferWorkersEnvVar); envWorkers != "" {
-		if num, err := strconv.Atoi(envWorkers); err == nil && num > 0 {
-			return num
-		}
+// calculateEffectiveTransferWorkers determines the number of workers to use.
+// It prioritizes an explicit attribute setting, then falls back to CPU-based auto-detection.
+func calculateEffectiveTransferWorkers(ctx context.Context) int {
+	// First, obtain the OCM data context from the provided Go context.
+	// `ocm.DefaultContext()` is a common way to get it if it's not directly `datacontext.Context`.
+	ocmCtx := ocm.DefaultContext()
+
+	// Get the workers value from the attribute.
+	// This will be:
+	// - User-defined value (if -X or .ocmconfig is used and > 0)
+	// - 0 (if user explicitly set -X maxworkers=0, OR if the attribute was not set at all)
+	attributeWorkers := maxworkersattr.Get(ocmCtx)
+
+	// If attributeWorkers is 0, it means either user explicitly set 0, or attribute was not set (default to 0).
+	// In both cases, this signals to use the CPU-based auto-detection.
+	if attributeWorkers == 0 {
+		return determineWorkersFromCPU()
 	}
 
+	// Otherwise (if attributeWorkers is > 0), use the user-defined value.
+	return int(attributeWorkers)
+}
+
+// determineWorkersFromCPU implements your CPU-based logic.
+func determineWorkersFromCPU() int {
 	numCPU := runtime.NumCPU()
 
-	switch {
-	case numCPU <= 2:
+	if numCPU <= 2 {
 		return 1
-	case numCPU <= 4:
+	} else if numCPU <= 4 {
 		return 2
-	case numCPU <= 8:
+	} else if numCPU <= 8 {
 		return 4
-	default:
+	} else {
 		return numCPU / 2
 	}
 }
@@ -293,11 +311,8 @@ func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log 
 	*t.GetDescriptor() = *prep
 
 	log.Info("  transferring resources and sources using worker pool", "workers", maxWorkers)
-	// The suggested change: make tasks a buffered channel
-	// A common buffer size is equal to or a small multiple of the number of workers.
-	// This provides some buffer without allowing an unbounded queue.
 	taskBufferSize := maxWorkers * 2 // Example: buffer size is twice the number of workers
-	if taskBufferSize == 0 { // Handle case where maxWorkers might be 0 or 1, ensure at least a small buffer or 1
+	if taskBufferSize == 0 {         // Handle case where maxWorkers might be 0 or 1, ensure at least a small buffer or 1
 		taskBufferSize = 1
 	}
 	tasks := make(chan transferTask, taskBufferSize) // Now a buffered channel
