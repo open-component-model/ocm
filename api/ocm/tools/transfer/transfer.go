@@ -228,8 +228,7 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 		}
 
 		if !doMerge || doCopy {
-			// *** FIX: Pass 'ctx' argument here ***
-			numWorkers := calculateEffectiveTransferWorkers(ctx) // Line 231
+			numWorkers := calculateEffectiveTransferWorkers(ctx) 
 			err = copyVersionWithWorkerPool(ctx, printer, log, state.History, src, t, n, handler, numWorkers)
 			if err != nil {
 				return err
@@ -250,8 +249,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 }
 
 func CopyVersionWithContext(cctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	// *** FIX: Pass 'cctx' argument here ***
-	numWorkers := calculateEffectiveTransferWorkers(cctx) // Line 252
+	numWorkers := calculateEffectiveTransferWorkers(cctx) 
 	return copyVersionWithWorkerPool(cctx, printer, log, hist, src, t, src.GetDescriptor().Copy(), handler, numWorkers)
 }
 
@@ -452,3 +450,5 @@ func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string,
 		log.Debug("handle artifact", "kind", kind, "name", meta.GetName(), "type", meta.GetType(), "index", index, "message", msg)
 	}
 }
+
+
