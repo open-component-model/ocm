@@ -315,7 +315,7 @@ func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log 
 	}
 	tasks := make(chan transferTask, taskBufferSize) // Now a buffered channel
 
-	// The 'errChan' should also ideally be buffered to avoid blocking when reporting multiple errors
+	// The 'errChan' should also ideally be buffered to avoid blocking when reporting multiple errors.
 	errChan := make(chan error, len(src.GetResources())+len(src.GetSources()))
 
 	var wg sync.WaitGroup
