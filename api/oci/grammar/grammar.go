@@ -130,7 +130,7 @@ var (
 		Capture(Or(HostPortRegexp, DomainPortRegexp)),
 		Literal("/"),
 		Literal("/"),
-		CapturedArtifactVersionRegexp))
+		Optional(CapturedArtifactVersionRegexp)))
 
 	ReqHostPortRegexp = Sequence(
 		Or(DomainComponentRegexp, IPRegexp),
