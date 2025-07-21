@@ -81,4 +81,33 @@ var _ = Describe("ref matching", func() {
 			CheckURI("DockerDaemon::unix://some/path/docker.sock:100//repo:test", t, s, p[1:], r, v, "")
 		})
 	})
+
+	Context("AnchoredTypedSchemedHostPortArtifactRegexp", func() {
+		It("should be able to parse OCI references", func() {
+			// Full expression.
+			Check("OCIRegistry::https://ghcr.io//test-repo/ocm/value:v2.0@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				AnchoredTypedSchemedHostPortArtifactRegexp,
+				"OCIRegistry", "https", "ghcr.io", "test-repo/ocm/value", "v2.0", "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")
+
+			// Typical reference to an image.
+			Check("ghcr.io//test-repo/ocm/value:v2.0",
+				AnchoredTypedSchemedHostPortArtifactRegexp,
+				"", "", "ghcr.io", "test-repo/ocm/value", "v2.0", "")
+
+			// Reference to a repository in an OCI registry.
+			Check("ghcr.io//test-repo",
+				AnchoredTypedSchemedHostPortArtifactRegexp,
+				"", "", "ghcr.io", "test-repo", "", "")
+
+			// Reference to the root of an OCI registry.
+			Check("ghcr.io//test-repo",
+				AnchoredTypedSchemedHostPortArtifactRegexp,
+				"", "", "ghcr.io", "test-repo", "", "")
+
+			// Reference to an image in the root of an OCI registry.
+			Check("ghcr.io//ocm/value:v2.0",
+				AnchoredTypedSchemedHostPortArtifactRegexp,
+				"", "", "ghcr.io", "ocm/value", "v2.0", "")
+		})
+	})
 })
