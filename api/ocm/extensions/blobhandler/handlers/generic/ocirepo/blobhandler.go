@@ -134,6 +134,28 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if tag != "" {
 		tag = ":" + tag
 	}
-	ref := base.ComposeRef(namespace.GetNamespace() + tag + version)
-	return ociartifact.New(ref), nil
+
+	suffix := tag
+	if version != "" {
+		suffix += version
+	}
+
+	host, port := base.HostPort()
+	repoRef := host
+	if port != "" {
+		repoRef += ":" + port
+	}
+	if namespace.GetNamespace() != "" {
+		repoRef += "/" + namespace.GetNamespace()
+	}
+	artRaw := repoRef + suffix
+
+	artRef, err := oci.ParseArt(artRaw) // validate the reference
+	if err != nil {
+		// if this not an official OCI reference, we still allow it (for legacy reasons)
+		// but return it as an OCM OCI Artifact Reference (note that this is technically not an OCI reference and invalid)
+		return ociartifact.New(base.ComposeRef(namespace.GetNamespace() + tag + version)), nil
+	}
+
+	return ociartifact.New(artRef.String()), nil
 }
