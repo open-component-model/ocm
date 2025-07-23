@@ -135,27 +135,44 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		tag = ":" + tag
 	}
 
-	suffix := tag
-	if version != "" {
-		suffix += version
-	}
-
 	host, port := base.HostPort()
-	repoRef := host
-	if port != "" {
-		repoRef += ":" + port
-	}
-	if namespace.GetNamespace() != "" {
-		repoRef += "/" + namespace.GetNamespace()
-	}
-	artRaw := repoRef + suffix
-
-	artRef, err := oci.ParseArt(artRaw) // validate the reference
+	artRef, err := GenOciRef(host, port, tag, version, namespace.GetNamespace())
 	if err != nil {
 		// if this not an official OCI reference, we still allow it (for legacy reasons)
 		// but return it as an OCM OCI Artifact Reference (note that this is technically not an OCI reference and invalid)
 		return ociartifact.New(base.ComposeRef(namespace.GetNamespace() + tag + version)), nil
 	}
 
-	return ociartifact.New(artRef.String()), nil
+	return ociartifact.New(artRef), nil
+}
+
+func GenOciRef(host, port, tag, version, namespace string) (string, error) {
+	suffix := tag
+	if version != "" {
+		suffix += version
+	}
+
+	repoRef := host
+	if port != "" {
+		repoRef += ":" + port
+	}
+	if namespace != "" {
+		repoRef += "/" + namespace
+	} else {
+		// TODO(ikhandamirov): remove this workaround once the oci.ParseArt() function is fixed.
+		return "", errors.ErrInvalid("namespace cannot be empty in an OCI reference")
+	}
+	artRaw := repoRef + suffix
+
+	// TODO(ikhandamirov): oci.ParseArt() as a validating function has certain shortcomings.
+	// 1. If a port number is specified, it returns an error, even though the port is allowed in an OCI reference.
+	//    E.g.: sub.example.com:443/repo/publisher/image:latest@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+	// 2. If the namespace is empty, it does not return an error, even though the resulting reference is not a valid OCI reference.
+	//    E.g.: sub.example.com:latest@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+	artRef, err := oci.ParseArt(artRaw) // validate the reference
+	if err != nil {
+		return "", err
+	}
+
+	return artRef.String(), nil
 }
