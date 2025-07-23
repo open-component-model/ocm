@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"oras.land/oras-go/v2/registry"
+
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/grammar"
@@ -50,4 +52,9 @@ func GetConsumerIdForRef(ref string) (cpi.ConsumerIdentity, error) {
 		return nil, err
 	}
 	return ociidentity.GetConsumerId(r.Host, r.Repository), nil
+}
+
+func IsValidReference(ref string) (bool, error) {
+	_, err := registry.ParseReference(ref)
+	return err == nil, err
 }

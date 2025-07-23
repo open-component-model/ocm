@@ -158,21 +158,13 @@ func GenOciRef(host, port, tag, version, namespace string) (string, error) {
 	}
 	if namespace != "" {
 		repoRef += "/" + namespace
-	} else {
-		// TODO(ikhandamirov): remove this workaround once the oci.ParseArt() function is fixed.
-		return "", errors.ErrInvalid("namespace cannot be empty in an OCI reference")
 	}
 	artRaw := repoRef + suffix
 
-	// TODO(ikhandamirov): oci.ParseArt() as a validating function has certain shortcomings.
-	// 1. If a port number is specified, it returns an error, even though the port is allowed in an OCI reference.
-	//    E.g.: sub.example.com:443/repo/publisher/image:latest@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
-	// 2. If the namespace is empty, it does not return an error, even though the resulting reference is not a valid OCI reference.
-	//    E.g.: sub.example.com:latest@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
-	artRef, err := oci.ParseArt(artRaw) // validate the reference
-	if err != nil {
+	valid, err := oci.IsValidReference(artRaw)
+	if !valid {
 		return "", err
 	}
 
-	return artRef.String(), nil
+	return artRaw, nil
 }

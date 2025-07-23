@@ -18,17 +18,16 @@ func TestGenOciRef(t *testing.T) {
 		wantRef                                   string
 		wantErr                                   bool
 	}{
-		// TODO(ikhandamirov): Uncomment this valid test case once the oci.ParseArt() function accepts port numbers.
-		//{
-		//	"all fields set",
-		//	"sub.example.com",
-		//	"433",
-		//	":latest",
-		//	"@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-		//	"repo/publisher/image",
-		//	"sub.example.com:443/repo/publisher/image:latest@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-		//	false,
-		//},
+		{
+			"all fields set",
+			"sub.example.com",
+			"443",
+			":latest",
+			"@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+			"repo/publisher/image",
+			"sub.example.com:443/repo/publisher/image:latest@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+			false,
+		},
 		{
 			"port not set",
 			"sub.example.com",
