@@ -3,6 +3,7 @@ package ocirepo
 import (
 	"encoding/json"
 	"fmt"
+	"oras.land/oras-go/v2/registry"
 	"path"
 	"strings"
 
@@ -161,8 +162,9 @@ func GenOciRef(host, port, tag, version, namespace string) (string, error) {
 	}
 	artRaw := repoRef + suffix
 
-	valid, err := oci.IsValidReference(artRaw)
-	if !valid {
+	// Validate the reference.
+	_, err := registry.ParseReference(artRaw)
+	if err != nil {
 		return "", err
 	}
 
