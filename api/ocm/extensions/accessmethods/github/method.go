@@ -64,6 +64,10 @@ type AccessSpec struct {
 	// Commit defines the hash of the commit
 	Commit string `json:"commit"`
 
+	// Reference defines the original ref used to get the commit from
+	// Mutually exclusive with Commit
+	Reference string `json:"ref,omitempty"`
+
 	client     *http.Client
 	downloader downloader.Downloader
 }
