@@ -8,6 +8,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
+	"oras.land/oras-go/v2/registry"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -161,8 +162,9 @@ func GenOciRef(host, port, tag, version, namespace string) (string, error) {
 	}
 	artRaw := repoRef + suffix
 
-	valid, err := oci.IsValidReference(artRaw)
-	if !valid {
+	// Validate the reference.
+	_, err := registry.ParseReference(artRaw)
+	if err != nil {
 		return "", err
 	}
 
