@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"ocm.software/ocm/api/ocm/compdesc"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
@@ -173,7 +174,15 @@ func (a *action) Add(e interface{}) error {
 	if !ok {
 		return fmt.Errorf("object of type %T is not a valid comphdlr.Object", e)
 	}
-	err := transfer.TransferVersion(a.printer, a.closure, o.ComponentVersion, a.target, a.handler)
+	sub, h, err := a.handler.TransferVersion(o.Repository, nil, compdesc.NewComponentReference("", o.ComponentVersion.GetName(), o.ComponentVersion.GetVersion(), nil), a.target)
+	if err != nil {
+		return errors.Wrapf(err, "cannot transfer component version %s/%s", o.ComponentVersion.GetName(), o.ComponentVersion.GetVersion())
+	}
+	if sub == nil {
+		return fmt.Errorf("cannot transfer component version %s/%s", o.ComponentVersion.GetName(), o.ComponentVersion.GetVersion())
+	}
+	err = transfer.TransferVersion(a.printer, a.closure, sub, a.target, h)
+	sub.Close()
 	a.errors.Add(err)
 	if err != nil {
 		a.printer.Printf("Error: %s\n", err)
