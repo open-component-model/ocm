@@ -8,6 +8,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
+	"oras.land/oras-go/v2/registry"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -134,6 +135,37 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if tag != "" {
 		tag = ":" + tag
 	}
-	ref := base.ComposeRef(namespace.GetNamespace() + tag + version)
-	return ociartifact.New(ref), nil
+
+	host, port := base.HostPort()
+	artRef, err := GenOciRef(host, port, tag, version, namespace.GetNamespace())
+	if err != nil {
+		// if this not an official OCI reference, we still allow it (for legacy reasons)
+		// but return it as an OCM OCI Artifact Reference (note that this is technically not an OCI reference and invalid)
+		return ociartifact.New(base.ComposeRef(namespace.GetNamespace() + tag + version)), nil
+	}
+
+	return ociartifact.New(artRef), nil
+}
+
+func GenOciRef(host, port, tag, version, namespace string) (string, error) {
+	suffix := tag
+	if version != "" {
+		suffix += version
+	}
+
+	repoRef := host
+	if port != "" {
+		repoRef += ":" + port
+	}
+	if namespace != "" {
+		repoRef += "/" + namespace
+	}
+	artRaw := repoRef + suffix
+
+	// Validate the reference.
+	if _, err := registry.ParseReference(artRaw); err != nil {
+		return "", fmt.Errorf("failed to validate OCI reference %q: %w", artRaw, err)
+	}
+
+	return artRaw, nil
 }
