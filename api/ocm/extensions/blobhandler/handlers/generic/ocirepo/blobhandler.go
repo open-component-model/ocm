@@ -163,9 +163,8 @@ func GenOciRef(host, port, tag, version, namespace string) (string, error) {
 	artRaw := repoRef + suffix
 
 	// Validate the reference.
-	_, err := registry.ParseReference(artRaw)
-	if err != nil {
-		return "", err
+	if _, err := registry.ParseReference(artRaw); err != nil {
+		return "", fmt.Errorf("failed to validate OCI reference %q: %w", artRaw, err)
 	}
 
 	return artRaw, nil
