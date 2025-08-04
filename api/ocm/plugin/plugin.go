@@ -140,7 +140,7 @@ func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) (result []by
 		}
 	}
 
-	data, err := cache.Exec(p.ctx, p.Path(), p.config, r, w, args...)
+	data, err := cache.Exec(p.Path(), p.config, r, w, args...)
 
 	if logfile != nil {
 		r, oerr := os.OpenFile(logfile.Name(), vfs.O_RDONLY, 0o600)
