@@ -14,11 +14,11 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 )
 
-func Exec(execpath string, config json.RawMessage, r io.Reader, w io.Writer, args ...string) ([]byte, error) {
+func Exec(ctx context.Context, execpath string, config json.RawMessage, r io.Reader, w io.Writer, args ...string) ([]byte, error) {
 	if len(config) > 0 {
 		args = append([]string{"-c", string(config)}, args...)
 	}
-	cmd := exec.CommandContext(context.Background(), execpath, args...)
+	cmd := exec.CommandContext(ctx, execpath, args...)
 	stdout := w
 	if w == nil {
 		stdout = accessio.LimitBuffer(accessio.DESCRIPTOR_LIMIT)
