@@ -57,6 +57,9 @@ linters:
     - wastedassign
     - wrapcheck
     - wsl
+    - embeddedstructfieldcheck
+    - noinlineerr
+    - wsl_v5
   settings:
     cyclop:
       max-complexity: 15

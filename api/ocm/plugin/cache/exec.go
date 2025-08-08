@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,7 +18,7 @@ func Exec(execpath string, config json.RawMessage, r io.Reader, w io.Writer, arg
 	if len(config) > 0 {
 		args = append([]string{"-c", string(config)}, args...)
 	}
-	cmd := exec.Command(execpath, args...)
+	cmd := exec.CommandContext(context.TODO(), execpath, args...)
 	stdout := w
 	if w == nil {
 		stdout = accessio.LimitBuffer(accessio.DESCRIPTOR_LIMIT)
