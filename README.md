@@ -2,6 +2,7 @@
 
 CHANGE
 CHANGE 2
+CHANGE 3
 
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7156/badge)](https://bestpractices.coreinfrastructure.org/projects/7156)
 [![REUSE status](https://api.reuse.software/badge/github.com/open-component-model/ocm)](https://api.reuse.software/info/github.com/open-component-model/ocm)
