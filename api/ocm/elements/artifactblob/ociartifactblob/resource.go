@@ -2,6 +2,7 @@ package ociartifactblob
 
 import (
 	"github.com/mandelsoft/goutils/generics"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
