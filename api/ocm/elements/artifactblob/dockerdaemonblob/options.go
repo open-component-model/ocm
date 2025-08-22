@@ -1,15 +1,21 @@
 package dockerdaemonblob
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/elements/artifactblob/api"
 	base "ocm.software/ocm/api/utils/blobaccess/dockerdaemon"
 	common "ocm.software/ocm/api/utils/misc"
 )
 
-type Option = optionutils.Option[*Options]
+type Option interface {
+	ApplyTo(opts *Options)
+}
+
+type OptionFunc func(opts *Options)
+
+func (f OptionFunc) ApplyTo(opts *Options) {
+	f(opts)
+}
 
 type Options struct {
 	api.Options
@@ -22,48 +28,59 @@ var (
 )
 
 func (o *Options) ApplyTo(opts *Options) {
+	if opts == nil {
+		return
+	}
 	o.Options.ApplyTo(&opts.Options)
 	o.Blob.ApplyTo(&opts.Blob)
 }
 
 func (o *Options) Apply(opts ...Option) {
-	optionutils.ApplyOptions(o, opts...)
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(o)
+		}
+	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 // General Options
 
 func WithHint(h string) Option {
-	return api.WrapHint[Options](h)
+	return OptionFunc(func(opts *Options) {
+		api.WithHint(h).ApplyTo(&opts.Options)
+	})
 }
 
 func WithGlobalAccess(a cpi.AccessSpec) Option {
-	return api.WrapGlobalAccess[Options](a)
+	return OptionFunc(func(opts *Options) {
+		api.WithGlobalAccess(a).ApplyTo(&opts.Options)
+	})
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Docker BlobAccess Options
-
-func mapBaseOption(opts *Options) *base.Options {
-	return &opts.Blob
-}
-
-func wrapBase(o base.Option) Option {
-	return optionutils.OptionWrapperFunc[*base.Options, *Options](o, mapBaseOption)
-}
+// //////////////////////////////////////////////////////////////////////////////
+// Docker Daemon Blob Options
 
 func WithName(n string) Option {
-	return wrapBase(base.WithName(n))
+	return OptionFunc(func(opts *Options) {
+		base.WithName(n).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithVersion(v string) Option {
-	return wrapBase(base.WithVersion(v))
+	return OptionFunc(func(opts *Options) {
+		base.WithVersion(v).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithVersionOverride(v string, flag ...bool) Option {
-	return wrapBase(base.WithVersionOverride(v, flag...))
+	return OptionFunc(func(opts *Options) {
+		base.WithVersionOverride(v, flag...).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithOrigin(o common.NameVersion) Option {
-	return wrapBase(base.WithOrigin(o))
+	return OptionFunc(func(opts *Options) {
+		base.WithOrigin(o).ApplyTo(&opts.Blob)
+	})
 }

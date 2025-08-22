@@ -2,8 +2,6 @@ package ociartifactblob
 
 import (
 	"github.com/mandelsoft/goutils/generics"
-	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -15,7 +13,13 @@ import (
 const TYPE = resourcetypes.OCI_IMAGE
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, refname string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(append(opts, WithContext(ctx))...)
+	var eff Options
+	WithContext(ctx).ApplyTo(&eff)
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)
 	}

@@ -1,7 +1,6 @@
 package dirtreeblob
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/ocm/cpi"
@@ -9,7 +8,15 @@ import (
 	base "ocm.software/ocm/api/utils/blobaccess/dirtree"
 )
 
-type Option = optionutils.Option[*Options]
+type Option interface {
+	ApplyTo(opts *Options)
+}
+
+type OptionFunc func(opts *Options)
+
+func (f OptionFunc) ApplyTo(opts *Options) {
+	f(opts)
+}
 
 type Options struct {
 	api.Options
@@ -22,56 +29,71 @@ var (
 )
 
 func (o *Options) ApplyTo(opts *Options) {
+	if opts == nil {
+		return
+	}
 	o.Options.ApplyTo(&opts.Options)
 	o.Blob.ApplyTo(&opts.Blob)
 }
 
 func (o *Options) Apply(opts ...Option) {
-	optionutils.ApplyOptions(o, opts...)
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(o)
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // General Options
 
 func WithHint(h string) Option {
-	return api.WrapHint[Options](h)
+	return OptionFunc(func(opts *Options) {
+		api.WithHint(h).ApplyTo(&opts.Options)
+	})
 }
 
 func WithGlobalAccess(a cpi.AccessSpec) Option {
-	return api.WrapGlobalAccess[Options](a)
+	return OptionFunc(func(opts *Options) {
+		api.WithGlobalAccess(a).ApplyTo(&opts.Options)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // DirTree BlobAccess Options
 
-func mapBaseOption(opts *Options) *base.Options {
-	return &opts.Blob
-}
-
-func wrapBase(o base.Option) Option {
-	return optionutils.OptionWrapperFunc[*base.Options, *Options](o, mapBaseOption)
-}
-
 func WithFileSystem(fs vfs.FileSystem) Option {
-	return wrapBase(base.WithFileSystem(fs))
+	return OptionFunc(func(opts *Options) {
+		base.WithFileSystem(fs).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithExcludeFiles(files []string) Option {
-	return wrapBase(base.WithExcludeFiles(files))
+	return OptionFunc(func(opts *Options) {
+		base.WithExcludeFiles(files).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithIncludeFiles(files []string) Option {
-	return wrapBase(base.WithIncludeFiles(files))
+	return OptionFunc(func(opts *Options) {
+		base.WithIncludeFiles(files).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithFollowSymlinks(b ...bool) Option {
-	return wrapBase(base.WithFollowSymlinks(b...))
+	return OptionFunc(func(opts *Options) {
+		base.WithFollowSymlinks(b...).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithPreserveDir(b ...bool) Option {
-	return wrapBase(base.WithPreserveDir(b...))
+	return OptionFunc(func(opts *Options) {
+		base.WithPreserveDir(b...).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithCompressWithGzip(b ...bool) Option {
-	return wrapBase(base.WithCompressWithGzip(b...))
+	return OptionFunc(func(opts *Options) {
+		base.WithCompressWithGzip(b...).ApplyTo(&opts.Blob)
+	})
 }

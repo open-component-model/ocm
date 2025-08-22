@@ -1,8 +1,6 @@
 package textblob
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -11,11 +9,17 @@ import (
 )
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, blob string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(opts...)
+	var eff Options
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
+
 	if eff.MimeType == "" {
 		eff.MimeType = mime.MIME_TEXT
 	}
-	return datablob.Access(ctx, meta, []byte(blob), eff)
+	return datablob.Access(ctx, meta, []byte(blob), &eff)
 }
 
 func ResourceAccess(ctx ocm.Context, meta *ocm.ResourceMeta, blob string, opts ...Option) cpi.ResourceAccess {

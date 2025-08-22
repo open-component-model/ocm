@@ -2,8 +2,6 @@ package npmblob
 
 import (
 	"github.com/mandelsoft/goutils/generics"
-	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -15,8 +13,14 @@ import (
 const TYPE = resourcetypes.NPM_PACKAGE
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, repo, pkg, version string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithHint(common.NewNameVersion(pkg, version).String()), WithCredentialContext(ctx))...)
-
+	var eff Options
+	WithHint(common.NewNameVersion(pkg, version).String()).ApplyTo(&eff)
+	WithCredentialContext(ctx).ApplyTo(&eff)
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)
 	}

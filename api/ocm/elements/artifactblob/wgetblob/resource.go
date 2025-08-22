@@ -2,8 +2,6 @@ package wgetblob
 
 import (
 	"github.com/mandelsoft/goutils/generics"
-	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -14,7 +12,13 @@ import (
 const TYPE = resourcetypes.BLOB
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, url string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithCredentialContext(ctx))...)
+	var eff Options
+	WithCredentialContext(ctx).ApplyTo(&eff)
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
 
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)

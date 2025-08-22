@@ -1,13 +1,19 @@
 package datablob
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/elements/artifactblob/api"
 )
 
-type Option = optionutils.Option[*Options]
+type Option interface {
+	ApplyTo(opts *Options)
+}
+
+type OptionFunc func(opts *Options)
+
+func (f OptionFunc) ApplyTo(opts *Options) {
+	f(opts)
+}
 
 type compressionMode string
 
@@ -29,56 +35,58 @@ var (
 )
 
 func (o *Options) ApplyTo(opts *Options) {
+	if opts == nil {
+		return
+	}
 	o.Options.ApplyTo(&opts.Options)
 	if o.MimeType != "" {
 		opts.MimeType = o.MimeType
 	}
+	if o.Compression != NONE {
+		opts.Compression = o.Compression
+	}
 }
 
 func (o *Options) Apply(opts ...Option) {
-	optionutils.ApplyOptions(o, opts...)
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(o)
+		}
+	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 // General Options
 
 func WithHint(h string) Option {
-	return api.WrapHint[Options](h)
+	return OptionFunc(func(opts *Options) {
+		api.WithHint(h).ApplyTo(&opts.Options)
+	})
 }
 
 func WithGlobalAccess(a cpi.AccessSpec) Option {
-	return api.WrapGlobalAccess[Options](a)
+	return OptionFunc(func(opts *Options) {
+		api.WithGlobalAccess(a).ApplyTo(&opts.Options)
+	})
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 // Local Options
 
-type mimetype struct {
-	mime string
-}
-
-func (o mimetype) ApplyTo(opts *Options) {
-	opts.MimeType = o.mime
-}
-
 func WithMimeType(mime string) Option {
-	return mimetype{mime}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type compression struct {
-	mode compressionMode
-}
-
-func (o compression) ApplyTo(opts *Options) {
-	opts.Compression = o.mode
+	return OptionFunc(func(opts *Options) {
+		opts.MimeType = mime
+	})
 }
 
 func WithCompression() Option {
-	return compression{COMPRESSION}
+	return OptionFunc(func(opts *Options) {
+		opts.Compression = COMPRESSION
+	})
 }
 
 func WithDecompression() Option {
-	return compression{DECOMPRESSION}
+	return OptionFunc(func(opts *Options) {
+		opts.Compression = DECOMPRESSION
+	})
 }

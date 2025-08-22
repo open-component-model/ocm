@@ -1,15 +1,22 @@
 package api
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/ocm/cpi"
 )
 
-type (
-	Option                 = optionutils.Option[*Options]
-	GeneralOptionsProvider = optionutils.NestedOptionsProvider[*Options]
-)
+type Option interface {
+	ApplyTo(opts *Options)
+}
+
+type OptionFunc func(opts *Options)
+
+func (f OptionFunc) ApplyTo(opts *Options) {
+	f(opts)
+}
+
+type GeneralOptionsProvider interface {
+	NestedOptions() *Options
+}
 
 type Options struct {
 	Global cpi.AccessSpec
@@ -17,8 +24,8 @@ type Options struct {
 }
 
 var (
-	_ optionutils.NestedOptionsProvider[*Options] = (*Options)(nil)
-	_ optionutils.Option[*Options]                = (*Options)(nil)
+	_ GeneralOptionsProvider = (*Options)(nil)
+	_ Option                 = (*Options)(nil)
 )
 
 func (w *Options) NestedOptions() *Options {
@@ -26,6 +33,9 @@ func (w *Options) NestedOptions() *Options {
 }
 
 func (o *Options) ApplyTo(opts *Options) {
+	if opts == nil {
+		return
+	}
 	if o.Global != nil {
 		opts.Global = o.Global
 	}
@@ -35,37 +45,24 @@ func (o *Options) ApplyTo(opts *Options) {
 }
 
 func (o *Options) Apply(opts ...Option) {
-	optionutils.ApplyOptions(o, opts...)
-}
-
-type hint string
-
-func (o hint) ApplyTo(opts *Options) {
-	opts.Hint = string(o)
-}
-
-func WithHint(h string) Option {
-	return hint(h)
-}
-
-func WrapHint[O any, P optionutils.OptionTargetProvider[*Options, O]](h string) optionutils.Option[P] {
-	return optionutils.OptionWrapper[*Options, O, P](WithHint(h))
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(o)
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Local Options
 
-type global struct {
-	cpi.AccessSpec
-}
-
-func (o global) ApplyTo(opts *Options) {
-	opts.Global = o.AccessSpec
+func WithHint(h string) Option {
+	return OptionFunc(func(opts *Options) {
+		opts.Hint = h
+	})
 }
 
 func WithGlobalAccess(a cpi.AccessSpec) Option {
-	return global{a}
-}
-
-func WrapGlobalAccess[O any, P optionutils.OptionTargetProvider[*Options, O]](a cpi.AccessSpec) optionutils.Option[P] {
-	return optionutils.OptionWrapper[*Options, O, P](WithGlobalAccess(a))
+	return OptionFunc(func(opts *Options) {
+		opts.Global = a
+	})
 }
