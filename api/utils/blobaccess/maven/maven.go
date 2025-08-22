@@ -1,7 +1,6 @@
 package maven
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/tech/maven"
@@ -32,6 +31,11 @@ func (o *optionwrapper) ApplyTo(opts *Coordinates) {
 }
 
 func NewCoordinates(groupId, artifactId, version string, opts ...Option) *Coordinates {
-	eff := optionutils.EvalOptions(opts...)
-	return maven.NewCoordinates(groupId, artifactId, version, &optionwrapper{eff})
+	var eff Options
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
+	return maven.NewCoordinates(groupId, artifactId, version, &optionwrapper{&eff})
 }

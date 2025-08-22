@@ -7,7 +7,6 @@ import (
 	gogit "github.com/go-git/go-git/v5"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
@@ -26,7 +25,10 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
-	options := optionutils.EvalOptions(opt...)
+	var options Options
+	for _, opt := range opt {
+		opt.ApplyTo(&options)
+	}
 	if options.URL == "" {
 		return nil, errors.New("no URL specified")
 	}

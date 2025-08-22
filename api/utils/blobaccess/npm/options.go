@@ -1,7 +1,6 @@
 package npm
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -16,7 +15,15 @@ import (
 	"ocm.software/ocm/api/utils/stdopts"
 )
 
-type Option = optionutils.Option[*Options]
+type Option interface {
+	ApplyTo(opts *Options)
+}
+
+type OptionFunc func(opts *Options)
+
+func (f OptionFunc) ApplyTo(opts *Options) {
+	f(opts)
+}
 
 type Options struct {
 	stdopts.StandardContexts
@@ -24,7 +31,11 @@ type Options struct {
 }
 
 func (o *Options) Logger(keyValuePairs ...interface{}) logging.Logger {
-	return ocmlog.LogContext(o.LoggingContext.Value, o.CredentialContext.Value, o.CachingContext.Value).Logger(npm.REALM).WithValues(keyValuePairs...)
+	return ocmlog.LogContext(
+		o.LoggingContext.Value,
+		o.CredentialContext.Value,
+		o.CachingContext.Value,
+	).Logger(npm.REALM).WithValues(keyValuePairs...)
 }
 
 func (o *Options) FileSystem() vfs.FileSystem {
@@ -72,48 +83,66 @@ func (o *Options) ApplyTo(opts *Options) {
 	}
 }
 
-func option[S any, T any](v T) optionutils.Option[*Options] {
-	return optionutils.WithGenericOption[S, *Options](v)
-}
+// //////////////////////////////////////////////////////////////////////////////
+// Option constructors
 
 func WithCredentialContext(ctx credentials.ContextProvider) Option {
-	return option[stdopts.CredentialContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCredentialContext(ctx.CredentialsContext())
+	})
 }
 
 func WithLoggingContext(ctx logging.ContextProvider) Option {
-	return option[stdopts.LoggingContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetLoggingContext(ctx.LoggingContext())
+	})
 }
 
 func WithCachingContext(ctx datacontext.Context) Option {
-	return option[stdopts.CachingContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCachingContext(ctx)
+	})
 }
 
 func WithCachingFileSystem(fs vfs.FileSystem) Option {
-	return option[stdopts.CachingFileSystemOptionBag](fs)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCachingFileSystem(fs)
+	})
 }
 
 func WithCachingPath(p string) Option {
-	return option[stdopts.CachingPathOptionBag](p)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCachingPath(p)
+	})
 }
 
 func WithCredentials(c credentials.Credentials) Option {
-	return option[stdopts.CredentialsOptionBag](c)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCredentials(c)
+	})
 }
 
 func WithPathFileSystem(fs vfs.FileSystem) Option {
-	return option[stdopts.PathFileSystemOptionBag](fs)
+	return OptionFunc(func(opts *Options) {
+		opts.SetPathFileSystem(fs)
+	})
 }
+
+// //////////////////////////////////////////////////////////////////////////////
+// DataContext integration
 
 func (o *Options) SetDataContext(ctx datacontext.Context) {
 	if c, ok := ctx.(credentials.ContextProvider); ok {
-		o.CredentialContext.Value = c.CredentialsContext()
+		o.SetCredentialContext(c.CredentialsContext())
 	}
-	o.PathFileSystem.Value = vfsattr.Get(ctx.AttributesContext())
-	o.CachingContext.Value = ctx.AttributesContext()
+	o.SetPathFileSystem(vfsattr.Get(ctx.AttributesContext()))
+	o.SetCachingContext(ctx.AttributesContext())
 }
 
 var _ stdopts.DataContextOptionBag = (*Options)(nil)
 
 func WithDataContext(ctx datacontext.Context) Option {
-	return option[stdopts.DataContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetDataContext(ctx)
+	})
 }

@@ -14,9 +14,9 @@ type (
 // General Options
 
 func WithHint(h string) Option {
-	return api.WrapHint[Options](h)
+	return api.WithHint(h)
 }
 
 func WithGlobalAccess(a cpi.AccessSpec) Option {
-	return api.WrapGlobalAccess[Options](a)
+	return api.WithGlobalAccess(a)
 }

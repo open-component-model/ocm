@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.24-alpine3.21 AS build
+FROM --platform=$BUILDPLATFORM golang:1.25-alpine3.22 AS build
 
 RUN apk add --no-cache make git
 

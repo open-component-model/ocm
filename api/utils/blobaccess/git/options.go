@@ -1,7 +1,6 @@
 package git
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -17,7 +16,15 @@ import (
 	"ocm.software/ocm/api/utils/stdopts"
 )
 
-type Option = optionutils.Option[*Options]
+type Option interface {
+	ApplyTo(opts *Options)
+}
+
+type OptionFunc func(opts *Options)
+
+func (f OptionFunc) ApplyTo(opts *Options) {
+	f(opts)
+}
 
 type Options struct {
 	git.ClientOptions
@@ -27,7 +34,9 @@ type Options struct {
 }
 
 func (o *Options) Logger(keyValuePairs ...interface{}) logging.Logger {
-	return ocmlog.LogContext(o.LoggingContext.Value, o.CredentialContext.Value).Logger(git.REALM).WithValues(keyValuePairs...)
+	return ocmlog.LogContext(o.LoggingContext.Value, o.CredentialContext.Value).
+		Logger(git.REALM).
+		WithValues(keyValuePairs...)
 }
 
 func (o *Options) Cache() *tmpcache.Attribute {
@@ -73,7 +82,6 @@ func (o *Options) ConfigureAuthMethod() error {
 	}
 
 	var err error
-
 	if o.Credentials.Value != nil {
 		if o.ClientOptions.AuthMethod, err = git.AuthFromCredentials(o.Credentials.Value); err != nil {
 			return err
@@ -94,7 +102,6 @@ func (o *Options) ConfigureAuthMethod() error {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -110,7 +117,6 @@ func (o *Options) CachingFilesystem() (vfs.FileSystem, func() error, error) {
 		if fs := vfsattr.Get(o.CachingContext.Value); fs != nil {
 			return fs, nil, nil
 		}
-
 		if fromtmp := tmpcache.Get(o.CachingContext.Value); fromtmp != nil {
 			fs, err := projectionfs.New(fromtmp.Filesystem, fromtmp.Path)
 			if err != nil {
@@ -119,39 +125,52 @@ func (o *Options) CachingFilesystem() (vfs.FileSystem, func() error, error) {
 			return fs, nil, nil
 		}
 	}
+
 	tmpfs, err := osfs.NewTempFileSystem()
 	return tmpfs, func() error { return vfs.Cleanup(tmpfs) }, err
 }
 
-func option[S any, T any](v T) optionutils.Option[*Options] {
-	return optionutils.WithGenericOption[S, *Options](v)
-}
+// //////////////////////////////////////////////////////////////////////////////
+// Option constructors
 
 func WithCredentialContext(ctx credentials.ContextProvider) Option {
-	return option[stdopts.CredentialContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCredentialContext(ctx.CredentialsContext())
+	})
 }
 
 func WithLoggingContext(ctx logging.ContextProvider) Option {
-	return option[stdopts.LoggingContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetLoggingContext(ctx.LoggingContext())
+	})
 }
 
 func WithCachingContext(ctx datacontext.Context) Option {
-	return option[stdopts.CachingContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCachingContext(ctx)
+	})
 }
 
 func WithCachingFileSystem(fs vfs.FileSystem) Option {
-	return option[stdopts.CachingFileSystemOptionBag](fs)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCachingFileSystem(fs)
+	})
 }
 
 func WithPathFileSystem(fs vfs.FileSystem) Option {
-	return option[stdopts.PathFileSystemOptionBag](fs)
+	return OptionFunc(func(opts *Options) {
+		opts.SetPathFileSystem(fs)
+	})
 }
 
 func WithCredentials(c credentials.Credentials) Option {
-	return option[stdopts.CredentialsOptionBag](c)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCredentials(c)
+	})
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
+// URL
 
 type URLOptionBag interface {
 	SetURL(v string)
@@ -162,10 +181,13 @@ func (o *Options) SetURL(v string) {
 }
 
 func WithURL(url string) Option {
-	return option[URLOptionBag](url)
+	return OptionFunc(func(opts *Options) {
+		opts.SetURL(url)
+	})
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
+// Ref
 
 type RefOptionBag interface {
 	SetRef(v string)
@@ -176,10 +198,13 @@ func (o *Options) SetRef(v string) {
 }
 
 func WithRef(ref string) Option {
-	return option[RefOptionBag](ref)
+	return OptionFunc(func(opts *Options) {
+		opts.SetRef(ref)
+	})
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
+// Commit
 
 type CommitOptionBag interface {
 	SetCommit(v string)
@@ -189,6 +214,8 @@ func (o *Options) SetCommit(v string) {
 	o.Commit = v
 }
 
-func WithCommit(ref string) Option {
-	return option[CommitOptionBag](ref)
+func WithCommit(commit string) Option {
+	return OptionFunc(func(opts *Options) {
+		opts.SetCommit(commit)
+	})
 }
