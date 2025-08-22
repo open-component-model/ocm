@@ -93,7 +93,7 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              go_1_24   # golang 1.24
+              go_1_25   # golang 1.25
               gopls     # go language server
               gotools   # go imports
               go-tools  # static checks

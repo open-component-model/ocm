@@ -1,7 +1,6 @@
 package maven
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -13,7 +12,15 @@ import (
 	"ocm.software/ocm/api/utils/stdopts"
 )
 
-type Option = optionutils.Option[*Options]
+type Option interface {
+	ApplyTo(opts *Options)
+}
+
+type OptionFunc func(opts *Options)
+
+func (f OptionFunc) ApplyTo(opts *Options) {
+	f(opts)
+}
 
 type Options struct {
 	stdopts.StandardContexts
@@ -77,35 +84,43 @@ func (o *Options) ApplyTo(opts *Options) {
 	}
 }
 
-func option[S any, T any](v T) optionutils.Option[*Options] {
-	return optionutils.WithGenericOption[S, *Options](v)
-}
-
 func WithCredentialContext(ctx credentials.ContextProvider) Option {
-	return option[stdopts.CredentialContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCredentialContext(ctx.CredentialsContext())
+	})
 }
 
 func WithLoggingContext(ctx logging.ContextProvider) Option {
-	return option[stdopts.LoggingContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetLoggingContext(ctx.LoggingContext())
+	})
 }
 
 func WithCachingContext(ctx datacontext.Context) Option {
-	return option[stdopts.CachingContextOptionBag](ctx)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCachingContext(ctx)
+	})
 }
 
 func WithCachingFileSystem(fs vfs.FileSystem) Option {
-	return option[stdopts.CachingFileSystemOptionBag](fs)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCachingFileSystem(fs)
+	})
 }
 
 func WithCachingPath(p string) Option {
-	return option[stdopts.CachingPathOptionBag](p)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCachingPath(p)
+	})
 }
 
 func WithCredentials(c credentials.Credentials) Option {
-	return option[stdopts.CredentialsOptionBag](c)
+	return OptionFunc(func(opts *Options) {
+		opts.SetCredentials(c)
+	})
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type ClassifierOptionBag interface {
 	SetClassifier(v string)
@@ -116,17 +131,19 @@ func (o *Options) SetClassifier(v string) {
 }
 
 func WithClassifier(c string) Option {
-	return option[ClassifierOptionBag](c)
+	return OptionFunc(func(opts *Options) {
+		opts.SetClassifier(c)
+	})
 }
 
 func WithOptionalClassifier(c *string) Option {
 	if c != nil {
 		return WithClassifier(*c)
 	}
-	return &optionutils.NoOption[*Options]{}
+	return nil
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type MediaTypeOptionBag interface {
 	SetMediaType(v string)
@@ -137,17 +154,19 @@ func (o *Options) SetMediaType(v string) {
 }
 
 func WithMediaType(c string) Option {
-	return option[MediaTypeOptionBag](c)
+	return OptionFunc(func(opts *Options) {
+		opts.SetMediaType(c)
+	})
 }
 
 func WithOptionalMediaType(c *string) Option {
 	if c != nil {
 		return WithMediaType(*c)
 	}
-	return &optionutils.NoOption[*Options]{}
+	return nil
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type ExtensionOptionBag interface {
 	SetExtension(v string)
@@ -158,25 +177,23 @@ func (o *Options) SetExtension(v string) {
 }
 
 func WithExtension(e string) Option {
-	return option[ExtensionOptionBag](e)
+	return OptionFunc(func(opts *Options) {
+		opts.SetExtension(e)
+	})
 }
 
 func WithOptionalExtension(e *string) Option {
 	if e != nil {
 		return WithExtension(*e)
 	}
-	return &optionutils.NoOption[*Options]{}
+	return nil
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 func (o *Options) SetDataContext(ctx datacontext.Context) {
 	if c, ok := ctx.(credentials.ContextProvider); ok {
 		o.SetCredentialContext(c.CredentialsContext())
 	}
 	o.SetCachingContext(ctx)
-}
-
-func WithDataContext(ctx datacontext.ContextProvider) Option {
-	return option[stdopts.DataContextOptionBag](ctx)
 }
