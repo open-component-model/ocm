@@ -139,7 +139,7 @@ jobs:
     - name: Move CTF into correct directory to be recognized by the release process
       run: |
         mv \
-            ${{ github.workspace }}/gen/downloaded-ctfs/ctf-aggregated \
+            ${{ github.workspace }}/gen/downloaded-ctfs \
             ${{ github.workspace }}/gen/ctf
 
     # TODO: Remove Go setup once binaries no longer need to be built by goreleaser.
