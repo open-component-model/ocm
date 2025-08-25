@@ -28,7 +28,7 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@90bb610b90bf290cad97484ba341453bd1cbefea # v19
         with:
-          nix-package-url: https://releases.nixos.org/nix/nix-2.26.2/nix-2.26.2-x86_64-linux.tar.xz
+          nix-package-url: https://releases.nixos.org/nix/nix-2.31.0/nix-2.31.0-x86_64-linux.tar.xz
       - name: Update flake.lock
         run: nix flake update
       - name: Update ocm vendor hash
