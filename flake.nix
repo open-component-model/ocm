@@ -2,8 +2,8 @@
   description = "Nix flake for ocm";
 
   inputs = {
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -30,7 +30,7 @@
           inherit (pkgs) stdenv lib ;
         in
         {
-          ${pname} = pkgs.buildGoModule.override { go = pkgs.go_1_24; } rec {
+          ${pname} = pkgs.buildGoModule.override { go = pkgs.go_1_25; } rec {
             inherit pname self;
             version = lib.fileContents ./VERSION;
             gitCommit = if (self ? rev) then self.rev else self.dirtyRev;
