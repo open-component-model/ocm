@@ -1,7 +1,6 @@
 package npmblob
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -13,7 +12,15 @@ import (
 	base "ocm.software/ocm/api/utils/blobaccess/npm"
 )
 
-type Option = optionutils.Option[*Options]
+type Option interface {
+	ApplyTo(opts *Options)
+}
+
+type OptionFunc func(opts *Options)
+
+func (f OptionFunc) ApplyTo(opts *Options) {
+	f(opts)
+}
 
 type Options struct {
 	api.Options
@@ -26,71 +33,90 @@ var (
 )
 
 func (o *Options) ApplyTo(opts *Options) {
+	if opts == nil {
+		return
+	}
 	o.Options.ApplyTo(&opts.Options)
 	o.Blob.ApplyTo(&opts.Blob)
 }
 
 func (o *Options) Apply(opts ...Option) {
-	optionutils.ApplyOptions(o, opts...)
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(o)
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // General Options
 
 func WithHint(h string) Option {
-	return api.WrapHint[Options](h)
+	return OptionFunc(func(opts *Options) {
+		api.WithHint(h).ApplyTo(&opts.Options)
+	})
 }
 
 func WithHintForCoords(coords *maven.Coordinates) Option {
 	if coords.IsPackage() {
 		return WithHint(coords.GAV())
 	}
-	return optionutils.NoOption[*Options]{}
+	return nil
 }
 
 func WithGlobalAccess(a cpi.AccessSpec) Option {
-	return api.WrapGlobalAccess[Options](a)
+	return OptionFunc(func(opts *Options) {
+		api.WithGlobalAccess(a).ApplyTo(&opts.Options)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Local Options
-
-func mapBaseOption(opts *Options) *base.Options {
-	return &opts.Blob
-}
-
-func wrapBase(o base.Option) Option {
-	return optionutils.OptionWrapperFunc[*base.Options, *Options](o, mapBaseOption)
-}
+// Local (Blob) Options
 
 func WithCredentialContext(credctx credentials.ContextProvider) Option {
-	return wrapBase(base.WithCredentialContext(credctx))
+	return OptionFunc(func(opts *Options) {
+		base.WithCredentialContext(credctx).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithLoggingContext(logctx logging.ContextProvider) Option {
-	return wrapBase(base.WithLoggingContext(logctx))
+	return OptionFunc(func(opts *Options) {
+		base.WithLoggingContext(logctx).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithCachingContext(cachectx datacontext.Context) Option {
-	return wrapBase(base.WithCachingContext(cachectx))
+	return OptionFunc(func(opts *Options) {
+		base.WithCachingContext(cachectx).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithCachingFileSystem(fs vfs.FileSystem) Option {
-	return wrapBase(base.WithCachingFileSystem(fs))
+	return OptionFunc(func(opts *Options) {
+		base.WithCachingFileSystem(fs).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithCachingPath(p string) Option {
-	return wrapBase(base.WithCachingPath(p))
+	return OptionFunc(func(opts *Options) {
+		base.WithCachingPath(p).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithCredentials(c credentials.Credentials) Option {
-	return wrapBase(base.WithCredentials(c))
+	return OptionFunc(func(opts *Options) {
+		base.WithCredentials(c).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithPathFileSystem(fs vfs.FileSystem) Option {
-	return wrapBase(base.WithPathFileSystem(fs))
+	return OptionFunc(func(opts *Options) {
+		base.WithPathFileSystem(fs).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithDataContext(ctx datacontext.Context) Option {
-	return wrapBase(base.WithDataContext(ctx))
+	return OptionFunc(func(opts *Options) {
+		base.WithDataContext(ctx).ApplyTo(&opts.Blob)
+	})
 }

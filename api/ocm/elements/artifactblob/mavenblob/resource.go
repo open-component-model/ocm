@@ -14,7 +14,13 @@ import (
 const TYPE = resourcetypes.MAVEN_PACKAGE
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, repo *maven.Repository, groupId, artifactId, version string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(optionutils.WithDefaults(opts, WithCredentialContext(ctx))...)
+	var eff Options
+	WithCredentialContext(ctx).ApplyTo(&eff)
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
 	if eff.Blob.IsPackage() && eff.Hint == "" {
 		eff.Hint = maven.NewCoordinates(groupId, artifactId, version).GAV()
 	}

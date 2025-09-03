@@ -12,11 +12,16 @@ func DataAccess(repo *maven.Repository, groupId, artifactId, version string, opt
 }
 
 func BlobAccess(repo *maven.Repository, groupId, artifactId, version string, opts ...Option) (bpi.BlobAccess, error) {
-	eff := optionutils.EvalOptions(opts...)
+	var eff Options
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
 	s := &spec{
 		coords:  maven.NewCoordinates(groupId, artifactId, version, maven.WithOptionalClassifier(eff.Classifier), maven.WithOptionalExtension(eff.Extension), maven.WithOptionalMediaType(eff.MediaType)),
 		repo:    repo,
-		options: eff,
+		options: &eff,
 	}
 	return s.getBlobAccess()
 }

@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"ocm.software/ocm/api/tech/npm"
@@ -44,12 +43,17 @@ func NewPackageSpec(registry, pkg, version string, opts ...Option) (*PackageSpec
 	if version == "" {
 		return nil, errors.ErrRequired("version")
 	}
-	eff := optionutils.EvalOptions(opts...)
+	var eff Options
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
 	return &PackageSpec{
 		registry: registry,
 		pkg:      pkg,
 		version:  version,
-		options:  eff,
+		options:  &eff,
 	}, nil
 }
 

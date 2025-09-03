@@ -2,7 +2,6 @@ package ocmblob
 
 import (
 	"github.com/mandelsoft/goutils/generics"
-	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -10,7 +9,13 @@ import (
 )
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx cpi.Context, meta P, cvp base.ComponentVersionProvider, res base.ResourceProvider, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(opts...)
+	var eff Options
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
+
 	blobprov := base.Provider(cvp, res)
 	accprov := cpi.NewAccessProviderForBlobAccessProvider(ctx, blobprov, eff.Hint, eff.Global)
 	// strange type cast is required by Go compiler, meta has the correct type.

@@ -15,7 +15,13 @@ import (
 const TYPE = resourcetypes.OCI_IMAGE
 
 func Access[M any, P compdesc.ArtifactMetaPointer[M]](ctx ocm.Context, meta P, name string, opts ...Option) cpi.ArtifactAccess[M] {
-	eff := optionutils.EvalOptions(opts...)
+	var eff Options
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(&eff)
+		}
+	}
+
 	if meta.GetType() == "" {
 		meta.SetType(TYPE)
 	}

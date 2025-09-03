@@ -39,7 +39,7 @@ jobs:
       draft-release-notes-body: ${{ steps.release-notes.outputs.release_notes_body }}
     steps:
     - name: Checkout
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         fetch-depth: 0
     - name: Check Tag
@@ -119,27 +119,27 @@ jobs:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Checkout
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         # fetch all history so we can calculate the version and tagging
         fetch-depth: 0
         token: ${{ steps.generate_token.outputs.token }}
 
     - name: Setup Syft
-      uses: anchore/sbom-action/download-syft@cee1b8e05ae5b2593a75e197229729eabaa9f8ec # v0.20.2
+      uses: anchore/sbom-action/download-syft@da167eac915b4e86f08b264dbdbc867b61be6f0c # v0.20.5
 
     - name: Setup Cosign
-      uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
+      uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
 
     - name: Download CTF
-      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       with:
         pattern: 'ctf-aggregated'
         path: gen/downloaded-ctfs
     - name: Move CTF into correct directory to be recognized by the release process
       run: |
         mv \
-            ${{ github.workspace }}/gen/downloaded-ctfs/ctf-aggregated \
+            ${{ github.workspace }}/gen/downloaded-ctfs \
             ${{ github.workspace }}/gen/ctf
 
     # TODO: Remove Go setup once binaries no longer need to be built by goreleaser.
@@ -160,7 +160,7 @@ jobs:
     - name: Restore / Reuse Cache from central build
       id: cache-golang-restore
       # Only Restore, not build another cache (too big)
-      uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
       with:
         path: |
           ${{ env.go_cache }}
@@ -222,7 +222,7 @@ jobs:
         echo "RELEASE_NOTES=$RUNNER_TEMP/RELEASE_NOTES.md" >> $GITHUB_ENV
         cat $RUNNER_TEMP/RELEASE_NOTES.md
     - name: Run GoReleaser
-      uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
+      uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
       with:
         distribution: goreleaser
         version: 2.1.0

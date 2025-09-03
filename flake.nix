@@ -37,7 +37,7 @@
             state = if (self ? rev) then "clean" else "dirty";
 
             # This vendorHash represents a derivative of all go.mod dependencies and needs to be adjusted with every change
-            vendorHash = "sha256-A4ViFWPWNsF3/TbYNALyjMzfvl09DZxAlUxS7FsTuUY=";
+            vendorHash = "sha256-004Qv+RBLBloxFfSWQrpLstlGun2p4TtdabhUBgCpag=";
 
             src = ./.;
 
@@ -93,7 +93,7 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              go_1_24   # golang 1.24
+              go_1_25   # golang 1.25
               gopls     # go language server
               gotools   # go imports
               go-tools  # static checks
