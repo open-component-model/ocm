@@ -234,6 +234,9 @@ The following configuration types are supported:
          ...
   </pre>
 - <code>oci.uploader.config.ocm.software</code>
+  WARNING: This is an experimental feature. Will be replaced with native local
+  blob support in OCM in the future.
+
   The config type <code>oci.uploader.config.ocm.software</code> can be used to set some
   configurations for the implicit OCI artifact upload for OCI based OCM repositories.
 

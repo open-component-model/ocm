@@ -41,6 +41,9 @@ func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 }
 
 const usage = `
+WARNING: This is an experimental feature. Will be replaced with native local
+blob support in OCM in the future.
+
 The config type <code>` + ConfigType + `</code> can be used to set some
 configurations for the implicit OCI artifact upload for OCI based OCM repositories.
 
