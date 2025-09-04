@@ -60,14 +60,14 @@ jobs:
         # your codebase is analyzed, see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
     steps:
     - name: Self Hosted Runner Post Job Cleanup Action
-      uses: TooMuch4U/actions-clean@v2.2
+      uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
 
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
 
     - name: Setup Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
       if: matrix.build-mode == 'manual'
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
@@ -86,7 +86,8 @@ jobs:
     - name: Restore / Reuse Cache from central build
       if: matrix.build-mode == 'manual'
       id: cache-golang-restore
-      uses: actions/cache/restore@v4 # Only Restore, not build another cache (too big)
+      # Only Restore, not build another cache (too big) 
+      uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
       with:
         path: |
           ${{ env.go_cache }}
@@ -99,7 +100,7 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@2d92b76c45b91eb80fc44c74ce3fce0ee94e8f9d # v3.29.5
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -116,7 +117,7 @@ jobs:
       run: make build -j
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@2d92b76c45b91eb80fc44c74ce3fce0ee94e8f9d # v3.29.5
       with:
         category: "/language:${{matrix.language}}"
 

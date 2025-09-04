@@ -2,7 +2,8 @@
   description = "Nix flake for ocm";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -36,7 +37,7 @@
             state = if (self ? rev) then "clean" else "dirty";
 
             # This vendorHash represents a derivative of all go.mod dependencies and needs to be adjusted with every change
-            vendorHash = "sha256-W9Od79/LKuZEJdZS//R9Wbjq3xkB8sgMbp+rtTtmmmA=";
+            vendorHash = "sha256-004Qv+RBLBloxFfSWQrpLstlGun2p4TtdabhUBgCpag=";
 
             src = ./.;
 
@@ -48,9 +49,9 @@
             # "-X ocm.software/ocm/api/version.buildDate=1970-01-01T0:00:00+0000"
             ];
 
-            env = {
-              CGO_ENABLED = "0";
-            };
+            # env = {
+            #   CGO_ENABLED = "0";
+            # };
 
             subPackages = [
               "cmds/ocm"
@@ -92,7 +93,7 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              go_1_24   # golang 1.24
+              go_1_25   # golang 1.25
               gopls     # go language server
               gotools   # go imports
               go-tools  # static checks

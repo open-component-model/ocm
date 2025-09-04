@@ -10,8 +10,8 @@ import (
 	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
+	"go.yaml.in/yaml/v3"
 	glog "gopkg.in/op/go-logging.v1"
-	"gopkg.in/yaml.v3"
 
 	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"

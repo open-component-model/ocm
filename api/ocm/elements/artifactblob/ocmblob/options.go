@@ -5,17 +5,18 @@ import (
 	"ocm.software/ocm/api/ocm/elements/artifactblob/api"
 )
 
-type Option = api.Option
+type (
+	Option  = api.Option
+	Options = api.Options
+)
 
-type Options = api.Options
-
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 // General Options
 
 func WithHint(h string) Option {
-	return api.WrapHint[Options](h)
+	return api.WithHint(h)
 }
 
 func WithGlobalAccess(a cpi.AccessSpec) Option {
-	return api.WrapGlobalAccess[Options](a)
+	return api.WithGlobalAccess(a)
 }

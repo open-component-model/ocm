@@ -84,7 +84,7 @@ var _ = Describe("component repository mapping", func() {
 		cva, err := comp.NewVersion("v1.two.zeo-2")
 		Expect(err).To(HaveOccurred())
 		Expect(cva).To(BeNil())
-		Expect(err.Error()).To(Equal("Invalid Semantic Version"))
+		Expect(err.Error()).To(Equal("invalid semantic version"))
 	})
 
 	It("creates a dummy component", func() {

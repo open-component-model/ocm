@@ -4,7 +4,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/credentials"
@@ -14,7 +13,15 @@ import (
 	base "ocm.software/ocm/api/utils/blobaccess/wget"
 )
 
-type Option = optionutils.Option[*Options]
+type Option interface {
+	ApplyTo(opts *Options)
+}
+
+type OptionFunc func(opts *Options)
+
+func (f OptionFunc) ApplyTo(opts *Options) {
+	f(opts)
+}
 
 type Options struct {
 	api.Options
@@ -27,64 +34,83 @@ var (
 )
 
 func (o *Options) ApplyTo(opts *Options) {
+	if opts == nil {
+		return
+	}
 	o.Options.ApplyTo(&opts.Options)
 	o.Blob.ApplyTo(&opts.Blob)
 }
 
 func (o *Options) Apply(opts ...Option) {
-	optionutils.ApplyOptions(o, opts...)
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyTo(o)
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // General Options
 
 func WithHint(h string) Option {
-	return api.WrapHint[Options](h)
+	return OptionFunc(func(opts *Options) {
+		api.WithHint(h).ApplyTo(&opts.Options)
+	})
 }
 
 func WithGlobalAccess(a cpi.AccessSpec) Option {
-	return api.WrapGlobalAccess[Options](a)
+	return OptionFunc(func(opts *Options) {
+		api.WithGlobalAccess(a).ApplyTo(&opts.Options)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Local Options
 
-func mapBaseOption(opts *Options) *base.Options {
-	return &opts.Blob
-}
-
-func wrapBase(o base.Option) Option {
-	return optionutils.OptionWrapperFunc[*base.Options, *Options](o, mapBaseOption)
-}
-
 func WithCredentialContext(credctx credentials.ContextProvider) Option {
-	return wrapBase(base.WithCredentialContext(credctx))
+	return OptionFunc(func(opts *Options) {
+		base.WithCredentialContext(credctx).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithLoggingContext(logctx logging.ContextProvider) Option {
-	return wrapBase(base.WithLoggingContext(logctx))
+	return OptionFunc(func(opts *Options) {
+		base.WithLoggingContext(logctx).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithMimeType(mime string) Option {
-	return wrapBase(base.WithMimeType(mime))
+	return OptionFunc(func(opts *Options) {
+		base.WithMimeType(mime).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithCredentials(creds credentials.Credentials) Option {
-	return wrapBase(base.WithCredentials(creds))
+	return OptionFunc(func(opts *Options) {
+		base.WithCredentials(creds).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithHeader(h http.Header) Option {
-	return wrapBase(base.WithHeader(h))
+	return OptionFunc(func(opts *Options) {
+		base.WithHeader(h).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithVerb(v string) Option {
-	return wrapBase(base.WithVerb(v))
+	return OptionFunc(func(opts *Options) {
+		base.WithVerb(v).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithBody(v io.Reader) Option {
-	return wrapBase(base.WithBody(v))
+	return OptionFunc(func(opts *Options) {
+		base.WithBody(v).ApplyTo(&opts.Blob)
+	})
 }
 
 func WithNoRedirect(r ...bool) Option {
-	return wrapBase(wget.WithNoRedirect(r...))
+	return OptionFunc(func(opts *Options) {
+		wget.WithNoRedirect(r...).ApplyTo(&opts.Blob)
+	})
 }

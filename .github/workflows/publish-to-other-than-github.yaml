@@ -11,6 +11,9 @@ on:
   repository_dispatch:
     types: [publish-ocm-cli]
 
+permissions:
+  contents: read
+
 jobs:
   push-to-brew-tap:
     name: Update Homebrew Tap
@@ -23,24 +26,24 @@ jobs:
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@v2
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         path: tap
         repository: ${{ env.REPO }}
         token: ${{ steps.generate_token.outputs.token }}
     - name: Get Update Script
-      uses: actions/checkout@v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         path: scripts
         sparse-checkout: |
           hack/brew
     - name: Setup Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
       with:
         go-version-file: ${{ github.workspace }}/scripts/hack/brew/go.mod
         cache: false
@@ -57,7 +60,7 @@ jobs:
         cd ${{ github.workspace }}/tap/Aliases
         ln -sf ../Formula/$(basename $formula) ./ocm
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
       with:
         path: tap
         token: ${{ steps.generate_token.outputs.token }}
@@ -80,7 +83,7 @@ jobs:
     - name: Ensure proper version
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
     - name: Install SSH key
-      uses: shimataro/ssh-key-action@v2
+      uses: shimataro/ssh-key-action@d4fffb50872869abe2d9a9098a6d9c5aa7d16be4 # v2.7.0
       with:
         name: aur
         key: ${{ secrets.ARCHLINUX_SSH_PRIVATE_KEY }}
@@ -108,37 +111,18 @@ jobs:
         echo "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@v2
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         token: ${{ steps.generate_token.outputs.token }}
     - name: Update Chocolatey package
       run: |
         .\hack\chocolatey\update.ps1
         choco push ocm-cli.${{ env.RELEASE_VERSION }}.nupkg --source "'https://push.chocolatey.org/'" --api-key="${{ secrets.CHOCO_API_KEY }}"
-
-  push-to-winget:
-    name: Update Winget
-    if: github.event.client_payload.push-to-winget && github.event.client_payload.version != ''
-    runs-on: windows-latest
-    steps:
-    - name: Ensure proper version
-      run: |
-        $version = "${{ github.event.client_payload.version }}" -replace 'v'
-        echo "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV
-    - name: Install wingetcreate
-      run: iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-    - name: Update Winget package
-      run: |
-        .\wingetcreate.exe update --submit --token ${{ secrets.OCM_CI_ROBOT_0_REPO }} --urls `
-          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-amd64.zip `
-          https://github.com/open-component-model/ocm/releases/download/v${{ env.RELEASE_VERSION }}/ocm-${{ env.RELEASE_VERSION }}-windows-arm64.zip `
-          --version ${{ env.RELEASE_VERSION }} `
-          Open-Component-Model.ocm-cli
 
   push-to-website:
     name: Update OCM Website
@@ -149,12 +133,12 @@ jobs:
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }})" >> $GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: tibdex/github-app-token@v2
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
       with:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Publish Release Event
-      uses: peter-evans/repository-dispatch@v3
+      uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
       with:
         token: ${{ steps.generate_token.outputs.token }}
         repository: open-component-model/ocm-website

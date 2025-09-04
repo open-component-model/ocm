@@ -55,7 +55,6 @@ Install the latest release with
 - [AUR](#aur)
 - [Docker and Podman](#container)
 - [Chocolatey](#chocolatey)
-- [Winget](#winget)
 
 ### Bash
 
@@ -145,7 +144,7 @@ You can pass in the following arguments to override the predefined defaults:
 Please check [hub.docker.com](https://hub.docker.com/_/golang/tags?page=1&name=alpine) for possible version combinations.
 
 ```bash
-podman build -t ocm --build-arg GO_VERSION=1.24 --build-arg ALPINE_VERSION=3.21 --build-arg GO_PROXY=https://proxy.golang.org .
+podman build -t ocm --build-arg GO_VERSION=1.25 --build-arg ALPINE_VERSION=3.21 --build-arg GO_PROXY=https://proxy.golang.org .
 ```
 
 ### Chocolatey
@@ -155,14 +154,6 @@ choco install ocm-cli
 ```
 
 see: [chocolatey community package: ocm-cli](https://community.chocolatey.org/packages/ocm-cli)
-
-### Winget
-
-```powershell
-winget install ocm-cli
-```
-
-see: [microsoft/winget-packages: Open-Component-Model](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/Open-Component-Model)
 
 ## Examples
 

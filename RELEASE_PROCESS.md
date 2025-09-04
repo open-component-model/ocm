@@ -285,10 +285,6 @@ In case of error you can try to [Manually retrigger the publishing of ocm-cli to
 
 [Update brew tap](https://github.com/open-component-model/homebrew-tap/pulls).
 
-### winget-pkgs
-
-[Check winget-pkgs PRs for: `New version: Open-Component-Model.ocm-cli`](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+New+version%3A+Open-Component-Model.ocm-cli).
-
 ### chocolatey
 
 [Check the `Packages in Moderation`](https://community.chocolatey.org/profiles/ocm.software#profile-moderation).

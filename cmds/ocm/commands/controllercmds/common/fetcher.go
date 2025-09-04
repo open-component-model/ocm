@@ -74,7 +74,7 @@ func fetch(ctx context.Context, url, version, dir, filename string) error {
 		ghURL = fmt.Sprintf("%s/download/%s/%s", url, version, filename)
 	}
 
-	req, err := http.NewRequest(http.MethodGet, ghURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ghURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create HTTP request for %s, error: %w", ghURL, err)
 	}

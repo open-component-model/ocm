@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.24-alpine3.21 AS build
+FROM --platform=$BUILDPLATFORM golang:1.25-alpine3.22 AS build
 
 RUN apk add --no-cache make git
 
@@ -20,7 +20,7 @@ ENV BUILD_FLAGS="-trimpath"
 # by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
 RUN make bin/ocm GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH}
 
-FROM gcr.io/distroless/static-debian12:nonroot@sha256:c0f429e16b13e583da7e5a6ec20dd656d325d88e6819cafe0adb0828976529dc
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:a9f88e0d99c1ceedbce565fad7d3f96744d15e6919c19c7dafe84a6dd9a80c61
 
 COPY --from=build /src/bin/ocm /usr/local/bin/ocm
 

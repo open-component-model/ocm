@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -46,7 +47,11 @@ type TarFileSystemOptions struct {
 	ExcludeFiles []string
 	// PreserveDir defines that the directory specified in the Path field should be included in the blob.
 	// Only supported for Type dir.
-	PreserveDir    bool
+	PreserveDir bool
+	// ZeroModTime defines that the modtime of the files added to the tar should be zeroed. This is important
+	// if the TAR archives need to be comparable on byte level (e.g. for hashing). To get fully byte-equivalent
+	// TAR archives at different timestamps, the mod time needs to be set to 0.
+	ZeroModTime    bool
 	FollowSymlinks bool
 
 	root string
@@ -118,6 +123,10 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 		return err
 	}
 	header.Name = path
+
+	if opts.ZeroModTime {
+		header.ModTime = time.Time{}
+	}
 
 	switch {
 	case info.IsDir():
@@ -241,9 +250,18 @@ func ListSortedFilesInDir(fs vfs.FileSystem, root string, flat bool) ([]string, 
 	return files, err
 }
 
-// TgzFs creates a tar.gz archive from a filesystem with all files being in the root of the zipped archive.
+// TgzFs works like PackFsIntoTar, but compresses the tar archive with [gzip.NewWriter].
+func TgzFs(fs vfs.FileSystem, writer io.Writer, options TarFileSystemOptions) (err error) {
+	zip := gzip.NewWriter(writer)
+	defer func() {
+		err = errors.Join(err, zip.Close())
+	}()
+	return PackFsIntoTar(fs, "", zip, options)
+}
+
+// TgzFlatFs creates a tar.gz archive from a filesystem with all files being in the root of the zipped archive.
 // The writer is closed after the archive is written. The TAR-headers are normalized, see RegularFileInfoHeader.
-func TgzFs(fs vfs.FileSystem, writer io.Writer) error {
+func TgzFlatFs(fs vfs.FileSystem, writer io.Writer) error {
 	zip := gzip.NewWriter(writer)
 	err := TarFlatFs(fs, zip)
 	if err != nil {
