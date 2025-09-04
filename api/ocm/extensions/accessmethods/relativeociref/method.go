@@ -84,12 +84,10 @@ func (a *AccessSpec) GetOCIReference(cv accspeccpi.ComponentVersionAccess) (stri
 	if o, ok := accspeccpi.GetAccessMethodImplementation(m).(ociartifact.OCIArtifactReferenceProvider); ok {
 		im, err := o.GetOCIReference(cv)
 		if err == nil {
-			if s, ok := cv.Repository().GetSpecification().(oci.UniformRepositorySpecProvider); ok {
-				host := s.UniformRepositorySpec().Host
-				// not supported for fake repos
-				if host != "" {
-					im = host + "/" + im
-				}
+			spec := cv.Repository().GetSpecification().AsUniformSpec(cv.GetContext())
+			// not supported for fake repos
+			if spec.Host != "" {
+				im = spec.Host + "/" + im
 			}
 		}
 		return im, err

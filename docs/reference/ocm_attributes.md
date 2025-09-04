@@ -130,12 +130,6 @@ OCM library:
 
   Directory to look for OCM plugin executables.
 
-- <code>github.com/mandelsoft/ocm/preferrelativeaccess</code> [<code>preferrelativeaccess</code>]: *bool*
-
-  If an artifact blob is uploaded to the technical repository
-  used as OCM repository, the uploader should prefer to return
-  a relative access method.
-
 - <code>github.com/mandelsoft/ocm/rootcerts</code> [<code>rootcerts</code>]: *JSON*
 
   General root certificate settings given as JSON document with the following
@@ -203,6 +197,12 @@ OCM library:
   If composition mode is disabled blobs will directly be forwarded to
   the backend and descriptor updated will be persisted on AddVersion
   or closing a provided existing component version.
+
+- <code>ocm.software/ocm/oci/preferrelativeaccess</code> [<code>preferrelativeaccess</code>]: *bool*
+
+  If an artifact blob is uploaded to the technical repository
+  used as OCM repository, the uploader should prefer to return
+  a relative access method.
 
 - <code>ocm.software/signing/sigstore</code> [<code>sigstore</code>]: *sigstore config* Configuration to use for sigstore based signing.
 

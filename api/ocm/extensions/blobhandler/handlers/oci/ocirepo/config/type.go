@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ConfigType   = "local.oci.uploader" + cfgcpi.OCM_CONFIG_TYPE_SUFFIX
+	ConfigType   = "oci.uploader" + cfgcpi.OCM_CONFIG_TYPE_SUFFIX
 	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
 )
 

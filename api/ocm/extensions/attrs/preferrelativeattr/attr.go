@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	ATTR_KEY   = "github.com/mandelsoft/ocm/preferrelativeaccess"
 	ATTR_SHORT = "preferrelativeaccess"
+	ATTR_KEY   = "ocm.software/ocm/oci/" + ATTR_SHORT
 )
 
 func init() {

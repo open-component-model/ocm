@@ -20,15 +20,11 @@ type IntermediateRepositorySpecAspect interface {
 	IsIntermediate() bool
 }
 
-type UniformRepositorySpecProvider interface {
-	UniformRepositorySpec() *UniformRepositorySpec
-}
-
 type RepositorySpec interface {
 	runtime.VersionedTypedObject
-	UniformRepositorySpecProvider
 
 	Name() string
+	UniformRepositorySpec() *UniformRepositorySpec
 	Repository(Context, credentials.Credentials) (Repository, error)
 
 	Validate(Context, credentials.Credentials, ...credentials.UsageContext) error

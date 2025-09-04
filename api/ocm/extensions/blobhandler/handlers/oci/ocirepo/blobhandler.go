@@ -11,7 +11,7 @@ import (
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/opencontainers/go-digest"
 
-	cfgctx "ocm.software/ocm/api/config"
+	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
@@ -230,10 +230,11 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	keep := keepblobattr.Get(ctx.GetContext())
 
-	opts, _ := cfgctx.GetConfigured[config.UploadOptions](ctx.GetContext())
-	if opts == nil {
-		opts = &config.UploadOptions{}
+	opts := &config.UploadOptions{}
+	if err := cfgcpi.NewUpdater(ctx.GetContext().ConfigContext(), opts).Update(); err != nil {
+		return nil, err
 	}
+
 	// this attribute (only if set) overrides the enabling set in the
 	// config.
 	preferrelativeattr.ApplyTo(ctx.GetContext(), &opts.PreferRelativeAccess)

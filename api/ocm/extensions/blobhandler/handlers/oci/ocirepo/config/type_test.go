@@ -58,8 +58,6 @@ var _ = Describe("Test Environment", func() {
 
 			MustBeSuccessful(cfg.ApplyConfig(o, "manual"))
 
-			opts = Must(cfgctx.GetConfigured[config.UploadOptions](cfg))
-
 			Expect(opts.PreferRelativeAccessFor("localhost")).To(BeTrue())
 			Expect(opts.PreferRelativeAccessFor("localhost:5000")).To(BeTrue())
 			Expect(opts.PreferRelativeAccessFor("localhost:6000")).To(BeTrue())
