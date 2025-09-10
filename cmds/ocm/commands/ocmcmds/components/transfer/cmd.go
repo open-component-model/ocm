@@ -178,9 +178,6 @@ func (a *action) Add(e interface{}) error {
 	if err != nil {
 		return errors.Wrapf(err, "cannot transfer component version %s/%s", o.ComponentVersion.GetName(), o.ComponentVersion.GetVersion())
 	}
-	if sub == nil {
-		return fmt.Errorf("cannot transfer component version %s/%s", o.ComponentVersion.GetName(), o.ComponentVersion.GetVersion())
-	}
 	err = transfer.TransferVersion(a.printer, a.closure, sub, a.target, h)
 	sub.Close()
 	a.errors.Add(err)
