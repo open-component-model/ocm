@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
-
-	"github.com/mandelsoft/goutils/testutils"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -18,7 +17,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/spiff"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
@@ -293,6 +292,101 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(err).To(Succeed())
 			_, err = tgt.LookupComponentVersion(COMPONENT, VERSION)
 			Expect(err).To(Succeed())
+		})
+	})
+
+	Context("test omit access type option", func() {
+		var env *Builder
+		testOciAccess := ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION))
+
+		BeforeEach(func() {
+			env = NewBuilder()
+
+			FakeOCIRepo(env, OCIPATH, OCIHOST)
+
+			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+				OCIManifest2(env)
+			})
+
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMPONENT, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+							env.Access(
+								testOciAccess,
+							)
+						})
+					})
+				})
+			})
+
+			env.OCMCommonTransport(ARCH2, accessio.FormatDirectory, func() {
+				env.Component(COMPONENT2, func() {
+					env.Version(VERSION, func() {
+						env.Reference("ref", COMPONENT, VERSION)
+						env.Provider(PROVIDER)
+					})
+				})
+			})
+		})
+
+		AfterEach(func() {
+			env.Cleanup()
+		})
+
+		It("should omit oci access", func() {
+			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
+			Expect(err).To(Succeed())
+			tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env)
+			Expect(err).To(Succeed())
+			defer tgt.Close()
+
+			handler, err := spiff.New(standard.ResourcesByValue(), standard.AddOmittedAccessTypes(ociartifact.Type))
+			Expect(err).To(Succeed())
+			err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
+			Expect(err).To(Succeed())
+			Expect(env.DirExists(OUT)).To(BeTrue())
+
+			list, err := tgt.ComponentLister().GetComponents("", true)
+			Expect(err).To(Succeed())
+			Expect(list).To(Equal([]string{COMPONENT}))
+			comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
+			Expect(err).To(Succeed())
+			Expect(len(comp.GetDescriptor().Resources)).To(Equal(1))
+
+			acc := comp.GetDescriptor().Resources[0].Access
+			Expect(acc).To(testutils.YAMLEqual(testOciAccess))
+		})
+
+		It("should not omit oci access", func() {
+			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
+			Expect(err).To(Succeed())
+			tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env)
+			Expect(err).To(Succeed())
+			defer tgt.Close()
+
+			handler, err := spiff.New(standard.ResourcesByValue())
+			Expect(err).To(Succeed())
+			err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
+			Expect(err).To(Succeed())
+			Expect(env.DirExists(OUT)).To(BeTrue())
+
+			list, err := tgt.ComponentLister().GetComponents("", true)
+			Expect(err).To(Succeed())
+			Expect(list).To(Equal([]string{COMPONENT}))
+			comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
+			Expect(err).To(Succeed())
+			Expect(len(comp.GetDescriptor().Resources)).To(Equal(1))
+
+			data, err := json.Marshal(comp.GetDescriptor().Resources[0].Access)
+			Expect(err).To(Succeed())
+			hash := HashManifest2(artifactset.DefaultArtifactSetDescriptorFileName)
+			Expect(string(data)).To(testutils.StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 		})
 	})
 })
