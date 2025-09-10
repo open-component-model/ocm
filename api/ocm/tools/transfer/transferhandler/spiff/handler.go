@@ -112,6 +112,9 @@ func (h *Handler) TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessS
 	if !h.opts.IsResourcesByValue() {
 		return false, nil
 	}
+	if h.opts.IsAccessTypeOmitted(a.GetType()) {
+		return false, nil
+	}
 	if h.opts.GetScript() == nil {
 		return true, nil
 	}
@@ -121,6 +124,9 @@ func (h *Handler) TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessS
 
 func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.SourceAccess) (bool, error) {
 	if !h.opts.IsSourcesByValue() {
+		return false, nil
+	}
+	if h.opts.IsAccessTypeOmitted(a.GetType()) {
 		return false, nil
 	}
 	if h.opts.GetScript() == nil {
