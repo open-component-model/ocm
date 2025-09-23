@@ -12,7 +12,7 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
+	"github.com/go-openapi/swag/conv"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/sigstore/cosign/v2/cmd/cosign/cli/fulcio"
 	"github.com/sigstore/cosign/v2/cmd/cosign/cli/options"
@@ -147,7 +147,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 
 	// prepare the entry for submission
 	entry := &models.Hashedrekord{
-		APIVersion: swag.String(hashedEntry.APIVersion()),
+		APIVersion: conv.Pointer(hashedEntry.APIVersion()),
 		Spec:       hashedEntry.HashedRekordObj,
 	}
 
@@ -282,8 +282,8 @@ func prepareRekorEntry(digest string, sig, publicKey []byte) hashedrekord_v001.V
 		HashedRekordObj: models.HashedrekordV001Schema{
 			Data: &models.HashedrekordV001SchemaData{
 				Hash: &models.HashedrekordV001SchemaDataHash{
-					Algorithm: swag.String(models.HashedrekordV001SchemaDataHashAlgorithmSha256),
-					Value:     swag.String(digest),
+					Algorithm: conv.Pointer(models.HashedrekordV001SchemaDataHashAlgorithmSha256),
+					Value:     conv.Pointer(digest),
 				},
 			},
 			Signature: &models.HashedrekordV001SchemaSignature{
