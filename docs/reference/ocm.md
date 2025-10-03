@@ -306,6 +306,12 @@ The value can be a simple type or a JSON/YAML string for complex values
   the backend and descriptor updated will be persisted on AddVersion
   or closing a provided existing component version.
 
+- <code>ocm.software/ocm/oci/preferrelativeaccess</code> [<code>preferrelativeaccess</code>]: *bool*
+
+  If an artifact blob is uploaded to the technical repository
+  used as OCM repository, the uploader should prefer to return
+  a relative access method.
+
 - <code>ocm.software/signing/sigstore</code> [<code>sigstore</code>]: *sigstore config* Configuration to use for sigstore based signing.
 
   The following fields are used.

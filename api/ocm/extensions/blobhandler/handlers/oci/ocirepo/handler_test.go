@@ -10,6 +10,11 @@ import (
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
 
+	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
+	"ocm.software/ocm/api/ocm/extensions/attrs/preferrelativeattr"
+	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/oci/ocirepo/config"
+	"ocm.software/ocm/api/ocm/ocmutils"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	ocictf "ocm.software/ocm/api/oci/extensions/repositories/ctf"
@@ -100,6 +105,124 @@ var _ = Describe("oci artifact transfer", func() {
 				})
 			})
 		})
+
+		It("it should copy a resource by value and export the OCI image using a relative OCI access method", func() {
+			env.OCMContext().BlobHandlers().Register(ocirepo.NewArtifactHandler(FakeOCIRegBaseFunction),
+				cpi.ForRepo(oci.CONTEXT_TYPE, ocictf.Type), cpi.ForMimeType(artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest)))
+			preferrelativeattr.Set(env.OCMContext(), true)
+
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
+			cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+			tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
+			defer tgt.Close()
+
+			opts := &standard.Options{}
+			opts.SetResourcesByValue(true)
+			handler := standard.NewDefaultHandler(opts)
+
+			MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, tgt, handler))
+			Expect(env.DirExists(OUT)).To(BeTrue())
+
+			list := Must(tgt.ComponentLister().GetComponents("", true))
+			Expect(list).To(Equal([]string{COMPONENT}))
+			comp := Must(tgt.LookupComponentVersion(COMPONENT, VERSION))
+			Expect(len(comp.GetDescriptor().Resources)).To(Equal(2))
+			data := Must(json.Marshal(comp.GetDescriptor().Resources[1].Access))
+
+			fmt.Printf("%s\n", string(data))
+			Expect(data).To(YAMLEqual(`{"reference":"` + OCINAMESPACE + ":" + OCIVERSION + `@sha256:` + D_OCIMANIFEST1 + `","type":"relativeOciReference"}`))
+			ocirepo := genericocireg.GetOCIRepository(tgt)
+			Expect(ocirepo).NotTo(BeNil())
+
+			res := Must(comp.GetResourceByIndex(1))
+			s := Must(ocmutils.GetOCIArtifactRef(comp.GetContext(), res))
+			Expect(s).To(Equal("ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
+			art := Must(ocirepo.LookupArtifact(OCINAMESPACE, OCIVERSION))
+			defer Close(art, "artifact")
+
+			man := MustBeNonNil(art.ManifestAccess())
+			Expect(len(man.GetDescriptor().Layers)).To(Equal(1))
+			Expect(man.GetDescriptor().Layers[0].Digest).To(Equal(ldesc.Digest))
+
+			blob := Must(man.GetBlob(ldesc.Digest))
+			data = Must(blob.Get())
+			Expect(string(data)).To(Equal(OCILAYER))
+
+			b := Must(res.BlobAccess())
+			defer Close(b, "blob")
+
+			set := Must(artifactset.OpenFromBlob(accessobj.ACC_READONLY, b, env))
+			defer Close(set, "artifact")
+			Expect(set.GetAnnotation(artifactset.MAINARTIFACT_ANNOTATION)).To(Equal("sha256:" + D_OCIMANIFEST1))
+		})
+
+		DescribeTable("it should copy a resource by value and export the OCI image using a relative OCI access method", func(prefer bool, repos []string, relative bool) {
+			env.OCMContext().BlobHandlers().Register(ocirepo.NewArtifactHandler(FakeOCIRegBaseFunction),
+				cpi.ForRepo(oci.CONTEXT_TYPE, ocictf.Type), cpi.ForMimeType(artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest)))
+
+			o := config.New()
+			o.UploadOptions = config.UploadOptions{PreferRelativeAccess: prefer, Repositories: repos}
+			env.ConfigContext().ApplyConfig(o, "manual")
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
+			cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+			tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0o700, accessio.FormatDirectory, env))
+			defer tgt.Close()
+
+			opts := &standard.Options{}
+			opts.SetResourcesByValue(true)
+			handler := standard.NewDefaultHandler(opts)
+
+			MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, tgt, handler))
+			Expect(env.DirExists(OUT)).To(BeTrue())
+
+			list := Must(tgt.ComponentLister().GetComponents("", true))
+			Expect(list).To(Equal([]string{COMPONENT}))
+			comp := Must(tgt.LookupComponentVersion(COMPONENT, VERSION))
+			Expect(len(comp.GetDescriptor().Resources)).To(Equal(2))
+			data := Must(json.Marshal(comp.GetDescriptor().Resources[1].Access))
+
+			fmt.Printf("%s\n", string(data))
+			if relative {
+				Expect(data).To(YAMLEqual(`{"reference":"` + OCINAMESPACE + ":" + OCIVERSION + `@sha256:` + D_OCIMANIFEST1 + `","type":"relativeOciReference"}`))
+
+				ocirepo := genericocireg.GetOCIRepository(tgt)
+				Expect(ocirepo).NotTo(BeNil())
+
+				res := Must(comp.GetResourceByIndex(1))
+				s := Must(ocmutils.GetOCIArtifactRef(comp.GetContext(), res))
+				if relative {
+					// cannot be faked
+					Expect(s).To(Equal("ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
+				} else {
+					Expect(s).To(Equal("baseurl.io/ocm/value:v2.0@sha256:" + D_OCIMANIFEST1))
+				}
+				art := Must(ocirepo.LookupArtifact(OCINAMESPACE, OCIVERSION))
+				defer Close(art, "artifact")
+
+				man := MustBeNonNil(art.ManifestAccess())
+				Expect(len(man.GetDescriptor().Layers)).To(Equal(1))
+				Expect(man.GetDescriptor().Layers[0].Digest).To(Equal(ldesc.Digest))
+
+				blob := Must(man.GetBlob(ldesc.Digest))
+				data = Must(blob.Get())
+				Expect(string(data)).To(Equal(OCILAYER))
+
+				b := Must(res.BlobAccess())
+				defer Close(b, "blob")
+
+				set := Must(artifactset.OpenFromBlob(accessobj.ACC_READONLY, b, env))
+				defer Close(set, "artifact")
+				Expect(set.GetAnnotation(artifactset.MAINARTIFACT_ANNOTATION)).To(Equal("sha256:" + D_OCIMANIFEST1))
+			} else {
+				// cannot access faked local repository URL baseurl.io
+				Expect(data).To(YAMLEqual(`{"imageReference":"baseurl.io/` + OCINAMESPACE + ":" + OCIVERSION + `@sha256:` + D_OCIMANIFEST1 + `","type":"ociArtifact"}`))
+			}
+		},
+			Entry("none", false, nil, false),
+			Entry("baseurl.io", true, []string{"baseurl.io"}, true),
+			Entry("baseurl.de", true, []string{"baseurl.de"}, false),
+			Entry("all", true, nil, true),
+		)
 
 		It("it should copy a resource by value and export the OCI image but keep the local blob", func() {
 			env.OCMContext().BlobHandlers().Register(ocirepo.NewArtifactHandler(FakeOCIRegBaseFunction),

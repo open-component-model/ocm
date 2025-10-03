@@ -233,6 +233,30 @@ The following configuration types are supported:
          &lt;name>: &lt;OCI registry specification>
          ...
   </pre>
+- <code>oci.uploader.config.ocm.software</code>
+  WARNING: This is an experimental feature. Will be replaced with native local
+  blob support in OCM in the future.
+
+  The config type <code>oci.uploader.config.ocm.software</code> can be used to set some
+  configurations for the implicit OCI artifact upload for OCI based OCM repositories.
+
+  <pre>
+      type: oci.uploader.config.ocm.software
+      preferRelativeAccess: true # use relative access methods for given target repositories.
+      repositories:
+  	- localhost:5000
+  </pre>
+
+  If <code>preferRelativeAccess</code> is set to <code>true</code> the
+  OCI uploader for OCI based OCM repositories does not use the
+  OCI repository to create absolute OCI access methods
+  if the target repository is in the <code>repositories</code> list.
+  Instead, a relative  <code>relativeOciReference</code> access method
+  is created.
+  If this list is empty, all uploads are handled this way.
+
+  If the global attribute <code>preferrelativeaccess</code>
+  is configured, it overrides the <code>preferRelativeAccess</code> setting.
 - <code>ocm.cmd.config.ocm.software</code>
   The config type <code>ocm.cmd.config.ocm.software</code> can be used to
   configure predefined aliases for dedicated OCM repositories and
