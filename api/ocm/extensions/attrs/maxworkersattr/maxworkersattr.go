@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/utils/runtime"
+	"ocm.software/ocm/api/utils/runtime" 
 )
 
 const (
@@ -68,7 +68,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 	if err != nil {
 		var s string
 		if e := unmarshaller.Unmarshal(data, &s); e == nil {
-			parsedVal, err := strconv.ParseUint(s, 10, 32)
+			parsedVal, err := strconv.ParseUint(s, 10, 32) 
 			if err == nil {
 				return uint(parsedVal), nil
 			}
@@ -85,7 +85,7 @@ func Get(ctx datacontext.Context) uint {
 	if a == nil {
 		// If the attribute is NOT explicitly set by the user, return 0.
 		// This 0 will signal the calling code to use the CPU-based auto-detection.
-		return 50
+		return 0
 	}
 	if val, ok := a.(uint); ok {
 		return val // Return the user-specified value (can be 0 if user explicitly set it to 0).
@@ -97,3 +97,4 @@ func Get(ctx datacontext.Context) uint {
 func Set(ctx datacontext.Context, workers uint) error {
 	return ctx.GetAttributes().SetAttribute(ATTR_KEY, workers)
 }
+
