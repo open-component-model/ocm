@@ -18,7 +18,7 @@ import (
 	"ocm.software/ocm/api/ocm/tools/transfer/internal"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	common "ocm.software/ocm/api/utils/misc"
-	runtimeutil "ocm.software/ocm/api/utils/runtime" 
+	runtimeutil "ocm.software/ocm/api/utils/runtime"
 )
 
 type WalkingState = common.WalkingState[*struct{}, interface{}]
@@ -228,7 +228,7 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 		}
 
 		if !doMerge || doCopy {
-			numWorkers := calculateEffectiveTransferWorkers(ctx) 
+			numWorkers := calculateEffectiveTransferWorkers(ctx)
 			err = copyVersionWithWorkerPool(ctx, printer, log, state.History, src, t, n, handler, numWorkers)
 			if err != nil {
 				return err
@@ -249,7 +249,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 }
 
 func CopyVersionWithContext(cctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	numWorkers := calculateEffectiveTransferWorkers(cctx) 
+	numWorkers := calculateEffectiveTransferWorkers(cctx)
 	return copyVersionWithWorkerPool(cctx, printer, log, hist, src, t, src.GetDescriptor().Copy(), handler, numWorkers)
 }
 
@@ -257,19 +257,30 @@ func CopyVersionWithContext(cctx context.Context, printer common.Printer, log lo
 // It prioritizes an explicit attribute setting, then falls back to CPU-based auto-detection.
 func calculateEffectiveTransferWorkers(ctx context.Context) int {
 	// First, obtain the OCM data context from the provided Go context.
-	// `ocm.DefaultContext()` is a common way to get it if it's not directly `datacontext.Context`.
-	ocmCtx := ocm.DefaultContext()
-
+	// `ocm.DefaultContext()` is a common way to get it if it's not directly `datacontext.Context`
+	// attributeWorkers := parallelattr.Get(ocmCtx)
 	// Get the workers value from the attribute.
 	// This will be:
 	// - User-defined value (if -X or .ocmconfig is used and > 0)
 	// - 0 (if user explicitly set -X maxworkers=0, OR if the attribute was not set at all)
+	// -=-=-=-=-=-=-=--condition to pick workers: -=-=-=-=-=-=-=-=-=-
+	// 	if nil :
+	// 	taking numworker as -1 , going sequential
+	// if maxworker = 0:
+	// 	taking worker as pwr cpu
+	// if makxworker = (any number)
+	// 	taking that number
+	ocmCtx := ocm.DefaultContext()
 	attributeWorkers := maxworkersattr.Get(ocmCtx)
 
 	// If attributeWorkers is 0, it means either user explicitly set 0, or attribute was not set (default to 0).
 	// In both cases, this signals to use the CPU-based auto-detection.
 	if attributeWorkers == 0 {
 		return determineWorkersFromCPU()
+	}
+
+	if attributeWorkers == 50 {
+		return -1 // If attribute is explicitly unset, use 1 worker.
 	}
 
 	// Otherwise (if attributeWorkers is > 0), use the user-defined value.
@@ -289,141 +300,6 @@ func determineWorkersFromCPU() int {
 	} else {
 		return numCPU / 2
 	}
-}
-
-func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler, maxWorkers int) (rerr error) {
-	type transferTask struct {
-		task func() error
-		id   string
-	}
-
-	var finalize finalizer.Finalizer
-	defer errors.PropagateError(&rerr, finalize.Finalize)
-
-	if handler == nil {
-		handler = standard.NewDefaultHandler(nil)
-	}
-
-	srccd := src.GetDescriptor()
-	cur := *t.GetDescriptor()
-	*t.GetDescriptor() = *prep
-
-	log.Info("  transferring resources and sources using worker pool", "workers", maxWorkers)
-	taskBufferSize := maxWorkers * 2 // Example: buffer size is twice the number of workers
-	if taskBufferSize == 0 {         // Handle case where maxWorkers might be 0 or 1, ensure at least a small buffer or 1
-		taskBufferSize = 1
-	}
-	tasks := make(chan transferTask, taskBufferSize) // Now a buffered channel
-
-	// The 'errChan' should also ideally be buffered to avoid blocking when reporting multiple errors.
-	errChan := make(chan error, len(src.GetResources())+len(src.GetSources()))
-
-	var wg sync.WaitGroup
-	for i := 0; i < maxWorkers; i++ {
-		wg.Add(1)
-		go func(id int) {
-			defer wg.Done()
-			for item := range tasks {
-				if err := item.task(); err != nil {
-					errChan <- err
-				}
-			}
-		}(i)
-	}
-
-	// Helper function to handle resource transfer
-	handleResourceTransfer := func(i int, r ocmcpi.ResourceAccess) func() error {
-		return func() error {
-			nested := finalize.Nested()
-			a, err := r.Access()
-			if err != nil {
-				return err
-			}
-			m, err := a.AccessMethod(src)
-			nested.Close(m, fmt.Sprintf("%s: transferring resource %d: closing access method", hist, i))
-			if err != nil {
-				return err
-			}
-			ok := a.IsLocal(src.GetContext())
-			if !ok && !none.IsNone(a.GetKind()) {
-				ok, err = handler.TransferResource(src, a, r)
-				if err != nil || !ok {
-					return err
-				}
-			}
-			if ok {
-				hint := ocmcpi.ArtifactNameHint(a, src)
-				old, err := cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
-				changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
-				valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
-				if changed || valueNeeded {
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "copy")
-					return handler.HandleTransferResource(r, m, hint, t)
-				} else if err == nil {
-					t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify(), ocm.DisableExtraIdentityDefaulting())
-					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
-				}
-			}
-			return nested.Finalize()
-		}
-	}
-
-	// Helper function to handle source transfer
-	handleSourceTransfer := func(i int, r ocmcpi.SourceAccess) func() error {
-		return func() error {
-			a, err := r.Access()
-			if err != nil {
-				return err
-			}
-			m, err := a.AccessMethod(src)
-			if err != nil {
-				return err
-			}
-			ok := a.IsLocal(src.GetContext())
-			if !ok && !none.IsNone(a.GetKind()) {
-				ok, err = handler.TransferSource(src, a, r)
-				if err != nil || !ok {
-					return err
-				}
-			}
-			if ok {
-				hint := ocmcpi.ArtifactNameHint(a, src)
-				notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint)
-				if err := handler.HandleTransferSource(r, m, hint, t); err != nil {
-					return err
-				}
-			}
-			return m.Close()
-		}
-	}
-
-	go func() {
-		for i, r := range src.GetResources() {
-			tasks <- transferTask{
-				id:   fmt.Sprintf("resource-%d", i),
-				task: handleResourceTransfer(i, r),
-			}
-		}
-
-		for i, r := range src.GetSources() {
-			tasks <- transferTask{
-				id:   fmt.Sprintf("source-%d", i),
-				task: handleSourceTransfer(i, r),
-			}
-		}
-		close(tasks)
-	}()
-
-	go func() {
-		wg.Wait()
-		close(errChan)
-	}()
-
-	errList := errors.ErrListf("transfer resources and sources")
-	for e := range errChan {
-		errList.Add(e)
-	}
-	return errList.Result()
 }
 
 func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, meta compdesc.ArtifactMetaAccess, hint string, msgs ...interface{}) {
@@ -451,4 +327,199 @@ func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string,
 	}
 }
 
+func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log logging.Logger, hist common.History,
+	src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor,
+	handler TransferHandler, maxWorkers int) (rerr error) {
 
+	var finalize finalizer.Finalizer
+	defer errors.PropagateError(&rerr, finalize.Finalize)
+
+	if handler == nil {
+		handler = standard.NewDefaultHandler(nil)
+	}
+
+	srccd := src.GetDescriptor()
+	cur := *t.GetDescriptor()
+	*t.GetDescriptor() = *prep
+
+	if maxWorkers <= 1 {
+		// LINEWORKER SEQUENTIAL TRANSFER
+		for i, r := range src.GetResources() {
+			nested := finalize.Nested()
+			a, err := r.Access()
+			if err != nil {
+				return err
+			}
+			m, err := a.AccessMethod(src)
+			nested.Close(m, fmt.Sprintf("%s: transferring resource %d: closing access method", hist, i))
+			if err != nil {
+				return err
+			}
+			ok := a.IsLocal(src.GetContext())
+			if !ok && !none.IsNone(a.GetKind()) {
+				ok, err = handler.TransferResource(src, a, r)
+				if err != nil || !ok {
+					return err
+				}
+			}
+			if ok {
+				hint := ocmcpi.ArtifactNameHint(a, src)
+				old, err := cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
+				changed := err != nil || old.Digest == nil || !old.Digest.Equal(r.Meta().Digest)
+				valueNeeded := err == nil && needsTransport(src.GetContext(), r, &old)
+				if changed || valueNeeded {
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint)
+					if err := handler.HandleTransferResource(r, m, hint, t); err != nil {
+						return err
+					}
+				} else if err == nil {
+					t.SetResource(r.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify(), ocm.DisableExtraIdentityDefaulting())
+					notifyArtifactInfo(printer, log, "resource", i, r.Meta(), hint, "already present")
+				}
+			}
+			if err := nested.Finalize(); err != nil {
+				return err
+			}
+		}
+
+		for i, r := range src.GetSources() {
+			a, err := r.Access()
+			if err != nil {
+				return err
+			}
+			m, err := a.AccessMethod(src)
+			if err != nil {
+				return err
+			}
+			ok := a.IsLocal(src.GetContext())
+			if !ok && !none.IsNone(a.GetKind()) {
+				ok, err = handler.TransferSource(src, a, r)
+				if err != nil || !ok {
+					return err
+				}
+			}
+			if ok {
+				hint := ocmcpi.ArtifactNameHint(a, src)
+				notifyArtifactInfo(printer, log, "source", i, r.Meta(), hint)
+				if err := handler.HandleTransferSource(r, m, hint, t); err != nil {
+					return err
+				}
+			}
+			if err := m.Close(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// PARALLEL WORKER POOL TRANSFER (maxWorkers > 1)
+	type transferTask struct {
+		task func() error
+		id   string
+	}
+	taskBufferSize := maxWorkers * 2
+	if taskBufferSize == 0 {
+		taskBufferSize = 1
+	}
+	tasks := make(chan transferTask, taskBufferSize)
+	errChan := make(chan error, len(src.GetResources())+len(src.GetSources()))
+
+	var wg sync.WaitGroup
+	for i := 0; i < maxWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for item := range tasks {
+				if err := item.task(); err != nil {
+					errChan <- err
+				}
+			}
+		}()
+	}
+
+	for i, r := range src.GetResources() {
+		idx := i
+		res := r
+		tasks <- transferTask{
+			id: fmt.Sprintf("resource-%d", idx),
+			task: func() error {
+				nested := finalize.Nested()
+				a, err := res.Access()
+				if err != nil {
+					return err
+				}
+				m, err := a.AccessMethod(src)
+				nested.Close(m, fmt.Sprintf("%s: transferring resource %d: closing access method", hist, idx))
+				if err != nil {
+					return err
+				}
+				ok := a.IsLocal(src.GetContext())
+				if !ok && !none.IsNone(a.GetKind()) {
+					ok, err = handler.TransferResource(src, a, res)
+					if err != nil || !ok {
+						return err
+					}
+				}
+				if ok {
+					hint := ocmcpi.ArtifactNameHint(a, src)
+					old, err := cur.GetResourceByIdentity(res.Meta().GetIdentity(srccd.Resources))
+					changed := err != nil || old.Digest == nil || !old.Digest.Equal(res.Meta().Digest)
+					valueNeeded := err == nil && needsTransport(src.GetContext(), res, &old)
+					if changed || valueNeeded {
+						notifyArtifactInfo(printer, log, "resource", idx, res.Meta(), hint)
+						if err := handler.HandleTransferResource(res, m, hint, t); err != nil {
+							return err
+						}
+					} else if err == nil {
+						t.SetResource(res.Meta(), old.Access, ocm.ModifyElement(), ocm.SkipVerify(), ocm.DisableExtraIdentityDefaulting())
+						notifyArtifactInfo(printer, log, "resource", idx, res.Meta(), hint, "already present")
+					}
+				}
+				return nested.Finalize()
+			},
+		}
+	}
+
+	for i, r := range src.GetSources() {
+		idx := i
+		srcRes := r
+		tasks <- transferTask{
+			id: fmt.Sprintf("source-%d", idx),
+			task: func() error {
+				a, err := srcRes.Access()
+				if err != nil {
+					return err
+				}
+				m, err := a.AccessMethod(src)
+				if err != nil {
+					return err
+				}
+				ok := a.IsLocal(src.GetContext())
+				if !ok && !none.IsNone(a.GetKind()) {
+					ok, err = handler.TransferSource(src, a, srcRes)
+					if err != nil || !ok {
+						return err
+					}
+				}
+				if ok {
+					hint := ocmcpi.ArtifactNameHint(a, src)
+					notifyArtifactInfo(printer, log, "source", idx, srcRes.Meta(), hint)
+					if err := handler.HandleTransferSource(srcRes, m, hint, t); err != nil {
+						return err
+					}
+				}
+				return m.Close()
+			},
+		}
+	}
+
+	close(tasks)
+	wg.Wait()
+	close(errChan)
+
+	errList := errors.ErrListf("transfer resources and sources")
+	for e := range errChan {
+		errList.Add(e)
+	}
+	return errList.Result()
+}
