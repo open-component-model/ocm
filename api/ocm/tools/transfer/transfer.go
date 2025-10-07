@@ -288,16 +288,17 @@ func calculateEffectiveTransferWorkers(ctx context.Context) int {
 }
 
 // determineWorkersFromCPU implements your CPU-based logic.
+
 func determineWorkersFromCPU() int {
 	numCPU := runtime.NumCPU()
-
-	if numCPU <= 2 {
+	switch {
+	case numCPU <= 2:
 		return 1
-	} else if numCPU <= 4 {
+	case numCPU <= 4:
 		return 2
-	} else if numCPU <= 8 {
+	case numCPU <= 8:
 		return 4
-	} else {
+	default:
 		return numCPU / 2
 	}
 }
