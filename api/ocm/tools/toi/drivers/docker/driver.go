@@ -206,7 +206,8 @@ func (d *Driver) initializeDockerCli() (command.Cli, error) {
 	}
 
 	if d.config[OptionQuiet] == "1" {
-		err = cli.Apply(command.WithCombinedStreams(io.Discard))
+		op := command.WithCombinedStreams(io.Discard)
+		err = op(cli)
 		if err != nil {
 			return nil, err
 		}
