@@ -182,9 +182,11 @@ $defs:
       digest:
         $ref: '#/$defs/digestSpec'
       resourceDigests:
-        type: 'array'
-        items:
-          $ref: '#/$defs/nestedDigestSpec'
+        oneOf:
+          - type: 'array'
+            items:
+              $ref: '#/$defs/nestedDigestSpec'
+          - type: 'null'
 
   srcRef:
     type: 'object'
@@ -194,9 +196,11 @@ $defs:
       identitySelector:
         $ref: '#/$defs/identityAttribute'
       labels:
-        type: 'array'
-        items:
-          $ref: '#/$defs/label'
+        oneOf:
+          - type: 'array'
+            items:
+              $ref: '#/$defs/label'
+          - type: 'null'
 
   componentReference:
     type: 'object'
@@ -217,9 +221,11 @@ $defs:
       version:
         $ref: '#/$defs/relaxedSemver'
       labels:
-        type: 'array'
-        items:
-          $ref: '#/$defs/label'
+        oneOf:
+          - type: 'array'
+            items:
+              $ref: '#/$defs/label'
+          - type: 'null'
       digest:
         oneOf:
           - type: 'null'
@@ -245,16 +251,20 @@ $defs:
       type:
         type: 'string'
       srcRefs:
-        type: 'array'
-        items:
-          $ref: '#/$defs/srcRef'
+        oneOf:
+          - type: 'array'
+            items:
+              $ref: '#/$defs/srcRef'
+          - type: 'null'
       relation:
         type: 'string'
         enum: ['local', 'external']
       labels:
-        type: 'array'
-        items:
-          $ref: '#/$defs/label'
+        oneOf:
+          - type: 'array'
+            items:
+              $ref: '#/$defs/label'
+          - type: 'null'
       access:
           $ref: '#/$defs/access'
       digest:
@@ -282,9 +292,11 @@ $defs:
         type: ['string', 'null']
         format: date-time
       repositoryContexts:
-        type: 'array'
-        items:
-          $ref: '#/$defs/repositoryContext'
+        oneOf:
+          - type: 'array'
+            items:
+              $ref: '#/$defs/repositoryContext'
+          - type: 'null'
       provider:
         type: 'string'
       labels:
@@ -292,18 +304,23 @@ $defs:
         items:
           $ref: '#/$defs/label'
       sources:
-        type: 'array'
-        items:
-          $ref: '#/$defs/sourceDefinition'
+        oneOf:
+          - type: 'array'
+            items:
+              $ref: '#/$defs/sourceDefinition'
+          - type: 'null'
       componentReferences:
-        type: 'array'
-        items:
-          $ref: '#/$defs/componentReference'
+        oneOf:
+          - type: 'array'
+            items:
+              $ref: '#/$defs/componentReference'
+          - type: 'null'
       resources:
-        type: 'array'
-        items:
-          $ref: '#/$defs/resourceDefinition'
-
+        oneOf:
+          - type: 'array'
+            items:
+              $ref: '#/$defs/resourceDefinition'
+          - type: 'null'
 type: 'object'
 required:
   - 'meta'
@@ -314,10 +331,14 @@ properties:
   component:
     $ref: '#/$defs/component'
   signatures:
-    type: 'array'
-    items:
-      $ref: '#/$defs/signature'
+    oneOf:
+      - type: 'array'
+        items:
+          $ref: '#/$defs/signature'
+      - type: 'null'
   nestedDigests:
-    type: 'array'
-    items:
-      $ref: '#/$defs/nestedComponentDigests'
+    oneOf:
+      - type: 'array'
+        items:
+          $ref: '#/$defs/nestedComponentDigests'
+      - type: 'null'
