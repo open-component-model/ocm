@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm/compdesc"

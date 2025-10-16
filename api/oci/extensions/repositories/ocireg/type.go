@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/containerd/containerd/reference"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/tech/oci/identity"

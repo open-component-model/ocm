@@ -2,7 +2,6 @@ package add
 
 import (
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/utils/template"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"

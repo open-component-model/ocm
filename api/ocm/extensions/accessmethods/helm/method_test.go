@@ -7,10 +7,8 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/api/helper/builder"
-
 	"helm.sh/helm/v3/pkg/chart/loader"
-
+	. "ocm.software/ocm/api/helper/builder"
 	"ocm.software/ocm/api/ocm/cpi"
 	me "ocm.software/ocm/api/ocm/extensions/accessmethods/helm"
 	"ocm.software/ocm/api/tech/helm"

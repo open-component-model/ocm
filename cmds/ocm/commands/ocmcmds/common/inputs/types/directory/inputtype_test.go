@@ -2,10 +2,9 @@ package directory
 
 import (
 	. "github.com/onsi/ginkgo/v2"
-	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
-
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
 )
 
 var _ = Describe("Input Type", func() {

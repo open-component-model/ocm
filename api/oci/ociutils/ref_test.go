@@ -4,9 +4,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/oci/ociutils"
 	"ocm.software/ocm/api/oci/testhelper"
 )

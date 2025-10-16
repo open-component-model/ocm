@@ -1,12 +1,10 @@
 package localize_test
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"ocm.software/ocm/api/helper/builder"
 	envhelper "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/ocm/ocmutils/localize"

@@ -9,7 +9,6 @@ import (
 
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/goutils/sliceutils"
-
 	"ocm.software/ocm/api/tech/signing/signutils"
 )
 

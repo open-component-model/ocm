@@ -4,7 +4,6 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/utils/accessobj"
 )

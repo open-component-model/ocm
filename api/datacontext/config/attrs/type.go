@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/utils/runtime"

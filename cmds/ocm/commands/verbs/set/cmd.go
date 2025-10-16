@@ -2,7 +2,6 @@ package set
 
 import (
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	pubsub "ocm.software/ocm/cmds/ocm/commands/ocmcmds/pubsub/set"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"

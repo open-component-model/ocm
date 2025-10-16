@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 	ociidentity "ocm.software/ocm/api/tech/oci/identity"

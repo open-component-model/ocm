@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/utils/runtime"

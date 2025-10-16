@@ -3,11 +3,10 @@ package spiff_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/spiff"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 var _ = Describe("spiff processing", func() {

@@ -4,7 +4,6 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/utils/runtime"

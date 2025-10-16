@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/ocmutils/localize"
 )

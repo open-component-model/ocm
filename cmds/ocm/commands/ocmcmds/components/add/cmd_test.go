@@ -1,16 +1,13 @@
 package add_test
 
 import (
+	"github.com/mandelsoft/goutils/general"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/api/oci/testhelper"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
-	"github.com/mandelsoft/goutils/general"
-
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
+	. "ocm.software/ocm/api/oci/testhelper"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -23,6 +20,7 @@ import (
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

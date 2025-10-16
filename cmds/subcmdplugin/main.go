@@ -3,12 +3,11 @@ package main
 import (
 	"os"
 
-	// enable mandelsoft plugin logging configuration.
-	_ "ocm.software/ocm/api/ocm/plugin/ppi/logging"
-
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/clicmd"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds"
+	// enable mandelsoft plugin logging configuration.
+	_ "ocm.software/ocm/api/ocm/plugin/ppi/logging"
 	"ocm.software/ocm/api/version"
 	"ocm.software/ocm/cmds/subcmdplugin/cmds/group"
 )

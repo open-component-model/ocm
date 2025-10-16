@@ -11,7 +11,6 @@ import (
 	"github.com/containerd/log"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
-
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/tech/oras"

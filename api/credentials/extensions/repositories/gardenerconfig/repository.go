@@ -13,7 +13,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/credentials/cpi"
 	gardenercfgcpi "ocm.software/ocm/api/credentials/extensions/repositories/gardenerconfig/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/gardenerconfig/identity"

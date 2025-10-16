@@ -5,7 +5,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/sliceutils"
-
 	"ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/utils/semverutils"
 )

@@ -6,8 +6,6 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/api/ocm/plugin/testutils"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/extensions/actions/oci-repository-prepare"
 	"ocm.software/ocm/api/ocm"
@@ -19,6 +17,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/common"
 	"ocm.software/ocm/api/ocm/plugin/plugins"
 	"ocm.software/ocm/api/ocm/plugin/registration"
+	. "ocm.software/ocm/api/ocm/plugin/testutils"
 	"ocm.software/ocm/api/ocm/valuemergehandler"
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/defaultmerge"
 	"ocm.software/ocm/api/utils/misc"

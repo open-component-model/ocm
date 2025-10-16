@@ -2,7 +2,6 @@ package repooption
 
 import (
 	"github.com/spf13/pflag"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/utils/listformat"

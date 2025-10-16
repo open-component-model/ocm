@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/pflag"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-
 	"ocm.software/ocm/api/utils/cobrautils/groups"
 )
 

@@ -2,7 +2,6 @@ package genericblob
 
 import (
 	"github.com/mandelsoft/goutils/generics"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"

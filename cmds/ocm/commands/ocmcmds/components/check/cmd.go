@@ -6,7 +6,6 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/util/json"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/ocmutils/check"

@@ -2,7 +2,6 @@ package bootstrapping
 
 import (
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/tools/toi"

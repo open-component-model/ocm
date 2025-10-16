@@ -1,15 +1,13 @@
 package config_test
 
 import (
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/api/helper/env"
-
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/extensions/repositories/memory"
+	. "ocm.software/ocm/api/helper/env"
 	common "ocm.software/ocm/api/utils/misc"
 )
 

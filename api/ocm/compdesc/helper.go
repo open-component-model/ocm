@@ -5,7 +5,6 @@ import (
 	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors"
 	"ocm.software/ocm/api/ocm/selectors/refsel"

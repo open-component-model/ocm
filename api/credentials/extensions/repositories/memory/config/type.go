@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/memory"

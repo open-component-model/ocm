@@ -6,7 +6,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
@@ -26,23 +25,23 @@ func Download2(p common.Printer, ctx oci.Context, ref string, path string, fs vf
 
 	r, err := oci.ParseRef(ref)
 	if err != nil {
-		return
+		return chart, prov, aset, err
 	}
 
 	spec, err := ctx.MapUniformRepositorySpec(&r.UniformRepositorySpec)
 	if err != nil {
-		return
+		return chart, prov, aset, err
 	}
 
 	repo, err := ctx.RepositoryForSpec(spec, creds...)
 	if err != nil {
-		return
+		return chart, prov, aset, err
 	}
 	finalize.Close(repo)
 
 	art, err := repo.LookupArtifact(r.Repository, r.Version())
 	if err != nil {
-		return
+		return chart, prov, aset, err
 	}
 	finalize.Close(art)
 

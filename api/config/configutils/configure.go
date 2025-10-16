@@ -1,11 +1,9 @@
 package configutils
 
 import (
-	_ "ocm.software/ocm/api/datacontext/config"
-
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/config"
+	_ "ocm.software/ocm/api/datacontext/config"
 	utils "ocm.software/ocm/api/ocm/ocmutils"
 )
 

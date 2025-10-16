@@ -2,7 +2,6 @@ package comppathopt
 
 import (
 	"github.com/spf13/pflag"
-
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common"
 	"ocm.software/ocm/cmds/ocm/common/output"

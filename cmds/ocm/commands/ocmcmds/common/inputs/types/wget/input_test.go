@@ -4,11 +4,10 @@ import (
 	"net/http"
 
 	. "github.com/onsi/ginkgo/v2"
-	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
-
 	"ocm.software/ocm/api/utils/mime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/wget"
 )
 

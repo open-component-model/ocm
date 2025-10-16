@@ -8,11 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	. "github.com/mandelsoft/goutils/regexutils"
-
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
-
+	. "github.com/mandelsoft/goutils/regexutils"
 	ocmmime "ocm.software/ocm/api/utils/mime"
 )
 

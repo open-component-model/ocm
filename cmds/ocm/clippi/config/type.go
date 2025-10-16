@@ -5,7 +5,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
-
 	"ocm.software/ocm/api/config"
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	config2 "ocm.software/ocm/api/config/extensions/config"

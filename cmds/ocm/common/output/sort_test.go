@@ -3,7 +3,6 @@ package output
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"ocm.software/ocm/cmds/ocm/common/data"
 )
 

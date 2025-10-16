@@ -6,12 +6,10 @@ import (
 	"strings"
 	"sync"
 
-	. "github.com/mandelsoft/goutils/finalizer"
-
 	"github.com/mandelsoft/goutils/errors"
+	. "github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"

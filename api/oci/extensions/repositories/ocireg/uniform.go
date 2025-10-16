@@ -2,7 +2,6 @@ package ocireg
 
 import (
 	regex "github.com/mandelsoft/goutils/regexutils"
-
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/grammar"
 )

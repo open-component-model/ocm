@@ -5,7 +5,6 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 )

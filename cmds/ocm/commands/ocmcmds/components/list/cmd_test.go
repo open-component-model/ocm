@@ -7,9 +7,8 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
 	"ocm.software/ocm/api/utils/accessio"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

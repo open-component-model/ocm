@@ -2,7 +2,6 @@ package artifactset
 
 import (
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/utils/accessio"
 )
 

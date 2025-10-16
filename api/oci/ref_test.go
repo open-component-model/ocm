@@ -3,13 +3,11 @@ package oci_test
 import (
 	"strings"
 
+	"github.com/mandelsoft/goutils/generics"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/goutils/generics"
 	godigest "github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"

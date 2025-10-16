@@ -4,7 +4,6 @@ import (
 	"reflect"
 
 	"github.com/spf13/pflag"
-
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
 	"ocm.software/ocm/api/utils/cobrautils/groups"

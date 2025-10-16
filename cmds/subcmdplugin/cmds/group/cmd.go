@@ -2,7 +2,6 @@ package group
 
 import (
 	"github.com/spf13/cobra"
-
 	"ocm.software/ocm/cmds/subcmdplugin/cmds/demo"
 )
 

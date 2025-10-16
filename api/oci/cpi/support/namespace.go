@@ -3,7 +3,6 @@ package support
 import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"

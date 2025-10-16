@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci"
 	ocicpi "ocm.software/ocm/api/oci/cpi"

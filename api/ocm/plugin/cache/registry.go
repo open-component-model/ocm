@@ -2,7 +2,6 @@ package cache
 
 import (
 	"github.com/mandelsoft/goutils/set"
-
 	"ocm.software/ocm/api/ocm/ocmutils/registry"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 )

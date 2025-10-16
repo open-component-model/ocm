@@ -8,7 +8,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
-
 	"ocm.software/ocm/api/datacontext"
 	utils "ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/utils/runtime"

@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
 	"ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/utils/accessobj"
 )

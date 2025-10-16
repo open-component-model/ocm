@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/tools/signing"

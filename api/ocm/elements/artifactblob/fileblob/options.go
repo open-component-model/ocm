@@ -2,7 +2,6 @@ package fileblob
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/elements/artifactblob/api"
 )

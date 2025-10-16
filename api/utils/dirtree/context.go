@@ -8,7 +8,6 @@ import (
 
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/utils"
 )
 

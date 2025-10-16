@@ -5,17 +5,13 @@ import (
 	"os"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/api/oci/testhelper"
-	. "ocm.software/ocm/api/ocm/tools/signing"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci"
+	. "ocm.software/ocm/api/oci/testhelper"
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -23,11 +19,13 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/resolvers"
+	. "ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
 	common "ocm.software/ocm/api/utils/misc"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

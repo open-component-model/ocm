@@ -11,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
-
 	"ocm.software/ocm/api/oci/ociutils/helm/ignore"
 	"ocm.software/ocm/api/oci/ociutils/helm/sympath"
 )

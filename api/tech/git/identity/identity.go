@@ -4,7 +4,6 @@ import (
 	"net"
 
 	giturls "github.com/chainguard-dev/git-urls"
-
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/utils/listformat"

@@ -7,15 +7,13 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"github.com/opencontainers/go-digest"
-	"sigs.k8s.io/yaml"
-
 	"ocm.software/ocm/api/helper/builder"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/labels/routingslip"
 	"ocm.software/ocm/api/ocm/extensions/labels/routingslip/types/comment"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
+	"sigs.k8s.io/yaml"
 )
 
 const (

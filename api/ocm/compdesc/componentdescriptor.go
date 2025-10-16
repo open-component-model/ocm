@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors/accessors"

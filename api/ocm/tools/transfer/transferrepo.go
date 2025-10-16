@@ -2,7 +2,6 @@ package transfer
 
 import (
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"

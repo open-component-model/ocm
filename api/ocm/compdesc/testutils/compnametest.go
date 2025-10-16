@@ -6,9 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"github.com/sirupsen/logrus"
-
 	"ocm.software/ocm/api/utils/runtime"
 )
 

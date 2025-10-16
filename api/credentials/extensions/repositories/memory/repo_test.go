@@ -6,7 +6,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"ocm.software/ocm/api/credentials"
 	local "ocm.software/ocm/api/credentials/extensions/repositories/memory"
 	common "ocm.software/ocm/api/utils/misc"

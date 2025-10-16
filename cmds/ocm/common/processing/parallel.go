@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/logging"
-
 	"ocm.software/ocm/cmds/ocm/common/data"
 )
 

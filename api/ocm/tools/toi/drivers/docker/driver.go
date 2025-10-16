@@ -23,7 +23,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mitchellh/copystructure"
-
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"

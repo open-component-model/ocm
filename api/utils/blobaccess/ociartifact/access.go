@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"

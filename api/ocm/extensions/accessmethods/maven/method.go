@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/tech/maven"

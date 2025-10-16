@@ -9,11 +9,10 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/spf13/pflag"
-	"sigs.k8s.io/yaml"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
+	"sigs.k8s.io/yaml"
 )
 
 type Registration struct {

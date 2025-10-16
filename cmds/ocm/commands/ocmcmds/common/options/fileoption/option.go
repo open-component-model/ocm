@@ -6,7 +6,6 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
-
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/cobrautils/flag"
 	"ocm.software/ocm/api/utils/compression"

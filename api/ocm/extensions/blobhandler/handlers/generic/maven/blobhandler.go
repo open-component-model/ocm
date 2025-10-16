@@ -12,7 +12,6 @@ import (
 	"github.com/mandelsoft/goutils/ioutils"
 	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/ocm/cpi"
 	access "ocm.software/ocm/api/ocm/extensions/accessmethods/maven"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"

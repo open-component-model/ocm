@@ -3,7 +3,6 @@ package storeoption
 import (
 	"github.com/mandelsoft/goutils/general"
 	"github.com/spf13/pflag"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	ocmsign "ocm.software/ocm/api/ocm/tools/signing"

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/cpi"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"

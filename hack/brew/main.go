@@ -9,10 +9,12 @@ import (
 	"ocm.software/ocm/hack/brew/internal"
 )
 
-const DefaultReleaseURL = "https://github.com/open-component-model/ocm/releases/download"
-const DefaultFormulaTemplate = "hack/brew/internal/ocm_formula_template.rb.tpl"
-const DefaultArchitectures = "amd64,arm64"
-const DefaultOperatingSystems = "darwin,linux"
+const (
+	DefaultReleaseURL       = "https://github.com/open-component-model/ocm/releases/download"
+	DefaultFormulaTemplate  = "hack/brew/internal/ocm_formula_template.rb.tpl"
+	DefaultArchitectures    = "amd64,arm64"
+	DefaultOperatingSystems = "darwin,linux"
+)
 
 func main() {
 	version := flag.String("version", "", "version of the OCM formula")

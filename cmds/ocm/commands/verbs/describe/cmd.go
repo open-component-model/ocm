@@ -2,7 +2,6 @@ package describe
 
 import (
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	cache "ocm.software/ocm/cmds/ocm/commands/cachecmds/describe"
 	resources "ocm.software/ocm/cmds/ocm/commands/ocicmds/artifacts/describe"

@@ -3,10 +3,9 @@ package compdesc_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/api/ocm/compdesc/equivalent/testhelper"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
+	. "ocm.software/ocm/api/ocm/compdesc/equivalent/testhelper"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/none"

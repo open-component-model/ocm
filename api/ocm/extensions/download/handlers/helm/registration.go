@@ -6,7 +6,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	helmregistry "helm.sh/helm/v3/pkg/registry"
-
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/cpi"

@@ -3,7 +3,6 @@ package logging
 import (
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
-
 	"ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/datacontext"
 	logdata "ocm.software/ocm/api/utils/cobrautils/logopts/logging"

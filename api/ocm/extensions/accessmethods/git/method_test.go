@@ -5,24 +5,21 @@ import (
 	"bytes"
 	"compress/gzip"
 	"embed"
+	_ "embed"
 	"fmt"
 	"io"
 	"os"
 	"time"
 
-	_ "embed"
-
-	. "github.com/mandelsoft/goutils/testutils"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	. "github.com/mandelsoft/goutils/testutils"
 	"github.com/mandelsoft/vfs/pkg/cwdfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
-
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"ocm.software/ocm/api/datacontext/attrs/tmpcache"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm"

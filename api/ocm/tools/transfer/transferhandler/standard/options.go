@@ -8,7 +8,6 @@ import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mandelsoft/goutils/sliceutils"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"
 	"ocm.software/ocm/api/utils/runtime"

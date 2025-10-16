@@ -4,9 +4,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"github.com/spf13/pflag"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/optutils"

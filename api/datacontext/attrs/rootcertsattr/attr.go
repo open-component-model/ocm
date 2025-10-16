@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/utils/runtime"

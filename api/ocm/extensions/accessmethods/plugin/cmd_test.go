@@ -1,20 +1,18 @@
 package plugin_test
 
 import (
+	"github.com/mandelsoft/goutils/sliceutils"
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mandelsoft/goutils/transformer"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/api/helper/env"
-	. "ocm.software/ocm/api/ocm/plugin/testutils"
-
-	"github.com/mandelsoft/goutils/sliceutils"
-	"github.com/mandelsoft/goutils/transformer"
 	"github.com/spf13/pflag"
-
+	. "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 	"ocm.software/ocm/api/ocm/plugin/plugins"
 	"ocm.software/ocm/api/ocm/plugin/registration"
+	. "ocm.software/ocm/api/ocm/plugin/testutils"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 )
 

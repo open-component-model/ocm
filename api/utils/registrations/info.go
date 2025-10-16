@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/general"
-
 	"ocm.software/ocm/api/utils/listformat"
 )
 

@@ -3,9 +3,7 @@ package flagsets_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"github.com/spf13/pflag"
-
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 )
 

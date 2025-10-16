@@ -1,14 +1,12 @@
 package helm_test
 
 import (
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"helm.sh/helm/v3/pkg/registry"
-
-	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	. "ocm.software/ocm/api/helper/builder"
 	envhelper "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -134,5 +132,4 @@ var _ = Describe("upload", func() {
 		MustBeSuccessful(tarutils.ExtractArchiveToFs(env.FileSystem(), path, env.FileSystem()))
 		Expect(Must(vfs.FileExists(env.FileSystem(), "/ingress-nginx/Chart.yaml"))).To(BeTrue())
 	})
-
 })

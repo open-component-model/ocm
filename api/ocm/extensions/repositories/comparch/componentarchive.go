@@ -3,7 +3,6 @@ package comparch
 import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	ocicpi "ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"

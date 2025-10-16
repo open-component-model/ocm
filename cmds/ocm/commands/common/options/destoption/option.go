@@ -3,7 +3,6 @@ package destoption
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/cmds/ocm/common/options"
 )

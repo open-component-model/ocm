@@ -4,7 +4,6 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	me "ocm.software/ocm/api/ocm/elements"
 	"ocm.software/ocm/api/ocm/extensions/digester/digesters/blob"

@@ -2,7 +2,6 @@ package dockerdaemon
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
-
 	cpi "ocm.software/ocm/api/oci/types"
 	"ocm.software/ocm/api/utils"
 	common "ocm.software/ocm/api/utils/misc"

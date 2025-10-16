@@ -10,13 +10,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-	. "ocm.software/ocm/api/ocm/compdesc/versions/v2"
-
 	"k8s.io/apimachinery/pkg/util/validation/field"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	meta "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/compdesc/testutils"
+	. "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 	"ocm.software/ocm/api/ocm/compdesc/versions/v2/jsonscheme"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/utils/runtime"

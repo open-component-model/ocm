@@ -2,7 +2,6 @@ package processing
 
 import (
 	"github.com/mandelsoft/logging"
-
 	"ocm.software/ocm/cmds/ocm/common/data"
 	"ocm.software/ocm/cmds/ocm/common/options"
 )

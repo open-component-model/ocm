@@ -6,7 +6,6 @@ import (
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
-
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/common/output"
 	"ocm.software/ocm/cmds/ocm/common/processing"

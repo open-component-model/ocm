@@ -2,7 +2,6 @@ package download
 
 import (
 	"github.com/mandelsoft/logging"
-
 	ocmlog "ocm.software/ocm/api/utils/logging"
 )
 

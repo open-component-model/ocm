@@ -2,7 +2,6 @@ package list
 
 import (
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	components "ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/list"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"

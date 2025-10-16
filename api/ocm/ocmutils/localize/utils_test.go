@@ -1,10 +1,8 @@
 package localize_test
 
 import (
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
+	. "github.com/onsi/gomega"
 	"ocm.software/ocm/api/ocm/ocmutils/localize"
 	"ocm.software/ocm/api/utils/runtime"
 )

@@ -3,13 +3,11 @@ package output
 import (
 	"fmt"
 
-	. "ocm.software/ocm/api/utils/out"
-	. "ocm.software/ocm/cmds/ocm/common/processing"
-
-	"sigs.k8s.io/yaml"
-
 	"ocm.software/ocm/api/utils"
+	. "ocm.software/ocm/api/utils/out"
 	"ocm.software/ocm/api/utils/runtime"
+	. "ocm.software/ocm/cmds/ocm/common/processing"
+	"sigs.k8s.io/yaml"
 )
 
 type ComplexProcessingOutput struct {

@@ -1,11 +1,10 @@
 package semverutils
 
 import (
+	"github.com/Masterminds/semver/v3"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/Masterminds/semver/v3"
 )
 
 var _ = Describe("filter", func() {

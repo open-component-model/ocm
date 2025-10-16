@@ -9,7 +9,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/tech/maven"
 	"ocm.software/ocm/api/tech/maven/identity"

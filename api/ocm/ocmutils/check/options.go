@@ -2,7 +2,6 @@ package check
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/utils"
 )
 

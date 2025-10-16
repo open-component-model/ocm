@@ -3,7 +3,6 @@ package hashoption
 import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/compdesc/normalizations/jsonv1"

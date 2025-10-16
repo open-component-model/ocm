@@ -2,9 +2,7 @@ package localociblob
 
 import (
 	. "github.com/mandelsoft/goutils/exception"
-
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/utils/runtime"

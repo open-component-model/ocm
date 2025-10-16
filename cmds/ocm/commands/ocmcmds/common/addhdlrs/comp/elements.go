@@ -3,11 +3,9 @@ package comp
 import (
 	"fmt"
 
-	. "github.com/mandelsoft/goutils/finalizer"
-
 	"github.com/mandelsoft/goutils/errors"
+	. "github.com/mandelsoft/goutils/finalizer"
 	"github.com/spf13/pflag"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"

@@ -4,13 +4,11 @@ import (
 	"encoding/json"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
-
 	"ocm.software/ocm/api/helper/builder"
 	envhelper "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"

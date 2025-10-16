@@ -5,13 +5,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"github.com/tonglil/buflogr"
-
 	local "ocm.software/ocm/api/utils/logging"
 )
 

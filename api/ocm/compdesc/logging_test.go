@@ -3,14 +3,12 @@ package compdesc_test
 import (
 	"bytes"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/go-logr/logr"
 	"github.com/mandelsoft/goutils/testutils"
 	"github.com/mandelsoft/logging"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"github.com/tonglil/buflogr"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 )

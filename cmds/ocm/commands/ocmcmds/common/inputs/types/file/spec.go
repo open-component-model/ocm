@@ -2,7 +2,6 @@ package file
 
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
-
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"

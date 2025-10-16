@@ -6,7 +6,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	gssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/tech/git/identity"
 )

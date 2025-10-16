@@ -4,13 +4,11 @@ import (
 	"crypto"
 	"io"
 
+	"github.com/mandelsoft/goutils/optionutils"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-
-	"github.com/mandelsoft/goutils/optionutils"
-
 	me "ocm.software/ocm/api/tech/maven"
 	"ocm.software/ocm/api/tech/maven/maventest"
 )

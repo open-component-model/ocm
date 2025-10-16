@@ -2,7 +2,6 @@ package add
 
 import (
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	components "ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/add"
 	references "ocm.software/ocm/cmds/ocm/commands/ocmcmds/references/add"

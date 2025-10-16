@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/utils"
 )
 

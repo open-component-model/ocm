@@ -2,7 +2,6 @@ package internal
 
 import (
 	"github.com/mandelsoft/logging"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"

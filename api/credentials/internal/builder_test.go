@@ -3,7 +3,6 @@ package internal_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"ocm.software/ocm/api/config"
 	local "ocm.software/ocm/api/credentials/internal"
 	"ocm.software/ocm/api/datacontext"

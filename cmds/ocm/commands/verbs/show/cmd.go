@@ -2,7 +2,6 @@ package show
 
 import (
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	tags "ocm.software/ocm/cmds/ocm/commands/ocicmds/tags/show"
 	versions "ocm.software/ocm/cmds/ocm/commands/ocmcmds/versions/show"

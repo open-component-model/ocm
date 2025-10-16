@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/credentials/cpi"
 	npmCredentials "ocm.software/ocm/api/tech/npm/identity"
 	"ocm.software/ocm/api/utils"

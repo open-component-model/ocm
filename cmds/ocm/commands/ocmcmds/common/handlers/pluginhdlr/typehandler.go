@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm/extensions/attrs/plugincacheattr"
 	"ocm.software/ocm/api/ocm/plugin"

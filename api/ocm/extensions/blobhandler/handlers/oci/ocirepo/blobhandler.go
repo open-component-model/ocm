@@ -5,12 +5,10 @@ import (
 	"path"
 	"strings"
 
-	. "github.com/mandelsoft/goutils/finalizer"
-
 	"github.com/mandelsoft/goutils/errors"
+	. "github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/opencontainers/go-digest"
-
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"

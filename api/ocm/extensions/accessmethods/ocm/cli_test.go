@@ -1,14 +1,12 @@
 package ocm_test
 
 import (
+	"github.com/mandelsoft/goutils/sliceutils"
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mandelsoft/goutils/transformer"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/goutils/sliceutils"
-	"github.com/mandelsoft/goutils/transformer"
 	"github.com/spf13/pflag"
-
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ocm"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"

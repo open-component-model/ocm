@@ -4,7 +4,6 @@ import (
 	"io"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/credentials"

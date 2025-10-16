@@ -5,7 +5,6 @@ import (
 
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/utils"
 )
 

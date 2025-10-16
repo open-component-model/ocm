@@ -5,12 +5,9 @@ import (
 	"os"
 
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/datacontext"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
@@ -22,6 +19,7 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
 	common "ocm.software/ocm/api/utils/misc"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

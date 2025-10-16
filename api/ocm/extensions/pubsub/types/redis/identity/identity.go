@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/utils/listformat"

@@ -1,16 +1,14 @@
 package transfer_test
 
 import (
+	"github.com/mandelsoft/goutils/finalizer"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-	. "ocm.software/ocm/api/oci/testhelper"
-
-	"github.com/mandelsoft/goutils/finalizer"
-
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
+	. "ocm.software/ocm/api/oci/testhelper"
 	"ocm.software/ocm/api/oci/tools/transfer"
 	"ocm.software/ocm/api/oci/tools/transfer/filters"
 	"ocm.software/ocm/api/utils/accessio"

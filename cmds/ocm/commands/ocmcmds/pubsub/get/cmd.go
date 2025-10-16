@@ -5,7 +5,6 @@ import (
 
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/cpi"

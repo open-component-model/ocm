@@ -5,7 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "ocm.software/ocm/api/ocm/compdesc/equivalent/testhelper"
-
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 )
 

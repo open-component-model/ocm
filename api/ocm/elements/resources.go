@@ -2,7 +2,6 @@ package elements
 
 import (
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils"

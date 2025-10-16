@@ -2,7 +2,6 @@ package verify
 
 import (
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	components "ocm.software/ocm/cmds/ocm/commands/ocmcmds/components/verify"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"

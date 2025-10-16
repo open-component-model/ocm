@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mandelsoft/goutils/errors"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/utils/accessio"
 )
 

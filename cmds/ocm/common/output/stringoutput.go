@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	. "ocm.software/ocm/api/utils/out"
-
 	"ocm.software/ocm/cmds/ocm/common/processing"
 )
 

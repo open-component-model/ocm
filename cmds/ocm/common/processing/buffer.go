@@ -6,7 +6,6 @@ import (
 
 	"github.com/containerd/containerd/pkg/atomic"
 	"github.com/mandelsoft/logging"
-
 	"ocm.software/ocm/api/utils/panics"
 	"ocm.software/ocm/cmds/ocm/common/data"
 )

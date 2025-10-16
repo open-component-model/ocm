@@ -5,7 +5,6 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/accessio"

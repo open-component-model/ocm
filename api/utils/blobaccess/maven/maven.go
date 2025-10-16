@@ -2,7 +2,6 @@ package maven
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/tech/maven"
 )
 

@@ -6,7 +6,6 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
-
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/labels/routingslip/internal"
 	"ocm.software/ocm/api/tech/signing"

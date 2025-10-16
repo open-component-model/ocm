@@ -8,16 +8,14 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/utils/encrypt"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 var ISSUER = &pkix.Name{CommonName: "mandelsoft"}

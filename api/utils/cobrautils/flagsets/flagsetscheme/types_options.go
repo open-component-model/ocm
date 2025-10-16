@@ -2,7 +2,6 @@ package flagsetscheme
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
-
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime/descriptivetype"
 )

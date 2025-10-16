@@ -6,9 +6,7 @@ import (
 	"strings"
 
 	. "github.com/mandelsoft/goutils/finalizer"
-
 	"github.com/modern-go/reflect2"
-
 	"ocm.software/ocm/api/config"
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials"

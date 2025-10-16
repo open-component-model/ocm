@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	godigest "github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/helm"
 	"ocm.software/ocm/api/ocm/plugin/ppi"

@@ -5,10 +5,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/spf13/cobra"
 	// bind OCM configuration.
 	_ "ocm.software/ocm/api/ocm/plugin/ppi/config"
-
-	"github.com/spf13/cobra"
 )
 
 const Name = "demo"

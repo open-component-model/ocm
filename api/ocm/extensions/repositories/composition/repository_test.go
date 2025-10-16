@@ -1,13 +1,11 @@
 package composition_test
 
 import (
+	"github.com/mandelsoft/goutils/finalizer"
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/goutils/finalizer"
-	"github.com/mandelsoft/vfs/pkg/memoryfs"
-
 	"ocm.software/ocm/api/helper/builder"
 	"ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/ocm"

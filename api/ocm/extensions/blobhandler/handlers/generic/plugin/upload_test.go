@@ -7,16 +7,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-	. "ocm.software/ocm/api/ocm/plugin/testutils"
-
-	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/blobhandler"
@@ -26,6 +23,7 @@ import (
 	"ocm.software/ocm/api/ocm/plugin/config"
 	"ocm.software/ocm/api/ocm/plugin/plugins"
 	"ocm.software/ocm/api/ocm/plugin/registration"
+	. "ocm.software/ocm/api/ocm/plugin/testutils"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/api/utils/accessio"

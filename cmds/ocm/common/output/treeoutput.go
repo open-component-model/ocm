@@ -2,7 +2,6 @@ package output
 
 import (
 	"github.com/mandelsoft/goutils/generics"
-
 	"ocm.software/ocm/cmds/ocm/common/data"
 	"ocm.software/ocm/cmds/ocm/common/processing"
 	"ocm.software/ocm/cmds/ocm/common/tree"

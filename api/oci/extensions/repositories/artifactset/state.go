@@ -2,7 +2,6 @@ package artifactset
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils/accessobj"
 )

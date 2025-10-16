@@ -2,14 +2,12 @@ package install
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"os"
 
-	_ "embed"
-
 	"github.com/fluxcd/pkg/ssa"
 	"github.com/mandelsoft/filepath/pkg/filepath"
-
 	"ocm.software/ocm/cmds/ocm/commands/controllercmds/common"
 )
 

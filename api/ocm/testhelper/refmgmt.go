@@ -2,7 +2,6 @@ package testhelper
 
 import (
 	"github.com/mandelsoft/logging"
-
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/refmgmt"
 )

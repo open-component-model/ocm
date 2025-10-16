@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
-
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/common/tree"
 )

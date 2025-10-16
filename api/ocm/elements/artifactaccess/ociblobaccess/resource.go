@@ -3,7 +3,6 @@ package ociblobaccess
 import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"

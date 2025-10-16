@@ -6,11 +6,10 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/tech/oci/identity"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 var _ = Describe("Test Environment", func() {

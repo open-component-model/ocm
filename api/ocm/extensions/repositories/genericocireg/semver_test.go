@@ -1,12 +1,10 @@
 package genericocireg_test
 
 import (
+	"github.com/Masterminds/semver/v3"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/Masterminds/semver/v3"
-
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"
 )
 

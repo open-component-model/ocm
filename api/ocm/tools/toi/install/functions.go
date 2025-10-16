@@ -4,7 +4,6 @@ import (
 	"github.com/mandelsoft/spiff/dynaml"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/spiff/yaml"
-
 	"ocm.software/ocm/api/ocm"
 )
 

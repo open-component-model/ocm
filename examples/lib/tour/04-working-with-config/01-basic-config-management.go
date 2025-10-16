@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-test/deep"
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/credentials"
 	credcfg "ocm.software/ocm/api/credentials/config"

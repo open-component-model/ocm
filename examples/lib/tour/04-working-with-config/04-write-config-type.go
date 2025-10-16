@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
-	"sigs.k8s.io/yaml"
-
 	"ocm.software/ocm/api/config/cpi"
 	configcfg "ocm.software/ocm/api/config/extensions/config"
 	"ocm.software/ocm/api/credentials"
@@ -15,6 +13,7 @@ import (
 	ociidentity "ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/examples/lib/helper"
+	"sigs.k8s.io/yaml"
 )
 
 // TYPE is the name of our new configuration object type.

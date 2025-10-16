@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/mandelsoft/logging"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/utils/blobaccess/wget"
 )

@@ -1,11 +1,10 @@
 package add_test
 
 import (
+	"github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
-
-	"github.com/mandelsoft/goutils/testutils"
 )
 
 const (

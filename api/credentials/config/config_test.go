@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"reflect"
 
+	"github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/goutils/testutils"
-
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/credentials"
 	localconfig "ocm.software/ocm/api/credentials/config"

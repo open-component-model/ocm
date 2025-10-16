@@ -2,7 +2,6 @@ package get
 
 import (
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	config "ocm.software/ocm/cmds/ocm/commands/misccmds/config/get"
 	credentials "ocm.software/ocm/cmds/ocm/commands/misccmds/credentials/get"

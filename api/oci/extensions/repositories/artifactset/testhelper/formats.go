@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
-
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 )
 

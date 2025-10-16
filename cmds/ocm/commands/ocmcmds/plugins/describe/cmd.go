@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/utils/cobrautils"
 	common "ocm.software/ocm/api/utils/misc"

@@ -2,7 +2,6 @@ package genericocireg
 
 import (
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"

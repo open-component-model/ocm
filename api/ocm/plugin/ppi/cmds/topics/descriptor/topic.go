@@ -2,7 +2,6 @@ package descriptor
 
 import (
 	"github.com/spf13/cobra"
-
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
 )
 

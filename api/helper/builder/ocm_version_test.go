@@ -5,12 +5,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-	. "ocm.software/ocm/api/ocm/testhelper"
-
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/attrs/compositionmodeattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	ocmutils "ocm.software/ocm/api/ocm/ocmutils"
+	. "ocm.software/ocm/api/ocm/testhelper"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 )

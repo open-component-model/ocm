@@ -5,7 +5,6 @@ import (
 	"slices"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/cpi"

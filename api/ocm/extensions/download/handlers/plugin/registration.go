@@ -7,7 +7,6 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/xeipuuv/gojsonschema"
-
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/attrs/plugincacheattr"
 	"ocm.software/ocm/api/ocm/extensions/download"

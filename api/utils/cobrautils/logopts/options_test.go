@@ -5,14 +5,12 @@ import (
 	"fmt"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/logging/config"
-	"sigs.k8s.io/yaml"
-
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	clictx "ocm.software/ocm/api/cli"
+	"sigs.k8s.io/yaml"
 )
 
 var _ = Describe("log configuration", func() {

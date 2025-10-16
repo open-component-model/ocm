@@ -2,7 +2,6 @@ package testhelper
 
 import (
 	"github.com/mandelsoft/goutils/testutils"
-
 	"ocm.software/ocm/api/helper/builder"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/digester/digesters/blob"

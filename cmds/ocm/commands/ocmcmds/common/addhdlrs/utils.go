@@ -11,7 +11,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/errkind"

@@ -12,7 +12,6 @@ import (
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	"go.yaml.in/yaml/v3"
 	glog "gopkg.in/op/go-logging.v1"
-
 	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/runtime"

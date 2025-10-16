@@ -2,7 +2,6 @@ package s3
 
 import (
 	. "github.com/mandelsoft/goutils/exception"
-
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/utils/runtime"

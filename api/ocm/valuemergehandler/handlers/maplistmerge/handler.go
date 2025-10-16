@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/valuemergehandler/hpi"
 )

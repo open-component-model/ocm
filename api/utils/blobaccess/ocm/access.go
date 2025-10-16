@@ -2,7 +2,6 @@ package ocm
 
 import (
 	"github.com/mandelsoft/goutils/finalizer"
-
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 	"ocm.software/ocm/api/utils/refmgmt"
 )

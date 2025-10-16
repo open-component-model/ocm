@@ -4,15 +4,13 @@ import (
 	"bytes"
 
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mikefarah/yq/v4/pkg/yqlib"
-	"sigs.k8s.io/yaml"
-
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors"
 	"ocm.software/ocm/api/ocm/selectors/labelsel"
+	"sigs.k8s.io/yaml"
 )
 
 func Parse(data []byte) (*yqlib.CandidateNode, error) {

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/spf13/cobra"
-
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 )
 

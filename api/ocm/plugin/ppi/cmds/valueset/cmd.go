@@ -2,7 +2,6 @@ package valueset
 
 import (
 	"github.com/spf13/cobra"
-
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/valueset/compose"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/valueset/validate"

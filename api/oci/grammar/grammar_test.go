@@ -4,10 +4,9 @@ import (
 	"regexp"
 	"testing"
 
+	tool "github.com/mandelsoft/goutils/regexutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	tool "github.com/mandelsoft/goutils/regexutils"
 )
 
 func TestConfig(t *testing.T) {

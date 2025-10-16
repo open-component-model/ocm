@@ -3,10 +3,9 @@ package downloaderoption
 import (
 	"sort"
 
-	_ "ocm.software/ocm/api/ocm/extensions/download/handlers"
-
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/download"
+	_ "ocm.software/ocm/api/ocm/extensions/download/handlers"
 	"ocm.software/ocm/api/utils/listformat"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/optutils"
 	"ocm.software/ocm/cmds/ocm/common/options"

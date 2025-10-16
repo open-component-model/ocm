@@ -6,12 +6,11 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/mime"
 	"ocm.software/ocm/cmds/ocm/commands/ocicmds/common/handlers/artifacthdlr"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

@@ -4,9 +4,6 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
@@ -14,7 +11,9 @@ import (
 	"ocm.software/ocm/api/utils/mime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/npm"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

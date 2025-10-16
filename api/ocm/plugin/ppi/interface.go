@@ -6,7 +6,6 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
-
 	"ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext/action"

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"

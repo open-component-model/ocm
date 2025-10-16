@@ -1,11 +1,9 @@
 package genericocireg_test
 
 import (
+	"github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/goutils/testutils"
-
 	"ocm.software/ocm/api/ocm"
 )
 

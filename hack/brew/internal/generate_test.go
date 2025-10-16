@@ -104,7 +104,7 @@ func TestGenerateFormula(t *testing.T) {
 version "{{ .Version }}"
 end`
 	templateFile := "test_template.rb.tpl"
-	if err := os.WriteFile(templateFile, []byte(templateContent), 0644); err != nil {
+	if err := os.WriteFile(templateFile, []byte(templateContent), 0o644); err != nil {
 		t.Fatalf("failed to write template file: %v", err)
 	}
 	defer os.Remove(templateFile)
@@ -135,7 +135,7 @@ func TestEnsureDirectory(t *testing.T) {
 	}
 
 	nonDirFile := filepath.Join(dir, "file")
-	if err := os.WriteFile(nonDirFile, []byte("content"), 0644); err != nil {
+	if err := os.WriteFile(nonDirFile, []byte("content"), 0o644); err != nil {
 		t.Fatalf("failed to write file: %v", err)
 	}
 

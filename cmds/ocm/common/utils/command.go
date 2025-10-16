@@ -8,7 +8,6 @@ import (
 	"github.com/mandelsoft/goutils/general"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/utils/cobrautils"
 	"ocm.software/ocm/cmds/ocm/common/options"

@@ -4,19 +4,17 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/mandelsoft/goutils/finalizer"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
-
-	"github.com/mandelsoft/goutils/finalizer"
-
 	"ocm.software/ocm/api/ocm/extensions/labels/routingslip"
 	"ocm.software/ocm/api/ocm/extensions/labels/routingslip/types/comment"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

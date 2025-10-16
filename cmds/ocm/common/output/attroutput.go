@@ -1,10 +1,9 @@
 package output
 
 import (
+	"github.com/mandelsoft/goutils/errors"
 	. "ocm.software/ocm/api/utils/out"
 	. "ocm.software/ocm/cmds/ocm/common/processing"
-
-	"github.com/mandelsoft/goutils/errors"
 )
 
 type AttrProcessingOutput struct {

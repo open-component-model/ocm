@@ -4,12 +4,11 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	. "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
 )
 
 var _ = Describe("Input Type", func() {

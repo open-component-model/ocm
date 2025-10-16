@@ -14,7 +14,6 @@ import (
 	"testing"
 
 	"github.com/spf13/pflag"
-
 	"ocm.software/ocm/api/utils/cobrautils/flag"
 )
 

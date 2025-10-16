@@ -4,10 +4,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-	. "ocm.software/ocm/api/oci/testhelper"
-
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/grammar"
+	. "ocm.software/ocm/api/oci/testhelper"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociblob"
 	"ocm.software/ocm/api/utils/accessio"

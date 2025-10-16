@@ -3,7 +3,6 @@ package dockerconfig
 import (
 	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
-
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/utils"

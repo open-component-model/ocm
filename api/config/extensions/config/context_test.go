@@ -6,16 +6,14 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/mandelsoft/goutils/general"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/goutils/general"
-	"sigs.k8s.io/yaml"
-
 	"ocm.software/ocm/api/config"
 	local "ocm.software/ocm/api/config/extensions/config"
 	"ocm.software/ocm/api/datacontext"
+	"sigs.k8s.io/yaml"
 )
 
 func CheckRefs(ctx config.Context, n int) {

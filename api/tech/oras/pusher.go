@@ -7,10 +7,9 @@ import (
 	"github.com/containerd/errdefs"
 	"github.com/moby/locker"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+	"ocm.software/ocm/api/oci/ociutils"
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote/auth"
-
-	"ocm.software/ocm/api/oci/ociutils"
 )
 
 type OrasPusher struct {

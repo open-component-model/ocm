@@ -5,7 +5,6 @@ import (
 	"crypto/x509/pkix"
 
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/tech/signing/signutils"
 )
 

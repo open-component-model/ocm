@@ -2,7 +2,6 @@ package ocmutils
 
 import (
 	"github.com/mandelsoft/goutils/errors"
-
 	"ocm.software/ocm/api/ocm"
 	common "ocm.software/ocm/api/utils/misc"
 )

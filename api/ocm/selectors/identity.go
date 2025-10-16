@@ -4,7 +4,6 @@ import (
 	"regexp"
 
 	"github.com/Masterminds/semver/v3"
-
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors/accessors"
 )

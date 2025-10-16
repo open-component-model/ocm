@@ -3,7 +3,6 @@ package transfer
 import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
-
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"

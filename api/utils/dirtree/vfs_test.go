@@ -5,11 +5,9 @@ import (
 	"encoding/hex"
 
 	. "github.com/mandelsoft/goutils/testutils"
+	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/logging"
-
 	"ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/utils/dirtree"
 )

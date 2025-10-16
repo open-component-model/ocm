@@ -5,7 +5,6 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/generics"
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/tools/transfer/filters"
 	"ocm.software/ocm/api/utils/logging"

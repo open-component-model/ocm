@@ -7,7 +7,6 @@ import (
 	"hash"
 
 	"github.com/sirupsen/logrus"
-
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/tech/signing/signutils"
 )

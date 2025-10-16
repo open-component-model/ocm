@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/tmpcache"
 	"ocm.software/ocm/api/utils/accessio"

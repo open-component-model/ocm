@@ -2,7 +2,6 @@ package download
 
 import (
 	"github.com/spf13/pflag"
-
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/cmds/ocm/common/output"
 )

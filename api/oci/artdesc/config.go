@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
-
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 

@@ -4,11 +4,9 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/mandelsoft/goutils/general"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/goutils/general"
-
 	me "ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/utils/runtimefinalizer"
 )

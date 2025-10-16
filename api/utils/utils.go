@@ -23,9 +23,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/yaml"
-
 	ocmlog "ocm.software/ocm/api/utils/logging"
+	"sigs.k8s.io/yaml"
 )
 
 // PrintPrettyYaml prints the given objects as yaml if enabled.

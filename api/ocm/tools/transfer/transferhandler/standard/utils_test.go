@@ -1,11 +1,9 @@
 package standard_test
 
 import (
+	"github.com/mandelsoft/goutils/generics"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/goutils/generics"
-
 	me "ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 )
 
