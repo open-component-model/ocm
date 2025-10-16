@@ -2,6 +2,7 @@ package v3alpha1
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1/jsonscheme"

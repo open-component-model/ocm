@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 var _ = Describe("Get config", func() {

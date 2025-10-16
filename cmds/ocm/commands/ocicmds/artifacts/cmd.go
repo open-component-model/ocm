@@ -2,6 +2,7 @@ package artifacts
 
 import (
 	"github.com/spf13/cobra"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/cmds/ocm/commands/ocicmds/artifacts/describe"
 	"ocm.software/ocm/cmds/ocm/commands/ocicmds/artifacts/download"

@@ -3,6 +3,7 @@ package defaultmerge
 import (
 	// special case to resolve dependency cycles.
 	"github.com/mandelsoft/goutils/errors"
+
 	hpi "ocm.software/ocm/api/ocm/valuemergehandler/internal"
 )
 

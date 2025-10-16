@@ -3,10 +3,12 @@ package dockermulti
 import (
 	"fmt"
 
-	"github.com/mandelsoft/goutils/errors"
 	. "github.com/mandelsoft/goutils/finalizer"
+
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/annotations"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -139,7 +141,7 @@ func BlobAccess(opts ...Option) (bpi.BlobAccess, error) {
 			}
 		}
 		i++
-		return fac, main, err
+		return
 	})
 	if err != nil {
 		return nil, err

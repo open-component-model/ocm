@@ -2,6 +2,7 @@ package toicmds
 
 import (
 	"github.com/spf13/cobra"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/cmds/ocm/commands/toicmds/config"
 	_package "ocm.software/ocm/cmds/ocm/commands/toicmds/package"

@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/mandelsoft/goutils/sliceutils"
+
 	"ocm.software/ocm/api/ocm/ocmutils/registry"
 )
 

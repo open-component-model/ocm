@@ -2,6 +2,7 @@ package accessmethod
 
 import (
 	"github.com/spf13/cobra"
+
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/accessmethod/compose"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/accessmethod/get"

@@ -2,6 +2,7 @@ package descriptivetype
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
+
 	"ocm.software/ocm/api/utils/runtime"
 )
 

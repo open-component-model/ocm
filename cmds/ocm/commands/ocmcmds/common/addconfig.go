@@ -8,6 +8,8 @@ import (
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
+	"sigs.k8s.io/yaml"
+
 	clictx "ocm.software/ocm/api/cli"
 	utils2 "ocm.software/ocm/api/utils"
 	common "ocm.software/ocm/api/utils/misc"
@@ -16,7 +18,6 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
 	"ocm.software/ocm/cmds/ocm/common/options"
 	"ocm.software/ocm/cmds/ocm/common/utils"
-	"sigs.k8s.io/yaml"
 )
 
 type ModifiedResourceSpecificationsFile struct {

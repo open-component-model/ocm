@@ -1,11 +1,13 @@
 package resolvers_test
 
 import (
-	"github.com/mandelsoft/goutils/sliceutils"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
+
+	"github.com/mandelsoft/goutils/sliceutils"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/resolvers"

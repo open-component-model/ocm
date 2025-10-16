@@ -2,6 +2,7 @@ package hashattr
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/hasher/sha256"

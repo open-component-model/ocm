@@ -42,7 +42,7 @@ func (m *viewManager[O, V]) View(v CloserView) (V, error) {
 		var n V
 		err := v.Execute(func() (err error) {
 			n, err = m.view()
-			return err
+			return
 		})
 		return n, err
 	}

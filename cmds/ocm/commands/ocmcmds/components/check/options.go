@@ -3,6 +3,7 @@ package check
 import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/spf13/pflag"
+
 	"ocm.software/ocm/api/ocm/ocmutils/check"
 	"ocm.software/ocm/cmds/ocm/common/options"
 )

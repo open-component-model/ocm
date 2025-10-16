@@ -3,10 +3,12 @@ package routingslip_test
 import (
 	"fmt"
 
-	"github.com/mandelsoft/goutils/finalizer"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/finalizer"
+
 	"ocm.software/ocm/api/helper/builder"
 	"ocm.software/ocm/api/ocm/extensions/attrs/compositionmodeattr"
 	"ocm.software/ocm/api/ocm/extensions/labels/routingslip"

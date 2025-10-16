@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/optionutils"
+
 	"ocm.software/ocm/api/oci/annotations"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/oci/extensions/repositories/docker"

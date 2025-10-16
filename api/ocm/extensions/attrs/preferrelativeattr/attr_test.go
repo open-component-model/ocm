@@ -3,6 +3,7 @@ package preferrelativeattr_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext"

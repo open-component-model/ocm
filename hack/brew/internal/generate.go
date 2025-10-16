@@ -104,7 +104,7 @@ func GenerateFormula(templateFile, outputDir, version string, values map[string]
 func ensureDirectory(dir string) error {
 	fi, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
+		if err := os.MkdirAll(dir, 0755); err != nil {
 			return fmt.Errorf("failed to create directory: %w", err)
 		}
 	} else if err != nil {

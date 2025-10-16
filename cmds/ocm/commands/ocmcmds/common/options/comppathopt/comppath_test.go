@@ -3,9 +3,11 @@ package comppathopt_test
 import (
 	"testing"
 
-	"github.com/mandelsoft/goutils/errors"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/errors"
+
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/comppathopt"
 )

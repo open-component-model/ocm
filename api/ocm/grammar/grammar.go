@@ -2,6 +2,7 @@ package grammar
 
 import (
 	. "github.com/mandelsoft/goutils/regexutils"
+
 	"ocm.software/ocm/api/oci/grammar"
 )
 

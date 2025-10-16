@@ -1,13 +1,15 @@
 package compdesc_test
 
 import (
+	_ "ocm.software/ocm/api/ocm/compdesc/normalizations"
+	_ "ocm.software/ocm/api/ocm/compdesc/versions"
+
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"ocm.software/ocm/api/ocm/compdesc"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	_ "ocm.software/ocm/api/ocm/compdesc/normalizations"
-	_ "ocm.software/ocm/api/ocm/compdesc/versions"
 	"ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/none"
 )

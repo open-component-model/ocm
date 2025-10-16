@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+	"sigs.k8s.io/yaml"
+
 	configcfg "ocm.software/ocm/api/config/extensions/config"
 	"ocm.software/ocm/api/credentials"
 	credcfg "ocm.software/ocm/api/credentials/config"
@@ -12,7 +14,6 @@ import (
 	"ocm.software/ocm/api/ocm"
 	utils "ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/examples/lib/helper"
-	"sigs.k8s.io/yaml"
 )
 
 func HandleOCMConfig(cfg *helper.Config) error {

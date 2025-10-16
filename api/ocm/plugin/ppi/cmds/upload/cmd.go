@@ -2,6 +2,7 @@ package upload
 
 import (
 	"github.com/spf13/cobra"
+
 	"ocm.software/ocm/api/ocm/plugin/ppi"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload/put"
 	"ocm.software/ocm/api/ocm/plugin/ppi/cmds/upload/validate"

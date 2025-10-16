@@ -2,6 +2,7 @@ package topicocmrefs
 
 import (
 	"github.com/spf13/cobra"
+
 	clictx "ocm.software/ocm/api/cli"
 	topicocirefs "ocm.software/ocm/cmds/ocm/topics/oci/refs"
 )

@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/mandelsoft/goutils/sliceutils"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/sliceutils"
+
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/cpi"

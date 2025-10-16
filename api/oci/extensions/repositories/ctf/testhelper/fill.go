@@ -1,10 +1,12 @@
 package testhelper
 
 import (
+	. "github.com/onsi/gomega"
+
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/goutils/testutils"
-	. "github.com/onsi/gomega"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"

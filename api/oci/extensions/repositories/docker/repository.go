@@ -7,6 +7,7 @@ import (
 	dockertypes "github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/mandelsoft/logging"
+
 	"ocm.software/ocm/api/oci/cpi"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 )

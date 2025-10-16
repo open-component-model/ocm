@@ -2,6 +2,7 @@ package directcreds
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/credentials/cpi"
 )
 

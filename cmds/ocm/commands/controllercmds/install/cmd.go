@@ -12,12 +12,13 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/cmds/ocm/commands/controllercmds/common"
 	"ocm.software/ocm/cmds/ocm/commands/controllercmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/verbs"
 	"ocm.software/ocm/cmds/ocm/common/utils"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var (

@@ -2,6 +2,7 @@ package testhelper
 
 import (
 	. "github.com/onsi/gomega"
+
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 )
 

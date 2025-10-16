@@ -2,6 +2,7 @@ package virtual
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"

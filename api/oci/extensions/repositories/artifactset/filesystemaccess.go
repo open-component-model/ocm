@@ -2,6 +2,7 @@ package artifactset
 
 import (
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/cpi/support"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -27,7 +28,7 @@ func (i *FileSystemBlobAccess) GetArtifact(access support.NamespaceAccessImpl, d
 		blob := blobaccess.ForDataAccess("", -1, "", data)
 		acc, err = support.NewArtifactForBlob(access, blob)
 	}
-	return acc, err
+	return
 }
 
 func (i *FileSystemBlobAccess) AddArtifactBlob(artifact cpi.Artifact) (cpi.BlobAccess, error) {

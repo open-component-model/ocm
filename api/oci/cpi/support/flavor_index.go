@@ -3,6 +3,7 @@ package support
 import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/internal"

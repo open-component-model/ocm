@@ -2,6 +2,7 @@ package topicconfig
 
 import (
 	"github.com/spf13/cobra"
+
 	clictx "ocm.software/ocm/api/cli"
 )
 

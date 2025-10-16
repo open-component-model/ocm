@@ -2,6 +2,7 @@ package compdesc
 
 import (
 	"github.com/mandelsoft/goutils/generics"
+
 	"ocm.software/ocm/api/ocm/selectors/accessors"
 )
 

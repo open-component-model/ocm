@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"ocm.software/ocm/api/cli/internal"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/ocm"

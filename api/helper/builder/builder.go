@@ -5,6 +5,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/modern-go/reflect2"
 	"github.com/onsi/ginkgo/v2"
+
 	"ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"

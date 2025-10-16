@@ -8,6 +8,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 	"ocm.software/ocm/api/utils/compression"
 	"ocm.software/ocm/api/utils/mime"

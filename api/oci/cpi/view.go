@@ -6,6 +6,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/internal"

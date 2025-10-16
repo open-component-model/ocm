@@ -3,9 +3,11 @@ package testutils
 import (
 	"encoding/json"
 
-	"github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/testutils"
 	"github.com/spf13/pflag"
+
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"

@@ -7,9 +7,10 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"sigs.k8s.io/yaml"
+
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils"
-	"sigs.k8s.io/yaml"
 )
 
 func gkind(kind ...string) string {

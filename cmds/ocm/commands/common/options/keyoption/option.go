@@ -2,6 +2,7 @@ package keyoption
 
 import (
 	"github.com/spf13/pflag"
+
 	"ocm.software/ocm/api/ocm"
 	ocmsign "ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/tech/signing"

@@ -8,13 +8,14 @@ import (
 	"io"
 
 	"github.com/opencontainers/go-digest"
+	"sigs.k8s.io/yaml"
+
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/compression"
 	"ocm.software/ocm/api/utils/mime"
 	common "ocm.software/ocm/api/utils/misc"
-	"sigs.k8s.io/yaml"
 )
 
 type BlobInfo struct {

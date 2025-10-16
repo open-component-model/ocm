@@ -2,6 +2,7 @@ package _package
 
 import (
 	"github.com/spf13/cobra"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/cmds/ocm/commands/toicmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/toicmds/package/bootstrap"

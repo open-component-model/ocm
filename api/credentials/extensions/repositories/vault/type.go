@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/mandelsoft/goutils/optionutils"
+
 	"ocm.software/ocm/api/credentials/cpi"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"
 	"ocm.software/ocm/api/credentials/internal"

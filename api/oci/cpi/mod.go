@@ -2,6 +2,7 @@ package cpi
 
 import (
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/utils/accessobj"
 )

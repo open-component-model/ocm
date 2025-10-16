@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"ocm.software/ocm/api/oci/extensions/repositories/docker"
 	"ocm.software/ocm/api/oci/grammar"
 	"ocm.software/ocm/api/oci/tools/transfer/filters"

@@ -2,6 +2,7 @@ package builder
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"

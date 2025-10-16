@@ -2,6 +2,7 @@ package tags
 
 import (
 	"github.com/spf13/cobra"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/cmds/ocm/commands/ocicmds/names"
 	"ocm.software/ocm/cmds/ocm/commands/ocicmds/tags/show"

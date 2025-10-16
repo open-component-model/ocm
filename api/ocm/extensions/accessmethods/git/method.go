@@ -6,6 +6,7 @@ import (
 	giturls "github.com/chainguard-dev/git-urls"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"

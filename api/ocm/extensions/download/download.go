@@ -3,6 +3,7 @@ package download
 import (
 	"github.com/mandelsoft/goutils/optionutils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/utils"
 	common "ocm.software/ocm/api/utils/misc"

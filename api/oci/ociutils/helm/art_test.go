@@ -7,12 +7,14 @@ import (
 	"strings"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
+
 	"ocm.software/ocm/api/helper/builder"
 	"ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"

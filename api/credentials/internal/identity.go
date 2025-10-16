@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
+
 	"ocm.software/ocm/api/utils/runtime"
 )
 

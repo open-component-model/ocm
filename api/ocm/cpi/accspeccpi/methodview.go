@@ -5,6 +5,7 @@ import (
 
 	"github.com/modern-go/reflect2"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/credentials"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/utils"
@@ -88,7 +89,7 @@ func (a *accessMethodView) Get() ([]byte, error) {
 	var result []byte
 	err := a.Execute(func() (err error) {
 		result, err = a.methodimpl.Get()
-		return err
+		return
 	})
 	return result, err
 }
@@ -97,7 +98,7 @@ func (a *accessMethodView) Reader() (io.ReadCloser, error) {
 	var result io.ReadCloser
 	err := a.Execute(func() (err error) {
 		result, err = a.methodimpl.Reader()
-		return err
+		return
 	})
 	return result, err
 }

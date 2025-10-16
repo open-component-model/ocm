@@ -7,8 +7,9 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"ocm.software/ocm/api/ocm/tools/toi/install"
 	"sigs.k8s.io/yaml"
+
+	"ocm.software/ocm/api/ocm/tools/toi/install"
 )
 
 const OptionTargetPath = "TARGET_PATH"

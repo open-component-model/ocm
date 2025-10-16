@@ -8,11 +8,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mandelsoft/filepath/pkg/filepath"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
+
+	"github.com/mandelsoft/filepath/pkg/filepath"
 )
 
 var _ = Describe("Test Environment", func() {

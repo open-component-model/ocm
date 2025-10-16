@@ -3,14 +3,17 @@ package comparch_test
 import (
 	"encoding/json"
 
+	. "github.com/mandelsoft/goutils/testutils"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	. "ocm.software/ocm/api/ocm/testhelper"
+
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/goutils/finalizer"
-	. "github.com/mandelsoft/goutils/testutils"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+
 	"ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -19,7 +22,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/digester/digesters/blob"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	"ocm.software/ocm/api/ocm/selectors"
-	. "ocm.software/ocm/api/ocm/testhelper"
 	"ocm.software/ocm/api/tech/signing/hasher/sha256"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"

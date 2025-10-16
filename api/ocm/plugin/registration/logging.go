@@ -2,6 +2,7 @@ package registration
 
 import (
 	"github.com/mandelsoft/logging"
+
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 )
 

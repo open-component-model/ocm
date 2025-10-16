@@ -6,6 +6,7 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 	"ocm.software/ocm/api/utils/iotools"
 	mimetypes "ocm.software/ocm/api/utils/mime"

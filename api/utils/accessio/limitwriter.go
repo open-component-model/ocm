@@ -30,7 +30,7 @@ func (l *LimitedWriter) Write(p []byte) (n int, err error) {
 	}
 	n, err = l.W.Write(p)
 	l.N -= int64(n)
-	return n, err
+	return
 }
 
 func LimitBuffer(n int64) *LimitedBuffer {

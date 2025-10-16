@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"

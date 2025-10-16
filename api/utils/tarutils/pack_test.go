@@ -6,12 +6,14 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/mandelsoft/goutils/errors"
 	. "github.com/mandelsoft/goutils/testutils"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/errors"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+
 	"ocm.software/ocm/api/utils/tarutils"
 )
 

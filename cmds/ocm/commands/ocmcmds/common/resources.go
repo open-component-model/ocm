@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
+
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/general"
 	"github.com/mandelsoft/goutils/sliceutils"
@@ -11,6 +13,7 @@ import (
 	"github.com/spf13/pflag"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -26,7 +29,6 @@ import (
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	_ "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/dryrunoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"

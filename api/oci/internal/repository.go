@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"

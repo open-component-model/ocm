@@ -7,10 +7,13 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "ocm.software/ocm/api/oci/testhelper"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
+
 	"github.com/spf13/pflag"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
-	. "ocm.software/ocm/api/oci/testhelper"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/utils/accessio"
@@ -19,7 +22,6 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 	me "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

@@ -2,6 +2,7 @@ package ctf
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg"

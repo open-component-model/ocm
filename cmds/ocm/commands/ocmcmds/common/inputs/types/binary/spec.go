@@ -2,6 +2,7 @@ package binary
 
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"

@@ -3,10 +3,13 @@ package cpi_test
 import (
 	. "github.com/mandelsoft/goutils/finalizer"
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/memoryfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "ocm.software/ocm/api/ocm/testhelper"
+
+	"github.com/mandelsoft/vfs/pkg/memoryfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -15,7 +18,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/attrs/compositionmodeattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/selectors"
-	. "ocm.software/ocm/api/ocm/testhelper"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess"

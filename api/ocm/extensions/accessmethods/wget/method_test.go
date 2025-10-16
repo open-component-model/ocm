@@ -14,10 +14,11 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "ocm.software/ocm/api/ocm/extensions/accessmethods/wget"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/cpi"
-	. "ocm.software/ocm/api/ocm/extensions/accessmethods/wget"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/tech/wget/identity"

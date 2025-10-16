@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/mandelsoft/goutils/errors"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/datacontext"
 )

@@ -7,13 +7,15 @@ import (
 	"strings"
 	"unicode"
 
+	_ "ocm.software/ocm/api/cli/config"
+	_ "ocm.software/ocm/api/ocm/extensions/attrs"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
 	clictx "ocm.software/ocm/api/cli"
-	_ "ocm.software/ocm/api/cli/config"
 	"ocm.software/ocm/api/datacontext/attrs/clicfgattr"
-	_ "ocm.software/ocm/api/ocm/extensions/attrs"
 	"ocm.software/ocm/api/ocm/extensions/attrs/plugincacheattr"
 	"ocm.software/ocm/api/ocm/ocmutils/defaultconfigregistry"
 	"ocm.software/ocm/api/ocm/plugin/registration"

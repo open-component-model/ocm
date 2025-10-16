@@ -5,6 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/cli/config"
 	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"

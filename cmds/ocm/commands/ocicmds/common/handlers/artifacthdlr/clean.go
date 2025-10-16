@@ -2,6 +2,7 @@ package artifacthdlr
 
 import (
 	"github.com/opencontainers/go-digest"
+
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/cmds/ocm/common/data"
 	"ocm.software/ocm/cmds/ocm/common/output"

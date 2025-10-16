@@ -2,6 +2,7 @@ package builder
 
 import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
+
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/tech/signing/handlers/rsa"
 	"ocm.software/ocm/api/tech/signing/signutils"

@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	_ "ocm.software/ocm/api/cli/config"
+
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	_ "ocm.software/ocm/api/cli/config"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"

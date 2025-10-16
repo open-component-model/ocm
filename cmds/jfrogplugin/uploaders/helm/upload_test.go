@@ -54,6 +54,7 @@ func TestUpload(t *testing.T) {
 		credentials.ATTR_USERNAME: "foo",
 		credentials.ATTR_PASSWORD: "bar",
 	}, "")
+
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -77,4 +78,5 @@ func TestUpload(t *testing.T) {
 	if helmAccessSpec.HelmRepository != fmt.Sprintf("%s/artifactory/api/helm/%s", artifactory, repo) {
 		t.Fatalf("expected an injected helm api reference to artifactory")
 	}
+
 }

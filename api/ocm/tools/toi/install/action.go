@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"sort"
 
+	. "github.com/mandelsoft/goutils/finalizer"
+
 	"github.com/ghodss/yaml"
 	"github.com/mandelsoft/goutils/errors"
-	. "github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/xeipuuv/gojsonschema"
+
 	globalconfig "ocm.software/ocm/api/config/extensions/config"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext/attrs/logforward"

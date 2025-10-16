@@ -5,6 +5,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/tech/signing/signutils"
 	"ocm.software/ocm/api/utils"

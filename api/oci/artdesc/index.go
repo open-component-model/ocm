@@ -7,6 +7,7 @@ import (
 	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 

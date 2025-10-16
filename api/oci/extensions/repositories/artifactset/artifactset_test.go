@@ -5,15 +5,17 @@ import (
 	"compress/gzip"
 	"io"
 
-	"github.com/mandelsoft/goutils/finalizer"
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	. "ocm.software/ocm/api/oci/extensions/repositories/artifactset/testhelper"
 	. "ocm.software/ocm/api/oci/extensions/repositories/ctf/testhelper"
+
+	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"

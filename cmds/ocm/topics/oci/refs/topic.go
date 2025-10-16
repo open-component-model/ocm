@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 )

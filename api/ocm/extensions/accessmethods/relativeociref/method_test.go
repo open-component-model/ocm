@@ -1,12 +1,14 @@
 package relativeociref_test
 
 import (
-	"github.com/mandelsoft/goutils/finalizer"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
+
+	"github.com/mandelsoft/goutils/finalizer"
+
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/relativeociref"

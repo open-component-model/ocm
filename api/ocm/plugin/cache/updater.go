@@ -14,6 +14,8 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"sigs.k8s.io/yaml"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/attrs/plugindirattr"
@@ -24,7 +26,6 @@ import (
 	"ocm.software/ocm/api/utils/filelock"
 	common "ocm.software/ocm/api/utils/misc"
 	"ocm.software/ocm/api/utils/semverutils"
-	"sigs.k8s.io/yaml"
 )
 
 type PluginInfo struct {

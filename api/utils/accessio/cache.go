@@ -14,6 +14,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/marstr/guid"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/file"

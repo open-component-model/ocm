@@ -2,6 +2,7 @@ package ociartifact
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/tools/transfer/filters"
 	common "ocm.software/ocm/api/utils/misc"

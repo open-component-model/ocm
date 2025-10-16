@@ -1,10 +1,12 @@
 package maven_test
 
 import (
-	"github.com/mandelsoft/goutils/optionutils"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/optionutils"
+
 	me "ocm.software/ocm/api/tech/maven"
 )
 

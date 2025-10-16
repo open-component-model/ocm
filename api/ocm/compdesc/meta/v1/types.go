@@ -7,6 +7,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"ocm.software/ocm/api/ocm/compdesc/equivalent"
 )
 

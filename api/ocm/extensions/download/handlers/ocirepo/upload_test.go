@@ -6,8 +6,10 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	. "ocm.software/ocm/api/helper/builder"
+
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	ctfoci "ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/oci/grammar"

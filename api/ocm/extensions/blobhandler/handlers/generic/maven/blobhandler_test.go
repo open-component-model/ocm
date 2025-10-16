@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/mandelsoft/goutils/sliceutils"
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
+
+	"github.com/mandelsoft/goutils/sliceutils"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"ocm.software/ocm/api/ocm/elements"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	me "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/maven"

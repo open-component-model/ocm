@@ -2,6 +2,7 @@ package hash
 
 import (
 	"github.com/spf13/pflag"
+
 	"ocm.software/ocm/api/ocm/tools/signing"
 	common "ocm.software/ocm/api/utils/misc"
 	signingcmd "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/cmds/signing"

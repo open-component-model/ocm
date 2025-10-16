@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/maplistmerge"
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/simplemapmerge"

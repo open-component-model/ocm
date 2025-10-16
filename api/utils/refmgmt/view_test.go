@@ -8,6 +8,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"ocm.software/ocm/api/utils/refmgmt"
 )
 
@@ -71,7 +72,7 @@ func (v *view) Value() (string, error) {
 
 	err := v.Execute(func() (err error) {
 		value, err = v.obj.Value() // forward to viewd object
-		return err
+		return
 	})
 	return value, err
 }

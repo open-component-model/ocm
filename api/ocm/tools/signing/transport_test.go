@@ -3,20 +3,22 @@ package signing_test
 import (
 	"fmt"
 
-	"github.com/mandelsoft/goutils/finalizer"
 	// . "ocm.software/ocm/api/ocm/tools/signing"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
+	. "ocm.software/ocm/api/ocm/testhelper"
+
+	"github.com/mandelsoft/goutils/finalizer"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	. "ocm.software/ocm/api/ocm/testhelper"
 	"ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"

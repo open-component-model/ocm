@@ -2,6 +2,7 @@ package testhelper
 
 import (
 	"github.com/mandelsoft/goutils/testutils"
+
 	"ocm.software/ocm/api/helper/builder"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"

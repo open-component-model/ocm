@@ -4,13 +4,15 @@ import (
 	"bytes"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/logging"
-	logcfg "github.com/mandelsoft/logging/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/tonglil/buflogr"
-	local "ocm.software/ocm/api/utils/logging"
 	. "ocm.software/ocm/api/utils/logging/testhelper"
+
+	"github.com/mandelsoft/logging"
+	logcfg "github.com/mandelsoft/logging/config"
+	"github.com/tonglil/buflogr"
+
+	local "ocm.software/ocm/api/utils/logging"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

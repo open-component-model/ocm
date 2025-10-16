@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/grammar"
 	common "ocm.software/ocm/api/utils/misc"

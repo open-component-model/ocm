@@ -8,6 +8,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/registry"
+
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"

@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/mandelsoft/goutils/errors"
 	. "github.com/mandelsoft/goutils/exception"
 	. "github.com/mandelsoft/goutils/finalizer"
+
+	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/download"

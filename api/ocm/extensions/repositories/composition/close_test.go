@@ -1,12 +1,14 @@
 package composition_test
 
 import (
-	"github.com/mandelsoft/goutils/finalizer"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/helper/builder"
 	. "ocm.software/ocm/api/oci/testhelper"
+
+	"github.com/mandelsoft/goutils/finalizer"
+
+	"ocm.software/ocm/api/helper/builder"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/relativeociref"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"

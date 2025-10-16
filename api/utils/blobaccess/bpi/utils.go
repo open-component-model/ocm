@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/utils/iotools"
 )
 

@@ -6,6 +6,9 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "ocm.software/ocm/api/ocm/plugin/testutils"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -13,8 +16,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	"ocm.software/ocm/api/ocm/plugin/plugins"
 	"ocm.software/ocm/api/ocm/plugin/registration"
-	. "ocm.software/ocm/api/ocm/plugin/testutils"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

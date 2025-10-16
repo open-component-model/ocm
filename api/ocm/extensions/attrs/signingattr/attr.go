@@ -2,6 +2,7 @@ package signingattr
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/datacontext"
 	ocm "ocm.software/ocm/api/ocm/types"
 	"ocm.software/ocm/api/tech/signing"

@@ -6,6 +6,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	clictx "ocm.software/ocm/api/cli"
 )
 

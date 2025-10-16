@@ -2,6 +2,7 @@ package builder
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 )

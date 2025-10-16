@@ -2,6 +2,7 @@ package elemhdlr
 
 import (
 	"github.com/Masterminds/semver/v3"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"

@@ -4,15 +4,17 @@ import (
 	"bytes"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "ocm.software/ocm/api/utils/logging/testhelper"
+
+	"github.com/mandelsoft/logging"
 	"github.com/tonglil/buflogr"
+
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/datacontext"
 	logcfg "ocm.software/ocm/api/datacontext/config/logging"
 	log "ocm.software/ocm/api/utils/logging"
-	. "ocm.software/ocm/api/utils/logging/testhelper"
 )
 
 var _ = Describe("logging configuration", func() {

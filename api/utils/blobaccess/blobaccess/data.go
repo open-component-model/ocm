@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 )
 

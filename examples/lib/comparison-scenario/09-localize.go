@@ -8,6 +8,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/chart"
+	"sigs.k8s.io/yaml"
+
 	"ocm.software/ocm/api/ocm"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/download"
@@ -21,7 +23,6 @@ import (
 	"ocm.software/ocm/api/utils/tarutils"
 	"ocm.software/ocm/api/utils/template"
 	"ocm.software/ocm/examples/lib/helper"
-	"sigs.k8s.io/yaml"
 )
 
 type DeployDescriptor struct {

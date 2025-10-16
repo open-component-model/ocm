@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"sigs.k8s.io/yaml"
+
 	"ocm.software/ocm/api/config"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/utils/runtime"
-	"sigs.k8s.io/yaml"
 )
 
 const (

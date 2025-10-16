@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"github.com/spf13/cobra"
+
 	clictx "ocm.software/ocm/api/cli"
 	config "ocm.software/ocm/cmds/ocm/commands/toicmds/config/bootstrap"
 	_package "ocm.software/ocm/cmds/ocm/commands/toicmds/package/bootstrap"

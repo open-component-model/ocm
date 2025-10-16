@@ -9,6 +9,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"

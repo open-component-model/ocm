@@ -10,6 +10,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/tech/git"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 	"ocm.software/ocm/api/utils/blobaccess/file"

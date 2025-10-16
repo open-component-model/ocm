@@ -5,10 +5,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
+	. "ocm.software/ocm/api/oci/testhelper"
+
 	"ocm.software/ocm/api/oci"
 	ctfoci "ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	"ocm.software/ocm/api/oci/grammar"
-	. "ocm.software/ocm/api/oci/testhelper"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"

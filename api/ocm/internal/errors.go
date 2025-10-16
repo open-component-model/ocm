@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/utils/errkind"
 )

@@ -2,6 +2,7 @@ package blobaccess
 
 import (
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 )
 

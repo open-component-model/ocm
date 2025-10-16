@@ -12,6 +12,9 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/moby/locker"
+	"oras.land/oras-go/v2/registry/remote/auth"
+	"oras.land/oras-go/v2/registry/remote/retry"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"
 	"ocm.software/ocm/api/oci/artdesc"
@@ -21,8 +24,6 @@ import (
 	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/refmgmt"
-	"oras.land/oras-go/v2/registry/remote/auth"
-	"oras.land/oras-go/v2/registry/remote/retry"
 )
 
 type RepositoryInfo struct {

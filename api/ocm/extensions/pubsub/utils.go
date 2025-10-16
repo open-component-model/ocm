@@ -3,6 +3,7 @@ package pubsub
 import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/maputils"
+
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/utils/listformat"
 	common "ocm.software/ocm/api/utils/misc"

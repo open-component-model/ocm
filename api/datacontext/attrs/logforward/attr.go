@@ -5,9 +5,10 @@ import (
 	"fmt"
 
 	logcfg "github.com/mandelsoft/logging/config"
+	"sigs.k8s.io/yaml"
+
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/utils/runtime"
-	"sigs.k8s.io/yaml"
 )
 
 const (

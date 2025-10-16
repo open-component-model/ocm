@@ -6,13 +6,16 @@ import (
 	"reflect"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "ocm.software/ocm/api/oci/testhelper"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 	"helm.sh/helm/v3/pkg/chart/loader"
+
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
-	. "ocm.software/ocm/api/oci/testhelper"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
@@ -25,7 +28,6 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
 	common "ocm.software/ocm/api/utils/misc"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const (

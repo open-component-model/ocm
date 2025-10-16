@@ -4,10 +4,12 @@ import (
 	"testing"
 
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	"gopkg.in/yaml.v3"
+
 	"ocm.software/ocm/api/utils/template"
 )
 

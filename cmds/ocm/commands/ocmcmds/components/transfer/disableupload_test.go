@@ -6,10 +6,12 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "ocm.software/ocm/api/oci/testhelper"
+	. "ocm.software/ocm/cmds/ocm/testhelper"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	ocictf "ocm.software/ocm/api/oci/extensions/repositories/ctf"
-	. "ocm.software/ocm/api/oci/testhelper"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
@@ -20,7 +22,6 @@ import (
 	ctfocm "ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
-	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
 const BASEURL = "baseurl.io"

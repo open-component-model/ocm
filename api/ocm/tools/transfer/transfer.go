@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/logging"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmcpi "ocm.software/ocm/api/ocm/cpi"
@@ -38,8 +39,6 @@ func TransferVersionWithContext(ctx context.Context, closure TransportClosure, s
 	state := WalkingState{Closure: closure}
 	return transferVersion(ctx, Logger(src), state, src, tgt, handler)
 }
-
-// nolint:maintidx
 
 func transferVersion(ctx context.Context, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) (rerr error) {
 	printer := common.GetPrinter(ctx)
@@ -285,7 +284,7 @@ func calculateEffectiveTransferWorkers(ctx context.Context) int {
 	}
 
 	// Otherwise (if attributeWorkers is > 0), use the user-defined value.
-	return int(attributeWorkers) // #nosec G115
+	return int(attributeWorkers)
 }
 
 // determineWorkersFromCPU implements your CPU-based logic.
@@ -329,12 +328,10 @@ func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string,
 	}
 }
 
-// nolint:maintidx
-
 func copyVersionWithWorkerPool(ctx context.Context, printer common.Printer, log logging.Logger, hist common.History,
 	src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor,
-	handler TransferHandler, maxWorkers int,
-) (rerr error) {
+	handler TransferHandler, maxWorkers int) (rerr error) {
+
 	var finalize finalizer.Finalizer
 	defer errors.PropagateError(&rerr, finalize.Finalize)
 

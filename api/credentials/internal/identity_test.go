@@ -4,9 +4,11 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"sigs.k8s.io/yaml"
+
 	"ocm.software/ocm/api/credentials/identity/hostpath"
 	"ocm.software/ocm/api/credentials/internal"
-	"sigs.k8s.io/yaml"
 )
 
 var _ = Describe("unmarshal cunsomer identity", func() {

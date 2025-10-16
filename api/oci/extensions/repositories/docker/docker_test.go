@@ -3,8 +3,10 @@
 package docker_test
 
 import (
-	"github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
+
+	"github.com/mandelsoft/goutils/testutils"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/docker"
 )

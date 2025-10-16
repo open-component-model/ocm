@@ -7,6 +7,7 @@ import (
 
 	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
+
 	"ocm.software/ocm/api/oci/cpi"
 )
 

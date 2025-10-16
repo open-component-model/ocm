@@ -8,9 +8,10 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/ocm/extensions/attrs/plugincacheattr"
 	. "ocm.software/ocm/api/ocm/plugin/testutils"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
+
+	"ocm.software/ocm/api/ocm/extensions/attrs/plugincacheattr"
 )
 
 var _ = Describe("subcmdplugin", func() {

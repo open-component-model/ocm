@@ -2,6 +2,7 @@ package ocm
 
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"ocm.software/ocm/api/credentials"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	cpi2 "ocm.software/ocm/api/ocm/cpi"

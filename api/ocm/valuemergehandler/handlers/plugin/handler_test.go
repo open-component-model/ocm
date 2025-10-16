@@ -7,9 +7,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
+	. "ocm.software/ocm/api/ocm/plugin/testutils"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/plugin/registration"
-	. "ocm.software/ocm/api/ocm/plugin/testutils"
 	"ocm.software/ocm/api/ocm/valuemergehandler"
 	"ocm.software/ocm/api/ocm/valuemergehandler/handlers/defaultmerge"
 	"ocm.software/ocm/api/ocm/valuemergehandler/hpi"

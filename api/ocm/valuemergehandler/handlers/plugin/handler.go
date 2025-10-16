@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/ocm/plugin"
 	"ocm.software/ocm/api/ocm/plugin/descriptor"
 	"ocm.software/ocm/api/ocm/valuemergehandler/hpi"

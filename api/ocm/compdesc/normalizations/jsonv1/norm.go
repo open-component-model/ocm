@@ -6,6 +6,7 @@ package jsonv1
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/compdesc/normalizations/legacy"
 	"ocm.software/ocm/api/utils/errkind"

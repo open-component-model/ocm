@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	ocicpi "ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"

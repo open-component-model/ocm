@@ -6,10 +6,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	. "ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	meta "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/compdesc/testutils"
-	. "ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1"
 	"ocm.software/ocm/api/ocm/compdesc/versions/ocm.software/v3alpha1/jsonscheme"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/utils/runtime"

@@ -1,9 +1,11 @@
 package registry_test
 
 import (
-	"github.com/mandelsoft/goutils/set"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/set"
+
 	"ocm.software/ocm/api/ocm/ocmutils/registry"
 )
 

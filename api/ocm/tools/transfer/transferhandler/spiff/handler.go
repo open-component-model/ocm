@@ -10,6 +10,7 @@ import (
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/spiff/yaml"
 	"github.com/sirupsen/logrus"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler"

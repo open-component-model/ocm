@@ -9,11 +9,13 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/hashicorp/vault-client-go"
-	"github.com/hashicorp/vault-client-go/schema"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/hashicorp/vault-client-go"
+	"github.com/hashicorp/vault-client-go/schema"
+
 	"ocm.software/ocm/api/credentials"
 	me "ocm.software/ocm/api/credentials/extensions/repositories/vault"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"

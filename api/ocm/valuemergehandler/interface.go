@@ -1,10 +1,11 @@
 package valuemergehandler
 
 import (
-	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/ocm/cpi"
 	_ "ocm.software/ocm/api/ocm/valuemergehandler/config"
 	_ "ocm.software/ocm/api/ocm/valuemergehandler/handlers"
+
+	"ocm.software/ocm/api/datacontext"
+	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/valuemergehandler/hpi"
 	"ocm.software/ocm/api/ocm/valuemergehandler/internal"
 )

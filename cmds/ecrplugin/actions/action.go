@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/mandelsoft/goutils/errors"
+
 	ocmcreds "ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/extensions/actions/oci-repository-prepare"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/s3/identity"

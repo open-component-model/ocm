@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/Masterminds/semver/v3"
-	gr "github.com/mandelsoft/goutils/regexutils"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/Masterminds/semver/v3"
+	gr "github.com/mandelsoft/goutils/regexutils"
 )
 
 func CheckRef(ref string, parts ...string) {

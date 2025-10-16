@@ -5,6 +5,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/bpi"
 	"ocm.software/ocm/api/utils/blobaccess/dirtree"

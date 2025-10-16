@@ -6,8 +6,9 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/ocm/tools/signing/signingtest"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
+
+	"ocm.software/ocm/api/ocm/tools/signing/signingtest"
 )
 
 const ISSUER = "mandelsoft"

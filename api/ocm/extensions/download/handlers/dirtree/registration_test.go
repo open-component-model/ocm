@@ -2,10 +2,12 @@ package dirtree_test
 
 import (
 	. "github.com/mandelsoft/goutils/testutils"
-	"github.com/mandelsoft/vfs/pkg/projectionfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/projectionfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"ocm.software/ocm/api/helper/builder"
 	envhelper "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"

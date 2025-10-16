@@ -3,6 +3,7 @@ package oci_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"ocm.software/ocm/api/oci"
 	oci_repository_prepare "ocm.software/ocm/api/oci/extensions/actions/oci-repository-prepare"
 )

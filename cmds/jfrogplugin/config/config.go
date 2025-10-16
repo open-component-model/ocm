@@ -5,7 +5,8 @@ import (
 	"fmt"
 )
 
-type Config struct{}
+type Config struct {
+}
 
 // GetConfig returns the config from the raw json message.
 // any return is required for the plugin interface.
@@ -16,4 +17,5 @@ func GetConfig(raw json.RawMessage) (interface{}, error) {
 		return nil, fmt.Errorf("could not get config: %w", err)
 	}
 	return &cfg, nil
+
 }

@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/refmgmt"
 )
@@ -72,7 +73,7 @@ func (b *blobAccessView) Digest() (result digest.Digest) {
 	if err != nil {
 		return BLOB_UNKNOWN_DIGEST
 	}
-	return result
+	return
 }
 
 func (b *blobAccessView) MimeType() string {
@@ -91,5 +92,5 @@ func (b *blobAccessView) Size() (result int64) {
 	if err != nil {
 		return BLOB_UNKNOWN_SIZE
 	}
-	return result
+	return
 }

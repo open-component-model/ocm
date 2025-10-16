@@ -7,6 +7,7 @@ import (
 
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/mandelsoft/logging"
+
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/internal"

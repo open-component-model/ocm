@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	"gopkg.in/op/go-logging.v1"
+
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors"
 	"ocm.software/ocm/api/utils"

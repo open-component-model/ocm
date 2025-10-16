@@ -2,6 +2,7 @@ package attributes
 
 import (
 	"github.com/spf13/cobra"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/utils/listformat"

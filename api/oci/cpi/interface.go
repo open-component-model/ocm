@@ -5,6 +5,7 @@ package cpi
 import (
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
 	"ocm.software/ocm/api/datacontext"
 	"ocm.software/ocm/api/oci/internal"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"

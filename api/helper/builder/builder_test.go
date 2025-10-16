@@ -3,9 +3,10 @@ package builder
 import (
 	"fmt"
 
-	"github.com/mandelsoft/goutils/exception"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/goutils/exception"
 )
 
 var _ = Describe("Builder", func() {

@@ -2,6 +2,7 @@ package signing
 
 import (
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/utils/encrypt"
 )
 

@@ -1,13 +1,12 @@
 package ocirepo_test
 
 import (
-	"testing"
-
 	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/extensions/attrs/ociuploadattr"
 	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/generic/ocirepo"
 	"ocm.software/ocm/api/utils/runtime"
+	"testing"
 )
 
 // TestGenOciRef tests the GenOciRef function, which is used in the context of generic oci blob handler,

@@ -8,6 +8,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
 	"ocm.software/ocm/api/oci/artdesc/helper"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )

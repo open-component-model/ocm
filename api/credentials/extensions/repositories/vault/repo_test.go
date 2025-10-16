@@ -8,6 +8,7 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"ocm.software/ocm/api/credentials"
 	me "ocm.software/ocm/api/credentials/extensions/repositories/vault"
 	"ocm.software/ocm/api/credentials/extensions/repositories/vault/identity"

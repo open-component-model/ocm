@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/goutils/errors"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/examples/lib/helper"

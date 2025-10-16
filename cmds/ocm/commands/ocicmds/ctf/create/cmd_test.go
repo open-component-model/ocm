@@ -3,8 +3,9 @@ package create_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
+
+	"ocm.software/ocm/api/oci/extensions/repositories/ctf"
 )
 
 const ARCH = "/tmp/ctf"

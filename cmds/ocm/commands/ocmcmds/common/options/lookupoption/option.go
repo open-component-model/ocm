@@ -2,6 +2,7 @@ package lookupoption
 
 import (
 	"github.com/spf13/pflag"
+
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/resolvers"

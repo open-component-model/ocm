@@ -5,8 +5,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/spf13/cobra"
 	_ "ocm.software/ocm/api/cli/config"
+
+	"github.com/spf13/cobra"
+
 	"ocm.software/ocm/api/utils/out"
 )
 

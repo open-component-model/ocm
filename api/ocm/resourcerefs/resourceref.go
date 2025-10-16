@@ -3,8 +3,10 @@ package resourcerefs
 import (
 	"fmt"
 
-	"github.com/mandelsoft/goutils/errors"
 	. "github.com/mandelsoft/goutils/finalizer"
+
+	"github.com/mandelsoft/goutils/errors"
+
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	ocm "ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/resolvers"

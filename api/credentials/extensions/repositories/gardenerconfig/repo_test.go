@@ -9,9 +9,11 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/memoryfs"
+
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/cpi"
 	local "ocm.software/ocm/api/credentials/extensions/repositories/gardenerconfig"

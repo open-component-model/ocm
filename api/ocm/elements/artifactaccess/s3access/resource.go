@@ -2,6 +2,7 @@ package s3access
 
 import (
 	"github.com/mandelsoft/goutils/optionutils"
+
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"

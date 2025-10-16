@@ -3,10 +3,11 @@ package ociartifact_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"ocm.software/ocm/api/credentials"
 	. "ocm.software/ocm/api/helper/builder"
-	"ocm.software/ocm/api/oci"
 	. "ocm.software/ocm/api/oci/testhelper"
+
+	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"

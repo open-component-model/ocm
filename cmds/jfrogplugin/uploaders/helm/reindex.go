@@ -7,13 +7,13 @@ import (
 	"path"
 
 	"golang.org/x/net/context"
+
 	"ocm.software/ocm/api/credentials"
 )
 
 func ReindexChart(ctx context.Context, client *http.Client, artifactoryURL string,
 	repository string,
-	creds credentials.Credentials,
-) (err error) {
+	creds credentials.Credentials) (err error) {
 	reindexURL, err := convertToReindexURL(artifactoryURL, repository)
 	if err != nil {
 		return fmt.Errorf("failed to convert to reindex URL: %w", err)
