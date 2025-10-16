@@ -306,12 +306,6 @@ The value can be a simple type or a JSON/YAML string for complex values
   the backend and descriptor updated will be persisted on AddVersion
   or closing a provided existing component version.
 
-- <code>ocm.software/ocm/api/ocm/extensions/attrs/maxworkers</code> [<code>maxworkers</code>]: *integer*
-
-  Specifies the maximum number of concurrent workers to use for resource and source
-  transfer operations. This can influence performance and resource consumption.
-  A value of 0 (or not specified) indicates auto-detection based on CPU cores.
-
 - <code>ocm.software/ocm/oci/preferrelativeaccess</code> [<code>preferrelativeaccess</code>]: *bool*
 
   If an artifact blob is uploaded to the technical repository
