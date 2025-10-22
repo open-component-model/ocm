@@ -30,14 +30,14 @@
           inherit (pkgs) stdenv lib ;
         in
         {
-          ${pname} = pkgs.buildGoModule.override { go = pkgs.go_1_24; } rec {
+          ${pname} = pkgs.buildGoModule.override { go = pkgs.go_1_25; } rec {
             inherit pname self;
             version = lib.fileContents ./VERSION;
             gitCommit = if (self ? rev) then self.rev else self.dirtyRev;
             state = if (self ? rev) then "clean" else "dirty";
 
             # This vendorHash represents a derivative of all go.mod dependencies and needs to be adjusted with every change
-            vendorHash = "sha256-004Qv+RBLBloxFfSWQrpLstlGun2p4TtdabhUBgCpag=";
+            vendorHash = "sha256-a+6CueleIgCthC3MFQjQTZaRfyuv9czRKQBwFQNz6Y8=";
 
             src = ./.;
 
