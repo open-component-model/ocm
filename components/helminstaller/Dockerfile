@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.25.1 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25.3 AS builder
 ARG COMMIT EFFECTIVE_VERSION GIT_TREE_STATE
 ARG TARGETOS TARGETARCH
 
@@ -18,7 +18,7 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
 	./cmds/helminstaller
 
 ###################################################################################
-FROM alpine:3.20.2
+FROM alpine:3.22.2
 
 COPY --from=builder /main /toi/run
 ENTRYPOINT [ "/toi/run" ]
