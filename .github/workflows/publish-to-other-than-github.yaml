@@ -43,7 +43,7 @@ jobs:
         sparse-checkout: |
           hack/brew
     - name: Setup Go
-      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
       with:
         go-version-file: ${{ github.workspace }}/scripts/hack/brew/go.mod
         cache: false
@@ -138,7 +138,7 @@ jobs:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Publish Release Event
-      uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+      uses: peter-evans/repository-dispatch@5fc4efd1a4797ddb68ffd0714a238564e4cc0e6f # v4.0.0
       with:
         token: ${{ steps.generate_token.outputs.token }}
         repository: open-component-model/ocm-website

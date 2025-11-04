@@ -11,6 +11,7 @@ import (
 	"github.com/mandelsoft/goutils/sliceutils"
 	"github.com/opencontainers/go-digest"
 
+	cfgcpi "ocm.software/ocm/api/config/cpi"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
@@ -23,10 +24,13 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localociblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociblob"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/relativeociref"
 	"ocm.software/ocm/api/ocm/extensions/attrs/compatattr"
 	"ocm.software/ocm/api/ocm/extensions/attrs/keepblobattr"
 	"ocm.software/ocm/api/ocm/extensions/attrs/mapocirepoattr"
+	"ocm.software/ocm/api/ocm/extensions/attrs/preferrelativeattr"
 	storagecontext "ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/oci"
+	"ocm.software/ocm/api/ocm/extensions/blobhandler/handlers/oci/ocirepo/config"
 	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
@@ -226,6 +230,15 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	keep := keepblobattr.Get(ctx.GetContext())
 
+	opts := &config.UploadOptions{}
+	if err := cfgcpi.NewUpdater(ctx.GetContext().ConfigContext(), opts).Update(); err != nil {
+		return nil, err
+	}
+
+	// this attribute (only if set) overrides the enabling set in the
+	// config.
+	preferrelativeattr.ApplyTo(ctx.GetContext(), &opts.PreferRelativeAccess)
+
 	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView]); ok {
 		// prepare for optimized point to point implementation
 		log.Debug("oci artifact handler with ocm access source",
@@ -339,6 +352,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	}
 	if tag != "" {
 		tag = ":" + tag
+	}
+	if opts.PreferRelativeAccessFor(base) {
+		ref := namespace.GetNamespace() + tag + version
+		return relativeociref.New(ref), nil
 	}
 	ref := scheme + path.Join(base, namespace.GetNamespace()) + tag + version
 	return ociartifact.New(ref), nil
