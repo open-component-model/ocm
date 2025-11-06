@@ -64,7 +64,7 @@ func (o nodefaulthandler) ApplyBlobModificationOption(opts *BlobModificationOpti
 }
 
 func (o nodefaulthandler) ApplyBlobUploadOption(opts *BlobUploadOptions) {
-	opts.UseNoDefaultIfNotSet = optionutils.PointerTo(bool(o))
+	opts.UseNoDefaultIfNotSet = generics.PointerTo(bool(o))
 }
 
 func UseNoDefaultBlobHandlers(b ...bool) BlobOptionImpl {

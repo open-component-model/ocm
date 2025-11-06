@@ -560,9 +560,14 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 )
 
-replace github.com/aliyun/credentials-go => github.com/aliyun/credentials-go v1.3.10
+replace (
+	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider => github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.15.2
+	// recent releases of aliyun credentials go have a hardcoded syscall for unix without go build tag and are broken
+	github.com/aliyun/credentials-go => github.com/aliyun/credentials-go v1.3.10
+)
 
-replace github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider => github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.15.2
+// latest version of mandelsoft vfs is pulled in unreleased and needs to be pinned to stay stable
+replace github.com/mandelsoft/vfs => github.com/mandelsoft/vfs v0.4.4
 
 replace github.com/ThalesIgnite/crypto11 => github.com/ThalesGroup/crypto11 v1.6.0
 

@@ -4,12 +4,11 @@ import (
 	"crypto"
 	"io"
 
+	"github.com/mandelsoft/goutils/generics"
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
-
-	"github.com/mandelsoft/goutils/optionutils"
 
 	me "ocm.software/ocm/api/tech/maven"
 	"ocm.software/ocm/api/tech/maven/maventest"
@@ -76,21 +75,21 @@ sdk-modules-bom-5.7.0.pom: 3
 			Expect(coords.FilterFileMap(files)).To(Equal(files))
 		})
 		It("filter by empty classifier", func() {
-			coords.Classifier = optionutils.PointerTo("")
+			coords.Classifier = generics.PointerTo("")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0.jar: 3
 sdk-modules-bom-5.7.0.pom: 3
 `))
 		})
 		It("filter by non-empty classifier", func() {
-			coords.Classifier = optionutils.PointerTo("random-content")
+			coords.Classifier = generics.PointerTo("random-content")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0-random-content.json: 3
 sdk-modules-bom-5.7.0-random-content.txt: 3
 `))
 		})
 		It("filter by extension", func() {
-			coords.Extension = optionutils.PointerTo("jar")
+			coords.Extension = generics.PointerTo("jar")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0-sources.jar: 3
 sdk-modules-bom-5.7.0.jar: 3
@@ -98,16 +97,16 @@ sdk-modules-bom-5.7.0.jar: 3
 		})
 
 		It("filter by empty classifier and extension", func() {
-			coords.Classifier = optionutils.PointerTo("")
-			coords.Extension = optionutils.PointerTo("jar")
+			coords.Classifier = generics.PointerTo("")
+			coords.Extension = generics.PointerTo("jar")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0.jar: 3
 `))
 		})
 
 		It("filter by non-empty classifier and extension", func() {
-			coords.Classifier = optionutils.PointerTo("sources")
-			coords.Extension = optionutils.PointerTo("jar")
+			coords.Classifier = generics.PointerTo("sources")
+			coords.Extension = generics.PointerTo("jar")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0-sources.jar: 3
 `))
