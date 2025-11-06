@@ -5,7 +5,7 @@ import (
 	"text/template"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/Masterminds/sprig"
+	"github.com/Masterminds/sprig/v3"
 )
 
 func init() {
