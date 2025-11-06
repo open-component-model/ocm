@@ -24,7 +24,7 @@ func NewGo() Templater {
 }
 
 func (g GoTemplater) Process(data string, values Values) (string, error) {
-	t, err := template.New("resourcespec").Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(data)
+	t, err := template.New("resourcespec").Option("missingkey=error").Funcs(sprig.HermeticTxtFuncMap()).Parse(data)
 	if err != nil {
 		return "", err
 	}
