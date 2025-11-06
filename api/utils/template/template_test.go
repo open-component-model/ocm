@@ -143,6 +143,16 @@ var _ = Describe("Template", func() {
 			Expect(res).To(Equal("my test"))
 		})
 
+		It("should template with a function from sprig", func() {
+			s := "my {{ upper .MY_VAR }}"
+			opts.Vars = map[string]interface{}{
+				"MY_VAR": "test",
+			}
+			res, err := opts.Execute(s)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(res).To(Equal("my TEST"))
+		})
+
 		It("should template multiple value", func() {
 			s := "my {{.MY_VAR}} {{.my_second_var}}"
 			opts.Vars = map[string]interface{}{
