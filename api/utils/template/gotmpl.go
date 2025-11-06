@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/Masterminds/sprig/v3"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 func init() {
