@@ -79,7 +79,7 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 			if err != nil {
 				return fmt.Errorf("invalid %s registration %s (invalid priority) must be of %s", o.name, n, RegistrationFormat)
 			}
-			prio = generics.Pointer(int(v))
+			prio = generics.PointerTo(int(v))
 		}
 		i = strings.Index(med, ":")
 		if i >= 0 {

@@ -298,7 +298,7 @@ func (m TargetIndex) ApplyModificationOption(opts *ModificationOptions) {
 
 func (m TargetIndex) ApplyElementModificationOption(opts *ElementModificationOptions) {
 	if m < 0 {
-		opts.ModifyElement = generics.Pointer(true)
+		opts.ModifyElement = generics.PointerTo(true)
 	}
 	m.ApplyTargetOption(&opts.TargetElementOptions)
 }

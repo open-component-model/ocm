@@ -38,7 +38,7 @@ func (s RepositorySpec) WithConsumerPropagation(propagate bool) *RepositorySpec 
 func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 	var p *bool
 	if len(prop) > 0 {
-		p = generics.Pointer(utils.Optional(prop...))
+		p = generics.PointerTo(utils.Optional(prop...))
 	}
 	if path == "" {
 		path = "~/.docker/config.json"
@@ -53,7 +53,7 @@ func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 func NewRepositorySpecForConfig(data []byte, prop ...bool) *RepositorySpec {
 	var p *bool
 	if len(prop) > 0 {
-		p = generics.Pointer(utils.Optional(prop...))
+		p = generics.PointerTo(utils.Optional(prop...))
 	}
 	return &RepositorySpec{
 		ObjectVersionedType:      runtime.NewVersionedTypedObject(Type),

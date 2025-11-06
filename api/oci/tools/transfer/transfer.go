@@ -23,7 +23,7 @@ func TransferArtifactWithFilter(art cpi.ArtifactAccess, set cpi.ArtifactSink, fi
 		if filter != nil && !filter.Accept(art, nil) {
 			return nil, errors.ErrNoMatch(cpi.KIND_OCIARTIFACT, art.Digest().String())
 		}
-		return generics.Pointer(art.Digest()), TransferManifest(art.ManifestAccess(), set, tags...)
+		return generics.PointerTo(art.Digest()), TransferManifest(art.ManifestAccess(), set, tags...)
 	}
 }
 
@@ -74,7 +74,7 @@ func TransferIndexWithFilter(art cpi.IndexAccess, set cpi.ArtifactSink, filter f
 			if err != nil {
 				return nil, errors.Wrapf(err, "transferring indexed artifact %s", l.Digest)
 			}
-			dig = generics.Pointer(l.Digest)
+			dig = generics.PointerTo(l.Digest)
 		} else {
 			index.Manifests = append(index.Manifests[:i-ign], index.Manifests[i-ign+1:]...)
 			ign++
@@ -104,7 +104,7 @@ func TransferIndexWithFilter(art cpi.IndexAccess, set cpi.ArtifactSink, filter f
 	if err != nil {
 		return nil, errors.Wrapf(err, "transferring index artifact")
 	}
-	return generics.Pointer(modified.Digest()), err
+	return generics.PointerTo(modified.Digest()), err
 }
 
 func TransferManifest(art cpi.ManifestAccess, set cpi.ArtifactSink, tags ...string) (err error) {

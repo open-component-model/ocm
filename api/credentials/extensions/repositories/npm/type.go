@@ -38,7 +38,7 @@ func NewRepositorySpec(path string, propagate ...bool) *RepositorySpec {
 		}
 	}
 	if len(propagate) > 0 {
-		p = generics.Pointer(utils.OptionalDefaultedBool(true, propagate...))
+		p = generics.PointerTo(utils.OptionalDefaultedBool(true, propagate...))
 	}
 
 	return &RepositorySpec{

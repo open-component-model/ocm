@@ -41,7 +41,7 @@ func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher 
 		URL:                       url,
 		ConfigType:                configType,
 		Cipher:                    cipher,
-		PropagateConsumerIdentity: generics.Pointer(utils.OptionalDefaultedBool(true, propagateConsumerIdentity...)),
+		PropagateConsumerIdentity: generics.PointerTo(utils.OptionalDefaultedBool(true, propagateConsumerIdentity...)),
 	}
 }
 

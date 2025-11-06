@@ -368,7 +368,7 @@ func _apply(cctx context.Context, state WalkingState, nv common.NameVersion, cv 
 			}
 			signature.Timestamp = &metav1.TimestampSpec{
 				Value: string(data),
-				Time:  generics.Pointer(compdesc.NewTimestampFor(t)),
+				Time:  generics.PointerTo(compdesc.NewTimestampFor(t)),
 			}
 		}
 		if found >= 0 {

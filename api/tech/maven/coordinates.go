@@ -207,7 +207,7 @@ func (c *Coordinates) SetClassifierExtensionBy(filename string) error {
 
 // Copy creates a new Coordinates with the same values.
 func (c *Coordinates) Copy() *Coordinates {
-	return generics.Pointer(*c)
+	return generics.PointerTo(*c)
 }
 
 func (c *Coordinates) FilterFileMap(fileMap map[string]crypto.Hash) map[string]crypto.Hash {
