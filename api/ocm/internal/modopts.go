@@ -64,7 +64,7 @@ func (o nodefaulthandler) ApplyBlobModificationOption(opts *BlobModificationOpti
 }
 
 func (o nodefaulthandler) ApplyBlobUploadOption(opts *BlobUploadOptions) {
-	opts.UseNoDefaultIfNotSet = generics.PointerTo(bool(o))
+	opts.UseNoDefaultIfNotSet = generics.Pointer(bool(o))
 }
 
 func UseNoDefaultBlobHandlers(b ...bool) BlobOptionImpl {
@@ -298,7 +298,7 @@ func (m TargetIndex) ApplyModificationOption(opts *ModificationOptions) {
 
 func (m TargetIndex) ApplyElementModificationOption(opts *ElementModificationOptions) {
 	if m < 0 {
-		opts.ModifyElement = generics.PointerTo(true)
+		opts.ModifyElement = generics.Pointer(true)
 	}
 	m.ApplyTargetOption(&opts.TargetElementOptions)
 }

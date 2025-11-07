@@ -75,21 +75,21 @@ sdk-modules-bom-5.7.0.pom: 3
 			Expect(coords.FilterFileMap(files)).To(Equal(files))
 		})
 		It("filter by empty classifier", func() {
-			coords.Classifier = generics.PointerTo("")
+			coords.Classifier = generics.Pointer("")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0.jar: 3
 sdk-modules-bom-5.7.0.pom: 3
 `))
 		})
 		It("filter by non-empty classifier", func() {
-			coords.Classifier = generics.PointerTo("random-content")
+			coords.Classifier = generics.Pointer("random-content")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0-random-content.json: 3
 sdk-modules-bom-5.7.0-random-content.txt: 3
 `))
 		})
 		It("filter by extension", func() {
-			coords.Extension = generics.PointerTo("jar")
+			coords.Extension = generics.Pointer("jar")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0-sources.jar: 3
 sdk-modules-bom-5.7.0.jar: 3
@@ -97,16 +97,16 @@ sdk-modules-bom-5.7.0.jar: 3
 		})
 
 		It("filter by empty classifier and extension", func() {
-			coords.Classifier = generics.PointerTo("")
-			coords.Extension = generics.PointerTo("jar")
+			coords.Classifier = generics.Pointer("")
+			coords.Extension = generics.Pointer("jar")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0.jar: 3
 `))
 		})
 
 		It("filter by non-empty classifier and extension", func() {
-			coords.Classifier = generics.PointerTo("sources")
-			coords.Extension = generics.PointerTo("jar")
+			coords.Classifier = generics.Pointer("sources")
+			coords.Extension = generics.Pointer("jar")
 			Expect(coords.FilterFileMap(files)).To(YAMLEqual(`
 sdk-modules-bom-5.7.0-sources.jar: 3
 `))

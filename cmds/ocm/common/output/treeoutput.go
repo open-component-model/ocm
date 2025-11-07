@@ -33,7 +33,7 @@ func (f TreeElemTitleFunc) ApplyTreeOutputOption(o *TreeOutputOptions) {
 type TreeSymbol string
 
 func (s TreeSymbol) ApplyTreeOutputOption(o *TreeOutputOptions) {
-	o.symbol = generics.PointerTo(string(s))
+	o.symbol = generics.Pointer(string(s))
 }
 
 type TreeOutputOptions struct {

@@ -30,7 +30,7 @@ func LocalSourcesOnly(b ...bool) Option {
 }
 
 func (l localSources) ApplyTo(t *Options) {
-	t.CheckLocalSources = generics.PointerTo(bool(l))
+	t.CheckLocalSources = generics.Pointer(bool(l))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,5 +42,5 @@ func LocalResourcesOnly(b ...bool) Option {
 }
 
 func (l localResources) ApplyTo(t *Options) {
-	t.CheckLocalResources = generics.PointerTo(bool(l))
+	t.CheckLocalResources = generics.Pointer(bool(l))
 }

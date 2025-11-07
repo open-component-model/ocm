@@ -262,7 +262,7 @@ func (b *componentVersionAccessBridge) update(final bool) error {
 	d := b.getDescriptor()
 
 	opts := &cpi.BlobUploadOptions{
-		UseNoDefaultIfNotSet: generics.PointerTo(true),
+		UseNoDefaultIfNotSet: generics.Pointer(true),
 	}
 	err := b.setupLocalBlobs("resource", b.composeAccess, d.Resources, true, opts)
 	if err == nil {

@@ -28,7 +28,7 @@ func WithOptionalClassifier(c *string) CoordinateOption {
 }
 
 func (o WithClassifier) ApplyTo(c *Coordinates) {
-	c.Classifier = generics.PointerTo(string(o))
+	c.Classifier = generics.Pointer(string(o))
 }
 
 type WithExtension string
@@ -41,7 +41,7 @@ func WithOptionalExtension(e *string) CoordinateOption {
 }
 
 func (o WithExtension) ApplyTo(c *Coordinates) {
-	c.Extension = generics.PointerTo(string(o))
+	c.Extension = generics.Pointer(string(o))
 }
 
 type WithMediaType string
@@ -54,7 +54,7 @@ func WithOptionalMediaType(mt *string) CoordinateOption {
 }
 
 func (o WithMediaType) ApplyTo(c *Coordinates) {
-	c.MediaType = generics.PointerTo(string(o))
+	c.MediaType = generics.Pointer(string(o))
 }
 
 type FileCoordinates struct {
@@ -196,18 +196,18 @@ func (c *Coordinates) SetClassifierExtensionBy(filename string) error {
 		if i < 0 {
 			return fmt.Errorf("no extension after classifier found in filename: %s", filename)
 		}
-		c.Classifier = generics.PointerTo(s[:i])
+		c.Classifier = generics.Pointer(s[:i])
 		s = strings.TrimPrefix(s, optionutils.AsValue(c.Classifier))
 	} else {
-		c.Classifier = generics.PointerTo("")
+		c.Classifier = generics.Pointer("")
 	}
-	c.Extension = generics.PointerTo(strings.TrimPrefix(s, "."))
+	c.Extension = generics.Pointer(strings.TrimPrefix(s, "."))
 	return nil
 }
 
 // Copy creates a new Coordinates with the same values.
 func (c *Coordinates) Copy() *Coordinates {
-	return generics.PointerTo(*c)
+	return generics.Pointer(*c)
 }
 
 func (c *Coordinates) FilterFileMap(fileMap map[string]crypto.Hash) map[string]crypto.Hash {
@@ -243,10 +243,10 @@ func Parse(serializedArtifact string) (*Coordinates, error) {
 	}
 	coords := NewCoordinates(parts[0], parts[1], parts[2])
 	if len(parts) >= 4 {
-		coords.Classifier = generics.PointerTo(parts[3])
+		coords.Classifier = generics.Pointer(parts[3])
 	}
 	if len(parts) >= 5 {
-		coords.Extension = generics.PointerTo(parts[4])
+		coords.Extension = generics.Pointer(parts[4])
 	}
 	return coords, nil
 }

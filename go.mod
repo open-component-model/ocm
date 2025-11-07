@@ -42,10 +42,10 @@ require (
 	github.com/klauspost/compress v1.18.1
 	github.com/klauspost/pgzip v1.2.6
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
-	github.com/mandelsoft/goutils v0.0.0-20251102201303-2dad79a134aa
+	github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc
 	github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a
 	github.com/mandelsoft/spiff v1.7.0-beta-7
-	github.com/mandelsoft/vfs v0.4.5-0.20250514111339-d7b067920e91
+	github.com/mandelsoft/vfs v0.4.4
 	github.com/marstr/guid v1.1.0
 	github.com/mikefarah/yq/v4 v4.48.1
 	github.com/mitchellh/copystructure v1.2.0
@@ -565,9 +565,6 @@ replace (
 	// recent releases of aliyun credentials go have a hardcoded syscall for unix without go build tag and are broken
 	github.com/aliyun/credentials-go => github.com/aliyun/credentials-go v1.3.10
 )
-
-// latest version of mandelsoft vfs is pulled in unreleased and needs to be pinned to stay stable
-replace github.com/mandelsoft/vfs => github.com/mandelsoft/vfs v0.4.4
 
 replace github.com/ThalesIgnite/crypto11 => github.com/ThalesGroup/crypto11 v1.6.0
 

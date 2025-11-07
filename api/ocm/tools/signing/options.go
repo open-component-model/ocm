@@ -336,9 +336,9 @@ func (o *issuer) ApplySigningOption(opts *Options) {
 		if opts.Keys == nil {
 			opts.Keys = signing.NewKeyRegistry()
 		}
-		opts.Keys.RegisterIssuer(o.name, generics.PointerTo(o.issuer))
+		opts.Keys.RegisterIssuer(o.name, generics.Pointer(o.issuer))
 	} else {
-		opts.Issuer = generics.PointerTo(o.issuer)
+		opts.Issuer = generics.Pointer(o.issuer)
 	}
 }
 

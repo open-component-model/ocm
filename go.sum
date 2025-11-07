@@ -1696,8 +1696,8 @@ github.com/magiconair/properties v1.8.10 h1:s31yESBquKXCV9a/ScB3ESkOjUYYv+X0rg8S
 github.com/magiconair/properties v1.8.10/go.mod h1:Dhd985XPs7jluiymwWYZ0G4Z61jb3vdS329zhj2hYo0=
 github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3 h1:oo9nIgnyiBgYPbcZslRT4y29siuL5EoNJ/t1tr0xEVQ=
 github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3/go.mod h1:LxhqC7khDoRENwooP6f/vWvia9ivj6TqLYrR39zqkN0=
-github.com/mandelsoft/goutils v0.0.0-20251102201303-2dad79a134aa h1:h/e/9iGXC8y0XXtkx/jxlDpsgHNQa9VaFo2T//Bb//I=
-github.com/mandelsoft/goutils v0.0.0-20251102201303-2dad79a134aa/go.mod h1:fTCyGFCMm+ugUn1FqcHeWelCjoSYtkJaqnJvSmgkx1M=
+github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc h1:706IHCvAg6DjmG4cQ24CRNpvNVJ8+KQkcGEdQiLyJbU=
+github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc/go.mod h1:9TJgkwSY43RWHiIAAz7fL8SEIHf0L13Pk4w8fDIt+i4=
 github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a h1:MAvh0gbP2uwKmf7wWCkYCzrYa6vPjBvYeGhoUlVHwtI=
 github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a/go.mod h1:uO460C1lIB3IOOgrbXhAlz3AKsOv4T2K6ALBn3PwuSg=
 github.com/mandelsoft/spiff v1.7.0-beta-7 h1:ow8hgn7A80RlgsN2wjVpwl/7HSObzw3ph3m4vay7KZs=

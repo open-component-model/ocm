@@ -27,7 +27,7 @@ func ParseVersion(vers string) (*ArtVersion, error) {
 			return nil, err
 		}
 		return &ArtVersion{
-			Tag:    generics.PointerTo(vers[:i]),
+			Tag:    generics.Pointer(vers[:i]),
 			Digest: &dig,
 		}, nil
 	}
