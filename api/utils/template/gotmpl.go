@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
@@ -23,7 +24,7 @@ func NewGo() Templater {
 }
 
 func (g GoTemplater) Process(data string, values Values) (string, error) {
-	t, err := template.New("resourcespec").Option("missingkey=error").Parse(data)
+	t, err := template.New("resourcespec").Option("missingkey=error").Funcs(sprig.HermeticTxtFuncMap()).Parse(data)
 	if err != nil {
 		return "", err
 	}
