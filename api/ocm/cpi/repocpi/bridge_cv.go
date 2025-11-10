@@ -8,6 +8,7 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
+	"github.com/mandelsoft/goutils/generics"
 	"github.com/mandelsoft/goutils/optionutils"
 
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -261,7 +262,7 @@ func (b *componentVersionAccessBridge) update(final bool) error {
 	d := b.getDescriptor()
 
 	opts := &cpi.BlobUploadOptions{
-		UseNoDefaultIfNotSet: optionutils.PointerTo(true),
+		UseNoDefaultIfNotSet: generics.Pointer(true),
 	}
 	err := b.setupLocalBlobs("resource", b.composeAccess, d.Resources, true, opts)
 	if err == nil {
