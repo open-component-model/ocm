@@ -198,12 +198,25 @@ OCM library:
   the backend and descriptor updated will be persisted on AddVersion
   or closing a provided existing component version.
 
-- <code>ocm.software/ocm/api/ocm/extensions/attrs/maxworkers</code> [<code>maxworkers</code>]: *integer*
+- <code>ocm.software/ocm/api/ocm/extensions/attrs/maxworkers</code> [<code>maxworkers</code>]: *integer* or *"auto"*
 
-  Specifies the maximum number of concurrent workers to use for resource and source
-  transfer operations. This can influence performance and resource consumption.
-  A value of 0 (or not specified) indicates auto-detection based on CPU cores.
-  WARNING: This is an experimental feature and may cause unexpected issues.
+  Specifies the maximum number of concurrent workers to use for resource and source,
+  as well as reference transfer operations.
+
+  Supported values:
+    - A positive integer: use exactly that number of workers.
+    - The string "auto": automatically use the number of logical CPU cores.
+    - Zero or omitted: fall back to single-worker mode (1). This is the default.
+      This mode guarantees deterministic ordering of operations.
+
+  Precedence:
+    1. Attribute set in the current OCM context.
+    2. Environment variable OCM_TRANSFER_WORKER_COUNT.
+    3. Default value (1).
+
+  WARNING: This is an experimental feature and may cause unexpected behavior
+  depending on workload concurrency. Values above 1 may result in non-deterministic
+  transfer ordering.
 
 - <code>ocm.software/ocm/oci/preferrelativeaccess</code> [<code>preferrelativeaccess</code>]: *bool*
 
