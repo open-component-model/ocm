@@ -2,6 +2,7 @@ package maxworkersattr
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"ocm.software/ocm/api/datacontext"
@@ -9,21 +10,26 @@ import (
 )
 
 const (
+	// TransferWorkersEnvVar is the environment variable to configure the number of transfer workers.
+	TransferWorkersEnvVar = "OCM_TRANSFER_WORKER_COUNT"
 	// ATTR_KEY is the full unique key for the max workers attribute.
 	// This key should reflect its location or purpose within the ocm.software domain.
 	ATTR_KEY = "ocm.software/ocm/api/ocm/extensions/attrs/maxworkers"
 	// ATTR_SHORT is a shorter alias for the max workers attribute, useful for CLI.
 	ATTR_SHORT = "maxworkers"
 
-	// InternalDefault is now 0. If the user doesn't specify the attribute,
-	// Get() will return 0, signaling the calling code to use CPU-based auto-detection.
-	InternalDefault uint = 0
+	// SingleWorker is 1. If the user doesn't specify the attribute,
+	// Get() will return this value, signaling the calling code to use only one worker at a time.
+	// Additionally, this can be used to signal that coding should run sequentially, so that ordering is guaranteed.
+	SingleWorker uint = 1
 )
 
 func init() {
 	// This function runs automatically when the package is imported.
 	// It registers your attribute type with the OCM data context.
-	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
+	if err := datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT); err != nil {
+		panic(err)
+	}
 }
 
 // AttributeType implements the datacontext.AttributeType interface for max workers.
@@ -41,6 +47,7 @@ func (a AttributeType) Description() string {
 Specifies the maximum number of concurrent workers to use for resource and source
 transfer operations. This can influence performance and resource consumption.
 A value of 0 (or not specified) indicates auto-detection based on CPU cores.
+WARNING: This is an experimental feature and may cause unexpected issues.
 `
 }
 
@@ -80,18 +87,34 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Get(ctx datacontext.Context) uint {
+func Get(ctx datacontext.Context) (uint, error) {
+	val, err := get(ctx)
+	if err != nil {
+		return 0, err
+	}
+	if val > SingleWorker {
+		ctx.Logger().Warn(ATTR_SHORT + " attribute is not set to a single worker, this is experimental and may cause unexpected issues")
+	}
+	return val, nil
+}
+
+func get(ctx datacontext.Context) (uint, error) {
 	a := ctx.GetAttributes().GetAttribute(ATTR_KEY)
-	if a == nil {
-		// If the attribute is NOT explicitly set by the user, return 0.
-		// This 0 will signal the calling code to use the CPU-based auto-detection.
-		return 50
+	if a != nil {
+		if val, ok := a.(uint); ok {
+			return val, nil // Return the user-specified value (can be 0 if user explicitly set it to 0).
+		} else {
+			return 0, fmt.Errorf("unexpected type %T for maxworkers attribute, expected uint", a)
+		}
 	}
-	if val, ok := a.(uint); ok {
-		return val // Return the user-specified value (can be 0 if user explicitly set it to 0).
+	if val, foundInEnv := os.LookupEnv(TransferWorkersEnvVar); foundInEnv {
+		parsedFromEnv, err := strconv.ParseUint(val, 10, 32)
+		if err != nil {
+			return 0, fmt.Errorf("failed to parse %s environment variable: %w", TransferWorkersEnvVar, err)
+		}
+		return uint(parsedFromEnv), nil
 	}
-	// Fallback in case of type mismatch (should ideally not happen with correct Encode/Decode)
-	return 0 // Default to 0 for auto-detection in case of error
+	return SingleWorker, nil
 }
 
 func Set(ctx datacontext.Context, workers uint) error {
