@@ -3,120 +3,216 @@ package maxworkersattr
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
+	"sync"
 
 	"ocm.software/ocm/api/datacontext"
-	"ocm.software/ocm/api/utils/runtime"
+	rtruntime "ocm.software/ocm/api/utils/runtime"
 )
 
 const (
-	// TransferWorkersEnvVar is the environment variable to configure the number of transfer workers.
+	// TransferWorkersEnvVar defines the environment variable that configures
+	// the maximum number of concurrent transfer workers.
+	//
+	// If set to a positive integer value, that number of concurrent workers is used.
+	// If set to "auto", the number of logical CPU cores on the system is used.
+	// If unset, the attribute value (if any) or the default of SingleWorker (1) is used.
 	TransferWorkersEnvVar = "OCM_TRANSFER_WORKER_COUNT"
-	// ATTR_KEY is the full unique key for the max workers attribute.
-	// This key should reflect its location or purpose within the ocm.software domain.
+
+	// ATTR_KEY is the globally unique key under which this attribute is registered
+	// in the OCM data context. It follows the ocm.software naming convention.
 	ATTR_KEY = "ocm.software/ocm/api/ocm/extensions/attrs/maxworkers"
-	// ATTR_SHORT is a shorter alias for the max workers attribute, useful for CLI.
+
+	// ATTR_SHORT is the short alias of the attribute, suitable for CLI or YAML use.
 	ATTR_SHORT = "maxworkers"
 
-	// SingleWorker is 1. If the user doesn't specify the attribute,
-	// Get() will return this value, signaling the calling code to use only one worker at a time.
-	// Additionally, this can be used to signal that coding should run sequentially, so that ordering is guaranteed.
+	// SingleWorker is the default number of workers (1) used when no configuration
+	// is provided. This mode guarantees deterministic ordering of operations.
 	SingleWorker uint = 1
+
+	// autoLiteral is the string literal used to indicate that the number of workers
+	// should be automatically determined based on the number of logical CPU cores.
+	autoLiteral = "auto"
 )
 
 func init() {
-	// This function runs automatically when the package is imported.
-	// It registers your attribute type with the OCM data context.
 	if err := datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT); err != nil {
 		panic(err)
 	}
 }
 
-// AttributeType implements the datacontext.AttributeType interface for max workers.
+// AttributeType implements the datacontext.AttributeType interface for
+// the `maxworkers` attribute. It controls the maximum concurrency used
+// during resource and source transfer operations.
 type AttributeType struct{}
 
-// Name returns the full unique key of the attribute.
-func (a AttributeType) Name() string {
-	return ATTR_KEY
-}
+// Name returns the globally unique key for this attribute.
+func (a AttributeType) Name() string { return ATTR_KEY }
 
-// Description provides documentation for the attribute, visible in help messages.
+// Description provides extended docs for this attribute.
 func (a AttributeType) Description() string {
 	return `
-*integer*
-Specifies the maximum number of concurrent workers to use for resource and source
-transfer operations. This can influence performance and resource consumption.
-A value of 0 (or not specified) indicates auto-detection based on CPU cores.
-WARNING: This is an experimental feature and may cause unexpected issues.
+*integer* or *"auto"*
+Specifies the maximum number of concurrent workers to use for resource and source,
+as well as reference transfer operations.
+
+Supported values:
+  - A positive integer: use exactly that number of workers.
+  - The string "auto": automatically use the number of logical CPU cores.
+  - Zero or omitted: fall back to single-worker mode (1). This is the default.
+    This mode guarantees deterministic ordering of operations.
+
+Precedence:
+  1. Attribute set in the current OCM context.
+  2. Environment variable OCM_TRANSFER_WORKER_COUNT.
+  3. Default value (1).
+
+WARNING: This is an experimental feature and may cause unexpected behavior
+depending on workload concurrency. Values above 1 may result in non-deterministic
+transfer ordering.
 `
 }
 
-// Encode converts the attribute's Go value (uint) to its marshaled byte representation (e.g., JSON).
-func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error) {
-	val, ok := v.(uint) // Expecting a uint for number of workers
-	if !ok {
-		// Attempt to convert from int if it's passed as int (common Go numeric type)
-		if intVal, ok := v.(int); ok {
-			if intVal < 0 {
-				return nil, fmt.Errorf("negative integer for maxworkers not allowed")
-			}
-			val = uint(intVal)
-		} else {
-			return nil, fmt.Errorf("unsigned integer (uint) or integer (int) required for maxworkers")
+// Encode converts the attribute's Go value into its marshaled representation.
+// It supports uint, int, and string ("auto") forms.
+func (a AttributeType) Encode(v interface{}, m rtruntime.Marshaler) ([]byte, error) {
+	switch val := v.(type) {
+	case uint:
+		return m.Marshal(val)
+	case int:
+		if val < 0 {
+			return nil, fmt.Errorf("negative integer for %s not allowed", ATTR_SHORT)
 		}
+		return m.Marshal(uint(val))
+	case string:
+		if val != autoLiteral {
+			return nil, fmt.Errorf("invalid string value for %s: %q", ATTR_SHORT, val)
+		}
+		return m.Marshal(val)
+	default:
+		return nil, fmt.Errorf("unsupported type %T for %s", v, ATTR_SHORT)
 	}
-	return marshaller.Marshal(val) // Marshal the uint value
 }
 
-// Decode converts the marshaled byte representation (e.g., JSON) to the attribute's Go value (uint).
-func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (interface{}, error) {
-	var value uint // Decode into a uint
-	err := unmarshaller.Unmarshal(data, &value)
-	if err != nil {
-		var s string
-		if e := unmarshaller.Unmarshal(data, &s); e == nil {
-			parsedVal, err := strconv.ParseUint(s, 10, 32)
-			if err == nil {
+// Decode converts marshaled bytes back into Go form (either uint or "auto").
+func (a AttributeType) Decode(data []byte, unmarshaller rtruntime.Unmarshaler) (interface{}, error) {
+	// Try uint first (e.g., `6`)
+	var value uint
+	if err := unmarshaller.Unmarshal(data, &value); err == nil {
+		return value, nil
+	}
+
+	// Try string next (e.g., `"auto"` or `"6"`)
+	var s string
+	if err := unmarshaller.Unmarshal(data, &s); err == nil {
+		switch s {
+		case autoLiteral:
+			return s, nil
+		default:
+			if parsedVal, err := strconv.ParseUint(s, 10, 32); err == nil {
 				return uint(parsedVal), nil
 			}
+			return nil, fmt.Errorf("invalid string value for %s: %q", ATTR_SHORT, s)
 		}
-		return nil, fmt.Errorf("failed to decode maxworkers as uint: %w", err)
 	}
-	return value, nil
+
+	return nil, fmt.Errorf("failed to decode %s", ATTR_SHORT)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Get returns the resolved number of concurrent transfer workers from the context.
+// Resolution order:
+//  1. Attribute value (ctx)
+//  2. Environment variable OCM_TRANSFER_WORKER_COUNT
+//  3. Default SingleWorker (1)
+//
+// The resolver only auto-detects CPUs if the value is exactly "auto".
+// Any 0 resolves to SingleWorker.
 func Get(ctx datacontext.Context) (uint, error) {
-	val, err := get(ctx)
+	var val = SingleWorker
+	var err error
+
+	if attribute := ctx.GetAttributes().GetAttribute(ATTR_KEY); attribute != nil {
+		val, err = resolveWorkers(attribute)
+	} else if env, ok := os.LookupEnv(TransferWorkersEnvVar); ok {
+		val, err = resolveWorkers(env)
+	}
+
 	if err != nil {
 		return 0, err
 	}
+
 	if val > SingleWorker {
-		ctx.Logger().Warn(ATTR_SHORT + " attribute is not set to a single worker, this is experimental and may cause unexpected issues")
+		warnUnstableOnce.Do(func() {
+			ctx.Logger().Warn(ATTR_SHORT + " attribute is set to more than 1 worker, this may cause unexpected behavior")
+		})
 	}
+
+	// 3) Default
 	return val, nil
 }
 
-func get(ctx datacontext.Context) (uint, error) {
-	a := ctx.GetAttributes().GetAttribute(ATTR_KEY)
-	if a != nil {
-		if val, ok := a.(uint); ok {
-			return val, nil // Return the user-specified value (can be 0 if user explicitly set it to 0).
-		} else {
-			return 0, fmt.Errorf("unexpected type %T for maxworkers attribute, expected uint", a)
-		}
+// warnUnstableOnce ensures we only log only one warning if the attribute is retrieved multiple times.
+var warnUnstableOnce sync.Once
+
+// Set stores the attribute after validation via the unified resolver.
+// Accepts uint, int>=0, or the string "auto".
+func Set(ctx datacontext.Context, workers any) error {
+	val, err := resolveWorkers(workers)
+	if err != nil {
+		return err
 	}
-	if val, foundInEnv := os.LookupEnv(TransferWorkersEnvVar); foundInEnv {
-		parsedFromEnv, err := strconv.ParseUint(val, 10, 32)
-		if err != nil {
-			return 0, fmt.Errorf("failed to parse %s environment variable: %w", TransferWorkersEnvVar, err)
-		}
-		return uint(parsedFromEnv), nil
-	}
-	return SingleWorker, nil
+	return ctx.GetAttributes().SetAttribute(ATTR_KEY, val)
 }
 
-func Set(ctx datacontext.Context, workers uint) error {
-	return ctx.GetAttributes().SetAttribute(ATTR_KEY, workers)
+////////////////////////////////////////////////////////////////////////////////
+
+// resolveWorkers normalizes all supported input forms into a concrete uint.
+// Supported forms:
+//   - uint, int >= 0
+//   - string "auto" → runtime.NumCPU()
+//   - numeric string (e.g. "4") → parsed value
+//   - 0 → SingleWorker
+func resolveWorkers(v any) (uint, error) {
+	switch t := v.(type) {
+	case nil:
+		return SingleWorker, nil
+
+	case uint:
+		if t == 0 {
+			return SingleWorker, nil
+		}
+		return t, nil
+
+	case int:
+		if t < 0 {
+			return 0, fmt.Errorf("%s cannot be negative", ATTR_SHORT)
+		}
+		if t == 0 {
+			return SingleWorker, nil
+		}
+		return uint(t), nil
+
+	case string:
+		if t == autoLiteral {
+			n := runtime.NumCPU()
+			if n <= 0 {
+				return SingleWorker, nil
+			}
+			return uint(n), nil
+		}
+		// Try numeric string conversion
+		if parsed, err := strconv.ParseUint(t, 10, 32); err == nil {
+			if parsed == 0 {
+				return SingleWorker, nil
+			}
+			return uint(parsed), nil
+		}
+		return 0, fmt.Errorf("invalid string value for %s: %q", ATTR_SHORT, t)
+
+	default:
+		return 0, fmt.Errorf("unexpected %s type %T", ATTR_SHORT, v)
+	}
 }
