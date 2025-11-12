@@ -87,7 +87,7 @@ format:
 
 .PHONY: check
 check: ## Run golangci-lint.
-	go tool golangci-lint run --timeout 10m --config .github/config/golangci.yaml $(EFFECTIVE_DIRECTORIES)
+	go tool golangci-lint run --fix --timeout 10m --config .github/config/golangci.yaml $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: force-test
 force-test:
