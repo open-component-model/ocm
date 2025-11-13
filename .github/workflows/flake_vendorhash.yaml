@@ -26,7 +26,7 @@ jobs:
         with:
           token: ${{ steps.generate_token.outputs.token }}
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@786fff0690178f1234e4e1fe9b536e94f5433196 # v20
+        uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
         with:
           nix-package-url: https://releases.nixos.org/nix/nix-2.31.0/nix-2.31.0-x86_64-linux.tar.xz
       - name: Update flake.lock
