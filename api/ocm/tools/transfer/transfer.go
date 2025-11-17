@@ -12,10 +12,10 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmcpi "ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/none"
-	"ocm.software/ocm/api/ocm/extensions/attrs/maxworkersattr"
 	cpi "ocm.software/ocm/api/ocm/internal"
 	"ocm.software/ocm/api/ocm/tools/transfer/internal"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
+	"ocm.software/ocm/api/utils/concurrency"
 	"ocm.software/ocm/api/utils/errkind"
 	common "ocm.software/ocm/api/utils/misc"
 	runtimeutil "ocm.software/ocm/api/utils/runtime"
@@ -199,11 +199,7 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 		}
 
 		if !doMerge || doCopy {
-			maxWorkers, err := maxworkersattr.Get(src.GetContext())
-			if err != nil {
-				return fmt.Errorf("failed to get max workers attribute: %w", err)
-			}
-			err = copyVersion(ctx, printer, log, state.History, src, t, n, handler, maxWorkers)
+			err = copyVersion(ctx, printer, log, state.History, src, t, n, handler)
 			if err != nil {
 				return err
 			}
@@ -219,24 +215,11 @@ func transferVersion(ctx context.Context, log logging.Logger, state WalkingState
 }
 
 func transferReferences(ctx context.Context, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler, d *compdesc.ComponentDescriptor) error {
-	maxWorkers, err := maxworkersattr.Get(src.GetContext())
-	if err != nil {
-		return fmt.Errorf("failed to get max workers attribute: %w", err)
-	}
 	if len(d.References) > 0 {
-		switch maxWorkers {
-		case maxworkersattr.SingleWorker:
-			for _, ref := range d.References {
-				if err := transferReference(ctx, log, state, src, tgt, handler, ref); err != nil {
-					return err
-				}
-			}
-		default:
-			if err := runWorkerPool(ctx, d.References, maxWorkers, func(ctx context.Context, ref compdesc.Reference) error {
-				return transferReference(ctx, log, state, src, tgt, handler, ref)
-			}); err != nil {
-				return err
-			}
+		if err := concurrency.RunInWorkerPool(ctx, src.GetContext(), d.References, func(ctx context.Context, ref compdesc.Reference) error {
+			return transferReference(ctx, log, state, src, tgt, handler, ref)
+		}); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -264,12 +247,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 }
 
 func CopyVersionWithContext(cctx context.Context, printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
-	maxWorkers, err := maxworkersattr.Get(src.GetContext())
-	if err != nil {
-		return fmt.Errorf("failed to get max workers attribute: %w", err)
-	}
-
-	return copyVersion(cctx, printer, log, hist, src, t, src.GetDescriptor().Copy(), handler, maxWorkers)
+	return copyVersion(cctx, printer, log, hist, src, t, src.GetDescriptor().Copy(), handler)
 }
 
 func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, meta compdesc.ArtifactMetaAccess, hint string, msgs ...interface{}) {
@@ -306,7 +284,6 @@ func copyVersion(
 	t ocm.ComponentVersionAccess,
 	prep *compdesc.ComponentDescriptor,
 	handler TransferHandler,
-	workers uint,
 ) (rerr error) {
 	var finalize finalizer.Finalizer
 	defer errors.PropagateError(&rerr, finalize.Finalize)
@@ -319,40 +296,16 @@ func copyVersion(
 	cur := *t.GetDescriptor()
 	*t.GetDescriptor() = *prep
 
-	switch workers {
-	case maxworkersattr.SingleWorker:
-		log.Debug("single worker environment detected, using sequential copy")
-		return copyVersionSequentially(ctx, src, &finalize, hist, handler, &cur, srccd, printer, log, t)
-
-	default:
-		log.Debug("concurrent worker environment detected, using concurrent copy", "workers", workers)
-		return copyVersionConcurrently(ctx, printer, log, hist, src, t, workers, &finalize, handler, &cur, srccd)
-	}
+	return copyVersionWithWorkers(ctx, printer, log, hist, src, t, &finalize, handler, &cur, srccd)
 }
 
-func copyVersionSequentially(ctx context.Context, src ocm.ComponentVersionAccess, finalize *finalizer.Finalizer, hist common.History, handler TransferHandler, cur *compdesc.ComponentDescriptor, srccd *compdesc.ComponentDescriptor, printer common.Printer, log logging.Logger, t ocm.ComponentVersionAccess) error {
-	for i, r := range src.GetResources() {
-		if err := copyResource(src, finalize, hist, handler, cur, srccd, printer, log, t, r, i); err != nil {
-			return err
-		}
-	}
-
-	for i, r := range src.GetSources() {
-		if err := copySource(ctx, src, hist, r, handler, printer, log, i, t); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func copyVersionConcurrently(
+func copyVersionWithWorkers(
 	ctx context.Context,
 	printer common.Printer,
 	log logging.Logger,
 	hist common.History,
 	src ocm.ComponentVersionAccess,
 	target ocm.ComponentVersionAccess,
-	maxWorkers uint,
 	finalize *finalizer.Finalizer,
 	handler TransferHandler,
 	curDesc, srcDesc *compdesc.ComponentDescriptor,
@@ -383,7 +336,7 @@ func copyVersionConcurrently(
 	}
 
 	// Run all tasks using the generic worker pool
-	return runWorkerPool(ctx, tasks, maxWorkers, func(ctx context.Context, t transferTask) error {
+	return concurrency.RunInWorkerPool(ctx, src.GetContext(), tasks, func(ctx context.Context, t transferTask) error {
 		log.Debug("starting transfer task", "task", t.id)
 		if err := t.exec(ctx); err != nil {
 			return fmt.Errorf("%s failed: %w", t.id, err)

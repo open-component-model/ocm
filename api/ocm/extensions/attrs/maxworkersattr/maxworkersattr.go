@@ -8,8 +8,11 @@ import (
 	"sync"
 
 	"ocm.software/ocm/api/datacontext"
+	ocmlog "ocm.software/ocm/api/utils/logging"
 	rtruntime "ocm.software/ocm/api/utils/runtime"
 )
+
+var realm = ocmlog.SubRealm("api/ocm/extensions/attrs/maxworkersattr")
 
 const (
 	// TransferWorkersEnvVar defines the environment variable that configures
@@ -31,9 +34,9 @@ const (
 	// is provided. This mode guarantees deterministic ordering of operations.
 	SingleWorker uint = 1
 
-	// autoLiteral is the string literal used to indicate that the number of workers
+	// AutomaticWorkersBasedOnCPU is the string literal used to indicate that the number of workers
 	// should be automatically determined based on the number of logical CPU cores.
-	autoLiteral = "auto"
+	AutomaticWorkersBasedOnCPU = "auto"
 )
 
 func init() {
@@ -86,7 +89,7 @@ func (a AttributeType) Encode(v interface{}, m rtruntime.Marshaler) ([]byte, err
 		}
 		return m.Marshal(uint(val))
 	case string:
-		if val != autoLiteral {
+		if val != AutomaticWorkersBasedOnCPU {
 			return nil, fmt.Errorf("invalid string value for %s: %q", ATTR_SHORT, val)
 		}
 		return m.Marshal(val)
@@ -107,7 +110,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller rtruntime.Unmarshaler) (
 	var s string
 	if err := unmarshaller.Unmarshal(data, &s); err == nil {
 		switch s {
-		case autoLiteral:
+		case AutomaticWorkersBasedOnCPU:
 			return s, nil
 		default:
 			if parsedVal, err := strconv.ParseUint(s, 10, 32); err == nil {
@@ -131,7 +134,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller rtruntime.Unmarshaler) (
 // The resolver only auto-detects CPUs if the value is exactly "auto".
 // Any 0 resolves to SingleWorker.
 func Get(ctx datacontext.Context) (uint, error) {
-	var val = SingleWorker
+	val := SingleWorker
 	var err error
 
 	if attribute := ctx.GetAttributes().GetAttribute(ATTR_KEY); attribute != nil {
@@ -146,7 +149,7 @@ func Get(ctx datacontext.Context) (uint, error) {
 
 	if val > SingleWorker {
 		warnUnstableOnce.Do(func() {
-			ctx.Logger().Warn(ATTR_SHORT + " attribute is set to more than 1 worker, this may cause unexpected behavior")
+			ctx.Logger(realm).Warn("attribute is set to more than 1 worker, this may cause unexpected behavior")
 		})
 	}
 
@@ -196,7 +199,7 @@ func resolveWorkers(v any) (uint, error) {
 		return uint(t), nil
 
 	case string:
-		if t == autoLiteral {
+		if t == AutomaticWorkersBasedOnCPU {
 			n := runtime.NumCPU()
 			if n <= 0 {
 				return SingleWorker, nil
