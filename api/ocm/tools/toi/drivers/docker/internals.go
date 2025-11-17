@@ -7,7 +7,6 @@ import (
 	"github.com/distribution/reference"
 	"github.com/docker/cli/cli/config/configfile"
 	"github.com/moby/moby/api/types/registry"
-	registrytypes "github.com/moby/moby/api/types/registry"
 )
 
 const (
@@ -47,6 +46,8 @@ func normalizeIndexName(val string) string {
 	return val
 }
 
+var lookupIP = net.LookupIP
+
 // isInsecure is used to detect whether a registry domain or IP-address is allowed
 // to use an insecure (non-TLS, or self-signed cert) connection according to the
 // defaults, which allows for insecure connections with registries running on a
@@ -73,7 +74,7 @@ func isInsecure(hostNameOrIP string) bool {
 		addresses = append(addresses, ip)
 	} else {
 		// Try to resolve the host's IP-addresses.
-		addrs, _ := net.LookupIP(hostNameOrIP)
+		addrs, _ := lookupIP(hostNameOrIP)
 		addresses = append(addresses, addrs...)
 	}
 
@@ -94,14 +95,14 @@ const authConfigKey = "https://index.docker.io/v1/"
 // ResolveAuthConfig returns auth-config for the given registry from the
 // credential-store. It returns an empty AuthConfig if no credentials were
 // found.
-func resolveAuthConfig(cfg *configfile.ConfigFile, index *registrytypes.IndexInfo) registrytypes.AuthConfig {
+func resolveAuthConfig(cfg *configfile.ConfigFile, index *registry.IndexInfo) registry.AuthConfig {
 	configKey := index.Name
 	if index.Official {
 		configKey = authConfigKey
 	}
 
 	a, _ := cfg.GetAuthConfig(configKey)
-	return registrytypes.AuthConfig{
+	return registry.AuthConfig{
 		Username:      a.Username,
 		Password:      a.Password,
 		ServerAddress: a.ServerAddress,
