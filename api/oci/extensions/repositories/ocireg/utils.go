@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"time"
 
 	"github.com/containerd/containerd/remotes"
 	"github.com/containerd/errdefs"
@@ -92,7 +93,12 @@ func pushData(ctx context.Context, p oras.Pusher, desc artdesc.Descriptor, data 
 		desc.Size = -1
 	}
 
-	logging.Logger().Debug("*** push blob", "mediatype", desc.MediaType, "digest", desc.Digest, "key", key)
+	logger := logging.Logger().WithValues("mediatype", desc.MediaType, "digest", desc.Digest, "key", key)
+	logger.Debug("oci push blob")
+	start := time.Now()
+	defer func() {
+		logger.Debug("oci push blob done", "elapsed", time.Since(start))
+	}()
 	if err := p.Push(ctx, desc, data); err != nil {
 		if errdefs.IsAlreadyExists(err) {
 			logging.Logger().Debug("blob already exists", "mediatype", desc.MediaType, "digest", desc.Digest)
