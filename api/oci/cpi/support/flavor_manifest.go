@@ -2,15 +2,12 @@ package support
 
 import (
 	"compress/gzip"
-	"reflect"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
-	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
-	"ocm.software/ocm/api/ocm/extensions/repositories/genericocireg/componentmapping"
 	"ocm.software/ocm/api/utils/accessobj"
 )
 
@@ -137,30 +134,10 @@ func (m *ManifestAccess) AddLayer(blob cpi.BlobAccess, d *artdesc.Descriptor) (i
 	return len(manifest.Layers) - 1, nil
 }
 
-func (m *ManifestAccess) AssureLayer(blob cpi.BlobAccess) error {
+func (m *ManifestAccess) Modify(f func(manifest *artdesc.Manifest) error) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	desc := m.GetDescriptor()
 
-	d := artdesc.DefaultBlobDescriptor(blob)
-
-	found := -1
-	for i, l := range desc.Layers {
-		if reflect.DeepEqual(&desc.Layers[i], d) {
-			return nil
-		}
-		if l.Digest == blob.Digest() {
-			found = i
-		}
-	}
-	if found > 0 { // ignore layer 0 used for component descriptor
-		desc.Layers[found] = *d
-	} else {
-		if len(desc.Layers) == 0 {
-			// fake descriptor layer
-			desc.Layers = append(desc.Layers, ociv1.Descriptor{MediaType: componentmapping.ComponentDescriptorConfigMimeType})
-		}
-		desc.Layers = append(desc.Layers, *d)
-	}
-	return nil
+	return f(desc)
 }
