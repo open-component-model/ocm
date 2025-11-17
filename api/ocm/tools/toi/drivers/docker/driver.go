@@ -14,15 +14,14 @@ import (
 	"github.com/containerd/errdefs"
 	"github.com/distribution/reference"
 	"github.com/docker/cli/cli/command"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/image"
-	registrytypes "github.com/docker/docker/api/types/registry"
-	"github.com/docker/docker/pkg/jsonmessage"
-	"github.com/docker/docker/pkg/stdcopy"
-	"github.com/docker/docker/registry"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/set"
 	"github.com/mitchellh/copystructure"
+	"github.com/moby/moby/api/pkg/authconfig"
+	"github.com/moby/moby/api/pkg/stdcopy"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/client"
+	"github.com/moby/moby/client/pkg/jsonmessage"
 
 	"ocm.software/ocm/api/ocm/tools/toi"
 	"ocm.software/ocm/api/ocm/tools/toi/install"
@@ -159,19 +158,16 @@ func pullImage(ctx context.Context, cli command.Cli, imageName string) error {
 	}
 
 	// Resolve the Repository name from fqn to RepositoryInfo
-	repoInfo, err := registry.ParseRepositoryInfo(ref)
-	if err != nil {
-		return fmt.Errorf("unable to parse repository info: %w", err)
-	}
+	indexInfo := NewIndexInfo(ref)
 
-	authConfig := command.ResolveAuthConfig(cli.ConfigFile(), repoInfo.Index)
+	authConfig := resolveAuthConfig(cli.ConfigFile(), indexInfo)
 
-	encodedAuth, err := registrytypes.EncodeAuthConfig(authConfig)
+	encodedAuth, err := authconfig.Encode(authConfig)
 	if err != nil {
 		return fmt.Errorf("unable encode auth: %w", err)
 	}
 
-	options := image.PullOptions{
+	options := client.ImagePullOptions{
 		RegistryAuth: encodedAuth,
 	}
 
@@ -248,13 +244,16 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 		return nil, err
 	}
 
-	resp, err := cli.Client().ContainerCreate(ctx, &d.containerCfg, &d.containerHostCfg, nil, nil, "")
+	resp, err := cli.Client().ContainerCreate(ctx, client.ContainerCreateOptions{
+		Config:     &d.containerCfg,
+		HostConfig: &d.containerHostCfg,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("cannot create container: %w", err)
 	}
 
 	if d.config[OptionCleanup] == trueAsString {
-		defer cli.Client().ContainerRemove(ctx, resp.ID, container.RemoveOptions{})
+		defer cli.Client().ContainerRemove(ctx, resp.ID, client.ContainerRemoveOptions{})
 	}
 
 	containerUID := getContainerUserID(ii.Config.User)
@@ -262,12 +261,13 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error staging files: %w", err)
 	}
-	options := container.CopyToContainerOptions{
-		AllowOverwriteDirWithFile: false,
-	}
 	// This copies the tar to the root of the container. The tar has been assembled using the
 	// path from the given file, starting at the /.
-	err = cli.Client().CopyToContainer(ctx, resp.ID, "/", tarContent, options)
+	_, err = cli.Client().CopyToContainer(ctx, resp.ID, client.CopyToContainerOptions{
+		DestinationPath:           "/",
+		Content:                   tarContent,
+		AllowOverwriteDirWithFile: false,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error copying to / in container: %w", err)
 	}
@@ -277,7 +277,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}
 	tarContent.Close()
 
-	attach, err := cli.Client().ContainerAttach(ctx, resp.ID, container.AttachOptions{
+	attach, err := cli.Client().ContainerAttach(ctx, resp.ID, client.ContainerAttachOptions{
 		Stream: true,
 		Stdout: true,
 		Stderr: true,
@@ -310,17 +310,19 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 		}
 	}()
 
-	if err = cli.Client().ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
+	if _, err = cli.Client().ContainerStart(ctx, resp.ID, client.ContainerStartOptions{}); err != nil {
 		return nil, fmt.Errorf("cannot start container: %w", err)
 	}
-	statusc, errc := cli.Client().ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
+	statusc := cli.Client().ContainerWait(ctx, resp.ID, client.ContainerWaitOptions{
+		Condition: container.WaitConditionNotRunning,
+	})
 	select {
-	case err := <-errc:
+	case err := <-statusc.Error:
 		if err != nil {
 			opResult, fetchErr := d.fetchOutputs(ctx, resp.ID, op)
 			return opResult, containerError("error in container", err, fetchErr)
 		}
-	case s := <-statusc:
+	case s := <-statusc.Result:
 		if s.StatusCode == 0 {
 			return d.fetchOutputs(ctx, resp.ID, op)
 		}
@@ -406,11 +408,13 @@ func (d *Driver) fetchOutputs(ctx context.Context, container string, op *install
 	if len(op.Outputs) == 0 {
 		return opResult, nil
 	}
-	ioReader, _, err := d.dockerCli.Client().CopyFromContainer(ctx, container, install.PathOutputs)
+	result, err := d.dockerCli.Client().CopyFromContainer(ctx, container, client.CopyFromContainerOptions{
+		SourcePath: install.PathOutputs,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error copying outputs from container: %w", err)
 	}
-	tarReader := tar.NewReader(ioReader)
+	tarReader := tar.NewReader(result.Content)
 	header, err := tarReader.Next()
 	// io.EOF pops us out of loop on successful run.
 	for err == nil {
@@ -508,7 +512,7 @@ type ConfigurationOption func(*container.Config, *container.HostConfig) error
 
 // inspectImage inspects the operation image and returns an object of image.InspectResponse,
 // pulling the image if not found locally.
-func (d *Driver) inspectImage(ctx context.Context, image string) (image.InspectResponse, error) {
+func (d *Driver) inspectImage(ctx context.Context, image string) (client.ImageInspectResult, error) {
 	ii, err := d.dockerCli.Client().ImageInspect(ctx, image)
 	switch {
 	case errdefs.IsNotFound(err):

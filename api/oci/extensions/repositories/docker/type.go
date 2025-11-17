@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/mandelsoft/logging"
+	dockerclient "github.com/moby/moby/client"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/cpi"
@@ -60,6 +61,6 @@ func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials
 		return err
 	}
 
-	_, err = client.Ping(context.Background())
+	_, err = client.Ping(context.Background(), dockerclient.PingOptions{})
 	return err
 }
