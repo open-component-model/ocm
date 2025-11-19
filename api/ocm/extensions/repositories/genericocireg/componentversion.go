@@ -385,7 +385,10 @@ func (c *ComponentVersionContainer) addLayer(blob cpi.BlobAccess, refs *[]string
 	if err != nil {
 		return err
 	}
-	err = ocihdlr.AssureLayer(c.manifest.GetDescriptor(), blob)
+
+	err = c.manifest.Modify(func(manifest *artdesc.Manifest) error {
+		return ocihdlr.AssureLayerLocked(blob, manifest)
+	})
 	if err != nil {
 		return err
 	}
