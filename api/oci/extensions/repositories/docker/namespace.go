@@ -7,9 +7,9 @@ import (
 
 	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/types"
-	dockertypes "github.com/docker/docker/api/types/image"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
+	"github.com/moby/moby/client"
 	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/oci/artdesc"
@@ -127,14 +127,14 @@ func (n *namespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 }
 
 func (n *namespaceHandler) ListTags() ([]string, error) {
-	opts := dockertypes.ListOptions{}
+	opts := client.ImageListOptions{}
 	list, err := n.repo.client.ImageList(dummyContext, opts)
 	if err != nil {
 		return nil, err
 	}
 	var result []string
 	if n.impl.GetNamespace() == "" {
-		for _, e := range list {
+		for _, e := range list.Items {
 			// ID is always the config digest
 			// filter images without a repo tag for empty namespace
 			if len(e.RepoTags) == 0 {
@@ -146,7 +146,7 @@ func (n *namespaceHandler) ListTags() ([]string, error) {
 		}
 	} else {
 		prefix := n.impl.GetNamespace() + ":"
-		for _, e := range list {
+		for _, e := range list.Items {
 			for _, t := range e.RepoTags {
 				if strings.HasPrefix(t, prefix) {
 					result = append(result, t[len(prefix):])
@@ -252,7 +252,8 @@ func (n *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	}
 
 	for _, tag := range tags {
-		err := n.repo.client.ImageTag(dummyContext, src, n.impl.GetNamespace()+":"+tag)
+		opts := client.ImageTagOptions{Source: src, Target: n.impl.GetNamespace() + ":" + tag}
+		_, err := n.repo.client.ImageTag(dummyContext, opts)
 		if err != nil {
 			return fmt.Errorf("failed to add image tag: %w", err)
 		}

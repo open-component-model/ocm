@@ -4,9 +4,8 @@ import (
 	"strings"
 
 	"github.com/containers/image/v5/types"
-	dockertypes "github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/client"
 	"github.com/mandelsoft/logging"
+	"github.com/moby/moby/client"
 
 	"ocm.software/ocm/api/oci/cpi"
 	ocmlog "ocm.software/ocm/api/utils/logging"
@@ -75,13 +74,13 @@ func (r *RepositoryImpl) GetNamespaces(prefix string, closure bool) ([]string, e
 }
 
 func (r *RepositoryImpl) GetRepositories() ([]string, error) {
-	opts := dockertypes.ListOptions{}
+	opts := client.ImageListOptions{}
 	list, err := r.client.ImageList(dummyContext, opts)
 	if err != nil {
 		return nil, err
 	}
 	var result cpi.StringList
-	for _, e := range list {
+	for _, e := range list.Items {
 		if len(e.RepoTags) > 0 {
 			for _, t := range e.RepoTags {
 				i := strings.Index(t, ":")
@@ -103,13 +102,13 @@ func (r *RepositoryImpl) ExistsArtifact(name string, version string) (bool, erro
 	if err != nil {
 		return false, err
 	}
-	opts := dockertypes.ListOptions{}
+	opts := client.ImageListOptions{}
 	opts.Filters.Add("reference", ref.StringWithinTransport())
 	list, err := r.client.ImageList(dummyContext, opts)
 	if err != nil {
 		return false, err
 	}
-	return len(list) > 0, nil
+	return len(list.Items) > 0, nil
 }
 
 func (r *RepositoryImpl) LookupArtifact(name string, version string) (cpi.ArtifactAccess, error) {
