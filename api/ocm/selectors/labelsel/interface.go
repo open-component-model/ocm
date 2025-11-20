@@ -8,17 +8,16 @@ import (
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
-	"gopkg.in/op/go-logging.v1"
 
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/selectors"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/runtime"
+	ocm_yqlib "ocm.software/ocm/api/utils/yqlib"
 )
 
 func init() {
-	logging.SetLevel(logging.ERROR, "yq-lib")
-	yqlib.InitExpressionParser()
+	ocm_yqlib.InitYq()
 }
 
 type Selector = selectors.LabelSelector
