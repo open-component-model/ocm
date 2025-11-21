@@ -2,6 +2,7 @@ package genericocireg
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
+	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -99,8 +101,15 @@ func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
 		err  error
 	)
 	if len(refs) < 2 {
-		_, data, err = m.namespace.GetBlobData(digest.Digest(m.spec.LocalReference))
-		if err != nil {
+		if m.spec.MediaType == artdesc.MediaTypeImageIndex || m.spec.MediaType == artdesc.MediaTypeImageManifest {
+			// if we have a nested manifest or index, we can use the blob synthesis utility here to download
+			// the entire artifact set.
+			artblob, err := artifactset.SynthesizeArtifactBlob(m.namespace, m.spec.LocalReference)
+			if err != nil {
+				return nil, fmt.Errorf("failed to synthesize artifact blob: %w", err)
+			}
+			data = artblob
+		} else if _, data, err = m.namespace.GetBlobData(digest.Digest(m.spec.LocalReference)); err != nil {
 			return nil, err
 		}
 	} else {
@@ -126,7 +135,7 @@ func (m *localBlobAccessMethod) MimeType() string {
 	return m.spec.MediaType
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type composedBlock struct {
 	m    *localBlobAccessMethod
