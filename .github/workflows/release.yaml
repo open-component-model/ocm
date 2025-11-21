@@ -39,7 +39,7 @@ jobs:
       draft-release-notes-body: ${{ steps.release-notes.outputs.release_notes_body }}
     steps:
     - name: Checkout
-      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       with:
         fetch-depth: 0
     - name: Check Tag
@@ -119,7 +119,7 @@ jobs:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Checkout
-      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       with:
         # fetch all history so we can calculate the version and tagging
         fetch-depth: 0
