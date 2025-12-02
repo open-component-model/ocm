@@ -575,6 +575,8 @@ retract [v0.16.0, v0.16.9] // Retract all from v0.16 due to https://github.com/o
 
 retract v0.22.0 // Retract because of accidentially released version, reported by https://github.com/open-component-model/ocm-project/issues/1399
 
+retract v0.34.0 // Retract because release includes dependency that is a release candidate (go.yaml.in/yaml/v4)
+
 // crypto/tls: Client Hello is always sent in 2 TCP frames if GODEBUG=tlskyber=1 (default) which causes
 // issues with various enterprise network gateways such as Palo Alto Networks. We have been reported issues
 // such as https://github.com/open-component-model/ocm/issues/1027 and do not want to pin our crypto/tls version.
