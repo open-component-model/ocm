@@ -134,7 +134,8 @@ type namespaceContainer struct {
 
 // New returns a new representation based element.
 func New(acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode, formatVersion string) (*ArtifactSet, error) {
-	return _Wrap(accessobj.NewAccessObject(NewAccessObjectInfo(formatVersion), acc, fs, setup, closer, mode))
+	opts := &Options{FormatVersion: formatVersion}
+	return _Wrap(accessobj.NewAccessObject(NewAccessObjectInfo(opts), acc, fs, setup, closer, mode))
 }
 
 func _Wrap(obj *accessobj.AccessObject, err error) (*ArtifactSet, error) {

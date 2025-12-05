@@ -2,12 +2,21 @@ package download_test
 
 import (
 	"bytes"
+	"context"
+	"os"
+	"path/filepath"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/projectionfs"
+	"oras.land/oras-go/v2/content"
+	"oras.land/oras-go/v2/content/oci"
+
+	envhelper "ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/oci/grammar"
 	"ocm.software/ocm/api/utils/accessio"
@@ -69,4 +78,76 @@ var _ = Describe("Test Environment", func() {
 `))
 		Expect(env.ReadFile("/tmp/res")).To(StringEqualWithContext("testdata"))
 	})
+
+	// Issue 1668: Downloading artifact leads to broken OCI image layout
+	// https://github.com/open-component-model/ocm/issues/1668
+	//
+	// When running `ocm download artifacts --oci-layout` the directory structure
+	// should adhere to the OpenContainer Image Layout Spec.
+	// Spec: https://specs.opencontainers.org/image-spec/image-layout/
+	//
+	// This test suite verifies compliance with each requirement from the spec.
+	// Download is executed once, then ORAS library is used to verify all requirements.
+	Describe("OCI Image Layout Spec compliance with --oci-layout flag", Ordered, func() {
+		var (
+			tempDir string
+			testEnv *TestEnv
+			store   *oci.Store
+			ctx     context.Context
+		)
+
+		BeforeAll(func() {
+			ctx = context.Background()
+
+			var err error
+			tempDir, err = os.MkdirTemp("", "oci-test-*")
+			Expect(err).To(Succeed())
+
+			fs, err := projectionfs.New(osfs.New(), tempDir)
+			Expect(err).To(Succeed())
+
+			testEnv = NewTestEnv(envhelper.FileSystem(fs))
+
+			buf := bytes.NewBuffer(nil)
+			Expect(testEnv.CatchOutput(buf).Execute("download", "artifact", "--oci-layout", "-O", "/out", "alpine:latest")).To(Succeed())
+
+			// Open with ORAS - validates oci-layout and index.json
+			store, err = oci.New(filepath.Join(tempDir, "out"))
+			Expect(err).To(Succeed(), "ORAS MUST be able to open OCI-compliant layout")
+
+		})
+
+		AfterAll(func() {
+			Expect(testEnv.Cleanup()).To(Succeed())
+			Expect(os.RemoveAll(tempDir)).To(Succeed())
+		})
+
+		It("without --oci-layout flag ORAS MUST fail to resolve or fetch", func() {
+			// Download without --oci-layout
+			outDir := filepath.Join(tempDir, "no-oci-layout")
+
+			buf := bytes.NewBuffer(nil)
+			Expect(testEnv.CatchOutput(buf).Execute("download", "artifact", "-O", outDir, "alpine:latest")).To(Succeed())
+
+			// ORAS can open the layout (index.json exists)
+			noOciStore, err := oci.New(outDir)
+			Expect(err).To(Succeed(), "ORAS opens the layout")
+
+			// Either resolve fails (tag not stored properly) or fetch fails (wrong blob paths)
+			desc, resolveErr := noOciStore.Resolve(ctx, "latest")
+			Expect(resolveErr).To(Succeed())
+			_, fetchErr := content.FetchAll(ctx, noOciStore, desc)
+			Expect(fetchErr).NotTo(Succeed(), "ORAS MUST fail to fetch blobs from non-OCI-compliant layout")
+		})
+
+		It("manifest MUST be resolvable and fetchable via ORAS", func() {
+			manifestDesc, err := store.Resolve(ctx, "latest")
+			Expect(err).To(Succeed(), "ORAS MUST resolve tag")
+
+			_, err = content.FetchAll(ctx, store, manifestDesc)
+			Expect(err).To(Succeed(), "Manifest MUST be fetchable")
+		})
+
+	})
+
 })
