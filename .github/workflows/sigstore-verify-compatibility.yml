@@ -1,0 +1,154 @@
+name: Sigstore Verify Compatibility Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      v2_repository:
+        description: 'v2 Repository (owner/repo)'
+        required: true
+        default: 'open-component-model/ocm'
+        type: string
+      v2_ref:
+        description: 'v2 Reference (tag/branch/commit)'
+        required: true
+        default: 'v0.34.1'
+        type: string
+      
+      v3_repository:
+        description: 'v3 Repository (owner/repo)'
+        required: true
+        default: 'morri-son/ocm'
+        type: string
+      v3_ref:
+        description: 'v3 Reference (tag/branch/commit)'
+        required: true
+        default: 'test/sigstore-v3-compatibility'
+        type: string
+
+jobs:
+  verify-compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # v2 CLI verifies v2 signature
+          - cli_repo: ${{ inputs.v2_repository }}
+            cli_ref: ${{ inputs.v2_ref }}
+            signature_name: "sigstore-v2"
+            test_name: "v2_cli_verifies_v2_signature"
+          
+          # v2 CLI verifies v3 signature
+          - cli_repo: ${{ inputs.v2_repository }}
+            cli_ref: ${{ inputs.v2_ref }}
+            signature_name: "sigstore-v3"
+            test_name: "v2_cli_verifies_v3_signature"
+          
+          # v3 CLI verifies v2 signature
+          - cli_repo: ${{ inputs.v3_repository }}
+            cli_ref: ${{ inputs.v3_ref }}
+            signature_name: "sigstore-v2"
+            test_name: "v3_cli_verifies_v2_signature"
+          
+          # v3 CLI verifies v3 signature
+          - cli_repo: ${{ inputs.v3_repository }}
+            cli_ref: ${{ inputs.v3_ref }}
+            signature_name: "sigstore-v3"
+            test_name: "v3_cli_verifies_v3_signature"
+      
+      fail-fast: false
+    
+    name: ${{ matrix.test_name }}
+    
+    steps:
+      - name: Checkout Repository (for pre-signed component)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          path: ocm-repo
+          fetch-depth: 1
+      
+      - name: Setup Go
+        uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
+        with:
+          go-version: '1.25.4'
+      
+      - name: Checkout OCM CLI
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ${{ matrix.cli_repo }}
+          ref: ${{ matrix.cli_ref }}
+          path: ocm-cli
+          fetch-depth: 1
+      
+      - name: Build OCM CLI
+        run: |
+          echo "Building OCM CLI for verification"
+          echo "  Repository: ${{ matrix.cli_repo }}"
+          echo "  Reference:  ${{ matrix.cli_ref }}"
+          cd ocm-cli
+          make install
+          ocm version
+      
+      - name: Verify Pre-signed Component
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          echo "Verifying signature: ${{ matrix.signature_name }}"
+          echo "Using CLI: ${{ matrix.cli_repo }}@${{ matrix.cli_ref }}"
+          
+          ocm verify cv \
+            --signature ${{ matrix.signature_name }} \
+            --keyless \
+            ghcr.io/morri-son/ocm-test//ocm.software/sigstore-test-comp:1.0.0
+          
+          echo "✅ Verification successful!"
+      
+      - name: Display Component Info
+        if: always()
+        run: |
+          echo "=== Component Details ==="
+          ocm get cv ghcr.io/morri-son/ocm-test//ocm.software/sigstore-test-comp:1.0.0 -oyaml
+      
+      - name: Test Result Summary
+        if: success()
+        run: |
+          echo "✅ SUCCESS: ${{ matrix.test_name }}"
+          echo ""
+          echo "CLI:"
+          echo "  Repository: ${{ matrix.cli_repo }}"
+          echo "  Reference:  ${{ matrix.cli_ref }}"
+          echo ""
+          echo "Signature: ${{ matrix.signature_name }}"
+
+  summary:
+    needs: verify-compatibility
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate Test Summary
+        run: |
+          echo "# Sigstore Verify Compatibility Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **v2 CLI**: \`${{ inputs.v2_repository }}@${{ inputs.v2_ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **v3 CLI**: \`${{ inputs.v3_repository }}@${{ inputs.v3_ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Matrix" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Tests verification of pre-signed components:" >> $GITHUB_STEP_SUMMARY
+          echo "- **sigstore-v2**: Signed with Sigstore v2" >> $GITHUB_STEP_SUMMARY
+          echo "- **sigstore-v3**: Signed with Sigstore v3" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| CLI Version | Signature | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| v2 | sigstore-v2 | ${{ needs.verify-compatibility.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| v2 | sigstore-v3 | ${{ needs.verify-compatibility.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| v3 | sigstore-v2 | ${{ needs.verify-compatibility.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| v3 | sigstore-v3 | ${{ needs.verify-compatibility.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Note" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow tests **verification only** using pre-signed components." >> $GITHUB_STEP_SUMMARY
+          echo "Signing tests must be performed manually due to OIDC requirements." >> $GITHUB_STEP_SUMMARY
+          echo "See \`.github/test-data/README.md\` for manual signing instructions." >> $GITHUB_STEP_SUMMARY
