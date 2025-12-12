@@ -39,7 +39,7 @@ jobs:
       - name: Restore / Reuse Cache from central build
         id: cache-golang-restore
         # Only Restore, not build another cache (too big)
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
         with:
           path: |
             ${{ env.go_cache }}
@@ -59,7 +59,7 @@ jobs:
         id: cache-golang-save
         if: github.ref == 'refs/heads/main' # Only run on main, never in PR
         # Only saves cache build-test (linux-amd64)
-        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/save@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
         with:
           path: |
             ${{ env.go_cache }}
@@ -93,7 +93,7 @@ jobs:
       - name: Restore / Reuse Cache from central build
         id: cache-golang-restore
         # Only Restore, not build another cache (too big)
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
         with:
           path: |
             ${{ env.go_cache }}
