@@ -1,6 +1,8 @@
 package artifactset
 
 import (
+	"path"
+	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -42,6 +44,9 @@ func DescriptorFileName(format string) string {
 
 type accessObjectInfo struct {
 	accessobj.DefaultAccessObjectInfo
+	// ociBlobLayout enables OCI Image Layout Specification compliant blob paths.
+	// When true, blobs are stored at blobs/<algorithm>/<encoded> instead of blobs/<algorithm>.<encoded>.
+	ociBlobLayout bool
 }
 
 var _ accessobj.AccessObjectInfo = (*accessObjectInfo)(nil)
@@ -59,19 +64,26 @@ func validateDescriptor(data []byte) error {
 	return err
 }
 
-func NewAccessObjectInfo(fmts ...string) accessobj.AccessObjectInfo {
+// NewAccessObjectInfo creates an AccessObjectInfo for artifact set storage.
+// It configures blob path handling based on the provided options:
+//   - OCIBlobLayout: when true, uses OCI Image Layout paths (blobs/<algorithm>/<encoded>)
+//   - FormatVersion: selects OCI or OCM descriptor format
+func NewAccessObjectInfo(opts accessio.Options) accessobj.AccessObjectInfo {
 	a := &accessObjectInfo{
-		baseInfo,
+		DefaultAccessObjectInfo: baseInfo,
+	}
+	// Extract OCIBlobLayout option for OCI Image Layout Specification compliance.
+	if o, ok := opts.(*Options); ok {
+		a.ociBlobLayout = o.OCIBlobLayout
 	}
 	oci := IsOCIDefaultFormat()
-	if len(fmts) > 0 {
-		switch fmts[0] {
-		case FORMAT_OCM:
-			oci = false
-		case FORMAT_OCI:
-			oci = true
-		case "":
-		}
+	fmtVersion := GetFormatVersion(opts)
+	switch fmtVersion {
+	case FORMAT_OCM:
+		oci = false
+	case FORMAT_OCI:
+		oci = true
+	case "":
 	}
 	if oci {
 		a.setOCI()
@@ -91,6 +103,33 @@ func (a *accessObjectInfo) setOCM() {
 	a.AdditionalFiles = nil
 }
 
+// SubPath returns the path to a blob within the artifact set.
+// When ociBlobLayout is true, blobs are stored at blobs/<algorithm>/<encoded> per OCI Image Layout spec.
+// Otherwise, blobs are stored at blobs/<algorithm>.<encoded> (OCM format).
+func (a *accessObjectInfo) SubPath(name string) string {
+	if a.ociBlobLayout {
+		return a.ociSubPath(name)
+	}
+	return a.DefaultAccessObjectInfo.SubPath(name)
+}
+
+// ociSubPath converts a blob name to OCI-compliant path.
+// Input: "sha256.abc123" or "sha256:abc123"
+// Output: "blobs/sha256/abc123"
+func (a *accessObjectInfo) ociSubPath(name string) string {
+	var algorithm, encoded string
+	if idx := strings.Index(name, "."); idx > 0 {
+		algorithm = name[:idx]
+		encoded = name[idx+1:]
+	} else if idx := strings.Index(name, ":"); idx > 0 {
+		algorithm = name[:idx]
+		encoded = name[idx+1:]
+	} else {
+		return a.DefaultAccessObjectInfo.SubPath(name)
+	}
+	return path.Join(a.ElementDirectoryName, algorithm, encoded)
+}
+
 func (a *accessObjectInfo) setupOCIFS(fs vfs.FileSystem, mode vfs.FileMode) error {
 	data := `{
     "imageLayoutVersion": "1.0.0"
@@ -105,6 +144,12 @@ func (a *accessObjectInfo) SetupFileSystem(fs vfs.FileSystem, mode vfs.FileMode)
 	}
 	if err := a.DefaultAccessObjectInfo.SetupFileSystem(fs, mode); err != nil {
 		return err
+	}
+	if a.ociBlobLayout {
+		// Create sha256 subdirectory for OCI-compliant blob storage
+		if err := fs.MkdirAll(path.Join(BlobsDirectoryName, "sha256"), mode); err != nil {
+			return err
+		}
 	}
 	if len(a.AdditionalFiles) > 0 {
 		return a.setupOCIFS(fs, mode)
@@ -265,11 +310,11 @@ func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...ac
 ////////////////////////////////////////////////////////////////////////////////
 
 func (h *formatHandler) Open(acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
-	return _Wrap(h.FormatHandler.Open(NewAccessObjectInfo(GetFormatVersion(opts)), acc, path, opts))
+	return _Wrap(h.FormatHandler.Open(NewAccessObjectInfo(opts), acc, path, opts))
 }
 
 func (h *formatHandler) Create(path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
-	return _Wrap(h.FormatHandler.Create(NewAccessObjectInfo(GetFormatVersion(opts)), path, opts, mode))
+	return _Wrap(h.FormatHandler.Create(NewAccessObjectInfo(opts), path, opts, mode))
 }
 
 // WriteToFilesystem writes the current object to a filesystem.

@@ -10,6 +10,7 @@ type Options struct {
 	accessio.StandardOptions
 
 	FormatVersion string `json:"formatVersion,omitempty"`
+	OCIBlobLayout bool   `json:"ociBlobLayout,omitempty"`
 }
 
 func NewOptions(olist ...accessio.Option) (*Options, error) {
@@ -55,11 +56,32 @@ func (o *Options) ApplyOption(opts accessio.Options) error {
 			return errors.ErrNotSupported("format version option")
 		}
 	}
+	if o.OCIBlobLayout {
+		if t, ok := opts.(*Options); ok {
+			t.OCIBlobLayout = o.OCIBlobLayout
+		}
+	}
 	return nil
 }
 
 type optFmt struct {
 	format string
+}
+
+type optOCIBlobLayout bool
+
+var _ accessio.Option = optOCIBlobLayout(false)
+
+// OCIBlobLayout returns an option to enable OCI Image Layout blob paths.
+func OCIBlobLayout(enabled bool) accessio.Option {
+	return optOCIBlobLayout(enabled)
+}
+
+func (o optOCIBlobLayout) ApplyOption(opts accessio.Options) error {
+	if t, ok := opts.(*Options); ok {
+		t.OCIBlobLayout = bool(o)
+	}
+	return nil
 }
 
 var _ accessio.Option = (*optFmt)(nil)
