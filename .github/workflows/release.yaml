@@ -132,7 +132,7 @@ jobs:
       uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
     - name: Download CTF
-      uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
       with:
         pattern: 'ctf-aggregated'
         path: gen/downloaded-ctfs
@@ -160,7 +160,7 @@ jobs:
     - name: Restore / Reuse Cache from central build
       id: cache-golang-restore
       # Only Restore, not build another cache (too big)
-      uses: actions/cache/restore@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+      uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
       with:
         path: |
           ${{ env.go_cache }}
