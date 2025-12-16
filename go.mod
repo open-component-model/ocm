@@ -569,6 +569,9 @@ replace github.com/ThalesIgnite/crypto11 => github.com/ThalesGroup/crypto11 v1.6
 // see https://github.com/darccio/mergo?tab=readme-ov-file#100
 replace github.com/imdario/mergo => github.com/imdario/mergo v1.0.2
 
+// See https://github.com/open-component-model/ocm-project/issues/797
+replace github.com/klauspost/compress => github.com/klauspost/compress v1.18.0
+
 retract [v0.16.0, v0.16.9] // Retract all from v0.16 due to https://github.com/open-component-model/ocm-project/issues/293
 
 retract v0.22.0 // Retract because of accidentially released version, reported by https://github.com/open-component-model/ocm-project/issues/1399
