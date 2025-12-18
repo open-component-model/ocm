@@ -11,7 +11,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
@@ -28,6 +27,7 @@ type localBlobAccessMethod struct {
 	spec      *localblob.AccessSpec
 	namespace oci.NamespaceAccess
 	artifact  oci.ArtifactAccess
+	mimeType  string
 }
 
 var _ accspeccpi.AccessMethodImpl = (*localBlobAccessMethod)(nil)
@@ -41,6 +41,11 @@ func newLocalBlobAccessMethodImpl(a *localblob.AccessSpec, ns oci.NamespaceAcces
 		spec:      a,
 		namespace: ns,
 		artifact:  art,
+	}
+	if m.spec.MediaType == artdesc.MediaTypeImageIndex || m.spec.MediaType == artdesc.MediaTypeImageManifest {
+		// if we discover a localblob with an index or manifest media type, we can
+		// assume that we are dealing with a new style of artifact created by the new reference library.
+		m.mimeType = artifactset.MediaType(m.spec.MediaType)
 	}
 	ref.BeforeCleanup(refmgmt.CleanupHandlerFunc(m.cache))
 	return m, nil
@@ -132,6 +137,9 @@ func (m *localBlobAccessMethod) Get() ([]byte, error) {
 }
 
 func (m *localBlobAccessMethod) MimeType() string {
+	if m.mimeType != "" {
+		return m.mimeType
+	}
 	return m.spec.MediaType
 }
 
