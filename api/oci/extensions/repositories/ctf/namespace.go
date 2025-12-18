@@ -3,7 +3,6 @@ package ctf
 import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
-
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/oci/cpi/support"
 	"ocm.software/ocm/api/oci/extensions/repositories/ctf/index"
@@ -37,10 +36,6 @@ func (n *namespaceContainer) IsReadOnly() bool {
 }
 
 func (n *namespaceContainer) Close() error {
-	return nil
-}
-
-func (n *namespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return nil
 }
 
@@ -84,6 +79,7 @@ func (n *namespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) 
 		Repository: n.impl.GetNamespace(),
 		Tag:        "",
 		Digest:     blob.Digest(),
+		MediaType:  blob.MimeType(),
 	})
 	return blob, n.AddTags(blob.Digest(), tags...)
 }
