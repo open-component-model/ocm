@@ -4,18 +4,15 @@ import (
 	"bytes"
 	"container/list"
 	"regexp"
-	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
-	mlog "github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	"go.yaml.in/yaml/v3"
-	glog "gopkg.in/op/go-logging.v1"
 
 	"ocm.software/ocm/api/utils"
-	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/runtime"
+	ocm_yqlib "ocm.software/ocm/api/utils/yqlib"
 )
 
 type SubstitutionTarget interface {
@@ -40,24 +37,7 @@ func ParseFile(file string, fss ...vfs.FileSystem) (SubstitutionTarget, error) {
 }
 
 func Parse(data []byte) (SubstitutionTarget, error) {
-	sync.OnceFunc(func() {
-		var lvl glog.Level
-		switch ocmlog.Context().GetDefaultLevel() {
-		case mlog.None:
-			fallthrough
-		case mlog.ErrorLevel:
-			lvl = glog.ERROR
-		case mlog.WarnLevel:
-			lvl = glog.WARNING
-		case mlog.InfoLevel:
-			lvl = glog.INFO
-		case mlog.DebugLevel:
-			fallthrough
-		case mlog.TraceLevel:
-			lvl = glog.DEBUG
-		}
-		glog.SetLevel(lvl, "yq-lib")
-	})()
+	ocm_yqlib.InitYq()
 
 	var (
 		err error
@@ -187,7 +167,6 @@ func (f *fileinfo) substituteByValue(path string, value *yqlib.CandidateNode) er
 	ctxt := yqlib.Context{MatchingNodes: inptLst}
 	ctxt.SetVariable("newValue", vlLst)
 
-	yqlib.InitExpressionParser()
 	expr := "." + path + " |= $newValue"
 
 	expressionNode, err := yqlib.ExpressionParser.ParseExpression(expr)

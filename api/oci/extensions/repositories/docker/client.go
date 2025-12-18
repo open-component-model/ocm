@@ -3,13 +3,14 @@
 package docker
 
 import (
+	"net/http"
 	"os"
 
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/config"
 	cliflags "github.com/docker/cli/cli/flags"
-	dockerclient "github.com/docker/docker/client"
 	mlog "github.com/mandelsoft/logging"
+	dockerclient "github.com/moby/moby/client"
 	"github.com/spf13/pflag"
 
 	"ocm.software/ocm/api/utils/logging"
@@ -27,20 +28,20 @@ func newDockerClient(dockerhost string, logger mlog.UnboundLogger) (*dockerclien
 		}
 		return c.(*dockerclient.Client), nil
 	}
-	c, err := dockerclient.NewClientWithOpts(dockerclient.FromEnv, dockerclient.WithHost(dockerhost))
+	var opts []dockerclient.Opt
+	opts = append(opts, dockerclient.FromEnv)
+	opts = append(opts, dockerclient.WithHost(dockerhost))
+	url, err := dockerclient.ParseHostURL(dockerhost)
+	if err == nil && url.Scheme == "unix" {
+		opts = append(opts, dockerclient.WithScheme(url.Scheme))
+	}
+	clnt := http.Client{}
+	clnt.Transport = logging.NewRoundTripper(clnt.Transport, logger)
+	opts = append(opts, dockerclient.WithHTTPClient(&clnt))
+	c, err := dockerclient.New(opts...)
 	if err != nil {
 		return nil, err
 	}
-	url, err := dockerclient.ParseHostURL(dockerhost)
-	if err == nil && url.Scheme == "unix" {
-		if err := dockerclient.WithScheme(url.Scheme)(c); err != nil {
-			return nil, err
-		}
-	}
-	clnt := c.HTTPClient()
-	clnt.Transport = logging.NewRoundTripper(clnt.Transport, logger)
-	if err := dockerclient.WithHTTPClient(clnt)(c); err != nil {
-		return nil, err
-	}
+
 	return c, nil
 }

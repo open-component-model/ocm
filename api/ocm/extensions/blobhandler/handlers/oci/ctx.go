@@ -48,15 +48,17 @@ func (s *StorageContext) TargetComponentName() string {
 }
 
 func (s *StorageContext) AssureLayer(blob cpi.BlobAccess) error {
-	return AssureLayer(s.Manifest.GetDescriptor(), blob)
+	return s.Manifest.Modify(func(manifest *artdesc.Manifest) error {
+		return AssureLayerLocked(blob, manifest)
+	})
 }
 
-func AssureLayer(desc *artdesc.Manifest, blob cpi.BlobAccess) error {
+// AssureLayerLocked assures that the blob is listed as a layer in the manifest.
+func AssureLayerLocked(blob cpi.BlobAccess, manifest *artdesc.Manifest) error {
 	d := artdesc.DefaultBlobDescriptor(blob)
-
 	found := -1
-	for i, l := range desc.Layers {
-		if reflect.DeepEqual(&desc.Layers[i], d) {
+	for i, l := range manifest.Layers {
+		if reflect.DeepEqual(&manifest.Layers[i], d) {
 			return nil
 		}
 		if l.Digest == blob.Digest() {
@@ -64,13 +66,13 @@ func AssureLayer(desc *artdesc.Manifest, blob cpi.BlobAccess) error {
 		}
 	}
 	if found > 0 { // ignore layer 0 used for component descriptor
-		desc.Layers[found] = *d
+		manifest.Layers[found] = *d
 	} else {
-		if len(desc.Layers) == 0 {
+		if len(manifest.Layers) == 0 {
 			// fake descriptor layer
-			desc.Layers = append(desc.Layers, ociv1.Descriptor{MediaType: componentmapping.ComponentDescriptorConfigMimeType})
+			manifest.Layers = append(manifest.Layers, ociv1.Descriptor{MediaType: componentmapping.ComponentDescriptorConfigMimeType})
 		}
-		desc.Layers = append(desc.Layers, *d)
+		manifest.Layers = append(manifest.Layers, *d)
 	}
 	return nil
 }

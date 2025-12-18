@@ -133,3 +133,11 @@ func (m *ManifestAccess) AddLayer(blob cpi.BlobAccess, d *artdesc.Descriptor) (i
 	manifest.Layers = append(manifest.Layers, *d)
 	return len(manifest.Layers) - 1, nil
 }
+
+func (m *ManifestAccess) Modify(f func(manifest *artdesc.Manifest) error) error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	desc := m.GetDescriptor()
+
+	return f(desc)
+}

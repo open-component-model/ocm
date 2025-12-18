@@ -24,6 +24,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/attrs/compositionmodeattr"
+	"ocm.software/ocm/api/ocm/extensions/attrs/maxworkersattr"
 	"ocm.software/ocm/api/ocm/extensions/attrs/signingattr"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/ocm/resolvers"
@@ -546,5 +547,104 @@ warning:   version "github.com/mandelsoft/test:v1" already present, but differs 
 		dig, err = ocmsign.Apply(nil, nil, cv, opts)
 		Expect(err).To(Succeed())
 		Expect(dig.Value).To(Equal(digest))
+	})
+
+	Context("with concurrent transfer", func() {
+		It("copies resources concurrently and matches sequential result", func() {
+			Expect(maxworkersattr.Set(env.OCMContext(), 4)).To(Succeed())
+
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+			defer Close(src, "source")
+			cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+			defer Close(cv, "source cv")
+
+			tgtSeq := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT+"_seq", 0o700, accessio.FormatDirectory, env))
+			defer Close(tgtSeq, "tgtSeq")
+
+			tgtConc := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT+"_conc", 0o700, accessio.FormatDirectory, env))
+			defer Close(tgtConc, "tgtConc")
+
+			// sequential transfer
+			pSeq, buf := common.NewBufferedPrinter()
+			optsSeq := []transferhandler.TransferOption{
+				standard.ResourcesByValue(),
+				transfer.WithPrinter(pSeq),
+				&optionsChecker{},
+			}
+			MustBeSuccessful(transfer.Transfer(cv, tgtSeq, optsSeq...))
+			Expect(env.DirExists(OUT + "_seq")).To(BeTrue())
+
+			// concurrent transfer
+			printer, buf := common.NewBufferedPrinter()
+			ctx := common.WithPrinter(context.Background(), printer)
+			Expect(maxworkersattr.Set(env.OCMContext(), 4)).To(Succeed())
+			optsConc := []transferhandler.TransferOption{
+				standard.ResourcesByValue(),
+				&optionsChecker{},
+			}
+			MustBeSuccessful(transfer.TransferWithContext(ctx, cv, tgtConc, optsConc...))
+			Expect(env.DirExists(OUT + "_conc")).To(BeTrue())
+
+			// compare resulting descriptors
+			tcvSeq := Must(tgtSeq.LookupComponentVersion(COMPONENT, VERSION))
+			defer Close(tcvSeq, "tcvSeq")
+			tcvConc := Must(tgtConc.LookupComponentVersion(COMPONENT, VERSION))
+			defer Close(tcvConc, "tcvConc")
+			Expect(tcvSeq.GetDescriptor()).To(DeepEqual(tcvConc.GetDescriptor()))
+
+			_ = buf
+		})
+
+		It("honors cancellation during concurrent transfer", func() {
+			Expect(maxworkersattr.Set(env.OCMContext(), 4)).To(Succeed())
+
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+			defer Close(src, "source")
+			cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+			defer Close(cv, "cv")
+
+			tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT+"_cancel", 0o700, accessio.FormatDirectory, env))
+			defer Close(tgt, "target")
+
+			p, buf := common.NewBufferedPrinter()
+			opts := []transferhandler.TransferOption{standard.ResourcesByValue(), transfer.WithPrinter(p), &optionsChecker{}}
+			ctx, cancel := context.WithCancel(context.Background())
+			ctx = common.WithPrinter(ctx, p)
+			cancel() // cancel immediately
+
+			err := transfer.TransferWithContext(ctx, cv, tgt, opts...)
+			Expect(err).To(MatchError(context.Canceled))
+			Expect(buf.String()).To(ContainSubstring("transfer cancelled"))
+		})
+
+		It("overwrites differing artifacts concurrently", func() {
+			Expect(maxworkersattr.Set(env.OCMContext(), 8)).To(Succeed())
+
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
+			defer Close(src, "source")
+			cv := Must(src.LookupComponentVersion(COMPONENT, VERSION))
+			defer Close(cv, "cv")
+
+			tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT+"_overwrite", 0o700, accessio.FormatDirectory, env))
+			defer Close(tgt, "target")
+
+			// initial transfer
+			MustBeSuccessful(transfer.Transfer(cv, tgt, standard.ResourcesByValue(), &optionsChecker{}))
+
+			// mutate source and overwrite concurrently
+			MustBeSuccessful(cv.SetResourceBlob(Must(cv.GetResourceByIndex(0)).Meta().Fresh(),
+				blobaccess.ForString(mime.MIME_TEXT, "updated"),
+				"", nil))
+
+			p, buf := common.NewBufferedPrinter()
+			ctx := common.WithPrinter(context.Background(), p)
+			opts := []transferhandler.TransferOption{
+				standard.ResourcesByValue(),
+				standard.Overwrite(),
+				&optionsChecker{},
+			}
+			MustBeSuccessful(transfer.TransferWithContext(ctx, cv, tgt, opts...))
+			Expect(buf.String()).To(ContainSubstring("(overwrite)"))
+		})
 	})
 })

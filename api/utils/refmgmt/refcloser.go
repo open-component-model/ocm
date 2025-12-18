@@ -138,7 +138,7 @@ type CloserView interface {
 }
 
 type view struct {
-	lock   sync.Mutex
+	lock   sync.RWMutex
 	ref    ReferencableCloser
 	main   bool
 	closed atomic.Bool
@@ -159,8 +159,8 @@ func (v *view) Allocatable() ExtendedAllocatable {
 }
 
 func (v *view) Execute(f func() error) error {
-	v.lock.Lock()
-	defer v.lock.Unlock()
+	v.lock.RLock()
+	defer v.lock.RUnlock()
 	if v.closed.Load() {
 		return ErrClosed
 	}
