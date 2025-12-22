@@ -10,11 +10,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/registry"
 	"golang.org/x/crypto/bcrypt"
+	"ocm.software/ocm/api/utils/tarutils"
 	"oras.land/oras-go/v2"
+	"oras.land/oras-go/v2/content/oci"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
 	"oras.land/oras-go/v2/registry/remote/retry"
@@ -54,6 +57,7 @@ func StartDockerContainerRegistry(t FullGinkgoTInterface, container, htpasswd st
 	t.Cleanup(func() {
 		r.NoError(testcontainers.TerminateContainer(registryContainer))
 	})
+
 	t.Logf("Test registry started")
 
 	registryAddress, err := registryContainer.HostAddress(context.Background())
@@ -105,22 +109,30 @@ var _ = Describe("Index Transfer", func() {
 		env.Cleanup()
 	})
 
-	FIt("transfers an OCI Index artifact as a local blob", func() {
-		tempDir := env.FSTempDir()
+	It("transfers an OCI Index artifact as a local blob", func() {
 		ctx := context.Background()
 		r := require.New(GinkgoT())
+		tempDir := env.FSTempDir()
 
-		// 1. Pull the CLI image (Index) to local registry using oras-go
+		user := "admin"
+		pass := "password"
+
+		var (
+			componentName    = "ocm.software/test-component"
+			componentVersion = "v1.0.0"
+			resourceName     = "cli-image"
+		)
+
+		By("pulling the OCI index image from GHCR and pushing it to the local registry")
 		srcRef := "ghcr.io/open-component-model/cli:main"
-
 		dstRef := fmt.Sprintf("%s/ocm-cli:main", registryAddress)
 
-		// Create a resolver for GHCR
 		repoSrc, err := remote.NewRepository(srcRef)
 		r.NoError(err)
 
 		desc, err := oras.Resolve(ctx, repoSrc, srcRef, oras.ResolveOptions{})
 		r.NoError(err)
+
 		repoSrc.Reference.Reference = desc.Digest.String()
 		srcRef = repoSrc.Reference.String()
 
@@ -130,20 +142,21 @@ var _ = Describe("Index Transfer", func() {
 		repoDst.Client = &auth.Client{
 			Client: retry.DefaultClient,
 			Credential: auth.StaticCredential(registryAddress, auth.Credential{
-				Username: "admin",
-				Password: "password",
+				Username: user,
+				Password: pass,
 			}),
 		}
 		repoDst.PlainHTTP = true
 
-		_, err = oras.Copy(ctx, repoSrc, repoSrc.Reference.Reference, repoDst, repoDst.Reference.Reference, oras.CopyOptions{})
-		r.NoError(err, "failed to copy cli image from ghcr to local registry")
+		_, err = oras.Copy(
+			ctx,
+			repoSrc, repoSrc.Reference.Reference,
+			repoDst, repoDst.Reference.Reference,
+			oras.CopyOptions{},
+		)
+		r.NoError(err, "failed to copy CLI image to local registry")
 
-		// Define Component Version with dir input using the OCI Layout directory
-		componentName := "ocm.software/test-component"
-		componentVersion := "v1.0.0"
-		resourceName := "cli-image"
-
+		By("writing the component constructor definition")
 		constructorContent := fmt.Sprintf(`
 components:
 - name: %s
@@ -159,14 +172,18 @@ components:
     access:
       type: ociArtifact
       imageReference: "%s"
-`, componentName, componentVersion, resourceName, componentVersion, "http://"+dstRef)
+`,
+			componentName,
+			componentVersion,
+			resourceName,
+			componentVersion,
+			"http://"+dstRef,
+		)
 
 		constructorPath := filepath.Join(tempDir, "constructor.yaml")
 		r.NoError(os.WriteFile(constructorPath, []byte(constructorContent), os.ModePerm))
 
-		// 2.1 Generate .ocmconfig for credentials
-		// Extract port from registryAddress (e.g. localhost:55007)
-		// We assume localhost for testcontainers with host network
+		By("writing OCM credential configuration for the local registry")
 		host, port, err := net.SplitHostPort(registryAddress)
 		r.NoError(err)
 
@@ -177,27 +194,25 @@ configurations:
   consumers:
     - identity:
         type: OCIRepository
-        hostname: %[1]q
-        port: %[2]q
+        hostname: %q
+        port: %q
         scheme: http
       credentials:
       - type: Credentials/v1
         properties:
-          username: admin
-          password: password
-`, host, port)
+          username: %s
+          password: %s
+`, host, port, user, pass)
+
 		configPath := filepath.Join(tempDir, "ocmconfig.yaml")
 		r.NoError(os.WriteFile(configPath, []byte(strings.TrimSpace(ocmConfigContent)), os.ModePerm))
 
-		// 3. Add Component Version directly to the local registry using the NEW CLI (via docker run)
-		// We mount the tempDir to /work in the container
-		// We use --network host so the container can reach the local test registry found on localhost
-
-		dockerArgs := []string{
+		By("adding the component version to the registry using the OCM CLI")
+		addArgs := []string{
 			"run", "--rm",
 			"--network", "host",
 			"-v", fmt.Sprintf("%s:/work", tempDir),
-			"ghcr.io/open-component-model/cli:0.0.0-local.dev",
+			"ghcr.io/open-component-model/cli:main",
 			"add", "component-version",
 			"--repository", "http://" + registryAddress,
 			"--config", "/work/ocmconfig.yaml",
@@ -205,35 +220,36 @@ configurations:
 			"--loglevel", "debug",
 		}
 
-		verifyCmd := exec.Command("docker", dockerArgs...)
-		out, err := verifyCmd.CombinedOutput()
-		r.NoError(err, fmt.Sprintf("failed to run new CLI via docker: %s", string(out)))
+		cmd := exec.Command("docker", addArgs...)
+		out, err := cmd.CombinedOutput()
+		r.NoError(err, string(out))
 
-		dockerArgs = []string{
+		By("verifying the component version exists in the registry")
+		getArgs := []string{
 			"run", "--rm",
 			"--network", "host",
 			"-v", fmt.Sprintf("%s:/work", tempDir),
-			"ghcr.io/open-component-model/cli:0.0.0-local.dev",
+			"ghcr.io/open-component-model/cli:main",
 			"get", "component-version",
 			"--config", "/work/ocmconfig.yaml",
-			"--loglevel", "error",
 			"-oyaml",
-			fmt.Sprintf("%s//%s:%s", "http://"+registryAddress, componentName, componentVersion),
+			fmt.Sprintf("http://%s//%s:%s", registryAddress, componentName, componentVersion),
 		}
-		verifyCmd = exec.Command("docker", dockerArgs...)
-		out, err = verifyCmd.CombinedOutput()
-		r.NoError(err, fmt.Sprintf("failed to verify component version in local registry via docker: %s", string(out)))
+
+		cmd = exec.Command("docker", getArgs...)
+		out, err = cmd.CombinedOutput()
+		r.NoError(err, string(out))
 
 		credArgs := []string{
-			"--cred", ":type=" + "OCIRegistry",
+			"--cred", ":type=OCIRegistry",
 			"--cred", ":hostname=" + host,
 			"--cred", ":port=" + port,
-			"--cred", ":scheme=" + "http",
+			"--cred", ":scheme=http",
 			"--cred", "username=" + user,
 			"--cred", "password=" + pass,
 		}
 
-		// Ensure the resource can be accessed via ocm CLI
+		By("ensuring the resource is accessible via the OCM CLI")
 		Expect(env.Execute(append(credArgs,
 			"get", "resource",
 			"--repo", "http://"+registryAddress,
@@ -242,7 +258,7 @@ configurations:
 			componentName+":"+componentVersion, resourceName,
 		)...)).To(Succeed())
 
-		// 4a. Download the resource to verify synthesization works on demand
+		By("downloading the resource to verify on-demand synthesis")
 		Expect(env.Execute(append(credArgs,
 			"download", "resource",
 			"--repo", "http://"+registryAddress,
@@ -251,18 +267,18 @@ configurations:
 			"--outfile", filepath.Join(tempDir, "downloaded-cli"),
 		)...)).To(Succeed())
 
-		// 4b. Transfer from Registry to CTF with synthesization (ResourcesByValue=true to force localBlob creation)
+		By("transferring the component version to a CTF with localBlob synthesis")
 		targetCTF := filepath.Join(tempDir, "target-ctf")
 		Expect(env.Execute(append(credArgs,
 			"transfer", "componentversions",
 			componentName+":"+componentVersion,
 			targetCTF,
 			"--repo", "http://"+registryAddress,
-			"--lookup", "http://"+registryAddress, // Use the registry as lookup for references too
+			"--lookup", "http://"+registryAddress,
 			"--copy-resources",
 		)...)).To(Succeed())
 
-		// 5. Verify that the target CTF contains the resource as a localBlob and can be read
+		By("verifying the resource is stored as a localBlob in the CTF")
 		repo, err := ctf.Open(env, accessobj.ACC_READONLY, targetCTF, 0o700, ctf.FormatDirectory)
 		r.NoError(err)
 		defer repo.Close()
@@ -271,15 +287,14 @@ configurations:
 		r.NoError(err)
 		defer cv.Close()
 
-		resources := cv.GetResources()
 		var res cpi.ResourceAccess
-		for _, resc := range resources {
-			if resc.Meta().Name == resourceName {
-				res = resc
+		for _, rsc := range cv.GetResources() {
+			if rsc.Meta().Name == resourceName {
+				res = rsc
 				break
 			}
 		}
-		r.NotNil(res, "resource not found")
+		r.NotNil(res)
 
 		meth, err := res.AccessMethod()
 		r.NoError(err)
@@ -287,8 +302,19 @@ configurations:
 
 		r.Equal("localBlob", meth.GetKind())
 
-		blob, err := meth.Get()
+		By("extracting and resolving the OCI layout from the localBlob")
+		reader, err := meth.Reader()
 		r.NoError(err)
-		r.NotEmpty(blob)
+		defer reader.Close()
+
+		tempfs, err := tarutils.ExtractTgzToTempFs(reader)
+		r.NoError(err)
+
+		store, err := oci.NewFromFS(ctx, vfs.AsIoFS(tempfs))
+		r.NoError(err)
+
+		desc, err = store.Resolve(ctx, "latest")
+		r.NoError(err)
+		r.NotNil(desc)
 	})
 })

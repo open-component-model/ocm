@@ -11,6 +11,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/opencontainers/go-digest"
+
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
@@ -109,7 +110,27 @@ func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
 		if m.spec.MediaType == artdesc.MediaTypeImageIndex || m.spec.MediaType == artdesc.MediaTypeImageManifest {
 			// if we have a nested manifest or index, we can use the blob synthesis utility here to download
 			// the entire artifact set.
-			artblob, err := artifactset.SynthesizeArtifactBlob(m.namespace, m.spec.LocalReference)
+			art, err := m.namespace.GetArtifact(m.spec.LocalReference)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact for local reference %q: %w", m.spec.LocalReference, err)
+			}
+			defer art.Close()
+			var artifactRefs []string
+			if m.spec.ReferenceName != "" {
+				// if we have a reference name, it consists of repository and tag
+				// so we can extract the tag to use it as target, instead of latest
+				refSpec, err := oci.ParseRef(m.spec.ReferenceName)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse reference name %q: %w", m.spec.ReferenceName, err)
+				}
+				if refSpec.GetTag() != "" {
+					artifactRefs = append(artifactRefs, refSpec.GetTag())
+				}
+			}
+			localReferenceDigest := digest.Digest(m.spec.LocalReference)
+			artifactRefs = append(artifactRefs, fmt.Sprintf("%s-%s", localReferenceDigest.Algorithm(), localReferenceDigest.Encoded()))
+			artifactRefs = append(artifactRefs, "latest")
+			artblob, err := artifactset.SynthesizeArtifactBlobForArtifact(art, artifactRefs)
 			if err != nil {
 				return nil, fmt.Errorf("failed to synthesize artifact blob: %w", err)
 			}

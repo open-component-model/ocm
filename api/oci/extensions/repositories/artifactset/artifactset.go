@@ -1,6 +1,8 @@
 package artifactset
 
 import (
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -204,26 +206,123 @@ func (a *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	defer a.base.Unlock()
 
 	idx := a.GetIndex()
-	for i, e := range idx.Manifests {
-		if e.Digest == digest {
-			if e.Annotations == nil {
-				e.Annotations = map[string]string{}
-				idx.Manifests[i].Annotations = e.Annotations
-			}
-			cur := RetrieveTags(e.Annotations)
-			if cur != "" {
-				cur = strings.Join(append([]string{cur}, tags...), ",")
-			} else {
-				cur = strings.Join(tags, ",")
-			}
-			e.Annotations[TAGS_ANNOTATION] = cur
-			if a.base.FileSystemBlobAccess.Access().GetInfo().GetDescriptorFileName() == OCIArtifactSetDescriptorFileName {
-				e.Annotations[OCITAG_ANNOTATION] = tags[0]
-			}
-			return nil
+	isOCI := a.base.FileSystemBlobAccess.
+		Access().
+		GetInfo().
+		GetDescriptorFileName() == OCIArtifactSetDescriptorFileName
+
+	// Collect all descriptors for this digest (there may already be multiple).
+	var descIdxs []int
+	for i := range idx.Manifests {
+		if idx.Manifests[i].Digest == digest {
+			descIdxs = append(descIdxs, i)
 		}
 	}
-	return errors.ErrUnknown(cpi.KIND_OCIARTIFACT, digest.String())
+	if len(descIdxs) == 0 {
+		return errors.ErrUnknown(cpi.KIND_OCIARTIFACT, digest.String())
+	}
+
+	// Build complete tag set from:
+	//   - existing TAGS_ANNOTATION on any descriptor for this digest
+	//   - incoming tags
+	tagSet := map[string]struct{}{}
+	for _, i := range descIdxs {
+		ann := idx.Manifests[i].Annotations
+		if ann == nil {
+			continue
+		}
+		for _, t := range strings.Split(RetrieveTags(ann), ",") {
+			if t = strings.TrimSpace(t); t != "" {
+				tagSet[t] = struct{}{}
+			}
+		}
+	}
+	for _, t := range tags {
+		if t = strings.TrimSpace(t); t != "" {
+			tagSet[t] = struct{}{}
+		}
+	}
+
+	// Materialize tags deterministically (avoid map iteration order).
+	allTags := make([]string, 0, len(tagSet))
+	for t := range tagSet {
+		allTags = append(allTags, t)
+	}
+	slices.Sort(allTags)
+
+	fullTagsValue := strings.Join(allTags, ",")
+
+	// Non-OCI: just update TAGS_ANNOTATION on the first descriptor for digest.
+	if !isOCI {
+		d := &idx.Manifests[descIdxs[0]]
+		if d.Annotations == nil {
+			d.Annotations = map[string]string{}
+		}
+		d.Annotations[TAGS_ANNOTATION] = fullTagsValue
+		return nil
+	}
+
+	// OCI: enforce exactly one descriptor per tag for this digest.
+	//
+	// We rebuild the digest's descriptor set keyed by OCITAG, and then rewrite idx.Manifests:
+	// - keep all non-matching digests unchanged
+	// - replace all descriptors for this digest with the normalized set (len == len(allTags))
+	byTag := map[string]cpi.Descriptor{}
+
+	// Choose a template descriptor (first one for digest).
+	template := idx.Manifests[descIdxs[0]]
+	if template.Annotations == nil {
+		template.Annotations = map[string]string{}
+	} else {
+		template.Annotations = maps.Clone(template.Annotations)
+	}
+
+	// Seed byTag with existing descriptors that already have an OCITAG.
+	for _, i := range descIdxs {
+		d := idx.Manifests[i]
+		if d.Annotations == nil {
+			continue
+		}
+		t := strings.TrimSpace(d.Annotations[OCITAG_ANNOTATION])
+		if t == "" {
+			continue
+		}
+		// Keep first occurrence per tag (dedupe); we'll normalize annotations below.
+		if _, exists := byTag[t]; !exists {
+			byTag[t] = d
+		}
+	}
+
+	// Ensure there is exactly one descriptor per tag in allTags.
+	normalized := make([]cpi.Descriptor, 0, len(allTags))
+	for _, t := range allTags {
+		d, ok := byTag[t]
+		if !ok {
+			// Create a new descriptor for this tag from template.
+			d = template
+		}
+		if d.Annotations == nil {
+			d.Annotations = map[string]string{}
+		} else {
+			d.Annotations = maps.Clone(d.Annotations)
+		}
+		d.Annotations[TAGS_ANNOTATION] = fullTagsValue
+		d.Annotations[OCITAG_ANNOTATION] = t
+		normalized = append(normalized, d)
+	}
+
+	// Rewrite idx.Manifests: remove all entries for this digest, then append normalized set.
+	out := make([]cpi.Descriptor, 0, len(idx.Manifests)-len(descIdxs)+len(normalized))
+	for i := range idx.Manifests {
+		if idx.Manifests[i].Digest == digest {
+			continue
+		}
+		out = append(out, idx.Manifests[i])
+	}
+	out = append(out, normalized...)
+	idx.Manifests = out
+
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -437,14 +536,24 @@ func (a *namespaceContainer) AddPlatformArtifact(artifact cpi.Artifact, platform
 		return nil, err
 	}
 
-	idx.Manifests = append(idx.Manifests, cpi.Descriptor{
-		MediaType:   blob.MimeType(),
+	desc := cpi.Descriptor{
 		Digest:      blob.Digest(),
 		Size:        blob.Size(),
 		URLs:        nil,
 		Annotations: nil,
 		Platform:    platform,
-	})
+	}
+
+	isOCI := a.base.FileSystemBlobAccess.
+		Access().
+		GetInfo().
+		GetDescriptorFileName() == OCIArtifactSetDescriptorFileName
+
+	if isOCI {
+		desc.MediaType = blob.MimeType()
+	}
+
+	idx.Manifests = append(idx.Manifests, desc)
 	return blob, nil
 }
 
