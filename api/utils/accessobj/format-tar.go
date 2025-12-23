@@ -67,7 +67,26 @@ func (h *TarHandler) Write(obj *AccessObject, path string, opts accessio.Options
 
 	defer writer.Close()
 
+	// Check if OCI layout (has subdirectories in element dir)
+	if h.hasNestedDirs(obj) {
+		return h.writeToStreamOCI(obj, writer, opts)
+	}
 	return h.WriteToStream(obj, writer, opts)
+}
+
+// hasNestedDirs checks if the element directory contains subdirectories (OCI layout).
+func (h *TarHandler) hasNestedDirs(obj *AccessObject) bool {
+	elemDir := obj.info.GetElementDirectoryName()
+	entries, err := vfs.ReadDir(obj.fs, elemDir)
+	if err != nil {
+		return false
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			return true
+		}
+	}
+	return false
 }
 
 func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts accessio.Options) error {
@@ -189,6 +208,130 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 		if err := content.Close(); err != nil {
 			return fmt.Errorf("unable to close %s %s: %w", obj.info.GetElementTypeName(), path, err)
 		}
+	}
+
+	return tw.Close()
+}
+
+// writeToStreamOCI writes the access object to a tar stream using OCI layout format.
+// This handles nested directory structures (e.g., blobs/sha256/DIGEST).
+func (h TarHandler) writeToStreamOCI(obj *AccessObject, writer io.Writer, opts accessio.Options) error {
+	if h.compression != nil {
+		w, err := h.compression.Compressor(writer, nil, nil)
+		if err != nil {
+			return fmt.Errorf("unable to compress writer: %w", err)
+		}
+		defer w.Close()
+
+		writer = w
+	}
+
+	// write descriptor
+	_, err := obj.Update()
+	if err != nil {
+		return fmt.Errorf("unable to update access object: %w", err)
+	}
+
+	data, err := obj.state.GetBlob()
+	if err != nil {
+		return fmt.Errorf("unable to write to get state blob: %w", err)
+	}
+	defer data.Close()
+
+	tw := tar.NewWriter(writer)
+	cdHeader := &tar.Header{
+		Name:    obj.info.GetDescriptorFileName(),
+		Size:    data.Size(),
+		Mode:    FileMode,
+		ModTime: ModTime,
+	}
+
+	if err := tw.WriteHeader(cdHeader); err != nil {
+		return fmt.Errorf("unable to write descriptor header: %w", err)
+	}
+
+	r, err := data.Reader()
+	if err != nil {
+		return fmt.Errorf("unable to get reader: %w", err)
+	}
+	defer r.Close()
+
+	if _, err := io.Copy(tw, r); err != nil {
+		return fmt.Errorf("unable to write descriptor content: %w", err)
+	}
+
+	// Copy additional files
+	for _, f := range obj.info.GetAdditionalFiles(obj.fs) {
+		ok, err := vfs.IsFile(obj.fs, f)
+		if err != nil {
+			return errors.Wrapf(err, "cannot check for file %q", f)
+		}
+		if ok {
+			fi, err := obj.fs.Stat(f)
+			if err != nil {
+				return errors.Wrapf(err, "cannot stat file %q", f)
+			}
+			header := &tar.Header{
+				Name:    f,
+				Size:    fi.Size(),
+				Mode:    FileMode,
+				ModTime: ModTime,
+			}
+			if err := tw.WriteHeader(header); err != nil {
+				return errors.Wrapf(err, "unable to write descriptor header")
+			}
+
+			r, err := obj.fs.Open(f)
+			if err != nil {
+				return errors.Wrapf(err, "unable to get reader")
+			}
+			if _, err := io.Copy(tw, r); err != nil {
+				r.Close()
+				return errors.Wrapf(err, "unable to write file %s", f)
+			}
+			r.Close()
+		}
+	}
+
+	// add all element content (nested structure for OCI layout)
+	elemDir := obj.info.GetElementDirectoryName()
+	err = vfs.Walk(obj.fs, elemDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		header := &tar.Header{
+			Name:    path,
+			Mode:    FileMode,
+			ModTime: ModTime,
+		}
+
+		if info.IsDir() {
+			header.Typeflag = tar.TypeDir
+			header.Mode = DirMode
+		} else {
+			header.Size = info.Size()
+		}
+
+		if err := tw.WriteHeader(header); err != nil {
+			return fmt.Errorf("unable to write header for %s: %w", path, err)
+		}
+
+		if !info.IsDir() {
+			content, err := obj.fs.Open(path)
+			if err != nil {
+				return fmt.Errorf("unable to open %s: %w", path, err)
+			}
+			_, err = io.Copy(tw, content)
+			content.Close()
+			if err != nil {
+				return fmt.Errorf("unable to write content for %s: %w", path, err)
+			}
+		}
+		return nil
+	})
+	if err != nil && !os.IsNotExist(err) {
+		return err
 	}
 
 	return tw.Close()

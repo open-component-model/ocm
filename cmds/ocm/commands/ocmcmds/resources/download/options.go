@@ -21,6 +21,7 @@ type Option struct {
 	SilentOption bool
 	UseHandlers  bool
 	Verify       bool
+	OCILayout    bool
 }
 
 func (o *Option) SetUseHandlers(ok ...bool) *Option {
@@ -33,6 +34,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 		fs.BoolVarP(&o.UseHandlers, "download-handlers", "d", false, "use download handler if possible")
 	}
 	fs.BoolVarP(&o.Verify, "verify", "", false, "verify downloads")
+	fs.BoolVarP(&o.OCILayout, "oci-layout", "", false, "download OCI artifacts in OCI Image Layout format (blobs/<algorithm>/<encoded>)")
 }
 
 func (o *Option) Usage() string {

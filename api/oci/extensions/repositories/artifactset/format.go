@@ -1,6 +1,8 @@
 package artifactset
 
 import (
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -14,7 +16,7 @@ import (
 )
 
 const (
-	// The artifact descriptor name for artifact format.
+	// ArtifactSetDescriptorFileName is the artifact descriptor name for artifact format.
 	ArtifactSetDescriptorFileName = "artifact-descriptor.json"
 	BlobsDirectoryName            = "blobs"
 
@@ -30,7 +32,7 @@ func IsOCIDefaultFormat() bool {
 
 func DescriptorFileName(format string) string {
 	switch format {
-	case FORMAT_OCI:
+	case FORMAT_OCI, FORMAT_OCI_COMPLIANT:
 		return OCIArtifactSetDescriptorFileName
 	case FORMAT_OCM:
 		return ArtifactSetDescriptorFileName
@@ -42,6 +44,7 @@ func DescriptorFileName(format string) string {
 
 type accessObjectInfo struct {
 	accessobj.DefaultAccessObjectInfo
+	format string // FORMAT_OCI, FORMAT_OCI_COMPLIANT, or FORMAT_OCM
 }
 
 var _ accessobj.AccessObjectInfo = (*accessObjectInfo)(nil)
@@ -61,7 +64,7 @@ func validateDescriptor(data []byte) error {
 
 func NewAccessObjectInfo(fmts ...string) accessobj.AccessObjectInfo {
 	a := &accessObjectInfo{
-		baseInfo,
+		DefaultAccessObjectInfo: baseInfo,
 	}
 	oci := IsOCIDefaultFormat()
 	if len(fmts) > 0 {
@@ -69,6 +72,9 @@ func NewAccessObjectInfo(fmts ...string) accessobj.AccessObjectInfo {
 		case FORMAT_OCM:
 			oci = false
 		case FORMAT_OCI:
+			oci = true
+		case FORMAT_OCI_COMPLIANT:
+			a.format = FORMAT_OCI_COMPLIANT
 			oci = true
 		case "":
 		}
@@ -89,6 +95,18 @@ func (a *accessObjectInfo) setOCI() {
 func (a *accessObjectInfo) setOCM() {
 	a.DescriptorFileName = ArtifactSetDescriptorFileName
 	a.AdditionalFiles = nil
+}
+
+// SubPath returns the path for a blob. For OCI-compliant format, converts
+// "sha256.DIGEST" to "blobs/sha256/DIGEST" per OCI Image Layout Specification.
+func (a *accessObjectInfo) SubPath(name string) string {
+	if a.format == FORMAT_OCI_COMPLIANT {
+		// Convert sha256.DIGEST to sha256/DIGEST for OCI compliance
+		if algo, dig, ok := strings.Cut(name, "."); ok {
+			return filepath.Join(a.ElementDirectoryName, algo, dig)
+		}
+	}
+	return filepath.Join(a.ElementDirectoryName, name)
 }
 
 func (a *accessObjectInfo) setupOCIFS(fs vfs.FileSystem, mode vfs.FileMode) error {
@@ -118,7 +136,7 @@ func (a *accessObjectInfo) SetupFor(fs vfs.FileSystem) error {
 		return err
 	}
 	if ok {
-		a.setOCI()
+		a.setOCIDescriptor()
 		return nil
 	}
 
@@ -136,12 +154,19 @@ func (a *accessObjectInfo) SetupFor(fs vfs.FileSystem) error {
 		return err
 	}
 	if ok {
-		a.setOCI()
+		a.setOCIDescriptor()
 		return nil
 	}
 
 	// keep configured format
 	return nil
+}
+
+// setOCIDescriptor sets OCI descriptor/files but preserves format
+// (which determines flat vs nested blob paths based on FORMAT_OCI vs FORMAT_OCI_COMPLIANT).
+func (a *accessObjectInfo) setOCIDescriptor() {
+	a.DescriptorFileName = OCIArtifactSetDescriptorFileName
+	a.AdditionalFiles = []string{OCILayouFileName}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
