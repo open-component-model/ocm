@@ -138,6 +138,7 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 			resourceName,
 		)).To(Succeed())
 		Expect(verifyOCILayoutStructure(resourcesOciDir)).To(Succeed())
+
 		store, err := oci.New(resourcesOciDir)
 		Expect(err).To(Succeed(), "ORAS failed to open OCI layout: %w", err)
 

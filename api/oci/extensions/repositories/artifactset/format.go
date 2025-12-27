@@ -1,6 +1,8 @@
 package artifactset
 
 import (
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -42,6 +44,7 @@ func DescriptorFileName(format string) string {
 
 type accessObjectInfo struct {
 	accessobj.DefaultAccessObjectInfo
+	ociFormat bool
 }
 
 var _ accessobj.AccessObjectInfo = (*accessObjectInfo)(nil)
@@ -61,7 +64,7 @@ func validateDescriptor(data []byte) error {
 
 func NewAccessObjectInfo(fmts ...string) accessobj.AccessObjectInfo {
 	a := &accessObjectInfo{
-		baseInfo,
+		DefaultAccessObjectInfo: baseInfo,
 	}
 	oci := IsOCIDefaultFormat()
 	if len(fmts) > 0 {
@@ -84,6 +87,19 @@ func NewAccessObjectInfo(fmts ...string) accessobj.AccessObjectInfo {
 func (a *accessObjectInfo) setOCI() {
 	a.DescriptorFileName = OCIArtifactSetDescriptorFileName
 	a.AdditionalFiles = []string{OCILayouFileName}
+	a.ociFormat = true
+}
+
+// SubPath returns the path for a blob. For OCI format, converts "sha256.DIGEST"
+// to "blobs/sha256/DIGEST" per OCI Image Layout Specification.
+func (a *accessObjectInfo) SubPath(name string) string {
+	if a.ociFormat {
+		// Convert sha256.DIGEST to sha256/DIGEST for OCI compliance
+		if algo, dig, ok := strings.Cut(name, "."); ok {
+			return filepath.Join(a.ElementDirectoryName, algo, dig)
+		}
+	}
+	return filepath.Join(a.ElementDirectoryName, name)
 }
 
 func (a *accessObjectInfo) setOCM() {

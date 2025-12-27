@@ -81,10 +81,26 @@ var _ = Describe("artifact management", func() {
 		for _, fi := range infos {
 			blobs = append(blobs, fi.Name())
 		}
-		Expect(blobs).To(ContainElements(
-			"sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
-			"sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+		if format == artifactset.FORMAT_OCI {
+			// OCI format uses nested directory structure: blobs/sha256/DIGEST
+			Expect(blobs).To(ContainElement("sha256"))
+			subInfos, err := vfs.ReadDir(tempfs, "test/"+artifactset.BlobsDirectoryName+"/sha256")
+			Expect(err).To(Succeed())
+			subBlobs := []string{}
+			for _, fi := range subInfos {
+				subBlobs = append(subBlobs, fi.Name())
+			}
+			Expect(subBlobs).To(ContainElements(
+				"3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
+				"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+				"810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+		} else {
+			// OCM format uses flat structure: blobs/sha256.DIGEST
+			Expect(blobs).To(ContainElements(
+				"sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
+				"sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+				"sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+		}
 	})
 
 	TestForAllFormats("instantiate tgz artifact", func(format string) {
@@ -108,6 +124,7 @@ var _ = Describe("artifact management", func() {
 		tr := tar.NewReader(zip)
 
 		files := []string{}
+		dirs := []string{}
 		for {
 			header, err := tr.Next()
 			if err != nil {
@@ -119,19 +136,33 @@ var _ = Describe("artifact management", func() {
 
 			switch header.Typeflag {
 			case tar.TypeDir:
-				Expect(header.Name).To(Equal(artifactset.BlobsDirectoryName))
+				dirs = append(dirs, header.Name)
 			case tar.TypeReg:
 				files = append(files, header.Name)
 			}
 		}
+
+		// Check directories
+		Expect(dirs).To(ContainElement(artifactset.BlobsDirectoryName))
+		if format == artifactset.FORMAT_OCI {
+			Expect(dirs).To(ContainElement("blobs/sha256"))
+		}
+
+		// Check files based on format
 		elems := []interface{}{
 			artifactset.DescriptorFileName(format),
-			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
-			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
 		}
 		if format == artifactset.FORMAT_OCI {
 			elems = append(elems, artifactset.OCILayouFileName)
+			elems = append(elems,
+				"blobs/sha256/3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
+				"blobs/sha256/44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+				"blobs/sha256/810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
+		} else {
+			elems = append(elems,
+				"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
+				"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+				"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
 		}
 		Expect(files).To(ContainElements(elems))
 	})
@@ -160,6 +191,7 @@ var _ = Describe("artifact management", func() {
 		tr := tar.NewReader(zip)
 
 		files := []string{}
+		dirs := []string{}
 		for {
 			header, err := tr.Next()
 			if err != nil {
@@ -171,19 +203,33 @@ var _ = Describe("artifact management", func() {
 
 			switch header.Typeflag {
 			case tar.TypeDir:
-				Expect(header.Name).To(Equal(artifactset.BlobsDirectoryName))
+				dirs = append(dirs, header.Name)
 			case tar.TypeReg:
 				files = append(files, header.Name)
 			}
 		}
+
+		// Check directories
+		Expect(dirs).To(ContainElement(artifactset.BlobsDirectoryName))
+		if format == artifactset.FORMAT_OCI {
+			Expect(dirs).To(ContainElement("blobs/sha256"))
+		}
+
+		// Check files based on format
 		elems := []interface{}{
 			artifactset.DescriptorFileName(format),
-			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
-			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
 		}
 		if format == artifactset.FORMAT_OCI {
 			elems = append(elems, artifactset.OCILayouFileName)
+			elems = append(elems,
+				"blobs/sha256/3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
+				"blobs/sha256/44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+				"blobs/sha256/810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
+		} else {
+			elems = append(elems,
+				"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
+				"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+				"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
 		}
 		Expect(files).To(ContainElements(elems))
 	})

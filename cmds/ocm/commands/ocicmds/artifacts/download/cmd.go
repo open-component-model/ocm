@@ -54,9 +54,13 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Short: "download oci artifacts",
 		Long: `
 Download artifacts from an OCI registry. The result is stored in
-artifact set format, without the repository part
+artifact set format, without the repository part.
 
 The files are named according to the artifact repository name.
+
+By default, blobs are stored in OCM artifact set format (blobs/<algorithm>.<encoded>).
+Use --oci-layout to store blobs in OCI Image Layout format (blobs/<algorithm>/<encoded>)
+for compatibility with tools that expect the OCI Image Layout Specification.
 `,
 	}
 }
@@ -242,7 +246,18 @@ func (d *download) Save(o *artifacthdlr.Object, f string) error {
 
 		digest := blob.Digest()
 		format := formatoption.From(d.opts)
-		set, err := artifactset.Create(accessobj.ACC_CREATE, f, format.Mode(), format.Format, accessio.PathFileSystem(dest.PathFilesystem))
+
+		createOpts := []accessio.Option{
+			format.Format,
+			accessio.PathFileSystem(dest.PathFilesystem),
+		}
+		// When --oci-layout is specified, use FORMAT_OCI to store blobs at
+		// blobs/<algorithm>/<encoded> per OCI Image Layout Specification.
+		if opts.OCILayout {
+			createOpts = append(createOpts, artifactset.StructureFormat(artifactset.FORMAT_OCI))
+		}
+
+		set, err := artifactset.Create(accessobj.ACC_CREATE, f, format.Mode(), createOpts...)
 		if err != nil {
 			return err
 		}

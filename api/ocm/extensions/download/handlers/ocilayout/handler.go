@@ -1,7 +1,6 @@
 package ocilayout
 
 import (
-	"path/filepath"
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -71,20 +70,17 @@ func (h *Handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		return true, "", errors.Wrapf(err, "create OCI layout")
 	}
 
-	// Step 6: Transfer all manifests and blobs to target with resource version as tag
-	version := racc.Meta().GetVersion()
-	if err := artifactset.TransferArtifact(art, target, version); err != nil {
-		target.Close()
+	// Step 6: Transfer all manifests and blobs to target with hybrid tagging:
+	// - Original tags from source (e.g., "latest", "linux")
+	// - Resource version (e.g., "1.0.0")
+	tags := collectTags(src, racc.Meta().GetVersion())
+	if err := artifactset.TransferArtifact(art, target, tags...); err != nil {
+		err = errors.Join(err, target.Close())
 		return true, "", errors.Wrapf(err, "transfer artifact")
 	}
 
 	if err := target.Close(); err != nil {
 		return true, "", errors.Wrapf(err, "close target")
-	}
-
-	// Step 7: Convert blob paths from sha256.DIGEST to sha256/DIGEST
-	if err := convertBlobPaths(fs, path); err != nil {
-		return true, "", err
 	}
 
 	p.Printf("%s: downloaded to OCI layout\n", path)
@@ -96,36 +92,34 @@ func isOCIArtifact(mime string) bool {
 		(strings.HasSuffix(mime, "+tar") || strings.HasSuffix(mime, "+tar+gzip"))
 }
 
-// convertBlobPaths converts blob paths from artifactset format (sha256.DIGEST)
-// to OCI Image Layout format (sha256/DIGEST).
-//
-// This is needed because artifactset uses DigestToFileName which always produces
-// "sha256.DIGEST" format. The FORMAT_OCI option only controls the descriptor file
-// (index.json) and oci-layout file creation, not the blob path structure.
-//
-// Call trace where DigestToFileName is invoked:
-//
-//	TransferArtifact() -> TransferManifest() -> set.AddBlob()
-//	  -> accessobj.FileSystemBlobAccess.AddBlob()
-//	    -> path := a.DigestPath(blob.Digest())
-//	      -> common.DigestToFileName(digest)  // returns "sha256.DIGEST"
-func convertBlobPaths(fs vfs.FileSystem, dir string) error {
-	blobsDir := filepath.Join(dir, "blobs")
-	entries, err := vfs.ReadDir(fs, blobsDir)
-	if err != nil {
-		return err
+// collectTags returns a deduplicated list of tags combining:
+// - Resource version FIRST (becomes org.opencontainers.image.ref.name for ORAS resolution)
+// - Original tags from the source artifact set (preserves mutable refs like "latest")
+func collectTags(src *artifactset.ArtifactSet, version string) []string {
+	seen := make(map[string]struct{})
+	var tags []string
+
+	// Add resource version first - it becomes the primary tag (org.opencontainers.image.ref.name)
+	if version != "" {
+		seen[version] = struct{}{}
+		tags = append(tags, version)
 	}
 
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-		name := e.Name()
-		if algo, dig, ok := strings.Cut(name, "."); ok {
-			algoDir := filepath.Join(blobsDir, algo)
-			fs.MkdirAll(algoDir, 0o755)
-			fs.Rename(filepath.Join(blobsDir, name), filepath.Join(algoDir, dig))
+	// Add original tags from source index annotations
+	mainDigest := src.GetMain()
+	for _, m := range src.GetIndex().Manifests {
+		if m.Digest == mainDigest && m.Annotations != nil {
+			if tagStr := artifactset.RetrieveTags(m.Annotations); tagStr != "" {
+				for _, t := range strings.Split(tagStr, ",") {
+					t = strings.TrimSpace(t)
+					if _, ok := seen[t]; !ok && t != "" {
+						seen[t] = struct{}{}
+						tags = append(tags, t)
+					}
+				}
+			}
 		}
 	}
-	return nil
+
+	return tags
 }
