@@ -194,29 +194,7 @@ func (a *namespaceContainer) HasAnnotation(name string) bool {
 ////////////////////////////////////////////////////////////////////////////////
 // sink
 
-// AddTags adds one or more tags to the artifact identified by the given digest.
-//
-// The function merges the provided tags with any existing tags already
-// associated with the digest, removes duplicates, normalizes whitespace, and
-// stores the result in a deterministic (sorted) form.
-//
-// Behavior depends on the artifact set format:
-//
-//   - Non-OCI artifact sets:
-//     Exactly one descriptor exists per digest. The merged tag list is written
-//     to the TAGS_ANNOTATION of that descriptor.
-//   - OCI artifact sets:
-//     OCI semantics require one descriptor per (digest, tag) pair. The index is
-//     rewritten so that:
-//     1. There is exactly one descriptor per tag for the given digest
-//     2. All descriptors share the same TAGS_ANNOTATION value (the full tag list)
-//     3. Each descriptor has a distinct OCITAG_ANNOTATION corresponding to its tag
-//
-// Existing descriptors are reused where possible; otherwise, new descriptors
-// are created by cloning a template descriptor for the digest.
-//
-// AddTags is a no-op if no tags are provided.
-func (a *namespaceContainer) AddTags(d digest.Digest, tags ...string) error {
+func (a *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
 	if a.IsClosed() {
 		return accessio.ErrClosed
 	}
@@ -227,92 +205,106 @@ func (a *namespaceContainer) AddTags(d digest.Digest, tags ...string) error {
 	a.base.Lock()
 	defer a.base.Unlock()
 
-	idx := a.GetIndex()
+	index := a.GetIndex()
 
-	// Collect descriptors for digest
-	var descIdxs []int
-	for i, m := range idx.Manifests {
-		if m.Digest == d {
-			descIdxs = append(descIdxs, i)
-		}
-	}
-	if len(descIdxs) == 0 {
-		return errors.ErrUnknown(cpi.KIND_OCIARTIFACT, d.String())
+	manifests := index.Manifests
+
+	artifacts := decodeIndexManifests(manifests)
+
+	art := artifacts[digest]
+	if art == nil {
+		return errors.ErrUnknown(cpi.KIND_OCIARTIFACT, digest.String())
 	}
 
-	// Build merged tag set
-	tagSet := map[string]struct{}{}
-	addTag := func(t string) {
-		if t = strings.TrimSpace(t); t != "" {
-			tagSet[t] = struct{}{}
-		}
+	for _, tag := range tags {
+		art.addTag(tag)
 	}
 
-	for _, i := range descIdxs {
-		for _, t := range strings.Split(RetrieveTags(idx.Manifests[i].Annotations), ",") {
-			addTag(t)
-		}
-	}
-	for _, t := range tags {
-		addTag(t)
-	}
-
-	sortedTags := slices.Sorted(maps.Keys(tagSet))
-	fullTags := strings.Join(sortedTags, ",")
-
-	// Non-OCI: update first descriptor only
-	if a.base.FileSystemBlobAccess.Access().
+	isOCI := a.base.
+		FileSystemBlobAccess.
+		Access().
 		GetInfo().
-		GetDescriptorFileName() != OCIArtifactSetDescriptorFileName {
+		GetDescriptorFileName() == OCIArtifactSetDescriptorFileName
 
-		d := &idx.Manifests[descIdxs[0]]
-		if d.Annotations == nil {
-			d.Annotations = map[string]string{}
-		}
-		d.Annotations[TAGS_ANNOTATION] = fullTags
-		return nil
-	}
-
-	// OCI: normalize to exactly one descriptor per tag
-	template := idx.Manifests[descIdxs[0]]
-	template.Annotations = maps.Clone(template.Annotations)
-
-	byTag := map[string]cpi.Descriptor{}
-	for _, i := range descIdxs {
-		d := idx.Manifests[i]
-		t := strings.TrimSpace(d.Annotations[OCITAG_ANNOTATION])
-		if t != "" {
-			byTag[t] = d
-		}
-	}
-
-	var normalized []cpi.Descriptor
-	for _, t := range sortedTags {
-		d := byTag[t]
-		if d.Digest == "" {
-			d = template
-		}
-		if d.Annotations == nil {
-			d.Annotations = map[string]string{}
-		} else {
-			// clone the map pointer here so we track changes to the annotations per descriptor
-			d.Annotations = maps.Clone(d.Annotations)
-		}
-		d.Annotations[TAGS_ANNOTATION] = fullTags
-		d.Annotations[OCITAG_ANNOTATION] = t
-		normalized = append(normalized, d)
-	}
-
-	// Rewrite manifests
-	out := idx.Manifests[:0]
-	for _, m := range idx.Manifests {
-		if m.Digest != d {
-			out = append(out, m)
-		}
-	}
-	idx.Manifests = append(out, normalized...)
+	index.Manifests = encodeIndexManifests(artifacts, isOCI)
 
 	return nil
+}
+
+type descriptorWithTags struct {
+	cpi.Descriptor
+	Tags map[string]struct{}
+}
+
+func (d *descriptorWithTags) addTag(tag string) {
+	if tag := strings.TrimSpace(tag); tag != "" {
+		d.Tags[tag] = struct{}{}
+	}
+}
+
+func decodeIndexManifests(manifests []cpi.Descriptor) map[digest.Digest]*descriptorWithTags {
+	out := map[digest.Digest]*descriptorWithTags{}
+	for _, m := range manifests {
+		if out[m.Digest] == nil {
+			out[m.Digest] = &descriptorWithTags{
+				Descriptor: normalizeDecodedDescriptorWithoutTags(m),
+				Tags:       map[string]struct{}{},
+			}
+		}
+		annotated := out[m.Digest]
+
+		// OCM multi-tag annotation
+		tagsFromAnnotations := strings.Split(RetrieveTags(m.Annotations), ",")
+		for _, tag := range tagsFromAnnotations {
+			annotated.addTag(tag)
+		}
+
+		// OCI single-tag annotation
+		if tag, ok := m.Annotations[OCITAG_ANNOTATION]; ok {
+			annotated.addTag(tag)
+		}
+	}
+
+	return out
+}
+
+func normalizeDecodedDescriptorWithoutTags(d cpi.Descriptor) cpi.Descriptor {
+	d.Annotations = maps.Clone(d.Annotations)
+	delete(d.Annotations, TAGS_ANNOTATION)
+	delete(d.Annotations, OCITAG_ANNOTATION)
+	if len(d.Annotations) == 0 {
+		d.Annotations = nil
+	}
+	return d
+}
+
+func encodeIndexManifests(
+	descriptors map[digest.Digest]*descriptorWithTags,
+	oci bool,
+) []cpi.Descriptor {
+	var manifests []cpi.Descriptor
+	for _, desc := range descriptors {
+		tags := slices.Sorted(maps.Keys(desc.Tags))
+		joined := strings.Join(tags, ",")
+		if !oci {
+			d := desc.Descriptor
+			d.Annotations = map[string]string{
+				TAGS_ANNOTATION: joined,
+			}
+			manifests = append(manifests, d)
+			continue
+		}
+		for _, t := range tags {
+			d := desc.Descriptor
+			d.Annotations = map[string]string{
+				TAGS_ANNOTATION:   joined,
+				OCITAG_ANNOTATION: t,
+			}
+			manifests = append(manifests, d)
+		}
+	}
+
+	return manifests
 }
 
 ////////////////////////////////////////////////////////////////////////////////
