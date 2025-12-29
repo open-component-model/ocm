@@ -44,7 +44,7 @@ require (
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
 	github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc
 	github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a
-	github.com/mandelsoft/spiff v1.7.0-beta-7
+	github.com/mandelsoft/spiff v1.7.0-beta-8
 	github.com/mandelsoft/vfs v0.4.4
 	github.com/marstr/guid v1.1.0
 	github.com/mikefarah/yq/v4 v4.48.1
