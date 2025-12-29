@@ -241,6 +241,7 @@ func (r *RepositoryIndex) GetDescriptor() *ArtifactIndex {
 					Repository: vers.Repository,
 					Tag:        vers.Tag,
 					Digest:     vers.Digest,
+					MediaType:  vers.MediaType,
 				}
 				index.Index = append(index.Index, *d)
 			}

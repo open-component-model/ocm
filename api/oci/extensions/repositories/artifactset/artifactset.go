@@ -1,6 +1,8 @@
 package artifactset
 
 import (
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/mandelsoft/goutils/errors"
@@ -203,27 +205,106 @@ func (a *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	a.base.Lock()
 	defer a.base.Unlock()
 
-	idx := a.GetIndex()
-	for i, e := range idx.Manifests {
-		if e.Digest == digest {
-			if e.Annotations == nil {
-				e.Annotations = map[string]string{}
-				idx.Manifests[i].Annotations = e.Annotations
+	index := a.GetIndex()
+
+	manifests := index.Manifests
+
+	artifacts := decodeIndexManifests(manifests)
+
+	art := artifacts[digest]
+	if art == nil {
+		return errors.ErrUnknown(cpi.KIND_OCIARTIFACT, digest.String())
+	}
+
+	for _, tag := range tags {
+		art.addTag(tag)
+	}
+
+	isOCI := a.base.
+		FileSystemBlobAccess.
+		Access().
+		GetInfo().
+		GetDescriptorFileName() == OCIArtifactSetDescriptorFileName
+
+	index.Manifests = encodeIndexManifests(artifacts, isOCI)
+
+	return nil
+}
+
+type descriptorWithTags struct {
+	cpi.Descriptor
+	Tags map[string]struct{}
+}
+
+func (d *descriptorWithTags) addTag(tag string) {
+	if tag := strings.TrimSpace(tag); tag != "" {
+		d.Tags[tag] = struct{}{}
+	}
+}
+
+func decodeIndexManifests(manifests []cpi.Descriptor) map[digest.Digest]*descriptorWithTags {
+	out := map[digest.Digest]*descriptorWithTags{}
+	for _, m := range manifests {
+		if out[m.Digest] == nil {
+			out[m.Digest] = &descriptorWithTags{
+				Descriptor: normalizeDecodedDescriptorWithoutTags(m),
+				Tags:       map[string]struct{}{},
 			}
-			cur := RetrieveTags(e.Annotations)
-			if cur != "" {
-				cur = strings.Join(append([]string{cur}, tags...), ",")
-			} else {
-				cur = strings.Join(tags, ",")
-			}
-			e.Annotations[TAGS_ANNOTATION] = cur
-			if a.base.FileSystemBlobAccess.Access().GetInfo().GetDescriptorFileName() == OCIArtifactSetDescriptorFileName {
-				e.Annotations[OCITAG_ANNOTATION] = tags[0]
-			}
-			return nil
+		}
+		annotated := out[m.Digest]
+
+		// OCM multi-tag annotation
+		tagsFromAnnotations := strings.Split(RetrieveTags(m.Annotations), ",")
+		for _, tag := range tagsFromAnnotations {
+			annotated.addTag(tag)
+		}
+
+		// OCI single-tag annotation
+		if tag, ok := m.Annotations[OCITAG_ANNOTATION]; ok {
+			annotated.addTag(tag)
 		}
 	}
-	return errors.ErrUnknown(cpi.KIND_OCIARTIFACT, digest.String())
+
+	return out
+}
+
+func normalizeDecodedDescriptorWithoutTags(d cpi.Descriptor) cpi.Descriptor {
+	d.Annotations = maps.Clone(d.Annotations)
+	delete(d.Annotations, TAGS_ANNOTATION)
+	delete(d.Annotations, OCITAG_ANNOTATION)
+	if len(d.Annotations) == 0 {
+		d.Annotations = nil
+	}
+	return d
+}
+
+func encodeIndexManifests(
+	descriptors map[digest.Digest]*descriptorWithTags,
+	oci bool,
+) []cpi.Descriptor {
+	var manifests []cpi.Descriptor
+	for _, desc := range descriptors {
+		tags := slices.Sorted(maps.Keys(desc.Tags))
+		joined := strings.Join(tags, ",")
+		if !oci {
+			d := desc.Descriptor
+			d.Annotations = map[string]string{
+				TAGS_ANNOTATION: joined,
+			}
+			manifests = append(manifests, d)
+			continue
+		}
+		for _, t := range tags {
+			d := desc.Descriptor
+			d.Annotations = map[string]string{
+				TAGS_ANNOTATION:   joined,
+				OCITAG_ANNOTATION: t,
+			}
+			manifests = append(manifests, d)
+		}
+	}
+
+	return manifests
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -437,14 +518,24 @@ func (a *namespaceContainer) AddPlatformArtifact(artifact cpi.Artifact, platform
 		return nil, err
 	}
 
-	idx.Manifests = append(idx.Manifests, cpi.Descriptor{
-		MediaType:   blob.MimeType(),
+	desc := cpi.Descriptor{
 		Digest:      blob.Digest(),
 		Size:        blob.Size(),
 		URLs:        nil,
 		Annotations: nil,
 		Platform:    platform,
-	})
+	}
+
+	isOCI := a.base.FileSystemBlobAccess.
+		Access().
+		GetInfo().
+		GetDescriptorFileName() == OCIArtifactSetDescriptorFileName
+
+	if isOCI {
+		desc.MediaType = blob.MimeType()
+	}
+
+	idx.Manifests = append(idx.Manifests, desc)
 	return blob, nil
 }
 
