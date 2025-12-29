@@ -206,10 +206,6 @@ func (a *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	defer a.base.Unlock()
 
 	idx := a.GetIndex()
-	isOCI := a.base.FileSystemBlobAccess.
-		Access().
-		GetInfo().
-		GetDescriptorFileName() == OCIArtifactSetDescriptorFileName
 
 	// Collect all descriptors for this digest (there may already be multiple).
 	var descIdxs []int
@@ -253,7 +249,10 @@ func (a *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	fullTagsValue := strings.Join(allTags, ",")
 
 	// Non-OCI: just update TAGS_ANNOTATION on the first descriptor for digest.
-	if !isOCI {
+	if isOCI := a.base.FileSystemBlobAccess.
+		Access().
+		GetInfo().
+		GetDescriptorFileName() == OCIArtifactSetDescriptorFileName; !isOCI {
 		d := &idx.Manifests[descIdxs[0]]
 		if d.Annotations == nil {
 			d.Annotations = map[string]string{}
