@@ -49,6 +49,8 @@ jobs:
             ${{ env.cache_name }}-${{ runner.os }}-go-
         env:
           cache_name: run-tests-go-cache # needs to be the same key in the end as in the build step
+      - name: Set up skopeo
+        uses: warjiang/setup-skopeo@71776e03c10d767c04af8924fe5a67763f9b3d34
       - name: Build
         run: make build -j
       - name: Test

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -140,6 +141,14 @@ func (a *FileSystemBlobAccess) AddBlob(blob blobaccess.BlobAccess) error {
 	}
 
 	defer r.Close()
+
+	// Create parent directory if path uses nested structure (e.g., blobs/sha256/DIGEST vs blobs/sha256.DIGEST)
+	if dir := filepath.Dir(path); dir != a.base.GetInfo().GetElementDirectoryName() {
+		if err := a.base.GetFileSystem().MkdirAll(dir, a.base.GetMode()|0o111); err != nil {
+			return fmt.Errorf("unable to create directory for '%s': %w", path, err)
+		}
+	}
+
 	w, err := a.base.GetFileSystem().OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, a.base.GetMode()&0o666)
 	if err != nil {
 		return fmt.Errorf("unable to open file '%s': %w", path, err)
