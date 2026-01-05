@@ -137,7 +137,7 @@ func (a *accessObjectInfo) SetupFor(fs vfs.FileSystem) error {
 		return err
 	}
 	if ok {
-		a.setOCIDescriptor()
+		a.setOCI()
 		return nil
 	}
 
@@ -155,20 +155,12 @@ func (a *accessObjectInfo) SetupFor(fs vfs.FileSystem) error {
 		return err
 	}
 	if ok {
-		a.setOCIDescriptor()
+		a.setOCI()
 		return nil
 	}
 
 	// keep configured format
 	return nil
-}
-
-// setOCIDescriptor sets OCI descriptor/files but preserves format
-// (which determines flat vs nested blob paths based on FORMAT_OCI vs FORMAT_OCI_COMPLIANT).
-// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
-func (a *accessObjectInfo) setOCIDescriptor() {
-	a.DescriptorFileName = OCIArtifactSetDescriptorFileName
-	a.AdditionalFiles = []string{OCILayouFileName}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
