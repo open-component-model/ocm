@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -27,8 +28,17 @@ const (
 	componentVersion = "1.0.0"
 	resourceName     = "hello-image"
 	resourceVersion  = "1.0.0"
-	imageReference   = "hello-world:linux"
+	imageReference   = "ghcr.io/piotrjanik/open-component-model/hello-ocm:latest"
 )
+
+func gunzipToTar(tgzPath string) (string, error) {
+	tarPath := tgzPath[:len(tgzPath)-3] + "tar"
+	out, err := exec.Command("sh", "-c", "gunzip -c "+tgzPath+" > "+tarPath).CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("gunzip failed: %s", string(out))
+	}
+	return tarPath, nil
+}
 
 // This test verifies the CTF-based workflow with --oci-layout flag:
 //  1. Create a CTF archive with an OCI image resource
@@ -47,7 +57,7 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		sourceCTF       string
 		targetCTF       string
 		resourcesOciTgz string
-		resourcesOcmDir string
+		resourcesOcmTgz string
 		imageTag        string
 		env             *TestEnv
 		log             logr.Logger
@@ -64,6 +74,9 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 	})
 
 	AfterAll(func() {
+		if imageTag != "" {
+			_ = exec.Command("docker", "rmi", imageTag).Run()
+		}
 		if env != nil {
 			env.Cleanup()
 		}
@@ -144,11 +157,8 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 
 	It("verifies with oras-go library", func() {
 		ctx := context.Background()
-		// Gunzip for oras-go (doesn't support gzip directly)
-		tarPath := resourcesOciTgz[:len(resourcesOciTgz)-3] + "tar"
-		gunzipCmd := exec.Command("sh", "-c", "gunzip -c "+resourcesOciTgz+" > "+tarPath)
-		out, err := gunzipCmd.CombinedOutput()
-		Expect(err).To(Succeed(), "gunzip failed: %s", string(out))
+		tarPath, err := gunzipToTar(resourcesOciTgz)
+		Expect(err).To(Succeed())
 
 		// Open OCI layout from tar using oras-go
 		store, err := oci.NewFromTar(ctx, tarPath)
@@ -157,27 +167,32 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		// Resolve by resource version tag
 		desc, err := store.Resolve(ctx, resourceVersion)
 		Expect(err).To(Succeed(), "oras failed to resolve by resource version tag")
-		Expect(desc.MediaType).To(Equal(ociv1.MediaTypeImageIndex))
-		log.Info("ORAS verified OCI layout", "tag", resourceVersion, "digest", desc.Digest.String())
+		Expect(desc.MediaType).ToNot(BeEmpty())
 
-		// Fetch index
+		// Verify multi-arch image index
+		Expect(desc.MediaType).To(Equal(ociv1.MediaTypeImageIndex))
+
+		// Fetch and parse index
 		reader, err := store.Fetch(ctx, desc)
-		Expect(err).To(Succeed(), "failed to fetch manifest")
+		Expect(err).To(Succeed(), "failed to fetch index")
+		indexData, err := io.ReadAll(reader)
+		Expect(err).To(Succeed(), "failed to read index")
+		Expect(reader.Close()).To(Succeed())
+
+		var index ociv1.Index
+		Expect(json.Unmarshal(indexData, &index)).To(Succeed())
+		Expect(index.Manifests).To(HaveLen(2), "expected 2 platform manifests (amd64, arm64)")
+
+		// Fetch first platform manifest
+		reader, err = store.Fetch(ctx, index.Manifests[0])
+		Expect(err).To(Succeed(), "failed to fetch platform manifest")
 		manifestData, err := io.ReadAll(reader)
 		Expect(err).To(Succeed(), "failed to read manifest")
-		Expect(reader.Close()).To(Succeed(), "failed to close reader")
-		var index ociv1.Index
-		Expect(json.Unmarshal(manifestData, &index)).To(Succeed())
+		Expect(reader.Close()).To(Succeed())
 
-		// Fetch manifest
 		var manifest ociv1.Manifest
-		reader, err = store.Fetch(ctx, index.Manifests[0])
-		Expect(err).To(Succeed(), "failed to fetch manifest")
-		manifestData, err = io.ReadAll(reader)
-		Expect(err).To(Succeed(), "failed to read manifest")
-		Expect(reader.Close()).To(Succeed(), "failed to close reader")
 		Expect(json.Unmarshal(manifestData, &manifest)).To(Succeed())
-		Expect(manifest.Layers).To(HaveLen(1))
+		Expect(manifest.Layers).ToNot(BeEmpty())
 
 		// Verify config
 		configReader, err := store.Fetch(ctx, manifest.Config)
@@ -185,11 +200,9 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		configData, err := io.ReadAll(configReader)
 		Expect(err).To(Succeed(), "failed to read config")
 		Expect(configReader.Close()).To(Succeed(), "failed to close reader")
-
 		var config ociv1.Image
 		Expect(json.Unmarshal(configData, &config)).To(Succeed())
-		Expect(config.Config.Cmd).ToNot(BeEmpty(), "image config should have Cmd")
-		log.Info("Verified image config", "cmd", config.Config.Cmd)
+		Expect(config.Config.Entrypoint).ToNot(BeEmpty())
 	})
 
 	It("copies OCI archive to Docker with skopeo", func() {
@@ -201,7 +214,6 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 			"--override-os=linux")
 		out, err := cmd.CombinedOutput()
 		Expect(err).To(Succeed(), "skopeo copy failed: %s", string(out))
-		log.Info("Skopeo copy output", "output", string(out))
 	})
 
 	It("runs image copied by skopeo", func() {
@@ -210,27 +222,27 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		cmd := exec.Command("docker", "run", "--rm", imageTag)
 		out, err := cmd.CombinedOutput()
 		Expect(err).To(Succeed(), "docker run failed: %s", string(out))
-		Expect(string(out)).To(ContainSubstring("Hello from Docker"))
-
-		// Cleanup
-		_ = exec.Command("docker", "rmi", imageTag).Run()
+		Expect(string(out)).To(ContainSubstring("Hello OCM!"))
 	})
 
-	It("downloads resource from target CTF without --oci-layout", func() {
-		resourcesOcmDir = filepath.Join(tempDir, "resource-ocm-layout")
+	It("downloads resource from target CTF without --oci-layout and verifies it", func() {
+		ctx := context.Background()
+		resourcesOcmTgz = filepath.Join(tempDir, "resource-ocm-layout")
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute(
 			"download", "resources",
-			"-O", resourcesOcmDir,
+			"-O", resourcesOcmTgz,
 			targetCTF+"//"+componentName+":"+componentVersion,
 			resourceName,
 		)).To(Succeed())
 		log.Info("Resource download output", "output", buf.String())
-
+		tarPath, err := gunzipToTar(resourcesOcmTgz)
+		Expect(err).To(Succeed())
 		// Verify oras cannot open OCM format as OCI layout
-		_, err := oci.New(resourcesOcmDir)
-		Expect(err).ToNot(Succeed(), "oras should fail to open non-OCI layout")
-		log.Info("ORAS correctly rejected non-OCI layout", "error", err)
+		store, err := oci.NewFromTar(ctx, tarPath)
+		Expect(err).To(Succeed(), "oras should open non-OCI layout")
+		_, err = store.Resolve(ctx, resourceVersion)
+		Expect(err).ToNot(Succeed(), "oras should fail to resolve by resource version tag")
 	})
 })
