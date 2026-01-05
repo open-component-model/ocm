@@ -99,6 +99,7 @@ func (a *accessObjectInfo) setOCM() {
 
 // SubPath returns the path for a blob. For OCI-compliant format, converts
 // "sha256.DIGEST" to "blobs/sha256/DIGEST" per OCI Image Layout Specification.
+// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
 func (a *accessObjectInfo) SubPath(name string) string {
 	if a.format == FORMAT_OCI_COMPLIANT {
 		// Convert sha256.DIGEST to sha256/DIGEST for OCI compliance
@@ -164,6 +165,7 @@ func (a *accessObjectInfo) SetupFor(fs vfs.FileSystem) error {
 
 // setOCIDescriptor sets OCI descriptor/files but preserves format
 // (which determines flat vs nested blob paths based on FORMAT_OCI vs FORMAT_OCI_COMPLIANT).
+// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
 func (a *accessObjectInfo) setOCIDescriptor() {
 	a.DescriptorFileName = OCIArtifactSetDescriptorFileName
 	a.AdditionalFiles = []string{OCILayouFileName}

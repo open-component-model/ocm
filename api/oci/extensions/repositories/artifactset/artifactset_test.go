@@ -32,6 +32,7 @@ func defaultManifestFill(a *artifactset.ArtifactSet) {
 // blobPath returns the expected blob path based on format.
 // FORMAT_OCI_COMPLIANT uses nested paths (blobs/sha256/DIGEST),
 // others use flat paths (blobs/sha256.DIGEST).
+// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
 func blobPath(format, digest string) string {
 	if format == artifactset.FORMAT_OCI_COMPLIANT {
 		return "blobs/sha256/" + digest
@@ -129,6 +130,7 @@ var _ = Describe("artifact management", func() {
 			switch header.Typeflag {
 			case tar.TypeDir:
 				// FORMAT_OCI_COMPLIANT has nested dirs (blobs/sha256/), others have only blobs/
+				// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
 				if format != artifactset.FORMAT_OCI_COMPLIANT {
 					Expect(header.Name).To(Equal(artifactset.BlobsDirectoryName))
 				}
@@ -184,6 +186,7 @@ var _ = Describe("artifact management", func() {
 			switch header.Typeflag {
 			case tar.TypeDir:
 				// FORMAT_OCI_COMPLIANT has nested dirs (blobs/sha256/), others have only blobs/
+				// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
 				if format != artifactset.FORMAT_OCI_COMPLIANT {
 					Expect(header.Name).To(Equal(artifactset.BlobsDirectoryName))
 				}

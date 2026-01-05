@@ -215,6 +215,7 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 
 // writeToStreamOCI writes the access object to a tar stream using OCI layout format.
 // This handles nested directory structures (e.g., blobs/sha256/DIGEST).
+// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
 func (h TarHandler) writeToStreamOCI(obj *AccessObject, writer io.Writer, opts accessio.Options) error {
 	if h.compression != nil {
 		w, err := h.compression.Compressor(writer, nil, nil)

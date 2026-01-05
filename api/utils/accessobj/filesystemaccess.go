@@ -143,6 +143,7 @@ func (a *FileSystemBlobAccess) AddBlob(blob blobaccess.BlobAccess) error {
 	defer r.Close()
 
 	// Create parent directory if path uses nested structure (e.g., blobs/sha256/DIGEST vs blobs/sha256.DIGEST)
+	// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
 	if dir := filepath.Dir(path); dir != a.base.GetInfo().GetElementDirectoryName() {
 		if err := a.base.GetFileSystem().MkdirAll(dir, a.base.GetMode()|0o111); err != nil {
 			return fmt.Errorf("unable to create directory for '%s': %w", path, err)

@@ -253,6 +253,7 @@ func (d *download) Save(o *artifacthdlr.Object, f string) error {
 		}
 		// When --oci-layout is specified, use FORMAT_OCI_COMPLIANT to store blobs at
 		// blobs/<algorithm>/<encoded> per OCI Image Layout Specification.
+		// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
 		if opts.OCILayout {
 			createOpts = append(createOpts, artifactset.StructureFormat(artifactset.FORMAT_OCI_COMPLIANT))
 		}
