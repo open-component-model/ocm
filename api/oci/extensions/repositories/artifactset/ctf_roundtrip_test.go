@@ -5,7 +5,8 @@ package artifactset_test
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"encoding/json"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"oras.land/oras-go/v2/content/oci"
 
 	envhelper "ocm.software/ocm/api/helper/env"
@@ -46,7 +48,6 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		targetCTF       string
 		resourcesOciTgz string
 		resourcesOcmDir string
-		resolvedDigest  string
 		imageTag        string
 		env             *TestEnv
 		log             logr.Logger
@@ -141,22 +142,54 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		log.Info("Downloaded OCI tgz", "path", resourcesOciTgz)
 	})
 
-	It("verifies ref.name with oras-go library", func() {
+	It("verifies with oras-go library", func() {
+		ctx := context.Background()
 		// Gunzip for oras-go (doesn't support gzip directly)
 		tarPath := resourcesOciTgz[:len(resourcesOciTgz)-3] + "tar"
-		cmd := exec.Command("sh", "-c", "gunzip -c "+resourcesOciTgz+" > "+tarPath)
-		out, err := cmd.CombinedOutput()
+		gunzipCmd := exec.Command("sh", "-c", "gunzip -c "+resourcesOciTgz+" > "+tarPath)
+		out, err := gunzipCmd.CombinedOutput()
 		Expect(err).To(Succeed(), "gunzip failed: %s", string(out))
 
 		// Open OCI layout from tar using oras-go
-		store, err := oci.NewFromTar(context.Background(), tarPath)
-		Expect(err).To(Succeed(), "oras failed to open tar")
+		store, err := oci.NewFromTar(ctx, tarPath)
+		Expect(err).To(Succeed(), "oras failed to open tar as OCI layout")
 
-		// Resolve by resource version tag - this proves ref.name is set correctly
-		desc, err := store.Resolve(context.Background(), resourceVersion)
-		Expect(err).To(Succeed(), "oras failed to resolve by resource version")
-		resolvedDigest = desc.Digest.String()
-		log.Info("ORAS resolved manifest by resource version", "version", resourceVersion, "digest", resolvedDigest)
+		// Resolve by resource version tag
+		desc, err := store.Resolve(ctx, resourceVersion)
+		Expect(err).To(Succeed(), "oras failed to resolve by resource version tag")
+		Expect(desc.MediaType).To(Equal(ociv1.MediaTypeImageIndex))
+		log.Info("ORAS verified OCI layout", "tag", resourceVersion, "digest", desc.Digest.String())
+
+		// Fetch index
+		reader, err := store.Fetch(ctx, desc)
+		Expect(err).To(Succeed(), "failed to fetch manifest")
+		manifestData, err := io.ReadAll(reader)
+		Expect(err).To(Succeed(), "failed to read manifest")
+		Expect(reader.Close()).To(Succeed(), "failed to close reader")
+		var index ociv1.Index
+		Expect(json.Unmarshal(manifestData, &index)).To(Succeed())
+
+		// Fetch manifest
+		var manifest ociv1.Manifest
+		reader, err = store.Fetch(ctx, index.Manifests[0])
+		Expect(err).To(Succeed(), "failed to fetch manifest")
+		manifestData, err = io.ReadAll(reader)
+		Expect(err).To(Succeed(), "failed to read manifest")
+		Expect(reader.Close()).To(Succeed(), "failed to close reader")
+		Expect(json.Unmarshal(manifestData, &manifest)).To(Succeed())
+		Expect(manifest.Layers).To(HaveLen(1))
+
+		// Verify config
+		configReader, err := store.Fetch(ctx, manifest.Config)
+		Expect(err).To(Succeed(), "failed to fetch config")
+		configData, err := io.ReadAll(configReader)
+		Expect(err).To(Succeed(), "failed to read config")
+		Expect(configReader.Close()).To(Succeed(), "failed to close reader")
+
+		var config ociv1.Image
+		Expect(json.Unmarshal(configData, &config)).To(Succeed())
+		Expect(config.Config.Cmd).ToNot(BeEmpty(), "image config should have Cmd")
+		log.Info("Verified image config", "cmd", config.Config.Cmd)
 	})
 
 	It("copies OCI archive to Docker with skopeo", func() {
@@ -164,7 +197,8 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		imageTag = "ocm-test-hello:" + resourceVersion
 		cmd := exec.Command("skopeo", "copy",
 			"oci-archive:"+resourcesOciTgz+":"+resourceVersion,
-			"docker-daemon:"+imageTag)
+			"docker-daemon:"+imageTag,
+			"--override-os=linux")
 		out, err := cmd.CombinedOutput()
 		Expect(err).To(Succeed(), "skopeo copy failed: %s", string(out))
 		log.Info("Skopeo copy output", "output", string(out))
@@ -192,35 +226,11 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 			targetCTF+"//"+componentName+":"+componentVersion,
 			resourceName,
 		)).To(Succeed())
-		Expect(verifyOCILayoutStructure(resourcesOcmDir)).ToNot(Succeed())
 		log.Info("Resource download output", "output", buf.String())
+
+		// Verify oras cannot open OCM format as OCI layout
+		_, err := oci.New(resourcesOcmDir)
+		Expect(err).ToNot(Succeed(), "oras should fail to open non-OCI layout")
+		log.Info("ORAS correctly rejected non-OCI layout", "error", err)
 	})
 })
-
-// verifyOCILayoutStructure checks that the OCI layout has the expected structure.
-// Returns an error if any required file or directory is missing.
-func verifyOCILayoutStructure(ociDir string) error {
-	// Check oci-layout file exists
-	ociLayoutPath := filepath.Join(ociDir, "oci-layout")
-	if _, err := os.Stat(ociLayoutPath); err != nil {
-		return fmt.Errorf("oci-layout file MUST exist: %w", err)
-	}
-
-	// Check index.json exists
-	indexPath := filepath.Join(ociDir, "index.json")
-	if _, err := os.Stat(indexPath); err != nil {
-		return fmt.Errorf("index.json MUST exist: %w", err)
-	}
-
-	// Check blobs directory exists
-	blobsDir := filepath.Join(ociDir, "blobs")
-	info, err := os.Stat(blobsDir)
-	if err != nil {
-		return fmt.Errorf("blobs directory MUST exist: %w", err)
-	}
-	if !info.IsDir() {
-		return fmt.Errorf("blobs MUST be a directory, got file")
-	}
-
-	return nil
-}
