@@ -216,6 +216,9 @@ func (h TarHandler) writeFileIfExists(obj *AccessObject, tw *tar.Writer, path st
 }
 
 // writeElementsFlat writes element content using flat directory structure.
+// This handles non-OCI compliant formats where blobs are stored with filenames in the format
+// 'algorithm.digest' (e.g., 'sha256.abcd1234...') directly in the blobs directory,
+// rather than nested in blobs/sha256/abcd1234... as required by the OCI specification.
 func (h TarHandler) writeElementsFlat(obj *AccessObject, tw *tar.Writer) error {
 	elemDir := obj.info.GetElementDirectoryName()
 
@@ -314,6 +317,7 @@ func (h TarHandler) writeOCICompliant(obj *AccessObject, tw *tar.Writer) error {
 
 // writeDirEntry writes a directory entry and its content to the tar.
 // This specifically handles OCI-style directory entries (e.g. the 'sha256' subdirectory).
+// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#filesystem-layout
 func (h TarHandler) writeDirEntry(obj *AccessObject, tw *tar.Writer, path string) error {
 	// Write directory header
 	if err := tw.WriteHeader(&tar.Header{
