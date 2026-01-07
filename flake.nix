@@ -3,7 +3,7 @@
 
   inputs = {
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -37,7 +37,7 @@
             state = if (self ? rev) then "clean" else "dirty";
 
             # This vendorHash represents a derivative of all go.mod dependencies and needs to be adjusted with every change
-            vendorHash = "sha256-Q2As+qjbyD6Tv/TCwBpoIRXbYHVPJxWiLoDb5IiICm4=";
+            vendorHash = "sha256-oGFYVeCAD0GppUtTlb4mT4GWd8D6SQQjeA1DQumSMu8=";
 
             src = ./.;
 
@@ -93,7 +93,7 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              go_1_25   # golang 1.25
+              go        # golang 1.25
               gopls     # go language server
               gotools   # go imports
               go-tools  # static checks
