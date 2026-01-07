@@ -166,51 +166,28 @@ func (h TarHandler) writeDescriptor(obj *AccessObject, tw *tar.Writer) error {
 	return nil
 }
 
-// writeAdditionalFiles copies additional files to the tar.
+// writeAdditionalFiles copies additional files to the tar if they exist.
 func (h TarHandler) writeAdditionalFiles(obj *AccessObject, tw *tar.Writer) error {
-	for _, f := range obj.info.GetAdditionalFiles(obj.fs) {
-		if err := h.writeFileIfExists(obj, tw, f); err != nil {
+	for _, path := range obj.info.GetAdditionalFiles(obj.fs) {
+		// Skip if file doesn't exist
+		ok, err := vfs.IsFile(obj.fs, path)
+		if err != nil {
+			return errors.Wrapf(err, "cannot check for file %q", path)
+		}
+		if !ok {
+			continue
+		}
+
+		// Get file info for the existing file
+		fi, err := obj.fs.Stat(path)
+		if err != nil {
+			return errors.Wrapf(err, "cannot stat file %q", path)
+		}
+
+		// Use writeFileEntry for the actual writing
+		if err := h.writeFileEntry(obj, tw, path, fi); err != nil {
 			return err
 		}
-	}
-	return nil
-}
-
-// writeFileIfExists writes a single file to the tar if it exists.
-func (h TarHandler) writeFileIfExists(obj *AccessObject, tw *tar.Writer, path string) (err error) {
-	ok, err := vfs.IsFile(obj.fs, path)
-	if err != nil {
-		return errors.Wrapf(err, "cannot check for file %q", path)
-	}
-	if !ok {
-		return nil
-	}
-
-	fi, err := obj.fs.Stat(path)
-	if err != nil {
-		return errors.Wrapf(err, "cannot stat file %q", path)
-	}
-
-	header := &tar.Header{
-		Name:    path,
-		Size:    fi.Size(),
-		Mode:    FileMode,
-		ModTime: ModTime,
-	}
-	if err := tw.WriteHeader(header); err != nil {
-		return errors.Wrapf(err, "unable to write header for %q", path)
-	}
-
-	r, err := obj.fs.Open(path)
-	if err != nil {
-		return errors.Wrapf(err, "unable to open %q", path)
-	}
-	defer func() {
-		err = errors.Join(err, r.Close())
-	}()
-
-	if _, err := io.CopyN(tw, r, fi.Size()); err != nil {
-		return errors.Wrapf(err, "unable to write file %q", path)
 	}
 	return nil
 }
