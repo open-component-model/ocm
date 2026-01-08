@@ -84,7 +84,12 @@ func (h *Handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		return true, "", errors.Wrapf(err, "close target")
 	}
 
-	p.Printf("%s: downloaded to OCI layout\n", path)
+	resourceName := racc.Meta().GetName()
+	resourceVersion := racc.Meta().GetVersion()
+	resourceType := racc.Meta().GetType()
+
+	p.Printf("Resource '%s' (type: %s, version: %s) saved to: %s with tag: %s\n",
+		resourceName, resourceType, resourceVersion, path, resourceVersion)
 	return true, path, nil
 }
 
