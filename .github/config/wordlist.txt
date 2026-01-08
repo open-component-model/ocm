@@ -6,6 +6,7 @@ actiondescriptor
 additionalresource
 addversion
 adr
+afterall
 aggregative
 aml
 anchore
