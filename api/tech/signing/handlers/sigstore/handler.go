@@ -33,8 +33,10 @@ import (
 // Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
 // Since "sigstore" contained a buggy implementation, we are introducing "sigstore-v3" as well.
 // "sigstore-v3" correctly injects the Fulcio fs.Cert into the bundle, not just the public key like in "sigstore".
-const Algorithm = "sigstore"
-const AlgorithmV3 = "sigstore-v3"
+const (
+	Algorithm   = "sigstore"
+	AlgorithmV3 = "sigstore-v3"
+)
 
 // MediaType defines the media type for a plain RSA signature.
 const MediaType = "application/vnd.ocm.signature.sigstore"
