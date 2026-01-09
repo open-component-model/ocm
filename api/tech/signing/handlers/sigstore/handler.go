@@ -345,6 +345,5 @@ func extractECDSAPublicKey(pubKeyBytes []byte) (*ecdsa.PublicKey, error) {
 		return pub, nil
 	default:
 		return nil, fmt.Errorf("unsupported PEM block type: %s", block.Type)
-
 	}
 }
