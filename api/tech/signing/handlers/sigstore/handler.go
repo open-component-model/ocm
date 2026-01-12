@@ -257,18 +257,13 @@ func (h Handler) Verify(digest string, sig *signing.Signature, sctx signing.Sign
 			return fmt.Errorf("failed to decode rekor public key: %w", err)
 		}
 
-		block, _ := pem.Decode(rekorPublicKeyRaw)
-		if block == nil {
-			return fmt.Errorf("failed to decode public key: %w", err)
-		}
-
-		rekorPublicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+		rekorPublicKey, err := extractECDSAPublicKey(rekorPublicKeyRaw)
 		if err != nil {
-			return fmt.Errorf("failed to parse public key: %w", err)
+			return err
 		}
 
 		// verify signature
-		if err := ecdsa.VerifyASN1(rekorPublicKey.(*ecdsa.PublicKey), rawDigest, rekorSignature); !err {
+		if ok := ecdsa.VerifyASN1(rekorPublicKey, rawDigest, rekorSignature); !ok {
 			return errors.New("could not verify signature using public key")
 		}
 
@@ -289,8 +284,8 @@ func loadVerifier(ctx context.Context) (signature.Verifier, error) {
 	for _, pubKey := range publicKeys.Keys {
 		return signature.LoadVerifier(pubKey.PubKey, crypto.SHA256)
 	}
-
-	return nil, nil
+	// in rare case no public keys are found
+	return nil, errors.New("no Rekor public key found")
 }
 
 // based on: https://github.com/sigstore/cosign/blob/ff648d5fb4ed6d0d1c16eaaceff970411fa969e3/pkg/cosign/tlog.go#L233
@@ -324,7 +319,7 @@ func extractECDSAPublicKey(pubKeyBytes []byte) (*ecdsa.PublicKey, error) {
 	case "PUBLIC KEY":
 		result, err := x509.ParsePKIXPublicKey(block.Bytes)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse Fulcio public key: %w", err)
+			return nil, fmt.Errorf("failed to parse public key: %w", err)
 		}
 		// cast to ecdsa.PublicKey as we use this in the verification
 		pub, ok := result.(*ecdsa.PublicKey)
