@@ -244,12 +244,13 @@ func OpenFromDataAccess(acc accessobj.AccessMode, mediatype string, data blobacc
 	}
 	defer reader.Close()
 	o.SetReader(reader)
-	fmt := accessio.FormatTar
-
-	if mime.IsGZip(mediatype) {
-		fmt = accessio.FormatTGZ
+	if o.GetFileFormat() == nil {
+		fmt := accessio.FormatTar
+		if mime.IsGZip(mediatype) {
+			fmt = accessio.FormatTGZ
+		}
+		o.SetFileFormat(fmt)
 	}
-	o.SetFileFormat(fmt)
 	return Open(acc&accessobj.ACC_READONLY, "", 0, o)
 }
 

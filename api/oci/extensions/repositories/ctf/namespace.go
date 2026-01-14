@@ -40,10 +40,6 @@ func (n *namespaceContainer) Close() error {
 	return nil
 }
 
-func (n *namespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	return nil
-}
-
 func (n *namespaceContainer) ListTags() ([]string, error) {
 	return n.repo.getIndex().GetTags(n.impl.GetNamespace()), nil // return digests as tags, also
 }
@@ -84,6 +80,7 @@ func (n *namespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) 
 		Repository: n.impl.GetNamespace(),
 		Tag:        "",
 		Digest:     blob.Digest(),
+		MediaType:  blob.MimeType(),
 	})
 	return blob, n.AddTags(blob.Digest(), tags...)
 }
