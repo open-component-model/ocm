@@ -48,7 +48,7 @@ jobs:
           images: |            
             ghcr.io/${{ github.repository }}
       - name: Go Build Cache for Docker
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           path: go-build-cache
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
@@ -98,7 +98,7 @@ jobs:
       run: |
         gh api -X PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/open-component-model/ocm/git/refs/tags/ocm-cli/latest -f "sha=${{ github.sha }}" -F "force=true"
     - name: Setup go
-      uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+      uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
         check-latest: false
@@ -116,7 +116,7 @@ jobs:
     - name: Restore / Reuse Cache from central build
       id: cache-golang-restore
       # Only Restore, not build another cache (too big)
-      uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+      uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
       with:
         path: |
           ${{ env.go_cache }}
@@ -160,7 +160,7 @@ jobs:
     - name: Save Cache of Build (only on main)
       id: cache-golang-save
       # Only save build cache once
-      uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+      uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
       with:
         path: |
           ${{ env.go_cache }}
