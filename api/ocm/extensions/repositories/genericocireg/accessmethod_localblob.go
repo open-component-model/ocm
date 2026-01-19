@@ -118,7 +118,7 @@ func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
 			var artifactRefs []string
 			if m.spec.ReferenceName != "" {
 				// if we have a reference name, it consists of repository and tag
-				// so we can extract the tag to use it as target, instead of latest
+				// so we can extract the tag to use it
 				refSpec, err := oci.ParseRef(m.spec.ReferenceName)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse reference name %q: %w", m.spec.ReferenceName, err)
@@ -127,9 +127,6 @@ func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
 					artifactRefs = append(artifactRefs, refSpec.GetTag())
 				}
 			}
-			localReferenceDigest := digest.Digest(m.spec.LocalReference)
-			artifactRefs = append(artifactRefs, fmt.Sprintf("%s-%s", localReferenceDigest.Algorithm(), localReferenceDigest.Encoded()))
-			artifactRefs = append(artifactRefs, "latest")
 			artblob, err := artifactset.SynthesizeArtifactBlobForArtifact(art, artifactRefs)
 			if err != nil {
 				return nil, fmt.Errorf("failed to synthesize artifact blob: %w", err)

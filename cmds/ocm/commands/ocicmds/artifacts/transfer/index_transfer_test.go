@@ -10,14 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/registry"
 	"golang.org/x/crypto/bcrypt"
-	"ocm.software/ocm/api/utils/tarutils"
 	"oras.land/oras-go/v2"
-	"oras.land/oras-go/v2/content/oci"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
 	"oras.land/oras-go/v2/registry/remote/retry"
@@ -25,10 +22,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/cmds/ocm/testhelper"
-
-	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
-	"ocm.software/ocm/api/utils/accessobj"
 )
 
 const distributionRegistryImage = "registry:3.0.0"
@@ -279,42 +272,12 @@ configurations:
 		)...)).To(Succeed())
 
 		By("verifying the resource is stored as a localBlob in the CTF")
-		repo, err := ctf.Open(env, accessobj.ACC_READONLY, targetCTF, 0o700, ctf.FormatDirectory)
-		r.NoError(err)
-		defer repo.Close()
-
-		cv, err := repo.LookupComponentVersion(componentName, componentVersion)
-		r.NoError(err)
-		defer cv.Close()
-
-		var res cpi.ResourceAccess
-		for _, rsc := range cv.GetResources() {
-			if rsc.Meta().Name == resourceName {
-				res = rsc
-				break
-			}
-		}
-		r.NotNil(res)
-
-		meth, err := res.AccessMethod()
-		r.NoError(err)
-		defer meth.Close()
-
-		r.Equal("localBlob", meth.GetKind())
-
-		By("extracting and resolving the OCI layout from the localBlob")
-		reader, err := meth.Reader()
-		r.NoError(err)
-		defer reader.Close()
-
-		tempfs, err := tarutils.ExtractTgzToTempFs(reader)
-		r.NoError(err)
-
-		store, err := oci.NewFromFS(ctx, vfs.AsIoFS(tempfs))
-		r.NoError(err)
-
-		desc, err = store.Resolve(ctx, "latest")
-		r.NoError(err)
-		r.NotNil(desc)
+		Expect(env.Execute(append(credArgs,
+			"download", "resource",
+			"--repo", targetCTF,
+			componentName+":"+componentVersion, resourceName,
+			"--oci-layout",
+			"--outfile", filepath.Join(tempDir, "downloaded-resource"),
+		)...)).To(Succeed())
 	})
 })
