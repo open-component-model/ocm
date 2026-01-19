@@ -226,6 +226,11 @@ OCM library:
 
 - <code>ocm.software/signing/sigstore</code> [<code>sigstore</code>]: *sigstore config* Configuration to use for sigstore based signing.
 
+  This configuration applies to both <code>sigstore</code> and <code>sigstore-v3</code> signing algorithms.
+  The difference between the algorithms is transparent to configuration but affects how signatures are stored in Rekor:
+  - <code>sigstore</code>: stores only the public key in the Rekor entry (not compliant with Sigstore Bundle specification).
+  - <code>sigstore-v3</code>: stores the Fulcio certificate in the Rekor entry (complies with Sigstore Bundle specification).
+
   The following fields are used.
   - *<code>fulcioURL</code>* *string*  default is https://fulcio.sigstore.dev
   - *<code>rekorURL</code>* *string*  default is https://rekor.sigstore.dev

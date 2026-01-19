@@ -30,9 +30,11 @@ import (
 	"ocm.software/ocm/api/tech/signing/handlers/sigstore/attr"
 )
 
-// Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
-// Since "sigstore" contained a buggy implementation, we are introducing "sigstore-v3" as well.
-// "sigstore-v3" correctly injects the Fulcio fs.Cert into the bundle, not just the public key like in "sigstore".
+// Algorithm defines the type for the Sigstore signature algorithm:
+// "sigstore" uses only the public key in the Rekor entry.
+// "sigstore-v3" uses the Fulcio certificate in the Rekor entry,
+// as required by the Sigstore Bundle specification.
+// "sigstore-v3" is the recommend and preferred algorithm to use.
 const (
 	Algorithm   = "sigstore"
 	AlgorithmV3 = "sigstore-v3"
@@ -42,6 +44,8 @@ const (
 const MediaType = "application/vnd.ocm.signature.sigstore"
 
 func init() {
+	// Register both algorithms for signature creation.
+	// "sigstore" for backwards compatibility, "sigstore-v3" for correct sigstore bundle implementation.
 	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{algorithm: Algorithm})
 	signing.DefaultHandlerRegistry().RegisterSigner(AlgorithmV3, Handler{algorithm: AlgorithmV3})
 }
@@ -59,12 +63,12 @@ func (h Handler) Algorithm() string {
 }
 
 // Sign implements the signing functionality.
-// Since the "sigstore" algorithm had a buggy implementation, we are introducing "sigstore-v3" as well.
-// We use the algorithm name to decide if old sigstore or new sigstore-v3 flow is used to
+// Since the "sigstore" algorithm has a buggy implementation, we introduce "sigstore-v3".
+// We use the algorithm name to decide if old "sigstore" or new "sigstore-v3" flow is used to
 // guarantee backwards compatibility.
 func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (*signing.Signature, error) {
 	hash := sctx.GetHash()
-	// exit immediately if hash alg is not SHA-256, rekor doesn't currently support other hash functions
+	// exit immediately if hash alg is not SHA-256, Rekor doesn't currently support other hash functions
 	if hash != crypto.SHA256 {
 		return nil, fmt.Errorf("cannot sign using sigstore. rekor only supports SHA-256 digests: %s provided", hash.String())
 	}
