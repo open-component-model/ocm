@@ -130,7 +130,10 @@ func TestExtractECDSAPublicKey_UnsupportedPEMType(t *testing.T) {
 }
 
 // ============================================================================
-// Verify signatures using both algorithms (also test backwards compatibility)
+// Verify signatures with both Sigstore algorithms (backwards compatibility)
+// These tests work OFFLINE because:
+// - Rekor public keys are embedded in cosign library
+// - All verification data is in the self-contained Sigstore bundle
 // ============================================================================
 
 // Test verifying legacy "sigstore" signature (created with old OCM CLI up to version v0.35.x)
@@ -147,12 +150,13 @@ func TestVerify_LegacySignature(t *testing.T) {
 		Algorithm: Algorithm,
 	}, nil)
 
-	assert.NoError(t, err, "legacy sigstore signature verification with new code should succeed")
+	assert.NoError(t, err, "legacy signature verification with new code should succeed")
 }
 
 // Test verifying "sigstore-v3" signature (created with new OCM CLI with fix)
 // This tests the corrected implementation with Fulcio certificate in Rekor bundle
 func TestVerify_V3Signature(t *testing.T) {
+
 	descriptorYAML := loadTestData(t, "component-descriptor-signed.yaml")
 	digest, sigValue := getSignatureByName(t, descriptorYAML, "sigstore-recommended")
 
@@ -164,5 +168,5 @@ func TestVerify_V3Signature(t *testing.T) {
 		Algorithm: AlgorithmV3,
 	}, nil)
 
-	assert.NoError(t, err, "sigstore signature verification using new algorithm should succeed")
+	assert.NoError(t, err, "v3 signature verification should succeed")
 }
