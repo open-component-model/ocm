@@ -32,6 +32,7 @@ func TestUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to marshal response: %v", err)
 		}
+		w.WriteHeader(http.StatusCreated)
 		if _, err := w.Write(data); err != nil {
 			t.Fatalf("failed to write response: %v", err)
 		}

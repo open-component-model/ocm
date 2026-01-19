@@ -9,12 +9,12 @@ import (
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"helm.sh/helm/v4/pkg/chart/common"
+	chart "helm.sh/helm/v4/pkg/chart/v2"
+	chartutil "helm.sh/helm/v4/pkg/chart/v2/util"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chartutil"
-
 	"ocm.software/ocm/api/helper/builder"
 	"ocm.software/ocm/api/helper/env"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
@@ -24,7 +24,7 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 )
 
-type Files []*chart.File
+type Files []*common.File
 
 var _ sort.Interface = (Files)(nil)
 

@@ -9,8 +9,9 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/pkg/errors"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v4/pkg/chart/loader/archive"
+	chart "helm.sh/helm/v4/pkg/chart/v2"
+	"helm.sh/helm/v4/pkg/chart/v2/loader"
 
 	"ocm.software/ocm/api/oci/ociutils/helm/ignore"
 	"ocm.software/ocm/api/oci/ociutils/helm/sympath"
@@ -46,7 +47,7 @@ func LoadDir(fs vfs.FileSystem, dir string) (*chart.Chart, error) {
 	}
 	rules.AddDefaults()
 
-	files := []*loader.BufferedFile{}
+	files := []*archive.BufferedFile{}
 	topdir += vfs.PathSeparatorString
 
 	walk := func(name string, fi os.FileInfo, err error) error {
@@ -92,7 +93,7 @@ func LoadDir(fs vfs.FileSystem, dir string) (*chart.Chart, error) {
 
 		data = bytes.TrimPrefix(data, utf8bom)
 
-		files = append(files, &loader.BufferedFile{Name: n, Data: data})
+		files = append(files, &archive.BufferedFile{Name: n, Data: data})
 		return nil
 	}
 	if err = sympath.Walk(fs, topdir, walk); err != nil {

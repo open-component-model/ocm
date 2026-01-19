@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"helm.sh/helm/v3/pkg/registry"
+	"helm.sh/helm/v4/pkg/registry"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/utils"

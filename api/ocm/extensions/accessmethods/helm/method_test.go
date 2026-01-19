@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "ocm.software/ocm/api/helper/builder"
 
-	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v4/pkg/chart/v2/loader"
 
 	"ocm.software/ocm/api/ocm/cpi"
 	me "ocm.software/ocm/api/ocm/extensions/accessmethods/helm"
