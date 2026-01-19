@@ -5,8 +5,7 @@ import (
 	"fmt"
 )
 
-type Config struct {
-}
+type Config struct{}
 
 // GetConfig returns the config from the raw json message.
 // any return is required for the plugin interface.

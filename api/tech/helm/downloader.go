@@ -82,7 +82,7 @@ func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, re
 
 		chart, prov, aset, err = ocihelm.Download2(out, ctx.OCIContext(), identity.OCIRepoURL(repourl, ref)+":"+version, chart, osfs.New(), true, creds)
 		if err != nil {
-			return nil, fmt.Errorf("failed to download chart %s from OCI repository: %s", ref, err)
+			return nil, fmt.Errorf("failed to download chart %s from OCI repository: %w", ref, err)
 		}
 		if prov != "" && dl.Verify > downloader.VerifyNever && dl.Verify != downloader.VerifyLater {
 			defaultProvFile := chart + ".prov"
@@ -90,13 +90,13 @@ func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, re
 			if err != nil {
 				// Fail always in this case, since it means the verification step
 				// failed.
-				return nil, fmt.Errorf("failed to verify chart %s: %s", defaultProvFile, err)
+				return nil, fmt.Errorf("failed to verify chart %s: %w", defaultProvFile, err)
 			}
 		}
 	} else {
 		chart, _, err = dl.DownloadTo("repo/"+ref, version, dl.root)
 		if err != nil {
-			return nil, fmt.Errorf("failed to download chart %s from helm repository: %s", ref, err)
+			return nil, fmt.Errorf("failed to download chart %s from helm repository: %w", ref, err)
 		}
 		prov = chart + ".prov"
 	}
