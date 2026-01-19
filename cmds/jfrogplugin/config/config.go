@@ -16,5 +16,4 @@ func GetConfig(raw json.RawMessage) (interface{}, error) {
 		return nil, fmt.Errorf("could not get config: %w", err)
 	}
 	return &cfg, nil
-
 }
