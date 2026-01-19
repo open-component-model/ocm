@@ -46,10 +46,10 @@ func (a AttributeType) Description() string {
 	return `
 *sigstore config* Configuration to use for sigstore based signing.
 
-This configuration applies to both <code>sigstore</code> (legacy) and <code>sigstore-v2</code> signing algorithms.
+Configuration applies to <code>sigstore</code> (legacy) and <code>sigstore-v2</code> signing algorithms.
 The difference between the algorithms is transparent to configuration but affects how signatures are stored in Rekor:
-- <code>sigstore</code>: stores only the public key in the Rekor entry (does not comply with Sigstore Bundle specification).
-- <code>sigstore-v2</code>: stores the Fulcio certificate in the Rekor entry (complies with Sigstore Bundle specification).
+- <code>sigstore</code>: stores only the public key in the Rekor entry (non-compliant Sigstore Bundle specification).
+- <code>sigstore-v2</code>: stores the Fulcio certificate in the Rekor entry (compliant Sigstore Bundle specification).
 
 The following fields are used.
 - *<code>fulcioURL</code>* *string*  default is https://fulcio.sigstore.dev

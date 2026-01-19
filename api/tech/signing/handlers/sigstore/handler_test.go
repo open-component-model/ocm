@@ -153,19 +153,19 @@ func TestVerify_LegacySignature(t *testing.T) {
 	assert.NoError(t, err, "legacy signature verification with new code should succeed")
 }
 
-// Test verifying "sigstore-v3" signature (created with new OCM CLI with fix)
+// Test verifying "sigstore-v2" signature (created with new OCM CLI with fix)
 // This tests the corrected implementation with Fulcio certificate in Rekor bundle
 func TestVerify_V3Signature(t *testing.T) {
 
 	descriptorYAML := loadTestData(t, "component-descriptor-signed.yaml")
 	digest, sigValue := getSignatureByName(t, descriptorYAML, "sigstore-recommended")
 
-	handler := Handler{algorithm: AlgorithmV3}
+	handler := Handler{algorithm: AlgorithmV2}
 
 	err := handler.Verify(digest, &signing.Signature{
 		Value:     sigValue,
 		MediaType: MediaType,
-		Algorithm: AlgorithmV3,
+		Algorithm: AlgorithmV2,
 	}, nil)
 
 	assert.NoError(t, err, "v3 signature verification should succeed")

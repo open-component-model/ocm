@@ -32,14 +32,14 @@ import (
 
 /*
 Algorithm defines the type for the Sigstore signature algorithm:
-- "sigstore" uses only the public key in the Rekor entry (legacy).
-- "sigstore-v3" uses the Fulcio certificate in the Rekor entry,
-  as required by the Sigstore Bundle specification.
-- "sigstore-v3" is the recommended algorithm to use.
+  - "sigstore" uses only the public key in the Rekor entry (legacy).
+  - "sigstore-v2" uses the Fulcio certificate in the Rekor entry,
+    as required by the Sigstore Bundle specification.
+  - "sigstore-v2" is the recommended algorithm to use.
 */
 const (
 	Algorithm   = "sigstore"
-	AlgorithmV3 = "sigstore-v3"
+	AlgorithmV2 = "sigstore-v2"
 )
 
 // MediaType defines the media type for a plain RSA signature.
@@ -47,9 +47,9 @@ const MediaType = "application/vnd.ocm.signature.sigstore"
 
 func init() {
 	// Register both algorithms for signature creation.
-	// "sigstore" for backwards compatibility, "sigstore-v3" for correct sigstore bundle implementation.
+	// "sigstore" for backwards compatibility, "sigstore-v2" for correct sigstore bundle implementation.
 	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{algorithm: Algorithm})
-	signing.DefaultHandlerRegistry().RegisterSigner(AlgorithmV3, Handler{algorithm: AlgorithmV3})
+	signing.DefaultHandlerRegistry().RegisterSigner(AlgorithmV2, Handler{algorithm: AlgorithmV2})
 }
 
 // Handler is a signatures.Signer compatible struct to sign using sigstore
@@ -154,10 +154,10 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 
 	// decide which public material to use for rekor entry
 	// old "sigstore" flow uses only public key
-	// new "sigstore-v3" flow uses the fulcio certificate
+	// new "sigstore-v2" flow uses the fulcio certificate
 	// Since v3 the Fulcio certificate fs.Cert is already in PEM format
 	rekorPublicMaterial := publicKey
-	if h.Algorithm() == AlgorithmV3 {
+	if h.Algorithm() == AlgorithmV2 {
 		rekorPublicMaterial = fs.Cert
 	}
 
