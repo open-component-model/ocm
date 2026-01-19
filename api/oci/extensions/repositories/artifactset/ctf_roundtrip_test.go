@@ -28,7 +28,7 @@ const (
 	componentVersion = "1.0.0"
 	resourceName     = "hello-image"
 	resourceVersion  = "1.0.0"
-	imageReference   = "ghcr.io/piotrjanik/open-component-model/hello-ocm:latest"
+	imageReference   = "ghcr.io/open-component-model/open-component-model/hello-ocm:latest"
 )
 
 func gunzipToTar(tgzPath string) (string, error) {
