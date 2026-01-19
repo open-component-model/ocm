@@ -30,11 +30,13 @@ import (
 	"ocm.software/ocm/api/tech/signing/handlers/sigstore/attr"
 )
 
-// Algorithm defines the type for the Sigstore signature algorithm:
-// "sigstore" uses only the public key in the Rekor entry.
-// "sigstore-v3" uses the Fulcio certificate in the Rekor entry,
-// as required by the Sigstore Bundle specification.
-// "sigstore-v3" is the recommend and preferred algorithm to use.
+/*
+Algorithm defines the type for the Sigstore signature algorithm:
+- "sigstore" uses only the public key in the Rekor entry (legacy).
+- "sigstore-v3" uses the Fulcio certificate in the Rekor entry,
+  as required by the Sigstore Bundle specification.
+- "sigstore-v3" is the recommended algorithm to use.
+*/
 const (
 	Algorithm   = "sigstore"
 	AlgorithmV3 = "sigstore-v3"
@@ -52,7 +54,7 @@ func init() {
 
 // Handler is a signatures.Signer compatible struct to sign using sigstore
 // and a signatures.Verifier compatible struct to verify using sigstore.
-// Uses "algorithm" field to distinguish between old "sigstore" and new "sigstore-v3" flows.
+// Uses "algorithm" field to distinguish between old "sigstore" and new "sigstore-v2" flows.
 type Handler struct {
 	algorithm string
 }
@@ -63,8 +65,8 @@ func (h Handler) Algorithm() string {
 }
 
 // Sign implements the signing functionality.
-// Since the "sigstore" algorithm has a buggy implementation, we introduce "sigstore-v3".
-// We use the algorithm name to decide if old "sigstore" or new "sigstore-v3" flow is used to
+// Since the "sigstore" algorithm has a buggy implementation, we introduce "sigstore-v2".
+// We use the algorithm name to decide if old "sigstore" or new "sigstore-v2" flow is used to
 // guarantee backwards compatibility.
 func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (*signing.Signature, error) {
 	hash := sctx.GetHash()
@@ -191,7 +193,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	}
 
 	// store the rekor response in the signature value
-	// depending on the used algorithm, either "sigstore" or "sigstore-v3"
+	// depending on the used algorithm, either "sigstore" or "sigstore-v2"
 	return &signing.Signature{
 		Value:     base64.StdEncoding.EncodeToString(data),
 		MediaType: MediaType,

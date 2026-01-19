@@ -118,18 +118,8 @@ The following signing types are supported with option <code>--algorithm</code>:
   - <code>RSASSA-PSS</code>
   - <code>rsa-signingservice</code>
   - <code>rsapss-signingservice</code>
-  - <code>sigstore</code> (legacy, uses public key in Rekor entry)
-    - <code>sigstore-v3</code> (uses Fulcio certificate in Rekor entry, recommended for new signatures)
-
-**Sigstore Algorithms Note:**
-
-The algorithm <code>sigstore</code> was the initial implementation using only a public key in the Rekor entry, which is not compliant with the Sigstore Bundle specification.
-<code>sigstore-v3</code> implements the Sigstore Bundle specification correctly and places the Fulcio certificate in the Rekor entry for correct verification.
-
-- <code>sigstore</code>: Legacy implementation, maintained for backwards compatibility. Stores public key in Rekor entry.
-- <code>sigstore-v3</code>: Recommended for new signatures. Stores Fulcio certificate in Rekor entry as specified in Sigstore Bundle specification.
-
-Both algorithms support keyless signing with OIDC-based identity verification via Fulcio. For new implementations, <code>sigstore-v3</code> is strongly recommended.
+  - <code>sigstore</code>
+  - <code>sigstore-v3</code>
 
 
 The following normalization modes are supported with option <code>--normalization</code>:
@@ -157,18 +147,6 @@ references.
 
 ```bash
 $ ocm sign componentversion --signature mysignature --private-key=my.key ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0
-```
-
-Sign a component version using keyless Sigstore v3 signing (recommended):
-
-```bash
-$ ocm sign componentversion --signature mysignature --algorithm sigstore-v3 --keyless ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0
-```
-
-Sign a component version using legacy Sigstore signing (for backwards compatibility):
-
-```bash
-$ ocm sign componentversion --signature mysignature --algorithm sigstore --keyless ghcr.io/open-component-model/ocm//ocm.software/ocmcli:0.17.0
 ```
 
 ### SEE ALSO
