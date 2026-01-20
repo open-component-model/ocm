@@ -48,10 +48,6 @@ func getSignatureByName(t *testing.T, descriptorYAML []byte, name string) (diges
 	return
 }
 
-// ============================================================================
-// Pure Function Tests (No Network, No OIDC flows)
-// ============================================================================
-
 // Test extracting public key from PEM format
 func TestExtractECDSAPublicKey_FromPEMPublicKey(t *testing.T) {
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -68,10 +64,10 @@ func TestExtractECDSAPublicKey_FromPEMPublicKey(t *testing.T) {
 
 	_, err = extractECDSAPublicKey(pemData)
 
-	assert.NoError(t, err, "extractECDSAPublicKey should successfully parse valid PUBLIC KEY PEM block")
+	assert.NoError(t, err, "Should successfully parse valid PUBLIC KEY PEM block")
 }
 
-// Test extracting public key from certificate
+// Test extracting public key from cert
 func TestExtractECDSAPublicKey_FromPEMCertificate(t *testing.T) {
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	require.NoError(t, err)
@@ -93,7 +89,7 @@ func TestExtractECDSAPublicKey_FromPEMCertificate(t *testing.T) {
 
 	_, err = extractECDSAPublicKey(certPEM)
 
-	assert.NoError(t, err, "extractECDSAPublicKey should successfully extract public key from CERTIFICATE PEM block")
+	assert.NoError(t, err, "Should successfully extract public key from CERTIFICATE PEM block")
 }
 
 // Test error handling for invalid PEM
@@ -105,7 +101,7 @@ func TestExtractECDSAPublicKey_InvalidPEM(t *testing.T) {
 	assert.Error(t, err)
 }
 
-// Test error handling for malformed certificate
+// Test error handling for malformed cert
 func TestExtractECDSAPublicKey_MalformedCertificate(t *testing.T) {
 	malformedCert := pem.EncodeToMemory(&pem.Block{
 		Type:  "CERTIFICATE",
@@ -129,15 +125,13 @@ func TestExtractECDSAPublicKey_UnsupportedPEMType(t *testing.T) {
 	assert.Error(t, err)
 }
 
-// ============================================================================
-// Verify signatures with both Sigstore algorithms (backwards compatibility)
-// These tests work OFFLINE because:
-// - Rekor public keys are embedded in cosign library
-// - All verification data is in the self-contained Sigstore bundle
-// ============================================================================
+// ================================================================
+// Verify signatures with both Sigstore algorithms (works offline,
+// as Rekor public keys are embedded in Cosign library and
+// all verification data contained in Sigstore bundle)
+// ================================================================
 
-// Test verifying legacy "sigstore" signature (created with old OCM CLI up to version v0.35.x)
-// This ensures backwards compatibility - old signatures can be verified with new code
+// Verify legacy "sigstore" signature
 func TestVerify_LegacySignature(t *testing.T) {
 	descriptorYAML := loadTestData(t, "component-descriptor-signed.yaml")
 	digest, sigValue := getSignatureByName(t, descriptorYAML, "sigstore-legacy")
@@ -153,9 +147,8 @@ func TestVerify_LegacySignature(t *testing.T) {
 	assert.NoError(t, err, "legacy signature verification with new code should succeed")
 }
 
-// Test verifying "sigstore-v2" signature (created with new OCM CLI with fix)
-// This tests the corrected implementation with Fulcio certificate in Rekor bundle
-func TestVerify_V3Signature(t *testing.T) {
+// Verify "sigstore-v2" signature
+func TestVerify_V2Signature(t *testing.T) {
 
 	descriptorYAML := loadTestData(t, "component-descriptor-signed.yaml")
 	digest, sigValue := getSignatureByName(t, descriptorYAML, "sigstore-recommended")

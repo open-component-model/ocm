@@ -1,14 +1,9 @@
 # OCM Component Descriptor with different Sigstore Signatures
-# Signatures:
-#   1. "sigstore-legacy" (algorithm: sigstore)
-#      - Stores ONLY the PUBLIC KEY in the Rekor entry (which does not comply with Sigstore bundle spec)
-#      - This is the old behavior that was used before the fix (up to OCM version v0.35.x)
-#      - Used to verify backwards compatibility with older signatures
+#  algorithm: sigstore
+#   - Stores only PUBLIC KEY in Rekor entry (non-compliant with Sigstore bundle spec)
 #
-#   2. "sigstore-recommended" (algorithm: sigstore-v3)
-#      - Stores the FULCIO certificate in the Rekor entry
-#      - This is the correct implementation following the Sigstore Bundle specification
-#      - Recommended for all new signatures
+#  algorithm: sigstore-v2
+#   - Stores FULCIO certificate in Rekor entry (compliant with Sigstore bundle spec)
 component:
   componentReferences: []
   creationTime: "2026-01-19T11:18:36Z"

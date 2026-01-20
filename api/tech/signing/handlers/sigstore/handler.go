@@ -316,6 +316,8 @@ func prepareRekorEntry(digest string, sig, publicKey []byte) hashedrekord_v001.V
 	}
 }
 
+// extractECDSAPublicKey extracts an ECDSA public key from PEM encoded bytes.
+// Fulcio’s current production setup for keyless flows present ECDSA public keys.
 func extractECDSAPublicKey(pubKeyBytes []byte) (*ecdsa.PublicKey, error) {
 	block, _ := pem.Decode(pubKeyBytes)
 	if block == nil {
