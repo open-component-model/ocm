@@ -27,12 +27,13 @@ import (
 	ocmlog "ocm.software/ocm/api/utils/logging"
 )
 
-func NewState(mode accessobj.AccessMode, name, version string, access oci.ManifestAccess, compat ...bool) (accessobj.State, error) {
-	return accessobj.NewState(mode, NewStateAccess(access, compat...), NewStateHandler(name, version))
+func NewState(mode accessobj.AccessMode, name, version string, parentIndex oci.IndexAccess, access oci.ManifestAccess, compat ...bool) (accessobj.State, error) {
+	return accessobj.NewState(mode, NewStateAccess(parentIndex, access, compat...), NewStateHandler(name, version))
 }
 
 // StateAccess handles the component descriptor persistence in an OCI Manifest.
 type StateAccess struct {
+	parent     oci.IndexAccess
 	access     oci.ManifestAccess
 	layerMedia string
 	compat     bool
@@ -40,10 +41,11 @@ type StateAccess struct {
 
 var _ accessobj.StateAccess = (*StateAccess)(nil)
 
-func NewStateAccess(access oci.ManifestAccess, compat ...bool) accessobj.StateAccess {
+func NewStateAccess(parentIndex oci.IndexAccess, access oci.ManifestAccess, compat ...bool) accessobj.StateAccess {
 	return &StateAccess{
 		compat: utils.Optional(compat...),
 		access: access,
+		parent: parentIndex,
 	}
 }
 
@@ -226,7 +228,7 @@ type ComponentDescriptorConfig struct {
 	ComponentDescriptorLayer *ociv1.Descriptor `json:"componentDescriptorLayer,omitempty"`
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 // StateHandler handles the encoding of a component descriptor.
 type StateHandler struct {
