@@ -18,6 +18,7 @@ type ArtifactMeta struct {
 	Repository string        `json:"repository"`
 	Tag        string        `json:"tag,omitempty"`
 	Digest     digest.Digest `json:"digest,omitempty"`
+	MediaType  string        `json:"mediaType,omitempty"`
 }
 
 func Decode(data []byte) (*ArtifactIndex, error) {

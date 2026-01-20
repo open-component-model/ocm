@@ -84,35 +84,32 @@ func SynthesizeArtifactBlobWithFilter(ns cpi.NamespaceAccess, ref string, filter
 			return nil, err
 		}
 	}
-	return SynthesizeArtifactBlobForArtifact(art, ref, filter)
+	return SynthesizeArtifactBlobForArtifact(art, []string{ref}, filter)
 }
 
-func SynthesizeArtifactBlobForArtifact(art cpi.ArtifactAccess, ref string, filter ...filters.Filter) (ArtifactBlob, error) {
+func SynthesizeArtifactBlobForArtifact(art cpi.ArtifactAccess, refs []string, filter ...filters.Filter) (ArtifactBlob, error) {
 	blob, err := art.Blob()
 	if err != nil {
 		return nil, err
 	}
 
-	vers, err := ociutils.ParseVersion(ref)
-	if err != nil {
-		return nil, err
+	tags := make([]string, 0, len(refs))
+	for _, ref := range refs {
+		vers, err := ociutils.ParseVersion(ref)
+		if err != nil {
+			return nil, err
+		}
+		if vers.IsTagged() {
+			tags = append(tags, vers.GetTag())
+		}
 	}
 
 	return SythesizeArtifactSet(func(set *ArtifactSet) (string, error) {
-		dig, err := transfer.TransferArtifactWithFilter(art, set, filters.And(filter...))
+		dig, err := transfer.TransferArtifactWithFilter(art, set, filters.And(filter...), tags...)
 		if err != nil {
 			return "", fmt.Errorf("failed to transfer artifact: %w", err)
 		}
-
-		if ok := vers.IsTagged(); ok {
-			err = set.AddTags(*dig, vers.GetTag())
-			if err != nil {
-				return "", fmt.Errorf("failed to add tag: %w", err)
-			}
-		}
-
 		set.Annotate(MAINARTIFACT_ANNOTATION, dig.String())
-
 		return blob.MimeType(), nil
 	})
 }
