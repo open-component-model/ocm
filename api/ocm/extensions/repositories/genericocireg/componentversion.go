@@ -87,6 +87,7 @@ func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAcce
 
 		m = firstArtifact.ManifestAccess()
 		manifestArtifact = firstArtifact
+		i = access.IndexAccess()
 		indexArtifact = access
 	} else {
 		m = access.ManifestAccess()
