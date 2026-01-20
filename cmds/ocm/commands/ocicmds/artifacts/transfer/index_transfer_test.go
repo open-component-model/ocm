@@ -1,7 +1,6 @@
 package transfer_test
 
 import (
-	"context"
 	"fmt"
 	"net"
 	"os"
@@ -36,7 +35,7 @@ func StartDockerContainerRegistry(t FullGinkgoTInterface, container, htpasswd st
 	t.Helper()
 	// Start containerized registry
 	t.Logf("Launching test registry (%s)...", distributionRegistryImage)
-	registryContainer, err := registry.Run(context.Background(), distributionRegistryImage,
+	registryContainer, err := registry.Run(t.Context(), distributionRegistryImage,
 		WithHtpasswd(htpasswd),
 		testcontainers.WithEnv(map[string]string{
 			"REGISTRY_VALIDATION_DISABLED": "true",
@@ -53,7 +52,7 @@ func StartDockerContainerRegistry(t FullGinkgoTInterface, container, htpasswd st
 
 	t.Logf("Test registry started")
 
-	registryAddress, err := registryContainer.HostAddress(context.Background())
+	registryAddress, err := registryContainer.HostAddress(t.Context())
 	r.NoError(err)
 
 	return registryAddress
@@ -102,8 +101,7 @@ var _ = Describe("Index Transfer", func() {
 		env.Cleanup()
 	})
 
-	It("transfers an OCI Index artifact as a local blob", func() {
-		ctx := context.Background()
+	It("transfers an OCI Index artifact as a local blob", func(ctx SpecContext) {
 		r := require.New(GinkgoT())
 		tempDir := env.FSTempDir()
 
