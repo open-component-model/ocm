@@ -128,24 +128,6 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 		return nil, fmt.Errorf("failed to verify signed certificate timestamp: %w", err)
 	}
 
-	// get the public key from the signing key pair
-	pub, err := fs.PublicKey()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get public key for signing: %w", err)
-	}
-
-	// marshal the public key bytes
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal public key for signing: %w", err)
-	}
-
-	// encode the public key to pem format
-	publicKey := pem.EncodeToMemory(&pem.Block{
-		Bytes: publicKeyBytes,
-		Type:  "PUBLIC KEY",
-	})
-
 	// init the rekor client
 	rekorClient, err := client.GetRekorClient(cfg.RekorURL)
 	if err != nil {
@@ -155,10 +137,26 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	// decide which public material to use for rekor entry
 	// old "sigstore" flow uses only raw public key
 	// new "sigstore-v2" flow uses Fulcio certificate
-	// Since v3 the Fulcio certificate fs.Cert is already in PEM format
-	rekorPublicMaterial := publicKey
+	var rekorPublicMaterial []byte
 	if h.Algorithm() == AlgorithmV2 {
+		// Since v3 the Fulcio certificate fs.Cert is already in PEM format
 		rekorPublicMaterial = fs.Cert
+	} else {
+		// get the public key from the signing key pair
+		pub, err := fs.PublicKey()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get public key for signing: %w", err)
+		}
+		// marshal the public key bytes
+		publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal public key for signing: %w", err)
+		}
+		// encode the public key to pem format
+		rekorPublicMaterial = pem.EncodeToMemory(&pem.Block{
+			Bytes: publicKeyBytes,
+			Type:  "PUBLIC KEY",
+		})
 	}
 
 	// create a Rekor hashed entry
