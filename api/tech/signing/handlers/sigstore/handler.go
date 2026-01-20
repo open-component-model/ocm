@@ -65,7 +65,7 @@ func (h Handler) Algorithm() string {
 }
 
 // Sign implements the signing functionality.
-// Since the "sigstore" algorithm has a buggy implementation, we introduce "sigstore-v2".
+// Since "sigstore" algorithm is not compliant with Sigstore bundle spec, we introduce "sigstore-v2".
 // We use the algorithm name to decide if old "sigstore" or new "sigstore-v2" flow is used to
 // guarantee backwards compatibility.
 func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (*signing.Signature, error) {
@@ -153,15 +153,15 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	}
 
 	// decide which public material to use for rekor entry
-	// old "sigstore" flow uses only public key
-	// new "sigstore-v2" flow uses the fulcio certificate
+	// old "sigstore" flow uses only raw public key
+	// new "sigstore-v2" flow uses Fulcio certificate
 	// Since v3 the Fulcio certificate fs.Cert is already in PEM format
 	rekorPublicMaterial := publicKey
 	if h.Algorithm() == AlgorithmV2 {
 		rekorPublicMaterial = fs.Cert
 	}
 
-	// create a rekor hashed entry
+	// create a Rekor hashed entry
 	hashedEntry := prepareRekorEntry(digest, sig, rekorPublicMaterial)
 
 	// validate the rekor entry before submission
@@ -193,7 +193,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	}
 
 	// store the rekor response in the signature value
-	// depending on the used algorithm, either "sigstore" or "sigstore-v2"
+	// depending on used algorithm, either "sigstore" or "sigstore-v2"
 	return &signing.Signature{
 		Value:     base64.StdEncoding.EncodeToString(data),
 		MediaType: MediaType,
@@ -317,7 +317,7 @@ func prepareRekorEntry(digest string, sig, publicKey []byte) hashedrekord_v001.V
 }
 
 // extractECDSAPublicKey extracts an ECDSA public key from PEM encoded bytes.
-// Fulcio’s current production setup for keyless flows present ECDSA public keys.
+// Fulcio’s current production setup for keyless flows only presents ECDSA public keys.
 func extractECDSAPublicKey(pubKeyBytes []byte) (*ecdsa.PublicKey, error) {
 	block, _ := pem.Decode(pubKeyBytes)
 	if block == nil {

@@ -228,9 +228,9 @@ OCM library:
 
 
   Configuration applies to <code>sigstore</code> (legacy) and <code>sigstore-v2</code> signing algorithms.
-  The difference between the algorithms is transparent to configuration but affects how signatures are stored in Rekor:
-  - <code>sigstore</code>: stores only the public key in the Rekor entry (non-compliant Sigstore Bundle specification).
-  - <code>sigstore-v2</code>: stores the Fulcio certificate in the Rekor entry (compliant Sigstore Bundle specification).
+  The algorithms affect how signatures are stored in Rekor:
+  - <code>sigstore</code>: stores only public key in Rekor entry (non-compliant Sigstore Bundle spec).
+  - <code>sigstore-v2</code>: stores Fulcio certificate in Rekor entry (compliant Sigstore Bundle spec).
 
   The following fields are used.
   - *<code>fulcioURL</code>* *string*  default is https://fulcio.sigstore.dev
