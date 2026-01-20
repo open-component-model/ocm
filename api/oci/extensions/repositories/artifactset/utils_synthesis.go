@@ -105,19 +105,11 @@ func SynthesizeArtifactBlobForArtifact(art cpi.ArtifactAccess, refs []string, fi
 	}
 
 	return SythesizeArtifactSet(func(set *ArtifactSet) (string, error) {
-		dig, err := transfer.TransferArtifactWithFilter(art, set, filters.And(filter...))
+		dig, err := transfer.TransferArtifactWithFilter(art, set, filters.And(filter...), tags...)
 		if err != nil {
 			return "", fmt.Errorf("failed to transfer artifact: %w", err)
 		}
-
-		if len(tags) > 0 {
-			if err := set.AddTags(*dig, tags...); err != nil {
-				return "", fmt.Errorf("failed to add tag: %w", err)
-			}
-		}
-
 		set.Annotate(MAINARTIFACT_ANNOTATION, dig.String())
-
 		return blob.MimeType(), nil
 	})
 }
