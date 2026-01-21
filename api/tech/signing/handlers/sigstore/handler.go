@@ -14,9 +14,9 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/conv"
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/sigstore/cosign/v2/cmd/cosign/cli/fulcio"
-	"github.com/sigstore/cosign/v2/cmd/cosign/cli/options"
-	"github.com/sigstore/cosign/v2/pkg/cosign"
+	"github.com/sigstore/cosign/v3/cmd/cosign/cli/fulcio"
+	"github.com/sigstore/cosign/v3/cmd/cosign/cli/options"
+	"github.com/sigstore/cosign/v3/pkg/cosign"
 	"github.com/sigstore/rekor/pkg/client"
 	"github.com/sigstore/rekor/pkg/generated/client/entries"
 	"github.com/sigstore/rekor/pkg/generated/models"
@@ -30,32 +30,47 @@ import (
 	"ocm.software/ocm/api/tech/signing/handlers/sigstore/attr"
 )
 
-// Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
-const Algorithm = "sigstore"
+/*
+Algorithm defines the type for the Sigstore signature algorithm:
+  - "sigstore" uses only the public key in the Rekor entry (legacy).
+  - "sigstore-v2" uses the Fulcio certificate in the Rekor entry,
+    as required by the Sigstore Bundle specification.
+  - "sigstore-v2" is the recommended algorithm to use.
+*/
+const (
+	Algorithm   = "sigstore"
+	AlgorithmV2 = "sigstore-v2"
+)
 
 // MediaType defines the media type for a plain RSA signature.
 const MediaType = "application/vnd.ocm.signature.sigstore"
 
-// SignaturePEMBlockAlgorithmHeader defines the header in a signature pem block where the signature algorithm is defined.
-const SignaturePEMBlockAlgorithmHeader = "Algorithm"
-
 func init() {
-	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{})
+	// Register both algorithms for signature creation.
+	// "sigstore" for backwards compatibility, "sigstore-v2" for correct sigstore bundle implementation.
+	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{algorithm: Algorithm})
+	signing.DefaultHandlerRegistry().RegisterSigner(AlgorithmV2, Handler{algorithm: AlgorithmV2})
 }
 
 // Handler is a signatures.Signer compatible struct to sign using sigstore
 // and a signatures.Verifier compatible struct to verify using sigstore.
-type Handler struct{}
+// Uses "algorithm" field to distinguish between old "sigstore" and new "sigstore-v2" flows.
+type Handler struct {
+	algorithm string
+}
 
 // Algorithm specifies the name of the signing algorithm.
 func (h Handler) Algorithm() string {
-	return Algorithm
+	return h.algorithm
 }
 
 // Sign implements the signing functionality.
+// Since "sigstore" algorithm is not compliant with Sigstore bundle spec, we introduce "sigstore-v2".
+// We use the algorithm name to decide if old "sigstore" or new "sigstore-v2" flow is used to
+// guarantee backwards compatibility.
 func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.SigningContext) (*signing.Signature, error) {
 	hash := sctx.GetHash()
-	// exit immediately if hash alg is not SHA-256, rekor doesn't currently support other hash functions
+	// exit immediately if hash alg is not SHA-256, Rekor doesn't currently support other hash functions
 	if hash != crypto.SHA256 {
 		return nil, fmt.Errorf("cannot sign using sigstore. rekor only supports SHA-256 digests: %s provided", hash.String())
 	}
@@ -113,32 +128,39 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 		return nil, fmt.Errorf("failed to verify signed certificate timestamp: %w", err)
 	}
 
-	// get the public key from the signing key pair
-	pub, err := fs.PublicKey()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get public key for signing: %w", err)
-	}
-
-	// marshal the public key bytes
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal public key for signing: %w", err)
-	}
-
-	// encode the public key to pem format
-	publicKey := pem.EncodeToMemory(&pem.Block{
-		Bytes: publicKeyBytes,
-		Type:  "PUBLIC KEY",
-	})
-
 	// init the rekor client
 	rekorClient, err := client.GetRekorClient(cfg.RekorURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create rekor client: %w", err)
 	}
 
-	// create a rekor hashed entry
-	hashedEntry := prepareRekorEntry(digest, sig, publicKey)
+	// decide which public material to use for rekor entry
+	// old "sigstore" flow uses only raw public key
+	// new "sigstore-v2" flow uses Fulcio certificate
+	var rekorPublicMaterial []byte
+	if h.Algorithm() == AlgorithmV2 {
+		// Since v3 the Fulcio certificate fs.Cert is already in PEM format
+		rekorPublicMaterial = fs.Cert
+	} else {
+		// get the public key from the signing key pair
+		pub, err := fs.PublicKey()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get public key for signing: %w", err)
+		}
+		// marshal the public key bytes
+		publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal public key for signing: %w", err)
+		}
+		// encode the public key to pem format
+		rekorPublicMaterial = pem.EncodeToMemory(&pem.Block{
+			Bytes: publicKeyBytes,
+			Type:  "PUBLIC KEY",
+		})
+	}
+
+	// create a Rekor hashed entry
+	hashedEntry := prepareRekorEntry(digest, sig, rekorPublicMaterial)
 
 	// validate the rekor entry before submission
 	if _, err := hashedEntry.Canonicalize(ctx); err != nil {
@@ -169,10 +191,11 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 	}
 
 	// store the rekor response in the signature value
+	// depending on used algorithm, either "sigstore" or "sigstore-v2"
 	return &signing.Signature{
 		Value:     base64.StdEncoding.EncodeToString(data),
 		MediaType: MediaType,
-		Algorithm: Algorithm,
+		Algorithm: h.Algorithm(),
 		Issuer:    "",
 	}, nil
 }
@@ -238,18 +261,13 @@ func (h Handler) Verify(digest string, sig *signing.Signature, sctx signing.Sign
 			return fmt.Errorf("failed to decode rekor public key: %w", err)
 		}
 
-		block, _ := pem.Decode(rekorPublicKeyRaw)
-		if block == nil {
-			return fmt.Errorf("failed to decode public key: %w", err)
-		}
-
-		rekorPublicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+		rekorPublicKey, err := extractECDSAPublicKey(rekorPublicKeyRaw)
 		if err != nil {
-			return fmt.Errorf("failed to parse public key: %w", err)
+			return err
 		}
 
 		// verify signature
-		if err := ecdsa.VerifyASN1(rekorPublicKey.(*ecdsa.PublicKey), rawDigest, rekorSignature); !err {
+		if ok := ecdsa.VerifyASN1(rekorPublicKey, rawDigest, rekorSignature); !ok {
 			return errors.New("could not verify signature using public key")
 		}
 
@@ -270,8 +288,7 @@ func loadVerifier(ctx context.Context) (signature.Verifier, error) {
 	for _, pubKey := range publicKeys.Keys {
 		return signature.LoadVerifier(pubKey.PubKey, crypto.SHA256)
 	}
-
-	return nil, nil
+	return nil, errors.New("no Rekor public key found")
 }
 
 // based on: https://github.com/sigstore/cosign/blob/ff648d5fb4ed6d0d1c16eaaceff970411fa969e3/pkg/cosign/tlog.go#L233
@@ -294,4 +311,36 @@ func prepareRekorEntry(digest string, sig, publicKey []byte) hashedrekord_v001.V
 			},
 		},
 	}
+}
+
+// extractECDSAPublicKey extracts an ECDSA public key from PEM encoded bytes.
+// Fulcio’s current production setup for keyless flows only presents ECDSA public keys.
+func extractECDSAPublicKey(pubKeyBytes []byte) (*ecdsa.PublicKey, error) {
+	block, _ := pem.Decode(pubKeyBytes)
+	if block == nil {
+		return nil, fmt.Errorf("no PEM block found in Fulcio public key")
+	}
+	var rawPub any
+	switch block.Type {
+	case "PUBLIC KEY":
+		result, err := x509.ParsePKIXPublicKey(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse public key: %w", err)
+		}
+		rawPub = result
+	case "CERTIFICATE":
+		cert, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse Fulcio certificate: %w", err)
+		}
+		rawPub = cert.PublicKey
+	default:
+		return nil, fmt.Errorf("unsupported PEM block type: %s", block.Type)
+	}
+	// cast to ecdsa.PublicKey as we use this in the verification
+	pubKey, ok := rawPub.(*ecdsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("unexpected public key type: %T", rawPub)
+	}
+	return pubKey, nil
 }
