@@ -27,8 +27,8 @@ func loadTestData(t *testing.T, filename string) []byte {
 	return data
 }
 
-// Helper to extract signature from descriptor YAML
-func getSignatureByName(t *testing.T, descriptorYAML []byte, name string) (digest, sigValue string) {
+// Helper to extract signature from descriptor YAML by algorithm
+func getSignatureByAlgorithm(t *testing.T, descriptorYAML []byte, algorithm string) (digest, sigValue string) {
 	var descriptor map[string]any
 	err := yaml.Unmarshal(descriptorYAML, &descriptor)
 	require.NoError(t, err)
@@ -38,13 +38,14 @@ func getSignatureByName(t *testing.T, descriptorYAML []byte, name string) (diges
 
 	for _, s := range sigs {
 		sig := s.(map[string]any)
-		if sig["name"].(string) == name {
+		sigData := sig["signature"].(map[string]any)
+		if sigData["algorithm"].(string) == algorithm {
 			digest = sig["digest"].(map[string]any)["value"].(string)
-			sigValue = sig["signature"].(map[string]any)["value"].(string)
+			sigValue = sigData["value"].(string)
 			return
 		}
 	}
-	t.Fatalf("signature %s not found", name)
+	t.Fatalf("signature with algorithm %s not found", algorithm)
 	return
 }
 
@@ -98,7 +99,7 @@ func TestExtractECDSAPublicKey_InvalidPEM(t *testing.T) {
 
 	_, err := extractECDSAPublicKey(invalidPEM)
 
-	assert.Error(t, err)
+	assert.EqualError(t, err, "no PEM block found in Fulcio public key")
 }
 
 // Test error handling for malformed cert
@@ -110,7 +111,7 @@ func TestExtractECDSAPublicKey_MalformedCertificate(t *testing.T) {
 
 	_, err := extractECDSAPublicKey(malformedCert)
 
-	assert.Error(t, err)
+	assert.ErrorContains(t, err, "failed to parse Fulcio certificate")
 }
 
 // Test error handling for unsupported PEM type
@@ -122,19 +123,17 @@ func TestExtractECDSAPublicKey_UnsupportedPEMType(t *testing.T) {
 
 	_, err := extractECDSAPublicKey(unsupportedPEM)
 
-	assert.Error(t, err)
+	assert.EqualError(t, err, "unsupported PEM block type: UNSUPPORTED")
 }
 
-// ================================================================
 // Verify signatures with both Sigstore algorithms (works offline,
 // as Rekor public keys are embedded in Cosign library and
 // all verification data contained in Sigstore bundle)
-// ================================================================
 
 // Verify legacy "sigstore" signature
 func TestVerify_LegacySignature(t *testing.T) {
 	descriptorYAML := loadTestData(t, "component-descriptor-signed.yaml")
-	digest, sigValue := getSignatureByName(t, descriptorYAML, "sigstore-legacy")
+	digest, sigValue := getSignatureByAlgorithm(t, descriptorYAML, Algorithm)
 
 	handler := Handler{algorithm: Algorithm}
 
@@ -149,9 +148,8 @@ func TestVerify_LegacySignature(t *testing.T) {
 
 // Verify "sigstore-v2" signature
 func TestVerify_V2Signature(t *testing.T) {
-
 	descriptorYAML := loadTestData(t, "component-descriptor-signed.yaml")
-	digest, sigValue := getSignatureByName(t, descriptorYAML, "sigstore-recommended")
+	digest, sigValue := getSignatureByAlgorithm(t, descriptorYAML, AlgorithmV2)
 
 	handler := Handler{algorithm: AlgorithmV2}
 
@@ -161,5 +159,5 @@ func TestVerify_V2Signature(t *testing.T) {
 		Algorithm: AlgorithmV2,
 	}, nil)
 
-	assert.NoError(t, err, "v3 signature verification should succeed")
+	assert.NoError(t, err, "v2 signature verification should succeed")
 }

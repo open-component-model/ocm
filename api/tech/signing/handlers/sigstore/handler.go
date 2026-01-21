@@ -288,7 +288,6 @@ func loadVerifier(ctx context.Context) (signature.Verifier, error) {
 	for _, pubKey := range publicKeys.Keys {
 		return signature.LoadVerifier(pubKey.PubKey, crypto.SHA256)
 	}
-	// in rare case no public keys are found
 	return nil, errors.New("no Rekor public key found")
 }
 
