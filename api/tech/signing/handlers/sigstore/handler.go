@@ -320,30 +320,27 @@ func extractECDSAPublicKey(pubKeyBytes []byte) (*ecdsa.PublicKey, error) {
 	if block == nil {
 		return nil, fmt.Errorf("no PEM block found in Fulcio public key")
 	}
+	var rawPub any
 	switch block.Type {
 	case "PUBLIC KEY":
 		result, err := x509.ParsePKIXPublicKey(block.Bytes)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse public key: %w", err)
 		}
-		// cast to ecdsa.PublicKey as we use this in the verification
-		pub, ok := result.(*ecdsa.PublicKey)
-		if !ok {
-			return nil, fmt.Errorf("unexpected public key type: %T", result)
-		}
-		return pub, nil
+		rawPub = result
 	case "CERTIFICATE":
 		cert, err := x509.ParseCertificate(block.Bytes)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse Fulcio certificate: %w", err)
 		}
-		// cast to ecdsa.PublicKey as we use this in the verification
-		pub, ok := cert.PublicKey.(*ecdsa.PublicKey)
-		if !ok {
-			return nil, fmt.Errorf("unexpected certificate public key type: %T", cert.PublicKey)
-		}
-		return pub, nil
+		rawPub = cert.PublicKey
 	default:
 		return nil, fmt.Errorf("unsupported PEM block type: %s", block.Type)
 	}
+	// cast to ecdsa.PublicKey as we use this in the verification
+	pubKey, ok := rawPub.(*ecdsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("unexpected public key type: %T", rawPub)
+	}
+	return pubKey, nil
 }
