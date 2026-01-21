@@ -46,38 +46,82 @@ func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessI
 	return &repocpi.ComponentVersionAccessInfo{c, true, persistent}, nil
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
 	bridge repocpi.ComponentVersionAccessBridge
 
-	comp     *componentAccessImpl
-	version  string
-	access   oci.ArtifactAccess
-	manifest oci.ManifestAccess
-	state    accessobj.State
+	comp             *componentAccessImpl
+	version          string
+	indexArtifact    oci.ArtifactAccess
+	manifestArtifact oci.ArtifactAccess
+	manifest         oci.ManifestAccess
+	index            oci.IndexAccess
+	state            accessobj.State
 }
 
 var _ repocpi.ComponentVersionAccessImpl = (*ComponentVersionContainer)(nil)
 
 func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtifactAccess) (*ComponentVersionContainer, error) {
-	m := access.ManifestAccess()
-	if m == nil {
-		return nil, errors.ErrInvalid("artifact type")
+	var m oci.ManifestAccess
+	var i oci.IndexAccess
+
+	var manifestArtifact, indexArtifact oci.ArtifactAccess
+
+	if access.IsIndex() {
+		idx, err := access.Index()
+		if err != nil {
+			return nil, err
+		}
+		if len(idx.Manifests) < 1 {
+			return nil, fmt.Errorf("index has no manifests")
+		}
+		first := idx.Manifests[0]
+		firstArtifact, err := access.GetArtifact(first.Digest)
+		if err != nil {
+			return nil, err
+		}
+		if !firstArtifact.IsManifest() {
+			return nil, fmt.Errorf("first manifest in index is not a manifest")
+		}
+
+		m = firstArtifact.ManifestAccess()
+		manifestArtifact = firstArtifact
+		i = access.IndexAccess()
+		indexArtifact = access
+	} else {
+		m = access.ManifestAccess()
+		if m == nil {
+			return nil, fmt.Errorf("artifact is neither manifest nor index")
+		}
+
+		manifestArtifact = access
 	}
-	state, err := NewState(mode, comp.name, version, m, compatattr.Get(comp.GetContext()))
+
+	state, err := NewState(mode, comp.name, version, i, m, compatattr.Get(comp.GetContext()))
 	if err != nil {
-		access.Close()
+		err = errors.Join(err, manifestArtifact.Close())
+		if indexArtifact != nil {
+			err = errors.Join(err, indexArtifact.Close())
+		}
 		return nil, err
 	}
 
-	return &ComponentVersionContainer{
-		comp:     comp,
-		version:  version,
-		access:   access,
-		manifest: m,
-		state:    state,
-	}, nil
+	container := &ComponentVersionContainer{
+		comp:             comp,
+		version:          version,
+		manifestArtifact: manifestArtifact,
+		indexArtifact:    indexArtifact,
+		manifest:         m,
+		state:            state,
+	}
+
+	if indexArtifact != nil {
+		// index based manifests are optional and only read based for next gen support
+		container.SetReadOnly()
+	}
+
+	return container, nil
 }
 
 func (c *ComponentVersionContainer) SetBridge(impl repocpi.ComponentVersionAccessBridge) {
@@ -89,11 +133,20 @@ func (c *ComponentVersionContainer) GetParentBridge() repocpi.ComponentAccessBri
 }
 
 func (c *ComponentVersionContainer) Close() error {
-	if c.manifest == nil {
+	if c.manifest == nil && c.manifestArtifact == nil {
 		return accessio.ErrClosed
 	}
 	c.manifest = nil
-	return c.access.Close()
+	c.index = nil
+
+	var err error
+	if c.indexArtifact != nil {
+		err = errors.Join(err, c.indexArtifact.Close())
+	}
+	if c.manifestArtifact != nil {
+		err = errors.Join(err, c.manifestArtifact.Close())
+	}
+	return err
 }
 
 func (c *ComponentVersionContainer) SetReadOnly() {
@@ -140,9 +193,9 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 
 	switch a.GetKind() {
 	case localblob.Type:
-		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access, cv)
+		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.manifestArtifact, cv)
 	case localociblob.Type:
-		return newLocalOCIBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access, cv)
+		return newLocalOCIBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.manifestArtifact, cv)
 	case relativeociref.Type:
 		m, err := ociartifact.NewMethod(c.GetContext(), a, accessSpec.(*relativeociref.AccessSpec).Reference, c.comp.repo.ocirepo)
 		if err == nil {

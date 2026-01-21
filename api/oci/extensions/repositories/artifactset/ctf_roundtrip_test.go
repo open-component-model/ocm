@@ -28,7 +28,7 @@ const (
 	componentVersion = "1.0.0"
 	resourceName     = "hello-image"
 	resourceVersion  = "1.0.0"
-	imageReference   = "ghcr.io/piotrjanik/open-component-model/hello-ocm:latest"
+	imageReference   = "ghcr.io/open-component-model/open-component-model/hello-ocm:latest"
 )
 
 func gunzipToTar(tgzPath string) (string, error) {
@@ -205,10 +205,10 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		Expect(config.Config.Entrypoint).ToNot(BeEmpty())
 	})
 
-	It("copies OCI archive to Docker with skopeo", func() {
+	It("copies OCI archive to Docker with skopeo", func(ctx SpecContext) {
 		// Use skopeo to copy from OCI archive (tgz) to docker daemon
 		imageTag = "ocm-test-hello:" + resourceVersion
-		cmd := exec.Command("skopeo", "copy",
+		cmd := exec.CommandContext(ctx, "skopeo", "copy",
 			"oci-archive:"+resourcesOciTgz+":"+resourceVersion,
 			"docker-daemon:"+imageTag,
 			"--override-os=linux")
@@ -225,8 +225,7 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		Expect(string(out)).To(ContainSubstring("Hello OCM!"))
 	})
 
-	It("downloads resource from target CTF without --oci-layout and verifies it", func() {
-		ctx := context.Background()
+	It("downloads resource from target CTF without --oci-layout and verifies it", func(ctx SpecContext) {
 		resourcesOcmTgz = filepath.Join(tempDir, "resource-ocm-layout")
 
 		buf := bytes.NewBuffer(nil)
