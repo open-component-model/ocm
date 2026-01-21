@@ -6,12 +6,15 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
+	"encoding/json"
 	"encoding/pem"
 	"math/big"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/sigstore/rekor/pkg/generated/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
@@ -124,6 +127,92 @@ func TestExtractECDSAPublicKey_UnsupportedPEMType(t *testing.T) {
 	_, err := extractECDSAPublicKey(unsupportedPEM)
 
 	assert.EqualError(t, err, "unsupported PEM block type: UNSUPPORTED")
+}
+
+// Negative: Digest mismatch by passing wrong digest (no bundle mutation)
+func TestVerify_DigestMismatch(t *testing.T) {
+	descriptorYAML := loadTestData(t, "component-descriptor-signed.yaml")
+	realDigest, sigValue := getSignatureByAlgorithm(t, descriptorYAML, AlgorithmV2)
+
+	wrongDigest := "deadbeef" + realDigest
+
+	handler := Handler{algorithm: AlgorithmV2}
+	err := handler.Verify(wrongDigest, &signing.Signature{
+		Value:     sigValue,
+		MediaType: MediaType,
+		Algorithm: AlgorithmV2,
+	}, nil)
+
+	assert.EqualError(t, err, "rekor hash doesn't match provided digest")
+}
+
+// Negative: Invalid signature bytes
+func TestVerify_InvalidSignature(t *testing.T) {
+	descriptorYAML := loadTestData(t, "component-descriptor-signed.yaml")
+	digest, sigValue := getSignatureByAlgorithm(t, descriptorYAML, AlgorithmV2)
+
+	// decode bundle
+	var entries map[string]any
+	data, err := base64.StdEncoding.DecodeString(sigValue)
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(data, &entries))
+
+	// mutate signature content of first entry
+	for k, v := range entries {
+		entry := v.(map[string]any)
+		bodyB64 := entry["body"].(string)
+		bodyJSONRaw, err := base64.StdEncoding.DecodeString(bodyB64)
+		require.NoError(t, err)
+
+		var rekorEntry models.Hashedrekord
+		require.NoError(t, json.Unmarshal(bodyJSONRaw, &rekorEntry))
+
+		rekorSpec := rekorEntry.Spec.(map[string]any)
+		sigField := rekorSpec["signature"].(map[string]any)
+		content := sigField["content"].(string)
+		sigBytes, err := base64.StdEncoding.DecodeString(content)
+		require.NoError(t, err)
+		// flip one bit
+		sigBytes[0] ^= 0x01
+		sigField["content"] = base64.StdEncoding.EncodeToString(sigBytes)
+
+		mutBody, err := json.Marshal(rekorEntry)
+		require.NoError(t, err)
+		entry["body"] = base64.StdEncoding.EncodeToString(mutBody)
+		entries[k] = entry
+		break
+	}
+
+	// re-encode bundle
+	mutData, err := json.Marshal(entries)
+	require.NoError(t, err)
+	mutated := base64.StdEncoding.EncodeToString(mutData)
+
+	// verify mutated signature
+	handler := Handler{algorithm: AlgorithmV2}
+	err = handler.Verify(digest, &signing.Signature{
+		Value:     mutated,
+		MediaType: MediaType,
+		Algorithm: AlgorithmV2,
+	}, nil)
+
+	assert.EqualError(t, err, "could not verify signature using public key")
+}
+
+// Test handler for sigstore-v2 is registered and usable via signing registry
+func TestHandlerRegistry_RegisteredAndUsable(t *testing.T) {
+	verifier := signing.DefaultHandlerRegistry().GetVerifier(AlgorithmV2)
+	require.NotNil(t, verifier, "v2 verifier should be registered")
+
+	descriptorYAML := loadTestData(t, "component-descriptor-signed.yaml")
+	digest, sigValue := getSignatureByAlgorithm(t, descriptorYAML, AlgorithmV2)
+
+	err := verifier.Verify(digest, &signing.Signature{
+		Value:     sigValue,
+		MediaType: MediaType,
+		Algorithm: AlgorithmV2,
+	}, nil)
+	assert.NoError(t, err, "verification via registry for v2 should succeed")
 }
 
 // Verify signatures with both Sigstore algorithms (works offline,
