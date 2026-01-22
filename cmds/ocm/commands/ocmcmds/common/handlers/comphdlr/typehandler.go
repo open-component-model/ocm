@@ -7,9 +7,9 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/mandelsoft/goutils/errors"
-	"ocm.software/ocm/api/credentials"
 
 	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
