@@ -4,8 +4,6 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 )
 
-const KIND_CREDENTIALS_RECEIVE = "receive credentials"
-
 func CredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, unknownAsError bool, matchers ...IdentityMatcher) (Credentials, error) {
 	cctx := ctx.CredentialsContext()
 
@@ -21,7 +19,7 @@ func CredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, unknownAsE
 	}
 	creds, err := src.Credentials(cctx)
 	if err != nil {
-		unknownErr := errors.ErrUnknown(KIND_CREDENTIALS_RECEIVE, id.String())
+		unknownErr := errors.ErrUnknown(KIND_CREDENTIALS, id.String())
 		err = errors.Wrapf(err, "unable to receive credentials for %s", id)
 		return nil, errors.Wrap(unknownErr, err)
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/mandelsoft/goutils/errors"
+	"ocm.software/ocm/api/credentials"
 
 	clictx "ocm.software/ocm/api/cli"
 	"ocm.software/ocm/api/ocm"
@@ -159,7 +160,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 		if err != nil {
 			evaluated = nil
 			if h.resolver != nil {
-				if errors.IsErrUnknown(err) {
+				if errors.IsErrUnknownKind(err, credentials.KIND_CREDENTIALS) {
 					return nil, errors.Wrapf(err, "failed to get component version %q", name)
 				}
 
