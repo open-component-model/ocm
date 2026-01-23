@@ -127,9 +127,6 @@ hashicorp
 hashicorpvault
 helmchart
 helmchartrepository
-helmdemo
-helmexecutor
-helminstaller
 helmrepository
 hoc
 homebrew

@@ -35,7 +35,7 @@ CGO_ENABLED := 0
 GOOS := $(shell go env GOOS)
 GOARCH := $(shell go env GOARCH)
 
-COMPONENTS ?= ocmcli demoplugin ecrplugin helmdemo subchartsdemo
+COMPONENTS ?= ocmcli demoplugin ecrplugin
 
 .PHONY: build bin
 build: bin bin/ocm bin/demo bin/cliplugin bin/ecrplugin

@@ -81,7 +81,6 @@ Install using [Nix](https://nixos.org) (with [Flakes](https://nixos.wiki/wiki/Fl
 # Nix (macOS, Linux, and Windows)
 # ad-hoc cmd execution
 nix run github:open-component-model/ocm -- --help
-nix run github:open-component-model/ocm#helminstaller -- --help
 
 # install development version
 nix profile install github:open-component-model/ocm

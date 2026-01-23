@@ -30,7 +30,7 @@ permissions:
 env:
   REF: ${{ inputs.ref == '' && github.ref || inputs.ref }}
   CTF_TYPE: directory
-  components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin", "jfrogplugin"]'
+  components: '["ocmcli", "ecrplugin", "jfrogplugin"]'
   components_for_aggregated_ctf: "ocmcli ecrplugin jfrogplugin" # only bundle relevant components for the aggregated CTF
   IMAGE_PLATFORMS: 'linux/amd64 linux/arm64'
   PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
