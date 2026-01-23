@@ -309,3 +309,6 @@ yitsushi
 yml
 yyyy
 jsonNormalisation
+rekor
+oidc
+fulcio
