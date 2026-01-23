@@ -31,13 +31,13 @@ jobs:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Checkout
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         path: tap
         repository: ${{ env.REPO }}
         token: ${{ steps.generate_token.outputs.token }}
     - name: Get Update Script
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         path: scripts
         sparse-checkout: |
@@ -60,7 +60,7 @@ jobs:
         cd ${{ github.workspace }}/tap/Aliases
         ln -sf ../Formula/$(basename $formula) ./ocm
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
+      uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
       with:
         path: tap
         token: ${{ steps.generate_token.outputs.token }}
@@ -116,7 +116,7 @@ jobs:
         app_id: ${{ secrets.OCMBOT_APP_ID }}
         private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
     - name: Checkout
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         token: ${{ steps.generate_token.outputs.token }}
     - name: Update Chocolatey package
