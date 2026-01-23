@@ -62,7 +62,7 @@ require (
 	github.com/rogpeppe/go-internal v1.14.1
 	github.com/sigstore/cosign/v3 v3.0.3
 	github.com/sigstore/rekor v1.4.3
-	github.com/sigstore/sigstore v1.10.3
+	github.com/sigstore/sigstore v1.10.4
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
