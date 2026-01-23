@@ -10,6 +10,7 @@ import (
 	"helm.sh/helm/v4/pkg/registry"
 
 	"ocm.software/ocm/api/oci/artdesc"
+	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/utils"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
 	"ocm.software/ocm/api/utils/blobaccess/file"
@@ -135,5 +136,5 @@ func (c *chartAccess) ArtefactSet() (blobaccess.BlobAccess, error) {
 	if c.aset == "" {
 		return nil, nil
 	}
-	return newFileAccess(c, c.aset, artdesc.MediaTypeImageManifest), nil
+	return newFileAccess(c, c.aset, artifactset.MediaType(artdesc.MediaTypeImageManifest)), nil
 }
