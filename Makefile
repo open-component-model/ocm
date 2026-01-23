@@ -35,19 +35,16 @@ CGO_ENABLED := 0
 GOOS := $(shell go env GOOS)
 GOARCH := $(shell go env GOARCH)
 
-COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
+COMPONENTS ?= ocmcli demoplugin ecrplugin helmdemo subchartsdemo
 
 .PHONY: build bin
-build: bin bin/ocm bin/helminstaller bin/demo bin/cliplugin bin/ecrplugin
+build: bin bin/ocm bin/demo bin/cliplugin bin/ecrplugin
 
 bin:
 	mkdir -p bin
 
 bin/ocm: bin $(SOURCES)
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/ocm ./cmds/ocm
-
-bin/helminstaller: bin $(SOURCES)
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
 
 bin/demo: bin $(SOURCES)
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(BUILD_FLAGS) -ldflags $(LD_FLAGS) -o bin/demo ./cmds/demoplugin
@@ -68,7 +65,7 @@ examples: $(SOURCES)
 build-platforms: $(GEN)/.exists $(SOURCES)
 	@for i in $(PLATFORMS); do \
     echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i); \
-    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=$(CGO_ENABLED) go build ./cmds/ocm ./cmds/helminstaller ./cmds/ecrplugin & \
+    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=$(CGO_ENABLED) go build ./cmds/ocm ./cmds/ecrplugin & \
     done; \
 	wait
 
@@ -79,7 +76,7 @@ install-requirements:
 .PHONY: prepare
 prepare: generate format generate-deepcopy build test check
 
-EFFECTIVE_DIRECTORIES := $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/cmds/jfrogplugin/... $(REPO_ROOT)/cmds/ecrplugin/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/cmds/cliplugin/... $(REPO_ROOT)/examples/... $(REPO_ROOT)/cmds/subcmdplugin/... $(REPO_ROOT)/api/...
+EFFECTIVE_DIRECTORIES := $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/jfrogplugin/... $(REPO_ROOT)/cmds/ecrplugin/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/cmds/cliplugin/... $(REPO_ROOT)/examples/... $(REPO_ROOT)/cmds/subcmdplugin/... $(REPO_ROOT)/api/...
 
 .PHONY: format
 format:
