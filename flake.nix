@@ -58,7 +58,6 @@
               "cmds/cliplugin"
               "cmds/demoplugin"
               "cmds/ecrplugin"
-              "cmds/helminstaller"
               "cmds/subcmdplugin"
               "cmds/jfrogplugin"
             ];
@@ -111,10 +110,6 @@
         default = {
             type = "app";
             program = self.packages.${system}.${pname} + "/bin/ocm";
-        };
-        helminstaller = {
-          type = "app";
-          program = self.packages.${system}.${pname} + "/bin/helminstaller";
         };
         demo = {
           type = "app";

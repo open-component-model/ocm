@@ -1,6 +1,0 @@
----
-name: ocmhelminstaller
-type: Image
-input:
-  type: docker
-  path: mandelsoft/ocmhelminstaller:0.1.0-dev

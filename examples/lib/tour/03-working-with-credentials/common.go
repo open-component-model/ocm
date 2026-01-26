@@ -63,7 +63,7 @@ func setupVersion(cv ocm.ComponentVersionAccess) error {
 	// OCM ecosystem.
 	// Supported access types can be found under
 	// .../api/ocm/extensions/accessmethods.
-	acc := ociartifact.New("ghcr.io/open-component-model/ocm/ocm.software/toi/installers/helminstaller/helminstaller:0.4.0")
+	acc := ociartifact.New("ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.35.0")
 
 	// Once we have both, the metadata and the content specification,
 	// we can now add the resource.
