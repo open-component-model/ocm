@@ -158,7 +158,7 @@ see: [chocolatey community package: ocm-cli](https://community.chocolatey.org/pa
 
 An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](examples/make/Makefile).
 
-More comprehensive examples can be taken from the [`components`](components) contained in this repository. [Here](components/helmdemo/README.md) a complete component build including a multi-arch image is done and finally packaged into a CTF archive which can be transported into an OCI repository. See the readme files for details.
+More comprehensive examples can be taken from the [`components`](components) contained in this repository.
 
 ## GPG Public Key
 
