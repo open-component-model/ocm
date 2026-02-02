@@ -11,9 +11,9 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.41.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.7
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.7
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.21.0
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.21.1
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.55.1
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.95.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.96.0
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/cloudflare/cfssl v1.6.5
 	github.com/containerd/containerd v1.7.30
@@ -22,11 +22,11 @@ require (
 	github.com/containers/image/v5 v5.36.2
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.1.5+incompatible
+	github.com/docker/cli v29.2.0+incompatible
 	github.com/docker/go-connections v0.6.0
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/cli-utils v0.37.1-flux.1
-	github.com/fluxcd/pkg/ssa v0.64.0
+	github.com/fluxcd/pkg/ssa v0.65.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.7.0
@@ -50,15 +50,15 @@ require (
 	github.com/mikefarah/yq/v4 v4.48.1
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/moby/locker v1.0.1
-	github.com/moby/moby/api v1.52.0
-	github.com/moby/moby/client v0.2.1
+	github.com/moby/moby/api v1.53.0
+	github.com/moby/moby/client v0.2.2
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee
-	github.com/onsi/ginkgo/v2 v2.27.5
-	github.com/onsi/gomega v1.39.0
+	github.com/onsi/ginkgo/v2 v2.28.1
+	github.com/onsi/gomega v1.39.1
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/pkg/errors v0.9.1
-	github.com/redis/go-redis/v9 v9.17.2
+	github.com/redis/go-redis/v9 v9.17.3
 	github.com/rogpeppe/go-internal v1.14.1
 	github.com/sigstore/cosign/v3 v3.0.4
 	github.com/sigstore/rekor v1.5.0
@@ -82,14 +82,14 @@ require (
 	golang.org/x/text v0.33.0
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1
-	helm.sh/helm/v4 v4.0.5
+	helm.sh/helm/v4 v4.1.0
 	k8s.io/api v0.35.0
 	k8s.io/apiextensions-apiserver v0.35.0
 	k8s.io/apimachinery v0.35.0
 	k8s.io/cli-runtime v0.35.0
 	k8s.io/client-go v0.35.0
 	oras.land/oras-go/v2 v2.6.0
-	sigs.k8s.io/controller-runtime v0.23.0
+	sigs.k8s.io/controller-runtime v0.23.1
 	sigs.k8s.io/yaml v1.6.0
 )
 
@@ -306,7 +306,7 @@ require (
 	github.com/google/go-containerregistry v0.20.7 // indirect
 	github.com/google/go-github/v73 v73.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
-	github.com/google/pprof v0.0.0-20251007162407-5df77e3f7d1d // indirect
+	github.com/google/pprof v0.0.0-20260115054156-294ebfa9ad83 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.9 // indirect
@@ -460,7 +460,7 @@ require (
 	github.com/tdakkota/asciicheck v0.4.1 // indirect
 	github.com/tetafro/godot v1.5.1 // indirect
 	github.com/tetratelabs/wabin v0.0.0-20230304001439-f6f874872834 // indirect
-	github.com/tetratelabs/wazero v1.9.0 // indirect
+	github.com/tetratelabs/wazero v1.11.0 // indirect
 	github.com/thales-e-security/pool v0.0.2 // indirect
 	github.com/theupdateframework/go-tuf v0.7.0 // indirect
 	github.com/theupdateframework/go-tuf/v2 v2.4.1 // indirect
@@ -517,13 +517,13 @@ require (
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20250620022241-b7579e27df2b // indirect
-	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/telemetry v0.0.0-20251203150158-8fff8a5912fc // indirect
+	golang.org/x/telemetry v0.0.0-20260109210033-bd525da824e2 // indirect
 	golang.org/x/term v0.39.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
-	golang.org/x/tools v0.40.0 // indirect
+	golang.org/x/tools v0.41.0 // indirect
 	google.golang.org/api v0.260.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b // indirect
@@ -548,7 +548,7 @@ require (
 	sigs.k8s.io/kustomize/kyaml v0.21.0 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/release-utils v0.12.3 // indirect
-	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
+	sigs.k8s.io/structured-merge-diff/v6 v6.3.2-0.20260122202528-d9cc6641c482 // indirect
 )
 
 replace (
