@@ -198,6 +198,14 @@ OCM library:
   the backend and descriptor updated will be persisted on AddVersion
   or closing a provided existing component version.
 
+- <code>ocm.software/ocm/api/datacontext/attrs/httptimeout</code> [<code>timeout</code>]: *string*
+
+  Configures the timeout duration for HTTP client requests used to access
+  OCI registries and other remote endpoints. The value is specified as a
+  Go duration string (e.g. "30s", "5m", "1h").
+
+  If not set, the default timeout of 30s is used.
+
 - <code>ocm.software/ocm/api/ocm/extensions/attrs/maxworkers</code> [<code>maxworkers</code>]: *integer* or *"auto"*
 
   Specifies the maximum number of concurrent workers to use for resource and source,
