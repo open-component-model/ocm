@@ -81,7 +81,6 @@ Install using [Nix](https://nixos.org) (with [Flakes](https://nixos.wiki/wiki/Fl
 # Nix (macOS, Linux, and Windows)
 # ad-hoc cmd execution
 nix run github:open-component-model/ocm -- --help
-nix run github:open-component-model/ocm#helminstaller -- --help
 
 # install development version
 nix profile install github:open-component-model/ocm
@@ -144,7 +143,7 @@ You can pass in the following arguments to override the predefined defaults:
 Please check [hub.docker.com](https://hub.docker.com/_/golang/tags?page=1&name=alpine) for possible version combinations.
 
 ```bash
-podman build -t ocm --build-arg GO_VERSION=1.25.5 --build-arg ALPINE_VERSION=3.21 --build-arg GO_PROXY=https://proxy.golang.org .
+podman build -t ocm --build-arg GO_VERSION=1.25.7 --build-arg ALPINE_VERSION=3.22 --build-arg GO_PROXY=https://proxy.golang.org .
 ```
 
 ### Chocolatey
@@ -159,7 +158,7 @@ see: [chocolatey community package: ocm-cli](https://community.chocolatey.org/pa
 
 An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](examples/make/Makefile).
 
-More comprehensive examples can be taken from the [`components`](components) contained in this repository. [Here](components/helmdemo/README.md) a complete component build including a multi-arch image is done and finally packaged into a CTF archive which can be transported into an OCI repository. See the readme files for details.
+More comprehensive examples can be taken from the [`components`](components) contained in this repository.
 
 ## GPG Public Key
 

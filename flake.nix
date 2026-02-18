@@ -37,7 +37,7 @@
             state = if (self ? rev) then "clean" else "dirty";
 
             # This vendorHash represents a derivative of all go.mod dependencies and needs to be adjusted with every change
-            vendorHash = "sha256-nydog+/KGi2D1T3XhXtbh+jCuG9QTE5eCa2HhIS8/R0=";
+            vendorHash = "sha256-5jDSW53s391vHrWIQdHKHTx3KYptHeA5fjQ706OVQxA=";
 
             src = ./.;
 
@@ -58,7 +58,6 @@
               "cmds/cliplugin"
               "cmds/demoplugin"
               "cmds/ecrplugin"
-              "cmds/helminstaller"
               "cmds/subcmdplugin"
               "cmds/jfrogplugin"
             ];
@@ -111,10 +110,6 @@
         default = {
             type = "app";
             program = self.packages.${system}.${pname} + "/bin/ocm";
-        };
-        helminstaller = {
-          type = "app";
-          program = self.packages.${system}.${pname} + "/bin/helminstaller";
         };
         demo = {
           type = "app";

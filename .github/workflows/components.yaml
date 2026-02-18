@@ -30,7 +30,7 @@ permissions:
 env:
   REF: ${{ inputs.ref == '' && github.ref || inputs.ref }}
   CTF_TYPE: directory
-  components: '["ocmcli", "helminstaller", "helmdemo", "subchartsdemo", "ecrplugin", "jfrogplugin"]'
+  components: '["ocmcli", "ecrplugin", "jfrogplugin"]'
   components_for_aggregated_ctf: "ocmcli ecrplugin jfrogplugin" # only bundle relevant components for the aggregated CTF
   IMAGE_PLATFORMS: 'linux/amd64 linux/arm64'
   PLATFORMS: 'windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64'
@@ -61,7 +61,7 @@ jobs:
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ env.REF }}
       - name: Setup Go
@@ -72,7 +72,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - name: Docker Login
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -88,7 +88,7 @@ jobs:
       - name: Restore / Reuse Cache from central build
         id: cache-golang-restore
         # Only Restore, not build another cache (too big)
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: |
             ${{ env.go_cache }}
@@ -130,7 +130,7 @@ jobs:
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ env.REF }}
       - name: Download CTFs
