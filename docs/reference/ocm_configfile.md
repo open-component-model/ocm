@@ -129,6 +129,18 @@ The following configuration types are supported:
     - <code>NO-DIGEST</code>
     - <code>SHA-256</code> (default)
     - <code>SHA-512</code>
+- <code>http.config.ocm.software</code>
+  The config type <code>http.config.ocm.software</code> can be used to configure
+  HTTP client settings:
+
+  <pre>
+      type: http.config.ocm.software
+      timeout: 30s
+  </pre>
+
+  The <code>timeout</code> field specifies the HTTP client timeout as a
+  Go duration string (e.g. "30s", "5m", "1h"). If not set, the default
+  timeout of 30s is used.
 - <code>keys.config.ocm.software</code>
   The config type <code>keys.config.ocm.software</code> can be used to define
   public and private keys. A key value might be given by one of the fields:

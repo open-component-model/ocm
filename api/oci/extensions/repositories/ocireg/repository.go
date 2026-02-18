@@ -16,6 +16,7 @@ import (
 	"oras.land/oras-go/v2/registry/remote/retry"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/datacontext/attrs/httptimeoutattr"
 	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
@@ -153,8 +154,11 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		}
 	}
 
-	client := retry.DefaultClient
-	client.Transport = ocmlog.NewRoundTripper(retry.DefaultClient.Transport, logger)
+	client := &http.Client{
+		Transport: retry.NewTransport(nil),
+		Timeout:   httptimeoutattr.Get(r.GetContext()),
+	}
+	client.Transport = ocmlog.NewRoundTripper(client.Transport, logger)
 	if r.info.Scheme == "https" {
 		// set up TLS
 		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
