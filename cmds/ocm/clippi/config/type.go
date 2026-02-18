@@ -2,6 +2,7 @@ package config
 
 import (
 	"strings"
+	"time"
 
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/spf13/pflag"
@@ -11,6 +12,7 @@ import (
 	config2 "ocm.software/ocm/api/config/extensions/config"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/datacontext"
+	"ocm.software/ocm/api/datacontext/attrs/httptimeoutattr"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
 	datacfg "ocm.software/ocm/api/datacontext/config/attrs"
 	"ocm.software/ocm/api/ocm"
@@ -44,6 +46,7 @@ type Config struct {
 	ConfigSets  []string                 `json:"configSets,omitempty"`
 	Credentials []string                 `json:"credentials,omitempty"`
 	Settings    []string                 `json:"settings,omitempty"`
+	Timeout     string                   `json:"timeout,omitempty"`
 	Verbose     bool                     `json:"verbose,omitempty"`
 	Signing     keyoption.ConfigFragment `json:"signing,omitempty"`
 	Logging     logopts.ConfigFragment   `json:"logging,omitempty"`
@@ -69,6 +72,7 @@ func (c *Config) AddFlags(fs *pflag.FlagSet) {
 	fs.StringSliceVarP(&c.ConfigSets, "config-set", "", nil, "apply configuration set")
 	fs.StringArrayVarP(&c.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&c.Settings, "attribute", "X", nil, "attribute setting")
+	fs.StringVar(&c.Timeout, "timeout", "", "client timeout (default 30s, e.g. 30s, 5m)")
 	fs.BoolVarP(&c.Verbose, "verbose", "v", false, "deprecated: enable logrus verbose logging")
 
 	c.Logging.AddFlags(fs)
@@ -160,6 +164,17 @@ func (c *Config) Evaluate(ctx ocm.Context, main bool) (*EvaluatedOptions, error)
 		ctx.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
 	} else if len(id) != 0 {
 		return opts, errors.Newf("empty credential attribute set for %s", id.String())
+	}
+
+	if c.Timeout != "" {
+		timeout, err := time.ParseDuration(c.Timeout)
+		if err != nil {
+			return opts, errors.Wrapf(err, "invalid timeout value %q: use a duration string like 30s, 5m, or 1h", c.Timeout)
+		}
+		err = ctx.ConfigContext().ApplyConfig(httptimeoutattr.NewConfig(timeout), "cli timeout flag")
+		if err != nil {
+			return opts, errors.Wrapf(err, "applying timeout config")
+		}
 	}
 
 	set, err := common2.ParseLabels(vfsattr.Get(ctx), c.Settings, "attribute setting")

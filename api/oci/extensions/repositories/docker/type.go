@@ -7,6 +7,7 @@ import (
 	dockerclient "github.com/moby/moby/client"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/datacontext/attrs/httptimeoutattr"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils"
 	ocmlog "ocm.software/ocm/api/utils/logging"
@@ -56,7 +57,7 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, usageContext ...credentials.UsageContext) error {
 	urs := a.UniformRepositorySpec()
 	logger := logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host))
-	client, err := newDockerClient(a.DockerHost, logger)
+	client, err := newDockerClient(a.DockerHost, logger, httptimeoutattr.Get(ctx))
 	if err != nil {
 		return err
 	}

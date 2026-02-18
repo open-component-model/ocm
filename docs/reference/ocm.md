@@ -23,6 +23,7 @@ ocm [<options>] <sub command> ...
   -l, --loglevel string           set log level
   -K, --private-key stringArray   private key setting
   -k, --public-key stringArray    public key setting
+      --timeout string            client timeout (default 30s, e.g. 30s, 5m)
   -v, --verbose                   deprecated: enable logrus verbose logging
       --version                   show version
 ```
@@ -305,6 +306,14 @@ The value can be a simple type or a JSON/YAML string for complex values
   If composition mode is disabled blobs will directly be forwarded to
   the backend and descriptor updated will be persisted on AddVersion
   or closing a provided existing component version.
+
+- <code>ocm.software/ocm/api/datacontext/attrs/httptimeout</code> [<code>timeout</code>]: *string*
+
+  Configures the timeout duration for HTTP client requests used to access
+  OCI registries and other remote endpoints. The value is specified as a
+  Go duration string (e.g. "30s", "5m", "1h").
+
+  If not set, the default timeout of 30s is used.
 
 - <code>ocm.software/ocm/api/ocm/extensions/attrs/maxworkers</code> [<code>maxworkers</code>]: *integer* or *"auto"*
 
