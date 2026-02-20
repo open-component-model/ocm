@@ -83,7 +83,7 @@ jobs:
     - name: Ensure proper version
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
     - name: Install SSH key
-      uses: shimataro/ssh-key-action@d4fffb50872869abe2d9a9098a6d9c5aa7d16be4 # v2.7.0
+      uses: shimataro/ssh-key-action@6b84f2e793b32fa0b03a379cadadec75cc539391 # v2.8.0
       with:
         name: aur
         key: ${{ secrets.ARCHLINUX_SSH_PRIVATE_KEY }}
