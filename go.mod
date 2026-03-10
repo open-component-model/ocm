@@ -93,6 +93,9 @@ require (
 	sigs.k8s.io/yaml v1.6.0
 )
 
+// until cosign pushes a release, we need to override its transient dependency on mongo-driver v1.17.6
+replace go.mongodb.org/mongo-driver => go.mongodb.org/mongo-driver v1.17.9 // BDSA-2026-1849
+
 require (
 	4d63.com/gocheckcompilerdirectives v1.3.0 // indirect
 	4d63.com/gochecknoglobals v0.2.2 // indirect
