@@ -26,7 +26,7 @@ jobs:
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
+      uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -112,7 +112,7 @@ jobs:
         echo "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
+      uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -134,7 +134,7 @@ jobs:
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }})" >> $GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
+      uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
