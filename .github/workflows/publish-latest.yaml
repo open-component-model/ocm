@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate_token
-        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v2
         with: # OCMBot
           app-id: ${{ secrets.OCMBOT_APP_ID }}
           private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -81,7 +81,7 @@ jobs:
       uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
+      uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -139,7 +139,7 @@ jobs:
         GORELEASER_CURRENT_TAG: v0.0.0
         GORELEASER_PREVIOUS_TAG: v0.0.0
     - name: Create or update release
-      uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
+      uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
       with:
         name: latest ocm-cli
         tag: ocm-cli/latest
