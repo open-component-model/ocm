@@ -306,6 +306,21 @@ The value can be a simple type or a JSON/YAML string for complex values
   the backend and descriptor updated will be persisted on AddVersion
   or closing a provided existing component version.
 
+- <code>ocm.software/ocm/api/datacontext/attrs/httptimeout</code> [<code>httpcfg</code>]: *JSON*
+
+  Configures HTTP client timeout settings for OCI registry and remote endpoint access.
+  Settings are provided as a JSON document matching the http.config.ocm.software config type.
+
+  For full control use the config file:
+  <pre>
+      type: http.config.ocm.software
+      timeout: 0s
+      tcpDialTimeout: 30s
+      tcpKeepAlive: 30s
+      tlsHandshakeTimeout: 10s
+      idleConnTimeout: 90s
+  </pre>
+
 - <code>ocm.software/ocm/api/ocm/extensions/attrs/maxworkers</code> [<code>maxworkers</code>]: *integer* or *"auto"*
 
   Specifies the maximum number of concurrent workers to use for resource and source,

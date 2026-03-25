@@ -16,12 +16,14 @@ import (
 	"oras.land/oras-go/v2/registry/remote/retry"
 
 	"ocm.software/ocm/api/credentials"
+	"ocm.software/ocm/api/datacontext/attrs/httpcfgattr"
 	"ocm.software/ocm/api/datacontext/attrs/rootcertsattr"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/tech/oras"
 	"ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils/httpclient"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/refmgmt"
 )
@@ -153,12 +155,12 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		}
 	}
 
-	client := retry.DefaultClient
-	client.Transport = ocmlog.NewRoundTripper(retry.DefaultClient.Transport, logger)
+	httpCfg := httpcfgattr.Get(r.GetContext()).GetHTTPSettings()
+	baseTransport := httpclient.NewTransport(httpCfg)
+
 	if r.info.Scheme == "https" {
-		// set up TLS
 		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
-		conf := &tls.Config{
+		baseTransport.TLSClientConfig = &tls.Config{
 			// MinVersion: tls.VersionTLS13,
 			RootCAs: func() *x509.CertPool {
 				rootCAs := rootcertsattr.Get(r.GetContext()).GetRootCertPool(true)
@@ -168,13 +170,16 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 						rootCAs.AppendCertsFromPEM([]byte(c))
 					}
 				}
-
 				return rootCAs
 			}(),
 		}
-		client.Transport = ocmlog.NewRoundTripper(retry.NewTransport(&http.Transport{
-			TLSClientConfig: conf,
-		}), logger)
+	}
+
+	retryTransport := retry.NewTransport(baseTransport)
+
+	client := &http.Client{
+		Transport: ocmlog.NewRoundTripper(retryTransport, logger),
+		Timeout:   httpCfg.GetTimeout(),
 	}
 
 	authClient := &auth.Client{
