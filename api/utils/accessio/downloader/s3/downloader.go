@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
@@ -58,18 +58,26 @@ func (s *Downloader) Download(w io.WriterAt) error {
 	}
 
 	if s.region == "" {
-		var err error
 		// deliberately use a different client so the real one will use the right region.
 		// Region has to be provided to get the region of the specified bucket. We use the
 		// global "default" of us-west-1 here. This will be updated to the right region
 		// once we retrieve it or die trying.
-		cfg.Region = defaultRegion
-		s.region, err = manager.GetBucketRegion(ctx, s3.NewFromConfig(cfg), s.bucket, func(o *s3.Options) {
+		// With the new API introduced, transfermanager no longer has GetBucketRegion.
+		// Thus, we just implement GetBucketRegion here instead as it was in the old manager SDK.
+		// construct the default client with the default region
+		tmpClient := s3.NewFromConfig(cfg, func(o *s3.Options) {
+			// Pass in creds because of https://github.com/aws/aws-sdk-go-v2/issues/1797
+			o.Credentials = awsCred
 			o.Region = defaultRegion
+		})
+		resp, err := tmpClient.HeadBucket(ctx, &s3.HeadBucketInput{
+			Bucket: aws.String(s.bucket),
 		})
 		if err != nil {
 			return fmt.Errorf("failed to find bucket region: %w", err)
 		}
+
+		s.region = *resp.BucketRegion
 		cfg.Region = s.region
 	}
 
@@ -78,16 +86,18 @@ func (s *Downloader) Download(w io.WriterAt) error {
 		o.Credentials = awsCred
 		o.Region = s.region
 	})
-	downloader := manager.NewDownloader(client)
 
-	input := &s3.GetObjectInput{
-		Bucket: aws.String(s.bucket),
-		Key:    aws.String(s.key),
+	downloader := transfermanager.New(client)
+	input := &transfermanager.DownloadObjectInput{
+		Bucket:   aws.String(s.bucket),
+		Key:      aws.String(s.key),
+		WriterAt: w,
 	}
 	if s.version != "" {
-		input.VersionId = aws.String(s.version)
+		input.VersionID = aws.String(s.version)
 	}
-	if _, err := downloader.Download(ctx, w, input); err != nil {
+
+	if _, err := downloader.DownloadObject(ctx, input); err != nil {
 		return fmt.Errorf("failed to download object: %w", err)
 	}
 

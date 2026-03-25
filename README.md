@@ -143,7 +143,7 @@ You can pass in the following arguments to override the predefined defaults:
 Please check [hub.docker.com](https://hub.docker.com/_/golang/tags?page=1&name=alpine) for possible version combinations.
 
 ```bash
-podman build -t ocm --build-arg GO_VERSION=1.25.5 --build-arg ALPINE_VERSION=3.21 --build-arg GO_PROXY=https://proxy.golang.org .
+podman build -t ocm --build-arg GO_VERSION=1.25.7 --build-arg ALPINE_VERSION=3.22 --build-arg GO_PROXY=https://proxy.golang.org .
 ```
 
 ### Chocolatey
@@ -168,7 +168,7 @@ The authenticity of released packages that have been uploaded to public reposito
 
 Code contributions, feature requests, bug reports, and help requests are very welcome. Please refer to the [Contributing Guide in the Community repository](https://github.com/open-component-model/community/blob/main/CONTRIBUTING.md) for more information on how to contribute to OCM.
 
-OCM follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md).
+OCM follows the [NeoNephos Code of Conduct](https://github.com/neonephos/.github/blob/main/CODE_OF_CONDUCT.md).
 
 ## Release Process
 
