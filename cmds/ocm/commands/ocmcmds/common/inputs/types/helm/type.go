@@ -4,10 +4,14 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
-const TYPE = "helm"
+const (
+	TYPE       = "helm"
+	UPPER_TYPE = "Helm"
+)
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE, &Spec{}, usage, ConfigHandler()))
 }
 
 const usage = `
