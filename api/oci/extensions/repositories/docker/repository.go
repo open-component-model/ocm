@@ -23,7 +23,12 @@ var _ cpi.RepositoryImpl = (*RepositoryImpl)(nil)
 func NewRepository(ctx cpi.Context, spec *RepositorySpec) (cpi.Repository, error) {
 	urs := spec.UniformRepositorySpec()
 	logger := logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host))
-	client, err := newDockerClient(spec.DockerHost, logger)
+	httpSettings, err := ctx.GetHTTPSettings()
+	if err != nil {
+		return nil, err
+	}
+	httpCfg := &httpSettings
+	client, err := newDockerClient(spec.DockerHost, logger, httpCfg)
 	if err != nil {
 		return nil, err
 	}

@@ -13,11 +13,18 @@ import (
 	dockerclient "github.com/moby/moby/client"
 	"github.com/spf13/pflag"
 
+	"ocm.software/ocm/api/oci/cpi"
+	"ocm.software/ocm/api/utils/httpclient"
 	"ocm.software/ocm/api/utils/logging"
 )
 
-func newDockerClient(dockerhost string, logger mlog.UnboundLogger) (*dockerclient.Client, error) {
+func newDockerClient(dockerhost string, logger mlog.UnboundLogger, httpCfg *cpi.HTTPSettings) (*dockerclient.Client, error) {
 	if dockerhost == "" {
+		// Use Docker CLI context resolution (DOCKER_CONTEXT env,
+		// currentContext in ~/.docker/config.json, DOCKER_HOST env,
+		// default socket). NewAPIClientFromFlags builds its own HTTP
+		// transport internally, so OCM HTTP timeout settings do not
+		// apply to this path.
 		opts := cliflags.NewClientOptions()
 		// set defaults
 		opts.SetDefaultOptions(pflag.NewFlagSet("", pflag.ContinueOnError))
@@ -35,8 +42,22 @@ func newDockerClient(dockerhost string, logger mlog.UnboundLogger) (*dockerclien
 	if err == nil && url.Scheme == "unix" {
 		opts = append(opts, dockerclient.WithScheme(url.Scheme))
 	}
-	clnt := http.Client{}
-	clnt.Transport = logging.NewRoundTripper(clnt.Transport, logger)
+
+	transport, err := httpclient.NewTransport(httpCfg)
+	if err != nil {
+		return nil, err
+	}
+	timeout, err := httpCfg.GetTimeout()
+	if err != nil {
+		return nil, err
+	}
+
+	clnt := http.Client{
+		Transport: logging.NewRoundTripper(transport, logger),
+	}
+	if timeout != nil {
+		clnt.Timeout = *timeout
+	}
 	opts = append(opts, dockerclient.WithHTTPClient(&clnt))
 	c, err := dockerclient.New(opts...)
 	if err != nil {

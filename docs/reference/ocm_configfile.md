@@ -129,6 +129,29 @@ The following configuration types are supported:
     - <code>NO-DIGEST</code>
     - <code>SHA-256</code> (default)
     - <code>SHA-512</code>
+- <code>http.config.ocm.software</code>
+  The config type <code>http.config.ocm.software</code> can be used to configure
+  HTTP client settings:
+
+  <pre>
+      type: generic.config.ocm.software/v1
+      configurations:
+        - type: http.config.ocm.software
+          timeout: "0s"
+          tcpDialTimeout: "30s"
+          tcpKeepAlive: "30s"
+          tlsHandshakeTimeout: "10s"
+          responseHeaderTimeout: "0s"
+          idleConnTimeout: "90s"
+  </pre>
+
+  All timeout values are Go duration strings (e.g. "30s", "5m", "1h").
+  Use "0s" to disable a specific timeout. If not set, the <code>http.DefaultTransport</code>
+  values from the Go standard library are used.
+
+  Note: <code>timeout</code> controls the overall <code>http.Client</code> request deadline and is
+  independent of the transport-level settings. Setting only <code>timeout</code> does not
+  affect <code>tcpDialTimeout</code>, <code>tlsHandshakeTimeout</code>, or other transport timeouts.
 - <code>keys.config.ocm.software</code>
   The config type <code>keys.config.ocm.software</code> can be used to define
   public and private keys. A key value might be given by one of the fields:
