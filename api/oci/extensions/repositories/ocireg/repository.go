@@ -53,6 +53,18 @@ type RepositoryImpl struct {
 	info   *RepositoryInfo
 }
 
+func newHTTPTransport(conf *tls.Config) *http.Transport {
+	base, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return &http.Transport{TLSClientConfig: conf}
+	}
+
+	transport := base.Clone()
+	transport.TLSClientConfig = conf
+
+	return transport
+}
+
 var (
 	_ cpi.RepositoryImpl                   = (*RepositoryImpl)(nil)
 	_ credentials.ConsumerIdentityProvider = &RepositoryImpl{}
@@ -172,9 +184,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 				return rootCAs
 			}(),
 		}
-		client.Transport = ocmlog.NewRoundTripper(retry.NewTransport(&http.Transport{
-			TLSClientConfig: conf,
-		}), logger)
+		client.Transport = ocmlog.NewRoundTripper(retry.NewTransport(newHTTPTransport(conf)), logger)
 	}
 
 	authClient := &auth.Client{
