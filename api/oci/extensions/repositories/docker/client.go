@@ -1,4 +1,4 @@
-// taken from "github.com/containers/image/v5", unfortunately this is private and cannot be used via import
+// taken from "go.podman.io/image/v5" (formerly github.com/containers/image/v5), unfortunately this is private and cannot be used via import
 
 package docker
 

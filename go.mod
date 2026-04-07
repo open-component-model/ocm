@@ -19,7 +19,6 @@ require (
 	github.com/containerd/containerd v1.7.30
 	github.com/containerd/errdefs v1.0.0
 	github.com/containerd/log v0.1.0
-	github.com/containers/image/v5 v5.36.2
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467
 	github.com/distribution/reference v0.6.0
 	github.com/docker/cli v29.3.1+incompatible
@@ -73,6 +72,7 @@ require (
 	github.com/tonglil/buflogr v1.1.1
 	github.com/ulikunitz/xz v0.5.15
 	github.com/xeipuuv/gojsonschema v1.2.0
+	go.podman.io/image/v5 v5.39.2
 	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/crypto v0.49.0
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546
@@ -206,7 +206,6 @@ require (
 	github.com/containerd/stargz-snapshotter/estargz v0.18.2 // indirect
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
 	github.com/containers/ocicrypt v1.2.1 // indirect
-	github.com/containers/storage v1.59.1 // indirect
 	github.com/coreos/go-oidc/v3 v3.17.0 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
 	github.com/curioswitch/go-reassign v0.3.0 // indirect
@@ -508,6 +507,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.41.0 // indirect
 	go.opentelemetry.io/otel/trace v1.41.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
+	go.podman.io/storage v1.62.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect

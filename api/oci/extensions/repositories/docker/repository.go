@@ -3,9 +3,9 @@ package docker
 import (
 	"strings"
 
-	"github.com/containers/image/v5/types"
 	"github.com/mandelsoft/logging"
 	"github.com/moby/moby/client"
+	"go.podman.io/image/v5/types"
 
 	"ocm.software/ocm/api/oci/cpi"
 	ocmlog "ocm.software/ocm/api/utils/logging"
