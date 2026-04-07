@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/containers/image/v5/image"
-	"github.com/containers/image/v5/manifest"
-	"github.com/containers/image/v5/types"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
+	"go.podman.io/image/v5/image"
+	"go.podman.io/image/v5/manifest"
+	"go.podman.io/image/v5/types"
 
 	"ocm.software/ocm/api/oci/cpi"
 	"ocm.software/ocm/api/utils/accessio"
