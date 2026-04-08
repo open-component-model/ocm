@@ -109,12 +109,39 @@ configurations:
 			Expect(err.Error()).To(ContainSubstring("invalid duration: notaduration"))
 		})
 
-		It("rejects negative duration", func() {
+		DescribeTable("rejects negative duration for timeout fields",
+			func(field string, cfg *config.HTTPConfig) {
+				ctx := cpi.New()
+				Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(MatchError(
+					ContainSubstring("invalid value for " + field),
+				))
+			},
+			Entry("timeout", "timeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{Timeout: dur("-5m")}}),
+			Entry("tcpDialTimeout", "tcpDialTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TCPDialTimeout: dur("-5m")}}),
+			Entry("tlsHandshakeTimeout", "tlsHandshakeTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TLSHandshakeTimeout: dur("-5m")}}),
+			Entry("responseHeaderTimeout", "responseHeaderTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{ResponseHeaderTimeout: dur("-5m")}}),
+			Entry("idleConnTimeout", "idleConnTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{IdleConnTimeout: dur("-5m")}}),
+		)
+
+		It("allows -1 tcpKeepAlive to disable keep-alive probes", func() {
 			ctx := cpi.New()
-			raw := []byte(`{"type":"http.config.ocm.software/v1alpha1","timeout":"-5m"}`)
-			_, err := ctx.ConfigContext().GetConfigForData(raw, nil)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("negative duration not allowed: -5m"))
+			cfg := &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TCPKeepAlive: dur("-1s")}}
+			Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(Succeed())
+			g := MustGetHTTPSettings(ctx)
+			Expect(g.TCPKeepAlive.TimeDuration()).To(HaveValue(Equal(-1 * time.Second)))
+		})
+
+		It("rejects tcpKeepAlive values more negative than -1", func() {
+			ctx := cpi.New()
+			cfg := &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TCPKeepAlive: dur("-2s")}}
+			Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(MatchError(
+				ContainSubstring("invalid value for tcpKeepAlive"),
+			))
 		})
 
 		It("default settings are nil", func() {

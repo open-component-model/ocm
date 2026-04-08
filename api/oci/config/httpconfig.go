@@ -31,6 +31,9 @@ func (a *HTTPConfig) ApplyTo(_ cfgcpi.Context, target interface{}) error {
 	if !ok {
 		return cfgcpi.ErrNoContext(HTTPConfigType)
 	}
+	if err := a.HTTPSettings.Validate(); err != nil {
+		return err
+	}
 	s, err := t.GetHTTPSettings()
 	if err != nil {
 		return err

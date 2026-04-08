@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -11,19 +12,13 @@ import (
 type Duration string
 
 // UnmarshalJSON implements the json.Unmarshaller interface.
-// Negative durations are rejected because timeout values must be
-// zero (disabled) or positive.
 func (d *Duration) UnmarshalJSON(b []byte) error {
 	var str string
 	if err := json.Unmarshal(b, &str); err != nil {
 		return err
 	}
-	pd, err := time.ParseDuration(str)
-	if err != nil {
+	if _, err := time.ParseDuration(str); err != nil {
 		return fmt.Errorf("invalid duration: %s", str)
-	}
-	if pd < 0 {
-		return fmt.Errorf("negative duration not allowed: %s", str)
 	}
 	*d = Duration(str)
 	return nil
@@ -42,6 +37,30 @@ func (d *Duration) TimeDuration() (*time.Duration, error) {
 		return nil, fmt.Errorf("invalid duration %q: %w", string(*d), err)
 	}
 	return &pd, nil
+}
+
+// nonNegative requires the duration to be zero or positive.
+func nonNegative(d Duration) bool {
+	return !strings.HasPrefix(string(d), "-")
+}
+
+// nonNegativeOrMinusOne requires the duration to be zero, positive,
+// or -1 (to disable keep-alive probes).
+func nonNegativeOrMinusOne(d Duration) bool {
+	return !strings.HasPrefix(string(d), "-") || strings.HasPrefix(string(d), "-1")
+}
+
+func validateDuration(name string, d *Duration, valid func(Duration) bool) error {
+	if d == nil {
+		return nil
+	}
+	if _, err := d.TimeDuration(); err != nil {
+		return err
+	}
+	if !valid(*d) {
+		return fmt.Errorf("invalid value for %s: %s", name, string(*d))
+	}
+	return nil
 }
 
 // HTTPSettings contains the timeout settings for HTTP clients.
@@ -63,6 +82,7 @@ type HTTPSettings struct {
 	TCPDialTimeout *Duration `json:"tcpDialTimeout,omitempty"`
 
 	// TCPKeepAlive is the interval between TCP keep-alive probes.
+	// Use -1 to disable keep-alive probes.
 	TCPKeepAlive *Duration `json:"tcpKeepAlive,omitempty"`
 
 	// TLSHandshakeTimeout is the maximum time to wait for a TLS handshake.
@@ -73,4 +93,27 @@ type HTTPSettings struct {
 
 	// IdleConnTimeout is the maximum time an idle connection remains open.
 	IdleConnTimeout *Duration `json:"idleConnTimeout,omitempty"`
+}
+
+// Validate checks that timeout values are non-negative.
+// TCPKeepAlive additionally allows -1 to disable keep-alive probes
+// (consistent with Go's net.Dialer.KeepAlive).
+func (s *HTTPSettings) Validate() error {
+	for _, check := range []struct {
+		name  string
+		val   *Duration
+		valid func(Duration) bool
+	}{
+		{"timeout", s.Timeout, nonNegative},
+		{"tcpDialTimeout", s.TCPDialTimeout, nonNegative},
+		{"tcpKeepAlive", s.TCPKeepAlive, nonNegativeOrMinusOne},
+		{"tlsHandshakeTimeout", s.TLSHandshakeTimeout, nonNegative},
+		{"responseHeaderTimeout", s.ResponseHeaderTimeout, nonNegative},
+		{"idleConnTimeout", s.IdleConnTimeout, nonNegative},
+	} {
+		if err := validateDuration(check.name, check.val, check.valid); err != nil {
+			return err
+		}
+	}
+	return nil
 }
