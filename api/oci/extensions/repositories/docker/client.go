@@ -47,7 +47,7 @@ func newDockerClient(dockerhost string, logger mlog.UnboundLogger, httpCfg *cpi.
 	if err != nil {
 		return nil, err
 	}
-	timeout, err := httpCfg.GetTimeout()
+	timeout, err := httpCfg.Timeout.TimeDuration()
 	if err != nil {
 		return nil, err
 	}

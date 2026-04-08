@@ -77,7 +77,30 @@ All timeout values are Go duration strings (e.g. "30s", "5m", "1h").
 Use "0s" to disable a specific timeout. If not set, the <code>http.DefaultTransport</code>
 values from the Go standard library are used.
 
-Note: <code>timeout</code> controls the overall <code>http.Client</code> request deadline and is
-independent of the transport-level settings. Setting only <code>timeout</code> does not
-affect <code>tcpDialTimeout</code>, <code>tlsHandshakeTimeout</code>, or other transport timeouts.
+The fields have the following meaning:
+
+- <code>timeout</code> &mdash; specifies a time limit for requests made by the HTTP
+  client. The timeout includes connection time, any redirects, and reading
+  the response body. A timeout of zero means no timeout.
+
+- <code>tcpDialTimeout</code> &mdash; the maximum amount of time a dial will wait
+  for a TCP connect to complete. When dialing a host name with multiple IP
+  addresses, the timeout may be divided between them. The operating system
+  may impose its own earlier timeout.
+
+- <code>tcpKeepAlive</code> &mdash; specifies the interval between keep-alive
+  probes for an active network connection. If negative, keep-alive probes
+  are disabled.
+
+- <code>tlsHandshakeTimeout</code> &mdash; specifies the maximum amount of time
+  to wait for a TLS handshake. Zero means no timeout.
+
+- <code>responseHeaderTimeout</code> &mdash; specifies the amount of time to wait
+  for a server's response headers after fully writing the request (including
+  its body, if any). This time does not include the time to read the response
+  body.
+
+- <code>idleConnTimeout</code> &mdash; the maximum amount of time an idle
+  (keep-alive) connection will remain idle before closing itself. Zero means
+  no limit.
 `

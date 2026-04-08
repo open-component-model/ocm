@@ -17,11 +17,11 @@ func NewTransport(cfg *cpi.HTTPSettings) (*http.Transport, error) {
 		return transport, nil
 	}
 
-	dialTimeout, err := cfg.GetTCPDialTimeout()
+	dialTimeout, err := cfg.TCPDialTimeout.TimeDuration()
 	if err != nil {
 		return nil, err
 	}
-	keepAlive, err := cfg.GetTCPKeepAlive()
+	keepAlive, err := cfg.TCPKeepAlive.TimeDuration()
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func NewTransport(cfg *cpi.HTTPSettings) (*http.Transport, error) {
 		transport.DialContext = dialer.DialContext
 	}
 
-	tlsHandshake, err := cfg.GetTLSHandshakeTimeout()
+	tlsHandshake, err := cfg.TLSHandshakeTimeout.TimeDuration()
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func NewTransport(cfg *cpi.HTTPSettings) (*http.Transport, error) {
 		transport.TLSHandshakeTimeout = *tlsHandshake
 	}
 
-	responseHeader, err := cfg.GetResponseHeaderTimeout()
+	responseHeader, err := cfg.ResponseHeaderTimeout.TimeDuration()
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func NewTransport(cfg *cpi.HTTPSettings) (*http.Transport, error) {
 		transport.ResponseHeaderTimeout = *responseHeader
 	}
 
-	idleConn, err := cfg.GetIdleConnTimeout()
+	idleConn, err := cfg.IdleConnTimeout.TimeDuration()
 	if err != nil {
 		return nil, err
 	}

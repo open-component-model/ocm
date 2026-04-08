@@ -199,7 +199,7 @@ func configureTransport(ctx cpi.Context, scheme string, creds credentials.Creden
 	if err != nil {
 		return nil, nil, err
 	}
-	timeout, err := httpCfg.GetTimeout()
+	timeout, err := httpCfg.Timeout.TimeDuration()
 	if err != nil {
 		return nil, nil, err
 	}

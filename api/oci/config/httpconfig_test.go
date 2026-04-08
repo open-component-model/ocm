@@ -29,7 +29,7 @@ var _ = Describe("http config", func() {
 
 			Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(Succeed())
 			g := MustGetHTTPSettings(ctx)
-			Expect(g.GetTimeout()).To(HaveValue(Equal(5 * time.Minute)))
+			Expect(g.Timeout.TimeDuration()).To(HaveValue(Equal(5 * time.Minute)))
 		})
 
 		It("applies via config context", func() {
@@ -38,7 +38,7 @@ var _ = Describe("http config", func() {
 
 			Expect(ctx.ConfigContext().ApplyConfig(cfg, "programmatic")).To(Succeed())
 			g := MustGetHTTPSettings(ctx)
-			Expect(g.GetTimeout()).To(HaveValue(Equal(30 * time.Second)))
+			Expect(g.Timeout.TimeDuration()).To(HaveValue(Equal(30 * time.Second)))
 		})
 
 		It("parses all fields from JSON config", func() {
@@ -49,7 +49,7 @@ var _ = Describe("http config", func() {
 			Expect(ctx.ConfigContext().ApplyConfig(cfg, "config file")).To(Succeed())
 
 			g := MustGetHTTPSettings(ctx)
-			Expect(g.GetTimeout()).To(HaveValue(Equal(10 * time.Second)))
+			Expect(g.Timeout.TimeDuration()).To(HaveValue(Equal(10 * time.Second)))
 			Expect(g.TCPDialTimeout.TimeDuration()).To(HaveValue(Equal(15 * time.Second)))
 			Expect(g.TCPKeepAlive.TimeDuration()).To(HaveValue(Equal(20 * time.Second)))
 			Expect(g.TLSHandshakeTimeout.TimeDuration()).To(HaveValue(Equal(5 * time.Second)))
@@ -71,7 +71,7 @@ var _ = Describe("http config", func() {
 			Expect(second.ApplyTo(ctx.ConfigContext(), ctx)).To(Succeed())
 
 			g := MustGetHTTPSettings(ctx)
-			Expect(g.GetTimeout()).To(HaveValue(Equal(1 * time.Minute)))
+			Expect(g.Timeout.TimeDuration()).To(HaveValue(Equal(1 * time.Minute)))
 			Expect(g.TCPDialTimeout.TimeDuration()).To(HaveValue(Equal(15 * time.Second)))
 		})
 
@@ -93,12 +93,12 @@ configurations:
 			Expect(ctx.ConfigContext().ApplyConfig(cfg, "config file")).To(Succeed())
 
 			g := MustGetHTTPSettings(ctx)
-			Expect(g.GetTimeout()).To(HaveValue(Equal(10 * time.Second)))
-			Expect(g.GetTCPDialTimeout()).To(HaveValue(Equal(15 * time.Second)))
-			Expect(g.GetTCPKeepAlive()).To(HaveValue(Equal(20 * time.Second)))
-			Expect(g.GetTLSHandshakeTimeout()).To(HaveValue(Equal(5 * time.Second)))
-			Expect(g.GetResponseHeaderTimeout()).To(HaveValue(Equal(8 * time.Second)))
-			Expect(g.GetIdleConnTimeout()).To(HaveValue(Equal(45 * time.Second)))
+			Expect(g.Timeout.TimeDuration()).To(HaveValue(Equal(10 * time.Second)))
+			Expect(g.TCPDialTimeout.TimeDuration()).To(HaveValue(Equal(15 * time.Second)))
+			Expect(g.TCPKeepAlive.TimeDuration()).To(HaveValue(Equal(20 * time.Second)))
+			Expect(g.TLSHandshakeTimeout.TimeDuration()).To(HaveValue(Equal(5 * time.Second)))
+			Expect(g.ResponseHeaderTimeout.TimeDuration()).To(HaveValue(Equal(8 * time.Second)))
+			Expect(g.IdleConnTimeout.TimeDuration()).To(HaveValue(Equal(45 * time.Second)))
 		})
 
 		It("rejects invalid duration string", func() {
@@ -121,7 +121,7 @@ configurations:
 
 		It("nil timeout returns nil not zero", func() {
 			g := MustGetHTTPSettings(cpi.New())
-			timeout, err := g.GetTimeout()
+			timeout, err := g.Timeout.TimeDuration()
 			Expect(err).To(Succeed())
 			Expect(timeout).To(BeNil())
 		})
