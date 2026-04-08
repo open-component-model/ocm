@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
@@ -154,35 +155,9 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		}
 	}
 
-	httpSettings, err := r.GetContext().GetHTTPSettings()
+	baseTransport, timeout, err := configureTransport(r.GetContext(), r.info.Scheme, creds)
 	if err != nil {
 		return nil, err
-	}
-	httpCfg := &httpSettings
-	baseTransport, err := httpclient.NewTransport(httpCfg)
-	if err != nil {
-		return nil, err
-	}
-	timeout, err := httpCfg.GetTimeout()
-	if err != nil {
-		return nil, err
-	}
-
-	if r.info.Scheme == "https" {
-		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
-		baseTransport.TLSClientConfig = &tls.Config{
-			// MinVersion: tls.VersionTLS13,
-			RootCAs: func() *x509.CertPool {
-				rootCAs := rootcertsattr.Get(r.GetContext()).GetRootCertPool(true)
-				if creds != nil {
-					c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
-					if c != "" {
-						rootCAs.AppendCertsFromPEM([]byte(c))
-					}
-				}
-				return rootCAs
-			}(),
-		}
 	}
 
 	retryTransport := retry.NewTransport(baseTransport)
@@ -212,6 +187,41 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		Logger:    logger,
 		Lock:      locker.New(),
 	}), nil
+}
+
+func configureTransport(ctx cpi.Context, scheme string, creds credentials.Credentials) (*http.Transport, *time.Duration, error) {
+	httpSettings, err := ctx.GetHTTPSettings()
+	if err != nil {
+		return nil, nil, err
+	}
+	httpCfg := &httpSettings
+	baseTransport, err := httpclient.NewTransport(httpCfg)
+	if err != nil {
+		return nil, nil, err
+	}
+	timeout, err := httpCfg.GetTimeout()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if scheme == "https" {
+		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
+		baseTransport.TLSClientConfig = &tls.Config{
+			// MinVersion: tls.VersionTLS13,
+			RootCAs: func() *x509.CertPool {
+				rootCAs := rootcertsattr.Get(ctx).GetRootCertPool(true)
+				if creds != nil {
+					c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
+					if c != "" {
+						rootCAs.AppendCertsFromPEM([]byte(c))
+					}
+				}
+				return rootCAs
+			}(),
+		}
+	}
+
+	return baseTransport, timeout, nil
 }
 
 func (r *RepositoryImpl) GetRef(comp, vers string) string {
