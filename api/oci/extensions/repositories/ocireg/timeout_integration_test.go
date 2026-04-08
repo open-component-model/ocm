@@ -78,8 +78,7 @@ var _ = Describe("Registry timeout:", Ordered, func() {
 		env = NewTestEnv(envhelper.FileSystem(osfs.New()))
 
 		// Create temp dir and CTF for all tests.
-		tempDir, err = os.MkdirTemp("", "ocm-timeout-*")
-		Expect(err).To(Succeed())
+		tempDir = GinkgoT().TempDir()
 
 		ctfDir = filepath.Join(tempDir, "ctf")
 		constructorFile := filepath.Join(tempDir, "constructor.yaml")
@@ -114,9 +113,6 @@ var _ = Describe("Registry timeout:", Ordered, func() {
 		}
 		if env != nil {
 			Expect(env.Cleanup()).To(Succeed())
-		}
-		if tempDir != "" {
-			Expect(os.RemoveAll(tempDir)).To(Succeed())
 		}
 	})
 
@@ -226,5 +222,6 @@ func addLatency(proxy *toxiproxy.Proxy, latencyMs int, stream string) {
 }
 
 func removeToxic(proxy *toxiproxy.Proxy, name string) {
-	Expect(proxy.RemoveToxic(name)).To(Succeed())
+	err := proxy.RemoveToxic(name)
+	Expect(err).ToNot(HaveOccurred())
 }

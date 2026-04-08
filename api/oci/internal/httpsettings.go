@@ -11,13 +11,19 @@ import (
 type Duration string
 
 // UnmarshalJSON implements the json.Unmarshaller interface.
+// Negative durations are rejected because timeout values must be
+// zero (disabled) or positive.
 func (d *Duration) UnmarshalJSON(b []byte) error {
 	var str string
 	if err := json.Unmarshal(b, &str); err != nil {
 		return err
 	}
-	if _, err := time.ParseDuration(str); err != nil {
+	pd, err := time.ParseDuration(str)
+	if err != nil {
 		return fmt.Errorf("invalid duration: %s", str)
+	}
+	if pd < 0 {
+		return fmt.Errorf("negative duration not allowed: %s", str)
 	}
 	*d = Duration(str)
 	return nil

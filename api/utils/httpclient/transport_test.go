@@ -45,6 +45,9 @@ var _ = Describe("NewTransport", func() {
 			Expect(tr.TLSHandshakeTimeout).To(Equal(defaultTransport.TLSHandshakeTimeout))
 			Expect(tr.IdleConnTimeout).To(Equal(defaultTransport.IdleConnTimeout))
 			Expect(tr.ResponseHeaderTimeout).To(Equal(defaultTransport.ResponseHeaderTimeout))
+			Expect(tr.ExpectContinueTimeout).To(Equal(defaultTransport.ExpectContinueTimeout))
+			Expect(tr.MaxIdleConns).To(Equal(defaultTransport.MaxIdleConns))
+			Expect(tr.ForceAttemptHTTP2).To(Equal(defaultTransport.ForceAttemptHTTP2))
 		})
 	})
 

@@ -109,6 +109,14 @@ configurations:
 			Expect(err.Error()).To(ContainSubstring("invalid duration: notaduration"))
 		})
 
+		It("rejects negative duration", func() {
+			ctx := cpi.New()
+			raw := []byte(`{"type":"http.config.ocm.software/v1alpha1","timeout":"-5m"}`)
+			_, err := ctx.ConfigContext().GetConfigForData(raw, nil)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("negative duration not allowed: -5m"))
+		})
+
 		It("default settings are nil", func() {
 			g := MustGetHTTPSettings(cpi.New())
 			Expect(g.Timeout).To(BeNil())
