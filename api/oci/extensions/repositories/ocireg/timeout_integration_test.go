@@ -66,11 +66,11 @@ var _ = Describe("Registry timeout:", Ordered, func() {
 		Expect(err).To(Succeed(), "failed to start toxiproxy container")
 
 		host, port, err := toxiContainer.ProxiedEndpoint(8666)
-		Expect(err).To(Succeed())
+		Expect(err).ToNot(HaveOccurred())
 		proxyHost = fmt.Sprintf("%s:%s", host, port)
 
 		uri, err := toxiContainer.URI(ctx)
-		Expect(err).To(Succeed())
+		Expect(err).ToNot(HaveOccurred())
 		toxiClient := toxiproxy.NewClient(uri)
 		proxy, err = toxiClient.Proxy(proxyName)
 		Expect(err).To(Succeed(), "failed to get toxiproxy proxy")
@@ -218,7 +218,7 @@ func addLatency(proxy *toxiproxy.Proxy, latencyMs int, stream string) {
 	_, err := proxy.AddToxic("latency", "latency", stream, 1.0, toxiproxy.Attributes{
 		"latency": latencyMs,
 	})
-	Expect(err).To(Succeed())
+	Expect(err).ToNot(HaveOccurred())
 }
 
 func removeToxic(proxy *toxiproxy.Proxy, name string) {

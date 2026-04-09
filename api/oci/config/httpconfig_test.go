@@ -128,7 +128,7 @@ configurations:
 				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{IdleConnTimeout: dur("-5m")}}),
 		)
 
-		It("allows -1 tcpKeepAlive to disable keep-alive probes", func() {
+		It("allows negative tcpKeepAlive to disable keep-alive probes", func() {
 			ctx := cpi.New()
 			cfg := &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TCPKeepAlive: dur("-1s")}}
 			Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(Succeed())
@@ -136,13 +136,56 @@ configurations:
 			Expect(g.TCPKeepAlive.TimeDuration()).To(HaveValue(Equal(-1 * time.Second)))
 		})
 
-		It("rejects tcpKeepAlive values more negative than -1", func() {
-			ctx := cpi.New()
-			cfg := &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TCPKeepAlive: dur("-2s")}}
-			Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(MatchError(
-				ContainSubstring("invalid value for tcpKeepAlive"),
-			))
-		})
+		DescribeTable("accepts compound duration like 1h5s",
+			func(cfg *config.HTTPConfig) {
+				ctx := cpi.New()
+				Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(Succeed())
+			},
+			Entry("timeout", &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{Timeout: dur("1h5s")}}),
+			Entry("tcpDialTimeout", &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TCPDialTimeout: dur("1h5s")}}),
+			Entry("tcpKeepAlive", &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TCPKeepAlive: dur("1h5s")}}),
+			Entry("tlsHandshakeTimeout", &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TLSHandshakeTimeout: dur("1h5s")}}),
+			Entry("responseHeaderTimeout", &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{ResponseHeaderTimeout: dur("1h5s")}}),
+			Entry("idleConnTimeout", &config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{IdleConnTimeout: dur("1h5s")}}),
+		)
+
+		DescribeTable("rejects negative compound duration -10h5m",
+			func(field string, cfg *config.HTTPConfig) {
+				ctx := cpi.New()
+				Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(MatchError(
+					ContainSubstring("invalid value for " + field),
+				))
+			},
+			Entry("timeout", "timeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{Timeout: dur("-10h5m")}}),
+			Entry("tcpDialTimeout", "tcpDialTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TCPDialTimeout: dur("-10h5m")}}),
+			Entry("tlsHandshakeTimeout", "tlsHandshakeTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TLSHandshakeTimeout: dur("-10h5m")}}),
+			Entry("responseHeaderTimeout", "responseHeaderTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{ResponseHeaderTimeout: dur("-10h5m")}}),
+			Entry("idleConnTimeout", "idleConnTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{IdleConnTimeout: dur("-10h5m")}}),
+		)
+
+		DescribeTable("rejects -10s",
+			func(field string, cfg *config.HTTPConfig) {
+				ctx := cpi.New()
+				Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(MatchError(
+					ContainSubstring("invalid value for " + field),
+				))
+			},
+			Entry("timeout", "timeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{Timeout: dur("-10s")}}),
+			Entry("tcpDialTimeout", "tcpDialTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TCPDialTimeout: dur("-10s")}}),
+			Entry("tlsHandshakeTimeout", "tlsHandshakeTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{TLSHandshakeTimeout: dur("-10s")}}),
+			Entry("responseHeaderTimeout", "responseHeaderTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{ResponseHeaderTimeout: dur("-10s")}}),
+			Entry("idleConnTimeout", "idleConnTimeout",
+				&config.HTTPConfig{HTTPSettings: cpi.HTTPSettings{IdleConnTimeout: dur("-10s")}}),
+		)
 
 		It("default settings are nil", func() {
 			g := MustGetHTTPSettings(cpi.New())

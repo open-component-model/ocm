@@ -3,7 +3,6 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -39,26 +38,16 @@ func (d *Duration) TimeDuration() (*time.Duration, error) {
 	return &pd, nil
 }
 
-// nonNegative requires the duration to be zero or positive.
-func nonNegative(d Duration) bool {
-	return !strings.HasPrefix(string(d), "-")
-}
-
-// nonNegativeOrMinusOne requires the duration to be zero, positive,
-// or -1 (to disable keep-alive probes).
-func nonNegativeOrMinusOne(d Duration) bool {
-	return !strings.HasPrefix(string(d), "-") || strings.HasPrefix(string(d), "-1")
-}
-
-func validateDuration(name string, d *Duration, valid func(Duration) bool) error {
+func validateNonNegative(name string, d *Duration) error {
 	if d == nil {
 		return nil
 	}
-	if _, err := d.TimeDuration(); err != nil {
+	td, err := d.TimeDuration()
+	if err != nil {
 		return err
 	}
-	if !valid(*d) {
-		return fmt.Errorf("invalid value for %s: %s", name, string(*d))
+	if td != nil && *td < 0 {
+		return fmt.Errorf("invalid value for %s: %s, must be zero or positive", name, string(*d))
 	}
 	return nil
 }
@@ -82,7 +71,8 @@ type HTTPSettings struct {
 	TCPDialTimeout *Duration `json:"tcpDialTimeout,omitempty"`
 
 	// TCPKeepAlive is the interval between TCP keep-alive probes.
-	// Use -1 to disable keep-alive probes.
+	// If zero, probes are sent with a default value (currently 15 seconds).
+	// If negative, keep-alive probes are disabled.
 	TCPKeepAlive *Duration `json:"tcpKeepAlive,omitempty"`
 
 	// TLSHandshakeTimeout is the maximum time to wait for a TLS handshake.
@@ -96,22 +86,20 @@ type HTTPSettings struct {
 }
 
 // Validate checks that timeout values are non-negative.
-// TCPKeepAlive additionally allows -1 to disable keep-alive probes
-// (consistent with Go's net.Dialer.KeepAlive).
+// TCPKeepAlive is not validated because any negative value
+// disables keep-alive probes (consistent with Go's net.Dialer.KeepAlive).
 func (s *HTTPSettings) Validate() error {
 	for _, check := range []struct {
-		name  string
-		val   *Duration
-		valid func(Duration) bool
+		name string
+		val  *Duration
 	}{
-		{"timeout", s.Timeout, nonNegative},
-		{"tcpDialTimeout", s.TCPDialTimeout, nonNegative},
-		{"tcpKeepAlive", s.TCPKeepAlive, nonNegativeOrMinusOne},
-		{"tlsHandshakeTimeout", s.TLSHandshakeTimeout, nonNegative},
-		{"responseHeaderTimeout", s.ResponseHeaderTimeout, nonNegative},
-		{"idleConnTimeout", s.IdleConnTimeout, nonNegative},
+		{"timeout", s.Timeout},
+		{"tcpDialTimeout", s.TCPDialTimeout},
+		{"tlsHandshakeTimeout", s.TLSHandshakeTimeout},
+		{"responseHeaderTimeout", s.ResponseHeaderTimeout},
+		{"idleConnTimeout", s.IdleConnTimeout},
 	} {
-		if err := validateDuration(check.name, check.val, check.valid); err != nil {
+		if err := validateNonNegative(check.name, check.val); err != nil {
 			return err
 		}
 	}
