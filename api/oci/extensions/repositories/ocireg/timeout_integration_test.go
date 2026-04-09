@@ -51,19 +51,19 @@ var _ = Describe("Registry timeout:", Ordered, func() {
 
 		var err error
 		nw, err = network.New(ctx)
-		Expect(err).To(Succeed(), "failed to create Docker network")
+		Expect(err).ToNot(HaveOccurred(), "failed to create Docker network")
 
 		registryContainer, err = registry.Run(ctx, registryImage,
 			network.WithNetwork([]string{"registry"}, nw),
 			testcontainers.WithWaitStrategy(wait.ForHTTP("/v2/").WithPort("5000/tcp")),
 		)
-		Expect(err).To(Succeed(), "failed to start registry container")
+		Expect(err).ToNot(HaveOccurred(), "failed to start registry container")
 
 		toxiContainer, err = tctoxiproxy.Run(ctx, toxiproxyImage,
 			network.WithNetwork([]string{"toxiproxy"}, nw),
 			tctoxiproxy.WithProxy(proxyName, fmt.Sprintf("registry:%d", registryPort)),
 		)
-		Expect(err).To(Succeed(), "failed to start toxiproxy container")
+		Expect(err).ToNot(HaveOccurred(), "failed to start toxiproxy container")
 
 		host, port, err := toxiContainer.ProxiedEndpoint(8666)
 		Expect(err).ToNot(HaveOccurred())
@@ -73,7 +73,7 @@ var _ = Describe("Registry timeout:", Ordered, func() {
 		Expect(err).ToNot(HaveOccurred())
 		toxiClient := toxiproxy.NewClient(uri)
 		proxy, err = toxiClient.Proxy(proxyName)
-		Expect(err).To(Succeed(), "failed to get toxiproxy proxy")
+		Expect(err).ToNot(HaveOccurred(), "failed to get toxiproxy proxy")
 
 		env = NewTestEnv(envhelper.FileSystem(osfs.New()))
 

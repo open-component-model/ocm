@@ -87,6 +87,14 @@ var _ = Describe("NewTransport", func() {
 			Expect(tr.DialContext).NotTo(BeNil())
 			Expect(tr.TLSHandshakeTimeout).To(Equal(defaultTransport.TLSHandshakeTimeout))
 		})
+
+		It("replaces DialContext when negative TCPKeepAlive disables probes", func() {
+			tr, err := httpclient.NewTransport(&ocicpi.HTTPSettings{
+				TCPKeepAlive: dur("-1s"),
+			})
+			Expect(err).To(Succeed())
+			Expect(tr.DialContext).NotTo(BeNil())
+		})
 	})
 
 	Context("when all fields are set", func() {
