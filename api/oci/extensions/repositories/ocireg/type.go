@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/containerd/containerd/reference"
+	"github.com/containerd/containerd/v2/pkg/reference"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/oci/cpi"

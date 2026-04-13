@@ -3,8 +3,8 @@ package processing
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 
-	"github.com/containerd/containerd/pkg/atomic"
 	"github.com/mandelsoft/logging"
 
 	"ocm.software/ocm/api/utils/panics"
@@ -165,7 +165,7 @@ func NewProcessingBuffer(log logging.Context, i BufferImplementation) Processing
 func (b *_buffer) new(log logging.Context, i BufferImplementation) *_buffer {
 	b.BufferImplementation = i
 	b.Cond = sync.NewCond(&b.Mutex)
-	b.complete = atomic.NewBool(false)
+	b.complete.Store(false)
 	i.SetFrame(b)
 	b.log = log
 	return b
@@ -184,20 +184,20 @@ func (b *_buffer) Add(e ProcessingEntry) ProcessingBuffer {
 func (b *_buffer) Open() {
 	b.Lock()
 	b.BufferImplementation.Open()
-	b.complete.Unset()
+	b.complete.Store(false)
 	b.Unlock()
 }
 
 func (b *_buffer) Close() {
 	b.Lock()
 	b.BufferImplementation.Close()
-	b.complete.Set()
+	b.complete.Store(true)
 	b.Unlock()
 	b.Broadcast()
 }
 
 func (b *_buffer) IsClosed() bool {
-	return b.complete.IsSet()
+	return b.complete.Load()
 }
 
 func (b *_buffer) Len() int {
