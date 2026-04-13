@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate_token
-        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v2
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v2
         with: # OCMBot
           app-id: ${{ secrets.OCMBOT_APP_ID }}
           private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -57,7 +57,7 @@ jobs:
         with:
           cache-source: go-build-cache
       - name: Build and push
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           context: .
           # supported platforms: https://github.com/GoogleContainerTools/distroless?tab=readme-ov-file#what-images-are-available
@@ -81,7 +81,7 @@ jobs:
       uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v2
+      uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
