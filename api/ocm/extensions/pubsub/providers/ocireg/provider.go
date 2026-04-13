@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"path"
 
-	containererr "github.com/containerd/containerd/remotes/errors"
+	containererr "github.com/containerd/containerd/v2/core/remotes/errors"
 	"github.com/mandelsoft/goutils/errors"
 
 	"ocm.software/ocm/api/ocm/cpi"
