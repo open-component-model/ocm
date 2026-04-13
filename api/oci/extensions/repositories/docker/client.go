@@ -5,6 +5,7 @@ package docker
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/config"
@@ -43,20 +44,13 @@ func newDockerClient(dockerhost string, logger mlog.UnboundLogger, httpCfg *cpi.
 		opts = append(opts, dockerclient.WithScheme(url.Scheme))
 	}
 
-	transport, err := httpclient.NewTransport(httpCfg)
-	if err != nil {
-		return nil, err
-	}
-	timeout, err := httpCfg.Timeout.TimeDuration()
-	if err != nil {
-		return nil, err
-	}
+	transport := httpclient.NewTransport(httpCfg)
 
 	clnt := http.Client{
 		Transport: logging.NewRoundTripper(transport, logger),
 	}
-	if timeout != nil {
-		clnt.Timeout = *timeout
+	if httpCfg.Timeout != nil {
+		clnt.Timeout = time.Duration(*httpCfg.Timeout)
 	}
 	opts = append(opts, dockerclient.WithHTTPClient(&clnt))
 	c, err := dockerclient.New(opts...)

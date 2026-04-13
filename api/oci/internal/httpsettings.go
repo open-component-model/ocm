@@ -6,50 +6,29 @@ import (
 	"time"
 )
 
-// Duration is a string type representing a Go duration (e.g. "30s", "5m").
-// It is validated on JSON unmarshaling.
-type Duration string
+// Duration is a time.Duration that marshals to/from a human-readable
+// Go duration string (e.g. "30s", "5m") in JSON/YAML.
+type Duration time.Duration
 
 // UnmarshalJSON implements the json.Unmarshaller interface.
+// It parses a quoted Go duration string (e.g. "30s", "1h5m") into a Duration.
 func (d *Duration) UnmarshalJSON(b []byte) error {
 	var str string
 	if err := json.Unmarshal(b, &str); err != nil {
-		return err
+		return fmt.Errorf("invalid duration %s: expected a Go duration string (e.g. \"30s\", \"5m\", \"1h30m\")", string(b))
 	}
-	if _, err := time.ParseDuration(str); err != nil {
-		return fmt.Errorf("invalid duration: %s", str)
+	pd, err := time.ParseDuration(str)
+	if err != nil {
+		return fmt.Errorf("invalid duration %q: expected a Go duration string (e.g. \"30s\", \"5m\", \"1h30m\")", str)
 	}
-	*d = Duration(str)
+	*d = Duration(pd)
 	return nil
 }
 
-// TimeDuration parses the Duration string and returns a *time.Duration.
-// Returns (nil, nil) if d is nil or empty — callers must distinguish
-// nil (not configured) from zero (explicitly disabled).
-// Returns an error if the string is malformed.
-func (d *Duration) TimeDuration() (*time.Duration, error) {
-	if d == nil || *d == "" {
-		return nil, nil
-	}
-	pd, err := time.ParseDuration(string(*d))
-	if err != nil {
-		return nil, fmt.Errorf("invalid duration %q: %w", string(*d), err)
-	}
-	return &pd, nil
-}
-
-func validateNonNegative(name string, d *Duration) error {
-	if d == nil {
-		return nil
-	}
-	td, err := d.TimeDuration()
-	if err != nil {
-		return err
-	}
-	if td != nil && *td < 0 {
-		return fmt.Errorf("invalid value for %s: %s, must be zero or positive", name, string(*d))
-	}
-	return nil
+// MarshalJSON implements the json.Marshaler interface.
+// It encodes the Duration as a quoted Go duration string (e.g. "30s", "1h5m").
+func (d Duration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(time.Duration(d).String())
 }
 
 // HTTPSettings contains the timeout settings for HTTP clients.
@@ -99,8 +78,8 @@ func (s *HTTPSettings) Validate() error {
 		{"responseHeaderTimeout", s.ResponseHeaderTimeout},
 		{"idleConnTimeout", s.IdleConnTimeout},
 	} {
-		if err := validateNonNegative(check.name, check.val); err != nil {
-			return err
+		if check.val != nil && time.Duration(*check.val) < 0 {
+			return fmt.Errorf("invalid value for %s: %s, must be zero or positive", check.name, time.Duration(*check.val))
 		}
 	}
 	return nil

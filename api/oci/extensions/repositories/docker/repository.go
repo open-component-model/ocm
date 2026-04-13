@@ -27,8 +27,7 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec) (cpi.Repository, error
 	if err != nil {
 		return nil, err
 	}
-	httpCfg := &httpSettings
-	client, err := newDockerClient(spec.DockerHost, logger, httpCfg)
+	client, err := newDockerClient(spec.DockerHost, logger, &httpSettings)
 	if err != nil {
 		return nil, err
 	}

@@ -194,19 +194,16 @@ func configureTransport(ctx cpi.Context, scheme string, creds credentials.Creden
 	if err != nil {
 		return nil, nil, err
 	}
-	httpCfg := &httpSettings
-	baseTransport, err := httpclient.NewTransport(httpCfg)
-	if err != nil {
-		return nil, nil, err
-	}
-	timeout, err := httpCfg.Timeout.TimeDuration()
-	if err != nil {
-		return nil, nil, err
+	baseTransport := httpclient.NewTransport(&httpSettings)
+	var timeout *time.Duration
+	if httpSettings.Timeout != nil {
+		timeout = new(time.Duration(*httpSettings.Timeout))
 	}
 
 	if scheme == "https" {
-		//nolint:gosec // there are OCI servers (quay.io) not working with min version.
+		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
 		baseTransport.TLSClientConfig = &tls.Config{
+			// MinVersion: tls.VersionTLS13,
 			RootCAs: func() *x509.CertPool {
 				rootCAs := rootcertsattr.Get(ctx).GetRootCertPool(true)
 				if creds != nil {
