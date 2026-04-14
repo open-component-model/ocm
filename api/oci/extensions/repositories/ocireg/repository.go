@@ -3,10 +3,10 @@ package ocireg
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"net/http"
 	"path"
 	"strings"
+	"sync"
 
 	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
@@ -51,6 +51,10 @@ type RepositoryImpl struct {
 	logger logging.UnboundLogger
 	spec   *RepositorySpec
 	info   *RepositoryInfo
+
+	mu        sync.Mutex
+	transport *http.Transport
+	lock      *locker.Locker
 }
 
 var (
@@ -87,6 +91,14 @@ func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {
 }
 
 func (r *RepositoryImpl) Close() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.transport != nil {
+		r.transport.CloseIdleConnections()
+		r.transport = nil
+	}
+
 	return nil
 }
 
@@ -114,6 +126,28 @@ func (r *RepositoryImpl) getCreds(comp string) (credentials.Credentials, error) 
 		return r.info.Creds, nil
 	}
 	return identity.GetCredentials(r.GetContext(), r.info.Locator, comp)
+}
+
+func (r *RepositoryImpl) getOrCreateTransport() *http.Transport {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.transport == nil {
+		r.transport = &http.Transport{}
+
+		if r.info.Scheme == "https" {
+			//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
+			r.transport.TLSClientConfig = &tls.Config{
+				RootCAs: rootcertsattr.Get(r.GetContext()).GetRootCertPool(true),
+			}
+		}
+	}
+
+	if r.lock == nil {
+		r.lock = locker.New()
+	}
+
+	return r.transport
 }
 
 func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
@@ -153,29 +187,17 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		}
 	}
 
-	client := retry.DefaultClient
-	client.Transport = ocmlog.NewRoundTripper(retry.DefaultClient.Transport, logger)
-	if r.info.Scheme == "https" {
-		// set up TLS
-		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
-		conf := &tls.Config{
-			// MinVersion: tls.VersionTLS13,
-			RootCAs: func() *x509.CertPool {
-				rootCAs := rootcertsattr.Get(r.GetContext()).GetRootCertPool(true)
-				if creds != nil {
-					c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
-					if c != "" {
-						rootCAs.AppendCertsFromPEM([]byte(c))
-					}
-				}
+	transport := r.getOrCreateTransport()
 
-				return rootCAs
-			}(),
+	if creds != nil && transport.TLSClientConfig != nil {
+		c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
+		if c != "" {
+			transport.TLSClientConfig.RootCAs.AppendCertsFromPEM([]byte(c))
 		}
-		client.Transport = ocmlog.NewRoundTripper(retry.NewTransport(&http.Transport{
-			TLSClientConfig: conf,
-		}), logger)
 	}
+
+	client := retry.DefaultClient
+	client.Transport = ocmlog.NewRoundTripper(retry.NewTransport(transport), logger)
 
 	authClient := &auth.Client{
 		Client: client,
@@ -193,7 +215,7 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		Client:    authClient,
 		PlainHTTP: r.info.Scheme == "http",
 		Logger:    logger,
-		Lock:      locker.New(),
+		Lock:      r.lock,
 	}), nil
 }
 
