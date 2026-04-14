@@ -38,6 +38,9 @@ type Context interface {
 
 	GetAlias(name string) RepositorySpec
 	SetAlias(name string, spec RepositorySpec)
+
+	GetHTTPSettings() (HTTPSettings, error)
+	SetHTTPSettings(s *HTTPSettings)
 }
 
 var key = reflect.TypeOf(_context{})
@@ -80,6 +83,7 @@ type _context struct {
 	knownRepositoryTypes RepositoryTypeScheme
 	specHandlers         RepositorySpecHandlers
 	aliases              map[string]RepositorySpec
+	httpSettings         HTTPSettings
 }
 
 var (
@@ -109,6 +113,7 @@ func (w *gcWrapper) SetContext(c *_context) {
 func newContext(credctx credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers, delegates datacontext.Delegates) Context {
 	c := &_context{
 		credentials:          datacontext.PersistentContextRef(credctx),
+		httpSettings:         HTTPSettings{},
 		knownRepositoryTypes: reposcheme,
 		specHandlers:         specHandlers,
 		aliases:              map[string]RepositorySpec{},
@@ -192,4 +197,20 @@ func (c *_context) SetAlias(name string, spec RepositorySpec) {
 	c.updater.Lock()
 	defer c.updater.Unlock()
 	c.aliases[name] = spec
+}
+
+func (c *_context) GetHTTPSettings() (HTTPSettings, error) {
+	err := c.updater.Update()
+	if err != nil {
+		return HTTPSettings{}, err
+	}
+	c.updater.RLock()
+	defer c.updater.RUnlock()
+	return c.httpSettings, nil
+}
+
+func (c *_context) SetHTTPSettings(s *HTTPSettings) {
+	c.updater.Lock()
+	defer c.updater.Unlock()
+	c.httpSettings = *s
 }
