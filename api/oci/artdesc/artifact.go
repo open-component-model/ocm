@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	out "fmt"
 
-	"github.com/containerd/containerd/images"
+	"github.com/containerd/containerd/v2/core/images"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"

@@ -8,6 +8,7 @@ require (
 	github.com/InfiniteLoopSpace/go_S-MIME v0.0.0-20181221134359-3f58f9a4b2b6
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/Masterminds/sprig/v3 v3.3.0
+	github.com/Shopify/toxiproxy/v2 v2.12.0
 	github.com/aws/aws-sdk-go-v2 v1.41.5
 	github.com/aws/aws-sdk-go-v2/config v1.32.14
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.14
@@ -16,7 +17,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.99.0
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/cloudflare/cfssl v1.6.5
-	github.com/containerd/containerd v1.7.30
+	github.com/containerd/containerd/v2 v2.2.2
 	github.com/containerd/errdefs v1.0.0
 	github.com/containerd/log v0.1.0
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467
@@ -68,6 +69,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.42.0
 	github.com/testcontainers/testcontainers-go/modules/registry v0.42.0
+	github.com/testcontainers/testcontainers-go/modules/toxiproxy v0.42.0
 	github.com/texttheater/golang-levenshtein v1.0.1
 	github.com/tonglil/buflogr v1.1.1
 	github.com/ulikunitz/xz v0.5.15
@@ -202,8 +204,9 @@ require (
 	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
-	github.com/containerd/platforms v0.2.1 // indirect
+	github.com/containerd/platforms v1.0.0-rc.2 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.18.2 // indirect
+	github.com/containerd/typeurl/v2 v2.2.3 // indirect
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
 	github.com/containers/ocicrypt v1.2.1 // indirect
 	github.com/coreos/go-oidc/v3 v3.17.0 // indirect
@@ -283,6 +286,7 @@ require (
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.18.0 // indirect
 	github.com/gofrs/flock v0.13.0 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
@@ -306,8 +310,8 @@ require (
 	github.com/google/pprof v0.0.0-20260115054156-294ebfa9ad83 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.3.12 // indirect
-	github.com/googleapis/gax-go/v2 v2.17.0 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.14 // indirect
+	github.com/googleapis/gax-go/v2 v2.19.0 // indirect
 	github.com/gordonklaus/ineffassign v0.1.0 // indirect
 	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
 	github.com/gostaticanalysis/comment v1.5.0 // indirect
@@ -440,7 +444,7 @@ require (
 	github.com/sigstore/protobuf-specs v0.5.0 // indirect
 	github.com/sigstore/rekor-tiles/v2 v2.2.1 // indirect
 	github.com/sigstore/sigstore-go v1.1.4 // indirect
-	github.com/sigstore/timestamp-authority/v2 v2.0.5 // indirect
+	github.com/sigstore/timestamp-authority/v2 v2.0.6 // indirect
 	github.com/sivchari/containedctx v1.0.3 // indirect
 	github.com/skeema/knownhosts v1.3.2 // indirect
 	github.com/sonatard/noctx v0.4.0 // indirect
@@ -521,9 +525,9 @@ require (
 	golang.org/x/term v0.42.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.43.0 // indirect
-	google.golang.org/api v0.269.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260203192932-546029d2fa20 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260217215200-42d3e9bedb6d // indirect
+	google.golang.org/api v0.272.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260316180232-0b37fe3546d5 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260316180232-0b37fe3546d5 // indirect
 	google.golang.org/grpc v1.80.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect

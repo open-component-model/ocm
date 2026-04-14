@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
@@ -22,6 +23,7 @@ import (
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/tech/oras"
 	"ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils/httpclient"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/refmgmt"
 )
@@ -153,28 +155,18 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		}
 	}
 
-	client := retry.DefaultClient
-	client.Transport = ocmlog.NewRoundTripper(retry.DefaultClient.Transport, logger)
-	if r.info.Scheme == "https" {
-		// set up TLS
-		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
-		conf := &tls.Config{
-			// MinVersion: tls.VersionTLS13,
-			RootCAs: func() *x509.CertPool {
-				rootCAs := rootcertsattr.Get(r.GetContext()).GetRootCertPool(true)
-				if creds != nil {
-					c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
-					if c != "" {
-						rootCAs.AppendCertsFromPEM([]byte(c))
-					}
-				}
+	baseTransport, timeout, err := configureTransport(r.GetContext(), r.info.Scheme, creds)
+	if err != nil {
+		return nil, err
+	}
 
-				return rootCAs
-			}(),
-		}
-		client.Transport = ocmlog.NewRoundTripper(retry.NewTransport(&http.Transport{
-			TLSClientConfig: conf,
-		}), logger)
+	retryTransport := retry.NewTransport(baseTransport)
+
+	client := &http.Client{
+		Transport: ocmlog.NewRoundTripper(retryTransport, logger),
+	}
+	if timeout != nil {
+		client.Timeout = *timeout
 	}
 
 	authClient := &auth.Client{
@@ -195,6 +187,37 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		Logger:    logger,
 		Lock:      locker.New(),
 	}), nil
+}
+
+func configureTransport(ctx cpi.Context, scheme string, creds credentials.Credentials) (*http.Transport, *time.Duration, error) {
+	httpSettings, err := ctx.GetHTTPSettings()
+	if err != nil {
+		return nil, nil, err
+	}
+	baseTransport := httpclient.NewTransport(&httpSettings)
+	var timeout *time.Duration
+	if httpSettings.Timeout != nil {
+		timeout = new(time.Duration(*httpSettings.Timeout))
+	}
+
+	if scheme == "https" {
+		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
+		baseTransport.TLSClientConfig = &tls.Config{
+			// MinVersion: tls.VersionTLS13,
+			RootCAs: func() *x509.CertPool {
+				rootCAs := rootcertsattr.Get(ctx).GetRootCertPool(true)
+				if creds != nil {
+					c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
+					if c != "" {
+						rootCAs.AppendCertsFromPEM([]byte(c))
+					}
+				}
+				return rootCAs
+			}(),
+		}
+	}
+
+	return baseTransport, timeout, nil
 }
 
 func (r *RepositoryImpl) GetRef(comp, vers string) string {
