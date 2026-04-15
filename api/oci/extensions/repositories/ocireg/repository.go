@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"path"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/containerd/errdefs"
@@ -54,7 +53,6 @@ type RepositoryImpl struct {
 	spec   *RepositorySpec
 	info   *RepositoryInfo
 
-	mu        sync.Mutex
 	transport *http.Transport
 	timeout   *time.Duration
 	lock      *locker.Locker
@@ -71,11 +69,18 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) 
 	if urs.Scheme == "http" {
 		logger.Warn("using insecure http for oci registry {{host}}", "host", urs.Host)
 	}
+	transport, timeout, err := configureTransport(ctx, info.Scheme)
+	if err != nil {
+		return nil, err
+	}
 	i := &RepositoryImpl{
 		RepositoryImplBase: cpi.NewRepositoryImplBase(ctx),
 		logger:             logger,
 		spec:               spec,
 		info:               info,
+		transport:          transport,
+		timeout:            timeout,
+		lock:               locker.New(),
 	}
 	i.logger.Debug("created repository")
 	return cpi.NewRepository(i), nil
@@ -94,13 +99,9 @@ func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {
 }
 
 func (r *RepositoryImpl) Close() error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	if r.transport != nil {
-		r.transport.CloseIdleConnections()
-		r.transport = nil
-	}
+	// transport is always initialized in NewRepository; CloseIdleConnections
+	// only drains idle pooled connections, the transport itself remains usable
+	r.transport.CloseIdleConnections()
 
 	return nil
 }
@@ -129,26 +130,6 @@ func (r *RepositoryImpl) getCreds(comp string) (credentials.Credentials, error) 
 		return r.info.Creds, nil
 	}
 	return identity.GetCredentials(r.GetContext(), r.info.Locator, comp)
-}
-
-func (r *RepositoryImpl) getOrCreateTransport() (*http.Transport, *time.Duration, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	if r.transport == nil {
-		transport, timeout, err := configureTransport(r.GetContext(), r.info.Scheme)
-		if err != nil {
-			return nil, nil, err
-		}
-		r.transport = transport
-		r.timeout = timeout
-	}
-
-	if r.lock == nil {
-		r.lock = locker.New()
-	}
-
-	return r.transport, r.timeout, nil
 }
 
 func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
@@ -188,25 +169,20 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		}
 	}
 
-	transport, timeout, err := r.getOrCreateTransport()
-	if err != nil {
-		return nil, err
-	}
-
-	if creds != nil && transport.TLSClientConfig != nil {
+	if creds != nil && r.transport.TLSClientConfig != nil {
 		c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
 		if c != "" {
-			transport.TLSClientConfig.RootCAs.AppendCertsFromPEM([]byte(c))
+			r.transport.TLSClientConfig.RootCAs.AppendCertsFromPEM([]byte(c))
 		}
 	}
 
-	retryTransport := retry.NewTransport(transport)
+	retryTransport := retry.NewTransport(r.transport)
 
 	client := &http.Client{
 		Transport: ocmlog.NewRoundTripper(retryTransport, logger),
 	}
-	if timeout != nil {
-		client.Timeout = *timeout
+	if r.timeout != nil {
+		client.Timeout = *r.timeout
 	}
 
 	authClient := &auth.Client{
