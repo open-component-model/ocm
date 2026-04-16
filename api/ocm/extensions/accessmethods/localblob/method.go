@@ -15,6 +15,9 @@ import (
 const (
 	Type   = "localBlob"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
+
+	UpperType   = "LocalBlob"
+	UpperTypeV1 = UpperType + runtime.VersionSeparator + "v1"
 )
 
 // this package shows how to implement access types with multiple serialization versions.
@@ -51,6 +54,9 @@ func init() {
 	Must(versions.Register(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](Type, &converterV1{}, accspeccpi.WithDescription(usage))))
 	Must(versions.Register(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](TypeV1, &converterV1{}, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler()))))
 	accspeccpi.RegisterAccessTypeVersions(versions)
+
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](UpperType, &converterV1{}))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](UpperTypeV1, &converterV1{}))
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {

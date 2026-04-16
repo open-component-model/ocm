@@ -21,11 +21,17 @@ import (
 const (
 	Type   = "ociBlob"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
+
+	UpperType   = "OCIImageLayer"
+	UpperTypeV1 = UpperType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
+
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1))
 }
 
 // New creates a new OCIBlob accessor.
