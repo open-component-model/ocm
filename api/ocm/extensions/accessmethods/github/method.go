@@ -53,7 +53,7 @@ func init() {
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
-	return spec != nil && (spec.GetKind() == Type || spec.GetKind() == LegacyType || spec.GetKind() == UpperType)
+	return spec != nil && spec.GetKind() == Type || spec.GetKind() == LegacyType
 }
 
 // AccessSpec describes the access for a GitHub registry.

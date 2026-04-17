@@ -34,7 +34,7 @@ func init() {
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
-	return spec != nil && (spec.GetKind() == Type || spec.GetKind() == UpperType)
+	return spec != nil && spec.GetKind() == Type
 }
 
 // New creates a new WGET accessor for http resources.

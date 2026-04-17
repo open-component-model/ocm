@@ -13,5 +13,5 @@ func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{},
 		Usage("The path must denote a file relative the resources file. "), ConfigHandler()))
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE, &Spec{},
-		Usage("The path must denote a file relative the resources file. "), ConfigHandler()))
+		"", ConfigHandler()))
 }
