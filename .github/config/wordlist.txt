@@ -1,3 +1,4 @@
+NeoNephos
 accessmethod
 accessmethoddescriptor
 accessmethods
@@ -99,6 +100,7 @@ finalizer
 finalizers
 foldername
 forwardspec
+fulcio
 gapped
 gav
 getinexpensivecontentversionidentity
@@ -145,6 +147,7 @@ ioutils
 ipcei
 iterable
 json
+jsonNormalisation
 jsonschema
 keyless
 keypair
@@ -181,7 +184,6 @@ mvn
 mvnrepository
 namespace
 namespaces
-NeoNephos
 newcomponentaccess
 newcomponentversionaccess
 newrepository
@@ -201,6 +203,7 @@ ocm
 ocmbot
 ocmcli
 ocmconfig
+oidc
 oncefunc
 oo
 oras
@@ -229,6 +232,7 @@ pubsub
 readme
 readonly
 refcount
+rekor
 relativeocireference
 releasenotes
 releaser
@@ -268,13 +272,13 @@ struct
 subchart
 subcharts
 subst
+tcp
 tempfile
 templated
 templater
 templaters
 templating
 tgz
-tcp
 tls
 todo
 toi
@@ -291,6 +295,7 @@ uploader
 uploaderdescriptor
 uploaders
 uploadhandlers
+uppercamelcase
 url
 urls
 utf
@@ -307,7 +312,3 @@ yaml
 yitsushi
 yml
 yyyy
-jsonNormalisation
-rekor
-oidc
-fulcio
