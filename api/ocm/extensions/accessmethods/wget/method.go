@@ -20,15 +20,21 @@ import (
 const (
 	Type   = "wget"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
+
+	UpperType   = "Wget"
+	UpperTypeV1 = UpperType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
+
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1))
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
-	return spec != nil && spec.GetKind() == Type
+	return spec != nil && (spec.GetKind() == Type || spec.GetKind() == UpperType)
 }
 
 // New creates a new WGET accessor for http resources.

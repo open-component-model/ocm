@@ -30,6 +30,9 @@ import (
 const (
 	Type   = "gitHub"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
+
+	UpperType   = "GitHub"
+	UpperTypeV1 = UpperType + runtime.VersionSeparator + "v1"
 )
 
 const (
@@ -44,10 +47,13 @@ func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyTypeV1))
+
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1))
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
-	return spec != nil && spec.GetKind() == Type || spec.GetKind() == LegacyType
+	return spec != nil && (spec.GetKind() == Type || spec.GetKind() == LegacyType || spec.GetKind() == UpperType)
 }
 
 // AccessSpec describes the access for a GitHub registry.

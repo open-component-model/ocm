@@ -271,6 +271,29 @@ with the field <code>type</code> in the <code>input</code> field:
 
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
+- Input type <code>Git</code>
+
+  The repository type allows accessing an arbitrary git repository
+  using the manifest annotation <code>software.ocm/component-version</code>.
+  The ref can be used to further specify the branch or tag to checkout, otherwise the remote HEAD is used.
+
+  This blob type specification supports the following fields:
+  - **<code>repository</code>** *string*
+
+    This REQUIRED property describes the URL of the git repository to access. All git URL formats are supported.
+
+  - **<code>ref</code>** *string*
+
+    This OPTIONAL property can be used to specify the remote branch or tag to checkout (commonly called ref).
+    If not set, the default HEAD (remotes/origin/HEAD) of the remote is used.
+
+  - **<code>commit</code>** *string*
+
+    This OPTIONAL property can be used to specify the commit hash to checkout.
+    If not set, the default HEAD of the ref is used.
+
+  Options used to configure fields: <code>--inputRepository</code>, <code>--inputVersion</code>
+
 - Input type <code>Helm</code>
 
   The path must denote an helm chart archive or directory
@@ -321,6 +344,62 @@ with the field <code>type</code> in the <code>input</code> field:
 
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputHelmRepository</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
 
+- Input type <code>Maven</code>
+
+  The <code>repoUrl</code> is the url pointing either to the http endpoint of a maven
+  repository (e.g. https://repo.maven.apache.org/maven2/) or to a file system based
+  maven repository (e.g. file://local/directory).
+
+  This blob type specification supports the following fields:
+  - **<code>repoUrl</code>** *string*
+
+    This REQUIRED property describes the url from which the resource is to be
+    accessed.
+
+  - **<code>groupId</code>** *string*
+
+    This REQUIRED property describes the groupId of a maven artifact.
+
+  - **<code>artifactId</code>** *string*
+  	
+    This REQUIRED property describes artifactId of a maven artifact.
+
+  - **<code>version</code>** *string*
+
+    This REQUIRED property describes the version of a maven artifact.
+
+  - **<code>classifier</code>** *string*
+
+    This OPTIONAL property describes the classifier of a maven artifact.
+
+  - **<code>extension</code>** *string*
+
+    This OPTIONAL property describes the extension of a maven artifact.
+
+  Options used to configure fields: <code>--artifactId</code>, <code>--classifier</code>, <code>--extension</code>, <code>--groupId</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--url</code>
+
+- Input type <code>NPM</code>
+
+  The <code>registry</code> is the url pointing to the npm registry from which a resource is
+  downloaded.
+
+  This blob type specification supports the following fields:
+  - **<code>registry</code>** *string*
+
+    This REQUIRED property describes the url from which the resource is to be
+    downloaded.
+
+  - **<code>package</code>** *string*
+  	
+    This REQUIRED property describes the name of the package to download.
+
+  - **<code>version</code>** *string*
+
+    This is an OPTIONAL property describing the version of the package to download. If
+    not defined, latest will be used automatically.
+
+  Options used to configure fields: <code>--inputRepository</code>, <code>--inputVersion</code>, <code>--package</code>
+
 - Input type <code>UTF8</code>
 
   This blob type is used to provide inline text based content (UTF8). The
@@ -353,6 +432,46 @@ with the field <code>type</code> in the <code>input</code> field:
     compressed or not.
 
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputFormattedJson</code>, <code>--inputJson</code>, <code>--inputText</code>, <code>--inputYaml</code>, <code>--mediaType</code>
+
+- Input type <code>Wget</code>
+
+  The <code>url</code> is the url pointing to the http endpoint from which a resource is
+  downloaded. The <code>mimeType</code> can be used to specify the MIME type of the
+  resource.
+
+  This blob type specification supports the following fields:
+  - **<code>url</code>** *string*
+
+    This REQUIRED property describes the url from which the resource is to be
+    downloaded.
+
+  - **<code>mediaType</code>** *string*
+
+    This OPTIONAL property describes the media type of the resource to be
+    downloaded. If omitted, ocm tries to read the mediaType from the Content-Type header
+    of the http response. If the mediaType cannot be set from the Content-Type header as well,
+    ocm tries to deduct the mediaType from the URL. If that is not possible either, the default
+    media type is defaulted to application/octet-stream.
+
+  - **<code>header</code>** *map[string][]string*
+  	
+    This OPTIONAL property describes the http headers to be set in the http request to the server.
+
+  - **<code>verb</code>** *string*
+
+    This OPTIONAL property describes the http verb (also known as http request method) for the http
+    request. If omitted, the http verb is defaulted to GET.
+
+  - **<code>body</code>** *[]byte*
+
+    This OPTIONAL property describes the http body to be included in the request.
+
+  - **<code>noredirect</code>** *bool*
+
+    This OPTIONAL property describes whether http redirects should be disabled. If omitted,
+    it is defaulted to false (so, per default, redirects are enabled).
+
+  Options used to configure fields: <code>--body</code>, <code>--header</code>, <code>--mediaType</code>, <code>--noredirect</code>, <code>--url</code>, <code>--verb</code>
 
 - Input type <code>binary</code>
 

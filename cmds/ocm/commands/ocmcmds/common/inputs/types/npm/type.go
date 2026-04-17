@@ -4,10 +4,14 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
-const TYPE = "npm"
+const (
+	TYPE       = "npm"
+	UPPER_TYPE = "NPM"
+)
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE, &Spec{}, usage, ConfigHandler()))
 }
 
 const usage = `

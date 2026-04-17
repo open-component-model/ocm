@@ -5,10 +5,14 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
-const TYPE = "git"
+const (
+	TYPE       = "git"
+	UPPER_TYPE = "Git"
+)
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE, &Spec{}, usage, ConfigHandler()))
 }
 
 const usage = `

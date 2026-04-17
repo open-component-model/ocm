@@ -5,10 +5,14 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
-const TYPE = "wget"
+const (
+	TYPE       = "wget"
+	UPPER_TYPE = "Wget"
+)
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE, &Spec{}, usage, ConfigHandler()))
 }
 
 const usage = `
