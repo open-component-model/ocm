@@ -182,37 +182,8 @@ There are several templaters that can be selected by the <code>--templater</code
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 
-- Input type <code>Dir</code>
-
-  Options used to configure fields: <code>--inputCompress</code>, <code>--inputExcludes</code>, <code>--inputFollowSymlinks</code>, <code>--inputIncludes</code>, <code>--inputPath</code>, <code>--inputPreserveDir</code>, <code>--mediaType</code>
-
-- Input type <code>File</code>
-
-  Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
-
-- Input type <code>Git</code>
-
-  Options used to configure fields: <code>--inputRepository</code>, <code>--inputVersion</code>
-
-- Input type <code>Helm</code>
-
-  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputHelmRepository</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
-
-- Input type <code>Maven</code>
-
-  Options used to configure fields: <code>--artifactId</code>, <code>--classifier</code>, <code>--extension</code>, <code>--groupId</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--url</code>
-
-- Input type <code>NPM</code>
-
-  Options used to configure fields: <code>--inputRepository</code>, <code>--inputVersion</code>, <code>--package</code>
-
-- Input type <code>UTF8</code>
-
-  Options used to configure fields: <code>--inputCompress</code>, <code>--inputFormattedJson</code>, <code>--inputJson</code>, <code>--inputText</code>, <code>--inputYaml</code>, <code>--mediaType</code>
-
-- Input type <code>Wget</code>
-
-  Options used to configure fields: <code>--body</code>, <code>--header</code>, <code>--mediaType</code>, <code>--noredirect</code>, <code>--url</code>, <code>--verb</code>
+UpperCamelCase type names (e.g. <code>Helm</code>) are aliases for the corresponding
+lowercase types (e.g. <code>helm</code>). See the lowercase entry for full documentation.
 
 - Input type <code>binary</code>
 
