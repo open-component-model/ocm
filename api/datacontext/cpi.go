@@ -94,6 +94,24 @@ func GetContextRefCount(ctx Context) int {
 	return -1
 }
 
+// Close releases a persistent reference held on the given context. When the
+// last persistent reference is released the context's cleanup runs
+// synchronously, finalizing registered closers and releasing its attributes.
+// Calling Close on an already-closed or non-persistent context is a no-op.
+func Close(ctx Context) error {
+	var m refmgmt.RefMgmt
+	switch a := ctx.(type) {
+	case view:
+		m, _ = a.getAllocatable().(refmgmt.RefMgmt)
+	case viewI:
+		m, _ = a.GetAllocatable().(refmgmt.RefMgmt)
+	}
+	if m == nil || m.IsClosed() {
+		return nil
+	}
+	return m.Unref()
+}
+
 type persistent interface {
 	IsPersistent() bool
 }
