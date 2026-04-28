@@ -279,7 +279,7 @@ In case of error you can try to [Manually retrigger the publishing of ocm-cli to
 
 ### ocm-website
 
-[Update the website](https://github.com/open-component-model/ocm-website/pulls).
+[Update the website](https://github.com/open-component-model/open-component-model/pulls).
 
 ### homebrew-tap
 

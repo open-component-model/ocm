@@ -162,7 +162,11 @@ More comprehensive examples can be taken from the [`components`](components) con
 
 ## GPG Public Key
 
-The authenticity of released packages that have been uploaded to public repositories can be verified using our GPG public key. You can find the current key in the file [OCM-RELEASES-PUBLIC-CURRENT.gpg](https://ocm.software/gpg/OCM-RELEASES-PUBLIC-CURRENT.gpg) on our website. You can find the old keys in the website github repository [here](https://github.com/open-component-model/ocm-website/tree/main/static/gpg).
+The authenticity of released packages that have been uploaded to public repositories can be verified using our GPG
+public key. You can find the current key in the file
+[OCM-RELEASES-PUBLIC-CURRENT.gpg](https://ocm.software/gpg/OCM-RELEASES-PUBLIC-CURRENT.gpg) on our website.
+You can find the old keys in the website github repository
+[here](https://github.com/open-component-model/open-component-model/tree/main/website/static/gpg).
 
 ## Contributing
 
