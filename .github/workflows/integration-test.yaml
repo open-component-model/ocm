@@ -15,7 +15,7 @@ permissions:
 jobs:
   test:
     name: Run
-    uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@main
+    uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@8b914397e79353d1f0b441295d7b1d36676849c3 # main
     with:
       ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
       repo: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
