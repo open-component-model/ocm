@@ -170,7 +170,9 @@ You can find the old keys in the website github repository
 
 ## Contributing
 
-Code contributions, feature requests, bug reports, and help requests are very welcome. Please refer to the [Contributing Guide in the Community repository](https://github.com/open-component-model/community/blob/main/CONTRIBUTING.md) for more information on how to contribute to OCM.
+Code contributions, feature requests, bug reports, and help requests are very welcome.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and workflow details,
+or the [central contributing guide](https://ocm.software/community/contributing/) for the general process.
 
 OCM follows the [NeoNephos Code of Conduct](https://github.com/neonephos/.github/blob/main/CODE_OF_CONDUCT.md).
 
