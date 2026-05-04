@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request_target:
+  pull_request:
     branches:
       - main
   workflow_dispatch:
@@ -16,7 +16,6 @@ jobs:
   test:
     name: Run
     uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@main
-    secrets: inherit
     with:
-      ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.ref || github.ref }}
-      repo: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name || github.repository }}
+      ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+      repo: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
