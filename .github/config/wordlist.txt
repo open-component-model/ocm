@@ -103,6 +103,7 @@ forwardspec
 fulcio
 gapped
 gav
+gci
 getinexpensivecontentversionidentity
 getresourcesbyname
 getter
@@ -114,6 +115,7 @@ globalaccess
 globals
 gocritic
 gofmt
+gofumpt
 golang
 golangci
 gomega
