@@ -167,6 +167,10 @@ func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consu
 	}
 	c._InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes(), delegates)
 	c.updater = cfgcpi.NewUpdaterForFactory(datacontext.PersistentContextRef(configctx), c.CredentialsContext)
+	c.Finalizer().With(func() error {
+		_ = datacontext.Close(c.sharedattributes)
+		return nil
+	})
 	return newView(c, true)
 }
 
