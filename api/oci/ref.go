@@ -130,6 +130,9 @@ func ParseRef(ref string) (RefSpec, error) {
 		spec.Repository = string(match[3])
 		spec.Tag = pointer(match[4])
 		spec.Digest = dig(match[5])
+		if (spec.Host == dockerHubDomain || spec.Host == dockerHubLegacyDomain) && !strings.Contains(spec.Repository, "/") {
+			spec.Repository = "library" + grammar.RepositorySeparator + spec.Repository
+		}
 		return spec, nil
 	}
 	match = grammar.TypedReferenceRegexp.FindSubmatch([]byte(ref))
