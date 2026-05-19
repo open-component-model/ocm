@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate_token
-        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v2
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v2
         with: # OCMBot
           app-id: ${{ secrets.OCMBOT_APP_ID }}
           private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -53,7 +53,7 @@ jobs:
           path: go-build-cache
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
       - name: inject go-build-cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@1b8ab18fbda5ad3646e3fcc9ed9dd41ce2f297b4 # v3.3.2
+        uses: reproducible-containers/buildkit-cache-dance@5422eac04292c961a382e0f584ea0f03ad9da723 # v3.4.0
         with:
           cache-source: go-build-cache
       - name: Build and push
@@ -81,7 +81,7 @@ jobs:
       uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v2
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -128,7 +128,7 @@ jobs:
         cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
 
     - name: Goreleaser release snapshot
-      uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
+      uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
       with:
         distribution: goreleaser
         version: 2.12.7
