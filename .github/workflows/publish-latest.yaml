@@ -16,6 +16,9 @@ jobs:
 
   docker_publish:
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     permissions:
       contents: write
       id-token: write
@@ -72,6 +75,9 @@ jobs:
   ocm-cli-latest:
     name: Build latest ocm-cli
     runs-on: large_runner
+    environment:
+      name: release
+      deployment: false
     permissions:
       contents: write
       id-token: write
