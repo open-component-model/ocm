@@ -11,6 +11,9 @@ on:
 jobs:
   updateVendorHash:
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     permissions:
       id-token: write
       contents: write
