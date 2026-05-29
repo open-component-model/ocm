@@ -28,6 +28,9 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     env:
       RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
     steps:
