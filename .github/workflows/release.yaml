@@ -27,6 +27,9 @@ jobs:
   check:
     name: Check Release Preconditions
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     permissions:
       contents: read
       repository-projects: read
@@ -103,6 +106,9 @@ jobs:
     - components
     name: Release Build
     runs-on: large_runner
+    environment:
+      name: release
+      deployment: false
     permissions:
       contents: write
       id-token: write

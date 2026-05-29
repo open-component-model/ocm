@@ -115,8 +115,8 @@ var _ = Describe("Index Transfer", func() {
 		)
 
 		By("pulling the OCI index image from GHCR and pushing it to the local registry")
-		srcRef := "ghcr.io/open-component-model/cli:main"
-		dstRef := fmt.Sprintf("%s/ocm-cli:main", registryAddress)
+		srcRef := "ghcr.io/open-component-model/cli:0.2.0"
+		dstRef := fmt.Sprintf("%s/ocm-cli:0.2.0", registryAddress)
 
 		repoSrc, err := remote.NewRepository(srcRef)
 		r.NoError(err)
@@ -203,7 +203,7 @@ configurations:
 			"run", "--rm",
 			"--network", "host",
 			"-v", fmt.Sprintf("%s:/work", tempDir),
-			"ghcr.io/open-component-model/cli:main",
+			"ghcr.io/open-component-model/cli:0.2.0",
 			"add", "component-version",
 			"--repository", "http://" + registryAddress,
 			"--config", "/work/ocmconfig.yaml",
@@ -220,7 +220,7 @@ configurations:
 			"run", "--rm",
 			"--network", "host",
 			"-v", fmt.Sprintf("%s:/work", tempDir),
-			"ghcr.io/open-component-model/cli:main",
+			"ghcr.io/open-component-model/cli:0.2.0",
 			"get", "component-version",
 			"--config", "/work/ocmconfig.yaml",
 			"-oyaml",
