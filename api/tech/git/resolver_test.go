@@ -75,7 +75,7 @@ var _ = Describe("standard tests with local file repo", func() {
 		}
 
 		wt := Must(repo.Worktree())
-		Expect(wt.AddGlob("*")).To(Succeed())
+		Expect(wt.AddWithOptions(&git.AddOptions{All: true})).To(Succeed())
 		commit = Must(wt.Commit("OCM Test Commit", &git.CommitOptions{
 			Author: &object.Signature{
 				Name:  "OCM Test",
