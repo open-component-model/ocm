@@ -4,10 +4,14 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
-const TYPE = "maven"
+const (
+	TYPE       = "maven"
+	UPPER_TYPE = "Maven"
+)
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE, &Spec{}, "", ConfigHandler()))
 }
 
 const usage = `

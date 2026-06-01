@@ -17,11 +17,17 @@ import (
 const (
 	Type   = "maven"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
+
+	UpperType   = "Maven"
+	UpperTypeV1 = UpperType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
+
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1))
 }
 
 // AccessSpec describes the access for a Maven artifact.

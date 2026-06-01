@@ -14,7 +14,7 @@ func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{},
 		usage, ConfigHandler()))
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE, &Spec{},
-		usage, ConfigHandler()))
+		"", ConfigHandler()))
 }
 
 const usage = `

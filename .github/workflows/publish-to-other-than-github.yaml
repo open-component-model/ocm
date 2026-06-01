@@ -19,6 +19,9 @@ jobs:
     name: Update Homebrew Tap
     if: github.event.client_payload.push-to-brew-tap && github.event.client_payload.version != ''
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     env:
       REPO: open-component-model/homebrew-tap
     steps:
@@ -26,7 +29,7 @@ jobs:
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v2
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -80,6 +83,9 @@ jobs:
     name: Update Arch Linux User Repository
     if: github.event.client_payload.push-to-aur && github.event.client_payload.version != ''
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     steps:
     - name: Ensure proper version
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
@@ -105,6 +111,9 @@ jobs:
     name: Update Chocolatey
     if: github.event.client_payload.push-to-chocolatey && github.event.client_payload.version != ''
     runs-on: windows-latest
+    environment:
+      name: release
+      deployment: false
     steps:
     - name: Ensure proper version
       run: |
@@ -112,7 +121,7 @@ jobs:
         echo "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v2
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -128,13 +137,16 @@ jobs:
   push-to-website:
     name: Update OCM Website
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     if: github.event.client_payload.push-to-website && github.event.client_payload.version != ''
     steps:
     - name: Ensure proper version
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }})" >> $GITHUB_ENV
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v2
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -143,6 +155,6 @@ jobs:
       uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
       with:
         token: ${{ steps.generate_token.outputs.token }}
-        repository: open-component-model/ocm-website
+        repository: open-component-model/open-component-model
         event-type: ocm-cli-release
         client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'

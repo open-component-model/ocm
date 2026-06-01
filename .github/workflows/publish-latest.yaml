@@ -16,6 +16,9 @@ jobs:
 
   docker_publish:
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     permissions:
       contents: write
       id-token: write
@@ -23,7 +26,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate_token
-        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v2
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v2
         with: # OCMBot
           app-id: ${{ secrets.OCMBOT_APP_ID }}
           private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -32,18 +35,18 @@ jobs:
         with:
           token: ${{ steps.generate_token.outputs.token }}
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
+        uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4.1.0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
       - name: Docker Login
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
           images: |            
             ghcr.io/${{ github.repository }}
@@ -53,11 +56,11 @@ jobs:
           path: go-build-cache
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
       - name: inject go-build-cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@1b8ab18fbda5ad3646e3fcc9ed9dd41ce2f297b4 # v3.3.2
+        uses: reproducible-containers/buildkit-cache-dance@5422eac04292c961a382e0f584ea0f03ad9da723 # v3.4.0
         with:
           cache-source: go-build-cache
       - name: Build and push
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           # supported platforms: https://github.com/GoogleContainerTools/distroless?tab=readme-ov-file#what-images-are-available
@@ -72,6 +75,9 @@ jobs:
   ocm-cli-latest:
     name: Build latest ocm-cli
     runs-on: large_runner
+    environment:
+      name: release
+      deployment: false
     permissions:
       contents: write
       id-token: write
@@ -81,7 +87,7 @@ jobs:
       uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v2
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v2
       with: # OCMBot
         app-id: ${{ secrets.OCMBOT_APP_ID }}
         private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
@@ -128,7 +134,7 @@ jobs:
         cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
 
     - name: Goreleaser release snapshot
-      uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+      uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
       with:
         distribution: goreleaser
         version: 2.12.7
