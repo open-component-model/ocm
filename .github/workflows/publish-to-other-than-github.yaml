@@ -19,6 +19,9 @@ jobs:
     name: Update Homebrew Tap
     if: github.event.client_payload.push-to-brew-tap && github.event.client_payload.version != ''
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     env:
       REPO: open-component-model/homebrew-tap
     steps:
@@ -80,6 +83,9 @@ jobs:
     name: Update Arch Linux User Repository
     if: github.event.client_payload.push-to-aur && github.event.client_payload.version != ''
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     steps:
     - name: Ensure proper version
       run: echo "RELEASE_VERSION=$(echo ${{ github.event.client_payload.version }} | tr -d ['v'])" >> $GITHUB_ENV
@@ -105,6 +111,9 @@ jobs:
     name: Update Chocolatey
     if: github.event.client_payload.push-to-chocolatey && github.event.client_payload.version != ''
     runs-on: windows-latest
+    environment:
+      name: release
+      deployment: false
     steps:
     - name: Ensure proper version
       run: |
@@ -128,6 +137,9 @@ jobs:
   push-to-website:
     name: Update OCM Website
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
     if: github.event.client_payload.push-to-website && github.event.client_payload.version != ''
     steps:
     - name: Ensure proper version
