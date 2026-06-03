@@ -74,7 +74,7 @@ jobs:
 
   ocm-cli-latest:
     name: Build latest ocm-cli
-    runs-on: large_runner
+    runs-on: ubuntu-latest
     environment:
       name: release
       deployment: false

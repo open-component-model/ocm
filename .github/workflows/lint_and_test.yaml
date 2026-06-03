@@ -14,7 +14,7 @@ permissions:
 jobs:
   test:
     name: Run tests
-    runs-on: large_runner
+    runs-on: ubuntu-latest
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
@@ -73,7 +73,7 @@ jobs:
 
   go-lint:
     name: Lint Golang
-    runs-on: large_runner
+    runs-on: ubuntu-latest
     steps:
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
