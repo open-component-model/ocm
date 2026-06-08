@@ -94,7 +94,7 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 }
 
 // pushExistsCheckEnabled reports whether the optional pre-push Exists() check
-// is requested via PushExistsCheckEnvVar. Unset, empty, or unparseable values
+// is requested via PushExistsCheckEnvVar. Unset, empty, or unparsable values
 // disable the check (default behaviour).
 func pushExistsCheckEnabled() bool {
 	v, ok := os.LookupEnv(PushExistsCheckEnvVar)
