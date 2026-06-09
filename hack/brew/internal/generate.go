@@ -13,10 +13,15 @@ import (
 
 const ClassName = "Ocm"
 
-// GenerateVersionedHomebrewFormula generates a Homebrew formula for a specific version,
-// architecture, and operating system. It fetches the SHA256 digest for each combination
-// and uses a template to create the formula file.
-func GenerateVersionedHomebrewFormula(
+// GenerateHomebrewFormula generates the canonical Homebrew formula and a
+// version-pinned formula for the given version. It fetches the SHA256 digest
+// for each os/arch combination and renders both files into outputDir:
+//
+//   - Formula/ocm.rb (class Ocm) — the canonical, unversioned formula. Overwritten
+//     on every release so `brew install ocm` and `brew upgrade` operate in place.
+//   - Formula/ocm@<version>.rb (class OcmAT<digits>) — opt-in pin to a specific
+//     version, for users who want `brew install ocm@X.Y.Z`.
+func GenerateHomebrewFormula(
 	version string,
 	architectures []string,
 	operatingSystems []string,
@@ -40,8 +45,16 @@ func GenerateVersionedHomebrewFormula(
 		}
 	}
 
-	if err := GenerateFormula(templateFile, outputDir, version, values, writer); err != nil {
-		return fmt.Errorf("failed to generate formula: %w", err)
+	if err := GenerateFormula(templateFile, outputDir, "ocm.rb", ClassName, values, writer); err != nil {
+		return fmt.Errorf("failed to generate canonical formula: %w", err)
+	}
+	if _, err := io.WriteString(writer, "\n"); err != nil {
+		return fmt.Errorf("failed to write separator: %w", err)
+	}
+	versionedFile := fmt.Sprintf("ocm@%s.rb", version)
+	versionedClass := fmt.Sprintf("%sAT%s", ClassName, strings.ReplaceAll(version, ".", ""))
+	if err := GenerateFormula(templateFile, outputDir, versionedFile, versionedClass, values, writer); err != nil {
+		return fmt.Errorf("failed to generate versioned formula: %w", err)
 	}
 
 	return nil
@@ -67,33 +80,33 @@ func FetchDigestFromGithubRelease(releaseURL, version, targetOs, arch string) (_
 	return strings.TrimSpace(string(digestBytes)), nil
 }
 
-// GenerateFormula generates the Homebrew formula file using the provided template and values.
-func GenerateFormula(templateFile, outputDir, version string, values map[string]string, writer io.Writer) error {
+// GenerateFormula renders templateFile into outputDir/outputFile using the
+// provided className for the Ruby class and values for template substitution.
+func GenerateFormula(templateFile, outputDir, outputFile, className string, values map[string]string, writer io.Writer) error {
 	tmpl, err := template.New(filepath.Base(templateFile)).Funcs(template.FuncMap{
 		"classname": func() string {
-			return fmt.Sprintf("%sAT%s", ClassName, strings.ReplaceAll(version, ".", ""))
+			return className
 		},
 	}).ParseFiles(templateFile)
 	if err != nil {
 		return fmt.Errorf("failed to parse template: %w", err)
 	}
 
-	outputFile := fmt.Sprintf("ocm@%s.rb", version)
 	if err := ensureDirectory(outputDir); err != nil {
 		return err
 	}
 
-	versionedFormula, err := os.Create(filepath.Join(outputDir, outputFile))
+	formula, err := os.Create(filepath.Join(outputDir, outputFile))
 	if err != nil {
 		return fmt.Errorf("failed to create output file: %w", err)
 	}
-	defer versionedFormula.Close()
+	defer formula.Close()
 
-	if err := tmpl.Execute(versionedFormula, values); err != nil {
+	if err := tmpl.Execute(formula, values); err != nil {
 		return fmt.Errorf("failed to execute template: %w", err)
 	}
 
-	if _, err := io.WriteString(writer, versionedFormula.Name()); err != nil {
+	if _, err := io.WriteString(writer, formula.Name()); err != nil {
 		return fmt.Errorf("failed to write output file path: %w", err)
 	}
 
