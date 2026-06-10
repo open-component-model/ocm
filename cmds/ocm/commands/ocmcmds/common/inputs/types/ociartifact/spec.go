@@ -5,7 +5,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"ocm.software/ocm/api/oci/extensions/repositories/docker"
+	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/grammar"
 	"ocm.software/ocm/api/oci/tools/transfer/filters"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -16,7 +16,7 @@ import (
 )
 
 type Spec struct {
-	// PathSpec holds the repository path and tag of the image in the docker daemon
+	// PathSpec holds the OCI image reference.
 	cpi.PathSpec
 	// Repository is the repository hint for the index artifact
 	Repository string `json:"repository,omitempty"`
@@ -39,8 +39,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	allErrs = ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
 	if s.Path != "" {
 		pathField := fldPath.Child("path")
-		_, _, err := docker.ParseGenericRef(s.Path)
-		if err != nil {
+		if _, err := oci.ParseRef(s.Path); err != nil {
 			allErrs = append(allErrs, field.Invalid(pathField, s.Path, err.Error()))
 		}
 	}

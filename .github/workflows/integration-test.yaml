@@ -4,25 +4,18 @@ on:
   push:
     branches:
       - main
-  pull_request_target:
+  pull_request:
     branches:
       - main
   workflow_dispatch:
 
 permissions:
-  # Necessary to write the branch
-  # TODO: Remove once https://github.com/open-component-model/ocm-integrationtest/blob/main/.github/workflows/integrationtest.yaml#L41 is not needed anymore
-  contents: write
+  contents: read
 
 jobs:
   test:
     name: Run
-    uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@main
-    permissions:
-      contents: write
-      id-token: write
-      packages: write
-    secrets: inherit
+    uses: open-component-model/ocm-integrationtest/.github/workflows/integrationtest.yaml@8b914397e79353d1f0b441295d7b1d36676849c3 # main
     with:
-      ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.ref || github.ref }}
-      repo: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name || github.repository }}
+      ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+      repo: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}

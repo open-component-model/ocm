@@ -223,13 +223,13 @@ necessary:
 2. Cherry-pick the commit from `main` to the patch branch, e.g.
    `git cherry-pick <commit-hash>`. Resolve conflicts as necessary.
 3. Create a Pull-Request for the cherry-picked commit to the branch,
-   and prefix the title with `[releases/<major>.<minor>]` (in this case
-   `[releases/0.17]`)
+   and prefix the title with `chore(releases-041):` (in this case
+   `[releases-041]`)
    to signal that this is a patch commit, e.g. with `gh`:
 
    ```shell
    gh pr create \
-      --title "[releases/0.17] cherry-pick: <Original PR or Commit>" \
+      --title "chore(releases-041): cherry-pick: <Original PR or Commit>" \
       --body "Cherry-pick of <Original PR or Commit> from main to releases/0.17" \
       --base releases/0.17 \
       --draft
@@ -279,7 +279,7 @@ In case of error you can try to [Manually retrigger the publishing of ocm-cli to
 
 ### ocm-website
 
-[Update the website](https://github.com/open-component-model/ocm-website/pulls).
+[Update the website](https://github.com/open-component-model/open-component-model/pulls).
 
 ### homebrew-tap
 

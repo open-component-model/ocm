@@ -92,7 +92,7 @@ var _ = Describe("git Blob Access", func() {
 
 			wt, err := repo.Worktree()
 			Expect(err).ToNot(HaveOccurred())
-			Expect(wt.AddGlob("*")).To(Succeed())
+			Expect(wt.AddWithOptions(&git.AddOptions{All: true})).To(Succeed())
 			_, err = wt.Commit("OCM Test Commit", &git.CommitOptions{
 				Author: &object.Signature{
 					Name:  "OCM Test",

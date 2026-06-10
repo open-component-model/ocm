@@ -11,6 +11,7 @@ import (
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 
 	"github.com/spf13/pflag"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
@@ -139,6 +140,31 @@ var _ = Describe("Test Environment", func() {
 			spec := Must(inputs.DefaultInputTypeScheme.GetInputSpecFor(opts))
 			Expect(spec).To(Equal(me.New("ghcr.io/open-component-model/image:v1.0", "linux/amd64", "/arm64")))
 		})
+	})
+
+	Context("validation", func() {
+		DescribeTable("accepts valid OCI references",
+			func(ref string) {
+				spec := me.New(ref)
+				errs := spec.Validate(field.NewPath("input"), nil, "")
+				Expect(errs).To(BeEmpty())
+			},
+			Entry("domain/repo:tag", "ghcr.io/open-component-model/image:v1.0"),
+			Entry("domain/repo:tag@digest", "ghcr.io/stefanprodan/podinfo:6.11.2@sha256:187803cdf611a19d4fffbdf6a4260a01be4c09ffe9924b28902424fc0639ceb8"),
+			Entry("domain/repo@digest", "ghcr.io/stefanprodan/podinfo@sha256:187803cdf611a19d4fffbdf6a4260a01be4c09ffe9924b28902424fc0639ceb8"),
+			Entry("docker library shorthand", "alpine:3.19"),
+			Entry("docker org shorthand", "library/alpine:3.19"),
+		)
+
+		DescribeTable("rejects invalid OCI references",
+			func(ref string) {
+				spec := me.New(ref)
+				errs := spec.Validate(field.NewPath("input"), nil, "")
+				Expect(errs).NotTo(BeEmpty())
+			},
+			Entry("empty string", ""),
+			Entry("just a tag", ":latest"),
+		)
 	})
 
 	Context("scenario", func() {
