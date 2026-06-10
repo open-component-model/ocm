@@ -18,7 +18,7 @@ var tplFile []byte
 //go:embed testdata/expected_formula.rb
 var expectedResolved []byte
 
-func TestGenerateVersionedHomebrewFormula(t *testing.T) {
+func TestGenerateHomebrewFormula(t *testing.T) {
 	version := "1.0.0"
 	architectures := []string{"amd64", "arm64"}
 	operatingSystems := []string{"darwin", "linux"}
@@ -39,7 +39,7 @@ func TestGenerateVersionedHomebrewFormula(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	err := GenerateVersionedHomebrewFormula(
+	err := GenerateHomebrewFormula(
 		version,
 		architectures,
 		operatingSystems,
@@ -52,29 +52,38 @@ func TestGenerateVersionedHomebrewFormula(t *testing.T) {
 		t.Fatalf("expected no error, got %v", err)
 	}
 
-	file := buf.String()
+	paths := strings.Split(strings.TrimSpace(buf.String()), "\n")
+	if len(paths) != 2 {
+		t.Fatalf("expected 2 generated paths, got %d: %q", len(paths), paths)
+	}
 
-	fi, err := os.Stat(file)
+	for _, file := range paths {
+		fi, err := os.Stat(file)
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if fi.Size() == 0 {
+			t.Fatalf("expected file to be non-empty")
+		}
+		if filepath.Ext(file) != ".rb" {
+			t.Fatalf("expected file to have .rb extension")
+		}
+	}
+
+	canonical, err := os.ReadFile(paths[0])
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
-	if fi.Size() == 0 {
-		t.Fatalf("expected file to be non-empty")
-	}
-	if filepath.Ext(file) != ".rb" {
-		t.Fatalf("expected file to have .rb extension")
-	}
-	if !strings.Contains(file, version) {
-		t.Fatalf("expected file to contain version")
+
+	if string(canonical) != string(expectedResolved) {
+		t.Fatalf("expected %s, got %s", string(expectedResolved), string(canonical))
 	}
 
-	data, err := os.ReadFile(file)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
+	if filepath.Base(paths[0]) != "ocm.rb" {
+		t.Fatalf("expected first generated file to be ocm.rb, got %s", paths[0])
 	}
-
-	if string(data) != string(expectedResolved) {
-		t.Fatalf("expected %s, got %s", string(expectedResolved), string(data))
+	if filepath.Base(paths[1]) != "ocm@1.0.0.rb" {
+		t.Fatalf("expected second generated file to be ocm@1.0.0.rb, got %s", paths[1])
 	}
 }
 
@@ -114,7 +123,7 @@ end`
 
 	var buf bytes.Buffer
 
-	if err := GenerateFormula(templateFile, outputDir, "1.0.0", values, &buf); err != nil {
+	if err := GenerateFormula(templateFile, outputDir, "ocm.rb", "Ocm", values, &buf); err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
 
@@ -122,7 +131,7 @@ end`
 		t.Fatalf("expected non-empty output")
 	}
 
-	outputFile := filepath.Join(outputDir, "ocm@1.0.0.rb")
+	outputFile := filepath.Join(outputDir, "ocm.rb")
 	if _, err := os.Stat(outputFile); os.IsNotExist(err) {
 		t.Fatalf("expected output file to exist")
 	}

@@ -56,13 +56,10 @@ jobs:
       run: go build -o script
     - name: Update Homebrew Tap
       run: |
-        formula=$(${{ github.workspace }}/scripts/hack/brew/script \
+        ${{ github.workspace }}/scripts/hack/brew/script \
             --version ${{ env.RELEASE_VERSION }} \
             --template ${{ github.workspace }}/scripts/hack/brew/internal/ocm_formula_template.rb.tpl \
-            --outputDirectory ${{ github.workspace }}/tap/Formula)
-        mkdir -p ${{ github.workspace }}/tap/Aliases
-        cd ${{ github.workspace }}/tap/Aliases
-        ln -sf ../Formula/$(basename $formula) ./ocm
+            --outputDirectory ${{ github.workspace }}/tap/Formula
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
       with:
@@ -75,7 +72,6 @@ jobs:
         sign-commits: true
         add-paths: |
           Formula/*
-          Aliases/*
         body: |
           Update OCM CLI to v${{ env.RELEASE_VERSION }}.
 

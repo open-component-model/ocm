@@ -28,7 +28,7 @@ func main() {
 		log.Fatalf("version is required")
 	}
 
-	if err := internal.GenerateVersionedHomebrewFormula(*version,
+	if err := internal.GenerateHomebrewFormula(*version,
 		strings.Split(*architecturesRaw, ","),
 		strings.Split(*operatingSystemsRaw, ","),
 		*releaseURL,
