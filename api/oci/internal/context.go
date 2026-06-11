@@ -120,6 +120,10 @@ func newContext(credctx credentials.Context, reposcheme RepositoryTypeScheme, sp
 	}
 	c._InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.ConfigContext().GetAttributes(), delegates)
 	c.updater = cfgcpi.NewUpdaterForFactory(credctx.ConfigContext(), c.OCIContext)
+	c.Finalizer().With(func() error {
+		_ = datacontext.Close(c.credentials)
+		return nil
+	})
 	return newView(c, true)
 }
 

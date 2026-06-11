@@ -25,6 +25,14 @@ var _ = Describe("area test", func() {
 		Expect(r.Get()).To(ConsistOf(id))
 	})
 
+	It("can be closed synchronously", func() {
+		ctx := me.New()
+		Expect(me.GetContextRefCount(ctx)).To(Equal(1))
+		Expect(me.Close(ctx)).To(Succeed())
+		Expect(me.GetContextRefCount(ctx)).To(Equal(0))
+		Expect(me.Close(ctx)).To(Succeed()) // idempotent
+	})
+
 	It("provides second reference", func() {
 		// ocmlog.Context().AddRule(logging.NewConditionRule(logging.DebugLevel, me.Realm))
 		multiRefs := general.Conditional(me.MULTI_REF, 2, 1)

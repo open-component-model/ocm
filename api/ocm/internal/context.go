@@ -183,6 +183,11 @@ func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme Repo
 		MatchingResolver: NewMatchingResolver(c),
 	}
 	c.Finalizer().With(c.resolver.Finalize)
+	c.Finalizer().With(func() error {
+		_ = datacontext.Close(c.credctx)
+		_ = datacontext.Close(c.ocictx)
+		return nil
+	})
 	return newView(c, true)
 }
 
