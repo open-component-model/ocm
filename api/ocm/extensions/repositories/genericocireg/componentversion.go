@@ -192,7 +192,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 	}
 
 	switch a.GetKind() {
-	case localblob.Type:
+	case localblob.Type, localblob.UpperType:
 		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.manifestArtifact, cv)
 	case localociblob.Type:
 		return newLocalOCIBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.manifestArtifact, cv)

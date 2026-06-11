@@ -52,7 +52,11 @@ func init() {
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
-	return spec != nil && (spec.GetKind() == Type || spec.GetKind() == LegacyType)
+	if spec == nil {
+		return false
+	}
+	k := spec.GetKind()
+	return k == Type || k == LegacyType || k == LegacyType2
 }
 
 // AccessSpec describes the access for a oci registry.

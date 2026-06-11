@@ -48,15 +48,19 @@ const (
 // which converts between the internal go representation and the external formats,
 // given by a dedicated go Type with serialization annotations.
 
-var versions = accspeccpi.NewAccessTypeVersionScheme(Type)
+var versions = accspeccpi.NewAccessTypeVersionScheme(Type).WithKindAliases(UpperType)
 
 func init() {
 	Must(versions.Register(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](Type, &converterV1{}, accspeccpi.WithDescription(usage))))
 	Must(versions.Register(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](TypeV1, &converterV1{}, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler()))))
-	accspeccpi.RegisterAccessTypeVersions(versions)
 
-	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](UpperType, &converterV1{}))
-	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](UpperTypeV1, &converterV1{}))
+	// v2-emitted aliases. Registered through `versions` (not the global scheme)
+	// so the resulting AccessSpec carries `versions` as its encoder — without
+	// this, MarshalJSON cannot find the converter and panics. See #1979.
+	Must(versions.Register(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](UpperType, &converterV1{})))
+	Must(versions.Register(accspeccpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](UpperTypeV1, &converterV1{})))
+
+	accspeccpi.RegisterAccessTypeVersions(versions)
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
