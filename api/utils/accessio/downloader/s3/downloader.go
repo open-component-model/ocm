@@ -2,14 +2,17 @@ package s3
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
 const defaultRegion = "us-west-1"
@@ -73,11 +76,21 @@ func (s *Downloader) Download(w io.WriterAt) error {
 		resp, err := tmpClient.HeadBucket(ctx, &s3.HeadBucketInput{
 			Bucket: aws.String(s.bucket),
 		})
-		if err != nil {
-			return fmt.Errorf("failed to find bucket region: %w", err)
+		if err == nil {
+			s.region = aws.ToString(resp.BucketRegion)
+		} else {
+			// S3 returns 301 when the bucket is in a different region than the hint region.
+			// The SDK does not follow 301 redirects, but the correct region is in X-Amz-Bucket-Region.
+			var respErr *smithyhttp.ResponseError
+			if !errors.As(err, &respErr) || respErr.HTTPStatusCode() != http.StatusMovedPermanently {
+				return fmt.Errorf("failed to find bucket region: %w", err)
+			}
+			region := respErr.Response.Header.Get("X-Amz-Bucket-Region")
+			if region == "" {
+				return fmt.Errorf("failed to find bucket region: %w", err)
+			}
+			s.region = region
 		}
-
-		s.region = *resp.BucketRegion
 		cfg.Region = s.region
 	}
 
