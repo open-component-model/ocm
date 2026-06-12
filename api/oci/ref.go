@@ -130,7 +130,11 @@ func ParseRef(ref string) (RefSpec, error) {
 		spec.Repository = string(match[3])
 		spec.Tag = pointer(match[4])
 		spec.Digest = dig(match[5])
-		if (spec.Host == dockerHubDomain || spec.Host == dockerHubLegacyDomain) && !strings.Contains(spec.Repository, "/") {
+		needsDockerLibraryPath := (spec.Host == dockerHubDomain || spec.Host == dockerHubLegacyDomain) && !strings.Contains(spec.Repository, "/")
+		// inject library path segment into the repository part of the parsed ref.
+		// for docker, images are resolved including a "library" path segment. This segment needs to be
+		// added into the Repository field, otherwise the lookup would fail in case of docker's image registry
+		if needsDockerLibraryPath {
 			spec.Repository = "library" + grammar.RepositorySeparator + spec.Repository
 		}
 		return spec, nil
