@@ -1,3 +1,4 @@
+NeoNephos
 accessmethod
 accessmethoddescriptor
 accessmethods
@@ -6,6 +7,7 @@ actiondescriptor
 additionalresource
 addversion
 adr
+afterall
 aggregative
 aml
 anchore
@@ -98,8 +100,10 @@ finalizer
 finalizers
 foldername
 forwardspec
+fulcio
 gapped
 gav
+gci
 getinexpensivecontentversionidentity
 getresourcesbyname
 getter
@@ -111,6 +115,7 @@ globalaccess
 globals
 gocritic
 gofmt
+gofumpt
 golang
 golangci
 gomega
@@ -126,9 +131,6 @@ hashicorp
 hashicorpvault
 helmchart
 helmchartrepository
-helmdemo
-helmexecutor
-helminstaller
 helmrepository
 hoc
 homebrew
@@ -147,6 +149,7 @@ ioutils
 ipcei
 iterable
 json
+jsonNormalisation
 jsonschema
 keyless
 keypair
@@ -202,6 +205,7 @@ ocm
 ocmbot
 ocmcli
 ocmconfig
+oidc
 oncefunc
 oo
 oras
@@ -230,6 +234,7 @@ pubsub
 readme
 readonly
 refcount
+rekor
 relativeocireference
 releasenotes
 releaser
@@ -269,6 +274,7 @@ struct
 subchart
 subcharts
 subst
+tcp
 tempfile
 templated
 templater
@@ -291,6 +297,7 @@ uploader
 uploaderdescriptor
 uploaders
 uploadhandlers
+uppercamelcase
 url
 urls
 utf
@@ -307,4 +314,3 @@ yaml
 yitsushi
 yml
 yyyy
-jsonNormalisation

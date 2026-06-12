@@ -334,6 +334,12 @@ The value can be a simple type or a JSON/YAML string for complex values
 
 - <code>ocm.software/signing/sigstore</code> [<code>sigstore</code>]: *sigstore config* Configuration to use for sigstore based signing.
 
+
+  Configuration applies to <code>sigstore</code> (legacy) and <code>sigstore-v2</code> signing algorithms.
+  The algorithms affect how signatures are stored in Rekor:
+  - <code>sigstore</code>: stores only public key in Rekor entry (non-compliant Sigstore Bundle spec).
+  - <code>sigstore-v2</code>: stores Fulcio certificate in Rekor entry (compliant Sigstore Bundle spec).
+
   The following fields are used.
   - *<code>fulcioURL</code>* *string*  default is https://fulcio.sigstore.dev
   - *<code>rekorURL</code>* *string*  default is https://rekor.sigstore.dev

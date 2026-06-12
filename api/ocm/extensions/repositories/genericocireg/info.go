@@ -28,7 +28,7 @@ func (h handler) Info(m cpi.ManifestAccess, config []byte) interface{} {
 	info := &ComponentVersionInfo{
 		Description: "component version",
 	}
-	acc := NewStateAccess(m)
+	acc := NewStateAccess(nil, m)
 	data, err := blobaccess.BlobData(acc.Get())
 	if err != nil {
 		info.Error = "cannot read component descriptor: " + err.Error()
@@ -46,7 +46,7 @@ func (h handler) Info(m cpi.ManifestAccess, config []byte) interface{} {
 
 func (h handler) Description(pr common.Printer, m cpi.ManifestAccess, config []byte) {
 	pr.Printf("component version:\n")
-	acc := NewStateAccess(m)
+	acc := NewStateAccess(nil, m)
 	data, err := blobaccess.BlobData(acc.Get())
 	if err != nil {
 		pr.Printf("  cannot read component descriptor: %s\n", err.Error())

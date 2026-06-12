@@ -3,10 +3,10 @@ package ocireg
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/goutils/errors"
@@ -22,6 +22,7 @@ import (
 	"ocm.software/ocm/api/tech/oci/identity"
 	"ocm.software/ocm/api/tech/oras"
 	"ocm.software/ocm/api/utils"
+	"ocm.software/ocm/api/utils/httpclient"
 	ocmlog "ocm.software/ocm/api/utils/logging"
 	"ocm.software/ocm/api/utils/refmgmt"
 )
@@ -51,6 +52,10 @@ type RepositoryImpl struct {
 	logger logging.UnboundLogger
 	spec   *RepositorySpec
 	info   *RepositoryInfo
+
+	transport *http.Transport
+	timeout   *time.Duration
+	lock      *locker.Locker
 }
 
 var (
@@ -64,11 +69,18 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) 
 	if urs.Scheme == "http" {
 		logger.Warn("using insecure http for oci registry {{host}}", "host", urs.Host)
 	}
+	transport, timeout, err := configureTransport(ctx, info.Scheme)
+	if err != nil {
+		return nil, err
+	}
 	i := &RepositoryImpl{
 		RepositoryImplBase: cpi.NewRepositoryImplBase(ctx),
 		logger:             logger,
 		spec:               spec,
 		info:               info,
+		transport:          transport,
+		timeout:            timeout,
+		lock:               locker.New(),
 	}
 	i.logger.Debug("created repository")
 	return cpi.NewRepository(i), nil
@@ -87,6 +99,10 @@ func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {
 }
 
 func (r *RepositoryImpl) Close() error {
+	// transport is always initialized in NewRepository; CloseIdleConnections
+	// only drains idle pooled connections, the transport itself remains usable
+	r.transport.CloseIdleConnections()
+
 	return nil
 }
 
@@ -153,28 +169,20 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		}
 	}
 
-	client := retry.DefaultClient
-	client.Transport = ocmlog.NewRoundTripper(retry.DefaultClient.Transport, logger)
-	if r.info.Scheme == "https" {
-		// set up TLS
-		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
-		conf := &tls.Config{
-			// MinVersion: tls.VersionTLS13,
-			RootCAs: func() *x509.CertPool {
-				rootCAs := rootcertsattr.Get(r.GetContext()).GetRootCertPool(true)
-				if creds != nil {
-					c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
-					if c != "" {
-						rootCAs.AppendCertsFromPEM([]byte(c))
-					}
-				}
-
-				return rootCAs
-			}(),
+	if creds != nil && r.transport.TLSClientConfig != nil {
+		c := creds.GetProperty(credentials.ATTR_CERTIFICATE_AUTHORITY)
+		if c != "" {
+			r.transport.TLSClientConfig.RootCAs.AppendCertsFromPEM([]byte(c))
 		}
-		client.Transport = ocmlog.NewRoundTripper(retry.NewTransport(&http.Transport{
-			TLSClientConfig: conf,
-		}), logger)
+	}
+
+	retryTransport := retry.NewTransport(r.transport)
+
+	client := &http.Client{
+		Transport: ocmlog.NewRoundTripper(retryTransport, logger),
+	}
+	if r.timeout != nil {
+		client.Timeout = *r.timeout
 	}
 
 	authClient := &auth.Client{
@@ -193,8 +201,29 @@ func (r *RepositoryImpl) getResolver(comp string) (oras.Resolver, error) {
 		Client:    authClient,
 		PlainHTTP: r.info.Scheme == "http",
 		Logger:    logger,
-		Lock:      locker.New(),
+		Lock:      r.lock,
 	}), nil
+}
+
+func configureTransport(ctx cpi.Context, scheme string) (*http.Transport, *time.Duration, error) {
+	httpSettings, err := ctx.GetHTTPSettings()
+	if err != nil {
+		return nil, nil, err
+	}
+	baseTransport := httpclient.NewTransport(&httpSettings)
+	var timeout *time.Duration
+	if httpSettings.Timeout != nil {
+		timeout = new(time.Duration(*httpSettings.Timeout))
+	}
+
+	if scheme == "https" {
+		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
+		baseTransport.TLSClientConfig = &tls.Config{
+			RootCAs: rootcertsattr.Get(ctx).GetRootCertPool(true),
+		}
+	}
+
+	return baseTransport, timeout, nil
 }
 
 func (r *RepositoryImpl) GetRef(comp, vers string) string {

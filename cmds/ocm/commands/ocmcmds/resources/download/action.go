@@ -12,6 +12,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/download"
+	ocilayouthdlr "ocm.software/ocm/api/ocm/extensions/download/handlers/ocilayout"
 	"ocm.software/ocm/api/ocm/tools/signing"
 	"ocm.software/ocm/api/utils/blobaccess"
 	common2 "ocm.software/ocm/api/utils/misc"
@@ -33,14 +34,23 @@ type Action struct {
 }
 
 func NewAction(ctx ocm.ContextProvider, opts *output.Options) *Action {
-	return &Action{downloaders: download.For(ctx), opts: opts}
+	downloaders := download.For(ctx)
+
+	local := From(opts)
+	if local.OCILayout {
+		// Create a copy to avoid modifying the global registry
+		downloaders = downloaders.Copy()
+		downloaders.Register(ocilayouthdlr.New(), download.ForArtifactType(download.ALL), download.WithPrio(ocilayouthdlr.PRIORITY))
+	}
+
+	return &Action{downloaders: downloaders, opts: opts}
 }
 
 func (d *Action) AddOptions(opts ...options.Options) {
 	d.opts.OptionSet = append(d.opts.OptionSet, opts...)
 }
 
-func (d *Action) Add(e interface{}) error {
+func (d *Action) Add(e any) error {
 	d.data = append(d.data, e.(*elemhdlr.Object))
 	return nil
 }

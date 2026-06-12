@@ -9,6 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 
 	clictx "ocm.software/ocm/api/cli"
+	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -159,12 +160,19 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 		if err != nil {
 			evaluated = nil
 			if h.resolver != nil {
+				if errors.IsErrUnknownKind(err, credentials.KIND_CREDENTIALS) {
+					return nil, errors.Wrapf(err, "failed to get component version %q", name)
+				}
+
+				origErr := err
 				comp, err := ocm.ParseComp(name)
 				if err != nil {
+					err = errors.Wrap(origErr, err)
 					return nil, errors.Wrapf(err, "invalid component version reference %q", name)
 				}
 				if comp.IsVersion() {
 					cv, err := h.resolver.LookupComponentVersion(comp.Component, *comp.Version)
+					err = errors.Wrap(origErr, err)
 					if err != nil {
 						return nil, err
 					}
@@ -174,7 +182,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 						evaluated.Ref.CompSpec = comp
 						evaluated.Version = cv
 						evaluated.Repository = cv.Repository()
-						h.session.Closer(cv)
+						_, _ = h.session.Closer(cv)
 					}
 				}
 			}

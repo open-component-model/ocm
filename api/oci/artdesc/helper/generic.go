@@ -3,7 +3,7 @@ package helper
 import (
 	"fmt"
 
-	"github.com/containerd/containerd/images"
+	"github.com/containerd/containerd/v2/core/images"
 	"github.com/mandelsoft/goutils/errors"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )

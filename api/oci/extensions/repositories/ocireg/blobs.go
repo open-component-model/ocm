@@ -3,7 +3,7 @@ package ocireg
 import (
 	"sync"
 
-	"github.com/containerd/containerd/remotes"
+	"github.com/containerd/containerd/v2/core/remotes"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"

@@ -18,6 +18,7 @@ artifacts, artifact, art, a
       --dirtree          extract as effective filesystem content
   -h, --help             help for artifacts
       --layers ints      extract dedicated layers
+      --oci-layout       download as OCI Image Layout (blobs in blobs/<algorithm>/<encoded>)
   -O, --outfile string   output file or directory
       --repo string      repository name or spec
   -t, --type string      archive format (directory, tar, tgz) (default "directory")
@@ -26,9 +27,13 @@ artifacts, artifact, art, a
 ### Description
 
 Download artifacts from an OCI registry. The result is stored in
-artifact set format, without the repository part
+artifact set format, without the repository part.
 
 The files are named according to the artifact repository name.
+
+By default, blobs are stored in OCM artifact set format (blobs/<algorithm>.<encoded>).
+Use --oci-layout to store blobs in OCI Image Layout format (blobs/<algorithm>/<encoded>)
+for compatibility with tools that expect the OCI Image Layout Specification.
 
 
 If the repository/registry option is specified, the given names are interpreted
@@ -70,6 +75,15 @@ With option <code>--layers</code> it is possible to request the download of
 dedicated layers, only. Option <code>--dirtree</code> expects the artifact to
 be a layered filesystem (for example OCI Image) and provided the effective
 filesystem content.
+
+Option <code>--oci-layout</code> changes the blob storage structure in the downloaded
+artifact. Without this option, blobs are stored in a flat directory at
+<code>blobs/&lt;algorithm&gt;.&lt;encoded&gt;</code> (e.g., <code>blobs/sha256.abc123...</code>).
+With this option, blobs are stored in a nested directory structure at
+<code>blobs/&lt;algorithm&gt;/&lt;encoded&gt;</code> (e.g., <code>blobs/sha256/abc123...</code>)
+as specified by the OCI Image Layout Specification
+(see <a href="https://github.com/opencontainers/image-spec/blob/main/image-layout.md">
+https://github.com/opencontainers/image-spec/blob/main/image-layout.md</a>).
 
 
 The <code>--type</code> option accepts a file format for the

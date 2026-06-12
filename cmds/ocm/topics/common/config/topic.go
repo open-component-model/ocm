@@ -22,11 +22,28 @@ configurations:
    - type: attributes.config.ocm.software
      attributes:  # map of attribute settings
        compat: true
+# Scripts configuration example
 #  - type: scripts.ocm.config.ocm.software
 #    scripts:
 #      "default":
 #         script:
 #           process: true
+# wget credential configuration example
+#  - type: credentials.config.ocm.software
+#    consumers:
+#      - identity:
+#          type: wget
+#          hostname: example.com
+#          # scheme: https   (optional)
+#          # port: 443       (optional)
+#          # pathprefix: /api (optional)
+#        credentials:
+#          - type: Credentials
+#            properties:
+#              username: myuser
+#              password: mypassword
+#              # or identityToken: bearer‑token
+#              # or certificate, privateKey, certificateAuthority for mTLS
 `,
 		Annotations: map[string]string{"ExampleCodeStyle": "yaml"},
 		Long: `

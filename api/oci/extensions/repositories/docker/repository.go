@@ -3,9 +3,9 @@ package docker
 import (
 	"strings"
 
-	"github.com/containers/image/v5/types"
 	"github.com/mandelsoft/logging"
 	"github.com/moby/moby/client"
+	"go.podman.io/image/v5/types"
 
 	"ocm.software/ocm/api/oci/cpi"
 	ocmlog "ocm.software/ocm/api/utils/logging"
@@ -23,7 +23,11 @@ var _ cpi.RepositoryImpl = (*RepositoryImpl)(nil)
 func NewRepository(ctx cpi.Context, spec *RepositorySpec) (cpi.Repository, error) {
 	urs := spec.UniformRepositorySpec()
 	logger := logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host))
-	client, err := newDockerClient(spec.DockerHost, logger)
+	httpSettings, err := ctx.GetHTTPSettings()
+	if err != nil {
+		return nil, err
+	}
+	client, err := newDockerClient(spec.DockerHost, logger, &httpSettings)
 	if err != nil {
 		return nil, err
 	}

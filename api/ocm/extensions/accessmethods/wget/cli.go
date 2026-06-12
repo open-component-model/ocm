@@ -2,6 +2,7 @@ package wget
 
 import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
+	"ocm.software/ocm/api/tech/wget/identity"
 	"ocm.software/ocm/api/utils/cobrautils/flagsets"
 	"ocm.software/ocm/api/utils/mime"
 )
@@ -68,4 +69,7 @@ This OPTIONAL property describes the http body to be included in the request.
 
 This OPTIONAL property describes whether http redirects should be disabled. If omitted,
 it is defaulted to false (so, per default, redirects are enabled).
+
+It uses the consumer identity type ` + identity.CONSUMER_TYPE + ` with the fields
+for a hostpath identity matcher (see <CMD>ocm get credentials</CMD>).
 `

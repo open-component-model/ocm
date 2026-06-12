@@ -5,11 +5,16 @@ import (
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 )
 
-const TYPE = "utf8"
+const (
+	TYPE       = "utf8"
+	UPPER_TYPE = "UTF8"
+)
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{},
 		usage, ConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE, &Spec{},
+		"", ConfigHandler()))
 }
 
 const usage = `

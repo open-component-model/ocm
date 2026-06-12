@@ -9,13 +9,9 @@ bin
 
 /cmds/demoplugin
 /cmds/ecrplugin
-/cmds/helminstaller
 /cmds/test
 /components/demoplugin
 /components/ecrplugin
-/components/helmdemo
-/components/helminstaller
-/components/subchartsdemo
 
 /docs
 /examples

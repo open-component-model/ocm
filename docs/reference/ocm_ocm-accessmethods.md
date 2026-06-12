@@ -391,6 +391,9 @@ shown below.
     This OPTIONAL property describes whether http redirects should be disabled. If omitted,
     it is defaulted to false (so, per default, redirects are enabled).
 
+    It uses the consumer identity type wget with the fields
+    for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
+
   Options used to configure fields: <code>--body</code>, <code>--header</code>, <code>--mediaType</code>, <code>--noredirect</code>, <code>--url</code>, <code>--verb</code>
 
 ### SEE ALSO

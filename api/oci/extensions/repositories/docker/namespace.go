@@ -5,12 +5,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/containers/image/v5/image"
-	"github.com/containers/image/v5/types"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/logging"
 	"github.com/moby/moby/client"
 	"github.com/opencontainers/go-digest"
+	"go.podman.io/image/v5/image"
+	"go.podman.io/image/v5/types"
 
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/cpi"

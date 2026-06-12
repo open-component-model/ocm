@@ -35,6 +35,9 @@ const (
 const (
 	LegacyType   = "ociRegistry"
 	LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
+
+	LegacyType2   = "OCIImage"
+	LegacyType2V1 = LegacyType2 + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -43,6 +46,9 @@ func init() {
 
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyTypeV1))
+
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType2))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType2V1))
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
@@ -355,7 +361,7 @@ func (m *accessMethod) getBlob() (artifactset.ArtifactBlob, error) {
 	}
 	logger := Logger(WrapContextProvider(m.ctx))
 	logger.Info("synthesize artifact blob", "ref", m.reference)
-	m.blob, err = artifactset.SynthesizeArtifactBlobForArtifact(m.art, m.ref.VersionSpec())
+	m.blob, err = artifactset.SynthesizeArtifactBlobForArtifact(m.art, []string{m.ref.VersionSpec()})
 	logger.Info("synthesize artifact blob done", "ref", m.reference, "error", logging.ErrorMessage(err))
 	if err != nil {
 		m.err = err

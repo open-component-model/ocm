@@ -8,11 +8,11 @@ import (
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/downloader"
-	"helm.sh/helm/v3/pkg/getter"
-	"helm.sh/helm/v3/pkg/registry"
-	"helm.sh/helm/v3/pkg/repo"
+	"helm.sh/helm/v4/pkg/cli"
+	"helm.sh/helm/v4/pkg/downloader"
+	"helm.sh/helm/v4/pkg/getter"
+	"helm.sh/helm/v4/pkg/registry"
+	"helm.sh/helm/v4/pkg/repo/v1"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/extensions/repositories/directcreds"
@@ -81,20 +81,24 @@ func DownloadChart(out common.Printer, ctx oci.ContextProvider, ref, version, re
 		}
 
 		chart, prov, aset, err = ocihelm.Download2(out, ctx.OCIContext(), identity.OCIRepoURL(repourl, ref)+":"+version, chart, osfs.New(), true, creds)
+		if err != nil {
+			return nil, fmt.Errorf("failed to download chart %s from OCI repository: %w", ref, err)
+		}
 		if prov != "" && dl.Verify > downloader.VerifyNever && dl.Verify != downloader.VerifyLater {
-			_, err = downloader.VerifyChart(chart, dl.Keyring)
+			defaultProvFile := chart + ".prov"
+			_, err = downloader.VerifyChart(chart, defaultProvFile, dl.Keyring)
 			if err != nil {
 				// Fail always in this case, since it means the verification step
 				// failed.
-				return nil, err
+				return nil, fmt.Errorf("failed to verify chart %s: %w", defaultProvFile, err)
 			}
 		}
 	} else {
 		chart, _, err = dl.DownloadTo("repo/"+ref, version, dl.root)
+		if err != nil {
+			return nil, fmt.Errorf("failed to download chart %s from helm repository: %w", ref, err)
+		}
 		prov = chart + ".prov"
-	}
-	if err != nil {
-		return nil, err
 	}
 	if prov != "" && filepath.Exists(prov) {
 		dl.prov = prov
@@ -169,7 +173,7 @@ func (d *chartDownloader) complete(ctx oci.ContextProvider, ref, repourl string)
 		return errors.Wrapf(err, "cannot get chart repository %q", repourl)
 	}
 
-	d.RepositoryCache, cr.CachePath = cache, cache
+	d.RepositoryCache, d.ContentCache, cr.CachePath = cache, cache, cache
 
 	_, err = cr.DownloadIndexFile()
 	if err != nil {

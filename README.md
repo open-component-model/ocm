@@ -81,7 +81,6 @@ Install using [Nix](https://nixos.org) (with [Flakes](https://nixos.wiki/wiki/Fl
 # Nix (macOS, Linux, and Windows)
 # ad-hoc cmd execution
 nix run github:open-component-model/ocm -- --help
-nix run github:open-component-model/ocm#helminstaller -- --help
 
 # install development version
 nix profile install github:open-component-model/ocm
@@ -144,7 +143,7 @@ You can pass in the following arguments to override the predefined defaults:
 Please check [hub.docker.com](https://hub.docker.com/_/golang/tags?page=1&name=alpine) for possible version combinations.
 
 ```bash
-podman build -t ocm --build-arg GO_VERSION=1.25.4 --build-arg ALPINE_VERSION=3.21 --build-arg GO_PROXY=https://proxy.golang.org .
+podman build -t ocm --build-arg GO_VERSION=1.25.7 --build-arg ALPINE_VERSION=3.22 --build-arg GO_PROXY=https://proxy.golang.org .
 ```
 
 ### Chocolatey
@@ -159,17 +158,23 @@ see: [chocolatey community package: ocm-cli](https://community.chocolatey.org/pa
 
 An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](examples/make/Makefile).
 
-More comprehensive examples can be taken from the [`components`](components) contained in this repository. [Here](components/helmdemo/README.md) a complete component build including a multi-arch image is done and finally packaged into a CTF archive which can be transported into an OCI repository. See the readme files for details.
+More comprehensive examples can be taken from the [`components`](components) contained in this repository.
 
 ## GPG Public Key
 
-The authenticity of released packages that have been uploaded to public repositories can be verified using our GPG public key. You can find the current key in the file [OCM-RELEASES-PUBLIC-CURRENT.gpg](https://ocm.software/gpg/OCM-RELEASES-PUBLIC-CURRENT.gpg) on our website. You can find the old keys in the website github repository [here](https://github.com/open-component-model/ocm-website/tree/main/static/gpg).
+The authenticity of released packages that have been uploaded to public repositories can be verified using our GPG
+public key. You can find the current key in the file
+[OCM-RELEASES-PUBLIC-CURRENT.gpg](https://ocm.software/gpg/OCM-RELEASES-PUBLIC-CURRENT.gpg) on our website.
+You can find the old keys in the website github repository
+[here](https://github.com/open-component-model/open-component-model/tree/main/website/static/gpg).
 
 ## Contributing
 
-Code contributions, feature requests, bug reports, and help requests are very welcome. Please refer to the [Contributing Guide in the Community repository](https://github.com/open-component-model/community/blob/main/CONTRIBUTING.md) for more information on how to contribute to OCM.
+Code contributions, feature requests, bug reports, and help requests are very welcome.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and workflow details,
+or the [central contributing guide](https://ocm.software/community/contributing/) for the general process.
 
-OCM follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md).
+OCM follows the [Linux Foundation EU Code of Conduct](https://linuxfoundation.eu/policies/code-of-conduct).
 
 ## Release Process
 
@@ -178,6 +183,9 @@ Please refer to the [Release Process Documentation](RELEASE_PROCESS.md) for more
 
 ## Licensing
 
-Copyright 2025 SAP SE or an SAP affiliate company and Open Component Model contributors.
 Please see our [LICENSE](LICENSE) for copyright and license information.
 Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/open-component-model/ocm).
+
+---
+
+<p align="center"><img alt="Bundesministerium für Wirtschaft und Energie (BMWE)-EU funding logo" src="https://apeirora.eu/assets/img/BMWK-EU.png" width="400"/></p>

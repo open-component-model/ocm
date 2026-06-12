@@ -26,6 +26,10 @@ updates:
     labels:
       - kind/dependency
       - kind/chore
+    # TODO: Remove when fixed https://github.com/open-component-model/ocm-project/issues/771
+    ignore:
+      - dependency-name: "github.com/mikefarah/yq/v4"
+        versions: [ ">4.48.1"]
   - package-ecosystem: docker
     directory: "/"
     schedule:

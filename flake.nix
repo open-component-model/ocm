@@ -3,7 +3,7 @@
 
   inputs = {
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -30,14 +30,14 @@
           inherit (pkgs) stdenv lib ;
         in
         {
-          ${pname} = pkgs.buildGoModule.override { go = pkgs.go_1_25; } rec {
+          ${pname} = pkgs.buildGoModule.override { go = pkgs.go_1_26; } rec {
             inherit pname self;
             version = lib.fileContents ./VERSION;
             gitCommit = if (self ? rev) then self.rev else self.dirtyRev;
             state = if (self ? rev) then "clean" else "dirty";
 
             # This vendorHash represents a derivative of all go.mod dependencies and needs to be adjusted with every change
-            vendorHash = "sha256-47H1E7DDNiF+Yca+aDx32edMXkG0baQ6d2EMnoI6EgU=";
+            vendorHash = "sha256-Y8iTobjLOJ0dZiG3FO+1pvoxrcFLYuXAxBn3ZOxuu2g=";
 
             src = ./.;
 
@@ -58,7 +58,6 @@
               "cmds/cliplugin"
               "cmds/demoplugin"
               "cmds/ecrplugin"
-              "cmds/helminstaller"
               "cmds/subcmdplugin"
               "cmds/jfrogplugin"
             ];
@@ -93,7 +92,7 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              go_1_25   # golang 1.25
+              go        # golang 1.26
               gopls     # go language server
               gotools   # go imports
               go-tools  # static checks
@@ -111,10 +110,6 @@
         default = {
             type = "app";
             program = self.packages.${system}.${pname} + "/bin/ocm";
-        };
-        helminstaller = {
-          type = "app";
-          program = self.packages.${system}.${pname} + "/bin/helminstaller";
         };
         demo = {
           type = "app";

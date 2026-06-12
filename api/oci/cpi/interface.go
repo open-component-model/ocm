@@ -42,6 +42,8 @@ type (
 	DataAccess                       = internal.DataAccess
 	RepositorySource                 = internal.RepositorySource
 	ConsumerIdentityProvider         = internal.ConsumerIdentityProvider
+	Duration                         = internal.Duration
+	HTTPSettings                     = internal.HTTPSettings
 )
 
 type Descriptor = ociv1.Descriptor

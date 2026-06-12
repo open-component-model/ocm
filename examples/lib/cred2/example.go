@@ -72,11 +72,11 @@ func SimpleWriteWithCredentials() (ferr error) {
 		return errors.Wrapf(err, "cannot add resource")
 	}
 
-	imageAccess := ociartifact.New("ghcr.io/open-component-model/ocm/ocm.software/toi/installers/helminstaller/helminstaller:0.4.0")
+	imageAccess := ociartifact.New("ghcr.io/open-component-model/ocm/ocm.software/ocmcli/ocmcli-image:0.35.0")
 	err = compvers.SetResource(&compdesc.ResourceMeta{
 		ElementMeta: compdesc.ElementMeta{
-			Name:    "helminstaller",
-			Version: "0.4.0",
+			Name:    "ocmcli",
+			Version: "0.35.0",
 		},
 		Type:     resourcetypes.OCI_IMAGE,
 		Relation: metav1.ExternalRelation,

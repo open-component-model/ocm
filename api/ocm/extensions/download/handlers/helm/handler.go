@@ -9,7 +9,7 @@ import (
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	helmregistry "helm.sh/helm/v3/pkg/registry"
+	helmregistry "helm.sh/helm/v4/pkg/registry"
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"

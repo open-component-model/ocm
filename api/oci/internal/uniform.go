@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/containerd/containerd/reference"
+	"github.com/containerd/containerd/v2/pkg/reference"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/sirupsen/logrus"
 

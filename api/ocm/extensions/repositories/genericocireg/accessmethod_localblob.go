@@ -2,6 +2,7 @@ package genericocireg
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
+	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/cpi/accspeccpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/utils/blobaccess/blobaccess"
@@ -26,6 +28,7 @@ type localBlobAccessMethod struct {
 	spec      *localblob.AccessSpec
 	namespace oci.NamespaceAccess
 	artifact  oci.ArtifactAccess
+	mimeType  string
 }
 
 var _ accspeccpi.AccessMethodImpl = (*localBlobAccessMethod)(nil)
@@ -39,6 +42,11 @@ func newLocalBlobAccessMethodImpl(a *localblob.AccessSpec, ns oci.NamespaceAcces
 		spec:      a,
 		namespace: ns,
 		artifact:  art,
+	}
+	if m.spec.MediaType == artdesc.MediaTypeImageIndex || m.spec.MediaType == artdesc.MediaTypeImageManifest {
+		// if we discover a localblob with an index or manifest media type, we can
+		// assume that we are dealing with a new style of artifact created by the new reference library.
+		m.mimeType = artifactset.MediaType(m.spec.MediaType)
 	}
 	ref.BeforeCleanup(refmgmt.CleanupHandlerFunc(m.cache))
 	return m, nil
@@ -99,8 +107,32 @@ func (m *localBlobAccessMethod) getBlob() (blobaccess.DataAccess, error) {
 		err  error
 	)
 	if len(refs) < 2 {
-		_, data, err = m.namespace.GetBlobData(digest.Digest(m.spec.LocalReference))
-		if err != nil {
+		if m.spec.MediaType == artdesc.MediaTypeImageIndex || m.spec.MediaType == artdesc.MediaTypeImageManifest {
+			// if we have a nested manifest or index, we can use the blob synthesis utility here to download
+			// the entire artifact set.
+			art, err := m.namespace.GetArtifact(m.spec.LocalReference)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact for local reference %q: %w", m.spec.LocalReference, err)
+			}
+			defer art.Close()
+			var artifactRefs []string
+			if m.spec.ReferenceName != "" {
+				// if we have a reference name, it consists of repository and tag
+				// so we can extract the tag to use it
+				refSpec, err := oci.ParseRef(m.spec.ReferenceName)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse reference name %q: %w", m.spec.ReferenceName, err)
+				}
+				if refSpec.GetTag() != "" {
+					artifactRefs = append(artifactRefs, refSpec.GetTag())
+				}
+			}
+			artblob, err := artifactset.SynthesizeArtifactBlobForArtifact(art, artifactRefs)
+			if err != nil {
+				return nil, fmt.Errorf("failed to synthesize artifact blob: %w", err)
+			}
+			data = artblob
+		} else if _, data, err = m.namespace.GetBlobData(digest.Digest(m.spec.LocalReference)); err != nil {
 			return nil, err
 		}
 	} else {
@@ -123,10 +155,13 @@ func (m *localBlobAccessMethod) Get() ([]byte, error) {
 }
 
 func (m *localBlobAccessMethod) MimeType() string {
+	if m.mimeType != "" {
+		return m.mimeType
+	}
 	return m.spec.MediaType
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type composedBlock struct {
 	m    *localBlobAccessMethod

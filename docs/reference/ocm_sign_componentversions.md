@@ -119,6 +119,7 @@ The following signing types are supported with option <code>--algorithm</code>:
   - <code>rsa-signingservice</code>
   - <code>rsapss-signingservice</code>
   - <code>sigstore</code>
+  - <code>sigstore-v2</code>
 
 
 The following normalization modes are supported with option <code>--normalization</code>:

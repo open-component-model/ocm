@@ -59,49 +59,98 @@ func (h *TarHandler) Create(info AccessObjectInfo, path string, opts accessio.Op
 }
 
 // Write tars the current descriptor and its artifacts.
-func (h *TarHandler) Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error {
+func (h *TarHandler) Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) (err error) {
 	writer, err := opts.WriterFor(path, mode)
 	if err != nil {
 		return fmt.Errorf("unable to write: %w", err)
 	}
 
-	defer writer.Close()
+	defer func() {
+		err = errors.Join(err, writer.Close())
+	}()
 
-	return h.WriteToStream(obj, writer, opts)
+	// Check if OCI layout (has subdirectories in element dir)
+	if h.hasNestedDirs(obj) {
+		return h.writeToStream(obj, writer, opts, h.writeOCICompliant)
+	}
+	return h.writeToStream(obj, writer, opts, h.writeElementsFlat)
 }
 
-func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts accessio.Options) error {
-	if h.compression != nil {
-		w, err := h.compression.Compressor(writer, nil, nil)
-		if err != nil {
-			return fmt.Errorf("unable to compress writer: %w", err)
+// hasNestedDirs checks if the element directory contains subdirectories (OCI layout).
+func (h *TarHandler) hasNestedDirs(obj *AccessObject) bool {
+	elemDir := obj.info.GetElementDirectoryName()
+	entries, err := vfs.ReadDir(obj.fs, elemDir)
+	if err != nil {
+		return false
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			return true
 		}
-		defer w.Close()
+	}
+	return false
+}
 
-		writer = w
+// writeToStream is the common implementation for writing tar streams.
+// The elementWriter parameter determines how element content is written (flat vs nested).
+func (h TarHandler) writeToStream(obj *AccessObject, writer io.Writer, opts accessio.Options, elementWriter func(*AccessObject, *tar.Writer) error) error {
+	writer, cleanup, err := h.applyCompression(writer)
+	if err != nil {
+		return err
+	}
+	if cleanup != nil {
+		defer cleanup()
 	}
 
-	// write descriptor
-	_, err := obj.Update()
+	tw := tar.NewWriter(writer)
+
+	if err := h.writeDescriptor(obj, tw); err != nil {
+		return err
+	}
+
+	if err := h.writeAdditionalFiles(obj, tw); err != nil {
+		return err
+	}
+
+	if err := elementWriter(obj, tw); err != nil {
+		return err
+	}
+
+	return tw.Close()
+}
+
+// applyCompression wraps the writer with compression if configured.
+// Returns the wrapped writer and a cleanup function (may be nil).
+func (h TarHandler) applyCompression(writer io.Writer) (io.Writer, func(), error) {
+	if h.compression == nil {
+		return writer, nil, nil
+	}
+	w, err := h.compression.Compressor(writer, nil, nil)
 	if err != nil {
+		return nil, nil, fmt.Errorf("unable to compress writer: %w", err)
+	}
+	return w, func() { w.Close() }, nil
+}
+
+// writeDescriptor updates the access object and writes the descriptor to the tar.
+func (h TarHandler) writeDescriptor(obj *AccessObject, tw *tar.Writer) error {
+	if _, err := obj.Update(); err != nil {
 		return fmt.Errorf("unable to update access object: %w", err)
 	}
 
 	data, err := obj.state.GetBlob()
 	if err != nil {
-		return fmt.Errorf("unable to write to get state blob: %w", err)
+		return fmt.Errorf("unable to get state blob: %w", err)
 	}
 	defer data.Close()
 
-	tw := tar.NewWriter(writer)
-	cdHeader := &tar.Header{
+	header := &tar.Header{
 		Name:    obj.info.GetDescriptorFileName(),
 		Size:    data.Size(),
 		Mode:    FileMode,
 		ModTime: ModTime,
 	}
-
-	if err := tw.WriteHeader(cdHeader); err != nil {
+	if err := tw.WriteHeader(header); err != nil {
 		return fmt.Errorf("unable to write descriptor header: %w", err)
 	}
 
@@ -111,55 +160,55 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 	}
 	defer r.Close()
 
-	if _, err := io.Copy(tw, r); err != nil {
+	if _, err := io.CopyN(tw, r, data.Size()); err != nil {
 		return fmt.Errorf("unable to write descriptor content: %w", err)
 	}
+	return nil
+}
 
-	// Copy additional files
-	for _, f := range obj.info.GetAdditionalFiles(obj.fs) {
-		ok, err := vfs.IsFile(obj.fs, f)
+// writeAdditionalFiles copies additional files to the tar if they exist.
+func (h TarHandler) writeAdditionalFiles(obj *AccessObject, tw *tar.Writer) error {
+	for _, path := range obj.info.GetAdditionalFiles(obj.fs) {
+		// Skip if file doesn't exist
+		ok, err := vfs.IsFile(obj.fs, path)
 		if err != nil {
-			return errors.Wrapf(err, "cannot check for file %q", f)
+			return errors.Wrapf(err, "cannot check for file %q", path)
 		}
-		if ok {
-			fi, err := obj.fs.Stat(f)
-			if err != nil {
-				return errors.Wrapf(err, "cannot stat file %q", f)
-			}
-			header := &tar.Header{
-				Name:    f,
-				Size:    fi.Size(),
-				Mode:    FileMode,
-				ModTime: ModTime,
-			}
-			if err := tw.WriteHeader(header); err != nil {
-				return errors.Wrapf(err, "unable to write descriptor header")
-			}
+		if !ok {
+			continue
+		}
 
-			r, err := obj.fs.Open(f)
-			if err != nil {
-				return errors.Wrapf(err, "unable to get reader")
-			}
-			if _, err := io.Copy(tw, r); err != nil {
-				r.Close()
-				return errors.Wrapf(err, "unable to write file %s", f)
-			}
-			r.Close()
+		// Get file info for the existing file
+		fi, err := obj.fs.Stat(path)
+		if err != nil {
+			return errors.Wrapf(err, "cannot stat file %q", path)
+		}
+
+		// Use writeFileEntry for the actual writing
+		if err := h.writeFileEntry(obj, tw, path, fi); err != nil {
+			return err
 		}
 	}
+	return nil
+}
 
-	// add all element content
-	err = tw.WriteHeader(&tar.Header{
+// writeElementsFlat writes element content using flat directory structure.
+// This handles non-OCI compliant formats where blobs are stored with filenames in the format
+// 'algorithm.digest' (e.g., 'sha256.abcd1234...') directly in the blobs directory,
+// rather than nested in blobs/sha256/abcd1234... as required by the OCI specification.
+func (h TarHandler) writeElementsFlat(obj *AccessObject, tw *tar.Writer) error {
+	elemDir := obj.info.GetElementDirectoryName()
+
+	if err := tw.WriteHeader(&tar.Header{
 		Typeflag: tar.TypeDir,
-		Name:     obj.info.GetElementDirectoryName(),
+		Name:     elemDir,
 		Mode:     DirMode,
 		ModTime:  ModTime,
-	})
-	if err != nil {
+	}); err != nil {
 		return fmt.Errorf("unable to write %s directory: %w", obj.info.GetElementTypeName(), err)
 	}
 
-	fileInfos, err := vfs.ReadDir(obj.fs, obj.info.GetElementDirectoryName())
+	fileInfos, err := vfs.ReadDir(obj.fs, elemDir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -169,29 +218,114 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 
 	for _, fileInfo := range fileInfos {
 		path := obj.info.SubPath(fileInfo.Name())
-		header := &tar.Header{
-			Name:    path,
-			Size:    fileInfo.Size(),
-			Mode:    FileMode,
-			ModTime: ModTime,
+		if err := h.writeFileEntry(obj, tw, path, fileInfo); err != nil {
+			return err
 		}
-		if err := tw.WriteHeader(header); err != nil {
-			return fmt.Errorf("unable to write %s header: %w", obj.info.GetElementTypeName(), err)
-		}
+	}
+	return nil
+}
 
-		content, err := obj.fs.Open(path)
-		if err != nil {
-			return fmt.Errorf("unable to open %s: %w", obj.info.GetElementTypeName(), err)
+// writeFileEntry writes a single file entry to the tar.
+func (h TarHandler) writeFileEntry(obj *AccessObject, tw *tar.Writer, path string, info os.FileInfo) (err error) {
+	header := &tar.Header{
+		Name:    path,
+		Size:    info.Size(),
+		Mode:    FileMode,
+		ModTime: ModTime,
+	}
+	if err = tw.WriteHeader(header); err != nil {
+		return fmt.Errorf("unable to write %s header: %w", obj.info.GetElementTypeName(), err)
+	}
+
+	content, err := obj.fs.Open(path)
+	if err != nil {
+		return fmt.Errorf("unable to open %s: %w", obj.info.GetElementTypeName(), err)
+	}
+	defer func() {
+		err = errors.Join(err, content.Close())
+	}()
+
+	if _, err = io.CopyN(tw, content, info.Size()); err != nil {
+		return fmt.Errorf("unable to write %s content: %w", obj.info.GetElementTypeName(), err)
+	}
+	return nil
+}
+
+// writeOCICompliant writes element content to the tar following OCI standards.
+// This handles OCI layouts with a standard two-level structure (e.g. blobs/sha256).
+// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#filesystem-layout
+func (h TarHandler) writeOCICompliant(obj *AccessObject, tw *tar.Writer) error {
+	dir := obj.info.GetElementDirectoryName()
+	// Write root directory header
+	if err := tw.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeDir,
+		Name:     dir,
+		Mode:     DirMode,
+		ModTime:  ModTime,
+	}); err != nil {
+		return fmt.Errorf("unable to write directory header for %s: %w", dir, err)
+	}
+
+	entries, err := vfs.ReadDir(obj.fs, dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
 		}
-		if _, err := io.Copy(tw, content); err != nil {
-			return fmt.Errorf("unable to write %s content: %w", obj.info.GetElementTypeName(), err)
+		return fmt.Errorf("unable to read directory %s: %w", dir, err)
+	}
+
+	// Process first level entries (typically 'blobs')
+	for _, entry := range entries {
+		subPath := dir + "/" + entry.Name()
+
+		if entry.IsDir() {
+			if err := h.writeDirEntry(obj, tw, subPath); err != nil {
+				return err
+			}
+		} else {
+			// Handle files in root directory
+			if err := h.writeFileEntry(obj, tw, subPath, entry); err != nil {
+				return err
+			}
 		}
-		if err := content.Close(); err != nil {
-			return fmt.Errorf("unable to close %s %s: %w", obj.info.GetElementTypeName(), path, err)
+	}
+	return nil
+}
+
+// writeDirEntry writes a directory entry and its content to the tar.
+// This specifically handles OCI-style directory entries (e.g. the 'sha256' subdirectory).
+// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#filesystem-layout
+func (h TarHandler) writeDirEntry(obj *AccessObject, tw *tar.Writer, path string) error {
+	// Write directory header
+	if err := tw.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeDir,
+		Name:     path,
+		Mode:     DirMode,
+		ModTime:  ModTime,
+	}); err != nil {
+		return fmt.Errorf("unable to write directory header for %s: %w", path, err)
+	}
+
+	// Process entries in this directory (typically hash digest files)
+	entries, err := vfs.ReadDir(obj.fs, path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("unable to read directory %s: %w", path, err)
+	}
+
+	// Process files in directory
+	for _, entry := range entries {
+		filePath := path + "/" + entry.Name()
+		if !entry.IsDir() {
+			if err := h.writeFileEntry(obj, tw, filePath, entry); err != nil {
+				return err
+			}
 		}
 	}
 
-	return tw.Close()
+	return nil
 }
 
 func (h *TarHandler) NewFromReader(info AccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error) {

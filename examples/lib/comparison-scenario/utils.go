@@ -6,9 +6,9 @@ import (
 	"io"
 	"os"
 
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v4/pkg/action"
+	chart "helm.sh/helm/v4/pkg/chart/v2"
+	"helm.sh/helm/v4/pkg/cli"
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/ocm"
@@ -65,7 +65,6 @@ func InstallChart(chart *chart.Chart, release, namespace string) error {
 		settings.RESTClientGetter(),
 		namespace,
 		os.Getenv("HELM_DRIVER"),
-		func(msg string, args ...interface{}) { fmt.Printf(msg, args...) },
 	); err != nil {
 		return err
 	}

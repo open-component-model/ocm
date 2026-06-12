@@ -56,7 +56,11 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 func (a *RepositorySpec) Validate(ctx cpi.Context, creds credentials.Credentials, usageContext ...credentials.UsageContext) error {
 	urs := a.UniformRepositorySpec()
 	logger := logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host))
-	client, err := newDockerClient(a.DockerHost, logger)
+	httpSettings, err := ctx.GetHTTPSettings()
+	if err != nil {
+		return err
+	}
+	client, err := newDockerClient(a.DockerHost, logger, &httpSettings)
 	if err != nil {
 		return err
 	}

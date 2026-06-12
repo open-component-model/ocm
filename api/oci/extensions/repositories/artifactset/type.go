@@ -22,8 +22,9 @@ func init() {
 }
 
 const (
-	FORMAT_OCI = "oci/v1"
-	FORMAT_OCM = "ocm/v1"
+	FORMAT_OCI           = "oci/v1"
+	FORMAT_OCI_COMPLIANT = "oci/v1+compliant" // OCI Image Layout with nested blob directories (blobs/sha256/DIGEST)
+	FORMAT_OCM           = "ocm/v1"
 )
 
 type RepositorySpec struct {

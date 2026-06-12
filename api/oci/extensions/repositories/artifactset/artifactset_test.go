@@ -29,6 +29,17 @@ func defaultManifestFill(a *artifactset.ArtifactSet) {
 	MustWithOffset(1, Calling(a.AddArtifact(art)))
 }
 
+// blobPath returns the expected blob path based on format.
+// FORMAT_OCI_COMPLIANT uses nested paths (blobs/sha256/DIGEST),
+// others use flat paths (blobs/sha256.DIGEST).
+// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
+func blobPath(format, digest string) string {
+	if format == artifactset.FORMAT_OCI_COMPLIANT {
+		return "blobs/sha256/" + digest
+	}
+	return "blobs/sha256." + digest
+}
+
 var _ = Describe("artifact management", func() {
 	var tempfs vfs.FileSystem
 	var opts accessio.Options
@@ -75,16 +86,15 @@ var _ = Describe("artifact management", func() {
 		Expect(vfs.FileExists(tempfs, "test/"+desc)).To(BeTrue())
 		Expect(vfs.FileExists(tempfs, "test/"+artifactset.OCILayouFileName)).To(Equal(desc == artifactset.OCIArtifactSetDescriptorFileName))
 
-		infos, err := vfs.ReadDir(tempfs, "test/"+artifactset.BlobsDirectoryName)
-		Expect(err).To(Succeed())
-		blobs := []string{}
-		for _, fi := range infos {
-			blobs = append(blobs, fi.Name())
+		// Check blobs exist at expected paths
+		for _, digest := range []string{
+			"3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
+			"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+			"810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
+		} {
+			path := "test/" + blobPath(format, digest)
+			Expect(vfs.FileExists(tempfs, path)).To(BeTrue(), "blob not found: %s", path)
 		}
-		Expect(blobs).To(ContainElements(
-			"sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
-			"sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
 	})
 
 	TestForAllFormats("instantiate tgz artifact", func(format string) {
@@ -119,18 +129,22 @@ var _ = Describe("artifact management", func() {
 
 			switch header.Typeflag {
 			case tar.TypeDir:
-				Expect(header.Name).To(Equal(artifactset.BlobsDirectoryName))
+				// FORMAT_OCI_COMPLIANT has nested dirs (blobs/sha256/), others have only blobs/
+				// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
+				if format != artifactset.FORMAT_OCI_COMPLIANT {
+					Expect(header.Name).To(Equal(artifactset.BlobsDirectoryName))
+				}
 			case tar.TypeReg:
 				files = append(files, header.Name)
 			}
 		}
 		elems := []interface{}{
 			artifactset.DescriptorFileName(format),
-			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
-			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
+			blobPath(format, "3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"),
+			blobPath(format, "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"),
+			blobPath(format, "810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"),
 		}
-		if format == artifactset.FORMAT_OCI {
+		if format == artifactset.FORMAT_OCI || format == artifactset.FORMAT_OCI_COMPLIANT {
 			elems = append(elems, artifactset.OCILayouFileName)
 		}
 		Expect(files).To(ContainElements(elems))
@@ -171,18 +185,22 @@ var _ = Describe("artifact management", func() {
 
 			switch header.Typeflag {
 			case tar.TypeDir:
-				Expect(header.Name).To(Equal(artifactset.BlobsDirectoryName))
+				// FORMAT_OCI_COMPLIANT has nested dirs (blobs/sha256/), others have only blobs/
+				// See: https://specs.opencontainers.org/image-spec/image-layout/?v=v1.1.1#blobs
+				if format != artifactset.FORMAT_OCI_COMPLIANT {
+					Expect(header.Name).To(Equal(artifactset.BlobsDirectoryName))
+				}
 			case tar.TypeReg:
 				files = append(files, header.Name)
 			}
 		}
 		elems := []interface{}{
 			artifactset.DescriptorFileName(format),
-			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
-			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
+			blobPath(format, "3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"),
+			blobPath(format, "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"),
+			blobPath(format, "810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"),
 		}
-		if format == artifactset.FORMAT_OCI {
+		if format != artifactset.FORMAT_OCM {
 			elems = append(elems, artifactset.OCILayouFileName)
 		}
 		Expect(files).To(ContainElements(elems))

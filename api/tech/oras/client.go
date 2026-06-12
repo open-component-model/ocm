@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/containerd/containerd/errdefs"
+	"github.com/containerd/errdefs"
 	"github.com/mandelsoft/logging"
 	"github.com/moby/locker"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
