@@ -76,22 +76,21 @@ func (s *Downloader) Download(w io.WriterAt) error {
 		resp, err := tmpClient.HeadBucket(ctx, &s3.HeadBucketInput{
 			Bucket: aws.String(s.bucket),
 		})
-		if err != nil {
+		if err == nil {
+			s.region = aws.ToString(resp.BucketRegion)
+		} else {
 			// S3 returns 301 when the bucket is in a different region than the hint region.
 			// The SDK does not follow 301 redirects, but the correct region is in X-Amz-Bucket-Region.
 			var respErr *smithyhttp.ResponseError
-			if errors.As(err, &respErr) && respErr.HTTPStatusCode() == http.StatusMovedPermanently {
-				if region := respErr.Response.Header.Get("X-Amz-Bucket-Region"); region != "" {
-					s.region = region
-					err = nil
-				}
+			if !errors.As(err, &respErr) || respErr.HTTPStatusCode() != http.StatusMovedPermanently {
+				return fmt.Errorf("failed to find bucket region: %w", err)
 			}
+			region := respErr.Response.Header.Get("X-Amz-Bucket-Region")
+			if region == "" {
+				return fmt.Errorf("failed to find bucket region: %w", err)
+			}
+			s.region = region
 		}
-		if err != nil {
-			return fmt.Errorf("failed to find bucket region: %w", err)
-		}
-
-		s.region = *resp.BucketRegion
 		cfg.Region = s.region
 	}
 
