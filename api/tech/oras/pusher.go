@@ -8,12 +8,14 @@ import (
 	"strconv"
 
 	"github.com/containerd/errdefs"
-	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"oras.land/oras-go/v2/errdef"
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote/auth"
 
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
 	"ocm.software/ocm/api/oci/ociutils"
+	"ocm.software/ocm/api/utils/logging"
 )
 
 // PushExistsCheckEnvVar gates the optional HEAD pre-check performed before
@@ -27,6 +29,20 @@ import (
 // (see PR #1676). Enable it when a registry's Push response is unreliable
 // and the redundant HEAD is preferable to a failed upload.
 const PushExistsCheckEnvVar = "OCM_OCI_PUSH_EXISTS_CHECK"
+
+// pushExistsCheckEnabled reports whether the optional pre-push Exists() check
+// is requested via PushExistsCheckEnvVar. The env var is consulted exactly
+// once at package initialisation; unset, empty, or unparsable values disable
+// the check.
+//
+// strconv.ParseBool returns (false, err) for "" - the os.Getenv result for an
+// unset variable — so a single call covers the unset and unparsable cases.
+var pushExistsCheckEnabled = func() bool {
+	enabled, _ := strconv.ParseBool(os.Getenv(PushExistsCheckEnvVar))
+	logging.Logger().Debug("oras pre-push Exists() check gate resolved",
+		"envVar", PushExistsCheckEnvVar, "enabled", enabled)
+	return enabled
+}()
 
 type OrasPusher struct {
 	client    *auth.Client
@@ -73,12 +89,14 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 		return nil
 	}
 
-	if pushExistsCheckEnabled() {
+	if pushExistsCheckEnabled {
 		ok, err := repository.Exists(ctx, d)
 		if err != nil {
 			return fmt.Errorf("failed to check if repository %q exists: %w", ref.Repository, err)
 		}
 		if ok {
+			logging.Logger().Debug("pre-push Exists() check short-circuited; blob already present",
+				"ref", c.ref, "digest", d.Digest.String())
 			return errdefs.ErrAlreadyExists
 		}
 	}
@@ -91,19 +109,4 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 	}
 
 	return nil
-}
-
-// pushExistsCheckEnabled reports whether the optional pre-push Exists() check
-// is requested via PushExistsCheckEnvVar. Unset, empty, or unparsable values
-// disable the check (default behaviour).
-func pushExistsCheckEnabled() bool {
-	v, ok := os.LookupEnv(PushExistsCheckEnvVar)
-	if !ok {
-		return false
-	}
-	enabled, err := strconv.ParseBool(v)
-	if err != nil {
-		return false
-	}
-	return enabled
 }
