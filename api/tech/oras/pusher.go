@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/containerd/errdefs"
+
 	"oras.land/oras-go/v2/errdef"
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote/auth"
