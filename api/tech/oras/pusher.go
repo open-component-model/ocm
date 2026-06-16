@@ -40,8 +40,7 @@ const PushExistsCheckEnvVar = "OCM_OCI_PUSH_EXISTS_CHECK"
 // unset variable — so a single call covers the unset and unparsable cases.
 var pushExistsCheckEnabled = func() bool {
 	enabled, _ := strconv.ParseBool(os.Getenv(PushExistsCheckEnvVar))
-	logging.Logger().Debug("oras pre-push Exists() check gate resolved",
-		"envVar", PushExistsCheckEnvVar, "enabled", enabled)
+
 	return enabled
 }()
 
