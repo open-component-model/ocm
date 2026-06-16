@@ -8,12 +8,10 @@ import (
 	"strconv"
 
 	"github.com/containerd/errdefs"
-
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"oras.land/oras-go/v2/errdef"
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote/auth"
-
-	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"ocm.software/ocm/api/oci/ociutils"
 	"ocm.software/ocm/api/utils/logging"
