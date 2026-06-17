@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"sync"
 
 	"github.com/containerd/errdefs"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
@@ -31,16 +32,26 @@ const PushExistsCheckEnvVar = "OCM_OCI_PUSH_EXISTS_CHECK"
 
 // pushExistsCheckEnabled reports whether the optional pre-push Exists() check
 // is requested via PushExistsCheckEnvVar. The env var is consulted exactly
-// once at package initialisation; unset, empty, or unparsable values disable
-// the check.
-//
-// strconv.ParseBool returns (false, err) for "" - the os.Getenv result for an
-// unset variable — so a single call covers the unset and unparsable cases.
-var pushExistsCheckEnabled = func() bool {
-	enabled, _ := strconv.ParseBool(os.Getenv(PushExistsCheckEnvVar))
+// once on first call; unset and empty values disable the check silently.
+// A set-but-unparsable value disables the check and emits a single warning
+// so the operator notices the typo.
+var pushExistsCheckEnabled = sync.OnceValue(func() bool {
+	v := os.Getenv(PushExistsCheckEnvVar)
+	if v == "" {
+		return false
+	}
 
+	enabled, err := strconv.ParseBool(v)
+	if err != nil {
+		logging.Logger().Warn(
+			"invalid value for "+PushExistsCheckEnvVar+"; pre-push Exists() check disabled",
+			"value", v, "error", err.Error())
+		return false
+	}
+
+	logging.Logger().Debug("pre-push Exists() check enabled")
 	return enabled
-}()
+})
 
 type OrasPusher struct {
 	client    *auth.Client
@@ -87,14 +98,13 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 		return nil
 	}
 
-	if pushExistsCheckEnabled {
+	if pushExistsCheckEnabled() {
 		ok, err := repository.Exists(ctx, d)
 		if err != nil {
 			return fmt.Errorf("failed to check if repository %q exists: %w", ref.Repository, err)
 		}
 		if ok {
-			logging.Logger().Debug("pre-push Exists() check short-circuited; blob already present",
-				"ref", c.ref, "digest", d.Digest.String())
+			logging.Logger().Debug("blob already exists", "ref", c.ref, "digest", d.Digest.String())
 			return errdefs.ErrAlreadyExists
 		}
 	}
