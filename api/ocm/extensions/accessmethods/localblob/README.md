@@ -9,6 +9,18 @@ type: localBlob/v1
 
 Provided blobs use the following media type: attribute `mediaType`
 
+The canonical type per the OCM specification is `LocalBlob` (optionally
+`LocalBlob/v1`). The lower-camel form `localBlob` is a legacy alias kept
+for backward compatibility. All four forms decode; this v1 implementation
+currently emits `localBlob` on serialization.
+
+| Kind           | Notes                                    |
+|----------------|------------------------------------------|
+| `LocalBlob`    | canonical per OCM spec                   |
+| `LocalBlob/v1` | canonical with explicit version          |
+| `localBlob`    | legacy alias (currently emitted by v1)   |
+| `localBlob/v1` | legacy alias with explicit version       |
+
 ### Description
 
 This method is used to store a resource blob along with the component descriptor
