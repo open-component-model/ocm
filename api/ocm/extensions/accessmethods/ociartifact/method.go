@@ -38,6 +38,15 @@ const (
 
 	LegacyType2   = "OCIImage"
 	LegacyType2V1 = LegacyType2 + runtime.VersionSeparator + "v1"
+
+	// LegacyType3 is the lower-camel form listed alongside `ociArtifact` and
+	// `ociRegistry` as a backward-compatible alias in the OCM spec
+	// (doc/04-extensions/02-access-types/ociartifact.md). The upper-camel
+	// `OCIImage` is the canonical name per the spec; this v1 implementation
+	// still emits `ociArtifact` and recognises all four legacy aliases on
+	// decode.
+	LegacyType3   = "ociImage"
+	LegacyType3V1 = LegacyType3 + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -49,6 +58,9 @@ func init() {
 
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType2))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType2V1))
+
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType3))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](LegacyType3V1))
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
@@ -56,7 +68,7 @@ func Is(spec accspeccpi.AccessSpec) bool {
 		return false
 	}
 	k := spec.GetKind()
-	return k == Type || k == LegacyType || k == LegacyType2
+	return k == Type || k == LegacyType || k == LegacyType2 || k == LegacyType3
 }
 
 // AccessSpec describes the access for a oci registry.
