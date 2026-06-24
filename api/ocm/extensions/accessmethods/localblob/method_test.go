@@ -116,6 +116,9 @@ var _ = Describe("Alias kinds", func() {
 			Expect(spec).To(BeAssignableToTypeOf(&localblob.AccessSpec{}))
 			Expect(spec.GetType()).To(Equal(typ))
 
+			By("recognising the spec through localblob.Is")
+			Expect(localblob.Is(spec)).To(BeTrue())
+
 			By("decoding via the package-level Decode (private versions scheme)")
 			pkgSpec := Must(localblob.Decode(in))
 			Expect(pkgSpec).To(BeAssignableToTypeOf(&localblob.AccessSpec{}))

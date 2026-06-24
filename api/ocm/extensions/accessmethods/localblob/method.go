@@ -64,7 +64,11 @@ func init() {
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
-	return spec != nil && spec.GetKind() == Type
+	if spec == nil {
+		return false
+	}
+	k := spec.GetKind()
+	return k == Type || k == UpperType
 }
 
 // New creates a new localFilesystemBlob accessor.
