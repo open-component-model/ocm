@@ -2,15 +2,56 @@ package oras
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"os"
+	"strconv"
+	"sync"
 
 	"github.com/containerd/errdefs"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+	"oras.land/oras-go/v2/errdef"
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote/auth"
 
 	"ocm.software/ocm/api/oci/ociutils"
+	"ocm.software/ocm/api/utils/logging"
 )
+
+// PushExistsCheckEnvVar gates the optional HEAD pre-check performed before
+// pushing a blob to an OCI registry. When set to a truthy value (parsed via
+// strconv.ParseBool, e.g. "1", "true"), OrasPusher.Push calls
+// repository.Exists() first and short-circuits with errdefs.ErrAlreadyExists
+// if the blob is already present.
+//
+// The check is opt-in because it adds an extra round-trip per blob and
+// serialises Exists/Push pairs in the hot path of concurrent transfers
+// (see PR #1676). Enable it when a registry's Push response is unreliable
+// and the redundant HEAD is preferable to a failed upload.
+const PushExistsCheckEnvVar = "OCM_OCI_PUSH_EXISTS_CHECK"
+
+// pushExistsCheckEnabled reports whether the optional pre-push Exists() check
+// is requested via PushExistsCheckEnvVar. The env var is consulted exactly
+// once on first call; unset and empty values disable the check silently.
+// A set-but-unparsable value disables the check and emits a single warning
+// so the operator notices the typo.
+var pushExistsCheckEnabled = sync.OnceValue(func() bool {
+	v := os.Getenv(PushExistsCheckEnvVar)
+	if v == "" {
+		return false
+	}
+
+	enabled, err := strconv.ParseBool(v)
+	if err != nil {
+		logging.Logger().Warn(
+			"invalid value for "+PushExistsCheckEnvVar+"; pre-push Exists() check disabled",
+			"value", v, "error", err.Error())
+		return false
+	}
+
+	logging.Logger().Debug("pre-push Exists() check enabled")
+	return enabled
+})
 
 type OrasPusher struct {
 	client    *auth.Client
@@ -48,18 +89,31 @@ func (c *OrasPusher) Push(ctx context.Context, d ociv1.Descriptor, src Source) (
 		// that layer resulting in the created tag pointing to the right
 		// blob data.
 		if err := repository.PushReference(ctx, d, reader, c.ref); err != nil {
-			if !errdefs.IsAlreadyExists(err) {
-				return fmt.Errorf("failed to push tag: %w", err)
+			if errors.Is(err, errdef.ErrAlreadyExists) {
+				return errdefs.ErrAlreadyExists
 			}
+			return fmt.Errorf("failed to push tag: %w, %s", err, c.ref)
 		}
 
 		return nil
 	}
 
-	if err := repository.Push(ctx, d, reader); err != nil {
-		if !errdefs.IsAlreadyExists(err) {
-			return fmt.Errorf("failed to push: %w, %s", err, c.ref)
+	if pushExistsCheckEnabled() {
+		ok, err := repository.Exists(ctx, d)
+		if err != nil {
+			return fmt.Errorf("failed to check if repository %q exists: %w", ref.Repository, err)
 		}
+		if ok {
+			logging.Logger().Debug("blob already exists", "ref", c.ref, "digest", d.Digest.String())
+			return errdefs.ErrAlreadyExists
+		}
+	}
+
+	if err := repository.Push(ctx, d, reader); err != nil {
+		if errors.Is(err, errdef.ErrAlreadyExists) {
+			return errdefs.ErrAlreadyExists
+		}
+		return fmt.Errorf("failed to push: %w, %s", err, c.ref)
 	}
 
 	return nil
