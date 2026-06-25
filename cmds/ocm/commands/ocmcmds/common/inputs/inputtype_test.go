@@ -82,103 +82,76 @@ var _ = Describe("Blob Inputs", func() {
 	})
 })
 
-var _ = Describe("Versioned input type aliases", func() {
-	scheme := inputs.DefaultInputTypeScheme
-
-	// decodeAs verifies that a type literal decodes to the expected concrete spec type.
-	decodeAs := func(typ string, prototype inputs.InputSpec) {
+// Every input type registers a canonical name and a `/v1`-suffixed variant;
+// the types that already had a Title-cased alias on main additionally got a
+// `Title/v1` variant, and `ociartifact` carries the legacy `ociImage` alias.
+// A missing or typo'd entry in one of the init() blocks would silently make
+// that variant un-decodable, so the table below exercises each registered
+// literal end-to-end through the global scheme.
+var _ = DescribeTable("Versioned input type aliases decode through the default scheme",
+	func(typ string, prototype inputs.InputSpec) {
 		data := []byte(fmt.Sprintf(`{"type":%q}`, typ))
-		s, err := scheme.DecodeInputSpec(data, nil)
+		s, err := inputs.DefaultInputTypeScheme.DecodeInputSpec(data, nil)
 		Expect(err).To(Succeed(), "type %q should decode", typ)
 		Expect(s).To(BeAssignableToTypeOf(prototype), "type %q should produce %T", typ, prototype)
-	}
+	},
+	Entry("binary", "binary", &binary.Spec{}),
+	Entry("binary/v1", "binary/v1", &binary.Spec{}),
 
-	Context("helm", func() {
-		It("decodes both unversioned and /v1 forms", func() {
-			decodeAs("helm", &helm.Spec{})
-			decodeAs("helm/v1", &helm.Spec{})
-			decodeAs("Helm", &helm.Spec{})
-			decodeAs("Helm/v1", &helm.Spec{})
-		})
+	Entry("dir", "dir", &directory.Spec{}),
+	Entry("dir/v1", "dir/v1", &directory.Spec{}),
+	Entry("Dir", "Dir", &directory.Spec{}),
+	Entry("Dir/v1", "Dir/v1", &directory.Spec{}),
 
-		It("constructor still emits the unversioned canonical form", func() {
-			data, err := json.Marshal(helm.New("./chart"))
-			Expect(err).To(Succeed())
+	Entry("docker", "docker", &docker.Spec{}),
+	Entry("docker/v1", "docker/v1", &docker.Spec{}),
 
-			var probe struct {
-				Type string `json:"type"`
-			}
-			Expect(json.Unmarshal(data, &probe)).To(Succeed())
-			Expect(probe.Type).To(Equal("helm"))
-		})
-	})
+	Entry("dockermulti", "dockermulti", &dockermulti.Spec{}),
+	Entry("dockermulti/v1", "dockermulti/v1", &dockermulti.Spec{}),
 
-	Context("ociartifact", func() {
-		It("decodes both canonical and legacy aliases incl. /v1", func() {
-			decodeAs("ociArtifact", &ociartifact.Spec{})
-			decodeAs("ociArtifact/v1", &ociartifact.Spec{})
-			decodeAs("ociImage", &ociartifact.Spec{})
-			decodeAs("ociImage/v1", &ociartifact.Spec{})
-		})
-	})
+	Entry("file", "file", &file.Spec{}),
+	Entry("file/v1", "file/v1", &file.Spec{}),
+	Entry("File", "File", &file.Spec{}),
+	Entry("File/v1", "File/v1", &file.Spec{}),
 
-	// Every input type registers a canonical name and a `/v1`-suffixed variant;
-	// the types that already had a Title-cased alias on main additionally got a
-	// `Title/v1` variant. A missing or typo'd entry in one of the init() blocks
-	// would silently make that variant un-decodable, so the table below exercises
-	// each registered literal end-to-end through the global scheme.
-	DescribeTable("every registered alias decodes through the default scheme",
-		func(typ string, prototype inputs.InputSpec) {
-			decodeAs(typ, prototype)
-		},
-		Entry("binary", "binary", &binary.Spec{}),
-		Entry("binary/v1", "binary/v1", &binary.Spec{}),
+	Entry("git", "git", &git.Spec{}),
+	Entry("git/v1", "git/v1", &git.Spec{}),
+	Entry("Git", "Git", &git.Spec{}),
+	Entry("Git/v1", "Git/v1", &git.Spec{}),
 
-		Entry("dir", "dir", &directory.Spec{}),
-		Entry("dir/v1", "dir/v1", &directory.Spec{}),
-		Entry("Dir", "Dir", &directory.Spec{}),
-		Entry("Dir/v1", "Dir/v1", &directory.Spec{}),
+	Entry("helm", "helm", &helm.Spec{}),
+	Entry("helm/v1", "helm/v1", &helm.Spec{}),
+	Entry("Helm", "Helm", &helm.Spec{}),
+	Entry("Helm/v1", "Helm/v1", &helm.Spec{}),
 
-		Entry("docker", "docker", &docker.Spec{}),
-		Entry("docker/v1", "docker/v1", &docker.Spec{}),
+	Entry("maven", "maven", &maven.Spec{}),
+	Entry("maven/v1", "maven/v1", &maven.Spec{}),
+	Entry("Maven", "Maven", &maven.Spec{}),
+	Entry("Maven/v1", "Maven/v1", &maven.Spec{}),
 
-		Entry("dockermulti", "dockermulti", &dockermulti.Spec{}),
-		Entry("dockermulti/v1", "dockermulti/v1", &dockermulti.Spec{}),
+	Entry("npm", "npm", &npm.Spec{}),
+	Entry("npm/v1", "npm/v1", &npm.Spec{}),
+	Entry("NPM", "NPM", &npm.Spec{}),
+	Entry("NPM/v1", "NPM/v1", &npm.Spec{}),
 
-		Entry("file", "file", &file.Spec{}),
-		Entry("file/v1", "file/v1", &file.Spec{}),
-		Entry("File", "File", &file.Spec{}),
-		Entry("File/v1", "File/v1", &file.Spec{}),
+	Entry("ociArtifact", "ociArtifact", &ociartifact.Spec{}),
+	Entry("ociArtifact/v1", "ociArtifact/v1", &ociartifact.Spec{}),
+	Entry("ociImage", "ociImage", &ociartifact.Spec{}),
+	Entry("ociImage/v1", "ociImage/v1", &ociartifact.Spec{}),
 
-		Entry("git", "git", &git.Spec{}),
-		Entry("git/v1", "git/v1", &git.Spec{}),
-		Entry("Git", "Git", &git.Spec{}),
-		Entry("Git/v1", "Git/v1", &git.Spec{}),
+	Entry("ocm", "ocm", &ocminput.Spec{}),
+	Entry("ocm/v1", "ocm/v1", &ocminput.Spec{}),
 
-		Entry("maven", "maven", &maven.Spec{}),
-		Entry("maven/v1", "maven/v1", &maven.Spec{}),
-		Entry("Maven", "Maven", &maven.Spec{}),
-		Entry("Maven/v1", "Maven/v1", &maven.Spec{}),
+	Entry("spiff", "spiff", &spiff.Spec{}),
+	Entry("spiff/v1", "spiff/v1", &spiff.Spec{}),
 
-		Entry("npm", "npm", &npm.Spec{}),
-		Entry("npm/v1", "npm/v1", &npm.Spec{}),
-		Entry("NPM", "NPM", &npm.Spec{}),
-		Entry("NPM/v1", "NPM/v1", &npm.Spec{}),
+	Entry("utf8", "utf8", &utf8.Spec{}),
+	Entry("utf8/v1", "utf8/v1", &utf8.Spec{}),
+	Entry("UTF8", "UTF8", &utf8.Spec{}),
+	Entry("UTF8/v1", "UTF8/v1", &utf8.Spec{}),
 
-		Entry("ocm", "ocm", &ocminput.Spec{}),
-		Entry("ocm/v1", "ocm/v1", &ocminput.Spec{}),
-
-		Entry("spiff", "spiff", &spiff.Spec{}),
-		Entry("spiff/v1", "spiff/v1", &spiff.Spec{}),
-
-		Entry("utf8", "utf8", &utf8.Spec{}),
-		Entry("utf8/v1", "utf8/v1", &utf8.Spec{}),
-		Entry("UTF8", "UTF8", &utf8.Spec{}),
-		Entry("UTF8/v1", "UTF8/v1", &utf8.Spec{}),
-
-		Entry("wget", "wget", &wget.Spec{}),
-		Entry("wget/v1", "wget/v1", &wget.Spec{}),
-		Entry("Wget", "Wget", &wget.Spec{}),
-		Entry("Wget/v1", "Wget/v1", &wget.Spec{}),
-	)
-})
+	Entry("wget", "wget", &wget.Spec{}),
+	Entry("wget/v1", "wget/v1", &wget.Spec{}),
+	Entry("Wget", "Wget", &wget.Spec{}),
+	Entry("Wget/v1", "Wget/v1", &wget.Spec{}),
+)
