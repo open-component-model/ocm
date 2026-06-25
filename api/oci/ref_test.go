@@ -575,6 +575,12 @@ var _ = Describe("ref parsing", func() {
 	It("succeeds for repository", func() {
 		CheckRef("::ghcr.io/", &oci.RefSpec{UniformRepositorySpec: ghcr})
 	})
+	It("normalizes docker.io single-component repos with library/ prefix", func() {
+		bashTag := "5.3.9"
+		CheckRef("docker.io/bash:5.3.9", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/bash", ArtVersion: oci.ArtVersion{Tag: &bashTag}}})
+		CheckRef("docker.io/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu"}})
+		CheckRef("docker.io/library/bash:5.3.9", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/bash", ArtVersion: oci.ArtVersion{Tag: &bashTag}}})
+	})
 	It("succeeds", func() {
 		CheckRef("ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu"}})
 		CheckRef("ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu", ArtVersion: oci.ArtVersion{Tag: &tag}}})
