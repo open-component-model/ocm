@@ -346,7 +346,7 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 
 // Deprecated: Component Archive (CA) - https://kubernetes.slack.com/archives/C05UWBE8R1D/p1734357630853489
 func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.ExtendedAllocatable) (cpi.AccessMethod, error) {
-	if a.GetKind() == localblob.Type || a.GetKind() == localblob.UpperType || a.GetKind() == localfsblob.Type {
+	if localblob.Is(a) || a.GetKind() == localfsblob.Type {
 		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err

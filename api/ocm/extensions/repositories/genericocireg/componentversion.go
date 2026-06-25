@@ -191,12 +191,13 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 		return nil, err
 	}
 
-	switch a.GetKind() {
-	case localblob.Type, localblob.UpperType:
+	k := a.GetKind()
+	switch {
+	case localblob.Is(a):
 		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.manifestArtifact, cv)
-	case localociblob.Type:
+	case k == localociblob.Type:
 		return newLocalOCIBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.manifestArtifact, cv)
-	case relativeociref.Type:
+	case k == relativeociref.Type:
 		m, err := ociartifact.NewMethod(c.GetContext(), a, accessSpec.(*relativeociref.AccessSpec).Reference, c.comp.repo.ocirepo)
 		if err == nil {
 			impl := accspeccpi.GetAccessMethodImplementation(m).(ociartifact.AccessMethodImpl)
