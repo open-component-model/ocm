@@ -51,7 +51,7 @@ jobs:
           images: |            
             ghcr.io/${{ github.repository }}
       - name: Go Build Cache for Docker
-        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: go-build-cache
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
@@ -122,7 +122,7 @@ jobs:
     - name: Restore / Reuse Cache from central build
       id: cache-golang-restore
       # Only Restore, not build another cache (too big)
-      uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ${{ env.go_cache }}
@@ -166,7 +166,7 @@ jobs:
     - name: Save Cache of Build (only on main)
       id: cache-golang-save
       # Only save build cache once
-      uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ${{ env.go_cache }}
