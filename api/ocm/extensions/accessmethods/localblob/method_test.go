@@ -2,6 +2,7 @@ package localblob_test
 
 import (
 	"encoding/json"
+	"fmt"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
@@ -90,4 +91,51 @@ type: localBlob
 		spec := Must(env.OCMContext().AccessSpecForSpec(access))
 		Expect(spec.GetVersion()).To(Equal("v1"))
 	})
+})
+
+// Alias kinds cover the v2-emitted variants registered through the local versions
+// scheme (see method.go, issue #1979). Each variant must decode through the global
+// context and the package-level Decode, marshal without panicking, and round-trip
+// while preserving the literal type token. Pre-fix, the upper-cased variants
+// panicked at MarshalJSON because their encoder was the global scheme, which has
+// no converter registered for them.
+var _ = Describe("Alias kinds", func() {
+	mkData := func(typ string) []byte {
+		return []byte(fmt.Sprintf(
+			`{"type":%q,"localReference":"path","mediaType":"text/plain","referenceName":"hint"}`,
+			typ,
+		))
+	}
+
+	DescribeTable("decode and round-trip every kind variant",
+		func(typ string) {
+			in := mkData(typ)
+
+			By("decoding via the global ocm context")
+			spec := Must(ocm.DefaultContext().AccessSpecForConfig(in, nil))
+			Expect(spec).To(BeAssignableToTypeOf(&localblob.AccessSpec{}))
+			Expect(spec.GetType()).To(Equal(typ))
+
+			By("recognising the spec through localblob.Is")
+			Expect(localblob.Is(spec)).To(BeTrue())
+
+			By("decoding via the package-level Decode (private versions scheme)")
+			pkgSpec := Must(localblob.Decode(in))
+			Expect(pkgSpec).To(BeAssignableToTypeOf(&localblob.AccessSpec{}))
+			Expect(pkgSpec.GetType()).To(Equal(typ))
+
+			By("marshalling without panicking and preserving the type token")
+			out := Must(json.Marshal(spec))
+			Expect(string(out)).To(ContainSubstring(fmt.Sprintf(`"type":%q`, typ)))
+
+			By("round-tripping the marshalled form back to the same type")
+			again := Must(ocm.DefaultContext().AccessSpecForConfig(out, nil))
+			Expect(again).To(BeAssignableToTypeOf(&localblob.AccessSpec{}))
+			Expect(again.GetType()).To(Equal(typ))
+		},
+		Entry("canonical", localblob.Type),
+		Entry("canonical /v1", localblob.TypeV1),
+		Entry("upper-case (v2 alias)", localblob.UpperType),
+		Entry("upper-case /v1 (v2 alias)", localblob.UpperTypeV1),
+	)
 })

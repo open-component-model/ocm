@@ -1,17 +1,22 @@
 package ociartifact
 
 import (
+	"ocm.software/ocm/api/utils/runtime"
 	"ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
 const (
-	TYPE        = "ociArtifact"
-	LEGACY_TYPE = "ociImage"
+	TYPE           = "ociArtifact"
+	TypeV1         = TYPE + runtime.VersionSeparator + "v1"
+	LEGACY_TYPE    = "ociImage"
+	LEGACY_TYPE_V1 = LEGACY_TYPE + runtime.VersionSeparator + "v1"
 )
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TypeV1, &Spec{}, "", ConfigHandler()))
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(LEGACY_TYPE, &Spec{}, legacy_usage, ConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(LEGACY_TYPE_V1, &Spec{}, "", ConfigHandler()))
 }
 
 const legacy_usage = `
