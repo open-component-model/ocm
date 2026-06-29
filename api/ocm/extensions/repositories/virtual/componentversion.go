@@ -101,10 +101,8 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec, cv refmgmt.Ex
 		return nil, err
 	}
 
-	switch a.GetKind() { // to be extended
-	case localfsblob.Type:
-		fallthrough
-	case localblob.Type:
+	switch { // to be extended
+	case a.GetKind() == localfsblob.Type, localblob.Is(a):
 		blob, err := c.access.GetBlob(accessSpec.(*localblob.AccessSpec).LocalReference)
 		if err != nil {
 			return nil, err

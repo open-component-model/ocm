@@ -20,6 +20,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "ocm.software/ocm/cmds/ocm/testhelper"
 )
 
@@ -115,8 +116,8 @@ var _ = Describe("Index Transfer", func() {
 		)
 
 		By("pulling the OCI index image from GHCR and pushing it to the local registry")
-		srcRef := "ghcr.io/open-component-model/cli:0.2.0"
-		dstRef := fmt.Sprintf("%s/ocm-cli:0.2.0", registryAddress)
+		srcRef := "ghcr.io/open-component-model/cli:latest"
+		dstRef := fmt.Sprintf("%s/ocm-cli:latest", registryAddress)
 
 		repoSrc, err := remote.NewRepository(srcRef)
 		r.NoError(err)
@@ -184,7 +185,7 @@ configurations:
 - type: credentials.config.ocm.software
   consumers:
     - identity:
-        type: OCIRepository
+        type: OCIRegistry
         hostname: %q
         port: %q
         scheme: http
@@ -202,8 +203,9 @@ configurations:
 		addArgs := []string{
 			"run", "--rm",
 			"--network", "host",
+			"--tmpfs", "/tmp:exec",
 			"-v", fmt.Sprintf("%s:/work", tempDir),
-			"ghcr.io/open-component-model/cli:0.2.0",
+			"ghcr.io/open-component-model/cli:latest",
 			"add", "component-version",
 			"--repository", "http://" + registryAddress,
 			"--config", "/work/ocmconfig.yaml",
@@ -219,8 +221,9 @@ configurations:
 		getArgs := []string{
 			"run", "--rm",
 			"--network", "host",
+			"--tmpfs", "/tmp:exec",
 			"-v", fmt.Sprintf("%s:/work", tempDir),
-			"ghcr.io/open-component-model/cli:0.2.0",
+			"ghcr.io/open-component-model/cli:latest",
 			"get", "component-version",
 			"--config", "/work/ocmconfig.yaml",
 			"-oyaml",

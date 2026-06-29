@@ -166,7 +166,7 @@ func (m *accessMethod) getBlob() (blobaccess.BlobAccess, error) {
 	}
 	if m.spec.Size == blobaccess.BLOB_UNKNOWN_SIZE {
 		m.spec.Size = size
-	} else if size != blobaccess.BLOB_UNKNOWN_SIZE {
+	} else if size != blobaccess.BLOB_UNKNOWN_SIZE && size != m.spec.Size {
 		return nil, errors.Newf("blob size mismatch %d != %d", size, m.spec.Size)
 	}
 	m.blob = blobaccess.ForDataAccess(m.spec.Digest, m.spec.Size, m.spec.MediaType, acc)
