@@ -104,7 +104,7 @@ jobs:
       run: |
         gh api -X PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/open-component-model/ocm/git/refs/tags/ocm-cli/latest -f "sha=${{ github.sha }}" -F "force=true"
     - name: Setup go
-      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
         check-latest: false
