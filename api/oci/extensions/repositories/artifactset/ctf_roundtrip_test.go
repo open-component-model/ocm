@@ -28,7 +28,7 @@ const (
 	componentVersion = "1.0.0"
 	resourceName     = "hello-image"
 	resourceVersion  = "1.0.0"
-	imageReference   = "ghcr.io/open-component-model/open-component-model/hello-ocm:latest"
+	imageReference   = "ghcr.io/open-component-model/ocm:latest"
 )
 
 func gunzipToTar(tgzPath string) (string, error) {
@@ -181,7 +181,7 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 
 		var index ociv1.Index
 		Expect(json.Unmarshal(indexData, &index)).To(Succeed())
-		Expect(index.Manifests).To(HaveLen(2), "expected 2 platform manifests (amd64, arm64)")
+		Expect(index.Manifests).To(HaveLen(4), "expected 4 manifests (2x platform, 2x attestations)")
 
 		// Fetch first platform manifest
 		reader, err = store.Fetch(ctx, index.Manifests[0])
@@ -222,7 +222,8 @@ var _ = Describe("CTF to CTF-with-resource to OCI roundtrip", Ordered, func() {
 		cmd := exec.Command("docker", "run", "--rm", imageTag)
 		out, err := cmd.CombinedOutput()
 		Expect(err).To(Succeed(), "docker run failed: %s", string(out))
-		Expect(string(out)).To(ContainSubstring("Hello OCM!"))
+		// reference image displays OCMs version containing the string 'Major'
+		Expect(string(out)).To(ContainSubstring("Major"))
 	})
 
 	It("downloads resource from target CTF without --oci-layout and verifies it", func(ctx SpecContext) {
