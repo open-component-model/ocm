@@ -181,6 +181,8 @@ linters:
     paths:
       - hack
       - api/tech/docker
+      # verbatim fork of removed cosign v3.1.1 helpers, see README.md; issue #2056
+      - api/tech/signing/handlers/sigstore/internal
       - third_party$
       - builtin$
       - examples/*
@@ -206,6 +208,8 @@ formatters:
     paths:
       - hack
       - api/tech/docker
+      # verbatim fork of removed cosign v3.1.1 helpers, see README.md; issue #2056
+      - api/tech/signing/handlers/sigstore/internal
       - third_party$
       - builtin$
       - examples/*

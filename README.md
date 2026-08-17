@@ -7,7 +7,7 @@
 
 The Open Component Model (OCM) is an open standard to describe software bills of delivery (SBOD). OCM is a technology-agnostic and machine-readable format focused on the software artifacts that must be delivered for software products.
 
-Check out the [the main OCM project web page](https://ocm.software) to find out what OCM offers you for implementing a secure software supply chain. It is your central entry point to all kind of OCM related [docs and guides](https://ocm.software/docs/overview/about), the [OCM specification](https://github.com/open-component-model/ocm-spec/blob/main/README.md) and all project [github repositories](https://github.com/open-component-model). It also offers a [Getting Started](https://ocm.software/docs/getting-started/) to quickly make your hands dirty with OCM, its toolset and concepts :smiley:
+Check out the [the main OCM project web page](https://ocm.software) to find out what OCM offers you for implementing a secure software supply chain. It is your central entry point to all kind of OCM related [docs and guides](https://ocm.software/legacy/docs/overview/), the [OCM specification](https://github.com/open-component-model/ocm-spec/blob/main/README.md) and all project [github repositories](https://github.com/open-component-model). It also offers a [Getting Started](https://ocm.software/legacy/docs/getting-started/) to quickly make your hands dirty with OCM, its toolset and concepts :smiley:
 
 ## OCM Specifications
 
@@ -75,7 +75,7 @@ brew install open-component-model/tap/ocm
 
 ### NixOS
 
-Install using [Nix](https://nixos.org) (with [Flakes](https://nixos.wiki/wiki/Flakes))
+Install using [Nix](https://nixos.org) (with [Flakes](https://wiki.nixos.org/wiki/Flakes))
 
 ```bash
 # Nix (macOS, Linux, and Windows)

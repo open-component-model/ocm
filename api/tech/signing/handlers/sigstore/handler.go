@@ -14,7 +14,6 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/conv"
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/sigstore/cosign/v3/cmd/cosign/cli/fulcio"
 	"github.com/sigstore/cosign/v3/cmd/cosign/cli/options"
 	"github.com/sigstore/cosign/v3/pkg/cosign"
 	"github.com/sigstore/rekor/pkg/client"
@@ -28,6 +27,7 @@ import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/sigstore/attr"
+	"ocm.software/ocm/api/tech/signing/handlers/sigstore/internal/fulcio"
 )
 
 /*
