@@ -295,7 +295,7 @@ lowercase types (e.g. <code>helm</code>). See the lowercase entry for full docum
 
   This input type describes the composition of a multi-platform OCI image.
   The various variants are taken from the local docker daemon. They should be
-  built with the "buildx" command for cross platform docker builds (see https://ocm.software/docs/tutorials/best-practices/#building-multi-architecture-images).
+  built with the "buildx" command for cross platform docker builds (see https://ocm.software/legacy/docs/tutorials/best-practices/#building-multi-architecture-images).
   The denoted images, as well as the wrapping image index, are packed as OCI
   artifact set.
   They will contain an informational back link to the component version
