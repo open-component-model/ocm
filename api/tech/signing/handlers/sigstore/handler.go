@@ -175,11 +175,10 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 
 	// prepare the create entry request parameters
 	params := entries.NewCreateLogEntryParams().
-		WithContext(ctx).
 		WithProposedEntry(entry)
 
 	// submit the create entry request
-	resp, err := rekorClient.Entries.CreateLogEntry(params)
+	resp, err := rekorClient.Entries.CreateLogEntryContext(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create rekor entry: %w", err)
 	}
