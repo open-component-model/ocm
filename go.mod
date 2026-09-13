@@ -37,7 +37,7 @@ require (
 	github.com/go-openapi/strfmt v0.27.0
 	github.com/go-openapi/swag/conv v0.29.1
 	github.com/go-test/deep v1.1.1
-	github.com/gobwas/glob v0.2.3
+	github.com/gobwas/glob v1.0.0
 	github.com/golang/mock v1.7.0-rc.1
 	github.com/google/go-github/v45 v45.2.0
 	github.com/hashicorp/vault-client-go v0.4.3
