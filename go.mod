@@ -1,6 +1,6 @@
 module ocm.software/ocm
 
-go 1.27.0
+go 1.26.8
 
 require (
 	dario.cat/mergo v1.0.2
@@ -65,7 +65,7 @@ require (
 	github.com/sigstore/cosign/v3 v3.1.3
 	github.com/sigstore/fulcio v1.8.8
 	github.com/sigstore/rekor v1.5.4
-	github.com/sigstore/sigstore v1.10.10
+	github.com/sigstore/sigstore v1.10.9
 	github.com/sirupsen/logrus v1.10.2
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
