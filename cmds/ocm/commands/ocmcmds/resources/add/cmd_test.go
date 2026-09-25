@@ -21,6 +21,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/wget"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	"ocm.software/ocm/api/utils/accessio"
@@ -438,6 +439,34 @@ type: plainText
 			Expect(err).To(Succeed())
 			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartifact.AccessSpec)(nil))))
 			Expect(acc.(*ociartifact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
+		})
+
+		It("adds external http blob by options using the http alias of the wget access type", func() {
+			url := "https://example.com/mystuff.tar.gz"
+			Expect(env.Execute("add", "resources", "--file", ARCH,
+				"--type", resourcetypes.BLOB,
+				"--name", "blob",
+				"--version", "v0.1.0",
+				"--accessType", wget.HTTPType,
+				"--url", url)).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			r, err := cd.GetResourceByIdentity(metav1.NewIdentity("blob"))
+			Expect(err).To(Succeed())
+			Expect(r.Type).To(Equal(resourcetypes.BLOB))
+			Expect(r.Version).To(Equal("v0.1.0"))
+			Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
+
+			Expect(r.Access.GetType()).To(Equal(wget.HTTPType))
+
+			acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
+			Expect(err).To(Succeed())
+			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*wget.AccessSpec)(nil))))
+			Expect(acc.(*wget.AccessSpec).URL).To(Equal(url))
 		})
 	})
 })
