@@ -1,9 +1,12 @@
 package tarutils_test
 
 import (
+	"archive/tar"
 	"bytes"
+	"io"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"runtime"
 
 	. "github.com/mandelsoft/goutils/testutils"
@@ -81,5 +84,43 @@ var _ = Describe("tar utils mapping", func() {
 		var buf3 bytes.Buffer
 		Expect(tarutils.TgzFs(fs, &buf3, tarutils.TarFileSystemOptions{})).To(Succeed())
 		Expect(buf1.Bytes()).ToNot(Equal(buf3.Bytes()))
+	})
+
+	It("normalizes host-specific tar headers", func() {
+		if runtime.GOOS == "windows" {
+			Skip("file permissions and symlinks differ on windows")
+		}
+		dir := GinkgoT().TempDir()
+		Expect(os.WriteFile(filepath.Join(dir, "regular"), []byte("regular"), 0o600)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(dir, "executable"), []byte("executable"), 0o700)).To(Succeed())
+		Expect(os.Mkdir(filepath.Join(dir, "subdir"), 0o700)).To(Succeed())
+		Expect(os.Symlink("regular", filepath.Join(dir, "link"))).To(Succeed())
+
+		var buf bytes.Buffer
+		Expect(tarutils.PackFsIntoTar(osfs.New(), dir, &buf, tarutils.TarFileSystemOptions{
+			ZeroModTime:      true,
+			NormalizeHeaders: true,
+		})).To(Succeed())
+
+		modes := map[string]int64{}
+		tr := tar.NewReader(&buf)
+		for {
+			h, err := tr.Next()
+			if err == io.EOF {
+				break
+			}
+			Expect(err).ToNot(HaveOccurred())
+			Expect(h.Uid).To(BeZero(), h.Name)
+			Expect(h.Gid).To(BeZero(), h.Name)
+			Expect(h.Uname).To(BeEmpty(), h.Name)
+			Expect(h.Gname).To(BeEmpty(), h.Name)
+			modes[h.Name] = h.Mode
+		}
+		Expect(modes).To(Equal(map[string]int64{
+			"regular":    0o644,
+			"executable": 0o755,
+			"subdir":     0o755,
+			"link":       0o777,
+		}))
 	})
 })
