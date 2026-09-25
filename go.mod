@@ -18,7 +18,7 @@ require (
 	github.com/aws/smithy-go v1.28.1
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/cloudflare/cfssl v1.6.5
-	github.com/containerd/containerd/v2 v2.4.0
+	github.com/containerd/containerd/v2 v2.4.1
 	github.com/containerd/errdefs v1.0.0
 	github.com/containerd/log v0.2.0
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467
@@ -241,7 +241,7 @@ require (
 	github.com/firefart/nonamedreturns v1.0.6 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fvbommel/sortorder v1.2.0 // indirect
-	github.com/fxamacker/cbor/v2 v2.9.3 // indirect
+	github.com/fxamacker/cbor/v2 v2.9.4 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
 	github.com/ghostiam/protogetter v0.3.15 // indirect
 	github.com/go-chi/chi/v5 v5.3.1 // indirect
