@@ -132,8 +132,10 @@ func (t *typeScheme[T, R, S]) Describe() string {
 			if format != "" {
 				s += fmt.Sprintf("  The following versions are supported:\n%s\n", strings.Trim(utils.IndentLines(format, "  "), "\n"))
 			}
+			// Kinds without a description are undocumented; an extra section
+			// would appear in the output without its type headline.
+			s += info.more
 		}
-		s += info.more
 	}
 	return s
 }
