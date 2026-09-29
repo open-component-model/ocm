@@ -600,7 +600,7 @@ lowercase types (e.g. <code>helm</code>). See the lowercase entry for full docum
 
   The <code>url</code> is the url pointing to the http endpoint from which a resource is
   downloaded. The <code>mimeType</code> can be used to specify the MIME type of the
-  resource.
+  resource. The input type can also be declared as <code>http</code> or <code>HTTP</code>.
 
   This blob type specification supports the following fields:
   - **<code>url</code>** *string*
