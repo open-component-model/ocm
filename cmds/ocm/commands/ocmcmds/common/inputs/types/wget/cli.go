@@ -6,8 +6,16 @@ import (
 )
 
 func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
+	return configHandler(TYPE)
+}
+
+func HTTPConfigHandler() flagsets.ConfigOptionTypeSetHandler {
+	return configHandler(HTTP_TYPE)
+}
+
+func configHandler(name string) flagsets.ConfigOptionTypeSetHandler {
 	return flagsets.NewConfigOptionTypeSetHandler(
-		TYPE, AddConfig,
+		name, AddConfig,
 		options.URLOption,
 		options.MediaTypeOption,
 		options.HTTPHeaderOption,
