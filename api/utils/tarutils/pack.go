@@ -53,6 +53,11 @@ type TarFileSystemOptions struct {
 	// TAR archives at different timestamps, the mod time needs to be set to 0.
 	ZeroModTime    bool
 	FollowSymlinks bool
+	// NormalizeHeaders drops host-specific metadata (owner, group, access and change time)
+	// and derives the permissions from the file type and executable bit only. Together with
+	// ZeroModTime the archive then no longer depends on the user, umask or temporary
+	// directory that produced it.
+	NormalizeHeaders bool
 
 	root string
 }
@@ -126,6 +131,21 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 
 	if opts.ZeroModTime {
 		header.ModTime = time.Time{}
+	}
+	if opts.NormalizeHeaders {
+		header.Uid, header.Gid = 0, 0
+		header.Uname, header.Gname = "", ""
+		header.AccessTime, header.ChangeTime = time.Time{}, time.Time{}
+		switch {
+		case info.IsDir():
+			header.Mode = 0o755
+		case header.Typeflag == tar.TypeSymlink:
+			header.Mode = 0o777
+		case info.Mode()&0o111 != 0:
+			header.Mode = 0o755
+		default:
+			header.Mode = 0o644
+		}
 	}
 
 	switch {

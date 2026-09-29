@@ -90,7 +90,7 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	dw := iotools.NewDigestWriterWith(digest.SHA256, tgz)
 	finalize.Close(dw)
 
-	if err := tarutils.TgzFs(filteredRepositoryFS, dw, tarutils.TarFileSystemOptions{ZeroModTime: true}); err != nil {
+	if err := tarutils.TgzFs(filteredRepositoryFS, dw, tarutils.TarFileSystemOptions{ZeroModTime: true, NormalizeHeaders: true}); err != nil {
 		return nil, fmt.Errorf("failed to create tgz: %w", err)
 	}
 
