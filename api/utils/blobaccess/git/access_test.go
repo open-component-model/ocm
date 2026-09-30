@@ -1,6 +1,8 @@
 package git_test
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"embed"
 	_ "embed"
 	"fmt"
@@ -129,6 +131,31 @@ var _ = Describe("git Blob Access", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(data1).ToNot(BeIdenticalTo(data2))
+		})
+
+		It("creates an archive without host-specific tar headers", func() {
+			b := Must(gitblob.BlobAccess(
+				gitblob.WithURL(url),
+				gitblob.WithLoggingContext(ctx),
+				gitblob.WithCachingContext(ctx),
+			))
+			defer Close(b)
+			reader := Must(b.Reader())
+			defer Close(reader)
+			gz := Must(gzip.NewReader(reader))
+			tr := tar.NewReader(gz)
+			for {
+				h, err := tr.Next()
+				if err == io.EOF {
+					break
+				}
+				Expect(err).ToNot(HaveOccurred())
+				Expect(h.Uid).To(BeZero(), h.Name)
+				Expect(h.Gid).To(BeZero(), h.Name)
+				Expect(h.Uname).To(BeEmpty(), h.Name)
+				Expect(h.Gname).To(BeEmpty(), h.Name)
+				Expect(h.Mode).To(BeElementOf(int64(0o644), int64(0o755)), h.Name)
+			}
 		})
 	})
 

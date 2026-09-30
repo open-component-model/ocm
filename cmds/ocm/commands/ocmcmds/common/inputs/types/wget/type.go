@@ -13,17 +13,30 @@ const (
 	UPPER_TYPE_V1 = UPPER_TYPE + runtime.VersionSeparator + "v1"
 )
 
+// Alias type names for the wget input type.
+const (
+	HTTP_TYPE          = "http"
+	HTTP_TYPE_V1       = HTTP_TYPE + runtime.VersionSeparator + "v1"
+	UPPER_HTTP_TYPE    = "HTTP"
+	UPPER_HTTP_TYPE_V1 = UPPER_HTTP_TYPE + runtime.VersionSeparator + "v1"
+)
+
 func init() {
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TypeV1, &Spec{}, "", ConfigHandler()))
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE, &Spec{}, "", ConfigHandler()))
 	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_TYPE_V1, &Spec{}, "", ConfigHandler()))
+
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(HTTP_TYPE, &Spec{}, "", HTTPConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(HTTP_TYPE_V1, &Spec{}, "", HTTPConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_HTTP_TYPE, &Spec{}, "", HTTPConfigHandler()))
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(UPPER_HTTP_TYPE_V1, &Spec{}, "", HTTPConfigHandler()))
 }
 
 const usage = `
 The <code>url</code> is the url pointing to the http endpoint from which a resource is 
 downloaded. The <code>mimeType</code> can be used to specify the MIME type of the 
-resource.
+resource. The input type can also be declared as <code>http</code> or <code>HTTP</code>.
 
 This blob type specification supports the following fields:
 - **<code>url</code>** *string*
