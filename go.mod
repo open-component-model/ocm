@@ -1,6 +1,6 @@
 module ocm.software/ocm
 
-go 1.26.8
+go 1.27.0
 
 require (
 	dario.cat/mergo v1.0.2
@@ -12,25 +12,25 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.47.1
 	github.com/aws/aws-sdk-go-v2/config v1.33.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.6
-	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.4.10
+	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.4.12
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.66.1
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.113.4
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.0
 	github.com/aws/smithy-go v1.28.2
 	github.com/chainguard-dev/git-urls v1.0.2
-	github.com/cloudflare/cfssl v1.6.5
+	github.com/cloudflare/cfssl v1.7.0
 	github.com/containerd/containerd/v2 v2.4.1
 	github.com/containerd/errdefs v1.0.0
 	github.com/containerd/log v0.2.0
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.8.1+incompatible
+	github.com/docker/cli v29.8.2+incompatible
 	github.com/docker/go-connections v0.8.1
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/cli-utils v1.3.0
 	github.com/fluxcd/pkg/ssa v0.78.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-git/go-billy/v5 v5.9.1
+	github.com/go-git/go-billy/v5 v5.9.2
 	github.com/go-git/go-git/v5 v5.19.2
 	github.com/go-jose/go-jose/v4 v4.1.5
 	github.com/go-logr/logr v1.4.4
@@ -42,7 +42,7 @@ require (
 	github.com/google/go-github/v45 v45.2.0
 	github.com/hashicorp/vault-client-go v0.4.3
 	github.com/klauspost/compress v1.20.1
-	github.com/klauspost/pgzip v1.2.6
+	github.com/klauspost/pgzip v1.2.7
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
 	github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc
 	github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a
@@ -65,7 +65,7 @@ require (
 	github.com/sigstore/cosign/v3 v3.1.3
 	github.com/sigstore/fulcio v1.8.8
 	github.com/sigstore/rekor v1.5.4
-	github.com/sigstore/sigstore v1.10.9
+	github.com/sigstore/sigstore v1.11.0
 	github.com/sirupsen/logrus v1.10.2
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
@@ -95,7 +95,7 @@ require (
 	k8s.io/cli-runtime v0.37.1
 	k8s.io/client-go v0.37.1
 	oras.land/oras-go/v2 v2.6.2
-	sigs.k8s.io/controller-runtime v0.25.1
+	sigs.k8s.io/controller-runtime v0.25.2
 	sigs.k8s.io/yaml v1.6.0
 )
 
