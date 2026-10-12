@@ -17,5 +17,5 @@ func (b *Builder) Access(acc compdesc.AccessSpec) {
 		b.fail("hint requires blob", 1)
 	}
 
-	*(b.ocm_acc) = acc
+	*b.ocm_acc = acc
 }

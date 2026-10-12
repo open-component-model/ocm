@@ -22,7 +22,7 @@ type Spec struct {
 	Component string `json:"component,omitempty"`
 
 	// Version is the version og the root component.
-	Version string `json:"version,omitempty,"`
+	Version string `json:"version,omitempty"`
 
 	ResourceRef metav1.ResourceReference `json:"resourceRef"`
 }

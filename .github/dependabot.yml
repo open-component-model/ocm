@@ -30,6 +30,19 @@ updates:
     ignore:
       - dependency-name: "github.com/mikefarah/yq/v4"
         versions: [ ">4.48.1"]
+  - package-ecosystem: "gomod"
+    directory: "/tools"
+    groups:
+      tools:
+        patterns:
+          - "*"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - kind/dependency
+      - kind/chore
+      - kind/skip-release-notes
   - package-ecosystem: docker
     directory: "/"
     schedule:

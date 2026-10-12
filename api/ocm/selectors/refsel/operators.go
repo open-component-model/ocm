@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	_ selectors.ErrorProvider = (and)(nil)
-	_ selectors.ErrorProvider = (or)(nil)
+	_ selectors.ErrorProvider = and(nil)
+	_ selectors.ErrorProvider = or(nil)
 	_ selectors.ErrorProvider = (*not)(nil)
 )
 

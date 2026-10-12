@@ -40,7 +40,7 @@ func (h region) ApplyTo(opts *Options) {
 }
 
 func WithRegion(h string) Option {
-	return region((h))
+	return region(h)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ func (h version) ApplyTo(opts *Options) {
 }
 
 func WithVersion(h string) Option {
-	return version((h))
+	return version(h)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,5 +64,5 @@ func (h mediatype) ApplyTo(opts *Options) {
 }
 
 func WithMediaType(h string) Option {
-	return mediatype((h))
+	return mediatype(h)
 }

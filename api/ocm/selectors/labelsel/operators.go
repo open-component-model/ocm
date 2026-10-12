@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	_ selectors.ErrorProvider = (or)(nil)
+	_ selectors.ErrorProvider = or(nil)
 	_ selectors.ErrorProvider = (*not)(nil)
 )
 

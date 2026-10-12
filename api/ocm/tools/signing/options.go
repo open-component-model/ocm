@@ -639,7 +639,7 @@ func (o *Options) Complete(ctx interface{}) error {
 		}
 	}
 	if o.NormalizationAlgo == "" {
-		o.NormalizationAlgo = compdesc.JsonNormalisationV1
+		o.NormalizationAlgo = compdesc.JsonNormalisationV1 //nolint:staticcheck // preserve historical default normalization
 	}
 
 	if o.Hasher == nil && o.HashAlgo != "" {

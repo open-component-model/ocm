@@ -206,5 +206,5 @@ func (b *Builder) Hint(hint string) {
 	if b.ocm_acc != nil && *b.ocm_acc != nil {
 		b.fail("access already set")
 	}
-	*(b.hint) = hint
+	*b.hint = hint
 }

@@ -117,7 +117,7 @@ type DefaultInputType struct {
 
 func NewInputType(name string, proto InputSpec, usage string, cfg flagsets.ConfigOptionTypeSetHandler) InputType {
 	t := reflect.TypeOf(proto)
-	for t.Kind() == reflect.Ptr {
+	for t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	return &DefaultInputType{

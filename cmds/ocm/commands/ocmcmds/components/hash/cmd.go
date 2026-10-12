@@ -33,6 +33,8 @@ var (
 	Verb  = verbs.Hash
 )
 
+const unknownComponentVersion = "<unknown component version>"
+
 type Command struct {
 	utils.BaseCommand
 
@@ -264,7 +266,7 @@ func (h *action) _manifester(e interface{}) *Manifest {
 
 	if p.Descriptor == nil {
 		if p.Error == nil {
-			m.Error = "<unknown component version>"
+			m.Error = unknownComponentVersion
 		} else {
 			m.Error = p.Error.Error()
 		}
@@ -306,7 +308,7 @@ func (h *action) mapGetRegularOutput(e interface{}) interface{} {
 		if p.Error != nil {
 			return []string{p.Spec.Component, tag, "error: " + p.Error.Error()}
 		}
-		return []string{p.Spec.Component, tag, "<unknown component version>"}
+		return []string{p.Spec.Component, tag, unknownComponentVersion}
 	}
 	hash, err := compdesc.Hash(p.Descriptor, h.opts.NormAlgorithm, h.opts.Hasher.Create())
 	if err != nil {
@@ -323,7 +325,7 @@ func (h *action) mapGetWideOutput(e interface{}) interface{} {
 		tag = *p.Spec.Version
 	}
 	if p.Descriptor == nil {
-		return []string{p.Spec.Component, tag, "<unknown component version>"}
+		return []string{p.Spec.Component, tag, unknownComponentVersion}
 	}
 	norm, hash, err := compdesc.NormHash(p.Descriptor, h.opts.NormAlgorithm, h.opts.Hasher.Create())
 	if err != nil {

@@ -13,6 +13,8 @@ import (
 	"github.com/mandelsoft/goutils/general"
 )
 
+const pemRSAPrivateKey = "RSA PRIVATE KEY"
+
 func GetPublicKey(key interface{}) (*rsa.PublicKey, *pkix.Name, error) {
 	var err error
 	if data, ok := key.([]byte); ok {
@@ -82,7 +84,7 @@ func PemBlockForKey(priv interface{}, gen ...bool) (*pem.Block, error) {
 		}
 		return &pem.Block{Type: "RSA PUBLIC KEY", Bytes: x509.MarshalPKCS1PublicKey(k)}, nil
 	case *rsa.PrivateKey:
-		return &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)}, nil
+		return &pem.Block{Type: pemRSAPrivateKey, Bytes: x509.MarshalPKCS1PrivateKey(k)}, nil
 	default:
 		return nil, errors.ErrInvalid("key")
 	}
@@ -94,7 +96,7 @@ func ParseKey(data []byte) (interface{}, error) {
 		return nil, fmt.Errorf("invalid key format (expected pem block)")
 	}
 	switch block.Type {
-	case "RSA PRIVATE KEY":
+	case pemRSAPrivateKey:
 		return x509.ParsePKCS1PrivateKey(block.Bytes)
 	case "CERTIFICATE":
 		return x509.ParseCertificate(block.Bytes)
@@ -129,7 +131,7 @@ func ParsePrivateKey(data []byte) (*rsa.PrivateKey, error) {
 	}
 	x509Encoded := block.Bytes
 	switch block.Type {
-	case "RSA PRIVATE KEY":
+	case pemRSAPrivateKey:
 		return x509.ParsePKCS1PrivateKey(x509Encoded)
 	default:
 		untypedPrivateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)

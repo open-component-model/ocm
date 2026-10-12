@@ -23,7 +23,7 @@ const (
 const (
 	ModeSym  Mode = ModeBlob | 1<<(15-2)
 	ModeDir  Mode = 1 << (15 - 1)
-	ModeBlob Mode = 1 << (15)
+	ModeBlob Mode = 1 << 15
 )
 
 // LogRealm is the realm used for logging output of this package.
@@ -37,7 +37,7 @@ var LogContext = ocmlog.Context().WithContext(LogRealm)
 type Mode = uint32
 
 func FileMode(m vfs.FileMode) Mode {
-	return Mode((m & 0o111) | (0o644))
+	return Mode((m & 0o111) | 0o644)
 }
 
 type Node interface {

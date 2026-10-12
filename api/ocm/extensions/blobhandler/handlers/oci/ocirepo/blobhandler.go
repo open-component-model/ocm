@@ -87,9 +87,9 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 	}
 
 	values := []interface{}{
-		"arttype", artType,
-		"mediatype", blob.MimeType(),
-		"hint", hint,
+		"arttype", artType, //nolint:goconst // log field key
+		"mediatype", blob.MimeType(), //nolint:goconst // log field key
+		"hint", hint, //nolint:goconst // log field key
 	}
 	if m, ok := blob.(blobaccess.AnnotatedBlobAccess[accspeccpi.AccessMethodView]); ok {
 		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci blob handler with ocm access source",
@@ -108,7 +108,7 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 		return nil, err
 	}
 	if compatattr.Get(ctx.GetContext()) {
-		return localociblob.New(blob.Digest()), nil
+		return localociblob.New(blob.Digest()), nil //nolint:staticcheck // intentionally produces the legacy localOCIBlob access type
 	} else {
 		if global == nil {
 			base := b.GetBaseURL(ocictx)

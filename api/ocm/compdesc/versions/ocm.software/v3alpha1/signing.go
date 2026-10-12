@@ -15,7 +15,7 @@ import (
 var CDExcludes = signing.MapExcludes{
 	"repositoryContexts": nil,
 	"metadata": signing.MapExcludes{
-		"labels": rules.LabelExcludes,
+		"labels": rules.LabelExcludes, //nolint:goconst // map key; a constant would hurt the aligned exclude spec
 	},
 	"spec": signing.MapExcludes{
 		"provider": signing.MapExcludes{
@@ -46,7 +46,7 @@ var CDExcludes = signing.MapExcludes{
 }
 
 func (cd *ComponentDescriptor) Normalize(normAlgo string) ([]byte, error) {
-	if normAlgo != compdesc.JsonNormalisationV1 {
+	if normAlgo != compdesc.JsonNormalisationV1 { //nolint:staticcheck // this normalization only supports the deprecated algorithm
 		return nil, fmt.Errorf("unsupported cd normalization %q", normAlgo)
 	}
 	data, err := signing.Normalize(entry.Type, cd, CDExcludes)

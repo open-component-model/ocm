@@ -16,7 +16,7 @@ type ConfigType interface {
 	Usage() string
 }
 
-var _ runtime.VersionedTypedObjectType[Config] = (ConfigType)(nil)
+var _ runtime.VersionedTypedObjectType[Config] = ConfigType(nil)
 
 type (
 	ConfigDecoder      = runtime.TypedObjectDecoder[Config]

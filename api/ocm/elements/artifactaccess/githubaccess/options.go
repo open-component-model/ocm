@@ -32,5 +32,5 @@ func (h apihostname) ApplyTo(opts *Options) {
 }
 
 func WithAPIHostName(h string) Option {
-	return apihostname((h))
+	return apihostname(h)
 }

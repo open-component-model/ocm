@@ -27,7 +27,7 @@ func New(data []byte, mediatype string, compress bool) *Spec {
 			},
 		},
 		ProcessSpec: cpi.NewProcessSpec(mediatype, compress),
-		Data:        (data), // see above
+		Data:        data, // see above
 	}
 }
 

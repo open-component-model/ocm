@@ -37,6 +37,7 @@ type ObjectMetaAccessor interface {
 }
 
 // ElementMetaAccessor provides generic access an elements meta information.
+//
 // Deprecated: use Element.
 type ElementMetaAccessor = accessors.Element
 

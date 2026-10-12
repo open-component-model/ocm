@@ -13,6 +13,7 @@ GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --
 
 CONTROLLER_TOOLS_VERSION ?= v0.17.1
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
+GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint
 
 PLATFORMS = windows/amd64 darwin/arm64 darwin/amd64 linux/amd64 linux/arm64
 
@@ -83,12 +84,12 @@ format:
 	@$(REPO_ROOT)/hack/format.sh $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: check
-check: ## Run golangci-lint.
-	go tool golangci-lint run --timeout 10m --config .github/config/golangci.yaml $(EFFECTIVE_DIRECTORIES)
+check: golangci-lint ## Run golangci-lint.
+	$(GOLANGCI_LINT) run --timeout 10m --config .github/config/golangci.yaml $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: check-fix
-check-fix: ## Run golangci-lint.
-	go tool golangci-lint run --fix --timeout 10m --config .github/config/golangci.yaml $(EFFECTIVE_DIRECTORIES)
+check-fix: golangci-lint ## Run golangci-lint.
+	$(GOLANGCI_LINT) run --fix --timeout 10m --config .github/config/golangci.yaml $(EFFECTIVE_DIRECTORIES)
 
 .PHONY: force-test
 force-test:
@@ -117,6 +118,11 @@ generate-deepcopy: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
 $(CONTROLLER_GEN): $(LOCALBIN)
 	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
+
+.PHONY: golangci-lint
+golangci-lint: $(GOLANGCI_LINT) ## Build golangci-lint from the tools module if necessary.
+$(GOLANGCI_LINT): $(LOCALBIN) tools/go.mod
+	GOBIN=$(LOCALBIN) go -C tools install github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 
 .PHONY: verify
 verify: check

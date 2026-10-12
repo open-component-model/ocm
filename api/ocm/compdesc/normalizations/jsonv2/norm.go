@@ -17,7 +17,7 @@ import (
 )
 
 // Deprecated: use compdesc.JsonNormalisationV3 instead
-const Algorithm = compdesc.JsonNormalisationV2
+const Algorithm = compdesc.JsonNormalisationV2 //nolint:staticcheck // legacy normalization must reference the deprecated algorithm
 
 func init() {
 	compdesc.Normalizations.Register(Algorithm, normalization{})
@@ -26,7 +26,7 @@ func init() {
 type normalization struct{}
 
 func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, error) {
-	legacy.DefaultingOfVersionIntoExtraIdentityForDescriptor(cd)
+	legacy.DefaultingOfVersionIntoExtraIdentityForDescriptor(cd) //nolint:staticcheck // legacy normalization defaulting kept for backwards compatibility
 	data, err := signing.Normalize(jcs.Type, cd, CDExcludes)
 	return data, err
 }
@@ -39,7 +39,7 @@ var CDExcludes = signing.MapExcludes{
 	"component": signing.MapExcludes{
 		"repositoryContexts": nil,
 		"provider": signing.MapExcludes{
-			"labels": rules.LabelExcludes,
+			"labels": rules.LabelExcludes, //nolint:goconst // map key; a constant would hurt the aligned exclude spec
 		},
 		"labels": rules.LabelExcludes,
 		"resources": signing.DynamicArrayExcludes{

@@ -19,7 +19,7 @@ func LinkForPath(path string) string {
 }
 
 func FormatLink(pname string, linkhandler func(string) string) string {
-	return fmt.Sprintf("[%s](%s)", pname, linkhandler((pname)))
+	return fmt.Sprintf("[%s](%s)", pname, linkhandler(pname))
 }
 
 func FormatLinkWithHandler(linkhandler func(string) string) func(string) string {

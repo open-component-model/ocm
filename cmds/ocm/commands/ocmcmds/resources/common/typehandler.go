@@ -29,7 +29,7 @@ func (t typeFilter) ApplyToElemHandler(handler *elemhdlr.TypeHandler) {
 	}
 }
 
-func (t typeFilter) Accept(e compdesc.ElementMetaAccessor) bool {
+func (t typeFilter) Accept(e compdesc.Element) bool {
 	if len(t.types) == 0 {
 		return true
 	}
