@@ -96,8 +96,8 @@ var _ = Describe("local accessmethods.maven.AccessSpec tests", func() {
 		list := Must(tarutils.ListArchiveContentFromReader(dr))
 		Expect(list).To(ConsistOf("sdk-modules-bom-5.7.0.pom"))
 
-		Expect(dr.Size()).To(Equal(int64(1109)))
-		Expect(dr.Digest().String()).To(Equal("SHA-1:4ee125ffe4f7690588833f1217a13cc741e4df5f"))
+		Expect(dr.Size()).To(Equal(int64(1111)))
+		Expect(dr.Digest().String()).To(Equal("SHA-1:9ea1494a6c88ed61dd1a87658a009599a6e00afe"))
 	})
 
 	It("Describe", func() {
