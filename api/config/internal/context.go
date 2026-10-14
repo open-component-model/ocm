@@ -154,32 +154,47 @@ var (
 type gcWrapper struct {
 	datacontext.GCWrapper
 	*_context
+	// Keep the persistent owner outside the cyclic backend graph.
+	sharedAttributes datacontext.AttributesContext
 }
 
 func newView(c *_context, ref ...bool) Context {
 	if utils.Optional(ref...) {
-		return datacontext.FinalizedContext[gcWrapper](c)
+		return newPersistentView(c, c.sharedAttributes)
 	}
 	return c
+}
+
+func newPersistentView(c *_context, shared datacontext.AttributesContext) Context {
+	w := datacontext.FinalizedContext[gcWrapper](c)
+	w.sharedAttributes = datacontext.PersistentContextRef(shared)
+	return w
 }
 
 func (w *gcWrapper) SetContext(c *_context) {
 	w._context = c
 }
 
+func (w gcWrapper) AttributesContext() datacontext.AttributesContext {
+	w.updater.Update()
+	return w.sharedAttributes
+}
+
 func newContext(shared datacontext.AttributesContext, reposcheme ConfigTypeScheme, delegates datacontext.Delegates) Context {
 	c := &_context{
 		coreContext: &coreContext{
-			sharedAttributes: shared,
+			// Backend cycles must not include a finalizer-managed view.
+			// The persistent config view keeps the shared context alive.
+			sharedAttributes: datacontext.InternalContextRef(shared),
 			knownConfigTypes: reposcheme,
 			configs:          NewConfigStore(),
 		},
 	}
 	c._InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes(), delegates)
 	c.updater = NewUpdaterForFactory(c, c.ConfigContext) // provide target as new view to internal context
-	datacontext.AssureUpdater(shared, NewUpdater(c, datacontext.PersistentContextRef(shared)))
+	datacontext.AssureUpdater(shared, NewUpdater(c, datacontext.InternalContextRef(shared)))
 
-	return newView(c, true)
+	return newPersistentView(c, shared)
 }
 
 func (c *_context) CreateView() Context {
