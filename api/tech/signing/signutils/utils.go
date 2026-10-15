@@ -463,7 +463,7 @@ func KeyUsages(usages x509.KeyUsage) []string {
 	result := []string{}
 	for _, u := range _keyUsages {
 		if usages&u != 0 {
-			result = append(result, (_keyUsage(u)).String())
+			result = append(result, _keyUsage(u).String())
 		}
 	}
 	return result
@@ -518,7 +518,7 @@ func (this _extKeyUsage) String() string {
 func ExtKeyUsages(usages []x509.ExtKeyUsage) []string {
 	result := []string{}
 	for _, u := range usages {
-		result = append(result, (_extKeyUsage(u)).String())
+		result = append(result, _extKeyUsage(u).String())
 	}
 	return result
 }

@@ -13,7 +13,7 @@ import (
 )
 
 // Deprecated: use compdesc.JsonNormalisationV3 instead
-const Algorithm = compdesc.JsonNormalisationV1
+const Algorithm = compdesc.JsonNormalisationV1 //nolint:staticcheck // legacy normalization must reference the deprecated algorithm
 
 func init() {
 	compdesc.Normalizations.Register(Algorithm, normalization{})
@@ -22,7 +22,7 @@ func init() {
 type normalization struct{}
 
 func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, error) {
-	legacy.DefaultingOfVersionIntoExtraIdentityForDescriptor(cd)
+	legacy.DefaultingOfVersionIntoExtraIdentityForDescriptor(cd) //nolint:staticcheck // legacy normalization defaulting kept for backwards compatibility
 	cv := compdesc.DefaultSchemes[cd.SchemaVersion()]
 	if cv == nil {
 		return nil, errors.ErrNotSupported(errkind.KIND_SCHEMAVERSION, cd.SchemaVersion())

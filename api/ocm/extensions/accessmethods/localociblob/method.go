@@ -25,6 +25,7 @@ func init() {
 }
 
 // New creates a new LocalOCIBlob accessor.
+//
 // Deprecated: Use LocalBlob.
 func New(digest digest.Digest) *localblob.AccessSpec {
 	return &localblob.AccessSpec{
@@ -42,6 +43,7 @@ func Decode(data []byte) (*localblob.AccessSpec, error) {
 }
 
 // AccessSpec describes the access for a oci registry.
+//
 // Deprecated: Use LocalBlob.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`

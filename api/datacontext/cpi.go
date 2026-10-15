@@ -195,7 +195,7 @@ type finalizableContextWrapper[C InternalContext, P any] interface {
 // context implementation.
 func FinalizedContext[W Context, C InternalContext, P finalizableContextWrapper[C, W]](c C) P {
 	var v W
-	p := (P)(&v)
+	p := P(&v)
 	p.SetContext(c)
 	p.setSelf(c.GetAllocatable(), p, c, c.GetKey()) // prepare for generic bind operation
 	return p

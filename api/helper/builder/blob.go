@@ -13,7 +13,7 @@ func (b *Builder) BlobStringData(mime string, data string) {
 	if b.ocm_acc != nil && *b.ocm_acc != nil {
 		b.fail("access already set")
 	}
-	*(b.blob) = blobaccess.ForData(mime, []byte(data))
+	*b.blob = blobaccess.ForData(mime, []byte(data))
 }
 
 func (b *Builder) BlobData(mime string, data []byte) {
@@ -21,7 +21,7 @@ func (b *Builder) BlobData(mime string, data []byte) {
 	if b.ocm_acc != nil && *b.ocm_acc != nil {
 		b.fail("access already set")
 	}
-	*(b.blob) = blobaccess.ForData(mime, data)
+	*b.blob = blobaccess.ForData(mime, data)
 }
 
 func (b *Builder) BlobFromFile(mime string, path string) {
@@ -29,8 +29,8 @@ func (b *Builder) BlobFromFile(mime string, path string) {
 	if b.ocm_acc != nil && *b.ocm_acc != nil {
 		b.fail("access already set")
 	}
-	*(b.blob) = blobaccess.ForFile(mime, path, b.FileSystem())
-	b.failOn(utils.ValidateObject(*(b.blob)))
+	*b.blob = blobaccess.ForFile(mime, path, b.FileSystem())
+	b.failOn(utils.ValidateObject(*b.blob))
 }
 
 func (b *Builder) BlobFromDirTree(path string, opts ...dirtree.Option) {
@@ -39,6 +39,6 @@ func (b *Builder) BlobFromDirTree(path string, opts ...dirtree.Option) {
 		b.fail("access already set")
 	}
 	var err error
-	*(b.blob), err = dirtree.BlobAccess(path, append([]dirtree.Option{dirtree.WithFileSystem(b.FileSystem())}, opts...)...)
+	*b.blob, err = dirtree.BlobAccess(path, append([]dirtree.Option{dirtree.WithFileSystem(b.FileSystem())}, opts...)...)
 	b.failOn(err)
 }

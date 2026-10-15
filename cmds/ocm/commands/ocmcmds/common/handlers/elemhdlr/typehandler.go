@@ -24,7 +24,7 @@ type Object struct {
 	Index   int
 	Id      metav1.Identity
 	Node    *common.NameVersion
-	Element compdesc.ElementMetaAccessor
+	Element compdesc.Element
 }
 
 func (o *Object) String() string {
@@ -78,7 +78,7 @@ func (o *Object) Compare(b *Object) int {
 ////////////////////////////////////////////////////////////////////////////////
 
 type ElementFilter interface {
-	Accept(e compdesc.ElementMetaAccessor) bool
+	Accept(e compdesc.Element) bool
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	return result, nil
 }
 
-func (h *TypeHandler) filterElement(e compdesc.ElementMetaAccessor) bool {
+func (h *TypeHandler) filterElement(e compdesc.Element) bool {
 	if h.filter == nil {
 		return true
 	}

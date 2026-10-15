@@ -15,7 +15,7 @@ import (
 func CompDigestSpec(d string) *metav1.DigestSpec {
 	return &metav1.DigestSpec{
 		HashAlgorithm:          sha256.Algorithm,
-		NormalisationAlgorithm: jsonv1.Algorithm,
+		NormalisationAlgorithm: jsonv1.Algorithm, //nolint:staticcheck // test helper intentionally uses the legacy algorithm
 		Value:                  d,
 	}
 }

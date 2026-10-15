@@ -46,6 +46,7 @@ func Decode(data []byte) (*localblob.AccessSpec, error) {
 }
 
 // AccessSpec describes the access for a blob on the filesystem.
+//
 // Deprecated: use LocalBlob.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
