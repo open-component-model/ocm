@@ -351,6 +351,7 @@ shown below.
 - Access type <code>wget</code>
 
   This method implements access to resources stored on an http server.
+  The access type can also be declared as <code>http</code> or <code>HTTP</code>.
 
   The following versions are supported:
   - Version <code>v1</code>

@@ -25,16 +25,37 @@ const (
 	UpperTypeV1 = UpperType + runtime.VersionSeparator + "v1"
 )
 
+// Alias type names for the wget access type.
+const (
+	HTTPType   = "http"
+	HTTPTypeV1 = HTTPType + runtime.VersionSeparator + "v1"
+
+	UpperHTTPType   = "HTTP"
+	UpperHTTPTypeV1 = UpperHTTPType + runtime.VersionSeparator + "v1"
+)
+
 func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1))
+
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](HTTPType))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](HTTPTypeV1, accspeccpi.WithConfigHandler(HTTPConfigHandler())))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperHTTPType))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperHTTPTypeV1))
 }
 
 func Is(spec accspeccpi.AccessSpec) bool {
-	return spec != nil && spec.GetKind() == Type
+	if spec == nil {
+		return false
+	}
+	switch spec.GetKind() {
+	case Type, UpperType, HTTPType, UpperHTTPType:
+		return true
+	}
+	return false
 }
 
 // New creates a new WGET accessor for http resources.

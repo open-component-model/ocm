@@ -8,8 +8,16 @@ import (
 )
 
 func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
+	return configHandler(Type)
+}
+
+func HTTPConfigHandler() flagsets.ConfigOptionTypeSetHandler {
+	return configHandler(HTTPType)
+}
+
+func configHandler(name string) flagsets.ConfigOptionTypeSetHandler {
 	return flagsets.NewConfigOptionTypeSetHandler(
-		Type, AddConfig,
+		name, AddConfig,
 		options.URLOption,
 		options.MediatypeOption,
 		options.HTTPHeaderOption,
@@ -31,6 +39,7 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 
 var usage = `
 This method implements access to resources stored on an http server.
+The access type can also be declared as <code>http</code> or <code>HTTP</code>.
 `
 
 var formatV1 = `

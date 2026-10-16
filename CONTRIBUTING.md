@@ -95,5 +95,5 @@ Allowed types: `feat`, `fix`, `chore`, `docs`, `test`, `perf`
 
 - [Project issues](https://github.com/open-component-model/ocm-project/issues)
 - [Repository issues](https://github.com/open-component-model/ocm/issues)
-- [Community engagement](https://ocm.software/community/engagement/)
+- [Community engagement](https://ocm.software/community/)
 - [Linux Foundation EU Code of Conduct](https://linuxfoundation.eu/policies/code-of-conduct)

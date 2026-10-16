@@ -14,7 +14,6 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/conv"
 	"github.com/mandelsoft/goutils/errors"
-	"github.com/sigstore/cosign/v3/cmd/cosign/cli/fulcio"
 	"github.com/sigstore/cosign/v3/cmd/cosign/cli/options"
 	"github.com/sigstore/cosign/v3/pkg/cosign"
 	"github.com/sigstore/rekor/pkg/client"
@@ -28,6 +27,7 @@ import (
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/tech/signing"
 	"ocm.software/ocm/api/tech/signing/handlers/sigstore/attr"
+	"ocm.software/ocm/api/tech/signing/handlers/sigstore/internal/fulcio"
 )
 
 /*
@@ -175,11 +175,10 @@ func (h Handler) Sign(cctx credentials.Context, digest string, sctx signing.Sign
 
 	// prepare the create entry request parameters
 	params := entries.NewCreateLogEntryParams().
-		WithContext(ctx).
 		WithProposedEntry(entry)
 
 	// submit the create entry request
-	resp, err := rekorClient.Entries.CreateLogEntry(params)
+	resp, err := rekorClient.Entries.CreateLogEntryContext(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create rekor entry: %w", err)
 	}

@@ -295,7 +295,7 @@ lowercase types (e.g. <code>helm</code>). See the lowercase entry for full docum
 
   This input type describes the composition of a multi-platform OCI image.
   The various variants are taken from the local docker daemon. They should be
-  built with the "buildx" command for cross platform docker builds (see https://ocm.software/docs/tutorials/best-practices/#building-multi-architecture-images).
+  built with the "buildx" command for cross platform docker builds (see https://ocm.software/legacy/docs/tutorials/best-practices/#building-multi-architecture-images).
   The denoted images, as well as the wrapping image index, are packed as OCI
   artifact set.
   They will contain an informational back link to the component version
@@ -600,7 +600,7 @@ lowercase types (e.g. <code>helm</code>). See the lowercase entry for full docum
 
   The <code>url</code> is the url pointing to the http endpoint from which a resource is
   downloaded. The <code>mimeType</code> can be used to specify the MIME type of the
-  resource.
+  resource. The input type can also be declared as <code>http</code> or <code>HTTP</code>.
 
   This blob type specification supports the following fields:
   - **<code>url</code>** *string*
@@ -979,6 +979,7 @@ shown below.
 - Access type <code>wget</code>
 
   This method implements access to resources stored on an http server.
+  The access type can also be declared as <code>http</code> or <code>HTTP</code>.
 
   The following versions are supported:
   - Version <code>v1</code>
