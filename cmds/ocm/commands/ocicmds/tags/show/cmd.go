@@ -91,7 +91,7 @@ func (o *Command) Run() error {
 	}
 
 	versions := Versions{}
-	tags := sliceutils.OrderedSlice[string]{}
+	var tags sliceutils.OrderedSlice[string]
 	repo := repooption.From(o)
 
 	var art oci.ArtifactAccess

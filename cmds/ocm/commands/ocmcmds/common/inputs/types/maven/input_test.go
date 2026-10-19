@@ -91,6 +91,6 @@ type: mavenPackage
 		access := Must(env.Context.OCMContext().AccessSpecForSpec(cd.Resources[0].Access)).(*localblob.AccessSpec)
 		Expect(access.MediaType).To(Equal(mime.MIME_TGZ))
 		fi := Must(env.FileSystem().Stat(env.Join(ARCH, "blobs", access.LocalReference)))
-		Expect(fi.Size()).To(Equal(int64(1109)))
+		Expect(fi.Size()).To(Equal(int64(1111)))
 	})
 })

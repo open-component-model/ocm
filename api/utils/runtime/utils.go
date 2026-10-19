@@ -23,7 +23,7 @@ func ProtoType(proto interface{}) (reflect.Type, error) {
 		return nil, errors.New("prototype required")
 	}
 	t := reflect.TypeOf(proto)
-	for t.Kind() == reflect.Ptr {
+	for t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	if t.Kind() != reflect.Struct {

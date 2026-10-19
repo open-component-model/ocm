@@ -32,5 +32,5 @@ func (h mediatype) ApplyTo(opts *Options) {
 }
 
 func WithMediaType(h string) Option {
-	return mediatype((h))
+	return mediatype(h)
 }

@@ -185,6 +185,7 @@ type ResourceSpec struct {
 	// References references component dependencies that can be resolved in the current context.
 	References []*refs.ResourceSpec `json:"references"`
 	// OldReferences references component dependencies that can be resolved in the current context.
+	//
 	// Deprecated: use field References.
 	OldReferences []*refs.ResourceSpec `json:"componentReferences"`
 	// Resources defines all resources that are created by the component and by a third party.

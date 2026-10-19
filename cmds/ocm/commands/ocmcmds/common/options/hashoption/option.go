@@ -59,6 +59,8 @@ func (o *Option) Configure(ctx clictx.Context) error {
 }
 
 func (o *Option) Usage() string {
+	//nolint:staticcheck // deprecated algorithm names referenced only to document them for users migrating away
+	deprecatedV1, deprecatedV2 := jsonv1.Algorithm, jsonv2.Algorithm
 	s := `
 The following normalization modes are supported with option <code>--normalization</code>:
 ` + listformat.FormatList(jsonv3.Algorithm, compdesc.Normalizations.Names()...)
@@ -69,7 +71,7 @@ Note that the normalization algorithm is important to be equivalent when used fo
 the verification can fail. Please always migrate to the latest normalization algorithm whenever possible.
 New signature algorithms can be used as soon as they are available in the component version after signing it.
 
-The algorithms ` + jsonv1.Algorithm + ` and ` + jsonv2.Algorithm + ` are deprecated and should not be used anymore.
+The algorithms ` + deprecatedV1 + ` and ` + deprecatedV2 + ` are deprecated and should not be used anymore.
 Please switch to ` + jsonv3.Algorithm + ` as soon as possible.
 
 `

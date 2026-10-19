@@ -130,7 +130,7 @@ func (dc *DigestContext) Propagate(d *metav1.DigestSpec) error {
 	if preset != nil {
 		var match bool
 		switch d.NormalisationAlgorithm {
-		case compdesc.JsonNormalisationV1, compdesc.JsonNormalisationV2:
+		case compdesc.JsonNormalisationV1, compdesc.JsonNormalisationV2: //nolint:staticcheck // legacy digests use the deprecated algorithms
 			match = matchLegacy(digs.Resources, preset.Resources)
 		default:
 			match = digs.Resources.Match(preset.Resources)

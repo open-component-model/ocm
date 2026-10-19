@@ -60,6 +60,9 @@ linters:
     - embeddedstructfieldcheck
     - noinlineerr
     - wsl_v5
+    - exhaustruct_v5
+    - modernize
+    - godoclint
   settings:
     cyclop:
       max-complexity: 15

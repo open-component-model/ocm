@@ -129,7 +129,7 @@ func FindOptions[T any](s OptionSetProvider) []T {
 func (s OptionSet) Get(proto interface{}) bool {
 	val := true
 	t := reflect.TypeOf(proto)
-	if t.Elem().Kind() == reflect.Ptr {
+	if t.Elem().Kind() == reflect.Pointer {
 		t = t.Elem()
 		val = false
 	}

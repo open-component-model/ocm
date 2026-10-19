@@ -217,7 +217,6 @@ func configureTransport(ctx cpi.Context, scheme string) (*http.Transport, *time.
 	}
 
 	if scheme == "https" {
-		//nolint:gosec // used like the default, there are OCI servers (quay.io) not working with min version.
 		baseTransport.TLSClientConfig = &tls.Config{
 			RootCAs: rootcertsattr.Get(ctx).GetRootCertPool(true),
 		}

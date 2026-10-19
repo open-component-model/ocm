@@ -187,7 +187,7 @@ func NewDefaultScheme[T TypedObject, R TypedObjectDecoder[T]](protoUnstr Unstruc
 
 	var protoIfce T
 	it := reflect.TypeOf(&protoIfce)
-	for it.Kind() == reflect.Ptr {
+	for it.Kind() == reflect.Pointer {
 		it = it.Elem()
 	}
 

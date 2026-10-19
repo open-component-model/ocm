@@ -22,7 +22,7 @@ func (g *GenericComponentDescriptor) UnmarshalJSON(bytes []byte) error {
 	if err != nil {
 		return err
 	}
-	*g = *((*GenericComponentDescriptor)(cd))
+	*g = *(*GenericComponentDescriptor)(cd)
 	return nil
 }
 
