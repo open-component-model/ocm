@@ -25,14 +25,14 @@ func (c Component) MatchReference(list accessors.ElementListAccessor, ref access
 ////////////////////////////////////////////////////////////////////////////////
 
 type compGlob struct {
-	*glob.Pattern
+	glob.Glob
 }
 
 func (c *compGlob) MatchReference(list accessors.ElementListAccessor, ref accessors.ReferenceAccessor) bool {
-	if c.Pattern == nil {
+	if c.Glob == nil {
 		return false
 	}
-	return c.Pattern.Match(ref.GetComponentName())
+	return c.Glob.Match(ref.GetComponentName())
 }
 
 func ComponentGlob(g string) Selector {
