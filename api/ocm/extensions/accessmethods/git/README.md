@@ -4,23 +4,28 @@
 ## Synopsis
 
 ```yaml
-type: git/v1
+type: Git/v1
 ```
 
 Provided blobs use the following media type for: `application/x-tgz`
 
-The artifact content is provided as gnu-zipped tar archive
+The artifact content is provided as a gzip-compressed tar archive. `Git/v1`
+archives contain the checked-out files and a `.git` directory with a detached
+`HEAD` and the complete history reachable from that commit. The legacy type
+spellings (`git`, `git/v1alpha1`, `Git`, and `Git/v1alpha1`) are still accepted
+and produce the same history-bearing archive.
 
 ### Description
 
 This method implements the access of the content of a git commit stored in a
 git repository.
 
-Supported specification version is `v1alpha1`
+The current access type is `Git/v1`. The legacy specification version is
+`v1alpha1`.
 
 ### Specification Versions
 
-#### Version `v1alpha1`
+#### Version `v1`
 
 The type specific specification fields are:
 
@@ -38,7 +43,7 @@ The type specific specification fields are:
 
 ### Go Bindings
 
-The go binding can be found [here](method.go)
+The Go binding is defined in [method.go](method.go).
 
 #### Example
 
@@ -75,13 +80,15 @@ func main() {
 
   r := tar.NewReader(unzippedContent)
 
-  file, err := r.Next()
-  if err != nil {
-    panic(err)
-  }
-  
-  if file.Name != "README.md" {
-    panic("Expected README.md")
+  var file *tar.Header
+  for {
+    file, err = r.Next()
+    if err != nil {
+      panic(err)
+    }
+    if file.Name == "README.md" {
+      break
+    }
   }
 
   data, err := io.ReadAll(r)

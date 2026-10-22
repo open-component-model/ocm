@@ -9,6 +9,9 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"os/exec"
+	"regexp"
+	"strings"
 	"time"
 
 	. "github.com/mandelsoft/goutils/testutils"
@@ -34,8 +37,11 @@ var testData embed.FS
 
 var _ = Describe("git Blob Access", func() {
 	var (
-		ctx ocm.Context
-		url string
+		ctx     ocm.Context
+		url     string
+		repoDir string
+		commit  plumbing.Hash
+		parent  plumbing.Hash
 	)
 
 	ctx = ocm.New()
@@ -49,7 +55,7 @@ var _ = Describe("git Blob Access", func() {
 
 	Context("git filesystem repository", func() {
 		BeforeEach(func() {
-			repoDir := GinkgoT().TempDir() + filepath.PathSeparatorString + "repo"
+			repoDir = GinkgoT().TempDir() + filepath.PathSeparatorString + "repo"
 
 			repo, err := git.PlainInit(repoDir, false)
 			Expect(err).ToNot(HaveOccurred())
@@ -95,12 +101,18 @@ var _ = Describe("git Blob Access", func() {
 			wt, err := repo.Worktree()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(wt.AddWithOptions(&git.AddOptions{All: true})).To(Succeed())
-			_, err = wt.Commit("OCM Test Commit", &git.CommitOptions{
+			parent, err = wt.Commit("OCM Test Parent", &git.CommitOptions{
 				Author: &object.Signature{
 					Name:  "OCM Test",
 					Email: "dummy@ocm.software",
 					When:  time.Now(),
 				},
+			})
+			Expect(err).ToNot(HaveOccurred())
+			Expect(os.WriteFile(filepath.Join(repoDir, "file_in_repo"), []byte("second revision\n"), 0o600)).To(Succeed())
+			Expect(wt.AddWithOptions(&git.AddOptions{All: true})).To(Succeed())
+			commit, err = wt.Commit("OCM Test Commit", &git.CommitOptions{
+				Author: &object.Signature{Name: "OCM Test", Email: "dummy@ocm.software", When: time.Now()},
 			})
 			Expect(err).ToNot(HaveOccurred())
 
@@ -115,7 +127,7 @@ var _ = Describe("git Blob Access", func() {
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			Expect(files).To(ConsistOf("file_in_repo", "file_in_dir_in_repo"))
+			expectArchiveFiles(files, "file_in_repo", "file_in_dir_in_repo")
 
 			data1, err := b.Reader()
 			Expect(err).ToNot(HaveOccurred())
@@ -130,7 +142,47 @@ var _ = Describe("git Blob Access", func() {
 			data2, err := b2.Reader()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(data1).ToNot(BeIdenticalTo(data2))
+			Expect(b.Digest()).To(Equal(b2.Digest()))
+			bytes1 := Must(io.ReadAll(data1))
+			bytes2 := Must(io.ReadAll(data2))
+			Expect(data1.Close()).To(Succeed())
+			Expect(data2.Close()).To(Succeed())
+			Expect(bytes1).To(Equal(bytes2))
+
+			cmd := exec.Command("git", "-C", repoDir, "gc", "--aggressive")
+			output, err := cmd.CombinedOutput()
+			Expect(err).ToNot(HaveOccurred(), string(output))
+			b3 := Must(gitblob.BlobAccess(
+				gitblob.WithURL(url),
+				gitblob.WithLoggingContext(ctx),
+				gitblob.WithCachingContext(ctx),
+			))
+			defer Close(b3)
+			Expect(b3.Digest()).To(Equal(b.Digest()))
+		})
+
+		It("contains a complete Git history with a detached HEAD", func() {
+			b := Must(gitblob.BlobAccess(
+				gitblob.WithURL(url),
+				gitblob.WithLoggingContext(ctx),
+				gitblob.WithCachingContext(ctx),
+			))
+			defer Close(b)
+			dir := GinkgoT().TempDir()
+			out := Must(projectionfs.New(osfs.New(), dir))
+			reader := Must(b.Reader())
+			Expect(tarutils.UnzipTarToFs(out, reader)).To(Succeed())
+			Expect(reader.Close()).To(Succeed())
+			head := Must(os.ReadFile(filepath.Join(dir, ".git", "HEAD")))
+			Expect(string(head)).To(Equal(commit.String() + "\n"))
+
+			cmd := exec.Command("git", "-C", dir, "fsck", "--strict")
+			output, err := cmd.CombinedOutput()
+			Expect(err).ToNot(HaveOccurred(), string(output))
+			cmd = exec.Command("git", "-C", dir, "rev-parse", "HEAD^", "HEAD")
+			output, err = cmd.CombinedOutput()
+			Expect(err).ToNot(HaveOccurred(), string(output))
+			Expect(strings.Fields(string(output))).To(Equal([]string{parent.String(), commit.String()}))
 		})
 
 		It("creates an archive without host-specific tar headers", func() {
@@ -179,7 +231,7 @@ var _ = Describe("git Blob Access", func() {
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			Expect(files).To(ConsistOf("README"))
+			expectArchiveFiles(files, "README")
 		})
 
 		It("hello world from github with master branch", func() {
@@ -191,7 +243,7 @@ var _ = Describe("git Blob Access", func() {
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			Expect(files).To(ConsistOf("README"))
+			expectArchiveFiles(files, "README")
 		})
 
 		It("hello world from github with custom ref", func() {
@@ -203,8 +255,27 @@ var _ = Describe("git Blob Access", func() {
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			Expect(files).To(ConsistOf("README", "CONTRIBUTING.md"))
+			expectArchiveFiles(files, "README", "CONTRIBUTING.md")
 		})
 	})
 
 })
+
+func expectArchiveFiles(files []string, worktree ...string) {
+	var history, contents []string
+	for _, name := range files {
+		if name == ".git" || strings.HasPrefix(name, ".git/") {
+			history = append(history, name)
+		} else {
+			contents = append(contents, name)
+		}
+	}
+	Expect(contents).To(ConsistOf(worktree))
+	Expect(history).To(ContainElements(".git", ".git/HEAD", ".git/objects", ".git/objects/pack", ".git/refs"))
+	Expect(history).To(HaveLen(7))
+	packPattern := regexp.MustCompile(`^\.git/objects/pack/pack-[0-9a-f]{40}\.pack$`)
+	indexPattern := regexp.MustCompile(`^\.git/objects/pack/pack-[0-9a-f]{40}\.idx$`)
+	Expect(history[4]).To(MatchRegexp(indexPattern.String()))
+	Expect(history[5]).To(MatchRegexp(packPattern.String()))
+	Expect(strings.TrimSuffix(history[4], ".idx")).To(Equal(strings.TrimSuffix(history[5], ".pack")))
+}
