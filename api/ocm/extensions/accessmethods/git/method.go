@@ -24,6 +24,7 @@ const (
 
 	UpperType         = "Git"
 	UpperTypeV1Alpha1 = UpperType + runtime.VersionSeparator + "v1alpha1"
+	UpperTypeV1       = UpperType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -34,6 +35,7 @@ func init() {
 
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1Alpha1))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1, accspeccpi.WithConfigHandler(ConfigHandler())))
 }
 
 // AccessSpec describes the access for a GitHub registry.
@@ -65,10 +67,10 @@ func WithRef(ref string) AccessSpecOptions {
 	}
 }
 
-// New creates a new git registry access spec version v1.
+// New creates a Git/v1 access spec whose archive includes the commit history.
 func New(url string, opts ...AccessSpecOptions) *AccessSpec {
 	s := &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(UpperTypeV1),
 		Repository:          url,
 	}
 	for _, o := range opts {
@@ -89,8 +91,8 @@ func (a *AccessSpec) GlobalAccessSpec(accspeccpi.Context) accspeccpi.AccessSpec 
 	return a
 }
 
-func (*AccessSpec) GetType() string {
-	return Type
+func (a *AccessSpec) GetType() string {
+	return a.ObjectVersionedType.GetType()
 }
 
 func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal.AccessMethod, error) {
