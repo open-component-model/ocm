@@ -10,7 +10,7 @@ type: Git/v1
 Provided blobs use the following media type for: `application/x-tgz`
 
 The artifact content is provided as a gzip-compressed tar archive. Both
-`Git/v1` and its unversioned alias `Git` produce archives with the checked-out
+`Git/v1` and its alias `Git` produce archives with the checked-out
 files and a `.git` directory containing a detached `HEAD` and the complete
 history reachable from that commit. The legacy type spellings (`git`,
 `git/v1alpha1`, and `Git/v1alpha1`) retain their files-only archive format.
