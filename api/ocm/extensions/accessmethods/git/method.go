@@ -33,7 +33,7 @@ func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1Alpha1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 
-	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType, accspeccpi.WithConfigHandler(ConfigHandler())))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1Alpha1))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1, accspeccpi.WithConfigHandler(ConfigHandler())))
 }
@@ -92,10 +92,14 @@ func (a *AccessSpec) GlobalAccessSpec(accspeccpi.Context) accspeccpi.AccessSpec 
 }
 
 func (a *AccessSpec) GetType() string {
-	if a.ObjectVersionedType.GetType() == UpperTypeV1 {
+	if a.isV1() {
 		return UpperTypeV1
 	}
 	return Type
+}
+
+func (a *AccessSpec) isV1() bool {
+	return a.ObjectVersionedType.GetType() == UpperType || a.ObjectVersionedType.GetType() == UpperTypeV1
 }
 
 func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal.AccessMethod, error) {
@@ -124,7 +128,7 @@ func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal
 	if creds != nil {
 		opts = append(opts, gitblob.WithCredentials(creds))
 	}
-	if a.ObjectVersionedType.GetType() == UpperTypeV1 {
+	if a.isV1() {
 		opts = append(opts, gitblob.WithFullHistory())
 	}
 

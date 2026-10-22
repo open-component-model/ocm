@@ -99,15 +99,22 @@ var _ = Describe("Method based on Filesystem", func() {
 
 	It("uses Git/v1 for newly created access specs", func() {
 		Expect(accessSpec.GetType()).To(Equal(me.UpperTypeV1))
-		decoded := Must(ctx.AccessSpecForConfig([]byte(`{"type":"Git/v1","repository":"https://example.com/repo.git","ref":"refs/heads/main"}`), nil))
+	})
+
+	DescribeTable("uses the v1 history archive for Git access types", func(typ string) {
+		decoded := Must(ctx.AccessSpecForConfig([]byte(fmt.Sprintf(`{"type":%q,"repository":"https://example.com/repo.git","ref":"refs/heads/main"}`, typ)), nil))
 		Expect(decoded.GetType()).To(Equal(me.UpperTypeV1))
+		accessSpec.SetType(typ)
 		m := Must(accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx}))
 		content := Must(m.Get())
 		unzippedContent := Must(gzip.NewReader(bytes.NewReader(content)))
 		r := tar.NewReader(unzippedContent)
 		head := archiveFile(r, ".git/HEAD")
 		Expect(head.Size).To(Equal(int64(41)))
-	})
+	},
+		Entry("Git", me.UpperType),
+		Entry("Git/v1", me.UpperTypeV1),
+	)
 
 	DescribeTable("keeps legacy access types as files-only archives", func(typ string) {
 		decoded := Must(ctx.AccessSpecForConfig([]byte(fmt.Sprintf(`{"type":%q,"repository":"https://example.com/repo.git","ref":"refs/heads/main"}`, typ)), nil))
@@ -126,7 +133,6 @@ var _ = Describe("Method based on Filesystem", func() {
 	},
 		Entry("git", me.Type),
 		Entry("git/v1alpha1", me.TypeV1Alpha1),
-		Entry("Git", me.UpperType),
 		Entry("Git/v1alpha1", me.UpperTypeV1Alpha1),
 	)
 
