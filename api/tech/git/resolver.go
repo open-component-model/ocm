@@ -80,6 +80,8 @@ type ClientOptions struct {
 	// Commit is the commit hash to checkout after cloning the repository.
 	// If empty, it will default to the plumbing.HEAD of the Ref.
 	Commit string
+	// FullHistory fetches all ancestors when no commit is pinned.
+	FullHistory bool
 	// AuthMethod is the authentication method to use for the repository.
 	AuthMethod AuthMethod
 }
@@ -117,17 +119,23 @@ func (c *client) Repository(ctx context.Context) (*git.Repository, error) {
 	if err != nil {
 		return nil, err
 	}
+	depth := 0
+	if c.opts.Commit == "" && !c.opts.FullHistory {
+		depth = 1 // a files-only archive needs only the selected HEAD
+	}
+
 	newRepo := false
 	repo, err := git.Open(strg, billyFS)
 	if errors.Is(err, git.ErrRepositoryNotExists) {
 		repo, err = git.CloneContext(ctx, strg, billyFS, &git.CloneOptions{
-			Auth:          c.opts.AuthMethod,
-			URL:           c.opts.URL,
-			RemoteName:    git.DefaultRemoteName,
-			ReferenceName: plumbing.ReferenceName(c.opts.Ref),
-			SingleBranch:  true,
-			Depth:         0,
-			Tags:          git.AllTags,
+			Auth:              c.opts.AuthMethod,
+			URL:               c.opts.URL,
+			RemoteName:        git.DefaultRemoteName,
+			ReferenceName:     plumbing.ReferenceName(c.opts.Ref),
+			SingleBranch:      true,
+			Depth:             depth,
+			ShallowSubmodules: depth == 1,
+			Tags:              git.AllTags,
 		})
 		newRepo = true
 	}

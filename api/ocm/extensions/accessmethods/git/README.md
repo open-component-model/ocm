@@ -12,8 +12,8 @@ Provided blobs use the following media type for: `application/x-tgz`
 The artifact content is provided as a gzip-compressed tar archive. `Git/v1`
 archives contain the checked-out files and a `.git` directory with a detached
 `HEAD` and the complete history reachable from that commit. The legacy type
-spellings (`git`, `git/v1alpha1`, `Git`, and `Git/v1alpha1`) are still accepted
-and produce the same history-bearing archive.
+spellings (`git`, `git/v1alpha1`, `Git`, and `Git/v1alpha1`) retain their
+files-only archive format.
 
 ### Description
 

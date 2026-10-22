@@ -101,25 +101,34 @@ var _ = Describe("Method based on Filesystem", func() {
 		Expect(accessSpec.GetType()).To(Equal(me.UpperTypeV1))
 		decoded := Must(ctx.AccessSpecForConfig([]byte(`{"type":"Git/v1","repository":"https://example.com/repo.git","ref":"refs/heads/main"}`), nil))
 		Expect(decoded.GetType()).To(Equal(me.UpperTypeV1))
-	})
-
-	It("accepts legacy access types with the history archive", func() {
-		decoded := Must(ctx.AccessSpecForConfig([]byte(`{"type":"git","repository":"https://example.com/repo.git","ref":"refs/heads/main"}`), nil))
-		Expect(decoded.GetType()).To(Equal(me.Type))
-		accessSpec.SetType(decoded.GetType())
-		accessSpec.Commit = ""
 		m := Must(accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx}))
 		content := Must(m.Get())
 		unzippedContent := Must(gzip.NewReader(bytes.NewReader(content)))
 		r := tar.NewReader(unzippedContent)
 		head := archiveFile(r, ".git/HEAD")
 		Expect(head.Size).To(Equal(int64(41)))
-		file := archiveFile(r, "file_in_repo")
+	})
+
+	DescribeTable("keeps legacy access types as files-only archives", func(typ string) {
+		decoded := Must(ctx.AccessSpecForConfig([]byte(fmt.Sprintf(`{"type":%q,"repository":"https://example.com/repo.git","ref":"refs/heads/main"}`, typ)), nil))
+		Expect(decoded.GetType()).To(Equal(me.Type))
+		accessSpec.SetType(typ)
+		accessSpec.Commit = ""
+		m := Must(accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx}))
+		content := Must(m.Get())
+		unzippedContent := Must(gzip.NewReader(bytes.NewReader(content)))
+		r := tar.NewReader(unzippedContent)
+		file := Must(r.Next())
 		Expect(file.Name).To(Equal("file_in_repo"))
 		Expect(Must(io.ReadAll(r))).To(Equal(expectedBlobContent))
 		_, err := r.Next()
 		Expect(err).To(Equal(io.EOF))
-	})
+	},
+		Entry("git", me.Type),
+		Entry("git/v1alpha1", me.TypeV1Alpha1),
+		Entry("Git", me.UpperType),
+		Entry("Git/v1alpha1", me.UpperTypeV1Alpha1),
+	)
 
 	It("downloads artifacts with full ref", func() {
 		m := Must(accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx}))

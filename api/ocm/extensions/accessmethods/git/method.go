@@ -92,7 +92,10 @@ func (a *AccessSpec) GlobalAccessSpec(accspeccpi.Context) accspeccpi.AccessSpec 
 }
 
 func (a *AccessSpec) GetType() string {
-	return a.ObjectVersionedType.GetType()
+	if a.ObjectVersionedType.GetType() == UpperTypeV1 {
+		return UpperTypeV1
+	}
+	return Type
 }
 
 func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal.AccessMethod, error) {
@@ -120,6 +123,9 @@ func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal
 	}
 	if creds != nil {
 		opts = append(opts, gitblob.WithCredentials(creds))
+	}
+	if a.ObjectVersionedType.GetType() == UpperTypeV1 {
+		opts = append(opts, gitblob.WithFullHistory())
 	}
 
 	factory := func() (blobaccess.BlobAccess, error) {

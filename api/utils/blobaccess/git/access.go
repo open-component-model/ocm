@@ -27,7 +27,7 @@ import (
 )
 
 // BlobAccess clones the repository into a temporary filesystem and returns a
-// tar.gz containing the checked-out files and the reachable Git history.
+// tar.gz containing the checked-out files. WithFullHistory also includes Git history.
 func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
@@ -80,23 +80,24 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	if err != nil {
 		return nil, err
 	}
-	head, err := repo.Head()
-	if err != nil {
-		return nil, fmt.Errorf("cannot resolve git HEAD: %w", err)
-	}
-	packName, err := writeHistory(repo, repositoryFS, head.Hash())
-	if err != nil {
-		return nil, err
-	}
-	filteredRepositoryFS := &filteredVFS{
-		FileSystem: repositoryFS,
-		filter: func(s string) bool {
+	filter := func(s string) bool { return s != gogit.GitDirName }
+	if options.FullHistory {
+		head, err := repo.Head()
+		if err != nil {
+			return nil, fmt.Errorf("cannot resolve git HEAD: %w", err)
+		}
+		packName, err := writeHistory(repo, repositoryFS, head.Hash())
+		if err != nil {
+			return nil, err
+		}
+		filter = func(s string) bool {
 			if s == gogit.GitDirName || s == ".git/HEAD" || s == ".git/refs" || s == ".git/objects" || s == ".git/objects/pack" {
 				return true
 			}
 			return s == ".git/objects/pack/"+packName+".pack" || s == ".git/objects/pack/"+packName+".idx" || !strings.HasPrefix(s, gogit.GitDirName+"/")
-		},
+		}
 	}
+	filteredRepositoryFS := &filteredVFS{FileSystem: repositoryFS, filter: filter}
 
 	// pack all downloaded files into a tar.gz file
 	fs := tmpFS
