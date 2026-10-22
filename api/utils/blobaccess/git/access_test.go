@@ -127,7 +127,7 @@ var _ = Describe("git Blob Access", func() {
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			expectArchiveFiles(files, "file_in_repo", "file_in_dir_in_repo")
+			Expect(files).To(ConsistOf("file_in_repo", "file_in_dir_in_repo"))
 
 			data1, err := b.Reader()
 			Expect(err).ToNot(HaveOccurred())
@@ -149,25 +149,17 @@ var _ = Describe("git Blob Access", func() {
 			Expect(data2.Close()).To(Succeed())
 			Expect(bytes1).To(Equal(bytes2))
 
-			cmd := exec.Command("git", "-C", repoDir, "gc", "--aggressive")
-			output, err := cmd.CombinedOutput()
-			Expect(err).ToNot(HaveOccurred(), string(output))
-			b3 := Must(gitblob.BlobAccess(
-				gitblob.WithURL(url),
-				gitblob.WithLoggingContext(ctx),
-				gitblob.WithCachingContext(ctx),
-			))
-			defer Close(b3)
-			Expect(b3.Digest()).To(Equal(b.Digest()))
 		})
 
 		It("contains a complete Git history with a detached HEAD", func() {
 			b := Must(gitblob.BlobAccess(
 				gitblob.WithURL(url),
+				gitblob.WithFullHistory(),
 				gitblob.WithLoggingContext(ctx),
 				gitblob.WithCachingContext(ctx),
 			))
 			defer Close(b)
+			expectArchiveFiles(Must(tarutils.ListArchiveContentFromReader(Must(b.Reader()))), "file_in_repo", "file_in_dir_in_repo")
 			dir := GinkgoT().TempDir()
 			out := Must(projectionfs.New(osfs.New(), dir))
 			reader := Must(b.Reader())
@@ -183,11 +175,24 @@ var _ = Describe("git Blob Access", func() {
 			output, err = cmd.CombinedOutput()
 			Expect(err).ToNot(HaveOccurred(), string(output))
 			Expect(strings.Fields(string(output))).To(Equal([]string{parent.String(), commit.String()}))
+
+			cmd = exec.Command("git", "-C", repoDir, "gc", "--aggressive")
+			output, err = cmd.CombinedOutput()
+			Expect(err).ToNot(HaveOccurred(), string(output))
+			repacked := Must(gitblob.BlobAccess(
+				gitblob.WithURL(url),
+				gitblob.WithFullHistory(),
+				gitblob.WithLoggingContext(ctx),
+				gitblob.WithCachingContext(ctx),
+			))
+			defer Close(repacked)
+			Expect(repacked.Digest()).To(Equal(b.Digest()))
 		})
 
 		It("creates an archive without host-specific tar headers", func() {
 			b := Must(gitblob.BlobAccess(
 				gitblob.WithURL(url),
+				gitblob.WithFullHistory(),
 				gitblob.WithLoggingContext(ctx),
 				gitblob.WithCachingContext(ctx),
 			))
@@ -231,7 +236,7 @@ var _ = Describe("git Blob Access", func() {
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			expectArchiveFiles(files, "README")
+			Expect(files).To(ConsistOf("README"))
 		})
 
 		It("hello world from github with master branch", func() {
@@ -243,7 +248,7 @@ var _ = Describe("git Blob Access", func() {
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			expectArchiveFiles(files, "README")
+			Expect(files).To(ConsistOf("README"))
 		})
 
 		It("hello world from github with custom ref", func() {
@@ -255,7 +260,7 @@ var _ = Describe("git Blob Access", func() {
 			))
 			defer Close(b)
 			files := Must(tarutils.ListArchiveContentFromReader(Must(b.Reader())))
-			expectArchiveFiles(files, "README", "CONTRIBUTING.md")
+			Expect(files).To(ConsistOf("README", "CONTRIBUTING.md"))
 		})
 	})
 
