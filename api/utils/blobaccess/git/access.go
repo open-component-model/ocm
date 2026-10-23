@@ -3,8 +3,15 @@ package git
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strings"
 
 	gogit "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/format/packfile"
+	"github.com/go-git/go-git/v5/plumbing/revlist"
+	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/mandelsoft/goutils/errors"
 	"github.com/mandelsoft/goutils/finalizer"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -19,8 +26,8 @@ import (
 	"ocm.software/ocm/api/utils/tarutils"
 )
 
-// BlobAccess clones the repository into a temporary filesystem, packs it into a tar.gz file,
-// and returns a BlobAccess object for the tar.gz file.
+// BlobAccess clones the repository into a temporary filesystem and returns a
+// tar.gz containing the checked-out files. WithFullHistory also includes Git history.
 func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
@@ -69,16 +76,28 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	}
 
 	// get the repository, triggering a clone if not present into the filesystem provided by setup
-	if _, err := c.Repository(context.Background()); err != nil {
+	repo, err := c.Repository(context.Background())
+	if err != nil {
 		return nil, err
 	}
-
-	filteredRepositoryFS := &filteredVFS{
-		FileSystem: repositoryFS,
-		filter: func(s string) bool {
-			return s != gogit.GitDirName
-		},
+	filter := func(s string) bool { return s != gogit.GitDirName }
+	if options.FullHistory {
+		head, err := repo.Head()
+		if err != nil {
+			return nil, fmt.Errorf("cannot resolve git HEAD: %w", err)
+		}
+		packName, err := writeHistory(repo, repositoryFS, head.Hash())
+		if err != nil {
+			return nil, err
+		}
+		filter = func(s string) bool {
+			if s == gogit.GitDirName || s == ".git/HEAD" || s == ".git/refs" || s == ".git/objects" || s == ".git/objects/pack" {
+				return true
+			}
+			return s == ".git/objects/pack/"+packName+".pack" || s == ".git/objects/pack/"+packName+".idx" || !strings.HasPrefix(s, gogit.GitDirName+"/")
+		}
 	}
+	filteredRepositoryFS := &filteredVFS{FileSystem: repositoryFS, filter: filter}
 
 	// pack all downloaded files into a tar.gz file
 	fs := tmpFS
@@ -104,6 +123,53 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 		file.WithSize(dw.Size()),
 	), nil
 }
+
+// writeHistory adds a pack containing precisely the objects reachable from
+// HEAD. The archive filter excludes all other clone metadata and object packs.
+func writeHistory(repo *gogit.Repository, fs vfs.FileSystem, commit plumbing.Hash) (string, error) {
+	hashes, err := revlist.Objects(repo.Storer, []plumbing.Hash{commit}, nil)
+	if err != nil {
+		return "", fmt.Errorf("cannot collect git history: %w", err)
+	}
+	for _, hash := range hashes {
+		if err := repo.Storer.HasEncodedObject(hash); err != nil {
+			return "", fmt.Errorf("incomplete git history at %s: %w", hash, err)
+		}
+	}
+	sort.Sort(plumbing.HashSlice(hashes))
+	packer, ok := repo.Storer.(storer.PackfileWriter)
+	if !ok {
+		return "", fmt.Errorf("git storage cannot write packfiles")
+	}
+	pack, err := packer.PackfileWriter()
+	if err != nil {
+		return "", fmt.Errorf("cannot create git packfile: %w", err)
+	}
+	checksum, err := packfile.NewEncoder(pack, contentStorer{repo.Storer}, false).Encode(hashes, config.DefaultPackWindow)
+	if err != nil {
+		_ = pack.Close()
+		return "", fmt.Errorf("cannot encode git packfile: %w", err)
+	}
+	if err := pack.Close(); err != nil {
+		return "", fmt.Errorf("cannot finish git packfile: %w", err)
+	}
+	head, err := fs.OpenFile(".git/HEAD", vfs.O_WRONLY|vfs.O_TRUNC, 0o644)
+	if err != nil {
+		return "", fmt.Errorf("cannot write detached git HEAD: %w", err)
+	}
+	if _, err := head.Write([]byte(commit.String() + "\n")); err != nil {
+		_ = head.Close()
+		return "", fmt.Errorf("cannot write detached git HEAD: %w", err)
+	}
+	if err := head.Close(); err != nil {
+		return "", fmt.Errorf("cannot finish detached git HEAD: %w", err)
+	}
+	return "pack-" + checksum.String(), nil
+}
+
+// Hiding DeltaObjectStorer makes pack generation depend on object content,
+// rather than on the source repository's existing delta layout.
+type contentStorer struct{ storer.EncodedObjectStorer }
 
 type filteredVFS struct {
 	vfs.FileSystem
