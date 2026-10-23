@@ -18,6 +18,7 @@ import (
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/git"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/options"
@@ -468,5 +469,38 @@ type: plainText
 			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*wget.AccessSpec)(nil))))
 			Expect(acc.(*wget.AccessSpec).URL).To(Equal(url))
 		})
+
+		DescribeTable("adds external git blob by options", func(typ string) {
+			repo := "https://github.com/open-component-model/ocm"
+			Expect(env.Execute("add", "resources", "--file", ARCH,
+				"--type", resourcetypes.DIRECTORY_TREE,
+				"--name", "source",
+				"--version", "v0.1.0",
+				"--accessType", typ,
+				"--accessRepository", repo,
+				"--reference", "refs/heads/main",
+				"--commit", "4685558ce",
+				"--skip-digest-generation")).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			r, err := cd.GetResourceByIdentity(metav1.NewIdentity("source"))
+			Expect(err).To(Succeed())
+			Expect(r.Access.GetType()).To(Equal(typ))
+
+			acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
+			Expect(err).To(Succeed())
+			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*git.AccessSpec)(nil))))
+			Expect(acc.(*git.AccessSpec).Repository).To(Equal(repo))
+			Expect(acc.(*git.AccessSpec).Ref).To(Equal("refs/heads/main"))
+			Expect(acc.(*git.AccessSpec).Commit).To(Equal("4685558ce"))
+		},
+			Entry("git", git.Type),
+			Entry("Git", git.UpperType),
+			Entry("Git/v1", git.UpperTypeV1),
+		)
 	})
 })

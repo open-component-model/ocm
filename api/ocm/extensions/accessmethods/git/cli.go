@@ -6,8 +6,16 @@ import (
 )
 
 func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
+	return configHandler(Type)
+}
+
+func UpperConfigHandler() flagsets.ConfigOptionTypeSetHandler {
+	return configHandler(UpperType)
+}
+
+func configHandler(name string) flagsets.ConfigOptionTypeSetHandler {
 	return flagsets.NewConfigOptionTypeSetHandler(
-		Type, AddConfig,
+		name, AddConfig,
 		options.RepositoryOption,
 		options.ReferenceOption,
 		options.CommitOption,
@@ -15,7 +23,7 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "repository", "repo", "repoUrl", "repoURL")
+	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "repository")
 	flagsets.AddFieldByOptionP(opts, options.CommitOption, config, "commit")
 	flagsets.AddFieldByOptionP(opts, options.ReferenceOption, config, "ref")
 	return nil
