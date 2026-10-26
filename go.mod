@@ -107,6 +107,7 @@ require (
 	connectrpc.com/connect v1.20.0 // indirect
 	cyphar.com/go-pathrs v0.2.5 // indirect
 	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.18.1 // indirect
+	github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata v0.0.9 // indirect
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20261006220739-8c912ac31dd4 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
@@ -405,12 +406,6 @@ require (
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/release-utils v0.12.5 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.4.2 // indirect
-)
-
-replace (
-	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider => github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.15.2
-	// recent releases of aliyun credentials go have a hardcoded syscall for unix without go build tag and are broken
-	github.com/aliyun/credentials-go => github.com/aliyun/credentials-go v1.3.10
 )
 
 // see https://github.com/darccio/mergo?tab=readme-ov-file#100
