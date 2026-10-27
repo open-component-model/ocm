@@ -16,6 +16,14 @@ jobs:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
+      # Workaround for ubuntu-26 runners having /tmp as RAM-backed tmpfs which is too small for our builds.
+      # The builds and lint/test now fail with "compile: writing output: write $WORK/b2613/_pkg_.a: disk quota exceeded"
+      # See for example https://github.com/open-component-model/ocm/actions/runs/40293355251/job/122028523395?pr=2156
+      # See workaround description and reasoning https://github.com/actions/runner-images/issues/14777
+      - name: Put /tmp back on the root disk
+        run: |
+          sudo systemctl mask tmp.mount
+          sudo umount -l /tmp
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
       - name: Checkout
