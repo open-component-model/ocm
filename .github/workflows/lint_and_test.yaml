@@ -23,7 +23,7 @@ jobs:
       - name: Put /tmp back on the root disk
         run: |
           sudo systemctl mask tmp.mount
-          sudo umount -l /tmp
+          mountpoint -q /tmp && sudo umount -l /tmp || true
       - name: Self Hosted Runner Post Job Cleanup Action
         uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
       - name: Checkout
