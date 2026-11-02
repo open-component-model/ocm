@@ -9,13 +9,13 @@ require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/Shopify/toxiproxy/v2 v2.13.0
-	github.com/aws/aws-sdk-go-v2 v1.47.3
-	github.com/aws/aws-sdk-go-v2/config v1.33.9
-	github.com/aws/aws-sdk-go-v2/credentials v1.20.9
-	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.4.18
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.66.5
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.4
-	github.com/aws/smithy-go v1.28.6
+	github.com/aws/aws-sdk-go-v2 v1.47.5
+	github.com/aws/aws-sdk-go-v2/config v1.33.12
+	github.com/aws/aws-sdk-go-v2/credentials v1.20.12
+	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.5.1
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.67.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.6
+	github.com/aws/smithy-go v1.28.7
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/cloudflare/cfssl v1.6.5
 	github.com/containerd/containerd/v2 v2.4.2
@@ -27,7 +27,7 @@ require (
 	github.com/docker/go-connections v0.8.2
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/cli-utils v1.4.0
-	github.com/fluxcd/pkg/ssa v0.80.0
+	github.com/fluxcd/pkg/ssa v0.83.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.9.2
@@ -37,7 +37,7 @@ require (
 	github.com/go-openapi/strfmt v0.27.4
 	github.com/go-openapi/swag/conv v0.29.2
 	github.com/go-test/deep v1.1.2
-	github.com/gobwas/glob v1.0.0
+	github.com/gobwas/glob v1.1.0
 	github.com/golang/mock v1.7.0-rc.1
 	github.com/google/go-github/v45 v45.2.0
 	github.com/hashicorp/vault-client-go v0.4.3
@@ -78,23 +78,23 @@ require (
 	github.com/ulikunitz/xz v0.5.17
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.podman.io/image/v5 v5.42.0
-	go.yaml.in/yaml/v3 v3.0.5
+	go.yaml.in/yaml/v3 v3.0.6
 	golang.org/x/crypto v0.58.0
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/net v0.61.0
+	golang.org/x/net v0.62.0
 	golang.org/x/oauth2 v0.37.0
 	golang.org/x/term v0.47.0
 	golang.org/x/text v0.43.0
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v4 v4.3.1
-	k8s.io/api v0.37.1
-	k8s.io/apiextensions-apiserver v0.37.1
-	k8s.io/apimachinery v0.37.1
-	k8s.io/cli-runtime v0.37.1
-	k8s.io/client-go v0.37.1
-	oras.land/oras-go/v2 v2.6.4
+	k8s.io/api v0.37.2
+	k8s.io/apiextensions-apiserver v0.37.2
+	k8s.io/apimachinery v0.37.2
+	k8s.io/cli-runtime v0.37.2
+	k8s.io/client-go v0.37.2
+	oras.land/oras-go/v2 v2.7.0
 	sigs.k8s.io/controller-runtime v0.25.2
 	sigs.k8s.io/yaml v1.6.0
 )
@@ -138,20 +138,20 @@ require (
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
 	github.com/aliyun/credentials-go v1.4.7 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.23 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.20.3 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.5.6 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.6 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.6 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.25 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.20.5 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.5.8 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.8 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ecrpublic v1.38.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.21 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.11.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signin v1.10.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.38.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.43.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.51.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.23 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.11.9 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.8 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.8 // indirect
+	github.com/aws/aws-sdk-go-v2/service/signin v1.12.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.39.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.44.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.51.6 // indirect
 	github.com/awslabs/amazon-ecr-credential-helper/ecr-login v0.12.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
@@ -208,7 +208,7 @@ require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-openapi/analysis v1.0.0 // indirect
 	github.com/go-openapi/errors v0.22.9 // indirect
-	github.com/go-openapi/jsonpointer v1.0.1 // indirect
+	github.com/go-openapi/jsonpointer v1.0.2 // indirect
 	github.com/go-openapi/jsonreference v1.0.2 // indirect
 	github.com/go-openapi/loads v0.25.3 // indirect
 	github.com/go-openapi/runtime v0.33.3 // indirect
@@ -351,7 +351,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vbatts/tar-split v0.12.3 // indirect
-	github.com/wI2L/jsondiff v0.6.1 // indirect
+	github.com/wI2L/jsondiff v0.7.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
@@ -393,8 +393,8 @@ require (
 	gopkg.in/ini.v1 v1.67.3 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiserver v0.37.1 // indirect
-	k8s.io/component-base v0.37.1 // indirect
+	k8s.io/apiserver v0.37.2 // indirect
+	k8s.io/component-base v0.37.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260821135717-be32def86098 // indirect
 	k8s.io/kubectl v0.37.1 // indirect
