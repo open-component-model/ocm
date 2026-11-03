@@ -15,14 +15,14 @@ files and a `.git` directory containing a detached `HEAD` and the complete
 history reachable from that commit. The legacy type spellings (`git`,
 `git/v1alpha1`, and `Git/v1alpha1`) retain their files-only archive format.
 
-#### Archive layout
+### Archive layout
 
 The archive is byte-identical to the one OCM v2 builds for the same commit, so a
 resource created by either implementation verifies against the digest recorded by
 the other. It therefore depends on the commit alone, not on how the source
 repository stores its objects nor on the host the archive was built on: tar
 headers carry no owner and no modification time, directories are `0755`, files
-`0644` or `0755`, and symlinks `0777`.
+`0644` or `0755`, and symbolic links `0777`.
 
 Next to the checked-out files it holds exactly these entries:
 
@@ -37,10 +37,10 @@ Next to the checked-out files it holds exactly these entries:
 .git/refs/tags/                            (empty)
 ```
 
-Everything else a clone holds - the source remote, refs, the index and logs -
-stays out of the archive. The same archive is produced by the CLI `git` input
-type, so a local blob created with it can be uploaded back into a Git repository
-by OCM v2.
+Everything else a clone holds - the source remote, its references, the index and
+the logs - stays out of the archive. The same archive is produced by the CLI
+`git` input type, so a local blob created with it can be uploaded back into a Git
+repository by OCM v2.
 
 ### Description
 
