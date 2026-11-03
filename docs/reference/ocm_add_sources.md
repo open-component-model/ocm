@@ -346,6 +346,12 @@ lowercase types (e.g. <code>helm</code>). See the lowercase entry for full docum
   using the manifest annotation <code>software.ocm/component-version</code>.
   The ref can be used to further specify the branch or tag to checkout, otherwise the remote HEAD is used.
 
+  The blob is a gzip-compressed tar archive of the files checked out for the commit
+  and of a <code>.git</code> directory holding a detached <code>HEAD</code> and the
+  complete history reachable from that commit. It is byte-identical to the archive
+  OCM v2 builds for the same commit. The type names <code>git/v1</code>,
+  <code>Git</code> and <code>Git/v1</code> select the same input.
+
   This blob type specification supports the following fields:
   - **<code>repository</code>** *string*
 
@@ -643,17 +649,53 @@ The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.
 
+- Access type <code>Git</code>
+
+  This method implements the access of the content of a git commit stored in a
+  Git repository. The blob is a gzip-compressed tar archive of the files checked
+  out for the commit and of a <code>.git</code> directory holding a detached
+  <code>HEAD</code> and the complete history reachable from that commit. It is
+  byte-identical to the archive OCM v2 builds for the same commit, so both
+  implementations digest and verify the same resource bytes.
+
+  The legacy spellings <code>git</code>, <code>git/v1alpha1</code> and
+  <code>Git/v1alpha1</code> provide the files only.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+
+    The type specific specification fields are:
+
+    - **<code>repository</code>**  *string*
+
+      Repository URL with or without scheme.
+
+    - **<code>ref</code>** (optional) *string*
+
+      Original ref used to get the commit from
+
+    - **<code>commit</code>** *string*
+
+      The sha/id of the git commit
+
+  Options used to configure fields: <code>--accessRepository</code>, <code>--commit</code>, <code>--reference</code>
+
 - Access type <code>git</code>
 
   This method implements the access of the content of a git commit stored in a
-  Git repository.
+  Git repository. The blob is a gzip-compressed tar archive of the files checked
+  out for the commit.
+
+  This spelling and the version <code>v1alpha1</code> are legacy; they provide the
+  files only. Use the access type <code>Git</code>, whose archive also carries the
+  commit history and can be uploaded back into a Git repository by OCM v2.
 
   The following versions are supported:
   - Version <code>v1alpha1</code>
 
     The type specific specification fields are:
 
-    - **<code>repoUrl</code>**  *string*
+    - **<code>repository</code>**  *string*
 
       Repository URL with or without scheme.
 

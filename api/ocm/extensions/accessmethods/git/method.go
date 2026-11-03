@@ -24,6 +24,7 @@ const (
 
 	UpperType         = "Git"
 	UpperTypeV1Alpha1 = UpperType + runtime.VersionSeparator + "v1alpha1"
+	UpperTypeV1       = UpperType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -32,8 +33,11 @@ func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1Alpha1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 
-	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType))
+	// Unlike the other upper camel case spellings, Git is not an alias of git: its
+	// archive carries the commit history, so it is documented on its own.
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType, accspeccpi.WithDescription(upperUsage)))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1Alpha1))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(UpperConfigHandler())))
 }
 
 // AccessSpec describes the access for a GitHub registry.
@@ -65,10 +69,10 @@ func WithRef(ref string) AccessSpecOptions {
 	}
 }
 
-// New creates a new git registry access spec version v1.
+// New creates a Git/v1 access spec whose archive includes the commit history.
 func New(url string, opts ...AccessSpecOptions) *AccessSpec {
 	s := &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(UpperTypeV1),
 		Repository:          url,
 	}
 	for _, o := range opts {
@@ -89,8 +93,15 @@ func (a *AccessSpec) GlobalAccessSpec(accspeccpi.Context) accspeccpi.AccessSpec 
 	return a
 }
 
-func (*AccessSpec) GetType() string {
+func (a *AccessSpec) GetType() string {
+	if a.isV1() {
+		return UpperTypeV1
+	}
 	return Type
+}
+
+func (a *AccessSpec) isV1() bool {
+	return a.ObjectVersionedType.GetType() == UpperType || a.ObjectVersionedType.GetType() == UpperTypeV1
 }
 
 func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal.AccessMethod, error) {
@@ -118,6 +129,9 @@ func (a *AccessSpec) AccessMethod(cva internal.ComponentVersionAccess) (internal
 	}
 	if creds != nil {
 		opts = append(opts, gitblob.WithCredentials(creds))
+	}
+	if a.isV1() {
+		opts = append(opts, gitblob.WithFullHistory())
 	}
 
 	factory := func() (blobaccess.BlobAccess, error) {

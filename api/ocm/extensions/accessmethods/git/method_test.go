@@ -97,6 +97,45 @@ var _ = Describe("Method based on Filesystem", func() {
 		expectedBlobContent = Must(testData.ReadFile(path))
 	})
 
+	It("uses Git/v1 for newly created access specs", func() {
+		Expect(accessSpec.GetType()).To(Equal(me.UpperTypeV1))
+	})
+
+	DescribeTable("uses the v1 history archive for Git access types", func(typ string) {
+		decoded := Must(ctx.AccessSpecForConfig([]byte(fmt.Sprintf(`{"type":%q,"repository":"https://example.com/repo.git","ref":"refs/heads/main"}`, typ)), nil))
+		Expect(decoded.GetType()).To(Equal(me.UpperTypeV1))
+		accessSpec.SetType(typ)
+		m := Must(accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx}))
+		content := Must(m.Get())
+		unzippedContent := Must(gzip.NewReader(bytes.NewReader(content)))
+		r := tar.NewReader(unzippedContent)
+		head := archiveFile(r, ".git/HEAD")
+		Expect(head.Size).To(Equal(int64(41)))
+	},
+		Entry("Git", me.UpperType),
+		Entry("Git/v1", me.UpperTypeV1),
+	)
+
+	DescribeTable("keeps legacy access types as files-only archives", func(typ string) {
+		decoded := Must(ctx.AccessSpecForConfig([]byte(fmt.Sprintf(`{"type":%q,"repository":"https://example.com/repo.git","ref":"refs/heads/main"}`, typ)), nil))
+		Expect(decoded.GetType()).To(Equal(me.Type))
+		accessSpec.SetType(typ)
+		accessSpec.Commit = ""
+		m := Must(accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx}))
+		content := Must(m.Get())
+		unzippedContent := Must(gzip.NewReader(bytes.NewReader(content)))
+		r := tar.NewReader(unzippedContent)
+		file := Must(r.Next())
+		Expect(file.Name).To(Equal("file_in_repo"))
+		Expect(Must(io.ReadAll(r))).To(Equal(expectedBlobContent))
+		_, err := r.Next()
+		Expect(err).To(Equal(io.EOF))
+	},
+		Entry("git", me.Type),
+		Entry("git/v1alpha1", me.TypeV1Alpha1),
+		Entry("Git/v1alpha1", me.UpperTypeV1Alpha1),
+	)
+
 	It("downloads artifacts with full ref", func() {
 		m := Must(accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx}))
 		content := Must(m.Get())
@@ -104,7 +143,7 @@ var _ = Describe("Method based on Filesystem", func() {
 
 		r := tar.NewReader(unzippedContent)
 
-		file := Must(r.Next())
+		file := archiveFile(r, "file_in_repo")
 		Expect(file.Name).To(Equal("file_in_repo"))
 		Expect(file.Size).To(Equal(int64(len(expectedBlobContent))))
 
@@ -121,7 +160,7 @@ var _ = Describe("Method based on Filesystem", func() {
 
 		r := tar.NewReader(unzippedContent)
 
-		file := Must(r.Next())
+		file := archiveFile(r, "file_in_repo")
 		Expect(file.Name).To(Equal("file_in_repo"))
 		Expect(file.Size).To(Equal(int64(len(expectedBlobContent))))
 
@@ -161,7 +200,17 @@ var _ = Describe("Method based on Real Repository", func() {
 
 		r := tar.NewReader(unzippedContent)
 
-		file := Must(r.Next())
+		file := archiveFile(r, "README")
 		Expect(file.Name).To(Equal("README"))
 	})
 })
+
+func archiveFile(r *tar.Reader, name string) *tar.Header {
+	for {
+		header, err := r.Next()
+		Expect(err).ToNot(HaveOccurred())
+		if header.Name == name {
+			return header
+		}
+	}
+}

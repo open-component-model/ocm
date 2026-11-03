@@ -74,6 +74,9 @@ func (o *Options) ApplyTo(opts *Options) {
 	if o.Commit != "" {
 		opts.Commit = o.Commit
 	}
+	if o.FullHistory {
+		opts.FullHistory = true
+	}
 }
 
 func (o *Options) ConfigureAuthMethod() error {
@@ -217,5 +220,12 @@ func (o *Options) SetCommit(v string) {
 func WithCommit(commit string) Option {
 	return OptionFunc(func(opts *Options) {
 		opts.SetCommit(commit)
+	})
+}
+
+// WithFullHistory includes the selected commit's reachable history in the archive.
+func WithFullHistory() Option {
+	return OptionFunc(func(opts *Options) {
+		opts.FullHistory = true
 	})
 }
