@@ -1,9 +1,14 @@
 package add_test
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
+	"strings"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
@@ -18,6 +23,7 @@ import (
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	"ocm.software/ocm/api/ocm/compdesc"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/git"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -30,6 +36,7 @@ import (
 	"ocm.software/ocm/api/utils/blobaccess"
 	"ocm.software/ocm/api/utils/mime"
 	common "ocm.software/ocm/api/utils/misc"
+	"ocm.software/ocm/api/utils/tarutils"
 )
 
 const (
@@ -470,8 +477,8 @@ type: plainText
 			Expect(acc.(*wget.AccessSpec).URL).To(Equal(url))
 		})
 
-		DescribeTable("adds external git blob by options", func(typ string) {
-			repo := "https://github.com/open-component-model/ocm"
+		DescribeTable("adds external git blob by options", func(typ string, history bool) {
+			repo, commit := gitFixtureRepository()
 			Expect(env.Execute("add", "resources", "--file", ARCH,
 				"--type", resourcetypes.DIRECTORY_TREE,
 				"--name", "source",
@@ -479,8 +486,7 @@ type: plainText
 				"--accessType", typ,
 				"--accessRepository", repo,
 				"--reference", "refs/heads/main",
-				"--commit", "4685558ce",
-				"--skip-digest-generation")).To(Succeed())
+				"--commit", commit)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -496,11 +502,49 @@ type: plainText
 			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*git.AccessSpec)(nil))))
 			Expect(acc.(*git.AccessSpec).Repository).To(Equal(repo))
 			Expect(acc.(*git.AccessSpec).Ref).To(Equal("refs/heads/main"))
-			Expect(acc.(*git.AccessSpec).Commit).To(Equal("4685558ce"))
+			Expect(acc.(*git.AccessSpec).Commit).To(Equal(commit))
+
+			// The digest is generated from the archive the access serves, so it also
+			// states which archive format the type selects.
+			Expect(r.Digest).ToNot(BeNil())
+			m, err := acc.AccessMethod(&cpi.DummyComponentVersionAccess{Context: env.OCMContext()})
+			Expect(err).To(Succeed())
+			defer Close(m)
+			archive, err := m.Get()
+			Expect(err).To(Succeed())
+			Expect(digest.FromBytes(archive).Encoded()).To(Equal(r.Digest.Value))
+			files, err := tarutils.ListArchiveContentFromReader(bytes.NewReader(archive))
+			Expect(err).To(Succeed())
+			if history {
+				Expect(files).To(ContainElement(".git/HEAD"))
+			} else {
+				Expect(files).To(ConsistOf("file"))
+			}
 		},
-			Entry("git", git.Type),
-			Entry("Git", git.UpperType),
-			Entry("Git/v1", git.UpperTypeV1),
+			Entry("git", git.Type, false),
+			Entry("Git", git.UpperType, true),
+			Entry("Git/v1", git.UpperTypeV1, true),
 		)
 	})
 })
+
+// gitFixtureRepository creates a local Git repository with one commit and returns
+// its URL and commit. The repository lives on the host filesystem, as git
+// transports read it from there.
+func gitFixtureRepository() (string, string) {
+	dir := GinkgoT().TempDir()
+	Expect(os.WriteFile(filepath.Join(dir, "file"), []byte("content\n"), 0o600)).To(Succeed())
+
+	run := func(args ...string) string {
+		cmd := exec.Command("git", args...)
+		cmd.Dir = dir
+		output, err := cmd.CombinedOutput()
+		Expect(err).ToNot(HaveOccurred(), string(output))
+		return strings.TrimSpace(string(output))
+	}
+	run("init", "-q", "-b", "main", ".")
+	run("add", "-A")
+	run("-c", "user.name=OCM Test", "-c", "user.email=dummy@ocm.software", "-c", "commit.gpgsign=false",
+		"commit", "-q", "-m", "fixture")
+	return "file://" + dir, run("rev-parse", "HEAD")
+}

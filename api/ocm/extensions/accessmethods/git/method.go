@@ -33,9 +33,11 @@ func init() {
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](Type, accspeccpi.WithDescription(usage)))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](TypeV1Alpha1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(ConfigHandler())))
 
-	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType))
+	// Unlike the other upper camel case spellings, Git is not an alias of git: its
+	// archive carries the commit history, so it is documented on its own.
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperType, accspeccpi.WithDescription(upperUsage)))
 	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1Alpha1))
-	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1, accspeccpi.WithConfigHandler(UpperConfigHandler())))
+	accspeccpi.RegisterAccessType(accspeccpi.NewAccessSpecType[*AccessSpec](UpperTypeV1, accspeccpi.WithFormatSpec(formatV1), accspeccpi.WithConfigHandler(UpperConfigHandler())))
 }
 
 // AccessSpec describes the access for a GitHub registry.

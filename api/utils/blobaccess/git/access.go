@@ -9,6 +9,7 @@ import (
 	gogit "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/format/idxfile"
 	"github.com/go-git/go-git/v5/plumbing/format/packfile"
 	"github.com/go-git/go-git/v5/plumbing/revlist"
 	"github.com/go-git/go-git/v5/plumbing/storer"
@@ -86,15 +87,15 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 		if err != nil {
 			return nil, fmt.Errorf("cannot resolve git HEAD: %w", err)
 		}
-		packName, err := writeHistory(repo, repositoryFS, head.Hash())
+		storage, err := writeGitStorage(repo, repositoryFS, head.Hash())
 		if err != nil {
 			return nil, err
 		}
 		filter = func(s string) bool {
-			if s == gogit.GitDirName || s == ".git/HEAD" || s == ".git/refs" || s == ".git/objects" || s == ".git/objects/pack" {
+			if s != gogit.GitDirName && !strings.HasPrefix(s, gogit.GitDirName+"/") {
 				return true
 			}
-			return s == ".git/objects/pack/"+packName+".pack" || s == ".git/objects/pack/"+packName+".idx" || !strings.HasPrefix(s, gogit.GitDirName+"/")
+			return storage[s]
 		}
 	}
 	filteredRepositoryFS := &filteredVFS{FileSystem: repositoryFS, filter: filter}
@@ -124,9 +125,58 @@ func BlobAccess(opt ...Option) (_ bpi.BlobAccess, rerr error) {
 	), nil
 }
 
-// writeHistory adds a pack containing precisely the objects reachable from
-// HEAD. The archive filter excludes all other clone metadata and object packs.
-func writeHistory(repo *gogit.Repository, fs vfs.FileSystem, commit plumbing.Hash) (string, error) {
+// repositoryConfig is the repository configuration OCM v2 archives: the defaults
+// of a freshly initialized go-git repository. It is pinned instead of taken from
+// the clone, whose configuration names the source remote, and must stay
+// byte-identical with v2 (see writeGitStorage).
+const repositoryConfig = "[core]\n\tbare = false\n\trepositoryformatversion = 1\n\tfilemode = true\n"
+
+// writeGitStorage prepares the Git storage of the archive and returns the entries
+// it consists of, which is what the archive carries of the clone's .git directory:
+// a detached HEAD, the repository configuration, and exactly one packfile with its
+// index and reverse index, holding precisely the objects reachable from commit.
+// Everything else the clone keeps - the source remote, refs, the index, logs and
+// the fetched packs - stays out.
+//
+// The entries, their contents and their order are those of an archive built by OCM
+// v2, so that both implementations digest the same bytes for the same commit.
+func writeGitStorage(repo *gogit.Repository, fs vfs.FileSystem, commit plumbing.Hash) (map[string]bool, error) {
+	pack, err := writePackfile(repo, commit)
+	if err != nil {
+		return nil, err
+	}
+	if err := writeRevIndexFor(fs, pack); err != nil {
+		return nil, err
+	}
+	if err := vfs.WriteFile(fs, ".git/HEAD", []byte(commit.String()+"\n"), 0o644); err != nil {
+		return nil, fmt.Errorf("cannot write detached git HEAD: %w", err)
+	}
+	if err := vfs.WriteFile(fs, ".git/config", []byte(repositoryConfig), 0o644); err != nil {
+		return nil, fmt.Errorf("cannot write git configuration: %w", err)
+	}
+
+	// Directories the layout contains empty; a clone need not have them.
+	directories := []string{".git/objects/info", ".git/refs/heads", ".git/refs/tags"}
+	for _, dir := range directories {
+		if err := fs.MkdirAll(dir, 0o755); err != nil {
+			return nil, fmt.Errorf("cannot create git storage directory %q: %w", dir, err)
+		}
+	}
+
+	entries := map[string]bool{}
+	for _, entry := range append(directories,
+		".git", ".git/HEAD", ".git/config", ".git/objects", ".git/objects/pack", ".git/refs",
+		pack+".pack", pack+".idx", pack+".rev",
+	) {
+		entries[entry] = true
+	}
+	return entries, nil
+}
+
+// writePackfile stores the objects reachable from commit as a single packfile in
+// the repository and returns its path without extension. Objects are packed in
+// hash order, as OCM v2 and git itself do.
+func writePackfile(repo *gogit.Repository, commit plumbing.Hash) (string, error) {
 	hashes, err := revlist.Objects(repo.Storer, []plumbing.Hash{commit}, nil)
 	if err != nil {
 		return "", fmt.Errorf("cannot collect git history: %w", err)
@@ -147,24 +197,39 @@ func writeHistory(repo *gogit.Repository, fs vfs.FileSystem, commit plumbing.Has
 	}
 	checksum, err := packfile.NewEncoder(pack, contentStorer{repo.Storer}, false).Encode(hashes, config.DefaultPackWindow)
 	if err != nil {
-		_ = pack.Close()
-		return "", fmt.Errorf("cannot encode git packfile: %w", err)
+		return "", errors.Join(fmt.Errorf("cannot encode git packfile: %w", err), pack.Close())
 	}
 	if err := pack.Close(); err != nil {
 		return "", fmt.Errorf("cannot finish git packfile: %w", err)
 	}
-	head, err := fs.OpenFile(".git/HEAD", vfs.O_WRONLY|vfs.O_TRUNC, 0o644)
+	return ".git/objects/pack/pack-" + checksum.String(), nil
+}
+
+// writeRevIndexFor writes the reverse index of an already stored packfile, which
+// go-git v5 does not maintain, from the index go-git wrote for it.
+func writeRevIndexFor(fs vfs.FileSystem, pack string) error {
+	index, err := fs.Open(pack + ".idx")
 	if err != nil {
-		return "", fmt.Errorf("cannot write detached git HEAD: %w", err)
+		return fmt.Errorf("cannot read git packfile index: %w", err)
 	}
-	if _, err := head.Write([]byte(commit.String() + "\n")); err != nil {
-		_ = head.Close()
-		return "", fmt.Errorf("cannot write detached git HEAD: %w", err)
+	defer func() { _ = index.Close() }()
+
+	decoded := idxfile.NewMemoryIndex()
+	if err := idxfile.NewDecoder(index).Decode(decoded); err != nil {
+		return fmt.Errorf("cannot decode git packfile index: %w", err)
 	}
-	if err := head.Close(); err != nil {
-		return "", fmt.Errorf("cannot finish detached git HEAD: %w", err)
+
+	rev, err := fs.OpenFile(pack+".rev", vfs.O_WRONLY|vfs.O_CREATE|vfs.O_TRUNC, 0o644)
+	if err != nil {
+		return fmt.Errorf("cannot create git reverse index: %w", err)
 	}
-	return "pack-" + checksum.String(), nil
+	if err := writeRevIndex(rev, decoded); err != nil {
+		return errors.Join(err, rev.Close())
+	}
+	if err := rev.Close(); err != nil {
+		return fmt.Errorf("cannot finish git reverse index: %w", err)
+	}
+	return nil
 }
 
 // Hiding DeltaObjectStorer makes pack generation depend on object content,

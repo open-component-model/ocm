@@ -25,6 +25,12 @@ The repository type allows accessing an arbitrary git repository
 using the manifest annotation <code>` + annotations.COMPVERS_ANNOTATION + `</code>.
 The ref can be used to further specify the branch or tag to checkout, otherwise the remote HEAD is used.
 
+The blob is a gzip-compressed tar archive of the files checked out for the commit
+and of a <code>.git</code> directory holding a detached <code>HEAD</code> and the
+complete history reachable from that commit. It is byte-identical to the archive
+OCM v2 builds for the same commit. The type names <code>git/v1</code>,
+<code>Git</code> and <code>Git/v1</code> select the same input.
+
 This blob type specification supports the following fields: 
 - **<code>repository</code>** *string*
 

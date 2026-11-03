@@ -4,15 +4,15 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"embed"
-	_ "embed"
 	"fmt"
 	"io"
 	"io/fs"
 	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 	"time"
+
+	_ "embed"
 
 	. "github.com/mandelsoft/goutils/testutils"
 	. "github.com/onsi/ginkgo/v2"
@@ -24,6 +24,7 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
+	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/datacontext/attrs/tmpcache"
 	"ocm.software/ocm/api/datacontext/attrs/vfsattr"
@@ -148,7 +149,6 @@ var _ = Describe("git Blob Access", func() {
 			Expect(data1.Close()).To(Succeed())
 			Expect(data2.Close()).To(Succeed())
 			Expect(bytes1).To(Equal(bytes2))
-
 		})
 
 		It("contains a complete Git history with a detached HEAD", func() {
@@ -216,6 +216,120 @@ var _ = Describe("git Blob Access", func() {
 		})
 	})
 
+	Context("archive layout of OCM v2", func() {
+		// The fixture has fixed commit metadata and is built without ambient Git
+		// configuration, so it always has the same commit and hence the same archive.
+		const (
+			fixtureCommit = "0c4a69dc63c3a99b921e85c2bfc1023dd0e507b9"
+			fixtureParent = "e9449c3d074078c398f0a313a1d6b1173e789de9"
+			// archiveDigest is the SHA-256 of the uncompressed archive OCM v2 builds
+			// for fixtureCommit, which this implementation must reproduce byte for
+			// byte: a resource created here is verified against this digest by v2,
+			// and one created by v2 against the digest produced here. Update it only
+			// from an archive v2 produced for the fixture, never from the bytes this
+			// implementation happens to produce.
+			archiveDigest = "sha256:692de62dbd8a107bf0c1f239deae4361c0f3c6183fce00de04773cf0bd7b2deb"
+		)
+
+		var layoutURL string
+
+		BeforeEach(func() {
+			dir := filepath.Join(GinkgoT().TempDir(), "fixture")
+			Expect(os.MkdirAll(filepath.Join(dir, "sub", "deep"), 0o700)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(dir, "README.md"), []byte("hello\n"), 0o600)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(dir, "sub", "deep", "file.txt"), []byte("nested\n"), 0o600)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(dir, "run.sh"), []byte("#!/bin/sh\necho hi\n"), 0o700)).To(Succeed())
+			Expect(os.Symlink("README.md", filepath.Join(dir, "link.md"))).To(Succeed())
+
+			const first = "2020-01-01T00:00:00+0000"
+			fixtureGit(dir, first, "init", "-q", "-b", "main", ".")
+			fixtureGit(dir, first, "add", "-A")
+			fixtureGit(dir, first, "-c", "commit.gpgsign=false", "commit", "-q", "-m", "first")
+
+			const second = "2020-01-02T00:00:00+0000"
+			Expect(os.WriteFile(filepath.Join(dir, "README.md"), []byte("hello\nsecond\n"), 0o600)).To(Succeed())
+			fixtureGit(dir, second, "add", "-A")
+			fixtureGit(dir, second, "-c", "commit.gpgsign=false", "commit", "-q", "-m", "second")
+
+			layoutURL = fmt.Sprintf("file://%s", dir)
+		})
+
+		It("digests the bytes OCM v2 digests for the same commit", func() {
+			b := Must(gitblob.BlobAccess(
+				gitblob.WithURL(layoutURL),
+				gitblob.WithCommit(fixtureCommit),
+				gitblob.WithFullHistory(),
+				gitblob.WithLoggingContext(ctx),
+				gitblob.WithCachingContext(ctx),
+			))
+			defer Close(b)
+			reader := Must(b.Reader())
+			defer Close(reader)
+			unzipped := Must(gzip.NewReader(reader))
+
+			// The compressed digest additionally depends on the gzip implementation,
+			// which neither side guarantees; the archive itself must match.
+			Expect(digest.SHA256.FromReader(unzipped)).To(Equal(digest.Digest(archiveDigest)))
+		})
+
+		It("writes the Git storage of an OCM v2 archive", func() {
+			b := Must(gitblob.BlobAccess(
+				gitblob.WithURL(layoutURL),
+				gitblob.WithCommit(fixtureCommit),
+				gitblob.WithFullHistory(),
+				gitblob.WithLoggingContext(ctx),
+				gitblob.WithCachingContext(ctx),
+			))
+			defer Close(b)
+			expectArchiveFiles(Must(tarutils.ListArchiveContentFromReader(Must(b.Reader()))),
+				"README.md", "link.md", "run.sh", "sub", "sub/deep", "sub/deep/file.txt")
+
+			dir := GinkgoT().TempDir()
+			out := Must(projectionfs.New(osfs.New(), dir))
+			reader := Must(b.Reader())
+			Expect(tarutils.UnzipTarToFs(out, reader)).To(Succeed())
+			Expect(reader.Close()).To(Succeed())
+
+			Expect(string(Must(os.ReadFile(filepath.Join(dir, ".git", "HEAD"))))).To(Equal(fixtureCommit + "\n"))
+			Expect(string(Must(os.ReadFile(filepath.Join(dir, ".git", "config"))))).To(
+				Equal("[core]\n\tbare = false\n\trepositoryformatversion = 1\n\tfilemode = true\n"))
+
+			output := Must(exec.Command("git", "-C", dir, "rev-parse", "HEAD^", "HEAD").CombinedOutput())
+			Expect(strings.Fields(string(output))).To(Equal([]string{fixtureParent, fixtureCommit}))
+		})
+
+		It("writes the packfile index and reverse index git writes", func() {
+			b := Must(gitblob.BlobAccess(
+				gitblob.WithURL(layoutURL),
+				gitblob.WithCommit(fixtureCommit),
+				gitblob.WithFullHistory(),
+				gitblob.WithLoggingContext(ctx),
+				gitblob.WithCachingContext(ctx),
+			))
+			defer Close(b)
+			dir := GinkgoT().TempDir()
+			out := Must(projectionfs.New(osfs.New(), dir))
+			reader := Must(b.Reader())
+			Expect(tarutils.UnzipTarToFs(out, reader)).To(Succeed())
+			Expect(reader.Close()).To(Succeed())
+
+			packs := Must(filepath.Glob(filepath.Join(dir, ".git", "objects", "pack", "pack-*.pack")))
+			Expect(packs).To(HaveLen(1))
+
+			// go-git writes the index itself and cannot write a reverse index at all,
+			// so both are compared against the files git derives from the packfile.
+			check := GinkgoT().TempDir()
+			fixtureGit(check, "", "init", "-q", ".")
+			Expect(os.WriteFile(filepath.Join(check, "candidate.pack"), Must(os.ReadFile(packs[0])), 0o600)).To(Succeed())
+			fixtureGit(check, "", "index-pack", "--rev-index", "-o", "candidate.idx", "candidate.pack")
+
+			for _, extension := range []string{".idx", ".rev"} {
+				Expect(Must(os.ReadFile(strings.TrimSuffix(packs[0], ".pack")+extension))).To(
+					Equal(Must(os.ReadFile(filepath.Join(check, "candidate"+extension)))), extension)
+			}
+		})
+	})
+
 	Context("git http repository", func() {
 		host := "github.com:443"
 		reachable := PingTCPServer(host, time.Second) == nil
@@ -263,24 +377,50 @@ var _ = Describe("git Blob Access", func() {
 			Expect(files).To(ConsistOf("README", "CONTRIBUTING.md"))
 		})
 	})
-
 })
 
+// expectArchiveFiles asserts that the archive consists of the Git storage OCM v2
+// writes, in the order v2 writes it, plus the given worktree entries. The order is
+// part of the contract: both implementations must produce the same archive bytes.
 func expectArchiveFiles(files []string, worktree ...string) {
-	var history, contents []string
+	var storage, contents []string
 	for _, name := range files {
 		if name == ".git" || strings.HasPrefix(name, ".git/") {
-			history = append(history, name)
+			storage = append(storage, name)
 		} else {
 			contents = append(contents, name)
 		}
 	}
 	Expect(contents).To(ConsistOf(worktree))
-	Expect(history).To(ContainElements(".git", ".git/HEAD", ".git/objects", ".git/objects/pack", ".git/refs"))
-	Expect(history).To(HaveLen(7))
-	packPattern := regexp.MustCompile(`^\.git/objects/pack/pack-[0-9a-f]{40}\.pack$`)
-	indexPattern := regexp.MustCompile(`^\.git/objects/pack/pack-[0-9a-f]{40}\.idx$`)
-	Expect(history[4]).To(MatchRegexp(indexPattern.String()))
-	Expect(history[5]).To(MatchRegexp(packPattern.String()))
-	Expect(strings.TrimSuffix(history[4], ".idx")).To(Equal(strings.TrimSuffix(history[5], ".pack")))
+	Expect(storage).To(HaveLen(12))
+	pack := strings.TrimSuffix(storage[6], ".idx")
+	Expect(pack).To(MatchRegexp(`^\.git/objects/pack/pack-[0-9a-f]{40}$`))
+	Expect(storage).To(Equal([]string{
+		".git", ".git/HEAD", ".git/config",
+		".git/objects", ".git/objects/info", ".git/objects/pack",
+		pack + ".idx", pack + ".pack", pack + ".rev",
+		".git/refs", ".git/refs/heads", ".git/refs/tags",
+	}))
+}
+
+// fixtureGit runs git in dir with a fixed identity and commit date and without
+// any ambient configuration, so the fixture has the same objects on every machine.
+func fixtureGit(dir, date string, args ...string) {
+	cmd := exec.Command("git", args...)
+	cmd.Dir = dir
+	cmd.Env = []string{
+		"PATH=" + os.Getenv("PATH"),
+		"HOME=" + dir,
+		"GIT_CONFIG_NOSYSTEM=1",
+		"GIT_CONFIG_GLOBAL=/dev/null",
+		"GIT_CONFIG_SYSTEM=/dev/null",
+		"GIT_AUTHOR_NAME=OCM Test",
+		"GIT_AUTHOR_EMAIL=dummy@ocm.software",
+		"GIT_COMMITTER_NAME=OCM Test",
+		"GIT_COMMITTER_EMAIL=dummy@ocm.software",
+		"GIT_AUTHOR_DATE=" + date,
+		"GIT_COMMITTER_DATE=" + date,
+	}
+	output, err := cmd.CombinedOutput()
+	Expect(err).ToNot(HaveOccurred(), string(output))
 }

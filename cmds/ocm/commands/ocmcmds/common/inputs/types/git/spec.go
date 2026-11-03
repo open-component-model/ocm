@@ -61,6 +61,10 @@ func (s *Spec) Validate(fldPath *field.Path, _ inputs.Context, _ string) field.E
 	return allErrs
 }
 
+// GetBlob packages the repository as the archive OCM v2 builds for the same
+// commit, including the Git history, so a local blob created here can be uploaded
+// back into a Git repository and digests the same under both implementations. All
+// registered type names of this input behave alike, as they do in OCM v2.
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (blobaccess.BlobAccess, string, error) {
 	blob, err := git.BlobAccess(
 		git.WithURL(s.Repository),
@@ -69,6 +73,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (bloba
 		git.WithCredentialContext(ctx),
 		git.WithLoggingContext(ctx),
 		git.WithCachingContext(ctx),
+		git.WithFullHistory(),
 	)
 	if err != nil {
 		return nil, "", err
