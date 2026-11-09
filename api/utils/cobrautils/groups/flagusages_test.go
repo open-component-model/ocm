@@ -54,6 +54,13 @@ var _ = Describe("FlagUsages", func() {
 
 	It("does not modify the original flag set", func() {
 		groups.FlagUsagesWrapped(fs, 0)
+
+		// the original value must still be a bool flag for pflag
+		_, ok := fs.Lookup("help").Value.(interface{ IsBoolFlag() bool })
+		Expect(ok).To(BeTrue())
+		// and plain pflag rendering of the original keeps its v1.1.0 format
+		Expect(fs.FlagUsages()).To(ContainSubstring("--help[=true|false]"))
+
 		Expect(fs.Parse([]string{"-h"})).To(Succeed())
 		Expect(fs.Lookup("help").Value.String()).To(Equal("true"))
 	})
