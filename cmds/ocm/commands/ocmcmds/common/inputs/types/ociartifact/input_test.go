@@ -16,6 +16,7 @@ import (
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ctf"
 	"ocm.software/ocm/api/utils/accessio"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -45,8 +46,13 @@ func CheckComponent(env *TestEnv) {
 	r := Must(cv.GetResource(metav1.Identity{"name": "image"}))
 	a := Must(r.Access())
 
-	expDigest := "sha256:bde0f428596a33a6ba00b2df6047227e06130409fae69cf37edbe2eca13e8448"
-	Expect(a.Describe(env.OCMContext())).To(Equal("Local blob " + expDigest + "[ocm.software/demo/test/image:v2.0-index]"))
+	hash := CheckOCIArtifactBlob(r, D_OCIMANIFEST1, OCILAYER)
+	lb, ok := a.(*localblob.AccessSpec)
+	Expect(ok).To(BeTrue())
+	Expect(lb.LocalReference).To(Equal(hash))
+	Expect(lb.ReferenceName).To(Equal("ocm.software/demo/test/image:v2.0-index"))
+	Expect(lb.MediaType).To(Equal("application/vnd.oci.image.index.v1+tar+gzip"))
+	Expect(lb.GlobalAccess).To(BeNil())
 
 	m := Must(r.AccessMethod())
 	defer Close(m, "method")

@@ -89,8 +89,9 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 
 		fmt.Printf("%s\n", string(data))
-		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(`{"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`, hash)))
+		r0 := Must(comp.GetResourceByIndex(0))
+		hash := CheckOCIArtifactBlob(r0, D_OCIMANIFEST1, OCILAYER)
+		Expect(data).To(MatchJSON(fmt.Sprintf(`{"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`, hash)))
 
 		r, err := comp.GetResourceByIndex(0)
 		Expect(err).To(Succeed())
@@ -143,7 +144,8 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 
 		fmt.Printf("%s\n", string(data))
-		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:`+D_OCIMANIFEST1+`","type":"ociArtifact"},"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`, hash)))
+		r0 := Must(comp.GetResourceByIndex(0))
+		hash := CheckOCIArtifactBlob(r0, D_OCIMANIFEST1, OCILAYER)
+		Expect(data).To(MatchJSON(fmt.Sprintf(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0@sha256:`+D_OCIMANIFEST1+`","type":"ociArtifact"},"localReference":"%s","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`, hash)))
 	})
 })
