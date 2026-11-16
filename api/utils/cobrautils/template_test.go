@@ -16,27 +16,33 @@ var _ = Describe("help templates", func() {
 
 	BeforeEach(func() {
 		root = &cobra.Command{Use: "root", Short: "root command"}
-		root.PersistentFlags().Bool("verbose", false, "verbose output")
+		root.PersistentFlags().Bool("verbose", false, "verbose output\ncontinuation marker\nsee --local for detail")
 		child = &cobra.Command{Use: "child", Short: "child command", Run: func(*cobra.Command, []string) {}}
 		child.Flags().Bool("local", false, "local flag")
 		root.AddCommand(child)
 		cobrautils.TweakCommand(root, nil)
 	})
 
-	It("renders inherited bool flags without value suffix (help)", func() {
+	assertInheritedUsage := func(out string) {
+		Expect(out).To(ContainSubstring("Global Options:"))
+		// local and inherited flags both present
+		Expect(out).To(MatchRegexp(`(?m)^\s+--local\s+local flag$`))
+		Expect(out).To(MatchRegexp(`(?m)^\s+--verbose\s+verbose output$`))
+		// every supplied inherited description line survives
+		Expect(out).To(ContainSubstring("continuation marker"))
+		Expect(out).To(ContainSubstring("see --local for detail"))
+		Expect(out).NotTo(ContainSubstring("[=true|false]"))
+	}
+
+	It("renders inherited multi-line bool flags without value suffix (help)", func() {
 		buf := &bytes.Buffer{}
 		root.SetOut(buf)
 		root.SetArgs([]string{"child", "--help"})
 		Expect(root.Execute()).To(Succeed())
-		Expect(buf.String()).To(ContainSubstring("Global Options:"))
-		Expect(buf.String()).To(MatchRegexp(`(?m)^\s+--verbose\s+verbose output$`))
-		Expect(buf.String()).NotTo(ContainSubstring("[=true|false]"))
+		assertInheritedUsage(buf.String())
 	})
 
-	It("renders inherited bool flags without value suffix (usage)", func() {
-		u := child.UsageString()
-		Expect(u).To(ContainSubstring("Global Options:"))
-		Expect(u).To(MatchRegexp(`(?m)^\s+--verbose\s+verbose output$`))
-		Expect(u).NotTo(ContainSubstring("[=true|false]"))
+	It("renders inherited multi-line bool flags without value suffix (usage)", func() {
+		assertInheritedUsage(child.UsageString())
 	})
 })

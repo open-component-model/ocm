@@ -85,26 +85,47 @@ func GroupedFlagUsagesWrapped(f *pflag.FlagSet, cols int) []UsageGroup {
 
 func DetermineGroups(f *pflag.FlagSet, cols int) map[string][]string {
 	lines := map[string][]string{}
-	for _, line := range strings.Split(usageFlagSet(f).FlagUsagesWrapped(cols), "\n") {
-		i := strings.Index(line, "--")
-		if i < 0 {
-			continue
-		}
-
-		name := line[i+2:]
-		if end := strings.IndexAny(name, " ["); end >= 0 {
-			name = name[:end]
-		}
-		groups := []string{""}
-		if flag := f.Lookup(name); flag != nil && flag.Annotations != nil {
-			g := flag.Annotations[FlagGroupAnnotation]
-			if len(g) > 0 {
-				groups = g
+	// currentGroups holds the group membership of the most recently seen flag
+	// header. Continuation lines (wrapped or explicitly multi-line usages) have
+	// no flag header and are attributed to the same groups as that header.
+	// It starts nil so an empty FlagSet yields an empty map rather than a
+	// phantom default group.
+	var currentGroups []string
+	rendered := strings.TrimSuffix(usageFlagSet(f).FlagUsagesWrapped(cols), "\n")
+	if rendered == "" {
+		return lines
+	}
+	for _, line := range strings.Split(rendered, "\n") {
+		// pflag renders a flag header as either "      --name" or
+		// "  -x, --name"; its continuation lines are indented farther right and
+		// never carry "--" at these fixed offsets. Only treat such headers as a
+		// new flag; everything else continues the previous flag's groups.
+		if isFlagHeader(line) {
+			name := line[8:]
+			if end := strings.IndexAny(name, " ["); end >= 0 {
+				name = name[:end]
+			}
+			currentGroups = []string{""}
+			if flag := f.Lookup(name); flag != nil && flag.Annotations != nil {
+				g := flag.Annotations[FlagGroupAnnotation]
+				if len(g) > 0 {
+					currentGroups = g
+				}
 			}
 		}
-		for _, g := range groups {
+		for _, g := range currentGroups {
 			lines[g] = append(lines[g], line)
 		}
 	}
 	return lines
+}
+
+// isFlagHeader reports whether line is a pflag flag header line, i.e. it starts
+// a new flag rather than continuing the previous flag's usage text. pflag emits
+// "      --name ..." (no shorthand) or "  -x, --name ..." (with shorthand).
+func isFlagHeader(line string) bool {
+	if len(line) < 8 || line[6:8] != "--" {
+		return false
+	}
+	return line[:6] == "      " || (line[:3] == "  -" && line[4:6] == ", ")
 }
