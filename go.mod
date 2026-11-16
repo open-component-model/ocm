@@ -23,7 +23,7 @@ require (
 	github.com/containerd/log v0.2.0
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.9.3+incompatible
+	github.com/docker/cli v29.10.0+incompatible
 	github.com/docker/go-connections v0.8.2
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/cli-utils v1.4.0
@@ -41,7 +41,7 @@ require (
 	github.com/golang/mock v1.7.0-rc.1
 	github.com/google/go-github/v45 v45.2.0
 	github.com/hashicorp/vault-client-go v0.4.3
-	github.com/klauspost/compress v1.20.3
+	github.com/klauspost/compress v1.20.4
 	github.com/klauspost/pgzip v1.3.0
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3
 	github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc
@@ -52,8 +52,8 @@ require (
 	github.com/mikefarah/yq/v4 v4.48.1
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/moby/locker v1.0.1
-	github.com/moby/moby/api v1.56.1
-	github.com/moby/moby/client v0.6.2
+	github.com/moby/moby/api v1.57.0
+	github.com/moby/moby/client v0.6.3
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee
 	github.com/onsi/ginkgo/v2 v2.34.0
 	github.com/onsi/gomega v1.44.0
@@ -88,7 +88,7 @@ require (
 	golang.org/x/text v0.44.0
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1
-	helm.sh/helm/v4 v4.3.1
+	helm.sh/helm/v4 v4.3.2
 	k8s.io/api v0.37.2
 	k8s.io/apiextensions-apiserver v0.37.2
 	k8s.io/apimachinery v0.37.2
@@ -399,7 +399,7 @@ require (
 	k8s.io/component-base v0.37.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260821135717-be32def86098 // indirect
-	k8s.io/kubectl v0.37.1 // indirect
+	k8s.io/kubectl v0.37.2 // indirect
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3 // indirect
 	mvdan.cc/gofumpt v0.9.2 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
