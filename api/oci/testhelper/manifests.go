@@ -1,75 +1,19 @@
 package testhelper
 
 import (
-	"bytes"
-	"io"
-
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/goutils/testutils"
-	"github.com/opencontainers/go-digest"
 
 	"ocm.software/ocm/api/helper/builder"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/oci/artdesc"
 	"ocm.software/ocm/api/oci/extensions/repositories/artifactset"
-	"ocm.software/ocm/api/ocm"
 	metav1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	resourcetypes "ocm.software/ocm/api/ocm/extensions/artifacttypes"
 	"ocm.software/ocm/api/ocm/extensions/digester/digesters/artifact"
-	"ocm.software/ocm/api/ocm/ocmutils"
 	"ocm.software/ocm/api/tech/signing/hasher/sha256"
-	"ocm.software/ocm/api/utils/accessio"
-	"ocm.software/ocm/api/utils/accessobj"
 	"ocm.software/ocm/api/utils/mime"
 )
-
-// CheckOCIArtifactBlob validates that acc provides a synthesized OCI artifact
-// set archive whose decoded content matches the expected fixture: expectedRoot
-// is the hex (without "sha256:") of the main manifest, expectedLayer the single
-// text layer's content. It verifies the archive integrity independently of the
-// compressor used to produce the "+tar+gzip" blob, and returns the actual
-// "sha256:"-prefixed digest of the stored archive bytes so callers can assert
-// the local reference without pinning a compressor-specific value.
-func CheckOCIArtifactBlob(acc ocm.AccessProvider, expectedRoot, expectedLayer string) string {
-	data, err := ocmutils.GetResourceData(acc)
-	ExpectWithOffset(1, err).ToNot(HaveOccurred())
-	archiveDigest := digest.FromBytes(data)
-
-	set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(io.NopCloser(bytes.NewReader(data))))
-	ExpectWithOffset(1, err).ToNot(HaveOccurred())
-	defer set.Close()
-
-	main := set.GetMain()
-	ExpectWithOffset(1, main.String()).To(Equal("sha256:" + expectedRoot))
-
-	// independently re-hash the main manifest blob instead of trusting the index
-	_, manifestData, err := set.GetBlobData(main)
-	ExpectWithOffset(1, err).ToNot(HaveOccurred())
-	defer manifestData.Close()
-	manifestBytes, err := manifestData.Get()
-	ExpectWithOffset(1, err).ToNot(HaveOccurred())
-	ExpectWithOffset(1, digest.FromBytes(manifestBytes).String()).To(Equal("sha256:" + expectedRoot))
-
-	// config blob is the fixed "{}" document
-	_, configData, err := set.GetBlobData(digest.FromBytes([]byte("{}")))
-	ExpectWithOffset(1, err).ToNot(HaveOccurred())
-	defer configData.Close()
-	configBytes, err := configData.Get()
-	ExpectWithOffset(1, err).ToNot(HaveOccurred())
-	ExpectWithOffset(1, configBytes).To(Equal([]byte("{}")))
-
-	// layer blob is the fixed text content
-	_, layerData, err := set.GetBlobData(digest.FromBytes([]byte(expectedLayer)))
-	ExpectWithOffset(1, err).ToNot(HaveOccurred())
-	defer layerData.Close()
-	layerBytes, err := layerData.Get()
-	ExpectWithOffset(1, err).ToNot(HaveOccurred())
-	ExpectWithOffset(1, layerBytes).To(Equal([]byte(expectedLayer)))
-
-	return archiveDigest.String()
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // manifestlaver
@@ -81,8 +25,10 @@ const (
 )
 
 var OCIDigests = testutils.Substitutions{
-	"D_OCIMANIFEST1": D_OCIMANIFEST1,
-	"D_OCIMANIFEST2": D_OCIMANIFEST2,
+	"D_OCIMANIFEST1":     D_OCIMANIFEST1,
+	"H_OCIARCHMANIFEST1": H_OCIARCHMANIFEST1,
+	"D_OCIMANIFEST2":     D_OCIMANIFEST2,
+	"H_OCIARCHMANIFEST2": H_OCIARCHMANIFEST2,
 }
 
 func OCIManifest1(env *builder.Builder) *artdesc.Descriptor {
@@ -117,13 +63,27 @@ func OCIArtifactResource1(env *builder.Builder, name string, host string, funcs 
 }
 
 const (
-	D_OCIMANIFEST1 = "0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"
+	D_OCIMANIFEST1     = "0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f"
+	H_OCIARCHMANIFEST1 = "b0692bcec00e0a875b6b280f3209d6776f3eca128adcb7e81e82fd32127c0c62"
+	// H_OCIARCHMANIFEST1 = "818fb6a69a5f55e8b3dbc921a61fdd000b9445a745b587ba753a811b02426326".
 )
 
 var DS_OCIMANIFEST1 = &metav1.DigestSpec{
 	HashAlgorithm:          sha256.Algorithm,
 	NormalisationAlgorithm: artifact.OciArtifactDigestV1,
 	Value:                  D_OCIMANIFEST1,
+}
+
+func HashManifest1(fmt string) string {
+	// hash := "sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed"
+	hash := "xxx"
+	if fmt == artifactset.FORMAT_OCI || fmt == artifactset.OCIArtifactSetDescriptorFileName {
+		// hash = "sha256:334b587868e607fe2ce74c27d7f75e90b6391fe91b808b2d42ad1bfcc5651a66"
+		// hash = "sha256:0a326cc646d24f48c9bc79d303f7626404d41f2646934ef713cd1917bd5480ce" // with gardener.cloud legacy format
+		// hash = "sha256:fafabfc2f9861c2ecf0ee3fc584ef4fb92c927902c8f561f72542281097cff83"
+		hash = "sha256:" + H_OCIARCHMANIFEST1
+	}
+	return hash
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,8 +123,22 @@ func OCIManifest2For(env *builder.Builder, ns, tag string, nested ...func()) (*a
 }
 
 const (
-	D_OCIMANIFEST2 = "c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7"
+	D_OCIMANIFEST2     = "c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7"
+	H_OCIARCHMANIFEST2 = "cb85cd58b10e36343971691abbfe40200cb645c6e95f0bdabd111a30cf794708"
+	// H_OCIARCHMANIFEST2 = "2aaf6f8857dcbfa04a72fb98dd53f649b46e5d81aa4fb17330df74b0ffc30839".
 )
+
+func HashManifest2(fmt string) string {
+	// hash := "sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f"
+	hash := "xxx"
+	if fmt == artifactset.FORMAT_OCI || fmt == artifactset.OCIArtifactSetDescriptorFileName {
+		// hash = "sha256:253c2a52cd0e229ae97613b953e1aa5c0b8146ff653988904e858a676507d4f4"
+		// hash = "sha256:d748056b98897e4894217daf2fed90c98d5603ca549256f0d9534994baee3795" // with gardener.cloud legacy format
+		// hash = "sha256:e6b922b290aee4c9bca83d977b83dc3f91fe928e2085f0d45c1bde4544d3b19b"
+		hash = "sha256:" + H_OCIARCHMANIFEST2
+	}
+	return hash
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
