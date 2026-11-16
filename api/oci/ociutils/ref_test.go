@@ -12,7 +12,7 @@ import (
 )
 
 var _ = Describe("Ref Test Environment", func() {
-	dig := "sha256:" + testhelper.H_OCIARCHMANIFEST1
+	dig := "sha256:" + testhelper.D_OCIMANIFEST1
 
 	type expect struct {
 		yaml        string

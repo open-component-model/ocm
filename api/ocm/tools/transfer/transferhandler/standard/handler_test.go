@@ -227,8 +227,9 @@ transferring version "github.com/mandelsoft/test:v1"...
 		data := Must(json.Marshal(tcv.GetDescriptor().Resources[1].Access))
 
 		fmt.Printf("%s\n", string(data))
-		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(acc, hash)))
+		r1 := Must(tcv.GetResourceByIndex(1))
+		hash := CheckOCIArtifactBlob(r1, D_OCIMANIFEST1, OCILAYER)
+		Expect(data).To(MatchJSON(fmt.Sprintf(acc, hash)))
 
 		tcd := tcv.GetDescriptor().Copy()
 		r := Must(tcv.GetResourceByIndex(1))
@@ -362,8 +363,9 @@ transferring version "github.com/mandelsoft/test:v1"...
 		data = Must(json.Marshal(tcv.GetDescriptor().Resources[1].Access))
 
 		fmt.Printf("%s\n", string(data))
-		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(acc, hash)))
+		r1 := Must(tcv.GetResourceByIndex(1))
+		hash := CheckOCIArtifactBlob(r1, D_OCIMANIFEST1, OCILAYER)
+		Expect(data).To(MatchJSON(fmt.Sprintf(acc, hash)))
 
 		tcd = tcv.GetDescriptor().Copy()
 		r = Must(tcv.GetResourceByIndex(1))
