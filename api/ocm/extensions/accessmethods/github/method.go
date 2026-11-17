@@ -312,7 +312,7 @@ func (m *accessMethod) setup() error {
 func (m *accessMethod) getDownloadLink() (string, error) {
 	link, resp, err := m.repositoryService.GetArchiveLink(context.Background(), m.owner, m.repo, github.Tarball, &github.RepositoryContentGetOptions{
 		Ref: m.spec.Commit,
-	}, 10)
+	}, 1)
 	if err != nil {
 		return "", err
 	}
