@@ -266,6 +266,29 @@ var _ = Describe("Method", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
+
+	When("the archive API returns 200 with no Location header", func() {
+		It("errors with a clear message", func() {
+			client := NewTestClient(func(req *http.Request) *http.Response {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Status:     "200 OK",
+					Body:       io.NopCloser(bytes.NewBufferString("")),
+					Header:     http.Header{},
+				}
+			})
+			spec := me.New(
+				"https://github.com/test/test",
+				"",
+				"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
+				me.WithClient(client),
+			)
+			m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+			Expect(err).ToNot(HaveOccurred())
+			_, err = m.Get()
+			Expect(err).To(MatchError(ContainSubstring("no download link returned")))
+		})
+	})
 })
 
 type mockComponentVersionAccess struct {

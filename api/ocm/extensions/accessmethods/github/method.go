@@ -318,6 +318,10 @@ func (m *accessMethod) getDownloadLink() (string, error) {
 	}
 	defer resp.Body.Close()
 
+	if link == nil || link.String() == "" {
+		return "", fmt.Errorf("no download link returned (status %s)", resp.Status)
+	}
+
 	return link.String(), nil
 }
 
