@@ -10,7 +10,7 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/google/go-github/v45/github"
+	"github.com/google/go-github/v93/github"
 	"github.com/mandelsoft/goutils/errors"
 	"golang.org/x/oauth2"
 
@@ -148,7 +148,7 @@ func (a *AccessSpec) createHTTPClient(token string) *http.Client {
 
 // RepositoryService defines capabilities of a GitHub repository.
 type RepositoryService interface {
-	GetArchiveLink(ctx context.Context, owner, repo string, archiveformat github.ArchiveFormat, opts *github.RepositoryContentGetOptions, followRedirects bool) (*url.URL, *github.Response, error)
+	GetArchiveLink(ctx context.Context, owner, repo string, archiveformat github.ArchiveFormat, opts *github.RepositoryContentGetOptions, maxRedirects int) (*url.URL, *github.Response, error)
 }
 
 type accessMethod struct {
@@ -194,7 +194,10 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (*accessMetho
 	httpclient := a.createHTTPClient(token)
 
 	if u.Hostname() == "github.com" {
-		client = github.NewClient(httpclient)
+		client, err = github.NewClient(github.WithHTTPClient(httpclient))
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		t := *u
 		t.Path = ""
@@ -202,7 +205,7 @@ func newMethod(c accspeccpi.ComponentVersionAccess, a *AccessSpec) (*accessMetho
 			t.Host = a.APIHostname
 		}
 
-		client, err = github.NewEnterpriseClient(t.String(), t.String(), httpclient)
+		client, err = github.NewClient(github.WithHTTPClient(httpclient), github.WithEnterpriseURLs(t.String(), t.String()))
 		if err != nil {
 			return nil, err
 		}
@@ -306,7 +309,7 @@ func (m *accessMethod) setup() error {
 func (m *accessMethod) getDownloadLink() (string, error) {
 	link, resp, err := m.repositoryService.GetArchiveLink(context.Background(), m.owner, m.repo, github.Tarball, &github.RepositoryContentGetOptions{
 		Ref: m.spec.Commit,
-	}, true)
+	}, 10)
 	if err != nil {
 		return "", err
 	}
