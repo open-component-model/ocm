@@ -143,7 +143,10 @@ func (a *AccessSpec) createHTTPClient(token string) *http.Client {
 		}
 		return oauth2.NewClient(ctx, ts)
 	}
-	return a.client
+	if a.client != nil {
+		return a.client
+	}
+	return &http.Client{}
 }
 
 // RepositoryService defines capabilities of a GitHub repository.
