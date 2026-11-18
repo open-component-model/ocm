@@ -37,10 +37,14 @@ func TestComponentNameGrammar(t *testing.T) {
 		{"github.com/open-component-model/ocm", true},
 		{"acme.org/a_b", true},
 		// still rejected
-		{"acme.org/Foo", false}, // uppercase
-		{"Acme.org/foo", false}, // uppercase label
-		{"a", false},            // no DNS domain and no path
-		{"acme/foo", false},     // no alphabetic top-level label
+		{"acme.org/Foo", false},  // uppercase
+		{"Acme.org/foo", false},  // uppercase label
+		{"a", false},             // no DNS domain and no path
+		{"acme/foo", false},      // no dot, no top-level label
+		{"acme.12/foo", false},   // numeric top-level label
+		{"acme.org/-foo", false}, // path segment starts with '-'
+		{"a.com/_x", false},      // path segment starts with '_'
+		{"-a.com/x", false},      // DNS label starts with '-'
 	}
 
 	for _, tc := range cases {
