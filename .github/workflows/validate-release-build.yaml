@@ -1,0 +1,103 @@
+name: validate release build
+
+# Validates that the goreleaser release packaging path still builds on main
+# across all release targets (linux/darwin/windows x amd64/arm64/arm), without
+# creating a tag, release, or publishing anything. This replaces the build
+# validation the old "publish as latest" workflow implicitly provided; that
+# workflow was dropped because it force-moved the mutable ocm-cli/latest git
+# tag, which the org immutable-tags ruleset forbids.
+#
+# It is also the central populator of the ocm-cli-latest-go-cache build cache
+# that the lint_and_test, components, codeql, and release workflows restore.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.go'
+      - '**/*.mod'
+      - '**/*.sum'
+      - 'resources/**'
+      - '.github/config/latest.yml'
+      - '.github/workflows/validate-release-build.yaml'
+
+jobs:
+  validate-release-build:
+    name: Validate release build (all targets, no publish)
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    steps:
+    # Workaround for ubuntu-26 runners having /tmp as RAM-backed tmpfs which is too small for our builds.
+    # The builds and lint/test now fail with "compile: writing output: write $WORK/b2613/_pkg_.a: disk quota exceeded"
+    # See for example https://github.com/open-component-model/ocm/actions/runs/40293355251/job/122028523395?pr=2156
+    # See workaround description and reasoning https://github.com/actions/runner-images/issues/14777
+    - name: Put /tmp back on the root disk
+      run: |
+        sudo systemctl mask tmp.mount
+        mountpoint -q /tmp && sudo umount -l /tmp || true
+    - name: Self hosted runner post job cleanup
+      uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0
+    - name: Setup go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: '${{ github.workspace }}/go.mod'
+        check-latest: false
+        cache: false
+
+    - name: Get go environment for use with cache
+      run: |
+        echo "go_cache=$(go env GOCACHE)" >> $GITHUB_ENV
+        echo "go_modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+    - name: Restore / Reuse Cache from central build
+      id: cache-golang-restore
+      # Only Restore, not build another cache (too big)
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          ${{ env.go_cache }}
+          ${{ env.go_modcache }}
+        key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
+        restore-keys: |
+          ${{ env.cache_name }}-${{ runner.os }}-go-
+      env:
+        cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
+
+    - name: Goreleaser release snapshot (build + package, no publish)
+      uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+      with:
+        distribution: goreleaser
+        version: 2.12.7
+        # --snapshot already implies --skip=announce,publish,validate and
+        # produces no tag/release, so this builds + packages all targets
+        # without publishing anything.
+        args: release --clean --timeout 60m --snapshot --skip=validate --config=.github/config/latest.yml
+      env:
+        GITHUBORG: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GORELEASER_CURRENT_TAG: v0.0.0
+        GORELEASER_PREVIOUS_TAG: v0.0.0
+
+    # This step is actually responsible for populating our build cache for the
+    # next runs in PRs or on main (ocm-cli-latest-go-cache key).
+    - name: Save Cache of Build (only on main)
+      id: cache-golang-save
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          ${{ env.go_cache }}
+          ${{ env.go_modcache }}
+        key: ${{ env.cache_name }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/go.mod') }}
+        upload-chunk-size: 256000000 # default of 32MB is not really optimal for our large cache, choose 256MB instead
+      env:
+        cache_name: ocm-cli-latest-go-cache # needs to be the same key in the end as in the build step
