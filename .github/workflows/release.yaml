@@ -277,9 +277,6 @@ jobs:
     - release-version
     - release
     runs-on: ubuntu-latest
-    environment:
-      name: release
-      deployment: false
     permissions:
       contents: read
       packages: write

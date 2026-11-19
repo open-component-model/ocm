@@ -25,13 +25,8 @@ jobs:
   validate-release-build:
     name: Validate release build (all targets, no publish)
     runs-on: ubuntu-latest
-    environment:
-      name: release
-      deployment: false
     permissions:
       contents: read
-      id-token: write
-      packages: read
     steps:
     # Workaround for ubuntu-26 runners having /tmp as RAM-backed tmpfs which is too small for our builds.
     # The builds and lint/test now fail with "compile: writing output: write $WORK/b2613/_pkg_.a: disk quota exceeded"
@@ -47,6 +42,7 @@ jobs:
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
+        persist-credentials: false
     - name: Setup go
       uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
