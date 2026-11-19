@@ -268,6 +268,59 @@ jobs:
         event-type: publish-ocm-cli
         client-payload: '{"version":"${{ env.RELEASE_VERSION }}","push-to-website":true,"push-to-aur":true,"push-to-chocolatey":true,"push-to-brew-tap":true}'
 
+  # Point the :latest container tags at the released image, but only for the highest stable
+  # version, so a patch release on an older release branch does not move :latest backwards.
+  tag-latest-image:
+    if: inputs.release_candidate == false
+    name: Tag Latest Image
+    needs:
+    - release-version
+    - release
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      deployment: false
+    permissions:
+      contents: read
+      packages: write
+    env:
+      RELEASE_VERSION: ${{ needs.release-version.outputs.version }}
+      RELEASE_VERSION_NO_PREFIX: ${{ needs.release-version.outputs.version_no_prefix }}
+      REPOSITORY: ${{ github.repository }}
+    steps:
+    - name: Check if release is the highest stable version
+      id: check
+      run: |
+        set -euo pipefail
+        HIGHEST=$(git ls-remote --tags --refs "https://github.com/${REPOSITORY}" 'v*' \
+          | awk '{sub("refs/tags/", "", $2); print $2}' \
+          | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+          | sort -V | tail -n1)
+        echo "highest stable version: ${HIGHEST}, released version: ${RELEASE_VERSION}"
+        if [ "${HIGHEST}" = "${RELEASE_VERSION}" ]; then
+          echo "latest=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "latest=false" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Set up Docker Buildx
+      if: steps.check.outputs.latest == 'true'
+      uses: docker/setup-buildx-action@594f3bf4285d9ea8dc53c9a0c9c4092420091003 # v4.4.0
+    - name: Docker Login
+      if: steps.check.outputs.latest == 'true'
+      uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Tag released image as latest
+      if: steps.check.outputs.latest == 'true'
+      run: |
+        SOURCE_IMAGE="ghcr.io/${REPOSITORY}/ocm.software/ocmcli/ocmcli-image"
+        docker buildx imagetools create \
+          --tag "${SOURCE_IMAGE}:latest" \
+          --tag "ghcr.io/${REPOSITORY}:latest" \
+          "${SOURCE_IMAGE}:${RELEASE_VERSION_NO_PREFIX}"
+
   # make sure that the branch contains the next valid patch
   bump-release-branch-pr:
     if: inputs.release_candidate == false
