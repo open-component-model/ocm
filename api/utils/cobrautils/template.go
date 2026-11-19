@@ -16,7 +16,7 @@ Options:
 {{ flagUsages .LocalFlags | trimTrailingWhitespaces}}{{end}}{{if and .HasAvailableInheritedFlags .IsAvailableCommand}}
 
 Global Options:
-{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}
+{{ flagUsages .InheritedFlags | trimTrailingWhitespaces}}{{end}}
 
 Description:
 {{with (or .Long .Short)}}{{. | substituteCommandLinks | trimTrailingWhitespaces | indent 2}}{{end}}{{if .HasAvailableSubCommands}}
@@ -48,7 +48,7 @@ Options:
 {{ flagUsages .LocalFlags | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
 
 Global Options:
-{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+{{ flagUsages .InheritedFlags | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
 
 Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
   {{rpad (commandPath .) .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
