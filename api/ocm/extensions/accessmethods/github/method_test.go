@@ -248,11 +248,124 @@ var _ = Describe("Method", func() {
 		})
 	})
 
+	When("no token or custom client is configured", func() {
+		It("creates an access method without token or custom client", func() {
+			for _, repo := range []string{"https://github.com/test/test", "https://ghe.example.com/test/test"} {
+				spec := me.New(repo, "", "7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f")
+				_, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+				Expect(err).ToNot(HaveOccurred(), repo)
+			}
+		})
+	})
+
 	When("repoURL doesn't have an https prefix", func() {
 		It("will add one", func() {
 			expectedURL = "https://api.github.com/repos/test/test/tarball/25d9a3f0031c0b42e9ef7ab0117c35378040ef82"
 			spec := me.New("github.com/test/test", "", "25d9a3f0031c0b42e9ef7ab0117c35378040ef82", me.WithClient(clientFn(expectedURL)))
 			_, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+			Expect(err).ToNot(HaveOccurred())
+		})
+	})
+
+	When("the archive API returns 200 with no Location header", func() {
+		It("errors with a clear message", func() {
+			client := NewTestClient(func(req *http.Request) *http.Response {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Status:     "200 OK",
+					Body:       io.NopCloser(bytes.NewBufferString("")),
+					Header:     http.Header{},
+				}
+			})
+			spec := me.New(
+				"https://github.com/test/test",
+				"",
+				"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
+				me.WithClient(client),
+			)
+			m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+			Expect(err).ToNot(HaveOccurred())
+			_, err = m.Get()
+			Expect(err).To(MatchError(ContainSubstring("no download link returned")))
+		})
+	})
+
+	When("the archive API returns a same-origin 301 followed by a 302", func() {
+		It("follows the 301 and returns the final download link", func() {
+			redirectedURL := "https://api.github.com/repositories/12345/legacy.tar.gz"
+			client := NewTestClient(func(req *http.Request) *http.Response {
+				if req.URL.String() == redirectedURL {
+					return &http.Response{
+						StatusCode: http.StatusFound,
+						Status:     "302 Found",
+						Body:       io.NopCloser(bytes.NewBufferString("")),
+						Header:     http.Header{"Location": []string{defaultLink}},
+					}
+				}
+				return &http.Response{
+					StatusCode: http.StatusMovedPermanently,
+					Status:     "301 Moved Permanently",
+					Body:       io.NopCloser(bytes.NewBufferString("")),
+					Header:     http.Header{"Location": []string{redirectedURL}},
+				}
+			})
+			spec := me.New(
+				"https://github.com/test/test",
+				"",
+				"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
+				me.WithClient(client),
+				me.WithDownloader(&mockDownloader{expected: expectedBlobContent}),
+			)
+			m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+			Expect(err).ToNot(HaveOccurred())
+			_, err = m.Get()
+			Expect(err).ToNot(HaveOccurred())
+		})
+	})
+
+	When("the archive API returns a 301 to a different host", func() {
+		It("errors", func() {
+			client := NewTestClient(func(req *http.Request) *http.Response {
+				return &http.Response{
+					StatusCode: http.StatusMovedPermanently,
+					Status:     "301 Moved Permanently",
+					Body:       io.NopCloser(bytes.NewBufferString("")),
+					Header:     http.Header{"Location": []string{"https://other.example.com/repos/test/test/tarball/"}},
+				}
+			})
+			spec := me.New(
+				"https://github.com/test/test",
+				"",
+				"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
+				me.WithClient(client),
+			)
+			m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+			Expect(err).ToNot(HaveOccurred())
+			_, err = m.Get()
+			Expect(err).To(MatchError(ContainSubstring("refusing to follow cross-host redirect")))
+		})
+	})
+
+	When("the archive API returns 200 with a Location header", func() {
+		It("accepts the 200 and uses the Location as the download link", func() {
+			client := NewTestClient(func(req *http.Request) *http.Response {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Status:     "200 OK",
+					Body:       io.NopCloser(bytes.NewBufferString("")),
+					Header:     http.Header{"Location": []string{defaultLink}},
+				}
+			})
+			spec := me.New(
+				"https://github.com/test/test",
+				"",
+				"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
+				me.WithClient(client),
+				me.WithDownloader(&mockDownloader{expected: expectedBlobContent}),
+			)
+			m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+			Expect(err).ToNot(HaveOccurred())
+			_, err = m.Get()
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})

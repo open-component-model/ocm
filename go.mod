@@ -39,7 +39,7 @@ require (
 	github.com/go-test/deep v1.1.2
 	github.com/gobwas/glob v1.1.0
 	github.com/golang/mock v1.7.0-rc.1
-	github.com/google/go-github/v45 v45.2.0
+	github.com/google/go-github/v93 v93.0.0
 	github.com/hashicorp/vault-client-go v0.4.3
 	github.com/klauspost/compress v1.20.4
 	github.com/klauspost/pgzip v1.3.0
@@ -378,7 +378,6 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
-	golang.org/x/crypto/openpgp v0.1.0-deprecated // indirect
 	golang.org/x/mod v0.42.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
