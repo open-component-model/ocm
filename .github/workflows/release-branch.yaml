@@ -29,9 +29,9 @@ jobs:
       - name: Generate token
         id: generate_token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v2
-        with: # OCMBot
-          app-id: ${{ secrets.OCMBOT_APP_ID }}
-          private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
+        with: # OCM Bot (release)
+          client-id: ${{ secrets.OCM_BOT_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.OCM_BOT_RELEASE_PRIV_KEY }}
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -77,9 +77,9 @@ jobs:
       - name: Generate token
         id: generate_token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v2
-        with: # OCMBot
-          app-id: ${{ secrets.OCMBOT_APP_ID }}
-          private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
+        with: # OCM Bot (release)
+          client-id: ${{ secrets.OCM_BOT_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.OCM_BOT_RELEASE_PRIV_KEY }}
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
