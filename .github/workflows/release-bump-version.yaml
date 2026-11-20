@@ -74,7 +74,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
           title: "chore: bump VERSION to ${{ steps.version-bump.outputs.version }}"
           commit-message: "[github-actions] Bump to ${{ steps.version-bump.outputs.version }}"
-          branch: "chore/bump-${{ inputs.bump-type }}/v${{ steps.version-bump.outputs.version }}"
+          branch: "automation/bump-${{ inputs.bump-type }}-v${{ steps.version-bump.outputs.version }}"
           delete-branch: true
           sign-commits: true
           add-paths: |
