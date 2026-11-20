@@ -19,12 +19,10 @@ jobs:
     name: "Pull Request"
     runs-on: ubuntu-latest
     environment:
-      name: release
+      name: pull-request
       deployment: false
     permissions:
-      contents: write
-      id-token: write
-      packages: write
+      contents: read
     env:
       REF: ${{ inputs.ref == '' && github.ref || inputs.ref }}
     steps:
@@ -38,9 +36,11 @@ jobs:
       - name: Generate token
         id: generate_token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v2
-        with: # OCMBot
-          app-id: ${{ secrets.OCMBOT_APP_ID }}
-          private-key: ${{ secrets.OCMBOT_PRIV_KEY }}
+        with: # OCM Bot (pull requests only)
+          client-id: ${{ secrets.OCM_BOT_PULL_REQUEST_CLIENT_ID }}
+          private-key: ${{ secrets.OCM_BOT_PULL_REQUEST_PRIV_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

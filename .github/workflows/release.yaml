@@ -324,10 +324,7 @@ jobs:
     uses: ./.github/workflows/release-bump-version.yaml
     needs: release
     permissions:
-      contents: write
-      id-token: write
-      packages: write
-    secrets: inherit
+      contents: read
     with:
       bump-type: patch
       ref: ${{ github.ref }}
