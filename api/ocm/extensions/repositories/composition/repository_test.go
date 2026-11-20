@@ -139,6 +139,15 @@ var _ = Describe("repository", func() {
 	It("provides early error", func() {
 		repo := me.NewRepository(ctx)
 		cv := me.NewComponentVersion(ctx, "a", "1.0")
-		ExpectError(repo.AddComponentVersion(cv)).To(MatchError("component.name: Does not match pattern '^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$'"))
+		ExpectError(repo.AddComponentVersion(cv)).To(MatchError("component.name: Does not match pattern '^[a-z0-9][-a-z0-9]*([.][a-z0-9][-a-z0-9]*)*[.][a-z]{2,}(/[a-z0-9][-a-z0-9_]*([.][a-z0-9][-a-z0-9_]*)*)+$'"))
+	})
+
+	It("accepts digit-led component names", func() {
+		repo := me.NewRepository(ctx)
+		defer Close(repo, "repo")
+		cv := me.NewComponentVersion(ctx, "1password.com/cli", "1.0.0")
+		defer Close(cv, "cv")
+		cv.GetDescriptor().Provider.Name = "acme.org"
+		MustBeSuccessful(repo.AddComponentVersion(cv))
 	})
 })
