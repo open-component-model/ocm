@@ -67,7 +67,7 @@ jobs:
         token: ${{ steps.generate_token.outputs.token }}
         title: "chore: update OCM CLI to v${{ env.RELEASE_VERSION }}"
         commit-message: "[github-actions] update OCM CLI to v${{ env.RELEASE_VERSION }}"
-        branch: chore/update-ocm-cli/${{ env.RELEASE_VERSION }}
+        branch: automation/update-ocm-cli-${{ env.RELEASE_VERSION }}
         delete-branch: true
         sign-commits: true
         add-paths: |
