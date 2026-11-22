@@ -10,11 +10,11 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/Shopify/toxiproxy/v2 v2.13.0
 	github.com/aws/aws-sdk-go-v2 v1.48.0
-	github.com/aws/aws-sdk-go-v2/config v1.33.18
-	github.com/aws/aws-sdk-go-v2/credentials v1.21.0
-	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.5.7
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.67.6
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.10
+	github.com/aws/aws-sdk-go-v2/config v1.33.20
+	github.com/aws/aws-sdk-go-v2/credentials v1.21.2
+	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.5.10
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.69.0
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.116.0
 	github.com/aws/smithy-go v1.28.9
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/cloudflare/cfssl v1.6.5
@@ -27,7 +27,7 @@ require (
 	github.com/docker/go-connections v0.8.2
 	github.com/drone/envsubst v1.0.3
 	github.com/fluxcd/cli-utils v1.4.0
-	github.com/fluxcd/pkg/ssa v0.84.0
+	github.com/fluxcd/pkg/ssa v0.85.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.9.2
@@ -64,7 +64,7 @@ require (
 	github.com/rogpeppe/go-internal v1.16.0
 	github.com/sigstore/cosign/v3 v3.1.4
 	github.com/sigstore/fulcio v1.9.0
-	github.com/sigstore/rekor v1.6.1
+	github.com/sigstore/rekor v1.6.2
 	github.com/sigstore/sigstore v1.11.3
 	github.com/sirupsen/logrus v1.10.2
 	github.com/spf13/cobra v1.10.2
@@ -82,7 +82,7 @@ require (
 	golang.org/x/crypto v0.59.0
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/net v0.62.0
+	golang.org/x/net v0.63.0
 	golang.org/x/oauth2 v0.38.0
 	golang.org/x/term v0.48.0
 	golang.org/x/text v0.44.0
@@ -95,7 +95,7 @@ require (
 	k8s.io/cli-runtime v0.37.2
 	k8s.io/client-go v0.37.2
 	oras.land/oras-go/v2 v2.7.0
-	sigs.k8s.io/controller-runtime v0.25.2
+	sigs.k8s.io/controller-runtime v0.25.3
 	sigs.k8s.io/yaml v1.6.0
 )
 
@@ -148,7 +148,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.11.13 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.12 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.12 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signin v1.13.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/signin v1.14.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.39.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.44.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.52.0 // indirect
@@ -379,7 +379,7 @@ require (
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	golang.org/x/crypto/openpgp v0.1.0-deprecated // indirect
-	golang.org/x/mod v0.42.0 // indirect
+	golang.org/x/mod v0.43.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/telemetry v0.0.0-20261009151841-97e8ea77aa2a // indirect
