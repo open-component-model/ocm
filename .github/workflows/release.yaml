@@ -61,7 +61,7 @@ jobs:
         echo "Branch ${{ env.REF }} is a valid release branch"
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v2
+      uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v2
       with: # OCM Bot (release)
         client-id: ${{ secrets.OCM_BOT_RELEASE_CLIENT_ID }}
         private-key: ${{ secrets.OCM_BOT_RELEASE_PRIV_KEY }}
@@ -128,7 +128,7 @@ jobs:
       uses: TooMuch4U/actions-clean@9b358e33df99574ac0bdf2e92fa3db1ae1415563 # v2.2
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v2
+      uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v2
       with: # OCM Bot (release)
         client-id: ${{ secrets.OCM_BOT_RELEASE_CLIENT_ID }}
         private-key: ${{ secrets.OCM_BOT_RELEASE_PRIV_KEY }}
@@ -158,7 +158,7 @@ jobs:
 
     # TODO: Remove Go setup once binaries no longer need to be built by goreleaser.
     - name: Setup Go
-      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
         check-latest: false
