@@ -175,7 +175,7 @@ components:
 		constructorPath := filepath.Join(tempDir, "constructor.yaml")
 		r.NoError(os.WriteFile(constructorPath, []byte(constructorContent), os.ModePerm))
 
-		By("writing OCM credential configuration for the local registry")
+		By("writing OCM credential and HTTP configuration for the local registry")
 		host, port, err := net.SplitHostPort(registryAddress)
 		r.NoError(err)
 
@@ -194,7 +194,13 @@ configurations:
         properties:
           username: %s
           password: %s
-`, host, port, user, pass)
+# The local test registry has no TLS. The OCM CLI only talks plain HTTP to
+# hosts marked as such; an http:// prefix alone is rejected.
+- type: http.config.ocm.software/v1alpha1
+  hosts:
+    %q:
+      plainHTTP: true
+`, host, port, user, pass, registryAddress)
 
 		configPath := filepath.Join(tempDir, "ocmconfig.yaml")
 		r.NoError(os.WriteFile(configPath, []byte(strings.TrimSpace(ocmConfigContent)), os.ModePerm))
